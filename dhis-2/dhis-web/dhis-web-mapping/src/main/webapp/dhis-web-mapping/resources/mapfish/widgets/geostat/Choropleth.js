@@ -1495,7 +1495,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     
     prepareMapViewValueType: function() {
         var obj = {};
-        if (this.valueType.isIndicator()) {            
+        if (this.valueType.isIndicator()) {
             this.cmp.indicatorgroup.showField();
             this.cmp.indicator.showField();
             this.cmp.dataelementgroup.hideField();

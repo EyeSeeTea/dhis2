@@ -2622,33 +2622,108 @@
 		iconCls: 'icon-thematic1',
 		tooltip: G.i18n.thematic_layer + ' 1',
         style: 'margin-top:1px',
-        menu: new Ext.menu.Menu({
-            items: [
-                {
-                    text: 'Edit layer..',
-                    iconCls: 'menu-layeroptions-locate',
-                    handler: function() {
-                        choroplethWindow.show();
-                    }
-                },
-                {
-                    text: 'Refresh layer',
-                    iconCls: 'menu-layeroptions-locate',
-                    handler: function() {
-                        choropleth.updateValues = true;
-                        choropleth.classify();
-                    }
-                },
-                {
-                    text: 'Clear layer',
-                    iconCls: 'menu-layeroptions-locate',
-                    handler: function() {
-                        choropleth.formValues.clearForm.call(choropleth);
-                    }
-                }
-            ]
-        })
+        listeners: {
+            'afterrender': function() {
+                this.menu = new Ext.menu.Menu({
+                    items: [
+                        {
+                            text: 'Edit..',
+                            iconCls: 'menu-layeroptions-edit',
+                            handler: function() {
+                                choroplethWindow.show();
+                            }
+                        },
+                        {
+                            text: 'Filter..',
+                            iconCls: 'menu-layeroptions-filter',
+                            handler: function() {
+                                choroplethWindow.show();
+                            }
+                        },
+                        '-',
+                        {
+                            text: 'Search..',
+                            iconCls: 'menu-layeroptions-locate',
+                            handler: function() {
+                            }
+                        },
+                        {
+                            text: 'Labels..',
+                            iconCls: 'menu-layeroptions-labels',
+                            handler: function() {
+                            }
+                        },
+                        {
+                            text: 'Opacity',
+                            iconCls: 'menu-layeroptions-opacity',
+                            menu: { 
+                                items: G.conf.opacityItems,
+                                listeners: {
+                                    'itemclick': function(item) {
+                                    }
+                                }
+                            }
+                        },
+                        '-',
+                        {
+                            text: 'Refresh',
+                            iconCls: 'menu-layeroptions-refresh',
+                            handler: function() {
+                                choropleth.updateValues = true;
+                                choropleth.classify();
+                            }
+                        },
+                        {
+                            text: 'Close',
+                            iconCls: 'menu-layeroptions-clear',
+                            handler: function() {
+                                choropleth.formValues.clearForm.call(choropleth);
+                            }
+                        }
+                    ]
+                });
+            }
+        }
 	});
+    
+    var pointButton = new Ext.Button({
+		iconCls: 'icon-thematic2',
+		tooltip: G.i18n.thematic_layer + ' 2',
+        style: 'margin-top:1px',
+        listeners: {
+            'afterrender': function() {
+                this.menu = new Ext.menu.Menu({
+                    items: []
+                });
+            }
+        }
+    });
+    
+    var symbolButton = new Ext.Button({
+		iconCls: 'icon-symbol',
+		tooltip: G.i18n.symbol_layer,
+        style: 'margin-top:1px',
+        listeners: {
+            'afterrender': function() {
+                this.menu = new Ext.menu.Menu({
+                    items: []
+                });
+            }
+        }
+    });
+    
+    var centroidButton = new Ext.Button({
+		iconCls: 'icon-centroid',
+		tooltip: 'Centroid layer',
+        style: 'margin-top:1px',
+        listeners: {
+            'afterrender': function() {
+                this.menu = new Ext.menu.Menu({
+                    items: []
+                });
+            }
+        }
+    });
 	
 	var zoomInButton = new Ext.Button({
 		iconCls: 'icon-zoomin',
@@ -2933,6 +3008,9 @@
 			mapLabel,
 			' ',' ',' ',' ',' ',
 			choroplethButton,
+            pointButton,
+            symbolButton,
+            centroidButton,
 			'-',
             zoomInButton,
 			zoomOutButton,

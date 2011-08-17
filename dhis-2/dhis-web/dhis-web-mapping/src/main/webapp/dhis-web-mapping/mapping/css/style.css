@@ -114,6 +114,18 @@ a.x-menu-item-custom {
 .x-menu-list-item {
     font:10px lucida sans unicode,arial,ubuntu;
 }
+.menu-layeroptions-edit {
+    background:url('../../../images/edit2.png') center bottom;
+}
+.menu-layeroptions-refresh {
+    background:url('../../../images/refresh.png') center bottom;
+}
+.menu-layeroptions-clear {
+    background:url('../../../images/clear2.png') center bottom;
+}
+.menu-layeroptions-filter {
+    background:url('../../../images/filter.png') center bottom;
+}
 .menu-layeroptions-locate {
     background:url('../../../images/search2.png') center bottom;
 }
@@ -201,6 +213,12 @@ a.x-menu-item-custom {
 }
 .x-btn .icon-thematic2  {
 	background-image:url('../../../images/thematic2.png');
+}
+.x-btn .icon-symbol  {
+	background-image:url('../../../images/symbol.png');
+}
+.x-btn .icon-centroid  {
+	background-image:url('../../../images/centroid.png');
 }
 .x-btn .icon-zoomin  {
 	background-image:url('../../../images/zoom_in2.png');
