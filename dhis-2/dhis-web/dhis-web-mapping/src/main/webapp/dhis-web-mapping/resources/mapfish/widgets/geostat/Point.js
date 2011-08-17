@@ -1277,10 +1277,10 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
     prepareMapViewValueType: function() {
         var obj = {};
         if (this.valueType.isIndicator()) {
-            this.form.findField('indicatorgroup').showField();
-            this.form.findField('indicator').showField();
-            this.form.findField('dataelementgroup').hideField();
-            this.form.findField('dataelement').hideField();
+            this.form.findField('indicatorgroup').show();
+            this.form.findField('indicator').show();
+            this.form.findField('dataelementgroup').hide();
+            this.form.findField('dataelement').hide();
             obj.components = {
                 valueTypeGroup: this.form.findField('indicatorgroup'),
                 valueType: this.form.findField('indicator')
@@ -1295,10 +1295,10 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             };
         }
         else if (this.valueType.isDataElement()) {
-            this.form.findField('indicatorgroup').hideField();
-            this.form.findField('indicator').hideField();
-            this.form.findField('dataelementgroup').showField();
-            this.form.findField('dataelement').showField();
+            this.form.findField('indicatorgroup').hide();
+            this.form.findField('indicator').hide();
+            this.form.findField('dataelementgroup').show();
+            this.form.findField('dataelement').show();
             obj.components = {
                 valueTypeGroup: this.form.findField('dataelementgroup'),
                 valueType: this.form.findField('dataelement')
@@ -1318,10 +1318,10 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
     prepareMapViewDateType: function() {
         var obj = {};
         if (G.system.mapDateType.isFixed()) {
-            this.form.findField('periodtype').showField();
-            this.form.findField('period').showField();
-            this.form.findField('startdate').hideField();
-            this.form.findField('enddate').hideField();
+            this.form.findField('periodtype').show();
+            this.form.findField('period').show();
+            this.form.findField('startdate').hide();
+            this.form.findField('enddate').hide();
             obj.components = {
                 c1: this.form.findField('periodtype'),
                 c2: this.form.findField('period')
@@ -1336,10 +1336,10 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
             };
         }
         else if (G.system.mapDateType.isStartEnd()) {
-            this.form.findField('periodtype').hideField();
-            this.form.findField('period').hideField();
-            this.form.findField('startdate').showField();
-            this.form.findField('enddate').showField();
+            this.form.findField('periodtype').hide();
+            this.form.findField('period').hide();
+            this.form.findField('startdate').show();
+            this.form.findField('enddate').show();
             obj.components = {
                 c1: this.form.findField('startdate'),
                 c2: this.form.findField('enddate')
@@ -1356,27 +1356,27 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.FormPanel, {
         this.form.findField('maplegendtype').setValue(this.legend.value);
         
         if (this.legend.value == G.conf.map_legendset_type_automatic) {
-            this.form.findField('method').showField();
-            this.form.findField('startcolor').showField();
-            this.form.findField('endcolor').showField();
-            this.form.findField('maplegendset').hideField();
+            this.form.findField('method').show();
+            this.form.findField('startcolor').show();
+            this.form.findField('endcolor').show();
+            this.form.findField('maplegendset').hide();
             
             if (this.legend.method == G.conf.classify_with_bounds) {
-                this.form.findField('classes').hideField();
-                this.form.findField('bounds').showField();
+                this.form.findField('classes').hide();
+                this.form.findField('bounds').show();
             }
             else {
-                this.form.findField('classes').showField();
-                this.form.findField('bounds').hideField();
+                this.form.findField('classes').show();
+                this.form.findField('bounds').hide();
             }                
         }
         else if (this.legend.value == G.conf.map_legendset_type_predefined) {
-            this.form.findField('method').hideField();
-            this.form.findField('classes').hideField();
-            this.form.findField('bounds').hideField();
-            this.form.findField('startcolor').hideField();
-            this.form.findField('endcolor').hideField();
-            this.form.findField('maplegendset').showField();
+            this.form.findField('method').hide();
+            this.form.findField('classes').hide();
+            this.form.findField('bounds').hide();
+            this.form.findField('startcolor').hide();
+            this.form.findField('endcolor').hide();
+            this.form.findField('maplegendset').show();
         }
     },
     

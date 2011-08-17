@@ -111,7 +111,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             function mapViewStoreCallback() {
                 this.cmp.mapview.setValue(this.mapView.id);
                 this.valueType.value = this.mapView.mapValueType;
-                this.cmp.mapvaluetype.setValue(this.valueType.value);
+                this.cmp.mapValueType.setValue(this.valueType.value);
                 this.setMapView();
             }
             
@@ -147,9 +147,9 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     
     getColors: function() {
         var startColor = new mapfish.ColorRgb();
-        startColor.setFromHex(this.cmp.startcolor.getValue());
+        startColor.setFromHex(this.cmp.startColor.getValue());
         var endColor = new mapfish.ColorRgb();
-        endColor.setFromHex(this.cmp.endcolor.getValue());
+        endColor.setFromHex(this.cmp.endColor.getValue());
         return [startColor, endColor];
     },
     
@@ -319,7 +319,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         Ext.getCmp('mapdatetype_cb').setValue(G.system.mapDateType.value);
 
                         this.valueType.value = this.mapView.mapValueType;
-                        this.cmp.mapvaluetype.setValue(this.valueType.value);
+                        this.cmp.mapValueType.setValue(this.valueType.value);
                         this.setMapView();
                     }
                 }
@@ -354,7 +354,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             }
         });
         
-        this.cmp.indicatorgroup = new Ext.form.ComboBox({
+        this.cmp.indicatorGroup = new Ext.form.ComboBox({
             fieldLabel: G.i18n.indicator_group,
             typeAhead: true,
             editable: false,
@@ -413,7 +413,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                                     this.prepareMapViewLegend();
                                     
                                     function load() {
-                                        this.cmp.maplegendset.setValue(mapLegendSet.id);
+                                        this.cmp.mapLegendSet.setValue(mapLegendSet.id);
                                         this.applyPredefinedLegend();
                                     }
                                     
@@ -455,7 +455,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        this.cmp.dataelement.clearValue();
+                        this.cmp.dataElement.clearValue();
                         this.stores.dataElementsByGroup.setBaseParam('dataElementGroupId', cb.getValue());
                         this.stores.dataElementsByGroup.load();
                     }
@@ -497,7 +497,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                                     this.prepareMapViewLegend();
                                     
                                     function load() {
-                                        this.cmp.maplegendset.setValue(mapLegendSet.id);
+                                        this.cmp.mapLegendSet.setValue(mapLegendSet.id);
                                         this.applyPredefinedLegend();
                                     }
                                     
@@ -576,7 +576,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             }
         });
         
-        this.cmp.startdate = new Ext.form.DateField({
+        this.cmp.startDate = new Ext.form.DateField({
             fieldLabel: G.i18n.start_date,
             format: 'Y-m-d',
             hidden: true,
@@ -587,14 +587,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     fn: function(df, date) {
                         this.cmp.mapview.clearValue();
                         this.updateValues = true;
-                        this.cmp.enddate.setMinValue(date);
+                        this.cmp.endDate.setMinValue(date);
                         this.classify(false, true);
                     }
                 }
             }
         });
         
-        this.cmp.enddate = new Ext.form.DateField({
+        this.cmp.endDate = new Ext.form.DateField({
             fieldLabel: G.i18n.end_date,
             format: 'Y-m-d',
             hidden: true,
@@ -605,7 +605,174 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     fn: function(df, date) {
                         this.cmp.mapview.clearValue();
                         this.updateValues = true;
-                        this.cmp.startdate.setMaxValue(date);
+                        this.cmp.startDate.setMaxValue(date);
+                        this.classify(false, true);
+                    }
+                }
+            }
+        });
+        
+        this.cmp.mapLegendType = new Ext.form.ComboBox({
+            editable: false,
+            valueField: 'value',
+            displayField: 'text',
+            mode: 'local',
+            fieldLabel: G.i18n.legend_type,
+            value: this.legend.value,
+            triggerAction: 'all',
+            width: G.conf.combo_width,
+            store: new Ext.data.ArrayStore({
+                fields: ['value', 'text'],
+                data: [
+                    [G.conf.map_legendset_type_automatic, G.i18n.automatic],
+                    [G.conf.map_legendset_type_predefined, G.i18n.predefined]
+                ]
+            }),
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        if (cb.getValue() == G.conf.map_legendset_type_predefined && cb.getValue() != this.legend.value) {
+                            this.legend.value = G.conf.map_legendset_type_predefined;
+                            this.prepareMapViewLegend();
+                            
+                            if (this.cmp.mapLegendSet.getValue()) {
+                                this.applyPredefinedLegend();
+                            }
+                        }
+                        else if (cb.getValue() == G.conf.map_legendset_type_automatic && cb.getValue() != this.legend.value) {
+                            this.legend.value = G.conf.map_legendset_type_automatic;
+                            this.prepareMapViewLegend();                            
+                            this.classify(false, true);
+                        }
+                    }
+                }
+            }
+        });
+        
+        this.cmp.mapLegendSet = new Ext.form.ComboBox({
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            mode: 'remote',
+            fieldLabel: G.i18n.legendset,
+            triggerAction: 'all',
+            width: G.conf.combo_width,
+            hidden: true,
+            store: G.stores.predefinedColorMapLegendSet,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function() {
+                        this.cmp.mapview.clearValue();
+                        this.applyPredefinedLegend();
+                    }
+                }
+            }
+        });
+                
+        this.cmp.method = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.method,
+            editable: false,
+            valueField: 'value',
+            displayField: 'text',
+            mode: 'local',
+            value: this.legend.method,
+            triggerAction: 'all',
+            width: G.conf.combo_width,
+            store: new Ext.data.ArrayStore({
+                fields: ['value', 'text'],
+                data: [
+                    [2, G.i18n.equal_intervals],
+                    [3, G.i18n.equal_group_count],
+                    [1, G.i18n.fixed_intervals]
+                ]
+            }),
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        this.cmp.mapview.clearValue();
+                        if (cb.getValue() == G.conf.classify_with_bounds && cb.getValue() != this.legend.method) {
+                            this.legend.method = G.conf.classify_with_bounds;
+                            this.prepareMapViewLegend();
+                        }
+                        else if (cb.getValue() != this.legend.method) {
+                            this.legend.method = cb.getValue();
+                            this.prepareMapViewLegend();
+                            this.classify(false, true);
+                        }
+                    }
+                }
+            }
+        });
+        
+        this.cmp.bounds = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.bounds,
+            width: G.conf.combo_width,
+            hidden: true,
+            listeners: {
+                'change': {
+                    scope: this,
+                    fn: function() {
+                        this.classify(false, true);
+                    }
+                }  
+            }
+        });
+        
+        this.cmp.classes = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.classes,
+            editable: false,
+            valueField: 'value',
+            displayField: 'value',
+            mode: 'local',
+            value: this.legend.classes,
+            triggerAction: 'all',
+            width: G.conf.combo_width,
+            store: new Ext.data.ArrayStore({
+                fields: ['value'],
+                data: [[1], [2], [3], [4], [5], [6], [7]]
+            }),
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        this.cmp.mapview.clearValue();
+                        
+                        if (cb.getValue() != this.legend.classes) {
+                            this.legend.classes = cb.getValue();
+                            this.classify(false, true);
+                        }
+                    }
+                }
+            }
+        });
+
+        this.cmp.startColor = new Ext.ux.ColorField({
+            fieldLabel: G.i18n.low_color,
+            allowBlank: false,
+            width: G.conf.combo_width,
+            value: "#FF0000",
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function() {
+                        this.classify(false, true);
+                    }
+                }
+            }
+        });
+        
+        this.cmp.endColor = new Ext.ux.ColorField({
+            fieldLabel: G.i18n.high_color,
+            allowBlank: false,
+            width: G.conf.combo_width,
+            value: "#FFFF00",
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function() {
                         this.classify(false, true);
                     }
                 },
@@ -618,33 +785,45 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             }
         });
         
-        this.cmp. = new Ext.form.ComboBox({
+        this.cmp.radiusLow = new Ext.form.NumberField({
+            fieldLabel: G.i18n.low_point_size,
+            width: G.conf.combo_number_width_small,
+            allowDecimals: false,
+            allowNegative: false,
+            minValue: 1,
+            value: 5,
+            listeners: {
+                'change': {
+                    scope: this,
+                    fn: function() {
+                        this.classify(false, true);
+                    }
+                }
+            }
+        });
         
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.CombstoBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
-        
-        this.cmp. = new Ext.form.ComboBox({
+        this.cmp.radiusHigh = new Ext.form.NumberField({
+            fieldLabel: G.i18n.high_point_size,
+            width: G.conf.combo_number_width_small,
+            allowDecimals: false,
+            allowNegative: false,
+            minValue: 1,
+            value: 20,
+            listeners: {
+                'change': {
+                    scope: this,
+                    fn: function() {
+                        this.classify(false, true);
+                    }
+                },
+                'render': {
+                    scope: this,
+                    fn: function(cmp) {
+                        this.cmp[cmp.name] = cmp;
+                    }
+                }
+            }
+        });
     },
     
     addItems: function() {    
@@ -659,9 +838,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         xtype: 'form',
                         width: 270,
                         items: [
-                            {
-                                html: '<div class="window-info">Data options</div>'
-                            },
+                            { html: '<div class="window-info">Data options</div>' },
+                            
                             this.cmp.mapview,
                             
                             { html: '<div class="thematic-br">' },
@@ -680,306 +858,33 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                             
                             this.cmp.period,
                             
-                            this.cmp.startdate,
+                            this.cmp.startDate,
                             
-                            this.cmp.enddate,
-                            
-                            { html: '<div class="thematic-br">' },
-                            
-                            this.cmp.,
-                            
-                            this.cmp.,
-                            
-                            this.cmp.,
-                            
-                            this.cmp.,
-                            
-                            this.cmp.,
-                            
-                            this.cmp.,
-                            
-                            this.cmp.,
-                            
-                            this.cmp.,
-                            
-                            {
-                                html: '<div class="window-info">Legend options</div>'
-                            },
-                            
-                            {
-                                xtype: 'combo',
-                                name: 'maplegendtype',
-                                editable: false,
-                                valueField: 'value',
-                                displayField: 'text',
-                                mode: 'local',
-                                fieldLabel: G.i18n.legend_type,
-                                value: this.legend.value,
-                                triggerAction: 'all',
-                                width: G.conf.combo_width,
-                                store: new Ext.data.ArrayStore({
-                                    fields: ['value', 'text'],
-                                    data: [
-                                        [G.conf.map_legendset_type_automatic, G.i18n.automatic],
-                                        [G.conf.map_legendset_type_predefined, G.i18n.predefined]
-                                    ]
-                                }),
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            if (cb.getValue() == G.conf.map_legendset_type_predefined && cb.getValue() != this.legend.value) {
-                                                this.legend.value = G.conf.map_legendset_type_predefined;
-                                                this.prepareMapViewLegend();
-                                                
-                                                if (this.cmp.maplegendset.getValue()) {
-                                                    this.applyPredefinedLegend();
-                                                }
-                                            }
-                                            else if (cb.getValue() == G.conf.map_legendset_type_automatic && cb.getValue() != this.legend.value) {
-                                                this.legend.value = G.conf.map_legendset_type_automatic;
-                                                this.prepareMapViewLegend();                            
-                                                this.classify(false, true);
-                                            }
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
-                            
-                            {
-                                xtype: 'combo',
-                                name: 'maplegendset',
-                                editable: false,
-                                valueField: 'id',
-                                displayField: 'name',
-                                mode: 'remote',
-                                fieldLabel: G.i18n.legendset,
-                                triggerAction: 'all',
-                                width: G.conf.combo_width,
-                                hidden: true,
-                                store: G.stores.predefinedColorMapLegendSet,
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function() {
-                                            this.cmp.mapview.clearValue();
-                                            this.applyPredefinedLegend();
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
-
-                            {
-                                xtype: 'combo',
-                                name: 'method',
-                                fieldLabel: G.i18n.method,
-                                editable: false,
-                                valueField: 'value',
-                                displayField: 'text',
-                                mode: 'local',
-                                value: this.legend.method,
-                                triggerAction: 'all',
-                                width: G.conf.combo_width,
-                                store: new Ext.data.ArrayStore({
-                                    fields: ['value', 'text'],
-                                    data: [
-                                        [2, G.i18n.equal_intervals],
-                                        [3, G.i18n.equal_group_count],
-                                        [1, G.i18n.fixed_intervals]
-                                    ]
-                                }),
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            this.cmp.mapview.clearValue();
-                                            if (cb.getValue() == G.conf.classify_with_bounds && cb.getValue() != this.legend.method) {
-                                                this.legend.method = G.conf.classify_with_bounds;
-                                                this.prepareMapViewLegend();
-                                            }
-                                            else if (cb.getValue() != this.legend.method) {
-                                                this.legend.method = cb.getValue();
-                                                this.prepareMapViewLegend();
-                                                this.classify(false, true);
-                                            }
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
-                            
-                            {
-                                xtype: 'textfield',
-                                name: 'bounds',
-                                fieldLabel: G.i18n.bounds,
-                                width: G.conf.combo_width,
-                                hidden: true,
-                                listeners: {
-                                    'change': {
-                                        scope: this,
-                                        fn: function() {
-                                            this.classify(false, true);
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }       
-                                }
-                            },
-                            
-                            {
-                                xtype: 'combo',
-                                name: 'classes',
-                                fieldLabel: G.i18n.classes,
-                                editable: false,
-                                valueField: 'value',
-                                displayField: 'value',
-                                mode: 'local',
-                                value: this.legend.classes,
-                                triggerAction: 'all',
-                                width: G.conf.combo_width,
-                                store: new Ext.data.ArrayStore({
-                                    fields: ['value'],
-                                    data: [[1], [2], [3], [4], [5], [6], [7]]
-                                }),
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            this.cmp.mapview.clearValue();
-                                            
-                                            if (cb.getValue() != this.legend.classes) {
-                                                this.legend.classes = cb.getValue();
-                                                this.classify(false, true);
-                                            }
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
-
-                            {
-                                xtype: 'colorfield',
-                                name: 'startcolor',
-                                fieldLabel: G.i18n.low_color,
-                                allowBlank: false,
-                                width: G.conf.combo_width,
-                                value: "#FF0000",
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function() {
-                                            this.classify(false, true);
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
-                            
-                            {
-                                xtype: 'colorfield',
-                                name: 'endcolor',
-                                fieldLabel: G.i18n.high_color,
-                                allowBlank: false,
-                                width: G.conf.combo_width,
-                                value: "#FFFF00",
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function() {
-                                            this.classify(false, true);
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            this.cmp.endDate,
                             
                             { html: '<div class="thematic-br">' },
                             
-                            {
-                                xtype: 'numberfield',
-                                name: 'radiuslow',
-                                fieldLabel: G.i18n.low_point_size,
-                                width: G.conf.combo_number_width_small,
-                                allowDecimals: false,
-                                allowNegative: false,
-                                minValue: 1,
-                                value: 5,
-                                listeners: {
-                                    'change': {
-                                        scope: this,
-                                        fn: function() {
-                                            this.classify(false, true);
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            { html: '<div class="window-info">Legend options</div>' },
                             
-                            {
-                                xtype: 'numberfield',
-                                name: 'radiushigh',
-                                fieldLabel: G.i18n.high_point_size,
-                                width: G.conf.combo_number_width_small,
-                                allowDecimals: false,
-                                allowNegative: false,
-                                minValue: 1,
-                                value: 20,
-                                listeners: {
-                                    'change': {
-                                        scope: this,
-                                        fn: function() {
-                                            this.classify(false, true);
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            }
+                            this.cmp.mapLegendType,
+                            
+                            this.cmp.mapLegendSet,
+                            
+                            this.cmp.method,
+                            
+                            this.cmp.bounds,
+                            
+                            this.cmp.classes,
+                            
+                            this.cmp.startColor,
+                            
+                            this.cmp.endColor,
+                            
+                            { html: '<div class="thematic-br">' },
+                            
+                            this.cmp.radiusLow,
+                            
+                            this.cmp.radiusHigh
                         ],
                         listeners: {
                             'render': {
@@ -1486,12 +1391,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     prepareMapViewValueType: function() {
         var obj = {};
         if (this.valueType.isIndicator()) {
-            this.cmp.indicatorgroup.show();
+            this.cmp.indicatorGroup.show();
             this.cmp.indicator.show();
-            this.cmp.dataelementgroup.hide();
-            this.cmp.dataelement.hide();
+            this.cmp.dataElementGroup.hide();
+            this.cmp.dataElement.hide();
             obj.components = {
-                valueTypeGroup: this.cmp.indicatorgroup,
+                valueTypeGroup: this.cmp.indicatorGroup,
                 valueType: this.cmp.indicator
             };
             obj.stores = {
@@ -1504,13 +1409,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             };
         }
         else if (this.valueType.isDataElement()) {
-            this.cmp.indicatorgroup.hideField();
-            this.cmp.indicator.hideField();
-            this.cmp.dataelementgroup.showField();
-            this.cmp.dataelement.showField();
+            this.cmp.indicatorGroup.hide();
+            this.cmp.indicator.hide();
+            this.cmp.dataElementGroup.show();
+            this.cmp.dataElement.show();
             obj.components = {
-                valueTypeGroup: this.cmp.dataelementgroup,
-                valueType: this.cmp.dataelement
+                valueTypeGroup: this.cmp.dataElementGroup,
+                valueType: this.cmp.dataElement
             };
             obj.stores = {
                 valueTypeGroup: G.stores.dataElementGroup,
@@ -1527,12 +1432,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     prepareMapViewDateType: function() {
         var obj = {};
         if (G.system.mapDateType.isFixed()) {
-            this.cmp.periodtype.showField();
-            this.cmp.period.showField();
-            this.cmp.startdate.hideField();
-            this.cmp.enddate.hideField();
+            this.cmp.periodType.show();
+            this.cmp.period.show();
+            this.cmp.startDate.hide();
+            this.cmp.endDate.hide();
             obj.components = {
-                c1: this.cmp.periodtype,
+                c1: this.cmp.periodType,
                 c2: this.cmp.period
             };
             obj.stores = {
@@ -1545,13 +1450,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             };
         }
         else if (G.system.mapDateType.isStartEnd()) {
-            this.cmp.periodtype.hideField();
-            this.cmp.period.hideField();
-            this.cmp.startdate.showField();
-            this.cmp.enddate.showField();
+            this.cmp.periodType.hide();
+            this.cmp.period.hide();
+            this.cmp.startDate.show();
+            this.cmp.endDate.show();
             obj.components = {
-                c1: this.cmp.startdate,
-                c2: this.cmp.enddate
+                c1: this.cmp.startDate,
+                c2: this.cmp.endDate
             };
             obj.mapView = {
                 c1: 'startDate',
@@ -1562,30 +1467,30 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     },
     
     prepareMapViewLegend: function() {
-        this.cmp.maplegendtype.setValue(this.legend.value);
+        this.cmp.mapLegendType.setValue(this.legend.value);
         
         if (this.legend.value == G.conf.map_legendset_type_automatic) {
-            this.cmp.method.showField();
-            this.cmp.startcolor.showField();
-            this.cmp.endcolor.showField();
-            this.cmp.maplegendset.hideField();
+            this.cmp.method.show();
+            this.cmp.startColor.show();
+            this.cmp.endColor.show();
+            this.cmp.mapLegendSet.hide();
             
             if (this.legend.method == G.conf.classify_with_bounds) {
-                this.cmp.classes.hideField();
-                this.cmp.bounds.showField();
+                this.cmp.classes.hide();
+                this.cmp.bounds.show();
             }
             else {
-                this.cmp.classes.showField();
-                this.cmp.bounds.hideField();
+                this.cmp.classes.show();
+                this.cmp.bounds.hide();
             }                
         }
         else if (this.legend.value == G.conf.map_legendset_type_predefined) {
-            this.cmp.method.hideField();
-            this.cmp.classes.hideField();
-            this.cmp.bounds.hideField();
-            this.cmp.startcolor.hideField();
-            this.cmp.endcolor.hideField();
-            this.cmp.maplegendset.showField();
+            this.cmp.method.hide();
+            this.cmp.classes.hide();
+            this.cmp.bounds.hide();
+            this.cmp.startColor.hide();
+            this.cmp.endColor.hide();
+            this.cmp.mapLegendSet.show();
         }
     },
     
@@ -1646,17 +1551,17 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
         this.prepareMapViewLegend();
 
         function predefinedMapLegendSetStoreCallback() {
-            this.cmp.maplegendset.setValue(this.mapView.mapLegendSetId);
+            this.cmp.mapLegendSet.setValue(this.mapView.mapLegendSetId);
             this.applyPredefinedLegend(true);
         }
         
-        this.cmp.radiuslow.setValue(this.mapView.radiusLow || G.conf.defaultLowRadius);
-        this.cmp.radiushigh.setValue(this.mapView.radiusHigh || G.conf.defaultHighRadius);
+        this.cmp.radiusLow.setValue(this.mapView.radiusLow || G.conf.defaultLowRadius);
+        this.cmp.radiusHigh.setValue(this.mapView.radiusHigh || G.conf.defaultHighRadius);
         
         if (this.legend.value == G.conf.map_legendset_type_automatic) {
             this.cmp.method.setValue(this.mapView.method);
-            this.cmp.startcolor.setValue(this.mapView.colorLow);
-            this.cmp.endcolor.setValue(this.mapView.colorHigh);
+            this.cmp.startColor.setValue(this.mapView.colorLow);
+            this.cmp.endColor.setValue(this.mapView.colorHigh);
 
             if (this.legend.method == G.conf.classify_with_bounds) {
                 this.cmp.bounds.setValue(this.mapView.bounds);
@@ -1702,7 +1607,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
 	
 	applyPredefinedLegend: function(isMapView) {
         this.legend.value = G.conf.map_legendset_type_predefined;
-		var mls = this.cmp.maplegendset.getValue();
+		var mls = this.cmp.mapLegendSet.getValue();
 		Ext.Ajax.request({
 			url: G.conf.path_mapping + 'getMapLegendsByMapLegendSet' + G.conf.type,
 			method: 'POST',
@@ -1739,7 +1644,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     
     formValidation: {
         validateForm: function(exception) {
-            if (this.cmp.mapvaluetype.getValue() == G.conf.map_value_type_indicator) {
+            if (this.cmp.mapValueType.getValue() == G.conf.map_value_type_indicator) {
                 if (!this.cmp.indicator.getValue()) {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
@@ -1747,8 +1652,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     return false;
                 }
             }
-            else if (this.cmp.mapvaluetype.getValue() == G.conf.map_value_type_dataelement) {
-                if (!this.cmp.dataelement.getValue()) {
+            else if (this.cmp.mapValueType.getValue() == G.conf.map_value_type_dataelement) {
+                if (!this.cmp.dataElement.getValue()) {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
@@ -1765,7 +1670,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 }
             }
             else {
-                if (!this.cmp.startdate.getValue() || !this.cmp.enddate.getValue()) {
+                if (!this.cmp.startDate.getValue() || !this.cmp.endDate.getValue()) {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
@@ -1780,7 +1685,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 return false;
             }
 
-            if (this.cmp.maplegendtype.getValue() == G.conf.map_legendset_type_automatic) {
+            if (this.cmp.mapLegendType.getValue() == G.conf.map_legendset_type_automatic) {
                 if (this.cmp.method.getValue() == G.conf.classify_with_bounds) {
                     if (!this.cmp.bounds.getValue()) {
                         if (exception) {
@@ -1790,8 +1695,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     }
                 }
             }
-            else if (this.cmp.maplegendtype.getValue() == G.conf.map_legendset_type_predefined) {
-                if (!this.cmp.maplegendset.getValue()) {
+            else if (this.cmp.mapLegendType.getValue() == G.conf.map_legendset_type_predefined) {
+                if (!this.cmp.mapLegendSet.getValue()) {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
@@ -1799,7 +1704,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 }
             }
             
-            if (!this.cmp.radiuslow.getValue() || !this.cmp.radiushigh.getValue()) {
+            if (!this.cmp.radiusLow.getValue() || !this.cmp.radiusHigh.getValue()) {
                 if (exception) {
                     Ext.message.msg(false, G.i18n.form_is_not_complete);
                 }
@@ -1813,33 +1718,33 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     formValues: {
 		getAllValues: function() {
 			return {
-                mapValueType: this.cmp.mapvaluetype.getValue(),
-                indicatorGroupId: this.valueType.isIndicator() ? this.cmp.indicatorgroup.getValue() : null,
+                mapValueType: this.cmp.mapValueType.getValue(),
+                indicatorGroupId: this.valueType.isIndicator() ? this.cmp.indicatorGroup.getValue() : null,
                 indicatorId: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : null,
 				indicatorName: this.valueType.isIndicator() ? this.cmp.indicator.getRawValue() : null,
-                dataElementGroupId: this.valueType.isDataElement() ? this.cmp.dataelementgroup.getValue() : null,
-                dataElementId: this.valueType.isDataElement() ? this.cmp.dataelement.getValue() : null,
-				dataElementName: this.valueType.isDataElement() ? this.cmp.dataelement.getRawValue() : null,
+                dataElementGroupId: this.valueType.isDataElement() ? this.cmp.dataElementGroup.getValue() : null,
+                dataElementId: this.valueType.isDataElement() ? this.cmp.dataElement.getValue() : null,
+				dataElementName: this.valueType.isDataElement() ? this.cmp.dataElement.getRawValue() : null,
                 mapDateType: G.system.mapDateType.value,
-                periodTypeId: G.system.mapDateType.isFixed() ? this.cmp.periodtype.getValue() : null,
+                periodTypeId: G.system.mapDateType.isFixed() ? this.cmp.periodType.getValue() : null,
                 periodId: G.system.mapDateType.isFixed() ? this.cmp.period.getValue() : null,
                 periodName: G.system.mapDateType.isFixed() ? this.cmp.period.getRawValue() : null,
-                startDate: G.system.mapDateType.isStartEnd() ? this.cmp.startdate.getRawValue() : null,
-                endDate: G.system.mapDateType.isStartEnd() ? this.cmp.enddate.getRawValue() : null,
+                startDate: G.system.mapDateType.isStartEnd() ? this.cmp.startDate.getRawValue() : null,
+                endDate: G.system.mapDateType.isStartEnd() ? this.cmp.endDate.getRawValue() : null,
                 parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
                 parentOrganisationUnitLevel: this.organisationUnitSelection.parent.level,
                 parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
                 organisationUnitLevel: this.organisationUnitSelection.level.level,
                 organisationUnitLevelName: this.organisationUnitSelection.level.name,
-                mapLegendType: this.cmp.maplegendtype.getValue(),
+                mapLegendType: this.cmp.mapLegendType.getValue(),
                 method: this.legend.value == G.conf.map_legendset_type_automatic ? this.cmp.method.getValue() : null,
                 classes: this.legend.value == G.conf.map_legendset_type_automatic ? this.cmp.classes.getValue() : null,
                 bounds: this.legend.value == G.conf.map_legendset_type_automatic && this.legend.method == G.conf.classify_with_bounds ? this.cmp.bounds.getValue() : null,
-                colorLow: this.legend.value == G.conf.map_legendset_type_automatic ? this.cmp.startcolor.getValue() : null,
-                colorHigh: this.legend.value == G.conf.map_legendset_type_automatic ? this.cmp.endcolor.getValue() : null,
-                mapLegendSetId: this.legend.value == G.conf.map_legendset_type_predefined ? this.cmp.maplegendset.getValue() : null,
-				radiusLow: this.cmp.radiuslow.getValue(),
-				radiusHigh: this.cmp.radiushigh.getValue(),
+                colorLow: this.legend.value == G.conf.map_legendset_type_automatic ? this.cmp.startColor.getValue() : null,
+                colorHigh: this.legend.value == G.conf.map_legendset_type_automatic ? this.cmp.endColor.getValue() : null,
+                mapLegendSetId: this.legend.value == G.conf.map_legendset_type_predefined ? this.cmp.mapLegendSet.getValue() : null,
+				radiusLow: this.cmp.radiusLow.getValue(),
+				radiusHigh: this.cmp.radiusHigh.getValue(),
                 longitude: G.vars.map.getCenter().lon,
                 latitude: G.vars.map.getCenter().lat,
                 zoom: parseFloat(G.vars.map.getZoom())
@@ -1848,30 +1753,30 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
         
         getImageExportValues: function() {
 			return {
-				mapValueTypeValue: this.cmp.mapvaluetype.getValue() == G.conf.map_value_type_indicator ?
-					this.cmp.indicator.getRawValue() : this.cmp.dataelement.getRawValue(),
+				mapValueTypeValue: this.cmp.mapValueType.getValue() == G.conf.map_value_type_indicator ?
+					this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
 				dateValue: G.system.mapDateType.isFixed() ?
-					this.cmp.period.getRawValue() : new Date(this.cmp.startdate.getRawValue()).format('Y M j') + ' - ' + new Date(this.cmp.enddate.getRawValue()).format('Y M j')
+					this.cmp.period.getRawValue() : new Date(this.cmp.startDate.getRawValue()).format('Y M j') + ' - ' + new Date(this.cmp.endDate.getRawValue()).format('Y M j')
 			};
 		},
         
         clearForm: function() {            
             this.cmp.mapview.clearValue();            
             
-            this.cmp.mapvaluetype.setValue(G.conf.map_value_type_indicator);
+            this.cmp.mapValueType.setValue(G.conf.map_value_type_indicator);
             this.valueType.setIndicator();
             this.prepareMapViewValueType();
-            this.cmp.indicatorgroup.clearValue();
+            this.cmp.indicatorGroup.clearValue();
             this.cmp.indicator.clearValue();
-            this.cmp.dataelementgroup.clearValue();
-            this.cmp.dataelement.clearValue();
+            this.cmp.dataElementGroup.clearValue();
+            this.cmp.dataElement.clearValue();
             
             G.system.mapDateType.setFixed();
             this.prepareMapViewDateType();
-            this.cmp.periodtype.clearValue();
+            this.cmp.periodType.clearValue();
             this.cmp.period.clearValue();
-            this.cmp.startdate.reset();
-            this.cmp.enddate.reset();
+            this.cmp.startDate.reset();
+            this.cmp.endDate.reset();
             
             if (this.cmp.parentorgunit.getSelectionModel().getSelectedNode()) {
                 this.cmp.parentorgunit.getSelectionModel().getSelectedNode().unselect();
@@ -1886,11 +1791,11 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             this.cmp.classes.setValue(this.legend.classes);
             this.cmp.bounds.reset();
             
-            this.cmp.startcolor.setValue('#FF0000');
-            this.cmp.endcolor.setValue('#FFFF00');
+            this.cmp.startColor.setValue('#FF0000');
+            this.cmp.endColor.setValue('#FFFF00');
             
-            this.cmp.radiuslow.reset();
-            this.cmp.radiushigh.reset();
+            this.cmp.radiusLow.reset();
+            this.cmp.radiusHigh.reset();
             
             document.getElementById(this.legendDiv).innerHTML = '';
             
@@ -1933,10 +1838,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             if (this.updateValues) {
                 var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
                 var params = {
-                    id: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : this.cmp.dataelement.getValue(),
+                    id: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : this.cmp.dataElement.getValue(),
                     periodId: G.system.mapDateType.isFixed() ? this.cmp.period.getValue() : null,
-                    startDate: G.system.mapDateType.isStartEnd() ? new Date(this.cmp.startdate.getValue()).format('Y-m-d') : null,
-                    endDate: G.system.mapDateType.isStartEnd() ? new Date(this.cmp.enddate.getValue()).format('Y-m-d') : null,
+                    startDate: G.system.mapDateType.isStartEnd() ? new Date(this.cmp.startDate.getValue()).format('Y-m-d') : null,
+                    endDate: G.system.mapDateType.isStartEnd() ? new Date(this.cmp.endDate.getValue()).format('Y-m-d') : null,
                     parentId: this.organisationUnitSelection.parent.id,
                     level: this.organisationUnitSelection.level.level
                 };
@@ -1990,8 +1895,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             method: this.cmp.method.getValue(),
             numClasses: this.cmp.classes.getValue(),
             colors: this.getColors(),
-            minSize: parseInt(this.cmp.radiuslow.getValue()),
-            maxSize: parseInt(this.cmp.radiushigh.getValue())
+            minSize: parseInt(this.cmp.radiusLow.getValue()),
+            maxSize: parseInt(this.cmp.radiusHigh.getValue())
         };
         
         G.vars.activeWidget = this;

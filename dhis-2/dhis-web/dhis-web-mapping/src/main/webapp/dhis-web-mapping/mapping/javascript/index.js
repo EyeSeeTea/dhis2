@@ -886,12 +886,12 @@
                                 listeners: {
                                     'select': function(cb) {
                                         if (cb.getValue() == G.conf.map_legend_symbolizer_color) {
-                                            Ext.getCmp('predefinedmaplegendcolor_cf').showField();
-                                            Ext.getCmp('predefinedmaplegendimage_cb').hideField();
+                                            Ext.getCmp('predefinedmaplegendcolor_cf').show();
+                                            Ext.getCmp('predefinedmaplegendimage_cb').hide();
                                         }
                                         else if (cb.getValue() == G.conf.map_legend_symbolizer_image) {
-                                            Ext.getCmp('predefinedmaplegendcolor_cf').hideField();
-                                            Ext.getCmp('predefinedmaplegendimage_cb').showField();
+                                            Ext.getCmp('predefinedmaplegendcolor_cf').hide();
+                                            Ext.getCmp('predefinedmaplegendimage_cb').show();
                                         }
                                     }
                                 }
