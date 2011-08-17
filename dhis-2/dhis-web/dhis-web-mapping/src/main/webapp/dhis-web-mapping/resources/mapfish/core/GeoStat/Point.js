@@ -62,7 +62,7 @@ mapfish.GeoStat.Point = OpenLayers.Class(mapfish.GeoStat, {
     
     createColorInterpolation: function() {
         var numColors = this.classification.bins.length;
-		var mapLegendType = this.widget.form.findField('maplegendtype').getValue();
+		var mapLegendType = this.widget.cmp.mapLegendType.getValue();
         this.widget.imageLegend = [];
         
         this.colorInterpolation = mapLegendType == G.conf.map_legendset_type_automatic ?
