@@ -2128,12 +2128,6 @@
                     cmo.contextNode = node;
                     cmo.showAt(e.getXY());
                 }
-                
-                else {
-                    var cmv = node.getOwnerTree().contextMenuVector;
-                    cmv.contextNode = node;
-                    cmv.showAt(e.getXY());
-                }
             }
         },
 		listeners: {
@@ -2199,7 +2193,6 @@
             '->',
             {
                 xtype: 'button',
-                name: 'apply',
                 text: G.i18n.apply,
                 iconCls: 'icon-assign',
                 disabled: true,
@@ -2237,7 +2230,6 @@
             ' ',
             {
                 xtype: 'button',
-                name: 'reset',
                 text: 'Reset',
                 iconCls: 'icon-cancel',
                 disabled: true,
@@ -2258,32 +2250,14 @@
         ]
     });    
     choropleth.window.setPosition(340,45);
-
+    
     point = new mapfish.widgets.geostat.Point({
         id: 'point',
         map: G.vars.map,
         layer: pointLayer,
-		title: '<span class="panel-title">Thematic layer 2</span>',
         featureSelection: false,
         legendDiv: 'pointlegend',
         defaults: {width: 130},
-        tools: [
-            {
-                id: 'refresh',
-                qtip: 'Refresh layer',
-                handler: function() {
-                    point.updateValues = true;
-                    point.classify();
-                }
-            },
-            {
-                id: 'close',
-                qtip: 'Clear layer',
-                handler: function() {
-                    point.formValues.clearForm.call(point);
-                }
-            }
-        ],
         listeners: {
             'expand': function() {
                 G.vars.activePanel.setPoint();
@@ -2293,6 +2267,77 @@
             }
         }
     });
+    
+    point.window = new Ext.Window({
+        title: '<span id="window-thematic2-title">Thematic layer 2</span>',
+        layout: 'fit',
+        bodyStyle: 'padding:8px 8px 0px 8px; background-color:#fff',
+        closeAction: 'hide',
+        width: 575,
+        height: 478,
+        items: point,
+        cmp: {},
+        bbar: [
+            '->',
+            {
+                xtype: 'button',
+                text: G.i18n.apply,
+                iconCls: 'icon-assign',
+                disabled: true,
+                scope: point,
+                handler: function() {
+                    if (!this.formValidation.validateForm.apply(this)) {
+                        return;
+                    }
+                    var node = this.cmp.parent.getSelectionModel().getSelectedNode();
+                    if (!node || !this.cmp.level.getValue()) {
+                        return;
+                    }
+                    if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
+                        Ext.message.msg(false, 'Level is higher than boundary level');
+                        return;
+                    }
+                    
+                    this.cmp.mapview.clearValue();
+                    this.updateValues = true;
+                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
+                        this.cmp.level.getValue(), this.cmp.level.getRawValue());
+                        
+                    this.window.hide();									
+                    this.loadGeoJson();
+                },
+                listeners: {
+                    'render': {
+                        scope: point,
+                        fn: function(b) {
+                            this.window.cmp.apply = b;
+                        }
+                    }
+                }
+            },
+            ' ',
+            {
+                xtype: 'button',
+                text: 'Reset',
+                iconCls: 'icon-cancel',
+                disabled: true,
+                scope: point,
+                handler: function() {
+                    this.formValues.clearForm.call(this, false);
+                    this.window.cmp.reset.disable();
+                },
+                listeners: {
+                    'render': {
+                        scope: point,
+                        fn: function(b) {
+                            this.window.cmp.reset = b;
+                        }
+                    }
+                }
+            }
+        ]
+    });    
+    point.window.setPosition(340,45);
 
     symbol = new mapfish.widgets.geostat.Symbol({
         id: 'symbol',
@@ -2395,7 +2440,18 @@
                         {
                             text: 'Search..',
                             iconCls: 'menu-layeroptions-locate',
-                            showSearchWindow: function() {                            
+                            cmp: {
+                                highlightColor: new Ext.ux.ColorField({
+                                    emptyText: G.conf.emptytext,
+                                    labelSeparator: G.conf.labelseparator,
+                                    fieldLabel: G.i18n.highlight_color,
+                                    allowBlank: false,
+                                    width: G.conf.combo_width_fieldset,
+                                    value: "#0000FF"
+                                }),
+                                window: null
+                            },
+                            showSearchWindow: function() {
                                 var layer = polygonLayer;
 
                                 var data = [];
@@ -2413,12 +2469,11 @@
                                         data: data
                                     });
                                     
-                                    if (Ext.getCmp('locatefeature_w')) {
-                                        Ext.getCmp('locatefeature_w').destroy();
-                                    }
+                                    if (this.cmp.window) {
+                                        this.cmp.window.destroy();
+                                    }  
                                     
-                                    var locateFeatureWindow = new Ext.Window({
-                                        id: 'locatefeature_w',
+                                    this.cmp.window = new Ext.Window({
                                         title: '<span id="window-locate-title">Organisation unit search</span>',
                                         layout: 'fit',
                                         width: G.conf.window_width,
@@ -2429,20 +2484,10 @@
                                                 bodyStyle:'padding:8px',
                                                 labelWidth: G.conf.label_width,
                                                 items: [
-                                                    {html: '<div class="window-info">Locate an organisation unit on the map</div>'},
-                                                    {
-                                                        xtype: 'colorfield',
-                                                        id: 'highlightcolor_cf',
-                                                        emptyText: G.conf.emptytext,
-                                                        labelSeparator: G.conf.labelseparator,
-                                                        fieldLabel: G.i18n.highlight_color,
-                                                        allowBlank: false,
-                                                        width: G.conf.combo_width_fieldset,
-                                                        value: "#0000FF"
-                                                    },
+                                                    { html: '<div class="window-info">Locate organisation units on the map</div>' },
+                                                    this.cmp.highlightColor,
                                                     {
                                                         xtype: 'textfield',
-                                                        id: 'locatefeature_tf',
                                                         emptyText: G.conf.emptytext,
                                                         labelSeparator: G.conf.labelseparator,
                                                         fieldLabel: G.i18n.text_filter,
@@ -2453,11 +2498,10 @@
                                                                 featureStore.filter('name', tf.getValue(), true, false);
                                                             }
                                                         }
-                                                    },
-                                                    {html: '<div class="window-p"></div>'},
+                                                    },                                                    
+                                                    { html: '<div class="window-p"></div>' },
                                                     {
                                                         xtype: 'grid',
-                                                        id: 'featuregrid_gp',
                                                         height: G.util.getMultiSelectHeight(),
                                                         cm: new Ext.grid.ColumnModel({
                                                             columns: [{id: 'name', header: 'Features', dataIndex: 'name', width: 250}]
@@ -2469,6 +2513,7 @@
                                                         store: featureStore,
                                                         listeners: {
                                                             'cellclick': {
+                                                                scope: this,
                                                                 fn: function(g, ri, ci, e) {
                                                                     layer.redraw();
                                                                     
@@ -2482,7 +2527,7 @@
                                                                         }
                                                                     }
                                                                     
-                                                                    var color = Ext.getCmp('highlightcolor_cf').getValue();
+                                                                    var color = this.cmp.highlightColor.getValue();
                                                                     var symbolizer;
                                                                     
                                                                     if (feature.geometry.CLASS_NAME == G.conf.map_feature_type_multipolygon_class_name ||
@@ -2513,8 +2558,8 @@
                                             }
                                         }
                                     });
-                                    locateFeatureWindow.setPagePosition(Ext.getCmp('east').x - (locateFeatureWindow.width + 15), Ext.getCmp('center').y + 41);
-                                    locateFeatureWindow.show();
+                                    this.cmp.window.setPagePosition(Ext.getCmp('east').x - (this.cmp.window.width + 15), Ext.getCmp('center').y + 41);
+                                    this.cmp.window.show();
                                 }
                                 else {
                                     Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
@@ -2689,19 +2734,327 @@
             }
         }
 	});
-    
-    var pointButton = new Ext.Button({
+	
+	var pointButton = new Ext.Button({
 		iconCls: 'icon-thematic2',
 		tooltip: G.i18n.thematic_layer + ' 2',
         style: 'margin-top:1px',
         listeners: {
             'afterrender': function() {
                 this.menu = new Ext.menu.Menu({
-                    items: []
+                    items: [
+                        {
+                            text: 'Edit layer..',
+                            iconCls: 'menu-layeroptions-edit',
+                            handler: function() {
+                                point.window.show();
+                            }
+                        },
+                        {
+                            text: 'Filter..',
+                            iconCls: 'menu-layeroptions-filter',
+                            handler: function() {
+                                point.window.show();
+                            }
+                        },
+                        '-',
+                        {
+                            text: 'Search..',
+                            iconCls: 'menu-layeroptions-locate',
+                            cmp: {
+                                highlightColor: new Ext.ux.ColorField({
+                                    emptyText: G.conf.emptytext,
+                                    labelSeparator: G.conf.labelseparator,
+                                    fieldLabel: G.i18n.highlight_color,
+                                    allowBlank: false,
+                                    width: G.conf.combo_width_fieldset,
+                                    value: "#0000FF"
+                                }),
+                                window: null
+                            },
+                            showSearchWindow: function() {
+                                var layer = pointLayer;
+
+                                var data = [];
+                                for (var i = 0; i < layer.features.length; i++) {
+                                    data.push([layer.features[i].data.id || i, layer.features[i].data.name]);
+                                }
+                                
+                                if (data.length) {
+                                    var featureStore = new Ext.data.ArrayStore({
+                                        mode: 'local',
+                                        idProperty: 'id',
+                                        fields: ['id','name'],
+                                        sortInfo: {field: 'name', direction: 'ASC'},
+                                        autoDestroy: true,
+                                        data: data
+                                    });
+                                    
+                                    if (this.cmp.window) {
+                                        this.cmp.window.destroy();
+                                    }  
+                                    
+                                    this.cmp.window = new Ext.Window({
+                                        title: '<span id="window-locate-title">Organisation unit search</span>',
+                                        layout: 'fit',
+                                        width: G.conf.window_width,
+                                        height: G.util.getMultiSelectHeight() + 140,
+                                        items: [
+                                            {
+                                                xtype: 'form',
+                                                bodyStyle:'padding:8px',
+                                                labelWidth: G.conf.label_width,
+                                                items: [
+                                                    { html: '<div class="window-info">Locate organisation units on the map</div>' },
+                                                    this.cmp.highlightColor,
+                                                    {
+                                                        xtype: 'textfield',
+                                                        emptyText: G.conf.emptytext,
+                                                        labelSeparator: G.conf.labelseparator,
+                                                        fieldLabel: G.i18n.text_filter,
+                                                        width: G.conf.combo_width_fieldset,
+                                                        enableKeyEvents: true,
+                                                        listeners: {
+                                                            'keyup': function(tf) {
+                                                                featureStore.filter('name', tf.getValue(), true, false);
+                                                            }
+                                                        }
+                                                    },                                                    
+                                                    { html: '<div class="window-p"></div>' },
+                                                    {
+                                                        xtype: 'grid',
+                                                        height: G.util.getMultiSelectHeight(),
+                                                        cm: new Ext.grid.ColumnModel({
+                                                            columns: [{id: 'name', header: 'Features', dataIndex: 'name', width: 250}]
+                                                        }),
+                                                        sm: new Ext.grid.RowSelectionModel({singleSelect:true}),
+                                                        viewConfig: {forceFit: true},
+                                                        sortable: true,
+                                                        autoExpandColumn: 'name',
+                                                        store: featureStore,
+                                                        listeners: {
+                                                            'cellclick': {
+                                                                scope: this,
+                                                                fn: function(g, ri, ci, e) {
+                                                                    layer.redraw();
+                                                                    
+                                                                    var id, feature;
+                                                                    id = g.getStore().getAt(ri).data.id;
+                                                                    
+                                                                    for (var i = 0; i < layer.features.length; i++) {
+                                                                        if (layer.features[i].data.id == id) {
+                                                                            feature = layer.features[i];
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                    
+                                                                    var color = this.cmp.highlightColor.getValue();
+                                                                    var symbolizer;
+                                                                    
+                                                                    if (feature.geometry.CLASS_NAME == G.conf.map_feature_type_multipolygon_class_name ||
+                                                                        feature.geometry.CLASS_NAME == G.conf.map_feature_type_polygon_class_name) {
+                                                                        symbolizer = new OpenLayers.Symbolizer.Polygon({
+                                                                            'strokeColor': color,
+                                                                            'fillColor': color
+                                                                        });
+                                                                    }
+                                                                    else if (feature.geometry.CLASS_NAME == G.conf.map_feature_type_point_class_name) {
+                                                                        symbolizer = new OpenLayers.Symbolizer.Point({
+                                                                            'pointRadius': 7,
+                                                                            'fillColor': color
+                                                                        });
+                                                                    }
+                                                                    
+                                                                    layer.drawFeature(feature,symbolizer);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        ],
+                                        listeners: {
+                                            'hide': function() {
+                                                layer.redraw();
+                                            }
+                                        }
+                                    });
+                                    this.cmp.window.setPagePosition(Ext.getCmp('east').x - (this.cmp.window.width + 15), Ext.getCmp('center').y + 41);
+                                    this.cmp.window.show();
+                                }
+                                else {
+                                    Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
+                                }
+                            },
+                            handler: function() {
+                                this.showSearchWindow();
+                            }
+                        },
+                        {
+                            text: 'Labels..',
+                            iconCls: 'menu-layeroptions-labels',
+                            showLabelWindow: function() {
+                                var layer = polygonLayer;
+                                
+                                if (layer.features.length) {
+                                    if (this.labelWindow) {
+                                        this.labelWindow.show();
+                                    }
+                                    else {
+                                        this.labelWindow = new Ext.Window({
+                                            title: '<span id="window-labels-title">Labels</span>',
+                                            layout: 'fit',
+                                            closeAction: 'hide',
+                                            width: G.conf.window_width,
+                                            height: 200,
+                                            items: [
+                                                {
+                                                    xtype: 'form',
+                                                    bodyStyle: 'padding:8px',
+                                                    labelWidth: G.conf.label_width,
+                                                    items: [
+                                                        {html: '<div class="window-info">Show/hide feature labels</div>'},
+                                                        {
+                                                            xtype: 'numberfield',
+                                                            id: 'labelfontsize_nf',
+                                                            fieldLabel: G.i18n.font_size,
+                                                            labelSeparator: G.conf.labelseparator,
+                                                            width: G.conf.combo_number_width_small,
+                                                            enableKeyEvents: true,
+                                                            allowDecimals: false,
+                                                            allowNegative: false,
+                                                            value: 13,
+                                                            emptyText: 13,
+                                                            listeners: {
+                                                                'keyup': function(nf) {
+                                                                    if (layer.widget.labels) {
+                                                                        layer.widget.labels = false;
+                                                                        G.util.labels.toggleFeatureLabels(layer.widget, nf.getValue(), Ext.getCmp('labelstrong_chb').getValue(),
+                                                                            Ext.getCmp('labelitalic_chb').getValue(), Ext.getCmp('labelcolor_cf').getValue());
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            xtype: 'checkbox',
+                                                            id: 'labelstrong_chb',
+                                                            fieldLabel: '<b>' + G.i18n.bold_ + '</b>',
+                                                            labelSeparator: G.conf.labelseparator,
+                                                            listeners: {
+                                                                'check': function(chb, checked) {
+                                                                    if (layer.widget.labels) {
+                                                                        layer.widget.labels = false;
+                                                                        G.util.labels.toggleFeatureLabels(layer.widget, Ext.getCmp('labelfontsize_nf').getValue(),
+                                                                            checked, Ext.getCmp('labelitalic_chb').getValue(), Ext.getCmp('labelcolor_cf').getValue());
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            xtype: 'checkbox',
+                                                            id: 'labelitalic_chb',
+                                                            fieldLabel: '<i>' + G.i18n.italic + '</i>',
+                                                            labelSeparator: G.conf.labelseparator,
+                                                            listeners: {
+                                                                'check': function(chb, checked) {
+                                                                    if (layer.widget.labels) {
+                                                                        layer.widget.labels = false;
+                                                                        G.util.labels.toggleFeatureLabels(layer.widget, Ext.getCmp('labelfontsize_nf').getValue(),
+                                                                            Ext.getCmp('labelstrong_chb').getValue(), checked, Ext.getCmp('labelcolor_cf').getValue());
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        {
+                                                            xtype: 'colorfield',
+                                                            id: 'labelcolor_cf',
+                                                            fieldLabel: G.i18n.color,
+                                                            labelSeparator: G.conf.labelseparator,
+                                                            allowBlank: false,
+                                                            width: G.conf.combo_width_fieldset,
+                                                            value: "#000000",
+                                                            listeners: {
+                                                                'select': {
+                                                                    scope: this,
+                                                                    fn: function(cf) {
+                                                                        if (layer.widget.labels) {
+                                                                            layer.widget.labels = false;
+                                                                            G.util.labels.toggleFeatureLabels(layer.widget, Ext.getCmp('labelfontsize_nf').getValue(),
+                                                                                Ext.getCmp('labelstrong_chb').getValue(), Ext.getCmp('labelitalic_chb').getValue(), cf.getValue());
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            bbar: [
+                                                '->',
+                                                {
+                                                    xtype: 'button',
+                                                    id: 'labelshow_b',
+                                                    iconCls: 'icon-assign',
+                                                    hideLabel: true,
+                                                    text: G.i18n.toggle,
+                                                    handler: function() {
+                                                        var layer = polygonLayer;
+                                                        if (layer.features.length) {
+                                                            G.util.labels.toggleFeatureLabels(layer.widget, Ext.getCmp('labelfontsize_nf').getValue(),
+                                                                Ext.getCmp('labelstrong_chb').getValue(), Ext.getCmp('labelitalic_chb').getValue(), Ext.getCmp('labelcolor_cf').getValue());
+                                                        }
+                                                        else {
+                                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        });
+                                        this.labelWindow.setPagePosition(Ext.getCmp('east').x - (this.labelWindow.width + 15), Ext.getCmp('center').y + 41);                        
+                                        this.labelWindow.show();
+                                    }
+                                }
+                                else {
+                                    Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
+                                }
+                            },
+                            handler: function() {
+                                this.showLabelWindow();
+                            }
+                        },
+                        {
+                            text: 'Opacity',
+                            iconCls: 'menu-layeroptions-opacity',
+                            menu: { 
+                                items: G.conf.opacityItems,
+                                listeners: {
+                                    'itemclick': function(item) {
+                                        polygonLayer.setOpacity(item.text);
+                                    }
+                                }
+                            }
+                        },
+                        '-',
+                        {
+                            text: 'Refresh',
+                            iconCls: 'menu-layeroptions-refresh',
+                            handler: function() {
+                                choropleth.updateValues = true;
+                                choropleth.classify();
+                            }
+                        },
+                        {
+                            text: 'Clear',
+                            iconCls: 'menu-layeroptions-clear',
+                            handler: function() {
+                                choropleth.formValues.clearForm.call(choropleth, false);
+                            }
+                        }
+                    ]
                 });
             }
         }
-    });
+	});
     
     var symbolButton = new Ext.Button({
 		iconCls: 'icon-symbol',
@@ -3109,7 +3462,6 @@
                     frame: true
                 },
                 items: [
-                    point,
                     symbol,
                     centroid
                 ]
