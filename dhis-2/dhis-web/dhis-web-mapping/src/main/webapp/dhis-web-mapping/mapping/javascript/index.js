@@ -2474,7 +2474,6 @@
         closeAction: 'hide',
         width: 575,
         height: 478,
-        cmp: {},
         items: choropleth,
         bbar: [
             '->',
@@ -2510,14 +2509,26 @@
                     'render': {
                         scope: choropleth,
                         fn: function(b) {
-                            this.window.cmp.apply = b;
+                            this.window.cmp = {
+                                apply: b
+                            };
                         }
                     }
+                }
+            },
+            ' ',
+            {
+                xtype: 'button',
+                text: 'Reset',
+                iconCls: 'icon-cancel',
+                scope: choropleth,
+                handler: function() {
+                    this.formValues.clearForm.call(this, false);
                 }
             }
         ]
     });
-    choropleth.window.setPosition(400,50);
+    choropleth.window.setPosition(340,45);
 
     point = new mapfish.widgets.geostat.Point({
         id: 'point',
