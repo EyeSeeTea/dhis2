@@ -1,7 +1,7 @@
 ﻿Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '../resources/ext-ux/theme/gray-extend/gray-extend/s.gif';
-	Ext.override(Ext.form.Field,{showField:function(){this.show();this.container.up('div.x-form-item').setDisplayed(true);},hideField:function(){this.hide();this.container.up('div.x-form-item').setDisplayed(false);}});
-	Ext.QuickTips.init();
+	Ext.layout.FormLayout.prototype.trackLabels = true;
+    Ext.QuickTips.init();
 	document.body.oncontextmenu = function(){return false;};
     
 	G.vars.map = new OpenLayers.Map({
@@ -2674,7 +2674,7 @@
                             }
                         },
                         {
-                            text: 'Close',
+                            text: 'Clear',
                             iconCls: 'menu-layeroptions-clear',
                             handler: function() {
                                 choropleth.formValues.clearForm.call(choropleth);
@@ -2962,6 +2962,7 @@
 		disabled: !G.user.isAdmin,
         style: 'margin-top:1px',
 		handler: function() {
+console.log(polygonLayer);            
             if (!adminWindow.hidden) {
                 adminWindow.hide();
             }

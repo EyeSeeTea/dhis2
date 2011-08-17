@@ -92,6 +92,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
         
         this.createItems();
         
+        this.addItems();
+        
         this.createSelectFeatures();
 
         if (G.vars.parameter.id) {
@@ -287,10 +289,365 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     
     createItems: function() {
         
-        this.defaults = {
-			labelSeparator: G.conf.labelseparator,
-            emptyText: G.conf.emptytext,
-        };
+        this.cmp.mapview = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.favorite,
+            typeAhead: true,
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            mode: 'remote',
+            forceSelection: true,
+            triggerAction: 'all',
+            emptyText: G.i18n.optional,
+            selectOnFocus: true,
+            width: G.conf.combo_width,
+            listWidth: 'auto',
+            store: G.stores.mapView,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        this.mapView = G.stores.mapView.getAt(G.stores.mapView.find('id', cb.getValue())).data;
+                        this.updateValues = true;
+                        
+                        this.legend.value = this.mapView.mapLegendType;
+                        this.legend.method = this.mapView.method || this.legend.method;
+                        this.legend.classes = this.mapView.classes || this.legend.classes;
+
+                        G.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
+                        G.system.mapDateType.value = this.mapView.mapDateType;
+                        Ext.getCmp('mapdatetype_cb').setValue(G.system.mapDateType.value);
+
+                        this.valueType.value = this.mapView.mapValueType;
+                        this.cmp.mapvaluetype.setValue(this.valueType.value);
+                        this.setMapView();
+                    }
+                }
+            }
+        });
+        
+        this.cmp.mapValueType = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.mapvaluetype,
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            mode: 'local',
+            triggerAction: 'all',
+            width: G.conf.combo_width,
+            value: G.conf.map_value_type_indicator,
+            store: new Ext.data.ArrayStore({
+                fields: ['id', 'name'],
+                data: [
+                    [G.conf.map_value_type_indicator, 'Indicator'],
+                    [G.conf.map_value_type_dataelement, 'Data element']
+                ]
+            }),
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        this.valueType.value = cb.getValue();
+                        this.prepareMapViewValueType();
+                        this.classify(false, true);
+                    }
+                }
+            }
+        });
+        
+        this.cmp.indicatorgroup = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.indicator_group,
+            typeAhead: true,
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            mode: 'remote',
+            forceSelection: true,
+            triggerAction: 'all',
+            selectOnFocus: true,
+            width: G.conf.combo_width,
+            store: G.stores.indicatorGroup,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        this.cmp.indicator.clearValue();
+                        this.stores.indicatorsByGroup.setBaseParam('indicatorGroupId', cb.getValue());
+                        this.stores.indicatorsByGroup.load();
+                    }
+                }
+            }
+        });
+        
+        this.cmp.indicator = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.indicator,
+            typeAhead: true,
+            editable: false,
+            valueField: 'id',
+            displayField: 'shortName',
+            mode: 'remote',
+            forceSelection: true,
+            triggerAction: 'all',
+            selectOnFocus: true,
+            width: G.conf.combo_width,
+            store: this.stores.indicatorsByGroup,
+            currentValue: null,
+            keepPosition: false,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        if (G.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
+                            return;
+                        }
+                        
+                        this.updateValues = true;
+                        Ext.Ajax.request({
+                            url: G.conf.path_mapping + 'getMapLegendSetByIndicator' + G.conf.type,
+                            method: 'POST',
+                            params: {indicatorId: cb.getValue()},
+                            scope: this,
+                            success: function(r) {
+                                var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
+                                if (mapLegendSet.id) {
+                                    this.legend.value = G.conf.map_legendset_type_predefined;
+                                    this.prepareMapViewLegend();
+                                    
+                                    function load() {
+                                        this.cmp.maplegendset.setValue(mapLegendSet.id);
+                                        this.applyPredefinedLegend();
+                                    }
+                                    
+                                    if (!G.stores.predefinedMapLegendSet.isLoaded) {
+                                        G.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
+                                            load.call(this);
+                                        }});
+                                    }
+                                    else {
+                                        load.call(this);
+                                    }
+                                }
+                                else {
+                                    this.legend.value = G.conf.map_legendset_type_automatic;
+                                    this.prepareMapViewLegend();
+                                    this.classify(false, cb.keepPosition);
+                                    G.util.setKeepPosition(cb);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        });
+        
+        this.cmp.dataElementGroup = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.dataelement_group,
+            typeAhead: true,
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            mode: 'remote',
+            forceSelection: true,
+            triggerAction: 'all',
+            selectOnFocus: true,
+            width: G.conf.combo_width,
+            store: G.stores.dataElementGroup,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        this.cmp.dataelement.clearValue();
+                        this.stores.dataElementsByGroup.setBaseParam('dataElementGroupId', cb.getValue());
+                        this.stores.dataElementsByGroup.load();
+                    }
+                }
+            }
+        });
+        
+        this.cmp.dataElement = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.dataelement,
+            typeAhead: true,
+            editable: false,
+            valueField: 'id',
+            displayField: 'shortName',
+            mode: 'remote',
+            forceSelection: true,
+            triggerAction: 'all',
+            selectOnFocus: true,
+            width: G.conf.combo_width,
+            store: this.stores.dataElementsByGroup,
+            keepPosition: false,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        if (G.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
+                            return;
+                        }
+                        
+                        this.updateValues = true;
+                        Ext.Ajax.request({
+                            url: G.conf.path_mapping + 'getMapLegendSetByDataElement' + G.conf.type,
+                            method: 'POST',
+                            params: {dataElementId: cb.getValue()},
+                            scope: this,
+                            success: function(r) {
+                                var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
+                                if (mapLegendSet.id) {
+                                    this.legend.value = G.conf.map_legendset_type_predefined;
+                                    this.prepareMapViewLegend();
+                                    
+                                    function load() {
+                                        this.cmp.maplegendset.setValue(mapLegendSet.id);
+                                        this.applyPredefinedLegend();
+                                    }
+                                    
+                                    if (!G.stores.predefinedMapLegendSet.isLoaded) {
+                                        G.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
+                                            load.call(this);
+                                        }});
+                                    }
+                                    else {
+                                        load.call(this);
+                                    }
+                                }
+                                else {
+                                    this.legend.value = G.conf.map_legendset_type_automatic;
+                                    this.prepareMapViewLegend();
+                                    this.classify(false, cb.keepPosition);
+                                    G.util.setKeepPosition(cb);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        });
+        
+        this.cmp.periodType = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.period_type,
+            typeAhead: true,
+            editable: false,
+            valueField: 'name',
+            displayField: 'displayName',
+            mode: 'remote',
+            forceSelection: true,
+            triggerAction: 'all',
+            selectOnFocus: true,
+            width: G.conf.combo_width,
+            store: G.stores.periodType,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        this.cmp.period.clearValue();
+                        this.stores.periodsByType.setBaseParam('name', cb.getValue());
+                        this.stores.periodsByType.load();
+                    }
+                }
+            }
+        });
+        
+        this.cmp.period = new Ext.form.ComboBox({
+            fieldLabel: G.i18n.period,
+            typeAhead: true,
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            mode: 'remote',
+            forceSelection: true,
+            triggerAction: 'all',
+            selectOnFocus: true,
+            width: G.conf.combo_width,
+            store: this.stores.periodsByType,
+            keepPosition: false,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(cb) {
+                        if (G.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
+                            return;
+                        }
+                        
+                        this.updateValues = true;
+                        this.classify(false, cb.keepPosition);                        
+                        G.util.setKeepPosition(cb);
+                    }
+                }
+            }
+        });
+        
+        this.cmp.startdate = new Ext.form.DateField({
+            fieldLabel: G.i18n.start_date,
+            format: 'Y-m-d',
+            hidden: true,
+            width: G.conf.combo_width,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(df, date) {
+                        this.cmp.mapview.clearValue();
+                        this.updateValues = true;
+                        this.cmp.enddate.setMinValue(date);
+                        this.classify(false, true);
+                    }
+                }
+            }
+        });
+        
+        this.cmp.enddate = new Ext.form.DateField({
+            fieldLabel: G.i18n.end_date,
+            format: 'Y-m-d',
+            hidden: true,
+            width: G.conf.combo_width,
+            listeners: {
+                'select': {
+                    scope: this,
+                    fn: function(df, date) {
+                        this.cmp.mapview.clearValue();
+                        this.updateValues = true;
+                        this.cmp.startdate.setMaxValue(date);
+                        this.classify(false, true);
+                    }
+                },
+                'render': {
+                    scope: this,
+                    fn: function(cmp) {
+                        this.cmp[cmp.name] = cmp;
+                    }
+                }
+            }
+        });
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.CombstoBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+        
+        this.cmp. = new Ext.form.ComboBox({
+    },
+    
+    addItems: function() {    
         
         this.items = [
             {
@@ -305,412 +662,45 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                             {
                                 html: '<div class="window-info">Data options</div>'
                             },
-                            {
-                                xtype: 'combo',
-                                name: 'mapview',
-                                fieldLabel: G.i18n.favorite,
-                                typeAhead: true,
-                                editable: false,
-                                valueField: 'id',
-                                displayField: 'name',
-                                mode: 'remote',
-                                forceSelection: true,
-                                triggerAction: 'all',
-                                emptyText: G.i18n.optional,
-                                selectOnFocus: true,
-                                width: G.conf.combo_width,
-                                listWidth: 'auto',
-                                store: G.stores.mapView,
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            this.mapView = G.stores.mapView.getAt(G.stores.mapView.find('id', cb.getValue())).data;
-                                            this.updateValues = true;
-                                            
-                                            this.legend.value = this.mapView.mapLegendType;
-                                            this.legend.method = this.mapView.method || this.legend.method;
-                                            this.legend.classes = this.mapView.classes || this.legend.classes;
-
-                                            G.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-                                            G.system.mapDateType.value = this.mapView.mapDateType;
-                                            Ext.getCmp('mapdatetype_cb').setValue(G.system.mapDateType.value);
-
-                                            this.valueType.value = this.mapView.mapValueType;
-                                            this.cmp.mapvaluetype.setValue(this.valueType.value);
-                                            this.setMapView();
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            this.cmp.mapview,
                             
                             { html: '<div class="thematic-br">' },
                             
-                            {
-                                xtype: 'combo',
-                                name: 'mapvaluetype',
-                                fieldLabel: G.i18n.mapvaluetype,
-                                editable: false,
-                                valueField: 'id',
-                                displayField: 'name',
-                                mode: 'local',
-                                triggerAction: 'all',
-                                width: G.conf.combo_width,
-                                value: G.conf.map_value_type_indicator,
-                                store: new Ext.data.ArrayStore({
-                                    fields: ['id', 'name'],
-                                    data: [
-                                        [G.conf.map_value_type_indicator, 'Indicator'],
-                                        [G.conf.map_value_type_dataelement, 'Data element']
-                                    ]
-                                }),
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            this.valueType.value = cb.getValue();
-                                            this.prepareMapViewValueType();
-                                            this.classify(false, true);
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            this.cmp.mapValueType,
                             
-                            {
-                                xtype: 'combo',
-                                name: 'indicatorgroup',
-                                fieldLabel: G.i18n.indicator_group,
-                                typeAhead: true,
-                                editable: false,
-                                valueField: 'id',
-                                displayField: 'name',
-                                mode: 'remote',
-                                forceSelection: true,
-                                triggerAction: 'all',
-                                selectOnFocus: true,
-                                width: G.conf.combo_width,
-                                store: G.stores.indicatorGroup,
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            this.cmp.indicator.clearValue();
-                                            this.stores.indicatorsByGroup.setBaseParam('indicatorGroupId', cb.getValue());
-                                            this.stores.indicatorsByGroup.load();
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            this.cmp.indicatorGroup,
                             
-                            {
-                                xtype: 'combo',
-                                name: 'indicator',
-                                fieldLabel: G.i18n.indicator,
-                                typeAhead: true,
-                                editable: false,
-                                valueField: 'id',
-                                displayField: 'shortName',
-                                mode: 'remote',
-                                forceSelection: true,
-                                triggerAction: 'all',
-                                selectOnFocus: true,
-                                width: G.conf.combo_width,
-                                store: this.stores.indicatorsByGroup,
-                                currentValue: null,
-                                keepPosition: false,
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            if (G.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
-                                                return;
-                                            }
-                                            
-                                            this.updateValues = true;
-                                            Ext.Ajax.request({
-                                                url: G.conf.path_mapping + 'getMapLegendSetByIndicator' + G.conf.type,
-                                                method: 'POST',
-                                                params: {indicatorId: cb.getValue()},
-                                                scope: this,
-                                                success: function(r) {
-                                                    var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
-                                                    if (mapLegendSet.id) {
-                                                        this.legend.value = G.conf.map_legendset_type_predefined;
-                                                        this.prepareMapViewLegend();
-                                                        
-                                                        function load() {
-                                                            this.cmp.maplegendset.setValue(mapLegendSet.id);
-                                                            this.applyPredefinedLegend();
-                                                        }
-                                                        
-                                                        if (!G.stores.predefinedMapLegendSet.isLoaded) {
-                                                            G.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
-                                                                load.call(this);
-                                                            }});
-                                                        }
-                                                        else {
-                                                            load.call(this);
-                                                        }
-                                                    }
-                                                    else {
-                                                        this.legend.value = G.conf.map_legendset_type_automatic;
-                                                        this.prepareMapViewLegend();
-                                                        this.classify(false, cb.keepPosition);
-                                                        G.util.setKeepPosition(cb);
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            this.cmp.indicator,
                             
-                            {
-                                xtype: 'combo',
-                                name: 'dataelementgroup',
-                                fieldLabel: G.i18n.dataelement_group,
-                                typeAhead: true,
-                                editable: false,
-                                valueField: 'id',
-                                displayField: 'name',
-                                mode: 'remote',
-                                forceSelection: true,
-                                triggerAction: 'all',
-                                selectOnFocus: true,
-                                width: G.conf.combo_width,
-                                store: G.stores.dataElementGroup,
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            this.cmp.dataelement.clearValue();
-                                            this.stores.dataElementsByGroup.setBaseParam('dataElementGroupId', cb.getValue());
-                                            this.stores.dataElementsByGroup.load();
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            this.cmp.dataElementGroup,
                             
-                            {
-                                xtype: 'combo',
-                                name: 'dataelement',
-                                fieldLabel: G.i18n.dataelement,
-                                typeAhead: true,
-                                editable: false,
-                                valueField: 'id',
-                                displayField: 'shortName',
-                                mode: 'remote',
-                                forceSelection: true,
-                                triggerAction: 'all',
-                                selectOnFocus: true,
-                                width: G.conf.combo_width,
-                                store: this.stores.dataElementsByGroup,
-                                keepPosition: false,
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            if (G.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
-                                                return;
-                                            }
-                                            
-                                            this.updateValues = true;
-                                            Ext.Ajax.request({
-                                                url: G.conf.path_mapping + 'getMapLegendSetByDataElement' + G.conf.type,
-                                                method: 'POST',
-                                                params: {dataElementId: cb.getValue()},
-                                                scope: this,
-                                                success: function(r) {
-                                                    var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
-                                                    if (mapLegendSet.id) {
-                                                        this.legend.value = G.conf.map_legendset_type_predefined;
-                                                        this.prepareMapViewLegend();
-                                                        
-                                                        function load() {
-                                                            this.cmp.maplegendset.setValue(mapLegendSet.id);
-                                                            this.applyPredefinedLegend();
-                                                        }
-                                                        
-                                                        if (!G.stores.predefinedMapLegendSet.isLoaded) {
-                                                            G.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
-                                                                load.call(this);
-                                                            }});
-                                                        }
-                                                        else {
-                                                            load.call(this);
-                                                        }
-                                                    }
-                                                    else {
-                                                        this.legend.value = G.conf.map_legendset_type_automatic;
-                                                        this.prepareMapViewLegend();
-                                                        this.classify(false, cb.keepPosition);
-                                                        G.util.setKeepPosition(cb);
-                                                    }
-                                                }
-                                            });
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            this.cmp.dataElement,
                             
-                            {
-                                xtype: 'combo',
-                                name: 'periodtype',
-                                fieldLabel: G.i18n.period_type,
-                                typeAhead: true,
-                                editable: false,
-                                valueField: 'name',
-                                displayField: 'displayName',
-                                mode: 'remote',
-                                forceSelection: true,
-                                triggerAction: 'all',
-                                selectOnFocus: true,
-                                width: G.conf.combo_width,
-                                store: G.stores.periodType,
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            this.cmp.period.clearValue();
-                                            this.stores.periodsByType.setBaseParam('name', cb.getValue());
-                                            this.stores.periodsByType.load();
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
-
-                            {
-                                xtype: 'combo',
-                                name: 'period',
-                                fieldLabel: G.i18n.period,
-                                typeAhead: true,
-                                editable: false,
-                                valueField: 'id',
-                                displayField: 'name',
-                                mode: 'remote',
-                                forceSelection: true,
-                                triggerAction: 'all',
-                                selectOnFocus: true,
-                                width: G.conf.combo_width,
-                                store: this.stores.periodsByType,
-                                keepPosition: false,
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(cb) {
-                                            if (G.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
-                                                return;
-                                            }
-                                            
-                                            this.updateValues = true;
-                                            this.classify(false, cb.keepPosition);                        
-                                            G.util.setKeepPosition(cb);
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            this.cmp.periodType,
                             
-                            {
-                                xtype: 'datefield',
-                                name: 'startdate',
-                                fieldLabel: G.i18n.start_date,
-                                format: 'Y-m-d',
-                                hidden: true,
-                                width: G.conf.combo_width,
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(df, date) {
-                                            this.cmp.mapview.clearValue();
-                                            this.updateValues = true;
-                                            this.cmp.enddate.setMinValue(date);
-                                            this.classify(false, true);
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            this.cmp.period,
                             
-                            {
-                                xtype: 'datefield',
-                                name: 'enddate',
-                                fieldLabel: G.i18n.end_date,
-                                format: 'Y-m-d',
-                                hidden: true,
-                                width: G.conf.combo_width,
-                                listeners: {
-                                    'select': {
-                                        scope: this,
-                                        fn: function(df, date) {
-                                            this.cmp.mapview.clearValue();
-                                            this.updateValues = true;
-                                            this.cmp.startdate.setMaxValue(date);
-                                            this.classify(false, true);
-                                        }
-                                    },
-                                    'render': {
-                                        scope: this,
-                                        fn: function(cmp) {
-                                            this.cmp[cmp.name] = cmp;
-                                        }
-                                    }
-                                }
-                            },
+                            this.cmp.startdate,
+                            
+                            this.cmp.enddate,
                             
                             { html: '<div class="thematic-br">' },
+                            
+                            this.cmp.,
+                            
+                            this.cmp.,
+                            
+                            this.cmp.,
+                            
+                            this.cmp.,
+                            
+                            this.cmp.,
+                            
+                            this.cmp.,
+                            
+                            this.cmp.,
+                            
+                            this.cmp.,
                             
                             {
                                 html: '<div class="window-info">Legend options</div>'
@@ -1496,10 +1486,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     prepareMapViewValueType: function() {
         var obj = {};
         if (this.valueType.isIndicator()) {
-            this.cmp.indicatorgroup.showField();
-            this.cmp.indicator.showField();
-            this.cmp.dataelementgroup.hideField();
-            this.cmp.dataelement.hideField();
+            this.cmp.indicatorgroup.show();
+            this.cmp.indicator.show();
+            this.cmp.dataelementgroup.hide();
+            this.cmp.dataelement.hide();
             obj.components = {
                 valueTypeGroup: this.cmp.indicatorgroup,
                 valueType: this.cmp.indicator
