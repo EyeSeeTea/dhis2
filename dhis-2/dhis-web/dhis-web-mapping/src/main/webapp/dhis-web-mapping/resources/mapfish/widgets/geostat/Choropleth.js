@@ -907,7 +907,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 this.collapseAll();
                 this.getRootNode().expand();
                 this.isSelected = false;
-console.log(this.widget);                
                 this.widget.window.cmp.apply.disable();
             },
             listeners: {

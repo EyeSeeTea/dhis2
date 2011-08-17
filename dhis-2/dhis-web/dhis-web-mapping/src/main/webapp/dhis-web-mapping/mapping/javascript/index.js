@@ -2726,7 +2726,7 @@
                             text: 'Clear',
                             iconCls: 'menu-layeroptions-clear',
                             handler: function() {
-                                choropleth.formValues.clearForm.call(choropleth, false);
+                                choropleth.formValues.clearForm.call(choropleth, true);
                             }
                         }
                     ]
@@ -2891,17 +2891,101 @@
                             }
                         },
                         {
+                            name: 'labels',
                             text: 'Labels..',
                             iconCls: 'menu-layeroptions-labels',
+                            layer: pointLayer,
+                            cmp: {
+                                fontSize: new Ext.form.NumberField({
+                                    name: 'fontsize',
+                                    fieldLabel: G.i18n.font_size,
+                                    labelSeparator: G.conf.labelseparator,
+                                    width: G.conf.combo_number_width_small,
+                                    enableKeyEvents: true,
+                                    allowDecimals: false,
+                                    allowNegative: false,
+                                    value: 13,
+                                    emptyText: 13,
+                                    listeners: {
+                                        'keyup': {
+                                            scope: this,
+                                            fn: function(nf) {
+                                                var item = this.menu.find('name','labels')[0];
+                                                
+                                                if (item.layer.widget.labels) {
+                                                    item.layer.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, nf.getValue(), item.cmp.strong.getValue(),
+                                                        item.cmp.italic.getValue(), item.cmp.color.getValue());
+                                                }
+                                            }
+                                        }
+                                    }
+                                }),
+                                strong: new Ext.form.Checkbox({
+                                    fieldLabel: '<b>' + G.i18n.bold_ + '</b>',
+                                    labelSeparator: G.conf.labelseparator,
+                                    listeners: {
+                                        'check': {
+                                            scope: this,
+                                            fn: function(chb, checked) {
+                                                var item = this.menu.find('name','labels')[0];
+                                                
+                                                if (item.layer.widget.labels) {
+                                                    item.layer.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, item.cmp.fontSize.getValue(),
+                                                        checked, item.cmp.italic.getValue(), item.cmp.color.getValue());
+                                                }
+                                            }
+                                        }
+                                    }
+                                }),
+                                italic: new Ext.form.Checkbox({
+                                    fieldLabel: '<i>' + G.i18n.italic + '</i>',
+                                    labelSeparator: G.conf.labelseparator,
+                                    listeners: {
+                                        'check': {
+                                            scope: this,
+                                            fn: function(chb, checked) {
+                                                var item = this.menu.find('name','labels')[0];
+                                                
+                                                if (item.layer.widget.labels) {
+                                                    item.layer.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, item.cmp.fontSize.getValue(),
+                                                        item.cmp.strong.getValue(), checked, item.cmp.color.getValue());
+                                                }
+                                            }
+                                        }
+                                    }
+                                }),
+                                color: new Ext.ux.ColorField({
+                                    fieldLabel: G.i18n.color,
+                                    labelSeparator: G.conf.labelseparator,
+                                    allowBlank: false,
+                                    width: G.conf.combo_width_fieldset,
+                                    value: "#000000",
+                                    listeners: {
+                                        'select': {
+                                            scope: this,
+                                            fn: function(cf) {
+                                                var item = this.menu.find('name','labels')[0];
+                                                
+                                                if (item.layer.widget.labels) {
+                                                    item.layer.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, item.cmp.fontSize.getValue(),
+                                                        item.cmp.strong.getValue(), item.cmp.italic.getValue(), cf.getValue());
+                                                }
+                                            }
+                                        }
+                                    }
+                                })
+                            },
                             showLabelWindow: function() {
-                                var layer = polygonLayer;
-                                
-                                if (layer.features.length) {
-                                    if (this.labelWindow) {
-                                        this.labelWindow.show();
+                                if (this.layer.features.length) {
+                                    if (this.cmp.labelWindow) {
+                                        this.cmp.labelWindow.show();
                                     }
                                     else {
-                                        this.labelWindow = new Ext.Window({
+                                        this.cmp.labelWindow = new Ext.Window({
                                             title: '<span id="window-labels-title">Labels</span>',
                                             layout: 'fit',
                                             closeAction: 'hide',
@@ -2914,78 +2998,10 @@
                                                     labelWidth: G.conf.label_width,
                                                     items: [
                                                         {html: '<div class="window-info">Show/hide feature labels</div>'},
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            id: 'labelfontsize_nf',
-                                                            fieldLabel: G.i18n.font_size,
-                                                            labelSeparator: G.conf.labelseparator,
-                                                            width: G.conf.combo_number_width_small,
-                                                            enableKeyEvents: true,
-                                                            allowDecimals: false,
-                                                            allowNegative: false,
-                                                            value: 13,
-                                                            emptyText: 13,
-                                                            listeners: {
-                                                                'keyup': function(nf) {
-                                                                    if (layer.widget.labels) {
-                                                                        layer.widget.labels = false;
-                                                                        G.util.labels.toggleFeatureLabels(layer.widget, nf.getValue(), Ext.getCmp('labelstrong_chb').getValue(),
-                                                                            Ext.getCmp('labelitalic_chb').getValue(), Ext.getCmp('labelcolor_cf').getValue());
-                                                                    }
-                                                                }
-                                                            }
-                                                        },
-                                                        {
-                                                            xtype: 'checkbox',
-                                                            id: 'labelstrong_chb',
-                                                            fieldLabel: '<b>' + G.i18n.bold_ + '</b>',
-                                                            labelSeparator: G.conf.labelseparator,
-                                                            listeners: {
-                                                                'check': function(chb, checked) {
-                                                                    if (layer.widget.labels) {
-                                                                        layer.widget.labels = false;
-                                                                        G.util.labels.toggleFeatureLabels(layer.widget, Ext.getCmp('labelfontsize_nf').getValue(),
-                                                                            checked, Ext.getCmp('labelitalic_chb').getValue(), Ext.getCmp('labelcolor_cf').getValue());
-                                                                    }
-                                                                }
-                                                            }
-                                                        },
-                                                        {
-                                                            xtype: 'checkbox',
-                                                            id: 'labelitalic_chb',
-                                                            fieldLabel: '<i>' + G.i18n.italic + '</i>',
-                                                            labelSeparator: G.conf.labelseparator,
-                                                            listeners: {
-                                                                'check': function(chb, checked) {
-                                                                    if (layer.widget.labels) {
-                                                                        layer.widget.labels = false;
-                                                                        G.util.labels.toggleFeatureLabels(layer.widget, Ext.getCmp('labelfontsize_nf').getValue(),
-                                                                            Ext.getCmp('labelstrong_chb').getValue(), checked, Ext.getCmp('labelcolor_cf').getValue());
-                                                                    }
-                                                                }
-                                                            }
-                                                        },
-                                                        {
-                                                            xtype: 'colorfield',
-                                                            id: 'labelcolor_cf',
-                                                            fieldLabel: G.i18n.color,
-                                                            labelSeparator: G.conf.labelseparator,
-                                                            allowBlank: false,
-                                                            width: G.conf.combo_width_fieldset,
-                                                            value: "#000000",
-                                                            listeners: {
-                                                                'select': {
-                                                                    scope: this,
-                                                                    fn: function(cf) {
-                                                                        if (layer.widget.labels) {
-                                                                            layer.widget.labels = false;
-                                                                            G.util.labels.toggleFeatureLabels(layer.widget, Ext.getCmp('labelfontsize_nf').getValue(),
-                                                                                Ext.getCmp('labelstrong_chb').getValue(), Ext.getCmp('labelitalic_chb').getValue(), cf.getValue());
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
+                                                        this.cmp.fontSize,
+                                                        this.cmp.strong,
+                                                        this.cmp.italic,
+                                                        this.cmp.color
                                                     ]
                                                 }
                                             ],
@@ -2993,29 +3009,49 @@
                                                 '->',
                                                 {
                                                     xtype: 'button',
-                                                    id: 'labelshow_b',
                                                     iconCls: 'icon-assign',
                                                     hideLabel: true,
                                                     text: G.i18n.toggle,
+                                                    scope: this,
                                                     handler: function() {
-                                                        var layer = polygonLayer;
-                                                        if (layer.features.length) {
-                                                            G.util.labels.toggleFeatureLabels(layer.widget, Ext.getCmp('labelfontsize_nf').getValue(),
-                                                                Ext.getCmp('labelstrong_chb').getValue(), Ext.getCmp('labelitalic_chb').getValue(), Ext.getCmp('labelcolor_cf').getValue());
+                                                        if (this.layer.features.length) {
+                                                            G.util.labels.toggleFeatureLabels(this.layer.widget, this.cmp.fontSize.getValue(),
+                                                                this.cmp.strong.getValue(), this.cmp.italic.getValue(), this.cmp.color.getValue());
                                                         }
                                                         else {
-                                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
+                                                            Ext.message.msg(false, '<span class="x-msg-hl">' + this.layer.name + '</span>: No features rendered');
                                                         }
                                                     }
                                                 }
-                                            ]
+                                            ],
+                                            listeners:
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
+                                            
                                         });
-                                        this.labelWindow.setPagePosition(Ext.getCmp('east').x - (this.labelWindow.width + 15), Ext.getCmp('center').y + 41);                        
-                                        this.labelWindow.show();
+                                        this.cmp.labelWindow.setPagePosition(Ext.getCmp('east').x - (this.cmp.labelWindow.width + 15), Ext.getCmp('center').y + 41);                        
+                                        this.cmp.labelWindow.show();
                                     }
                                 }
                                 else {
-                                    Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
+                                    Ext.message.msg(false, '<span class="x-msg-hl">' + this.layer.name + '</span>: No features rendered');
                                 }
                             },
                             handler: function() {
@@ -3047,7 +3083,7 @@
                             text: 'Clear',
                             iconCls: 'menu-layeroptions-clear',
                             handler: function() {
-                                choropleth.formValues.clearForm.call(choropleth, false);
+                                choropleth.formValues.clearForm.call(choropleth, true);
                             }
                         }
                     ]
