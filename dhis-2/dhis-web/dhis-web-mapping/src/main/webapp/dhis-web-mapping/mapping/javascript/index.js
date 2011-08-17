@@ -314,7 +314,7 @@
                 )
             ),
             'select': new OpenLayers.Style(
-                {'strokeColor': '#000000', 'strokeWidth': 2, 'cursor': 'pointer'}
+                {'strokeColor': '#111', 'strokeWidth': 2, 'cursor': 'pointer'}
             )
         })
     });
@@ -2467,22 +2467,25 @@
         }
     });
     
-    choroplethWindow = new Ext.Window({
+    choropleth.window = new Ext.Window({
         title: '<span id="window-thematic1-title">Thematic layer 1</span>',
         layout: 'fit',
-        bodyStyle: 'padding:10px 8px 0px 8px; background-color:#fff',
+        bodyStyle: 'padding:8px 8px 0px 8px; background-color:#fff',
         closeAction: 'hide',
         width: 575,
         height: 478,
+        cmp: {},
         items: choropleth,
         bbar: [
             '->',
             {
                 xtype: 'button',
+                name: 'apply',
                 text: G.i18n.apply,
                 iconCls: 'icon-assign',
+                disabled: true,
                 scope: choropleth,
-                handler: function() {       
+                handler: function() {
                     if (!this.formValidation.validateForm.apply(this)) {
                         return;
                     }
@@ -2499,14 +2502,22 @@
                     this.updateValues = true;
                     this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
                         this.cmp.level.getValue(), this.cmp.level.getRawValue());
-                    
-                    choroplethWindow.hide();									
+                        
+                    this.window.hide();									
                     this.loadGeoJson();
+                },
+                listeners: {
+                    'render': {
+                        scope: choropleth,
+                        fn: function(b) {
+                            this.window.cmp.apply = b;
+                        }
+                    }
                 }
             }
         ]
     });
-    choroplethWindow.setPosition(400,50);
+    choropleth.window.setPosition(400,50);
 
     point = new mapfish.widgets.geostat.Point({
         id: 'point',
@@ -2630,14 +2641,14 @@
                             text: 'Edit layer..',
                             iconCls: 'menu-layeroptions-edit',
                             handler: function() {
-                                choroplethWindow.show();
+                                choropleth.window.show();
                             }
                         },
                         {
                             text: 'Filter..',
                             iconCls: 'menu-layeroptions-filter',
                             handler: function() {
-                                choroplethWindow.show();
+                                choropleth.window.show();
                             }
                         },
                         '-',
@@ -2677,7 +2688,7 @@
                             text: 'Clear',
                             iconCls: 'menu-layeroptions-clear',
                             handler: function() {
-                                choropleth.formValues.clearForm.call(choropleth);
+                                choropleth.formValues.clearForm.call(choropleth, false);
                             }
                         }
                     ]
@@ -2962,11 +2973,6 @@
 		disabled: !G.user.isAdmin,
         style: 'margin-top:1px',
 		handler: function() {
-            
-            
-choropleth.cmp.parent.getNodeById(264).expand();
-choropleth.cmp.parent.getNodeById(539).select();
-
             if (!adminWindow.hidden) {
                 adminWindow.hide();
             }

@@ -830,6 +830,12 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     scope: this,
                     fn: function(cb) {
                     }
+                },
+                'select': {
+                    scope: this,
+                    fn: function() {
+                        this.formValidation.validateForm.call(this);
+                    }
                 }
             }
         });
@@ -852,12 +858,24 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 draggable: false,
                 expanded: true
             },
-            clickedNode: null,
+            widget: this,
+            isSelected: false,
+            reset: function() {
+                if (this.getSelectionModel().getSelectedNode()) {
+                    this.getSelectionModel().getSelectedNode().unselect();
+                }                
+                this.collapseAll();
+                this.getRootNode().expand();
+                this.isSelected = false;
+                this.widget.window.cmp.apply.disable();
+            },
             listeners: {
                 'click': {
                     scope: this,
                     fn: function(n) {
                         this.cmp.parent.selectedNode = n;
+                        this.cmp.parent.isSelected = true;
+                        this.formValidation.validateForm.call(this);                     
                     }
                 }
             }
@@ -876,52 +894,29 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         xtype: 'form',
                         width: 270,
                         items: [
-                            { html: '<div class="window-info">Data options</div>' },
-                            
-                            this.cmp.mapview,
-                            
-                            { html: '<div class="thematic-br">' },
-                            
-                            this.cmp.mapValueType,
-                            
-                            this.cmp.indicatorGroup,
-                            
-                            this.cmp.indicator,
-                            
-                            this.cmp.dataElementGroup,
-                            
-                            this.cmp.dataElement,
-                            
-                            this.cmp.periodType,
-                            
-                            this.cmp.period,
-                            
-                            this.cmp.startDate,
-                            
-                            this.cmp.endDate,
-                            
-                            { html: '<div class="thematic-br">' },
-                            
-                            { html: '<div class="window-info">Legend options</div>' },
-                            
-                            this.cmp.mapLegendType,
-                            
-                            this.cmp.mapLegendSet,
-                            
-                            this.cmp.method,
-                            
-                            this.cmp.bounds,
-                            
-                            this.cmp.classes,
-                            
-                            this.cmp.startColor,
-                            
-                            this.cmp.endColor,
-                            
-                            { html: '<div class="thematic-br">' },
-                            
-                            this.cmp.radiusLow,
-                            
+                            { html: '<div class="window-info">Data options</div>' },                            
+                            this.cmp.mapview,                            
+                            { html: '<div class="thematic-br">' },                            
+                            this.cmp.mapValueType,                            
+                            this.cmp.indicatorGroup,                            
+                            this.cmp.indicator,                            
+                            this.cmp.dataElementGroup,                            
+                            this.cmp.dataElement,                            
+                            this.cmp.periodType,                            
+                            this.cmp.period,                            
+                            this.cmp.startDate,                            
+                            this.cmp.endDate,                            
+                            { html: '<div class="thematic-br">' },                            
+                            { html: '<div class="window-info">Legend options</div>' },                            
+                            this.cmp.mapLegendType,                            
+                            this.cmp.mapLegendSet,                            
+                            this.cmp.method,                            
+                            this.cmp.bounds,                            
+                            this.cmp.classes,                            
+                            this.cmp.startColor,                            
+                            this.cmp.endColor,                            
+                            { html: '<div class="thematic-br">' },                            
+                            this.cmp.radiusLow,                            
                             this.cmp.radiusHigh
                         ]
                     },
@@ -930,20 +925,16 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         width: 270,
                         bodyStyle: 'padding:0 0 0 8px;',
                         items: [
-                            { html: '<div class="window-info">' + G.i18n.organisation_unit_level + '</div>' },
-                            
+                            { html: '<div class="window-info">' + G.i18n.organisation_unit_level + '</div>' },                            
                             {
                                 xtype: 'panel',
                                 layout: 'form',
                                 items: [
                                     this.cmp.level
                                 ]
-                            },
-                            
-                            { html: '<div class="thematic-br"></div><div class="thematic-br"></div>' },
-                            
-                            { html: '<div class="window-info">Parent organisation unit</div>' },
-                            
+                            },                            
+                            { html: '<div class="thematic-br"></div><div class="thematic-br"></div>' },                            
+                            { html: '<div class="window-info">Parent organisation unit</div>' },                            
                             this.cmp.parent
                         ]
                     }
@@ -1165,16 +1156,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     function organisationUnitLevelCallback() {
                         this.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
                         
+                        this.cmp.parent.reset();
                         this.cmp.parent.selectedNode = {attributes: {
                             id: this.organisationUnitSelection.parent.id,
                             text: this.organisationUnitSelection.parent.name,
                             level: this.organisationUnitSelection.parent.level
                         }};
-                        if (this.cmp.parent.getSelectionModel().getSelectedNode()) {
-                            this.cmp.parent.getSelectionModel().getSelectedNode().unselect();
-                            this.cmp.parent.collapseAll();
-                            this.cmp.parent.getRootNode().expand();
-                        }
+                        
                         this.cmp.level.setValue(this.organisationUnitSelection.level.level);
                         this.loadGeoJson();
                     }
@@ -1405,22 +1393,19 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     setMapViewMap: function() {
         this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
             this.mapView.parentOrganisationUnitLevel, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
-        
-        G.stores.organisationUnitLevel.load();
+            
+        this.cmp.parent.reset();
         this.cmp.parent.selectedNode = {attributes: {
             id: this.mapView.parentOrganisationUnitId,
             text: this.mapView.parentOrganisationUnitName,
             level: this.mapView.parentOrganisationUnitLevel
         }};
-        if (this.cmp.parent.getSelectionModel().getSelectedNode()) {
-            this.cmp.parent.getSelectionModel().getSelectedNode().unselect();
-            this.cmp.parent.collapseAll();
-            this.cmp.parent.getRootNode().expand();
-        }
-        this.cmp.level.setValue(this.mapView.organisationUnitLevelName);
-        
-        G.vars.activePanel.setPolygon();
-        this.loadGeoJson();
+            
+        G.stores.organisationUnitLevel.load({scope: this, callback: function() {
+            this.cmp.level.setValue(this.mapView.organisationUnitLevel);
+            G.vars.activePanel.setPolygon();
+            this.loadGeoJson();
+        }});
     },
 	
 	applyPredefinedLegend: function(isMapView) {
@@ -1529,6 +1514,10 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 return false;
             }
             
+            if (this.cmp.parent.isSelected) {
+                this.window.cmp.apply.enable();
+            }
+            
             return true;
         }
     },
@@ -1578,7 +1567,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
 			};
 		},
         
-        clearForm: function() {            
+        clearForm: function(clearLayer) {
             this.cmp.mapview.clearValue();            
             
             this.cmp.mapValueType.setValue(G.conf.map_value_type_indicator);
@@ -1596,11 +1585,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             this.cmp.startDate.reset();
             this.cmp.endDate.reset();
             
-            if (this.cmp.parent.getSelectionModel().getSelectedNode()) {
-                this.cmp.parent.getSelectionModel().getSelectedNode().unselect();
-                this.cmp.parent.collapseAll();
-                this.cmp.parent.getRootNode().expand();
-            }
+            this.cmp.parent.reset();
             this.cmp.level.clearValue();
             
             this.legend.reset();
@@ -1615,10 +1600,13 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             this.cmp.radiusLow.reset();
             this.cmp.radiusHigh.reset();
             
-            document.getElementById(this.legendDiv).innerHTML = '';
+            this.window.cmp.apply.disable();
             
-            this.layer.destroyFeatures();
-            this.layer.setVisibility(false);
+            if (clearLayer) {            
+                document.getElementById(this.legendDiv).innerHTML = '';                
+                this.layer.destroyFeatures();
+                this.layer.setVisibility(false);
+            }
         }
 	},
     
