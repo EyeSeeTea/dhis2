@@ -2441,6 +2441,7 @@
 		iconCls: 'icon-thematic1',
 		tooltip: G.i18n.thematic_layer + ' 1',
         style: 'margin-top:1px',
+        handler: function() {console.log(this);},
         listeners: {
             'afterrender': function() {
                 this.menu = new Ext.menu.Menu({
@@ -3694,7 +3695,7 @@
 		tooltip: 'Administrator settings',
 		disabled: !G.user.isAdmin,
         style: 'margin-top:1px',
-		handler: function() {            
+		handler: function() {
             if (!adminWindow.hidden) {
                 adminWindow.hide();
             }
@@ -3737,34 +3738,37 @@
 	var mapToolbar = new Ext.Toolbar({
 		id: 'map_tb',
 		items: [
-			' ',' ',' ',' ',' ',' ',
+			' ',' ',' ',' ',' ',
 			l_l,
-			' ',' ',' ',' ',
+			' ',' ',
 			choroplethButton,
             pointButton,
             symbolButton,
             centroidButton,
+            ' ',
 			'-',
 			' ',' ',' ',
 			mapLabel,
-			' ',' ',' ',
+			' ',' ',
             zoomInButton,
 			zoomOutButton,
 			zoomToVisibleExtentButton,
 			viewHistoryButton,
+            ' ',
 			'-',
 			' ',' ',' ',
 			t_l,
-			' ',' ',' ',
+			' ',' ',
 			favoritesButton,
             predefinedMapLegendSetButton,
 			exportImageButton,
             measureDistanceButton,
+            ' ',
 			'-',
             adminButton,
 			helpButton,
 			'->',
-			exitButton,' ',' '
+			exitButton,' '
 		]
 	});
 
@@ -3851,6 +3855,7 @@
                 xtype: 'gx_mappanel',
                 region: 'center',
                 id: 'center',
+                margins: '0 0 0 5px',
                 height: 1000,
                 width: 800,
                 map: G.vars.map,

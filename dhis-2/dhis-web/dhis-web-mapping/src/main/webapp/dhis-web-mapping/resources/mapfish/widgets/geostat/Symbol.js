@@ -24,7 +24,7 @@
 
 Ext.namespace('mapfish.widgets', 'mapfish.widgets.geostat');
 
-mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
+mapfish.widgets.geostat.Symbol = Ext.extend(Ext.Panel, {
 
     layer: null,
 
@@ -269,6 +269,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                             this.cmp.group.removeAll();
                             this.cmp.group.doLayout();
                         }
+                        
+                        this.window.cmp.reset.enable();
                     }
                 }
             }
@@ -276,9 +278,10 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
         
         this.cmp.group = new Ext.Panel({
             layout: 'form',
-            bodyStyle: 'margin:0px; padding:8px 0px 8px 5px;',
-            width: '100%',
-            labelWidth: 195,
+            width: 257,
+            height: 344,
+            bodyStyle: 'padding:8px 0px 8px 18px;overflow-x:hidden;overflow-y:auto;',
+            labelWidth: 170,
             defaults: {
                 xtype: 'combo',
                 plugins: new Ext.ux.plugins.IconCombo(),
@@ -288,7 +291,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 editable: false,
                 triggerAction: 'all',
                 mode: 'local',
-                labelStyle: 'color:#000',
+                labelStyle: 'color:#000;',
                 labelSeparator: G.conf.labelseparator,
                 width: G.conf.combo_number_width_small,
                 listWidth: G.conf.combo_number_width_small,
@@ -386,11 +389,13 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 width: 570,
                 items: [
                     {
-                        xtype: 'form',
+                        xtype: 'panel',
+                        layout: 'form',
                         width: 270,
                         items: [
-                            { html: '<div class="window-info">Icons by group / group sets</div>' },                            
+                            { html: '<div class="window-info">Symbolizer by group / group set</div>' },                            
                             this.cmp.groupSet,
+                            { html: '<div class="thematic-br"></div>' },
                             this.cmp.group
                         ]
                     },
@@ -399,7 +404,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                         width: 270,
                         bodyStyle: 'padding:0 0 0 8px;',
                         items: [
-                            { html: '<div class="window-info">' + G.i18n.organisation_unit_level + '</div>' },                            
+                            { html: '<div class="window-info">' + G.i18n.organisation_unit_level + ' (facility)</div>' },                            
                             {
                                 xtype: 'panel',
                                 layout: 'form',
@@ -665,6 +670,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 if (exception) {
                     Ext.message.msg(false, G.i18n.form_is_not_complete);
                 }
+                this.window.cmp.apply.disable();
                 return false;
             }
 
@@ -672,6 +678,15 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
                 if (exception) {
                     Ext.message.msg(false, G.i18n.form_is_not_complete);
                 }
+                this.window.cmp.apply.disable();
+                return false;
+            }
+            
+            if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
+                if (exception) {
+                    Ext.message.msg(false, 'Invalid parent organisation unit');
+                }
+                this.window.cmp.apply.disable();
                 return false;
             }
             
@@ -708,7 +723,7 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.FormPanel, {
 			};
 		},
         
-        clearForm: function() {
+        clearForm: function(clearLayer) {
             this.cmp.groupSet.clearValue();
             this.cmp.groupSet.currentValue = null;
             
