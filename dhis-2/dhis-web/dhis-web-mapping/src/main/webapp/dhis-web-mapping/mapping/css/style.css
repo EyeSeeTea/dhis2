@@ -334,6 +334,18 @@ a.x-menu-item-custom {
 	font:bold 11px arial;
 	color:#111;
 }
+#window-symbol-title {
+	padding:0 0 3px 21px;
+	background:url('../../../images/symbol.png') no-repeat 0 0 transparent;
+	font:bold 11px arial;
+	color:#111;
+}
+#window-centroid-title {
+	padding:0 0 3px 21px;
+	background:url('../../../images/centroid.png') no-repeat 0 0 transparent;
+	font:bold 11px arial;
+	color:#111;
+}
 #window-favorites-title {
 	padding:0 0 3px 21px;
 	background:url('../../../images/favorite.png') no-repeat 0 0 transparent;

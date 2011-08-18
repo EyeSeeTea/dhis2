@@ -33,8 +33,8 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
         this.addOptions(newOptions);
     },
 
-    applyClassification: function(form) {
-        var panel = Ext.getCmp('groups_p');
+    applyClassification: function(form, widget) {
+        var panel = widget.cmp.group;
         G.stores.groupsByGroupSet.img = [];
         for (var i = 0, items = panel.items.items; i < items.length; i++) {
             G.stores.groupsByGroupSet.img.push(items[i].getRawValue());

@@ -1118,6 +1118,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
         G.vars.mask.msg = G.i18n.loading_geojson;
         G.vars.mask.show();
         G.vars.activeWidget = this;
+        this.updateValues = true;
         
         this.setUrl(G.conf.path_mapping + 'getGeoJson.action?' +
             'parentId=' + this.organisationUnitSelection.parent.id +

@@ -924,7 +924,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
         });
     },
     
-    addItems: function() {    
+    addItems: function() {
         
         this.items = [
             {
@@ -1494,6 +1494,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
+                    this.window.cmp.apply.disable();
                     return false;
                 }
             }
@@ -1502,6 +1503,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
+                    this.window.cmp.apply.disable();
                     return false;
                 }
             }
@@ -1511,6 +1513,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
+                    this.window.cmp.apply.disable();
                     return false;
                 }
             }
@@ -1519,6 +1522,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
+                    this.window.cmp.apply.disable();
                     return false;
                 }
             }
@@ -1527,6 +1531,15 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 if (exception) {
                     Ext.message.msg(false, G.i18n.form_is_not_complete);
                 }
+                this.window.cmp.apply.disable();
+                return false;
+            }
+            
+            if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
+                if (exception) {
+                    Ext.message.msg(false, 'Invalid parent organisation unit');
+                }
+                this.window.cmp.apply.disable();
                 return false;
             }
 
@@ -1536,6 +1549,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         if (exception) {
                             Ext.message.msg(false, G.i18n.form_is_not_complete);
                         }
+                        this.window.cmp.apply.disable();
                         return false;
                     }
                 }
@@ -1545,6 +1559,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
+                    this.window.cmp.apply.disable();
                     return false;
                 }
             }
@@ -1553,6 +1568,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 if (exception) {
                     Ext.message.msg(false, G.i18n.form_is_not_complete);
                 }
+                this.window.cmp.apply.disable();
                 return false;
             }
             
@@ -1657,6 +1673,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
         G.vars.mask.msg = G.i18n.loading_geojson;
         G.vars.mask.show();
         G.vars.activeWidget = this;
+        this.updateValues = true;
         
         this.setUrl(G.conf.path_mapping + 'getGeoJson.action?' +
             'parentId=' + this.organisationUnitSelection.parent.id +
