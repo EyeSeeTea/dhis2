@@ -84,11 +84,15 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
     
     featureOptions: {},
     
+    cmp: {},
+    
     initComponent: function() {
     
         this.initProperties();
         
         this.createItems();
+        
+        this.addItems();
         
         this.createSelectFeatures();
         
@@ -255,15 +259,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
     
     createItems: function() {
         
-        this.defaults = {
-			labelSeparator: G.conf.labelseparator,
-            emptyText: G.conf.emptytext
-        };
-        
-        this.items = [
-        {
-            xtype: 'combo',
-            name: 'mapview',
+        this.cmp.mapview = new Ext.form.ComboBox({
             fieldLabel: G.i18n.favorite,
             typeAhead: true,
             editable: false,
