@@ -320,11 +320,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.Panel, {
             width: G.conf.combo_width,
             store: G.stores.organisationUnitLevel,
             listeners: {
-                'afterrender': {
-                    scope: this,
-                    fn: function(cb) {
-                    }
-                },
                 'select': {
                     scope: this,
                     fn: function() {

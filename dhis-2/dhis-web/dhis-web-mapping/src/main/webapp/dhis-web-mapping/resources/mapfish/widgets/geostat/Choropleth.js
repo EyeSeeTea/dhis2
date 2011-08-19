@@ -864,11 +864,6 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             width: G.conf.combo_width,
             store: G.stores.organisationUnitLevel,
             listeners: {
-                'afterrender': {
-                    scope: this,
-                    fn: function(cb) {
-                    }
-                },
                 'select': {
                     scope: this,
                     fn: function() {
@@ -1643,8 +1638,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             this.cmp.startDate.reset();
             this.cmp.endDate.reset();
             
-            this.cmp.parent.reset();
             this.cmp.level.clearValue();
+            this.cmp.parent.reset();
             
             this.legend.reset();
             this.prepareMapViewLegend();

@@ -118,9 +118,9 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
     
     getColors: function() {
         var startColor = new mapfish.ColorRgb();
-        startColor.setFromHex(this.form.findField('startcolor').getValue());
+        startColor.setFromHex(this.cmp.startColor.getValue());
         var endColor = new mapfish.ColorRgb();
-        endColor.setFromHex(this.form.findField('endcolor').getValue());
+        endColor.setFromHex(this.cmp.endColor.getValue());
         return [startColor, endColor];
     },
     
@@ -333,11 +333,8 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        if (G.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
-                            return;
-                        }
-                        
                         this.updateValues = true;
+                        
                         Ext.Ajax.request({
                             url: G.conf.path_mapping + 'getMapLegendSetByIndicator' + G.conf.type,
                             method: 'POST',
@@ -346,8 +343,6 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                             success: function(r) {
                                 var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
                                 if (mapLegendSet.id) {
-                                    this.legend.value = G.conf.map_legendset_type_predefined;
-                                    this.prepareMapViewLegend();
                                     
                                     function load() {
                                         this.cmp.mapLegendSet.setValue(mapLegendSet.id);
@@ -363,12 +358,9 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                                         load.call(this);
                                     }
                                 }
-                                else {
-                                    this.legend.value = G.conf.map_legendset_type_automatic;
-                                    this.prepareMapViewLegend();
-                                    this.classify(false, cb.keepPosition);
-                                    G.util.setKeepPosition(cb);
-                                }
+                                
+                                this.classify(false, cb.keepPosition);
+                                G.util.setKeepPosition(cb);
                             }
                         });
                         
@@ -421,11 +413,8 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        if (G.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
-                            return;
-                        }
-                        
                         this.updateValues = true;
+                        
                         Ext.Ajax.request({
                             url: G.conf.path_mapping + 'getMapLegendSetByDataElement' + G.conf.type,
                             method: 'POST',
@@ -434,8 +423,6 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                             success: function(r) {
                                 var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
                                 if (mapLegendSet.id) {
-                                    this.legend.value = G.conf.map_legendset_type_predefined;
-                                    this.prepareMapViewLegend();
                                     
                                     function load() {
                                         this.cmp.mapLegendSet.setValue(mapLegendSet.id);
@@ -451,12 +438,9 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                                         load.call(this);
                                     }
                                 }
-                                else {
-                                    this.legend.value = G.conf.map_legendset_type_automatic;
-                                    this.prepareMapViewLegend();
-                                    this.classify(false, cb.keepPosition);
-                                    G.util.setKeepPosition(cb);
-                                }
+                                
+                                this.classify(false, cb.keepPosition);
+                                G.util.setKeepPosition(cb);
                             }
                         });
                         
@@ -509,11 +493,8 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        if (G.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
-                            return;
-                        }
-                        
                         this.updateValues = true;
+                        
                         this.classify(false, cb.keepPosition);                        
                         G.util.setKeepPosition(cb);
                         
@@ -532,7 +513,6 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                 'select': {
                     scope: this,
                     fn: function(df, date) {
-                        this.cmp.mapview.clearValue();
                         this.updateValues = true;
                         this.cmp.endDate.setMinValue(date);
                         this.classify(false, true);
@@ -552,7 +532,6 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                 'select': {
                     scope: this,
                     fn: function(df, date) {
-                        this.cmp.mapview.clearValue();
                         this.updateValues = true;
                         this.cmp.startDate.setMaxValue(date);
                         this.classify(false, true);
@@ -571,15 +550,12 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
             fieldLabel: G.i18n.legendset,
             triggerAction: 'all',
             width: G.conf.combo_width,
-            hidden: true,
-            store: G.stores.predefinedColorMapLegendSet,
+            store: G.stores.predefinedImageMapLegendSet,
             listeners: {
                 'select': {
                     scope: this,
                     fn: function() {
-                        this.cmp.mapview.clearValue();
-                        this.applyPredefinedLegend();
-                        
+                        this.applyPredefinedLegend();                        
                         this.window.cmp.reset.enable();
                     }
                 }
@@ -599,16 +575,10 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
             width: G.conf.combo_width,
             store: G.stores.organisationUnitLevel,
             listeners: {
-                'afterrender': {
-                    scope: this,
-                    fn: function(cb) {
-                    }
-                },
                 'select': {
                     scope: this,
                     fn: function() {
-                        this.formValidation.validateForm.call(this);
-                        
+                        this.formValidation.validateForm.call(this);                        
                         this.window.cmp.reset.enable();
                     }
                 }
@@ -747,13 +717,13 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
     prepareMapViewValueType: function() {
         var obj = {};
         if (this.valueType.isIndicator()) {
-            this.form.findField('indicatorgroup').show();
-            this.form.findField('indicator').show();
-            this.form.findField('dataelementgroup').hide();
-            this.form.findField('dataelement').hide();
+            this.cmp.indicatorGroup.show();
+            this.cmp.indicator.show();
+            this.cmp.dataElementGroup.hide();
+            this.cmp.dataElement.hide();
             obj.components = {
-                valueTypeGroup: this.form.findField('indicatorgroup'),
-                valueType: this.form.findField('indicator')
+                valueTypeGroup: this.cmp.indicatorGroup,
+                valueType: this.cmp.indicator
             };
             obj.stores = {
                 valueTypeGroup: G.stores.indicatorGroup,
@@ -765,13 +735,13 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
             };
         }
         else if (this.valueType.isDataElement()) {
-            this.form.findField('indicatorgroup').hide();
-            this.form.findField('indicator').hide();
-            this.form.findField('dataelementgroup').show();
-            this.form.findField('dataelement').show();
+            this.cmp.indicatorGroup.hide();
+            this.cmp.indicator.hide();
+            this.cmp.dataElementGroup.show();
+            this.cmp.dataElement.show();
             obj.components = {
-                valueTypeGroup: this.form.findField('dataelementgroup'),
-                valueType: this.form.findField('dataelement')
+                valueTypeGroup: this.cmp.dataElementGroup,
+                valueType: this.cmp.dataElement
             };
             obj.stores = {
                 valueTypeGroup: G.stores.dataElementGroup,
@@ -788,13 +758,13 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
     prepareMapViewDateType: function() {
         var obj = {};
         if (G.system.mapDateType.isFixed()) {
-            this.form.findField('periodtype').show();
-            this.form.findField('period').show();
-            this.form.findField('startdate').hide();
-            this.form.findField('enddate').hide();
+            this.cmp.periodType.show();
+            this.cmp.period.show();
+            this.cmp.startDate.hide();
+            this.cmp.endDate.hide();
             obj.components = {
-                c1: this.form.findField('periodtype'),
-                c2: this.form.findField('period')
+                c1: this.cmp.periodType,
+                c2: this.cmp.period
             };
             obj.stores = {
                 c1: G.stores.periodType,
@@ -806,13 +776,13 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
             };
         }
         else if (G.system.mapDateType.isStartEnd()) {
-            this.form.findField('periodtype').hide();
-            this.form.findField('period').hide();
-            this.form.findField('startdate').show();
-            this.form.findField('enddate').show();
+            this.cmp.periodType.hide();
+            this.cmp.period.hide();
+            this.cmp.startDate.show();
+            this.cmp.endDate.show();
             obj.components = {
-                c1: this.form.findField('startdate'),
-                c2: this.form.findField('enddate')
+                c1: this.cmp.startDate,
+                c2: this.cmp.endDate
             };
             obj.mapView = {
                 c1: 'startDate',
@@ -877,7 +847,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
     
     setMapViewLegend: function() {
         function predefinedMapLegendSetStoreCallback() {
-            this.form.findField('maplegendset').setValue(this.mapView.mapLegendSetId);
+            this.cmp.mapLegendSet.setValue(this.mapView.mapLegendSetId);
             this.applyPredefinedLegend(true);
         }
         
@@ -894,17 +864,24 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
     setMapViewMap: function() {
         this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
             this.mapView.parentOrganisationUnitLevel, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
-        
-        G.stores.organisationUnitLevel.load();
-        this.form.findField('boundary').setValue(this.mapView.parentOrganisationUnitName);
-        this.form.findField('level').setValue(this.mapView.organisationUnitLevelName);
-        
-        this.loadGeoJson();
+            
+        this.cmp.parent.reset();
+        this.cmp.parent.selectedNode = {attributes: {
+            id: this.mapView.parentOrganisationUnitId,
+            text: this.mapView.parentOrganisationUnitName,
+            level: this.mapView.parentOrganisationUnitLevel
+        }};
+            
+        G.stores.organisationUnitLevel.load({scope: this, callback: function() {
+            this.cmp.level.setValue(this.mapView.organisationUnitLevel);
+            G.vars.activePanel.setCentroid();
+            this.loadGeoJson();
+        }});
     },
 	
 	applyPredefinedLegend: function(isMapView) {
         this.legend.value = G.conf.map_legendset_type_predefined;
-		var mls = this.form.findField('maplegendset').getValue();
+		var mls = this.cmp.mapLegendSet.getValue();
 		Ext.Ajax.request({
 			url: G.conf.path_mapping + 'getMapLegendsByMapLegendSet' + G.conf.type,
 			method: 'POST',
@@ -937,16 +914,16 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
     
     formValidation: {
         validateForm: function(exception) {
-            if (this.form.findField('mapvaluetype').getValue() == G.conf.map_value_type_indicator) {
-                if (!this.form.findField('indicator').getValue()) {
+            if (this.cmp.mapValueType.getValue() == G.conf.map_value_type_indicator) {
+                if (!this.cmp.indicator.getValue()) {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
                     return false;
                 }
             }
-            else if (this.form.findField('mapvaluetype').getValue() == G.conf.map_value_type_dataelement) {
-                if (!this.form.findField('dataelement').getValue()) {
+            else if (this.cmp.mapValueType.getValue() == G.conf.map_value_type_dataelement) {
+                if (!this.cmp.dataElement.getValue()) {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
@@ -955,7 +932,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
             }
 
             if (G.system.mapDateType.isFixed()) {
-                if (!this.form.findField('period').getValue()) {
+                if (!this.cmp.period.getValue()) {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
@@ -963,7 +940,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                 }
             }
             else {
-                if (!this.form.findField('startdate').getValue() || !this.form.findField('enddate').getValue()) {
+                if (!this.cmp.startDate.getValue() || !this.cmp.endDate.getValue()) {
                     if (exception) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
                     }
@@ -971,18 +948,31 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                 }
             }
 
-            if (!this.form.findField('boundary').getValue() || !this.form.findField('level').getValue()) {
+            if (!this.cmp.parent.selectedNode || !this.cmp.level.getValue()) {
+                if (exception) {
+                    Ext.message.msg(false, G.i18n.form_is_not_complete);
+                }
+                this.window.cmp.apply.disable();
+                return false;
+            }
+            
+            if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
+                if (exception) {
+                    Ext.message.msg(false, 'Invalid parent organisation unit');
+                }
+                this.window.cmp.apply.disable();
+                return false;
+            }
+            
+            if (!this.cmp.mapLegendSet.getValue()) {
                 if (exception) {
                     Ext.message.msg(false, G.i18n.form_is_not_complete);
                 }
                 return false;
             }
             
-            if (!this.form.findField('maplegendset').getValue()) {
-                if (exception) {
-                    Ext.message.msg(false, G.i18n.form_is_not_complete);
-                }
-                return false;
+            if (this.cmp.parent.isSelected) {
+                this.window.cmp.apply.enable();
             }
             
             return true;
@@ -992,25 +982,25 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
     formValues: {
 		getAllValues: function() {
 			return {
-                mapValueType: this.form.findField('mapvaluetype').getValue(),
-                indicatorGroupId: this.valueType.isIndicator() ? this.form.findField('indicatorgroup').getValue() : null,
-                indicatorId: this.valueType.isIndicator() ? this.form.findField('indicator').getValue() : null,
-				indicatorName: this.valueType.isIndicator() ? this.form.findField('indicator').getRawValue() : null,
-                dataElementGroupId: this.valueType.isDataElement() ? this.form.findField('dataelementgroup').getValue() : null,
-                dataElementId: this.valueType.isDataElement() ? this.form.findField('dataelement').getValue() : null,
-				dataElementName: this.valueType.isDataElement() ? this.form.findField('dataelement').getRawValue() : null,
+                mapValueType: this.cmp.mapValueType.getValue(),
+                indicatorGroupId: this.valueType.isIndicator() ? this.cmp.indicatorGroup.getValue() : null,
+                indicatorId: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : null,
+				indicatorName: this.valueType.isIndicator() ? this.cmp.indicator.getRawValue() : null,
+                dataElementGroupId: this.valueType.isDataElement() ? this.cmp.dataElementGroup.getValue() : null,
+                dataElementId: this.valueType.isDataElement() ? this.cmp.dataElement.getValue() : null,
+				dataElementName: this.valueType.isDataElement() ? this.cmp.dataElement.getRawValue() : null,
                 mapDateType: G.system.mapDateType.value,
-                periodTypeId: G.system.mapDateType.isFixed() ? this.form.findField('periodtype').getValue() : null,
-                periodId: G.system.mapDateType.isFixed() ? this.form.findField('period').getValue() : null,
-                periodName: G.system.mapDateType.isFixed() ? this.form.findField('period').getRawValue() : null,
-                startDate: G.system.mapDateType.isStartEnd() ? this.form.findField('startdate').getRawValue() : null,
-                endDate: G.system.mapDateType.isStartEnd() ? this.form.findField('enddate').getRawValue() : null,
+                periodTypeId: G.system.mapDateType.isFixed() ? this.cmp.periodType.getValue() : null,
+                periodId: G.system.mapDateType.isFixed() ? this.cmp.period.getValue() : null,
+                periodName: G.system.mapDateType.isFixed() ? this.cmp.period.getRawValue() : null,
+                startDate: G.system.mapDateType.isStartEnd() ? this.cmp.startDate.getRawValue() : null,
+                endDate: G.system.mapDateType.isStartEnd() ? this.cmp.endDate.getRawValue() : null,
                 parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
                 parentOrganisationUnitLevel: this.organisationUnitSelection.parent.level,
                 parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
                 organisationUnitLevel: this.organisationUnitSelection.level.level,
                 organisationUnitLevelName: this.organisationUnitSelection.level.name,
-                mapLegendSetId: this.form.findField('maplegendset').getValue(),
+                mapLegendSetId: this.cmp.mapLegendSet.getValue(),
                 longitude: G.vars.map.getCenter().lon,
                 latitude: G.vars.map.getCenter().lat,
                 zoom: parseFloat(G.vars.map.getZoom())
@@ -1019,45 +1009,42 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
         
         getImageExportValues: function() {
 			return {
-				mapValueTypeValue: this.form.findField('mapvaluetype').getValue() == G.conf.map_value_type_indicator ?
-					this.form.findField('indicator').getRawValue() : this.form.findField('dataelement').getRawValue(),
+				mapValueTypeValue: this.cmp.mapValueType.getValue() == G.conf.map_value_type_indicator ?
+					this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
 				dateValue: G.system.mapDateType.isFixed() ?
-					this.form.findField('period').getRawValue() : new Date(this.form.findField('startdate').getRawValue()).format('Y M j') + ' - ' + new Date(this.form.findField('enddate').getRawValue()).format('Y M j')
+					this.cmp.period.getRawValue() : new Date(this.cmp.startDate.getRawValue()).format('Y M j') + ' - ' + new Date(this.cmp.endDate.getRawValue()).format('Y M j')
 			};
 		},
         
-        clearForm: function() {            
-            this.form.findField('mapview').clearValue();            
-            
-            this.form.findField('mapvaluetype').setValue(G.conf.map_value_type_indicator);
+        clearForm: function(clearLayer) {
+            this.cmp.mapValueType.setValue(G.conf.map_value_type_indicator);
             this.valueType.setIndicator();
             this.prepareMapViewValueType();
-            this.form.findField('indicatorgroup').clearValue();
-            this.form.findField('indicator').clearValue();
-            this.form.findField('dataelementgroup').clearValue();
-            this.form.findField('dataelement').clearValue();
+            this.cmp.indicatorGroup.clearValue();
+            this.cmp.indicator.clearValue();
+            this.cmp.dataElementGroup.clearValue();
+            this.cmp.dataElement.clearValue();
             
             G.system.mapDateType.setFixed();
             this.prepareMapViewDateType();
-            this.form.findField('periodtype').clearValue();
-            this.form.findField('period').clearValue();
-            this.form.findField('startdate').reset();
-            this.form.findField('enddate').reset();
+            this.cmp.periodType.clearValue();
+            this.cmp.period.clearValue();
+            this.cmp.startDate.reset();
+            this.cmp.endDate.reset();
             
-            var boundary = this.form.findField('boundary')
-            var level = this.form.findField('level');
-            boundary.reset();
-            level.reset();
-            if (boundary.treePanel && level.levelComboBox) {
-                boundary.treePanel.selectPath(boundary.treePanel.getRootNode().getPath());
-                level.levelComboBox.clearValue();
+            this.cmp.mapLegendSet.clearValue();
+            
+            this.cmp.level.clearValue();
+            this.cmp.parent.reset();
+            
+            this.window.cmp.apply.disable();
+            this.window.cmp.reset.disable();
+            
+            if (clearLayer) {            
+                document.getElementById(this.legendDiv).innerHTML = '';                
+                this.layer.destroyFeatures();
+                this.layer.setVisibility(false);
             }
-            this.form.findField('maplegendset').clearValue();
-            
-            document.getElementById(this.legendDiv).innerHTML = '';
-            
-            this.layer.destroyFeatures();
-            this.layer.setVisibility(false);
         }
 	},
     
@@ -1096,10 +1083,10 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
             if (this.updateValues) {
                 var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
                 var params = {
-                    id: this.valueType.isIndicator() ? this.form.findField('indicator').getValue() : this.form.findField('dataelement').getValue(),
-                    periodId: G.system.mapDateType.isFixed() ? this.form.findField('period').getValue() : null,
-                    startDate: G.system.mapDateType.isStartEnd() ? new Date(this.form.findField('startdate').getValue()).format('Y-m-d') : null,
-                    endDate: G.system.mapDateType.isStartEnd() ? new Date(this.form.findField('enddate').getValue()).format('Y-m-d') : null,
+                    id: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : this.cmp.dataElement.getValue(),
+                    periodId: G.system.mapDateType.isFixed() ? this.cmp.period.getValue() : null,
+                    startDate: G.system.mapDateType.isStartEnd() ? new Date(this.cmp.startDate.getValue()).format('Y-m-d') : null,
+                    endDate: G.system.mapDateType.isStartEnd() ? new Date(this.cmp.endDate.getValue()).format('Y-m-d') : null,
                     parentId: this.organisationUnitSelection.parent.id,
                     level: this.organisationUnitSelection.level.level
                 };

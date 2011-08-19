@@ -2164,7 +2164,6 @@
 	
     /* Section: widgets */
     choropleth = new mapfish.widgets.geostat.Choropleth({
-        id: 'choropleth',
         map: G.vars.map,
         layer: polygonLayer,
         featureSelection: false,
@@ -2207,9 +2206,8 @@
                 },
                 listeners: {
                     'render': {
-                        scope: choropleth,
                         fn: function(b) {
-                            this.window.cmp.apply = b;
+                            b.scope.window.cmp.apply = b;
                         }
                     }
                 }
@@ -2227,9 +2225,8 @@
                 },
                 listeners: {
                     'render': {
-                        scope: choropleth,
                         fn: function(b) {
-                            this.window.cmp.reset = b;
+                            b.scope.window.cmp.reset = b;
                         }
                     }
                 }
@@ -2239,7 +2236,6 @@
     choropleth.window.setPosition(340,45);
     
     point = new mapfish.widgets.geostat.Point({
-        id: 'point',
         map: G.vars.map,
         layer: pointLayer,
         featureSelection: false,
@@ -2282,9 +2278,8 @@
                 },
                 listeners: {
                     'render': {
-                        scope: point,
                         fn: function(b) {
-                            this.window.cmp.apply = b;
+                            b.scope.window.cmp.apply = b;
                         }
                     }
                 }
@@ -2302,9 +2297,8 @@
                 },
                 listeners: {
                     'render': {
-                        scope: point,
                         fn: function(b) {
-                            this.window.cmp.reset = b;
+                            b.scope.window.cmp.reset = b;
                         }
                     }
                 }
@@ -2314,7 +2308,6 @@
     point.window.setPosition(340,45);
     
     symbol = new mapfish.widgets.geostat.Symbol({
-        id: 'symbol',
         map: G.vars.map,
         layer: symbolLayer,
         featureSelection: false,
@@ -2357,9 +2350,8 @@
                 },
                 listeners: {
                     'render': {
-                        scope: symbol,
                         fn: function(b) {
-                            this.window.cmp.apply = b;
+                            b.scope.window.cmp.apply = b;
                         }
                     }
                 }
@@ -2377,9 +2369,8 @@
                 },
                 listeners: {
                     'render': {
-                        scope: symbol,
                         fn: function(b) {
-                            this.window.cmp.reset = b;
+                            b.scope.window.cmp.reset = b;
                         }
                     }
                 }
@@ -2389,30 +2380,11 @@
     symbol.window.setPosition(340,45);
     
     centroid = new mapfish.widgets.geostat.Centroid({
-        id: 'centroid',
-		title: '<span class="panel-title">Centroid layer</span>',
         map: G.vars.map,
         layer: centroidLayer,
         featureSelection: false,
         legendDiv: 'centroidlegend',
         defaults: {width: 130},
-        tools: [
-            {
-                id: 'refresh',
-                qtip: 'Refresh layer',
-                handler: function() {
-                    centroid.updateValues = true;
-                    centroid.classify();
-                }
-            },
-            {
-                id: 'close',
-                qtip: 'Clear layer',
-                handler: function() {
-                    centroid.formValues.clearForm.call(centroid);
-                }
-            }
-        ],
         listeners: {
             'expand': function() {
                 G.vars.activePanel.setCentroid();
@@ -2422,6 +2394,62 @@
             }
         }
     });
+    
+    centroid.window = new Ext.Window({
+        title: '<span id="window-centroid-title">Centroid layer</span>',
+        layout: 'fit',
+        bodyStyle: 'padding:8px 8px 0px 8px; background-color:#fff',
+        closeAction: 'hide',
+        width: 570,
+        height: 478,
+        items: centroid,
+        cmp: {},
+        bbar: [
+            '->',
+            {
+                xtype: 'button',
+                text: G.i18n.apply,
+                iconCls: 'icon-assign',
+                disabled: true,
+                scope: centroid,
+                handler: function() {
+                    var node = this.cmp.parent.selectedNode;
+                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
+                        this.cmp.level.getValue(), this.cmp.level.getRawValue());
+                        
+                    this.window.hide();									
+                    this.loadGeoJson();
+                },
+                listeners: {
+                    'render': {
+                        fn: function(b) {       
+                            b.scope.window.cmp.apply = b;
+                        }
+                    }
+                }
+            },
+            ' ',
+            {
+                xtype: 'button',
+                text: 'Reset',
+                iconCls: 'icon-cancel',
+                disabled: true,
+                scope: centroid,
+                handler: function() {
+                    this.formValues.clearForm.call(this, false);
+                    this.window.cmp.reset.disable();
+                },
+                listeners: {
+                    'render': {
+                        fn: function(b) {
+                            b.scope.window.cmp.reset = b;
+                        }
+                    }
+                }
+            }
+        ]
+    });    
+    centroid.window.setPosition(340,45);
     
 	/* Section: map toolbar */
 	var mapLabel = new Ext.form.Label({
