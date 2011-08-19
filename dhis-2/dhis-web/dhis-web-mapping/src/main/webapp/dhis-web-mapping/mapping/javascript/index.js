@@ -2437,30 +2437,65 @@
 		style: 'font:bold 11px arial; color:#333;'
 	});
 	
-	var choroplethButton = new Ext.Button({
+	choroplethButton = new Ext.Button({
 		iconCls: 'icon-thematic1',
 		tooltip: G.i18n.thematic_layer + ' 1',
         style: 'margin-top:1px',
-        handler: function() {console.log(this);},
+        widget: choropleth,
+        enableItems: function(bool) {
+            var menuItems = [2,3,5,6,7,9];
+            for (var i = 0; i < menuItems.length; i++) {
+                if (bool) {
+                    this.menu.items.items[menuItems[i]].enable();
+                }
+                else {
+                    this.menu.items.items[menuItems[i]].disable();
+                }
+            }
+        },
+        handler: function() {
+            this.enableItems(this.widget.layer.features ? this.widget.layer.features.length : false);
+        },
         listeners: {
-            'afterrender': function() {
+            'afterrender': function(b) {
                 this.menu = new Ext.menu.Menu({
+                    parent: b,
                     items: [
                         {
                             text: 'Edit layer..',
                             iconCls: 'menu-layeroptions-edit',
+                            scope: this,
                             handler: function() {
-                                choropleth.window.show();
-                            }
-                        },
-                        {
-                            text: 'Filter..',
-                            iconCls: 'menu-layeroptions-filter',
-                            handler: function() {
-                                choropleth.window.show();
+                                this.widget.window.show();
                             }
                         },
                         '-',
+                        {
+                            text: 'Refresh',
+                            iconCls: 'menu-layeroptions-refresh',
+                            scope: this,
+                            handler: function() {
+                                this.widget.updateValues = true;
+                                this.widget.classify();
+                            }
+                        },
+                        {
+                            text: 'Clear',
+                            iconCls: 'menu-layeroptions-clear',
+                            scope: this,
+                            handler: function() {
+                                this.widget.formValues.clearForm.call(this.widget, true);
+                            }
+                        },
+                        '-',
+                        {
+                            text: 'Filter..',
+                            iconCls: 'menu-layeroptions-filter',
+                            scope: this,
+                            handler: function() {
+                                this.widget.window.show();
+                            }
+                        },
                         {
                             text: 'Search..',
                             iconCls: 'menu-layeroptions-locate',
@@ -2476,7 +2511,7 @@
                                 window: null
                             },
                             showSearchWindow: function() {
-                                var layer = polygonLayer;
+                                var layer = this.parentMenu.parent.widget.layer;
 
                                 var data = [];
                                 for (var i = 0; i < layer.features.length; i++) {
@@ -2597,7 +2632,6 @@
                             name: 'labels',
                             text: 'Labels..',
                             iconCls: 'menu-layeroptions-labels',
-                            layer: polygonLayer,
                             cmp: {
                                 fontSize: new Ext.form.NumberField({
                                     name: 'fontsize',
@@ -2612,12 +2646,12 @@
                                     listeners: {
                                         'keyup': {
                                             scope: this,
-                                            fn: function(nf) {
+                                            fn: function(nf) {  
                                                 var item = this.menu.find('name','labels')[0];
-                                                
-                                                if (item.layer.widget.labels) {
-                                                    item.layer.widget.labels = false;
-                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, nf.getValue(), item.cmp.strong.getValue(),
+                                                                                                
+                                                if (this.widget.labels) {
+                                                    this.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(this.widget, nf.getValue(), item.cmp.strong.getValue(),
                                                         item.cmp.italic.getValue(), item.cmp.color.getValue());
                                                 }
                                             }
@@ -2633,9 +2667,9 @@
                                             fn: function(chb, checked) {
                                                 var item = this.menu.find('name','labels')[0];
                                                 
-                                                if (item.layer.widget.labels) {
-                                                    item.layer.widget.labels = false;
-                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, item.cmp.fontSize.getValue(),
+                                                if (this.widget.labels) {
+                                                    this.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
                                                         checked, item.cmp.italic.getValue(), item.cmp.color.getValue());
                                                 }
                                             }
@@ -2651,9 +2685,9 @@
                                             fn: function(chb, checked) {
                                                 var item = this.menu.find('name','labels')[0];
                                                 
-                                                if (item.layer.widget.labels) {
-                                                    item.layer.widget.labels = false;
-                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, item.cmp.fontSize.getValue(),
+                                                if (this.widget.labels) {
+                                                    this.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
                                                         item.cmp.strong.getValue(), checked, item.cmp.color.getValue());
                                                 }
                                             }
@@ -2672,9 +2706,9 @@
                                             fn: function(cf) {
                                                 var item = this.menu.find('name','labels')[0];
                                                 
-                                                if (item.layer.widget.labels) {
-                                                    item.layer.widget.labels = false;
-                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, item.cmp.fontSize.getValue(),
+                                                if (this.widget.labels) {
+                                                    this.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
                                                         item.cmp.strong.getValue(), item.cmp.italic.getValue(), cf.getValue());
                                                 }
                                             }
@@ -2683,7 +2717,8 @@
                                 })
                             },
                             showLabelWindow: function() {
-                                if (this.layer.features.length) {
+                                var layer = this.parentMenu.parent.widget.layer;
+                                if (layer.features.length) {
                                     if (this.cmp.labelWindow) {
                                         this.cmp.labelWindow.show();
                                     }
@@ -2717,12 +2752,12 @@
                                                     text: G.i18n.toggle,
                                                     scope: this,
                                                     handler: function() {
-                                                        if (this.layer.features.length) {
-                                                            G.util.labels.toggleFeatureLabels(this.layer.widget, this.cmp.fontSize.getValue(),
+                                                        if (layer.features.length) {
+                                                            G.util.labels.toggleFeatureLabels(layer.widget, this.cmp.fontSize.getValue(),
                                                                 this.cmp.strong.getValue(), this.cmp.italic.getValue(), this.cmp.color.getValue());
                                                         }
                                                         else {
-                                                            Ext.message.msg(false, '<span class="x-msg-hl">' + this.layer.name + '</span>: No features rendered');
+                                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
                                                         }
                                                     }
                                                 }
@@ -2733,39 +2768,27 @@
                                     }
                                 }
                                 else {
-                                    Ext.message.msg(false, '<span class="x-msg-hl">' + this.layer.name + '</span>: No features rendered');
+                                    Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
                                 }
                             },
                             handler: function() {
                                 this.showLabelWindow();
                             }
                         },
+                        '-',
                         {
                             text: 'Opacity',
                             iconCls: 'menu-layeroptions-opacity',
                             menu: { 
                                 items: G.conf.opacityItems,
                                 listeners: {
-                                    'itemclick': function(item) {
-                                        polygonLayer.setOpacity(item.text);
+                                    'itemclick': {
+                                        scope: this,
+                                        fn: function(item) {
+                                            this.widget.layer.setOpacity(item.text);
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        '-',
-                        {
-                            text: 'Refresh',
-                            iconCls: 'menu-layeroptions-refresh',
-                            handler: function() {
-                                choropleth.updateValues = true;
-                                choropleth.classify();
-                            }
-                        },
-                        {
-                            text: 'Clear',
-                            iconCls: 'menu-layeroptions-clear',
-                            handler: function() {
-                                choropleth.formValues.clearForm.call(choropleth, true);
                             }
                         }
                     ]
@@ -2774,29 +2797,65 @@
         }
 	});
 	
-	var pointButton = new Ext.Button({
+	pointButton = new Ext.Button({
 		iconCls: 'icon-thematic2',
 		tooltip: G.i18n.thematic_layer + ' 2',
         style: 'margin-top:1px',
+        widget: point,
+        enableItems: function(bool) {
+            var menuItems = [2,3,5,6,7,9];
+            for (var i = 0; i < menuItems.length; i++) {
+                if (bool) {
+                    this.menu.items.items[menuItems[i]].enable();
+                }
+                else {
+                    this.menu.items.items[menuItems[i]].disable();
+                }
+            }
+        },
+        handler: function() {
+            this.enableItems(this.widget.layer.features ? this.widget.layer.features.length : false);
+        },
         listeners: {
-            'afterrender': function() {
+            'afterrender': function(b) {
                 this.menu = new Ext.menu.Menu({
+                    parent: b,
                     items: [
                         {
                             text: 'Edit layer..',
                             iconCls: 'menu-layeroptions-edit',
+                            scope: this,
                             handler: function() {
-                                point.window.show();
-                            }
-                        },
-                        {
-                            text: 'Filter..',
-                            iconCls: 'menu-layeroptions-filter',
-                            handler: function() {
-                                point.window.show();
+                                this.widget.window.show();
                             }
                         },
                         '-',
+                        {
+                            text: 'Refresh',
+                            iconCls: 'menu-layeroptions-refresh',
+                            scope: this,
+                            handler: function() {
+                                this.widget.updateValues = true;
+                                this.widget.classify();
+                            }
+                        },
+                        {
+                            text: 'Clear',
+                            iconCls: 'menu-layeroptions-clear',
+                            scope: this,
+                            handler: function() {
+                                this.widget.formValues.clearForm.call(this.widget, true);
+                            }
+                        },
+                        '-',
+                        {
+                            text: 'Filter..',
+                            iconCls: 'menu-layeroptions-filter',
+                            scope: this,
+                            handler: function() {
+                                this.widget.window.show();
+                            }
+                        },
                         {
                             text: 'Search..',
                             iconCls: 'menu-layeroptions-locate',
@@ -2812,7 +2871,7 @@
                                 window: null
                             },
                             showSearchWindow: function() {
-                                var layer = pointLayer;
+                                var layer = this.parentMenu.parent.widget.layer;
 
                                 var data = [];
                                 for (var i = 0; i < layer.features.length; i++) {
@@ -2933,7 +2992,6 @@
                             name: 'labels',
                             text: 'Labels..',
                             iconCls: 'menu-layeroptions-labels',
-                            layer: pointLayer,
                             cmp: {
                                 fontSize: new Ext.form.NumberField({
                                     name: 'fontsize',
@@ -2948,12 +3006,12 @@
                                     listeners: {
                                         'keyup': {
                                             scope: this,
-                                            fn: function(nf) {
+                                            fn: function(nf) {  
                                                 var item = this.menu.find('name','labels')[0];
-                                                
-                                                if (item.layer.widget.labels) {
-                                                    item.layer.widget.labels = false;
-                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, nf.getValue(), item.cmp.strong.getValue(),
+                                                                                                
+                                                if (this.widget.labels) {
+                                                    this.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(this.widget, nf.getValue(), item.cmp.strong.getValue(),
                                                         item.cmp.italic.getValue(), item.cmp.color.getValue());
                                                 }
                                             }
@@ -2969,9 +3027,9 @@
                                             fn: function(chb, checked) {
                                                 var item = this.menu.find('name','labels')[0];
                                                 
-                                                if (item.layer.widget.labels) {
-                                                    item.layer.widget.labels = false;
-                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, item.cmp.fontSize.getValue(),
+                                                if (this.widget.labels) {
+                                                    this.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
                                                         checked, item.cmp.italic.getValue(), item.cmp.color.getValue());
                                                 }
                                             }
@@ -2987,9 +3045,9 @@
                                             fn: function(chb, checked) {
                                                 var item = this.menu.find('name','labels')[0];
                                                 
-                                                if (item.layer.widget.labels) {
-                                                    item.layer.widget.labels = false;
-                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, item.cmp.fontSize.getValue(),
+                                                if (this.widget.labels) {
+                                                    this.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
                                                         item.cmp.strong.getValue(), checked, item.cmp.color.getValue());
                                                 }
                                             }
@@ -3008,9 +3066,9 @@
                                             fn: function(cf) {
                                                 var item = this.menu.find('name','labels')[0];
                                                 
-                                                if (item.layer.widget.labels) {
-                                                    item.layer.widget.labels = false;
-                                                    G.util.labels.toggleFeatureLabels(item.layer.widget, item.cmp.fontSize.getValue(),
+                                                if (this.widget.labels) {
+                                                    this.widget.labels = false;
+                                                    G.util.labels.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
                                                         item.cmp.strong.getValue(), item.cmp.italic.getValue(), cf.getValue());
                                                 }
                                             }
@@ -3019,7 +3077,8 @@
                                 })
                             },
                             showLabelWindow: function() {
-                                if (this.layer.features.length) {
+                                var layer = this.parentMenu.parent.widget.layer;
+                                if (layer.features.length) {
                                     if (this.cmp.labelWindow) {
                                         this.cmp.labelWindow.show();
                                     }
@@ -3053,12 +3112,12 @@
                                                     text: G.i18n.toggle,
                                                     scope: this,
                                                     handler: function() {
-                                                        if (this.layer.features.length) {
-                                                            G.util.labels.toggleFeatureLabels(this.layer.widget, this.cmp.fontSize.getValue(),
+                                                        if (layer.features.length) {
+                                                            G.util.labels.toggleFeatureLabels(layer.widget, this.cmp.fontSize.getValue(),
                                                                 this.cmp.strong.getValue(), this.cmp.italic.getValue(), this.cmp.color.getValue());
                                                         }
                                                         else {
-                                                            Ext.message.msg(false, '<span class="x-msg-hl">' + this.layer.name + '</span>: No features rendered');
+                                                            Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
                                                         }
                                                     }
                                                 }
@@ -3069,39 +3128,27 @@
                                     }
                                 }
                                 else {
-                                    Ext.message.msg(false, '<span class="x-msg-hl">' + this.layer.name + '</span>: No features rendered');
+                                    Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: No features rendered');
                                 }
                             },
                             handler: function() {
                                 this.showLabelWindow();
                             }
                         },
+                        '-',
                         {
                             text: 'Opacity',
                             iconCls: 'menu-layeroptions-opacity',
                             menu: { 
                                 items: G.conf.opacityItems,
                                 listeners: {
-                                    'itemclick': function(item) {
-                                        pointLayer.setOpacity(item.text);
+                                    'itemclick': {
+                                        scope: this,
+                                        fn: function(item) {
+                                            this.widget.layer.setOpacity(item.text);
+                                        }
                                     }
                                 }
-                            }
-                        },
-                        '-',
-                        {
-                            text: 'Refresh',
-                            iconCls: 'menu-layeroptions-refresh',
-                            handler: function() {
-                                point.updateValues = true;
-                                point.classify();
-                            }
-                        },
-                        {
-                            text: 'Clear',
-                            iconCls: 'menu-layeroptions-clear',
-                            handler: function() {
-                                point.formValues.clearForm.call(point, true);
                             }
                         }
                     ]
