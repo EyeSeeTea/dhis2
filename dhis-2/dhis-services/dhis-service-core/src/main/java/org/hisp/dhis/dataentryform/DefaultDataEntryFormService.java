@@ -57,7 +57,6 @@ public class DefaultDataEntryFormService
 {    
     private static final String EMPTY_VALUE_TAG = "value=\"\"";
     private static final String EMPTY_TITLE_TAG = "title=\"\"";
-    private static final String STYLE_TAG = "style=\"";
     private static final String TAG_CLOSE = "/>";
     private static final String EMPTY = "";
     
@@ -225,7 +224,7 @@ public class DefaultDataEntryFormService
         return sb.toString();
     }
 
-    public String prepareDataEntryFormForEntry( String htmlCode, String disabled, I18n i18n, DataSet dataSet )
+    public String prepareDataEntryFormForEntry( String htmlCode, I18n i18n, DataSet dataSet )
     {
         // ---------------------------------------------------------------------
         // Inline javascript/html to add to HTML before output
@@ -233,8 +232,8 @@ public class DefaultDataEntryFormService
         
         int i = 1;
         
-        final String jsCodeForInputFields = " name=\"entryfield\" $DISABLED ";
-        final String jsCodeForSelectLists = " name=\"entryfield\" $DISABLED ";
+        final String jsCodeForInputFields = " name=\"ef\" ";
+        final String jsCodeForSelectLists = " name=\"es\" ";
         
         StringBuffer sb = new StringBuffer();
 
@@ -286,8 +285,6 @@ public class DefaultDataEntryFormService
                 
                 inputHtml = inputHtml.contains( EMPTY_TITLE_TAG ) ? inputHtml.replace( EMPTY_TITLE_TAG, title ) : inputHtml + " " + title;
 
-                String backgroundColor = "style=\"";
-                
                 String appendCode = "";
 
                 if ( dataElement.getType().equals( VALUE_TYPE_BOOL ) )
@@ -306,9 +303,6 @@ public class DefaultDataEntryFormService
 
                 inputHtml = inputHtml.replace( TAG_CLOSE, appendCode );
                 
-                inputHtml = inputHtml.replace( "$DISABLED", disabled );
-                inputHtml = inputHtml.replace( STYLE_TAG, backgroundColor );
-
                 inputMatcher.appendReplacement( sb, inputHtml );
             }
         }

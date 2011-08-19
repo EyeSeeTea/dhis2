@@ -33,8 +33,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 
 import com.opensymphony.xwork2.Action;
@@ -59,18 +62,18 @@ public class RegisterCompleteDataSetAction
         this.registrationService = registrationService;
     }
 
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
-    
     private DataSetService dataSetService;
 
     public void setDataSetService( DataSetService dataSetService )
     {
         this.dataSetService = dataSetService;
+    }
+
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
     }
 
     // -------------------------------------------------------------------------
@@ -91,6 +94,13 @@ public class RegisterCompleteDataSetAction
         this.dataSetId = dataSetId;
     }
 
+    private Integer organisationUnitId;
+
+    public void setOrganisationUnitId( Integer organisationUnitId )
+    {
+        this.organisationUnitId = organisationUnitId;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -99,14 +109,22 @@ public class RegisterCompleteDataSetAction
     {
         CompleteDataSetRegistration registration = new CompleteDataSetRegistration();
 
-        registration.setDataSet( dataSetService.getDataSet( dataSetId ) );
-        registration.setPeriod( PeriodType.createPeriodExternalId( periodId ) );
-        registration.setSource( selectionManager.getSelectedOrganisationUnit() );
-        registration.setDate( new Date() );
+        DataSet dataSet = dataSetService.getDataSet( dataSetId );
+        Period period = PeriodType.createPeriodExternalId( periodId );
+        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
 
-        registrationService.saveCompleteDataSetRegistration( registration );
+        if ( registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit ) == null )
+        {
+            registration.setDataSet( dataSet );
+            registration.setPeriod( period );
+            registration.setSource( organisationUnit );
+            registration.setDate( new Date() );
 
-        log.info( "DataSet registered as complete: " + registration );
+            registrationService.saveCompleteDataSetRegistration( registration );
+
+            log.info( "DataSet registered as complete: " + registration );
+        }
+
 
         return SUCCESS;
     }

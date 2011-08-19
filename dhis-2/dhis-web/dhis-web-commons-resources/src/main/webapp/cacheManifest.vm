@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2.4-SNAPSHOT Version 10
+# 2.4-SNAPSHOT Version 13
 NETWORK:
 *
 CACHE:
@@ -14,15 +14,21 @@ css/light_blue/logo_separator.png
 css/widgets.css
 ../dhis-web-dataentry/style/dhis-web-dataentry.css
 javascripts/jQuery/jquery-1.6.1.min.js
-javascripts/jQuery/ui/jquery-ui-1.8.12.custom.min.js
 javascripts/jQuery/jquery.metadata.js
 javascripts/jQuery/jquery.glob.js
 javascripts/jQuery/jquery.date.js
 javascripts/jQuery/jquery.tmpl.js
+i18nJavaScript.action
 javascripts/commons.js
 javascripts/lists.js
 javascripts/periodType.js
 javascripts/date.js
+javascripts/dhis2/dhis2.util.js
+javascripts/dhis2/dhis2.array.js
+javascripts/dhis2/dhis2.select.js
+javascripts/dhis2/dhis2.comparator.js
+javascripts/dhis2/dhis2.availability.js
+javascripts/jQuery/jquery.cookie.js
 ../main.js
 ouwt/ouwt.js 
 fonts/LiberationSans-Regular-webfont.eot

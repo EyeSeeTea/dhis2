@@ -70,8 +70,9 @@ var validationRules = {
             "rangelength" : [ 2, 25 ]
         },
         "code" : {
-            "required" : true,
-            "rangelength" : [ 0, 25 ]
+            "rangelength" : [ 0, 25 ],
+            "alphanumericwithbasicpuncspaces" : true,
+            "notOnlyDigits" : false
         },
         "openingDate" : {
             "required" : true
@@ -392,4 +393,4 @@ var validationRules = {
             "alphanumericwithbasicpuncspaces" : true
 		}
     }
-}
+};

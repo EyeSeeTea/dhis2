@@ -1,7 +1,7 @@
-package org.hisp.dhis.dd.action.dataelementgroup;
+package org.hisp.dhis.commons.action;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,51 +27,36 @@ package org.hisp.dhis.dd.action.dataelementgroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
+import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
- * @version $Id:
+ * @author mortenoh
  */
-public class GetAssignedGroupsByDataElementAction
+public class GetPingAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataElementService dataElementService;
+    private CurrentUserService currentUserService;
 
-    public void setDataElementService( DataElementService dataElementService )
+    public void setCurrentUserService( CurrentUserService currentUserService )
     {
-        this.dataElementService = dataElementService;
+        this.currentUserService = currentUserService;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer dataElementId;
+    private Boolean loggedIn;
 
-    public void setDataElementId( Integer dataElementId )
+    public Boolean isLoggedIn()
     {
-        this.dataElementId = dataElementId;
-    }
-
-    private List<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>();
-
-    public List<DataElementGroup> getDataElementGroups()
-    {
-        return dataElementGroups;
+        return loggedIn;
     }
 
     // -------------------------------------------------------------------------
@@ -79,17 +64,8 @@ public class GetAssignedGroupsByDataElementAction
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
-        if ( dataElementId != null )
-        {
-            DataElement dataElement = dataElementService.getDataElement( dataElementId );
-
-            dataElementGroups = new ArrayList<DataElementGroup>( dataElementService
-                .getGroupsContainingDataElement( dataElement ) );
-
-            Collections.sort( dataElementGroups, new DataElementGroupNameComparator() );
-        }
+        loggedIn = !(currentUserService.getCurrentUser() == null);
 
         return SUCCESS;
     }

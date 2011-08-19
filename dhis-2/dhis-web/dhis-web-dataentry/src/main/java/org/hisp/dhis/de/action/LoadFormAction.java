@@ -31,13 +31,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -49,32 +46,21 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementSortOrderComparator;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
-import org.hisp.dhis.datalock.DataSetLock;
-import org.hisp.dhis.datalock.DataSetLockService;
-import org.hisp.dhis.dataset.CompleteDataSetRegistration;
-import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.dataset.comparator.SectionOrderComparator;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: SelectAction.java 5930 2008-10-15 03:30:52Z tri $
  */
 public class LoadFormAction
     implements Action
 {
-    private static final Log log = LogFactory.getLog( LoadFormAction.class );
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -98,27 +84,6 @@ public class LoadFormAction
     public void setDataSetService( DataSetService dataSetService )
     {
         this.dataSetService = dataSetService;
-    }
-
-    private DataSetLockService dataSetLockService;
-
-    public void setDataSetLockService( DataSetLockService dataSetLockService )
-    {
-        this.dataSetLockService = dataSetLockService;
-    }
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
-
-    private CompleteDataSetRegistrationService registrationService;
-
-    public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
-    {
-        this.registrationService = registrationService;
     }
 
     private DataElementCategoryService categoryService;
@@ -158,7 +123,18 @@ public class LoadFormAction
     }
 
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Input
+    // -------------------------------------------------------------------------
+
+    private Integer dataSetId;
+
+    public void setDataSetId( Integer dataSetId )
+    {
+        this.dataSetId = dataSetId;
+    }
+
+    // -------------------------------------------------------------------------
+    // Output
     // -------------------------------------------------------------------------
 
     private Map<DataElementCategoryCombo, List<DataElement>> orderedDataElements = new HashMap<DataElementCategoryCombo, List<DataElement>>();
@@ -175,67 +151,11 @@ public class LoadFormAction
         return this.customDataEntryFormCode;
     }
 
-    private OrganisationUnit organisationUnit;
-
-    public OrganisationUnit getOrganisationUnit()
-    {
-        return organisationUnit;
-    }
-
-    private Period period;
-
-    public Period getPeriod()
-    {
-        return period;
-    }
-
-    private boolean locked;
-
-    public boolean isLocked()
-    {
-        return locked;
-    }
-
-    private CompleteDataSetRegistration registration;
-
-    public CompleteDataSetRegistration getRegistration()
-    {
-        return registration;
-    }
-
-    private Date registrationDate;
-
-    public Date getRegistrationDate()
-    {
-        return registrationDate;
-    }
-
     private List<Section> sections;
 
     public List<Section> getSections()
     {
         return sections;
-    }
-
-    private Integer dataSetId;
-
-    public void setDataSetId( Integer dataSetId )
-    {
-        this.dataSetId = dataSetId;
-    }
-
-    private String periodId;
-
-    public void setPeriodId( String periodId )
-    {
-        this.periodId = periodId;
-    }
-    
-    private boolean defaultForm;
-
-    public void setDefaultForm( boolean defaultForm )
-    {
-        this.defaultForm = defaultForm;
     }
 
     private Map<Integer, Map<Integer, Collection<DataElementCategoryOption>>> orderedOptionsMap = new HashMap<Integer, Map<Integer, Collection<DataElementCategoryOption>>>();
@@ -273,25 +193,11 @@ public class LoadFormAction
         return orderdCategoryOptionCombos;
     }
 
-    private List<DataElementCategoryOptionCombo> allOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
-
-    public List<DataElementCategoryOptionCombo> getAllOptionCombos()
-    {
-        return allOptionCombos;
-    }
-
     private List<DataElementCategoryCombo> orderedCategoryCombos = new ArrayList<DataElementCategoryCombo>();
 
     public List<DataElementCategoryCombo> getOrderedCategoryCombos()
     {
         return orderedCategoryCombos;
-    }
-
-    private Map<Integer, Boolean> sectionIsMultiDimensional = new HashMap<Integer, Boolean>();
-
-    public Map<Integer, Boolean> getSectionIsMultiDimensional()
-    {
-        return sectionIsMultiDimensional;
     }
 
     private Map<Integer, Integer> sectionCombos = new HashMap<Integer, Integer>();
@@ -315,46 +221,8 @@ public class LoadFormAction
     public String execute()
         throws Exception
     {
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
         DataSet dataSet = dataSetService.getDataSet( dataSetId );
 
-        Period period = PeriodType.createPeriodExternalId( periodId );
-
-        // ---------------------------------------------------------------------
-        // Get data locking info
-        // ---------------------------------------------------------------------
-
-        if ( dataSet != null && period != null )
-        {
-            DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
-
-            if ( dataSetLock != null && dataSetLock.getSources().contains( organisationUnit ) )
-            {
-                locked = true;
-
-                log.info( "Dataset '" + dataSet.getName() + "' is locked " );
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // Get data set completeness info
-        // ---------------------------------------------------------------------
-
-        if ( dataSet != null && period != null && organisationUnit != null )
-        {
-            registration = registrationService.getCompleteDataSetRegistration( dataSet, period,
-                organisationUnit );
-
-            registrationDate = registration != null ? registration.getDate() : new Date();
-        }
-
-        // ---------------------------------------------------------------------
-        // Get display mode
-        // ---------------------------------------------------------------------
-
-        String displayMode = defaultForm ? DataSet.TYPE_DEFAULT : dataSet.getDataSetType();
-        
         List<DataElement> dataElements = new ArrayList<DataElement>( dataSet.getDataElements() );
 
         if ( dataElements.isEmpty() )
@@ -371,8 +239,6 @@ public class LoadFormAction
         for ( DataElementCategoryCombo categoryCombo : orderedCategoryCombos )
         {
             Collection<DataElementCategoryOptionCombo> optionCombos = categoryService.sortOptionCombos( categoryCombo );
-
-            allOptionCombos.addAll( optionCombos );
 
             orderdCategoryOptionCombos.put( categoryCombo.getId(), optionCombos );
 
@@ -434,13 +300,15 @@ public class LoadFormAction
         // Get data entry form
         // ---------------------------------------------------------------------
 
+        String displayMode = dataSet.getDataSetType();
+        
         if ( displayMode.equals( DataSet.TYPE_SECTION ) )
         {
             getSectionForm( dataElements, dataSet );
         }
         else
         {
-            getOtherDataEntryForm( dataElements, dataSet, locked );
+            getOtherDataEntryForm( dataElements, dataSet );
         }
 
         return displayMode;
@@ -467,11 +335,6 @@ public class LoadFormAction
                 sectionCombos.put( section.getId(), sectionCategoryCombo.getId() );
             }
 
-            if ( section.hasMultiDimensionalDataElement() )
-            {
-                sectionIsMultiDimensional.put( section.getId(), true );
-            }
-
             for ( DataElementOperand operand : section.getGreyedFields() )
             {
                 greyedFields.put( operand.getDataElement().getId() + ":" + operand.getCategoryOptionCombo().getId(),
@@ -480,16 +343,14 @@ public class LoadFormAction
         }
     }
 
-    private void getOtherDataEntryForm( List<DataElement> dataElements, DataSet dataSet, boolean locked )
+    private void getOtherDataEntryForm( List<DataElement> dataElements, DataSet dataSet )
     {
-        String disabled = locked ? "disabled" : "";
-
         DataEntryForm dataEntryForm = dataSet.getDataEntryForm();
 
         if ( dataEntryForm != null )
         {
             customDataEntryFormCode = dataEntryFormService.prepareDataEntryFormForEntry( 
-                dataEntryForm.getHtmlCode(), disabled, i18n, dataSet );
+                dataEntryForm.getHtmlCode(), i18n, dataSet );
         }
 
         List<DataElement> des = new ArrayList<DataElement>();

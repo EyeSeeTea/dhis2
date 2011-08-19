@@ -33,18 +33,13 @@
   background-color: #ff6600;
 }
 
-.grey
-{
-  background-color: #cccccc;
-}
-
-.altRow
+.alt
 {
   background-color: #e0e0e0;
   padding-right: 50px;
 }
 
-.regRow
+.reg
 {
   padding-right: 50px;
 }

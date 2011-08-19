@@ -1,19 +1,10 @@
-
-#macro( expandOrganisationUnit $organisationUnit )
-	{
-		"id": $!{organisationUnit.id},
-		#if( $organisationUnit.parent )"parentId": $!{organisationUnit.parent.id},#end
-		"name": "$!encoder.jsonEncode( ${organisationUnit.name} )"#if( $organisationUnit.children.size() > 0 ),
-		"children": [
-		#foreach ( $child in $organisationUnit.sortedChildren )
-			#expandOrganisationUnit( $child )#if( $velocityCount < $organisationUnit.children.size() ),#end
-		#end]#end
-	}
-#end
-
-{ "organisationUnits": [
-	#foreach ( $organisationUnit in $organisationUnits )
-		#expandOrganisationUnit( $organisationUnit )#if( $velocityCount < $organisationUnits.size() ),#end
-	#end
-	]
+{
+"version":"$!encoder.jsonEncode( $version )"
+#if( ! $versionOnly )
+,"roots": [ #foreach( $root in $rootOrganisationUnits )$root.id#if( $velocityCount < $rootOrganisationUnits.size() ),#end#end ]
+,"organisationUnits": {
+#foreach( $unit in $organisationUnits )
+"${unit.id}":{"id":${unit.id},"n":"$!encoder.jsonEncode( ${unit.name} )",#if( $unit.parent )"pid":${unit.parent.id},#end"c":[#foreach( $child in $unit.sortedChildren )${child.id}#if( $velocityCount < $unit.children.size() ),#end#end]}
+#if( $velocityCount < $organisationUnits.size() ),#end#end
+}#end
 }

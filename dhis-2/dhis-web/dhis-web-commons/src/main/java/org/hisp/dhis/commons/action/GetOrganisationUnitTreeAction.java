@@ -28,13 +28,17 @@ package org.hisp.dhis.commons.action;
  */
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.version.Version;
+import org.hisp.dhis.version.VersionService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -55,26 +59,55 @@ public class GetOrganisationUnitTreeAction
         this.currentUserService = currentUserService;
     }
 
-    // -------------------------------------------------------------------------
-    // Comparator
-    // -------------------------------------------------------------------------
+    private OrganisationUnitService organisationUnitService;
 
-    private Comparator<OrganisationUnit> organisationUnitComparator;
-
-    public void setOrganisationUnitComparator( Comparator<OrganisationUnit> organisationUnitComparator )
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
-        this.organisationUnitComparator = organisationUnitComparator;
+        this.organisationUnitService = organisationUnitService;
+    }
+
+    private VersionService versionService;
+
+    public void setVersionService( VersionService versionService )
+    {
+        this.versionService = versionService;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private List<OrganisationUnit> organisationUnits;
+    private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
 
     public List<OrganisationUnit> getOrganisationUnits()
     {
         return organisationUnits;
+    }
+
+    private List<OrganisationUnit> rootOrganisationUnits = new ArrayList<OrganisationUnit>();
+
+    public List<OrganisationUnit> getRootOrganisationUnits()
+    {
+        return rootOrganisationUnits;
+    }
+
+    private String version;
+
+    public String getVersion()
+    {
+        return version;
+    }
+
+    private Boolean versionOnly = false;
+
+    public void setVersionOnly( Boolean versionOnly )
+    {
+        this.versionOnly = versionOnly;
+    }
+
+    public Boolean getVersionOnly()
+    {
+        return versionOnly;
     }
 
     // -------------------------------------------------------------------------
@@ -84,19 +117,57 @@ public class GetOrganisationUnitTreeAction
     public String execute()
         throws Exception
     {
-        User user = currentUserService.getCurrentUser();
-
-        if ( user.getOrganisationUnits() != null )
+        if ( !versionOnly )
         {
-            organisationUnits = new ArrayList<OrganisationUnit>( user.getOrganisationUnits() );
-        }
-        else
-        {
-            organisationUnits = new ArrayList<OrganisationUnit>();
+            Collection<OrganisationUnit> userOrganisationUnits = new HashSet<OrganisationUnit>();
+
+            User user = currentUserService.getCurrentUser();
+
+            if ( user.getOrganisationUnits() != null && user.getOrganisationUnits().size() > 0 )
+            {
+                userOrganisationUnits = new ArrayList<OrganisationUnit>( user.getOrganisationUnits() );
+                rootOrganisationUnits = new ArrayList<OrganisationUnit>( user.getOrganisationUnits() );
+            }
+            else
+            {
+                if ( user.getOrganisationUnits() != null && currentUserService.currentUserIsSuper() )
+                {
+                    userOrganisationUnits = new ArrayList<OrganisationUnit>(
+                        organisationUnitService.getRootOrganisationUnits() );
+                    rootOrganisationUnits = new ArrayList<OrganisationUnit>(
+                        organisationUnitService.getRootOrganisationUnits() );
+                }
+                else
+                {
+                    userOrganisationUnits = new ArrayList<OrganisationUnit>();
+                    rootOrganisationUnits = new ArrayList<OrganisationUnit>();
+                }
+            }
+
+            for ( OrganisationUnit unit : userOrganisationUnits )
+            {
+                organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( unit.getId() ) );
+            }
         }
 
-        Collections.sort( organisationUnits, organisationUnitComparator );
+        version = getVersionString();
 
         return SUCCESS;
+    }
+
+    private String getVersionString()
+    {
+        Version orgUnitVersion = versionService.getVersionByKey( VersionService.ORGANISATIONUNIT_VERSION );
+
+        if ( orgUnitVersion == null )
+        {
+            String uuid = UUID.randomUUID().toString();
+            orgUnitVersion = new Version();
+            orgUnitVersion.setKey( VersionService.ORGANISATIONUNIT_VERSION );
+            orgUnitVersion.setValue( uuid );
+            versionService.addVersion( orgUnitVersion );
+        }
+
+        return orgUnitVersion.getValue();
     }
 }

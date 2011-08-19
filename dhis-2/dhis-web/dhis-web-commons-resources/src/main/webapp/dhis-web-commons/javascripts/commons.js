@@ -8,23 +8,6 @@ var _loading_bar_html = "<img src='../images/ajax-loader-bar.gif'>";
 var _loading_circle_html = "<img src='../images/ajax-loader-circle.gif'>";
 
 /**
- * Determines whether the DHIS server can be accessed, ie. if the server
- * is running (in the context of a remote server also if the network is up).
- */
-function serverIsAccessible()
-{
-	$.ajax( {
-		url: "../dhis-web-commons-stream/ping.action",
-		success: function( data, textStatus, jqXHR ) {
-			return true;
-		},
-		error: function( jqXHR, textStatus, errorThrown ) {
-			return false;
-		}
-	} );
-}
-
-/**
  * Go back using the document.referrer.
  * 
  * @param defaultUrl if there is not document.referrer, use this url
@@ -282,13 +265,23 @@ function hasElements( listId )
 }
 
 /**
+ * Returns true if the given value not equals null or "null" string, false if not.
+ * 
+ * @param value the given value.
+ */
+function isNotNull( value )
+{
+    return ( value != null && trim(value) != "null" );
+}
+
+/**
  * Returns true if the element with the given identifier exists, false if not.
  * 
  * @param elementId the identifier of the element.
  */
-function isNotNull( elementId )
+function isNotEmpty( elementId )
 {
-    return  jQuery("#" + elementId).length  == 1;
+    return jQuery("#" + elementId).length == 1;
 }
 
 /**
@@ -516,18 +509,14 @@ function hideMessage()
  */
 function setHeaderMessage( message )
 {
+	window.clearTimeout( headerMessageTimeout );
+	
     $( 'div#headerMessage' ).html( message );
-    $( 'div#headerMessage' ).slideDown( 'fast' );
-}
-
-/**
- * Updates the text in the header message div with the message.
- * 
- * @param message the message.
- */
-function updateHeaderMessage( message )
-{
-	$( 'div#headerMessage' ).html( message );
+    
+    if ( isHeaderMessageHidden() )
+    {
+    	$( 'div#headerMessage' ).slideDown( 'fast' );
+    }
 }
 
 /**
@@ -538,18 +527,14 @@ function updateHeaderMessage( message )
  */
 function setHeaderWaitMessage( message )
 {
+	window.clearTimeout( headerMessageTimeout );
+	
 	$( 'div#headerMessage' ).html( message + "&nbsp;&nbsp;&nbsp;" + _loading_bar_html );
-    $( 'div#headerMessage' ).slideDown( 'fast' );
-}
-
-/**
- * Updates the text in the header message div with the message.
- * 
- * @param message the message.
- */
-function updateHeaderWaitMessage( message )
-{
-	$( 'div#headerMessage' ).html( message + "&nbsp;&nbsp;&nbsp;" + _loading_bar_html );
+	
+	if ( isHeaderMessageHidden() )
+	{
+    	$( 'div#headerMessage' ).slideDown( 'fast' );
+	}
 }
 
 /**
@@ -559,9 +544,9 @@ function setHeaderDelayMessage( message )
 {
 	setHeaderMessage( message );
 	
-	window.clearTimeout( headerMessageTimeout ); // Clear waiting invocations
+	window.clearTimeout( headerMessageTimeout );
 	
-	headerMessageTimeout = window.setTimeout( "hideHeaderMessage();", 3000 );
+	headerMessageTimeout = window.setTimeout( "hideHeaderMessage();", 8000 );
 }
 
 /**
@@ -571,23 +556,9 @@ function setHeaderWaitDelayMessage( message )
 {
 	setHeaderWaitMessage( message );
 	
-	window.clearTimeout( headerMessageTimeout ); // Clear waiting invocations
+	window.clearTimeout( headerMessageTimeout );
 	
-	headerMessageTimeout = window.setTimeout( "hideHeaderMessage();", 3000 );
-}
-
-/**
- * Sets the header message and hides it after the given seconds, default as 3s.
- */
-function setHeaderTimeDelayMessage( message, timing )
-{
-	if ( timing == undefined ) { setHeaderDelayMessage( message ); return;}
-	
-	setHeaderMessage( message );
-	
-	window.clearTimeout( headerMessageTimeout ); // Clear waiting invocations
-	
-	headerMessageTimeout = window.setTimeout( "hideHeaderMessage();", timing );
+	headerMessageTimeout = window.setTimeout( "hideHeaderMessage();", 8000 );
 }
 
 /**
@@ -597,6 +568,22 @@ function hideHeaderMessage()
 {
     $( 'div#headerMessage' ).slideUp( 'fast' );
 }   
+
+/**
+ * Indicates whether the header message is visible.
+ */
+function isHeaderMessageVisible()
+{
+    return $( 'div#headerMessage' ).is(":visible");
+}
+
+/**
+ * Indicates whether the header message is not visible.
+ */
+function isHeaderMessageHidden()
+{
+    return !isHeaderMessageVisible();
+}
 
 /**
  * Slides down the info message div and sets the message as text.
