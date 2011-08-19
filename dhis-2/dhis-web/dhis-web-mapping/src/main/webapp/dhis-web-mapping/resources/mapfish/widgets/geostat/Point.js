@@ -1740,6 +1740,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                                 if (mapvalues[i].orgUnitName == this.layer.features[j].attributes.name) {
                                     this.layer.features[j].attributes.value = parseFloat(mapvalues[i].value);
                                     this.layer.features[j].attributes.labelString = this.layer.features[j].attributes.name + ' (' + this.layer.features[j].attributes.value + ')';
+                                    this.layer.features[j].attributes.name = G.util.cutString(this.layer.features[j].attributes.name, 30);
                                     break;
                                 }
                             }

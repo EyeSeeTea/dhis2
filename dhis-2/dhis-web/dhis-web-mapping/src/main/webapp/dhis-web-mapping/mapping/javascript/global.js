@@ -459,6 +459,13 @@ G.util = {
             }
         }
         return true;
+    },
+    
+    cutString: function(str, len) {
+        if (str.length > len) {
+            str = str.substr(0,len) + '..';
+        }
+        return str;
     }
 };
 
