@@ -718,6 +718,12 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.Panel, {
 			};
 		},
         
+        getLegendInfo: function() {
+            return {
+                map: this.organisationUnitSelection.level.name + ' / ' + this.organisationUnitSelection.parent.name
+            };
+        },
+        
         clearForm: function(clearLayer) {
             this.cmp.groupSet.clearValue();
             this.cmp.groupSet.currentValue = null;

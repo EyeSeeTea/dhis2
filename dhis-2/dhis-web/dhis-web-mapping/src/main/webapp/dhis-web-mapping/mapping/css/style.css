@@ -530,6 +530,12 @@ td.x-grid3-hd-over, td.sort-desc, td.sort-asc, td.x-grid3-hd-menu-open {
 #pointlegend {
     padding-left:4px;
 }
+#symbollegend {
+    padding-left:4px;
+}
+#centroidlegend {
+    padding-left:4px;
+}
 #map_tb .x-panel-bbar .x-toolbar, .x-panel-tbar .x-toolbar {
     border:1px solid #bbbbbb;
     border-bottom:1px solid #cccccc;

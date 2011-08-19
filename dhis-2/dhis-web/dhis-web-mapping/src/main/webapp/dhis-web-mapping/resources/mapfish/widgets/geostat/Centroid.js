@@ -1007,6 +1007,14 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
 			};
 		},
         
+        getLegendInfo: function() {
+            return {
+                name: this.valueType.isIndicator() ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+                time: G.system.mapDateType.isFixed() ? this.cmp.period.getRawValue() : this.cmp.startDate.getRawValue() + ' - ' + this.cmp.endDate.getRawValue(),
+                map: this.organisationUnitSelection.level.name + ' / ' + this.organisationUnitSelection.parent.name
+            };
+        },
+        
         getImageExportValues: function() {
 			return {
 				mapValueTypeValue: this.cmp.mapValueType.getValue() == G.conf.map_value_type_indicator ?
