@@ -24,7 +24,7 @@
 
 Ext.namespace('mapfish.widgets', 'mapfish.widgets.geostat');
 
-mapfish.widgets.geostat.Centroid = Ext.extend(Ext.FormPanel, {
+mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
 
     layer: null,
 
