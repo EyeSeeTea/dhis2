@@ -2807,10 +2807,6 @@
                 items:
                 [
                     layerTree,
-                    //{
-                        //title: '<span class="panel-title">' + G.i18n.overview_map + '</span>',
-                        //contentEl: 'overviewmap'
-                    //},
                     {
                         title: '<span class="panel-title">'+ G.i18n.cursor_position +'</span>',
                         contentEl: 'mouseposition'
@@ -2931,14 +2927,6 @@
         prefix: '<span style="color:#666">x: &nbsp;</span>',
         separator: '<br/><span style="color:#666">y: &nbsp;</span>'
     }));
-    
-    //G.vars.map.addControl(new OpenLayers.Control.OverviewMap({
-        //autoActivate: true,
-        //div: $('overviewmap'),
-        //size: new OpenLayers.Size(188, 97),
-        //minRectSize: 0,
-        //layers: [new OpenLayers.Layer.OSM.Osmarender('OSM Osmarender')]
-    //}));
     
     G.vars.map.addControl(new OpenLayers.Control.PanPanel({
         slideFactor: 100
