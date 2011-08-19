@@ -143,7 +143,7 @@ mapfish.GeoStat.Centroid = OpenLayers.Class(mapfish.GeoStat, {
         
         element = document.createElement("div");
         element.style.width = "1px";
-        element.style.height = "6px";
+        element.style.height = "5px";
         this.legendDiv.appendChild(element);
         
         for (var i = 0; i < this.classification.bins.length; i++) {

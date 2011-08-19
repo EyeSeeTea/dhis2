@@ -510,31 +510,25 @@ td.x-grid3-hd-over, td.sort-desc, td.sort-asc, td.x-grid3-hd-menu-open {
 #north {
     padding:2px;
 }
-#overviewmap {
-    height:97px;
-    padding-top:0px;
-}
 #mouseposition {
-    line-height:12px;
-    padding:0px 4px;
-    height:31px;
+    padding:0 0 0 6px;
+    height:19px;
 }
 #featuredatatext {
-    line-height:12px;
-    padding:0px 4px;
-    height:31px;
+    padding:0 0 0 6px;
+    height:30px;
 }
 #polygonlegend {
-    padding-left:4px;
+    padding:0 0 6px 6px;
 }
 #pointlegend {
-    padding-left:4px;
+    padding:0 0 6px 6px;
 }
 #symbollegend {
-    padding-left:4px;
+    padding:0 0 6px 6px;
 }
 #centroidlegend {
-    padding-left:4px;
+    padding:0 0 6px 6px;
 }
 #map_tb .x-panel-bbar .x-toolbar, .x-panel-tbar .x-toolbar {
     border:1px solid #bbbbbb;

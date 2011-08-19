@@ -2924,8 +2924,8 @@
 	G.vars.map.addControl(new OpenLayers.Control.MousePosition({
         displayClass: 'void',
         div: $('mouseposition'),
-        prefix: '<span style="color:#666">x: &nbsp;</span>',
-        separator: '<br/><span style="color:#666">y: &nbsp;</span>'
+        prefix: '<span style="color:#666">Lon: </span>',
+        separator: '<span style="color:#666">&nbsp;&nbsp;Lat: </span>'
     }));
     
     G.vars.map.addControl(new OpenLayers.Control.PanPanel({
