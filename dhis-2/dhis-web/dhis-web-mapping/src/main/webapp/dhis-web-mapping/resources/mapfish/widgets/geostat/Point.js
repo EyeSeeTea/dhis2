@@ -95,35 +95,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
         this.addItems();
         
         this.createSelectFeatures();
-
-        if (G.vars.parameter.id) {
-            this.mapView = G.vars.parameter.mapView;
-            this.updateValues = true;
-            this.legend = {
-                value: this.mapView.mapLegendType,
-                method: this.mapView.method || this.legend.method,
-                classes: this.mapView.classes || this.legend.classes
-            };
-            
-            G.vars.parameter.id = false;
-            G.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-            
-            function mapViewStoreCallback() {
-                this.cmp.mapview.setValue(this.mapView.id);
-                this.valueType.value = this.mapView.mapValueType;
-                this.cmp.mapValueType.setValue(this.valueType.value);
-                this.setMapView();
-            }
-            
-            if (G.stores.mapView.isLoaded) {
-                mapViewStoreCallback.call(this);
-            }
-            else {
-                G.stores.mapView.load({scope: this, callback: function() {
-                    mapViewStoreCallback.call(this);
-                }});
-            }
-        }
         
 		mapfish.widgets.geostat.Point.superclass.initComponent.apply(this);
     },

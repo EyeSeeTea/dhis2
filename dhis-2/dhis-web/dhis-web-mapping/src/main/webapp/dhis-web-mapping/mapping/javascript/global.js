@@ -492,6 +492,44 @@ G.util = {
             str = str.substr(0,len) + '..';
         }
         return str;
+    },
+    
+    mapView: {
+        prepare: function(id) {
+            if (!this.window.isShown) {
+                this.window.show();
+                this.window.hide();
+            }
+            var store = G.stores.mapView;
+            if (!store.isLoaded) {
+                store.load({scope: this, callback: function() {
+                    G.util.mapView.launch.call(this, id);
+                }});
+            }
+            else {
+                G.util.mapView.launch.call(this, id);
+            }
+        },
+        
+        launch: function(id) {
+            var store = G.stores.mapView;
+            this.mapView = store.getAt(store.find('id', id)).data;
+            this.updateValues = true;
+            
+            this.legend.value = this.mapView.mapLegendType;
+            this.legend.method = this.mapView.method || this.legend.method;
+            this.legend.classes = this.mapView.classes || this.legend.classes;
+
+            G.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
+            G.system.mapDateType.value = this.mapView.mapDateType;
+            Ext.getCmp('mapdatetype_cb').setValue(G.system.mapDateType.value);
+
+            this.valueType.value = this.mapView.mapValueType;
+            this.cmp.mapValueType.setValue(this.valueType.value);
+            
+            this.setMapView();
+            this.window.cmp.reset.enable();
+        }
     }
 };
 

@@ -551,7 +551,7 @@
                         success: function(r) {
                             Ext.message.msg(true, G.i18n.favorite + ' <span class="x-msg-hl">' + vn + '</span> ' + G.i18n.registered);
                             G.stores.mapView.load({callback: function() {
-                                favoriteButton.reloadMenu();
+                                favoritesButton.reloadMenu();
                             }});
                             Ext.getCmp('favoritename_tf').reset();
                             Ext.getCmp('favoritesystem_chb').reset();
@@ -581,13 +581,13 @@
                                     Ext.getCmp('favorite_cb').clearValue();
                                     
                                     G.stores.mapView.load({callback: function() {
-                                        favoriteButton.reloadMenu();
+                                        favoritesButton.reloadMenu();
                                     }});
                                     
-                                    if (v == choropleth.cmp.mapView.getValue()) {
+                                    if (v == choropleth.cmp.mapview.getValue()) {
                                         choropleth.cmp.mapView.clearValue();
                                     }
-                                    if (v == point.cmp.mapView.getValue()) {
+                                    if (v == point.cmp.mapview.getValue()) {
                                         point.cmp.mapView.clearValue();
                                     }
                                 }
@@ -2616,7 +2616,7 @@
             this.menu = new Ext.menu.Menu({
                 items: [
                     {
-                        text: 'Manage favorite mapviews..',
+                        text: 'Manage favorites..',
                         iconCls: 'menu-layeroptions-edit',
                         scope: this,
                         handler: function() {
@@ -2953,6 +2953,11 @@
                 });
                 
                 document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + G.i18n.no_feature_selected + '</div>';
+                
+                if (G.vars.parameter.id) {
+                    G.util.mapView.prepare.call(choropleth, G.vars.parameter.id);
+                    G.vars.parameter.id = null;
+                }
             }
         }
     });
