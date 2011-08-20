@@ -551,7 +551,7 @@
                         success: function(r) {
                             Ext.message.msg(true, G.i18n.favorite + ' <span class="x-msg-hl">' + vn + '</span> ' + G.i18n.registered);
                             G.stores.mapView.load({callback: function() {
-                                favoritesButton.reloadMenu();
+                                favoriteButton.reloadMenu();
                             }});
                             Ext.getCmp('favoritename_tf').reset();
                             Ext.getCmp('favoritesystem_chb').reset();
@@ -581,7 +581,7 @@
                                     Ext.getCmp('favorite_cb').clearValue();
                                     
                                     G.stores.mapView.load({callback: function() {
-                                        favoritesButton.reloadMenu();
+                                        favoriteButton.reloadMenu();
                                     }});
                                     
                                     if (v == choropleth.cmp.mapview.getValue()) {
@@ -2569,7 +2569,7 @@
         }
     });
 	
-	var favoritesButton = new Ext.Button({
+	var favoriteButton = new Ext.Button({
 		iconCls: 'icon-favorite',
 		tooltip: G.i18n.favorite_map_views,
         style: 'margin-top:1px',
@@ -2583,7 +2583,7 @@
                     mapViewId: store.data.items[i].data.id,
                     scope: choropleth,
                     handler: function(i) {
-                        G.util.mapView.prepare.call(this, i.mapViewId);
+                        G.util.mapView.layer(i.mapViewId);
                     }
                 });
                 this.menu.addItem(item);
@@ -2782,7 +2782,7 @@
 			' ',' ',' ',
 			toolsLabel,
 			' ',' ',
-			favoritesButton,
+			favoriteButton,
             predefinedMapLegendSetButton,
 			exportImageButton,
             measureDistanceButton,
@@ -2934,7 +2934,7 @@
                 document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + G.i18n.no_feature_selected + '</div>';
                 
                 if (G.vars.parameter.id) {
-                    G.util.mapView.prepare.call(choropleth, G.vars.parameter.id);
+                    G.util.mapView.layer(G.vars.parameter.id);
                     G.vars.parameter.id = null;
                 }
             }

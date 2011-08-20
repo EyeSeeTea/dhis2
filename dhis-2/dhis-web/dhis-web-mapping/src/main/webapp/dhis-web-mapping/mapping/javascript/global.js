@@ -495,7 +495,53 @@ G.util = {
     },
     
     mapView: {
+        layer: function(id) {
+            var w = new Ext.Window({
+                id: 'mapviewlayer_w',
+                title: '<span id="window-favorites-title">Favorite map view</span>',
+                layout: 'fit',
+                width: 200,
+                height: 100,
+                items: [
+                    {
+                        xtype: 'panel',
+                        bodyStyle: 'padding:14px;',
+                        items: [
+                            { html: 'Open favorite in which layer?' }
+                        ]
+                    }
+                ],
+                bbar: [
+                    '->',
+                    {
+                        xtype: 'button',
+                        iconCls: 'icon-assign',
+                        hideLabel: true,
+                        text: 'Layer 1',
+                        handler: function() {
+                            G.util.mapView.prepare.call(choropleth, id);
+                        }
+                    },
+                    {
+                        xtype: 'button',
+                        iconCls: 'icon-assign',
+                        hideLabel: true,
+                        text: 'Layer 2',
+                        handler: function() {
+                            G.util.mapView.prepare.call(point, id);
+                        }
+                    }
+                ]                    
+            });
+            var c = Ext.getCmp('center').x;
+            var e = Ext.getCmp('east').x;
+            w.setPagePosition(c+((e-c)/2)-(w.width/2), Ext.getCmp('east').y + 100);
+            w.show();
+        },
+        
         prepare: function(id) {
+            Ext.getCmp('mapviewlayer_w').destroy();
+            
             if (!this.window.isShown) {
                 this.window.show();
                 this.window.hide();
