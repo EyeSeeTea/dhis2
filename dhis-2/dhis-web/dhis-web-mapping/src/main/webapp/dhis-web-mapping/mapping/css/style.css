@@ -141,6 +141,9 @@ a.x-menu-item-custom {
 .menu-featureoptions-relocate {
     background-image:url('../../../images/relocate.png');
 }
+.menu-mapview {
+    background-image:url('../../../images/favorite.png');
+}
 .no-icon-menu .x-menu-item-icon {
     display: none;
 }
