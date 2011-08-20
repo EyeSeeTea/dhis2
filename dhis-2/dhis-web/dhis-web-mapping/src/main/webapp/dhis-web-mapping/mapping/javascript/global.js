@@ -500,14 +500,15 @@ G.util = {
                 id: 'mapviewlayer_w',
                 title: '<span id="window-favorites-title">Favorite map view</span>',
                 layout: 'fit',
-                width: 200,
+                modal: true,
+                width: 155,
                 height: 100,
                 items: [
                     {
                         xtype: 'panel',
                         bodyStyle: 'padding:14px;',
                         items: [
-                            { html: 'Open favorite in which layer?' }
+                            { html: 'Open in which layer?' }
                         ]
                     }
                 ],
@@ -515,18 +516,16 @@ G.util = {
                     '->',
                     {
                         xtype: 'button',
-                        iconCls: 'icon-assign',
+                        iconCls: 'icon-thematic1',
                         hideLabel: true,
-                        text: 'Layer 1',
                         handler: function() {
                             G.util.mapView.prepare.call(choropleth, id);
                         }
                     },
                     {
                         xtype: 'button',
-                        iconCls: 'icon-assign',
+                        iconCls: 'icon-thematic2',
                         hideLabel: true,
-                        text: 'Layer 2',
                         handler: function() {
                             G.util.mapView.prepare.call(point, id);
                         }
@@ -536,7 +535,7 @@ G.util = {
             var c = Ext.getCmp('center').x;
             var e = Ext.getCmp('east').x;
             w.setPagePosition(c+((e-c)/2)-(w.width/2), Ext.getCmp('east').y + 100);
-            w.show();
+            w.show(G.vars.map.id);
         },
         
         prepare: function(id) {
