@@ -894,6 +894,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 expanded: true
             },
             widget: this,
+            isLoaded: false,
             isSelected: false,
             reset: function() {
                 if (this.getSelectionModel().getSelectedNode()) {
@@ -1431,7 +1432,8 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
         this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
             this.mapView.parentOrganisationUnitLevel, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
             
-        this.cmp.parent.reset();
+        //this.cmp.parent.reset();
+        
         this.cmp.parent.selectedNode = {attributes: {
             id: this.mapView.parentOrganisationUnitId,
             text: this.mapView.parentOrganisationUnitName,
