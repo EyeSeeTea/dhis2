@@ -2233,7 +2233,7 @@
             }
         ]
     });    
-    choropleth.window.setPosition(340,45);
+    choropleth.window.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
     
     point = new mapfish.widgets.geostat.Point({
         map: G.vars.map,
@@ -2305,7 +2305,7 @@
             }
         ]
     });    
-    point.window.setPosition(340,45);
+    point.window.setPosition(G.conf.window_x_left,G.conf.window_y_left);
     
     symbol = new mapfish.widgets.geostat.Symbol({
         map: G.vars.map,
@@ -2377,7 +2377,7 @@
             }
         ]
     });    
-    symbol.window.setPosition(340,45);
+    symbol.window.setPosition(G.conf.window_x_left,G.conf.window_y_left);
     
     centroid = new mapfish.widgets.geostat.Centroid({
         map: G.vars.map,
@@ -2449,7 +2449,7 @@
             }
         ]
     });    
-    centroid.window.setPosition(340,45);
+    centroid.window.setPosition(G.conf.window_x_left,G.conf.window_y_left);
     
 	/* Section: map toolbar */
 	var mapLabel = new Ext.form.Label({
@@ -2598,8 +2598,8 @@
 				favoriteWindow.hide();
 			}
 			else {
-                var x = Ext.getCmp('center').x + G.conf.window_position_x;
-                var y = Ext.getCmp('center').y + G.conf.window_position_y;    
+                var x = Ext.getCmp('center').x + G.conf.window_x_right;
+                var y = Ext.getCmp('center').y + G.conf.window_y_right;    
                 favoriteWindow.setPosition(x,y);
 				favoriteWindow.show();
 			}
@@ -2616,8 +2616,8 @@
 				predefinedMapLegendSetWindow.hide();
 			}
 			else {
-                var x = Ext.getCmp('center').x + G.conf.window_position_x;
-                var y = Ext.getCmp('center').y + G.conf.window_position_y;
+                var x = Ext.getCmp('center').x + G.conf.window_x_right;
+                var y = Ext.getCmp('center').y + G.conf.window_y_right;
                 predefinedMapLegendSetWindow.setPosition(x,y);
 				predefinedMapLegendSetWindow.show();         
                 if (!G.stores.predefinedMapLegend.isLoaded) {
@@ -2641,8 +2641,8 @@
 				exportImageWindow.hide();
 			}
 			else {
-                var x = Ext.getCmp('center').x + G.conf.window_position_x;
-                var y = Ext.getCmp('center').y + G.conf.window_position_y;			
+                var x = Ext.getCmp('center').x + G.conf.window_x_right;
+                var y = Ext.getCmp('center').y + G.conf.window_y_right;			
                 exportImageWindow.setPosition(x,y);
 				exportImageWindow.show();
 			}
@@ -2706,8 +2706,8 @@
                 adminWindow.hide();
             }
             else {
-                var x = Ext.getCmp('center').x + G.conf.window_position_x;
-                var y = Ext.getCmp('center').y + G.conf.window_position_y;
+                var x = Ext.getCmp('center').x + G.conf.window_x_right;
+                var y = Ext.getCmp('center').y + G.conf.window_y_right;
                 adminWindow.setPosition(x,y);
                 adminWindow.show();
             }
