@@ -46,6 +46,10 @@
     background-image:url('../../resources/ext-ux/theme/gray-extend-ux/grid-split.png');
     height:23px;
 }
+.x-toolbar .xtb-sep-panel {
+    background-image:url('../../resources/ext-ux/theme/gray-extend-ux/grid-split.png');
+    height:17px;
+}
 .x-panel-tbar .x-toolbar {
     padding:0;
 }

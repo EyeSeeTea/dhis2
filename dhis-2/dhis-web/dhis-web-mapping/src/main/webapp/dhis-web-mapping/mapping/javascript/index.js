@@ -574,6 +574,10 @@
 				}
 			},
             {
+                xtype: 'tbseparator',
+                cls: 'xtb-sep-panel'
+            },
+            {
                 xtype: 'button',
                 id: 'deleteview_b',
                 iconCls: 'icon-remove',
@@ -653,6 +657,7 @@
             }
         }
     });
+    favoriteWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
 	
 	/* Section: export map */
 	var exportImageWindow = new Ext.Window({
@@ -831,6 +836,7 @@
             }
         ]    
     });
+    exportImageWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
 	
 	/* Section: predefined map legend set */
     var predefinedMapLegendSetWindow = new Ext.Window({
@@ -961,7 +967,8 @@
                         ]
                     },
                     {
-                        xtype: 'form',
+                        xtype: 'panel',
+                        layout: 'form',
                         items: [
                             {
                                 xtype: 'toolbar',
@@ -1027,6 +1034,10 @@
                                                 }
                                             });
                                         }
+                                    },
+                                    {
+                                        xtype: 'tbseparator',
+                                        cls: 'xtb-sep-panel'
                                     },
                                     {
                                         xtype: 'button',
@@ -1229,6 +1240,10 @@
                                                 }
                                             });
                                         }
+                                    },
+                                    {
+                                        xtype: 'tbseparator',
+                                        cls: 'xtb-sep-panel'
                                     },
                                     {
                                         xtype: 'button',
@@ -1569,6 +1584,7 @@
             }
         }
     });
+    predefinedMapLegendSetWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
     
 			
     /* Section: help */
@@ -1762,6 +1778,10 @@
                         }
                     });
                 }
+            },
+            {
+                xtype: 'tbseparator',
+                cls: 'xtb-sep-panel'
             },
             {
                 xtype: 'button',
@@ -1960,6 +1980,10 @@
                 }
             },
             {
+                xtype: 'tbseparator',
+                cls: 'xtb-sep-panel'
+            },
+            {
                 xtype: 'button',
                 id: 'deletemaplayer_b',
                 text: G.i18n.delete_,
@@ -2071,6 +2095,8 @@
             }
         }
     });
+    adminWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
+    
 
     var layerTree = new Ext.tree.TreePanel({
         id: 'layertree_tp',
@@ -2533,12 +2559,8 @@
     var pointButton = new G.cls.vectorLayerButton('icon-thematic2', G.i18n.thematic_layer + ' 2', point);
     
     var symbolButton = new G.cls.vectorLayerButton('icon-symbol', 'Symbol layer', symbol);
-    //symbolButton.menu.remove(symbolButton.menu.items.last());
-    //symbolButton.menu.remove(symbolButton.menu.items.last());
     
     var centroidButton = new G.cls.vectorLayerButton('icon-centroid', 'Centroid layer', centroid);
-    //centroidButton.menu.remove(centroidButton.menu.items.last());
-    //centroidButton.menu.remove(centroidButton.menu.items.last());
 	
 	var favoriteButton = new Ext.Button({
 		iconCls: 'icon-favorite',
@@ -2575,7 +2597,6 @@
                                 favoriteWindow.hide();
                             }
                             else {
-                                favoriteWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
                                 favoriteWindow.show(this.id);
                             }
                         }
@@ -2610,7 +2631,6 @@
 				predefinedMapLegendSetWindow.hide();
 			}
 			else {
-                predefinedMapLegendSetWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
 				predefinedMapLegendSetWindow.show(this.id);         
                 if (!G.stores.predefinedMapLegend.isLoaded) {
                     G.stores.predefinedMapLegend.load();
@@ -2633,7 +2653,6 @@
 				exportImageWindow.hide();
 			}
 			else {
-                exportImageWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
 				exportImageWindow.show(this.id);
 			}
 		}
@@ -2696,7 +2715,6 @@
                 adminWindow.hide();
             }
             else {
-                adminWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
                 adminWindow.show(this.id);
             }
 		}
@@ -2711,9 +2729,6 @@
                 helpWindow.hide();
             }
             else {
-                var c = Ext.getCmp('center').x;
-                var e = Ext.getCmp('east').x;
-                helpWindow.setPagePosition(c+((e-c)/2)-280, Ext.getCmp('east').y + 100);
                 helpWindow.show(this.id);
             }
 		}
@@ -2907,6 +2922,11 @@
                 symbolButton.menu.remove(symbolButton.menu.items.last());
                 centroidButton.menu.remove(centroidButton.menu.items.last());
                 centroidButton.menu.remove(centroidButton.menu.items.last());
+                
+                var c = Ext.getCmp('center').x;
+                var e = Ext.getCmp('east').x;
+                
+                helpWindow.setPagePosition(c+((e-c)/2)-(helpWindow.width/2), Ext.getCmp('east').y + 100);
                 
                 if (G.vars.parameter.id) {
                     G.util.mapView.layer(G.vars.parameter.id);

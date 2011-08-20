@@ -544,11 +544,11 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.Panel, {
                             title: '<span class="window-relocate-title">' + feature.attributes.name + '</span>',
                             layout: 'fit',
                             width: G.conf.window_width,
-                            height: 95,
+                            height: 100,
                             items: [
                                 {
                                     xtype: 'panel',
-                                    bodyStyle: 'padding:8px',
+                                    bodyStyle: 'padding:14px',
                                     items: [
                                         {html: G.i18n.select_new_location_on_map}
                                     ]
