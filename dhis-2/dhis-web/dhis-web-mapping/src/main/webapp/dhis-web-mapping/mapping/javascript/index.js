@@ -2583,27 +2583,7 @@
                     mapViewId: store.data.items[i].data.id,
                     scope: choropleth,
                     handler: function(i) {
-                        if (!this.window.isShown) {
-                            this.window.show();
-                            this.window.hide();
-                        }
-                                          
-                        this.mapView = store.getAt(store.find('id', i.mapViewId)).data;
-                        this.updateValues = true;
-                        
-                        this.legend.value = this.mapView.mapLegendType;
-                        this.legend.method = this.mapView.method || this.legend.method;
-                        this.legend.classes = this.mapView.classes || this.legend.classes;
-
-                        G.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-                        G.system.mapDateType.value = this.mapView.mapDateType;
-                        Ext.getCmp('mapdatetype_cb').setValue(G.system.mapDateType.value);
-
-                        this.valueType.value = this.mapView.mapValueType;
-                        this.cmp.mapValueType.setValue(this.valueType.value);
-                        
-                        this.setMapView();
-                        this.window.cmp.reset.enable();
+                        G.util.mapView.prepare.call(this, i.mapViewId);
                     }
                 });
                 this.menu.addItem(item);
@@ -2620,7 +2600,6 @@
                         iconCls: 'menu-layeroptions-edit',
                         scope: this,
                         handler: function() {
-                            //this.widget.window.show(this.id);
                             if (!favoriteWindow.hidden) {
                                 favoriteWindow.hide();
                             }
