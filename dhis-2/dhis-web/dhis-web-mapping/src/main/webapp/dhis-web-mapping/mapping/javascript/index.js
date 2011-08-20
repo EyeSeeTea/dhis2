@@ -1271,6 +1271,9 @@
                                                     if (mlsv == point.cmp.mapLegendSet.getValue()) {
                                                         point.cmp.mapLegendSet.clearValue();
                                                     }
+                                                    if (mlsv == centroid.cmp.mapLegendSet.getValue()) {
+                                                        centroid.cmp.mapLegendSet.clearValue();
+                                                    }
                                                 }
                                             });
                                         }
