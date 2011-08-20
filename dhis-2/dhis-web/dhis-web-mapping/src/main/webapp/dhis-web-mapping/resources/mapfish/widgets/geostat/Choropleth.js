@@ -278,25 +278,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                 'select': {
                     scope: this,
                     fn: function(cb) {
-                        
                         G.util.mapView.prepare.call(this, cb.getValue());
-                        
-                        //this.mapView = G.stores.mapView.getAt(G.stores.mapView.find('id', cb.getValue())).data;
-                        //this.updateValues = true;
-                        
-                        //this.legend.value = this.mapView.mapLegendType;
-                        //this.legend.method = this.mapView.method || this.legend.method;
-                        //this.legend.classes = this.mapView.classes || this.legend.classes;
-
-                        //G.vars.map.setCenter(new OpenLayers.LonLat(this.mapView.longitude, this.mapView.latitude), this.mapView.zoom);
-                        //G.system.mapDateType.value = this.mapView.mapDateType;
-                        //Ext.getCmp('mapdatetype_cb').setValue(G.system.mapDateType.value);
-
-                        //this.valueType.value = this.mapView.mapValueType;
-                        //this.cmp.mapValueType.setValue(this.valueType.value);
-                        //this.setMapView();
-                        
-                        //this.window.cmp.reset.enable();
                     }
                 }
             }

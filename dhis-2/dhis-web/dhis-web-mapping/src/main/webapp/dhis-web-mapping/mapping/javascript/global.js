@@ -498,11 +498,11 @@ G.util = {
         layer: function(id) {
             var w = new Ext.Window({
                 id: 'mapviewlayer_w',
-                title: '<span id="window-favorites-title">Favorite map view</span>',
+                title: '<span id="window-favorites-title">Favorite</span>',
                 layout: 'fit',
                 modal: true,
-                width: 155,
-                height: 100,
+                width: 150,
+                height: 98,
                 items: [
                     {
                         xtype: 'panel',
@@ -520,6 +520,7 @@ G.util = {
                         hideLabel: true,
                         handler: function() {
                             G.util.mapView.prepare.call(choropleth, id);
+                            Ext.getCmp('mapviewlayer_w').destroy();
                         }
                     },
                     {
@@ -528,6 +529,7 @@ G.util = {
                         hideLabel: true,
                         handler: function() {
                             G.util.mapView.prepare.call(point, id);
+                            Ext.getCmp('mapviewlayer_w').destroy();
                         }
                     }
                 ]                    
@@ -535,11 +537,10 @@ G.util = {
             var c = Ext.getCmp('center').x;
             var e = Ext.getCmp('east').x;
             w.setPagePosition(c+((e-c)/2)-(w.width/2), Ext.getCmp('east').y + 100);
-            w.show(G.vars.map.id);
+            w.show();
         },
         
         prepare: function(id) {
-            Ext.getCmp('mapviewlayer_w').destroy();
             
             if (!this.window.isShown) {
                 this.window.show();
