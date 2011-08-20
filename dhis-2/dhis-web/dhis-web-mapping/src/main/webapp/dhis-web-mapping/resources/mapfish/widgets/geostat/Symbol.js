@@ -115,11 +115,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.Panel, {
     },
     
     getColors: function() {
-        var startColor = new mapfish.ColorRgb();
-        startColor.setFromHex(this.form.findField('startcolor').getValue());
-        var endColor = new mapfish.ColorRgb();
-        endColor.setFromHex(this.form.findField('endcolor').getValue());
-        return [startColor, endColor];
     },
     
     initProperties: function() {
@@ -614,35 +609,6 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.Panel, {
                     ]
                 });
                 scope.featureOptions.menu.showAt([G.vars.mouseMove.x, G.vars.mouseMove.y]);
-            }
-            else {
-                if (feature.attributes.hasChildrenWithCoordinates) {
-                    if (G.vars.locateFeatureWindow) {
-                        G.vars.locateFeatureWindow.destroy();
-                    }
-                             
-                    scope.updateValues = true;
-                    scope.isDrillDown = true;
-                    
-                    function organisationUnitLevelCallback() {
-                        var names = this.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
-                        this.form.findField('boundary').setValue(names[0]);
-                        this.form.findField('level').setValue(names[1]);
-                        this.loadGeoJson();
-                    }
-                    
-                    if (G.stores.organisationUnitLevel.isLoaded) {
-                        organisationUnitLevelCallback.call(scope);
-                    }
-                    else {
-                        G.stores.organisationUnitLevel.load({scope: scope, callback: function() {
-                            organisationUnitLevelCallback.call(this);
-                        }});
-                    }
-                }
-                else {
-                    Ext.message.msg(false, G.i18n.no_coordinates_found);
-                }
             }
         };
         
