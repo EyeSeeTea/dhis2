@@ -144,7 +144,7 @@
         url: G.conf.path_mapping + 'getMapLegendSetsByType' + G.conf.type,
         baseParams: {type: G.conf.map_legendset_type_predefined},
         root: 'mapLegendSets',
-        fields: ['id', 'name', 'legendType', 'indicators', 'dataelements'],
+        fields: ['id', 'name', 'symbolizer', 'indicators', 'dataelements'],
         sortInfo: {field:'name', direction:'ASC'},
         autoLoad: false,
         isLoaded: false,
@@ -1118,7 +1118,7 @@
                                     }
                                 }
                             },
-                            {html: '<div class="window-field-label">'+G.i18n.legends+'</div>'},
+                            {html: '<div class="window-field-label">' + G.i18n.legends + '</div>'},
                             {
                                 xtype: 'multiselect',
                                 id: 'predefinednewmaplegend_ms',
@@ -1134,7 +1134,7 @@
                             {html: '<div class="window-info">Delete legend set</div>'},
                             {
                                 xtype: 'combo',
-                                id: 'predefinedmaplegendsetindicator_cb',
+                                id: 'predefinedmaplegendset_cb',
                                 editable: false,
                                 valueField: 'id',
                                 displayField: 'name',
@@ -1147,7 +1147,7 @@
                                 fieldLabel: G.i18n.legendset,
                                 width: G.conf.combo_width_fieldset,
                                 minListWidth: G.conf.combo_width_fieldset,
-                                store:G.stores.predefinedMapLegendSet
+                                store: G.stores.predefinedMapLegendSet
                             }
                         ]
                     },
@@ -1236,8 +1236,8 @@
                                         text: G.i18n.delete_,
                                         iconCls: 'icon-remove',
                                         handler: function() {
-                                            var mlsv = Ext.getCmp('predefinedmaplegendsetindicator_cb').getValue();
-                                            var mlsrv = Ext.getCmp('predefinedmaplegendsetindicator_cb').getRawValue();
+                                            var mlsv = Ext.getCmp('predefinedmaplegendset_cb').getValue();
+                                            var mlsrv = Ext.getCmp('predefinedmaplegendset_cb').getRawValue();
                                             
                                             if (!mlsv) {
                                                 Ext.message.msg(false, G.i18n.please_select_a_legend_set);
@@ -1250,14 +1250,27 @@
                                                 params: {id: mlsv},
                                                 success: function(r) {
                                                     Ext.message.msg(true, G.i18n.legendset + ' <span class="x-msg-hl">' + mlsrv + '</span> ' + G.i18n.was_deleted);
+                                                    var store = G.stores.predefinedMapLegendSet;
+                                                    var symbolizer = store.getAt(store.find('id', mlsv)).data.symbolizer;
+                                                    
                                                     G.stores.predefinedMapLegendSet.load();
-                                                    Ext.getCmp('predefinedmaplegendsetindicator_cb').clearValue();
-                                                    if (mlsv == Ext.getCmp('predefinedmaplegendsetindicator2_cb').getValue) {
-                                                        Ext.getCmp('predefinedmaplegendsetindicator2_cb').clearValue();
+                                                    store = symbolizer == G.conf.map_legend_symbolizer_color ?
+                                                        G.stores.predefinedColorMapLegendSet : G.stores.predefinedImageMapLegendSet;
+                                                    store.load();
+                                                    
+                                                    Ext.getCmp('predefinedmaplegendset_cb').clearValue();
+                                                    if (mlsv == Ext.getCmp('predefinedmaplegendsetindicator_cb').getValue) {
+                                                        Ext.getCmp('predefinedmaplegendsetindicator_cb').clearValue();
                                                     }
-                                                    if (mlsv == Ext.getCmp('predefinedmaplegendsetindicator2_cb').getValue) {
+                                                    if (mlsv == Ext.getCmp('predefinedmaplegendsetdataelement_cb').getValue) {
                                                         Ext.getCmp('predefinedmaplegendsetdataelement_cb').clearValue();
-                                                    }                            
+                                                    }
+                                                    if (mlsv == choropleth.cmp.mapLegendSet.getValue()) {
+                                                        choropleth.cmp.mapLegendSet.clearValue();
+                                                    }
+                                                    if (mlsv == point.cmp.mapLegendSet.getValue()) {
+                                                        point.cmp.mapLegendSet.clearValue();
+                                                    }
                                                 }
                                             });
                                         }
@@ -1306,7 +1319,7 @@
                             {html: '<div class="window-info">Assign indicators to legend set</div>'},
                             {
                                 xtype: 'combo',
-                                id: 'predefinedmaplegendsetindicator2_cb',
+                                id: 'predefinedmaplegendsetindicator_cb',
                                 editable: false,
                                 valueField: 'id',
                                 displayField: 'name',
@@ -1366,8 +1379,8 @@
                                         text: G.i18n.assign,
                                         iconCls: 'icon-assign',
                                         handler: function() {
-                                            var ls = Ext.getCmp('predefinedmaplegendsetindicator2_cb').getValue();
-                                            var lsrw = Ext.getCmp('predefinedmaplegendsetindicator2_cb').getRawValue();
+                                            var ls = Ext.getCmp('predefinedmaplegendsetindicator_cb').getValue();
+                                            var lsrw = Ext.getCmp('predefinedmaplegendsetindicator_cb').getRawValue();
                                             var lims = Ext.getCmp('predefinedmaplegendsetindicator_ms').getValue();
                                             
                                             if (!ls) {
