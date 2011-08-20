@@ -2146,7 +2146,7 @@
                 iconCls: 'icon-baselayer',
                 handler: function() {
                     Ext.getCmp('baselayers_w').setPagePosition(Ext.getCmp('east').x - (Ext.getCmp('overlays_w').width + 15), Ext.getCmp('center').y + 41);
-                    Ext.getCmp('baselayers_w').show();
+                    Ext.getCmp('baselayers_w').show(this.id);
                 }
             },
             {
@@ -2156,7 +2156,7 @@
                 iconCls: 'icon-overlay',
                 handler: function() {
                     Ext.getCmp('overlays_w').setPagePosition(Ext.getCmp('east').x - (Ext.getCmp('overlays_w').width + 15), Ext.getCmp('center').y + 41);
-                    Ext.getCmp('overlays_w').show();
+                    Ext.getCmp('overlays_w').show(this.id);
                 }
             }
         ]
@@ -2598,10 +2598,8 @@
 				favoriteWindow.hide();
 			}
 			else {
-                var x = Ext.getCmp('center').x + G.conf.window_x_right;
-                var y = Ext.getCmp('center').y + G.conf.window_y_right;    
-                favoriteWindow.setPosition(x,y);
-				favoriteWindow.show();
+                favoriteWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
+				favoriteWindow.show(this.id);
 			}
 		}
 	});
@@ -2616,10 +2614,8 @@
 				predefinedMapLegendSetWindow.hide();
 			}
 			else {
-                var x = Ext.getCmp('center').x + G.conf.window_x_right;
-                var y = Ext.getCmp('center').y + G.conf.window_y_right;
-                predefinedMapLegendSetWindow.setPosition(x,y);
-				predefinedMapLegendSetWindow.show();         
+                predefinedMapLegendSetWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
+				predefinedMapLegendSetWindow.show(this.id);         
                 if (!G.stores.predefinedMapLegend.isLoaded) {
                     G.stores.predefinedMapLegend.load();
                 }
@@ -2641,10 +2637,8 @@
 				exportImageWindow.hide();
 			}
 			else {
-                var x = Ext.getCmp('center').x + G.conf.window_x_right;
-                var y = Ext.getCmp('center').y + G.conf.window_y_right;			
-                exportImageWindow.setPosition(x,y);
-				exportImageWindow.show();
+                exportImageWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
+				exportImageWindow.show(this.id);
 			}
 		}
 	});
@@ -2682,8 +2676,8 @@
                         }
                     });
                 }
-                control.window.setPagePosition(Ext.getCmp('east').x - (control.window.width + 15), Ext.getCmp('center').y + 41);
-                control.window.show();
+                control.window.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
+                control.window.show(this.id);
                 document.getElementById('measureDistanceDiv').innerHTML = '0 km';                
                 control.setImmediate(true);
                 control.geodesic = true;
@@ -2706,10 +2700,8 @@
                 adminWindow.hide();
             }
             else {
-                var x = Ext.getCmp('center').x + G.conf.window_x_right;
-                var y = Ext.getCmp('center').y + G.conf.window_y_right;
-                adminWindow.setPosition(x,y);
-                adminWindow.show();
+                adminWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
+                adminWindow.show(this.id);
             }
 		}
 	});
@@ -2726,7 +2718,7 @@
                 var c = Ext.getCmp('center').x;
                 var e = Ext.getCmp('east').x;
                 helpWindow.setPagePosition(c+((e-c)/2)-280, Ext.getCmp('east').y + 100);
-                helpWindow.show();
+                helpWindow.show(this.id);
             }
 		}
 	});
