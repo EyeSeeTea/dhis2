@@ -319,7 +319,7 @@ G.util = {
         }
     },
     
-    setlockPosition: function(cb) {
+    setLockPosition: function(cb) {
         cb.lockPosition = !cb.lockPosition ? true : cb.lockPosition;
     },
     

@@ -360,7 +360,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                                 }
                                 
                                 this.classify(false, cb.lockPosition);
-                                G.util.setlockPosition(cb);
+                                G.util.setLockPosition(cb);
                             }
                         });
                         
@@ -440,7 +440,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                                 }
                                 
                                 this.classify(false, cb.lockPosition);
-                                G.util.setlockPosition(cb);
+                                G.util.setLockPosition(cb);
                             }
                         });
                         
@@ -496,7 +496,7 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                         this.updateValues = true;
                         
                         this.classify(false, cb.lockPosition);                        
-                        G.util.setlockPosition(cb);
+                        G.util.setLockPosition(cb);
                         
                         this.window.cmp.reset.enable();
                     }

@@ -436,7 +436,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                                     this.legend.value = G.conf.map_legendset_type_automatic;
                                     this.prepareMapViewLegend();
                                     this.classify(false, cb.lockPosition);
-                                    G.util.setlockPosition(cb);
+                                    G.util.setLockPosition(cb);
                                 }
                             }
                         });
@@ -524,7 +524,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                                     this.legend.value = G.conf.map_legendset_type_automatic;
                                     this.prepareMapViewLegend();
                                     this.classify(false, cb.lockPosition);
-                                    G.util.setlockPosition(cb);
+                                    G.util.setLockPosition(cb);
                                 }
                             }
                         });
@@ -584,7 +584,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                         
                         this.updateValues = true;
                         this.classify(false, cb.lockPosition);                        
-                        G.util.setlockPosition(cb);
+                        G.util.setLockPosition(cb);
                         
                         this.window.cmp.reset.enable();
                     }
