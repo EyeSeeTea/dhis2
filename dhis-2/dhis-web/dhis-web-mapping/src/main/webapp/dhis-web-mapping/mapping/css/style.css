@@ -144,6 +144,9 @@ a.x-menu-item-custom {
 .menu-mapview {
     background-image:url('../../../images/favorite.png');
 }
+.menu-history {
+    background-image:url('../../../images/history2.png');
+}
 .no-icon-menu .x-menu-item-icon {
     display: none;
 }
