@@ -2488,7 +2488,7 @@
 		tooltip: G.i18n.zoom_to_visible_extent,
         style: 'margin-top:1px',
 		handler: function() {
-            G.util.zoomToExtent();
+            G.util.zoomToVisibleExtent();
         }
 	});         
     

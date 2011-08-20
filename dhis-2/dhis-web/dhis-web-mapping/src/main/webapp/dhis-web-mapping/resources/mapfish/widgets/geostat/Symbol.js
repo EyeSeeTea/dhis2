@@ -758,8 +758,8 @@ mapfish.widgets.geostat.Symbol = Ext.extend(Ext.Panel, {
     },
 
     classify: function(exception, lockPosition) {
-        if (this.formValidation.validateForm.apply(this, [exception])) {            
-            G.util.zoomToExtent(lockPosition);
+        if (this.formValidation.validateForm.apply(this, [exception])) {
+            G.util.zoomToVisibleExtent(lockPosition);
             
             for (var i = 0; i < this.layer.features.length; i++) {
                 this.layer.features[i].attributes.labelString = this.layer.features[i].attributes.name;

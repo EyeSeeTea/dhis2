@@ -427,7 +427,7 @@ G.util = {
         return layers;
     },
     
-    zoomToExtent: function(lockPosition) {
+    zoomToVisibleExtent: function(lockPosition) {
         if (!lockPosition) {
             var bounds = [];
             var layers = this.getLayersByType(G.conf.map_layer_type_thematic);

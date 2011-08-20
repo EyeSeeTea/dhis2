@@ -1689,7 +1689,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
             G.vars.mask.msg = G.i18n.aggregating_map_values;
             G.vars.mask.show();
             
-            G.util.zoomToExtent(lockPosition);
+            G.util.zoomToVisibleExtent(lockPosition);
             
             if (this.mapView) {
                 if (this.mapView.longitude && this.mapView.latitude && this.mapView.zoom) {
@@ -1697,7 +1697,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                     G.vars.map.setCenter(new OpenLayers.LonLat(point.x, point.y), this.mapView.zoom);
                 }
                 else {
-                    G.util.zoomToExtent();
+                    G.util.zoomToVisibleExtent();
                 }
                 this.mapView = false;
             }
