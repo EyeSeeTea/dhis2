@@ -2305,7 +2305,7 @@
             }
         ]
     });    
-    point.window.setPosition(G.conf.window_x_left,G.conf.window_y_left);
+    point.window.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
     
     symbol = new mapfish.widgets.geostat.Symbol({
         map: G.vars.map,
@@ -2377,7 +2377,7 @@
             }
         ]
     });    
-    symbol.window.setPosition(G.conf.window_x_left,G.conf.window_y_left);
+    symbol.window.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
     
     centroid = new mapfish.widgets.geostat.Centroid({
         map: G.vars.map,
@@ -2449,18 +2449,18 @@
             }
         ]
     });    
-    centroid.window.setPosition(G.conf.window_x_left,G.conf.window_y_left);
+    centroid.window.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
     
 	/* Section: map toolbar */
 	var mapLabel = new Ext.form.Label({
 		text: G.i18n.map,
 		style: 'font:bold 11px arial; color:#333;'
 	});
-	var l_l = new Ext.form.Label({
+	var layersLabel = new Ext.form.Label({
 		text: 'Layers',
 		style: 'font:bold 11px arial; color:#333;'
 	});
-	var t_l = new Ext.form.Label({
+	var toolsLabel = new Ext.form.Label({
 		text: 'Tools',
 		style: 'font:bold 11px arial; color:#333;'
 	});
@@ -2754,7 +2754,7 @@
             ' ',
 			'-',
 			' ',' ',' ',
-			l_l,
+			layersLabel,
 			' ',' ',
             new G.cls.vectorLayerButton('icon-thematic1', G.i18n.thematic_layer + ' 1', choropleth),
             new G.cls.vectorLayerButton('icon-thematic2', G.i18n.thematic_layer + ' 2', point),
@@ -2763,7 +2763,7 @@
             ' ',
 			'-',
 			' ',' ',' ',
-			t_l,
+			toolsLabel,
 			' ',' ',
 			favoritesButton,
             predefinedMapLegendSetButton,
@@ -2892,7 +2892,7 @@
                 G.vars.map.events.register('click', null, function(e) {
                     if (G.vars.relocate.active) {
                         var mp = document.getElementById('mouseposition');
-                        var coordinates = '[' + mp.childNodes[1].data + ',' + mp.childNodes[4].data + ']';
+                        var coordinates = '[' + mp.childNodes[1].data + ',' + mp.childNodes[3].data + ']';
                         var center = Ext.getCmp('center').x;
 	
                         Ext.Ajax.request({
@@ -2908,7 +2908,7 @@
                                 Ext.message.msg(true, '<span class="x-msg-hl">' + G.vars.relocate.feature.attributes.name + 
                                     ' </span>relocated to ' +
                                     '[<span class="x-msg-hl">' + mp.childNodes[1].data + '</span>,' + 
-                                    '<span class="x-msg-hl">' + mp.childNodes[4].data + '</span>]');
+                                    '<span class="x-msg-hl">' + mp.childNodes[3].data + '</span>]');
                             }
                         });
                     }
