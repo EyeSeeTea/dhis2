@@ -510,10 +510,7 @@ td.x-grid3-hd-over, td.sort-desc, td.sort-asc, td.x-grid3-hd-menu-open {
 }
 .menu-item-inline-bg {
     background:url('../../../images/history2_small.png') no-repeat left center;
-    padding-left:27px;
-}
-a.x-menu-item {
-    padding:3px 20px 3px 29px;
+    padding-left:25px;
 }
 .menu-item-inline-c1 {
     color:#555;
