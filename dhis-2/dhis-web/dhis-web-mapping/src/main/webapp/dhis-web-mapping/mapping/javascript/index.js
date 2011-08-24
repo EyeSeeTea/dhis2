@@ -760,7 +760,7 @@
                                 document.getElementById('indicatorField2').value = values.mapValueTypeValue;
                                 document.getElementById('legendsField2').value = G.util.getLegendsJSON.call(point);
                                 
-                                var str1 = document.getElementById(polygonLayer.svgId).parentNode.innerHTML;District
+                                var str1 = document.getElementById(polygonLayer.svgId).parentNode.innerHTML;
                                 var str2 = document.getElementById(pointLayer.svgId).parentNode.innerHTML;
                                 svg = G.util.mergeSvg(str1, [str2]);                                
                             }
