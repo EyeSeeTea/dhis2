@@ -2526,8 +2526,9 @@
         closeAction: 'hide',
         width: 570,
         height: 478,
-        items: centroid,
+        isUpdate: false,
         cmp: {},
+        items: centroid,
         bbar: [
             {
                 xtype: 'button',
@@ -2557,6 +2558,7 @@
                     var node = this.cmp.parent.selectedNode;
                     this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
                         this.cmp.level.getValue(), this.cmp.level.getRawValue());
+                    this.window.isUpdate = true;
                     
                     this.loadGeoJson();
                 },
