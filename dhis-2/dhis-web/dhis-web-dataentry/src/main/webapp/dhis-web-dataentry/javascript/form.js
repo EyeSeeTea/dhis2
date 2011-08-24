@@ -48,6 +48,9 @@ var COLOR_ORANGE = '#ff6600';
 var COLOR_WHITE = '#ffffff';
 var COLOR_GREY = '#cccccc';
 
+var DEFAULT_TYPE = 'int';
+var DEFAULT_NAME = '[unknown]';
+
 /**
  * Page init. The order of events is:
  * 
@@ -193,8 +196,18 @@ function uploadLocalData()
 
                 if ( array.length < 1 )
                 {
-                    setHeaderDelayMessage( i18n_online_notification );
+                    setHeaderDelayMessage( i18n_sync_success );
                 }
+            },
+            error: function( jqXHR, textStatus, errorThrown )
+            {
+                var message = i18n_sync_failed
+                    + ' <button id="sync_button" type="button">' + i18n_sync_now
+                    + '</button>';
+
+                setHeaderMessage( message );
+
+                $( '#sync_button' ).bind( 'click', uploadLocalData );
             }
         } );
     };
@@ -232,8 +245,18 @@ function uploadLocalData()
                 }
                 else
                 {
-                    setHeaderDelayMessage( i18n_online_notification );
+                    setHeaderDelayMessage( i18n_sync_success );
                 }
+            },
+            error: function( jqXHR, textStatus, errorThrown )
+            {
+                var message = i18n_sync_failed
+                    + ' <button id="sync_button" type="button">' + i18n_sync_now
+                    + '</button>';
+
+                setHeaderMessage( message );
+    
+                $( '#sync_button' ).bind( 'click', uploadLocalData );
             }
         } );
     } )( dataValuesArray );
@@ -246,7 +269,7 @@ function addEventListeners()
         var id = $( this ).attr( 'id' );
         var dataElementId = id.split( '-' )[0];
         var optionComboId = id.split( '-' )[1];
-        var type = dataElements[dataElementId].type;
+        var type = getDataElementType( dataElementId );
 
         $( this ).unbind( 'focus' );
         $( this ).unbind( 'blur' );
@@ -342,7 +365,29 @@ function loadForm( dataSetId )
     }
 }
 
-// -----------------------------------------------------------------------------
+function getDataElementType( dataElementId )
+{
+	if ( dataElements[dataElementId] != null )
+	{
+		return dataElements[dataElementId].type
+	}
+	
+	console.log( 'Data element not present in data set, falling back to default type: ' + dataElementId );	
+	return DEFAULT_TYPE;
+}
+
+function getDataElementName( dataElementId )
+{
+	if ( dataElements[dataElementId] != null )
+	{
+		return dataElements[dataElementId].name;
+	}
+	
+	console.log( 'Data element present in data set, falling back to default name: ' + dataElementId );
+	return DEFAULT_NAME;	
+}
+
+// ----------------------------------------------------------------------------
 // OrganisationUnit Selection
 // -----------------------------------------------------------------------------
 
@@ -657,7 +702,7 @@ function valueFocus( e )
     var dataElementId = id.split( '-' )[0];
     var optionComboId = id.split( '-' )[1];
 
-    var dataElementName = dataElements[dataElementId].name;
+    var dataElementName = getDataElementName( dataElementId );
     var optionComboName = $( '#' + optionComboId + '-optioncombo' ).text();
 
     $( '#currentDataElement' ).html( dataElementName + ' ' + optionComboName );
@@ -873,7 +918,7 @@ function viewHist( dataElementId, optionComboId )
 {
     var periodId = $( '#selectedPeriodId' ).val();
 
-    var dataElementName = dataElements[dataElementId].name;
+    var dataElementName = getDataElementName( dataElementId );
     var optionComboName = $( '#' + optionComboId + '-optioncombo' ).html();
     var operandName = dataElementName + ' ' + optionComboName;
 

@@ -2371,7 +2371,7 @@
                     var node = this.cmp.parent.selectedNode;
                     this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
                         this.cmp.level.getValue(), this.cmp.level.getRawValue());
-                    this.window.isUpdate = true;                                        
+                    this.window.isUpdate = true;
                     this.loadGeoJson();
                 },
                 listeners: {
@@ -2437,8 +2437,9 @@
         closeAction: 'hide',
         width: 570,
         height: 478,
-        items: symbol,
+        isUpdate: false,
         cmp: {},
+        items: symbol,
         bbar: [
             {
                 xtype: 'button',
@@ -2468,7 +2469,7 @@
                     var node = this.cmp.parent.selectedNode;
                     this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
                         this.cmp.level.getValue(), this.cmp.level.getRawValue());
-                    this.window.isUpdate = true;                                        
+                    this.window.isUpdate = true;
                     this.loadGeoJson();
                 },
                 listeners: {
