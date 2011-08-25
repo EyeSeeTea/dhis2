@@ -24,80 +24,53 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient.action.patient;
 
-import java.util.ArrayList;
+package org.hisp.dhis.program;
+
 import java.util.Collection;
 
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version $ ProgramValidationDeletionHandler.java Aug 25, 2011 12:55:08 PM $
+ * 
  */
-public class ProgramEnrollmentSelectAction
-    implements Action
+public class ProgramValidationDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientService patientService;
+    private ProgramValidationService programValidationService;
 
-    public void setPatientService( PatientService patientService )
+    public void setProgramValidationService( ProgramValidationService programValidationService )
     {
-        this.patientService = patientService;
-    }
-
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
+        this.programValidationService = programValidationService;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
-    private Integer id;
-
-    public void setId( Integer id )
+    @Override
+    public String getClassName()
     {
-        this.id = id;
+        return Program.class.getSimpleName();
     }
 
-    private Patient patient;
-
-    public Patient getPatient()
+    @Override
+    public void deleteProgram( Program program )
     {
-        return patient;
-    }
+        Collection<ProgramValidation> programValidation = programValidationService.getAllProgramValidation();
 
-    private Collection<Program> programs = new ArrayList<Program>();
-
-    public Collection<Program> getPrograms()
-    {
-        return programs;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        patient = patientService.getPatient( id );
-
-        programs = programService.getAllPrograms();
-
-        return SUCCESS;
+        for ( ProgramValidation validation : programValidation )
+        {
+            if( program.equals( validation.getProgram() ) )
+            {
+                programValidationService.deleteProgramValidation( validation );
+            }
+        }
     }
 }

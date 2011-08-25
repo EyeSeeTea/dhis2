@@ -49,7 +49,6 @@ dhis2.availability.startAvailabilityCheck = function( onlineInterval, offlineInt
     {
         $.ajax( {
             url : "../dhis-web-commons-stream/ping.action",
-            cache : false,
             success : function( data, textStatus, jqXHR )
             {
                 dhis2.availability._isAvailable = true;
