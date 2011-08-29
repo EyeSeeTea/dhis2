@@ -688,7 +688,7 @@ G.cls = {
             style: 'margin-top:1px',
             widget: widget,
             enableItems: function(bool) {
-                var menuItems = [2,3,5,6,8];
+                var menuItems = [2,3,5,6,7,9];
                 for (var i = 0; i < menuItems.length; i++) {
                     if (bool) {
                         this.menu.items.items[menuItems[i]].enable();
@@ -733,14 +733,14 @@ G.cls = {
                                 }
                             },
                             '-',
-                            //{
-                                //text: 'Filter..',
-                                //iconCls: 'menu-layeroptions-filter',
-                                //scope: this,
-                                //handler: function() {
-                                    //this.widget.window.show();
-                                //}
-                            //},
+                            {
+                                text: 'Filter..',
+                                iconCls: 'menu-layeroptions-filter',
+                                scope: this,
+                                handler: function() {
+                                    //this.widget
+                                }
+                            },
                             {
                                 text: 'Search..',
                                 iconCls: 'menu-layeroptions-locate',
