@@ -85,6 +85,8 @@ G.conf = {
     map_view_access_level_system: 'system',
     aggregation_strategy_real_time: 'real_time',
     aggregation_strategy_batch: 'batch',
+    operator_lowerthan: 'lt',
+    operator_greaterthan: 'gt',
     
 //  MapFish
 
@@ -738,7 +740,7 @@ G.cls = {
                                 iconCls: 'menu-layeroptions-filter',
                                 scope: this,
                                 handler: function() {
-                                    //this.widget
+                                    this.widget.filtering.showFilteringWindow.call(this.widget);
                                 }
                             },
                             {

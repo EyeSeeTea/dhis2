@@ -4,9 +4,6 @@
     Ext.QuickTips.init();
 	document.body.oncontextmenu = function(){return false;};
     
-    
-    var cache = [];
-	
 	G.vars.map = new OpenLayers.Map({
         controls: [new OpenLayers.Control.MouseToolbar()],
         displayProjection: new OpenLayers.Projection('EPSG:4326'),
@@ -2772,7 +2769,7 @@
 			'-',
 			' ',' ',' ',
 			layersLabel,
-			' ',' ',
+			' ',' ', 
             choroplethButton,
             pointButton,
             symbolButton,
