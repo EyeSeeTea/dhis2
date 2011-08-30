@@ -107,6 +107,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="categoryService">
       <ref bean="org.hisp.dhis.dataelement.DataElementCategoryService" />
     </property>
+	<property name="dataSetService">
+	  <ref bean="org.hisp.dhis.dataset.DataSetService" />
+	</property>
   </bean>
 
   <bean id="org.hisp.dhis.dataset.action.section.SaveSectionSortOrderAction" class="org.hisp.dhis.dataset.action.section.SaveSectionSortOrderAction"
@@ -185,26 +188,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="dataElementService">
       <ref bean="org.hisp.dhis.dataelement.DataElementService" />
-    </property>
-  </bean>
-
-  <bean id="org.hisp.dhis.dataset.action.DataElementListFilteredByGroup" class="org.hisp.dhis.dataset.action.DataElementListFilteredByGroup"
-    scope="prototype">
-    <property name="dataElementService">
-      <ref bean="org.hisp.dhis.dataelement.DataElementService" />
-    </property>
-    <property name="dataSetService">
-      <ref bean="org.hisp.dhis.dataset.DataSetService" />
-    </property>
-  </bean>
-
-  <bean id="org.hisp.dhis.dataset.action.IndicatorListFilteredByGroup" class="org.hisp.dhis.dataset.action.IndicatorListFilteredByGroup"
-    scope="prototype">
-    <property name="indicatorService">
-      <ref bean="org.hisp.dhis.indicator.IndicatorService" />
-    </property>
-    <property name="dataSetService">
-      <ref bean="org.hisp.dhis.dataset.DataSetService" />
     </property>
   </bean>
 
@@ -378,19 +361,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
       <ref bean="org.hisp.dhis.dataelement.DataElementService" />
     </property>
     <property name="categoryService">
-      <ref bean="org.hisp.dhis.dataelement.DataElementCategoryService" />
-    </property>
-  </bean>
-
-  <bean id="org.hisp.dhis.dataset.action.section.DataElementListFilteredByGroupForSection" class="org.hisp.dhis.dataset.action.section.DataElementListFilteredByGroupForSection"
-    scope="prototype">
-    <property name="dataElementService">
-      <ref bean="org.hisp.dhis.dataelement.DataElementService" />
-    </property>
-    <property name="dataSetService">
-      <ref bean="org.hisp.dhis.dataset.DataSetService" />
-    </property>
-    <property name="dataElementCategoryService">
       <ref bean="org.hisp.dhis.dataelement.DataElementCategoryService" />
     </property>
   </bean>

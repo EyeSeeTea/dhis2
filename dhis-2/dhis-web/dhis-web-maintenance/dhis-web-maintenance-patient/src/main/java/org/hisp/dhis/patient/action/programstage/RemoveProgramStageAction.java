@@ -27,13 +27,6 @@
 
 package org.hisp.dhis.patient.action.programstage;
 
-import java.util.Set;
-
-import org.hisp.dhis.dataentryform.DataEntryForm;
-import org.hisp.dhis.dataentryform.DataEntryFormService;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageDataElement;
-import org.hisp.dhis.program.ProgramStageDataElementService;
 import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
@@ -50,25 +43,11 @@ public class RemoveProgramStageAction
     // Dependencies
     // -------------------------------------------------------------------------
     
-    private DataEntryFormService dataEntryFormService;
-
-    public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
-    {
-        this.dataEntryFormService = dataEntryFormService;
-    }
-
     private ProgramStageService programStageService;
 
     public void setProgramStageService( ProgramStageService programStageService )
     {
         this.programStageService = programStageService;
-    }
-
-    private ProgramStageDataElementService programStageDataElementService;
-
-    public void setProgramStageDataElementService( ProgramStageDataElementService programStageDataElementService )
-    {
-        this.programStageDataElementService = programStageDataElementService;
     }
 
     // -------------------------------------------------------------------------
@@ -89,50 +68,7 @@ public class RemoveProgramStageAction
     public String execute()
         throws Exception
     {
-        ProgramStage programStage = programStageService.getProgramStage( id );
-
-        for ( ProgramStageDataElement de : programStage.getProgramStageDataElements() )
-        {
-            programStageDataElementService.deleteProgramStageDataElement( de );
-        }
-
-        // ---------------------------------------------------------------------
-        // Check dataentry form of the selected programstage in other stages in
-        // the program
-        // ---------------------------------------------------------------------
-
-        DataEntryForm dataEntryForm = programStage.getDataEntryForm();
-
-        boolean flag = false;
-
-        if ( dataEntryForm != null )
-        {
-            Set<ProgramStage> programStages = programStage.getProgram().getProgramStages();
-
-            for ( ProgramStage stage : programStages )
-            {
-                if ( !stage.equals( programStage ) && stage.getDataEntryForm() != null )
-                {
-                    flag = true;
-                    break;
-                }
-            }
-
-            programStage.setDataEntryForm( null );
-           
-            programStageService.updateProgramStage( programStage );
-
-            if ( !flag )
-            {
-                dataEntryFormService.deleteDataEntryForm( dataEntryForm );
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // Delete the selected program stage
-        // ---------------------------------------------------------------------
-       
-        programStageService.deleteProgramStage( programStageService.getProgramStage( id ) );
+        programStageService.deleteProgramStage(  programStageService.getProgramStage( id ) );
 
         return SUCCESS;
     }

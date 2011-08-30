@@ -1,7 +1,5 @@
-package org.hisp.dhis.dataset.action.dataentryform;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,19 +25,21 @@ package org.hisp.dhis.dataset.action.dataentryform;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.program;
+
+import java.util.Set;
+
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Bharath Kumar
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version $ ProgramDataEntryDeletionHandler.java Aug 25, 2011 3:02:00 PM $
+ * 
  */
-public class SaveDataEntryFormAction
-    implements Action
+public class ProgramDataEntryFormDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -50,73 +50,51 @@ public class SaveDataEntryFormAction
     public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
     {
         this.dataEntryFormService = dataEntryFormService;
-    }   
+    }
 
-    private DataSetService dataSetService;
+    private ProgramStageService programStageService;
 
-    public void setDataSetService( DataSetService dataSetService )
+    public void setProgramStageService( ProgramStageService programStageService )
     {
-        this.dataSetService = dataSetService;
+        this.programStageService = programStageService;
     }
 
     // -------------------------------------------------------------------------
-    // Getters & Setters
+    // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
-    private int dataSetIdField;
-
-    public void setDataSetIdField( int dataSetIdField )
+    @Override
+    public String getClassName()
     {
-        this.dataSetIdField = dataSetIdField;
+        return DataEntryForm.class.getSimpleName();
     }
 
-    private String nameField;
-
-    public void setNameField( String nameField )
+    @Override
+    public void deleteProgramStage( ProgramStage programStage )
     {
-        this.nameField = nameField;
-    }
+        DataEntryForm dataEntryForm = programStage.getDataEntryForm();
 
-    private String designTextarea;
-
-    public void setDesignTextarea( String designTextarea )
-    {
-        this.designTextarea = designTextarea;
-    }
-
-    // -------------------------------------------------------------------------
-    // Execute
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        DataSet dataset = dataSetService.getDataSet( dataSetIdField );
-
-        designTextarea = dataEntryFormService.prepareDataEntryFormForSave( designTextarea );
-        
-        DataEntryForm dataEntryForm = dataset.getDataEntryForm();
-
-        if ( !( dataEntryForm != null && dataEntryForm.getHtmlCode().equals( designTextarea ) ) )
+        if ( dataEntryForm != null )
         {
-            dataset.increaseVersion(); // Check if version must be updated
-        }
-        
-        if ( dataEntryForm == null )
-        {
-            dataEntryForm = new DataEntryForm( nameField, dataEntryFormService.prepareDataEntryFormForSave( designTextarea ) );
-            dataEntryFormService.addDataEntryForm( dataEntryForm );
-            dataset.setDataEntryForm( dataEntryForm );
-        }
-        else
-        {
-            dataEntryForm.setName( nameField );
-            dataEntryForm.setHtmlCode( dataEntryFormService.prepareDataEntryFormForSave( designTextarea ) );
-            dataEntryFormService.updateDataEntryForm( dataEntryForm );
-        }
-        
-        dataSetService.updateDataSet( dataset );
+            boolean flag = false;
+            Set<ProgramStage> programStages = programStage.getProgram().getProgramStages();
+            programStages.remove( programStage );
+            for ( ProgramStage stage : programStages )
+            {
+                if ( stage.getDataEntryForm() != null )
+                {
+                    programStage.setDataEntryForm( null );
+                    programStageService.updateProgramStage( programStage );
+                    flag = true;
+                    break;
+                }
+            }
 
-        return SUCCESS;
+            if ( !flag )
+            {
+                dataEntryFormService.deleteDataEntryForm( dataEntryForm );
+            }
+        }
+
     }
 }

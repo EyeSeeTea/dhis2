@@ -81,8 +81,31 @@ function Selection()
 
             $( "#ouwt_loader" ).hide();
         }
+        
+        function update_required( remoteVersion, remoteRoots )
+        {
+            var localVersion = localStorage[getTagId( "Version" )] ? localStorage[getTagId( "Version" )] : 0;
+            var localRoots = localStorage[getTagId( "Roots" )] ? localStorage[getTagId( "Roots" )] : [];
 
-        var version = localStorage[getTagId( "Version" )];
+            if ( localVersion != remoteVersion )
+            {
+                return true;
+            }
+
+            localRoots.sort();
+            remoteRoots.sort();
+
+            for ( var i in localRoots )
+            {
+                if ( remoteRoots[i] == null || localRoots[i] != remoteRoots[i] )
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         var should_update = false;
 
         $.post( '../dhis-web-commons-ajax-json/getOrganisationUnitTree.action', {
@@ -92,11 +115,7 @@ function Selection()
             if ( data.indexOf( "<!DOCTYPE" ) != 0 )
             {
                 data = JSON.parse( data );
-
-                if ( version != data.version )
-                {
-                    should_update = true;
-                }
+              	should_update = update_required();
             }
         }, "text" ).complete(
                 function()
@@ -298,9 +317,15 @@ function Selection()
             {
                 sessionStorage[getTagId( "Selected" )] = unitId;
 
-                $.post( organisationUnitTreePath + "setorgunit.action", {
-                    id : unitId
-                } ).complete( this.responseReceived );
+                $.ajax({
+                    url: organisationUnitTreePath + "setorgunit.action",
+                    data: {
+                        id : unitId
+                    },
+                    type: 'POST',
+                    timeout: 10000,
+                    complete: this.responseReceived
+                });
 
                 $( "#orgUnitTree" ).find( "a" ).removeClass( "selected" );
                 $linkTag.addClass( "selected" );
@@ -347,8 +372,7 @@ function Selection()
     function getTagId( unitId )
     {
         return 'orgUnit' + unitId;
-    }
-    ;
+    };
 
     this.findByCode = function()
     {
@@ -492,33 +516,17 @@ function Subtree()
         var $treeTag = $( "#orgUnitTree" );
         $treeTag.children().eq( 0 ).remove();
 
-        if ( sessionStorage[getTagId( "Selected" )] == null )
-        {
-            var roots = JSON.parse( localStorage[getTagId( "Roots" )] );
+        var roots = localStorage[getTagId( "Roots" )];
+        var selected = sessionStorage[getTagId( "Selected" )];
 
-            expandTreeAtOrgUnits( roots );
-        }
-        else
-        {
-            var selected = sessionStorage[getTagId( "Selected" )];
+        roots = roots ? JSON.parse( roots ) : [];
+        selected = selected ? JSON.parse( selected ) : [];
+        selected = $.isArray( selected ) ? selected : [ selected ];
 
-            if ( selected != null )
-            {
-                selected = JSON.parse( selected );
+        expandTreeAtOrgUnits( roots );
+        expandTreeAtOrgUnits( selected );
 
-                if ( $.isArray( selected ) )
-                {
-                    expandTreeAtOrgUnits( selected );
-                }
-                else
-                {
-                    expandTreeAtOrgUnit( selected );
-                    selected = [ selected ];
-                }
-
-                selectOrgUnits( selected );
-            }
-        }
+        selectOrgUnits( selected );
     };
 
     // force reload
@@ -534,8 +542,7 @@ function Subtree()
         var child = $parentTag.find( "ul" ).eq( 0 );
         setVisible( child, false );
         setToggle( $parentTag, false );
-    }
-    ;
+    };
 
     function processExpand( parent )
     {
@@ -551,8 +558,7 @@ function Subtree()
             setVisible( $children.eq( 0 ), true );
             setToggle( $parentTag, true );
         }
-    }
-    ;
+    };
 
     function createChildren( parentTag, parent )
     {
@@ -568,8 +574,7 @@ function Subtree()
         setToggle( parentTag, true );
 
         $( parentTag ).append( $childrenTag );
-    }
-    ;
+    };
 
     function createTreeElementTag( ou )
     {
@@ -599,8 +604,7 @@ function Subtree()
         $childTag.append( $linkTag );
 
         return $childTag;
-    }
-    ;
+    };
 
     function setToggle( unitTag, expanded )
     {
@@ -615,8 +619,7 @@ function Subtree()
         {
             $toggleTag.append( toggleImg );
         }
-    }
-    ;
+    };
 
     function setVisible( tag, visible )
     {
@@ -628,42 +631,35 @@ function Subtree()
         {
             $( tag ).hide();
         }
-    }
-    ;
+    };
 
     function isVisible( tag )
     {
         return $( tag ).is( ":visible" );
-    }
-    ;
+    };
 
     function getTagId( unitId )
     {
         return 'orgUnit' + unitId;
-    }
-    ;
+    };
 
     function getToggleExpand()
     {
         return getToggleImage().attr( "src", "../images/colapse.png" ).attr( "alt", "[+]" );
-    }
-    ;
+    };
 
     function getToggleCollapse()
     {
         return getToggleImage().attr( "src", "../images/expand.png" ).attr( "alt", "[-]" );
-    }
-    ;
+    };
 
     function getToggleBlank()
     {
         return getToggleImage().attr( "src", "../images/transparent.gif" ).removeAttr( "alt" );
-    }
-    ;
+    };
 
     function getToggleImage()
     {
         return $( "<img/>" ).attr( "width", 9 ).attr( "height", 9 );
-    }
-    ;
+    };
 }

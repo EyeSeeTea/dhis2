@@ -25,6 +25,9 @@ var currentMinMaxValueMap = [];
 // Indicates whether any data entry form has been loaded
 var dataEntryFormIsLoaded = false;
 
+// Indicates whether meta data is loaded
+var metaDataIsLoaded = false;
+
 // Currently selected organisation unit identifier
 var currentOrganisationUnitId = null;
 
@@ -51,6 +54,10 @@ var COLOR_GREY = '#cccccc';
 var DEFAULT_TYPE = 'int';
 var DEFAULT_NAME = '[unknown]';
 
+var FORMTYPE_CUSTOM = 'custom';
+var FORMTYPE_SECTION = 'section';
+var FORMTYPE_DEFAULT = 'default';
+
 /**
  * Page init. The order of events is:
  * 
@@ -68,7 +75,7 @@ $( document ).ready( function()
 
     $( '#orgUnitTree' ).one( 'ouwtLoaded', function()
     {
-        console.log( 'Ouwt loaded' );
+        log( 'Ouwt loaded' );
         loadMetaData();
     } );
 
@@ -151,9 +158,10 @@ function loadMetaData()
 	        dataSetAssociationSets = metaData.dataSetAssociationSets;
 	        organisationUnitAssociationSetMap = metaData.organisationUnitAssociationSetMap;
 	
+	        metaDataIsLoaded = true;
 	        selection.responseReceived(); // Notify that meta data is loaded
 	        $( '#loaderSpan' ).hide();
-	        console.log( 'Meta-data loaded' );
+	        log( 'Meta-data loaded' );
 	
 	        updateForms();
 	    } 
@@ -185,7 +193,7 @@ function uploadLocalData()
         var key = array[0];
         var value = completeDataSets[key];
 
-        console.log( 'Uploaded complete data set: ' + key + ', with value: ' + value );
+        log( 'Uploaded complete data set: ' + key + ', with value: ' + value );
 
         $.ajax( {
             url: 'registerCompleteDataSet.action',
@@ -194,7 +202,7 @@ function uploadLocalData()
             cache: false,
             success: function( data, textStatus, jqXHR )
             {
-                console.log( 'Successfully saved complete dataset with value: ' + value );
+                log( 'Successfully saved complete dataset with value: ' + value );
                 storageManager.clearCompleteDataSet( value );
                 ( array = array.slice( 1 ) ).length && pushCompleteDataSets( array );
 
@@ -230,7 +238,7 @@ function uploadLocalData()
         var key = array[0];
         var value = dataValues[key];
 
-        console.log( 'Uploaded data value: ' + key + ', with value: ' + value );
+        log( 'Uploaded data value: ' + key + ', with value: ' + value );
 
         $.ajax( {
             url: 'saveValue.action',
@@ -240,7 +248,7 @@ function uploadLocalData()
             success: function( data, textStatus, jqXHR )
             {
                 storageManager.clearDataValueJSON( value );
-                console.log( 'Successfully saved data value with value: ' + value );
+                log( 'Successfully saved data value with value: ' + value );
                 ( array = array.slice( 1 ) ).length && pushDataValues( array );
 
                 if ( array.length < 1 && completeDataSetsArray.length > 0 )
@@ -267,7 +275,10 @@ function uploadLocalData()
 }
 
 function addEventListeners()
-{
+{	
+    var dataSetId = $( '#selectedDataSetId' ).val();
+	var formType = dataSets[dataSetId].type;
+	
     $( '[name="entryfield"]' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
@@ -300,8 +311,11 @@ function addEventListeners()
             keyPress( event, this );
         } );
 
-        $( this ).css( 'width', '100%' );
-        $( this ).css( 'text-align', 'center' );
+		if ( formType != FORMTYPE_CUSTOM )
+		{
+        	$( this ).css( 'width', '100%' );
+        	$( this ).css( 'text-align', 'center' );
+		}
 
         if ( type == 'date' )
         {
@@ -351,7 +365,7 @@ function loadForm( dataSetId )
 {
     if ( storageManager.formExists( dataSetId ) )
     {
-        console.log( 'Loading form locally: ' + dataSetId );
+        log( 'Loading form locally: ' + dataSetId );
 
         var html = storageManager.getForm( dataSetId );
 
@@ -361,7 +375,7 @@ function loadForm( dataSetId )
     }
     else
     {
-        console.log( 'Loading form remotely: ' + dataSetId );
+        log( 'Loading form remotely: ' + dataSetId );
 
         $( '#contentDiv' ).load( 'loadForm.action', {
             dataSetId : dataSetId
@@ -373,10 +387,10 @@ function getDataElementType( dataElementId )
 {
 	if ( dataElements[dataElementId] != null )
 	{
-		return dataElements[dataElementId].type
+		return dataElements[dataElementId].type;
 	}
 	
-	console.log( 'Data element not present in data set, falling back to default type: ' + dataElementId );	
+	log( 'Data element not present in data set, falling back to default type: ' + dataElementId );	
 	return DEFAULT_TYPE;
 }
 
@@ -387,7 +401,7 @@ function getDataElementName( dataElementId )
 		return dataElements[dataElementId].name;
 	}
 	
-	console.log( 'Data element present in data set, falling back to default name: ' + dataElementId );
+	log( 'Data element present in data set, falling back to default name: ' + dataElementId );
 	return DEFAULT_NAME;	
 }
 
@@ -427,6 +441,11 @@ function getSortedDataSetList()
 
 function organisationUnitSelected( orgUnits, orgUnitNames )
 {
+	if ( metaDataIsLoaded == false )
+	{
+	    return false;
+	}
+	
     currentOrganisationUnitId = orgUnits[0];
     var organisationUnitName = orgUnitNames[0];
 
@@ -435,42 +454,39 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 
     var dataSetList = getSortedDataSetList();
 
-    if ( dataSetList.length )
-    {
-        $( '#selectedDataSetId' ).removeAttr( 'disabled' );
-        
-        var dataSetId = $( '#selectedDataSetId' ).val();
-        var periodId = $( '#selectedPeriodId' ).val();
+    $( '#selectedDataSetId' ).removeAttr( 'disabled' );
     
-        clearListById( 'selectedDataSetId' );
-        addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
+    var dataSetId = $( '#selectedDataSetId' ).val();
+    var periodId = $( '#selectedPeriodId' ).val();
 
-        var dataSetValid = false;
+    clearListById( 'selectedDataSetId' );
+    addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
 
-        for ( i in dataSetList )
+    var dataSetValid = false;
+
+    for ( i in dataSetList )
+    {
+        addOptionById( 'selectedDataSetId', dataSetList[i].id, dataSetList[i].name );
+
+        if ( dataSetId == dataSetList[i].id )
         {
-            addOptionById( 'selectedDataSetId', dataSetList[i].id, dataSetList[i].name );
-
-            if ( dataSetId == dataSetList[i].id )
-            {
-                dataSetValid = true;
-            }
+            dataSetValid = true;
         }
+    }
 
-        if ( dataSetValid && dataSetId != null )
+    if ( dataSetValid && dataSetId != null )
+    {
+        $( '#selectedDataSetId' ).val( dataSetId );
+
+        if ( periodId && periodId != -1 && dataEntryFormIsLoaded )
         {
-            $( '#selectedDataSetId' ).val( dataSetId );
-
-            if ( periodId && periodId != -1 && dataEntryFormIsLoaded )
-            {
-                showLoader();
-                loadDataValues();
-            }
+            showLoader();
+            loadDataValues();
         }
-        else
-        {
-            clearPeriod();
-        }
+    }
+    else
+    {
+        clearPeriod();
     }
 }
 
@@ -971,11 +987,12 @@ function purgeLocalForms()
         if ( dataSets[localId] == null )
         {
             storageManager.deleteForm( localId );
-            console.log( 'Deleted locally stored form: ' + localId );
+            storageManager.deleteFormVersion( localId );
+            log( 'Deleted locally stored form: ' + localId );
         }
     }
 
-    console.log( 'Purged local forms' );
+    log( 'Purged local forms' );
 }
 
 function updateExistingLocalForms()
@@ -985,14 +1002,14 @@ function updateExistingLocalForms()
 
     for ( i in formIds )
     {
-        var dataSetId = formIds[i];
+        var localId = formIds[i];
 
-        var remoteVersion = dataSets[dataSetId].version;
-        var localVersion = formVersions[dataSetId];
+        var remoteVersion = dataSets[localId].version;
+        var localVersion = formVersions[localId];
 
         if ( remoteVersion == null || localVersion == null || remoteVersion != localVersion )
         {
-            storageManager.downloadForm( dataSetId, remoteVersion );
+            storageManager.downloadForm( localId, remoteVersion );
         }
     }
 }
@@ -1102,10 +1119,10 @@ function StorageManager()
         {
             localStorage[id] = html;
 
-            console.log( 'Successfully stored form: ' + dataSetId );
+            log( 'Successfully stored form: ' + dataSetId );
         } catch ( e )
         {
-            console.log( 'Max local storage quota reached, ignored form: ' + dataSetId );
+            log( 'Max local storage quota reached, ignored form: ' + dataSetId );
             return false;
         }
 
@@ -1113,7 +1130,7 @@ function StorageManager()
         {
             this.deleteForm( dataSetId );
 
-            console.log( 'Max local storage quota for forms reached, ignored form: ' + dataSetId );
+            log( 'Max local storage quota for forms reached, ignored form: ' + dataSetId );
             return false;
         }
 
@@ -1140,7 +1157,9 @@ function StorageManager()
      */
     this.deleteForm = function( dataSetId )
     {
-        localStorage.removeItem( dataSetId );
+    	var id = KEY_FORM_PREFIX + dataSetId;
+    	
+        localStorage.removeItem( id );
     };
 
     /**
@@ -1231,10 +1250,10 @@ function StorageManager()
         {
             localStorage[KEY_FORM_VERSIONS] = JSON.stringify( formVersions );
 
-            console.log( 'Successfully stored form version: ' + dataSetId );
+            log( 'Successfully stored form version: ' + dataSetId );
         } catch ( e )
         {
-            console.log( 'Max local storage quota reached, ignored form version: ' + dataSetId );
+            log( 'Max local storage quota reached, ignored form version: ' + dataSetId );
         }
     };
 
@@ -1256,6 +1275,25 @@ function StorageManager()
 
         return null;
     };
+    
+    /**
+     * Deletes the form version of the data set with the given identifier.
+     * 
+     * @param dataSetId the identifier of the data set of the form.
+     */
+    this.deleteFormVersion = function( dataSetId )
+    {
+    	if ( localStorage[KEY_FORM_VERSIONS] != null )
+        {
+            var formVersions = JSON.parse( localStorage[KEY_FORM_VERSIONS] );
+
+            if ( formVersions[dataSetId] != null )
+            {
+                delete formVersions[dataSetId];
+                localStorage[KEY_FORM_VERSIONS] = JSON.stringify( formVersions );
+            }
+        }
+    }
 
     this.getAllFormVersions = function()
     {
@@ -1285,10 +1323,10 @@ function StorageManager()
         {
             localStorage[KEY_DATAVALUES] = JSON.stringify( dataValues );
 
-            console.log( 'Successfully stored data value' );
+            log( 'Successfully stored data value' );
         } catch ( e )
         {
-            console.log( 'Max local storage quota reached, ignored data value' );
+            log( 'Max local storage quota reached, ignored data value' );
         }
     };
 
