@@ -112,7 +112,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
         },
         showFilteringWindow: function() {
             var window = new Ext.Window({
-                title: '<span id="window-filter-title">Filter</span>',
+                title: '<span class="window-filter-title">Organisation unit filter</span>',
                 layout: 'fit',
                 autoHeight: true,
                 height: 'auto',
@@ -186,6 +186,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                     }
                 }
             });
+            window.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
             window.show();
         }
     },
