@@ -4,8 +4,6 @@ Ext.onReady( function() {
         
         chart: null,
         
-        cmp: {},
-        
         viewport: Ext.create('Ext.container.Viewport', {
             layout: 'border',
             renderTo: Ext.getBody(),
@@ -22,11 +20,25 @@ Ext.onReady( function() {
                         },
                         {
                             xtype: 'button',
-                            text: 'Edit chart..',
+                            text: 'Run chart..',
                             handler: function() {
-                                var c = DV.viewport.query('panel[region="center"]')[0];
-                                DV.create(c.getWidth(), c.getHeight());
+                                var c = DV.getCmp('panel[region="center"]');
+                                var sd = [
+                                    { anc1: 12, anc2: 12, anc3: 5, anc4: 3, p: 'August 2010'},
+                                    { anc1: 5, anc2: 23, anc3: 16, anc4: 5, p: 'September 2010'},
+                                    { anc1: 21, anc2: 6, anc3: 11, anc4: 16, p: 'October 2010'},
+                                    { anc1: 15, anc2: 22, anc3: 16, anc4: 5, p: 'November 2010'},
+                                ];
+                                DV.create(c.getWidth(), c.getHeight(), sd);
                                 c.add(DV.chart);
+                            }
+                        },
+                        '->',
+                        {
+                            xtype: 'button',
+                            text: 'Exit..',
+                            handler: function() {
+                                window.location.href = '../dhis-web-portal/redirect.action';
                             }
                         }
                     ]
@@ -40,65 +52,61 @@ Ext.onReady( function() {
             ]
         }),
         
-        create: function(w, h) {
-alert(w);alert(h);            
+        getCmp: function(q) {
+            return this.viewport.query(q)[0];
+        },
+        
+        create: function(w, h, storeData) {
+            var sf = [];
+            for (var r in storeData[0]) {
+                sf.push(r);
+            }
+            
             Ext.define('WeatherPoint', {
                 extend: 'Ext.data.Model',
-                fields: ['temperature', 'date']
+                fields: sf
             });
             
             var store = Ext.create('Ext.data.Store', {
                 model: 'WeatherPoint',
-                data: [
-                    { temperature: 4, date: 'Q1' },
-                    { temperature: 21, date: 'Q2' },
-                    { temperature: 19, date: 'Q3' },
-                    { temperature: 5, date: 'Q4' }
-                ]
+                data: storeData
             });
+            
+            var lf = sf.slice(0,sf.length-1);
+            var bf = sf.slice(sf.length-1,sf.length);
             
             this.chart = Ext.create('Ext.chart.Chart', {
                 width: w,
                 height: h,
                 store: store,
+                legend: {
+                    position: 'bottom'
+                },
                 axes: [
                     {
-                        title: 'Temperature',
+                        title: 'Value',
                         type: 'Numeric',
                         position: 'left',
-                        fields: ['temperature'],
-                        minimum: 0
+                        fields: lf,
+                        minimum: 0,
+                        grid: true,
+                        label: {
+                            renderer: Ext.util.Format.numberRenderer('0,0')
+                        }
                     },
                     {
-                        title: 'Time',
+                        title: 'Indicator',
                         type: 'Category',
                         position: 'bottom',
-                        fields: ['date']
+                        fields: bf
                     }
                 ],
                 series: [
                     {
                         type: 'column',
                         axis: 'left',
-                        highlight: true,
-                        tips: {
-                            trackMouse: true,
-                            width: 140,
-                            height: 28,
-                            renderer: function(storeItem, item) {
-                               this.setTitle(storeItem.get('date') + ': ' + storeItem.get('temperature') + ' $');
-                            }
-                        },
-                        label: {
-                            display: 'insideEnd',
-                            'text-anchor': 'middle',
-                            field: 'temperature',
-                            renderer: Ext.util.Format.numberRenderer('0'),
-                            orientation: 'vertical',
-                            color: '#333'
-                        },
-                        xField: 'date',
-                        yField: 'temperature'
+                        xField: bf,
+                        yField: lf
                     }
                 ]
             });
