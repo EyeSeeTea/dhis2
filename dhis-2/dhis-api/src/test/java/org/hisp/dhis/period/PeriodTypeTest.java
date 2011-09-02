@@ -1,7 +1,7 @@
-package org.hisp.dhis.web.api.model;
+package org.hisp.dhis.period;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,76 +27,21 @@ package org.hisp.dhis.web.api.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 
-public class Task
-    implements DataStreamSerializable
+import org.junit.Test;
+
+public class PeriodTypeTest
 {
-    private int id;
 
-    private int programStageId;
-
-    private int programId;
-
-    private boolean completed;
-
-    public int getId()
+    @Test
+    public void testGetByIndex()
     {
-        return id;
+        assertNull( PeriodType.getByIndex( -1 ) );
+        assertEquals( new YearlyPeriodType(), PeriodType.getByIndex( 6 ) );
+        assertNull( PeriodType.getByIndex( 999 ) );
+    
     }
 
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public int getProgramStageId()
-    {
-        return programStageId;
-    }
-
-    public void setProgramStageId( int programStageId )
-    {
-        this.programStageId = programStageId;
-    }
-
-    public int getProgramId()
-    {
-        return programId;
-    }
-
-    public void setProgramId( int programId )
-    {
-        this.programId = programId;
-    }
-
-    public boolean isCompleted()
-    {
-        return completed;
-    }
-
-    public void setCompleted( boolean completed )
-    {
-        this.completed = completed;
-    }
-
-    @Override
-    public void serialize( DataOutputStream dout )
-        throws IOException
-    {
-        dout.writeInt( this.getId() );
-        dout.writeInt( this.getProgramStageId() );
-        dout.writeInt( this.getProgramId() );
-        dout.writeBoolean( this.isCompleted() );
-    }
-
-    @Override
-    public void deSerialize( DataInputStream dataInputStream )
-        throws IOException
-    {
-        // Fixme
-
-    }
 }
