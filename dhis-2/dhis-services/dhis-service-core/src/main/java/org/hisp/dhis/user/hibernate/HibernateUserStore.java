@@ -470,7 +470,7 @@ public class HibernateUserStore
 
         for ( User user : users )
         {
-            credentials.add( getUserCredentials( user ) );
+            credentials.add( user.getUserCredentials() );
         }
         
         return credentials;
