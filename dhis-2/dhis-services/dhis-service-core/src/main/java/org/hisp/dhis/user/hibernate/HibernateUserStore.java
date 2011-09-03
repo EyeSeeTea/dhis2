@@ -67,11 +67,6 @@ public class HibernateUserStore
 
     private GenericIdentifiableObjectStore<UserAuthorityGroup> userRoleStore;
     
-    public GenericIdentifiableObjectStore<UserAuthorityGroup> getUserRoleStore()
-    {
-        return userRoleStore;
-    }
-    
     public void setUserRoleStore( GenericIdentifiableObjectStore<UserAuthorityGroup> userRoleStore )
     {
         this.userRoleStore = userRoleStore;
