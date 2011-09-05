@@ -12,11 +12,8 @@ Ext.onReady( function() {
             }
         },
         
-        chart: {
-            chart: null,
-            
-            data: null,
-            
+        chart: {            
+            data: null,            
             getData: function() {
                 this.data = [
                     { x: 'August 2010', 'anc 1': 12, anc2: 12, anc3: 5, anc4: 3 },
@@ -28,8 +25,7 @@ Ext.onReady( function() {
                 return this.data;
             },
             
-            store: null,
-            
+            store: null,            
             getStore: function() {
                 var properties = [];
                 for (var p in this.data[0]) {
@@ -52,8 +48,7 @@ Ext.onReady( function() {
                 return this.store;
             },
             
-            chart: null,       
-        
+            chart: null,        
             getChart: function() {
                 this.chart = Ext.create('Ext.chart.Chart', {
                     width: DV.util.getViewportSize.x,
@@ -199,32 +194,14 @@ Ext.onReady( function() {
                             xtype: 'button',
                             text: 'Reload..',
                             handler: function() {
-                                var c = DV.util.getCmp('panel[region="center"]');
-                                var sd = [
-                                    { anc1: 16, anc2: 14, anc3: 7, anc4: 4, anc5: 11, p: 'August 2010'},
-                                    { anc1: 7, anc2: 17, anc3: 4, anc4: 5, anc5: 17, p: 'September 2010'},
-                                    { anc1: 15, anc2: 7, anc3: 13, anc4: 14, anc5: 7, p: 'October 2010'}
+                                var data = [
+                                    { x: 'August 2010', 'anc 1': 3, anc2: 18, anc3: 5, anc4: 3 },
+                                    { x: 'September 2010', 'anc 2': 5, anc2: 13, anc3: 16, anc4: 5 },
+                                    { x: 'October 2010', 'anc 3': 11, anc2: 16, anc3: 21, anc4: 16 },
+                                    { x: 'November 2010', 'anc 4': 25, anc2: 12, anc3: 16, anc4: 5 }
                                 ];
                                 
-                                var sf = [];
-                                for (var r in sd[0]) {
-                                    sf.push(r);
-                                }
-                                
-                                Ext.define('model1', {
-                                    extend: 'Ext.data.Model',
-                                    fields: sf
-                                });
-                                
-                                var lf = sf.slice(0,sf.length-1);
-                                var bf = sf.slice(sf.length-1,sf.length);
-                                
-                                
-                                //DV.create(c.getWidth(), c.getHeight(), sd);
-                                //c.removeAll();
-                                //c.add(DV.chart);
-                                DV.store.loadData(sd);
-                                //DV.chart.redraw();
+                                DV.chart.store.loadData(data);
                             }
                         },
                         '->',
