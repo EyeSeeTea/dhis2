@@ -9,10 +9,63 @@ Ext.onReady( function() {
             renderTo: Ext.getBody(),
             items: [
                 {
-                    region: 'north',
-                    height: 28,
-                    bodyStyle: 'border-bottom-style:none',
+                    region: 'west',
+                    width: 300,
+                    preventHeader: true,
+                    collapsible: true,
+                    collapseMode: 'mini',
                     tbar: [
+                        {
+                            xtype: 'label',
+                            text: 'Chart settings',
+                            style: 'font-weight:bold; padding:0 5px'
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Column',
+                            toggleGroup: 'settings'
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Pie',
+                            toggleGroup: 'settings'
+                        },
+                        {
+                            xtype: 'button',
+                            text: 'Line',
+                            toggleGroup: 'settings'
+                        }
+                    ],
+                    listeners: {
+                        collapse: function(p) {
+                            p.collapsed = true;
+                            DV.getCmp('button[name="resize"]').setText('>>');
+                        },
+                        expand: function(p) {
+                            p.collapsed = false;
+                            DV.getCmp('button[name="resize"]').setText('<<');
+                        }
+                    }
+                },
+                {
+                    region: 'center',
+                    layout: 'fit',
+                    bodyStyle: 'padding:10px',
+                    tbar: [
+                        {
+                            xtype: 'button',
+                            name: 'resize',
+                            text: '<<',
+                            handler: function() {
+                                var p = DV.getCmp('panel[region="west"]');
+                                if (p.collapsed) {
+                                    p.expand();
+                                }
+                                else {
+                                    p.collapse();
+                                }
+                            }
+                        },
                         {
                             xtype: 'label',
                             text: 'DHIS 2 Data Visualizer',
@@ -20,7 +73,7 @@ Ext.onReady( function() {
                         },
                         {
                             xtype: 'button',
-                            text: 'Run chart..',
+                            text: 'Export..',
                             handler: function() {
                                 var c = DV.getCmp('panel[region="center"]');
                                 var sd = [
@@ -42,12 +95,6 @@ Ext.onReady( function() {
                             }
                         }
                     ]
-                },
-                {
-                    region: 'center',
-                    layout: 'fit',
-                    bodyStyle: 'border-style:none; padding:10px',
-                    items: []
                 }
             ]
         }),
