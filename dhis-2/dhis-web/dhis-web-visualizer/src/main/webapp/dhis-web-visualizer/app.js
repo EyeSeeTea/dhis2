@@ -17,9 +17,9 @@ Ext.onReady( function() {
             getData: function() {
                 this.data = [
                     { x: 'August 2010', 'anc 1': 12, anc2: 12, anc3: 5, anc4: 3 },
-                    { x: 'September 2010', 'anc 2': 5, anc2: 23, anc3: 16, anc4: 5 },
-                    { x: 'October 2010', 'anc 3': 21, anc2: 6, anc3: 11, anc4: 16 },
-                    { x: 'November 2010', 'anc 4': 15, anc2: 22, anc3: 16, anc4: 5 }
+                    { x: 'September 2010', 'anc 1': 5, anc2: 23, anc3: 16, anc4: 5 },
+                    { x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 11, anc4: 16 },
+                    { x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 16, anc4: 5 }
                 ];
                 
                 return this.data;
@@ -88,6 +88,12 @@ Ext.onReady( function() {
                 });
                 
                 return this.chart;
+            },
+            
+            reload: function() {
+                var c = DV.util.getCmp('panel[region="center"]');
+                c.removeAll(true);
+                c.add(this.chart);
             }
         },
         
@@ -178,30 +184,32 @@ Ext.onReady( function() {
                         {
                             xtype: 'button',
                             text: 'Load..',
-                            handler: function() {
-                                var c = DV.util.getCmp('panel[region="center"]');
-                                
+                            handler: function() {                                
                                 DV.chart.getData();
                                 
                                 DV.chart.getStore();
                                 
-                                var chart = DV.chart.getChart();
+                                DV.chart.getChart();
                                 
-                                c.add(chart);
+                                DV.chart.reload();
                             }
                         },
                         {
                             xtype: 'button',
                             text: 'Reload..',
                             handler: function() {
-                                var data = [
-                                    { x: 'August 2010', 'anc 1': 3, anc2: 18, anc3: 5, anc4: 3 },
-                                    { x: 'September 2010', 'anc 2': 5, anc2: 13, anc3: 16, anc4: 5 },
-                                    { x: 'October 2010', 'anc 3': 11, anc2: 16, anc3: 21, anc4: 16 },
-                                    { x: 'November 2010', 'anc 4': 25, anc2: 12, anc3: 16, anc4: 5 }
+                                DV.chart.data = [
+                                    { x: 'August 2010', 'anc 1': 17, anc2: 5, anc3: 11, anc4: 14 },
+                                    { x: 'September 2010', 'anc 1': 5, anc2: 13, anc3: 16, anc4: 5 },
+                                    { x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 11, anc4: 16 },
+                                    { x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 16, anc4: 5 }
                                 ];
                                 
-                                DV.chart.store.loadData(data);
+                                DV.chart.getStore();
+                                
+                                DV.chart.getChart();
+                                
+                                DV.chart.reload();
                             }
                         },
                         '->',
