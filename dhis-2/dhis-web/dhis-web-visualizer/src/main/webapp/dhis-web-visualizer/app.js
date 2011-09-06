@@ -1,6 +1,19 @@
 Ext.onReady( function() {
     
+    Ext.define('simple', {
+        extend: 'Ext.data.Model',
+        fields: ['id', 'name']
+    });
+        
     DV = {
+        conf: {
+            finals: {
+                dimension_indicator: 'indicator',
+                dimension_dataelement: 'dataelement',
+                dimension_period: 'period',
+                dimension_organisationunit: 'organisationunit'
+            }
+        },
         
         util: {
             getCmp: function(q) {
@@ -18,14 +31,14 @@ Ext.onReady( function() {
                 this.data = [
                     { x: 'August 2010', 'anc 1': 12, anc2: 12, anc3: 5, anc4: 3 },
                     { x: 'September 2010', 'anc 1': 5, anc2: 23, anc3: 16, anc4: 5 },
-                    { x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 11, anc4: 16 },
+                    { x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 2, anc4: 16 },
                     { x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 16, anc4: 5 }
                 ];
                 
                 return this.data;
             },
             
-            store: null,            
+            store: null,
             getStore: function() {
                 var properties = [];
                 for (var p in this.data[0]) {
@@ -55,6 +68,7 @@ Ext.onReady( function() {
                     height: DV.util.getViewportSize.y,
                     animate: true,
                     store: this.store,
+                    theme: 'Green',
                     legend: {
                         position: 'bottom'
                     },
@@ -103,16 +117,20 @@ Ext.onReady( function() {
             items: [
                 {
                     region: 'west',
-                    width: 300,
+                    bodyStyle: 'padding:8px;',
+                    minWidth: 250,
                     preventHeader: true,
                     collapsible: true,
                     collapseMode: 'mini',
+                    resizable: true,
+                    resizeHandles: 'e',
                     tbar: [
                         {
                             xtype: 'label',
                             text: 'Chart settings',
                             style: 'font-weight:bold; padding:0 5px'
                         },
+                        '',
                         {
                             xtype: 'button',
                             text: 'Column',
@@ -143,6 +161,182 @@ Ext.onReady( function() {
                                     b.toggle();
                                 }
                             }
+                        }
+                    ],
+                    items: [
+                        {
+                            xtype: 'panel',
+                            layout: 'column',
+                            bodyStyle: 'border-style:none; padding-bottom:5px',
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: 'Series:',
+                                    width: 50,
+                                    style: 'line-height:21px;'
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:10px;',
+                                    text: 'Indicator',
+                                    toggleGroup: 'series',
+                                    pressed: true,
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:5px;',
+                                    text: 'Data element',
+                                    toggleGroup: 'series',
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:5px;',
+                                    text: 'Period',
+                                    toggleGroup: 'series',
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:5px;',
+                                    text: 'Organisation unit',
+                                    toggleGroup: 'series',
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
+                            layout: 'column',
+                            bodyStyle: 'border-style:none; padding-bottom:5px',
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: 'Column:',
+                                    width: 50,
+                                    style: 'line-height:21px;'
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:10px;',
+                                    text: 'Indicator',
+                                    toggleGroup: 'column',
+                                    pressed: true,
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:5px;',
+                                    text: 'Data element',
+                                    toggleGroup: 'column',
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:5px;',
+                                    text: 'Period',
+                                    toggleGroup: 'column',
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:5px;',
+                                    text: 'Organisation unit',
+                                    toggleGroup: 'column',
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            xtype: 'panel',
+                            layout: 'column',
+                            bodyStyle: 'border-style:none;',
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: 'Filter:',
+                                    width: 50,
+                                    style: 'line-height:21px;'
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:10px;',
+                                    text: 'Indicator',
+                                    toggleGroup: 'filter',
+                                    pressed: true,
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:5px;',
+                                    text: 'Data element',
+                                    toggleGroup: 'filter',
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:5px;',
+                                    text: 'Period',
+                                    toggleGroup: 'filter',
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                },
+                                {
+                                    xtype: 'button',
+                                    style: 'margin-left:5px;',
+                                    text: 'Organisation unit',
+                                    toggleGroup: 'filter',
+                                    handler: function(b) {
+                                        if (!b.pressed) {
+                                            b.toggle();
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     ],
                     listeners: {
@@ -184,13 +378,10 @@ Ext.onReady( function() {
                         {
                             xtype: 'button',
                             text: 'Load..',
-                            handler: function() {                                
-                                DV.chart.getData();
-                                
-                                DV.chart.getStore();
-                                
-                                DV.chart.getChart();
-                                
+                            handler: function() {
+                                DV.chart.getData();                                
+                                DV.chart.getStore();                                
+                                DV.chart.getChart();                                
                                 DV.chart.reload();
                             }
                         },
@@ -202,13 +393,11 @@ Ext.onReady( function() {
                                     { x: 'August 2010', 'anc 1': 17, anc2: 5, anc3: 11, anc4: 14 },
                                     { x: 'September 2010', 'anc 1': 5, anc2: 13, anc3: 16, anc4: 5 },
                                     { x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 11, anc4: 16 },
-                                    { x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 16, anc4: 5 }
+                                    { x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 44, anc4: 5 }
                                 ];
                                 
-                                DV.chart.getStore();
-                                
-                                DV.chart.getChart();
-                                
+                                DV.chart.getStore();                                
+                                DV.chart.getChart();                                
                                 DV.chart.reload();
                             }
                         },
@@ -222,7 +411,44 @@ Ext.onReady( function() {
                         }
                     ]
                 }
-            ]
+            ],
+            listeners: {
+                resize: function(v) {
+                    v.query('panel[region="west"]')[0].setWidth(v.getWidth() / 2);
+                }
+            }
         })
-    };    
+    };
+    
+    //DV.conf.data = [
+        //{ id: DV.conf.finals.dimension_indicator, name: 'Indicator' },
+        //{ id: DV.conf.finals.dimension_dataelement, name: 'Data element' },
+        //{ id: DV.conf.finals.dimension_period, name: 'Period' },
+        //{ id: DV.conf.finals.dimension_organisationunit, name: 'Organisation unit' }
+    //];
+    
+    //DV.util.getCmp('combobox').store.loadData(DV.conf.data);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
