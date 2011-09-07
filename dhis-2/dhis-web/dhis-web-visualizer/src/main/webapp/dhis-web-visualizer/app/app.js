@@ -1,5 +1,13 @@
 Ext.onReady( function() {
     
+    Ext.override(Ext.data.Store, {
+            setExtraParam: function (name, value) {
+            this.proxy.extraParams = this.proxy.extraParams || {};
+            this.proxy.extraParams[name] = value;
+            this.proxy.applyEncoding(this.proxy.extraParams);
+        }
+    });
+    
     DV = {};
     
     DV.conf = {
@@ -227,11 +235,11 @@ Ext.onReady( function() {
                         }
                     ],
                     items: [
-                        {
-                            xtype: 'fieldset',
-                            title: '<span style="padding:0 5px">Indicator</span>',
-                            collapsible: true,
-                            items: [
+                        //{
+                            //xtype: 'fieldset',
+                            //title: '<span style="padding:0 5px">Indicator</span>',
+                            //collapsible: true,
+                            //items: [
                                 {
                                     xtype: 'combobox',
                                     name: 'indicatorgroup',
@@ -250,32 +258,37 @@ Ext.onReady( function() {
                                                 root: 'indicatorGroups'
                                             }                                                
                                         }
-                                    })
-                                },                                
-                                {
-                                    xtype: 'itemselector',
-                                    name: 'indicator',
-                                    valueField: 'id',
-                                    displayField: 'name',
-                                    fieldLabel: 'Indicators',
-                                    editable: false,
-                                    queryMode: 'remote',
-                                    store: Ext.create('Ext.data.Store', {
-                                        fields: ['id', 'name'],
-                                        proxy: {
-                                            type: 'ajax',
-                                            url: DV.conf.finals.path_visualizer + 'getIndicatorsByIndicatorGroup' + DV.conf.finals.action,
-                                            reader: {
-                                                type: 'json',
-                                                root: 'indicators'
-                                            }                                                
+                                    }),
+                                    listeners: {
+                                        select: function(cb) {
+                                            var store = DV.app.util.getCmp('store[name="indicator"]');
+                                            store.setExtraParam('indicatorGroupId', cb.getValue());
+                                            store.load();
                                         }
-                                    })
+                                    }
                                 }
-                            ]
-                        }
-                    
-                    
+                                //{
+                                    //xtype: 'itemselector',
+                                    //name: 'indicator',
+                                    //valueField: 'id',
+                                    //displayField: 'name',
+                                    //fieldLabel: 'Indicators',
+                                    //editable: false,
+                                    //queryMode: 'remote',
+                                    //store: Ext.create('Ext.data.Store', {
+                                        //fields: ['id', 'name'],
+                                        //proxy: {
+                                            //type: 'ajax',
+                                            //url: DV.conf.finals.path_visualizer + 'getIndicatorsByIndicatorGroup' + DV.conf.finals.action,
+                                            //reader: {
+                                                //type: 'json',
+                                                //root: 'indicators'
+                                            //}                                                
+                                        //}
+                                    //})
+                                //}
+                            //]
+                        //}
                     ],
                     listeners: {
                         collapse: function(p) {                    

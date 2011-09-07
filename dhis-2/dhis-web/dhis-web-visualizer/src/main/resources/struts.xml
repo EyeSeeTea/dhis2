@@ -18,11 +18,11 @@
         <!-- Indicator -->
 
         <action name="getIndicatorsByIndicatorGroup"
-            class="org.hisp.dhis.mapping.action.GetIndicatorsByIndicatorGroupAction">
+            class="org.hisp.dhis.visualizer.action.GetIndicatorsByIndicatorGroupAction">
             <result name="success" type="velocity-json">
-                /dhis-web-mapping/jsonminIndicators.vm</result>
+                /dhis-web-visualizer/jsonminIndicators.vm</result>
             <result name="none" type="velocity-json">
-                /dhis-web-mapping/void.vm</result>
+                /dhis-web-visualizer/void.vm</result>
         </action>
 		
 	</package>
