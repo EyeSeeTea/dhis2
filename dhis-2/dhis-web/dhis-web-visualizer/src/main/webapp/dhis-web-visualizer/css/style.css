@@ -1,3 +1,23 @@
+/* Ext overrides */
+
+.x-form-empty-field, textarea.x-form-empty-field {
+    font-size: 10px;
+}
+
+.x-form-text, textarea.x-form-field {
+    font-size: 10px;
+}
+
+.x-webkit .x-form-empty-field {
+    line-height: 14px;
+}
+
 .x-splitter {
     display: none;
+}
+
+/* DHIS */
+
+li {
+   font-size:10px;
 }

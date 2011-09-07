@@ -161,6 +161,58 @@ Ext.onReady( function() {
                                     b.toggle();
                                 }
                             }
+                        },
+                        '',
+                        {
+                            xtype: 'combobox',
+                            emptyText: 'Series',
+                            queryMode: 'local',
+                            valueField: 'id',
+                            displayField: 'name',
+                            width: 90,
+                            store: Ext.create('Ext.data.Store', {
+                                model: 'simple',
+                                data: [
+                                    { id: 'indicator', name: 'Indicator' },
+                                    { id: 'dataelement', name: 'Data element' },
+                                    { id: 'period', name: 'Period' },
+                                    { id: 'orgunit', name: 'Org unit' }
+                                ]
+                            })
+                        },
+                        {
+                            xtype: 'combobox',
+                            emptyText: 'Columns',
+                            queryMode: 'local',
+                            valueField: 'id',
+                            displayField: 'name',
+                            width: 90,
+                            store: Ext.create('Ext.data.Store', {
+                                model: 'simple',
+                                data: [
+                                    { id: 'indicator', name: 'Indicator' },
+                                    { id: 'dataelement', name: 'Data element' },
+                                    { id: 'period', name: 'Period' },
+                                    { id: 'orgunit', name: 'Org unit' }
+                                ]
+                            })
+                        },
+                        {
+                            xtype: 'combobox',
+                            emptyText: 'Filter',
+                            queryMode: 'local',
+                            valueField: 'id',
+                            displayField: 'name',
+                            width: 90,
+                            store: Ext.create('Ext.data.Store', {
+                                model: 'simple',
+                                data: [
+                                    { id: 'indicator', name: 'Indicator' },
+                                    { id: 'dataelement', name: 'Data element' },
+                                    { id: 'period', name: 'Period' },
+                                    { id: 'orgunit', name: 'Org unit' }
+                                ]
+                            })
                         }
                     ],
                     items: [
