@@ -11,7 +11,7 @@
   
   <artifactId>dhis-web-visualizer</artifactId>
   <packaging>war</packaging>
-  <name>DHIS Visualizer</name>
+  <name>DHIS Data Visualizer</name>
   
   <build>
     <finalName>dhis-web-visualizer</finalName>

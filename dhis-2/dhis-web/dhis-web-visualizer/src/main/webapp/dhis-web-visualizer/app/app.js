@@ -4,6 +4,11 @@ Ext.onReady( function() {
     
     DV.conf = {
         finals: {
+            url_visualizer: '../',
+            url_commons: '../../dhis-web-commons-ajax-json/',
+            url_portal: '../../dhis-web-portal/',
+            action: '.action',
+            
             dimension_indicator: 'indicator',
             dimension_dataelement: 'dataelement',
             dimension_period: 'period',
@@ -230,35 +235,43 @@ Ext.onReady( function() {
                                 {
                                     xtype: 'combobox',
                                     name: 'indicatorgroup',
-                                    fieldLabel: 'Indicator group',
-                                    queryMode: 'remote',
-                                    editable: false,
                                     valueField: 'id',
                                     displayField: 'name',
-                                    triggerAction: 'all',
+                                    fieldLabel: 'Indicator group',
+                                    editable: false,
+                                    queryMode: 'remote',
                                     store: Ext.create('Ext.data.Store', {
                                         fields: ['id', 'name'],
                                         proxy: {
                                             type: 'ajax',
-                                            url: '../dhis-web-commons-ajax-json/getIndicatorGroups.action',
+                                            url: DV.conf.finals.path_commons + 'getIndicatorGroups' + DV.conf.finals.action,
                                             reader: {
                                                 type: 'json',
                                                 root: 'indicatorGroups'
                                             }                                                
                                         }
                                     })
+                                },                                
+                                {
+                                    xtype: 'itemselector',
+                                    name: 'indicator',
+                                    valueField: 'id',
+                                    displayField: 'name',
+                                    fieldLabel: 'Indicators',
+                                    editable: false,
+                                    queryMode: 'remote',
+                                    store: Ext.create('Ext.data.Store', {
+                                        fields: ['id', 'name'],
+                                        proxy: {
+                                            type: 'ajax',
+                                            url: DV.conf.finals.path_visualizer + 'getIndicatorsByIndicatorGroup' + DV.conf.finals.action,
+                                            reader: {
+                                                type: 'json',
+                                                root: 'indicators'
+                                            }                                                
+                                        }
+                                    })
                                 }
-                                    
-                                //{
-                                    //xtype: 'itemselector',
-                                    //name: 'indicator',
-                                    
-                                    
-                                    
-                                    
-                                //{ xtype: 'textfield', text: 'jeje', fieldLabel: 'Jejeje' }
-                                    
-                    
                             ]
                         }
                     
@@ -331,7 +344,7 @@ Ext.onReady( function() {
                             xtype: 'button',
                             text: 'Exit..',
                             handler: function() {
-                                window.location.href = '../dhis-web-portal/redirect.action';
+                                window.location.href = DV.conf.finals.url_portal + 'redirect' + DV.conf.finals.action;
                             }
                         }
                     ]

@@ -8,5 +8,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	
 	<bean id="org.hisp.dhis.visualizer.action.NoAction"
 		class="org.hisp.dhis.visualizer.action.NoAction" scope="prototype"/>
+    
+    <!-- Indicator -->
+
+	<bean id="org.hisp.dhis.mapping.action.GetIndicatorsByIndicatorGroupAction"
+		class="org.hisp.dhis.mapping.action.GetIndicatorsByIndicatorGroupAction"
+		scope="prototype">
+		<property name="indicatorService"
+			ref="org.hisp.dhis.indicator.IndicatorService"/>
+	</bean>
 	
 </beans>
