@@ -222,33 +222,45 @@ Ext.onReady( function() {
                         }
                     ],
                     items: [
-                        //{
-                            //xtype: 'fieldset',
-                            //title: 'Indicator',
-                            //collapsible: true,
-                            //layout: 'form',
-                            //items: [
-                                //{
-                                    //xtype: 'combobox',
-                                    //name: 'indicatorgroup',
-                                    //fieldLabel: 'Indicator group',
-                                    //queryMode: 'remote',
-                                    //editable: false,
-                                    //valueField: 'id',
-                                    //displayField: 'name',
-                                    //store: Ext.create('Ext.data.Store', {
-                                        //fields: ['id', 'name'],
-                                        //proxy: {
-                                            //type: 'ajax',
-                                            //url: '
+                        {
+                            xtype: 'fieldset',
+                            title: '<span style="padding:0 5px">Indicator</span>',
+                            collapsible: true,
+                            items: [
+                                {
+                                    xtype: 'combobox',
+                                    name: 'indicatorgroup',
+                                    fieldLabel: 'Indicator group',
+                                    queryMode: 'remote',
+                                    editable: false,
+                                    valueField: 'id',
+                                    displayField: 'name',
+                                    triggerAction: 'all',
+                                    store: Ext.create('Ext.data.Store', {
+                                        fields: ['id', 'name'],
+                                        proxy: {
+                                            type: 'ajax',
+                                            url: '../dhis-web-commons-ajax-json/getIndicatorGroups.action',
+                                            reader: {
+                                                type: 'json',
+                                                root: 'indicatorGroups'
+                                            }                                                
+                                        }
+                                    })
+                                }
                                     
                                 //{
                                     //xtype: 'itemselector',
                                     //name: 'indicator',
                                     
+                                    
+                                    
+                                    
+                                //{ xtype: 'textfield', text: 'jeje', fieldLabel: 'Jejeje' }
+                                    
                     
-                            //]
-                        //}
+                            ]
+                        }
                     
                     
                     ],
