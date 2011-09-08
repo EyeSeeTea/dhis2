@@ -17,5 +17,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="indicatorService"
 			ref="org.hisp.dhis.indicator.IndicatorService"/>
 	</bean>
+    
+    <!-- AggregatedIndicatorValue -->
+
+	<bean id="org.hisp.dhis.mapping.action.GetAggregatedIndicatorValuesAction"
+		class="org.hisp.dhis.mapping.action.GetAggregatedIndicatorValuesAction"
+		scope="prototype">
+		<property name="aggregatedDataValueService"
+			ref="org.hisp.dhis.aggregation.DefaultAggregatedDataValueService"/>
+	</bean>
 	
 </beans>

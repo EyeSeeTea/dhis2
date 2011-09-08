@@ -24,14 +24,6 @@ Ext.onReady( function() {
                 dataelement: 'dataelement',
                 period: 'period',
                 organisationunit: 'organisationunit'
-                //getAvailableDimensions: function(dimension, array) {
-                    //array = array || [this.indicator, this.dataelement, this.period, this.organisationunit];
-                    
-
-
-//var a = [this.indicator, this.dataelement, this.period, this.organisationunit];
-                    //if (d === this.indicator || d === dhis.dataelement) {
-                        //return [this.period, this.organisationunit];
             }
         }
     };
@@ -318,11 +310,11 @@ Ext.onReady( function() {
                         }
                     ],
                     items: [
-                        //{
-                            //xtype: 'fieldset',
-                            //title: '<span style="padding:0 5px">Indicator</span>',
-                            //collapsible: true,
-                            //items: [
+                        {
+                            xtype: 'fieldset',
+                            title: '<span style="padding:0 5px">Indicator</span>',
+                            collapsible: true,
+                            items: [
                                 {
                                     xtype: 'combobox',
                                     name: 'indicatorgroup',
@@ -335,7 +327,7 @@ Ext.onReady( function() {
                                         fields: ['id', 'name'],
                                         proxy: {
                                             type: 'ajax',
-                                            url: DV.conf.finals.path_commons + 'getIndicatorGroups' + DV.conf.finals.action,
+                                            url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroups' + DV.conf.finals.ajax.action,
                                             reader: {
                                                 type: 'json',
                                                 root: 'indicatorGroups'
@@ -370,8 +362,8 @@ Ext.onReady( function() {
                                         //}
                                     //})
                                 //}
-                            //]
-                        //}
+                            ]
+                        }
                     ],
                     listeners: {
                         collapse: function(p) {                    
