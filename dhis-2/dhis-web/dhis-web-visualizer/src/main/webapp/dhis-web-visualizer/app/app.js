@@ -12,15 +12,33 @@ Ext.onReady( function() {
     
     DV.conf = {
         finals: {
-            url_visualizer: '../',
-            url_commons: '../../dhis-web-commons-ajax-json/',
-            url_portal: '../../dhis-web-portal/',
-            action: '.action',
+            ajax: {
+                url_visualizer: '../',
+                url_commons: '../../dhis-web-commons-ajax-json/',
+                url_portal: '../../dhis-web-portal/',
+                action: '.action'
+            },
             
-            dimension_indicator: 'indicator',
-            dimension_dataelement: 'dataelement',
-            dimension_period: 'period',
-            dimension_organisationunit: 'organisationunit'
+            dimension: {
+                indicator: 'indicator',
+                dataelement: 'dataelement',
+                period: 'period',
+                organisationunit: 'organisationunit'
+            }
+        }
+    };
+    
+    DV.conf.store = {
+        dimension: function() {
+            return Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                data: [
+                    { id: DV.conf.finals.dimension.indicator, name: 'Indicator' },
+                    { id: DV.conf.finals.dimension.dataelement, name: 'Data element' },
+                    { id: DV.conf.finals.dimension.period, name: 'Period' },
+                    { id: DV.conf.finals.dimension.organisationunit, name: 'Org unit' }
+                ]
+            });
         }
     };
         
@@ -183,15 +201,35 @@ Ext.onReady( function() {
                             valueField: 'id',
                             displayField: 'name',
                             width: 90,
-                            store: Ext.create('Ext.data.Store', {
-                                fields: ['id', 'name'],
-                                data: [
-                                    { id: 'indicator', name: 'Indicator' },
-                                    { id: 'dataelement', name: 'Data element' },
-                                    { id: 'period', name: 'Period' },
-                                    { id: 'orgunit', name: 'Org unit' }
-                                ]
-                            })
+                            store: DV.conf.store.dimension(),
+                            listeners: {
+                                select: function(cb) {
+                                    var v = cb.getValue();
+                                    var i = DV.conf.finals.dimension.indicator;
+                                    var d = DV.conf.finals.dimension.dataelement;
+                                    var c = DV.app.util.getCmp('combobox[name="columns"]');
+                                    var f = DV.app.util.getCmp('combobox[name="filter"]');
+                                    var fn = function(r) {
+                                        if (((v === i) || (v === d)) && ((r.data.id === i) || (r.data.id === d))) {
+                                            return false;
+                                        }
+                                        else {
+                                            if (v === r.data.id) {
+                                                return false;
+                                            }
+                                        }
+                                        return true;
+                                    };
+                                    c.store.filterBy(fn);                                    
+                                    if (v === c.getValue()) {
+                                        c.clearValue();
+                                    }
+                                    f.store.filterBy(fn);
+                                    if (v === f.getValue()) {
+                                        f.clearValue();
+                                    }
+                                }
+                            }
                         },
                         ' ',
                         {
@@ -200,18 +238,11 @@ Ext.onReady( function() {
                             emptyText: 'Columns',
                             queryMode: 'local',
                             editable: false,
+                            lastQuery: '',
                             valueField: 'id',
                             displayField: 'name',
                             width: 90,
-                            store: Ext.create('Ext.data.Store', {
-                                fields: ['id', 'name'],
-                                data: [
-                                    { id: 'indicator', name: 'Indicator' },
-                                    { id: 'dataelement', name: 'Data element' },
-                                    { id: 'period', name: 'Period' },
-                                    { id: 'orgunit', name: 'Org unit' }
-                                ]
-                            })
+                            store: DV.conf.store.dimension()
                         },
                         ' ',
                         {
@@ -220,18 +251,11 @@ Ext.onReady( function() {
                             emptyText: 'Filter',
                             queryMode: 'local',
                             editable: false,
+                            lastQuery: '',
                             valueField: 'id',
                             displayField: 'name',
                             width: 90,
-                            store: Ext.create('Ext.data.Store', {
-                                fields: ['id', 'name'],
-                                data: [
-                                    { id: 'indicator', name: 'Indicator' },
-                                    { id: 'dataelement', name: 'Data element' },
-                                    { id: 'period', name: 'Period' },
-                                    { id: 'orgunit', name: 'Org unit' }
-                                ]
-                            })
+                            store: DV.conf.store.dimension()
                         }
                     ],
                     items: [
