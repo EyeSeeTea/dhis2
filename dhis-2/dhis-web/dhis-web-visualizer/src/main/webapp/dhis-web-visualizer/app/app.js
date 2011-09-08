@@ -24,6 +24,14 @@ Ext.onReady( function() {
                 dataelement: 'dataelement',
                 period: 'period',
                 organisationunit: 'organisationunit'
+                //getAvailableDimensions: function(dimension, array) {
+                    //array = array || [this.indicator, this.dataelement, this.period, this.organisationunit];
+                    
+
+
+//var a = [this.indicator, this.dataelement, this.period, this.organisationunit];
+                    //if (d === this.indicator || d === dhis.dataelement) {
+                        //return [this.period, this.organisationunit];
             }
         }
     };
@@ -204,30 +212,42 @@ Ext.onReady( function() {
                             store: DV.conf.store.dimension(),
                             listeners: {
                                 select: function(cb) {
-                                    var v = cb.getValue();
-                                    var i = DV.conf.finals.dimension.indicator;
-                                    var d = DV.conf.finals.dimension.dataelement;
-                                    var c = DV.app.util.getCmp('combobox[name="columns"]');
-                                    var f = DV.app.util.getCmp('combobox[name="filter"]');
-                                    var fn = function(r) {
-                                        if (((v === i) || (v === d)) && ((r.data.id === i) || (r.data.id === d))) {
-                                            return false;
+                                    var v = cb.getValue(),
+                                        c = DV.app.util.getCmp('combobox[name="columns"]'),
+                                        f = DV.app.util.getCmp('combobox[name="filter"]'),
+                                        i = DV.conf.finals.dimension.indicator,
+                                        d = DV.conf.finals.dimension.dataelement,
+                                        p = DV.conf.finals.dimension.period,
+                                        o = DV.conf.finals.dimension.organisationunit,
+                                        index = 0;
+                                        
+                                    c.enable();
+                                    
+                                    if (v === i || v === d) {
+                                        cb.filter = [false, false, true, true];
+                                    }
+                                    else if (v === p) {
+                                        cb.filter = [true, true, false, true];
+                                    }
+                                    else if (v === o) {
+                                        cb.filter = [true, true, true, false];
+                                    }
+                                    
+                                    var fn = function(cmp) {
+                                        cmp.store.filterBy( function(r) {
+                                            return cb.filter[index++];
+                                        });
+                                        if (v === cmp.getValue()) {
+                                            cmp.clearValue();
                                         }
-                                        else {
-                                            if (v === r.data.id) {
-                                                return false;
-                                            }
+                                        else if ((v === i || v === d) && (cmp.getValue() === i || cmp.getValue() === d)) {
+                                            cmp.clearValue();
                                         }
-                                        return true;
                                     };
-                                    c.store.filterBy(fn);                                    
-                                    if (v === c.getValue()) {
-                                        c.clearValue();
-                                    }
-                                    f.store.filterBy(fn);
-                                    if (v === f.getValue()) {
-                                        f.clearValue();
-                                    }
+                                    
+                                    fn(c);                                    
+                                    index = 0;
+                                    fn(f);
                                 }
                             }
                         },
@@ -242,7 +262,45 @@ Ext.onReady( function() {
                             valueField: 'id',
                             displayField: 'name',
                             width: 90,
-                            store: DV.conf.store.dimension()
+                            disabled: true,
+                            store: DV.conf.store.dimension(),
+                            listeners: {
+                                select: function(cb) {
+                                    var v = cb.getValue(),
+                                        s = DV.app.util.getCmp('combobox[name="series"]'),
+                                        f = DV.app.util.getCmp('combobox[name="filter"]'),
+                                        i = DV.conf.finals.dimension.indicator,
+                                        d = DV.conf.finals.dimension.dataelement,
+                                        p = DV.conf.finals.dimension.period,
+                                        o = DV.conf.finals.dimension.organisationunit,
+                                        index = 0;
+                                        
+                                    f.enable();
+                                    
+                                    cb.filter = s.filter.slice(0);
+                                    
+                                    if (cb.getValue() === i || cb.getValue() === d) {
+                                        cb.filter[0] = false;
+                                        cb.filter[1] = false;
+                                    }
+                                    else if (cb.getValue() === p) {
+                                        cb.filter[2] = false;
+                                    }
+                                    else if (cb.getValue() === o) {
+                                        cb.filter[3] = false;
+                                    }   
+                                    
+                                    f.store.filterBy( function(r) {
+                                        return cb.filter[index++];
+                                    });
+                                    if (v === f.getValue()) {
+                                        f.clearValue();
+                                    }
+                                    else if ((v === i || v === d) && (f.getValue() === i || f.getValue() === d)) {
+                                        f.clearValue();
+                                    }
+                                }
+                            }
                         },
                         ' ',
                         {
@@ -255,6 +313,7 @@ Ext.onReady( function() {
                             valueField: 'id',
                             displayField: 'name',
                             width: 90,
+                            disabled: true,
                             store: DV.conf.store.dimension()
                         }
                     ],
