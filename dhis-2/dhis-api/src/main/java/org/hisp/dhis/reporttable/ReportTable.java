@@ -410,9 +410,7 @@ public class ReportTable
         allPeriods.addAll( relativePeriods );
         allPeriods = removeDuplicates( allPeriods );
 
-        Collections.sort( allPeriods, new AscendingPeriodComparator() ); // Sort
-        // periods
-        // ascending
+        Collections.sort( allPeriods, new AscendingPeriodComparator() );
         setNames( allPeriods ); // Set names on periods
 
         allUnits.addAll( units );
@@ -519,14 +517,11 @@ public class ReportTable
         {
             if ( object != null && object instanceof Period )
             {
-                buffer.append( object.getName() + SEPARATOR ); // Relative
-                // periods must
-                // have static
-                // names when
-                // crosstabbed -
-                // which are set
-                // on name
-                // property
+                // -------------------------------------------------------------
+                // Periods need static names when crosstab - set on name prop
+                // -------------------------------------------------------------
+
+                buffer.append( object.getName() + SEPARATOR );
             }
             else
             {
@@ -593,8 +588,7 @@ public class ReportTable
     {
         List<String> ids = Arrays.asList( identifiers );
 
-        Collections.sort( ids ); // Sort to remove the significance of the
-        // order
+        Collections.sort( ids ); // Sort to remove the significance of order
 
         return StringUtils.join( ids, SEPARATOR );
     }
@@ -734,12 +728,11 @@ public class ReportTable
         {
             if ( period.getName() == null ) // Crosstabulated relative periods
             {
-                period.setName( i18nFormat.formatPeriod( period ) ); // Static
-                // periods
-                // +
-                // indexed
-                // relative
-                // periods
+                // -------------------------------------------------------------
+                // Static periods + index relative periods
+                // -------------------------------------------------------------
+
+                period.setName( i18nFormat.formatPeriod( period ) );
                 period.setShortName( i18nFormat.formatPeriod( period ) );
             }
         }
