@@ -1,12 +1,32 @@
+Ext.Loader.setConfig({enabled: true});
+Ext.Loader.setPath('Ext.ux', 'ext-ux');
+Ext.require([
+    'Ext.form.Panel',
+    'Ext.ux.form.MultiSelect',
+    'Ext.ux.form.ItemSelector'
+]);
+
 Ext.onReady( function() {
     
-    Ext.override(Ext.data.Store, {
-            setExtraParam: function (name, value) {
-            this.proxy.extraParams = this.proxy.extraParams || {};
-            this.proxy.extraParams[name] = value;
-            this.proxy.applyEncoding(this.proxy.extraParams);
+    //Ext.override(Ext.data.Store, {
+            //setExtraParam: function (name, value) {
+            //this.proxy.extraParams = this.proxy.extraParams || {};
+            //this.proxy.extraParams[name] = value;
+            //this.proxy.applyEncoding(this.proxy.extraParams);
+        //}
+    //});
+    
+    var ds = Ext.create('Ext.data.ArrayStore', {
+        data: [[123,'One Hundred Twenty Three'],
+            ['1', 'One'], ['2', 'Two'], ['3', 'Three'], ['4', 'Four'], ['5', 'Five'],
+            ['6', 'Six'], ['7', 'Seven'], ['8', 'Eight'], ['9', 'Nine']],
+        fields: ['value','text'],
+        sortInfo: {
+            field: 'value',
+            direction: 'ASC'
         }
     });
+    
     
     DV = {};
     
@@ -341,27 +361,25 @@ Ext.onReady( function() {
                                             store.load();
                                         }
                                     }
+                                },             
+                                {            
+                                    xtype: 'itemselector',
+                                    name: 'itemselector',
+                                    //anchor: '100%',
+                                    width: 600,
+                                    fieldLabel: 'ItemSelector',
+                                    imagePath: 'ext-ux/resources/',
+
+                                    store: ds,
+                                    displayField: 'text',
+                                    valueField: 'value',
+                                    value: ['3', '4', '6'],
+
+                                    allowBlank: false,
+                                    // minSelections: 2,
+                                    // maxSelections: 3,
+                                    msgTarget: 'side'
                                 }
-                                //{
-                                    //xtype: 'itemselector',
-                                    //name: 'indicator',
-                                    //valueField: 'id',
-                                    //displayField: 'name',
-                                    //fieldLabel: 'Indicators',
-                                    //editable: false,
-                                    //queryMode: 'remote',
-                                    //store: Ext.create('Ext.data.Store', {
-                                        //fields: ['id', 'name'],
-                                        //proxy: {
-                                            //type: 'ajax',
-                                            //url: DV.conf.finals.path_visualizer + 'getIndicatorsByIndicatorGroup' + DV.conf.finals.action,
-                                            //reader: {
-                                                //type: 'json',
-                                                //root: 'indicators'
-                                            //}                                                
-                                        //}
-                                    //})
-                                //}
                             ]
                         }
                     ],
@@ -446,14 +464,7 @@ Ext.onReady( function() {
         })
     };
     
-    //DV.app.conf.data = [
-        //{ id: DV.app.conf.finals.dimension_indicator, name: 'Indicator' },
-        //{ id: DV.app.conf.finals.dimension_dataelement, name: 'Data element' },
-        //{ id: DV.app.conf.finals.dimension_period, name: 'Period' },
-        //{ id: DV.app.conf.finals.dimension_organisationunit, name: 'Organisation unit' }
-    //];
-    
-    //DV.app.util.getCmp('combobox').store.loadData(DV.app.conf.data);
+    //});
 });
 
 
