@@ -2,6 +2,7 @@
 
 .x-form-empty-field, textarea.x-form-empty-field {
     font-size: 10px;
+    color: #777;
 }
 
 .x-form-text, textarea.x-form-field {

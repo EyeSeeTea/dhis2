@@ -334,6 +334,9 @@ Ext.onReady( function() {
                             xtype: 'fieldset',
                             title: '<span style="padding:0 5px">Indicator</span>',
                             collapsible: true,
+                            defaults: {
+                                style: 'margin-bottom:10px'
+                            },
                             items: [
                                 {
                                     xtype: 'combobox',
@@ -361,13 +364,12 @@ Ext.onReady( function() {
                                             store.load();
                                         }
                                     }
-                                },             
+                                },
                                 {            
                                     xtype: 'itemselector',
                                     name: 'itemselector',
-                                    //anchor: '100%',
-                                    width: 600,
-                                    fieldLabel: 'ItemSelector',
+                                    width: 540,
+                                    //fieldLabel: 'Indicators',
                                     imagePath: 'ext-ux/resources/',
 
                                     store: ds,
