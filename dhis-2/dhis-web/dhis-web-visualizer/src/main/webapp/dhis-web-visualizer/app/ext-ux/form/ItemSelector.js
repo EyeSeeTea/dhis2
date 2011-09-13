@@ -66,7 +66,6 @@ Ext.define('Ext.ux.form.ItemSelector', {
 
     fieldBodyCls: Ext.baseCSSPrefix + 'form-itemselector-body',
 
-
     bindStore: function(store, initial) {
         var me = this,
             toField = me.toField,
@@ -102,7 +101,7 @@ Ext.define('Ext.ux.form.ItemSelector', {
                 hideLabel: true
             },
             fromConfig = Ext.apply({
-                listTitle: 'Available',
+                listTitle: me.titleAvailable,
                 store: Ext.create('Ext.data.Store', {model: me.store.model}), //blank store to begin
                 listeners: {
                     boundList: {
@@ -112,7 +111,7 @@ Ext.define('Ext.ux.form.ItemSelector', {
                 }
             }, me.multiselects[0], commonConfig),
             toConfig = Ext.apply({
-                listTitle: 'Selected',
+                listTitle: me.titleSelected,
                 store: Ext.create('Ext.data.Store', {model: me.store.model}), //blank store to begin
                 listeners: {
                     boundList: {

@@ -1,32 +1,16 @@
 Ext.Loader.setConfig({enabled: true});
 Ext.Loader.setPath('Ext.ux', 'ext-ux');
-Ext.require([
-    'Ext.form.Panel',
-    'Ext.ux.form.MultiSelect',
-    'Ext.ux.form.ItemSelector'
-]);
+Ext.require(['Ext.form.Panel', 'Ext.ux.form.MultiSelect', 'Ext.ux.form.ItemSelector']);
 
 Ext.onReady( function() {
     
-    //Ext.override(Ext.data.Store, {
-            //setExtraParam: function (name, value) {
-            //this.proxy.extraParams = this.proxy.extraParams || {};
-            //this.proxy.extraParams[name] = value;
-            //this.proxy.applyEncoding(this.proxy.extraParams);
-        //}
-    //});
-    
-    var ds = Ext.create('Ext.data.ArrayStore', {
-        data: [[123,'One Hundred Twenty Three'],
-            ['1', 'One'], ['2', 'Two'], ['3', 'Three'], ['4', 'Four'], ['5', 'Five'],
-            ['6', 'Six'], ['7', 'Seven'], ['8', 'Eight'], ['9', 'Nine']],
-        fields: ['value','text'],
-        sortInfo: {
-            field: 'value',
-            direction: 'ASC'
+    Ext.override(Ext.data.Store, {
+        setExtraParam: function (name, value) {
+            this.proxy.extraParams = this.proxy.extraParams || {};
+            this.proxy.extraParams[name] = value;
+            this.proxy.applyEncoding(this.proxy.extraParams);
         }
     });
-    
     
     DV = {};
     
@@ -35,8 +19,7 @@ Ext.onReady( function() {
             ajax: {
                 url_visualizer: '../',
                 url_commons: '../../dhis-web-commons-ajax-json/',
-                url_portal: '../../dhis-web-portal/',
-                action: '.action'
+                url_portal: '../../dhis-web-portal/'
             },
             
             dimension: {
@@ -59,7 +42,52 @@ Ext.onReady( function() {
                     { id: DV.conf.finals.dimension.organisationunit, name: 'Org unit' }
                 ]
             });
-        }
+        },
+        
+        indicator: Ext.create('Ext.data.Store', {
+            fields: ['id', 'shortName'],
+            proxy: {
+                type: 'ajax',
+                baseUrl: DV.conf.finals.ajax.url_visualizer + 'getIndicatorsByIndicatorGroup.action',
+                url: DV.conf.finals.ajax.url_visualizer + 'getIndicatorsByIndicatorGroup.action',
+                reader: {
+                    type: 'json',
+                    root: 'indicators'
+                }
+            },
+            itemSelector: null,
+            addItemSelector: function(s) {
+                if (s.itemSelector) {
+                    DV.app.util.getCmp('fieldset[name="indicators"]').remove(s.itemSelector, true);
+                }
+                
+                DV.app.util.getCmp('fieldset[name="indicators"]').add({
+                    xtype: 'itemselector',
+                    name: 'itemselector',
+                    width: 518,
+                    hideNavIcons: true,
+                    titleAvailable: 'Available indicators:',
+                    titleSelected: 'Selected indicators:',
+                    displayField: 'shortName',
+                    valueField: 'id',
+                    value: ['3', '4', '6'],
+                    allowBlank: false,
+                    msgTarget: 'side',
+                    queryMode: 'remote',
+                    store: s,
+                    listeners: {
+                        afterrender: function(is) {
+                            s.itemSelector = is;
+                        }
+                    }
+                });
+            },
+            listeners: {
+                'load': function(s) {
+                    s.addItemSelector(s);
+                }
+            }
+        })
     };
         
     DV.app = {
@@ -289,7 +317,7 @@ Ext.onReady( function() {
                                         
                                     f.enable();
                                     
-                                    cb.filter = s.filter.slice(0);
+                                    cb.filter = Ext.Array.clone(s.filter);
                                     
                                     if (cb.getValue() === i || cb.getValue() === d) {
                                         cb.filter[0] = false;
@@ -332,15 +360,14 @@ Ext.onReady( function() {
                     items: [
                         {
                             xtype: 'fieldset',
+                            name: 'indicators',
                             title: '<span style="padding:0 5px; font-weight:bold; color:black">Indicators</span>',
                             collapsible: true,
-                            defaults: {
-                                style: 'margin-bottom:10px'
-                            },
                             items: [
                                 {
                                     xtype: 'combobox',
                                     name: 'indicatorgroup',
+                                    style: 'margin-bottom:8px',
                                     valueField: 'id',
                                     displayField: 'name',
                                     fieldLabel: 'Indicator group',
@@ -350,7 +377,7 @@ Ext.onReady( function() {
                                         fields: ['id', 'name'],
                                         proxy: {
                                             type: 'ajax',
-                                            url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroups' + DV.conf.finals.ajax.action,
+                                            url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroups.action',
                                             reader: {
                                                 type: 'json',
                                                 root: 'indicatorGroups'
@@ -359,29 +386,11 @@ Ext.onReady( function() {
                                     }),
                                     listeners: {
                                         select: function(cb) {
-                                            var store = DV.app.util.getCmp('store[name="indicator"]');
-                                            store.setExtraParam('indicatorGroupId', cb.getValue());
-                                            store.load();
+                                            DV.conf.store.indicator.proxy.url = Ext.String.urlAppend(DV.conf.store.indicator.proxy.baseUrl, 'id=' + cb.getValue());
+                                            DV.conf.store.indicator.load();
                                         }
                                     }
-                                },
-                                {            
-                                    xtype: 'itemselector',
-                                    name: 'itemselector',
-                                    width: 518,
-                                    imagePath: '',
-                                    buttons: [],
-
-                                    store: ds,
-                                    displayField: 'text',
-                                    valueField: 'value',
-                                    value: ['3', '4', '6'],
-
-                                    allowBlank: false,
-                                    // minSelections: 2,
-                                    // maxSelections: 3,
-                                    msgTarget: 'side'
-                                }
+                                }                                
                             ]
                         }
                     ],
@@ -459,14 +468,12 @@ Ext.onReady( function() {
                 }
             ],
             listeners: {
-                resize: function(v) {
-                    v.query('panel[region="west"]')[0].setWidth(v.getWidth() / 2);
+                resize: function(vp) {
+                    vp.query('panel[region="west"]')[0].setWidth(558); //vp.getWidth() / 2
                 }
             }
         })
     };
-    
-    //});
 });
 
 

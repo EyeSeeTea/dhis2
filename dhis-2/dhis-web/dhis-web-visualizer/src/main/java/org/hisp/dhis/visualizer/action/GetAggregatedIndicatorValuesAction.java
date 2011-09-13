@@ -51,7 +51,7 @@ public class GetAggregatedIndicatorValuesAction
     {
         this.aggregatedDataValueService = aggregatedDataValueService;
     }
-    
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -97,8 +97,8 @@ public class GetAggregatedIndicatorValuesAction
     {
         if ( indicatorIds != null && periodIds != null && organisationUnitIds != null )
         {
-            object = aggregatedDataValueService.getAggregatedIndicatorValues(
-                indicatorIds, periodIds, organisationUnitIds );
+            object = aggregatedDataValueService.getAggregatedIndicatorValues( indicatorIds, periodIds,
+                organisationUnitIds );
         }
 
         return SUCCESS;

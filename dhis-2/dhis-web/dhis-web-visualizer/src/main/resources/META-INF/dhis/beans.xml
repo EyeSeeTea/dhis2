@@ -11,8 +11,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     
     <!-- Indicator -->
 
-	<bean id="org.hisp.dhis.mapping.action.GetIndicatorsByIndicatorGroupAction"
-		class="org.hisp.dhis.mapping.action.GetIndicatorsByIndicatorGroupAction"
+	<bean id="org.hisp.dhis.visualizer.action.GetIndicatorsByIndicatorGroupAction"
+		class="org.hisp.dhis.visualizer.action.GetIndicatorsByIndicatorGroupAction"
 		scope="prototype">
 		<property name="indicatorService"
 			ref="org.hisp.dhis.indicator.IndicatorService"/>
@@ -20,8 +20,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     
     <!-- AggregatedIndicatorValue -->
 
-	<bean id="org.hisp.dhis.mapping.action.GetAggregatedIndicatorValuesAction"
-		class="org.hisp.dhis.mapping.action.GetAggregatedIndicatorValuesAction"
+	<bean id="org.hisp.dhis.visualizer.action.GetAggregatedIndicatorValuesAction"
+		class="org.hisp.dhis.visualizer.action.GetAggregatedIndicatorValuesAction"
 		scope="prototype">
 		<property name="aggregatedDataValueService"
 			ref="org.hisp.dhis.aggregation.DefaultAggregatedDataValueService"/>

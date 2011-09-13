@@ -31,6 +31,8 @@
             class="org.hisp.dhis.visualizer.action.GetAggregatedIndicatorValuesAction">
             <result name="success" type="velocity-json">
                 /dhis-web-visualizer/jsonAggregatedIndicatorValue.vm</result>
+            <result name="none" type="velocity-json">
+                /dhis-web-visualizer/void.vm</result>
         </action>
 		
 	</package>

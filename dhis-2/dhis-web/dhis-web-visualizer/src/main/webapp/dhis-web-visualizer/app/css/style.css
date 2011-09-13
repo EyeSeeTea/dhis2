@@ -1,20 +1,30 @@
 /* Ext overrides */
 
+/* Combobox empty text */
 .x-form-empty-field, textarea.x-form-empty-field {
     font-size: 10px;
     color: #777;
 }
 
+/* Combobox font size */
 .x-form-text, textarea.x-form-field {
     font-size: 10px;
 }
 
+/* Combobox field label font */
 .x-form-item-label {
     font: 11px arial;
 }
 
+/* Text position in combobox */
 .x-webkit .x-form-empty-field {
     line-height: 14px;
+}
+
+/* ItemSelector title */
+.x-panel-header-text-default {
+    font-weight: normal;
+    color: #000;
 }
 
 .x-splitter {
@@ -28,5 +38,6 @@ body {
 }
 
 li {
-   font-size:10px;
+   font-size: 10px;
+   color: #333;
 }
