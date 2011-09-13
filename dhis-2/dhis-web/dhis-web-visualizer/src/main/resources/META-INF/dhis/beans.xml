@@ -24,7 +24,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.visualizer.action.GetDataElementsByDataElementGroupAction"
 		scope="prototype">
 		<property name="dataElementService"
-			ref="org.hisp.dhis.indicator.DataElementService"/>
+			ref="org.hisp.dhis.dataelement.DataElementService"/>
 	</bean>
     
     <!-- AggregatedIndicatorValue -->

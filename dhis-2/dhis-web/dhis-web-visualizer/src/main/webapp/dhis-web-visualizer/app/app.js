@@ -156,10 +156,7 @@ Ext.onReady( function() {
             
             store: null,
             getStore: function() {
-                var properties = [];
-                for (var p in this.data[0]) {
-                    properties.push(p);
-                }
+                var properties = Ext.Object.getKeys(this.data[0]);
                                 
                 Ext.define('model1', {
                     extend: 'Ext.data.Model',
@@ -409,7 +406,7 @@ Ext.onReady( function() {
                                     style: 'margin-bottom:8px',
                                     valueField: 'id',
                                     displayField: 'name',
-                                    fieldLabel: 'Group',
+                                    fieldLabel: 'Indicator group',
                                     editable: false,
                                     queryMode: 'remote',
                                     store: Ext.create('Ext.data.Store', {
@@ -443,7 +440,6 @@ Ext.onReady( function() {
                                     xtype: 'combobox',
                                     name: 'dataelementgroup',
                                     style: 'margin-bottom:8px',
-                                    width: 500,
                                     valueField: 'id',
                                     displayField: 'name',
                                     fieldLabel: 'Data element group',
