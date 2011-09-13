@@ -25,7 +25,7 @@
                 /dhis-web-visualizer/void.vm</result>
         </action>
 
-        <!-- DataElemenet -->
+        <!-- DataElement -->
 
         <action name="getDataElementsByDataElementGroup"
             class="org.hisp.dhis.visualizer.action.GetDataElementsByDataElementGroupAction">

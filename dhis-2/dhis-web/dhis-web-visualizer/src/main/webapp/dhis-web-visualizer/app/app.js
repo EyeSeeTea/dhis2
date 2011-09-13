@@ -37,11 +37,11 @@ Ext.onReady( function() {
         },
         
         indicator: Ext.create('Ext.data.Store', {
-            fields: ['id', 'shortName'],
+            fields: ['id', 'name', 'shortName'],
             proxy: {
                 type: 'ajax',
-                baseUrl: DV.conf.finals.ajax.url_visualizer + 'getIndicatorsByIndicatorGroup.action',
-                url: DV.conf.finals.ajax.url_visualizer + 'getIndicatorsByIndicatorGroup.action',
+                baseUrl: DV.conf.finals.ajax.url_commons + 'getIndicators.action',
+                url: DV.conf.finals.ajax.url_commons + 'getIndicators.action',
                 reader: {
                     type: 'json',
                     root: 'indicators'
@@ -64,7 +64,7 @@ Ext.onReady( function() {
                     titleSelected: 'Selected indicators:',
                     displayField: 'shortName',
                     valueField: 'id',
-                    allowBlank: false,
+                    allowBlank: true,
                     msgTarget: 'side',
                     queryMode: 'remote',
                     store: s,
@@ -86,8 +86,8 @@ Ext.onReady( function() {
             fields: ['id', 'shortName'],
             proxy: {
                 type: 'ajax',
-                baseUrl: DV.conf.finals.ajax.url_visualizer + 'getDataElementsByDataElementGroup.action',
-                url: DV.conf.finals.ajax.url_visualizer + 'getDataElementsByDataElementGroup.action',
+                baseUrl: DV.conf.finals.ajax.url_commons + 'getDataElements.action',
+                url: DV.conf.finals.ajax.url_commons + 'getDataElements.action',
                 reader: {
                     type: 'json',
                     root: 'dataElements'
@@ -110,7 +110,53 @@ Ext.onReady( function() {
                     titleSelected: 'Selected indicators:',
                     displayField: 'shortName',
                     valueField: 'id',
-                    allowBlank: false,
+                    allowBlank: true,
+                    msgTarget: 'side',
+                    queryMode: 'remote',
+                    store: s,
+                    listeners: {
+                        afterrender: function(is) {
+                            s.itemSelector = is;
+                        }
+                    }
+                });
+            },
+            listeners: {
+                'load': function(s) {
+                    s.addItemSelector(s);
+                }
+            }
+        }),
+        
+        period: Ext.create('Ext.data.Store', {
+            fields: ['id', 'name'],
+            proxy: {
+                type: 'ajax',
+                baseUrl: DV.conf.finals.ajax.url_commons + 'getPeriods.action',
+                url: DV.conf.finals.ajax.url_commons + 'getPeriods.action',
+                reader: {
+                    type: 'json',
+                    root: 'periods'
+                }
+            },
+            itemSelector: null,
+            addItemSelector: function(s) {
+                var fs = DV.app.util.getCmp('fieldset[name="periods"]');
+                
+                if (s.itemSelector) {
+                    fs.remove(s.itemSelector, true);
+                }
+                
+                fs.add({
+                    xtype: 'itemselector',
+                    name: 'itemselector',
+                    width: 518,
+                    hideNavIcons: true,
+                    titleAvailable: 'Available indicators:',
+                    titleSelected: 'Selected indicators:',
+                    displayField: 'name',
+                    valueField: 'id',
+                    allowBlank: true,
                     msgTarget: 'side',
                     queryMode: 'remote',
                     store: s,
@@ -402,7 +448,6 @@ Ext.onReady( function() {
                             items: [
                                 {
                                     xtype: 'combobox',
-                                    name: 'indicatorgroup',
                                     style: 'margin-bottom:8px',
                                     valueField: 'id',
                                     displayField: 'name',
@@ -422,8 +467,9 @@ Ext.onReady( function() {
                                     }),
                                     listeners: {
                                         select: function(cb) {
-                                            DV.conf.store.indicator.proxy.url = Ext.String.urlAppend(DV.conf.store.indicator.proxy.baseUrl, 'id=' + cb.getValue());
-                                            DV.conf.store.indicator.load();
+                                            var store = DV.conf.store.indicator;
+                                            store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
+                                            store.load();
                                         }
                                     }
                                 }                                
@@ -438,7 +484,6 @@ Ext.onReady( function() {
                             items: [
                                 {
                                     xtype: 'combobox',
-                                    name: 'dataelementgroup',
                                     style: 'margin-bottom:8px',
                                     valueField: 'id',
                                     displayField: 'name',
@@ -458,8 +503,45 @@ Ext.onReady( function() {
                                     }),
                                     listeners: {
                                         select: function(cb) {
-                                            DV.conf.store.dataElement.proxy.url = Ext.String.urlAppend(DV.conf.store.dataElement.proxy.baseUrl, 'id=' + cb.getValue());
-                                            DV.conf.store.dataElement.load();
+                                            var store = DV.conf.store.dataElement;
+                                            store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
+                                            store.load();
+                                        }
+                                    }
+                                }                                
+                            ]
+                        },
+                        
+                        {
+                            xtype: 'fieldset',
+                            name: 'periods',
+                            title: '<span style="padding:0 5px; font-weight:bold; color:black">Periods</span>',
+                            collapsible: true,
+                            items: [
+                                {
+                                    xtype: 'combobox',
+                                    style: 'margin-bottom:8px',
+                                    valueField: 'name',
+                                    displayField: 'displayName',
+                                    fieldLabel: 'Period type',
+                                    editable: false,
+                                    queryMode: 'remote',
+                                    store: Ext.create('Ext.data.Store', {
+                                        fields: ['name', 'displayName'],
+                                        proxy: {
+                                            type: 'ajax',
+                                            url: DV.conf.finals.ajax.url_commons + 'getPeriodTypes.action',
+                                            reader: {
+                                                type: 'json',
+                                                root: 'periodTypes'
+                                            }                                                
+                                        }
+                                    }),
+                                    listeners: {
+                                        select: function(cb) {
+                                            var store = DV.conf.store.period;
+                                            store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
+                                            store.load();
                                         }
                                     }
                                 }                                
