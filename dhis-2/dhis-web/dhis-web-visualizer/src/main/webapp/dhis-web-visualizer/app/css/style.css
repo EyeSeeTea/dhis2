@@ -27,8 +27,17 @@
     color: #000;
 }
 
+/* Splitter column */
 .x-splitter {
     display: none;
+}
+
+/* Fieldset border */
+.x-fieldset {
+    border: 1px solid #d4d4d4;
+    border-radius: 2px 2px 2px 2px;
+    -moz-border-radius: 2px 2px 2px 2px;
+    -webkit-border-radius: 2px 2px 2px 2px;
 }
 
 /* DHIS */

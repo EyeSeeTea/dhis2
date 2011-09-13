@@ -4,14 +4,6 @@ Ext.require(['Ext.form.Panel', 'Ext.ux.form.MultiSelect', 'Ext.ux.form.ItemSelec
 
 Ext.onReady( function() {
     
-    Ext.override(Ext.data.Store, {
-        setExtraParam: function (name, value) {
-            this.proxy.extraParams = this.proxy.extraParams || {};
-            this.proxy.extraParams[name] = value;
-            this.proxy.applyEncoding(this.proxy.extraParams);
-        }
-    });
-    
     DV = {};
     
     DV.conf = {
@@ -57,11 +49,13 @@ Ext.onReady( function() {
             },
             itemSelector: null,
             addItemSelector: function(s) {
+                var fs = DV.app.util.getCmp('fieldset[name="indicators"]');
+                
                 if (s.itemSelector) {
-                    DV.app.util.getCmp('fieldset[name="indicators"]').remove(s.itemSelector, true);
+                    fs.remove(s.itemSelector, true);
                 }
                 
-                DV.app.util.getCmp('fieldset[name="indicators"]').add({
+                fs.add({
                     xtype: 'itemselector',
                     name: 'itemselector',
                     width: 518,
@@ -70,7 +64,52 @@ Ext.onReady( function() {
                     titleSelected: 'Selected indicators:',
                     displayField: 'shortName',
                     valueField: 'id',
-                    value: ['3', '4', '6'],
+                    allowBlank: false,
+                    msgTarget: 'side',
+                    queryMode: 'remote',
+                    store: s,
+                    listeners: {
+                        afterrender: function(is) {
+                            s.itemSelector = is;
+                        }
+                    }
+                });
+            },
+            listeners: {
+                'load': function(s) {
+                    s.addItemSelector(s);
+                }
+            }
+        }),
+        
+        dataElement: Ext.create('Ext.data.Store', {
+            fields: ['id', 'shortName'],
+            proxy: {
+                type: 'ajax',
+                baseUrl: DV.conf.finals.ajax.url_visualizer + 'getDataElementsByDataElementGroup.action',
+                url: DV.conf.finals.ajax.url_visualizer + 'getDataElementsByDataElementGroup.action',
+                reader: {
+                    type: 'json',
+                    root: 'dataElements'
+                }
+            },
+            itemSelector: null,
+            addItemSelector: function(s) {
+                var fs = DV.app.util.getCmp('fieldset[name="dataelements"]');
+                
+                if (s.itemSelector) {
+                    fs.remove(s.itemSelector, true);
+                }
+                
+                fs.add({
+                    xtype: 'itemselector',
+                    name: 'itemselector',
+                    width: 518,
+                    hideNavIcons: true,
+                    titleAvailable: 'Available indicators:',
+                    titleSelected: 'Selected indicators:',
+                    displayField: 'shortName',
+                    valueField: 'id',
                     allowBlank: false,
                     msgTarget: 'side',
                     queryMode: 'remote',
@@ -194,7 +233,7 @@ Ext.onReady( function() {
             items: [
                 {
                     region: 'west',
-                    bodyStyle: 'padding:8px;',
+                    bodyStyle: 'padding:10px;',
                     minWidth: 250,
                     preventHeader: true,
                     collapsible: true,
@@ -370,7 +409,7 @@ Ext.onReady( function() {
                                     style: 'margin-bottom:8px',
                                     valueField: 'id',
                                     displayField: 'name',
-                                    fieldLabel: 'Indicator group',
+                                    fieldLabel: 'Group',
                                     editable: false,
                                     queryMode: 'remote',
                                     store: Ext.create('Ext.data.Store', {
@@ -388,6 +427,43 @@ Ext.onReady( function() {
                                         select: function(cb) {
                                             DV.conf.store.indicator.proxy.url = Ext.String.urlAppend(DV.conf.store.indicator.proxy.baseUrl, 'id=' + cb.getValue());
                                             DV.conf.store.indicator.load();
+                                        }
+                                    }
+                                }                                
+                            ]
+                        },
+                        
+                        {
+                            xtype: 'fieldset',
+                            name: 'dataelements',
+                            title: '<span style="padding:0 5px; font-weight:bold; color:black">Data elements</span>',
+                            collapsible: true,
+                            items: [
+                                {
+                                    xtype: 'combobox',
+                                    name: 'dataelementgroup',
+                                    style: 'margin-bottom:8px',
+                                    width: 500,
+                                    valueField: 'id',
+                                    displayField: 'name',
+                                    fieldLabel: 'Data element group',
+                                    editable: false,
+                                    queryMode: 'remote',
+                                    store: Ext.create('Ext.data.Store', {
+                                        fields: ['id', 'name'],
+                                        proxy: {
+                                            type: 'ajax',
+                                            url: DV.conf.finals.ajax.url_commons + 'getDataElementGroups.action',
+                                            reader: {
+                                                type: 'json',
+                                                root: 'dataElementGroups'
+                                            }                                                
+                                        }
+                                    }),
+                                    listeners: {
+                                        select: function(cb) {
+                                            DV.conf.store.dataElement.proxy.url = Ext.String.urlAppend(DV.conf.store.dataElement.proxy.baseUrl, 'id=' + cb.getValue());
+                                            DV.conf.store.dataElement.load();
                                         }
                                     }
                                 }                                

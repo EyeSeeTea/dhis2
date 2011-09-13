@@ -25,6 +25,16 @@
                 /dhis-web-visualizer/void.vm</result>
         </action>
 
+        <!-- DataElemenet -->
+
+        <action name="getDataElementsByDataElementGroup"
+            class="org.hisp.dhis.visualizer.action.GetDataElementsByDataElementGroupAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-visualizer/jsonminDataElements.vm</result>
+            <result name="none" type="velocity-json">
+                /dhis-web-visualizer/void.vm</result>
+        </action>
+
         <!-- AggregatedIndicatorValue -->
 
         <action name="getAggregatedIndicatorValues"
