@@ -332,7 +332,7 @@ Ext.onReady( function() {
                     items: [
                         {
                             xtype: 'fieldset',
-                            title: '<span style="padding:0 5px">Indicator</span>',
+                            title: '<span style="padding:0 5px; font-weight:bold; color:black">Indicators</span>',
                             collapsible: true,
                             defaults: {
                                 style: 'margin-bottom:10px'
@@ -368,9 +368,9 @@ Ext.onReady( function() {
                                 {            
                                     xtype: 'itemselector',
                                     name: 'itemselector',
-                                    width: 540,
-                                    //fieldLabel: 'Indicators',
-                                    imagePath: 'ext-ux/resources/',
+                                    width: 518,
+                                    imagePath: '',
+                                    buttons: [],
 
                                     store: ds,
                                     displayField: 'text',
