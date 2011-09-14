@@ -3,7 +3,7 @@ Ext.onReady( function() {
     Ext.Ajax.request({
         url: DV.conf.finals.ajax.url_visualizer + 'initialize.action',
         success: function(r) {
-            DV.system = { rootNode: r.responseText.system.rootNode };
+            DV.system = { rootNode: Ext.JSON.decode(r.responseText).system.rootNode };
     
     DV.stores = {
         dimension: function() {
@@ -540,10 +540,9 @@ Ext.onReady( function() {
                                 {
                                     xtype: 'treepanel',
                                     height: 300,
-                                    width: 250,
+                                    width: 517,
                                     autoScroll: true,
                                     multiSelect: true,
-                                    //lines: false,
                                     store: Ext.create('Ext.data.TreeStore', {
                                         proxy: {
                                             type: 'ajax',
