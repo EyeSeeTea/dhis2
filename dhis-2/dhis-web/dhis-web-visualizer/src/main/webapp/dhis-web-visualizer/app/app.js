@@ -106,8 +106,8 @@ Ext.onReady( function() {
                     name: 'itemselector',
                     width: 518,
                     hideNavIcons: true,
-                    titleAvailable: 'Available indicators:',
-                    titleSelected: 'Selected indicators:',
+                    titleAvailable: 'Available data elements:',
+                    titleSelected: 'Selected data elements:',
                     displayField: 'shortName',
                     valueField: 'id',
                     allowBlank: true,
@@ -152,8 +152,8 @@ Ext.onReady( function() {
                     name: 'itemselector',
                     width: 518,
                     hideNavIcons: true,
-                    titleAvailable: 'Available indicators:',
-                    titleSelected: 'Selected indicators:',
+                    titleAvailable: 'Available periods:',
+                    titleSelected: 'Selected periods:',
                     displayField: 'name',
                     valueField: 'id',
                     allowBlank: true,
@@ -277,7 +277,6 @@ Ext.onReady( function() {
                 {
                     region: 'west',
                     bodyStyle: 'padding:10px;',
-                    minWidth: 250,
                     preventHeader: true,
                     collapsible: true,
                     collapseMode: 'mini',
@@ -540,13 +539,82 @@ Ext.onReady( function() {
                                     listeners: {
                                         select: function(cb) {
                                             var store = DV.conf.store.period;
-                                            store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
+                                            store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'name=' + cb.getValue());
                                             store.load();
                                         }
                                     }
                                 }                                
                             ]
+                        },
+                        
+                        {
+                            xtype: 'fieldset',
+                            name: 'organisationunits',
+                            title: '<span style="padding:0 5px; font-weight:bold; color:black">Organisation units</span>',
+                            collapsible: true,
+                            items: [
+                                {
+                                    xtype: 'treepanel',
+                                    height: 300,
+                                    width: 250,
+                                    autoScroll: true,
+                                    //lines: false,
+                                    store: Ext.create('Ext.data.TreeStore', {
+                                        proxy: {
+                                            type: 'ajax',
+                                            url: DV.conf.finals.ajax.url_visualizer + 'getOrganisationUnitChildren'
+                                        },
+                                        root: {
+                                            id: 525,
+                                            text: 'National level',
+                                            expanded: true
+                                        }
+                                    })
+                                }
+                            ]
                         }
+                                    
+                                    
+                                    
+                                    
+                                    //this.cmp.parent = new Ext.tree.TreePanel({
+                                        //cls: 'treepanel-layer-border',
+                                        //autoScroll: true,
+                                        //lines: false,
+                                        //loader: new Ext.tree.TreeLoader({
+                                            //dataUrl: G.conf.path_mapping + 'getOrganisationUnitChildren' + G.conf.type
+                                        //}),
+                                        //root: {
+                                            //id: G.system.rootNode.id,
+                                            //text: G.system.rootNode.name,
+                                            //level: G.system.rootNode.level,
+                                            //hasChildrenWithCoordinates: G.system.rootNode.hasChildrenWithCoordinates,
+                                            //nodeType: 'async',
+                                            //draggable: false,
+                                            //expanded: true
+                                        //},
+                                        //widget: this,
+                                        //isLoaded: false,
+                                        //reset: function() {
+                                            //if (this.getSelectionModel().getSelectedNode()) {
+                                                //this.getSelectionModel().getSelectedNode().unselect();
+                                            //}                
+                                            //this.collapseAll();
+                                            //this.getRootNode().expand();
+                                            //this.widget.window.cmp.apply.disable();
+                                        //},
+                                        //listeners: {
+                                            //'click': {
+                                                //scope: this,
+                                                //fn: function(n) {
+                                                    //var tree = n.getOwnerTree();
+                                                    //tree.selectedNode = n;
+                                                    //this.requireUpdate = true;
+                                                    //this.formValidation.validateForm.call(this);
+                                                //}
+                                            //}
+                                        //}
+                                    //});
                     ],
                     listeners: {
                         collapse: function(p) {                    
@@ -623,7 +691,7 @@ Ext.onReady( function() {
             ],
             listeners: {
                 resize: function(vp) {
-                    vp.query('panel[region="west"]')[0].setWidth(558); //vp.getWidth() / 2
+                    vp.query('panel[region="west"]')[0].setWidth(565); //vp.getWidth() / 2
                 }
             }
         })

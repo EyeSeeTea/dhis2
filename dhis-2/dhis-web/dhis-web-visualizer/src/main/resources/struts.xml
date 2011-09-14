@@ -35,6 +35,14 @@
                 /dhis-web-visualizer/void.vm</result>
         </action>
 
+        <!-- OrganisationUnit -->
+
+		<action name="getOrganisationUnitChildren"
+			class="org.hisp.dhis.visualizer.action.GetOrganisationUnitChildrenAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-visualizer/jsonOrganisationUnitChildren.vm</result>
+		</action>
+
         <!-- AggregatedIndicatorValue -->
 
         <action name="getAggregatedIndicatorValues"

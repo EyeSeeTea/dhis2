@@ -27,6 +27,15 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			ref="org.hisp.dhis.dataelement.DataElementService"/>
 	</bean>
     
+    <!-- OrganisationUnit -->
+
+	<bean id="org.hisp.dhis.visualizer.action.GetOrganisationUnitChildrenAction"
+		class="org.hisp.dhis.visualizer.action.GetOrganisationUnitChildrenAction"
+		scope="prototype">
+		<property name="organisationUnitService"
+			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+	</bean>
+    
     <!-- AggregatedIndicatorValue -->
 
 	<bean id="org.hisp.dhis.visualizer.action.GetAggregatedIndicatorValuesAction"
