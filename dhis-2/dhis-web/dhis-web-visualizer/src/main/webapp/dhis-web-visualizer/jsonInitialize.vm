@@ -1,0 +1,9 @@
+{
+  "system": {
+    "rootNode": {
+      "id": "$!{rootNode.id}",
+      "name": "$!encoder.jsonEncode( ${rootNode.name} )",
+      "level": 1
+    }
+  }
+}

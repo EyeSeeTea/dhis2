@@ -15,24 +15,12 @@
 			<result name="success" type="redirect">app/index.html</result>
 		</action>
 
-        <!-- Indicator -->
+		<!-- Initialize -->
 
-        <action name="getIndicatorsByIndicatorGroup"
-            class="org.hisp.dhis.visualizer.action.GetIndicatorsByIndicatorGroupAction">
+        <action name="initialize"
+            class="org.hisp.dhis.visualizer.action.InitializeAction">
             <result name="success" type="velocity-json">
-                /dhis-web-visualizer/jsonminIndicators.vm</result>
-            <result name="none" type="velocity-json">
-                /dhis-web-visualizer/void.vm</result>
-        </action>
-
-        <!-- DataElement -->
-
-        <action name="getDataElementsByDataElementGroup"
-            class="org.hisp.dhis.visualizer.action.GetDataElementsByDataElementGroupAction">
-            <result name="success" type="velocity-json">
-                /dhis-web-visualizer/jsonminDataElements.vm</result>
-            <result name="none" type="velocity-json">
-                /dhis-web-visualizer/void.vm</result>
+                /dhis-web-visualizer/jsonInitialize.vm</result>
         </action>
 
         <!-- OrganisationUnit -->

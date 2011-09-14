@@ -1,29 +1,11 @@
-Ext.Loader.setConfig({enabled: true});
-Ext.Loader.setPath('Ext.ux', 'ext-ux');
-Ext.require(['Ext.form.Panel', 'Ext.ux.form.MultiSelect', 'Ext.ux.form.ItemSelector']);
-
 Ext.onReady( function() {
     
-    DV = {};
+    Ext.Ajax.request({
+        url: DV.conf.finals.ajax.url_visualizer + 'initialize.action',
+        success: function(r) {
+            DV.system = { rootNode: r.responseText.system.rootNode };
     
-    DV.conf = {
-        finals: {
-            ajax: {
-                url_visualizer: '../',
-                url_commons: '../../dhis-web-commons-ajax-json/',
-                url_portal: '../../dhis-web-portal/'
-            },
-            
-            dimension: {
-                indicator: 'indicator',
-                dataelement: 'dataelement',
-                period: 'period',
-                organisationunit: 'organisationunit'
-            }
-        }
-    };
-    
-    DV.conf.store = {
+    DV.stores = {
         dimension: function() {
             return Ext.create('Ext.data.Store', {
                 fields: ['id', 'name'],
@@ -332,7 +314,7 @@ Ext.onReady( function() {
                             valueField: 'id',
                             displayField: 'name',
                             width: 90,
-                            store: DV.conf.store.dimension(),
+                            store: DV.stores.dimension(),
                             listeners: {
                                 select: function(cb) {
                                     var v = cb.getValue(),
@@ -386,7 +368,7 @@ Ext.onReady( function() {
                             displayField: 'name',
                             width: 90,
                             disabled: true,
-                            store: DV.conf.store.dimension(),
+                            store: DV.stores.dimension(),
                             listeners: {
                                 select: function(cb) {
                                     var v = cb.getValue(),
@@ -437,7 +419,7 @@ Ext.onReady( function() {
                             displayField: 'name',
                             width: 90,
                             disabled: true,
-                            store: DV.conf.store.dimension()
+                            store: DV.stores.dimension()
                         }
                     ],
                     items: [
@@ -468,7 +450,7 @@ Ext.onReady( function() {
                                     }),
                                     listeners: {
                                         select: function(cb) {
-                                            var store = DV.conf.store.indicator;
+                                            var store = DV.stores.indicator;
                                             store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
                                             store.load();
                                         }
@@ -504,7 +486,7 @@ Ext.onReady( function() {
                                     }),
                                     listeners: {
                                         select: function(cb) {
-                                            var store = DV.conf.store.dataElement;
+                                            var store = DV.stores.dataElement;
                                             store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
                                             store.load();
                                         }
@@ -540,7 +522,7 @@ Ext.onReady( function() {
                                     }),
                                     listeners: {
                                         select: function(cb) {
-                                            var store = DV.conf.store.period;
+                                            var store = DV.stores.period;
                                             store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'name=' + cb.getValue());
                                             store.load();
                                         }
@@ -560,6 +542,7 @@ Ext.onReady( function() {
                                     height: 300,
                                     width: 250,
                                     autoScroll: true,
+                                    multiSelect: true,
                                     //lines: false,
                                     store: Ext.create('Ext.data.TreeStore', {
                                         proxy: {
@@ -567,8 +550,8 @@ Ext.onReady( function() {
                                             url: DV.conf.finals.ajax.url_visualizer + 'getOrganisationUnitChildren.action'
                                         },
                                         root: {
-                                            id: 525,
-                                            text: 'National level',
+                                            id: DV.system.rootNode.id,
+                                            text: DV.system.rootNode.name,
                                             expanded: false
                                         }
                                     })
@@ -698,6 +681,8 @@ Ext.onReady( function() {
             }
         })
     };
+    
+    }});
 });
 
 
