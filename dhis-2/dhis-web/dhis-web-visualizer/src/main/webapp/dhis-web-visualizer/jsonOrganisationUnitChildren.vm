@@ -13,10 +13,7 @@
   {
     "id": ${child.id},
     "level": ${level},
-    "text": "$encoder.jsonEncode( ${child.name} )",
-    "leaf": true
-#end
-
+    "text": "$encoder.jsonEncode( ${child.name} )"
   }#if( $velocityCount < $innerSize ),#end
 #end
   ]

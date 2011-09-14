@@ -74,6 +74,8 @@ Ext.onReady( function() {
                         }
                     }
                 });
+                
+                s.itemSelector.setValue(['52486','52491']);
             },
             listeners: {
                 'load': function(s) {
@@ -562,12 +564,12 @@ Ext.onReady( function() {
                                     store: Ext.create('Ext.data.TreeStore', {
                                         proxy: {
                                             type: 'ajax',
-                                            url: DV.conf.finals.ajax.url_visualizer + 'getOrganisationUnitChildren'
+                                            url: DV.conf.finals.ajax.url_visualizer + 'getOrganisationUnitChildren.action'
                                         },
                                         root: {
                                             id: 525,
                                             text: 'National level',
-                                            expanded: true
+                                            expanded: false
                                         }
                                     })
                                 }

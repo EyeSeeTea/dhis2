@@ -41,6 +41,22 @@
     padding-bottom: 5px;
 }
 
+/* Tree panel font */
+.x-grid-row .x-grid-cell {
+    font: 10px arial;
+    color: #222;
+}
+
+/* Tree panel node height */
+.x-tree-panel .x-grid-row .x-grid-cell-inner {
+    height: 17px;
+}
+
+/* Panel (treepanel) border */
+.x-panel .x-grid-body {
+    border-style: none;
+}
+
 /* DHIS */
 
 body {
@@ -49,5 +65,7 @@ body {
 
 li {
    font-size: 10px;
-   color: #333;
+   color: #222;
 }
+
+
