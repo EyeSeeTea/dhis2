@@ -37,6 +37,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * The superclass of all PeriodTypes.
@@ -72,9 +73,9 @@ public abstract class PeriodType
         periodTypes.add( new FinancialAprilPeriodType() );
         periodTypes.add( new FinancialJulyPeriodType() );
         periodTypes.add( new FinancialOctoberPeriodType() );
-        //periodTypes.add( new OnChangePeriodType() );
-        //periodTypes.add( new SurveyPeriodType() );
-        
+        // periodTypes.add( new OnChangePeriodType() );
+        // periodTypes.add( new SurveyPeriodType() );
+
         periodTypeMap = new HashMap<String, PeriodType>();
 
         for ( PeriodType periodType : periodTypes )
@@ -104,7 +105,7 @@ public abstract class PeriodType
     {
         return periodTypeMap.get( name );
     }
-    
+
     public static PeriodType getByNameIgnoreCase( String name )
     {
         for ( PeriodType periodType : getAvailablePeriodTypes() )
@@ -116,6 +117,22 @@ public abstract class PeriodType
         }
 
         return null;
+    }
+
+    /** Get period type according to natural order order.
+     * 
+     * @param index the index of the period type with base 1
+     * @return period type according to index order or null if no match
+     * TODO: Consider manual ordering, since relying on natural order might create problems if new periods are introduced.
+     */
+    public static PeriodType getByIndex( int index )
+    {
+        index -= 1;
+        
+        if (index < 0 || index > periodTypes.size() - 1 )
+            return null;
+
+        return periodTypes.get( index );
     }
 
     // -------------------------------------------------------------------------
@@ -161,7 +178,7 @@ public abstract class PeriodType
      * @return the valid Period based on the given date
      */
     public abstract Period createPeriod( Date date );
-    
+
     /**
      * Returns a comparable value for the frequency length of this PeriodType.
      * Shortest is 0.
@@ -238,11 +255,31 @@ public abstract class PeriodType
             throw new RuntimeException( "Failed to parse medium date", ex );
         }
     }
-    
+
+    /**
+     * Returns a PeriodType corresponding to the provided string
+     * The test is quite rudimentary, testing for string format rather than invalid periods.
+     * Currently only recognizes the basic subset of common period types.
+     *
+     * @param  isoPeriod String formatted period (2011, 201101, 2011W34, 2011Q1 etc
+     * @return the PeriodType or null if unrecognised
+     */
+    public static PeriodType getPeriodTypeFromIsoString(String isoPeriod)
+    {
+        if (isoPeriod.matches("\\b\\d{4}\\b")) return new YearlyPeriodType();
+        if (isoPeriod.matches("\\b\\d{6}\\b")) return new MonthlyPeriodType();
+        if (isoPeriod.matches("\\b\\d{4}W\\d[\\d]?\\b")) return new WeeklyPeriodType();
+        if (isoPeriod.matches("\\b\\d{8}\\b")) return new DailyPeriodType();
+        if (isoPeriod.matches("\\b\\d{4}Q\\d\\b")) return new QuarterlyPeriodType();
+        if (isoPeriod.matches("\\b\\d{4}S\\d\\b")) return new SixMonthlyPeriodType();
+
+        return null;
+    }
+
     /**
      * Returns an iso8601 formatted string representation of the period
-     *
-     * @param period the period.
+     * 
+     * @param period
      * @return the period as string
      */
     public abstract String getIsoDate( Period period );
@@ -276,6 +313,7 @@ public abstract class PeriodType
         return periodType.createPeriod( getMediumDate( id[1] ) );
     }
     
+
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -308,7 +346,7 @@ public abstract class PeriodType
 
         return getName().equals( other.getName() );
     }
-    
+
     @Override
     public String toString()
     {

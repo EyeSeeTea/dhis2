@@ -18,21 +18,19 @@
 div#rightBar
 {
   display:none;
-  background-color: #baffbc;
+  background-color: #d5efd5;
   height: 454px;
   width: 300px;
   float: right;
   position: absolute;
   top: 85px;
   right: 10px;
-  border: 1px solid #12cd17;
+  border: 1px solid #a4d2a3;
   padding-left: 15px;
   padding-right: 15px;
   padding-top: 9px;
   padding-bottom: 9px;
   overflow: auto;
-  filter: alpha(opacity=94);
-  opacity: 0.94;
 }
 
 #hideRightBar
@@ -452,4 +450,52 @@ span.valid
 #cluetip-inner label
 {
 	padding-bottom:5px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Criteria                                                                   */
+/*----------------------------------------------------------------------------*/
+
+div.inputCriteria
+{
+  position: relative;
+  left: 2px;
+  width: 400px; /* Override this */
+  height: 400px; /* Override this */
+  border: 1px solid #a4d2a3;
+  background-color: #d5efd5;
+  padding-top: 10px;
+  padding-bottom: 5px;
+  padding-left: 20px;
+  margin-bottom: 15px;
+  border-radius: 3px;
+  -moz-border-radius: 3px; /* Firefox */
+}
+
+/*----------------------------------------------------------------------------*/
+/* Data entry forms                                                           */
+/*----------------------------------------------------------------------------*/
+
+.alt
+{
+  background-color: #e0e0e0;
+  padding-right: 50px;
+}
+
+.reg
+{
+  padding-right: 50px;
+}
+
+.cent
+{
+  text-align: center;
+}
+
+.formSection
+{
+  border:1px solid #c0c0c0; 
+  padding:10px;
+  border-radius: 3px;
+  -moz-border-radius: 3px; /* Firefox */
 }

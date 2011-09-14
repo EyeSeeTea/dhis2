@@ -97,7 +97,7 @@ public class TakeMySqlBackupAction
         }
         
         backupFilePath += "/" + "dhis2.sql";
-        
+        System.out.println(" MY-SQL Path is :" + mySqlPath );
         String backupCommand = "";
         
         try
@@ -111,6 +111,7 @@ public class TakeMySqlBackupAction
                 backupCommand = mySqlPath + "mysqldump -u "+ userName +" -p"+ password +" "+ dbName +" -r "+backupFilePath;
             }
             
+            System.out.println(" Backup Command is :" + backupCommand );
             Runtime rt = Runtime.getRuntime();
             
             Process process = rt.exec( backupCommand );
@@ -134,8 +135,10 @@ public class TakeMySqlBackupAction
             
             statusMessage = "Not able to take Backup, Please check MySQL configuration and SQL file path.";
         }
-
+        System.out.println(" Backup Path is :" + backupFilePath );
         return SUCCESS;
+        
+        
     }
-
+    
 }

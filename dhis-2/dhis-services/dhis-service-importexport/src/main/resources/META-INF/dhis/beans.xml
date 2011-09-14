@@ -217,12 +217,24 @@
     <property name="cacheManager" ref="cacheManager" />
   </bean>
 
+  <bean id="dxfv2StaXImporter" class="org.hisp.dhis.importexport.dxf2.service.StaXDataValueImportService">
+    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
+    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
+    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+    <property name="batchHandlerFactory" ref="batchHandlerFactory" />
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="aggregatedDataValueService" ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
+  </bean>
+
   <bean id="org.hisp.dhis.importexport.ImportService" class="org.hisp.dhis.importexport.DefaultImportService">
     <property name="converter" ref="dxfv1-Converter" />
+    <property name="dxf2converter" ref="dxfv2StaXImporter" />
     <property name="preConverter" ref="preConverter" />
   </bean>
 
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<!-- XSLT based import                                                    -->
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
@@ -268,11 +280,8 @@
 
   <bean id="org.hisp.dhis.importexport.PDFExportService" class="org.hisp.dhis.importexport.pdf.exporter.ITextPDFExportService">
     <property name="sessionFactory" ref="sessionFactory" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
+	<property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-    <property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
-    <property name="validationRuleService" ref="org.hisp.dhis.validation.ValidationRuleService" />
   </bean>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

@@ -42,6 +42,9 @@ import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.validation.ValidationRule;
 
 import com.lowagie.text.Document;
@@ -62,7 +65,7 @@ import com.lowagie.text.pdf.PdfWriter;
 public class PDFUtils
 {
     private static final String EMPTY = "";
-    
+
     /**
      * Creates a document.
      * 
@@ -202,34 +205,34 @@ public class PDFUtils
 
         return cell;
     }
-    
+
     public static PdfPCell getTitleCell( String text, int colspan )
     {
         return getCell( text, colspan, getBoldFont( 16 ), ALIGN_CENTER );
     }
-    
+
     public static PdfPCell getSubtitleCell( String text, int colspan )
     {
         return getCell( text, colspan, getItalicFont( 12 ), ALIGN_CENTER );
     }
-    
+
     public static PdfPCell getHeaderCell( String text, int colspan )
     {
         return getCell( text, colspan, getFont( 12 ), ALIGN_LEFT );
     }
-    
+
     public static PdfPCell getTextCell( String text )
     {
         return getCell( text, 1, getFont( 9 ), ALIGN_LEFT );
     }
-    
+
     public static PdfPCell getTextCell( Object object )
     {
         String text = object != null ? String.valueOf( object ) : EMPTY;
-        
+
         return getCell( text, 1, getFont( 9 ), ALIGN_LEFT );
     }
-    
+
     public static PdfPCell getItalicCell( String text )
     {
         return getCell( text, 1, getItalicFont( 9 ), ALIGN_LEFT );
@@ -241,10 +244,10 @@ public class PDFUtils
         cell.setPaddingBottom( bottom );
         cell.setPaddingLeft( left );
         cell.setPaddingRight( right );
- 
+
         return cell;
     }
-    
+
     /**
      * Creates an empty cell.
      * 
@@ -292,7 +295,7 @@ public class PDFUtils
         catch ( Exception ex )
         {
             throw new RuntimeException( "Error while creating base font", ex );
-        }        
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -307,8 +310,8 @@ public class PDFUtils
      * @param format The i18nFormat object
      * 
      */
-    public static void printObjectFrontPage( Document document, Collection<?> objectIds, I18n i18n,
-        I18nFormat format, String frontPageLabel )
+    public static void printObjectFrontPage( Document document, Collection<?> objectIds, I18n i18n, I18nFormat format,
+        String frontPageLabel )
     {
         if ( objectIds == null || objectIds.size() > 0 )
         {
@@ -373,7 +376,8 @@ public class PDFUtils
      *        multiple pages or should be kept at one page.
      * @param columnWidths The column widths.
      */
-    public static PdfPTable printDataElement( DataElement element, I18n i18n, boolean keepTogether, float... columnWidths )
+    public static PdfPTable printDataElement( DataElement element, I18n i18n, boolean keepTogether,
+        float... columnWidths )
     {
         PdfPTable table = getPdfPTable( keepTogether, columnWidths );
 
@@ -403,11 +407,16 @@ public class PDFUtils
         table.addCell( getItalicCell( i18n.getString( "active" ) ) );
         table.addCell( getTextCell( i18n.getString( getBoolean().get( element.isActive() ) ) ) );
 
-        table.addCell( getItalicCell( i18n.getString( "type" ) ) );
-        table.addCell( getTextCell( i18n.getString( getType().get( element.getType() ) ) ) );
-
-        table.addCell( getItalicCell( i18n.getString( "aggregation_operator" ) ) );
-        table.addCell( getTextCell( i18n.getString( getAggregationOperator().get( element.getAggregationOperator() ) ) ) );
+        if ( nullIfEmpty( element.getType() ) != null )
+        {
+            table.addCell( getItalicCell( i18n.getString( "value_type" ) ) );
+            table.addCell( getTextCell( i18n.getString( getType().get( element.getType() ) ) ) );
+        }
+        if ( nullIfEmpty( element.getAggregationOperator() ) != null )
+        {
+            table.addCell( getItalicCell( i18n.getString( "aggregation_operator" ) ) );
+            table.addCell( getTextCell( i18n.getString( getAggregationOperator().get( element.getAggregationOperator() ) ) ) );
+        }
 
         table.addCell( getEmptyCell( 2, 30 ) );
 
@@ -427,8 +436,8 @@ public class PDFUtils
      *        multiple pages or should be kept at one page.
      * @param columnWidths The column widths.
      */
-    public static PdfPTable printIndicator( Indicator indicator, I18n i18n, 
-        ExpressionService expressionService, boolean keepTogether, float... columnWidths )
+    public static PdfPTable printIndicator( Indicator indicator, I18n i18n, ExpressionService expressionService,
+        boolean keepTogether, float... columnWidths )
     {
         PdfPTable table = getPdfPTable( keepTogether, columnWidths );
 
@@ -464,8 +473,11 @@ public class PDFUtils
         table.addCell( getItalicCell( i18n.getString( "numerator_description" ) ) );
         table.addCell( getTextCell( indicator.getNumeratorDescription() ) );
 
-        table.addCell( getItalicCell( i18n.getString( "numerator_aggregation_operator" ) ) );
-        table.addCell( getTextCell( i18n.getString( getAggregationOperator().get( indicator.getNumeratorAggregationOperator() ) ) ) );
+        if ( nullIfEmpty( indicator.getNumeratorAggregationOperator() ) != null )
+        {
+            table.addCell( getItalicCell( i18n.getString( "numerator_aggregation_operator" ) ) );
+            table.addCell( getTextCell( i18n.getString( getAggregationOperator().get( indicator.getNumeratorAggregationOperator() ) ) ) );
+        }
 
         table.addCell( getItalicCell( i18n.getString( "numerator_formula" ) ) );
         table.addCell( getTextCell( expressionService.getExpressionDescription( indicator.getNumerator() ) ) );
@@ -473,8 +485,11 @@ public class PDFUtils
         table.addCell( getItalicCell( i18n.getString( "denominator_description" ) ) );
         table.addCell( getTextCell( indicator.getDenominatorDescription() ) );
 
-        table.addCell( getItalicCell( i18n.getString( "denominator_aggregation_operator" ) ) );
-        table.addCell( getTextCell( i18n.getString( getAggregationOperator().get( indicator.getDenominatorAggregationOperator() ) ) ) );
+        if ( nullIfEmpty( indicator.getDenominatorAggregationOperator() ) != null )
+        {
+            table.addCell( getItalicCell( i18n.getString( "denominator_aggregation_operator" ) ) );
+            table.addCell( getTextCell( i18n.getString( getAggregationOperator().get( indicator.getDenominatorAggregationOperator() ) ) ) );
+        }
 
         table.addCell( getItalicCell( i18n.getString( "denominator_formula" ) ) );
         table.addCell( getTextCell( expressionService.getExpressionDescription( indicator.getDenominator() ) ) );
@@ -497,7 +512,8 @@ public class PDFUtils
      *        multiple pages or should be kept at one page.
      * @param columnWidths The column widths.
      */
-    public static PdfPTable printOrganisationUnit( OrganisationUnit unit, I18n i18n, I18nFormat format, boolean keepTogether, float... columnWidths )
+    public static PdfPTable printOrganisationUnit( OrganisationUnit unit, I18n i18n, I18nFormat format,
+        boolean keepTogether, float... columnWidths )
     {
         PdfPTable table = getPdfPTable( keepTogether, columnWidths );
 
@@ -515,12 +531,12 @@ public class PDFUtils
         }
 
         table.addCell( getItalicCell( i18n.getString( "opening_date" ) ) );
-        table.addCell( getTextCell( unit.getOpeningDate() != null ? format.formatDate( unit.getOpeningDate() ) : "" ) );
+        table.addCell( getTextCell( unit.getOpeningDate() != null ? format.formatDate( unit.getOpeningDate() ) : EMPTY ) );
 
         if ( unit.getClosedDate() != null )
         {
             table.addCell( getItalicCell( i18n.getString( "closed_date" ) ) );
-            table.addCell( getTextCell( unit.getClosedDate() != null ? format.formatDate( unit.getClosedDate() ) : "" ) );
+            table.addCell( getTextCell( format.formatDate( unit.getClosedDate() ) ) );
         }
 
         table.addCell( getItalicCell( i18n.getString( "active" ) ) );
@@ -540,6 +556,77 @@ public class PDFUtils
     /**
      * Creates a table with the given validation rule
      * 
+     * @param user The User
+     * @param i18n i18n object
+     * @param format I18nFormat object
+     * @param keepTogether Indicates whether the table could be broken across
+     *        multiple pages or should be kept at one page.
+     * @param columnWidths The column widths.
+     */
+    public static PdfPTable printUser( UserCredentials userCredentials, I18n i18n, I18nFormat format,
+        boolean keepTogether, float... columnWidths )
+    {
+        User user = userCredentials.getUser();
+
+        PdfPTable table = getPdfPTable( keepTogether, columnWidths );
+
+        table.addCell( getHeaderCell( user.getFirstName() + ", " + user.getSurname(), 2 ) );
+
+        table.addCell( getEmptyCell( 2, 15 ) );
+
+        table.addCell( getItalicCell( i18n.getString( "username" ) ) );
+        table.addCell( getTextCell( userCredentials.getUsername() ) );
+
+        if ( nullIfEmpty( user.getEmail() ) != null )
+        {
+            table.addCell( getItalicCell( i18n.getString( "email" ) ) );
+            table.addCell( getTextCell( user.getEmail() ) );
+        }
+
+        if ( nullIfEmpty( user.getPhoneNumber() ) != null )
+        {
+            table.addCell( getItalicCell( i18n.getString( "phone_number" ) ) );
+            table.addCell( getTextCell( user.getPhoneNumber() ) );
+        }
+
+        table.addCell( getItalicCell( i18n.getString( "last_login" ) ) );
+        table.addCell( getTextCell( userCredentials.getLastLogin() != null ? format.formatDate( userCredentials
+            .getLastLogin() ) : EMPTY ) );
+
+        String temp = "";
+
+        for ( OrganisationUnit unit : user.getOrganisationUnits() )
+        {
+            temp += unit.getName().concat( ", " );
+        }
+
+        temp = temp.trim();
+        temp = temp.substring( 0, temp.isEmpty() ? 0 : temp.length() - 1 );
+
+        table.addCell( getItalicCell( i18n.getString( "organisation_units" ) ) );
+        table.addCell( getTextCell( temp ) );
+
+        temp = "";
+
+        for ( UserAuthorityGroup role : userCredentials.getUserAuthorityGroups() )
+        {
+            temp += role.getName().concat( ", " );
+        }
+
+        temp = temp.trim();
+        temp = temp.substring( 0, temp.isEmpty() ? 0 : temp.length() - 1 );
+
+        table.addCell( getItalicCell( i18n.getString( "roles" ) ) );
+        table.addCell( getTextCell( temp ) );
+
+        table.addCell( getEmptyCell( 2, 30 ) );
+
+        return table;
+    }
+
+    /**
+     * Creates a table with the given validation rule
+     * 
      * @param validationRule The validation rule
      * @param i18n i18n object
      * @param expressionService The expression service
@@ -550,7 +637,7 @@ public class PDFUtils
      *        multiple pages or should be kept at one page.
      * @param columnWidths The column widths.
      */
-    public static PdfPTable printValidationRule( ValidationRule validationRule, I18n i18n, 
+    public static PdfPTable printValidationRule( ValidationRule validationRule, I18n i18n,
         ExpressionService expressionService, boolean keepTogether, float... columnWidths )
     {
         PdfPTable table = getPdfPTable( keepTogether, columnWidths );
@@ -611,6 +698,7 @@ public class PDFUtils
         map.put( DataElement.VALUE_TYPE_STRING, "text" );
         map.put( DataElement.VALUE_TYPE_INT, "number" );
         map.put( DataElement.VALUE_TYPE_BOOL, "yes_no" );
+        map.put( DataElement.VALUE_TYPE_DATE, "date" );
         return map;
     }
 

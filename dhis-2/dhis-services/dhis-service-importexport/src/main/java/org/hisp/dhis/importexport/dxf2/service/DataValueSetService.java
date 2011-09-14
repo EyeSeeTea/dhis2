@@ -44,6 +44,7 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.importexport.dxf2.model.DataValueSet;
+import org.hisp.dhis.importexport.dxf2.model.DataValueSet.IdentificationStrategy;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.DailyPeriodType;
@@ -122,9 +123,14 @@ public class DataValueSetService
 
         Date timestamp = new Date();
 
+        IdentificationStrategy idStrategy = dataValueSet.getIdScheme();
+        if (idStrategy != DataValueSet.DEFAULT_STRATEGY) {
+            throw new IllegalArgumentException( "Onlu UUID id strategy supported currently." );
+        }
+
         DataSet dataSet = getDataSet( dataValueSet );
 
-        OrganisationUnit unit = getOrgUnit( dataValueSet.getOrganisationUnitUuid() );
+        OrganisationUnit unit = getOrgUnit( dataValueSet.getOrganisationUnitIdentifier());
 
         if ( !dataSet.getSources().contains( unit ) )
         {
@@ -147,7 +153,7 @@ public class DataValueSetService
     {
         DataSet dataSet = null;
 
-        String uuid = dataValueSet.getDataSetUuid();
+        String uuid = dataValueSet.getDataSetIdentifier();
         if ( uuid != null )
         {
             dataSet = dataSetService.getDataSet( uuid );
@@ -176,7 +182,7 @@ public class DataValueSetService
 
         for ( org.hisp.dhis.importexport.dxf2.model.DataValue value : dataValueSet.getDataValues() )
         {
-            DataElement dataElement = getDataElement( value.getDataElementUuid() );
+            DataElement dataElement = getDataElement( value.getDataElementIdentifier() );
             Set<DataSet> dataSets = dataElement.getDataSets();
 
             if ( dataSets == null || dataSets.isEmpty() )
@@ -224,7 +230,7 @@ public class DataValueSetService
     private void saveDataValue( Date timestamp, DataSet dataSet, OrganisationUnit unit, Period period,
         org.hisp.dhis.importexport.dxf2.model.DataValue dxfValue )
     {
-        DataElement dataElement = getDataElement( dxfValue.getDataElementUuid() );
+        DataElement dataElement = getDataElement( dxfValue.getDataElementIdentifier() );
 
         if ( !dataSet.getDataElements().contains( dataElement ) )
         {
@@ -232,7 +238,7 @@ public class DataValueSetService
                 + dataSet.getUuid() );
         }
 
-        DataElementCategoryOptionCombo combo = getOptionCombo( dxfValue.getCategoryOptionComboUuid(), dataElement );
+        DataElementCategoryOptionCombo combo = getOptionCombo( dxfValue.getCategoryOptionComboIdentifier(), dataElement );
 
         DataValue dv = dataValueService.getDataValue( unit, dataElement, period, combo );
 
@@ -240,7 +246,8 @@ public class DataValueSetService
 
         // dataElement.isValidValue(value);
 
-        String storedBy = getStoredBy( dxfValue );
+        String storedBy = currentUserService.getCurrentUsername();
+
 
         if ( dv == null )
         {
@@ -285,17 +292,6 @@ public class DataValueSetService
         }
     }
 
-    private String getStoredBy( org.hisp.dhis.importexport.dxf2.model.DataValue dxfValue )
-    {
-        String storedBy = dxfValue.getStoredBy();
-
-        if ( storedBy == null || storedBy.trim().equals( "" ) )
-        {
-            storedBy = currentUserService.getCurrentUsername();
-        }
-        return storedBy;
-    }
-
     private CompleteDataSetRegistration getComplete( DataSet dataSet, OrganisationUnit unit, Period period,
         String completeDateString, CompleteDataSetRegistration complete )
     {
@@ -328,24 +324,24 @@ public class DataValueSetService
         return period;
     }
 
-    private OrganisationUnit getOrgUnit( String uuid )
+    private OrganisationUnit getOrgUnit( String id)
     {
-        OrganisationUnit unit = organisationUnitService.getOrganisationUnit( uuid );
+        OrganisationUnit unit = organisationUnitService.getOrganisationUnit( id );
 
         if ( unit == null )
         {
-            throw new IllegalArgumentException( "Org unit with UUID " + uuid + " does not exist" );
+            throw new IllegalArgumentException( "Org unit with UUID " + id + " does not exist" );
         }
         return unit;
     }
 
-    private DataElement getDataElement( String uuid )
+    private DataElement getDataElement( String id )
     {
-        DataElement dataElement = dataElementService.getDataElement( uuid );
+        DataElement dataElement = dataElementService.getDataElement( id );
 
         if ( dataElement == null )
         {
-            throw new IllegalArgumentException( "Data element with UUID " + uuid + " does not exist" );
+            throw new IllegalArgumentException( "Data element with UUID " + id + " does not exist" );
         }
 
         return dataElement;

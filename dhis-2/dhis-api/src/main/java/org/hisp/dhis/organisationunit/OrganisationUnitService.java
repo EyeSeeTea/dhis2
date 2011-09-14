@@ -101,13 +101,30 @@ public interface OrganisationUnitService
     OrganisationUnit getOrganisationUnit( String uuid );
 
     /**
+     * Returns the OrganisationUnit with the given code.
+     *
+     * @param code the code of the OrganisationUnit to return.
+     * @return the OrganisationUnit with the given code, or null if no match.
+     */
+    OrganisationUnit getOrganisationUnitByCode( String code );
+
+    /**
      * Returns all OrganisationUnits.
      * 
      * @return a collection of all OrganisationUnits, or an empty collection if
      *         there are no OrganisationUnits.
      */
     Collection<OrganisationUnit> getAllOrganisationUnits();
-
+    
+    /**
+     * Returns all OrganisationUnits with corresponding name key based on the given list.
+     * 
+     * @param orgUnits the collection of organization unit objects.
+     * @param key the name key.
+     * @return a collection of OrganisationUnits.
+     */
+    void searchOrganisationUnitByName( List<OrganisationUnit> orgUnits, String key );
+    
     /**
      * Returns all OrganisationUnits with corresponding identifiers.
      * 
@@ -299,4 +316,10 @@ public interface OrganisationUnitService
     void updateOrganisationUnits( Collection<OrganisationUnit> units );
     
     Collection<OrganisationUnit> getOrganisationUnits( Boolean hasPatients );
+
+    // -------------------------------------------------------------------------
+    // Version
+    // -------------------------------------------------------------------------
+
+    void updateVersion();
 }

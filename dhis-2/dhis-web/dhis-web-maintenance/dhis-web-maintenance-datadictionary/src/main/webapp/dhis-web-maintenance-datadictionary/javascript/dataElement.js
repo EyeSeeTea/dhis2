@@ -1,3 +1,14 @@
+function exportPDF( type )
+{
+	var params = {
+		type: type,
+		key: jQuery( 'input[type=text][name=key]' ).val(),
+		dataDictionaryId: jQuery( '#dataDictionaryList' ).val()
+	};
+	
+	exportPdfByType( params );
+}
+
 function changeValueType( value )
 {
     if ( value == 'int' )
@@ -95,6 +106,14 @@ function dataElementReceived( dataElementElement )
     var lastUpdated = getElementValue( dataElementElement, 'lastUpdated' );
     setInnerHTML( 'lastUpdatedField', lastUpdated ? lastUpdated : '[' + i18n_none + ']' );
 
+	var temp = '';
+	var dataSets = dataElementElement.getElementsByTagName( 'dataSet' );
+	for ( var i = 0 ; i < dataSets.length ; i ++ )
+	{
+		temp += dataSets[i].firstChild.nodeValue + '<br/>';
+	}
+	setInnerHTML( 'dataSetsField', temp ? temp : '[' + i18n_none + ']' );
+	
     showDetails();
 }
 

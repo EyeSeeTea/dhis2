@@ -175,6 +175,14 @@ public interface UserService
      */
     void deleteUserCredentials( UserCredentials userCredentials );
 
+    /**
+     * Get the UserCredentials with the corresponding identifiers.
+     * 
+     * @param identifiers the collection of identifiers.
+     * @return a collection of users.
+     */
+    Collection<UserCredentials> getUsers( Collection<Integer> identifiers, User user );
+    
     Collection<UserCredentials> searchUsersByName( String key );
 
     Collection<UserCredentials> getUsersBetween( int first, int max );
@@ -189,7 +197,15 @@ public interface UserService
 
     Collection<UserCredentials> getUsersByOrganisationUnitBetweenByName( OrganisationUnit orgUnit, String name,
         int first, int max );
+    
+    Collection<UserCredentials> getInactiveUsers( int months );
+    
+    Collection<UserCredentials> getInactiveUsers( int months, int first, int max );
+    
+    int getInactiveUsersCount( int months );
 
+    int getActiveUsersCount( int days );
+    
     // -------------------------------------------------------------------------
     // UserAuthorityGroup
     // -------------------------------------------------------------------------
@@ -209,7 +225,7 @@ public interface UserService
      */
     void updateUserAuthorityGroup( UserAuthorityGroup userAuthorityGroup );
 
-    /**
+    /**2
      * Retrieves the UserAuthorityGroup with the given identifier.
      * 
      * @param id the identifier of the UserAuthorityGroup to retrieve.

@@ -39,41 +39,77 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType( XmlAccessType.FIELD )
 public class DataValueSet
 {
+   // ---------------------------------------------------------------------------
+   // Element and attribute names
+   // ---------------------------------------------------------------------------
 
-    @XmlAttribute( name = "dataSet" )
-    private String dataSetUuid;
+    public static final String ATTR_COMMENT = "comment";
 
-    @XmlAttribute( name = "orgUnit", required = true )
-    private String organisationUnitUuid;
+    public static final String ATTR_DATASET = "dataSet";
 
-    @XmlAttribute( name = "period", required = true )
+    public static final String ATTR_IDSCHEME = "idScheme";
+
+    public static final String ATTR_ORGUNIT = "orgUnit";
+
+    public static final String ATTR_PERIOD = "period";
+
+    public static final String ATTR_COMPLETE = "period";
+
+    public static final String DATAVALUE = "dataValue";
+
+    public enum IdentificationStrategy { INTERNAL, UUID, CODE  };
+
+    /**
+     *  A default strategy to use.
+     */
+    public static final IdentificationStrategy DEFAULT_STRATEGY = IdentificationStrategy.UUID;
+
+    @XmlAttribute( name = ATTR_DATASET )
+    private String dataSetIdentifier;
+
+    @XmlAttribute( name = ATTR_ORGUNIT )
+    private String organisationUnitIdentifier;
+
+    @XmlAttribute( name = ATTR_PERIOD, required = true )
     private String periodIsoDate;
 
-    @XmlAttribute( name = "complete" )
+    @XmlAttribute( name = ATTR_COMPLETE )
     private String completeDate;
 
-    @XmlElement( name = "dataValue" )
+    @XmlAttribute( name = ATTR_IDSCHEME )
+    private IdentificationStrategy idScheme;
+
+    @XmlElement( name = DATAVALUE )
     private List<DataValue> dataValues;
 
-    
-    public String getDataSetUuid()
+    public IdentificationStrategy getIdScheme()
     {
-        return dataSetUuid;
+        return (idScheme != null) ? idScheme : DEFAULT_STRATEGY;
     }
 
-    public void setDataSetUuid( String dataSetUuid )
+    public void setIdScheme( IdentificationStrategy idScheme )
     {
-        this.dataSetUuid = dataSetUuid;
+        this.idScheme = idScheme;
     }
 
-    public String getOrganisationUnitUuid()
+    public String getDataSetIdentifier()
     {
-        return organisationUnitUuid;
+        return dataSetIdentifier;
     }
 
-    public void setOrganisationUnitUuid( String organisationUnitUuid )
+    public void setDataSetIdentifier( String dataSetId )
     {
-        this.organisationUnitUuid = organisationUnitUuid;
+        this.dataSetIdentifier = dataSetId;
+    }
+
+    public String getOrganisationUnitIdentifier()
+    {
+        return organisationUnitIdentifier;
+    }
+
+    public void setOrganisationUnitIdentifier( String organisationUnitId )
+    {
+        this.organisationUnitIdentifier = organisationUnitId;
     }
 
     public String getPeriodIsoDate()
@@ -105,5 +141,4 @@ public class DataValueSet
     {
         this.dataValues = dataValues;
     }
-
 }

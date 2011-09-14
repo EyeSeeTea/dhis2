@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +52,6 @@ import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.UUIdUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.version.Version;
 import org.hisp.dhis.version.VersionService;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,8 +124,6 @@ public class DefaultOrganisationUnitService
 
         log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_EDIT,
             OrganisationUnit.class.getSimpleName(), organisationUnit.getName() ) );
-
-        updateVersion();
     }
 
     public void updateOrganisationUnit( OrganisationUnit organisationUnit, boolean updateHierarchy )
@@ -168,6 +166,19 @@ public class DefaultOrganisationUnitService
         return organisationUnitStore.getAll();
     }
 
+    public void searchOrganisationUnitByName( List<OrganisationUnit> orgUnits, String key )
+    {
+        Iterator<OrganisationUnit> iterator = orgUnits.iterator();
+        
+        while ( iterator.hasNext() )
+        {
+            if ( !iterator.next().getName().toLowerCase().contains( key.toLowerCase() ) )
+            {
+                iterator.remove();
+            }
+        }
+    }
+    
     public Collection<OrganisationUnit> getOrganisationUnits( final Collection<Integer> identifiers )
     {
         Collection<OrganisationUnit> objects = getAllOrganisationUnits();
@@ -189,6 +200,11 @@ public class DefaultOrganisationUnitService
     public OrganisationUnit getOrganisationUnitByName( String name )
     {
         return organisationUnitStore.getByName( name );
+    }
+
+    public OrganisationUnit getOrganisationUnitByCode( String code )
+    {
+        return organisationUnitStore.getByCode( code );
     }
 
     public OrganisationUnit getOrganisationUnitByNameIgnoreCase( String name )
@@ -651,8 +667,6 @@ public class DefaultOrganisationUnitService
     public void updateOrganisationUnits( Collection<OrganisationUnit> units )
     {
         organisationUnitStore.update( units );
-        
-        updateVersion();
     }
 
     @Override
@@ -661,23 +675,13 @@ public class DefaultOrganisationUnitService
         return organisationUnitStore.get( hasPatients );
     }
 
-    private void updateVersion()
+    // -------------------------------------------------------------------------
+    // Version
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void updateVersion()
     {
-        String uuid = UUID.randomUUID().toString();
-        Version orgUnitVersion = versionService.getVersionByKey( VersionService.ORGANISATIONUNIT_VERSION );
-
-        if ( orgUnitVersion == null )
-        {
-            orgUnitVersion = new Version();
-            orgUnitVersion.setKey( VersionService.ORGANISATIONUNIT_VERSION );
-            orgUnitVersion.setValue( uuid );
-
-            versionService.addVersion( orgUnitVersion );
-        }
-        else
-        {
-            orgUnitVersion.setValue( uuid );
-            versionService.updateVersion( orgUnitVersion );
-        }
+        versionService.updateVersion( VersionService.ORGANISATIONUNIT_VERSION, UUID.randomUUID().toString() );
     }
 }

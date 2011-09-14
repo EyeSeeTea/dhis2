@@ -155,8 +155,7 @@ var validationRules = {
             "required" : true
         },
         "sqlquery" : {
-            "required" : true,
-            "rangelength" : [ 1, 255 ]
+            "required" : true
         }
     },
     "dataLocking" : {
@@ -213,6 +212,11 @@ var validationRules = {
             "rangelength" : [ 3, 250 ],
             "alphanumericwithbasicpuncspaces" : true,
             "notOnlyDigits" : true
+        },
+        "formName" : {
+            "rangelength" : [ 2, 150 ],
+            "alphanumericwithbasicpuncspaces" : false,
+            "notOnlyDigits" : false
         },
         "url" : {
             "url" : true,
@@ -375,22 +379,36 @@ var validationRules = {
     "chartGroup" : {
         "name" : {
             "required" : true,
-			"rangelength" : [ 3, 230 ],
+            "rangelength" : [ 3, 230 ],
             "alphanumericwithbasicpuncspaces" : true
-		}
+        }
     },
     "reportGroup" : {
         "name" : {
             "required" : true,
-			"rangelength" : [ 3, 230 ],
+            "rangelength" : [ 3, 230 ],
             "alphanumericwithbasicpuncspaces" : true
-		}
+        }
     },
     "reportTableGroup" : {
         "name" : {
             "required" : true,
-			"rangelength" : [ 3, 230 ],
+            "rangelength" : [ 3, 230 ],
             "alphanumericwithbasicpuncspaces" : true
-		}
+        }
+    },
+    "attribute" : {
+        "name" : {
+            "required" : true,
+            "rangelength" : [ 3, 230 ],
+            "alphanumericwithbasicpuncspaces" : true
+        }
+    },
+    "attributeOption" : {
+        "name" : {
+            "required" : true,
+            "rangelength" : [ 3, 230 ],
+            "alphanumericwithbasicpuncspaces" : true
+        }
     }
 };

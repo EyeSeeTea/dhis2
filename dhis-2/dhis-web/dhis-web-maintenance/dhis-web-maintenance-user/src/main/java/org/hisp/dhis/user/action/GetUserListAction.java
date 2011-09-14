@@ -102,32 +102,56 @@ public class GetUserListAction
         return key;
     }
 
+    private Integer months;
+
+    public Integer getMonths()
+    {
+        return months;
+    }
+
+    public void setMonths( Integer months )
+    {
+        this.months = months;
+    }
+
     // -------------------------------------------------------------------------
     // Action implemantation
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
-    {        
+    {
         if ( isNotBlank( key ) ) // Filter on key only if set
         {
             this.paging = createPaging( userService.getUserCountByName( key ) );
-            
-            userCredentialsList = new ArrayList<UserCredentials>( userService.getUsersBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
+
+            userCredentialsList = new ArrayList<UserCredentials>( userService.getUsersBetweenByName( key, paging
+                .getStartPos(), paging.getPageSize() ) );
+
+            Collections.sort( userCredentialsList, new UsernameComparator() );
+        }
+        else if ( months != null && months != 0 )
+        {
+            this.paging = createPaging( userService.getInactiveUsersCount( months ) );
+
+            userCredentialsList = new ArrayList<UserCredentials>( userService.getInactiveUsers( months, paging
+                .getStartPos(), paging.getPageSize() ) );
         }
         else
         {
             this.paging = createPaging( userService.getUserCount() );
-            
-            userCredentialsList = new ArrayList<UserCredentials>( userService.getUsersBetween( paging.getStartPos(), paging.getPageSize() ) );
+
+            userCredentialsList = new ArrayList<UserCredentials>( userService.getUsersBetween( paging.getStartPos(),
+                paging.getPageSize() ) );
+
+            Collections.sort( userCredentialsList, new UsernameComparator() );
         }
 
-        FilterUtils.filter( userCredentialsList, new UserCredentialsCanUpdateFilter( currentUserService.getCurrentUser() ) );
-        
-        Collections.sort( userCredentialsList, new UsernameComparator() );
+        FilterUtils.filter( userCredentialsList, new UserCredentialsCanUpdateFilter( currentUserService
+            .getCurrentUser() ) );
 
         currentUserName = currentUserService.getCurrentUsername();
-        
+
         return SUCCESS;
     }
 }

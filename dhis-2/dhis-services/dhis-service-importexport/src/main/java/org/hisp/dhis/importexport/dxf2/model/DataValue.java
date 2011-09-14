@@ -27,44 +27,86 @@ package org.hisp.dhis.importexport.dxf2.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyAttribute;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.namespace.QName;
 
 @XmlAccessorType( XmlAccessType.FIELD )
 public class DataValue
 {
+   // ---------------------------------------------------------------------------
+   // Element and attribute names
+   // ---------------------------------------------------------------------------
 
-    @XmlAttribute( name = "dataElement", required = true )
-    private String dataElementUuid;
+    public static final String ATTR_DATAELEMENT = "dataElement";
 
-    @XmlAttribute( name = "categoryOptionCombo" )
-    private String categoryOptionComboUuid;
+    public static final String ATTR_VALUE = "value";
 
-    @XmlAttribute
-    private String storedBy;
+    public static final String ATTR_CATEGORY_OPTION_COMBO = "categoryOptionCombo";
 
-    @XmlAttribute
+    public static final String ATTR_ORGUNIT = "orgunit";
+
+    @XmlAttribute( name = ATTR_DATAELEMENT, required = true )
+    private String dataElementIdentifier;
+
+    @XmlAttribute( name = ATTR_VALUE, required = true)
     private String value;
 
-    public String getDataElementUuid()
+    /**
+     * optional - defaults to default
+     */
+    @XmlAttribute( name = ATTR_CATEGORY_OPTION_COMBO )
+    private String categoryOptionComboIdentifier;
+
+    /**
+     * optional - defaults to orgUnit id from datavalueset
+     */
+    @XmlAttribute( name = ATTR_ORGUNIT )
+    private String orgUnitIdentifier;
+
+    /**
+     * Arbitrary attributes identifying dimensions by concept name
+     */
+    @XmlAnyAttribute
+    Map<QName,Object> dimensions;
+
+    public String getDataElementIdentifier()
     {
-        return dataElementUuid;
+        return dataElementIdentifier;
     }
 
-    public void setDataElementUuid( String dataElementUuid )
+    public void setDataElementIdentifier( String dataElementId )
     {
-        this.dataElementUuid = dataElementUuid;
+        this.dataElementIdentifier = dataElementId;
     }
 
-    public String getCategoryOptionComboUuid()
+    public String getCategoryOptionComboIdentifier()
     {
-        return categoryOptionComboUuid;
+        return categoryOptionComboIdentifier;
     }
 
-    public void setCategoryOptionComboUuid( String categoryOptionComboUuid )
+    public void setCategoryOptionComboIdentifier( String categoryOptionComboId )
     {
-        this.categoryOptionComboUuid = categoryOptionComboUuid;
+        this.categoryOptionComboIdentifier = categoryOptionComboId;
+    }
+
+    public Map<QName, Object> getDimensions()
+    {
+        if ( dimensions == null )
+        {
+            dimensions = new HashMap<QName,Object>();
+        }
+        
+        return dimensions;
+    }
+
+    public void setDimensions( Map<QName, Object> dimensions )
+    {
+        this.dimensions = dimensions;
     }
 
     public String getValue()
@@ -76,15 +118,4 @@ public class DataValue
     {
         this.value = value;
     }
-
-    public String getStoredBy()
-    {
-        return storedBy;
-    }
-
-    public void setStoredBy( String storedBy )
-    {
-        this.storedBy = storedBy;
-    }
-
 }

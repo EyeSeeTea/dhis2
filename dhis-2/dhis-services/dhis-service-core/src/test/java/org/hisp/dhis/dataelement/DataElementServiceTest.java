@@ -173,6 +173,45 @@ public class DataElementServiceTest
     }
 
     @Test
+    public void testGetDataElementByCode()
+        throws Exception
+    {
+        DataElement dataElementA = createDataElement( 'A' );
+        DataElement dataElementB = createDataElement( 'B' );
+        DataElement dataElementC1 = createDataElement( 'C' );
+        DataElement dataElementC2 = createDataElement( 'D' );
+
+        dataElementA.setCode( "codeA");
+        dataElementB.setCode( "codeB");
+        dataElementC1.setCode( "codeC");
+        dataElementC2.setCode( "codeC");
+
+
+        int idA = dataElementService.addDataElement( dataElementA );
+        int idB = dataElementService.addDataElement( dataElementB );
+        int idC1 = dataElementService.addDataElement( dataElementC1 );
+        int idC2 = dataElementService.addDataElement( dataElementC2 );
+
+        dataElementA = dataElementService.getDataElementByCode( "codeA" );
+        assertNotNull( dataElementA );
+        assertEquals( idA, dataElementA.getId() );
+        assertEquals( "DataElementA", dataElementA.getName() );
+
+        dataElementB = dataElementService.getDataElementByCode( "codeB" );
+        assertNotNull( dataElementB );
+        assertEquals( idB, dataElementB.getId() );
+        assertEquals( "DataElementB", dataElementB.getName() );
+
+        try {
+            dataElementService.getDataElementByCode( "codeC" );
+            assertEquals("Should have thrown exception","not thrown");
+        } catch (org.hibernate.NonUniqueResultException e ) {}
+        
+        DataElement dataElementE = dataElementService.getDataElementByCode( "codeE" );
+        assertNull(dataElementE);
+    }
+
+    @Test
     public void testGetDataElementByName()
         throws Exception
     {

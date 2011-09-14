@@ -1,10 +1,9 @@
 
 #currentSelection
 {
-  color: black;
   padding: 6px;
-  background-color: #d5ffc5;
-  border: 1px solid black;
+  background-color: #e0e0e0;
+  border: 1px solid #a0a0a0;
   font-size: 14px;
   text-align: right;
   position: fixed;
@@ -14,6 +13,12 @@
   opacity: 0.85;
   border-radius: 3px;
   -moz-border-radius: 3px; /* Firefox */
+}
+
+.currentRow
+{
+  background-color: #d5ffc5;
+  padding-right: 50px;
 }
 
 #actions
@@ -26,31 +31,4 @@
 .hidden 
 {
   display: none;
-}
-
-.minmax
-{
-  background-color: #ff6600;
-}
-
-.alt
-{
-  background-color: #e0e0e0;
-  padding-right: 50px;
-}
-
-.reg
-{
-  padding-right: 50px;
-}
-
-.currentRow
-{
-  background-color: #d5ffc5;
-  padding-right: 50px;
-}
-
-.cent
-{
-  text-align: center;
 }

@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.AbstractNameableObject;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.PeriodType;
@@ -65,16 +66,15 @@ public class DataElement
     private static final long serialVersionUID = -7131541880444446669L;
 
     public static final String VALUE_TYPE_STRING = "string";
-    
+
     public static final String VALUE_TYPE_INT = "int";
 
     public static final String VALUE_TYPE_NUMBER = "number";
-    
+
     public static final String VALUE_TYPE_POSITIVE_INT = "positiveNumber";
-    
+
     public static final String VALUE_TYPE_NEGATIVE_INT = "negativeNumber";
-    
-    
+
     public static final String VALUE_TYPE_BOOL = "bool";
 
     public static final String VALUE_TYPE_DATE = "date";
@@ -89,6 +89,8 @@ public class DataElement
 
     public static final String AGGREGATION_OPERATOR_COUNT = "count";
 
+    private String formName;
+    
     /**
      * If this DataElement is active or not (enabled or disabled).
      */
@@ -110,7 +112,7 @@ public class DataElement
      * The number type. Is relevant when type is INT.
      */
     private String numberType;
-    
+
     /**
      * The aggregation operator of this DataElement; e.g. DataElement.SUM og
      * DataElement.AVERAGE.
@@ -168,6 +170,11 @@ public class DataElement
      */
     private Boolean zeroIsSignificant;
 
+    /**
+     * Set of the dynamic attributes values that belong to this dataElement.
+     */
+    private Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -223,19 +230,19 @@ public class DataElement
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-    
+
     public void addDataElementGroup( DataElementGroup group )
     {
         groups.add( group );
         group.getMembers().add( this );
     }
-    
+
     public void removeDataElementGroup( DataElementGroup group )
     {
         groups.remove( group );
         group.getMembers().remove( this );
     }
-    
+
     public void updateDataElementGroups( Set<DataElementGroup> updates )
     {
         for ( DataElementGroup group : new HashSet<DataElementGroup>( groups ) )
@@ -245,13 +252,13 @@ public class DataElement
                 removeDataElementGroup( group );
             }
         }
-        
+
         for ( DataElementGroup group : updates )
         {
             addDataElementGroup( group );
         }
     }
-    
+
     /**
      * Returns the value type. If value type is int and the number type exists,
      * the number type is returned, if the type is int and the number type does
@@ -259,7 +266,7 @@ public class DataElement
      */
     public String getDetailedNumberType()
     {
-        return ( type != null && type.equals( VALUE_TYPE_INT ) && numberType != null )  ? numberType : type;
+        return (type != null && type.equals( VALUE_TYPE_INT ) && numberType != null) ? numberType : type;
     }
 
     /**
@@ -267,10 +274,10 @@ public class DataElement
      */
     public boolean isZeroIsSignificant()
     {
-        return zeroIsSignificant != null && zeroIsSignificant;    
-        
+        return zeroIsSignificant != null && zeroIsSignificant;
+
     }
-    
+
     /**
      * Returns the PeriodType of the DataElement, based on the PeriodType of the
      * DataSet which the DataElement is registered for.
@@ -279,7 +286,7 @@ public class DataElement
     {
         return dataSets != null && dataSets.size() > 0 ? dataSets.iterator().next().getPeriodType() : null;
     }
-    
+
     /**
      * Returns the frequency order for the PeriodType of this DataElement. If no
      * PeriodType exists, 0 is returned.
@@ -287,7 +294,7 @@ public class DataElement
     public int getFrequencyOrder()
     {
         PeriodType periodType = getPeriodType();
-        
+
         return periodType != null ? periodType.getFrequencyOrder() : YearlyPeriodType.FREQUENCY_ORDER;
     }
 
@@ -353,21 +360,36 @@ public class DataElement
     }
 
     public String toJSON()
-    {   
-        StringBuffer result = new StringBuffer();        
-        
+    {
+        StringBuffer result = new StringBuffer();
+
         result.append( "{" );
         result.append( "\"id\":\"" + this.id + "\"" );
         result.append( ",\"name\":\"" + StringEscapeUtils.escapeJavaScript( this.name ) + "\"" );
         result.append( ",\"shortName\":\"" + StringEscapeUtils.escapeJavaScript( this.shortName ) + "\"" );
         result.append( ",\"type\":\"" + StringEscapeUtils.escapeJavaScript( this.type ) + "\"" );
-        result.append( "}" );        
+        result.append( "}" );
         return result.toString();
+    }
+    
+    public String getFormNameFallback()
+    {
+        return formName != null && !formName.isEmpty() ? formName : name;
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
+
+    public String getFormName()
+    {
+        return formName;
+    }
+
+    public void setFormName( String formName )
+    {
+        this.formName = formName;
+    }
 
     public boolean isActive()
     {
@@ -517,5 +539,15 @@ public class DataElement
     public void setNumberType( String numberType )
     {
         this.numberType = numberType;
+    }
+
+    public Set<AttributeValue> getAttributeValues()
+    {
+        return attributeValues;
+    }
+
+    public void setAttributeValues( Set<AttributeValue> attributeValues )
+    {
+        this.attributeValues = attributeValues;
     }
 }

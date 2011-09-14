@@ -1,5 +1,6 @@
 package org.hisp.dhis.user;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
@@ -7,7 +8,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.system.filter.UserCredentialsCanUpdateFilter;
 import org.hisp.dhis.system.util.AuditLogUtil;
+import org.hisp.dhis.system.util.Filter;
+import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /*
@@ -46,18 +51,18 @@ public class DefaultUserService
     implements UserService
 {
     private static final Log log = LogFactory.getLog( DefaultUserService.class );
-    
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
     private CurrentUserService currentUserService;
-    
+
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
     }
-    
+
     private UserStore userStore;
 
     public void setUserStore( UserStore userStore )
@@ -133,32 +138,26 @@ public class DefaultUserService
 
     public int addUser( User user )
     {
-        log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
-            AuditLogUtil.ACTION_ADD , 
-            User.class.getSimpleName(), 
-            user.getName()) );
-        
+        log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_ADD, User.class
+            .getSimpleName(), user.getName() ) );
+
         return userStore.addUser( user );
     }
 
     public void deleteUser( User user )
     {
         userStore.deleteUser( user );
-        
-        log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
-            AuditLogUtil.ACTION_DELETE , 
-            User.class.getSimpleName(), 
-            user.getName()) );
+
+        log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_DELETE,
+            User.class.getSimpleName(), user.getName() ) );
     }
 
     public void updateUser( User user )
     {
         userStore.updateUser( user );
 
-        log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(),
-                AuditLogUtil.ACTION_EDIT , 
-                User.class.getSimpleName(), 
-                user.getName()) );
+        log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_EDIT,
+            User.class.getSimpleName(), user.getName() ) );
     }
 
     public Collection<User> getAllUsers()
@@ -179,6 +178,22 @@ public class DefaultUserService
     public int getUserCountByName( String userName )
     {
         return userStore.getUserCountByName( userName );
+    }
+
+    public Collection<UserCredentials> getUsers( final Collection<Integer> identifiers, User user )
+    {
+        Collection<UserCredentials> userCredentialsS = getAllUserCredentials();
+
+        FilterUtils.filter( userCredentialsS, new UserCredentialsCanUpdateFilter( user ) );
+
+        return identifiers == null ? userCredentialsS : FilterUtils.filter( userCredentialsS,
+            new Filter<UserCredentials>()
+            {
+                public boolean retain( UserCredentials object )
+                {
+                    return identifiers.contains( object.getId() );
+                }
+            } );
     }
 
     public Collection<UserCredentials> getUsersByOrganisationUnitBetween( OrganisationUnit unit, int first, int max )
@@ -221,7 +236,7 @@ public class DefaultUserService
     {
         return userStore.getUsersWithoutOrganisationUnitCountByName( userName );
     }
-    
+
     // -------------------------------------------------------------------------
     // UserAuthorityGroup
     // -------------------------------------------------------------------------
@@ -292,7 +307,7 @@ public class DefaultUserService
             }
         }
     }
-    
+
     // -------------------------------------------------------------------------
     // UserCredentials
     // -------------------------------------------------------------------------
@@ -351,12 +366,44 @@ public class DefaultUserService
     {
         return userStore.searchUsersByName( username );
     }
-    
+
     public void setLastLogin( String username )
     {
         UserCredentials credentials = getUserCredentialsByUsername( username );
         credentials.setLastLogin( new Date() );
-        updateUserCredentials( credentials );        
+        updateUserCredentials( credentials );
+    }
+
+    public Collection<UserCredentials> getInactiveUsers( int months )
+    {
+        Calendar cal = PeriodType.createCalendarInstance();
+        cal.add( Calendar.MONTH, (months * -1) );
+        
+        return userStore.getInactiveUsers( cal.getTime() );
+    }
+
+    public Collection<UserCredentials> getInactiveUsers( int months, int first, int max )
+    {
+        Calendar cal = PeriodType.createCalendarInstance();
+        cal.add( Calendar.MONTH, (months * -1) );
+
+        return userStore.getInactiveUsers( cal.getTime(), first, max );
+    }
+
+    public int getInactiveUsersCount( int months )
+    {
+        Calendar cal = PeriodType.createCalendarInstance();
+        cal.add( Calendar.MONTH, (months * -1) );
+
+        return userStore.getInactiveUsersCount( cal.getTime() );
+    }
+
+    public int getActiveUsersCount( int days )
+    {
+        Calendar cal = PeriodType.createCalendarInstance();
+        cal.add( Calendar.DAY_OF_YEAR, (days * -1) );
+
+        return userStore.getActiveUsersCount( cal.getTime() );
     }
 
     // -------------------------------------------------------------------------

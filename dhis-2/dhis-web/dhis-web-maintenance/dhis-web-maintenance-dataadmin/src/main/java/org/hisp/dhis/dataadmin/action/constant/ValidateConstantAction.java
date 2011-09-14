@@ -102,7 +102,7 @@ public class ValidateConstantAction
 
             if ( match != null && (id == null || match.getId() != id) )
             {
-                message = i18n.getString( "name_in_used" );
+                message = i18n.getString( "name_in_use" );
 
                 return ERROR;
             }

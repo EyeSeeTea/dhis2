@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 @XmlAccessorType( XmlAccessType.FIELD )
 public class Link
 {
-
     @XmlAttribute( name = "id", required = true )
     private String id;
 
@@ -46,5 +45,10 @@ public class Link
     {
         this.name = name;
     }
-
+    
+    @Override
+    public String toString()
+    {
+        return "[id: " + id + ", href: " + href + ", name: " + name + "]"; 
+    }
 }
