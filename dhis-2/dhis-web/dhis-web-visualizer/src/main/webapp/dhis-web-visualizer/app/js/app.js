@@ -190,7 +190,32 @@ Ext.onReady( function() {
     DV.data = {
         data: null,
         
+        getParams: function() {
+            // TODO finne dimensions
+        },
+        
         getData: function() {
+            //var url = DV.conf.finals.ajax.url_visualizer + 'getAggregatedData.action';
+            //Ext.Array.each(
+            
+            var p = '?indicatorIds=52486&indicatorIds=52491&periodIds=1149560&periodIds=1149559&organisationUnitIds=264';
+            
+            Ext.Ajax.request({
+                url: DV.conf.finals.ajax.url_visualizer + 'getAggregatedIndicatorValues.action' + p,
+                success: function(r) {
+                    var data = Ext.JSON.decode(r.responseText);
+                    console.log(data);
+                    return;
+                }
+            });
+                
+            
+            
+            
+            
+            
+            
+            
             this.data = [
                 { x: 'August 2010', 'anc 1': 12, anc2: 12, anc3: 5, anc4: 3 },
                 { x: 'September 2010', 'anc 1': 5, anc2: 23, anc3: 16, anc4: 5 },
@@ -442,9 +467,12 @@ Ext.onReady( function() {
                             {
                                 xtype: 'combobox',
                                 style: 'margin-bottom:8px',
+                                width: 255,
                                 valueField: 'id',
                                 displayField: 'name',
-                                fieldLabel: 'Indicator group',
+                                fieldLabel: 'Group',
+                                labelWidth: 50,
+                                labelStyle: 'padding-left:7px;',
                                 editable: false,
                                 queryMode: 'remote',
                                 store: Ext.create('Ext.data.Store', {
@@ -479,9 +507,12 @@ Ext.onReady( function() {
                             {
                                 xtype: 'combobox',
                                 style: 'margin-bottom:8px',
+                                width: 255,
                                 valueField: 'id',
                                 displayField: 'name',
-                                fieldLabel: 'Data element group',
+                                fieldLabel: 'Group',
+                                labelWidth: 50,
+                                labelStyle: 'padding-left:7px;',
                                 editable: false,
                                 queryMode: 'remote',
                                 store: Ext.create('Ext.data.Store', {
@@ -516,9 +547,12 @@ Ext.onReady( function() {
                             {
                                 xtype: 'combobox',
                                 style: 'margin-bottom:8px',
+                                width: 255,
                                 valueField: 'name',
                                 displayField: 'displayName',
-                                fieldLabel: 'Period type',
+                                fieldLabel: 'Type',
+                                labelWidth: 50,
+                                labelStyle: 'padding-left:7px;',
                                 editable: false,
                                 queryMode: 'remote',
                                 store: Ext.create('Ext.data.Store', {
@@ -646,33 +680,10 @@ Ext.onReady( function() {
         ],
         listeners: {
             resize: function(vp) {
-                vp.query('panel[region="west"]')[0].setWidth(565); //vp.getWidth() / 2
+                vp.query('panel[region="west"]')[0].setWidth(562); //vp.getWidth() / 2
             }
         }
     });
     
     }});
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

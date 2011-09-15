@@ -6,6 +6,11 @@
     color: #777;
 }
 
+/* Combobox text position*/
+.x-webkit .x-form-empty-field {
+    line-height: 14px;
+}
+
 /* Combobox font size */
 .x-form-text, textarea.x-form-field {
     font-size: 10px;
@@ -14,17 +19,14 @@
 /* Combobox field label font */
 .x-form-item-label {
     font: 11px arial;
-}
-
-/* Text position in combobox */
-.x-webkit .x-form-empty-field {
-    line-height: 14px;
+    color: #222;
 }
 
 /* ItemSelector title */
 .x-panel-header-text-default {
     font-weight: normal;
-    color: #000;
+    color: #222;
+    padding-left: 2px;
 }
 
 /* Splitter column */
@@ -34,7 +36,7 @@
 
 /* Fieldset border */
 .x-fieldset {
-    border: 1px solid #d4d4d4;
+    border: 1px solid #ddd;
     border-radius: 2px 2px 2px 2px;
     -moz-border-radius: 2px 2px 2px 2px;
     -webkit-border-radius: 2px 2px 2px 2px;
@@ -52,9 +54,14 @@
     height: 17px;
 }
 
-/* Panel (treepanel) border */
+/* (Tree)Panel border */
 .x-panel .x-grid-body {
     border-style: none;
+}
+
+.x-boundlist-item {
+    color:#333;
+    padding: 2px 2px 2px 4px;
 }
 
 /* DHIS */
@@ -65,7 +72,7 @@ body {
 
 li {
    font-size: 10px;
-   color: #222;
+   color: #000;
 }
 
 
