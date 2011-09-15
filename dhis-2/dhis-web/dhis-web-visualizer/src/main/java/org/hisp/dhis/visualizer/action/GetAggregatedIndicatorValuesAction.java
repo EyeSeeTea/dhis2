@@ -99,6 +99,8 @@ public class GetAggregatedIndicatorValuesAction
         {
             object = aggregatedDataValueService.getAggregatedIndicatorValues( indicatorIds, periodIds,
                 organisationUnitIds );
+            
+System.out.println(object.size());            
         }
 
         return SUCCESS;

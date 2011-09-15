@@ -32,7 +32,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.visualizer.action.GetAggregatedIndicatorValuesAction"
 		scope="prototype">
 		<property name="aggregatedDataValueService"
-			ref="org.hisp.dhis.aggregation.DefaultAggregatedDataValueService" />
+			ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
 	</bean>
     
     <!-- AggregatedDataValue -->
@@ -41,7 +41,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         class="org.hisp.dhis.visualizer.action.GetAggregatedDataValuesAction"
         scope="prototype">
         <property name="aggregatedDataValueService"
-            ref="org.hisp.dhis.aggregation.DefaultAggregatedDataValueService" />
+            ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
     </bean>
 	
 </beans>
