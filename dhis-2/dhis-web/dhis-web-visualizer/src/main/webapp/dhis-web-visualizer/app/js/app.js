@@ -31,7 +31,7 @@ Ext.onReady( function() {
             },
             itemSelector: null,
             addItemSelector: function(s) {
-                var fs = DV.app.util.getCmp('fieldset[name="indicators"]');
+                var fs = DV.app.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]');
                 
                 if (s.itemSelector) {
                     fs.remove(s.itemSelector, true);
@@ -56,8 +56,6 @@ Ext.onReady( function() {
                         }
                     }
                 });
-                
-                s.itemSelector.setValue(['52486','52491']);
             },
             listeners: {
                 'load': function(s) {
@@ -79,7 +77,7 @@ Ext.onReady( function() {
             },
             itemSelector: null,
             addItemSelector: function(s) {
-                var fs = DV.app.util.getCmp('fieldset[name="dataelements"]');
+                var fs = DV.app.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.dataelement + '"]');
                 
                 if (s.itemSelector) {
                     fs.remove(s.itemSelector, true);
@@ -125,7 +123,7 @@ Ext.onReady( function() {
             },
             itemSelector: null,
             addItemSelector: function(s) {
-                var fs = DV.app.util.getCmp('fieldset[name="periods"]');
+                var fs = DV.app.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period + '"]');
                 
                 if (s.itemSelector) {
                     fs.remove(s.itemSelector, true);
@@ -327,6 +325,7 @@ Ext.onReady( function() {
                                         index = 0;
                                         
                                     c.enable();
+                                    DV.app.util.getCmp('fieldset[name="' + cb.getValue() + '"]').expand();
                                     
                                     if (v === i || v === d) {
                                         cb.filter = [false, false, true, true];
@@ -381,6 +380,7 @@ Ext.onReady( function() {
                                         index = 0;
                                         
                                     f.enable();
+                                    DV.app.util.getCmp('fieldset[name="' + cb.getValue() + '"]').expand();
                                     
                                     cb.filter = Ext.Array.clone(s.filter);
                                     
@@ -393,7 +393,7 @@ Ext.onReady( function() {
                                     }
                                     else if (cb.getValue() === o) {
                                         cb.filter[3] = false;
-                                    }   
+                                    }
                                     
                                     f.store.filterBy( function(r) {
                                         return cb.filter[index++];
@@ -419,14 +419,20 @@ Ext.onReady( function() {
                             displayField: 'name',
                             width: 90,
                             disabled: true,
-                            store: DV.stores.dimension()
+                            store: DV.stores.dimension(),
+                            listeners: {
+                                select: function(cb) {
+                                    DV.app.util.getCmp('fieldset[name="' + cb.getValue() + '"]').expand();
+                                }
+                            }                                    
                         }
                     ],
                     items: [
                         {
                             xtype: 'fieldset',
-                            name: 'indicators',
+                            name: DV.conf.finals.dimension.indicator,
                             title: '<span style="padding:0 5px; font-weight:bold; color:black">Indicators</span>',
+                            collapsed: true,
                             collapsible: true,
                             items: [
                                 {
@@ -461,8 +467,9 @@ Ext.onReady( function() {
                         
                         {
                             xtype: 'fieldset',
-                            name: 'dataelements',
+                            name: DV.conf.finals.dimension.dataelement,
                             title: '<span style="padding:0 5px; font-weight:bold; color:black">Data elements</span>',
+                            collapsed: true,
                             collapsible: true,
                             items: [
                                 {
@@ -497,8 +504,9 @@ Ext.onReady( function() {
                         
                         {
                             xtype: 'fieldset',
-                            name: 'periods',
+                            name: DV.conf.finals.dimension.period,
                             title: '<span style="padding:0 5px; font-weight:bold; color:black">Periods</span>',
+                            collapsed: true,
                             collapsible: true,
                             items: [
                                 {
@@ -533,8 +541,9 @@ Ext.onReady( function() {
                         
                         {
                             xtype: 'fieldset',
-                            name: 'organisationunits',
+                            name: DV.conf.finals.dimension.organisationunit,
                             title: '<span style="padding:0 5px; font-weight:bold; color:black">Organisation units</span>',
+                            collapsed: true,
                             collapsible: true,
                             items: [
                                 {
@@ -557,48 +566,6 @@ Ext.onReady( function() {
                                 }
                             ]
                         }
-                                    
-                                    
-                                    
-                                    
-                                    //this.cmp.parent = new Ext.tree.TreePanel({
-                                        //cls: 'treepanel-layer-border',
-                                        //autoScroll: true,
-                                        //lines: false,
-                                        //loader: new Ext.tree.TreeLoader({
-                                            //dataUrl: G.conf.path_mapping + 'getOrganisationUnitChildren' + G.conf.type
-                                        //}),
-                                        //root: {
-                                            //id: G.system.rootNode.id,
-                                            //text: G.system.rootNode.name,
-                                            //level: G.system.rootNode.level,
-                                            //hasChildrenWithCoordinates: G.system.rootNode.hasChildrenWithCoordinates,
-                                            //nodeType: 'async',
-                                            //draggable: false,
-                                            //expanded: true
-                                        //},
-                                        //widget: this,
-                                        //isLoaded: false,
-                                        //reset: function() {
-                                            //if (this.getSelectionModel().getSelectedNode()) {
-                                                //this.getSelectionModel().getSelectedNode().unselect();
-                                            //}                
-                                            //this.collapseAll();
-                                            //this.getRootNode().expand();
-                                            //this.widget.window.cmp.apply.disable();
-                                        //},
-                                        //listeners: {
-                                            //'click': {
-                                                //scope: this,
-                                                //fn: function(n) {
-                                                    //var tree = n.getOwnerTree();
-                                                    //tree.selectedNode = n;
-                                                    //this.requireUpdate = true;
-                                                    //this.formValidation.validateForm.call(this);
-                                                //}
-                                            //}
-                                        //}
-                                    //});
                     ],
                     listeners: {
                         collapse: function(p) {                    
