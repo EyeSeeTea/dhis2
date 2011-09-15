@@ -17,6 +17,12 @@ DV.conf = {
             dataelement: 'dataelement',
             period: 'period',
             organisationunit: 'organisationunit'
+        },
+        
+        chart: {
+            column: 'column',
+            line: 'line',
+            pie: 'pie'
         }
     }
 };

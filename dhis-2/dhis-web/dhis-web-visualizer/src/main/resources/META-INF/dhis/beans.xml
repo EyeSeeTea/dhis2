@@ -34,5 +34,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="aggregatedDataValueService"
 			ref="org.hisp.dhis.aggregation.DefaultAggregatedDataValueService" />
 	</bean>
+    
+    <!-- AggregatedDataValue -->
+
+    <bean id="org.hisp.dhis.visualizer.action.GetAggregatedDataValuesAction"
+        class="org.hisp.dhis.visualizer.action.GetAggregatedDataValuesAction"
+        scope="prototype">
+        <property name="aggregatedDataValueService"
+            ref="org.hisp.dhis.aggregation.DefaultAggregatedDataValueService" />
+    </bean>
 	
 </beans>
