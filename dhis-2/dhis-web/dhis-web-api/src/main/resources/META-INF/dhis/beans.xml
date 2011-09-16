@@ -37,6 +37,14 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
   </bean>
 
+  <bean id="org.hisp.dhis.web.api.resources.ChartResource" class="org.hisp.dhis.web.api.resources.ChartResource"
+	scope="prototype">
+	<property name="chartService" ref="org.hisp.dhis.chart.ChartService"/>
+	<property name="i18nManager" ref="org.hisp.dhis.i18n.I18nManager"/>
+  </bean>
+
+  <!-- Marshallers -->
+
   <bean id="JacksonJaxbJsonProvider" class="org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider" scope="singleton" />
 
   <!-- ImportDataValue -->
@@ -50,11 +58,5 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   </bean>
 
   <bean id="org.hisp.dhis.web.api.resources.VelocityManager" class="org.hisp.dhis.web.api.resources.VelocityManager" />
-
-  <!-- JSONP "api/jsonp/*" -->
-  <bean id="org.hisp.dhis.web.api.resources.DataSetsResourceP" class="org.hisp.dhis.web.api.resources.DataSetsResourceP"
-    scope="prototype">
-    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-  </bean>
 
 </beans>
