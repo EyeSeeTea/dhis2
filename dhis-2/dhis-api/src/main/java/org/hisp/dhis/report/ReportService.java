@@ -28,14 +28,9 @@ package org.hisp.dhis.report;
  */
 
 import java.io.OutputStream;
-import java.sql.SQLException;
 import java.util.Collection;
 
-import net.sf.jasperreports.engine.JRException;
-
 import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.report.Report;
-import org.hisp.dhis.report.ReportGroup;
 
 /**
  * @author Lars Helge Overland
@@ -44,6 +39,9 @@ import org.hisp.dhis.report.ReportGroup;
 public interface ReportService
 {
     final String ID = ReportService.class.getName();
+    
+    final String REPORTTYPE_PDF = "pdf";
+    final String REPORTTYPE_XLS = "xls";
 
     public void renderReport( OutputStream out, int id, Integer reportingPeriod, 
         Integer organisationUnitId, String type, I18nFormat format );

@@ -47,7 +47,7 @@ import org.hisp.dhis.util.StreamActionSupport;
 public class RenderReportAction
     extends StreamActionSupport
 {
-    private static final String DEFAULT_TYPE = "pdf";
+    private static final String DEFAULT_TYPE = ReportService.REPORTTYPE_PDF;
     
     // -------------------------------------------------------------------------
     // Dependencies
