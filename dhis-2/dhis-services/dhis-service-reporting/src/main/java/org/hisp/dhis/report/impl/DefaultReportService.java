@@ -29,13 +29,11 @@ package org.hisp.dhis.report.impl;
 
 import java.io.OutputStream;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -54,8 +52,8 @@ import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.system.util.StreamUtils;
 import org.hisp.dhis.system.util.JRExportUtils;
+import org.hisp.dhis.system.util.StreamUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -118,46 +116,52 @@ public class DefaultReportService
 
     public void renderReport( OutputStream out, int id, Integer reportingPeriod, 
         Integer organisationUnitId, String type, I18nFormat format )
-            throws JRException, SQLException
     {
         Report report = getReport( id );
         
         Map<String, Object> params = new HashMap<String, Object>();
         
         params.putAll( constantService.getConstantParameterMap() );
-                
-        JasperReport jasperReport = JasperCompileManager.compileReport( StreamUtils.getInputStream( report.getDesignContent() ) );
         
-        JasperPrint print = null;
-
-        if ( report.hasReportTable() ) // Use JR data source
+        try
         {
-            ReportTable reportTable = report.getReportTable();
+            JasperReport jasperReport = JasperCompileManager.compileReport( StreamUtils.getInputStream( report.getDesignContent() ) );
             
-            params.putAll( reportTable.getOrganisationUnitGroupMap( organisationUnitGroupService.getCompulsoryOrganisationUnitGroupSets() ) );
-            
-            Grid grid = reportTableService.getReportTableGrid( reportTable.getId(), format, reportingPeriod, organisationUnitId );
-            
-            print = JasperFillManager.fillReport( jasperReport, params, grid );
-        }
-        else // Assume SQL report and provide JDBC connection
-        {
-            Connection connection = statementManager.getHolder().getConnection();
-            
-            try
+            JasperPrint print = null;
+    
+            if ( report.hasReportTable() ) // Use JR data source
             {
-                print = JasperFillManager.fillReport( jasperReport, params, connection );
+                ReportTable reportTable = report.getReportTable();
+                
+                params.putAll( reportTable.getOrganisationUnitGroupMap( organisationUnitGroupService.getCompulsoryOrganisationUnitGroupSets() ) );
+                
+                Grid grid = reportTableService.getReportTableGrid( reportTable.getId(), format, reportingPeriod, organisationUnitId );
+                
+                print = JasperFillManager.fillReport( jasperReport, params, grid );
             }
-            finally
-            {        
-                connection.close();
+            else // Assume SQL report and provide JDBC connection
+            {
+                Connection connection = statementManager.getHolder().getConnection();
+                
+                try
+                {
+                    print = JasperFillManager.fillReport( jasperReport, params, connection );
+                }
+                finally
+                {        
+                    connection.close();
+                }
+            }
+            
+            if ( print != null )
+            {
+                JRExportUtils.export( type, out, print );
             }
         }
-        
-        if ( print != null )
+        catch ( Exception ex )
         {
-            JRExportUtils.export( type, out, print );
-        }        
+            throw new RuntimeException( "Failed to render report", ex );
+        }
     }
     
     public int saveReport( Report report )

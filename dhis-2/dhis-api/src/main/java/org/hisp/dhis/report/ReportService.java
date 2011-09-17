@@ -46,8 +46,8 @@ public interface ReportService
     final String ID = ReportService.class.getName();
 
     public void renderReport( OutputStream out, int id, Integer reportingPeriod, 
-        Integer organisationUnitId, String type, I18nFormat format )
-            throws JRException, SQLException;
+        Integer organisationUnitId, String type, I18nFormat format );
+    
     /**
      * Saves a Report.
      * 
