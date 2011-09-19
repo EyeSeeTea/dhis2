@@ -1,5 +1,4 @@
 Ext.onReady( function() {
-    
     Ext.Ajax.request({
         url: DV.conf.finals.ajax.url_visualizer + 'initialize.action',
         success: function(r) {
@@ -66,9 +65,19 @@ Ext.onReady( function() {
                     }
                 });
             },
+            storage: {},
+            addToStorage: function(s) {
+                st = this.storage;
+                s.each( function(r) {
+                    if (!st['_'+r.data.id]) {
+                        st['_'+r.data.id] = { name: r.data.shortName, group: s.param };
+                    }
+                });
+            },
             listeners: {
                 'load': function(s) {
                     s.addItemSelector(s);
+                    s.addToStorage(s);
                 }
             }
         }),
@@ -188,32 +197,54 @@ Ext.onReady( function() {
     };
     
     DV.data = {
-        data: null,
         
-        getParams: function() {
-            // TODO finne dimensions
-        },
+        values: null,
         
-        getData: function() {
-            //var url = DV.conf.finals.ajax.url_visualizer + 'getAggregatedData.action';
-            //Ext.Array.each(
-            
-            var p = '?indicatorIds=52486&indicatorIds=52491&periodIds=1149560&periodIds=1149559&organisationUnitIds=264';
+        getValues: function() {            
+            var p = '?indicatorIds=52486&indicatorIds=52491&indicatorIds=52487&periodIds=1091452&periodIds=1023570&periodIds=1023571&organisationUnitIds=264';
             
             Ext.Ajax.request({
                 url: DV.conf.finals.ajax.url_visualizer + 'getAggregatedIndicatorValues.action' + p,
                 success: function(r) {
-                    var data = Ext.JSON.decode(r.responseText);
-                    console.log(data);
-                    return;
+                    DV.data.values = Ext.JSON.decode(r.responseText).aggregatedIndicatorValues;
+                    DV.data.getData();
                 }
             });
+        },
+        
+        data: null,
+        
+        getData: function() {
+            Ext.Array.each(DV.data.values, function(item, i) {     
+                item[DV.conf.finals.dimension.indicator] = DV.store.indicator.storage['_'+item.i].name;
+                //item[DV.conf.finals.dimension.period] = DV.store.period.storage['_'+item.i].name;
+            });
+            
+            var dimensions = DV.data.getDimensions(),
+                data = [];
+                
+            for (var i = 0; i < DV.data.values.length; i++) {
+                var r = {};
+                
+                
+                
+            //TODO løpe gjennom og lagre alle distinct columns
+            
+            //så løpe gjennom for hver column og adde series
+            
+            
+            
+            
+            
+            
+           
                 
             
-            
-            
-            
-            
+            //{"v":"187.9","i":"52487","p":"1023571","o":"264"}
+            //{"v":"113.3","i":"52491","p":"1023570","o":"264"}
+            //{"v":"150.2","i":"52486","p":"1023571","o":"264"}
+            //{"v":"110.5","i":"52486","p":"1091452","o":"264"}
+            //{"v":"77.6","i":"52487","p":"1091452","o":"264"}
             
             
             this.data = [
@@ -223,7 +254,18 @@ Ext.onReady( function() {
                 { x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 16, anc4: 5 }
             ];
             return this.data;
-        }
+        },
+        
+        dimensions: null,
+        
+        getDimensions: function() {
+            this.dimensions = {
+                series: DV.util.getCmp('combobox[name="series"]').getValue(),
+                columns: DV.util.getCmp('combobox[name="columns"]').getValue(),
+                filter: DV.util.getCmp('combobox[name="filter"]').getValue()
+            };
+            return this.dimensions;
+        },
     };
     
     DV.chart = {
@@ -454,6 +496,14 @@ Ext.onReady( function() {
                                 DV.util.getCmp('fieldset[name="' + cb.getValue() + '"]').expand();
                             }
                         }                                    
+                    },
+                    ' ',' ',
+                    {
+                        xtype: 'button',
+                        text: 'Load..',
+                        handler: function() {
+                            DV.data.getValues();
+                        }
                     }
                 ],
                 items: [
@@ -489,6 +539,7 @@ Ext.onReady( function() {
                                 listeners: {
                                     select: function(cb) {
                                         var store = DV.store.indicator;
+                                        store.param = cb.getValue();
                                         store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
                                         store.load();
                                     }
@@ -672,7 +723,7 @@ Ext.onReady( function() {
                         xtype: 'button',
                         text: 'Exit..',
                         handler: function() {
-                            window.location.href = DV.conf.finals.url_portal + 'redirect' + DV.conf.finals.action;
+                            window.location.href = DV.conf.finals.ajax.url_portal + 'redirect.action';
                         }
                     }
                 ]
