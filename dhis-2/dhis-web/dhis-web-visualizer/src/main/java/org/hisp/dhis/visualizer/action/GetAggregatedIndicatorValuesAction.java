@@ -98,9 +98,7 @@ public class GetAggregatedIndicatorValuesAction
         if ( indicatorIds != null && periodIds != null && organisationUnitIds != null )
         {
             object = aggregatedDataValueService.getAggregatedIndicatorValues( indicatorIds, periodIds,
-                organisationUnitIds );
-            
-System.out.println(object.size());            
+                organisationUnitIds );      
         }
 
         return SUCCESS;

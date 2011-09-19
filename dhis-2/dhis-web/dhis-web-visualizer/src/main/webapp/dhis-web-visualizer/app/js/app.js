@@ -1,4 +1,8 @@
 Ext.onReady( function() {
+    
+    //TODO legge til for period
+    
+    
     Ext.Ajax.request({
         url: DV.conf.finals.ajax.url_visualizer + 'initialize.action',
         success: function(r) {
@@ -121,9 +125,19 @@ Ext.onReady( function() {
                     }
                 });
             },
+            storage: {},
+            addToStorage: function(s) {
+                st = this.storage;
+                s.each( function(r) {
+                    if (!st['_'+r.data.id]) {
+                        st['_'+r.data.id] = { name: r.data.shortName, group: s.param };
+                    }
+                });
+            },
             listeners: {
                 'load': function(s) {
                     s.addItemSelector(s);
+                    s.addToStorage(s);
                 }
             }
         }),
@@ -206,7 +220,7 @@ Ext.onReady( function() {
             Ext.Ajax.request({
                 url: DV.conf.finals.ajax.url_visualizer + 'getAggregatedIndicatorValues.action' + p,
                 success: function(r) {
-                    DV.data.values = Ext.JSON.decode(r.responseText).aggregatedIndicatorValues;
+                    DV.data.values = Ext.JSON.decode(r.responseText).values;
                     DV.data.getData();
                 }
             });
@@ -221,30 +235,45 @@ Ext.onReady( function() {
             });
             
             var dimensions = DV.data.getDimensions(),
-                data = [];
+                series = [],
+                columns = [];
                 
+            
             for (var i = 0; i < DV.data.values.length; i++) {
-                var r = {};
+                Ext.Array.include(columns, [DV.data.values[i][dimensions.columns]]);
+            }
+            
+console.log(columns);return;
+            
+            for (var j = 0; j < DV.data.values.length; j++) {
+                for (k = 0; k < columns.length; k++) {
+                    if (DV.data.values[j][dimensions.columns] === columns[k]) {
+                        var obj = {};
+                        obj[DV.data.values[j][dimensions.series]] = DV.data.values[j].v;
+                        columns[k].push(obj);
+                    }
+                }
+            }
+            
+console.log(columns);return;            
+            
+      
                 
-                
-                
-            //TODO løpe gjennom og lagre alle distinct columns
             
-            //så løpe gjennom for hver column og adde series
+            //{"v":"187.9", "indicator":"anc1", "period":"okt", "o":"264"},
+            //{"v":"113.3", "indicator":"anc2", "period":"nov", "o":"264"},
+            //{"v":"150.2", "indicator":"anc3", "period":"okt", "o":"264"},
+            //{"v":"110.5", "indicator":"anc3", "period":"des", "o":"264"},
+            //{"v":"77.6", "indicator":"anc1", "period":"des", "o":"264"},
+            //{"v":"103.9", "indicator":"anc2", "period":"des", "o":"264"},
+            //{"v":"139.9", "indicator":"anc2", "period":"okt", "o":"264"},
+            //{"v":"149.5", "indicator":"anc3", "period":"nov", "o":"264"},
+            //{"v":"94.6", "indicator":"anc1", "period":"nov", "o":"264"}
             
             
             
             
             
-            
-           
-                
-            
-            //{"v":"187.9","i":"52487","p":"1023571","o":"264"}
-            //{"v":"113.3","i":"52491","p":"1023570","o":"264"}
-            //{"v":"150.2","i":"52486","p":"1023571","o":"264"}
-            //{"v":"110.5","i":"52486","p":"1091452","o":"264"}
-            //{"v":"77.6","i":"52487","p":"1091452","o":"264"}
             
             
             this.data = [
