@@ -545,41 +545,28 @@ Ext.onReady( function() {
                     {
                         xtype: 'fieldset',
                         name: DV.conf.finals.dimension.indicator,
-                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Indicators</span>',
+                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Indicators by group</span>',
                         collapsed: true,
                         collapsible: true,
                         items: [
                             {
-                                xtype: 'combobox',
-                                style: 'margin-bottom:8px',
-                                width: 255,
-                                valueField: 'id',
-                                displayField: 'name',
-                                fieldLabel: 'Group',
-                                labelWidth: 50,
-                                labelStyle: 'padding-left:7px;',
-                                editable: false,
-                                queryMode: 'remote',
-                                store: Ext.create('Ext.data.Store', {
-                                    fields: ['id', 'name'],
+                                xtype: 'treepanel',
+                                height: 300,
+                                width: 517,
+                                autoScroll: true,
+                                multiSelect: true,
+                                store: Ext.create('Ext.data.TreeStore', {
                                     proxy: {
                                         type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroups.action',
-                                        reader: {
-                                            type: 'json',
-                                            root: 'indicatorGroups'
-                                        }                                                
+                                        url: DV.conf.finals.ajax.url_visualizer + 'getIndicatorTreeNodes.action'
+                                    },
+                                    root: {
+                                        id: 0,
+                                        text: '',
+                                        expanded: true
                                     }
-                                }),
-                                listeners: {
-                                    select: function(cb) {
-                                        var store = DV.store.indicator;
-                                        store.param = cb.getValue();
-                                        store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
-                                        store.load();
-                                    }
-                                }
-                            }                                
+                                })
+                            }
                         ]
                     },
                     
