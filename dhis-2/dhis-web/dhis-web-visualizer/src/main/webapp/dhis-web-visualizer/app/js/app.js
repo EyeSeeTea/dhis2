@@ -1,8 +1,4 @@
 Ext.onReady( function() {
-    
-    //TODO legge til for period
-    
-    
     Ext.Ajax.request({
         url: DV.conf.finals.ajax.url_visualizer + 'initialize.action',
         success: function(r) {
@@ -73,8 +69,8 @@ Ext.onReady( function() {
             addToStorage: function(s) {
                 st = this.storage;
                 s.each( function(r) {
-                    if (!st['_'+r.data.id]) {
-                        st['_'+r.data.id] = { name: r.data.shortName, group: s.param };
+                    if (!st[r.data.id]) {
+                        st[r.data.id] = { name: r.data.shortName, group: s.param };
                     }
                 });
             },
@@ -129,8 +125,8 @@ Ext.onReady( function() {
             addToStorage: function(s) {
                 st = this.storage;
                 s.each( function(r) {
-                    if (!st['_'+r.data.id]) {
-                        st['_'+r.data.id] = { name: r.data.shortName, group: s.param };
+                    if (!st[r.data.id]) {
+                        st[r.data.id] = { name: r.data.shortName, group: s.param };
                     }
                 });
             },
@@ -181,9 +177,19 @@ Ext.onReady( function() {
                     }
                 });
             },
+            storage: {},
+            addToStorage: function(s) {
+                st = this.storage;
+                s.each( function(r) {
+                    if (!st[r.data.id]) {
+                        st[r.data.id] = { name: r.data.name, group: s.param };
+                    }
+                });
+            },
             listeners: {
                 'load': function(s) {
                     s.addItemSelector(s);
+                    s.addToStorage(s);
                 }
             }
         }),
@@ -230,8 +236,8 @@ Ext.onReady( function() {
         
         getData: function() {
             Ext.Array.each(DV.data.values, function(item, i) {     
-                item[DV.conf.finals.dimension.indicator] = DV.store.indicator.storage['_'+item.i].name;
-                //item[DV.conf.finals.dimension.period] = DV.store.period.storage['_'+item.i].name;
+                item[DV.conf.finals.dimension.indicator] = DV.store.indicator.storage[item.i].name;
+                item[DV.conf.finals.dimension.period] = DV.store.period.storage[item.i].name;
             });
             
             var dimensions = DV.data.getDimensions(),
@@ -243,7 +249,7 @@ Ext.onReady( function() {
                 Ext.Array.include(columns, [DV.data.values[i][dimensions.columns]]);
             }
             
-console.log(columns);return;
+//console.log(columns);return;
             
             for (var j = 0; j < DV.data.values.length; j++) {
                 for (k = 0; k < columns.length; k++) {
@@ -255,7 +261,7 @@ console.log(columns);return;
                 }
             }
             
-console.log(columns);return;            
+//console.log(columns);return;            
             
       
                 
@@ -609,6 +615,7 @@ console.log(columns);return;
                                 listeners: {
                                     select: function(cb) {
                                         var store = DV.store.dataElement;
+                                        store.param = cb.getValue();
                                         store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
                                         store.load();
                                     }
@@ -649,6 +656,7 @@ console.log(columns);return;
                                 listeners: {
                                     select: function(cb) {
                                         var store = DV.store.period;
+                                        store.param = cb.getValue();
                                         store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'name=' + cb.getValue());
                                         store.load();
                                     }
