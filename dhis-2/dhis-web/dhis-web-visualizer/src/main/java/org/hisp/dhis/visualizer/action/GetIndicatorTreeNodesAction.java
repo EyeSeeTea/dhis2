@@ -29,13 +29,13 @@ package org.hisp.dhis.visualizer.action;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
+import org.hisp.dhis.indicator.comparator.IndicatorGroupNameComparator;
+import org.hisp.dhis.indicator.comparator.IndicatorNameComparator;
 
 import com.opensymphony.xwork2.Action;
 
@@ -54,20 +54,6 @@ public class GetIndicatorTreeNodesAction
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
-    }
-
-    private Comparator<IndicatorGroup> indicatorGroupComparator;
-
-    public void setIndicatorGroupComparator( Comparator<IndicatorGroup> indicatorGroupComparator )
-    {
-        this.indicatorGroupComparator = indicatorGroupComparator;
-    }
-
-    private Comparator<Indicator> indicatorComparator;
-
-    public void setIndicatorComparator( Comparator<Indicator> indicatorComparator )
-    {
-        this.indicatorComparator = indicatorComparator;
     }
 
     // -------------------------------------------------------------------------
@@ -113,7 +99,7 @@ public class GetIndicatorTreeNodesAction
             {
                 groups = new ArrayList<IndicatorGroup>( indicatorService.getAllIndicatorGroups() );
                 
-                //Collections.sort( groups, indicatorGroupComparator );
+                Collections.sort( groups, new IndicatorGroupNameComparator() );
                 
                 return "groups";
             }
@@ -122,7 +108,7 @@ public class GetIndicatorTreeNodesAction
             {
                 members = new ArrayList<Indicator>( indicatorService.getIndicatorGroup( node ).getMembers() );
                 
-                Collections.sort( members, indicatorComparator );
+                Collections.sort( members, new IndicatorNameComparator() );
                 
                 return "members";
             }

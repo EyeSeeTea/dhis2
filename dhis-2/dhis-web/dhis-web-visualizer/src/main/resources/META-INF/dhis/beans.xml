@@ -40,6 +40,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <bean id="org.hisp.dhis.visualizer.action.GetPeriodTreeNodesAction"
         class="org.hisp.dhis.visualizer.action.GetPeriodTreeNodesAction"
         scope="prototype">
+        <property name="periodStore"
+            ref="org.hisp.dhis.period.PeriodStore" />
         <property name="periodService"
             ref="org.hisp.dhis.period.PeriodService" />
     </bean>

@@ -35,6 +35,8 @@ import java.util.List;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
+import org.hisp.dhis.dataelement.comparator.DataElementNameComparator;
 
 import com.opensymphony.xwork2.Action;
 
@@ -53,20 +55,6 @@ public class GetDataElementTreeNodesAction
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
-    }
-
-    private Comparator<DataElementGroup> dataElementGroupComparator;
-
-    public void setDataElementGroupComparator( Comparator<DataElementGroup> dataElementGroupComparator )
-    {
-        this.dataElementGroupComparator = dataElementGroupComparator;
-    }
-
-    private Comparator<DataElement> dataElementComparator;
-
-    public void setDataElementComparator( Comparator<DataElement> dataElementComparator )
-    {
-        this.dataElementComparator = dataElementComparator;
     }
 
     // -------------------------------------------------------------------------
@@ -112,7 +100,7 @@ public class GetDataElementTreeNodesAction
             {
                 groups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
 
-                Collections.sort( groups, dataElementGroupComparator );
+                Collections.sort( groups, new DataElementGroupNameComparator() );
 
                 return "groups";
             }
@@ -121,7 +109,7 @@ public class GetDataElementTreeNodesAction
             {
                 members = new ArrayList<DataElement>( dataElementService.getDataElementGroup( node ).getMembers() );
 
-                Collections.sort( members, dataElementComparator );
+                Collections.sort( members, new DataElementNameComparator() );
 
                 return "members";
             }

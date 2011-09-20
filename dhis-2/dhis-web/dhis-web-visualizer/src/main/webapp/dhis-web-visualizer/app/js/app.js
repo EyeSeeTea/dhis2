@@ -555,6 +555,7 @@ Ext.onReady( function() {
                                 width: 517,
                                 autoScroll: true,
                                 multiSelect: true,
+                                rootVisible: false,
                                 store: Ext.create('Ext.data.TreeStore', {
                                     proxy: {
                                         type: 'ajax',
@@ -573,82 +574,58 @@ Ext.onReady( function() {
                     {
                         xtype: 'fieldset',
                         name: DV.conf.finals.dimension.dataelement,
-                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Data elements</span>',
+                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Data elements by group</span>',
                         collapsed: true,
                         collapsible: true,
                         items: [
                             {
-                                xtype: 'combobox',
-                                style: 'margin-bottom:8px',
-                                width: 255,
-                                valueField: 'id',
-                                displayField: 'name',
-                                fieldLabel: 'Group',
-                                labelWidth: 50,
-                                labelStyle: 'padding-left:7px;',
-                                editable: false,
-                                queryMode: 'remote',
-                                store: Ext.create('Ext.data.Store', {
-                                    fields: ['id', 'name'],
+                                xtype: 'treepanel',
+                                height: 300,
+                                width: 517,
+                                autoScroll: true,
+                                multiSelect: true,
+                                rootVisible: false,
+                                store: Ext.create('Ext.data.TreeStore', {
                                     proxy: {
                                         type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_commons + 'getDataElementGroups.action',
-                                        reader: {
-                                            type: 'json',
-                                            root: 'dataElementGroups'
-                                        }                                                
+                                        url: DV.conf.finals.ajax.url_visualizer + 'getDataElementTreeNodes.action'
+                                    },
+                                    root: {
+                                        id: 0,
+                                        text: '',
+                                        expanded: true
                                     }
-                                }),
-                                listeners: {
-                                    select: function(cb) {
-                                        var store = DV.store.dataElement;
-                                        store.param = cb.getValue();
-                                        store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
-                                        store.load();
-                                    }
-                                }
-                            }                                
+                                })
+                            }
                         ]
                     },
                     
                     {
                         xtype: 'fieldset',
                         name: DV.conf.finals.dimension.period,
-                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Periods</span>',
+                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Periods by type</span>',
                         collapsed: true,
                         collapsible: true,
                         items: [
                             {
-                                xtype: 'combobox',
-                                style: 'margin-bottom:8px',
-                                width: 255,
-                                valueField: 'name',
-                                displayField: 'displayName',
-                                fieldLabel: 'Type',
-                                labelWidth: 50,
-                                labelStyle: 'padding-left:7px;',
-                                editable: false,
-                                queryMode: 'remote',
-                                store: Ext.create('Ext.data.Store', {
-                                    fields: ['name', 'displayName'],
+                                xtype: 'treepanel',
+                                height: 300,
+                                width: 517,
+                                autoScroll: true,
+                                multiSelect: true,
+                                rootVisible: false,
+                                store: Ext.create('Ext.data.TreeStore', {
                                     proxy: {
                                         type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_commons + 'getPeriodTypes.action',
-                                        reader: {
-                                            type: 'json',
-                                            root: 'periodTypes'
-                                        }                                                
+                                        url: DV.conf.finals.ajax.url_visualizer + 'getPeriodTreeNodes.action'
+                                    },
+                                    root: {
+                                        id: 0,
+                                        text: '',
+                                        expanded: true
                                     }
-                                }),
-                                listeners: {
-                                    select: function(cb) {
-                                        var store = DV.store.period;
-                                        store.param = cb.getValue();
-                                        store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'name=' + cb.getValue());
-                                        store.load();
-                                    }
-                                }
-                            }                                
+                                })
+                            }
                         ]
                     },
                     

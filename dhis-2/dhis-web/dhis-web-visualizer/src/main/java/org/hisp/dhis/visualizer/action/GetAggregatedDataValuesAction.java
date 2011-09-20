@@ -31,7 +31,6 @@ import java.util.Collection;
 
 import org.hisp.dhis.aggregation.AggregatedDataValue;
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
-import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
 
 import com.opensymphony.xwork2.Action;
 

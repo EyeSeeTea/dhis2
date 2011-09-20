@@ -29,12 +29,16 @@ package org.hisp.dhis.visualizer.action;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.comparator.PeriodComparator;
+import org.hisp.dhis.system.filter.PastAndCurrentPeriodFilter;
+import org.hisp.dhis.system.util.FilterUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -48,6 +52,13 @@ public class GetPeriodTreeNodesAction
     // Dependencies
     // -------------------------------------------------------------------------
 
+    private PeriodStore periodStore;
+
+    public void setPeriodStore( PeriodStore periodStore )
+    {
+        this.periodStore = periodStore;
+    }
+
     private PeriodService periodService;
 
     public void setPeriodService( PeriodService periodService )
@@ -55,18 +66,11 @@ public class GetPeriodTreeNodesAction
         this.periodService = periodService;
     }
 
-    private Comparator<PeriodType> periodGroupComparator;
+    private I18nFormat format;
 
-    public void setPeriodGroupComparator( Comparator<PeriodType> periodGroupComparator )
+    public void setFormat( I18nFormat format )
     {
-        this.periodGroupComparator = periodGroupComparator;
-    }
-
-    private Comparator<Period> periodComparator;
-
-    public void setPeriodComparator( Comparator<Period> periodComparator )
-    {
-        this.periodComparator = periodComparator;
+        this.format = format;
     }
 
     // -------------------------------------------------------------------------
@@ -110,24 +114,28 @@ public class GetPeriodTreeNodesAction
         {
             if ( node == 0 )
             {
-                groups = new ArrayList<PeriodType>( periodService.getAllPeriodTypes() );
-
-                // Collections.sort( groups, periodGroupComparator );
+                groups = new ArrayList<PeriodType>( periodStore.getAllPeriodTypes() );
 
                 return "groups";
             }
 
             else
             {
-                members = new ArrayList<Period>( periodService.getPeriodsByPeriodType( periodService
-                    .getPeriodType( node ) ) );
-
-                Collections.sort( members, periodComparator );
+                members = new ArrayList<Period>( periodService.getPeriodsByPeriodType( periodService.getPeriodType( node ) ) );
+                
+                FilterUtils.filter( members, new PastAndCurrentPeriodFilter() );
+                
+                for ( Period period : members )
+                {
+                    period.setName( format.formatPeriod( period ) );
+                }
+                
+                Collections.sort( members, new PeriodComparator() );
 
                 return "members";
             }
         }
 
         return NONE;
-    }
+    }    
 }
