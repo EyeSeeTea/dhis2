@@ -11,6 +11,30 @@ Ext.onReady( function() {
         getViewportSize: function() {
             var c = DV.util.getCmp('panel[region="center"]');
             return { x: c.getWidth(), y: c.getHeight() };
+        },
+        multiselect: {
+            select: function(a, s, g) {
+                var selected = a.getValue();
+                if (selected.length) {
+                    Ext.Array.each(selected, function(item) {
+                        s.store.add({
+                            id: item,
+                            shortName: a.store.getAt(a.store.find('id', item)).data.shortName,
+                            parent: g.getValue()
+                        });
+                    });
+                    
+                    a.store.filterBy( function(r) {
+                        var filter = true;
+                        s.store.each( function(r2) {
+                            if (r.data.id === r2.data.id) {
+                                filter = false;
+                            }
+                        });
+                        return filter;
+                    });
+                }
+            }
         }
     };
     
@@ -27,60 +51,39 @@ Ext.onReady( function() {
             });
         },
         
-        indicator: Ext.create('Ext.data.Store', {
-            fields: ['id', 'name', 'shortName'],
-            proxy: {
-                type: 'ajax',
-                baseUrl: DV.conf.finals.ajax.url_commons + 'getIndicators.action',
-                url: DV.conf.finals.ajax.url_commons + 'getIndicators.action',
-                reader: {
-                    type: 'json',
-                    root: 'indicators'
-                }
-            },
-            itemSelector: null,
-            addItemSelector: function(s) {
-                var fs = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]');
-                
-                if (s.itemSelector) {
-                    fs.remove(s.itemSelector, true);
-                }
-                
-                fs.add({
-                    xtype: 'itemselector',
-                    width: 518,
-                    hideNavIcons: true,
-                    titleAvailable: 'Available indicators:',
-                    titleSelected: 'Selected indicators:',
-                    displayField: 'shortName',
-                    valueField: 'id',
-                    allowBlank: true,
-                    msgTarget: 'side',
-                    queryMode: 'remote',
-                    store: s,
-                    listeners: {
-                        afterrender: function(is) {
-                            s.itemSelector = is;
+        indicator: {
+            available: Ext.create('Ext.data.Store', {
+                fields: ['id', 'name', 'shortName'],
+                proxy: {
+                    type: 'ajax',
+                    baseUrl: DV.conf.finals.ajax.url_commons + 'getIndicators.action',
+                    url: DV.conf.finals.ajax.url_commons + 'getIndicators.action',
+                    reader: {
+                        type: 'json',
+                        root: 'indicators'
+                    }
+                },
+                storage: {},
+                addToStorage: function(s) {
+                    st = this.storage;
+                    s.each( function(r) {
+                        if (!st[r.data.id]) {
+                            st[r.data.id] = { name: r.data.shortName, group: s.param };
                         }
+                    });
+                },
+                listeners: {
+                    'load': function(s) {
+                        s.addToStorage(s);
                     }
-                });
-            },
-            storage: {},
-            addToStorage: function(s) {
-                st = this.storage;
-                s.each( function(r) {
-                    if (!st[r.data.id]) {
-                        st[r.data.id] = { name: r.data.shortName, group: s.param };
-                    }
-                });
-            },
-            listeners: {
-                'load': function(s) {
-                    s.addItemSelector(s);
-                    s.addToStorage(s);
                 }
-            }
-        }),
+            }),
+            
+            selected: Ext.create('Ext.data.Store', {
+                fields: ['id', 'parent'],
+                data: []
+            })
+        },
         
         dataElement: Ext.create('Ext.data.Store', {
             fields: ['id', 'shortName'],
@@ -235,33 +238,30 @@ Ext.onReady( function() {
         data: null,
         
         getData: function() {
-            Ext.Array.each(DV.data.values, function(item, i) {     
-                item[DV.conf.finals.dimension.indicator] = DV.store.indicator.storage[item.i].name;
-                item[DV.conf.finals.dimension.period] = DV.store.period.storage[item.i].name;
-            });
+            //Ext.Array.each(DV.data.values, function(item, i) {     
+                //item[DV.conf.finals.dimension.indicator] = DV.store.indicator.storage[item.i].name;
+                //item[DV.conf.finals.dimension.period] = DV.store.period.storage[item.i].name;
+            //});
             
-            var dimensions = DV.data.getDimensions(),
-                series = [],
-                columns = [];
+            //var dimensions = DV.data.getDimensions(),
+                //series = [],
+                //columns = [];
                 
             
-            for (var i = 0; i < DV.data.values.length; i++) {
-                Ext.Array.include(columns, [DV.data.values[i][dimensions.columns]]);
-            }
+            //for (var i = 0; i < DV.data.values.length; i++) {
+                //Ext.Array.include(columns, [DV.data.values[i][dimensions.columns]]);
+            //}
             
-//console.log(columns);return;
-            
-            for (var j = 0; j < DV.data.values.length; j++) {
-                for (k = 0; k < columns.length; k++) {
-                    if (DV.data.values[j][dimensions.columns] === columns[k]) {
-                        var obj = {};
-                        obj[DV.data.values[j][dimensions.series]] = DV.data.values[j].v;
-                        columns[k].push(obj);
-                    }
-                }
-            }
-            
-//console.log(columns);return;            
+            //for (var j = 0; j < DV.data.values.length; j++) {
+                //for (k = 0; k < columns.length; k++) {
+                    //if (DV.data.values[j][dimensions.columns] === columns[k]) {
+                        //var obj = {};
+                        //obj[DV.data.values[j][dimensions.series]] = DV.data.values[j].v;
+                        //columns[k].push(obj);
+                    //}
+                //}
+            //}
+                  
             
       
                 
@@ -300,7 +300,7 @@ Ext.onReady( function() {
                 filter: DV.util.getCmp('combobox[name="filter"]').getValue()
             };
             return this.dimensions;
-        },
+        }
     };
     
     DV.chart = {
@@ -537,7 +537,7 @@ Ext.onReady( function() {
                         xtype: 'button',
                         text: 'Load..',
                         handler: function() {
-                            DV.data.getValues();
+                            //DV.data.getValues();
                         }
                     }
                 ],
@@ -545,28 +545,118 @@ Ext.onReady( function() {
                     {
                         xtype: 'fieldset',
                         name: DV.conf.finals.dimension.indicator,
-                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Indicators by group</span>',
+                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Indicators</span>',
                         collapsed: true,
                         collapsible: true,
                         items: [
                             {
-                                xtype: 'treepanel',
-                                height: 300,
-                                width: 517,
-                                autoScroll: true,
-                                multiSelect: true,
-                                rootVisible: false,
-                                store: Ext.create('Ext.data.TreeStore', {
+                                xtype: 'combobox',
+                                style: 'margin-bottom:8px',
+                                width: 255,
+                                valueField: 'id',
+                                displayField: 'name',
+                                fieldLabel: 'Group',
+                                labelWidth: 50,
+                                labelStyle: 'padding-left:7px;',
+                                editable: false,
+                                queryMode: 'remote',
+                                store: Ext.create('Ext.data.Store', {
+                                    fields: ['id', 'name'],
                                     proxy: {
                                         type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_visualizer + 'getIndicatorTreeNodes.action'
-                                    },
-                                    root: {
-                                        id: 0,
-                                        text: '',
-                                        expanded: true
+                                        url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroups.action',
+                                        reader: {
+                                            type: 'json',
+                                            root: 'indicatorGroups'
+                                        }                                                
                                     }
-                                })
+                                }),
+                                listeners: {
+                                    select: function(cb) {
+                                        var store = DV.store.indicator.available;
+                                        store.param = cb.getValue();
+                                        store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
+                                        store.load();
+                                    }
+                                }
+                            },
+                            
+                            {
+                                xtype: 'panel',
+                                layout: 'column',
+                                bodyStyle: 'border-style:none',
+                                items: [
+                                    {
+                                        xtype: 'multiselect',
+                                        name: 'availableIndicators',
+                                        width: 254,
+                                        hideNavIcons: true,
+                                        displayField: 'shortName',
+                                        valueField: 'id',
+                                        allowBlank: true,
+                                        msgTarget: 'side',
+                                        queryMode: 'remote',
+                                        ddReorder: true,
+                                        store: DV.store.indicator.available,
+                                        tbar: [
+                                            {
+                                                xtype: 'label',
+                                                text: 'Available indicators',
+                                                style: 'padding-left:5px'
+                                            },
+                                            '->',
+                                            {
+                                                xtype: 'button',
+                                                text: '>',
+                                                handler: function() {
+                                                    var ai = DV.util.getCmp('multiselect[name="availableIndicators"]');
+                                                    var si = DV.util.getCmp('multiselect[name="selectedIndicators"]');
+                                                    var ig = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]').query('combobox')[0];
+                                                    DV.util.multiselect.select(ai, si, ig);
+                                                    
+                                                    //var selected = DV.util.getCmp('multiselect[name="availableIndicators"]').getValue().split(',');
+                                                    //if (selected.length) {
+                                                        //DV.util.multiselect.select(selected, 
+                                                    
+                                                    //var store = DV.util.getCmp('multiselect[name="availableIndicators"]').store;
+                                                    //alert(store);
+                                                }                                                    
+                                            },
+                                            {
+                                                xtype: 'button',
+                                                text: '>>'
+                                            }
+                                        ],
+                                        listeners: {
+                                            afterrender: function() {
+                                            }
+                                        }
+                                    },
+                                    
+                                    {
+                                        xtype: 'multiselect',
+                                        name: 'selectedIndicators',
+                                        width: 254,
+                                        hideNavIcons: true,
+                                        displayField: 'shortName',
+                                        valueField: 'id',
+                                        allowBlank: true,
+                                        msgTarget: 'side',
+                                        queryMode: 'remote',
+                                        ddReorder: true,
+                                        store: DV.store.indicator.selected,
+                                        tbar: [
+                                            {xtype:'button', text:'<<'},
+                                            {xtype:'button', text:'<'},
+                                            '->',
+                                            {
+                                                xtype: 'label',
+                                                text: 'Selected indicators',
+                                                style: 'padding-right:5px'
+                                            }
+                                        ]
+                                    }
+                                ]
                             }
                         ]
                     },
@@ -574,58 +664,82 @@ Ext.onReady( function() {
                     {
                         xtype: 'fieldset',
                         name: DV.conf.finals.dimension.dataelement,
-                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Data elements by group</span>',
+                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Data elements</span>',
                         collapsed: true,
                         collapsible: true,
                         items: [
                             {
-                                xtype: 'treepanel',
-                                height: 300,
-                                width: 517,
-                                autoScroll: true,
-                                multiSelect: true,
-                                rootVisible: false,
-                                store: Ext.create('Ext.data.TreeStore', {
+                                xtype: 'combobox',
+                                style: 'margin-bottom:8px',
+                                width: 255,
+                                valueField: 'id',
+                                displayField: 'name',
+                                fieldLabel: 'Group',
+                                labelWidth: 50,
+                                labelStyle: 'padding-left:7px;',
+                                editable: false,
+                                queryMode: 'remote',
+                                store: Ext.create('Ext.data.Store', {
+                                    fields: ['id', 'name'],
                                     proxy: {
                                         type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_visualizer + 'getDataElementTreeNodes.action'
-                                    },
-                                    root: {
-                                        id: 0,
-                                        text: '',
-                                        expanded: true
+                                        url: DV.conf.finals.ajax.url_commons + 'getDataElementGroups.action',
+                                        reader: {
+                                            type: 'json',
+                                            root: 'dataElementGroups'
+                                        }                                                
                                     }
-                                })
-                            }
+                                }),
+                                listeners: {
+                                    select: function(cb) {
+                                        var store = DV.store.dataElement;
+                                        store.param = cb.getValue();
+                                        store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
+                                        store.load();
+                                    }
+                                }
+                            }                                
                         ]
                     },
                     
                     {
                         xtype: 'fieldset',
                         name: DV.conf.finals.dimension.period,
-                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Periods by type</span>',
+                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Periods</span>',
                         collapsed: true,
                         collapsible: true,
                         items: [
                             {
-                                xtype: 'treepanel',
-                                height: 300,
-                                width: 517,
-                                autoScroll: true,
-                                multiSelect: true,
-                                rootVisible: false,
-                                store: Ext.create('Ext.data.TreeStore', {
+                                xtype: 'combobox',
+                                style: 'margin-bottom:8px',
+                                width: 255,
+                                valueField: 'name',
+                                displayField: 'displayName',
+                                fieldLabel: 'Type',
+                                labelWidth: 50,
+                                labelStyle: 'padding-left:7px;',
+                                editable: false,
+                                queryMode: 'remote',
+                                store: Ext.create('Ext.data.Store', {
+                                    fields: ['name', 'displayName'],
                                     proxy: {
                                         type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_visualizer + 'getPeriodTreeNodes.action'
-                                    },
-                                    root: {
-                                        id: 0,
-                                        text: '',
-                                        expanded: true
+                                        url: DV.conf.finals.ajax.url_commons + 'getPeriodTypes.action',
+                                        reader: {
+                                            type: 'json',
+                                            root: 'periodTypes'
+                                        }                                                
                                     }
-                                })
-                            }
+                                }),
+                                listeners: {
+                                    select: function(cb) {
+                                        var store = DV.store.period;
+                                        store.param = cb.getValue();
+                                        store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'name=' + cb.getValue());
+                                        store.load();
+                                    }
+                                }
+                            }                                
                         ]
                     },
                     
@@ -660,11 +774,11 @@ Ext.onReady( function() {
                 listeners: {
                     collapse: function(p) {                    
                         p.collapsed = true;
-                        DV.util.getCmp('button[name="resize"]').setText('>>');
+                        DV.util.getCmp('button[name="resize"]').setText('>>>');
                     },
                     expand: function(p) {
                         p.collapsed = false;
-                        DV.util.getCmp('button[name="resize"]').setText('<<');
+                        DV.util.getCmp('button[name="resize"]').setText('<<<');
                     }
                 }
             },
@@ -676,7 +790,7 @@ Ext.onReady( function() {
                     {
                         xtype: 'button',
                         name: 'resize',
-                        text: '<<',
+                        text: '<<<',
                         toolTip: 'Collapse',
                         handler: function() {
                             var p = DV.util.getCmp('panel[region="west"]');

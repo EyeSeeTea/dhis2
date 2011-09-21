@@ -148,7 +148,7 @@ Ext.define('Ext.ux.form.MultiSelect', {
         me.mon(selModel, {
             selectionChange: me.onSelectionChange,
             scope: me
-        });
+        });        
         panel = me.panel = Ext.create('Ext.panel.Panel', {
             title: me.listTitle,
             tbar: me.tbar,

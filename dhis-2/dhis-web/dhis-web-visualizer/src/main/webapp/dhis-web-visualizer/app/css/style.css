@@ -22,13 +22,6 @@
     color: #222;
 }
 
-/* ItemSelector title */
-.x-panel-header-text-default {
-    font-weight: normal;
-    color: #222;
-    padding-left: 2px;
-}
-
 /* Splitter column */
 .x-splitter {
     display: none;
@@ -40,7 +33,7 @@
     border-radius: 2px 2px 2px 2px;
     -moz-border-radius: 2px 2px 2px 2px;
     -webkit-border-radius: 2px 2px 2px 2px;
-    padding-bottom: 5px;
+    padding-bottom: 4px;
 }
 
 /* Tree panel font */
@@ -57,6 +50,11 @@
 /* (Tree)Panel border */
 .x-panel .x-grid-body {
     border-style: none;
+}
+
+/* Tree panel node hover */
+.x-grid-row .x-grid-row-over {
+    background-color: red !important;
 }
 
 .x-boundlist-item {
