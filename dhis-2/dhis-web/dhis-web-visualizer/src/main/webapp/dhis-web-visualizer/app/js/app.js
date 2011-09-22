@@ -34,6 +34,25 @@ Ext.onReady( function() {
                         return filter;
                     });
                 }
+            },
+            
+            unselect: function(a, s, g) {
+                var selected = s.getValue();
+                if (selected.length) {
+                    Ext.Array.each(selected, function(item) {
+                        s.store.remove(s.store.getAt(s.store.find('id', item)));
+                    });
+                    
+                    a.store.filterBy( function(r) {
+                        var filter = true;
+                        s.store.each( function(r2) {
+                            if (r.data.id === r2.data.id) {
+                                filter = false;
+                            }
+                        });
+                        return filter;
+                    });
+                }
             }
         }
     };
@@ -613,14 +632,7 @@ Ext.onReady( function() {
                                                     var si = DV.util.getCmp('multiselect[name="selectedIndicators"]');
                                                     var ig = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]').query('combobox')[0];
                                                     DV.util.multiselect.select(ai, si, ig);
-                                                    
-                                                    //var selected = DV.util.getCmp('multiselect[name="availableIndicators"]').getValue().split(',');
-                                                    //if (selected.length) {
-                                                        //DV.util.multiselect.select(selected, 
-                                                    
-                                                    //var store = DV.util.getCmp('multiselect[name="availableIndicators"]').store;
-                                                    //alert(store);
-                                                }                                                    
+                                                }
                                             },
                                             {
                                                 xtype: 'button',
@@ -646,8 +658,17 @@ Ext.onReady( function() {
                                         ddReorder: true,
                                         store: DV.store.indicator.selected,
                                         tbar: [
-                                            {xtype:'button', text:'<<'},
-                                            {xtype:'button', text:'<'},
+                                            {xtype:'button', text:'<<'},                                            
+                                            {
+                                                xtype: 'button',
+                                                text: '<',
+                                                handler: function() {
+                                                    var ai = DV.util.getCmp('multiselect[name="availableIndicators"]');
+                                                    var si = DV.util.getCmp('multiselect[name="selectedIndicators"]');
+                                                    var ig = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]').query('combobox')[0];
+                                                    DV.util.multiselect.unselect(ai, si, ig);
+                                                }
+                                            },
                                             '->',
                                             {
                                                 xtype: 'label',
