@@ -57,6 +57,10 @@
     background-color: red !important;
 }
 
+.x-fit-item {
+    border-style: none;
+}
+
 .x-boundlist-item {
     color:#333;
     padding: 2px 2px 2px 4px;

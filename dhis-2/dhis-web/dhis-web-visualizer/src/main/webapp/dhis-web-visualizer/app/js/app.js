@@ -17,22 +17,16 @@ Ext.onReady( function() {
                 var selected = a.getValue();
                 if (selected.length) {
                     Ext.Array.each(selected, function(item) {
-                        s.store.add({
-                            id: item,
-                            shortName: a.store.getAt(a.store.find('id', item)).data.shortName
-                        });
+                        s.store.add({id: item, shortName: a.store.getAt(a.store.find('id', item)).data.shortName});
                     });
                 }
-                this.filterSource(a, s);
+                this.filterAvailable(a, s);
             },            
             selectAll: function(a, s) {
                 a.store.each( function(r) {
-                    s.store.add({
-                        id: r.data.id,
-                        shortName: r.data.shortName
-                    });
+                    s.store.add({id: r.data.id, shortName: r.data.shortName});
                 });
-                this.filterSource(a, s);
+                this.filterAvailable(a, s);
             },            
             unselect: function(a, s) {
                 var selected = s.getValue();
@@ -40,14 +34,14 @@ Ext.onReady( function() {
                     Ext.Array.each(selected, function(item) {
                         s.store.remove(s.store.getAt(s.store.find('id', item)));
                     });                    
-                    this.filterSource(a, s);
+                    this.filterAvailable(a, s);
                 }
             },
             unselectAll: function(a, s) {
                 s.store.removeAll();
                 a.store.clearFilter();
             },
-            filterSource: function(a, s) {
+            filterAvailable: function(a, s) {
                 a.store.filterBy( function(r) {
                     var filter = true;
                     s.store.each( function(r2) {
@@ -87,18 +81,19 @@ Ext.onReady( function() {
                     }
                 },
                 storage: {},
-                addToStorage: function(s) {
+                addToStorage: function() {
                     st = this.storage;
-                    s.each( function(r) {
+                    this.each( function(r) {
                         if (!st[r.data.id]) {
-                            st[r.data.id] = { name: r.data.shortName, group: s.param };
+                            st[r.data.id] = { name: r.data.shortName, parent: this.param };
                         }
                     });
+alert(Ext.Object.getSize(st));                    
                 },
                 listeners: {
-                    'load': function(s) {
+                    load: function(s) {
                         s.addToStorage(s);
-                        DV.util.multiselect.filterSource(DV.util.getCmp('multiselect[name="availableIndicators"]'),
+                        DV.util.multiselect.filterAvailable(DV.util.getCmp('multiselect[name="availableIndicators"]'),
                             DV.util.getCmp('multiselect[name="selectedIndicators"]'));
                     }
                 }
@@ -159,7 +154,7 @@ Ext.onReady( function() {
                 });
             },
             listeners: {
-                'load': function(s) {
+                load: function(s) {
                     s.addItemSelector(s);
                     s.addToStorage(s);
                 }
@@ -215,7 +210,7 @@ Ext.onReady( function() {
                 });
             },
             listeners: {
-                'load': function(s) {
+                load: function(s) {
                     s.addItemSelector(s);
                     s.addToStorage(s);
                 }
