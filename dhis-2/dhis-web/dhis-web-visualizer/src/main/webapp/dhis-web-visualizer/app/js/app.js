@@ -34,8 +34,26 @@ Ext.onReady( function() {
                         return filter;
                     });
                 }
-            },
-            
+            },            
+            selectAll: function(a, s, g) {
+                a.store.each( function(r) {
+                    s.store.add({
+                        id: r.data.id,
+                        shortName: r.data.shortName,
+                        parent: g.getValue()
+                    });
+                });
+                
+                a.store.filterBy( function(r) {
+                    var filter = true;
+                    s.store.each( function(r2) {
+                        if (r.data.id === r2.data.id) {
+                            filter = false;
+                        }
+                    });
+                    return filter;
+                });
+            },            
             unselect: function(a, s, g) {
                 var selected = s.getValue();
                 if (selected.length) {
@@ -53,6 +71,10 @@ Ext.onReady( function() {
                         return filter;
                     });
                 }
+            },
+            unselectAll: function(a, s, g) {
+                s.store.removeAll();
+                a.store.clearFilter();
             }
         }
     };
@@ -636,7 +658,13 @@ Ext.onReady( function() {
                                             },
                                             {
                                                 xtype: 'button',
-                                                text: '>>'
+                                                text: '>>',
+                                                handler: function() {
+                                                    var ai = DV.util.getCmp('multiselect[name="availableIndicators"]');
+                                                    var si = DV.util.getCmp('multiselect[name="selectedIndicators"]');
+                                                    var ig = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]').query('combobox')[0];
+                                                    DV.util.multiselect.selectAll(ai, si, ig);
+                                                }
                                             }
                                         ],
                                         listeners: {
@@ -658,7 +686,16 @@ Ext.onReady( function() {
                                         ddReorder: true,
                                         store: DV.store.indicator.selected,
                                         tbar: [
-                                            {xtype:'button', text:'<<'},                                            
+                                            {
+                                                xtype: 'button',
+                                                text: '<<',
+                                                handler: function() {
+                                                    var ai = DV.util.getCmp('multiselect[name="availableIndicators"]');
+                                                    var si = DV.util.getCmp('multiselect[name="selectedIndicators"]');
+                                                    var ig = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]').query('combobox')[0];
+                                                    DV.util.multiselect.unselectAll(ai, si, ig);
+                                                }
+                                            },
                                             {
                                                 xtype: 'button',
                                                 text: '<',
