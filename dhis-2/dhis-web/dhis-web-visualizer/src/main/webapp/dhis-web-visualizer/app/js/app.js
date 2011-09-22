@@ -88,7 +88,6 @@ Ext.onReady( function() {
                             st[r.data.id] = { name: r.data.shortName, parent: this.param };
                         }
                     });
-alert(Ext.Object.getSize(st));                    
                 },
                 listeners: {
                     load: function(s) {
@@ -100,66 +99,46 @@ alert(Ext.Object.getSize(st));
             }),
             
             selected: Ext.create('Ext.data.Store', {
-                fields: ['id', 'parent'],
+                fields: ['id', 'shortName'],
                 data: []
             })
         },
         
-        dataElement: Ext.create('Ext.data.Store', {
-            fields: ['id', 'shortName'],
-            proxy: {
-                type: 'ajax',
-                baseUrl: DV.conf.finals.ajax.url_commons + 'getDataElements.action',
-                url: DV.conf.finals.ajax.url_commons + 'getDataElements.action',
-                reader: {
-                    type: 'json',
-                    root: 'dataElements'
-                }
-            },
-            itemSelector: null,
-            addItemSelector: function(s) {
-                var fs = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.dataelement + '"]');
-                
-                if (s.itemSelector) {
-                    fs.remove(s.itemSelector, true);
-                }
-                
-                fs.add({
-                    xtype: 'itemselector',
-                    name: DV.conf.finals.dimension.dataelement,
-                    width: 518,
-                    hideNavIcons: true,
-                    titleAvailable: 'Available data elements:',
-                    titleSelected: 'Selected data elements:',
-                    displayField: 'shortName',
-                    valueField: 'id',
-                    allowBlank: true,
-                    msgTarget: 'side',
-                    queryMode: 'remote',
-                    store: s,
-                    listeners: {
-                        afterrender: function(is) {
-                            s.itemSelector = is;
+        dataElement: {
+            available: Ext.create('Ext.data.Store', {
+                fields: ['id', 'name', 'shortName'],
+                proxy: {
+                    type: 'ajax',
+                    baseUrl: DV.conf.finals.ajax.url_commons + 'getDataElements.action',
+                    url: DV.conf.finals.ajax.url_commons + 'getDataElements.action',
+                    reader: {
+                        type: 'json',
+                        root: 'dataElements'
+                    }
+                },
+                storage: {},
+                addToStorage: function() {
+                    st = this.storage;
+                    this.each( function(r) {
+                        if (!st[r.data.id]) {
+                            st[r.data.id] = { name: r.data.shortName, parent: this.param };
                         }
+                    });
+                },
+                listeners: {
+                    load: function(s) {
+                        s.addToStorage(s);
+                        DV.util.multiselect.filterAvailable(DV.util.getCmp('multiselect[name="availableDataElements"]'),
+                            DV.util.getCmp('multiselect[name="selectedDataElements"]'));
                     }
-                });
-            },
-            storage: {},
-            addToStorage: function(s) {
-                st = this.storage;
-                s.each( function(r) {
-                    if (!st[r.data.id]) {
-                        st[r.data.id] = { name: r.data.shortName, group: s.param };
-                    }
-                });
-            },
-            listeners: {
-                load: function(s) {
-                    s.addItemSelector(s);
-                    s.addToStorage(s);
                 }
-            }
-        }),
+            }),
+            
+            selected: Ext.create('Ext.data.Store', {
+                fields: ['id', 'shortName'],
+                data: []
+            })
+        },
         
         period: Ext.create('Ext.data.Store', {
             fields: ['id', 'name'],
@@ -581,7 +560,7 @@ alert(Ext.Object.getSize(st));
                                 editable: false,
                                 queryMode: 'remote',
                                 store: Ext.create('Ext.data.Store', {
-                                    fields: ['id', 'name'],
+                                    fields: ['id', 'name', 'sortOrder'],
                                     proxy: {
                                         type: 'ajax',
                                         url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroups.action',
@@ -589,6 +568,12 @@ alert(Ext.Object.getSize(st));
                                             type: 'json',
                                             root: 'indicatorGroups'
                                         }                                                
+                                    },
+                                    listeners: {
+                                        load: function(s) {
+                                            s.add({id: 0, name: '[ All indicator groups ]', sortOrder: -1});
+                                            s.sort('sortOrder', 'ASC');
+                                        }
                                     }
                                 }),
                                 listeners: {
@@ -609,7 +594,7 @@ alert(Ext.Object.getSize(st));
                                     {
                                         xtype: 'multiselect',
                                         name: 'availableIndicators',
-                                        width: 254,
+                                        width: 255,
                                         hideNavIcons: true,
                                         displayField: 'shortName',
                                         valueField: 'id',
@@ -629,27 +614,19 @@ alert(Ext.Object.getSize(st));
                                                 xtype: 'button',
                                                 text: '>',
                                                 handler: function() {
-                                                    var ai = DV.util.getCmp('multiselect[name="availableIndicators"]');
-                                                    var si = DV.util.getCmp('multiselect[name="selectedIndicators"]');
-                                                    var ig = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]').query('combobox')[0];
-                                                    DV.util.multiselect.select(ai, si, ig);
+                                                    DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableIndicators"]'),
+                                                        DV.util.getCmp('multiselect[name="selectedIndicators"]'));
                                                 }
                                             },
                                             {
                                                 xtype: 'button',
                                                 text: '>>',
                                                 handler: function() {
-                                                    var ai = DV.util.getCmp('multiselect[name="availableIndicators"]');
-                                                    var si = DV.util.getCmp('multiselect[name="selectedIndicators"]');
-                                                    var ig = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]').query('combobox')[0];
-                                                    DV.util.multiselect.selectAll(ai, si, ig);
+                                                    DV.util.multiselect.selectAll(DV.util.getCmp('multiselect[name="availableIndicators"]'),
+                                                        DV.util.getCmp('multiselect[name="selectedIndicators"]'));
                                                 }
                                             }
-                                        ],
-                                        listeners: {
-                                            afterrender: function() {
-                                            }
-                                        }
+                                        ]
                                     },
                                     
                                     {
@@ -669,20 +646,16 @@ alert(Ext.Object.getSize(st));
                                                 xtype: 'button',
                                                 text: '<<',
                                                 handler: function() {
-                                                    var ai = DV.util.getCmp('multiselect[name="availableIndicators"]');
-                                                    var si = DV.util.getCmp('multiselect[name="selectedIndicators"]');
-                                                    var ig = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]').query('combobox')[0];
-                                                    DV.util.multiselect.unselectAll(ai, si, ig);
+                                                    DV.util.multiselect.unselectAll(DV.util.getCmp('multiselect[name="availableIndicators"]'),
+                                                        DV.util.getCmp('multiselect[name="selectedIndicators"]'));
                                                 }
                                             },
                                             {
                                                 xtype: 'button',
                                                 text: '<',
                                                 handler: function() {
-                                                    var ai = DV.util.getCmp('multiselect[name="availableIndicators"]');
-                                                    var si = DV.util.getCmp('multiselect[name="selectedIndicators"]');
-                                                    var ig = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.indicator + '"]').query('combobox')[0];
-                                                    DV.util.multiselect.unselect(ai, si, ig);
+                                                    DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableIndicators"]'),
+                                                        DV.util.getCmp('multiselect[name="selectedIndicators"]'));
                                                 }
                                             },
                                             '->',
@@ -729,13 +702,96 @@ alert(Ext.Object.getSize(st));
                                 }),
                                 listeners: {
                                     select: function(cb) {
-                                        var store = DV.store.dataElement;
+                                        var store = DV.store.dataElement.available;
                                         store.param = cb.getValue();
                                         store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
                                         store.load();
                                     }
                                 }
-                            }                                
+                            },
+                            
+                            {
+                                xtype: 'panel',
+                                layout: 'column',
+                                bodyStyle: 'border-style:none',
+                                items: [
+                                    {
+                                        xtype: 'multiselect',
+                                        name: 'availableDataElements',
+                                        width: 255,
+                                        hideNavIcons: true,
+                                        displayField: 'shortName',
+                                        valueField: 'id',
+                                        allowBlank: true,
+                                        msgTarget: 'side',
+                                        queryMode: 'remote',
+                                        ddReorder: true,
+                                        store: DV.store.dataElement.available,
+                                        tbar: [
+                                            {
+                                                xtype: 'label',
+                                                text: 'Available data element',
+                                                style: 'padding-left:5px'
+                                            },
+                                            '->',
+                                            {
+                                                xtype: 'button',
+                                                text: '>',
+                                                handler: function() {
+                                                    DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableDataElements"]'),
+                                                        DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                                }
+                                            },
+                                            {
+                                                xtype: 'button',
+                                                text: '>>',
+                                                handler: function() {
+                                                    DV.util.multiselect.selectAll(DV.util.getCmp('multiselect[name="availableDataElements"]'),
+                                                        DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    
+                                    {
+                                        xtype: 'multiselect',
+                                        name: 'selectedDataElements',
+                                        width: 254,
+                                        hideNavIcons: true,
+                                        displayField: 'shortName',
+                                        valueField: 'id',
+                                        allowBlank: true,
+                                        msgTarget: 'side',
+                                        queryMode: 'remote',
+                                        ddReorder: true,
+                                        store: DV.store.dataElement.selected,
+                                        tbar: [
+                                            {
+                                                xtype: 'button',
+                                                text: '<<',
+                                                handler: function() {
+                                                    DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableDataElements"]'),
+                                                        DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                                }
+                                            },
+                                            {
+                                                xtype: 'button',
+                                                text: '<',
+                                                handler: function() {
+                                                    DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableDataElements"]'),
+                                                        DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                                }
+                                            },
+                                            '->',
+                                            {
+                                                xtype: 'label',
+                                                text: 'Selected data elements',
+                                                style: 'padding-right:5px'
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
                         ]
                     },
                     
