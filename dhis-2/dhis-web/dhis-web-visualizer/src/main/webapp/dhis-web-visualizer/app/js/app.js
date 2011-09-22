@@ -13,37 +13,41 @@ Ext.onReady( function() {
             return { x: c.getWidth(), y: c.getHeight() };
         },
         multiselect: {
-            select: function(a, s, g) {
+            select: function(a, s) {
                 var selected = a.getValue();
                 if (selected.length) {
                     Ext.Array.each(selected, function(item) {
                         s.store.add({
                             id: item,
-                            shortName: a.store.getAt(a.store.find('id', item)).data.shortName,
-                            parent: g.getValue()
+                            shortName: a.store.getAt(a.store.find('id', item)).data.shortName
                         });
-                    });
-                    
-                    a.store.filterBy( function(r) {
-                        var filter = true;
-                        s.store.each( function(r2) {
-                            if (r.data.id === r2.data.id) {
-                                filter = false;
-                            }
-                        });
-                        return filter;
                     });
                 }
+                this.filterSource(a, s);
             },            
-            selectAll: function(a, s, g) {
+            selectAll: function(a, s) {
                 a.store.each( function(r) {
                     s.store.add({
                         id: r.data.id,
-                        shortName: r.data.shortName,
-                        parent: g.getValue()
+                        shortName: r.data.shortName
                     });
                 });
-                
+                this.filterSource(a, s);
+            },            
+            unselect: function(a, s) {
+                var selected = s.getValue();
+                if (selected.length) {
+                    Ext.Array.each(selected, function(item) {
+                        s.store.remove(s.store.getAt(s.store.find('id', item)));
+                    });                    
+                    this.filterSource(a, s);
+                }
+            },
+            unselectAll: function(a, s) {
+                s.store.removeAll();
+                a.store.clearFilter();
+            },
+            filterSource: function(a, s) {
                 a.store.filterBy( function(r) {
                     var filter = true;
                     s.store.each( function(r2) {
@@ -53,28 +57,6 @@ Ext.onReady( function() {
                     });
                     return filter;
                 });
-            },            
-            unselect: function(a, s, g) {
-                var selected = s.getValue();
-                if (selected.length) {
-                    Ext.Array.each(selected, function(item) {
-                        s.store.remove(s.store.getAt(s.store.find('id', item)));
-                    });
-                    
-                    a.store.filterBy( function(r) {
-                        var filter = true;
-                        s.store.each( function(r2) {
-                            if (r.data.id === r2.data.id) {
-                                filter = false;
-                            }
-                        });
-                        return filter;
-                    });
-                }
-            },
-            unselectAll: function(a, s, g) {
-                s.store.removeAll();
-                a.store.clearFilter();
             }
         }
     };
@@ -116,6 +98,8 @@ Ext.onReady( function() {
                 listeners: {
                     'load': function(s) {
                         s.addToStorage(s);
+                        DV.util.multiselect.filterSource(DV.util.getCmp('multiselect[name="availableIndicators"]'),
+                            DV.util.getCmp('multiselect[name="selectedIndicators"]'));
                     }
                 }
             }),
