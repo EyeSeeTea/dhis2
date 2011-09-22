@@ -57,6 +57,11 @@
     border-style: none;
 }
 
+/* Multiselect item hover */
+.x-boundlist-item-over {
+    background-color: #f4f4f4;
+}
+
 /* List (combo, multiselect etc) style */
 .x-boundlist-item {
     color:#333;
@@ -79,5 +84,11 @@ li {
    font-size: 10px;
    color: #000;
 }
+
+
+
+
+
+
 
 

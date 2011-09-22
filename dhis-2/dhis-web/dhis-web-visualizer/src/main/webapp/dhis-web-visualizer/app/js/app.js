@@ -555,12 +555,12 @@ Ext.onReady( function() {
                             {
                                 xtype: 'combobox',
                                 style: 'margin-bottom:8px',
-                                width: 255,
+                                width: 420,
                                 valueField: 'id',
                                 displayField: 'name',
-                                fieldLabel: 'Group',
-                                labelWidth: 50,
+                                fieldLabel: 'Indicator group',
                                 labelStyle: 'padding-left:7px;',
+                                labelWidth: 110,
                                 editable: false,
                                 queryMode: 'remote',
                                 store: Ext.create('Ext.data.Store', {
@@ -597,11 +597,11 @@ Ext.onReady( function() {
                                 items: [
                                     {
                                         xtype: 'multiselect',
+                                        cls: 'multiselect',
                                         name: 'availableIndicators',
-                                        width: 255,
+                                        width: 210,
                                         displayField: 'shortName',
                                         valueField: 'id',
-                                        ddReorder: true,
                                         queryMode: 'remote',
                                         store: DV.store.indicator.available,
                                         tbar: [
@@ -633,7 +633,7 @@ Ext.onReady( function() {
                                     {
                                         xtype: 'multiselect',
                                         name: 'selectedIndicators',
-                                        width: 255,
+                                        width: 210,
                                         displayField: 'shortName',
                                         valueField: 'id',
                                         ddReorder: true,
@@ -679,12 +679,12 @@ Ext.onReady( function() {
                             {
                                 xtype: 'combobox',
                                 style: 'margin-bottom:8px',
-                                width: 255,
+                                width: 420,
                                 valueField: 'id',
                                 displayField: 'name',
-                                fieldLabel: 'Group',
-                                labelWidth: 50,
+                                fieldLabel: 'Data element group',
                                 labelStyle: 'padding-left:7px;',
+                                labelWidth: 110,
                                 editable: false,
                                 queryMode: 'remote',
                                 store: Ext.create('Ext.data.Store', {
@@ -722,16 +722,15 @@ Ext.onReady( function() {
                                     {
                                         xtype: 'multiselect',
                                         name: 'availableDataElements',
-                                        width: 255,
+                                        width: 210,
                                         displayField: 'shortName',
                                         valueField: 'id',
-                                        ddReorder: true,
                                         queryMode: 'remote',
                                         store: DV.store.dataElement.available,
                                         tbar: [
                                             {
                                                 xtype: 'label',
-                                                text: 'Available data element',
+                                                text: 'Available data elements',
                                                 style: 'padding-left:5px'
                                             },
                                             '->',
@@ -757,7 +756,7 @@ Ext.onReady( function() {
                                     {
                                         xtype: 'multiselect',
                                         name: 'selectedDataElements',
-                                        width: 255,
+                                        width: 210,
                                         displayField: 'shortName',
                                         valueField: 'id',
                                         ddReorder: true,
@@ -901,7 +900,7 @@ Ext.onReady( function() {
                             {
                                 xtype: 'treepanel',
                                 height: 300,
-                                width: 517,
+                                width: 420,
                                 autoScroll: true,
                                 multiSelect: true,
                                 store: Ext.create('Ext.data.TreeStore', {
