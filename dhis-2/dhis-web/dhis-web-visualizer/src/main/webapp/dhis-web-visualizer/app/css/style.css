@@ -52,18 +52,21 @@
     border-style: none;
 }
 
-/* Tree panel node hover */
-.x-grid-row .x-grid-row-over {
-    background-color: red !important;
-}
-
+/* Multiselect inner border */
 .x-fit-item {
     border-style: none;
 }
 
+/* List (combo, multiselect etc) style */
 .x-boundlist-item {
     color:#333;
     padding: 2px 2px 2px 4px;
+}
+
+/* Checkbox box label */
+.x-form-cb-label-after {
+    padding-left: 3px;
+    font: 11px arial, ubuntu;
 }
 
 /* DHIS */

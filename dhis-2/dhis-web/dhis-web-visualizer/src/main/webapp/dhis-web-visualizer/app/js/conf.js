@@ -24,5 +24,10 @@ DV.conf = {
             line: 'line',
             pie: 'pie'
         }
+    },
+    style: {
+        label: {
+            period: 'font:bold 11px arial,ubuntu; color:#444; line-height:20px'
+        }
     }
 };

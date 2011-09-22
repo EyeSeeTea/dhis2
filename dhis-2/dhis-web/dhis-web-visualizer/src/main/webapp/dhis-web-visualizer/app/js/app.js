@@ -16,16 +16,20 @@ Ext.onReady( function() {
             select: function(a, s) {
                 var selected = a.getValue();
                 if (selected.length) {
+                    var array = [];
                     Ext.Array.each(selected, function(item) {
-                        s.store.add({id: item, shortName: a.store.getAt(a.store.find('id', item)).data.shortName});
+                        array.push({id: item, shortName: a.store.getAt(a.store.find('id', item)).data.shortName});
                     });
+                    s.store.add(array);
                 }
                 this.filterAvailable(a, s);
             },            
             selectAll: function(a, s) {
+                var array = [];
                 a.store.each( function(r) {
-                    s.store.add({id: r.data.id, shortName: r.data.shortName});
+                    array.push({id: r.data.id, shortName: r.data.shortName});
                 });
+                s.store.add(array);
                 this.filterAvailable(a, s);
             },            
             unselect: function(a, s) {
@@ -73,8 +77,8 @@ Ext.onReady( function() {
                 fields: ['id', 'name', 'shortName'],
                 proxy: {
                     type: 'ajax',
-                    baseUrl: DV.conf.finals.ajax.url_commons + 'getIndicators.action',
-                    url: DV.conf.finals.ajax.url_commons + 'getIndicators.action',
+                    baseUrl: DV.conf.finals.ajax.url_commons + 'getIndicatorsMinified.action',
+                    url: DV.conf.finals.ajax.url_commons + 'getIndicatorsMinified.action',
                     reader: {
                         type: 'json',
                         root: 'indicators'
@@ -109,8 +113,8 @@ Ext.onReady( function() {
                 fields: ['id', 'name', 'shortName'],
                 proxy: {
                     type: 'ajax',
-                    baseUrl: DV.conf.finals.ajax.url_commons + 'getDataElements.action',
-                    url: DV.conf.finals.ajax.url_commons + 'getDataElements.action',
+                    baseUrl: DV.conf.finals.ajax.url_commons + 'getDataElementsMinified.action',
+                    url: DV.conf.finals.ajax.url_commons + 'getDataElementsMinified.action',
                     reader: {
                         type: 'json',
                         root: 'dataElements'
@@ -563,7 +567,7 @@ Ext.onReady( function() {
                                     fields: ['id', 'name', 'sortOrder'],
                                     proxy: {
                                         type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroups.action',
+                                        url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroupsMinified.action',
                                         reader: {
                                             type: 'json',
                                             root: 'indicatorGroups'
@@ -595,13 +599,10 @@ Ext.onReady( function() {
                                         xtype: 'multiselect',
                                         name: 'availableIndicators',
                                         width: 255,
-                                        hideNavIcons: true,
                                         displayField: 'shortName',
                                         valueField: 'id',
-                                        allowBlank: true,
-                                        msgTarget: 'side',
-                                        queryMode: 'remote',
                                         ddReorder: true,
+                                        queryMode: 'remote',
                                         store: DV.store.indicator.available,
                                         tbar: [
                                             {
@@ -632,14 +633,11 @@ Ext.onReady( function() {
                                     {
                                         xtype: 'multiselect',
                                         name: 'selectedIndicators',
-                                        width: 254,
-                                        hideNavIcons: true,
+                                        width: 255,
                                         displayField: 'shortName',
                                         valueField: 'id',
-                                        allowBlank: true,
-                                        msgTarget: 'side',
-                                        queryMode: 'remote',
                                         ddReorder: true,
+                                        queryMode: 'local',
                                         store: DV.store.indicator.selected,
                                         tbar: [
                                             {
@@ -693,11 +691,17 @@ Ext.onReady( function() {
                                     fields: ['id', 'name'],
                                     proxy: {
                                         type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_commons + 'getDataElementGroups.action',
+                                        url: DV.conf.finals.ajax.url_commons + 'getDataElementGroupsMinified.action',
                                         reader: {
                                             type: 'json',
                                             root: 'dataElementGroups'
                                         }                                                
+                                    },
+                                    listeners: {
+                                        load: function(s) {
+                                            s.add({id: 0, name: '[ All data element groups ]', sortOrder: -1});
+                                            s.sort('sortOrder', 'ASC');
+                                        }
                                     }
                                 }),
                                 listeners: {
@@ -719,13 +723,10 @@ Ext.onReady( function() {
                                         xtype: 'multiselect',
                                         name: 'availableDataElements',
                                         width: 255,
-                                        hideNavIcons: true,
                                         displayField: 'shortName',
                                         valueField: 'id',
-                                        allowBlank: true,
-                                        msgTarget: 'side',
-                                        queryMode: 'remote',
                                         ddReorder: true,
+                                        queryMode: 'remote',
                                         store: DV.store.dataElement.available,
                                         tbar: [
                                             {
@@ -756,21 +757,18 @@ Ext.onReady( function() {
                                     {
                                         xtype: 'multiselect',
                                         name: 'selectedDataElements',
-                                        width: 254,
-                                        hideNavIcons: true,
+                                        width: 255,
                                         displayField: 'shortName',
                                         valueField: 'id',
-                                        allowBlank: true,
-                                        msgTarget: 'side',
-                                        queryMode: 'remote',
                                         ddReorder: true,
+                                        queryMode: 'remote',
                                         store: DV.store.dataElement.selected,
                                         tbar: [
                                             {
                                                 xtype: 'button',
                                                 text: '<<',
                                                 handler: function() {
-                                                    DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableDataElements"]'),
+                                                    DV.util.multiselect.unselectAll(DV.util.getCmp('multiselect[name="availableDataElements"]'),
                                                         DV.util.getCmp('multiselect[name="selectedDataElements"]'));
                                                 }
                                             },
@@ -803,36 +801,93 @@ Ext.onReady( function() {
                         collapsible: true,
                         items: [
                             {
-                                xtype: 'combobox',
-                                style: 'margin-bottom:8px',
-                                width: 255,
-                                valueField: 'name',
-                                displayField: 'displayName',
-                                fieldLabel: 'Type',
-                                labelWidth: 50,
-                                labelStyle: 'padding-left:7px;',
-                                editable: false,
-                                queryMode: 'remote',
-                                store: Ext.create('Ext.data.Store', {
-                                    fields: ['name', 'displayName'],
-                                    proxy: {
-                                        type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_commons + 'getPeriodTypes.action',
-                                        reader: {
-                                            type: 'json',
-                                            root: 'periodTypes'
-                                        }                                                
+                                xtype: 'panel',
+                                layout: 'column',
+                                bodyStyle: 'border-style:none',
+                                items: [
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'anchor',
+                                        bodyStyle: 'border-style:none; padding:0 100px 0 0px',
+                                        defaults: {
+                                            labelSeparator: ''
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'label',
+                                                text: 'Months',
+                                                style: DV.conf.style.label.period
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                boxLabel: 'Last month'
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                boxLabel: 'Months this year'
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                boxLabel: 'Months last year'
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'anchor',
+                                        bodyStyle: 'border-style:none; padding-right:100px',
+                                        defaults: {
+                                            labelSeparator: ''
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'label',
+                                                text: 'Quarters',
+                                                style: DV.conf.style.label.period
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                boxLabel: 'Last quarter'
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                boxLabel: 'Quarters this year'
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                boxLabel: 'Quarters last year'
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'anchor',
+                                        bodyStyle: 'border-style:none',
+                                        defaults: {
+                                            labelSeparator: ''
+                                        },  
+                                        items: [
+                                            {
+                                                xtype: 'label',
+                                                text: 'Years',
+                                                style: DV.conf.style.label.period
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                boxLabel: 'This year'
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                boxLabel: 'Last year'
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                boxLabel: 'Last 5 years'
+                                            }
+                                        ]
                                     }
-                                }),
-                                listeners: {
-                                    select: function(cb) {
-                                        var store = DV.store.period;
-                                        store.param = cb.getValue();
-                                        store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'name=' + cb.getValue());
-                                        store.load();
-                                    }
-                                }
-                            }                                
+                                ]
+                            }
                         ]
                     },
                     
@@ -875,7 +930,7 @@ Ext.onReady( function() {
                     }
                 }
             },
-            {
+            {   
                 region: 'center',
                 layout: 'fit',
                 bodyStyle: 'padding:10px',
@@ -939,7 +994,7 @@ Ext.onReady( function() {
         ],
         listeners: {
             resize: function(vp) {
-                vp.query('panel[region="west"]')[0].setWidth(562); //vp.getWidth() / 2
+                vp.query('panel[region="west"]')[0].setWidth(555); //vp.getWidth() / 2
             }
         }
     });
