@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
