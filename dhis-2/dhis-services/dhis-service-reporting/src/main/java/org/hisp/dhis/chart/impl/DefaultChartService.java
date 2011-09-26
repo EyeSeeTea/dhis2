@@ -82,6 +82,7 @@ import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.MathUtils;
@@ -106,7 +107,6 @@ import org.jfree.chart.renderer.category.BarRenderer3D;
 import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.chart.renderer.category.LineRenderer3D;
-import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
@@ -122,9 +122,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultChartService
     implements ChartService
 {
-    private static final Font titleFont = new Font( "Tahoma", Font.BOLD, 14 );
-
+    private static final Font titleFont = new Font( "Tahoma", Font.BOLD, 15 );
     private static final Font subTitleFont = new Font( "Tahoma", Font.PLAIN, 12 );
+    private static final Font labelFont = new Font( "Tahoma", Font.PLAIN, 10 );
 
     private static final String TREND_PREFIX = "Trend - ";
 
@@ -235,6 +235,62 @@ public class DefaultChartService
         return getJFreeChart( chart, !chart.getHideSubtitle() );
     }
 
+    public JFreeChart getPeriodJFreeChart( Indicator indicator, OrganisationUnit unit, boolean title, I18nFormat format )
+    {
+        RelativePeriods relatives = new RelativePeriods();
+        relatives.setMonthsThisYear( true );
+        List<Period> periods = periodService.reloadPeriods( relatives.getRelativePeriods( 1, format, true ) );
+
+        Chart chart = new Chart();
+
+        if ( title )
+        {
+            chart.setTitle( indicator.getName() );
+        }
+        
+        chart.setType( TYPE_LINE );
+        chart.setSize( SIZE_NORMAL );
+        chart.setDimension( DIMENSION_PERIOD_INDICATOR );
+        chart.setHideLegend( true );
+        chart.setVerticalLabels( true );
+        chart.getIndicators().add( indicator );
+        chart.setPeriods( periods );
+        chart.setOrganisationUnit( unit );
+        chart.setFormat( format );
+
+        chart.init();
+
+        return getJFreeChart( chart, title );
+    }
+
+    public JFreeChart getOrganisationUnitJFreeChart( Indicator indicator, OrganisationUnit parent, boolean title, I18nFormat format )
+    {
+        RelativePeriods relatives = new RelativePeriods();
+        relatives.setThisYear( true );
+        List<Period> periods = periodService.reloadPeriods( relatives.getRelativePeriods( 1, format, true ) );
+
+        Chart chart = new Chart();
+
+        if ( title )
+        {
+            chart.setTitle( indicator.getName() );
+        }
+        
+        chart.setType( TYPE_BAR );
+        chart.setSize( SIZE_NORMAL );
+        chart.setDimension( DIMENSION_ORGANISATIONUNIT_INDICATOR );
+        chart.setHideLegend( true );
+        chart.setVerticalLabels( true );
+        chart.getIndicators().add( indicator );
+        chart.setPeriods( periods );
+        chart.setOrganisationUnits( parent.getSortedChildren() );
+        chart.setFormat( format );
+
+        chart.init();
+
+        return getJFreeChart( chart, title );
+    }
+    
     public JFreeChart getJFreeChart( List<Indicator> indicators, List<DataElement> dataElements, List<Period> periods,
         List<OrganisationUnit> organisationUnits, String dimension, boolean regression, I18nFormat format )
     {
@@ -290,7 +346,7 @@ public class DefaultChartService
         int historyLength, I18nFormat format )
     {
         lastPeriod = periodService.reloadPeriod( lastPeriod );
-        
+
         List<Period> periods = periodService.getPeriods( lastPeriod, historyLength );
 
         MinMaxDataElement minMax = minMaxDataElementService.getMinMaxDataElement( organisationUnit, dataElement,
@@ -586,7 +642,7 @@ public class DefaultChartService
         CategoryPlot plot = null;
 
         CategoryDataset[] dataSets = getCategoryDataSet( chart );
-
+        
         if ( chart.isType( TYPE_LINE ) )
         {
             plot = new CategoryPlot( dataSets[0], new CategoryAxis(), new NumberAxis(), lineRenderer );
@@ -607,7 +663,7 @@ public class DefaultChartService
         {
             return getMultiplePieChart( chart, dataSets );
         }
-        else if ( chart.isType( TYPE_STACKED_BAR ) || chart.isType( TYPE_STACKED_BAR3D ))
+        else if ( chart.isType( TYPE_STACKED_BAR ) || chart.isType( TYPE_STACKED_BAR3D ) )
         {
             return getStackedBarChart( chart, dataSets[0] );
         }
@@ -653,7 +709,7 @@ public class DefaultChartService
         xAxis.setCategoryLabelPositions( chart.isVerticalLabels() ? CategoryLabelPositions.UP_45
             : CategoryLabelPositions.STANDARD );
         xAxis.setLabel( chart.getDomainAxixLabel() );
-        
+
         ValueAxis yAxis = plot.getRangeAxis();
         yAxis.setLabel( chart.getRangeAxisLabel() );
 
@@ -671,55 +727,55 @@ public class DefaultChartService
     {
         PlotOrientation orientation = chart.isHorizontalPlotOrientation() ? PlotOrientation.HORIZONTAL
             : PlotOrientation.VERTICAL;
-        
+
         JFreeChart stackedBarChart = null;
-        
+
         if ( chart.isType( TYPE_STACKED_BAR ) )
         {
-            stackedBarChart = ChartFactory.createStackedBarChart( chart.getTitle(), 
-                chart.getDomainAxixLabel(), chart.getRangeAxisLabel(), dataSet, orientation, true, false, false );
+            stackedBarChart = ChartFactory.createStackedBarChart( chart.getTitle(), chart.getDomainAxixLabel(),
+                chart.getRangeAxisLabel(), dataSet, orientation, true, false, false );
         }
         else
         {
-            stackedBarChart = ChartFactory.createStackedBarChart3D( chart.getTitle(), 
-                chart.getDomainAxixLabel(), chart.getRangeAxisLabel(), dataSet, orientation, true, false, false );
+            stackedBarChart = ChartFactory.createStackedBarChart3D( chart.getTitle(), chart.getDomainAxixLabel(),
+                chart.getRangeAxisLabel(), dataSet, orientation, true, false, false );
         }
         
         CategoryPlot plot = (CategoryPlot) stackedBarChart.getPlot();
         plot.setBackgroundPaint( Color.WHITE );
+        plot.setOutlinePaint( Color.WHITE );
 
         CategoryAxis xAxis = plot.getDomainAxis();
         xAxis.setCategoryLabelPositions( chart.isVerticalLabels() ? CategoryLabelPositions.UP_45
             : CategoryLabelPositions.STANDARD );
 
+        stackedBarChart.getTitle().setFont( titleFont );
+        stackedBarChart.addSubtitle( getSubTitle( chart, chart.getFormat() ) );
         stackedBarChart.setAntiAlias( true );
-        
+
         return stackedBarChart;
     }
-    
+
     private JFreeChart getMultiplePieChart( Chart chart, CategoryDataset[] dataSets )
     {
         JFreeChart multiplePieChart = null;
 
         if ( chart.isType( TYPE_PIE ) )
         {
-            multiplePieChart = ChartFactory.createMultiplePieChart( chart.getTitle(), dataSets[0],
-                TableOrder.BY_ROW, !chart.getHideLegend(), false, false );
+            multiplePieChart = ChartFactory.createMultiplePieChart( chart.getTitle(), dataSets[0], TableOrder.BY_ROW,
+                !chart.getHideLegend(), false, false );
         }
         else
         {
-            multiplePieChart = ChartFactory.createMultiplePieChart3D( chart.getTitle(), dataSets[0],
-                TableOrder.BY_ROW, !chart.getHideLegend(), false, false );
+            multiplePieChart = ChartFactory.createMultiplePieChart3D( chart.getTitle(), dataSets[0], TableOrder.BY_ROW,
+                !chart.getHideLegend(), false, false );
         }
 
+        multiplePieChart.getTitle().setFont( titleFont );
+        multiplePieChart.addSubtitle( getSubTitle( chart, chart.getFormat() ) );
+        multiplePieChart.getLegend().setItemFont( subTitleFont );
         multiplePieChart.setBackgroundPaint( Color.WHITE );
         multiplePieChart.setAntiAlias( true );
-
-        TextTitle title = multiplePieChart.getTitle();
-        title.setFont( titleFont );
-
-        LegendTitle legend = multiplePieChart.getLegend();
-        legend.setItemFont( subTitleFont );
 
         MultiplePiePlot multiplePiePlot = (MultiplePiePlot) multiplePieChart.getPlot();
         JFreeChart pieChart = multiplePiePlot.getPieChart();
@@ -727,9 +783,7 @@ public class DefaultChartService
 
         PiePlot piePlot = (PiePlot) pieChart.getPlot();
         piePlot.setBackgroundPaint( Color.WHITE );
-        piePlot.setShadowXOffset( 0 );
-        piePlot.setShadowYOffset( 0 );
-        piePlot.setLabelFont( new Font( "Tahoma", Font.PLAIN, 10 ) );
+        piePlot.setLabelFont( labelFont );
         piePlot.setLabelGenerator( new StandardPieSectionLabelGenerator( "{2}" ) );
         piePlot.setSimpleLabels( true );
         piePlot.setIgnoreZeroValues( true );
@@ -742,7 +796,7 @@ public class DefaultChartService
 
         return multiplePieChart;
     }
-    
+
     /**
      * Returns a DefaultCategoryDataSet based on aggregated data for the chart.
      */
@@ -798,19 +852,19 @@ public class DefaultChartService
                     for ( Period period : chart.getAllPeriods() )
                     {
                         Double value = null;
-
+                        
                         if ( isIndicatorChart )
                         {
                             value = aggregationStrategy.equals( AGGREGATION_STRATEGY_REAL_TIME ) ? aggregationService
-                                .getAggregatedIndicatorValue( indicators.get( i ), period.getStartDate(), period
-                                    .getEndDate(), selectedOrganisationUnit ) : aggregatedDataValueService
+                                .getAggregatedIndicatorValue( indicators.get( i ), period.getStartDate(),
+                                    period.getEndDate(), selectedOrganisationUnit ) : aggregatedDataValueService
                                 .getAggregatedValue( indicators.get( i ), period, selectedOrganisationUnit );
                         }
                         else if ( isDataElementChart )
                         {
                             value = aggregationStrategy.equals( AGGREGATION_STRATEGY_REAL_TIME ) ? aggregationService
-                                .getAggregatedDataValue( dataElements.get( i ), null, period.getStartDate(), period
-                                    .getEndDate(), selectedOrganisationUnit ) : aggregatedDataValueService
+                                .getAggregatedDataValue( dataElements.get( i ), null, period.getStartDate(),
+                                    period.getEndDate(), selectedOrganisationUnit ) : aggregatedDataValueService
                                 .getAggregatedValue( dataElements.get( i ), period, selectedOrganisationUnit );
                         }
 
@@ -955,7 +1009,19 @@ public class DefaultChartService
         {
             subTitle.setText( chart.getAllOrganisationUnits().get( 0 ).getName() );
         }
-
+        else if ( chart.isDimension( DIMENSION_PERIOD_DATAELEMENT ) && chart.getAllOrganisationUnits().size() > 0 )
+        {
+            subTitle.setText( chart.getAllOrganisationUnits().get( 0 ).getName() );
+        }
+        else if ( chart.isDimension( DIMENSION_ORGANISATIONUNIT_DATAELEMENT ) && chart.getAllPeriods().size() > 0 )
+        {
+            subTitle.setText( format.formatPeriod( chart.getAllPeriods().get( 0 ) ) );
+        }
+        else if ( chart.isDimension( DIMENSION_DATAELEMENT_PERIOD ) && chart.getDataElements().size() > 0 )
+        {
+            subTitle.setText( chart.getAllOrganisationUnits().get( 0 ).getName() );
+        }
+        
         return subTitle;
     }
 

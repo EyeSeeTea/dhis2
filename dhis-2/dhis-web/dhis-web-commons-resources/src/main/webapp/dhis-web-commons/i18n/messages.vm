@@ -68,5 +68,8 @@ var validationMessage	= {
 		,greaterDate: '$encoder.jsEscape($i18n.getString('closedDate_should_be_greater_than_openDate' ) , "'")'
 		,unicodechars: '$encoder.jsEscape($i18n.getString('please_unicode_chars_only' ) , "'")'
 		,unrecognizedcoordinatestring: '$encoder.jsEscape($i18n.getString('unrecognized_coordinate_string' ) , "'")'
-		
+		,number: '$encoder.jsEscape($i18n.getString('please_enter_valid_number' ) , "'")'
+		,integer: '$encoder.jsEscape($i18n.getString('please_enter_valid_integer' ) , "'")'
+		,positive_integer: '$encoder.jsEscape($i18n.getString('please_enter_valid_positive_integer' ) , "'")'
+		,negative_integer: '$encoder.jsEscape($i18n.getString('please_enter_valid_negative_integer' ) , "'")'
 };

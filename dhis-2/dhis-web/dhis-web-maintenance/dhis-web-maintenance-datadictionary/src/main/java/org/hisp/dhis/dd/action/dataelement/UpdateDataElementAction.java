@@ -29,14 +29,17 @@ package org.hisp.dhis.dd.action.dataelement;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.system.util.ConversionUtils;
 
 import com.opensymphony.xwork2.Action;
@@ -70,6 +73,13 @@ public class UpdateDataElementAction
     public void setDataSetService( DataSetService dataSetService )
     {
         this.dataSetService = dataSetService;
+    }
+
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
@@ -138,21 +148,21 @@ public class UpdateDataElementAction
     {
         this.domainType = domainType;
     }
-    
+
     private String numberType;
 
     public void setNumberType( String numberType )
     {
         this.numberType = numberType;
     }
-    
+
     private String valueType;
 
     public void setValueType( String valueType )
     {
         this.valueType = valueType;
     }
-    
+
     private String aggregationOperator;
 
     public void setAggregationOperator( String aggregationOperator )
@@ -188,6 +198,13 @@ public class UpdateDataElementAction
         this.zeroIsSignificant = zeroIsSignificant;
     }
 
+    private List<String> jsonAttributeValues;
+
+    public void setJsonAttributeValues( List<String> jsonAttributeValues )
+    {
+        this.jsonAttributeValues = jsonAttributeValues;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -212,7 +229,7 @@ public class UpdateDataElementAction
         {
             description = null;
         }
-        
+
         if ( formName != null && formName.trim().length() == 0 )
         {
             formName = null;
@@ -240,10 +257,12 @@ public class UpdateDataElementAction
         dataElement.setAggregationOperator( aggregationOperator );
         dataElement.setUrl( url );
         dataElement.setCategoryCombo( categoryCombo );
-        dataElement.setAggregationLevels( new ArrayList<Integer>( ConversionUtils.getIntegerCollection( aggregationLevels ) ) );
+        dataElement.setAggregationLevels( new ArrayList<Integer>( ConversionUtils
+            .getIntegerCollection( aggregationLevels ) ) );
         dataElement.setZeroIsSignificant( zeroIsSignificant );
-        
+
         Set<DataSet> dataSets = dataElement.getDataSets();
+
         for ( DataSet dataSet : dataSets )
         {
             if ( dataSet.getMobile() != null && dataSet.getMobile() )
@@ -251,6 +270,12 @@ public class UpdateDataElementAction
                 dataSet.setVersion( dataSet.getVersion() + 1 );
                 dataSetService.updateDataSet( dataSet );
             }
+        }
+
+        if ( jsonAttributeValues != null )
+        {
+            AttributeUtils.updateAttributeValuesFromJson( dataElement.getAttributeValues(), jsonAttributeValues,
+                attributeService );
         }
 
         dataElementService.updateDataElement( dataElement );

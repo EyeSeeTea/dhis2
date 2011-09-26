@@ -48,7 +48,7 @@ public class PaginatedList<T>
 
     private int fromIndex = 0;
     
-    public PaginatedList( Collection<? extends T> collection )
+    public PaginatedList( Collection<T> collection )
     {
         super( collection );
         this.pageSize = DEFAULT_PAGE_SIZE;

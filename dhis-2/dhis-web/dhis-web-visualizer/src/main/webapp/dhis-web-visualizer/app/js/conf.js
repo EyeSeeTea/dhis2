@@ -27,7 +27,7 @@ DV.conf = {
     },
     style: {
         label: {
-            period: 'font:bold 11px arial,ubuntu; color:#444; line-height:20px'
+            period: 'font:bold 11px arial,ubuntu; color:#444; line-height:20px',
         }
     }
 };

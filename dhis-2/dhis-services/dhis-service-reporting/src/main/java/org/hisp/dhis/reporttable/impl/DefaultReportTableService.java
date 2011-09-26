@@ -391,11 +391,26 @@ public class DefaultReportTableService
         }
 
         // ---------------------------------------------------------------------
+        // Leaf parent organisation unit report parameter
+        // ---------------------------------------------------------------------
+
+        if ( reportTable.getReportParams() != null &&
+            reportTable.getReportParams().isParamLeafParentOrganisationUnit() )
+        {
+            OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+            reportTable.getRelativeUnits().addAll(
+                new ArrayList<OrganisationUnit>( organisationUnitService.getLeafOrganisationUnits( organisationUnitId ) ) );
+            reportTable.setOrganisationUnitName( organisationUnit.getName() );
+            
+            log.info( "Leaf parent organisation unit: " + organisationUnit.getName() );
+        }
+        
+        // ---------------------------------------------------------------------
         // Grand parent organisation unit report parameter
         // ---------------------------------------------------------------------
 
-        if ( reportTable.getReportParams() != null
-            && reportTable.getReportParams().isParamGrandParentOrganisationUnit() )
+        if ( reportTable.getReportParams() != null && 
+            reportTable.getReportParams().isParamGrandParentOrganisationUnit() )
         {
             OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
             organisationUnit.setCurrentParent( true );
@@ -517,7 +532,7 @@ public class DefaultReportTableService
 
             for ( NameableObject object : row ) // Index name columns
             {
-                grid.addValue( object.getShortName() ); 
+                grid.addValue( object.getName() ); 
             }
 
             grid.addValue( reportTable.getReportingMonthName() );

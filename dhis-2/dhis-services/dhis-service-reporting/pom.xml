@@ -38,8 +38,12 @@
       <artifactId>dhis-service-mapping</artifactId>
     </dependency>
     
-    <!-- Other -->
-    
+    <!-- JasperReports -->
+
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports</artifactId>
+    </dependency>
     <dependency>
       <groupId>jfree</groupId>
       <artifactId>jfreechart</artifactId>
@@ -47,7 +51,14 @@
     <dependency>
       <groupId>jfree</groupId>
       <artifactId>jcommon</artifactId>
-    </dependency> 
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+    </dependency>
+    
+    <!-- Other -->
+    
     <dependency>
       <groupId>jep</groupId>
       <artifactId>jep</artifactId>

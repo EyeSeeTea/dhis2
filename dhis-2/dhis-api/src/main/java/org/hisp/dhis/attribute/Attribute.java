@@ -47,16 +47,20 @@ public class Attribute
 
     private boolean mandatory;
 
-    private boolean dataElement;
+    private boolean dataElementAttribute;
 
-    private boolean indicator;
+    private boolean indicatorAttribute;
 
-    private boolean organisationUnit;
+    private boolean organisationUnitAttribute;
+
+    private boolean userAttribute;
+
+    private Integer sortOrder;
 
     private Set<AttributeOption> attributeOptions = new HashSet<AttributeOption>();
-
+    
     private Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
-
+    
     public Attribute()
     {
 
@@ -88,34 +92,54 @@ public class Attribute
         this.mandatory = mandatory;
     }
 
-    public boolean isDataElement()
+    public boolean isDataElementAttribute()
     {
-        return dataElement;
+        return dataElementAttribute;
     }
 
-    public void setDataElement( boolean dataElement )
+    public void setDataElementAttribute( boolean dataElementAttribute )
     {
-        this.dataElement = dataElement;
+        this.dataElementAttribute = dataElementAttribute;
     }
 
-    public boolean isIndicator()
+    public boolean isIndicatorAttribute()
     {
-        return indicator;
+        return indicatorAttribute;
     }
 
-    public void setIndicator( boolean indicator )
+    public void setIndicatorAttribute( boolean indicatorAttribute )
     {
-        this.indicator = indicator;
+        this.indicatorAttribute = indicatorAttribute;
     }
 
-    public boolean isOrganisationUnit()
+    public boolean isOrganisationUnitAttribute()
     {
-        return organisationUnit;
+        return organisationUnitAttribute;
     }
 
-    public void setOrganisationUnit( boolean organisationUnit )
+    public void setOrganisationUnitAttribute( boolean organisationUnitAttribute )
     {
-        this.organisationUnit = organisationUnit;
+        this.organisationUnitAttribute = organisationUnitAttribute;
+    }
+
+    public void setAttributeValues( Set<AttributeValue> attributeValues )
+    {
+        this.attributeValues = attributeValues;
+    }
+
+    public void setSortOrder( Integer sortOrder )
+    {
+        this.sortOrder = sortOrder;
+    }
+    
+    public boolean isUserAttribute()
+    {
+        return userAttribute;
+    }
+
+    public void setUserAttribute( boolean userAttribute )
+    {
+        this.userAttribute = userAttribute;
     }
 
     public Set<AttributeOption> getAttributeOptions()
@@ -132,12 +156,7 @@ public class Attribute
     {
         return attributeValues;
     }
-
-    public void setAttributeValues( Set<AttributeValue> attributeValues )
-    {
-        this.attributeValues = attributeValues;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
@@ -152,5 +171,10 @@ public class Attribute
     {
         attributeOption.getAttributes().remove( this );
         attributeOptions.remove( attributeOption );
+    }
+
+    public Integer getSortOrder()
+    {
+        return sortOrder;
     }
 }

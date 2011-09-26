@@ -51,11 +51,6 @@ import org.hisp.dhis.paging.ActionPagingSupport;
 public class GetIndicatorListAction
     extends ActionPagingSupport<Indicator>
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = -8113994255652430513L;
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -190,7 +185,7 @@ public class GetIndicatorListAction
             
             this.paging = createPaging( indicators.size() );
             
-            indicators = getBlockElement( indicators, paging.getStartPage(), paging.getEndPos() );
+            indicators = getBlockElement( indicators, paging.getStartPos(), paging.getPageSize() );
         }
         else
         {

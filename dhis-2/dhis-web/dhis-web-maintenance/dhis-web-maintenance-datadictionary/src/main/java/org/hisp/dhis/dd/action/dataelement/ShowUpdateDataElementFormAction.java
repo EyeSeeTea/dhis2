@@ -30,9 +30,13 @@ package org.hisp.dhis.dd.action.dataelement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -41,6 +45,7 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementCategoryComboNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.system.util.AttributeUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -74,6 +79,13 @@ public class ShowUpdateDataElementFormAction
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
+    }
+
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
@@ -129,6 +141,20 @@ public class ShowUpdateDataElementFormAction
         return defaultCategoryCombo;
     }
 
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public Map<Integer, String> attributeValues = new HashMap<Integer, String>();
+
+    public Map<Integer, String> getAttributeValues()
+    {
+        return attributeValues;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -138,23 +164,29 @@ public class ShowUpdateDataElementFormAction
         defaultCategoryCombo = dataElementCategoryService
             .getDataElementCategoryComboByName( DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME );
 
-        dataElementCategoryCombos = new ArrayList<DataElementCategoryCombo>( dataElementCategoryService
-            .getAllDataElementCategoryCombos() );
+        dataElementCategoryCombos = new ArrayList<DataElementCategoryCombo>(
+            dataElementCategoryService.getAllDataElementCategoryCombos() );
 
         Collections.sort( dataElementCategoryCombos, new DataElementCategoryComboNameComparator() );
-        
+
         dataElement = dataElementService.getDataElement( id );
 
         organisationUnitLevels = organisationUnitService.getOrganisationUnitLevels();
 
         Map<Integer, OrganisationUnitLevel> levelMap = organisationUnitService.getOrganisationUnitLevelMap();
-        
+
         for ( Integer level : dataElement.getAggregationLevels() )
         {
             aggregationLevels.add( levelMap.get( level ) );
         }
 
         organisationUnitLevels.removeAll( aggregationLevels );
+
+        attributes = new ArrayList<Attribute>( attributeService.getDataElementAttributes() );
+
+        Collections.sort( attributes, new AttributeSortOrderComparator() );
+
+        attributeValues = AttributeUtils.getAttributeValueMap( dataElement.getAttributeValues() );
 
         return SUCCESS;
     }

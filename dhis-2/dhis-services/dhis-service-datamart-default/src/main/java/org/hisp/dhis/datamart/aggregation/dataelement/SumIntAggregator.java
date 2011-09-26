@@ -29,7 +29,6 @@ package org.hisp.dhis.datamart.aggregation.dataelement;
 
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_SUM;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
-import static org.hisp.dhis.system.util.DateUtils.getDaysInclusive;
 
 import java.util.Collection;
 import java.util.Date;
@@ -89,7 +88,7 @@ public class SumIntAggregator
         }
         
         final Collection<CrossTabDataValue> crossTabValues = crossTabService.getCrossTabDataValues( operands, 
-            aggregationCache.getIntersectingPeriods( period.getStartDate(), period.getEndDate() ), hierarchy.getChildren( unit.getId() ), key );
+            aggregationCache.getPeriodsBetweenDates( period.getStartDate(), period.getEndDate() ), hierarchy.getChildren( unit.getId() ), key );
         
         final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
             period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <Operand, [total value, total relevant days]>
@@ -98,7 +97,7 @@ public class SumIntAggregator
         
         for ( final Entry<DataElementOperand, double[]> entry : entries.entrySet() )
         {
-            if ( entry.getValue() != null && entry.getValue()[ 1 ] > 0 )
+            if ( entry.getValue() != null )
             {
                 values.put( entry.getKey(), entry.getValue()[ 0 ] );
             }
@@ -114,71 +113,28 @@ public class SumIntAggregator
 
         for ( final CrossTabDataValue crossTabValue : crossTabValues )
         {
-            final Period period = aggregationCache.getPeriod( crossTabValue.getPeriodId() );
-            
-            final Date currentStartDate = period.getStartDate();
-            final Date currentEndDate = period.getEndDate();
-            
-            final double duration = getDaysInclusive( currentStartDate, currentEndDate );
-            
             final int dataValueLevel = aggregationCache.getLevelOfOrganisationUnit( crossTabValue.getSourceId() );
             
-            if ( duration > 0 )
+            for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
             {
-                for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
+                if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel ) )
                 {
-                    if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel ) )
+                    double value = 0.0;
+                    
+                    try
                     {
-                        double value = 0.0;
-                        double relevantDays = 0.0;
-                        double factor = 0.0;                        
-                        
-                        try
-                        {
-                            value = Double.parseDouble( entry.getValue() );
-                        }
-                        catch ( NumberFormatException ex )
-                        {
-                            log.warn( "Value skipped, not numeric: '" + entry.getValue() + 
-                                "', for data element with id: '" + entry.getKey() +
-                                "', for period with id: '" + crossTabValue.getPeriodId() +
-                                "', for source with id: '" + crossTabValue.getSourceId() + "'" );
-                            continue;
-                        }
-                        
-                        if ( currentStartDate.compareTo( startDate ) >= 0 && currentEndDate.compareTo( endDate ) <= 0 ) // Value is within period
-                        {
-                            relevantDays = getDaysInclusive( startDate, endDate );
-                            factor = 1;
-                        }
-                        else if ( currentStartDate.compareTo( startDate ) <= 0 && currentEndDate.compareTo( endDate ) >= 0 ) // Value spans whole period
-                        {
-                            relevantDays = getDaysInclusive( startDate, endDate );
-                            factor = relevantDays / duration;
-                        }
-                        else if ( currentStartDate.compareTo( startDate ) <= 0 && currentEndDate.compareTo( startDate ) >= 0
-                            && currentEndDate.compareTo( endDate ) <= 0 ) // Value spans period start
-                        {
-                            relevantDays = getDaysInclusive( startDate, currentEndDate );
-                            factor = relevantDays / duration;
-                        }
-                        else if ( currentStartDate.compareTo( startDate ) >= 0 && currentStartDate.compareTo( endDate ) <= 0
-                            && currentEndDate.compareTo( endDate ) >= 0 ) // Value spans period end
-                        {
-                            relevantDays = getDaysInclusive( currentStartDate, endDate );
-                            factor = relevantDays / duration;
-                        }
-                        
-                        value = value * factor;
-
-                        final double[] totalSum = totalSums.get( entry.getKey() );
-                        value += totalSum != null ? totalSum[0] : 0;
-                        relevantDays += totalSum != null ? totalSum[1] : 0;
-                        
-                        final double[] values = { value, relevantDays };
-                        
-                        totalSums.put( entry.getKey(), values );
+                        value = Double.parseDouble( entry.getValue() );
                     }
+                    catch ( NumberFormatException ex )
+                    {
+                        log.warn( "Value skipped, not numeric: '" + entry.getValue() );
+                        continue;
+                    }
+                    
+                    final double[] totalSum = totalSums.get( entry.getKey() );
+                    value += totalSum != null ? totalSum[0] : 0;                        
+                    final double[] values = { value, 0 };                        
+                    totalSums.put( entry.getKey(), values );
                 }
             }
         }

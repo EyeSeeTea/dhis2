@@ -1,0 +1,31 @@
+
+<h2>$dataSet.name</h2>
+
+<form action="saveSectionForm.action" method="POST">
+
+<input type="hidden" id="organisationUnitId" name="organisationUnitId" value="$organisationUnitId" />
+<input type="hidden" id="dataSetId" name="dataSetId" value="$dataSetId" />
+<input type="hidden" id="periodId" name="periodId" value="$periodId" />
+
+#foreach( $section in $dataSet.sections )
+<div class="header-box">
+	<h3>$section.name</h3>
+	<p>
+		#foreach( $dataElement in $section.dataElements)
+			#foreach( $optionCombo in $section.categoryCombo.optionCombos )
+			#set( $key = "DE${dataElement.id}OC${optionCombo.id}" )
+			<label>$dataElement.name $optionCombo.name</label> <input type="text" size="24" name="$key" value="$dataValues.get($key)" /> <br />
+			#end
+		#end
+	</p>
+</div>
+#end
+
+<div class="header-box">
+	<p>
+		<input type="submit" style="width: 48%" value="Save"/>
+		<input type="reset" style="width: 48%" value="Clear"/>
+	</p>
+</div>
+
+</form>

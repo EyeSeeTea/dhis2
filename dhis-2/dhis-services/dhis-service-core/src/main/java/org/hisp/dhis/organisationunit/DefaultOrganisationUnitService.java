@@ -217,6 +217,19 @@ public class DefaultOrganisationUnitService
         return organisationUnitStore.getRootOrganisationUnits();
     }
 
+    public Collection<OrganisationUnit> getLeafOrganisationUnits( int id )
+    {
+        Collection<OrganisationUnit> units = getOrganisationUnitWithChildren( id );
+        
+        return FilterUtils.filter( units, new Filter<OrganisationUnit>()
+        {
+            public boolean retain( OrganisationUnit object )
+            {
+                return object != null && object.getChildren().isEmpty();
+            }            
+        } );
+    }
+    
     public Collection<OrganisationUnit> getOrganisationUnitWithChildren( int id )
     {
         OrganisationUnit organisationUnit = getOrganisationUnit( id );
@@ -303,7 +316,7 @@ public class DefaultOrganisationUnitService
             return getRootOrganisationUnits();
         }
 
-        HashSet<OrganisationUnit> result = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> result = new HashSet<OrganisationUnit>();
 
         for ( OrganisationUnit root : organisationUnitStore.getRootOrganisationUnits() )
         {
@@ -328,7 +341,7 @@ public class DefaultOrganisationUnitService
                 "Level must be greater than or equal to level of parent OrganisationUnit" );
         }
 
-        HashSet<OrganisationUnit> result = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> result = new HashSet<OrganisationUnit>();
 
         if ( level == parentLevel )
         {
@@ -348,7 +361,7 @@ public class DefaultOrganisationUnitService
      * the current level.
      */
     private void addOrganisationUnitChildrenAtLevel( OrganisationUnit parent, int currentLevel, int targetLevel,
-        HashSet<OrganisationUnit> result )
+        Set<OrganisationUnit> result )
     {
         if ( currentLevel == targetLevel )
         {

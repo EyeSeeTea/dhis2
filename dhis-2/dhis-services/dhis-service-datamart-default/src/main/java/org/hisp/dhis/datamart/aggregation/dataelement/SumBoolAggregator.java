@@ -29,7 +29,6 @@ package org.hisp.dhis.datamart.aggregation.dataelement;
 
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_SUM;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
-import static org.hisp.dhis.system.util.DateUtils.getDaysInclusive;
 import static org.hisp.dhis.system.util.MathUtils.getFloor;
 
 import java.util.Collection;
@@ -95,7 +94,7 @@ public class SumBoolAggregator
         
         for ( final Entry<DataElementOperand, double[]> entry : entries.entrySet() )
         {
-            if ( entry.getValue() != null && entry.getValue()[ 1 ] > 0 )
+            if ( entry.getValue() != null )
             {
                 values.put( entry.getKey(), getFloor( entry.getValue()[ 0 ] ) );
             }
@@ -111,63 +110,23 @@ public class SumBoolAggregator
 
         for ( final CrossTabDataValue crossTabValue : crossTabValues )
         {
-            final Period period = aggregationCache.getPeriod( crossTabValue.getPeriodId() );
-            
-            final Date currentStartDate = period.getStartDate();
-            final Date currentEndDate = period.getEndDate();
-            
-            final double duration = getDaysInclusive( currentStartDate, currentEndDate );
-
             final int dataValueLevel = aggregationCache.getLevelOfOrganisationUnit( crossTabValue.getSourceId() );
             
-            if ( duration > 0 )
+            for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
             {
-                for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
+                if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel ) )
                 {
-                    if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel ) )
+                    double value = 0.0;
+
+                    if ( entry.getValue().toLowerCase().equals( TRUE ) )
                     {
-                        double value = 0.0;                        
-                        double relevantDays = 0.0;
-                        double factor = 0.0;
-
-                        if ( currentStartDate.compareTo( startDate ) >= 0 && currentEndDate.compareTo( endDate ) <= 0 ) // Value is within period
-                        {
-                            relevantDays = getDaysInclusive( startDate, endDate );
-                            factor = 1;
-                        }
-                        else if ( currentStartDate.compareTo( startDate ) <= 0 && currentEndDate.compareTo( endDate ) >= 0 ) // Value spans whole period
-                        {
-                            relevantDays = getDaysInclusive( startDate, endDate );
-                            factor = relevantDays / duration;
-                        }
-                        else if ( currentStartDate.compareTo( startDate ) <= 0 && currentEndDate.compareTo( startDate ) >= 0
-                            && currentEndDate.compareTo( endDate ) <= 0 ) // Value spans period start
-                        {
-                            relevantDays = getDaysInclusive( startDate, currentEndDate );
-                            factor = relevantDays / duration;
-                        }
-                        else if ( currentStartDate.compareTo( startDate ) >= 0 && currentStartDate.compareTo( endDate ) <= 0
-                            && currentEndDate.compareTo( endDate ) >= 0 ) // Value spans period end
-                        {
-                            relevantDays = getDaysInclusive( currentStartDate, endDate );
-                            factor = relevantDays / duration;
-                        }
-
-                        if ( entry.getValue().toLowerCase().equals( TRUE ) )
-                        {
-                            value = 1;
-                        }
-                        
-                        value = value * factor;
-
-                        final double[] totalSum = totalSums.get( entry.getKey() );
-                        value += totalSum != null ? totalSum[0] : 0;
-                        relevantDays += totalSum != null ? totalSum[1] : 0;
-                        
-                        final double[] values = { value, relevantDays };
-                        
-                        totalSums.put( entry.getKey(), values );
+                        value = 1;
                     }
+                    
+                    final double[] totalSum = totalSums.get( entry.getKey() );
+                    value += totalSum != null ? totalSum[0] : 0;                        
+                    final double[] values = { value, 0 };                        
+                    totalSums.put( entry.getKey(), values );
                 }
             }
         }

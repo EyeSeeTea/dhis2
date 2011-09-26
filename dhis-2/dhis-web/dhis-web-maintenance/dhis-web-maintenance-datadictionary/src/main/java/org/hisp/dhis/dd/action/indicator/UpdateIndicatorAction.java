@@ -27,15 +27,18 @@ package org.hisp.dhis.dd.action.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.List;
+
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
+import org.hisp.dhis.system.util.AttributeUtils;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: UpdateIndicatorAction.java 5164 2008-05-16 12:23:58Z larshelg $
  */
 public class UpdateIndicatorAction
     implements Action
@@ -50,7 +53,14 @@ public class UpdateIndicatorAction
     {
         this.indicatorService = indicatorService;
     }
-        
+
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
+    }
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -117,26 +127,19 @@ public class UpdateIndicatorAction
     {
         this.url = url;
     }
-    
+
     private String numerator;
 
     public void setNumerator( String numerator )
     {
         this.numerator = numerator;
     }
-    
+
     private String numeratorDescription;
 
     public void setNumeratorDescription( String numeratorDescription )
     {
         this.numeratorDescription = numeratorDescription;
-    }
-
-    private String numeratorAggregationOperator;
-
-    public void setNumeratorAggregationOperator( String numeratorAggregationOperator )
-    {
-        this.numeratorAggregationOperator = numeratorAggregationOperator;
     }
 
     private String denominator;
@@ -153,13 +156,13 @@ public class UpdateIndicatorAction
         this.denominatorDescription = denominatorDescription;
     }
 
-    private String denominatorAggregationOperator;
+    private List<String> jsonAttributeValues;
 
-    public void setDenominatorAggregationOperator( String denominatorAggregationOperator )
+    public void setJsonAttributeValues( List<String> jsonAttributeValues )
     {
-        this.denominatorAggregationOperator = denominatorAggregationOperator;
+        this.jsonAttributeValues = jsonAttributeValues;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -167,7 +170,7 @@ public class UpdateIndicatorAction
     public String execute()
     {
         Indicator indicator = indicatorService.getIndicator( id );
-        
+
         IndicatorType indicatorType = indicatorService.getIndicatorType( indicatorTypeId );
 
         if ( alternativeName != null && alternativeName.trim().length() == 0 )
@@ -184,7 +187,7 @@ public class UpdateIndicatorAction
         {
             description = null;
         }
-        
+
         indicator.setName( name );
         indicator.setAlternativeName( alternativeName );
         indicator.setShortName( shortName );
@@ -195,11 +198,15 @@ public class UpdateIndicatorAction
         indicator.setUrl( url );
         indicator.setNumerator( numerator );
         indicator.setNumeratorDescription( numeratorDescription );
-        indicator.setNumeratorAggregationOperator( numeratorAggregationOperator );
         indicator.setDenominator( denominator );
         indicator.setDenominatorDescription( denominatorDescription );
-        indicator.setDenominatorAggregationOperator( denominatorAggregationOperator );
-        
+
+        if ( jsonAttributeValues != null )
+        {
+            AttributeUtils.updateAttributeValuesFromJson( indicator.getAttributeValues(), jsonAttributeValues,
+                attributeService );
+        }
+
         indicatorService.updateIndicator( indicator );
 
         return SUCCESS;

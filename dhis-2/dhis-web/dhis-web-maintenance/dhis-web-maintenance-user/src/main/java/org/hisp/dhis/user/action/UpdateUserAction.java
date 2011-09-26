@@ -30,12 +30,15 @@ package org.hisp.dhis.user.action;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.security.PasswordManager;
+import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
@@ -46,7 +49,6 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: UpdateUserAction.java 5556 2008-08-20 11:36:20Z abyot $
  */
 public class UpdateUserAction
     implements Action
@@ -90,8 +92,15 @@ public class UpdateUserAction
         this.currentUserService = currentUserService;
     }
 
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
+    }
+
     // -------------------------------------------------------------------------
-    // Input
+    // Input & Output
     // -------------------------------------------------------------------------
 
     private Integer id;
@@ -143,6 +152,13 @@ public class UpdateUserAction
         this.selectedList = selectedList;
     }
 
+    private List<String> jsonAttributeValues;
+
+    public void setJsonAttributeValues( List<String> jsonAttributeValues )
+    {
+        this.jsonAttributeValues = jsonAttributeValues;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -150,8 +166,9 @@ public class UpdateUserAction
     public String execute()
         throws Exception
     {
-        UserCredentials currentUserCredentials = currentUserService.getCurrentUser() != null ? currentUserService.getCurrentUser().getUserCredentials() : null;
-        
+        UserCredentials currentUserCredentials = currentUserService.getCurrentUser() != null ? currentUserService
+            .getCurrentUser().getUserCredentials() : null;
+
         // ---------------------------------------------------------------------
         // Prepare values
         // ---------------------------------------------------------------------
@@ -169,7 +186,7 @@ public class UpdateUserAction
         // ---------------------------------------------------------------------
         // Update userCredentials and user
         // ---------------------------------------------------------------------
-        
+
         Collection<OrganisationUnit> units = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
         User user = userService.getUser( id );
@@ -180,29 +197,35 @@ public class UpdateUserAction
         user.updateOrganisationUnits( new HashSet<OrganisationUnit>( units ) );
 
         UserCredentials userCredentials = userService.getUserCredentials( user );
-        
+
         Set<UserAuthorityGroup> userAuthorityGroups = new HashSet<UserAuthorityGroup>();
-        
+
         for ( String id : selectedList )
         {
             UserAuthorityGroup group = userService.getUserAuthorityGroup( Integer.parseInt( id ) );
-            
+
             if ( currentUserCredentials != null && currentUserCredentials.canIssue( group ) )
             {
                 userAuthorityGroups.add( group );
             }
         }
-        
+
         userCredentials.setUserAuthorityGroups( userAuthorityGroups );
-        
+
         if ( rawPassword != null )
         {
             userCredentials.setPassword( passwordManager.encodePassword( userCredentials.getUsername(), rawPassword ) );
         }
 
+        if ( jsonAttributeValues != null)
+        {
+            AttributeUtils.updateAttributeValuesFromJson( user.getAttributeValues(), jsonAttributeValues,
+                attributeService );
+        }
+
         userService.updateUserCredentials( userCredentials );
         userService.updateUser( user );
-        
+
         if ( units.size() > 0 )
         {
             selectionManager.setSelectedOrganisationUnits( units );

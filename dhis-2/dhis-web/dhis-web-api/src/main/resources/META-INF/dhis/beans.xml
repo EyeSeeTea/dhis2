@@ -37,6 +37,23 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
   </bean>
 
+  <bean id="org.hisp.dhis.web.api.resources.ChartResource" class="org.hisp.dhis.web.api.resources.ChartResource"
+	scope="prototype">
+	<property name="chartService" ref="org.hisp.dhis.chart.ChartService"/>
+	<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService"/>
+    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+	<property name="i18nManager" ref="org.hisp.dhis.i18n.I18nManager"/>
+  </bean>
+  
+  <bean id="org.hisp.dhis.web.api.resources.ReportResource" class="org.hisp.dhis.web.api.resources.ReportResource"
+	scope="prototype">
+	<property name="reportService" ref="org.hisp.dhis.report.ReportService"/>
+    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+	<property name="i18nManager" ref="org.hisp.dhis.i18n.I18nManager"/>
+  </bean>
+
+  <!-- Marshallers -->
+
   <bean id="JacksonJaxbJsonProvider" class="org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider" scope="singleton" />
 
   <!-- ImportDataValue -->
@@ -52,6 +69,3 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <bean id="org.hisp.dhis.web.api.resources.VelocityManager" class="org.hisp.dhis.web.api.resources.VelocityManager" />
 
 </beans>
-
-
-

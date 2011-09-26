@@ -14,7 +14,7 @@ var _loading_circle_html = "<img src='../images/ajax-loader-circle.gif'>";
  */
 function referrerBack( defaultUrl ) {
 	if(document.referrer !== undefined && document.referrer != "") {
-		if(document.referrer.indexOf("login.html") == -1) {
+		if(document.referrer.indexOf("login.action") == -1) {
 			location.href = document.referrer;
 			return;
 		}
@@ -149,7 +149,7 @@ function trim( string )
  */
 function isChecked( checkboxId )
 {
-	return jQuery( "#" + checkboxId ).attr("checked");   
+	return jQuery( "#" + checkboxId ) && jQuery( "#" + checkboxId ).attr("checked");   
 }
 
 /**
@@ -1336,7 +1336,7 @@ function deleteDivEffect()
 /**
  * Used to export PDF file by the given type and the filter params in page
  */
-function exportPdfByType( params )
+function exportPdfByType( type, params )
 {	
 	if ( jQuery( "table.listTable tbody tr" ).length == 0 )
 	{
@@ -1344,7 +1344,10 @@ function exportPdfByType( params )
 		return;
 	}
 	
-	jQuery.postUTF8( 'exportToPdf.action', params, function(){} );
+	var form = byId( 'filterKeyForm' );
+	form.action = 'exportToPdf.action?' + params;
+	form.submit();
+	form.action = type + '.action';
 }
 
 /**
@@ -1363,6 +1366,8 @@ function displayDiv( divId, divIds ) {
 function relativePeriodsChecked()
 {
     if ( isChecked( "reportingMonth" ) ||
+         isChecked( "reportingBimonth" ) ||
+         isChecked( "reportingQuarter" ) ||
          isChecked( "monthsThisYear" ) ||
          isChecked( "quartersThisYear" ) ||
          isChecked( "thisYear" ) ||

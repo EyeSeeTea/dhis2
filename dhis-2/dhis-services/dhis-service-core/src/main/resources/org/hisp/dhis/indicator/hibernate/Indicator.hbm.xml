@@ -43,13 +43,9 @@
 
     <property name="numeratorDescription" column="numeratordescription" type="text" />
 
-    <property name="numeratorAggregationOperator" column="numeratoraggregationtype" length="16" />
-
     <property name="denominator" column="denominator" type="text" />
 
     <property name="denominatorDescription" column="denominatordescription" type="text" />
-
-    <property name="denominatorAggregationOperator" column="denominatoraggregationtype" length="16" />
 
     <property name="sortOrder" />
 
@@ -74,7 +70,7 @@
     <set name="attributeValues" table="indicatorattributevalues">
       <cache usage="read-write" />
       <key column="indicatorid" />
-      <many-to-many class="org.hisp.dhis.attribute.AttributeValue" column="attributevalueid" />
+      <many-to-many class="org.hisp.dhis.attribute.AttributeValue" column="attributevalueid" unique="true"/>
     </set>
 
   </class>

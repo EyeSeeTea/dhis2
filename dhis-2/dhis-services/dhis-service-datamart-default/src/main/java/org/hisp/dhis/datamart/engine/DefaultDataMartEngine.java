@@ -52,13 +52,14 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.system.filter.AggregatableDataElementFilter;
 import org.hisp.dhis.system.filter.PastAndCurrentPeriodFilter;
 import org.hisp.dhis.system.util.Clock;
 import org.hisp.dhis.system.util.ConcurrentUtils;
 import org.hisp.dhis.system.util.ConversionUtils;
 import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.system.util.PaginatedList;
 import org.hisp.dhis.system.util.SystemUtils;
+import org.hisp.dhis.system.util.WeightedPaginatedList;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -168,7 +169,10 @@ public class DefaultDataMartEngine
         Collection<Period> periods = periodService.getPeriods( periodIds );
         Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnits( organisationUnitIds );
         Collection<DataElement> dataElements = dataElementService.getDataElements( dataElementIds );
-
+        
+        FilterUtils.filter( dataElements, new AggregatableDataElementFilter() );
+        expressionService.filterInvalidIndicators( indicators );
+        
         // ---------------------------------------------------------------------
         // Explode indicator expressions
         // ---------------------------------------------------------------------
@@ -245,9 +249,16 @@ public class DefaultDataMartEngine
         // Delete existing aggregated data
         // ---------------------------------------------------------------------
 
-        aggregatedDataValueService.deleteAggregatedDataValues( dataElementIds, periodIds, organisationUnitIds );
-
-        aggregatedDataValueService.deleteAggregatedIndicatorValues( indicatorIds, periodIds, organisationUnitIds );
+        if ( completeExport )
+        {
+            aggregatedDataValueService.deleteAggregatedDataValues( periodIds );
+            aggregatedDataValueService.deleteAggregatedIndicatorValues( periodIds );
+        }
+        else
+        {
+            aggregatedDataValueService.deleteAggregatedDataValues( dataElementIds, periodIds, organisationUnitIds );
+            aggregatedDataValueService.deleteAggregatedIndicatorValues( indicatorIds, periodIds, organisationUnitIds );
+        }
 
         clock.logTime( "Deleted existing aggregated data" );
         
@@ -257,7 +268,7 @@ public class DefaultDataMartEngine
 
         state.setMessage( "exporting_data_for_data_elements" );
 
-        List<List<Period>> periodPages = new PaginatedList<Period>( periods ).setNumberOfPages( cpuCores ).getPages();
+        List<List<Period>> periodPages = new WeightedPaginatedList<Period>( periods, cpuCores ).getPages();
         
         if ( allOperands.size() > 0 )
         {

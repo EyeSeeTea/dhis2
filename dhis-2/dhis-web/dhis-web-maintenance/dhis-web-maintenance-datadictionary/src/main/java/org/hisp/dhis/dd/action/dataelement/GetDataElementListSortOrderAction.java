@@ -85,11 +85,11 @@ public class GetDataElementListSortOrderAction
     public String execute()
     {
         dataElements = new ArrayList<DataElement>( dataElementService.getAllDataElements() );
-        
+
         Collections.sort( dataElements, new DataElementSortOrderComparator() );
-        
+
         displayPropertyHandler.handle( dataElements );
-        
+
         return SUCCESS;
     }
 }

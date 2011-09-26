@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.indicator.comparator.IndicatorTypeNameComparator;
@@ -40,16 +43,10 @@ import org.hisp.dhis.paging.ActionPagingSupport;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: GetIndicatorTypeListAction.java 3305 2007-05-14 18:55:52Z larshelg $
  */
 public class GetIndicatorTypeListAction
     extends ActionPagingSupport<IndicatorType>
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = 6266707412846006610L;
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -60,7 +57,14 @@ public class GetIndicatorTypeListAction
     {
         this.indicatorService = indicatorService;
     }
-    
+
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
+    }
+
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
@@ -71,9 +75,9 @@ public class GetIndicatorTypeListAction
     {
         return indicatorTypes;
     }
-    
+
     private String key;
-    
+
     public String getKey()
     {
         return key;
@@ -84,8 +88,15 @@ public class GetIndicatorTypeListAction
         this.key = key;
     }
 
+    private List<Attribute> attributes;
+    
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
     // -------------------------------------------------------------------------
-    // Action implemantation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
@@ -93,18 +104,24 @@ public class GetIndicatorTypeListAction
         if ( isNotBlank( key ) ) // Filter on key only if set
         {
             this.paging = createPaging( indicatorService.getIndicatorTypeCountByName( key ) );
-            
-            indicatorTypes = new ArrayList<IndicatorType>( indicatorService.getIndicatorTypesBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
+
+            indicatorTypes = new ArrayList<IndicatorType>( indicatorService.getIndicatorTypesBetweenByName( key,
+                paging.getStartPos(), paging.getPageSize() ) );
         }
         else
         {
             this.paging = createPaging( indicatorService.getIndicatorTypeCount() );
-            
-            indicatorTypes = new ArrayList<IndicatorType>( indicatorService.getIndicatorTypesBetween( paging.getStartPos(), paging.getPageSize() ) );
+
+            indicatorTypes = new ArrayList<IndicatorType>( indicatorService.getIndicatorTypesBetween(
+                paging.getStartPos(), paging.getPageSize() ) );
         }
 
         Collections.sort( indicatorTypes, new IndicatorTypeNameComparator() );
 
+        attributes = new ArrayList<Attribute>( attributeService.getIndicatorAttributes() );
+
+        Collections.sort( attributes, new AttributeSortOrderComparator() );
+        
         return SUCCESS;
     }
 }

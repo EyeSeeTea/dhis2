@@ -29,12 +29,18 @@ package org.hisp.dhis.dd.action.indicator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.indicator.comparator.IndicatorTypeNameComparator;
+import org.hisp.dhis.system.util.AttributeUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -55,6 +61,13 @@ public class ShowUpdateIndicatorFormAction
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
+    }
+
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
@@ -96,6 +109,20 @@ public class ShowUpdateIndicatorFormAction
         return indicatorTypes;
     }
 
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public Map<Integer, String> attributeValues = new HashMap<Integer, String>();
+
+    public Map<Integer, String> getAttributeValues()
+    {
+        return attributeValues;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -114,6 +141,12 @@ public class ShowUpdateIndicatorFormAction
         indicatorTypes = new ArrayList<IndicatorType>( indicatorService.getAllIndicatorTypes() );
 
         Collections.sort( indicatorTypes, new IndicatorTypeNameComparator() );
+
+        attributes = new ArrayList<Attribute>( attributeService.getIndicatorAttributes() );
+
+        Collections.sort( attributes, new AttributeSortOrderComparator() );
+
+        attributeValues = AttributeUtils.getAttributeValueMap( indicator.getAttributeValues() );
 
         return SUCCESS;
     }

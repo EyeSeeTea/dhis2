@@ -226,7 +226,7 @@ Ext.onReady( function() {
         
         values: null,
         
-        getValues: function() {            
+        getValues: function() {
             var p = '?indicatorIds=52486&indicatorIds=52491&indicatorIds=52487&periodIds=1091452&periodIds=1023570&periodIds=1023571&organisationUnitIds=264';
             
             Ext.Ajax.request({
@@ -317,7 +317,6 @@ Ext.onReady( function() {
                 height: DV.util.getViewportSize.y,
                 animate: true,
                 store: DV.store.chart,
-                theme: 'Green',
                 legend: {
                     position: 'bottom'
                 },
@@ -365,555 +364,586 @@ Ext.onReady( function() {
         items: [
             {
                 region: 'west',
-                bodyStyle: 'padding:10px;',
                 preventHeader: true,
                 collapsible: true,
                 collapseMode: 'mini',
                 resizable: true,
                 resizeHandles: 'e',
-                tbar: [
-                    {
-                        xtype: 'label',
-                        text: 'Chart settings',
-                        style: 'font-weight:bold; padding:0 5px'
-                    },
-                    ' ',
-                    {
-                        xtype: 'button',
-                        text: 'Column',
-                        toggleGroup: 'settings',
-                        pressed: true,
-                        handler: function(b) {
-                            if (!b.pressed) {
-                                b.toggle();
-                            }
-                        }
-                    },
-                    {
-                        xtype: 'button',
-                        text: 'Pie',
-                        toggleGroup: 'settings',
-                        disabled: true,
-                        handler: function(b) {
-                            if (!b.pressed) {
-                                b.toggle();
-                            }
-                        }
-                    },
-                    {
-                        xtype: 'button',
-                        text: 'Line',
-                        toggleGroup: 'settings',
-                        disabled: true,
-                        handler: function(b) {
-                            if (!b.pressed) {
-                                b.toggle();
-                            }
-                        }
-                    },
-                    ' ',' ',
-                    {
-                        xtype: 'combobox',
-                        name: 'series',
-                        emptyText: 'Series',
-                        queryMode: 'local',
-                        editable: false,
-                        valueField: 'id',
-                        displayField: 'name',
-                        width: 90,
-                        store: DV.store.dimension(),
-                        listeners: {
-                            select: function(cb) {
-                                var v = cb.getValue(),
-                                    c = DV.util.getCmp('combobox[name="columns"]'),
-                                    f = DV.util.getCmp('combobox[name="filter"]'),
-                                    i = DV.conf.finals.dimension.indicator,
-                                    d = DV.conf.finals.dimension.dataelement,
-                                    p = DV.conf.finals.dimension.period,
-                                    o = DV.conf.finals.dimension.organisationunit,
-                                    index = 0;
-                                    
-                                c.enable();
-                                DV.util.getCmp('fieldset[name="' + cb.getValue() + '"]').expand();
-                                
-                                if (v === i || v === d) {
-                                    cb.filter = [false, false, true, true];
+                tbar: Ext.create('Ext.toolbar.Toolbar', {
+                    height: 48,
+                    style: 'padding-top:4px',
+                    items: [
+                        {
+                            xtype: 'panel',
+                            bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+                            layout: 'anchor',
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: 'Chart type',
+                                    style: 'font-size:11px; font-weight:bold; padding:0 3px'
+                                },
+                                { html: '<div style="height:2px"></div>', bodyStyle: 'border-style:none;background-color:transparent' },
+                                {
+                                    xtype: 'combobox',
+                                    name: 'type',
+                                    emptyText: 'Chart type',
+                                    queryMode: 'local',
+                                    editable: false,
+                                    valueField: 'id',
+                                    displayField: 'name',
+                                    width: 100,
+                                    store: DV.store.dimension()
                                 }
-                                else if (v === p) {
-                                    cb.filter = [true, true, false, true];
-                                }
-                                else if (v === o) {
-                                    cb.filter = [true, true, true, false];
-                                }
-                                
-                                var fn = function(cmp) {
-                                    cmp.store.filterBy( function(r) {
-                                        return cb.filter[index++];
-                                    });
-                                    if (v === cmp.getValue()) {
-                                        cmp.clearValue();
-                                    }
-                                    else if ((v === i || v === d) && (cmp.getValue() === i || cmp.getValue() === d)) {
-                                        cmp.clearValue();
-                                    }
-                                };
-                                
-                                fn(c);                                    
-                                index = 0;
-                                fn(f);
-                            }
-                        }
-                    },
-                    ' ',
-                    {
-                        xtype: 'combobox',
-                        name: 'columns',
-                        emptyText: 'Columns',
-                        queryMode: 'local',
-                        editable: false,
-                        lastQuery: '',
-                        valueField: 'id',
-                        displayField: 'name',
-                        width: 90,
-                        disabled: true,
-                        store: DV.store.dimension(),
-                        listeners: {
-                            select: function(cb) {
-                                var v = cb.getValue(),
-                                    s = DV.util.getCmp('combobox[name="series"]'),
-                                    f = DV.util.getCmp('combobox[name="filter"]'),
-                                    i = DV.conf.finals.dimension.indicator,
-                                    d = DV.conf.finals.dimension.dataelement,
-                                    p = DV.conf.finals.dimension.period,
-                                    o = DV.conf.finals.dimension.organisationunit,
-                                    index = 0;
-                                    
-                                f.enable();
-                                DV.util.getCmp('fieldset[name="' + cb.getValue() + '"]').expand();
-                                
-                                cb.filter = Ext.Array.clone(s.filter);
-                                
-                                if (cb.getValue() === i || cb.getValue() === d) {
-                                    cb.filter[0] = false;
-                                    cb.filter[1] = false;
-                                }
-                                else if (cb.getValue() === p) {
-                                    cb.filter[2] = false;
-                                }
-                                else if (cb.getValue() === o) {
-                                    cb.filter[3] = false;
-                                }
-                                
-                                f.store.filterBy( function(r) {
-                                    return cb.filter[index++];
-                                });
-                                if (v === f.getValue()) {
-                                    f.clearValue();
-                                }
-                                else if ((v === i || v === d) && (f.getValue() === i || f.getValue() === d)) {
-                                    f.clearValue();
-                                }
-                            }
-                        }
-                    },
-                    ' ',
-                    {
-                        xtype: 'combobox',
-                        name: 'filter',
-                        emptyText: 'Filter',
-                        queryMode: 'local',
-                        editable: false,
-                        lastQuery: '',
-                        valueField: 'id',
-                        displayField: 'name',
-                        width: 90,
-                        disabled: true,
-                        store: DV.store.dimension(),
-                        listeners: {
-                            select: function(cb) {
-                                DV.util.getCmp('fieldset[name="' + cb.getValue() + '"]').expand();
-                            }
-                        }                                    
-                    },
-                    ' ',' ',
-                    {
-                        xtype: 'button',
-                        text: 'Load..',
-                        handler: function() {
-                            //DV.data.getValues();
-                        }
-                    }
-                ],
-                items: [
-                    {
-                        xtype: 'fieldset',
-                        name: DV.conf.finals.dimension.indicator,
-                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Indicators</span>',
-                        collapsed: true,
-                        collapsible: true,
-                        items: [
-                            {
-                                xtype: 'combobox',
-                                style: 'margin-bottom:8px',
-                                width: 420,
-                                valueField: 'id',
-                                displayField: 'name',
-                                fieldLabel: 'Indicator group',
-                                labelStyle: 'padding-left:7px;',
-                                labelWidth: 110,
-                                editable: false,
-                                queryMode: 'remote',
-                                store: Ext.create('Ext.data.Store', {
-                                    fields: ['id', 'name', 'index'],
-                                    proxy: {
-                                        type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroupsMinified.action',
-                                        reader: {
-                                            type: 'json',
-                                            root: 'indicatorGroups'
-                                        }                                                
-                                    },
+                            ]
+                        },
+                        
+                        {
+                            xtype: 'panel',
+                            bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+                            layout: 'anchor',
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: 'Series',
+                                    style: 'font-size:11px; font-weight:bold; padding:0 3px'
+                                },
+                                { html: '<div style="height:2px"></div>', bodyStyle: 'border-style:none;background-color:transparent' },
+                                {
+                                    xtype: 'combobox',
+                                    name: 'series',
+                                    emptyText: 'Series',
+                                    queryMode: 'local',
+                                    editable: false,
+                                    valueField: 'id',
+                                    displayField: 'name',
+                                    width: 100,
+                                    store: DV.store.dimension(),
                                     listeners: {
-                                        load: function(s) {
-                                            s.add({id: 0, name: '[ All indicator groups ]', index: -1});
-                                            s.sort('index', 'ASC');
+                                        select: function(cb) {
+                                            var v = cb.getValue(),
+                                                c = DV.util.getCmp('combobox[name="category"]'),
+                                                f = DV.util.getCmp('combobox[name="filter"]'),
+                                                i = DV.conf.finals.dimension.indicator,
+                                                d = DV.conf.finals.dimension.dataelement,
+                                                p = DV.conf.finals.dimension.period,
+                                                o = DV.conf.finals.dimension.organisationunit,
+                                                index = 0;
+                                                
+                                            c.enable();
+                                            DV.util.getCmp('fieldset[name="' + cb.getValue() + '"]').expand();
+                                            
+                                            if (v === i || v === d) {
+                                                cb.filter = [false, false, true, true];
+                                            }
+                                            else if (v === p) {
+                                                cb.filter = [true, true, false, true];
+                                            }
+                                            else if (v === o) {
+                                                cb.filter = [true, true, true, false];
+                                            }
+                                            
+                                            var fn = function(cmp) {
+                                                cmp.store.filterBy( function(r) {
+                                                    return cb.filter[index++];
+                                                });
+                                                if (v === cmp.getValue()) {
+                                                    cmp.clearValue();
+                                                }
+                                                else if ((v === i || v === d) && (cmp.getValue() === i || cmp.getValue() === d)) {
+                                                    cmp.clearValue();
+                                                }
+                                            };
+                                            
+                                            fn(c);                                    
+                                            index = 0;
+                                            fn(f);
                                         }
-                                    }
-                                }),
-                                listeners: {
-                                    select: function(cb) {
-                                        var store = DV.store.indicator.available;
-                                        store.param = cb.getValue();
-                                        store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
-                                        store.load();
                                     }
                                 }
-                            },
-                            
-                            {
-                                xtype: 'panel',
-                                layout: 'column',
-                                bodyStyle: 'border-style:none',
-                                items: [
-                                    {
-                                        xtype: 'multiselect',
-                                        cls: 'multiselect',
-                                        name: 'availableIndicators',
-                                        width: 210,
-                                        displayField: 'shortName',
-                                        valueField: 'id',
-                                        queryMode: 'remote',
-                                        store: DV.store.indicator.available,
-                                        tbar: [
-                                            {
-                                                xtype: 'label',
-                                                text: 'Available indicators',
-                                                style: 'padding-left:5px'
-                                            },
-                                            '->',
-                                            {
-                                                xtype: 'button',
-                                                text: '>',
-                                                handler: function() {
-                                                    DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableIndicators"]'),
-                                                        DV.util.getCmp('multiselect[name="selectedIndicators"]'));
-                                                }
-                                            },
-                                            {
-                                                xtype: 'button',
-                                                text: '>>',
-                                                handler: function() {
-                                                    DV.util.multiselect.selectAll(DV.util.getCmp('multiselect[name="availableIndicators"]'),
-                                                        DV.util.getCmp('multiselect[name="selectedIndicators"]'));
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    
-                                    {
-                                        xtype: 'multiselect',
-                                        name: 'selectedIndicators',
-                                        width: 210,
-                                        displayField: 'shortName',
-                                        valueField: 'id',
-                                        ddReorder: true,
-                                        queryMode: 'local',
-                                        store: DV.store.indicator.selected,
-                                        tbar: [
-                                            {
-                                                xtype: 'button',
-                                                text: '<<',
-                                                handler: function() {
-                                                    DV.util.multiselect.unselectAll(DV.util.getCmp('multiselect[name="availableIndicators"]'),
-                                                        DV.util.getCmp('multiselect[name="selectedIndicators"]'));
-                                                }
-                                            },
-                                            {
-                                                xtype: 'button',
-                                                text: '<',
-                                                handler: function() {
-                                                    DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableIndicators"]'),
-                                                        DV.util.getCmp('multiselect[name="selectedIndicators"]'));
-                                                }
-                                            },
-                                            '->',
-                                            {
-                                                xtype: 'label',
-                                                text: 'Selected indicators',
-                                                style: 'padding-right:5px'
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    
-                    {
-                        xtype: 'fieldset',
-                        name: DV.conf.finals.dimension.dataelement,
-                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Data elements</span>',
-                        collapsed: true,
-                        collapsible: true,
-                        items: [
-                            {
-                                xtype: 'combobox',
-                                style: 'margin-bottom:8px',
-                                width: 420,
-                                valueField: 'id',
-                                displayField: 'name',
-                                fieldLabel: 'Data element group',
-                                labelStyle: 'padding-left:7px;',
-                                labelWidth: 110,
-                                editable: false,
-                                queryMode: 'remote',
-                                store: Ext.create('Ext.data.Store', {
-                                    fields: ['id', 'name', 'index'],
-                                    proxy: {
-                                        type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_commons + 'getDataElementGroupsMinified.action',
-                                        reader: {
-                                            type: 'json',
-                                            root: 'dataElementGroups'
-                                        }
-                                    },
+                            ]
+                        },
+                        
+                        {
+                            xtype: 'panel',
+                            bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+                            layout: 'anchor',
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: 'Category',
+                                    style: 'font-size:11px; font-weight:bold; padding:0 3px'
+                                },
+                                { html: '<div style="height:2px"></div>', bodyStyle: 'border-style:none;background-color:transparent' },
+                                {
+                                    xtype: 'combobox',
+                                    name: 'category',
+                                    emptyText: 'Category',
+                                    queryMode: 'local',
+                                    editable: false,
+                                    lastQuery: '',
+                                    valueField: 'id',
+                                    displayField: 'name',
+                                    width: 100,
+                                    disabled: true,
+                                    store: DV.store.dimension(),
                                     listeners: {
-                                        load: function(s) {
-                                            s.add({id: 0, name: '[ All data element groups ]', index: -1});
-                                            s.sort('index', 'ASC');
+                                        select: function(cb) {
+                                            var v = cb.getValue(),
+                                                s = DV.util.getCmp('combobox[name="series"]'),
+                                                f = DV.util.getCmp('combobox[name="filter"]'),
+                                                i = DV.conf.finals.dimension.indicator,
+                                                d = DV.conf.finals.dimension.dataelement,
+                                                p = DV.conf.finals.dimension.period,
+                                                o = DV.conf.finals.dimension.organisationunit,
+                                                index = 0;
+                                                
+                                            f.enable();
+                                            DV.util.getCmp('fieldset[name="' + cb.getValue() + '"]').expand();
+                                            
+                                            cb.filter = Ext.Array.clone(s.filter);
+                                            
+                                            if (cb.getValue() === i || cb.getValue() === d) {
+                                                cb.filter[0] = false;
+                                                cb.filter[1] = false;
+                                            }
+                                            else if (cb.getValue() === p) {
+                                                cb.filter[2] = false;
+                                            }
+                                            else if (cb.getValue() === o) {
+                                                cb.filter[3] = false;
+                                            }
+                                            
+                                            f.store.filterBy( function(r) {
+                                                return cb.filter[index++];
+                                            });
+                                            if (v === f.getValue()) {
+                                                f.clearValue();
+                                            }
+                                            else if ((v === i || v === d) && (f.getValue() === i || f.getValue() === d)) {
+                                                f.clearValue();
+                                            }
                                         }
                                     }
-                                }),
-                                listeners: {
-                                    select: function(cb) {
-                                        var store = DV.store.dataElement.available;
-                                        store.param = cb.getValue();
-                                        store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
-                                        store.load();
-                                    }
                                 }
-                            },
-                            
+                            ]
+                        },
+                        
+                        {
+                            xtype: 'panel',
+                            bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+                            layout: 'anchor',
+                            items: [
+                                {
+                                    xtype: 'label',
+                                    text: 'Filter',
+                                    style: 'font-size:11px; font-weight:bold; padding:0 3px'
+                                },
+                                { html: '<div style="height:2px"></div>', bodyStyle: 'border-style:none;background-color:transparent' },
+                                {
+                                    xtype: 'combobox',
+                                    name: 'filter',
+                                    emptyText: 'Filter',
+                                    queryMode: 'local',
+                                    editable: false,
+                                    lastQuery: '',
+                                    valueField: 'id',
+                                    displayField: 'name',
+                                    width: 100,
+                                    disabled: true,
+                                    store: DV.store.dimension(),
+                                    listeners: {
+                                        select: function(cb) {
+                                            DV.util.getCmp('fieldset[name="' + cb.getValue() + '"]').expand();
+                                        }
+                                    }                                    
+                                }
+                            ]
+                        }
+                        //'->',
+                        //{
+                            //xtype: 'button',
+                            //text: 'L',
+                            //handler: function() {
+                                //DV.data.getValues();
+                            //}
+                        //}
+                    ]
+                }),
+                items: [                    
+                    {
+                        xtype: 'panel',
+                        bodyStyle: 'border-style:none; padding:10px',
+                        items: [
                             {
-                                xtype: 'panel',
-                                layout: 'column',
-                                bodyStyle: 'border-style:none',
+                                xtype: 'fieldset',
+                                name: DV.conf.finals.dimension.indicator,
+                                title: '<span style="padding:0 5px; font-weight:bold; color:black">Indicators</span>',
+                                collapsed: true,
+                                collapsible: true,
                                 items: [
                                     {
-                                        xtype: 'multiselect',
-                                        name: 'availableDataElements',
-                                        width: 210,
-                                        displayField: 'shortName',
+                                        xtype: 'combobox',
+                                        style: 'margin-bottom:8px',
+                                        width: 420,
                                         valueField: 'id',
+                                        displayField: 'name',
+                                        fieldLabel: 'Indicator group',
+                                        labelStyle: 'padding-left:7px;',
+                                        labelWidth: 110,
+                                        editable: false,
                                         queryMode: 'remote',
-                                        store: DV.store.dataElement.available,
-                                        tbar: [
-                                            {
-                                                xtype: 'label',
-                                                text: 'Available data elements',
-                                                style: 'padding-left:5px'
+                                        store: Ext.create('Ext.data.Store', {
+                                            fields: ['id', 'name', 'index'],
+                                            proxy: {
+                                                type: 'ajax',
+                                                url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroupsMinified.action',
+                                                reader: {
+                                                    type: 'json',
+                                                    root: 'indicatorGroups'
+                                                }                                                
                                             },
-                                            '->',
-                                            {
-                                                xtype: 'button',
-                                                text: '>',
-                                                handler: function() {
-                                                    DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableDataElements"]'),
-                                                        DV.util.getCmp('multiselect[name="selectedDataElements"]'));
-                                                }
-                                            },
-                                            {
-                                                xtype: 'button',
-                                                text: '>>',
-                                                handler: function() {
-                                                    DV.util.multiselect.selectAll(DV.util.getCmp('multiselect[name="availableDataElements"]'),
-                                                        DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                            listeners: {
+                                                load: function(s) {
+                                                    s.add({id: 0, name: '[ All indicator groups ]', index: -1});
+                                                    s.sort('index', 'ASC');
                                                 }
                                             }
-                                        ]
+                                        }),
+                                        listeners: {
+                                            select: function(cb) {
+                                                var store = DV.store.indicator.available;
+                                                store.param = cb.getValue();
+                                                store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
+                                                store.load();
+                                            }
+                                        }
                                     },
                                     
                                     {
-                                        xtype: 'multiselect',
-                                        name: 'selectedDataElements',
-                                        width: 210,
-                                        displayField: 'shortName',
-                                        valueField: 'id',
-                                        ddReorder: true,
-                                        queryMode: 'remote',
-                                        store: DV.store.dataElement.selected,
-                                        tbar: [
-                                            {
-                                                xtype: 'button',
-                                                text: '<<',
-                                                handler: function() {
-                                                    DV.util.multiselect.unselectAll(DV.util.getCmp('multiselect[name="availableDataElements"]'),
-                                                        DV.util.getCmp('multiselect[name="selectedDataElements"]'));
-                                                }
-                                            },
-                                            {
-                                                xtype: 'button',
-                                                text: '<',
-                                                handler: function() {
-                                                    DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableDataElements"]'),
-                                                        DV.util.getCmp('multiselect[name="selectedDataElements"]'));
-                                                }
-                                            },
-                                            '->',
-                                            {
-                                                xtype: 'label',
-                                                text: 'Selected data elements',
-                                                style: 'padding-right:5px'
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    
-                    {
-                        xtype: 'fieldset',
-                        name: DV.conf.finals.dimension.period,
-                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Periods</span>',
-                        collapsed: true,
-                        collapsible: true,
-                        items: [
-                            {
-                                xtype: 'panel',
-                                layout: 'column',
-                                bodyStyle: 'border-style:none',
-                                items: [
-                                    {
                                         xtype: 'panel',
-                                        layout: 'anchor',
-                                        bodyStyle: 'border-style:none; padding:0 100px 0 0px',
-                                        defaults: {
-                                            labelSeparator: ''
-                                        },
-                                        items: [
-                                            {
-                                                xtype: 'label',
-                                                text: 'Months',
-                                                style: DV.conf.style.label.period
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                boxLabel: 'Last month'
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                boxLabel: 'Months this year'
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                boxLabel: 'Months last year'
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        layout: 'anchor',
-                                        bodyStyle: 'border-style:none; padding-right:100px',
-                                        defaults: {
-                                            labelSeparator: ''
-                                        },
-                                        items: [
-                                            {
-                                                xtype: 'label',
-                                                text: 'Quarters',
-                                                style: DV.conf.style.label.period
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                boxLabel: 'Last quarter'
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                boxLabel: 'Quarters this year'
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                boxLabel: 'Quarters last year'
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        layout: 'anchor',
+                                        layout: 'column',
                                         bodyStyle: 'border-style:none',
-                                        defaults: {
-                                            labelSeparator: ''
-                                        },  
                                         items: [
                                             {
-                                                xtype: 'label',
-                                                text: 'Years',
-                                                style: DV.conf.style.label.period
+                                                xtype: 'multiselect',
+                                                cls: 'multiselect',
+                                                name: 'availableIndicators',
+                                                width: 210,
+                                                displayField: 'shortName',
+                                                valueField: 'id',
+                                                queryMode: 'remote',
+                                                store: DV.store.indicator.available,
+                                                tbar: [
+                                                    {
+                                                        xtype: 'label',
+                                                        text: 'Available indicators',
+                                                        style: 'padding-left:5px'
+                                                    },
+                                                    '->',
+                                                    {
+                                                        xtype: 'button',
+                                                        text: '>',
+                                                        handler: function() {
+                                                            DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableIndicators"]'),
+                                                                DV.util.getCmp('multiselect[name="selectedIndicators"]'));
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'button',
+                                                        text: '>>',
+                                                        handler: function() {
+                                                            DV.util.multiselect.selectAll(DV.util.getCmp('multiselect[name="availableIndicators"]'),
+                                                                DV.util.getCmp('multiselect[name="selectedIndicators"]'));
+                                                        }
+                                                    }
+                                                ]
                                             },
+                                            
                                             {
-                                                xtype: 'checkbox',
-                                                boxLabel: 'This year'
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                boxLabel: 'Last year'
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                boxLabel: 'Last 5 years'
+                                                xtype: 'multiselect',
+                                                name: 'selectedIndicators',
+                                                width: 210,
+                                                displayField: 'shortName',
+                                                valueField: 'id',
+                                                ddReorder: true,
+                                                queryMode: 'local',
+                                                store: DV.store.indicator.selected,
+                                                tbar: [
+                                                    {
+                                                        xtype: 'button',
+                                                        text: '<<',
+                                                        handler: function() {
+                                                            DV.util.multiselect.unselectAll(DV.util.getCmp('multiselect[name="availableIndicators"]'),
+                                                                DV.util.getCmp('multiselect[name="selectedIndicators"]'));
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'button',
+                                                        text: '<',
+                                                        handler: function() {
+                                                            DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableIndicators"]'),
+                                                                DV.util.getCmp('multiselect[name="selectedIndicators"]'));
+                                                        }
+                                                    },
+                                                    '->',
+                                                    {
+                                                        xtype: 'label',
+                                                        text: 'Selected indicators',
+                                                        style: 'padding-right:5px'
+                                                    }
+                                                ]
                                             }
                                         ]
                                     }
                                 ]
-                            }
-                        ]
-                    },
-                    
-                    {
-                        xtype: 'fieldset',
-                        name: DV.conf.finals.dimension.organisationunit,
-                        title: '<span style="padding:0 5px; font-weight:bold; color:black">Organisation units</span>',
-                        collapsed: true,
-                        collapsible: true,
-                        items: [
+                            },
+                            
                             {
-                                xtype: 'treepanel',
-                                height: 300,
-                                width: 420,
-                                autoScroll: true,
-                                multiSelect: true,
-                                store: Ext.create('Ext.data.TreeStore', {
-                                    proxy: {
-                                        type: 'ajax',
-                                        url: DV.conf.finals.ajax.url_visualizer + 'getOrganisationUnitChildren.action'
+                                xtype: 'fieldset',
+                                name: DV.conf.finals.dimension.dataelement,
+                                title: '<span style="padding:0 5px; font-weight:bold; color:black">Data elements</span>',
+                                collapsed: true,
+                                collapsible: true,
+                                items: [
+                                    {
+                                        xtype: 'combobox',
+                                        style: 'margin-bottom:8px',
+                                        width: 420,
+                                        valueField: 'id',
+                                        displayField: 'name',
+                                        fieldLabel: 'Data element group',
+                                        labelStyle: 'padding-left:7px;',
+                                        labelWidth: 110,
+                                        editable: false,
+                                        queryMode: 'remote',
+                                        store: Ext.create('Ext.data.Store', {
+                                            fields: ['id', 'name', 'index'],
+                                            proxy: {
+                                                type: 'ajax',
+                                                url: DV.conf.finals.ajax.url_commons + 'getDataElementGroupsMinified.action',
+                                                reader: {
+                                                    type: 'json',
+                                                    root: 'dataElementGroups'
+                                                }
+                                            },
+                                            listeners: {
+                                                load: function(s) {
+                                                    s.add({id: 0, name: '[ All data element groups ]', index: -1});
+                                                    s.sort('index', 'ASC');
+                                                }
+                                            }
+                                        }),
+                                        listeners: {
+                                            select: function(cb) {
+                                                var store = DV.store.dataElement.available;
+                                                store.param = cb.getValue();
+                                                store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
+                                                store.load();
+                                            }
+                                        }
                                     },
-                                    root: {
-                                        id: DV.system.rootNode.id,
-                                        text: DV.system.rootNode.name,
-                                        expanded: false
+                                    
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'column',
+                                        bodyStyle: 'border-style:none',
+                                        items: [
+                                            {
+                                                xtype: 'multiselect',
+                                                name: 'availableDataElements',
+                                                width: 210,
+                                                displayField: 'shortName',
+                                                valueField: 'id',
+                                                queryMode: 'remote',
+                                                store: DV.store.dataElement.available,
+                                                tbar: [
+                                                    {
+                                                        xtype: 'label',
+                                                        text: 'Available data elements',
+                                                        style: 'padding-left:5px'
+                                                    },
+                                                    '->',
+                                                    {
+                                                        xtype: 'button',
+                                                        text: '>',
+                                                        handler: function() {
+                                                            DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableDataElements"]'),
+                                                                DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'button',
+                                                        text: '>>',
+                                                        handler: function() {
+                                                            DV.util.multiselect.selectAll(DV.util.getCmp('multiselect[name="availableDataElements"]'),
+                                                                DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                                        }
+                                                    }
+                                                ]
+                                            },
+                                            
+                                            {
+                                                xtype: 'multiselect',
+                                                name: 'selectedDataElements',
+                                                width: 210,
+                                                displayField: 'shortName',
+                                                valueField: 'id',
+                                                ddReorder: true,
+                                                queryMode: 'remote',
+                                                store: DV.store.dataElement.selected,
+                                                tbar: [
+                                                    {
+                                                        xtype: 'button',
+                                                        text: '<<',
+                                                        handler: function() {
+                                                            DV.util.multiselect.unselectAll(DV.util.getCmp('multiselect[name="availableDataElements"]'),
+                                                                DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'button',
+                                                        text: '<',
+                                                        handler: function() {
+                                                            DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableDataElements"]'),
+                                                                DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                                        }
+                                                    },
+                                                    '->',
+                                                    {
+                                                        xtype: 'label',
+                                                        text: 'Selected data elements',
+                                                        style: 'padding-right:5px'
+                                                    }
+                                                ]
+                                            }
+                                        ]
                                     }
-                                })
+                                ]
+                            },
+                            
+                            {
+                                xtype: 'fieldset',
+                                name: DV.conf.finals.dimension.period,
+                                title: '<span style="padding:0 5px; font-weight:bold; color:black">Periods</span>',
+                                collapsed: true,
+                                collapsible: true,
+                                items: [
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'column',
+                                        bodyStyle: 'border-style:none',
+                                        items: [
+                                            {
+                                                xtype: 'panel',
+                                                layout: 'anchor',
+                                                bodyStyle: 'border-style:none; padding:0 60px 0 0px',
+                                                defaults: {labelSeparator: ''},
+                                                items: [
+                                                    {
+                                                        xtype: 'label',
+                                                        text: 'Months',
+                                                        style: DV.conf.style.label.period
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        boxLabel: 'Last month'
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        boxLabel: 'Months this year'
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        boxLabel: 'Months last year'
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                xtype: 'panel',
+                                                layout: 'anchor',
+                                                bodyStyle: 'border-style:none; padding-right:60px',
+                                                defaults: {
+                                                    labelSeparator: ''
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'label',
+                                                        text: 'Quarters',
+                                                        style: DV.conf.style.label.period
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        boxLabel: 'Last quarter'
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        boxLabel: 'Quarters this year'
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        boxLabel: 'Quarters last year'
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                xtype: 'panel',
+                                                layout: 'anchor',
+                                                bodyStyle: 'border-style:none',
+                                                defaults: {
+                                                    labelSeparator: ''
+                                                },  
+                                                items: [
+                                                    {
+                                                        xtype: 'label',
+                                                        text: 'Years',
+                                                        style: DV.conf.style.label.period
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        boxLabel: 'This year'
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        boxLabel: 'Last year'
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        boxLabel: 'Last 5 years'
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            
+                            {
+                                xtype: 'fieldset',
+                                name: DV.conf.finals.dimension.organisationunit,
+                                title: '<span style="padding:0 5px; font-weight:bold; color:black">Organisation units</span>',
+                                collapsed: true,
+                                collapsible: true,
+                                items: [
+                                    {
+                                        xtype: 'treepanel',
+                                        height: 300,
+                                        width: 420,
+                                        autoScroll: true,
+                                        multiSelect: true,
+                                        store: Ext.create('Ext.data.TreeStore', {
+                                            proxy: {
+                                                type: 'ajax',
+                                                url: DV.conf.finals.ajax.url_visualizer + 'getOrganisationUnitChildren.action'
+                                            },
+                                            root: {
+                                                id: DV.system.rootNode.id,
+                                                text: DV.system.rootNode.name,
+                                                expanded: false
+                                            }
+                                        })
+                                    }
+                                ]
                             }
                         ]
                     }
@@ -993,7 +1023,7 @@ Ext.onReady( function() {
         ],
         listeners: {
             resize: function(vp) {
-                vp.query('panel[region="west"]')[0].setWidth(555); //vp.getWidth() / 2
+                vp.query('panel[region="west"]')[0].setWidth(464); //vp.getWidth() / 2
             }
         }
     });

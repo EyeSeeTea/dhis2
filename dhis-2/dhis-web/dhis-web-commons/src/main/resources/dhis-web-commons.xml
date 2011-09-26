@@ -9,7 +9,6 @@
   <!-- Properties -->
 
   <constant name="struts.velocity.contexts" value="org.hisp.dhis.encoding.velocity.EncoderVelocityContext" />
-  <constant name="struts.velocity.toolboxlocation" value="toolbox.xml" /> <!-- Work-around -->
   <constant name="struts.i18n.encoding" value="UTF-8" />
   <constant name="struts.multipart.parser" value="jakarta" />
   <constant name="struts.multipart.maxSize" value="1073741824" />
@@ -56,7 +55,6 @@
       <interceptor-stack name="commonInterceptors">
         <interceptor-ref name="staticParams" />
         <interceptor-ref name="params" />
-        <interceptor-ref name="chain" />
         <interceptor-ref name="i18nInterceptor" />
         <!-- The securityInterceptor is put after the i18nInterceptor so that the access denied error pages can use internationalisation. -->
         <interceptor-ref name="securityInterceptor" />
@@ -105,8 +103,18 @@
 
   </package>
 
-  <!-- Organisation Unit Selection Tree -->
+  <!-- Security -->
+  <package name="dhis-web-commons-security" extends="dhis-web-commons" namespace="/dhis-web-commons/security">
 
+    <action name="login" class="org.hisp.dhis.security.action.LoginAction">
+      <result name="standard" type="velocity">/dhis-web-commons/security/login.vm</result>
+      <result name="mobile" type="velocity">/dhis-web-commons/security/login_mobile.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+
+  </package>
+
+  <!-- Organisation Unit Selection Tree -->
   <package name="dhis-web-commons-oust" extends="dhis-web-commons" namespace="/dhis-web-commons/oust">
 
     <action name="expandSubtree" class="org.hisp.dhis.oust.action.ExpandSubtreeAction">

@@ -29,8 +29,13 @@ package org.hisp.dhis.oum.action.organisationunit;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dataset.comparator.DataSetNameComparator;
@@ -39,13 +44,12 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitGroupSetNameComparator;
+import org.hisp.dhis.system.util.AttributeUtils;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: GetOrganisationUnitAction.java 1898 2006-09-22 12:06:56Z
- *          torgeilo $
  */
 public class GetOrganisationUnitAction
     implements Action
@@ -75,8 +79,15 @@ public class GetOrganisationUnitAction
         this.dataSetService = dataSetService;
     }
 
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
+    }
+
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input & Output
     // -------------------------------------------------------------------------
 
     private Integer id;
@@ -121,6 +132,20 @@ public class GetOrganisationUnitAction
         return groupSets;
     }
 
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public Map<Integer, String> attributeValues = new HashMap<Integer, String>();
+
+    public Map<Integer, String> getAttributeValues()
+    {
+        return attributeValues;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -137,13 +162,17 @@ public class GetOrganisationUnitAction
 
         dataSets = new ArrayList<DataSet>( organisationUnit.getDataSets() );
 
-        groupSets = new ArrayList<OrganisationUnitGroupSet>( organisationUnitGroupService
-            .getCompulsoryOrganisationUnitGroupSetsWithMembers() );
+        groupSets = new ArrayList<OrganisationUnitGroupSet>(
+            organisationUnitGroupService.getCompulsoryOrganisationUnitGroupSetsWithMembers() );
+
+        attributes = new ArrayList<Attribute>( attributeService.getDataElementAttributes() );
+
+        Collections.sort( attributes, new AttributeSortOrderComparator() );
+
+        attributeValues = AttributeUtils.getAttributeValueMap( organisationUnit.getAttributeValues() );
 
         Collections.sort( availableDataSets, new DataSetNameComparator() );
-
         Collections.sort( dataSets, new DataSetNameComparator() );
-
         Collections.sort( groupSets, new OrganisationUnitGroupSetNameComparator() );
 
         return SUCCESS;
