@@ -564,7 +564,7 @@ Ext.onReady( function() {
                                 editable: false,
                                 queryMode: 'remote',
                                 store: Ext.create('Ext.data.Store', {
-                                    fields: ['id', 'name', 'sortOrder'],
+                                    fields: ['id', 'name', 'index'],
                                     proxy: {
                                         type: 'ajax',
                                         url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroupsMinified.action',
@@ -575,8 +575,8 @@ Ext.onReady( function() {
                                     },
                                     listeners: {
                                         load: function(s) {
-                                            s.add({id: 0, name: '[ All indicator groups ]', sortOrder: -1});
-                                            s.sort('sortOrder', 'ASC');
+                                            s.add({id: 0, name: '[ All indicator groups ]', index: -1});
+                                            s.sort('index', 'ASC');
                                         }
                                     }
                                 }),
@@ -688,19 +688,19 @@ Ext.onReady( function() {
                                 editable: false,
                                 queryMode: 'remote',
                                 store: Ext.create('Ext.data.Store', {
-                                    fields: ['id', 'name'],
+                                    fields: ['id', 'name', 'index'],
                                     proxy: {
                                         type: 'ajax',
                                         url: DV.conf.finals.ajax.url_commons + 'getDataElementGroupsMinified.action',
                                         reader: {
                                             type: 'json',
                                             root: 'dataElementGroups'
-                                        }                                                
+                                        }
                                     },
                                     listeners: {
                                         load: function(s) {
-                                            s.add({id: 0, name: '[ All data element groups ]', sortOrder: -1});
-                                            s.sort('sortOrder', 'ASC');
+                                            s.add({id: 0, name: '[ All data element groups ]', index: -1});
+                                            s.sort('index', 'ASC');
                                         }
                                     }
                                 }),
