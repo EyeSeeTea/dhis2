@@ -1,4 +1,4 @@
-package org.hisp.dhis.light.action;
+package org.hisp.dhis.light.action.dashboard;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
