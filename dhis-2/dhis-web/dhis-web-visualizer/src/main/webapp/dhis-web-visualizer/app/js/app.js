@@ -624,7 +624,7 @@ Ext.onReady( function() {
                             {
                                 xtype: 'fieldset',
                                 name: DV.conf.finals.dimension.indicator,
-                                title: '<span style="padding:0 5px; font-weight:bold; color:#000">Indicators</span>',
+                                title: 'Indicators',
                                 collapsible: true,
                                 items: [
                                     {
@@ -752,7 +752,7 @@ Ext.onReady( function() {
                             {
                                 xtype: 'fieldset',
                                 name: DV.conf.finals.dimension.dataelement,
-                                title: '<span style="padding:0 5px; font-weight:bold; color:#000">Data elements</span>',
+                                title: 'Data elements',
                                 collapsed: true,
                                 collapsible: true,
                                 items: [
@@ -880,7 +880,7 @@ Ext.onReady( function() {
                             {
                                 xtype: 'fieldset',
                                 name: DV.conf.finals.dimension.period,
-                                title: '<span style="padding:0 5px; font-weight:bold; color:#000">Periods</span>',
+                                title: 'Periods',
                                 collapsed: true,
                                 collapsible: true,
                                 items: [
@@ -981,7 +981,7 @@ Ext.onReady( function() {
                             {
                                 xtype: 'fieldset',
                                 name: DV.conf.finals.dimension.organisationunit,
-                                title: '<span style="padding:0 5px; font-weight:bold; color:#000">Organisation units</span>',
+                                title: 'Organisation units',
                                 collapsed: true,
                                 collapsible: true,
                                 items: [
