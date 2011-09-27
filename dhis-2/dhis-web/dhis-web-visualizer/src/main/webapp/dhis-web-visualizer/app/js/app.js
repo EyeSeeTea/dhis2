@@ -8,9 +8,11 @@ Ext.onReady( function() {
         getCmp: function(q) {
             return DV.viewport.query(q)[0];
         },
-        getViewportSize: function() {
-            var c = DV.util.getCmp('panel[region="center"]');
-            return { x: c.getWidth(), y: c.getHeight() };
+        viewport: {
+            getSize: function() {
+                var c = DV.util.getCmp('panel[region="center"]');
+                return { x: c.getWidth(), y: c.getHeight() };
+            }
         },
         multiselect: {
             select: function(a, s) {
@@ -55,6 +57,15 @@ Ext.onReady( function() {
                     });
                     return filter;
                 });
+            }
+        },
+        fieldset: {
+            collapseOthers: function(name) {
+                for (var p in DV.conf.finals.dimension) {
+                    if (DV.conf.finals.dimension[p] !== name) {
+                        DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension[p] + '"]').collapse();
+                    }
+                }
             }
         }
     };
@@ -223,7 +234,6 @@ Ext.onReady( function() {
     };
     
     DV.data = {
-        
         values: null,
         
         getValues: function() {
@@ -313,8 +323,8 @@ Ext.onReady( function() {
         
         getChart: function() {
             this.chart = Ext.create('Ext.chart.Chart', {
-                width: DV.util.getViewportSize.x,
-                height: DV.util.getViewportSize.y,
+                width: DV.util.viewport.getSize().x,
+                height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
                 legend: {
@@ -734,7 +744,7 @@ Ext.onReady( function() {
                                 ],
                                 listeners: {
                                     expand: function() {
-                                        alert(1);
+                                        DV.util.fieldset.collapseOthers(this.name);
                                     }
                                 }
                             },
@@ -859,7 +869,12 @@ Ext.onReady( function() {
                                             }
                                         ]
                                     }
-                                ]
+                                ],
+                                listeners: {
+                                    expand: function() {
+                                        DV.util.fieldset.collapseOthers(this.name);
+                                    }
+                                }
                             },
                             
                             {
@@ -955,7 +970,12 @@ Ext.onReady( function() {
                                             }
                                         ]
                                     }
-                                ]
+                                ],
+                                listeners: {
+                                    expand: function() {
+                                        DV.util.fieldset.collapseOthers(this.name);
+                                    }
+                                }
                             },
                             
                             {
@@ -983,7 +1003,12 @@ Ext.onReady( function() {
                                             }
                                         })
                                     }
-                                ]
+                                ],
+                                listeners: {
+                                    expand: function() {
+                                        DV.util.fieldset.collapseOthers(this.name);
+                                    }
+                                }
                             }
                         ]
                     }
