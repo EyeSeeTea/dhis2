@@ -251,7 +251,35 @@ public class DataElementCategoryComboServiceTest
         assertEquals( 8, categoryComboA.getOptionCombos().size() );
         assertOptionCombos( categoryComboA.getOptionCombos() );
     }
-    
+
+    @Test
+    public void testUpdateCategoryOptionCombosC()
+    {
+        categoryComboA = new DataElementCategoryCombo( "CategoryComboA", categories );
+        categoryService.addDataElementCategoryCombo( categoryComboA );
+        
+        categoryService.generateOptionCombos( categoryComboA );
+        
+        assertNotNull( categoryComboA.getOptionCombos() );
+        assertEquals( 8, categoryComboA.getOptionCombos().size() );
+        assertOptionCombos( categoryComboA.getOptionCombos() );
+        
+        categoryC.getCategoryOptions().add( categoryOptionG );
+        categoryOptionG.setCategory( categoryC );
+        categoryService.updateDataElementCategory( categoryC );
+        
+        categoryService.updateOptionCombos( categoryC );
+        
+        assertNotNull( categoryComboA.getOptionCombos() );
+        assertEquals( 12, categoryComboA.getOptionCombos().size() );
+        assertOptionCombos( categoryComboA.getOptionCombos() );
+        
+        assertTrue( categoryComboA.getOptionCombos().contains( createCategoryOptionCombo( categoryComboA, categoryOptionA, categoryOptionC, categoryOptionG ) ) );
+        assertTrue( categoryComboA.getOptionCombos().contains( createCategoryOptionCombo( categoryComboA, categoryOptionA, categoryOptionD, categoryOptionG ) ) );
+        assertTrue( categoryComboA.getOptionCombos().contains( createCategoryOptionCombo( categoryComboA, categoryOptionB, categoryOptionC, categoryOptionG ) ) );
+        assertTrue( categoryComboA.getOptionCombos().contains( createCategoryOptionCombo( categoryComboA, categoryOptionB, categoryOptionD, categoryOptionG ) ) );
+    }
+  
     private void assertOptionCombos( Set<DataElementCategoryOptionCombo> optionCombos )
     {
         assertTrue( optionCombos.contains( createCategoryOptionCombo( categoryComboA, categoryOptionA, categoryOptionC, categoryOptionE ) ) );

@@ -476,6 +476,17 @@ public class DefaultDataElementCategoryService
         updateDataElementCategoryCombo( categoryCombo );
     }
     
+    public void updateOptionCombos( DataElementCategory category )
+    {
+        for ( DataElementCategoryCombo categoryCombo : getAllDataElementCategoryCombos() )
+        {
+            if ( categoryCombo.getCategories().contains( category ) )
+            {
+                updateOptionCombos( categoryCombo );
+            }
+        }
+    }
+    
     public void updateOptionCombos( DataElementCategoryCombo categoryCombo )
     {
         List<DataElementCategoryOptionCombo> generatedOptionCombos = categoryCombo.generateOptionCombosList();

@@ -310,6 +310,14 @@ public interface DataElementCategoryService
     void generateOptionCombos( DataElementCategoryCombo categoryCombo );
 
     /**
+     * Invokes updateOptionCombos( DataElementCategoryCombo ) for all category
+     * combos which the given category is a part of.
+     * 
+     * @param category the DataElementCategory.
+     */
+    void updateOptionCombos( DataElementCategory category );
+    
+    /**
      * Generates the complete set of category option combos for the given
      * category combo and compares it to the set of persisted category option
      * combos. Those which are not matched are persisted.
