@@ -11,11 +11,11 @@ function addCategoryOption()
 	if ( value.length == 0 ) 
 	{
 		markInvalid( 'categoryOptionName', i18n_specify_category_option_name );
-	} 
+	}
 	else if ( listContainsById( 'categoryOptionNames', value ) ) 
 	{
 		markInvalid( 'categoryOptionName', i18n_category_option_name_already_exists );
-	} 
+	}
 	else 
 	{
 		jQuery.postJSON( 'validateDataElementCategoryOption.action', { name:value }, function( json ) 
@@ -35,7 +35,28 @@ function addCategoryOption()
 
 function addCategoryOptionToExistingCategory()
 {
-	
+	if ( value.length == 0 ) 
+	{
+		markInvalid( 'categoryOptionName', i18n_specify_category_option_name );
+	}
+	else if ( listContainsById( 'categoryOptions', name, true ) )
+	{
+		markInvalid( 'categoryOptionName', i18n_category_option_name_already_exists );
+	}
+	else
+	{
+		jQuery.postJSON( 'validateDataElementCategoryOption.action', { name:name, id:id }, function( json )
+		{
+			if ( json.response == 'success' )
+			{
+				updateCategoryOptionName();
+			}
+			else
+			{
+				markInvalid( 'categoryOptionName', i18n_category_option_name_already_exists );
+			}
+		} );
+	}	
 }
 
 function updateCategoryOption()
@@ -46,7 +67,7 @@ function updateCategoryOption()
 	if ( name.length == 0 )
 	{
 		markInvalid( 'categoryOptionName', i18n_specify_category_option_name );
-	}		
+	}
 	else if ( listContainsById( 'categoryOptions', name, true ) )
 	{
 		markInvalid( 'categoryOptionName', i18n_category_option_name_already_exists );
@@ -80,7 +101,13 @@ function updateCategoryOptionName()
 	
 	var url = 'updateDataElementCategoryOption.action?id=' + id + '&name=' + name;
 	
-	$.postUTF8( url, {}, function() {
+	$.postUTF8( url, {}, function() 
+	{
 		$( '#categoryOptions :selected' ).text( name );
 	} );
+}
+
+function saveCategoryOption( name )
+{
+	
 }
