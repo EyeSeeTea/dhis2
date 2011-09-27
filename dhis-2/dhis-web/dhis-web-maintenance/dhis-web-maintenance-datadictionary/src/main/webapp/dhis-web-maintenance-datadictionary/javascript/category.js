@@ -6,8 +6,9 @@ function removeDataElementCategory( categoryId, categoryName )
 
 function addCategoryOption()
 {
-	var value = getFieldValue( 'categoryOptionName' );
-	if( value.length == 0 ) 
+	var value = $( '#categoryOptionName' ).val();
+	
+	if ( value.length == 0 ) 
 	{
 		markInvalid( 'categoryOptionName', i18n_specify_category_option_name );
 	} 
@@ -32,10 +33,15 @@ function addCategoryOption()
 	}
 }
 
+function addCategoryOptionToExistingCategory()
+{
+	
+}
+
 function updateCategoryOption()
 {
-	var name = getFieldValue( 'categoryOptionName' );
-	var id = getFieldValue( 'categoryOptions' );
+	var name = $( '#categoryOptionName' ).val();
+	var id = $( '#categoryOptions :selected' ).val;
 	
 	if ( name.length == 0 )
 	{
