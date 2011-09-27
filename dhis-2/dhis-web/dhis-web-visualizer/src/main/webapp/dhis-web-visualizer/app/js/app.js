@@ -1016,11 +1016,11 @@ Ext.onReady( function() {
                 listeners: {
                     collapse: function(p) {                    
                         p.collapsed = true;
-                        DV.util.getCmp('button[name="resize"]').setText('>>>');
+                        DV.util.getCmp('button[name="resize"]').setText('<span style="font-weight:bold">>>></span>');
                     },
                     expand: function(p) {
                         p.collapsed = false;
-                        DV.util.getCmp('button[name="resize"]').setText('<<<');
+                        DV.util.getCmp('button[name="resize"]').setText('<span style="font-weight:bold"><<<</span>');
                     }
                 }
             },
@@ -1032,7 +1032,8 @@ Ext.onReady( function() {
                     {
                         xtype: 'button',
                         name: 'resize',
-                        text: '<<<',
+                        text: '<span style="font-weight:bold"><<<</span>',
+                        style: 'color:red',
                         toolTip: 'Collapse',
                         handler: function() {
                             var p = DV.util.getCmp('panel[region="west"]');
@@ -1045,13 +1046,8 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        xtype: 'label',
-                        text: 'DHIS 2 Data Visualizer',
-                        style: 'font-weight:bold; padding:0 2px'
-                    },
-                    {
                         xtype: 'button',
-                        text: 'Load..',
+                        text: 'Update',
                         handler: function() {
                             DV.data.getData();
                             DV.store.getChartStore();
@@ -1060,20 +1056,9 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        xtype: 'button',
-                        text: 'Reload..',
-                        handler: function() {
-                            DV.data.data = [
-                                { x: 'August 2010', 'anc 1': 17, anc2: 5, anc3: 11, anc4: 14 },
-                                { x: 'September 2010', 'anc 1': 5, anc2: 13, anc3: 16, anc4: 5 },
-                                { x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 11, anc4: 16 },
-                                { x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 44, anc4: 5 }
-                            ];
-                            
-                            DV.store.getChartStore();                                
-                            DV.chart.getChart();                                
-                            DV.chart.reload();
-                        }
+                        xtype: 'label',
+                        text: '',
+                        style: 'font-weight:bold; padding:0 4px'
                     },
                     '->',
                     {

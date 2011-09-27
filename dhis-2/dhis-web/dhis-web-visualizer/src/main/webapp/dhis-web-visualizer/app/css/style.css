@@ -36,13 +36,27 @@
     padding-bottom: 4px;
 }
 
-/* Fieldset trigger icons (caused by ext fieldset override) */
+/* Fieldset trigger icons */
+.x-tool img {
+    background-image: url('../resources/tool-sprites.gif');
+    width: 25px;
+}
+
+    /* Untoggeled */
+.x-tool-over .x-tool-toggle {
+    background-position: -25px -60px;
+}
+
+.x-panel-collapsed .x-tool-over .x-tool-toggle .x-fieldset-collapsed .x-tool-over .x-toggle {
+    background-position: -25px -75px:
+}
+
 .x-tool-down {
     background-position: 0 -75px;
 }
 
 .x-tool-over .x-tool-down {
-    background-position: -15px -75px;
+    background-position: -25px -75px;
 }
 
 .x-tool-up {
@@ -50,7 +64,7 @@
 }
 
 .x-tool-over .x-tool-up {
-    background-position: -15px -60px;
+    background-position: -25px -60px;
 }
 
 /* Tree panel font */
