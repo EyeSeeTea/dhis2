@@ -36,6 +36,23 @@
     padding-bottom: 4px;
 }
 
+/* Fieldset trigger icons (caused by ext fieldset override) */
+.x-tool-down {
+    background-position: 0 -75px;
+}
+
+.x-tool-over .x-tool-down {
+    background-position: -15px -75px;
+}
+
+.x-tool-up {
+    background-position: 0 -60px;
+}
+
+.x-tool-over .x-tool-up {
+    background-position: -15px -60px;
+}
+
 /* Tree panel font */
 .x-grid-row .x-grid-cell {
     font: 10px arial;
@@ -74,6 +91,13 @@
     font: 11px arial, ubuntu;
 }
 
+/* Button chart image */
+.x-btn-default-toolbar-small-icon button {
+    width: 32 !important;
+}
+
+
+
 /* DHIS */
 
 body {
@@ -85,10 +109,15 @@ li {
    color: #000;
 }
 
-#chartseries_tb {
-    background:#f2f2f2;
+.visualizer-chart-button-icon {
+    background: transparent url('../resources/column.png') no-repeat center center;
+    width: 38px;
+    height: 38px;
 }
 
+#chartsettings_tb {
+    background: #eee;
+}
 
 
 
