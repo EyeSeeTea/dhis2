@@ -206,7 +206,7 @@ public class DataElementCategoryComboServiceTest
     }
     
     @Test
-    public void testUpdateCategoryOptionCombos()
+    public void testUpdateCategoryOptionCombosA()
     {
         categoryComboA = new DataElementCategoryCombo( "CategoryComboA", categories );
         categoryService.addDataElementCategoryCombo( categoryComboA );
@@ -231,6 +231,25 @@ public class DataElementCategoryComboServiceTest
         assertTrue( categoryComboA.getOptionCombos().contains( createCategoryOptionCombo( categoryComboA, categoryOptionA, categoryOptionD, categoryOptionG ) ) );
         assertTrue( categoryComboA.getOptionCombos().contains( createCategoryOptionCombo( categoryComboA, categoryOptionB, categoryOptionC, categoryOptionG ) ) );
         assertTrue( categoryComboA.getOptionCombos().contains( createCategoryOptionCombo( categoryComboA, categoryOptionB, categoryOptionD, categoryOptionG ) ) );
+    }
+
+    @Test
+    public void testUpdateCategoryOptionCombosB()
+    {
+        categoryComboA = new DataElementCategoryCombo( "CategoryComboA", categories );
+        categoryService.addDataElementCategoryCombo( categoryComboA );
+        
+        categoryService.generateOptionCombos( categoryComboA );
+        
+        assertNotNull( categoryComboA.getOptionCombos() );
+        assertEquals( 8, categoryComboA.getOptionCombos().size() );
+        assertOptionCombos( categoryComboA.getOptionCombos() );
+
+        categoryService.updateOptionCombos( categoryComboA );
+
+        assertNotNull( categoryComboA.getOptionCombos() );
+        assertEquals( 8, categoryComboA.getOptionCombos().size() );
+        assertOptionCombos( categoryComboA.getOptionCombos() );
     }
     
     private void assertOptionCombos( Set<DataElementCategoryOptionCombo> optionCombos )
