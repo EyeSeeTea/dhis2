@@ -469,9 +469,27 @@ public class DefaultDataElementCategoryService
         
         for ( DataElementCategoryOptionCombo optionCombo : categoryCombo.getOptionCombos() )
         {
+            categoryCombo.getOptionCombos().add( optionCombo );
             addDataElementCategoryOptionCombo( optionCombo );
         }
         
+        updateDataElementCategoryCombo( categoryCombo );
+    }
+    
+    public void updateOptionCombos( DataElementCategoryCombo categoryCombo )
+    {
+        List<DataElementCategoryOptionCombo> generatedOptionCombos = categoryCombo.generateOptionCombosList();
+        Set<DataElementCategoryOptionCombo> persistedOptionCombos = categoryCombo.getOptionCombos();
+        
+        for ( DataElementCategoryOptionCombo optionCombo : generatedOptionCombos )
+        {
+            if ( !persistedOptionCombos.contains( optionCombo ) )
+            {
+                categoryCombo.getOptionCombos().add( optionCombo );
+                addDataElementCategoryOptionCombo( optionCombo );
+            }
+        }
+
         updateDataElementCategoryCombo( categoryCombo );
     }
     
