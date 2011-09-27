@@ -36,18 +36,18 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Lars Helge Overland
  */
-public class AddDataElementCategoryOption
+public class AddDataElementCategoryOptionAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataElementCategoryService categoryService;
+    private DataElementCategoryService dataElementCategoryService;
 
-    public void setCategoryService( DataElementCategoryService categoryService )
+    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
     {
-        this.categoryService = categoryService;
+        this.dataElementCategoryService = dataElementCategoryService;
     }
 
     // -------------------------------------------------------------------------
@@ -69,20 +69,31 @@ public class AddDataElementCategoryOption
     }
 
     // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private DataElementCategoryOption dataElementCategoryOption;
+
+    public DataElementCategoryOption getDataElementCategoryOption()
+    {
+        return dataElementCategoryOption;
+    }
+
+    // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        DataElementCategory category = categoryService.getDataElementCategory( categoryId );
+        DataElementCategory category = dataElementCategoryService.getDataElementCategory( categoryId );
         
-        DataElementCategoryOption categoryOption = new DataElementCategoryOption( name );
-        categoryOption.setCategory( category );
-        category.getCategoryOptions().add( categoryOption );
+        dataElementCategoryOption = new DataElementCategoryOption( name );
+        dataElementCategoryOption.setCategory( category );
+        category.getCategoryOptions().add( dataElementCategoryOption );
         
-        categoryService.addDataElementCategoryOption( categoryOption );
-        categoryService.updateDataElementCategory( category );
-        categoryService.updateOptionCombos( category );
+        dataElementCategoryService.addDataElementCategoryOption( dataElementCategoryOption );
+        dataElementCategoryService.updateDataElementCategory( category );
+        dataElementCategoryService.updateOptionCombos( category );
         
         return SUCCESS;
     }

@@ -622,7 +622,7 @@
 
     <action name="addDataElementCategoryOption" class="org.hisp.dhis.dd.action.category.AddDataElementCategoryOptionAction">
       <result name="success" type="velocity-json">
-        /dhis-web-commons/ajax/jsonResponseSuccess.vm
+        /dhis-web-commons/ajax/jsonCategoryOption.vm
       </result>
       <param name="requiredAuthorities">F_DATAELEMENT_ADD</param>
     </action>
