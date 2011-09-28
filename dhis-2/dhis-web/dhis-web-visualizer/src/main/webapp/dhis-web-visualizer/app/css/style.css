@@ -99,9 +99,14 @@
     border-style: none;
 }
 
-/* Multiselect item hover */
-.x-boundlist-item-over {
-    background-color: #eee;
+/* Multiselect (custom) transparent row hover */
+.multiselect .x-boundlist-item-over {
+    background-color: transparent;
+    border-color: #fff;
+}
+.multiselect .x-boundlist-selected {
+    background-color: #d3d3d3;
+    border-color: #b3abaa;
 }
 
 /* List (combo, multiselect etc) style */
@@ -143,3 +148,16 @@ li {
     width: 38px;
     height: 38px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

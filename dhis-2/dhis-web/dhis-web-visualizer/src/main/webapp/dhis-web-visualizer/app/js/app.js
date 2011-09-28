@@ -672,8 +672,8 @@ Ext.onReady( function() {
                                         items: [
                                             {
                                                 xtype: 'multiselect',
-                                                cls: 'multiselect',
                                                 name: 'availableIndicators',
+                                                cls: 'multiselect',
                                                 width: DV.conf.layout.west_cmp_width / 2,
                                                 displayField: 'shortName',
                                                 valueField: 'id',
@@ -715,6 +715,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'multiselect',
                                                 name: 'selectedIndicators',
+                                                cls: 'multiselect',
                                                 width: DV.conf.layout.west_cmp_width / 2,
                                                 displayField: 'shortName',
                                                 valueField: 'id',
@@ -816,6 +817,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'multiselect',
                                                 name: 'availableDataElements',
+                                                cls: 'multiselect',
                                                 width: DV.conf.layout.west_cmp_width / 2,
                                                 displayField: 'shortName',
                                                 valueField: 'id',
@@ -857,6 +859,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'multiselect',
                                                 name: 'selectedDataElements',
+                                                cls: 'multiselect',
                                                 width: DV.conf.layout.west_cmp_width / 2,
                                                 displayField: 'shortName',
                                                 valueField: 'id',
