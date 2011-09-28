@@ -702,7 +702,14 @@ Ext.onReady( function() {
                                                                 DV.util.getCmp('multiselect[name="selectedIndicators"]'));
                                                         }
                                                     }
-                                                ]
+                                                ],
+                                                listeners: {
+                                                    afterrender: function(ms) {
+                                                        ms.boundList.on('itemdblclick', function() {
+                                                            DV.util.multiselect.select(ms, DV.util.getCmp('multiselect[name="selectedIndicators"]'));
+                                                        });
+                                                    }
+                                                }
                                             },
                                             
                                             {
@@ -737,7 +744,14 @@ Ext.onReady( function() {
                                                         text: 'Selected indicators',
                                                         style: 'padding-right:5px'
                                                     }
-                                                ]
+                                                ],
+                                                listeners: {
+                                                    afterrender: function(ms) {
+                                                        ms.boundList.on('itemdblclick', function() {
+                                                            DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableIndicators"]'), ms);
+                                                        });
+                                                    }
+                                                }
                                             }
                                         ]
                                     }
@@ -830,7 +844,14 @@ Ext.onReady( function() {
                                                                 DV.util.getCmp('multiselect[name="selectedDataElements"]'));
                                                         }
                                                     }
-                                                ]
+                                                ],
+                                                listeners: {
+                                                    afterrender: function(ms) {
+                                                        ms.boundList.on('itemdblclick', function() {
+                                                            DV.util.multiselect.select(ms, DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                                        });
+                                                    }
+                                                }
                                             },
                                             
                                             {
@@ -865,7 +886,14 @@ Ext.onReady( function() {
                                                         text: 'Selected data elements',
                                                         style: 'padding-right:5px'
                                                     }
-                                                ]
+                                                ],
+                                                listeners: {
+                                                    afterrender: function(ms) {
+                                                        ms.boundList.on('itemdblclick', function() {
+                                                            DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableDataElements"]'), ms);
+                                                        });
+                                                    }
+                                                }
                                             }
                                         ]
                                     }
