@@ -25,57 +25,45 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.light.action.dataentry;
+package org.hisp.dhis.light.dataentry.action;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.system.filter.DataSetTypeFilter;
-import org.hisp.dhis.system.util.FilterUtils;
+import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author mortenoh
  */
-public class GetDataSetsAction
+public class GetOrganisationUnitsAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitService organisationUnitService;
+    private CurrentUserService currentUserService;
 
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    public void setCurrentUserService( CurrentUserService currentUserService )
     {
-        this.organisationUnitService = organisationUnitService;
+        this.currentUserService = currentUserService;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer organisationUnitId;
+    private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
 
-    public void setOrganisationUnitId( Integer organisationUnitId )
+    public List<OrganisationUnit> getOrganisationUnits()
     {
-        this.organisationUnitId = organisationUnitId;
-    }
-
-    public Integer getOrganisationUnitId()
-    {
-        return organisationUnitId;
-    }
-
-    private List<DataSet> dataSets = new ArrayList<DataSet>();
-
-    public List<DataSet> getDataSets()
-    {
-        return dataSets;
+        return organisationUnits;
     }
 
     // -------------------------------------------------------------------------
@@ -85,11 +73,12 @@ public class GetDataSetsAction
     @Override
     public String execute()
     {
-        if ( organisationUnitId != null )
+        User user = currentUserService.getCurrentUser();
+
+        if ( user != null )
         {
-            OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
-            dataSets = new ArrayList<DataSet>( organisationUnit.getDataSets() );
-            FilterUtils.filter( dataSets, new DataSetTypeFilter( DataSet.TYPE_SECTION ) );
+            organisationUnits = new ArrayList<OrganisationUnit>( user.getOrganisationUnits() );
+            Collections.sort( organisationUnits, new OrganisationUnitNameComparator() );
         }
 
         return SUCCESS;
