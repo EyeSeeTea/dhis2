@@ -14,16 +14,17 @@ DV.conf = {
             url_visualizer: '../',
             url_commons: '../../dhis-web-commons-ajax-json/',
             url_portal: '../../dhis-web-portal/'
-        },
-        
+        },        
         dimension: {
             indicator: 'indicator',
             dataelement: 'dataelement',
             period: 'period',
             organisationunit: 'organisationunit'
-        },
-        
+        },        
         chart: {
+            series: 'series',
+            category: 'category',
+            filter: 'filter',
             column: 'column',
             line: 'line',
             pie: 'pie'

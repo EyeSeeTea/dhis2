@@ -67,7 +67,41 @@ Ext.onReady( function() {
                     }
                 }
             }
-        }
+        },
+        dimension: {
+            indicator: function(isFilter) {
+                var a = [];
+                DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
+                    a.push('indicatorIds=' + r.data.id);
+                });
+                return a;
+            },
+            dataelement: function(isFilter) {
+                var a = [];
+                DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
+                    a.push('dataElementIds=' + r.data.id);
+                });
+                return a;
+            },
+            period: function(isFilter) {
+                var a = [],
+                    cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period + '"]').cmp;
+                for (var i = 0; i < cmp.length; i++) {
+                    if (cmp[i].getValue()) {
+                        a.push(cmp[i].paramName + '=true');
+                    }
+                }
+                return a;
+            },
+            organisationunit: function(isFilter) {
+                var a = [],
+                    selection = DV.util.getCmp('treepanel').getSelectionModel().getSelection();
+                Ext.Array.each(selection, function(r) {
+                    a.push('organisationUnitIds=' + r.data.id);
+                });
+                return a;
+            }
+        }                
     };
     
     DV.store = {
@@ -237,13 +271,26 @@ Ext.onReady( function() {
         values: null,
         
         getValues: function() {
-            var p = '?indicatorIds=52486&indicatorIds=52491&indicatorIds=52487&periodIds=1091452&periodIds=1023570&periodIds=1023571&organisationUnitIds=264';
+            var params = [],
+                series = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.series + '"]').getValue(),
+                category = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.category + '"]').getValue(),
+                filter = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.filter + '"]').getValue();
+                
+            params = params.concat(DV.util.dimension[series]());
+            params = params.concat(DV.util.dimension[category]());
+            params = params.concat(DV.util.dimension[filter]());
+            
+            var url = DV.conf.finals.ajax.url_visualizer + 'getAggregatedIndicatorValues.action';
+            for (var i = 0; i < params.length; i++) {
+                url = Ext.String.urlAppend(url, params[i]);
+            }
             
             Ext.Ajax.request({
-                url: DV.conf.finals.ajax.url_visualizer + 'getAggregatedIndicatorValues.action' + p,
+                url: url,
                 success: function(r) {
                     DV.data.values = Ext.JSON.decode(r.responseText).values;
-                    DV.data.getData();
+                    console.log(DV.data.values);
+                    //DV.data.getData();
                 }
             });
         },
@@ -251,6 +298,9 @@ Ext.onReady( function() {
         data: null,
         
         getData: function() {
+            DV.data.getValues();//temp
+            
+            
             //Ext.Array.each(DV.data.values, function(item, i) {     
                 //item[DV.conf.finals.dimension.indicator] = DV.store.indicator.storage[item.i].name;
                 //item[DV.conf.finals.dimension.period] = DV.store.period.storage[item.i].name;
@@ -296,7 +346,7 @@ Ext.onReady( function() {
             
             
             this.data = [
-                { x: 'August 2010', 'anc 1': 12, anc2: 12, anc3: 5, anc4: 3 },
+                { x: 'August 2010', 'anc 1': 12, anc2: 12, anc3: 16, anc4: 5 },
                 { x: 'September 2010', 'anc 1': 5, anc2: 23, anc3: 16, anc4: 5 },
                 { x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 2, anc4: 16 },
                 { x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 16, anc4: 5 }
@@ -646,7 +696,7 @@ Ext.onReady( function() {
                                                 reader: {
                                                     type: 'json',
                                                     root: 'indicatorGroups'
-                                                }                                                
+                                                }
                                             },
                                             listeners: {
                                                 load: function(s) {
@@ -659,8 +709,7 @@ Ext.onReady( function() {
                                             select: function(cb) {
                                                 var store = DV.store.indicator.available;
                                                 store.param = cb.getValue();
-                                                store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
-                                                store.load();
+                                                store.load({params: {id: cb.getValue()}});
                                             }
                                         }
                                     },
@@ -803,8 +852,7 @@ Ext.onReady( function() {
                                             select: function(cb) {
                                                 var store = DV.store.dataElement.available;
                                                 store.param = cb.getValue();
-                                                store.proxy.url = Ext.String.urlAppend(store.proxy.baseUrl, 'id=' + cb.getValue());
-                                                store.load();
+                                                store.load({params: {id: cb.getValue()}});
                                             }
                                         }
                                     },
@@ -914,6 +962,7 @@ Ext.onReady( function() {
                                 title: 'Periods',
                                 collapsed: true,
                                 collapsible: true,
+                                cmp: [],
                                 items: [
                                     {
                                         xtype: 'panel',
@@ -924,7 +973,16 @@ Ext.onReady( function() {
                                                 xtype: 'panel',
                                                 layout: 'anchor',
                                                 bodyStyle: 'border-style:none; padding:0 40px 0 0px',
-                                                defaults: {labelSeparator: ''},
+                                                defaults: {
+                                                    labelSeparator: '',
+                                                    listeners: {
+                                                        afterrender: function(chb) {
+                                                            if (chb.xtype === 'checkbox') {
+                                                                chb.up('fieldset').cmp.push(chb);
+                                                            }
+                                                        }
+                                                    }
+                                                },
                                                 items: [
                                                     {
                                                         xtype: 'label',
@@ -933,14 +991,17 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'checkbox',
+                                                        paramName: 'lastMonth',
                                                         boxLabel: 'Last month'
                                                     },
                                                     {
                                                         xtype: 'checkbox',
+                                                        paramName: 'monthsThisYear',
                                                         boxLabel: 'Months this year'
                                                     },
                                                     {
                                                         xtype: 'checkbox',
+                                                        paramName: 'monthsLastYear',
                                                         boxLabel: 'Months last year'
                                                     }
                                                 ]
@@ -950,7 +1011,14 @@ Ext.onReady( function() {
                                                 layout: 'anchor',
                                                 bodyStyle: 'border-style:none; padding-right:40px',
                                                 defaults: {
-                                                    labelSeparator: ''
+                                                    labelSeparator: '',
+                                                    listeners: {
+                                                        afterrender: function(chb) {
+                                                            if (chb.xtype === 'checkbox') {
+                                                                chb.up('fieldset').cmp.push(chb);
+                                                            }
+                                                        }
+                                                    }
                                                 },
                                                 items: [
                                                     {
@@ -960,14 +1028,17 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'checkbox',
+                                                        paramName: 'lastQuarter',
                                                         boxLabel: 'Last quarter'
                                                     },
                                                     {
                                                         xtype: 'checkbox',
+                                                        paramName: 'quartersThisYear',
                                                         boxLabel: 'Quarters this year'
                                                     },
                                                     {
                                                         xtype: 'checkbox',
+                                                        paramName: 'quartersLastYear',
                                                         boxLabel: 'Quarters last year'
                                                     }
                                                 ]
@@ -977,8 +1048,15 @@ Ext.onReady( function() {
                                                 layout: 'anchor',
                                                 bodyStyle: 'border-style:none',
                                                 defaults: {
-                                                    labelSeparator: ''
-                                                },  
+                                                    labelSeparator: '',
+                                                    listeners: {
+                                                        afterrender: function(chb) {
+                                                            if (chb.xtype === 'checkbox') {
+                                                                chb.up('fieldset').cmp.push(chb);
+                                                            }
+                                                        }
+                                                    }
+                                                },
                                                 items: [
                                                     {
                                                         xtype: 'label',
@@ -987,14 +1065,17 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'checkbox',
+                                                        paramName: 'thisYear',
                                                         boxLabel: 'This year'
                                                     },
                                                     {
                                                         xtype: 'checkbox',
+                                                        paramName: 'lastYear',
                                                         boxLabel: 'Last year'
                                                     },
                                                     {
                                                         xtype: 'checkbox',
+                                                        paramName: 'lastFiveYears',
                                                         boxLabel: 'Last 5 years'
                                                     }
                                                 ]
