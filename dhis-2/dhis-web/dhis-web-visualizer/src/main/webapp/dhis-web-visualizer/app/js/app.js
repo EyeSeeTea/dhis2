@@ -274,13 +274,19 @@ Ext.onReady( function() {
             var params = [],
                 series = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.series + '"]').getValue(),
                 category = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.category + '"]').getValue(),
-                filter = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.filter + '"]').getValue();
+                filter = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.filter + '"]').getValue(),
+                indicator = DV.conf.finals.dimension.indicator,
+                indiment = (series === indicator || category === indicator || filter === indicator) ? 'Indicator' : 'Data';
                 
+            if (!(series && category && filter)) {
+                return;
+            }
+            
             params = params.concat(DV.util.dimension[series]());
             params = params.concat(DV.util.dimension[category]());
             params = params.concat(DV.util.dimension[filter]());
             
-            var url = DV.conf.finals.ajax.url_visualizer + 'getAggregatedIndicatorValues.action';
+            var url = DV.conf.finals.ajax.url_visualizer + 'getAggregated' + indiment + 'Values.action';
             for (var i = 0; i < params.length; i++) {
                 url = Ext.String.urlAppend(url, params[i]);
             }
