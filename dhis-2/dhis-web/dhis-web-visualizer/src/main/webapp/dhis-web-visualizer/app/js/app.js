@@ -153,7 +153,7 @@ Ext.onReady( function() {
             })
         },
         
-        dataElement: {
+        dataelement: {
             available: Ext.create('Ext.data.Store', {
                 fields: ['id', 'name', 'shortName'],
                 proxy: {
@@ -191,7 +191,7 @@ Ext.onReady( function() {
         
         chart: null,
         
-        getChartStore: function() {
+        getChartStore: function(exe) {
             var properties = Ext.Object.getKeys(DV.data.data[0]);
                             
             Ext.define('model1', {
@@ -207,7 +207,12 @@ Ext.onReady( function() {
             this.chart.bottom = properties.slice(0, 1);
             this.chart.left = properties.slice(1, properties.length);
             
-            return this.chart;
+            if (exe) {
+                DV.chart.getChart(true);
+            }
+            else {
+                return DV.store.chart;
+            }
         }
     };
     
@@ -218,7 +223,7 @@ Ext.onReady( function() {
     DV.data = {
         values: null,
         
-        getValues: function() {
+        getValues: function(exe) {
             var params = [],
                 series = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.series + '"]').getValue(),
                 category = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.category + '"]').getValue(),
@@ -246,18 +251,25 @@ Ext.onReady( function() {
                 success: function(r) {
                     DV.data.values = Ext.JSON.decode(r.responseText).values;
 console.log(DV.data.values);
-                    DV.data.getData();
+                    if (exe) {
+                        DV.data.getData(true);
+                    }
+                    else {
+                        return DV.data.values;
+                    }                    
                 }
             });
         },
         
         data: null,
         
-        getData: function() {
-            Ext.Array.each(DV.data.values, function(item, i) {     
-                item[DV.conf.finals.dimension[DV.state.indiment]] = DV.store[DV.state.indiment].storage[item.i].name;
-                //item[DV.conf.finals.dimension.organisationunit] = DV.util.getCmp('treepanel').store.getNodeById(item. DV.store.organisationunit     .storage[item.i].name;
+        getData: function(exe) {
+            Ext.Array.each(DV.data.values, function(item, i) {
+                item[DV.conf.finals.dimension[DV.state.indiment]] = DV.store[DV.state.indiment].available.storage[item.i].name;
+                item[DV.conf.finals.dimension.organisationunit] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
             });
+console.log(DV.data.values);
+return;            
             
             //var dimensions = DV.data.getDimensions(),
                 //series = [],
@@ -298,13 +310,19 @@ console.log(DV.data.values);
             
             
             
-            this.data = [
+            DV.data.data = [
                 { x: 'August 2010', 'anc 1': 12, anc2: 12, anc3: 16, anc4: 5 },
                 { x: 'September 2010', 'anc 1': 5, anc2: 23, anc3: 16, anc4: 5 },
                 { x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 2, anc4: 16 },
                 { x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 16, anc4: 5 }
             ];
-            return this.data;
+            
+            if (exe) {
+                DV.store.getChartStore(true);
+            }
+            else {
+                return DV.data.data;
+            }
         },
         
         dimensions: null,
@@ -324,7 +342,7 @@ console.log(DV.data.values);
         
         chart: null,
         
-        getChart: function() {
+        getChart: function(exe) {
             this.chart = Ext.create('Ext.chart.Chart', {
                 width: DV.util.viewport.getSize().x,
                 height: DV.util.viewport.getSize().y,
@@ -361,7 +379,13 @@ console.log(DV.data.values);
                     }
                 ]
             });
-            return this.chart;
+            
+            if (exe) {
+                DV.chart.reload();
+            }
+            else {
+                return DV.chart.chart;
+            }
         },
         
         reload: function() {
@@ -803,7 +827,7 @@ console.log(DV.data.values);
                                         }),
                                         listeners: {
                                             select: function(cb) {
-                                                var store = DV.store.dataElement.available;
+                                                var store = DV.store.dataelement.available;
                                                 store.param = cb.getValue();
                                                 store.load({params: {id: cb.getValue()}});
                                             }
@@ -823,7 +847,7 @@ console.log(DV.data.values);
                                                 displayField: 'shortName',
                                                 valueField: 'id',
                                                 queryMode: 'remote',
-                                                store: DV.store.dataElement.available,
+                                                store: DV.store.dataelement.available,
                                                 tbar: [
                                                     {
                                                         xtype: 'label',
@@ -866,7 +890,7 @@ console.log(DV.data.values);
                                                 valueField: 'id',
                                                 ddReorder: true,
                                                 queryMode: 'remote',
-                                                store: DV.store.dataElement.selected,
+                                                store: DV.store.dataelement.selected,
                                                 tbar: [
                                                     {
                                                         xtype: 'button',
@@ -1114,10 +1138,7 @@ console.log(DV.data.values);
                         xtype: 'button',
                         text: 'Update',
                         handler: function() {
-                            DV.data.getData();
-                            DV.store.getChartStore();
-                            DV.chart.getChart();
-                            DV.chart.reload();
+                            DV.data.getValues(true);
                         }
                     },
                     {
