@@ -712,7 +712,7 @@ console.log(DV.data.data);return;
                                         listeners: {
                                             select: function(cb) {
                                                 cb.filter(cb, DV.viewport);
-                                                DV.state.series.dimension = cb.getValue();
+                                                DV.state.category.dimension = cb.getValue();
                                             }
                                         }
                                     }
@@ -744,7 +744,7 @@ console.log(DV.data.data);return;
                                         value: DV.conf.finals.dimension.organisationunit,
                                         listeners: {
                                             select: function(cb) {                     
-                                                DV.state.series.dimension = cb.getValue();
+                                                DV.state.filter.dimension = cb.getValue();
                                             }
                                         }
                                     }
