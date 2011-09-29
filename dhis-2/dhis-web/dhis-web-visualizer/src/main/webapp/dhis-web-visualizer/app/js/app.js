@@ -117,7 +117,7 @@ Ext.onReady( function() {
                         cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period + '"]').cmp;
                     Ext.Array.each(cmp, function(item) {
                         if (item.getValue()) {
-                            Ext.Array.each(DV.system.system.periods[cmp[i].paramName], function(item) {
+                            Ext.Array.each(DV.init.system.periods[item.paramName], function(item) {
                                 a.push(item.name);
                             });
                         }
@@ -141,7 +141,7 @@ Ext.onReady( function() {
                         a.push(r.data.text);
                     });
                     return a;
-                }                    
+                }
             }
         }                
     };
@@ -259,6 +259,7 @@ Ext.onReady( function() {
     };
     
     DV.state = {
+        
         indiment: [],
         
         period: [],
@@ -266,33 +267,41 @@ Ext.onReady( function() {
         organisationunit: [],
         
         series: {
-            dimension: null,
+            dimension: DV.conf.finals.dimension.indicator,
             data: []
         },
         
         category: {
-            dimension: null,
+            dimension: DV.conf.finals.dimension.period,
             data: []
         },
         
         filter: {
-            dimension: null,
+            dimension: DV.conf.finals.dimension.organisationunit,
             data: []
         },
         
         setState: function() {
-            var indicator = DV.conf.finals.dimension.indicator;
-            var indiment = (series === indicator || category === indicator || filter === indicator) ?
-                DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement;
+            var indicator = DV.conf.finals.dimension.indicator,
+                indiment = (this.series.dimension === indicator || this.category.dimension === indicator || this.filter.dimension === indicator) ?
+                DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement,
+                period = DV.conf.finals.dimension.period,
+                organisationunit = DV.conf.finals.dimension.organisationunit;
             
-            DV.store[indiment].selected.each( function(r) {
-                this.indiment.push(r.data.shortName);
-            });
+            this.indiment = DV.util.dimension[indiment].getNames();            
+            this.period = DV.util.dimension[period].getNames();            
+            this.organisationunit = DV.util.dimension[organisationunit].getNames();
+    
+            DV.state.indicator = DV.state.indiment;
+            DV.state.dataelement = DV.state.indiment;
             
+            this.series.data = this[this.series.dimension];
+            this.category.data = this[this.category.dimension];
+            this.filter.data = this[this.filter.dimension];
             
-            
+console.log(this);
+return;            
         }
-            
     };
     
     DV.data = {
@@ -637,7 +646,7 @@ console.log(DV.data.data);return;
                                         listeners: {
                                             select: function(cb) {
                                                 cb.filter(cb, DV.viewport);
-                                                DV.state.series = cb.getValue();
+                                                DV.state.series.dimension = cb.getValue();
                                             }
                                         }
                                     }
@@ -703,7 +712,7 @@ console.log(DV.data.data);return;
                                         listeners: {
                                             select: function(cb) {
                                                 cb.filter(cb, DV.viewport);
-                                                DV.state.category = cb.getValue();
+                                                DV.state.series.dimension = cb.getValue();
                                             }
                                         }
                                     }
@@ -734,8 +743,8 @@ console.log(DV.data.data);return;
                                         store: DV.store.dimension(),
                                         value: DV.conf.finals.dimension.organisationunit,
                                         listeners: {
-                                            select: function(cb) {
-                                                DV.state.filter = cb.getValue();
+                                            select: function(cb) {                     
+                                                DV.state.series.dimension = cb.getValue();
                                             }
                                         }
                                     }
