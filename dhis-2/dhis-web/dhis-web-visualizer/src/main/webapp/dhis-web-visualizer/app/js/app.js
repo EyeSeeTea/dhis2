@@ -123,10 +123,20 @@ Ext.onReady( function() {
                         }
                     });
                     return a;
+                },
+                getNameById: function(id) {
+                    for (var obj in DV.init.system.periods) {
+                        var a = DV.init.system.periods[obj];
+                        for (var i = 0; i < a.length; i++) {
+                            if (a[i].id == id) {
+                                return a[i].name;
+                            }
+                        };
+                    }
                 }
             },
             organisationunit: {
-                getUrl: function() {
+                getUrl: function(isFilter) {
                     var a = [],
                         selection = DV.util.getCmp('treepanel').getSelectionModel().getSelection();
                     Ext.Array.each(selection, function(r) {
@@ -134,7 +144,7 @@ Ext.onReady( function() {
                     });
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
-                getNames: function(isFilter) {
+                getNames: function() {
                     var a = [],
                         selection = DV.util.getCmp('treepanel').getSelectionModel().getSelection();
                     Ext.Array.each(selection, function(r) {
@@ -281,7 +291,7 @@ Ext.onReady( function() {
             data: []
         },
         
-        setState: function() {
+        setState: function(exe) {
             var indicator = DV.conf.finals.dimension.indicator,
                 indiment = (this.series.dimension === indicator || this.category.dimension === indicator || this.filter.dimension === indicator) ?
                 DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement,
@@ -300,7 +310,10 @@ Ext.onReady( function() {
             this.filter.data = this[this.filter.dimension].slice(0,1);
             
 console.log(this);
-return;            
+            
+            if (exe) {
+                DV.data.getValues();
+            }
         }
     };
     
@@ -310,33 +323,40 @@ return;
         getValues: function(exe) {
             var params = [],
                 indicator = DV.conf.finals.dimension.indicator,
-                indiment = (series === indicator || category === indicator || filter === indicator) ? 'Indicator' : 'Data';
-            DV.state.series.dimension = [];
+                dataelement = DV.conf.finals.dimension.dataelement,
+                series = DV.state.series.dimension,
+                category = DV.state.category.dimension,
+                filter = DV.state.filter.dimension,
+                indiment = (series === indicator || category === indicator || filter === indicator) ? indicator : dataelement,
+                url = (series === indicator || category === indicator || filter === indicator) ? 'Indicator' : 'Data';
+            
+            //DV.state.series.dimension = [];
             //Ext.Array.each(series, function(item) {
                 //DV.state.series.push(
                 
-            if (!(series && category && filter)) {
-                return;
-            }
+            //if (!(series && category && filter)) {
+                //return;
+            //}
             
             params = params.concat(DV.util.dimension[series].getUrl());
             params = params.concat(DV.util.dimension[category].getUrl());
             params = params.concat(DV.util.dimension[filter].getUrl(true));
             
-            var url = DV.conf.finals.ajax.url_visualizer + 'getAggregated' + indiment + 'Values.action';
+            var baseUrl = DV.conf.finals.ajax.url_visualizer + 'getAggregated' + url + 'Values.action';
             for (var i = 0; i < params.length; i++) {
-                url = Ext.String.urlAppend(url, params[i]);
+                baseUrl = Ext.String.urlAppend(baseUrl, params[i]);
             }
             
             Ext.Ajax.request({
-                url: url,
+                url: baseUrl,
                 success: function(r) {
                     DV.data.values = Ext.JSON.decode(r.responseText).values;
-                    
-                    Ext.Array.each(DV.data.values, function(item, i) {
-                        item[DV.conf.finals.dimension[DV.state.indiment]] = DV.store[DV.state.indiment].available.storage[item.i].name;
+                    Ext.Array.each(DV.data.values, function(item) {
+                        item[indiment] = DV.store[indiment].available.storage[item.i].name;
+                        item[DV.conf.finals.dimension.period] = DV.util.dimension.period.getNameById(item.p);
                         item[DV.conf.finals.dimension.organisationunit] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
                     });
+console.log(DV.data.values);
                     
                     if (exe) {
                         DV.data.getData(true);
@@ -351,6 +371,7 @@ return;
         data: [],
         
         getData: function(exe) {
+return;            
 console.log(DV.data.values);
             
             //i: "52491", indicator: "ANC 2 Coverage(A)", o: "525", organisationunit: "Sierra Leone", p: "574790", v: "97.6"
@@ -1247,7 +1268,7 @@ console.log(DV.data.data);return;
                         xtype: 'button',
                         text: 'Update',
                         handler: function() {
-                            DV.state.setState();
+                            DV.state.setState(true);
                             //DV.data.getValues(true);
                         }
                     },
