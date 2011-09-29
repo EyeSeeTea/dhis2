@@ -15,6 +15,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         class="org.hisp.dhis.visualizer.action.InitializeAction"
         scope="prototype">
         <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+        <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     </bean>
     
     <!-- Indicator -->

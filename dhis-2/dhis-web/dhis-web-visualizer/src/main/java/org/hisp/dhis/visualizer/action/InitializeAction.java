@@ -29,9 +29,14 @@ package org.hisp.dhis.visualizer.action;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.RelativePeriods;
 
 import com.opensymphony.xwork2.Action;
 
@@ -52,6 +57,20 @@ public class InitializeAction
     {
         this.organisationUnitService = organisationUnitService;
     }
+    
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
+    }
+
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
+    }
 
     // -------------------------------------------------------------------------
     // Output
@@ -62,6 +81,69 @@ public class InitializeAction
     public OrganisationUnit getRootNode()
     {
         return rootNode;
+    }
+    
+    private List<Period> lastMonth;
+    
+    public List<Period> getLastMonth()
+    {
+        return lastMonth;
+    }
+
+    private List<Period> monthsThisYear;
+
+    public List<Period> getMonthsThisYear()
+    {
+        return monthsThisYear;
+    }
+    
+    private List<Period> monthsLastYear;
+
+    public List<Period> getMonthsLastYear()
+    {
+        return monthsLastYear;
+    }
+    
+    private List<Period> lastQuarter;
+
+    public List<Period> getLastQuarter()
+    {
+        return lastQuarter;
+    }
+    
+    private List<Period> quartersThisYear;
+
+    public List<Period> getQuartersThisYear()
+    {
+        return quartersThisYear;
+    }
+    
+    private List<Period> quartersLastYear;
+
+    public List<Period> getQuartersLastYear()
+    {
+        return quartersLastYear;
+    }
+    
+    private List<Period> thisYear;
+
+    public List<Period> getThisYear()
+    {
+        return thisYear;
+    }
+    
+    private List<Period> lastYear;
+
+    public List<Period> getLastYear()
+    {
+        return lastYear;
+    }
+    
+    private List<Period> lastFiveYears;
+
+    public List<Period> getLastFiveYears()
+    {
+        return lastFiveYears;
     }
 
     // -------------------------------------------------------------------------
@@ -75,7 +157,43 @@ public class InitializeAction
             .getOrganisationUnitsAtLevel( 1 ) );
 
         rootNode = rootUnits.size() > 0 ? rootUnits.iterator().next() : new OrganisationUnit();
+        
+        RelativePeriods rp = new RelativePeriods();
+        
+        rp.clear().setReportingMonth( true );
+        lastMonth = periodService.reloadPeriods( setNames( rp.getRelativePeriods() ) );
+        
+        rp.clear().setMonthsThisYear( true );
+        monthsThisYear = periodService.reloadPeriods( setNames( rp.getRelativePeriods() ) );
+        
+        rp.clear().setMonthsLastYear( true );
+        monthsLastYear = periodService.reloadPeriods( setNames( rp.getRelativePeriods() ) );
+        
+        rp.clear().setReportingQuarter( true );
+        lastQuarter = periodService.reloadPeriods( setNames( rp.getRelativePeriods() ) );
+        
+        rp.clear().setQuartersThisYear( true );
+        quartersThisYear = periodService.reloadPeriods( setNames( rp.getRelativePeriods() ) );
+        
+        rp.clear().setQuartersLastYear( true );
+        quartersLastYear = periodService.reloadPeriods( setNames( rp.getRelativePeriods() ) );
+        
+        rp.clear().setThisYear( true );
+        thisYear = periodService.reloadPeriods( setNames( rp.getRelativePeriods() ) );
+        
+        rp.clear().setLastYear( true );
+        lastYear = periodService.reloadPeriods( setNames( rp.getRelativePeriods() ) );
 
         return SUCCESS;
+    }
+    
+    private List<Period> setNames( List<Period> periods )
+    {
+        for ( Period period : periods )
+        {
+            period.setName( format.formatPeriod( period ) );
+        }
+        
+        return periods;
     }
 }

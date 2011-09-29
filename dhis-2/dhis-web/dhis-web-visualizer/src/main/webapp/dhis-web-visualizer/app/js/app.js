@@ -2,7 +2,7 @@ Ext.onReady( function() {
     Ext.Ajax.request({
         url: DV.conf.finals.ajax.url_visualizer + 'initialize.action',
         success: function(r) {
-            DV.system = { rootNode: Ext.JSON.decode(r.responseText).system.rootNode };
+            DV.init = Ext.JSON.decode(r.responseText);
         
     DV.util = {
         getCmp: function(q) {
@@ -69,37 +69,79 @@ Ext.onReady( function() {
             }
         },
         dimension: {
-            indicator: function(isFilter) {
-                var a = [];
-                DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
-                    a.push('indicatorIds=' + r.data.id);
-                });
-                return a;
-            },
-            dataelement: function(isFilter) {
-                var a = [];
-                DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
-                    a.push('dataElementIds=' + r.data.id);
-                });
-                return a;
-            },
-            period: function(isFilter) {
-                var a = [],
-                    cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period + '"]').cmp;
-                for (var i = 0; i < cmp.length; i++) {
-                    if (cmp[i].getValue()) {
-                        a.push(cmp[i].paramName + '=true');
-                    }
+            indicator: {
+                getUrl: function(isFilter) {
+                    var a = [];
+                    DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
+                        a.push('indicatorIds=' + r.data.id);
+                    });
+                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+                },
+                getNames: function() {
+                    var a = [];
+                    DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
+                        a.push(r.data.shortName);
+                    });
+                    return a;
                 }
-                return a;
             },
-            organisationunit: function(isFilter) {
-                var a = [],
-                    selection = DV.util.getCmp('treepanel').getSelectionModel().getSelection();
-                Ext.Array.each(selection, function(r) {
-                    a.push('organisationUnitIds=' + r.data.id);
-                });
-                return a;
+            dataelement: {
+                getUrl: function(isFilter) {
+                    var a = [];
+                    DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
+                        a.push('dataElementIds=' + r.data.id);
+                    });
+                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+                },
+                getNames: function() {
+                    var a = [];
+                    DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
+                        a.push(r.data.shortName);
+                    });
+                    return a;
+                }
+            },
+            period: {
+                getUrl: function(isFilter) {
+                    var a = [],
+                        cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period + '"]').cmp;
+                    for (var i = 0; i < cmp.length; i++) {
+                        if (cmp[i].getValue()) {
+                            a.push(cmp[i].paramName + '=true');
+                        }
+                    }
+                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+                },
+                getNames: function() {
+                    var a = [],
+                        cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period + '"]').cmp;
+                    Ext.Array.each(cmp, function(item) {
+                        if (item.getValue()) {
+                            Ext.Array.each(DV.system.system.periods[cmp[i].paramName], function(item) {
+                                a.push(item.name);
+                            });
+                        }
+                    });
+                    return a;
+                }
+            },
+            organisationunit: {
+                getUrl: function(isFilter) {
+                    var a = [],
+                        selection = DV.util.getCmp('treepanel').getSelectionModel().getSelection();
+                    Ext.Array.each(selection, function(r) {
+                        a.push('organisationUnitIds=' + r.data.id);
+                    });
+                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+                },
+                getNames: function() {
+                    var a = [],
+                        selection = DV.util.getCmp('treepanel').getSelectionModel().getSelection();
+                    Ext.Array.each(selection, function(r) {
+                        a.push(r.data.text);
+                    });
+                    return a;
+                }                    
             }
         }                
     };
@@ -217,7 +259,40 @@ Ext.onReady( function() {
     };
     
     DV.state = {
-        indiment: null
+        indiment: [],
+        
+        period: [],
+        
+        organisationunit: [],
+        
+        series: {
+            dimension: null,
+            data: []
+        },
+        
+        category: {
+            dimension: null,
+            data: []
+        },
+        
+        filter: {
+            dimension: null,
+            data: []
+        },
+        
+        setState: function() {
+            var indicator = DV.conf.finals.dimension.indicator;
+            var indiment = (series === indicator || category === indicator || filter === indicator) ?
+                DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement;
+            
+            DV.store[indiment].selected.each( function(r) {
+                this.indiment.push(r.data.shortName);
+            });
+            
+            
+            
+        }
+            
     };
     
     DV.data = {
@@ -225,21 +300,19 @@ Ext.onReady( function() {
         
         getValues: function(exe) {
             var params = [],
-                series = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.series + '"]').getValue(),
-                category = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.category + '"]').getValue(),
-                filter = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.filter + '"]').getValue(),
                 indicator = DV.conf.finals.dimension.indicator,
                 indiment = (series === indicator || category === indicator || filter === indicator) ? 'Indicator' : 'Data';
-            DV.state.indiment = (series === indicator || category === indicator || filter === indicator) ?
-                DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement;
+            DV.state.series.dimension = [];
+            //Ext.Array.each(series, function(item) {
+                //DV.state.series.push(
                 
             if (!(series && category && filter)) {
                 return;
             }
             
-            params = params.concat(DV.util.dimension[series]());
-            params = params.concat(DV.util.dimension[category]());
-            params = params.concat(DV.util.dimension[filter]());
+            params = params.concat(DV.util.dimension[series].getUrl());
+            params = params.concat(DV.util.dimension[category].getUrl());
+            params = params.concat(DV.util.dimension[filter].getUrl(true));
             
             var url = DV.conf.finals.ajax.url_visualizer + 'getAggregated' + indiment + 'Values.action';
             for (var i = 0; i < params.length; i++) {
@@ -250,7 +323,12 @@ Ext.onReady( function() {
                 url: url,
                 success: function(r) {
                     DV.data.values = Ext.JSON.decode(r.responseText).values;
-console.log(DV.data.values);
+                    
+                    Ext.Array.each(DV.data.values, function(item, i) {
+                        item[DV.conf.finals.dimension[DV.state.indiment]] = DV.store[DV.state.indiment].available.storage[item.i].name;
+                        item[DV.conf.finals.dimension.organisationunit] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
+                    });
+                    
                     if (exe) {
                         DV.data.getData(true);
                     }
@@ -261,19 +339,42 @@ console.log(DV.data.values);
             });
         },
         
-        data: null,
+        data: [],
         
         getData: function(exe) {
-            Ext.Array.each(DV.data.values, function(item, i) {
-                item[DV.conf.finals.dimension[DV.state.indiment]] = DV.store[DV.state.indiment].available.storage[item.i].name;
-                item[DV.conf.finals.dimension.organisationunit] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
-            });
 console.log(DV.data.values);
-return;            
             
-            //var dimensions = DV.data.getDimensions(),
-                //series = [],
-                //columns = [];
+            //i: "52491", indicator: "ANC 2 Coverage(A)", o: "525", organisationunit: "Sierra Leone", p: "574790", v: "97.6"
+            
+            
+            
+            var dimensions = DV.data.getDimensions(),
+                series = [],
+                category = [];
+                
+                
+                
+                
+            
+            
+                        
+            Ext.Array.each(DV.data.values, function(item) {
+                Ext.Array.include(category, item[DV.state.category]);
+            });
+            
+            Ext.Array.each(category, function(item) {
+                DV.data.data.push({x: item});
+            });
+            
+            
+            
+            
+            
+            //Ext.Array.each(
+            
+console.log(DV.data.data);return;            
+                            
+           
                 
             
             //for (var i = 0; i < DV.data.values.length; i++) {
@@ -291,9 +392,6 @@ return;
             //}
                   
             
-      
-                
-            
             //{"v":"187.9", "indicator":"anc1", "period":"okt", "o":"264"},
             //{"v":"113.3", "indicator":"anc2", "period":"nov", "o":"264"},
             //{"v":"150.2", "indicator":"anc3", "period":"okt", "o":"264"},
@@ -302,12 +400,7 @@ return;
             //{"v":"103.9", "indicator":"anc2", "period":"des", "o":"264"},
             //{"v":"139.9", "indicator":"anc2", "period":"okt", "o":"264"},
             //{"v":"149.5", "indicator":"anc3", "period":"nov", "o":"264"},
-            //{"v":"94.6", "indicator":"anc1", "period":"nov", "o":"264"}
-            
-            
-            
-            
-            
+            //{"v":"94.6", "indicator":"anc1", "period":"nov", "o":"264"}            
             
             
             DV.data.data = [
@@ -330,7 +423,7 @@ return;
         getDimensions: function() {
             this.dimensions = {
                 series: DV.util.getCmp('combobox[name="series"]').getValue(),
-                columns: DV.util.getCmp('combobox[name="columns"]').getValue(),
+                category: DV.util.getCmp('combobox[name="category"]').getValue(),
                 filter: DV.util.getCmp('combobox[name="filter"]').getValue()
             };
             return this.dimensions;
@@ -338,7 +431,7 @@ return;
     };
     
     DV.chart = {
-        type: DV.conf.finals.chart.column,
+        type: DV.conf.finals.chart.category,
         
         chart: null,
         
@@ -496,7 +589,7 @@ return;
                                     { html: '<div style="height:2px"></div>', bodyStyle: 'border-style:none;background-color:transparent' },
                                     {
                                         xtype: 'combobox',
-                                        name: 'series',
+                                        name: DV.conf.finals.chart.series,
                                         emptyText: 'Series',
                                         queryMode: 'local',
                                         editable: false,
@@ -544,6 +637,7 @@ return;
                                         listeners: {
                                             select: function(cb) {
                                                 cb.filter(cb, DV.viewport);
+                                                DV.state.series = cb.getValue();
                                             }
                                         }
                                     }
@@ -563,7 +657,7 @@ return;
                                     { html: '<div style="height:2px"></div>', bodyStyle: 'border-style:none;background-color:transparent' },
                                     {
                                         xtype: 'combobox',
-                                        name: 'category',
+                                        name: DV.conf.finals.chart.category,
                                         emptyText: 'Category',
                                         queryMode: 'local',
                                         editable: false,
@@ -609,6 +703,7 @@ return;
                                         listeners: {
                                             select: function(cb) {
                                                 cb.filter(cb, DV.viewport);
+                                                DV.state.category = cb.getValue();
                                             }
                                         }
                                     }
@@ -628,7 +723,7 @@ return;
                                     { html: '<div style="height:2px"></div>', bodyStyle: 'border-style:none;background-color:transparent' },
                                     {
                                         xtype: 'combobox',
-                                        name: 'filter',
+                                        name: DV.conf.finals.chart.filter,
                                         emptyText: 'Filter',
                                         queryMode: 'local',
                                         editable: false,
@@ -637,7 +732,12 @@ return;
                                         displayField: 'name',
                                         width: (DV.conf.layout.west_cmp_width / 3) + 4,
                                         store: DV.store.dimension(),
-                                        value: DV.conf.finals.dimension.organisationunit
+                                        value: DV.conf.finals.dimension.organisationunit,
+                                        listeners: {
+                                            select: function(cb) {
+                                                DV.state.filter = cb.getValue();
+                                            }
+                                        }
                                     }
                                 ]
                             }
@@ -1086,8 +1186,8 @@ return;
                                                 url: DV.conf.finals.ajax.url_visualizer + 'getOrganisationUnitChildren.action'
                                             },
                                             root: {
-                                                id: DV.system.rootNode.id,
-                                                text: DV.system.rootNode.name,
+                                                id: DV.init.system.rootNode.id,
+                                                text: DV.init.system.rootNode.name,
                                                 expanded: false
                                             }
                                         })
@@ -1138,7 +1238,8 @@ return;
                         xtype: 'button',
                         text: 'Update',
                         handler: function() {
-                            DV.data.getValues(true);
+                            DV.state.setState();
+                            //DV.data.getValues(true);
                         }
                     },
                     {
