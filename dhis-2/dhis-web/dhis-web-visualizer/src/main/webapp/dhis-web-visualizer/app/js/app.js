@@ -317,7 +317,7 @@ Ext.onReady( function() {
 console.log(this);
             
             if (exe) {
-                DV.data.getValues();
+                DV.data.getValues(true);
             }
         }
     };
@@ -329,10 +329,10 @@ console.log(this);
             var params = [],
                 indicator = DV.conf.finals.dimension.indicator,
                 dataelement = DV.conf.finals.dimension.dataelement,
-                series = DV.state.series,
-                category = DV.state.category,
-                filter = DV.state.filter,
-                indiment = (series.dimension === indicator || category.dimension === indicator || filter.dimension === indicator) ? indicator : dataelement,
+                series = DV.state.series.dimension,
+                category = DV.state.category.dimension,
+                filter = DV.state.filter.dimension,
+                indiment = (series === indicator || category === indicator || filter === indicator) ? indicator : dataelement,
                 url = (series === indicator || category === indicator || filter === indicator) ? 'Indicator' : 'Data';
             
             params = params.concat(DV.util.dimension[series].getUrl());
@@ -354,7 +354,6 @@ console.log(this);
                         item[DV.conf.finals.dimension.organisationunit] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
                     });
 console.log(DV.data.values);
-                    
                     if (exe) {
                         DV.data.getData(true);
                     }
@@ -368,41 +367,26 @@ console.log(DV.data.values);
         data: [],
         
         getData: function(exe) {
-return;            
-console.log(DV.data.values);
-            
-            //i: "52491", indicator: "ANC 2 Coverage(A)", o: "525", organisationunit: "Sierra Leone", p: "574790", v: "97.6"
-            
-            
-            
-            var dimensions = DV.data.getDimensions(),
-                series = [],
-                category = [];
+            //var dimensions = DV.data.getDimensions(),
+                //series = [],
+                //category = [];
                 
-                
-                
-                
-            
-            
-                        
-            Ext.Array.each(DV.data.values, function(item) {
-                Ext.Array.include(category, item[DV.state.category]);
-            });
-            
-            Ext.Array.each(category, function(item) {
+            //Ext.Array.each(DV.data.values, function(item) {
+                //Ext.Array.include(category, item[DV.state.category]);
+            //});
+            Ext.Array.each(DV.state.category.data, function(item) {
                 DV.data.data.push({x: item});
             });
             
+            Ext.Array.each(DV.data.data, function(item) {
+                for (var i = 0; i < DV.data.values.length; i++) {
+                    if (DV.data.values[i][DV.state.category.dimension] === item.x) {
+                        item[DV.data.values[i][DV.state.series.dimension]] = DV.data.values[i].v;
+                    }
+                }
+            });
             
-            
-            
-            
-            //Ext.Array.each(
-            
-console.log(DV.data.data);return;            
-                            
-           
-                
+console.log(DV.data.data);
             
             //for (var i = 0; i < DV.data.values.length; i++) {
                 //Ext.Array.include(columns, [DV.data.values[i][dimensions.columns]]);
@@ -430,12 +414,12 @@ console.log(DV.data.data);return;
             //{"v":"94.6", "indicator":"anc1", "period":"nov", "o":"264"}            
             
             
-            DV.data.data = [
-                { x: 'August 2010', 'anc 1': 12, anc2: 12, anc3: 16, anc4: 5 },
-                { x: 'September 2010', 'anc 1': 5, anc2: 23, anc3: 16, anc4: 5 },
-                { x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 2, anc4: 16 },
-                { x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 16, anc4: 5 }
-            ];
+            //DV.data.data = [
+                //{ x: 'August 2010', 'anc 1': 12, anc2: 12, anc3: 16, anc4: 5 },
+                //{ x: 'September 2010', 'anc 1': 5, anc2: 23, anc3: 16, anc4: 5 },
+                //{ x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 2, anc4: 16 },
+                //{ x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 16, anc4: 5 }
+            //];
             
             if (exe) {
                 DV.store.getChartStore(true);
