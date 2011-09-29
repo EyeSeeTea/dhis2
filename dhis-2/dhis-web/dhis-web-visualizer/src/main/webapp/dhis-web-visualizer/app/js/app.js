@@ -294,13 +294,18 @@ Ext.onReady( function() {
         setState: function(exe) {
             var indicator = DV.conf.finals.dimension.indicator,
                 indiment = (this.series.dimension === indicator || this.category.dimension === indicator || this.filter.dimension === indicator) ?
-                DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement,
+                    DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement,
                 period = DV.conf.finals.dimension.period,
                 organisationunit = DV.conf.finals.dimension.organisationunit;
             
             this.indiment = DV.util.dimension[indiment].getNames();
             this.period = DV.util.dimension[period].getNames();
             this.organisationunit = DV.util.dimension[organisationunit].getNames();
+            
+            if (!this.indiment.length || !this.period.length || !this.organisationunit.length) {
+                alert("form is not complete");
+                return;
+            }
     
             DV.state.indicator = DV.state.indiment;
             DV.state.dataelement = DV.state.indiment;
@@ -324,19 +329,11 @@ console.log(this);
             var params = [],
                 indicator = DV.conf.finals.dimension.indicator,
                 dataelement = DV.conf.finals.dimension.dataelement,
-                series = DV.state.series.dimension,
-                category = DV.state.category.dimension,
-                filter = DV.state.filter.dimension,
-                indiment = (series === indicator || category === indicator || filter === indicator) ? indicator : dataelement,
+                series = DV.state.series,
+                category = DV.state.category,
+                filter = DV.state.filter,
+                indiment = (series.dimension === indicator || category.dimension === indicator || filter.dimension === indicator) ? indicator : dataelement,
                 url = (series === indicator || category === indicator || filter === indicator) ? 'Indicator' : 'Data';
-            
-            //DV.state.series.dimension = [];
-            //Ext.Array.each(series, function(item) {
-                //DV.state.series.push(
-                
-            //if (!(series && category && filter)) {
-                //return;
-            //}
             
             params = params.concat(DV.util.dimension[series].getUrl());
             params = params.concat(DV.util.dimension[category].getUrl());
