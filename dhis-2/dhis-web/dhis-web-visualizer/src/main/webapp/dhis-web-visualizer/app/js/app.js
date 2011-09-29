@@ -126,7 +126,7 @@ Ext.onReady( function() {
                 }
             },
             organisationunit: {
-                getUrl: function(isFilter) {
+                getUrl: function() {
                     var a = [],
                         selection = DV.util.getCmp('treepanel').getSelectionModel().getSelection();
                     Ext.Array.each(selection, function(r) {
@@ -134,7 +134,7 @@ Ext.onReady( function() {
                     });
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
-                getNames: function() {
+                getNames: function(isFilter) {
                     var a = [],
                         selection = DV.util.getCmp('treepanel').getSelectionModel().getSelection();
                     Ext.Array.each(selection, function(r) {
@@ -288,8 +288,8 @@ Ext.onReady( function() {
                 period = DV.conf.finals.dimension.period,
                 organisationunit = DV.conf.finals.dimension.organisationunit;
             
-            this.indiment = DV.util.dimension[indiment].getNames();            
-            this.period = DV.util.dimension[period].getNames();            
+            this.indiment = DV.util.dimension[indiment].getNames();
+            this.period = DV.util.dimension[period].getNames();
             this.organisationunit = DV.util.dimension[organisationunit].getNames();
     
             DV.state.indicator = DV.state.indiment;
@@ -297,7 +297,7 @@ Ext.onReady( function() {
             
             this.series.data = this[this.series.dimension];
             this.category.data = this[this.category.dimension];
-            this.filter.data = this[this.filter.dimension];
+            this.filter.data = this[this.filter.dimension].slice(0,1);
             
 console.log(this);
 return;            
