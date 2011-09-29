@@ -189,62 +189,6 @@ Ext.onReady( function() {
             })
         },
         
-        period: Ext.create('Ext.data.Store', {
-            fields: ['id', 'name'],
-            proxy: {
-                type: 'ajax',
-                baseUrl: DV.conf.finals.ajax.url_commons + 'getPeriods.action',
-                url: DV.conf.finals.ajax.url_commons + 'getPeriods.action',
-                reader: {
-                    type: 'json',
-                    root: 'periods'
-                }
-            },
-            itemSelector: null,
-            addItemSelector: function(s) {
-                var fs = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period + '"]');
-                
-                if (s.itemSelector) {
-                    fs.remove(s.itemSelector, true);
-                }
-                
-                fs.add({
-                    xtype: 'itemselector',
-                    name: DV.conf.finals.dimension.period,
-                    width: 518,
-                    hideNavIcons: true,
-                    titleAvailable: 'Available periods:',
-                    titleSelected: 'Selected periods:',
-                    displayField: 'name',
-                    valueField: 'id',
-                    allowBlank: true,
-                    msgTarget: 'side',
-                    queryMode: 'remote',
-                    store: s,
-                    listeners: {
-                        afterrender: function(is) {
-                            s.itemSelector = is;
-                        }
-                    }
-                });
-            },
-            storage: {},
-            addToStorage: function(s) {
-                st = this.storage;
-                s.each( function(r) {
-                    if (!st[r.data.id]) {
-                        st[r.data.id] = { name: r.data.name, group: s.param };
-                    }
-                });
-            },
-            listeners: {
-                load: function(s) {
-                    s.addItemSelector(s);
-                    s.addToStorage(s);
-                }
-            }
-        }),
-        
         chart: null,
         
         getChartStore: function() {
@@ -267,6 +211,10 @@ Ext.onReady( function() {
         }
     };
     
+    DV.state = {
+        indiment: null
+    };
+    
     DV.data = {
         values: null,
         
@@ -277,6 +225,8 @@ Ext.onReady( function() {
                 filter = DV.util.getCmp('combobox[name="' + DV.conf.finals.chart.filter + '"]').getValue(),
                 indicator = DV.conf.finals.dimension.indicator,
                 indiment = (series === indicator || category === indicator || filter === indicator) ? 'Indicator' : 'Data';
+            DV.state.indiment = (series === indicator || category === indicator || filter === indicator) ?
+                DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement;
                 
             if (!(series && category && filter)) {
                 return;
@@ -295,8 +245,8 @@ Ext.onReady( function() {
                 url: url,
                 success: function(r) {
                     DV.data.values = Ext.JSON.decode(r.responseText).values;
-                    console.log(DV.data.values);
-                    //DV.data.getData();
+console.log(DV.data.values);
+                    DV.data.getData();
                 }
             });
         },
@@ -304,13 +254,10 @@ Ext.onReady( function() {
         data: null,
         
         getData: function() {
-            DV.data.getValues();//temp
-            
-            
-            //Ext.Array.each(DV.data.values, function(item, i) {     
-                //item[DV.conf.finals.dimension.indicator] = DV.store.indicator.storage[item.i].name;
-                //item[DV.conf.finals.dimension.period] = DV.store.period.storage[item.i].name;
-            //});
+            Ext.Array.each(DV.data.values, function(item, i) {     
+                item[DV.conf.finals.dimension[DV.state.indiment]] = DV.store[DV.state.indiment].storage[item.i].name;
+                //item[DV.conf.finals.dimension.organisationunit] = DV.util.getCmp('treepanel').store.getNodeById(item. DV.store.organisationunit     .storage[item.i].name;
+            });
             
             //var dimensions = DV.data.getDimensions(),
                 //series = [],
