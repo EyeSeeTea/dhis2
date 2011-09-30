@@ -7,10 +7,22 @@ DV.conf = {
             url_portal: '../../dhis-web-portal/'
         },        
         dimension: {
-            indicator: 'indicator',
-            dataelement: 'dataelement',
-            period: 'period',
-            organisationunit: 'organisationunit'
+            indicator: {
+                value: 'indicator',
+                rawvalue: 'Indicator'
+            },
+            dataelement: {
+                value: 'dataelement',
+                rawvalue: 'Data element'
+            },
+            period: {
+                value: 'period',
+                rawvalue: 'Period'
+            },
+            organisationunit: {
+                value: 'organisationunit',
+                rawvalue: 'Organisation unit'
+            }
         },        
         chart: {
             series: 'series',
@@ -103,8 +115,8 @@ Ext.onReady( function() {
         fieldset: {
             collapseOthers: function(name) {
                 for (var p in DV.conf.finals.dimension) {
-                    if (DV.conf.finals.dimension[p] !== name) {
-                        DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension[p] + '"]').collapse();
+                    if (DV.conf.finals.dimension[p].value !== name) {
+                        DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension[p].value + '"]').collapse();
                     }
                 }
             }
@@ -152,7 +164,7 @@ Ext.onReady( function() {
             period: {
                 getUrl: function(isFilter) {
                     var a = [],
-                        cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period + '"]').cmp;
+                        cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period.value + '"]').cmp;
                     for (var i = 0; i < cmp.length; i++) {
                         if (cmp[i].getValue()) {
                             a.push(cmp[i].paramName + '=true');
@@ -162,7 +174,7 @@ Ext.onReady( function() {
                 },
                 getNames: function() {
                     var a = [],
-                        cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period + '"]').cmp;
+                        cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period.value + '"]').cmp;
                     Ext.Array.each(cmp, function(item) {
                         if (item.getValue()) {
                             Ext.Array.each(DV.init.system.periods[item.paramName], function(item) {
@@ -209,10 +221,10 @@ Ext.onReady( function() {
             return Ext.create('Ext.data.Store', {
                 fields: ['id', 'name'],
                 data: [
-                    { id: DV.conf.finals.dimension.indicator, name: 'Indicator' },
-                    { id: DV.conf.finals.dimension.dataelement, name: 'Data element' },
-                    { id: DV.conf.finals.dimension.period, name: 'Period' },
-                    { id: DV.conf.finals.dimension.organisationunit, name: 'Org unit' }
+                    { id: DV.conf.finals.dimension.indicator.value, name: DV.conf.finals.dimension.indicator.rawvalue },
+                    { id: DV.conf.finals.dimension.dataelement.value, name: DV.conf.finals.dimension.dataelement.rawvalue },
+                    { id: DV.conf.finals.dimension.period.value, name: DV.conf.finals.dimension.period.rawvalue },
+                    { id: DV.conf.finals.dimension.organisationunit.value, name: DV.conf.finals.dimension.organisationunit.rawvalue }
                 ]
             });
         },        
@@ -310,25 +322,25 @@ Ext.onReady( function() {
         period: [],        
         organisationunit: [],        
         series: {
-            dimension: DV.conf.finals.dimension.indicator,
+            dimension: DV.conf.finals.dimension.indicator.value,
             data: []
         },        
         category: {
-            dimension: DV.conf.finals.dimension.period,
+            dimension: DV.conf.finals.dimension.period.value,
             data: []
         },        
         filter: {
-            dimension: DV.conf.finals.dimension.organisationunit,
+            dimension: DV.conf.finals.dimension.organisationunit.value,
             data: []
         },        
         getState: function(exe) {
             this.resetState();
             
-            var indicator = DV.conf.finals.dimension.indicator,
+            var indicator = DV.conf.finals.dimension.indicator.value,
                 indiment = (this.series.dimension === indicator || this.category.dimension === indicator || this.filter.dimension === indicator) ?
-                    DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement,
-                period = DV.conf.finals.dimension.period,
-                organisationunit = DV.conf.finals.dimension.organisationunit;
+                    DV.conf.finals.dimension.indicator.value : DV.conf.finals.dimension.dataelement.value,
+                period = DV.conf.finals.dimension.period.value,
+                organisationunit = DV.conf.finals.dimension.organisationunit.value;
             
             this.indiment = DV.util.dimension[indiment].getNames();
             this.period = DV.util.dimension[period].getNames();
@@ -364,8 +376,8 @@ Ext.onReady( function() {
         values: null,        
         getValues: function(exe) {
             var params = [],
-                indicator = DV.conf.finals.dimension.indicator,
-                dataelement = DV.conf.finals.dimension.dataelement,
+                indicator = DV.conf.finals.dimension.indicator.value,
+                dataelement = DV.conf.finals.dimension.dataelement.value,
                 series = DV.state.series.dimension,
                 category = DV.state.category.dimension,
                 filter = DV.state.filter.dimension,
@@ -387,8 +399,8 @@ Ext.onReady( function() {
                     DV.data.values = Ext.JSON.decode(r.responseText).values;
                     Ext.Array.each(DV.data.values, function(item) {
                         item[indiment] = DV.store[indiment].available.storage[item.i].name;
-                        item[DV.conf.finals.dimension.period] = DV.util.dimension.period.getNameById(item.p);
-                        item[DV.conf.finals.dimension.organisationunit] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
+                        item[DV.conf.finals.dimension.period.value] = DV.util.dimension.period.getNameById(item.p);
+                        item[DV.conf.finals.dimension.organisationunit.value] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
                     });
                     
                     if (exe) {
@@ -450,7 +462,7 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        title: 'Indicator',
+                        title: DV.conf.finals.dimension[DV.state.series.dimension].rawvalue,
                         type: 'Category',
                         position: 'bottom',
                         fields: DV.store.chart.bottom
@@ -559,15 +571,15 @@ Ext.onReady( function() {
                                         displayField: 'name',
                                         width: (DV.conf.layout.west_cmp_width / 3) + 4,
                                         store: DV.store.dimension(),
-                                        value: DV.conf.finals.dimension.indicator,
+                                        value: DV.conf.finals.dimension.indicator.value,
                                         filter: function(cb, vp) {
                                             var v = cb.getValue(),
-                                                c = vp.query('combobox[name="category"]')[0],
-                                                f = vp.query('combobox[name="filter"]')[0],
-                                                i = DV.conf.finals.dimension.indicator,
-                                                d = DV.conf.finals.dimension.dataelement,
-                                                p = DV.conf.finals.dimension.period,
-                                                o = DV.conf.finals.dimension.organisationunit,
+                                                c = vp.query('combobox[name="' + DV.conf.finals.chart.category + '"]')[0],
+                                                f = vp.query('combobox[name="' + DV.conf.finals.chart.filter + '"]')[0],
+                                                i = DV.conf.finals.dimension.indicator.value,
+                                                d = DV.conf.finals.dimension.dataelement.value,
+                                                p = DV.conf.finals.dimension.period.value,
+                                                o = DV.conf.finals.dimension.organisationunit.value,
                                                 index = 0;
                                             
                                             if (v === i || v === d) {
@@ -627,15 +639,15 @@ Ext.onReady( function() {
                                         displayField: 'name',
                                         width: (DV.conf.layout.west_cmp_width / 3) + 4,
                                         store: DV.store.dimension(),
-                                        value: DV.conf.finals.dimension.period,
+                                        value: DV.conf.finals.dimension.period.value,
                                         filter: function(cb, vp) {
                                             var v = cb.getValue(),
-                                                s = vp.query('combobox[name="series"]')[0],
-                                                f = vp.query('combobox[name="filter"]')[0],
-                                                i = DV.conf.finals.dimension.indicator,
-                                                d = DV.conf.finals.dimension.dataelement,
-                                                p = DV.conf.finals.dimension.period,
-                                                o = DV.conf.finals.dimension.organisationunit,
+                                                s = vp.query('combobox[name="' + DV.conf.finals.chart.series + '"]')[0],
+                                                f = vp.query('combobox[name="' + DV.conf.finals.chart.filter + '"]')[0],
+                                                i = DV.conf.finals.dimension.indicator.value,
+                                                d = DV.conf.finals.dimension.dataelement.value,
+                                                p = DV.conf.finals.dimension.period.value,
+                                                o = DV.conf.finals.dimension.organisationunit.value,
                                                 index = 0;
                                             
                                             cb.filterArray = Ext.Array.clone(s.filterArray);
@@ -692,7 +704,7 @@ Ext.onReady( function() {
                                         displayField: 'name',
                                         width: (DV.conf.layout.west_cmp_width / 3) + 4,
                                         store: DV.store.dimension(),
-                                        value: DV.conf.finals.dimension.organisationunit,
+                                        value: DV.conf.finals.dimension.organisationunit.value,
                                         listeners: {
                                             select: function(cb) {                     
                                                 DV.state.filter.dimension = cb.getValue();
@@ -709,7 +721,7 @@ Ext.onReady( function() {
                         items: [
                             {
                                 xtype: 'fieldset',
-                                name: DV.conf.finals.dimension.indicator,
+                                name: DV.conf.finals.dimension.indicator.value,
                                 title: 'Indicators',
                                 collapsible: true,
                                 items: [
@@ -850,7 +862,7 @@ Ext.onReady( function() {
                             },                            
                             {
                                 xtype: 'fieldset',
-                                name: DV.conf.finals.dimension.dataelement,
+                                name: DV.conf.finals.dimension.dataelement.value,
                                 title: 'Data elements',
                                 collapsed: true,
                                 collapsible: true,
@@ -992,7 +1004,7 @@ Ext.onReady( function() {
                             },                            
                             {
                                 xtype: 'fieldset',
-                                name: DV.conf.finals.dimension.period,
+                                name: DV.conf.finals.dimension.period.value,
                                 title: 'Periods',
                                 collapsed: true,
                                 collapsible: true,
@@ -1125,7 +1137,7 @@ Ext.onReady( function() {
                             },                            
                             {
                                 xtype: 'fieldset',
-                                name: DV.conf.finals.dimension.organisationunit,
+                                name: DV.conf.finals.dimension.organisationunit.value,
                                 title: 'Organisation units',
                                 collapsed: true,
                                 collapsible: true,
@@ -1220,9 +1232,9 @@ Ext.onReady( function() {
         ],
         listeners: {
             afterrender: function(vp) {
-                var s = this.query('combobox[name="series"]')[0];
+                var s = this.query('combobox[name="' + DV.conf.finals.chart.series + '"]')[0];
                 s.filter(s, vp);
-                var c = this.query('combobox[name="category"]')[0];
+                var c = this.query('combobox[name="' + DV.conf.finals.chart.category + '"]')[0];
                 c.filter(c, vp);
             },
             resize: function() {
