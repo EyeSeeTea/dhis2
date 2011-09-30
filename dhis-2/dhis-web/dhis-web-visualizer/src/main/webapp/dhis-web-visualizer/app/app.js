@@ -447,7 +447,7 @@ Ext.onReady( function() {
                 animate: true,
                 store: DV.store.chart,
                 legend: {
-                    position: 'bottom'
+                    position: 'top'
                 },
                 axes: [
                     {
@@ -462,7 +462,7 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        title: DV.conf.finals.dimension[DV.state.series.dimension].rawvalue,
+                        title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
                         type: 'Category',
                         position: 'bottom',
                         fields: DV.store.chart.bottom
