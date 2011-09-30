@@ -27,6 +27,9 @@
 
 package org.hisp.dhis.settings.action.user;
 
+import static org.hisp.dhis.user.UserSettingService.DEFAULT_CHARTS_IN_DASHBOARD;
+import static org.hisp.dhis.user.UserSettingService.KEY_CHARTS_IN_DASHBOARD;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,11 +40,9 @@ import java.util.SortedMap;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.i18n.resourcebundle.ResourceBundleManager;
-import org.hisp.dhis.options.UserSettingManager;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyManager;
 import org.hisp.dhis.options.sortorder.SortOrderManager;
 import org.hisp.dhis.options.style.StyleManager;
-import org.hisp.dhis.options.style.UserStyleManager;
 import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
@@ -86,13 +87,6 @@ public class GetAvailableUserSettingsAction
         this.sortOrderManager = sortOrderManager;
     }
 
-    private UserSettingManager userSettingManager;
-
-    public void setUserSettingManager( UserSettingManager userSettingManager )
-    {
-        this.userSettingManager = userSettingManager;
-    }
-
     private UserSettingService userSettingService;
 
     public void setUserSettingService( UserSettingService userSettingService )
@@ -106,14 +100,7 @@ public class GetAvailableUserSettingsAction
     {
         this.styleManager = styleManager;
     }
-
-    private UserStyleManager userStyleManager;
-
-    public void setUserStyleManager( UserStyleManager userStyleManager )
-    {
-        this.userStyleManager = userStyleManager;
-    }
-
+    
     private DisplayPropertyManager displayPropertyManager;
 
     public void setDisplayPropertyManager( DisplayPropertyManager displayPropertyManager )
@@ -272,9 +259,9 @@ public class GetAvailableUserSettingsAction
         // Get Charts in Dashboard
         // ---------------------------------------------------------------------
 
-        chartsInDashboard = userSettingManager.getChartsInDashboard();
+        chartsInDashboard = (Integer) userSettingService.getUserSetting( KEY_CHARTS_IN_DASHBOARD, DEFAULT_CHARTS_IN_DASHBOARD );
 
-        chartsInDashboardOptions = userSettingManager.getChartsInDashboardOptions();
+        chartsInDashboardOptions = UserSettingService.DASHBOARD_CHARTS_TO_DISPLAY;
 
         // ---------------------------------------------------------------------
         // Get Display Properties
@@ -296,7 +283,7 @@ public class GetAvailableUserSettingsAction
 
         styles = styleManager.getStyles();
 
-        currentStyle = userStyleManager.getCurrentStyle();
+        currentStyle = styleManager.getCurrentStyle();
 
         return SUCCESS;
     }

@@ -1,30 +1,73 @@
 
+#set( $Integer = 0 )
+
 <h2>$dataSet.name</h2>
+
+#if( $validationRuleViolations.size() > 0 )
+<div class="header-box" align="center">
+	<h3 style="text-align: left; background-color: #990000; color: white;">Validation Rule Violations</h3>
+	<p style="text-align: left;">
+	#foreach( $validationRuleViolation in $validationRuleViolations )
+		$validationRuleViolation <br />
+	#end
+	</p>
+</div>
+#end
 
 <form action="saveSectionForm.action" method="POST">
 
 <input type="hidden" id="organisationUnitId" name="organisationUnitId" value="$organisationUnitId" />
 <input type="hidden" id="dataSetId" name="dataSetId" value="$dataSetId" />
 <input type="hidden" id="periodId" name="periodId" value="$periodId" />
+<input type="hidden" id="validated" name="validated" value="#if($validated)true#{else}false#end" />
 
-#foreach( $section in $dataSet.sections )
-<div class="header-box">
-	<h3>$section.name</h3>
-	<p>
-		#foreach( $dataElement in $section.dataElements)
-			#foreach( $optionCombo in $section.categoryCombo.optionCombos )
-			#set( $key = "DE${dataElement.id}OC${optionCombo.id}" )
-			<label>$dataElement.name $optionCombo.name</label> <input type="text" size="24" name="$key" value="$dataValues.get($key)" /> <br />
+#macro( createSection $sectionName $dataElements )
+<div class="header-box" align="center">
+	<h3 style="text-align: left;">$sectionName</h3>
+	<p style="text-align: left;">
+		#foreach( $dataElement in $dataElements)
+			#foreach( $optionCombo in $dataElement.categoryCombo.optionCombos )
+				#set( $key = "DE${dataElement.id}OC${optionCombo.id}" )
+				<label>$dataElement.name $optionCombo.name</label>
+
+				#if( $validationViolations.get( $key ) )
+				#set( $validationViolation = $validationViolations.get( $key ) )
+
+                #if( $sectionFormUtils.valueHigher( $validationViolation.value, $validationViolation.max ) )
+                    <br /><span style="color: #990000;">Too high (max $validationViolation.max)</span>
+                #elseif( $sectionFormUtils.valueLower( $validationViolation.value, $validationViolation.min ) )
+                    <br /><span style="color: red;">Too low (min $validationViolation.min)</span>
+                #else
+                    <br /><span style="color: red;">Not a number</span>
+                #end
+
+                #end
+
+				<input type="number" size="24" name="$key" value="$!dataValues.get($key)" /> <br />
 			#end
 		#end
 	</p>
 </div>
 #end
 
-<div class="header-box">
+#if( $dataSet.sections.size() > 0 )
+    #foreach( $section in $dataSet.sections )
+        #createSection( $section.name $section.dataElements )
+    #end
+#else
+    #createSection( "Default" $dataSet.dataElements )
+#end
+
+<div class="header-box" align="center">
+	<p style="text-align: left;">
+		<input type="checkbox" id="complete" name="complete" value="true" #if($complete)checked="true"#end style="width: 15px; height: 15px; vertical-align: middle;" />
+        <label for="complete" style="vertical-align: middle; width: auto;">DataSet is complete</label>
+	</p>
+</div>
+
+<div class="header-box" align="center">
 	<p>
-		<input type="submit" style="width: 48%" value="Save"/>
-		<input type="reset" style="width: 48%" value="Clear"/>
+		<input type="submit" style="width: 100%;" value="Save"/>
 	</p>
 </div>
 

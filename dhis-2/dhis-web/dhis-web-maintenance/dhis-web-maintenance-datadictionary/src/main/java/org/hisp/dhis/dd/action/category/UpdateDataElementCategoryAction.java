@@ -28,14 +28,12 @@ package org.hisp.dhis.dd.action.category;
  */
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -64,12 +62,6 @@ public class UpdateDataElementCategoryAction
         this.conceptService = conceptService;
     }
 
-    private DataSetService dataSetService;
-    
-    public void setDataSetService( DataSetService dataSetService )
-    {
-        this.dataSetService = dataSetService;
-    } 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -116,21 +108,17 @@ public class UpdateDataElementCategoryAction
         // CategoryOptions can only be sorted on update
         // ---------------------------------------------------------------------
 
-        dataElementCategory.getCategoryOptions().clear();
-
+        List<DataElementCategoryOption> options = new ArrayList<DataElementCategoryOption>();
+        
         for ( String id : categoryOptions )
         {
-            dataElementCategory.getCategoryOptions().add(
-                dataElementCategoryService.getDataElementCategoryOption( Integer.parseInt( id ) ) );
+            options.add( dataElementCategoryService.getDataElementCategoryOption( Integer.parseInt( id ) ) );
         }
 
+        dataElementCategory.setCategoryOptions( options );
+        
         dataElementCategoryService.updateDataElementCategory( dataElementCategory );
 
-        Collection<DataSet> dataSets = dataSetService.getMobileDataSetsFromCategory(dataElementCategory.getId());
-        for(DataSet dataSet : dataSets){
-            dataSet.setVersion( dataSet.getVersion() + 1 );
-            dataSetService.updateDataSet( dataSet );
-        }
         return SUCCESS;
     }
 }

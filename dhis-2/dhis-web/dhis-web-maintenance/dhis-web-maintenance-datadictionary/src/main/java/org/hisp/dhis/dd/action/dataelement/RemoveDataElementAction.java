@@ -27,8 +27,6 @@ package org.hisp.dhis.dd.action.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Set;
-
 import org.hisp.dhis.common.DeleteNotAllowedException;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -102,12 +100,10 @@ public class RemoveDataElementAction
         try
         {
             DataElement dataElement = dataElementService.getDataElement( id );
-            Set<DataSet> dataSets = dataElement.getDataSets();
-            for(DataSet dataSet : dataSets){
-                if(dataSet.getMobile() != null && dataSet.getMobile()){
-                    dataSet.setVersion( dataSet.getVersion() + 1 );
-                    dataSetService.updateDataSet( dataSet );
-                }                
+            
+            for ( DataSet dataSet : dataElement.getDataSets() )
+            {
+                dataSetService.updateDataSet( dataSet.increaseVersion() );
             }
             
             dataElementService.deleteDataElement( dataElementService.getDataElement( id ) );
@@ -116,12 +112,11 @@ public class RemoveDataElementAction
         {
             if ( ex.getErrorCode().equals( DeleteNotAllowedException.ERROR_ASSOCIATED_BY_OTHER_OBJECTS ) )
             {
-                message = i18n.getString( "object_not_deleted_associated_by_objects" ) + " " + ex.getClassName();
+                message = i18n.getString( "object_not_deleted_associated_by_objects" ) + " " + ex.getMessage();
                 
                 return ERROR;
             }
-        }
-        
+        }        
         
         return SUCCESS;
     }

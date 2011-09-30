@@ -28,11 +28,14 @@ package org.hisp.dhis.dataelement;
  */
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.CombinationGenerator;
 
 /**
  * @author Abyot Aselefew
@@ -116,6 +119,62 @@ public class DataElementCategoryCombo
     public boolean doSubTotals()
     {
         return categories != null && categories.size() > 1;
+    }
+    
+    public DataElementCategoryOption[][] getCategoryOptionsAsArray()
+    {
+        DataElementCategoryOption[][] arrays = new DataElementCategoryOption[categories.size()][];
+        
+        int i = 0;
+        
+        for ( DataElementCategory category : categories )
+        {
+            arrays[i++] = new ArrayList<DataElementCategoryOption>( 
+                category.getCategoryOptions() ).toArray( new DataElementCategoryOption[0] );
+        }
+        
+        return arrays;
+    }
+    
+    public List<DataElementCategoryOptionCombo> generateOptionCombosList()
+    {
+        List<DataElementCategoryOptionCombo> list = new ArrayList<DataElementCategoryOptionCombo>();
+        
+        CombinationGenerator<DataElementCategoryOption> generator = 
+            new CombinationGenerator<DataElementCategoryOption>( getCategoryOptionsAsArray() );
+        
+        while ( generator.hasNext() )
+        {
+            DataElementCategoryOptionCombo optionCombo = new DataElementCategoryOptionCombo();
+            optionCombo.setCategoryOptions( generator.getNext() );
+            optionCombo.setCategoryCombo( this );
+            list.add( optionCombo );
+        }
+        
+        return list;
+    }
+
+    //TODO update category option -> category option combo association
+    
+    public void generateOptionCombos()
+    {
+        this.optionCombos = new HashSet<DataElementCategoryOptionCombo>( generateOptionCombosList() );
+    }
+    
+    public List<DataElementCategoryOptionCombo> getSortedOptionCombos()
+    {
+        final List<DataElementCategoryOptionCombo> persistedList = new ArrayList<DataElementCategoryOptionCombo>( optionCombos );
+        final List<DataElementCategoryOptionCombo> sortedList = generateOptionCombosList(); 
+        
+        Collections.sort( persistedList, new Comparator<DataElementCategoryOptionCombo>()
+        {
+            public int compare( DataElementCategoryOptionCombo o1, DataElementCategoryOptionCombo o2 )
+            {
+                return new Integer( sortedList.indexOf( o1 ) ).compareTo( new Integer( sortedList.indexOf( o2 ) ) );
+            }
+        } );
+        
+        return persistedList;
     }
     
     // -------------------------------------------------------------------------

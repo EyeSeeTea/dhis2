@@ -16,20 +16,6 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 
 selection.setListenerFunction( organisationUnitSelected );
 
-function selectDefaultForm()
-{
-    if( byId('useDefaultForm').checked  )
-	{
-		hideById('customEntryScreenContainer');
-		showById('defaultEntryScreenContainer');
-	}
-	else
-	{
-		hideById('defaultEntryScreenContainer');
-		showById('customEntryScreenContainer');
-	}
-}
-
 //--------------------------------------------------------------------------------------------
 // Show search-form
 //--------------------------------------------------------------------------------------------
@@ -114,7 +100,7 @@ function loadProgramStages()
 			{
 				history += '<tr>';
                 history += '<td>';
-                history += '<strong>' + json.programStageInstances[i].name + '</strong>';
+                history += '<span class="bold">' + json.programStageInstances[i].name + '</span>';
 				history += '</td>';
                 history += '<td style="text-align:center" bgcolor=' + json.programStageInstances[i].colorMap + '>';
                 history += json.programStageInstances[i].infor;
@@ -122,7 +108,19 @@ function loadProgramStages()
                 history += '</tr>';
 			}
 			history += '</table>';
-			setInnerHTML( 'currentSelection', history ); 
+			setInnerHTML( 'currentSelection', history );
+			
+			var singleEvent = jQuery('#programId option:selected').attr('singleevent');
+			if(singleEvent=='true')
+			{
+				byId('programStageId').selectedIndex = 1;
+				disable('programStageId');
+				loadDataEntry();
+			}
+			else
+			{
+				enable('programStageId');
+			}
 	});
 }
 
@@ -146,17 +144,14 @@ function loadDataEntry()
 	}
 	
 	showLoader();
-	var useDefaultForm = jQuery("input[id='useDefaultForm']:checked").val();
 	
 	$( '#dataEntryFormDiv' ).load( "dataentryform.action", 
 		{ 
-			programStageId:getFieldValue('programStageId'), 
-			useDefaultForm:useDefaultForm
+			programStageId:getFieldValue('programStageId')
 		},function( )
 		{
 			enable('validationBtn');
 			enable('completeBtn');
-			enable('useDefaultForm');
 			
 			hideLoader();
 			hideById('contentDiv'); 
@@ -222,26 +217,6 @@ function searchValidationCompleted( messageElement )
     {
         showWarningMessage( message );
     }
-}
-
-//-----------------------------------------------------------------------------
-// View details
-//-----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
-// View details
-// -----------------------------------------------------------------------------
-
-function showPatientDetails( patientId )
-{
-    $('#detailsArea').load("getPatientDetails.action", 
-		{
-			id:patientId
-		}
-		, function( html ){
-			setInnerHTML( 'detailsArea', html );
-			showDetails();
-		});
 }
 
 //------------------------------------------------------------------------------
@@ -763,6 +738,7 @@ function ExecutionDateSaver( programStageId_, executionDate_, resultColor_ )
         if ( codeElement == 'success' )
         {
             markValue( resultColor );
+			setFieldValue('programStageInstanceId',rootElement.firstChild.nodeValue);
 			showById('entryFormContainer');
 			showById('dataEntryFormDiv');
 			showById('entryForm');
@@ -927,7 +903,15 @@ TOGGLE = {
 
 function runValidation()
 {
-	window.open( 'validateProgram.action' );
+	$('<div id="validateProgramDiv">' ).load( 'validateProgram.action' ).dialog({
+			title: i18n_violate_validation,
+			maximize: true, 
+			closable: true,
+			modal:true,
+			overlay:{background:'#000000', opacity:0.1},
+			width: 800,
+			height: 450
+		});
 }
 
 //------------------------------------------------------
@@ -1010,11 +994,9 @@ function loadProgramStageRecords( programStageInstanceId )
 {
 	setInnerHTML('dataEntryFormDiv', '');
 	showLoader();
-	var useDefaultForm = jQuery("#useDefaultForm").attr('checked') ? true : false;
     $('#dataEntryFormDiv' ).load("loadProgramStageRecords.action",
 		{
-			programStageInstanceId: programStageInstanceId,
-			useDefaultForm:useDefaultForm
+			programStageInstanceId: programStageInstanceId
 		}, function() {
 			hideLoader();
 		});

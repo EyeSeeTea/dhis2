@@ -20,27 +20,10 @@ function organisationUnitSelected( orgUnits )
 				
 			if( type == 'success' )
 			{
-						
-				$( "#loaderDiv" ).show();
-				jQuery.postJSON( "patientform.action",
-					{
-					}, 
-					function( json ) 
-					{   
-						programComboBox = '<select id="searchText" name="searchText" style="width:20.2em" >';
-						
-						for ( i in json.programs ) 
-						{
-							programComboBox += '<option value=' + json.programs[i].id + '>' + json.programs[i].name + '</option>';
-						} 
-						programComboBox += '</select>';
-						
-						showById('searchPatientDiv');
-						enable('listPatientBtn');
-						setInnerHTML('warnmessage','');
-						
-						$( "#loaderDiv" ).hide();
-					});
+				showById('searchPatientDiv');
+				enable('listPatientBtn');
+				setInnerHTML('warnmessage','');
+				setFieldValue('selectedOrgunitText', json.message );
 			}
 			else if( type == 'input' )
 			{
@@ -61,31 +44,20 @@ function searchingAttributeOnChange( this_ )
 	var container = jQuery(this_).parent().parent().attr('id');
 	var attributeId = jQuery('#' + container+ ' [id=searchingAttributeId]').val(); 
 	var element = $('#' + container+ ' [id=searchText]');
+	var valueType = jQuery('#' + container+ ' [id=searchingAttributeId] option:selected').attr('valueType');
 	
 	if( attributeId == '0' )
 	{
 		element.replaceWith( programComboBox );
 	}
+	else if ( valueType=='YES/NO' )
+	{
+		element.replaceWith( trueFalseBox );
+	}
 	else
 	{
 		element.replaceWith( searchTextBox );
 	}
-}
-
-// -----------------------------------------------------------------------------
-// View details
-// -----------------------------------------------------------------------------
-
-function showPatientDetails( patientId )
-{
-    $('#detailsArea').load("getPatientDetails.action", 
-		{
-			id:patientId
-		}
-		, function( html ){
-			setInnerHTML( 'detailsArea', html );
-			showDetails();
-		});
 }
 
 // -----------------------------------------------------------------------------
@@ -306,22 +278,22 @@ function showListPatientDuplicate( rootElement, validate )
 	$( patients ).each( function( i, patient )
         {
 			sPatient += "<hr style='margin:5px 0px;'><table>";
-			sPatient += "<tr><td><strong>" + i18n_patient_system_id + "</strong></td><td>" + $(patient).find('systemIdentifier').text() + "</td></tr>" ;
-			sPatient += "<tr><td><strong>" + i18n_patient_full_name + "</strong></td><td>" + $(patient).find('fullName').text() + "</td></tr>" ;
-			sPatient += "<tr><td><strong>" + i18n_patient_gender + "</strong></td><td>" + $(patient).find('gender').text() + "</td></tr>" ;
-			sPatient += "<tr><td><strong>" + i18n_patient_date_of_birth + "</strong></td><td>" + $(patient).find('dateOfBirth').text() + "</td></tr>" ;
-			sPatient += "<tr><td><strong>" + i18n_patient_age + "</strong></td><td>" + $(patient).find('age').text() + "</td></tr>" ;
-			sPatient += "<tr><td><strong>" + i18n_patient_blood_group + "</strong></td><td>" + $(patient).find('bloodGroup').text() + "</td></tr>";
+			sPatient += "<tr><td class='bold'>" + i18n_patient_system_id + "</td><td>" + $(patient).find('systemIdentifier').text() + "</td></tr>" ;
+			sPatient += "<tr><td class='bold'>" + i18n_patient_full_name + "</td><td>" + $(patient).find('fullName').text() + "</td></tr>" ;
+			sPatient += "<tr><td class='bold'>" + i18n_patient_gender + "</td><td>" + $(patient).find('gender').text() + "</td></tr>" ;
+			sPatient += "<tr><td class='bold'>" + i18n_patient_date_of_birth + "</td><td>" + $(patient).find('dateOfBirth').text() + "</td></tr>" ;
+			sPatient += "<tr><td class='bold'>" + i18n_patient_age + "</td><td>" + $(patient).find('age').text() + "</td></tr>" ;
+			sPatient += "<tr><td class='bold'>" + i18n_patient_blood_group + "</td><td>" + $(patient).find('bloodGroup').text() + "</td></tr>";
         	
 			var identifiers = $(patient).find('identifier');
         	if( identifiers.length > 0 )
         	{
-        		sPatient += "<tr><td colspan='2'><strong>" + i18n_patient_identifiers + "</strong></td></tr>";
+        		sPatient += "<tr><td colspan='2' class='bold'>" + i18n_patient_identifiers + "</td></tr>";
 
         		$( identifiers ).each( function( i, identifier )
 				{
         			sPatient +="<tr class='identifierRow'>"
-        				+"<td><strong>" + $(identifier).find('name').text() + "</strong></td>"
+        				+"<td class='bold'>" + $(identifier).find('name').text() + "</td>"
         				+"<td>" + $(identifier).find('value').text() + "</td>	"	
         				+"</tr>";
         		});
@@ -330,12 +302,12 @@ function showListPatientDuplicate( rootElement, validate )
         	var attributes = $(patient).find('attribute');
         	if( attributes.length > 0 )
         	{
-        		sPatient += "<tr><td colspan='2'><strong>" + i18n_patient_attributes + "</strong></td></tr>";
+        		sPatient += "<tr><td colspan='2' class='bold'>" + i18n_patient_attributes + "</td></tr>";
 
         		$( attributes ).each( function( i, attribute )
 				{
         			sPatient +="<tr class='attributeRow'>"
-        				+"<td><strong>" + $(attribute).find('name').text() + "</strong></td>"
+        				+"<td class='bold'>" + $(attribute).find('name').text() + "</td>"
         				+"<td>" + $(attribute).find('value').text() + "</td>	"	
         				+"</tr>";
         		});
@@ -380,7 +352,7 @@ function toggleUnderAge(this_)
 			modal:true,
 			overlay:{background:'#000000', opacity:0.1},
 			width: 800,
-			height: 400
+			height: 450
 		});
 	}else
 	{
@@ -826,63 +798,6 @@ function addEventForPatientForm( divname )
 	jQuery("#" + divname + " [id=dobType]").change(function() {
 		dobTypeOnChange( divname );
 	});
-}
-
-
-// -----------------------------------------------------------------------------
-// Show Details
-// -----------------------------------------------------------------------------
-
-function showDetails()
-{
-	var detailArea = $("#detailsArea");
-	var top = (f_clientHeight() / 2) - 200;	
-	if ( top < 0 ) top = 0; 
-    var left = screen.width - detailArea.width() - 100;
-    detailArea.css({"left":left+"px","top":top+"px"});
-    detailArea.show('fast');
-    
-}
-
-/**
- *  Get document width, hieght, scroll positions
- *  Work with all browsers
- * @return
- */
-
-function f_clientWidth() {
-	return f_filterResults (
-		window.innerWidth ? window.innerWidth : 0,
-		document.documentElement ? document.documentElement.clientWidth : 0,
-		document.body ? document.body.clientWidth : 0
-	);
-}
-function f_clientHeight() {
-	return f_filterResults (
-		window.innerHeight ? window.innerHeight : 0,
-		document.documentElement ? document.documentElement.clientHeight : 0,
-		document.body ? document.body.clientHeight : 0
-	);
-}
-function f_scrollLeft() {
-	return f_filterResults (
-		window.pageXOffset ? window.pageXOffset : 0,
-		document.documentElement ? document.documentElement.scrollLeft : 0,
-		document.body ? document.body.scrollLeft : 0
-	);
-}
-function f_scrollTop() {
-	return f_filterResults (
-		window.pageYOffset ? window.pageYOffset : 0,
-		document.documentElement ? document.documentElement.scrollTop : 0,
-		document.body ? document.body.scrollTop : 0
-	);
-}
-function f_filterResults(n_win, n_docel, n_body) {
-	var n_result = n_win ? n_win : 0;
-	if (n_docel && (!n_result || (n_result > n_docel)))
-		n_result = n_docel;
-	return n_body && (!n_result || (n_result > n_body)) ? n_body : n_result;
 }
 
 // -----------------------------------------------------------------------------

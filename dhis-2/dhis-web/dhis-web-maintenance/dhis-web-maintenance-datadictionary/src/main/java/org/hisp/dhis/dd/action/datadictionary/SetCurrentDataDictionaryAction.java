@@ -27,12 +27,12 @@ package org.hisp.dhis.dd.action.datadictionary;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.options.datadictionary.DataDictionaryModeManager;
+import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author Lars Helge Overland 
  * @version $Id$
  */
 public class SetCurrentDataDictionaryAction
@@ -42,13 +42,13 @@ public class SetCurrentDataDictionaryAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DataDictionaryModeManager dataDictionaryModeManager;
+    private UserSettingService userSettingService;
 
-    public void setDataDictionaryModeManager( DataDictionaryModeManager dataDictionaryModeManager )
+    public void setUserSettingService( UserSettingService userSettingService )
     {
-        this.dataDictionaryModeManager = dataDictionaryModeManager;
+        this.userSettingService = userSettingService;
     }
-    
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -66,7 +66,7 @@ public class SetCurrentDataDictionaryAction
 
     public String execute()
     {
-        dataDictionaryModeManager.setCurrentDataDictionary( id );
+        userSettingService.saveUserSetting( UserSettingService.KEY_CURRENT_DATADICTIONARY, id );
         
         return SUCCESS;
     }

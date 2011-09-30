@@ -28,7 +28,6 @@ package org.hisp.dhis.dataelement;
  */
 
 import java.util.Collection;
-import java.util.List;
 
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 
@@ -289,15 +288,6 @@ public interface DataElementCategoryService
     Collection<DataElementCategoryOptionCombo> getAllDataElementCategoryOptionCombos();
 
     /**
-     * Sorts the DataElementCategoryOptionCombos in the given
-     * DataElementCategoryCombo.
-     * 
-     * @param categoryCombo the DataElementCategoryCombo.
-     * 
-     */
-    List<DataElementCategoryOptionCombo> sortOptionCombos( DataElementCategoryCombo categoryCombo );
-
-    /**
      * Generates and persists a default DataElementCategory,
      * DataElmentCategoryOption, DataElementCategoryCombo and
      * DataElementCategoryOptionCombo.
@@ -319,6 +309,23 @@ public interface DataElementCategoryService
      */
     void generateOptionCombos( DataElementCategoryCombo categoryCombo );
 
+    /**
+     * Invokes updateOptionCombos( DataElementCategoryCombo ) for all category
+     * combos which the given category is a part of.
+     * 
+     * @param category the DataElementCategory.
+     */
+    void updateOptionCombos( DataElementCategory category );
+    
+    /**
+     * Generates the complete set of category option combos for the given
+     * category combo and compares it to the set of persisted category option
+     * combos. Those which are not matched are persisted.
+     *  
+     * @param categoryCombo the DataElementCategoryCombo.
+     */
+    void updateOptionCombos( DataElementCategoryCombo categoryCombo );
+    
     /**
      * Populates all transient properties on each Operand in the given collection.
      * 

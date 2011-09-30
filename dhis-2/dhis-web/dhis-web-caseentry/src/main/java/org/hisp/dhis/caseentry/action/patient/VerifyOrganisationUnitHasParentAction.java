@@ -28,7 +28,6 @@ package org.hisp.dhis.caseentry.action.patient;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.caseentry.state.SelectedStateManager;
 
 import com.opensymphony.xwork2.Action;
 
@@ -49,13 +48,6 @@ public class VerifyOrganisationUnitHasParentAction
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
-    }
-
-    private SelectedStateManager selectedStateManager;
-
-    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
-    {
-        this.selectedStateManager = selectedStateManager;
     }
 
     // -------------------------------------------------------------------------
@@ -83,27 +75,14 @@ public class VerifyOrganisationUnitHasParentAction
     public String execute()
         throws Exception
     {
-        selectedStateManager.clearListAll();
-        selectedStateManager.clearSearchingAttributeId();
-//        selectedStateManager.clearSortingAttributeId();
-//        selectedStateManager.clearSearchText();
-//        selectedStateManager.clearSelectedProgram();
-        
-        message = "";
-
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( orgunitId );
 
-        if ( organisationUnit == null )
-        {
-            return INPUT;
-        }
+        message = organisationUnit.getName();
 
         if ( !organisationUnit.isHasPatients() )
         {
             return INPUT;
         }
-
-        message = organisationUnit.getName();
 
         return SUCCESS;
     }

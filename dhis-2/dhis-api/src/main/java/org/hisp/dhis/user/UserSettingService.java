@@ -28,7 +28,9 @@ package org.hisp.dhis.user;
  */
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * The main interface for working with user settings. Implementation need to get
@@ -42,8 +44,14 @@ public interface UserSettingService
     String ID = UserSettingService.class.getName();
 
     final String AUTO_SAVE_DATA_ENTRY_FORM = "autoSaveDataEntryForm";
+    final String KEY_CHARTS_IN_DASHBOARD = "keyChartsInDashboard";
+    final String KEY_CURRENT_DATADICTIONARY = "currentDataDictionary";
+    final String KEY_STYLE = "stylesheet";
+    final String KEY_STYLE_DIRECTORY = "stylesheetDirectory";
 
-    public static final String KEY_DASHBOARD_CHARTS_TO_DISPLAY = "keyDashboardChartsToDisplay";
+
+    final int DEFAULT_CHARTS_IN_DASHBOARD = 4;
+    final List<Integer> DASHBOARD_CHARTS_TO_DISPLAY = Arrays.asList( 4, 6, 8 );
 
     /**
      * Saves the name/value pair as a user setting connected to the currently
@@ -53,8 +61,7 @@ public interface UserSettingService
      * @param value the value to store.
      * @throws NoCurrentUserException if there is no current user.
      */
-    void saveUserSetting( String name, Serializable value )
-        throws NoCurrentUserException;
+    void saveUserSetting( String name, Serializable value );
 
     /**
      * Returns the value of the user setting specified by the given name.
@@ -64,8 +71,7 @@ public interface UserSettingService
      *         there is no match.
      * @throws NoCurrentUserException if there is no current user.
      */
-    Serializable getUserSetting( String name )
-        throws NoCurrentUserException;
+    Serializable getUserSetting( String name );
 
     /**
      * Returns the value of the user setting specified by the given name. If
@@ -86,8 +92,7 @@ public interface UserSettingService
      * @return all user settings belonging to the current user.
      * @throws NoCurrentUserException if there is no current user.
      */
-    Collection<UserSetting> getAllUserSettings()
-        throws NoCurrentUserException;
+    Collection<UserSetting> getAllUserSettings();
 
     /**
      * Deletes the user setting with the given name.
@@ -95,6 +100,5 @@ public interface UserSettingService
      * @param name the name of the user setting to delete.
      * @throws NoCurrentUserException if there is no current user.
      */
-    void deleteUserSetting( String name )
-        throws NoCurrentUserException;
+    void deleteUserSetting( String name );
 }

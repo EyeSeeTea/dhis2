@@ -4,22 +4,14 @@
 
 function showRelationshipTypeDetails( relationshipTypeId )
 {
-  	$.ajax({
-		url: 'getRelationshipType.action?id=' + relationshipTypeId,
-		cache: false,
-		dataType: "xml",
-		success: relationshipTypeReceived
-	});
-}
-
-function relationshipTypeReceived( relationshipTypeElement )
-{
-	setInnerHTML( 'idField', getElementValue( relationshipTypeElement, 'id' ) );
-	setInnerHTML( 'aIsToBField', getElementValue( relationshipTypeElement, 'aIsToB' ) );	
-	setInnerHTML( 'bIsToAField', getElementValue( relationshipTypeElement, 'bIsToA' ) );       
-	setInnerHTML( 'descriptionField', getElementValue( relationshipTypeElement, 'description' ) );
+  	jQuery.post( 'getRelationshipType.action', { id: relationshipTypeId }, function ( json ) {
+		setInnerHTML( 'idField', json.relationshipType.id );
+		setInnerHTML( 'aIsToBField', json.relationshipType.aIsToB );	
+		setInnerHTML( 'bIsToAField', json.relationshipType.bIsToA );       
+		setInnerHTML( 'descriptionField', json.relationshipType.description );
    
-    showDetails();
+		showDetails();
+	});
 }
 
 // -----------------------------------------------------------------------------
@@ -46,7 +38,7 @@ function validateAddRelationshipType()
     	    	}
     	    	else if ( json.response == "error" )
     	    	{
-    	    		setHeaderMessage( "i18n_adding_patient_atttibute_failed + ':' + '\n'" +json.message );
+    	    		setHeaderMessage( json.message );
     	    	}
     	    }
     	);
@@ -77,7 +69,7 @@ function validateUpdateRelationshipType()
     	    	}
     	    	else if ( json.response == "error" )
     	    	{
-    	    		setHeaderMessage( "i18n_adding_patient_atttibute_failed + ':' + '\n'" +json.message );
+    	    		setHeaderMessage( json.message );
     	    	}
     	    }
     	);

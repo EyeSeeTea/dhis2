@@ -119,9 +119,9 @@ public class GetSystemSettingsAction
     // Output
     // -------------------------------------------------------------------------
 
-    private SortedMap<String, String> flags;
+    private List<String> flags;
 
-    public SortedMap<String, String> getFlags()
+    public List<String> getFlags()
     {
         return flags;
     }
@@ -203,7 +203,7 @@ public class GetSystemSettingsAction
 
         styles = styleManager.getStyles();
 
-        currentStyle = styleManager.getCurrentStyle();
+        currentStyle = styleManager.getSystemStyle();
 
         aggregationStrategies = systemSettingManager.getAggregationStrategies();
 

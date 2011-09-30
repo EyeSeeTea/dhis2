@@ -42,9 +42,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="sortOrderManager">
       <ref bean="org.hisp.dhis.options.sortorder.SortOrderManager" />
     </property>
-    <property name="userSettingManager">
-      <ref bean="org.hisp.dhis.options.UserSettingManager" />
-    </property>
     <property name="displayPropertyManager">
       <ref bean="org.hisp.dhis.options.displayproperty.DisplayPropertyManager" />
     </property>
@@ -53,9 +50,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </property>
     <property name="styleManager">
       <ref bean="org.hisp.dhis.options.style.StyleManager" />
-    </property>
-    <property name="userStyleManager">
-      <ref bean="org.hisp.dhis.options.style.UserStyleManager" />
     </property>
   </bean>
 
@@ -82,8 +76,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
   <bean id="org.hisp.dhis.settings.action.user.SetCurrentChartsInDashboardAction" class="org.hisp.dhis.settings.action.user.SetCurrentChartsInDashboardAction"
     scope="prototype">
-    <property name="userSettingManager">
-      <ref bean="org.hisp.dhis.options.UserSettingManager" />
+    <property name="userSettingService">
+      <ref bean="org.hisp.dhis.user.UserSettingService" />
     </property>
   </bean>
 
@@ -103,8 +97,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
   <bean id="org.hisp.dhis.settings.action.user.SetCurrentStyleAction" class="org.hisp.dhis.settings.action.user.SetCurrentStyleAction"
     scope="prototype">
-    <property name="userStyleManager">
-      <ref bean="org.hisp.dhis.options.style.UserStyleManager" />
+    <property name="styleManager">
+      <ref bean="org.hisp.dhis.options.style.StyleManager" />
     </property>
   </bean>
 

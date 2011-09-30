@@ -29,6 +29,7 @@ package org.hisp.dhis.user;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,13 +64,12 @@ public class DefaultUserSettingService
     // -------------------------------------------------------------------------
 
     public void saveUserSetting( String name, Serializable value )
-        throws NoCurrentUserException
     {
         User currentUser = currentUserService.getCurrentUser();
 
         if ( currentUser == null )
         {
-            throw new NoCurrentUserException( "No current user. User setting not saved: " + name );
+            return;
         }
 
         UserSetting userSetting = userService.getUserSetting( currentUser, name );
@@ -92,13 +92,12 @@ public class DefaultUserSettingService
     }
 
     public Serializable getUserSetting( String name )
-        throws NoCurrentUserException
     {
         User currentUser = currentUserService.getCurrentUser();
 
         if ( currentUser == null )
         {
-            throw new NoCurrentUserException( "No current user. User setting not returned: " + name );
+            return null;
         }
 
         UserSetting userSetting = userService.getUserSetting( currentUser, name );
@@ -131,28 +130,24 @@ public class DefaultUserSettingService
     }
 
     public Collection<UserSetting> getAllUserSettings()
-        throws NoCurrentUserException
     {
         User currentUser = currentUserService.getCurrentUser();
 
         if ( currentUser == null )
         {
-            throw new NoCurrentUserException( "No current user. User settings not returned" );
+            return Collections.emptySet();
         }
 
         return userService.getAllUserSettings( currentUser );
     }
 
     public void deleteUserSetting( String name )
-        throws NoCurrentUserException
     {
         User currentUser = currentUserService.getCurrentUser();
 
-        if ( currentUser == null )
+        if ( currentUser != null )
         {
-            throw new NoCurrentUserException( "No current user. User setting not deleted: " + name );
-        }
-
-        userService.deleteUserSetting( userService.getUserSetting( currentUser, name ) );
+            userService.deleteUserSetting( userService.getUserSetting( currentUser, name ) );
+        }        
     }
 }

@@ -28,6 +28,7 @@ package org.hisp.dhis.dd.action.indicator;
  */
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.hisp.dhis.user.UserSettingService.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,9 +40,9 @@ import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.datadictionary.comparator.DataDictionaryNameComparator;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.options.datadictionary.DataDictionaryModeManager;
 import org.hisp.dhis.options.displayproperty.DisplayPropertyHandler;
 import org.hisp.dhis.paging.ActionPagingSupport;
+import org.hisp.dhis.user.UserSettingService;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -62,11 +63,11 @@ public class GetIndicatorListAction
         this.indicatorService = indicatorService;
     }
 
-    private DataDictionaryModeManager dataDictionaryModeManager;
+    private UserSettingService userSettingService;
 
-    public void setDataDictionaryModeManager( DataDictionaryModeManager dataDictionaryModeManager )
+    public void setUserSettingService( UserSettingService userSettingService )
     {
-        this.dataDictionaryModeManager = dataDictionaryModeManager;
+        this.userSettingService = userSettingService;
     }
 
     private DataDictionaryService dataDictionaryService;
@@ -152,17 +153,17 @@ public class GetIndicatorListAction
     {
         if ( dataDictionaryId == null ) // None, get current data dictionary
         {
-            dataDictionaryId = dataDictionaryModeManager.getCurrentDataDictionary();
+            dataDictionaryId = (Integer) userSettingService.getUserSetting( KEY_CURRENT_DATADICTIONARY );
         }
         else if ( dataDictionaryId == -1 ) // All, reset current data dictionary
         {
-            dataDictionaryModeManager.setCurrentDataDictionary( null );
+            userSettingService.saveUserSetting( KEY_CURRENT_DATADICTIONARY, null );
             
             dataDictionaryId = null;
         }
         else // Specified, set current data dictionary
         {
-            dataDictionaryModeManager.setCurrentDataDictionary( dataDictionaryId );
+            userSettingService.saveUserSetting( KEY_CURRENT_DATADICTIONARY, dataDictionaryId );
         }
         
         dataDictionaries = new ArrayList<DataDictionary>( dataDictionaryService.getAllDataDictionaries() );

@@ -10,8 +10,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="dataElementService">
       <ref bean="org.hisp.dhis.dataelement.DataElementService" />
     </property>
-    <property name="dataDictionaryModeManager">
-      <ref bean="org.hisp.dhis.options.datadictionary.DataDictionaryModeManager" />
+    <property name="userSettingService">
+      <ref bean="org.hisp.dhis.user.UserSettingService" />
     </property>
     <property name="dataDictionaryService">
       <ref bean="org.hisp.dhis.datadictionary.DataDictionaryService" />
@@ -382,9 +382,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
   <bean id="org.hisp.dhis.dd.action.indicatortype.GetIndicatorTypeAction" class="org.hisp.dhis.dd.action.indicatortype.GetIndicatorTypeAction"
     scope="prototype">
-    <property name="indicatorService">
-      <ref bean="org.hisp.dhis.indicator.IndicatorService" />
-    </property>
+    <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
   </bean>
 
   <bean id="org.hisp.dhis.dd.action.indicatortype.RemoveIndicatorTypeAction" class="org.hisp.dhis.dd.action.indicatortype.RemoveIndicatorTypeAction"
@@ -422,8 +420,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="indicatorService">
       <ref bean="org.hisp.dhis.indicator.IndicatorService" />
     </property>
-    <property name="dataDictionaryModeManager">
-      <ref bean="org.hisp.dhis.options.datadictionary.DataDictionaryModeManager" />
+    <property name="userSettingService">
+      <ref bean="org.hisp.dhis.user.UserSettingService" />
     </property>
     <property name="dataDictionaryService">
       <ref bean="org.hisp.dhis.datadictionary.DataDictionaryService" />
@@ -544,8 +542,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
   <bean id="org.hisp.dhis.dd.action.datadictionary.SetCurrentDataDictionaryAction" class="org.hisp.dhis.dd.action.datadictionary.SetCurrentDataDictionaryAction"
     scope="prototype">
-    <property name="dataDictionaryModeManager">
-      <ref bean="org.hisp.dhis.options.datadictionary.DataDictionaryModeManager" />
+    <property name="userSettingService">
+      <ref bean="org.hisp.dhis.user.UserSettingService" />
     </property>
   </bean>
 
@@ -583,9 +581,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="conceptService">
       <ref bean="org.hisp.dhis.concept.ConceptService" />
     </property>
-    <property name="dataSetService">
-      <ref bean="org.hisp.dhis.dataset.DataSetService" />
-    </property>
   </bean>
 
   <bean id="org.hisp.dhis.dd.action.category.GetDataElementCategoryAction" class="org.hisp.dhis.dd.action.category.GetDataElementCategoryAction"
@@ -605,13 +600,26 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </property>
   </bean>
 
+  <!-- CategoryOption -->
+
+  <bean id="org.hisp.dhis.dd.action.category.AddDataElementCategoryOptionAction" class="org.hisp.dhis.dd.action.category.AddDataElementCategoryOptionAction"
+    scope="prototype">
+    <property name="dataElementCategoryService">
+      <ref bean="org.hisp.dhis.dataelement.DataElementCategoryService" />
+    </property>
+  </bean>
+
   <bean id="org.hisp.dhis.dd.action.category.UpdateDataElementCategoryOptionAction" class="org.hisp.dhis.dd.action.category.UpdateDataElementCategoryOptionAction"
     scope="prototype">
     <property name="dataElementCategoryService">
       <ref bean="org.hisp.dhis.dataelement.DataElementCategoryService" />
     </property>
-    <property name="dataSetService">
-      <ref bean="org.hisp.dhis.dataset.DataSetService" />
+  </bean>
+
+  <bean id="org.hisp.dhis.dd.action.category.RemoveDataElementCategoryOptionAction" class="org.hisp.dhis.dd.action.category.RemoveDataElementCategoryOptionAction"
+    scope="prototype">
+    <property name="dataElementCategoryService">
+      <ref bean="org.hisp.dhis.dataelement.DataElementCategoryService" />
     </property>
   </bean>
 
@@ -678,11 +686,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
   </bean>
 
-  <!-- Other -->
-
-  <bean id="org.hisp.dhis.dd.action.NoAction" class="org.hisp.dhis.dd.action.NoAction" />
-
-
   <!-- Validate CategoryOption -->
 
   <bean id="org.hisp.dhis.dd.action.category.ValidateDataElementCategoryOptionAction" class="org.hisp.dhis.dd.action.category.ValidateDataElementCategoryOptionAction"
@@ -692,7 +695,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     </property>
   </bean>
 
-  <!-- Concept Name -->
+  <!-- Concept -->
 
   <bean id="org.hisp.dhis.dd.action.concept.AddConceptAction" class="org.hisp.dhis.dd.action.concept.AddConceptAction"
     scope="prototype">
@@ -723,5 +726,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="conceptService" ref="org.hisp.dhis.concept.ConceptService" />
   </bean>
+
+  <!-- Other -->
+
+  <bean id="org.hisp.dhis.dd.action.NoAction" class="org.hisp.dhis.dd.action.NoAction" />
 
 </beans>

@@ -1,22 +1,16 @@
 // -----------------------------------------------------------------------------
-// Show Data Element Group Set details
+// Show Indicator Group Set details
 // -----------------------------------------------------------------------------
 
 function showIndicatorGroupSetDetails( id )
 {
-    var request = new Request();
-    request.setResponseTypeXML( 'indicatorGroupSet' );
-    request.setCallbackSuccess( showDetailsCompleted );
-    request.sendAsPost( "id=" + id );
-    request.send( "../dhis-web-commons-ajax/getIndicatorGroupSet.action" );
-}
+	jQuery.post( '../dhis-web-commons-ajax-json/getIndicatorGroupSet.action',
+		{ id: id }, function( json ) {
+		setInnerHTML( 'nameField', json.indicatorGroupSet.name );
+		setInnerHTML( 'memberCountField', json.indicatorGroupSet.memberCount );
 
-function showDetailsCompleted( indicatorGroupSet )
-{
-    setInnerHTML( 'nameField', getElementValue( indicatorGroupSet, 'name' ) );
-    setInnerHTML( 'memberCountField', getElementValue( indicatorGroupSet, 'memberCount' ) );
-
-    showDetails();
+		showDetails();
+	});
 }
 
 // -----------------------------------------------------------------------------

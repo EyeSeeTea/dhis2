@@ -13,3 +13,7 @@ nbactions.xml
 .classpath
 .project
 .mtj
+.idea
+*.iml
+*.ipr
+*.iws
