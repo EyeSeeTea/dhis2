@@ -1,10 +1,26 @@
 Ext.Loader.setConfig({enabled: true});
 Ext.Loader.setPath('Ext.ux', 'lib/ext-ux');
-Ext.require(['Ext.form.Panel', 'Ext.ux.form.MultiSelect', 'Ext.ux.form.ItemSelector']);
+Ext.require([
+    'Ext.form.Panel',
+    'Ext.ux.form.MultiSelect',
+    'Ext.ux.form.ItemSelector',
+    'Ext.data.TreeStore',
+    'Ext.container.Viewport',
+    'Ext.form.Label',
+    'Ext.form.ComboBox',
+    'Ext.form.field.Picker',
+    'Ext.layout.container.Column',
+    'Ext.tree.Panel',
+    'Ext.panel.Table',
+    'Ext.tree.View',
+    'Ext.view.Table',
+    'Ext.layout.container.Border',
+    'Ext.resizer.Splitter'    
+]);
 
 Ext.onReady( function() {
     document.body.oncontextmenu = function(){return false;};
-
+    Ext.QuickTips.init();
     Ext.override(Ext.form.FieldSet,{setExpanded:function(a){var b=this,c=b.checkboxCmp,d=b.toggleCmp,e;a=!!a;if(c){c.setValue(a)}if(d){d.setType(a?"up":"down")}if(a){e="expand";b.removeCls(b.baseCls+"-collapsed")}else{e="collapse";b.addCls(b.baseCls+"-collapsed")}b.collapsed=!a;b.doComponentLayout();b.fireEvent(e,b);return b}});
 });
     

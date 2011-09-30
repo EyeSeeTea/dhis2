@@ -167,8 +167,7 @@ Ext.onReady( function() {
                     { id: DV.conf.finals.dimension.organisationunit, name: 'Org unit' }
                 ]
             });
-        },
-        
+        },        
         indicator: {
             available: Ext.create('Ext.data.Store', {
                 fields: ['id', 'name', 'shortName'],
@@ -197,14 +196,12 @@ Ext.onReady( function() {
                             DV.util.getCmp('multiselect[name="selectedIndicators"]'));
                     }
                 }
-            }),
-            
+            }),            
             selected: Ext.create('Ext.data.Store', {
                 fields: ['id', 'shortName'],
                 data: []
             })
-        },
-        
+        },        
         dataelement: {
             available: Ext.create('Ext.data.Store', {
                 fields: ['id', 'name', 'shortName'],
@@ -233,26 +230,18 @@ Ext.onReady( function() {
                             DV.util.getCmp('multiselect[name="selectedDataElements"]'));
                     }
                 }
-            }),
-            
+            }),            
             selected: Ext.create('Ext.data.Store', {
                 fields: ['id', 'shortName'],
                 data: []
             })
-        },
-        
-        chart: null,
-        
+        },        
+        chart: null,        
         getChartStore: function(exe) {
             var properties = Ext.Object.getKeys(DV.data.data[0]);
-                            
-            Ext.define('model1', {
-                extend: 'Ext.data.Model',
-                fields: properties
-            });
 
             this.chart = Ext.create('Ext.data.Store', {
-                model: 'model1',
+                fields: properties,
                 data: DV.data.data
             });
             
@@ -269,27 +258,21 @@ Ext.onReady( function() {
     };
     
     DV.state = {        
-        indiment: [],
-        
-        period: [],
-        
-        organisationunit: [],
-        
+        indiment: [],        
+        period: [],        
+        organisationunit: [],        
         series: {
             dimension: DV.conf.finals.dimension.indicator,
             data: []
-        },
-        
+        },        
         category: {
             dimension: DV.conf.finals.dimension.period,
             data: []
-        },
-        
+        },        
         filter: {
             dimension: DV.conf.finals.dimension.organisationunit,
             data: []
-        },
-        
+        },        
         getState: function(exe) {
             this.resetState();
             
@@ -318,8 +301,7 @@ Ext.onReady( function() {
             if (exe) {
                 DV.data.getValues(true);
             }
-        },
-        
+        },        
         resetState: function() {
             this.indiment = null;
             this.period = null;
@@ -331,8 +313,7 @@ Ext.onReady( function() {
     };
     
     DV.data = {
-        values: null,
-        
+        values: null,        
         getValues: function(exe) {
             var params = [],
                 indicator = DV.conf.finals.dimension.indicator,
@@ -370,10 +351,8 @@ Ext.onReady( function() {
                     }                    
                 }
             });
-        },
-        
-        data: [],
-        
+        },        
+        data: [],        
         getData: function(exe) {
             this.data = [];
             
@@ -395,25 +374,12 @@ Ext.onReady( function() {
             else {
                 return DV.data.data;
             }
-        },
-        
-        dimensions: null,
-        
-        getDimensions: function() {
-            this.dimensions = {
-                series: DV.util.getCmp('combobox[name="series"]').getValue(),
-                category: DV.util.getCmp('combobox[name="category"]').getValue(),
-                filter: DV.util.getCmp('combobox[name="filter"]').getValue()
-            };
-            return this.dimensions;
         }
     };
     
     DV.chart = {
-        type: DV.conf.finals.chart.category,
-        
-        chart: null,
-        
+        type: DV.conf.finals.chart.category,        
+        chart: null,        
         getChart: function(exe) {
             this.chart = Ext.create('Ext.chart.Chart', {
                 width: DV.util.viewport.getSize().x,
@@ -458,8 +424,7 @@ Ext.onReady( function() {
             else {
                 return DV.chart.chart;
             }
-        },
-        
+        },        
         reload: function() {
             var c = DV.util.getCmp('panel[region="center"]');
             c.removeAll(true);
@@ -547,8 +512,7 @@ Ext.onReady( function() {
                                 }
                             }
                         ]
-                    },
-                    
+                    },                    
                     {
                         xtype: 'toolbar',
                         id: 'chartsettings_tb',
@@ -621,8 +585,7 @@ Ext.onReady( function() {
                                         }
                                     }
                                 ]
-                            },
-                            
+                            },                            
                             {
                                 xtype: 'panel',
                                 bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
@@ -687,8 +650,7 @@ Ext.onReady( function() {
                                         }
                                     }
                                 ]
-                            },
-                            
+                            },                            
                             {
                                 xtype: 'panel',
                                 bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
@@ -721,8 +683,7 @@ Ext.onReady( function() {
                                 ]
                             }
                         ]
-                    },
-                    
+                    },                    
                     {
                         xtype: 'panel',
                         bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:10px;',
@@ -768,8 +729,7 @@ Ext.onReady( function() {
                                                 store.load({params: {id: cb.getValue()}});
                                             }
                                         }
-                                    },
-                                    
+                                    },                                    
                                     {
                                         xtype: 'panel',
                                         layout: 'column',
@@ -815,8 +775,7 @@ Ext.onReady( function() {
                                                         });
                                                     }
                                                 }
-                                            },
-                                            
+                                            },                                            
                                             {
                                                 xtype: 'multiselect',
                                                 name: 'selectedIndicators',
@@ -867,8 +826,7 @@ Ext.onReady( function() {
                                         DV.util.fieldset.collapseOthers(this.name);
                                     }
                                 }
-                            },
-                            
+                            },                            
                             {
                                 xtype: 'fieldset',
                                 name: DV.conf.finals.dimension.dataelement,
@@ -911,8 +869,7 @@ Ext.onReady( function() {
                                                 store.load({params: {id: cb.getValue()}});
                                             }
                                         }
-                                    },
-                                    
+                                    },                                    
                                     {
                                         xtype: 'panel',
                                         layout: 'column',
@@ -958,8 +915,7 @@ Ext.onReady( function() {
                                                         });
                                                     }
                                                 }
-                                            },
-                                            
+                                            },                                            
                                             {
                                                 xtype: 'multiselect',
                                                 name: 'selectedDataElements',
@@ -1010,8 +966,7 @@ Ext.onReady( function() {
                                         DV.util.fieldset.collapseOthers(this.name);
                                     }
                                 }
-                            },
-                            
+                            },                            
                             {
                                 xtype: 'fieldset',
                                 name: DV.conf.finals.dimension.period,
@@ -1144,8 +1099,7 @@ Ext.onReady( function() {
                                         DV.util.fieldset.collapseOthers(this.name);
                                     }
                                 }
-                            },
-                            
+                            },                            
                             {
                                 xtype: 'fieldset',
                                 name: DV.conf.finals.dimension.organisationunit,
@@ -1207,7 +1161,7 @@ Ext.onReady( function() {
                         name: 'resize',
                         text: '<span style="font-weight:bold"><<<</span>',
                         style: 'color:red',
-                        toolTip: 'Collapse',
+                        tooltip: 'Show/hide panel',
                         handler: function() {
                             var p = DV.util.getCmp('panel[region="west"]');
                             if (p.collapsed) {
@@ -1223,7 +1177,6 @@ Ext.onReady( function() {
                         text: 'Update',
                         handler: function() {
                             DV.state.getState(true);
-                            //DV.data.getValues(true);
                         }
                     },
                     {
@@ -1250,7 +1203,7 @@ Ext.onReady( function() {
                 c.filter(c, vp);
             },
             resize: function() {
-                this.query('panel[region="west"]')[0].setWidth(424); //vp.getWidth() / 2
+                this.query('panel[region="west"]')[0].setWidth(424);
             }
         }
     });
