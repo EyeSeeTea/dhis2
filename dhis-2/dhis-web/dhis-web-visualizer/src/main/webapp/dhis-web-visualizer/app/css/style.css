@@ -1,6 +1,6 @@
-/***************
+/****************
  ExtJS overrides
- ***************/
+ ****************/
 
 /* Combobox empty text */
 .x-form-empty-field, textarea.x-form-empty-field {
@@ -128,9 +128,9 @@
     width: 32px !important;
 }
 
-/***************
+/****************
  Data Visualizer
- **************/
+ ***************/
 
 body {
     font: normal 10px arial;
@@ -145,6 +145,32 @@ li {
     background: #eee;
 }
 
+/* Multiselect dock border radius */
+#availableIndicators .x-docked-top {
+    -webkit-border-top-left-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+}
+
+#availableDataElements .x-docked-top {
+    -webkit-border-top-left-radius: 3px;
+    -moz-border-radius-topleft: 3px;
+    border-top-left-radius: 3px;
+}
+
+#selectedIndicators .x-docked-top {
+    -webkit-border-top-right-radius: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-right-radius: 3px;
+}
+
+#selectedDataElements .x-docked-top {
+    -webkit-border-top-right-radius: 3px;
+    -moz-border-radius-topright: 3px;
+    border-top-right-radius: 3px;
+}
+
+/* Button icon */
 .visualizer-chart-button-icon {
     background: transparent url('../images/column.png') no-repeat center center;
     width: 38px;

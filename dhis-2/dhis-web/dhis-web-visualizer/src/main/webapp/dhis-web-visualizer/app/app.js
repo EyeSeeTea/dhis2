@@ -1,7 +1,3 @@
-Ext.Loader.setConfig({enabled: true});
-Ext.Loader.setPath('Ext.ux', 'lib/ext-ux');
-Ext.require('Ext.ux.form.MultiSelect');
-
 DV = {};
 DV.conf = {
     finals: {
@@ -34,6 +30,10 @@ DV.conf = {
         west_cmp_width: 380
     }
 };
+
+Ext.Loader.setConfig({enabled: true});
+Ext.Loader.setPath('Ext.ux', 'lib/ext-ux');
+Ext.require('Ext.ux.form.MultiSelect');
 
 Ext.onReady( function() {
     document.body.oncontextmenu = function(){return false;};
@@ -233,7 +233,7 @@ Ext.onReady( function() {
                     st = this.storage;
                     this.each( function(r) {
                         if (!st[r.data.id]) {
-                            st[r.data.id] = { name: r.data.shortName, parent: this.param };
+                            st[r.data.id] = {name: r.data.shortName, parent: this.param};
                         }
                     });
                 },
@@ -267,7 +267,7 @@ Ext.onReady( function() {
                     st = this.storage;
                     this.each( function(r) {
                         if (!st[r.data.id]) {
-                            st[r.data.id] = { name: r.data.shortName, parent: this.param };
+                            st[r.data.id] = {name: r.data.shortName, parent: this.param};
                         }
                     });
                 },
@@ -511,19 +511,24 @@ Ext.onReady( function() {
                             },
                             {
                                 icon: 'images/column.png',
+                                tooltip: 'Column chart',
                                 pressed: true
                             },
                             {
-                                icon: 'images/column.png'
+                                icon: 'images/column.png',
+                                disabled: true
                             },
                             {
-                                icon: 'images/column.png'
+                                icon: 'images/column.png',
+                                disabled: true
                             },
                             {
-                                icon: 'images/column.png'
+                                icon: 'images/column.png',
+                                disabled: true
                             },
                             {
-                                icon: 'images/column.png'
+                                icon: 'images/column.png',
+                                disabled: true
                             }
                         ]
                     },                    
@@ -751,6 +756,7 @@ Ext.onReady( function() {
                                         items: [
                                             {
                                                 xtype: 'multiselect',
+                                                id: 'availableIndicators',
                                                 name: 'availableIndicators',
                                                 cls: 'multiselect',
                                                 width: DV.conf.layout.west_cmp_width / 2,
@@ -792,6 +798,7 @@ Ext.onReady( function() {
                                             },                                            
                                             {
                                                 xtype: 'multiselect',
+                                                id: 'selectedIndicators',
                                                 name: 'selectedIndicators',
                                                 cls: 'multiselect',
                                                 width: DV.conf.layout.west_cmp_width / 2,
@@ -891,6 +898,7 @@ Ext.onReady( function() {
                                         items: [
                                             {
                                                 xtype: 'multiselect',
+                                                id: 'availableDataElements',
                                                 name: 'availableDataElements',
                                                 cls: 'multiselect',
                                                 width: DV.conf.layout.west_cmp_width / 2,
@@ -932,6 +940,7 @@ Ext.onReady( function() {
                                             },                                            
                                             {
                                                 xtype: 'multiselect',
+                                                id: 'selectedDataElements',
                                                 name: 'selectedDataElements',
                                                 cls: 'multiselect',
                                                 width: DV.conf.layout.west_cmp_width / 2,
