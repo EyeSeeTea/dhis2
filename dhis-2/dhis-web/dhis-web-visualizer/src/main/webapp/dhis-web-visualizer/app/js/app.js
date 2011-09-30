@@ -268,8 +268,7 @@ Ext.onReady( function() {
         }
     };
     
-    DV.state = {
-        
+    DV.state = {        
         indiment: [],
         
         period: [],
@@ -291,7 +290,9 @@ Ext.onReady( function() {
             data: []
         },
         
-        setState: function(exe) {
+        getState: function(exe) {
+            this.resetState();
+            
             var indicator = DV.conf.finals.dimension.indicator,
                 indiment = (this.series.dimension === indicator || this.category.dimension === indicator || this.filter.dimension === indicator) ?
                     DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement,
@@ -314,11 +315,18 @@ Ext.onReady( function() {
             this.category.data = this[this.category.dimension];
             this.filter.data = this[this.filter.dimension].slice(0,1);
             
-console.log(this);
-            
             if (exe) {
                 DV.data.getValues(true);
             }
+        },
+        
+        resetState: function() {
+            this.indiment = null;
+            this.period = null;
+            this.organisationunit = null;
+            this.series.data = null;
+            this.category.data = null;
+            this.filter.data = null;
         }
     };
     
@@ -353,7 +361,7 @@ console.log(this);
                         item[DV.conf.finals.dimension.period] = DV.util.dimension.period.getNameById(item.p);
                         item[DV.conf.finals.dimension.organisationunit] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
                     });
-console.log(DV.data.values);
+                    
                     if (exe) {
                         DV.data.getData(true);
                     }
@@ -367,13 +375,8 @@ console.log(DV.data.values);
         data: [],
         
         getData: function(exe) {
-            //var dimensions = DV.data.getDimensions(),
-                //series = [],
-                //category = [];
-                
-            //Ext.Array.each(DV.data.values, function(item) {
-                //Ext.Array.include(category, item[DV.state.category]);
-            //});
+            this.data = [];
+            
             Ext.Array.each(DV.state.category.data, function(item) {
                 DV.data.data.push({x: item});
             });
@@ -385,42 +388,7 @@ console.log(DV.data.values);
                     }
                 }
             });
-            
-console.log(DV.data.data);
-            
-            //for (var i = 0; i < DV.data.values.length; i++) {
-                //Ext.Array.include(columns, [DV.data.values[i][dimensions.columns]]);
-            //}
-            
-            //for (var j = 0; j < DV.data.values.length; j++) {
-                //for (k = 0; k < columns.length; k++) {
-                    //if (DV.data.values[j][dimensions.columns] === columns[k]) {
-                        //var obj = {};
-                        //obj[DV.data.values[j][dimensions.series]] = DV.data.values[j].v;
-                        //columns[k].push(obj);
-                    //}
-                //}
-            //}
-                  
-            
-            //{"v":"187.9", "indicator":"anc1", "period":"okt", "o":"264"},
-            //{"v":"113.3", "indicator":"anc2", "period":"nov", "o":"264"},
-            //{"v":"150.2", "indicator":"anc3", "period":"okt", "o":"264"},
-            //{"v":"110.5", "indicator":"anc3", "period":"des", "o":"264"},
-            //{"v":"77.6", "indicator":"anc1", "period":"des", "o":"264"},
-            //{"v":"103.9", "indicator":"anc2", "period":"des", "o":"264"},
-            //{"v":"139.9", "indicator":"anc2", "period":"okt", "o":"264"},
-            //{"v":"149.5", "indicator":"anc3", "period":"nov", "o":"264"},
-            //{"v":"94.6", "indicator":"anc1", "period":"nov", "o":"264"}            
-            
-            
-            //DV.data.data = [
-                //{ x: 'August 2010', 'anc 1': 12, anc2: 12, anc3: 16, anc4: 5 },
-                //{ x: 'September 2010', 'anc 1': 5, anc2: 23, anc3: 16, anc4: 5 },
-                //{ x: 'October 2010', 'anc 1': 21, anc2: 6, anc3: 2, anc4: 16 },
-                //{ x: 'November 2010', 'anc 1': 15, anc2: 22, anc3: 16, anc4: 5 }
-            //];
-            
+
             if (exe) {
                 DV.store.getChartStore(true);
             }
@@ -1201,7 +1169,12 @@ console.log(DV.data.data);
                                                 text: DV.init.system.rootNode.name,
                                                 expanded: false
                                             }
-                                        })
+                                        }),
+                                        listeners: {
+                                            itemcontextmenu: function(a,b,c,d,e) {
+                                                console.log(e);
+                                            }
+                                        }
                                     }
                                 ],
                                 listeners: {
@@ -1249,7 +1222,7 @@ console.log(DV.data.data);
                         xtype: 'button',
                         text: 'Update',
                         handler: function() {
-                            DV.state.setState(true);
+                            DV.state.getState(true);
                             //DV.data.getValues(true);
                         }
                     },
