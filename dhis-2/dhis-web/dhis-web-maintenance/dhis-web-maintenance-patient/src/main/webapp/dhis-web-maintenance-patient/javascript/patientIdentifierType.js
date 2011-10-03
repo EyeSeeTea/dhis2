@@ -6,20 +6,20 @@ function showPatientIdentifierTypeDetails( patientIdentifierTypeId )
 {
 	jQuery.post( 'getPatientIdentifierType.action', { id: patientIdentifierTypeId },
 		function ( json ) {
-			setInnerHTML( 'idField', json.patientIdentifierType.id );
-			setInnerHTML( 'nameField', json.patientIdentifierType.name );	
-			setInnerHTML( 'descriptionField', json.patientIdentifierType.description );
+			setInnerHTML( 'idField', json.patientAttributeType.id );
+			setInnerHTML( 'nameField', json.patientAttributeType.name );	
+			setInnerHTML( 'descriptionField', json.patientAttributeType.description );
 			
 			var boolValueMap = { 'true':i18n_yes, 'false':i18n_no };
-			var boolType = json.patientIdentifierType.mandatory;
+			var boolType = json.patientAttributeType.mandatory;
 			setInnerHTML( 'mandatoryField', boolValueMap[boolType] );
 			
-			boolType = json.patientIdentifierType.related;
+			boolType = json.patientAttributeType.related;
 			setInnerHTML( 'relatedField', boolValueMap[boolType] );
-			setInnerHTML( 'noCharsField', json.patientIdentifierType.noChars );
+			setInnerHTML( 'noCharsField', json.patientAttributeType.noChars );
 			
 			var valueTypeMap = { 'text':i18n_string, 'number':i18n_number, 'letter':i18n_alphabet };
-			var valueType = json.patientIdentifierType.type;
+			var valueType = json.patientAttributeType.type;
 			setInnerHTML( 'typeField', valueTypeMap[valueType] );
 			
 			showDetails();
