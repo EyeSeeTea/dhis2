@@ -1,7 +1,5 @@
-package org.hisp.dhis.patient.action.programstage;
-
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,30 +25,34 @@ package org.hisp.dhis.patient.action.programstage;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.patient.action.patientchart;
+
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.patientchart.PatientChart;
+import org.hisp.dhis.patientchart.PatientChartService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @modified Tran Thanh Tri
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version $Id: ValidatePatientChartAction.java Oct 3, 2011 2:52:13 PM $
  */
-
-public class ValidateProgramStageAction
+public class ValidatePatientChartAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ProgramStageService programStageService;
+    private PatientChartService patientChartService;
 
-    public void setProgramStageService( ProgramStageService programStageService )
+    public void setPatientChartService( PatientChartService patientChartService )
     {
-        this.programStageService = programStageService;
+        this.patientChartService = patientChartService;
     }
 
     // -------------------------------------------------------------------------
@@ -64,11 +66,11 @@ public class ValidateProgramStageAction
         this.id = id;
     }
 
-    private String name;
+    private String title;
 
-    public void setName( String name )
+    public void setTitle( String title )
     {
-        this.name = name;
+        this.title = title;
     }
 
     private String message;
@@ -92,21 +94,20 @@ public class ValidateProgramStageAction
     public String execute()
         throws Exception
     {
-        ProgramStage match = programStageService.getProgramStageByName( name );
+        title = title.trim();
+
+        PatientChart match = patientChartService.getPatientChartByTitle( title );
 
         if ( match != null && (id == null || match.getId() != id.intValue()) )
         {
-            message = i18n.getString( "duplicate_names" );
+            message = i18n.getString( "name_in_use" );
 
-            return ERROR;
+            return INPUT;
         }
-
-        // ---------------------------------------------------------------------
-        // Validation success
-        // ---------------------------------------------------------------------
 
         message = i18n.getString( "everything_is_ok" );
 
         return SUCCESS;
     }
+
 }

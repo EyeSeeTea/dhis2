@@ -96,7 +96,7 @@ public class ValidatePatientAttributeAction
 
         PatientAttribute match = patientAttributeService.getPatientAttributeByName( name );
 
-        if ( match != null && (id == null || match.getId() != id) )
+        if ( match != null && (id == null || match.getId() != id.intValue()) )
         {
             message = i18n.getString( "name_in_use" );
 
