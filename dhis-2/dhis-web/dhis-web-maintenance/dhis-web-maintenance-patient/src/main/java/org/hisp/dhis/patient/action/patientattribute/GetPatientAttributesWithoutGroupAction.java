@@ -1,7 +1,5 @@
-package org.hisp.dhis.patient.action.programstage;
-
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,62 +25,44 @@ package org.hisp.dhis.patient.action.programstage;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
+package org.hisp.dhis.patient.action.patientattribute;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @modified Tran Thanh Tri
- * @version $Id$
+ * @author Chau Thu Tran
+ *
+ * @version GetPatientAttributesWithoutGroupAction.java Sep 27, 2010 4:55:01 PM
  */
-
-public class ValidateProgramStageAction
+public class GetPatientAttributesWithoutGroupAction 
     implements Action
-{
+{   
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ProgramStageService programStageService;
+    private PatientAttributeService patientAttributeService;
 
-    public void setProgramStageService( ProgramStageService programStageService )
+    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
     {
-        this.programStageService = programStageService;
+        this.patientAttributeService = patientAttributeService;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Collection<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
 
-    public void setId( Integer id )
+    public Collection<PatientAttribute> getPatientAttributes()
     {
-        this.id = id;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
+        return patientAttributes;
     }
 
     // -------------------------------------------------------------------------
@@ -92,21 +72,9 @@ public class ValidateProgramStageAction
     public String execute()
         throws Exception
     {
-        ProgramStage match = programStageService.getProgramStageByName( name );
-
-        if ( match != null && (id == null || match.getId() != id.intValue()) )
-        {
-            message = i18n.getString( "duplicate_names" );
-
-            return ERROR;
-        }
-
-        // ---------------------------------------------------------------------
-        // Validation success
-        // ---------------------------------------------------------------------
-
-        message = i18n.getString( "everything_is_ok" );
+        patientAttributes = patientAttributeService.getPatientAttributesNotGroup();
 
         return SUCCESS;
     }
+
 }

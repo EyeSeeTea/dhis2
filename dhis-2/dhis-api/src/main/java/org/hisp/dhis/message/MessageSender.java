@@ -1,5 +1,7 @@
+package org.hisp.dhis.message;
+
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,54 +27,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.dataadmin.action.attribute;
+import java.util.Set;
 
-import org.hisp.dhis.attribute.AttributeOption;
-import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.user.User;
 
-import com.opensymphony.xwork2.Action;
-
-public class GetAttributeOptionAction
-    implements Action
+/**
+ * @author Lars Helge Overland
+ */
+public interface MessageSender
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private AttributeService attributeService;
-
-    public void setAttributeService( AttributeService attributeService )
-    {
-        this.attributeService = attributeService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
-
-    private AttributeOption attributeOption;
-
-    public AttributeOption getAttributeOption()
-    {
-        return attributeOption;
-    }
-
-    private Integer id;
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String execute()
-    {
-        attributeOption = attributeService.getAttributeOption( id );
-
-        return SUCCESS;
-    }
+    /**
+     * Sends a message. The given message will be sent to the given set of users.
+     * 
+     * @param message the message to send.
+     * @param users the users to send the message to.
+     */
+    void sendMessage( String subject, String text, Set<User> users );
 }

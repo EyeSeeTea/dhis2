@@ -1,3 +1,5 @@
+package org.hisp.dhis.message;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -25,15 +27,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.attribute;
+import java.util.Set;
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.user.User;
 
-/**
- * @author mortenoh
- */
-public interface AttributeOptionStore
-    extends GenericIdentifiableObjectStore<AttributeOption>
+public class MockMessageSender
+    implements MessageSender
 {
-    String ID = AttributeOptionStore.class.getName();
+    @Override
+    public void sendMessage( String subject, String text, Set<User> users )
+    {
+        // Do nothing
+    }
 }

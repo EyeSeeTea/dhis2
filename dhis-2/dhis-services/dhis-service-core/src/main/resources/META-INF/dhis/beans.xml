@@ -174,7 +174,6 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 
   <bean id="org.hisp.dhis.user.UserStore" class="org.hisp.dhis.user.hibernate.HibernateUserStore">
     <property name="sessionFactory" ref="sessionFactory" />
-    <property name="userRoleStore" ref="org.hisp.dhis.user.UserAuthorityGroupStore" />
   </bean>
 
   <bean id="org.hisp.dhis.user.UserGroupStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
@@ -235,11 +234,6 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
   <bean id="org.hisp.dhis.attribute.AttributeStore" class="org.hisp.dhis.attribute.hibernate.HibernateAttributeStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="clazz" value="org.hisp.dhis.attribute.Attribute" />
-  </bean>
-
-  <bean id="org.hisp.dhis.attribute.AttributeOptionStore" class="org.hisp.dhis.attribute.hibernate.HibernateAttributeOptionStore">
-    <property name="sessionFactory" ref="sessionFactory" />
-    <property name="clazz" value="org.hisp.dhis.attribute.AttributeOption" />
   </bean>
 
   <bean id="org.hisp.dhis.attribute.AttributeValueStore" class="org.hisp.dhis.attribute.hibernate.HibernateAttributeValueStore">
@@ -417,6 +411,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 
   <bean id="org.hisp.dhis.user.UserService" class="org.hisp.dhis.user.DefaultUserService">
     <property name="userStore" ref="org.hisp.dhis.user.UserStore" />
+    <property name="userRoleStore" ref="org.hisp.dhis.user.UserAuthorityGroupStore" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
   </bean>
 
@@ -444,6 +439,15 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="messageConversationStore" ref="org.hisp.dhis.message.MessageConversationStore" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />
+	<property name="messageSenders">
+	  <list>
+		<ref bean="emailMessageSender"/>
+	  </list>
+	</property>
+  </bean>
+
+  <bean id="emailMessageSender" class="org.hisp.dhis.message.EmailMessageSender">
+	<property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
   </bean>
 
   <bean id="org.hisp.dhis.concept.ConceptService" class="org.hisp.dhis.concept.DefaultConceptService">
@@ -468,7 +472,6 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 
   <bean id="org.hisp.dhis.attribute.AttributeService" class="org.hisp.dhis.attribute.DefaultAttributeService">
     <property name="attributeStore" ref="org.hisp.dhis.attribute.AttributeStore" />
-    <property name="attributeOptionStore" ref="org.hisp.dhis.attribute.AttributeOptionStore" />
     <property name="attributeValueStore" ref="org.hisp.dhis.attribute.AttributeValueStore" />
   </bean>
 

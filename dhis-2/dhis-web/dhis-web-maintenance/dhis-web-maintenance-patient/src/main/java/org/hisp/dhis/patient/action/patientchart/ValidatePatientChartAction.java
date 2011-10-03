@@ -25,44 +25,66 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patientattribute;
+package org.hisp.dhis.patient.action.patientchart;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.patientchart.PatientChart;
+import org.hisp.dhis.patientchart.PatientChartService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- *
- * @version GetPatientAttributesWithdoutGroupAction.java Sep 27, 2010 4:55:01 PM
+ * 
+ * @version $Id: ValidatePatientChartAction.java Oct 3, 2011 2:52:13 PM $
  */
-public class GetPatientAttributesWithdoutGroupAction 
+public class ValidatePatientChartAction
     implements Action
-{   
+{
+
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private PatientAttributeService patientAttributeService;
+    private PatientChartService patientChartService;
 
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    public void setPatientChartService( PatientChartService patientChartService )
     {
-        this.patientAttributeService = patientAttributeService;
+        this.patientChartService = patientChartService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input/Output
     // -------------------------------------------------------------------------
 
-    private Collection<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
+    private Integer id;
 
-    public Collection<PatientAttribute> getPatientAttributes()
+    public void setId( Integer id )
     {
-        return patientAttributes;
+        this.id = id;
+    }
+
+    private String title;
+
+    public void setTitle( String title )
+    {
+        this.title = title;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -72,7 +94,18 @@ public class GetPatientAttributesWithdoutGroupAction
     public String execute()
         throws Exception
     {
-        patientAttributes = patientAttributeService.getPatientAttributesNotGroup();
+        title = title.trim();
+
+        PatientChart match = patientChartService.getPatientChartByTitle( title );
+
+        if ( match != null && (id == null || match.getId() != id.intValue()) )
+        {
+            message = i18n.getString( "name_in_use" );
+
+            return INPUT;
+        }
+
+        message = i18n.getString( "everything_is_ok" );
 
         return SUCCESS;
     }

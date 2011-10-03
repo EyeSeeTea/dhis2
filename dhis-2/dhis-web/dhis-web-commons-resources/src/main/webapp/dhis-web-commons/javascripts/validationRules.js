@@ -410,5 +410,20 @@ var validationRules = {
             "rangelength" : [ 2, 230 ],
             "alphanumericwithbasicpuncspaces" : true
         }
-    }
+    },
+	"dataMart" : {
+		"name" : {
+			"required": true
+		}
+	},
+	"patientAttributeGroup" : {
+		"name" : {
+			"required" : true,
+			"rangelength" : [ 2,160 ]
+		},
+		"description" : {
+			"required" : true,
+			"rangelength" : [ 2, 255 ]
+		}
+	}
 };
