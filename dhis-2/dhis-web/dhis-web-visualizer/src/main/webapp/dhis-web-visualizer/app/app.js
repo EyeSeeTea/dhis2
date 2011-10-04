@@ -4,7 +4,9 @@ DV.conf = {
         ajax: {
             url_visualizer: '../',
             url_commons: '../../dhis-web-commons-ajax-json/',
-            url_portal: '../../dhis-web-portal/'
+            url_portal: '../../dhis-web-portal/',
+            url_indicator: 'getAggregatedIndicatorValues',
+            url_dataelement: 'getAggregatedDataValues'
         },        
         dimension: {
             indicator: {
@@ -342,37 +344,42 @@ Ext.onReady( function() {
         period: [],        
         organisationunit: [],        
         series: {
+            cmp: null,
             dimension: DV.conf.finals.dimension.indicator.value,
             data: []
         },        
         category: {
+            cmp: null,
             dimension: DV.conf.finals.dimension.period.value,
             data: []
         },        
         filter: {
+            cmp: null,
             dimension: DV.conf.finals.dimension.organisationunit.value,
             data: []
         },        
         getState: function(exe) {
             this.resetState();
             
-            var indicator = DV.conf.finals.dimension.indicator.value,
-                indiment = (this.series.dimension === indicator || this.category.dimension === indicator || this.filter.dimension === indicator) ?
-                    DV.conf.finals.dimension.indicator.value : DV.conf.finals.dimension.dataelement.value,
-                period = DV.conf.finals.dimension.period.value,
-                organisationunit = DV.conf.finals.dimension.organisationunit.value;
+            this.series.dimension = this.series.cmp.getValue();
+            this.category.dimension = this.category.cmp.getValue();
+            this.filter.dimension = this.filter.cmp.getValue();
             
-            this.indiment = DV.util.dimension[indiment].getNames();
-            this.period = DV.util.dimension[period].getNames();
-            this.organisationunit = DV.util.dimension[organisationunit].getNames();
+            var i = this.isIndicatorSelected() ? DV.conf.finals.dimension.indicator.value : DV.conf.finals.dimension.dataelement.value,
+                p = DV.conf.finals.dimension.period.value,
+                o = DV.conf.finals.dimension.organisationunit.value;
+            
+            this.indiment = DV.util.dimension[i].getNames();
+            this.period = DV.util.dimension[p].getNames();
+            this.organisationunit = DV.util.dimension[o].getNames();
             
             if (!this.indiment.length || !this.period.length || !this.organisationunit.length) {
-                alert("form is not complete");
+                alert('form is not complete');
                 return;
             }
     
-            DV.state.indicator = DV.state.indiment;
-            DV.state.dataelement = DV.state.indiment;
+            this.indicator = this.indiment;
+            this.dataelement = this.indiment;
             
             this.series.data = this[this.series.dimension];
             this.category.data = this[this.category.dimension];
@@ -381,14 +388,23 @@ Ext.onReady( function() {
             if (exe) {
                 DV.data.getValues(true);
             }
-        },        
+        },
         resetState: function() {
             this.indiment = null;
             this.period = null;
             this.organisationunit = null;
+            this.series.dimension = null;
             this.series.data = null;
+            this.category.dimension = null;
             this.category.data = null;
+            this.filter.dimension = null;
             this.filter.data = null;
+        },
+        isIndicatorSelected: function() {
+            var indicator = DV.conf.finals.dimension.indicator.value;
+            return (this.series.dimension === indicator ||
+                    this.category.dimension === indicator ||
+                    this.filter.dimension === indicator);
         }
     };
     
@@ -401,14 +417,14 @@ Ext.onReady( function() {
                 series = DV.state.series.dimension,
                 category = DV.state.category.dimension,
                 filter = DV.state.filter.dimension,
-                indiment = (series === indicator || category === indicator || filter === indicator) ? indicator : dataelement,
-                url = (series === indicator || category === indicator || filter === indicator) ? 'Indicator' : 'Data';
-            
+                indiment = DV.state.isIndicatorSelected() ? indicator : dataelement,
+                url = DV.state.isIndicatorSelected() ? DV.conf.finals.ajax.url_indicator : DV.conf.finals.ajax.url_dataelement;
+                
             params = params.concat(DV.util.dimension[series].getUrl());
             params = params.concat(DV.util.dimension[category].getUrl());
             params = params.concat(DV.util.dimension[filter].getUrl(true));
             
-            var baseUrl = DV.conf.finals.ajax.url_visualizer + 'getAggregated' + url + 'Values.action';
+            var baseUrl = DV.conf.finals.ajax.url_visualizer + url + '.action';
             for (var i = 0; i < params.length; i++) {
                 baseUrl = Ext.String.urlAppend(baseUrl, params[i]);
             }
@@ -549,7 +565,12 @@ Ext.onReady( function() {
                             {
                                 icon: 'images/column.png',
                                 tooltip: 'Column chart',
-                                pressed: true
+                                pressed: true,
+                                listeners: {
+                                    click: function() {
+                                        DV.state.type = DV.conf.finals.chart.column;
+                                    }
+                                }
                             },
                             {
                                 icon: 'images/column.png',
@@ -634,9 +655,11 @@ Ext.onReady( function() {
                                             fn(f);
                                         },
                                         listeners: {
+                                            afterrender: function(cb) {
+                                                DV.state[cb.name].cmp = cb;
+                                            },
                                             select: function(cb) {
                                                 cb.filter(cb, DV.viewport);
-                                                DV.state.series.dimension = cb.getValue();
                                             }
                                         }
                                     }
@@ -699,6 +722,9 @@ Ext.onReady( function() {
                                             }
                                         },
                                         listeners: {
+                                            afterrender: function(cb) {
+                                                DV.state[cb.name].cmp = cb;
+                                            },
                                             select: function(cb) {
                                                 cb.filter(cb, DV.viewport);
                                                 DV.state.category.dimension = cb.getValue();
@@ -731,6 +757,9 @@ Ext.onReady( function() {
                                         store: DV.store.dimension(),
                                         value: DV.conf.finals.dimension.organisationunit.value,
                                         listeners: {
+                                            afterrender: function(cb) {
+                                                DV.state[cb.name].cmp = cb;
+                                            },
                                             select: function(cb) {                     
                                                 DV.state.filter.dimension = cb.getValue();
                                             }
