@@ -1,6 +1,7 @@
 <script>
 	jQuery(document).ready(	function(){
-		validation( 'addProgramForm', function( form ){			
+		validation( 'addProgramForm', function( form ){		
+			enable('dateOfEnrollmentDescription');
 			form.submit();
 		});				
 		
@@ -33,6 +34,12 @@
 		</tr>	
 		
 		<tr>
+			<td><label>$i18n.getString( "single_event" )</label></td>
+			<td><input type="checkbox" id="singleEvent" name="singleEvent" value='true' onchange="singleEventOnChange();"></td>
+			<td></td>
+		</tr>
+		
+		<tr>
 			<td><label>$i18n.getString( "date_of_enrollment_description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input type="text" id="dateOfEnrollmentDescription" name="dateOfEnrollmentDescription" style="width:30em" class="{validate:{required:true,minlength:4}}"></td>
 			<td></td>
@@ -49,12 +56,6 @@
 			<td><input type="text" id="maxDaysAllowedInputData" name="maxDaysAllowedInputData" style="width:30em" class="{validate:{required:true,number:true}}"></td>
 			<td></td>
 		</tr>	
-		
-		<tr>
-			<td><label>$i18n.getString( "single_event" )</label></td>
-			<td><input type="checkbox" id="singleEvent" name="singleEvent" value='true'></td>
-			<td></td>
-		</tr>
 		
 		<tr>
 			<td colspan="2" style="height:15px"></td>
