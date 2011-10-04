@@ -36,11 +36,12 @@ DV.conf = {
     },
     style: {
         label: {
-            period: 'font:bold 11px arial,ubuntu; color:#444; line-height:20px',
+            period: 'font:bold 11px arial; color:#444; line-height:20px',
         }
     },
     layout: {
-        west_cmp_width: 380
+        west_cmp_width: 380,
+        west_width: 424
     }
 };
 
@@ -336,6 +337,7 @@ Ext.onReady( function() {
     };
     
     DV.state = {
+        type: DV.conf.finals.chart.column,
         indiment: [],        
         period: [],        
         organisationunit: [],        
@@ -462,7 +464,6 @@ Ext.onReady( function() {
     };
     
     DV.chart = {
-        type: DV.conf.finals.chart.column,        
         chart: null,        
         getChart: function(exe) {
             this.chart = Ext.create('Ext.chart.Chart', {
@@ -1273,7 +1274,7 @@ Ext.onReady( function() {
                 c.filter(c, vp);
             },
             resize: function() {
-                this.query('panel[region="west"]')[0].setWidth(424);
+                this.query('panel[region="west"]')[0].setWidth(DV.conf.layout.west_width);
             }
         }
     });
