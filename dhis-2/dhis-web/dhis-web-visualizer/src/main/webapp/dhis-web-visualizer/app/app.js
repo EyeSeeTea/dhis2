@@ -365,7 +365,7 @@ Ext.onReady( function() {
             this.category.dimension = this.category.cmp.getValue();
             this.filter.dimension = this.filter.cmp.getValue();
             
-            var i = this.isIndicatorSelected() ? DV.conf.finals.dimension.indicator.value : DV.conf.finals.dimension.dataelement.value,
+            var i = this.getIndiment().value,
                 p = DV.conf.finals.dimension.period.value,
                 o = DV.conf.finals.dimension.organisationunit.value;
             
@@ -389,6 +389,15 @@ Ext.onReady( function() {
                 DV.data.getValues(true);
             }
         },
+        getIndiment: function() {
+            var i = DV.conf.finals.dimension.indicator.value;
+            return (this.series.dimension === i || this.category.dimension === i || this.filter.dimension === i) ?
+                DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement;
+        },
+        isIndicator: function() {
+            var i = DV.conf.finals.dimension.indicator.value;
+            return (this.series.dimension === i || this.category.dimension === i || this.filter.dimension === i);
+        },
         resetState: function() {
             this.indiment = null;
             this.period = null;
@@ -399,12 +408,6 @@ Ext.onReady( function() {
             this.category.data = null;
             this.filter.dimension = null;
             this.filter.data = null;
-        },
-        isIndicatorSelected: function() {
-            var indicator = DV.conf.finals.dimension.indicator.value;
-            return (this.series.dimension === indicator ||
-                    this.category.dimension === indicator ||
-                    this.filter.dimension === indicator);
         }
     };
     
@@ -417,8 +420,8 @@ Ext.onReady( function() {
                 series = DV.state.series.dimension,
                 category = DV.state.category.dimension,
                 filter = DV.state.filter.dimension,
-                indiment = DV.state.isIndicatorSelected() ? indicator : dataelement,
-                url = DV.state.isIndicatorSelected() ? DV.conf.finals.ajax.url_indicator : DV.conf.finals.ajax.url_dataelement;
+                indiment = DV.state.getIndiment().value,
+                url = DV.state.isIndicator() ? DV.conf.finals.ajax.url_indicator : DV.conf.finals.ajax.url_dataelement;
                 
             params = params.concat(DV.util.dimension[series].getUrl());
             params = params.concat(DV.util.dimension[category].getUrl());
