@@ -29,6 +29,7 @@ DV.conf = {
             category: 'category',
             filter: 'filter',
             column: 'column',
+            bar: 'bar',
             line: 'line',
             pie: 'pie'
         }
@@ -48,14 +49,15 @@ Ext.Loader.setPath('Ext.ux', 'lib/ext-ux');
 Ext.require('Ext.ux.form.MultiSelect');
 
 Ext.onReady( function() {
-    document.body.oncontextmenu = function(){return false;};
-    Ext.QuickTips.init();
     Ext.override(Ext.form.FieldSet,{setExpanded:function(a){var b=this,c=b.checkboxCmp,d=b.toggleCmp,e;a=!!a;if(c){c.setValue(a)}if(d){d.setType(a?"up":"down")}if(a){e="expand";b.removeCls(b.baseCls+"-collapsed")}else{e="collapse";b.addCls(b.baseCls+"-collapsed")}b.collapsed=!a;b.doComponentLayout();b.fireEvent(e,b);return b}});
+    Ext.QuickTips.init();
+    document.body.oncontextmenu = function(){return false;};
 
     Ext.Ajax.request({
         url: DV.conf.finals.ajax.url_visualizer + 'initialize.action',
         success: function(r) {
-            DV.init = Ext.JSON.decode(r.responseText);
+            
+    DV.init = Ext.JSON.decode(r.responseText);
         
     DV.util = {
         getCmp: function(q) {
@@ -64,7 +66,7 @@ Ext.onReady( function() {
         viewport: {
             getSize: function() {
                 var c = DV.util.getCmp('panel[region="center"]');
-                return { x: c.getWidth(), y: c.getHeight() };
+                return {x: c.getWidth(), y: c.getHeight()};
             }
         },
         multiselect: {
@@ -241,10 +243,10 @@ Ext.onReady( function() {
             return Ext.create('Ext.data.Store', {
                 fields: ['id', 'name'],
                 data: [
-                    { id: DV.conf.finals.dimension.indicator.value, name: DV.conf.finals.dimension.indicator.rawvalue },
-                    { id: DV.conf.finals.dimension.dataelement.value, name: DV.conf.finals.dimension.dataelement.rawvalue },
-                    { id: DV.conf.finals.dimension.period.value, name: DV.conf.finals.dimension.period.rawvalue },
-                    { id: DV.conf.finals.dimension.organisationunit.value, name: DV.conf.finals.dimension.organisationunit.rawvalue }
+                    {id: DV.conf.finals.dimension.indicator.value, name: DV.conf.finals.dimension.indicator.rawvalue},
+                    {id: DV.conf.finals.dimension.dataelement.value, name: DV.conf.finals.dimension.dataelement.rawvalue},
+                    {id: DV.conf.finals.dimension.period.value, name: DV.conf.finals.dimension.period.rawvalue},
+                    {id: DV.conf.finals.dimension.organisationunit.value, name: DV.conf.finals.dimension.organisationunit.rawvalue}
                 ]
             });
         },        
@@ -253,7 +255,6 @@ Ext.onReady( function() {
                 fields: ['id', 'name', 'shortName'],
                 proxy: {
                     type: 'ajax',
-                    baseUrl: DV.conf.finals.ajax.url_commons + 'getIndicatorsMinified.action',
                     url: DV.conf.finals.ajax.url_commons + 'getIndicatorsMinified.action',
                     reader: {
                         type: 'json',
@@ -287,7 +288,6 @@ Ext.onReady( function() {
                 fields: ['id', 'name', 'shortName'],
                 proxy: {
                     type: 'ajax',
-                    baseUrl: DV.conf.finals.ajax.url_commons + 'getDataElementsMinified.action',
                     url: DV.conf.finals.ajax.url_commons + 'getDataElementsMinified.action',
                     reader: {
                         type: 'json',
@@ -319,12 +319,10 @@ Ext.onReady( function() {
         chart: null,        
         getChartStore: function(exe) {
             var properties = Ext.Object.getKeys(DV.data.data[0]);
-
             this.chart = Ext.create('Ext.data.Store', {
                 fields: properties,
                 data: DV.data.data
-            });
-            
+            });            
             this.chart.bottom = properties.slice(0, 1);
             this.chart.left = properties.slice(1, properties.length);
             
@@ -337,7 +335,7 @@ Ext.onReady( function() {
         }
     };
     
-    DV.state = {        
+    DV.state = {
         indiment: [],        
         period: [],        
         organisationunit: [],        
@@ -417,6 +415,12 @@ Ext.onReady( function() {
                 url: baseUrl,
                 success: function(r) {
                     DV.data.values = Ext.JSON.decode(r.responseText).values;
+                    
+                    if (!DV.data.values.length) {
+                        alert('no data values');
+                        return;
+                    }
+                    
                     Ext.Array.each(DV.data.values, function(item) {
                         item[indiment] = DV.store[indiment].available.storage[item.i].name;
                         item[DV.conf.finals.dimension.period.value] = DV.util.dimension.period.getNameById(item.p);
@@ -458,7 +462,7 @@ Ext.onReady( function() {
     };
     
     DV.chart = {
-        type: DV.conf.finals.chart.category,        
+        type: DV.conf.finals.chart.column,        
         chart: null,        
         getChart: function(exe) {
             this.chart = Ext.create('Ext.chart.Chart', {
@@ -1236,7 +1240,7 @@ Ext.onReady( function() {
                     ' ',
                     {
                         xtype: 'button',
-                        text: 'Update',
+                        text: 'Update..',
                         cls: 'x-btn-text-icon',
                         icon: 'images/refresh.png',
                         handler: function() {
@@ -1252,6 +1256,8 @@ Ext.onReady( function() {
                     {
                         xtype: 'button',
                         text: 'Exit..',
+                        cls: 'x-btn-text-icon',
+                        icon: 'images/exit.png',
                         handler: function() {
                             window.location.href = DV.conf.finals.ajax.url_portal + 'redirect.action';
                         }
