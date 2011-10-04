@@ -485,6 +485,15 @@ Ext.onReady( function() {
     DV.chart = {
         chart: null,        
         getChart: function(exe) {
+            this[DV.state.type]();
+            if (exe) {
+                this.reload();
+            }
+            else {
+                return this.chart;
+            }
+        },
+        column: function() {
             this.chart = Ext.create('Ext.chart.Chart', {
                 width: DV.util.viewport.getSize().x,
                 height: DV.util.viewport.getSize().y,
@@ -521,13 +530,6 @@ Ext.onReady( function() {
                     }
                 ]
             });
-            
-            if (exe) {
-                DV.chart.reload();
-            }
-            else {
-                return DV.chart.chart;
-            }
         },        
         reload: function() {
             var c = DV.util.getCmp('panel[region="center"]');
