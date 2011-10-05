@@ -1,7 +1,7 @@
-package org.hisp.dhis.dd.action.indicatorgroupset;
+package org.hisp.dhis.settings.action.system;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,97 +27,95 @@ package org.hisp.dhis.dd.action.indicatorgroupset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_APPLICATION_TITLE;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_FLAG;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_START_MODULE;
 
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorService;
+import org.apache.commons.lang.StringUtils;
+import org.hisp.dhis.options.SystemSettingManager;
+import org.hisp.dhis.options.style.StyleManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Lars Helge Overland
  * @version $Id$
  */
-public class UpdateIndicatorGroupSetAction
+public class SetAppearanceSettingsAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private IndicatorService indicatorService;
+    private SystemSettingManager systemSettingManager;
 
-    public void setIndicatorService( IndicatorService indicatorService )
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
     {
-        this.indicatorService = indicatorService;
+        this.systemSettingManager = systemSettingManager;
+    }
+
+    private StyleManager styleManager;
+
+    public void setStyleManager( StyleManager styleManager )
+    {
+        this.styleManager = styleManager;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String applicationTitle;
 
-    public void setId( Integer id )
+    public void setApplicationTitle( String applicationTitle )
     {
-        this.id = id;
+        this.applicationTitle = applicationTitle;
     }
 
-    private String name;
+    private String flag;
 
-    public void setName( String name )
+    public void setFlag( String flag )
     {
-        this.name = name;
+        this.flag = flag;
     }
 
-    private String description;
+    private String startModule;
 
-    public void setDescription( String description )
+    public void setStartModule( String startModule )
     {
-        this.description = description;
+        this.startModule = startModule;
     }
 
-    private boolean compulsory;
+    private String currentStyle;
 
-    public void setCompulsory( boolean compulsory )
+    public void setCurrentStyle( String style )
     {
-        this.compulsory = compulsory;
-    }
-    
-    private List<String> groupMembers = new ArrayList<String>();
-
-    public void setGroupMembers( List<String> groupMembers )
-    {
-        this.groupMembers = groupMembers;
+        this.currentStyle = style;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    @Override
     public String execute()
-        throws Exception
     {
-        IndicatorGroupSet indicatorGroupSet = indicatorService.getIndicatorGroupSet( id );
+        applicationTitle = StringUtils.trimToNull( applicationTitle );
 
-        indicatorGroupSet.setName( name.trim() );
-        indicatorGroupSet.setDescription( description );
-        indicatorGroupSet.setCompulsory( compulsory );
-        
-        indicatorGroupSet.getMembers().clear();
-
-        for ( String id : groupMembers )
+        if ( flag != null && flag.equals( "NO_FLAG" ) )
         {
-            IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( Integer.parseInt( id ) );
-
-            indicatorGroupSet.getMembers().add( indicatorGroup );
+            flag = null;
         }
 
-        indicatorService.updateIndicatorGroupSet( indicatorGroupSet );
+        if ( startModule != null && startModule.equals( "NO_START_PAGE" ) )
+        {
+            startModule = null;
+        }
+        
+        systemSettingManager.saveSystemSetting( KEY_APPLICATION_TITLE, applicationTitle );
+        systemSettingManager.saveSystemSetting( KEY_FLAG, flag );
+        systemSettingManager.saveSystemSetting( KEY_START_MODULE, startModule );
+        styleManager.setSystemStyle( currentStyle );
 
         return SUCCESS;
     }

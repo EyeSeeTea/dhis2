@@ -1,7 +1,7 @@
-package org.hisp.dhis.dd.action.indicatorgroupset;
+package org.hisp.dhis.settings.action.system;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,97 +27,100 @@ package org.hisp.dhis.dd.action.indicatorgroupset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedMap;
 
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.options.SystemSettingManager;
+import org.hisp.dhis.options.style.StyleManager;
+import org.hisp.dhis.system.util.Filter;
+import org.hisp.dhis.system.util.FilterUtils;
+import org.hisp.dhis.webportal.module.Module;
+import org.hisp.dhis.webportal.module.ModuleManager;
+import org.hisp.dhis.webportal.module.StartableModuleFilter;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Lars Helge Overland
  * @version $Id$
  */
-public class UpdateIndicatorGroupSetAction
+public class GetAppearanceSettingsAction
     implements Action
 {
+    private static final Filter<Module> startableFilter = new StartableModuleFilter();
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private IndicatorService indicatorService;
+    private SystemSettingManager systemSettingManager;
 
-    public void setIndicatorService( IndicatorService indicatorService )
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
     {
-        this.indicatorService = indicatorService;
+        this.systemSettingManager = systemSettingManager;
+    }
+
+    private ModuleManager moduleManager;
+
+    public void setModuleManager( ModuleManager moduleManager )
+    {
+        this.moduleManager = moduleManager;
+    }
+
+    private StyleManager styleManager;
+
+    public void setStyleManager( StyleManager styleManager )
+    {
+        this.styleManager = styleManager;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private List<String> flags;
 
-    public void setId( Integer id )
+    public List<String> getFlags()
     {
-        this.id = id;
+        return flags;
     }
 
-    private String name;
+    private List<Module> modules;
 
-    public void setName( String name )
+    public List<Module> getModules()
     {
-        this.name = name;
+        return modules;
     }
 
-    private String description;
+    private SortedMap<String, String> styles;
 
-    public void setDescription( String description )
+    public SortedMap<String, String> getStyles()
     {
-        this.description = description;
+        return styles;
     }
 
-    private boolean compulsory;
+    private String currentStyle;
 
-    public void setCompulsory( boolean compulsory )
+    public String getCurrentStyle()
     {
-        this.compulsory = compulsory;
-    }
-    
-    private List<String> groupMembers = new ArrayList<String>();
-
-    public void setGroupMembers( List<String> groupMembers )
-    {
-        this.groupMembers = groupMembers;
+        return currentStyle;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    @Override
     public String execute()
-        throws Exception
     {
-        IndicatorGroupSet indicatorGroupSet = indicatorService.getIndicatorGroupSet( id );
-
-        indicatorGroupSet.setName( name.trim() );
-        indicatorGroupSet.setDescription( description );
-        indicatorGroupSet.setCompulsory( compulsory );
+        styles = styleManager.getStyles();
         
-        indicatorGroupSet.getMembers().clear();
+        currentStyle = styleManager.getSystemStyle();
+        
+        flags = systemSettingManager.getFlags();
 
-        for ( String id : groupMembers )
-        {
-            IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( Integer.parseInt( id ) );
+        modules = moduleManager.getMenuModules();
 
-            indicatorGroupSet.getMembers().add( indicatorGroup );
-        }
-
-        indicatorService.updateIndicatorGroupSet( indicatorGroupSet );
+        FilterUtils.filter( modules, startableFilter );
 
         return SUCCESS;
     }

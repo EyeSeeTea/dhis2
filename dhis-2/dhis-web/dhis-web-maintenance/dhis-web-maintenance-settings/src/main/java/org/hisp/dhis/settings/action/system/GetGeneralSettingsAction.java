@@ -1,7 +1,7 @@
 package org.hisp.dhis.settings.action.system;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.SortedMap;
 
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
@@ -39,17 +38,11 @@ import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
 import org.hisp.dhis.options.SystemSettingManager;
-import org.hisp.dhis.options.style.StyleManager;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.util.Filter;
-import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.comparator.UserGroupComparator;
-import org.hisp.dhis.webportal.module.Module;
-import org.hisp.dhis.webportal.module.ModuleManager;
-import org.hisp.dhis.webportal.module.StartableModuleFilter;
 
 import com.opensymphony.xwork2.Action;
 
@@ -57,11 +50,9 @@ import com.opensymphony.xwork2.Action;
  * @author Lars Helge Overland
  * @version $Id$
  */
-public class GetSystemSettingsAction
+public class GetGeneralSettingsAction
     implements Action
 {
-    private static final Filter<Module> startableFilter = new StartableModuleFilter();
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -73,18 +64,11 @@ public class GetSystemSettingsAction
         this.systemSettingManager = systemSettingManager;
     }
 
-    private ModuleManager moduleManager;
+    private ConfigurationService configurationService;
 
-    public void setModuleManager( ModuleManager moduleManager )
+    public void setConfigurationService( ConfigurationService configurationService )
     {
-        this.moduleManager = moduleManager;
-    }
-
-    private StyleManager styleManager;
-
-    public void setStyleManager( StyleManager styleManager )
-    {
-        this.styleManager = styleManager;
+        this.configurationService = configurationService;
     }
 
     private DataElementService dataElementService;
@@ -108,51 +92,9 @@ public class GetSystemSettingsAction
         this.userGroupService = userGroupService;
     }
 
-    private ConfigurationService configurationService;
-
-    public void setConfigurationService( ConfigurationService configurationService )
-    {
-        this.configurationService = configurationService;
-    }
-
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
-
-    private List<String> flags;
-
-    public List<String> getFlags()
-    {
-        return flags;
-    }
-
-    private List<Module> modules;
-
-    public List<Module> getModules()
-    {
-        return modules;
-    }
-
-    private SortedMap<String, String> styles;
-
-    public SortedMap<String, String> getStyles()
-    {
-        return styles;
-    }
-
-    private String currentStyle;
-
-    public String getCurrentStyle()
-    {
-        return currentStyle;
-    }
-
-    private List<UserGroup> userGroups;
-
-    public List<UserGroup> getUserGroups()
-    {
-        return userGroups;
-    }
 
     private UserGroup feedbackRecipients;
 
@@ -166,13 +108,6 @@ public class GetSystemSettingsAction
     public Collection<String> getAggregationStrategies()
     {
         return aggregationStrategies;
-    }
-
-    private Configuration configuration;
-
-    public Configuration getConfiguration()
-    {
-        return configuration;
     }
 
     private List<DataElementGroup> dataElementGroups;
@@ -189,37 +124,41 @@ public class GetSystemSettingsAction
         return periodTypes;
     }
 
+    private List<UserGroup> userGroups;
+
+    public List<UserGroup> getUserGroups()
+    {
+        return userGroups;
+    }
+
+    private Configuration configuration;
+
+    public Configuration getConfiguration()
+    {
+        return configuration;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        flags = systemSettingManager.getFlags();
-
-        modules = moduleManager.getMenuModules();
-
-        FilterUtils.filter( modules, startableFilter );
-
-        styles = styleManager.getStyles();
-
-        currentStyle = styleManager.getSystemStyle();
-
         aggregationStrategies = systemSettingManager.getAggregationStrategies();
 
         configuration = configurationService.getConfiguration();
 
+        feedbackRecipients = configurationService.getConfiguration().getFeedbackRecipients();
+
         dataElementGroups = new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() );
 
         Collections.sort( dataElementGroups, new DataElementGroupNameComparator() );
-        
+
         periodTypes = new ArrayList<PeriodType>( periodService.getAllPeriodTypes() );
 
         userGroups = new ArrayList<UserGroup>( userGroupService.getAllUserGroups() );
 
         Collections.sort( userGroups, new UserGroupComparator() );
-
-        feedbackRecipients = configurationService.getConfiguration().getFeedbackRecipients();
 
         return SUCCESS;
     }

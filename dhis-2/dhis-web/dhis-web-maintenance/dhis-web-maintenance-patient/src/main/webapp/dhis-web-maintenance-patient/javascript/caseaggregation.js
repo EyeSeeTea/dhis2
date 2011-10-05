@@ -7,7 +7,7 @@ function getAggDataElements( )
 {
 	var dataElementGroup = document.getElementById( 'dataElementGroup' );
 	var dataElementGroupId = dataElementGroup.options[ dataElementGroup.selectedIndex ].value;
-	if( dataElementGroupId == 0 ){
+	if( dataElementGroupId == "" ){
 		clearList( byId('aggregationDataElementId'));
 		return;
 	}
@@ -174,3 +174,26 @@ function getConditionDescription()
 		},'html');
 }
 
+// -----------------------------------------------------------------------------
+// Test condition
+// -----------------------------------------------------------------------------
+
+function testCaseAggregationCondition()
+{
+	$.postJSON( 'testCaseAggregationCondition.action', 
+		{ 
+			condition:getFieldValue('aggregationCondition') 
+		},function (json)
+		{
+			var type = json.response;
+			
+			if ( type == "input" )
+			{
+				showWarningMessage( i18n_run_fail );
+			}
+			else
+			{
+				showSuccessMessage( i18n_run_success );
+			}
+		});
+}

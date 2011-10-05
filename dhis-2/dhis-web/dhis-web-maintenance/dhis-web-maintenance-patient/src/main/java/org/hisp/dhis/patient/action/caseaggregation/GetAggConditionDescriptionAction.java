@@ -45,7 +45,7 @@ public class GetAggConditionDescriptionAction
     private CaseAggregationConditionService aggregationConditionService;
 
     // -------------------------------------------------------------------------
-    // Getters && Setters
+    // Input && Output
     // -------------------------------------------------------------------------
 
     private String condition;

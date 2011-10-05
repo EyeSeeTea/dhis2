@@ -1,5 +1,3 @@
-package org.hisp.dhis.dd.action.indicatorgroupset;
-
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -27,71 +25,48 @@ package org.hisp.dhis.dd.action.indicatorgroupset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
+package org.hisp.dhis.patient.action.caseaggregation;
 
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorService;
+import java.util.Date;
+
+import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.AGGRERATION_COUNT;
+import org.hisp.dhis.caseaggregation.CaseAggregationConditionService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.Period;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version $Id: TestCaseAggregationConditionAction.java Oct 5, 2011 3:45:20 PM
+ *          $
  */
-public class UpdateIndicatorGroupSetAction
+public class TestCaseAggregationConditionAction
     implements Action
 {
 
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private IndicatorService indicatorService;
+    private CaseAggregationConditionService aggregationConditionService;
 
-    public void setIndicatorService( IndicatorService indicatorService )
+    public void setAggregationConditionService( CaseAggregationConditionService aggregationConditionService )
     {
-        this.indicatorService = indicatorService;
+        this.aggregationConditionService = aggregationConditionService;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Getters && Setters
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String condition;
 
-    public void setId( Integer id )
+    public void setCondition( String condition )
     {
-        this.id = id;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    private String description;
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
-    private boolean compulsory;
-
-    public void setCompulsory( boolean compulsory )
-    {
-        this.compulsory = compulsory;
-    }
-    
-    private List<String> groupMembers = new ArrayList<String>();
-
-    public void setGroupMembers( List<String> groupMembers )
-    {
-        this.groupMembers = groupMembers;
+        this.condition = condition;
     }
 
     // -------------------------------------------------------------------------
@@ -102,23 +77,24 @@ public class UpdateIndicatorGroupSetAction
     public String execute()
         throws Exception
     {
-        IndicatorGroupSet indicatorGroupSet = indicatorService.getIndicatorGroupSet( id );
+        CaseAggregationCondition aggCondition = new CaseAggregationCondition( "", AGGRERATION_COUNT, condition, null,
+            null );
 
-        indicatorGroupSet.setName( name.trim() );
-        indicatorGroupSet.setDescription( description );
-        indicatorGroupSet.setCompulsory( compulsory );
-        
-        indicatorGroupSet.getMembers().clear();
+        OrganisationUnit orgunit = new OrganisationUnit();
+        orgunit.setId( 1 );
 
-        for ( String id : groupMembers )
+        Period period = new Period();
+        period.setStartDate( new Date() );
+        period.setEndDate( new Date() );
+
+        Double value = aggregationConditionService.parseConditition( aggCondition, orgunit, period );
+
+        if ( value == null )
         {
-            IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( Integer.parseInt( id ) );
-
-            indicatorGroupSet.getMembers().add( indicatorGroup );
+            return INPUT;
         }
-
-        indicatorService.updateIndicatorGroupSet( indicatorGroupSet );
 
         return SUCCESS;
     }
+
 }

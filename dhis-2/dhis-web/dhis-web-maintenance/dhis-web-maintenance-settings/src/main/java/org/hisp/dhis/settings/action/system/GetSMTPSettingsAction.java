@@ -1,7 +1,7 @@
-package org.hisp.dhis.dd.action.indicatorgroupset;
+package org.hisp.dhis.settings.action.system;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,97 +27,64 @@ package org.hisp.dhis.dd.action.indicatorgroupset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.options.SystemSettingManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class UpdateIndicatorGroupSetAction
+public class GetSMTPSettingsAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private IndicatorService indicatorService;
+    private SystemSettingManager systemSettingManager;
 
-    public void setIndicatorService( IndicatorService indicatorService )
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
     {
-        this.indicatorService = indicatorService;
+        this.systemSettingManager = systemSettingManager;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String smtpHostName;
 
-    public void setId( Integer id )
+    public String getSmtpHostName()
     {
-        this.id = id;
+        return smtpHostName;
     }
 
-    private String name;
+    private String smtpUsername;
 
-    public void setName( String name )
+    public String getSmtpUsername()
     {
-        this.name = name;
+        return smtpUsername;
     }
 
-    private String description;
+    private String smtpPassword;
 
-    public void setDescription( String description )
+    public String getSmtpPassword()
     {
-        this.description = description;
-    }
-
-    private boolean compulsory;
-
-    public void setCompulsory( boolean compulsory )
-    {
-        this.compulsory = compulsory;
-    }
-    
-    private List<String> groupMembers = new ArrayList<String>();
-
-    public void setGroupMembers( List<String> groupMembers )
-    {
-        this.groupMembers = groupMembers;
+        return smtpPassword;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    @Override
     public String execute()
-        throws Exception
     {
-        IndicatorGroupSet indicatorGroupSet = indicatorService.getIndicatorGroupSet( id );
-
-        indicatorGroupSet.setName( name.trim() );
-        indicatorGroupSet.setDescription( description );
-        indicatorGroupSet.setCompulsory( compulsory );
+        smtpHostName = systemSettingManager.getEmailHostName();
         
-        indicatorGroupSet.getMembers().clear();
-
-        for ( String id : groupMembers )
-        {
-            IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( Integer.parseInt( id ) );
-
-            indicatorGroupSet.getMembers().add( indicatorGroup );
-        }
-
-        indicatorService.updateIndicatorGroupSet( indicatorGroupSet );
+        smtpPassword = systemSettingManager.getEmailPassword();
+        
+        smtpUsername = systemSettingManager.getEmailUsername();
 
         return SUCCESS;
     }

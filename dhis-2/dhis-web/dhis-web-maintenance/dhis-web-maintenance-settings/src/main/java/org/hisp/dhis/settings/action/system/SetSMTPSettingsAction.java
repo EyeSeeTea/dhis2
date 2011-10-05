@@ -1,7 +1,7 @@
-package org.hisp.dhis.dd.action.indicatorgroupset;
+package org.hisp.dhis.settings.action.system;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,99 +26,70 @@ package org.hisp.dhis.dd.action.indicatorgroupset;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+import static org.hisp.dhis.options.SystemSettingManager.KEY_EMAIL_HOST_NAME;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_EMAIL_PASSWORD;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_EMAIL_USERNAME;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.options.SystemSettingManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class UpdateIndicatorGroupSetAction
+public class SetSMTPSettingsAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+    
+    private SystemSettingManager systemSettingManager;
 
-    private IndicatorService indicatorService;
-
-    public void setIndicatorService( IndicatorService indicatorService )
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
     {
-        this.indicatorService = indicatorService;
+        this.systemSettingManager = systemSettingManager;
     }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String smtpHostName;
 
-    public void setId( Integer id )
+    public void setSmtpHostName( String hostName )
     {
-        this.id = id;
+        this.smtpHostName = hostName;
     }
 
-    private String name;
+    private String smtpUsername;
 
-    public void setName( String name )
+    public void setSmtpUsername( String username )
     {
-        this.name = name;
+        this.smtpUsername = username;
     }
 
-    private String description;
+    private String smtpPassword;
 
-    public void setDescription( String description )
+    public void setSmtpPassword( String password )
     {
-        this.description = description;
-    }
-
-    private boolean compulsory;
-
-    public void setCompulsory( boolean compulsory )
-    {
-        this.compulsory = compulsory;
-    }
-    
-    private List<String> groupMembers = new ArrayList<String>();
-
-    public void setGroupMembers( List<String> groupMembers )
-    {
-        this.groupMembers = groupMembers;
+        this.smtpPassword = password;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    @Override
     public String execute()
-        throws Exception
     {
-        IndicatorGroupSet indicatorGroupSet = indicatorService.getIndicatorGroupSet( id );
-
-        indicatorGroupSet.setName( name.trim() );
-        indicatorGroupSet.setDescription( description );
-        indicatorGroupSet.setCompulsory( compulsory );
+        systemSettingManager.saveSystemSetting( KEY_EMAIL_HOST_NAME, smtpHostName );
         
-        indicatorGroupSet.getMembers().clear();
-
-        for ( String id : groupMembers )
-        {
-            IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( Integer.parseInt( id ) );
-
-            indicatorGroupSet.getMembers().add( indicatorGroup );
-        }
-
-        indicatorService.updateIndicatorGroupSet( indicatorGroupSet );
+        systemSettingManager.saveSystemSetting( KEY_EMAIL_PASSWORD, smtpPassword );
+        
+        systemSettingManager.saveSystemSetting( KEY_EMAIL_USERNAME, smtpUsername );
 
         return SUCCESS;
     }
+
 }

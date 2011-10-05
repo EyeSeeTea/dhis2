@@ -50,10 +50,14 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.system.util.DateUtils;
@@ -78,6 +82,8 @@ public class DefaultCaseAggregationConditionService
 
     private final String PROPERTY_AGE = "age";
 
+    private final String INVALID_CONDITION = "Invalid condition";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -94,6 +100,10 @@ public class DefaultCaseAggregationConditionService
 
     private DataElementCategoryService categoryService;
 
+    private ProgramService programService;
+
+    private PatientAttributeService patientAttributeService;
+
     // -------------------------------------------------------------------------
     // Getters && Setters
     // -------------------------------------------------------------------------
@@ -101,6 +111,16 @@ public class DefaultCaseAggregationConditionService
     public void setAggregationConditionStore( CaseAggregationConditionStore aggregationConditionStore )
     {
         this.aggregationConditionStore = aggregationConditionStore;
+    }
+
+    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    {
+        this.patientAttributeService = patientAttributeService;
+    }
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
     }
 
     public void setProgramStageService( ProgramStageService programStageService )
@@ -177,12 +197,17 @@ public class DefaultCaseAggregationConditionService
     }
 
     @Override
-    public double parseConditition( CaseAggregationCondition aggregationCondition, OrganisationUnit orgunit,
+    public Double parseConditition( CaseAggregationCondition aggregationCondition, OrganisationUnit orgunit,
         Period period )
     {
         String sql = createSQL( aggregationCondition, orgunit, period );
 
         Collection<Integer> patientIds = aggregationConditionStore.executeSQL( sql );
+
+        if ( patientIds == null )
+        {
+            return null;
+        }
 
         return calValue( patientIds, aggregationCondition.getOperator() );
     }
@@ -234,18 +259,11 @@ public class DefaultCaseAggregationConditionService
 
     public String getConditionDescription( String condition )
     {
-        StringBuffer decription = new StringBuffer();
+        StringBuffer description = new StringBuffer();
 
-        String regExp = "\\[" + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "[0-9]+" + SEPARATOR_ID
-            + "[0-9]+" + SEPARATOR_ID + "[0-9]+" + "\\]";
+        Pattern patternCondition = Pattern.compile( regExp );
 
-        // ---------------------------------------------------------------------
-        // parse expressions
-        // ---------------------------------------------------------------------
-
-        Pattern pattern = Pattern.compile( regExp );
-
-        Matcher matcher = pattern.matcher( condition );
+        Matcher matcher = patternCondition.matcher( condition );
 
         while ( matcher.find() )
         {
@@ -253,30 +271,66 @@ public class DefaultCaseAggregationConditionService
             match = match.replaceAll( "[\\[\\]]", "" );
 
             String[] info = match.split( SEPARATOR_OBJECT );
-            String[] ids = info[1].split( SEPARATOR_ID );
 
-            int programStageId = Integer.parseInt( ids[0] );
-            ProgramStage programStage = programStageService.getProgramStage( programStageId );
-
-            int dataElementId = Integer.parseInt( ids[1] );
-            DataElement dataElement = dataElementService.getDataElement( dataElementId );
-
-            int categoryOptionId = Integer.parseInt( ids[2] );
-            DataElementCategoryOptionCombo optionCombo = categoryService
-                .getDataElementCategoryOptionCombo( categoryOptionId );
-
-            if ( programStage == null || dataElement == null || optionCombo == null )
+            if ( info[0].equalsIgnoreCase( OBJECT_PROGRAM_STAGE_DATAELEMENT ) )
             {
-                return "Invalid condition";
+                String[] ids = info[1].split( SEPARATOR_ID );
+
+                int programStageId = Integer.parseInt( ids[0] );
+                ProgramStage programStage = programStageService.getProgramStage( programStageId );
+
+                int dataElementId = Integer.parseInt( ids[1] );
+                DataElement dataElement = dataElementService.getDataElement( dataElementId );
+
+                int categoryOptionId = Integer.parseInt( ids[2] );
+                DataElementCategoryOptionCombo optionCombo = categoryService
+                    .getDataElementCategoryOptionCombo( categoryOptionId );
+
+                if ( programStage == null || dataElement == null || optionCombo == null )
+                {
+                    return INVALID_CONDITION;
+                }
+
+                matcher.appendReplacement( description, "[" + programStage.getName() + SEPARATOR_ID
+                    + dataElement.getName() + optionCombo.getName() + "]" );
+            }
+            else
+            {
+                String[] ids = info[1].split( SEPARATOR_ID );
+
+                int objectId = Integer.parseInt( ids[0] );
+
+                if ( info[0].equalsIgnoreCase( OBJECT_PATIENT_ATTRIBUTE ) )
+                {
+                    PatientAttribute patientAttribute = patientAttributeService.getPatientAttribute( objectId );
+
+                    if ( patientAttribute == null )
+                    {
+                        return INVALID_CONDITION;
+                    }
+
+                    matcher.appendReplacement( description, "[" + OBJECT_PATIENT_ATTRIBUTE + SEPARATOR_OBJECT
+                        + patientAttribute.getName() + "]" );
+                }
+                else if ( info[0].equalsIgnoreCase( OBJECT_PROGRAM ) )
+                {
+                    Program program = programService.getProgram( objectId );
+
+                    if ( program == null )
+                    {
+                        return INVALID_CONDITION;
+                    }
+
+                    matcher.appendReplacement( description, "[" + OBJECT_PROGRAM + SEPARATOR_OBJECT + program.getName()
+                        + "]" );
+                }
             }
 
-            matcher.appendReplacement( decription, "[" + programStage.getName() + SEPARATOR_ID + dataElement.getName()
-                + optionCombo.getName() + "]" );
         }
 
-        matcher.appendTail( decription );
+        matcher.appendTail( description );
 
-        return decription.toString();
+        return description.toString();
     }
 
     public Collection<DataElement> getDataElementsInCondition( String aggregationExpression )
@@ -616,13 +670,8 @@ public class DefaultCaseAggregationConditionService
         return sql;
     }
 
-    public double calValue( Collection<Integer> patientIds, String operator )
+    public Double calValue( Collection<Integer> patientIds, String operator )
     {
-        if ( patientIds == null )
-        {
-            return 0.0;
-        }
-
-        return patientIds.size();
+        return new Double( patientIds.size() );
     }
 }

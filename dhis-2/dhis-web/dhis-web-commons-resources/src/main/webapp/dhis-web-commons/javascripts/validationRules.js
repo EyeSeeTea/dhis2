@@ -256,6 +256,10 @@ var validationRules = {
         "name" : {
             "required" : true,
             "rangelength" : [ 2, 230 ]
+        },
+        "description" : {
+            "required" : true,
+            "rangelength" : [ 2, 255 ]
         }
     },
     "dataDictionary" : {
@@ -323,6 +327,10 @@ var validationRules = {
         "name" : {
             "required" : true,
             "rangelength" : [ 2, 230 ]
+        },
+        "description" : {
+            "required" : true,
+            "rangelength" : [ 2, 255 ]
         }
     },
     "indicatorType" : {
@@ -424,6 +432,19 @@ var validationRules = {
 		"description" : {
 			"required" : true,
 			"rangelength" : [ 2, 255 ]
+		}
+	},
+	"emailSettings" : {
+		"smtpHostName" : {
+			"required" : true,
+			"url" : true
+		},
+		"smtpUsername" : {
+			"required" : true
+		},
+		"smtpPassword" : {
+			"required" : true,
+			"password" : true
 		}
 	}
 };
