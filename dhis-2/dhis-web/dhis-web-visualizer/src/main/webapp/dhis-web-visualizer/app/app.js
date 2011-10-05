@@ -1324,8 +1324,10 @@ Ext.onReady( function() {
                                                         text: 'Select all children',
                                                         icon: 'images/node-select-child.png',
                                                         handler: function() {
-                                                            r.expand();
-                                                            v.getSelectionModel().select(r.childNodes);
+                                                            r.expand(false, function() {
+                                                                v.getSelectionModel().select(r.childNodes, true);
+                                                                v.getSelectionModel().deselect(r);
+                                                            });
                                                         }
                                                     });
                                                 }
