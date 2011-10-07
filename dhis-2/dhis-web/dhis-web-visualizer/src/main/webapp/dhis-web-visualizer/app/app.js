@@ -193,7 +193,7 @@ Ext.onReady( function() {
                 getNames: function() {
                     var a = [];
                     DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
-                        a.push(r.data.shortName.replace(/\./g,''));
+                        a.push(DV.util.chart.encodeSeriesName(r.data.shortName));
                     });
                     return a;
                 }
@@ -209,7 +209,7 @@ Ext.onReady( function() {
                 getNames: function() {
                     var a = [];
                     DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
-                        a.push(r.data.shortName.replace(/\./g,'')); 
+                        a.push(DV.util.chart.encodeSeriesName(r.data.shortName));
                     });
                     return a;
                 }
@@ -231,7 +231,7 @@ Ext.onReady( function() {
                     Ext.Array.each(cmp, function(item) {
                         if (item.getValue()) {
                             Ext.Array.each(DV.init.system.periods[item.paramName], function(item) {
-                                a.push(item.name);
+                                a.push(DV.util.chart.encodeSeriesName(item.name));
                             });
                         }
                     });
@@ -271,12 +271,17 @@ Ext.onReady( function() {
                         treepanel.selectRoot();
                     }
                     Ext.Array.each(selection, function(r) {
-                        a.push(r.data.text);
+                        a.push(DV.util.chart.encodeSeriesName(r.data.text));
                     });
                     return a;
                 }
             }
-        }                
+        },
+        chart: {
+            encodeSeriesName: function(text) {
+                return text.replace(/\./g,'');
+            }
+        }
     };
     
     DV.store = {
