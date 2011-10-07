@@ -28,6 +28,8 @@ package org.hisp.dhis.system.util;
  */
 
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.validator.DateValidator;
 import org.apache.commons.validator.EmailValidator;
@@ -39,6 +41,8 @@ import org.apache.commons.validator.UrlValidator;
  */
 public class ValidationUtils
 {
+    private static Pattern COORDINATE_PATTERN = Pattern.compile( "\\[([\\+\\-]*\\d+\\.*\\d*),([\\+\\-]*\\d+\\.*\\d*)\\]" );
+    
     /**
      * Validates whether an email string is valid.
      * 
@@ -100,8 +104,58 @@ public class ValidationUtils
      * 
      * @return true if the coordinate is valid, false otherwise.
      */
-    public static boolean validateGeoCoordinates( String coordinate )
+    public static boolean coordinateIsValid( String coordinate )
     {
-        return true;
+        return coordinate != null ? COORDINATE_PATTERN.matcher( coordinate ).matches() : false;
+    }
+    
+    /**
+     * Returns the latitude from the given coordinate. Returns null if the
+     * coordinate string is not valid.
+     * 
+     * @param coordinate the coordinate string.
+     * @return the latitude.
+     */
+    public static String getLatitude( String coordinate )
+    {
+        if ( coordinate == null )
+        {
+            return null;
+        }
+        
+        Matcher matcher = COORDINATE_PATTERN.matcher( coordinate );
+        
+        return matcher.find() ? matcher.group( 1 ) : null;
+    }
+
+    /**
+     * Returns the longitude from the given coordinate. Returns null if the
+     * coordinate string is not valid.
+     * 
+     * @param coordinate the coordinate string.
+     * @return the longitude.
+     */
+    public static String getLongitude( String coordinate )
+    {
+        if ( coordinate == null )
+        {
+            return null;
+        }
+        
+        Matcher matcher = COORDINATE_PATTERN.matcher( coordinate );
+        
+        return matcher.find() ? matcher.group( 2 ) : null;
+    }
+    
+    /**
+     * Returns a coordinate string based on the given latitude and longitude.
+     * 
+     * @param latitude the latitude string.
+     * @param longitude the longitude string.
+     * @return a coordinate string.
+     */
+    public static String getCoordinate( String latitude, String longitude )
+    {
+        return "[" + latitude + "," + longitude + "]";
     }
 }

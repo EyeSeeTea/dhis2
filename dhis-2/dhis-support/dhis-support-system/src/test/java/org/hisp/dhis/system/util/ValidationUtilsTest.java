@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.message.action;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,58 +27,49 @@ package org.hisp.dhis.dashboard.message.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.struts2.ServletActionContext;
-import org.hisp.dhis.message.MessageService;
-import org.hisp.dhis.util.ContextUtils;
+import static junit.framework.Assert.*;
+import static org.hisp.dhis.system.util.ValidationUtils.*;
 
-import com.opensymphony.xwork2.Action;
+import org.junit.Test;
 
 /**
  * @author Lars Helge Overland
  */
-public class SendFeedbackAction
-    implements Action
+public class ValidationUtilsTest
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private MessageService messageService;
-
-    public void setMessageService( MessageService messageService )
+    @Test
+    public void testCoordinateIsValid()
     {
-        this.messageService = messageService;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private String subject;
-    
-    public void setSubject( String subject )
-    {
-        this.subject = subject;
-    }
-
-    private String text;
-
-    public void setText( String text )
-    {
-        this.text = text;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-    {
-        String metaData = MessageService.META_USER_AGENT + 
-            ServletActionContext.getRequest().getHeader( ContextUtils.HEADER_USER_AGENT );
-
-        messageService.sendFeedback( subject, text, metaData );
+        assertTrue( coordinateIsValid( "[+37.99034,-28.94221]" ) );
+        assertTrue( coordinateIsValid( "[37.99034,-28.94221]" ) );
+        assertTrue( coordinateIsValid( "[+37.99034,28.94221]" ) );
+        assertTrue( coordinateIsValid( "[37.99034,28.94221]" ) );
+        assertTrue( coordinateIsValid( "[+37,-28.94221]" ) );
+        assertTrue( coordinateIsValid( "[37.99034,28]" ) );
         
-        return SUCCESS;
+        assertFalse( coordinateIsValid( "23.34343,56.3232" ) );
+        assertFalse( coordinateIsValid( "23.34343 56.3232" ) );
+        assertFalse( coordinateIsValid( "[23.34f43,56.3232]" ) );
+        assertFalse( coordinateIsValid( "23.34343,56.323.2" ) );
+        assertFalse( coordinateIsValid( "S-0.27726 E37.08472" ) );        
+        assertFalse( coordinateIsValid( null ) );
+    }
+    
+    @Test
+    public void testGetLatitude()
+    {
+        assertEquals( "+37.99034", getLatitude( "[+37.99034,-28.94221]" ) );
+        assertEquals( "37.99034", getLatitude( "[37.99034,28.94221]" ) );
+        assertNull( getLatitude( "23.34343,56.3232" ) );
+        assertNull( getLatitude( null ) );
+    }
+    
+    @Test
+    public void testGetLongitude()
+    {
+        assertEquals( "-28.94221", getLongitude( "[+37.99034,-28.94221]" ) );
+        assertEquals( "28.94221", getLongitude( "[37.99034,28.94221]" ) );
+        assertNull( getLongitude( "23.34343,56.3232" ) );
+        assertNull( getLongitude( null ) );
     }
 }

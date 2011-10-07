@@ -257,7 +257,7 @@
 
 		<action name="caseAggregationResultDetails"
 			class="org.hisp.dhis.caseentry.action.caseaggregation.CaseAggregationResultDetailsAction">
-			<result name="success" type="velocity">/popup.vm</result>
+			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/caseAggregationResultDetails.vm</param>
 		</action>
 
@@ -362,10 +362,6 @@
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">
 				/dhis-web-caseentry/updatePatientForm.vm</param>
-			<param name="stylesheets">
-				../dhis-web-commons/javascripts/jQuery/ui/css/ui.thickbox.css
-				,../dhis-web-commons/javascripts/jQuery/ui/css/jquery.cluetip.css
-			</param>
 			<param name="requiredAuthorities">F_PATIENT_UPDATE</param>
 		</action>
 

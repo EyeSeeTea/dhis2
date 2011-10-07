@@ -77,6 +77,12 @@ var validationRules = {
         "openingDate" : {
             "required" : true
         },
+        "latitude" : {
+        	"number" : true
+        },
+        "longitude" : {
+        	"number" : true
+        },
         "url" : {
             "url" : true,
             "rangelength" : [ 0, 255 ]
@@ -104,7 +110,7 @@ var validationRules = {
     "organisationUnitGroupSet" : {
         "name" : {
             "required" : true,
-            "rangelength" : [ 2, 230 ]
+            "rangelength" : [ 2, 160 ]
         },
         "description" : {
             "required" : true,
@@ -249,13 +255,13 @@ var validationRules = {
             "required" : true,
             "alphanumericwithbasicpuncspaces" : true,
             "notOnlyDigits" : true,
-            "rangelength" : [ 3, 150 ]
+            "rangelength" : [ 2, 160 ]
         }
     },
     "dataElementGroupSet" : {
         "name" : {
             "required" : true,
-            "rangelength" : [ 2, 230 ]
+            "rangelength" : [ 2, 160 ]
         },
         "description" : {
             "required" : true,
@@ -319,14 +325,14 @@ var validationRules = {
     "indicatorGroup" : {
         "name" : {
             "required" : true,
-            "rangelength" : [ 3, 150 ],
+            "rangelength" : [ 2, 160 ],
             "alphanumericwithbasicpuncspaces" : true
         }
     },
     "indicatorGroupSet" : {
         "name" : {
             "required" : true,
-            "rangelength" : [ 2, 230 ]
+            "rangelength" : [ 2, 160 ]
         },
         "description" : {
             "required" : true,

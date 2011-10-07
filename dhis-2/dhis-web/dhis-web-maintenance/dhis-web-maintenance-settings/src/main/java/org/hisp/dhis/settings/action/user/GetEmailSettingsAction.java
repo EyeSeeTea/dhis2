@@ -1,7 +1,7 @@
 package org.hisp.dhis.settings.action.user;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,37 +27,48 @@ package org.hisp.dhis.settings.action.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.options.style.StyleManager;
+import static org.hisp.dhis.user.UserSettingService.KEY_COMPLETENESS_EMAIL_NOTIFICATION;
+import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
+
+import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
- * @version $Id: SetCurrentStyleAction.java 2010-10-26 17:29:15Z $
+ * @author Dang Duy Hieu
+ * @version $Id$
+ * 
  */
-public class SetCurrentStyleAction
+public class GetEmailSettingsAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private StyleManager styleManager;
+    private UserSettingService userSettingService;
 
-    public void setStyleManager( StyleManager styleManager )
+    public void setUserSettingService( UserSettingService userSettingService )
     {
-        this.styleManager = styleManager;
+        this.userSettingService = userSettingService;
     }
-    
+
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Output
     // -------------------------------------------------------------------------
 
-    private String currentStyle;
+    private Boolean completenessEmailNotification;
 
-    public void setCurrentStyle( String style )
+    public Boolean getCompletenessEmailNotification()
     {
-        this.currentStyle = style;
+        return completenessEmailNotification;
+    }
+
+    private Boolean messageEmailNotification;
+
+    public Boolean getMessageEmailNotification()
+    {
+        return messageEmailNotification;
     }
 
     // -------------------------------------------------------------------------
@@ -65,8 +76,20 @@ public class SetCurrentStyleAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        styleManager.setUserStyle( currentStyle );
+        // ---------------------------------------------------------------------
+        // Get Completeness-email-notification
+        // ---------------------------------------------------------------------
+
+        completenessEmailNotification = (Boolean) userSettingService.getUserSetting(
+            KEY_COMPLETENESS_EMAIL_NOTIFICATION, false );
+
+        // ---------------------------------------------------------------------
+        // Get Message-email-notification
+        // ---------------------------------------------------------------------
+
+        messageEmailNotification = (Boolean) userSettingService.getUserSetting( KEY_MESSAGE_EMAIL_NOTIFICATION, false );
 
         return SUCCESS;
     }

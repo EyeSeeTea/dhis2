@@ -8,9 +8,10 @@ jQuery(function() {
 <h3>$i18n.getString( "dhis-web-maintenance-settings" )</h3>
 
 <ul id="introList">
-    #introListImgItem( "userSettings.action" "user_general_settings" "usersettings" )
-    #introListImgItem( "generalSettings.action" "system_general_settings" "systemsettings" )
-    #introListImgItem( "appearanceSettings.action" "system_appearance_settings" "systemsettings" )
-    #introListImgItem( "emailSettings.action" "system_email_settings" "systemsettings" )
+    #introListImgItem( "userGeneralSettings.action" "user_general_settings" "usersettings" )
+    #introListImgItem( "userEmailSettings.action" "user_email_settings" "usersettings" )
+    #introListImgItem( "systemGeneralSettings.action" "system_general_settings" "systemsettings" )
+    #introListImgItem( "systemAppearanceSettings.action" "system_appearance_settings" "systemsettings" )
+    #introListImgItem( "systemEmailSettings.action" "system_email_settings" "systemsettings" )
 </ul>
     

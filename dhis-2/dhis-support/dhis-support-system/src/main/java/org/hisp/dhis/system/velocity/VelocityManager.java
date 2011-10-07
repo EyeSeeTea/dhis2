@@ -1,4 +1,4 @@
-package org.hisp.dhis.settings.action.user;
+package org.hisp.dhis.system.velocity;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,35 +27,51 @@ package org.hisp.dhis.settings.action.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.user.UserSettingService;
+import java.io.StringWriter;
 
-import com.opensymphony.xwork2.Action;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
-import static org.hisp.dhis.user.UserSettingService.*;
-
-public class SetCurrentChartsInDashboardAction
-    implements Action
+public class VelocityManager
 {
-    private UserSettingService userSettingService;
+    public static final String CONTEXT_KEY = "object";
+    
+    private static final String RESOURCE_LOADER_NAME = "class";
+    private static final String VM_SUFFIX = ".vm";
+    private VelocityEngine velocity;
 
-    public void setUserSettingService( UserSettingService userSettingService )
+    public VelocityManager() throws Exception
     {
-        this.userSettingService = userSettingService;
+        velocity = new VelocityEngine();
+        velocity.setProperty( Velocity.RESOURCE_LOADER, RESOURCE_LOADER_NAME );
+        velocity.setProperty( RESOURCE_LOADER_NAME + ".resource.loader.class", ClasspathResourceLoader.class.getName() );
+        velocity.init();
     }
 
-    private Integer chartsInDashboard;
-
-    public void setChartsInDashboard( Integer chartsInDashboard )
+    public String render( Object object, String template )
     {
-        this.chartsInDashboard = chartsInDashboard;
-    }
-
-    @Override
-    public String execute()
-        throws Exception
-    {
-        userSettingService.saveUserSetting( KEY_CHARTS_IN_DASHBOARD, chartsInDashboard );
-
-        return SUCCESS;
+        try
+        {
+            StringWriter writer = new StringWriter();
+            
+            VelocityContext context = new VelocityContext();
+            
+            if ( object != null )
+            {
+                context.put( CONTEXT_KEY, object );
+            }
+            
+            velocity.getTemplate( template + VM_SUFFIX ).merge( context, writer );
+            
+            return writer.toString();
+            
+            // TODO include encoder in context
+        }
+        catch ( Exception ex )
+        {
+            throw new RuntimeException( "Failed to merge velocity template", ex );
+        }
     }
 }

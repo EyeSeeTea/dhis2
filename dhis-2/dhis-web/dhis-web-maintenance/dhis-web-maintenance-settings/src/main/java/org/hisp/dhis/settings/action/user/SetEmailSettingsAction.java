@@ -1,7 +1,7 @@
 package org.hisp.dhis.settings.action.user;
 
 /*
- * Copyright (c) 2004-2005, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,7 +11,7 @@ package org.hisp.dhis.settings.action.user;
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * * Neither the name of the <ORGANIZATION> nor the names of its contributors may
+ * * Neither the name of the HISP project nor the names of its contributors may
  *   be used to endorse or promote products derived from this software without
  *   specific prior written permission.
  *
@@ -27,70 +27,77 @@ package org.hisp.dhis.settings.action.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Locale;
+import static org.hisp.dhis.user.UserSettingService.KEY_COMPLETENESS_EMAIL_NOTIFICATION;
+import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
 
-import org.hisp.dhis.i18n.locale.LocaleManager;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Oyvind Brucker
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class SetCurrentLocaleDbAction
+public class SetEmailSettingsAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private LocaleManager localeManager;
+    private UserSettingService userSettingService;
 
-    public void setLocaleManager( LocaleManager localeManager )
+    public void setUserSettingService( UserSettingService userSettingService )
     {
-        this.localeManager = localeManager;
+        this.userSettingService = userSettingService;
     }
 
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private String currentLocaleDb;
+    private Boolean messageEmailNotification;
 
-    public void setCurrentLocaleDb( String currentLocaleDb )
+    public void setMessageEmailNotification( Boolean messageEmailNotification )
     {
-        this.currentLocaleDb = currentLocaleDb;
+        this.messageEmailNotification = messageEmailNotification;
+    }
+
+    private Boolean completenessEmailNotification;
+
+    public void setCompletenessEmailNotification( Boolean completenessEmailNotification )
+    {
+        this.completenessEmailNotification = completenessEmailNotification;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    public String execute() throws Exception
+    public String execute()
+        throws Exception
     {
-        String[] tokens = currentLocaleDb.split( "_" );
+        userSettingService.saveUserSetting( KEY_COMPLETENESS_EMAIL_NOTIFICATION, completenessEmailNotification );
+        
+        userSettingService.saveUserSetting( KEY_MESSAGE_EMAIL_NOTIFICATION, messageEmailNotification );
 
-        Locale newLocale = null;
-
-        switch ( tokens.length )
-        {
-        case 1:
-            newLocale = new Locale( tokens[0] );
-            break;
-
-        case 2:
-            newLocale = new Locale( tokens[0], tokens[1] );
-            break;
-
-        case 3:
-            newLocale = new Locale( tokens[0], tokens[1], tokens[2] );
-            break;
-
-        default:
-        }
-
-        localeManager.setCurrentLocale( newLocale );
+        message = i18n.getString( "settings_updated" );
 
         return SUCCESS;
     }
 }
-
