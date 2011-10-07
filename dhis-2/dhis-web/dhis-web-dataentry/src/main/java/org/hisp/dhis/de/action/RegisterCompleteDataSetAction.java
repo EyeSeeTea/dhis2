@@ -35,6 +35,8 @@ import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
@@ -74,6 +76,20 @@ public class RegisterCompleteDataSetAction
     {
         this.organisationUnitService = organisationUnitService;
     }
+    
+    private MessageService messageService;
+
+    public void setMessageService( MessageService messageService )
+    {
+        this.messageService = messageService;
+    }
+    
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
+    }
 
     // -------------------------------------------------------------------------
     // Input
@@ -110,6 +126,7 @@ public class RegisterCompleteDataSetAction
 
         DataSet dataSet = dataSetService.getDataSet( dataSetId );
         Period period = PeriodType.createPeriodExternalId( periodId );
+        period.setName( format.formatPeriod( period ) );
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
 
         if ( registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit ) == null )
@@ -122,8 +139,9 @@ public class RegisterCompleteDataSetAction
             registrationService.saveCompleteDataSetRegistration( registration );
 
             log.info( "DataSet registered as complete: " + registration );
-        }
 
+            messageService.sendCompletenessMessage( registration );
+        }
 
         return SUCCESS;
     }
