@@ -209,7 +209,7 @@ Ext.onReady( function() {
                 getNames: function() {
                     var a = [];
                     DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
-                        a.push(r.data.shortName.replace(/\./g,''));
+                        a.push(r.data.shortName.replace(/\./g,'')); 
                     });
                     return a;
                 }
@@ -347,12 +347,10 @@ Ext.onReady( function() {
         },
         column: function(exe) {
             var properties = Ext.Object.getKeys(DV.data.data[0]);
-            
             this.chart = Ext.create('Ext.data.Store', {
                 fields: properties,
                 data: DV.data.data
             });
-            
             this.chart.bottom = properties.slice(0, 1);
             this.chart.left = properties.slice(1, properties.length);
             
@@ -549,7 +547,8 @@ Ext.onReady( function() {
                 store: DV.store.chart,
                 legend: {
                     position: 'top',
-                    boxStroke: '#888; border-style:dashed'
+                    boxStroke: '#ffffff',
+                    boxStrokeWidth: 0
                 },
                 axes: [
                     {
