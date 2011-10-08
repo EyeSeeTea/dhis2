@@ -170,6 +170,7 @@ public class DefaultDataMartEngine
         Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnits( organisationUnitIds );
         Collection<DataElement> dataElements = dataElementService.getDataElements( dataElementIds );
         
+        organisationUnitService.filterOrganisationUnitsWithoutData( organisationUnits );
         FilterUtils.filter( dataElements, new AggregatableDataElementFilter() );
         expressionService.filterInvalidIndicators( indicators );
         
