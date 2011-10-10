@@ -568,7 +568,6 @@ Ext.onReady( function() {
     DV.chart = {
         chart: null,
         getChart: function(exe) {
-console.log(this);            
             this[DV.state.type]();
             if (exe) {
                 this.reload();
