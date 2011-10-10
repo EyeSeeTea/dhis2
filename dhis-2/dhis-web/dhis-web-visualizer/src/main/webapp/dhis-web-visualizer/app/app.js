@@ -33,7 +33,21 @@ DV.conf = {
             column: 'column',
             bar: 'bar',
             line: 'line',
+            area: 'area',
             pie: 'pie'
+        }
+    },
+    chart: {
+        legend: {
+            position: 'top',
+            boxStroke: '#ffffff',
+            boxStrokeWidth: 0
+        },
+        grid: {
+            opacity: 1,
+            fill: '#f1f1f1',
+            stroke: '#aaa',
+            'stroke-width': 0.2
         }
     },
     style: {
@@ -280,6 +294,20 @@ Ext.onReady( function() {
         chart: {
             encodeSeriesName: function(text) {
                 return text.replace(/\./g,'');
+            },
+            line: {
+                getSeriesArray: function() {
+                    var a = [];
+                    for (var i = 0; i < DV.store.chart.left.length; i++) {
+                        a.push({
+                            type: 'line',
+                            axis: 'left',
+                            xField: DV.store.chart.bottom,
+                            yField: DV.store.chart.left[i]
+                        });
+                    }
+                    return a;
+                }
             }
         }
     };
@@ -374,6 +402,38 @@ Ext.onReady( function() {
             });
             this.chart.left = properties.slice(0, 1);
             this.chart.bottom = properties.slice(1, properties.length);
+            
+            if (exe) {
+                DV.chart.getChart(true);
+            }
+            else {
+                return DV.store.chart;
+            }
+        },
+        line: function(exe) {
+            var properties = Ext.Object.getKeys(DV.data.data[0]);
+            this.chart = Ext.create('Ext.data.Store', {
+                fields: properties,
+                data: DV.data.data
+            });
+            this.chart.bottom = properties.slice(0, 1);
+            this.chart.left = properties.slice(1, properties.length);
+            
+            if (exe) {
+                DV.chart.getChart(true);
+            }
+            else {
+                return DV.store.chart;
+            }
+        },
+        area: function(exe) {
+            var properties = Ext.Object.getKeys(DV.data.data[0]);
+            this.chart = Ext.create('Ext.data.Store', {
+                fields: properties,
+                data: DV.data.data
+            });
+            this.chart.bottom = properties.slice(0, 1);
+            this.chart.left = properties.slice(1, properties.length);
             
             if (exe) {
                 DV.chart.getChart(true);
@@ -517,13 +577,13 @@ Ext.onReady( function() {
                 for (var i = 0; i < DV.state.series.data.length; i++) {
                     for (var j = 0; j < DV.data.values.length; j++) {
                         if (DV.data.values[j][DV.state.category.dimension] === item.x && DV.data.values[j][DV.state.series.dimension] === DV.state.series.data[i]) {
-                            item[DV.data.values[j][DV.state.series.dimension]] = DV.data.values[j].v;
+                            item[DV.data.values[j][DV.state.series.dimension]] = parseFloat(DV.data.values[j].v);
                             break;
                         }
                     }
                 }
             });
-
+            
             if (exe) {
                 DV.store.getChartStore(true);
             }
@@ -534,7 +594,7 @@ Ext.onReady( function() {
     };
     
     DV.chart = {
-        chart: null,        
+        chart: null,
         getChart: function(exe) {
             this[DV.state.type]();
             if (exe) {
@@ -550,11 +610,7 @@ Ext.onReady( function() {
                 height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
-                legend: {
-                    position: 'top',
-                    boxStroke: '#ffffff',
-                    boxStrokeWidth: 0
-                },
+                legend: DV.conf.chart.legend,
                 axes: [
                     {
                         title: 'Value',
@@ -565,6 +621,9 @@ Ext.onReady( function() {
                         fields: DV.store.chart.left,
                         label: {
                             renderer: Ext.util.Format.numberRenderer('0,0')
+                        },
+                        grid: {
+                            even: DV.conf.chart.grid
                         }
                     },
                     {
@@ -579,7 +638,10 @@ Ext.onReady( function() {
                         type: 'column',
                         axis: 'left',
                         xField: DV.store.chart.bottom,
-                        yField: DV.store.chart.left
+                        yField: DV.store.chart.left,
+                        style: {
+                            opacity: 0.8
+                        }
                     }
                 ]
             });
@@ -590,9 +652,7 @@ Ext.onReady( function() {
                 height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
-                legend: {
-                    position: 'top'
-                },
+                legend: DV.conf.chart.legend,
                 axes: [
                     {
                         title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
@@ -609,6 +669,9 @@ Ext.onReady( function() {
                         fields: DV.store.chart.bottom,
                         label: {
                             renderer: Ext.util.Format.numberRenderer('0,0')
+                        },
+                        grid: {
+                            even: DV.conf.chart.grid
                         }
                     }
                 ],
@@ -617,9 +680,84 @@ Ext.onReady( function() {
                         type: 'bar',
                         axis: 'bottom',
                         xField: DV.store.chart.left,
-                        yField: DV.store.chart.bottom
+                        yField: DV.store.chart.bottom,
+                        style: {
+                            opacity: 0.8
+                        }
                     }
                 ]
+            });
+        },
+        line: function() {
+            this.chart = Ext.create('Ext.chart.Chart', {
+                width: DV.util.viewport.getSize().x,
+                height: DV.util.viewport.getSize().y,
+                animate: true,
+                store: DV.store.chart,
+                legend: DV.conf.chart.legend,
+                axes: [
+                    {
+                        title: 'Value',
+                        type: 'Numeric',
+                        position: 'left',
+                        minimum: 0,
+                        grid: true,
+                        fields: DV.store.chart.left,
+                        label: {
+                            renderer: Ext.util.Format.numberRenderer('0,0')
+                        },
+                        grid: {
+                            even: DV.conf.chart.grid
+                        }
+                    },
+                    {
+                        title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
+                        type: 'Category',
+                        position: 'bottom',
+                        fields: DV.store.chart.bottom
+                    }
+                ],
+                series: DV.util.chart.line.getSeriesArray()
+            });
+        },
+        area: function() {
+            this.chart = Ext.create('Ext.chart.Chart', {
+                width: DV.util.viewport.getSize().x,
+                height: DV.util.viewport.getSize().y,
+                animate: true,
+                store: DV.store.chart,
+                legend: DV.conf.chart.legend,
+                axes: [
+                    {
+                        title: 'Value',
+                        type: 'Numeric',
+                        position: 'left',
+                        minimum: 0,
+                        grid: true,
+                        fields: DV.store.chart.left,
+                        label: {
+                            renderer: Ext.util.Format.numberRenderer('0,0')
+                        },
+                        grid: {
+                            even: DV.conf.chart.grid
+                        }
+                    },
+                    {
+                        title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
+                        type: 'Category',
+                        position: 'bottom',
+                        fields: DV.store.chart.bottom
+                    }
+                ],
+                series: [{
+                    type: 'area',
+                    axis: 'left',
+                    xField: DV.store.chart.bottom[0],
+                    yField: DV.store.chart.left,
+                    style: {
+                        opacity: 0.6
+                    }
+                }]
             });
         },
         reload: function() {
@@ -676,6 +814,16 @@ Ext.onReady( function() {
                                 icon: 'images/bar.png',
                                 name: DV.conf.finals.chart.bar,
                                 tooltip: 'Bar chart'
+                            },
+                            {
+                                icon: 'images/line.png',
+                                name: DV.conf.finals.chart.line,
+                                tooltip: 'Line chart'
+                            },
+                            {
+                                icon: 'images/area.png',
+                                name: DV.conf.finals.chart.area,
+                                tooltip: 'Area chart'
                             }
                         ]
                     },                    
@@ -1421,7 +1569,14 @@ Ext.onReady( function() {
                         cls: 'x-btn-text-icon',
                         icon: 'images/exit.png',
                         handler: function() {
-                            window.location.href = DV.conf.finals.ajax.url_portal + 'redirect.action';
+                            //var d = generateData(8);
+                            //console.log(DV.store.chart.left);
+                            //console.log(DV.store.chart.bottom);                            
+                            console.log(DV.data.data);
+                            
+                            
+                            
+                            //window.location.href = DV.conf.finals.ajax.url_portal + 'redirect.action';
                         }
                     }
                 ]
