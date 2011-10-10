@@ -75,11 +75,14 @@ public class ReportTable
     public static final String CATEGORYOPTION_ID = "categoryoptionid";
     public static final String INDICATOR_ID = "indicatorid";
     public static final String INDICATOR_NAME = "indicatorname";
+    public static final String INDICATOR_CODE = "indicatorcode";
     public static final String DATASET_ID = "datasetid";
     public static final String PERIOD_ID = "periodid";
     public static final String PERIOD_NAME = "periodname";
+    public static final String PERIOD_CODE = "periodcode";
     public static final String ORGANISATIONUNIT_ID = "organisationunitid";
     public static final String ORGANISATIONUNIT_NAME = "organisationunitname";
+    public static final String ORGANISATIONUNIT_CODE = "organisationunitcode";
     public static final String REPORTING_MONTH_COLUMN_NAME = "reporting_month_name";
     public static final String PARAM_ORGANISATIONUNIT_COLUMN_NAME = "param_organisationunit_name";
     public static final String ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME = "organisation_unit_is_parent";
@@ -102,10 +105,13 @@ public class ReportTable
             put( CATEGORYCOMBO_ID, "Category combination ID" );
             put( INDICATOR_ID, "Indicator ID" );
             put( INDICATOR_NAME, "Indicator" );
+            put( INDICATOR_CODE, "Indicator code" );
             put( PERIOD_ID, "Period ID" );
             put( PERIOD_NAME, "Period" );
+            put( PERIOD_CODE, "Period code" );
             put( ORGANISATIONUNIT_ID, "Organisation unit ID" );
             put( ORGANISATIONUNIT_NAME, "Organisation unit" );
+            put( ORGANISATIONUNIT_CODE, "Organisation unit code" );
             put( REPORTING_MONTH_COLUMN_NAME, "Reporting month" );
             put( PARAM_ORGANISATIONUNIT_COLUMN_NAME, "Organisation unit parameter" );
             put( ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME, "Organisation unit is parent" );
@@ -266,6 +272,12 @@ public class ReportTable
     private List<String> indexNameColumns = new ArrayList<String>();
 
     /**
+     * Names of the columns holding entry codes used to query the datavalue
+     * table.
+     */
+    private List<String> indexCodeColumns = new ArrayList<String>();
+    
+    /**
      * The I18nFormat used for internationalization of ie. periods.
      */
     private I18nFormat i18nFormat;
@@ -403,6 +415,9 @@ public class ReportTable
         add( indexNameColumns, INDICATOR_NAME, doIndicators );
         add( indexNameColumns, PERIOD_NAME, doPeriods );
         add( indexNameColumns, ORGANISATIONUNIT_NAME, doUnits );
+        add( indexCodeColumns, INDICATOR_CODE, doIndicators );
+        add( indexCodeColumns, PERIOD_CODE, doPeriods );
+        add( indexCodeColumns, ORGANISATIONUNIT_CODE, doUnits );
     }
 
     // -------------------------------------------------------------------------
@@ -1066,5 +1081,10 @@ public class ReportTable
     public List<String> getIndexNameColumns()
     {
         return indexNameColumns;
+    }
+
+    public List<String> getIndexCodeColumns()
+    {
+        return indexCodeColumns;
     }
 }
