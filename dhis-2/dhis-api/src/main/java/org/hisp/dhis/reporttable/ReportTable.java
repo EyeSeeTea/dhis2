@@ -71,15 +71,11 @@ public class ReportTable
     private static final long serialVersionUID = 5618655666320890565L;
 
     public static final String DATAELEMENT_ID = "dataelementid";
-    public static final String DATAELEMENT_NAME = "dataelementname";
     public static final String CATEGORYCOMBO_ID = "categoryoptioncomboid";
-    public static final String CATEGORYCOMBO_NAME = "categoryoptioncomboname";
     public static final String CATEGORYOPTION_ID = "categoryoptionid";
-    public static final String CATEGORYOPTION_NAME = "categoryoptionname";
     public static final String INDICATOR_ID = "indicatorid";
     public static final String INDICATOR_NAME = "indicatorname";
     public static final String DATASET_ID = "datasetid";
-    public static final String DATASET_NAME = "datasetname";
     public static final String PERIOD_ID = "periodid";
     public static final String PERIOD_NAME = "periodname";
     public static final String ORGANISATIONUNIT_ID = "organisationunitid";
@@ -103,14 +99,9 @@ public class ReportTable
     {
         private static final long serialVersionUID = 4194194769957136714L;
         {
-            put( DATAELEMENT_ID, "Data element ID" );
-            put( DATAELEMENT_NAME, "Data element" );
             put( CATEGORYCOMBO_ID, "Category combination ID" );
-            put( CATEGORYCOMBO_NAME, "Category combination" );
             put( INDICATOR_ID, "Indicator ID" );
             put( INDICATOR_NAME, "Indicator" );
-            put( DATASET_ID, "Data set ID" );
-            put( DATASET_NAME, "Data set" );
             put( PERIOD_ID, "Period ID" );
             put( PERIOD_NAME, "Period" );
             put( ORGANISATIONUNIT_ID, "Organisation unit ID" );
@@ -703,7 +694,7 @@ public class ReportTable
     /**
      * Adds an empty list of NameableObjects to the given list if empty.
      */
-    private void addIfEmpty( List<List<NameableObject>> list )
+    private static void addIfEmpty( List<List<NameableObject>> list )
     {
         if ( list != null && list.size() == 0 )
         {
