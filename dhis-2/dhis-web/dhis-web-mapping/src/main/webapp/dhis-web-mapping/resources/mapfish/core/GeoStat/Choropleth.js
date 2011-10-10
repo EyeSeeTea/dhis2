@@ -164,7 +164,7 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
                 element.style.width = "30px";
                 element.style.height = "15px";
                 element.style.cssFloat = "left";
-                element.style.marginRight = "6px";
+                element.style.marginRight = "8px";
                 this.legendDiv.appendChild(element);
 
                 element = document.createElement("div");
