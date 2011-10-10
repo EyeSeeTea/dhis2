@@ -31,7 +31,9 @@ DV.conf = {
             category: 'category',
             filter: 'filter',
             column: 'column',
+            column_stacked: 'column_stacked',
             bar: 'bar',
+            bar_stacked: 'bar_stacked',
             line: 'line',
             area: 'area',
             pie: 'pie'
@@ -566,6 +568,7 @@ Ext.onReady( function() {
     DV.chart = {
         chart: null,
         getChart: function(exe) {
+console.log(this);            
             this[DV.state.type]();
             if (exe) {
                 this.reload();
@@ -574,7 +577,7 @@ Ext.onReady( function() {
                 return this.chart;
             }
         },
-        column: function() {
+        column: function(stacked) {
             this.chart = Ext.create('Ext.chart.Chart', {
                 width: DV.util.viewport.getSize().x,
                 height: DV.util.viewport.getSize().y,
@@ -608,6 +611,7 @@ Ext.onReady( function() {
                         axis: 'left',
                         xField: DV.store.chart.bottom,
                         yField: DV.store.chart.left,
+                        stacked: stacked,
                         style: {
                             opacity: 0.8
                         }
@@ -615,7 +619,10 @@ Ext.onReady( function() {
                 ]
             });
         },
-        bar: function() {
+        column_stacked: function() {
+            this.column(true);
+        },
+        bar: function(stacked) {
             this.chart = Ext.create('Ext.chart.Chart', {
                 width: DV.util.viewport.getSize().x,
                 height: DV.util.viewport.getSize().y,
@@ -649,12 +656,16 @@ Ext.onReady( function() {
                         axis: 'bottom',
                         xField: DV.store.chart.left,
                         yField: DV.store.chart.bottom,
+                        stacked: stacked,
                         style: {
                             opacity: 0.8
                         }
                     }
                 ]
             });
+        },
+        bar_stacked: function() {
+            this.bar(true);
         },
         line: function() {
             this.chart = Ext.create('Ext.chart.Chart', {
@@ -721,7 +732,7 @@ Ext.onReady( function() {
                     xField: DV.store.chart.bottom[0],
                     yField: DV.store.chart.left,
                     style: {
-                        opacity: 0.6
+                        opacity: 0.65
                     }
                 }]
             });
@@ -754,6 +765,9 @@ Ext.onReady( function() {
                         segment: {
                             margin: 10
                         }
+                    },
+                    style: {
+                        opacity: 0.9
                     }
                 }]
             });
@@ -809,9 +823,19 @@ Ext.onReady( function() {
                                 pressed: true
                             },
                             {
+                                icon: 'images/column-stacked.png',
+                                name: DV.conf.finals.chart.column_stacked,
+                                tooltip: 'Stacked column chart'
+                            },
+                            {
                                 icon: 'images/bar.png',
                                 name: DV.conf.finals.chart.bar,
                                 tooltip: 'Bar chart'
+                            },
+                            {
+                                icon: 'images/bar-stacked.png',
+                                name: DV.conf.finals.chart.bar_stacked,
+                                tooltip: 'Stacked bar chart'
                             },
                             {
                                 icon: 'images/line.png',
@@ -1586,6 +1610,8 @@ Ext.onReady( function() {
                 c.filter(c, vp);
                 
                 DV.store.column = DV.store.defaultChartStore;
+                DV.store.column_stacked = DV.store.defaultChartStore;
+                DV.store.bar_stacked = DV.store.bar;
                 DV.store.line = DV.store.defaultChartStore;
                 DV.store.area = DV.store.defaultChartStore;
                 DV.store.pie = DV.store.defaultChartStore;
