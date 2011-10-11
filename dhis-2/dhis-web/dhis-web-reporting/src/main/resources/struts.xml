@@ -212,7 +212,7 @@
     </action>
 	
     <action name="addReportToDashboard" class="org.hisp.dhis.reporting.reportviewer.action.AddReportToDashboardAction">
-      <result name="success" type="velocity-xml">/dhis-web-reporting/responseSuccess.vm</result>
+      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
@@ -343,7 +343,7 @@
     </action>
 
     <action name="addReportTableToDashboard" class="org.hisp.dhis.reporting.tablecreator.action.AddReportTableToDashboardAction">
-      <result name="success" type="velocity-xml">/dhis-web-reporting/responseSuccess.vm</result>
+      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
