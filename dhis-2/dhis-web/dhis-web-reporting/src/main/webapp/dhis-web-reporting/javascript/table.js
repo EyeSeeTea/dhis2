@@ -6,7 +6,7 @@ function saveTable()
 {
 	if ( validateCollections() )
 	{
-		$.get( "validateTable.action", { id:getFieldValue( "tableId" ), "name":getFieldValue( "tableName" ) }, function( json )
+		$.postJSON( "validateTable.action", { id:getFieldValue( "tableId" ), "name":getFieldValue( "tableName" ) }, function( json )
 		{
 			if ( json.response == "input" )
 			{
