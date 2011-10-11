@@ -16,7 +16,7 @@ function saveTable()
 			else if ( json.response == "success" )
 			{
 				selectTableForm();
-	        	document.getElementById( "tableForm" ).submit();
+	        	$( "#tableForm" ).submit();
 			}
 		} );
 	}
