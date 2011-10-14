@@ -292,7 +292,7 @@ public class JdbcAggregatedDataValueStore
 
     public StoreIterator<AggregatedDataValue> getAggregatedDataValuesAtLevel( OrganisationUnit rootOrgunit, OrganisationUnitLevel level, Collection<Period> periods )
     {
-        final StatementHolder holder = statementManager.getHolder();
+        final StatementHolder holder = statementManager.getHolder( false );
 
         try
         {
@@ -310,13 +310,13 @@ public class JdbcAggregatedDataValueStore
 
             Statement statement = holder.getStatement();
 
-            statement.setFetchSize(FETCH_SIZE);
+            statement.setFetchSize( FETCH_SIZE );
 
             final ResultSet resultSet = statement.executeQuery( sql );
 
             RowMapper<AggregatedDataValue> rm = new AggregatedDataValueRowMapper();
             
-            return new JdbcStoreIterator<AggregatedDataValue>(resultSet, holder, rm);
+            return new JdbcStoreIterator<AggregatedDataValue>( resultSet, holder, rm );
         }
         catch ( SQLException ex )
         {
@@ -563,7 +563,7 @@ public class JdbcAggregatedDataValueStore
     @Override
     public StoreIterator<AggregatedIndicatorValue> getAggregatedIndicatorValuesAtLevel(OrganisationUnit rootOrgunit, OrganisationUnitLevel level, Collection<Period> periods)
     {
-        final StatementHolder holder = statementManager.getHolder();
+        final StatementHolder holder = statementManager.getHolder( false );
 
         try
         {
@@ -579,16 +579,14 @@ public class JdbcAggregatedDataValueStore
                 " AND ous.idlevel" + rootlevel + "=" + rootOrgunit.getId() +
                 " AND aiv.periodid IN (" + periodids + ") ";
 
-            log.info("sql: " + sql);
-
             Statement statement = holder.getStatement();
 
-            statement.setFetchSize(FETCH_SIZE);
+            statement.setFetchSize( FETCH_SIZE );
 
             final ResultSet resultSet = statement.executeQuery( sql );
 
             RowMapper<AggregatedIndicatorValue> rm = new AggregatedIndicatorValueRowMapper();
-            return new JdbcStoreIterator<AggregatedIndicatorValue>(resultSet, holder, rm);
+            return new JdbcStoreIterator<AggregatedIndicatorValue>( resultSet, holder, rm );
         }
         catch ( SQLException ex )
         {
@@ -597,7 +595,6 @@ public class JdbcAggregatedDataValueStore
         finally
         {
             // don't close holder or we lose resultset - iterator must close
-            // holder.close();
         }
     }
 

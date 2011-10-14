@@ -42,6 +42,7 @@ import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -153,7 +154,7 @@ public class DefaultReportTableService
     // ReportTableService implementation
     // -------------------------------------------------------------------------
 
-    public void populateReportTableDataMart( int id, String mode, Integer reportingPeriod, Integer organisationUnitId,
+    public void populateReportTableDataMart( int id, String mode, Date reportingPeriod, Integer organisationUnitId,
         I18nFormat format )
     {
         ReportTable reportTable = getReportTable( id, mode );
@@ -175,7 +176,7 @@ public class DefaultReportTableService
         }
     }
 
-    public Grid getReportTableGrid( int id, I18nFormat format, Integer reportingPeriod, Integer organisationUnitId )
+    public Grid getReportTableGrid( int id, I18nFormat format, Date reportingPeriod, Integer organisationUnitId )
     {
         ReportTable reportTable = getReportTable( id );
 
@@ -365,7 +366,7 @@ public class DefaultReportTableService
      * @param format the I18n format.
      * @return a report table.
      */
-    private ReportTable initDynamicMetaObjects( ReportTable reportTable, Integer reportingPeriod,
+    private ReportTable initDynamicMetaObjects( ReportTable reportTable, Date reportingPeriod,
         Integer organisationUnitId, I18nFormat format )
     {
         // ---------------------------------------------------------------------
@@ -376,18 +377,18 @@ public class DefaultReportTableService
         {
             reportTable.setRelativePeriods( periodService.reloadPeriods( reportTable.getRelatives().getRelativePeriods(
                 reportingPeriod, format, !reportTable.isDoPeriods() ) ) );
-            reportTable.setReportingMonthName( reportTable.getRelatives().getReportingMonthName( reportingPeriod,
+            reportTable.setReportingPeriodName( reportTable.getRelatives().getReportingPeriodName( reportingPeriod,
                 format ) );
 
-            log.info( "Reporting period date from report param: " + reportTable.getReportingMonthName() );
+            log.info( "Reporting period date from report param: " + reportTable.getReportingPeriodName() );
         }
         else
         {
             reportTable.setRelativePeriods( periodService.reloadPeriods( reportTable.getRelatives().getRelativePeriods(
-                1, format, !reportTable.isDoPeriods() ) ) );
-            reportTable.setReportingMonthName( reportTable.getRelatives().getReportingMonthName( 1, format ) );
+                format, !reportTable.isDoPeriods() ) ) );
+            reportTable.setReportingPeriodName( reportTable.getRelatives().getReportingPeriodName( format ) );
 
-            log.info( "Reporting period date default: " + reportTable.getReportingMonthName() );
+            log.info( "Reporting period date default: " + reportTable.getReportingPeriodName() );
         }
 
         // ---------------------------------------------------------------------
@@ -469,7 +470,7 @@ public class DefaultReportTableService
     private Grid getGrid( ReportTable reportTable )
     {
         String subtitle = StringUtils.trimToEmpty( reportTable.getOrganisationUnitName() ) + SPACE
-            + StringUtils.trimToEmpty( reportTable.getReportingMonthName() );
+            + StringUtils.trimToEmpty( reportTable.getReportingPeriodName() );
 
         Grid grid = new ListGrid().setTitle( reportTable.getName() ).setSubtitle( subtitle );
 
@@ -545,7 +546,7 @@ public class DefaultReportTableService
                 grid.addValue( object.getCode() ); 
             }
 
-            grid.addValue( reportTable.getReportingMonthName() );
+            grid.addValue( reportTable.getReportingPeriodName() );
             grid.addValue( reportTable.getOrganisationUnitName() );
             grid.addValue( isCurrentParent( row ) ? YES : NO );
 

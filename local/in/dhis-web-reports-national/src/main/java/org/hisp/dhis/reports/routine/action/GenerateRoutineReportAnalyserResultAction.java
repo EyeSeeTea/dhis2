@@ -182,6 +182,8 @@ public class GenerateRoutineReportAnalyserResultAction
     private PeriodType periodType;
 
     private String raFolderName;
+    
+    private SimpleDateFormat dateFormat;
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -200,6 +202,7 @@ public class GenerateRoutineReportAnalyserResultAction
         yearFormat = new SimpleDateFormat( "yyyy" );
         simpleYearFormat = new SimpleDateFormat( "yy" );
         dailyFormat = new SimpleDateFormat( "yyyy-MM-dd" );
+        dateFormat = new SimpleDateFormat( "dd-MM-yyyy" );
         String deCodesXMLFileName = "";
         String parentUnit = "";
 
@@ -258,7 +261,7 @@ public class GenerateRoutineReportAnalyserResultAction
         selectedPeriod = periodService.getPeriod( availablePeriods );
         sDate = format.parseDate( String.valueOf( selectedPeriod.getStartDate() ) );
         eDate = format.parseDate( String.valueOf( selectedPeriod.getEndDate() ) );
-
+        
         Workbook templateWorkbook = Workbook.getWorkbook( new File( inputTemplatePath ) );
         WritableWorkbook outputReportWorkbook = Workbook.createWorkbook( new File( outputReportPath ), templateWorkbook );
 
@@ -375,6 +378,18 @@ public class GenerateRoutineReportAnalyserResultAction
                 else if ( deCodeString.equalsIgnoreCase( "PERIOD-WEEK" ) )
                 {
                     tempStr = String.valueOf( tempStartDate.get( Calendar.WEEK_OF_MONTH ) );
+                }
+                else if ( deCodeString.equalsIgnoreCase( "PERIOD-WEEK-YEAR" ) )
+                {
+                    tempStr = String.valueOf( tempStartDate.get( Calendar.WEEK_OF_YEAR ) );
+                }
+                else if ( deCodeString.equalsIgnoreCase( "PERIOD-WEEK-START" ) )
+                {
+                    tempStr = dateFormat.format( sDate );
+                }
+                else if ( deCodeString.equalsIgnoreCase( "PERIOD-WEEK-END" ) )
+                {
+                    tempStr = dateFormat.format( eDate );
                 }
                 else if ( deCodeString.equalsIgnoreCase( "PERIOD-QUARTER" ) )
                 {

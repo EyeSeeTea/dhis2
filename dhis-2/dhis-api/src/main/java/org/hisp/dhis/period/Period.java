@@ -109,7 +109,7 @@ public class Period
      */
     public String getIsoDate() 
     {
-        return periodType.getIsoDate(this);
+        return periodType.getIsoDate( this );
     }
     
     /**
@@ -154,6 +154,16 @@ public class Period
     public int getWeight()
     {
         return frequencyOrder() + 15;
+    }
+    
+    /**
+     * Returns start date formatted as string.
+     * 
+     * @return start date formatted as string.
+     */
+    public String getStartDateString()
+    {
+        return getMediumDateString( startDate );
     }
 
     /**

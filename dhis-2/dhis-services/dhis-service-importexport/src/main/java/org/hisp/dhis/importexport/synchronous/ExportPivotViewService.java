@@ -34,6 +34,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,6 +56,7 @@ import org.hisp.dhis.system.util.MathUtils;
  * Exports pivot view synchronously (using calling thread)
  *
  * TODO: use exportparams and abstract service
+ *       factor out commonality between processIndicatorValues and processDataValues
  *
  * @author bobj
  */
@@ -61,13 +64,11 @@ public class ExportPivotViewService
 {
     private static final Log log = LogFactory.getLog( ExportPivotViewService.class );
 
-    // service can export either aggregated datavalues or aggregated indicator values
     public enum RequestType
     {
         DATAVALUE, INDICATORVALUE
     };
 
-    // precision to use when formatting double values
     public static int PRECISION = 5;
 
     // -------------------------------------------------------------------------
@@ -180,23 +181,31 @@ public class ExportPivotViewService
     private void processDataValues( Writer writer, OrganisationUnit rootOrgUnit, OrganisationUnitLevel orgUnitLevel, Collection<Period> periods )
         throws IOException
     {
-        StoreIterator<AggregatedDataValue> Iterator = aggregatedDataValueService.getAggregateDataValuesAtLevel( rootOrgUnit, orgUnitLevel, periods );
+        Map<Integer, String> periodIdIsoMap = getPeriodIdIsoMap( periods );
+        
+        StoreIterator<AggregatedDataValue> iterator = aggregatedDataValueService.getAggregateDataValuesAtLevel( rootOrgUnit, orgUnitLevel, periods );
 
-        AggregatedDataValue adv = Iterator.next();
-
-        writer.write( "# period, orgunit, dataelement, catoptcombo, value\n" );
-        while ( adv != null )
+        try
         {
-            int periodId = adv.getPeriodId();
-            String period = periodService.getPeriod( periodId ).getIsoDate();
+            AggregatedDataValue adv = iterator.next();
 
-            writer.write( "'" + period + "'," );
-            writer.write( adv.getOrganisationUnitId() + "," );
-            writer.write( adv.getDataElementId() + "," );
-            writer.write( adv.getCategoryOptionComboId() + "," );
-            writer.write( adv.getValue() + "\n" );
+            writer.write( "# period, orgunit, dataelement, catoptcombo, value\n" );
 
-            adv = Iterator.next();
+            while ( adv != null )
+            {
+                writer.write( "'" + periodIdIsoMap.get( adv.getPeriodId() ) + "'," );
+                writer.write( adv.getOrganisationUnitId() + "," );
+                writer.write( adv.getDataElementId() + "," );
+                writer.write( adv.getCategoryOptionComboId() + "," );
+                writer.write( adv.getValue() + "\n" );
+
+                adv = iterator.next();
+            }
+        } 
+        catch ( IOException ex )
+        {
+            iterator.close();
+            throw ( ex );
         }
 
         writer.flush();
@@ -205,25 +214,32 @@ public class ExportPivotViewService
     private void processIndicatorValues( Writer writer, OrganisationUnit rootOrgUnit, OrganisationUnitLevel orgUnitLevel, Collection<Period> periods )
         throws IOException
     {
-        StoreIterator<AggregatedIndicatorValue> Iterator = aggregatedDataValueService.getAggregateIndicatorValuesAtLevel( rootOrgUnit, orgUnitLevel, periods );
-
-        AggregatedIndicatorValue aiv = Iterator.next();
-
-        writer.write( "# period, orgunit, indicator, factor, numerator, denominator\n" );
+        Map<Integer, String> periodIdIsoMap = getPeriodIdIsoMap( periods );
         
-        while ( aiv != null )
+        StoreIterator<AggregatedIndicatorValue> iterator = aggregatedDataValueService.getAggregateIndicatorValuesAtLevel( rootOrgUnit, orgUnitLevel, periods );
+
+        try 
         {
-            int periodId = aiv.getPeriodId();
-            String period = periodService.getPeriod( periodId ).getIsoDate();
+            AggregatedIndicatorValue aiv = iterator.next();
 
-            writer.write( "'" + period + "'," );
-            writer.write( aiv.getOrganisationUnitId() + "," );
-            writer.write( aiv.getIndicatorId() + "," );
-            writer.write( MathUtils.roundToString( aiv.getFactor(), PRECISION ) + "," );
-            writer.write( MathUtils.roundToString( aiv.getNumeratorValue(), PRECISION ) + "," );
-            writer.write( MathUtils.roundToString( aiv.getDenominatorValue(), PRECISION ) + "\n" );
+            writer.write( "# period, orgunit, indicator, factor, numerator, denominator\n" );
 
-            aiv = Iterator.next();
+            while ( aiv != null )
+            {
+                writer.write( "'" + periodIdIsoMap.get( aiv.getPeriodId() ) + "'," );
+                writer.write( aiv.getOrganisationUnitId() + "," );
+                writer.write( aiv.getIndicatorId() + "," );
+                writer.write( MathUtils.roundToString( aiv.getFactor(), PRECISION ) + "," );
+                writer.write( MathUtils.roundToString( aiv.getNumeratorValue(), PRECISION ) + "," );
+                writer.write( MathUtils.roundToString( aiv.getDenominatorValue(), PRECISION ) + "\n" );
+
+                aiv = iterator.next();
+            }
+        } 
+        catch ( IOException ex )
+        {
+            iterator.close();
+            throw ( ex );
         }
 
         writer.flush();
@@ -233,5 +249,17 @@ public class ExportPivotViewService
     {
         periodType = periodType != null ? periodType : new MonthlyPeriodType(); // Fall back to monthly
         return periodService.getIntersectingPeriodsByPeriodType( periodType, startDate, endDate );
+    }
+    
+    private Map<Integer, String> getPeriodIdIsoMap( Collection<Period> periods )
+    {
+        Map<Integer, String> map = new HashMap<Integer, String>();
+        
+        for ( Period period : periods )
+        {
+            map.put( period.getId(), period.getIsoDate() );
+        }
+        
+        return map;
     }
 }

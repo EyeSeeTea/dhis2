@@ -27,7 +27,6 @@ package org.hisp.dhis.reporting.exp;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
@@ -45,21 +44,20 @@ import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.importexport.synchronous.ExportPivotViewService;
 import org.hisp.dhis.importexport.synchronous.ExportPivotViewService.RequestType;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.StreamUtils;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.util.ContextUtils;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Bob Jolliffe
- *
- * This action is called to export a csv formatted selection of aggregated indicator or
- * data values from datamart.
- * It requires 4 parameters:
- * startdate and enddate: 8 character string representation of date - 20100624
- * root: id of root organization unit
- * level: level number to fetch aggregated values for
+ * 
+ * This action is called to export a csv formatted selection of
+ * aggregated indicator or data values from datamart. It requires 4
+ * parameters: startdate and enddate: 8 character string representation
+ * of date - 20100624 root: id of root organization unit level: level
+ * number to fetch aggregated values for
  */
 public class ExportDataMartAction
     implements Action
@@ -70,8 +68,7 @@ public class ExportDataMartAction
     private static final Log log = LogFactory.getLog( ExportDataMartAction.class );
 
     private static final DateFormat dateFormat = new SimpleDateFormat( "yyyyMMdd" );
-    
-    // parameter errors
+
     private static final String NO_STARTDATE = "The request is missing a startDate parameter";
 
     private static final String NO_ENDDATE = "The request is missing an endDate parameter";
@@ -84,10 +81,10 @@ public class ExportDataMartAction
 
     private static final String NO_LEVEL = "The request is missing a non-zero dataSourceLevel parameter";
 
-    // http header result type
     private static final String CLIENT_ERROR = "client-error";
 
     private static final int HTTP_ERROR = 400;
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -137,7 +134,7 @@ public class ExportDataMartAction
     {
         this.dataSourceRoot = dataSourceRoot;
     }
-    
+
     private RequestType requestType;
 
     public void setRequestType( RequestType requestType )
@@ -155,13 +152,14 @@ public class ExportDataMartAction
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-    public String execute() throws IOException
+
+    public String execute()
+        throws IOException
     {
-        // do a basic audit log
         HttpServletRequest request = ServletActionContext.getRequest();
 
-        log.info( "DataMart export request from " + currentUserService.getCurrentUsername() +
-            " @ " + request.getRemoteAddr() );
+        log.info( "DataMart export request from " + currentUserService.getCurrentUsername() + " @ "
+            + request.getRemoteAddr() );
 
         HttpServletResponse response = ServletActionContext.getResponse();
 
@@ -211,7 +209,8 @@ public class ExportDataMartAction
                 {
                     paramError = BAD_ENDDATE;
                 }
-            } catch ( java.text.ParseException ex )
+            }
+            catch ( java.text.ParseException ex )
             {
                 paramError = ex.getMessage();
             }
@@ -226,29 +225,25 @@ public class ExportDataMartAction
 
         // timestamp filename
         SimpleDateFormat format = new SimpleDateFormat( "_yyyy_MM_dd_HHmm_ss" );
-        String fileName = requestType + format.format(Calendar.getInstance().getTime()) + ".csv.gz";
+        String filename = requestType + format.format( Calendar.getInstance().getTime() ) + ".csv.gz";
 
         PeriodType pType = PeriodType.getPeriodTypeByName( periodType );
-        
+
         // prepare to write output
         OutputStream out = null;
 
         // how many rows do we expect
-        int count = exportPivotViewService.count( requestType, pType, start, end,
-                dataSourceLevel, dataSourceRoot);
+        int count = exportPivotViewService.count( requestType, pType, start, end, dataSourceLevel, dataSourceRoot );
 
-        response.setContentType( "application/gzip");
-        response.addHeader( "Content-Disposition", "attachment; filename=\""+fileName+"\"" );
-        response.addHeader( "Cache-Control", "no-cache" );
-        response.addHeader( "Expires", DateUtils.getExpiredHttpDateString() );
+        ContextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_GZIP, true, filename, true );
+
         // write number of rows to custom header
         response.addHeader( "X-Number-Of-Rows", String.valueOf( count ) );
 
         try
         {
-            out = new GZIPOutputStream(response.getOutputStream(), GZIPBUFFER);
-            exportPivotViewService.execute(out, requestType, pType, start, end,
-                dataSourceLevel, dataSourceRoot);
+            out = new GZIPOutputStream( response.getOutputStream(), GZIPBUFFER );
+            exportPivotViewService.execute( out, requestType, pType, start, end, dataSourceLevel, dataSourceRoot );
         }
         finally
         {

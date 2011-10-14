@@ -27,6 +27,9 @@ package org.hisp.dhis.dataanalyser.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
+import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
+
 import java.sql.Connection;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -115,14 +118,88 @@ public class DashBoardService
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    
+    
+    public String getProgramwiseSummarySMS( OrganisationUnit orgUnit )
+    {
+        List<OrganisationUnit> childTree = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitWithChildren( orgUnit.getId() ) );
+        String orgUnitIdsByComma = getCommaDelimitedString( getIdentifiers( OrganisationUnit.class, childTree ) );
+        String prgWiseSummaryMsg = "";
+     
+        try
+        {
+            String query = "SELECT COUNT(*) FROM patient " +
+                                " WHERE organisationunitid IN ("+ orgUnitIdsByComma +")";
+    
+            SqlRowSet rs1 = jdbcTemplate.queryForRowSet( query );
+    
+            if ( rs1 != null && rs1.next() )
+            {
+                Integer totalRegCount = rs1.getInt( 1 );
+                
+                prgWiseSummaryMsg = orgUnit.getShortName()+";TotalReg:"+totalRegCount+";";
+            }
+            
+            query = "SELECT program.name, COUNT(*) FROM programinstance " +
+            		" INNER JOIN patient ON programinstance.patientid = patient.patientid " +
+            		" INNER JOIN program ON programinstance.programid = program.programid " +
+            		" WHERE patient.organisationunitid IN ("+ orgUnitIdsByComma +") GROUP BY program.programid";
+            
+            SqlRowSet rs2 = jdbcTemplate.queryForRowSet( query );
+            
+            while ( rs2.next() )
+            {
+                String programName = rs2.getString( 1 );
+                Integer totalCount = rs2.getInt( 2 );
+                
+                prgWiseSummaryMsg += programName+":"+totalCount+";";
+            }
+        }
+        catch( Exception e )
+        {
+            throw new RuntimeException( e );
+        }
+        
+        return prgWiseSummaryMsg;
+    }
+    
     public Map<Integer, Integer> getTotalEnrolledNumber( String orgUnitIdsByComma )
     {
         Map<Integer, Integer> aggDeMap = new HashMap<Integer, Integer>();
         try
         {
             String query = "SELECT programinstance.programid, COUNT(*) FROM programinstance INNER JOIN patient " +
+            				" ON programinstance.patientid = patient.patientid " +
+            				" WHERE patient.organisationunitid IN ("+ orgUnitIdsByComma +") GROUP BY programid";
+
+            SqlRowSet rs = jdbcTemplate.queryForRowSet( query );
+            
+            while ( rs.next() )
+            {
+                Integer programId = rs.getInt( 1 );
+                Integer totalCount = rs.getInt( 2 );
+                {
+                    aggDeMap.put( programId, totalCount );
+                }
+            }
+            
+            return aggDeMap;
+        }
+        catch( Exception e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
+
+    public Map<Integer, Integer> getTotalEnrolledNumberForSelectedDate( String orgUnitIdsByComma, String toDaysDate )
+    {
+        Map<Integer, Integer> aggDeMap = new HashMap<Integer, Integer>();
+        try
+        {
+            String query = "SELECT programinstance.programid, COUNT(*) FROM programinstance INNER JOIN patient " +
                                         " ON programinstance.patientid = patient.patientid " +
-                                        " WHERE patient.organisationunitid IN ("+ orgUnitIdsByComma +") GROUP BY programid";
+                                        " WHERE patient.organisationunitid IN ("+ orgUnitIdsByComma +") AND " +
+                                        " patient.registrationdate LIKE '"+ toDaysDate+"%' GROUP BY programid";
 
             SqlRowSet rs = jdbcTemplate.queryForRowSet( query );
             
@@ -150,6 +227,30 @@ public class DashBoardService
         {
             String query = "SELECT COUNT(*) FROM patient " +
                                " WHERE organisationunitid IN ("+ orgUnitIdsByComma +")";
+
+            SqlRowSet rs = jdbcTemplate.queryForRowSet( query );
+            
+            if ( rs != null && rs.next() )
+            {
+                totalRegCount = rs.getInt( 1 );
+            }
+            
+            return totalRegCount;
+        }
+        catch( Exception e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
+
+    public Integer getTotalRegisteredCountForSelDate( String orgUnitIdsByComma, String selDate )
+    {
+        Integer totalRegCount = 0;
+        try
+        {
+            String query = "SELECT COUNT(*) FROM patient " +
+                               " WHERE organisationunitid IN ("+ orgUnitIdsByComma +") AND " +
+                               	" registrationdate LIKE '"+ selDate+"%'";
 
             SqlRowSet rs = jdbcTemplate.queryForRowSet( query );
             

@@ -33,13 +33,13 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.reports.ReportType;
 
-import com.opensymphony.xwork2.ActionSupport;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Brajesh Murari
  * @version $Id$
  */
-public class GenerateAutoReportAnalyserFormAction extends ActionSupport
+public class GenerateAutoReportAnalyserFormAction implements Action
 {
 
     // -------------------------------------------------------------------------
@@ -93,7 +93,7 @@ public class GenerateAutoReportAnalyserFormAction extends ActionSupport
         
         periodTypes = periodService.getAllPeriodTypes();
 
-        // Filtering Periodtypes other than Monthly, Quarterly and Yearly
+        // Filtering Period types other than Monthly, Quarterly and Yearly
         Iterator<PeriodType> periodTypeIterator = periodTypes.iterator();
         while ( periodTypeIterator.hasNext() )
         {
