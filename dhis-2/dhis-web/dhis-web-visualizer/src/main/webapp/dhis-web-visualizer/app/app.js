@@ -259,7 +259,7 @@ Ext.onReady( function() {
                                 a.push(DV.util.chart.getEncodedSeriesName(item.name));
                             });
                         }
-                    });
+                    });                    
                     return a;
                 },
                 getNameById: function(id) {
@@ -537,12 +537,12 @@ Ext.onReady( function() {
             this.indiment = DV.util.dimension[i].getNames();
             this.period = DV.util.dimension[p].getNames();
             this.organisationunit = DV.util.dimension[o].getNames();
-            
+
             if (!this.indiment.length || !this.period.length || !this.organisationunit.length) {
                 alert('form is not complete');
                 return;
             }
-    
+            
             this.indicator = this.indiment;
             this.dataelement = this.indiment;
             
@@ -1075,7 +1075,6 @@ Ext.onReady( function() {
                                 id: 'indicator_fs',
                                 name: DV.conf.finals.dimension.indicator.value,
                                 title: '<a href="javascript:DV.util.fieldset.toggleIndicator();" class="dv-fieldset-title-link">Indicators</a>',
-								width: DV.conf.layout.west_cmp_width + 22,
                                 collapsible: true,
                                 items: [
                                     {
@@ -1224,7 +1223,6 @@ Ext.onReady( function() {
                                 id: 'dataelement_fs',
                                 name: DV.conf.finals.dimension.dataelement.value,
                                 title: '<a href="javascript:DV.util.fieldset.toggleDataElement();" class="dv-fieldset-title-link">Data elements</a>',
-								width: DV.conf.layout.west_cmp_width + 22,
                                 collapsed: true,
                                 collapsible: true,
                                 items: [
@@ -1374,7 +1372,6 @@ Ext.onReady( function() {
                                 id: 'period_fs',
                                 name: DV.conf.finals.dimension.period.value,
                                 title: '<a href="javascript:DV.util.fieldset.togglePeriod();" class="dv-fieldset-title-link">Periods</a>',
-								width: DV.conf.layout.west_cmp_width + 22,
                                 collapsed: true,
                                 collapsible: true,
                                 cmp: [],
@@ -1510,7 +1507,6 @@ Ext.onReady( function() {
                                 id: 'organisationunit_fs',
                                 name: DV.conf.finals.dimension.organisationunit.value,
                                 title: '<a href="javascript:DV.util.fieldset.toggleOrganisationUnit();" class="dv-fieldset-title-link">Organisation units</a>',
-								width: DV.conf.layout.west_cmp_width + 22,
                                 collapsed: true,
                                 collapsible: true,
                                 items: [
