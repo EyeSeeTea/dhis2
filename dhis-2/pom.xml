@@ -756,4 +756,5 @@
     <spring.security.version>3.0.7.RELEASE</spring.security.version>
     <hibernate.version>3.6.4.Final</hibernate.version>
   </properties>
+  
 </project>
