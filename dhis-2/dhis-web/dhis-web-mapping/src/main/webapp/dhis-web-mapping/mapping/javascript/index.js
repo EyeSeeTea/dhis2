@@ -1,4 +1,4 @@
-﻿Ext.onReady( function() {
+Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '../resources/ext-ux/theme/gray-extend/gray-extend/s.gif';
 	Ext.layout.FormLayout.prototype.trackLabels = true;
     Ext.QuickTips.init();
@@ -1689,6 +1689,14 @@
                         fieldLabel: G.i18n.layer,
                         width: G.conf.combo_width_fieldset
                     },
+                    {
+                        xtype: 'textfield',
+                        id: 'baselayertime_tf',
+                        emptytext: 'Optional',
+                        labelSeparator: G.conf.labelseparator,
+                        fieldLabel: 'Time',
+                        width: G.conf.combo_width_fieldset
+                    },
                     {html: '<div class="window-p"></div>'},
                     {html: '<div class="window-info">' + G.i18n.delete_ + ' WMS ' + G.i18n.overlay + '</div>'},
                     {
@@ -1720,6 +1728,7 @@
                     var bln = Ext.getCmp('baselayername_tf').getRawValue();
                     var blu = Ext.getCmp('baselayerurl_tf').getRawValue();
                     var bll = Ext.getCmp('baselayerlayer_tf').getRawValue();
+                    var blt = Ext.getCmp('baselayertime_tf').getRawValue();
                     
                     if (!bln || !blu || !bll) {
                         Ext.message.msg(false, G.i18n.form_is_not_complete);
@@ -1729,7 +1738,7 @@
                     Ext.Ajax.request({
                         url: G.conf.path_mapping + 'addOrUpdateMapLayer' + G.conf.type,
                         method: 'POST',
-                        params: {name: bln, type: G.conf.map_layer_type_baselayer, url: blu, layers: bll},
+                        params: {name: bln, type: G.conf.map_layer_type_baselayer, url: blu, layers: bll, time: blt},
                         success: function(r) {
                             Ext.message.msg(true, 'WMS ' + G.i18n.overlay + ' <span class="x-msg-hl">' + bln + '</span> ' + G.i18n.registered);
                             G.stores.baseLayer.load();
@@ -1738,7 +1747,7 @@
                                 G.vars.map.getLayersByName(bln)[0].destroy();
                             }
                             
-                            var baselayer = G.util.createWMSLayer(bln, blu, bll);  
+                            var baselayer = G.util.createWMSLayer(bln, blu, bll, blt);  
                             baselayer.layerType = G.conf.map_layer_type_baselayer;
                             baselayer.setVisibility(false);                            
                             G.vars.map.addLayer(baselayer);
@@ -2135,20 +2144,38 @@
                             }
                         }
                     }
+                },
+                {
+                    text: 'Get legend',
+                    iconCls: 'menu-layeroptions-legend',
+                    handler: function(item) {
+                        var layer = item.parentMenu.contextNode.layer;
+                        var url = G.util.convertWMSUrlToLegendString(layer.baseUrl);
+                        var win = Ext.Window({
+                            layout: 'fit',
+                            height: 200,
+                            width: 400,
+                            items: [
+                                //{html: '<img src="' + url + '" />'}
+                                {html: 'jeje'}
+                            ]
+                        });
+                        win.show();                        
+                    }
                 }
             ]
         }),
         clickEventFn: function(node, e) {
-            if (node.attributes.text != 'Base layers' && node.attributes.text != 'Overlays') {
+            if (node.attributes.text !== 'Base layers' && node.attributes.text !== 'Overlays') {
                 node.select();
                 
-                if (node.parentNode.attributes.text == 'Base layers') {
+                if (node.parentNode.attributes.text === 'Base layers') {
                     var cmb = node.getOwnerTree().contextMenuBaselayer;
                     cmb.contextNode = node;
                     cmb.showAt(e.getXY());
                 }
                 
-                else if (node.parentNode.attributes.text == 'Overlays') {
+                else if (node.parentNode.attributes.text === 'Overlays') {
                     var cmo = node.getOwnerTree().contextMenuOverlay;
                     cmo.contextNode = node;
                     cmo.showAt(e.getXY());
