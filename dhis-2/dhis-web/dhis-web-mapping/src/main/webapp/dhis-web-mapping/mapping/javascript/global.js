@@ -381,8 +381,6 @@ G.util = {
             ratio: 1
         });
         layer.baseUrl = url;
-        layer.layers = layers;
-        layer.time = time || 'Default period';
         return layer;
     },
     

@@ -2082,8 +2082,7 @@ Ext.onReady( function() {
             }
         }
     });
-    adminWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
-    
+    adminWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);    
 
     var layerTree = new Ext.tree.TreePanel({
         id: 'layertree_tp',
@@ -2221,7 +2220,7 @@ Ext.onReady( function() {
             {
                 xtype: 'button',
                 id: 'baselayers_b',
-                text: 'WMS ' + G.i18n.overlay,
+                text: 'WMS overlays',
                 iconCls: 'icon-baselayer',
                 handler: function() {
                     Ext.getCmp('baselayers_w').setPagePosition(Ext.getCmp('east').x - (Ext.getCmp('overlays_w').width + 15), Ext.getCmp('center').y + 41);
@@ -2231,7 +2230,7 @@ Ext.onReady( function() {
             {
                 xtype: 'button',
                 id: 'overlays_b',
-                text: 'Vector ' + G.i18n.overlay,
+                text: 'File overlays',
                 iconCls: 'icon-overlay',
                 handler: function() {
                     Ext.getCmp('overlays_w').setPagePosition(Ext.getCmp('east').x - (Ext.getCmp('overlays_w').width + 15), Ext.getCmp('center').y + 41);
