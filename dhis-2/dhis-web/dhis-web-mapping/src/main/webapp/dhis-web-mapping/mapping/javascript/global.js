@@ -69,6 +69,8 @@ G.conf = {
     map_layer_type_baselayer: 'baselayer',
     map_layer_type_overlay: 'overlay',
     map_layer_type_thematic: 'thematic',
+    map_overlay_type_wms: 'wms',
+    map_overlay_type_file: 'file',
 	map_value_type_indicator: 'indicator',
 	map_value_type_dataelement: 'dataelement',
     map_date_type_fixed: 'fixed',
@@ -364,9 +366,9 @@ G.util = {
         return p.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
     },
     
-    createWMSLayer: function(name, url, layer, time) {
+    createWMSLayer: function(name, url, layers, time) {
         var options = {
-            layers: layer,
+            layers: layers,
             transparent: true,
             format: 'image/png'
         };
@@ -379,6 +381,8 @@ G.util = {
             ratio: 1
         });
         layer.baseUrl = url;
+        layer.layers = layers;
+        layer.time = time || 'Default period';
         return layer;
     },
     

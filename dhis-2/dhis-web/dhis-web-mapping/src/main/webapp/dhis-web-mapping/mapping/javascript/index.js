@@ -411,6 +411,7 @@ Ext.onReady( function() {
                 for (var i = 0; i < r.length; i++) {
                     var baseLayer = G.util.createWMSLayer(r[i].data.name, r[i].data.url, r[i].data.layers);                    
                     baseLayer.layerType = G.conf.map_layer_type_baselayer;
+                    baseLayer.overlayType = G.conf.map_overlay_type_wms;
                     baseLayer.setVisibility(false);                    
                     G.vars.map.addLayer(baseLayer);
                 }
@@ -1735,10 +1736,18 @@ Ext.onReady( function() {
                         return;
                     }
                     
+                    var params = {};
+                    params.name = bln;
+                    params.type = G.conf.map_layer_type_baselayer;
+                    params.url = blu;
+                    params.layers = bll;
+                    if (blt) {
+                        params.time = blt;
+                    }
+                    
                     Ext.Ajax.request({
                         url: G.conf.path_mapping + 'addOrUpdateMapLayer' + G.conf.type,
-                        method: 'POST',
-                        params: {name: bln, type: G.conf.map_layer_type_baselayer, url: blu, layers: bll, time: blt},
+                        params: params,
                         success: function(r) {
                             Ext.message.msg(true, 'WMS ' + G.i18n.overlay + ' <span class="x-msg-hl">' + bln + '</span> ' + G.i18n.registered);
                             G.stores.baseLayer.load();
@@ -1749,6 +1758,7 @@ Ext.onReady( function() {
                             
                             var baselayer = G.util.createWMSLayer(bln, blu, bll, blt);  
                             baselayer.layerType = G.conf.map_layer_type_baselayer;
+                            baselayer.overlayType = G.conf.map_overlay_type_wms;
                             baselayer.setVisibility(false);                            
                             G.vars.map.addLayer(baselayer);
                             
@@ -2131,8 +2141,26 @@ Ext.onReady( function() {
                 }
             ]
         }),
-        contextMenuOverlay: new Ext.menu.Menu({
+        contextMenuOverlayWMS: new Ext.menu.Menu({
             items: [
+                {
+                    text: 'Show legend',
+                    iconCls: 'menu-layeroptions-legend',
+                    handler: function(item) {
+                        var layer = item.parentMenu.contextNode.layer;
+                        var url = G.util.convertWMSUrlToLegendString(layer.baseUrl);
+                        var window = new Ext.Window({
+                            title: '<span id="window-baselayer-title">' + item.parentMenu.contextNode.text + ' legend</span>',
+                            layout: 'fit',
+                            bodyStyle: 'padding:10px 8px 0 0; background:#fff',
+                            items: [
+                                { html: '<img src="' + url + '" />' }
+                            ]
+                        });
+                        window.setPagePosition(Ext.getCmp('east').x - 481, Ext.getCmp('center').y + 25);
+                        window.show();
+                    }
+                },
                 {
                     text: 'Opacity',
                     iconCls: 'menu-layeroptions-opacity',
@@ -2144,23 +2172,21 @@ Ext.onReady( function() {
                             }
                         }
                     }
-                },
+                }
+            ]
+        }),
+        contextMenuOverlayFile: new Ext.menu.Menu({
+            items: [
                 {
-                    text: 'Get legend',
-                    iconCls: 'menu-layeroptions-legend',
-                    handler: function(item) {
-                        var layer = item.parentMenu.contextNode.layer;
-                        var url = G.util.convertWMSUrlToLegendString(layer.baseUrl);
-                        var win = Ext.Window({
-                            layout: 'fit',
-                            height: 200,
-                            width: 400,
-                            items: [
-                                //{html: '<img src="' + url + '" />'}
-                                {html: 'jeje'}
-                            ]
-                        });
-                        win.show();                        
+                    text: 'Opacity',
+                    iconCls: 'menu-layeroptions-opacity',
+                    menu: { 
+                        items: G.conf.opacityItems,
+                        listeners: {
+                            'itemclick': function(item) {
+                                item.parentMenu.parentMenu.contextNode.layer.setOpacity(item.text);
+                            }
+                        }
                     }
                 }
             ]
@@ -2176,7 +2202,8 @@ Ext.onReady( function() {
                 }
                 
                 else if (node.parentNode.attributes.text === 'Overlays') {
-                    var cmo = node.getOwnerTree().contextMenuOverlay;
+                    var cmo = node.layer.overlayType === 'wms' ?
+                        node.getOwnerTree().contextMenuOverlayWMS : node.getOwnerTree().contextMenuOverlayFile;
                     cmo.contextNode = node;
                     cmo.showAt(e.getXY());
                 }
