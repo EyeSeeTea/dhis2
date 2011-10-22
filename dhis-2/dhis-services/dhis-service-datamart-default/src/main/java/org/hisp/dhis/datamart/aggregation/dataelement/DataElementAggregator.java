@@ -28,11 +28,9 @@ package org.hisp.dhis.datamart.aggregation.dataelement;
  */
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 
 import org.hisp.dhis.dataelement.DataElementOperand;
-import org.hisp.dhis.datamart.CrossTabDataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.period.Period;
@@ -47,9 +45,6 @@ public interface DataElementAggregator
 
     Map<DataElementOperand, Double> getAggregatedValues( final Collection<DataElementOperand> operands, 
         final Period period, final OrganisationUnit unit, int unitLevel, final OrganisationUnitHierarchy hierarchy, String key );
-    
-    Map<DataElementOperand, double[]> getAggregate( final Collection<CrossTabDataValue> crossTabValues, 
-        final Date startDate, final Date endDate, final Date aggregationStartDate, final Date aggregationEndDate, int unitLevel );
     
     Collection<DataElementOperand> filterOperands( Collection<DataElementOperand> operands, PeriodType periodType );
 }

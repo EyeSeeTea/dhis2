@@ -31,7 +31,6 @@ import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_SUM;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -90,26 +89,7 @@ public class SumIntAggregator
         final Collection<CrossTabDataValue> crossTabValues = crossTabService.getCrossTabDataValues( operands, 
             aggregationCache.getPeriodsBetweenDates( period.getStartDate(), period.getEndDate() ), hierarchy.getChildren( unit.getId() ), key );
         
-        final Map<DataElementOperand, double[]> entries = getAggregate( crossTabValues, period.getStartDate(), 
-            period.getEndDate(), period.getStartDate(), period.getEndDate(), unitLevel ); // <Operand, [total value, total relevant days]>
-        
-        final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>( entries.size() ); // <Operand, total value>
-        
-        for ( final Entry<DataElementOperand, double[]> entry : entries.entrySet() )
-        {
-            if ( entry.getValue() != null )
-            {
-                values.put( entry.getKey(), entry.getValue()[ 0 ] );
-            }
-        }
-        
-        return values;
-    }
-    
-    public Map<DataElementOperand, double[]> getAggregate( final Collection<CrossTabDataValue> crossTabValues, 
-        final Date startDate, final Date endDate, final Date aggregationStartDate, final Date aggregationEndDate, int unitLevel )
-    {
-        final Map<DataElementOperand, double[]> totalSums = new HashMap<DataElementOperand, double[]>(); // <Operand, [total value, total relevant days]>
+        final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>( crossTabValues.size() * operands.size() ); // <Operand, total value>
 
         for ( final CrossTabDataValue crossTabValue : crossTabValues )
         {
@@ -131,17 +111,15 @@ public class SumIntAggregator
                         continue;
                     }
                     
-                    final double[] totalSum = totalSums.get( entry.getKey() );
-                    value += totalSum != null ? totalSum[0] : 0;                        
-                    final double[] values = { value, 0 };                        
-                    totalSums.put( entry.getKey(), values );
+                    value += values.get( entry.getKey() ) != null ? values.get( entry.getKey() ) : 0.0;        
+                    values.put( entry.getKey(), value );
                 }
             }
         }
         
-        return totalSums;
+        return values;
     }
-
+    
     public Collection<DataElementOperand> filterOperands( final Collection<DataElementOperand> operands, final PeriodType periodType )
     {
         final Collection<DataElementOperand> filteredOperands = new HashSet<DataElementOperand>();
@@ -149,7 +127,7 @@ public class SumIntAggregator
         for ( final DataElementOperand operand : operands )
         {
             if ( operand.getValueType().equals( VALUE_TYPE_INT ) && operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_SUM ) &&
-                 operand.getFrequencyOrder() <= periodType.getFrequencyOrder() ) // Ignore disaggregation
+                operand.getFrequencyOrder() <= periodType.getFrequencyOrder() ) // Ignore disaggregation
             {
                 filteredOperands.add( operand );
             }
