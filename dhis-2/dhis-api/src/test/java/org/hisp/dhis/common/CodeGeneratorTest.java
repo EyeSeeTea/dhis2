@@ -1,7 +1,7 @@
-package org.hisp.dhis.system.util;
+package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2005, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,7 +11,7 @@ package org.hisp.dhis.system.util;
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
+ * * Neither the name of the <ORGANIZATION> nor the names of its contributors may
  *   be used to endorse or promote products derived from this software without
  *   specific prior written permission.
  *
@@ -27,36 +27,31 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.HashSet;
+import java.util.Set;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
- * @author Lars Helge Overland
+ * @author bobj
  */
-public class CodeUtils
+public class CodeGeneratorTest
 {
-    public static final int CODE_LENGTH = 11;
-    
-    private static final List<Character> CHAR_SET = Arrays.asList(
-        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 
-        's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
-        'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '~' );
-    
-    private static final int CHAR_MAX = CHAR_SET.size() - 1;
-    
-    public static String generateCode()
+    @Test
+    public void testCode()
     {
-        Random r = new Random();
-        
-        StringBuilder code = new StringBuilder();
-        
-        for ( int i = 0; i < CODE_LENGTH; i++ )
+        // set this as high as your heap space allows
+        int numberOfCodes = 1000;
+
+        Set<String> codes = new HashSet<String>();
+        for ( int n = 0; n < numberOfCodes; ++n )
         {
-            code.append( CHAR_SET.get( r.nextInt( CHAR_MAX ) ) );
+            String code = CodeGenerator.generateCode();
+            // test syntax
+            assertTrue( code.matches( "[0-9a-zA-Z]{11}" ) );
+            // test uniqueness
+            assertTrue( codes.add( code ) );
         }
-        
-        return code.toString();
     }
 }
