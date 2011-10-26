@@ -90,6 +90,13 @@
     <action name="saveSettingsForm" class="org.hisp.dhis.light.action.settings.action.SaveSettingsFormAction">
       <result name="success" type="redirect">/mobile/index.action</result>
     </action>
+    
+    <!-- Single Events -->
+	
+	<action name="singleEvents" class="org.hisp.dhis.light.singleevents.action.GetSingleEventsAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/singleEvents.vm</param>
+    </action>
 
   </package>
 </struts>
