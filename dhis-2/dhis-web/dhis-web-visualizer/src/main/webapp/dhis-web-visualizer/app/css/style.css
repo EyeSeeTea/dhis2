@@ -248,6 +248,10 @@ li {
     border-color: #aaa;
 }
 
+.x-menu-item-link {
+    padding: 3px 5px 4px 35px;
+}
+
 .x-menu-item-active .x-menu-item-link {
     -moz-border-radius: 2px 2px 2px 2px;
     -webkit-border-radius: 2px 2px 2px 2px;
