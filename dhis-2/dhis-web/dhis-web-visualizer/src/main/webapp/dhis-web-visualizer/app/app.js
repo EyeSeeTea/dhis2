@@ -925,8 +925,8 @@ Ext.onReady( function() {
                 items: [
                     {
                         xtype: 'toolbar',
-                        height: 44,
-                        style: 'padding-top:2px; border-style:none',
+                        height: 45,
+                        style: 'padding-top:1px; border-style:none',
                         defaults: {
                             height: 40,
                             toggleGroup: 'chartsettings',
@@ -943,7 +943,7 @@ Ext.onReady( function() {
                             {
                                 xtype: 'label',
                                 text: 'Chart type',
-                                style: 'font-size:11px; font-weight:bold; padding:12px 8px 0 10px'
+                                style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 10px'
                             },
                             {
 								xtype: 'button',
