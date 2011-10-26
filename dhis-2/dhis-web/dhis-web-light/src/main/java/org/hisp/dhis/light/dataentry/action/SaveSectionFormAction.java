@@ -47,6 +47,7 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.light.dataentry.utils.SectionFormUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -134,6 +135,13 @@ public class SaveSectionFormAction
     public SectionFormUtils getSectionFormUtils()
     {
         return sectionFormUtils;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -278,36 +286,103 @@ public class SaveSectionFormAction
                     .getDataValue( organisationUnit, dataElement, period, optionCombo );
 
                 value = value.trim();
+                Boolean valueIsEmpty = (value == null || value.length() == 0);
 
-                if ( value == null || value.length() == 0 || !SectionFormUtils.isInteger( value ) )
+                // validate types
+                Boolean correctType = true;
+                String type = dataElement.getType();
+                String numberType = dataElement.getNumberType();
+
+                if ( !valueIsEmpty )
+                {
+                    if ( type.equals( DataElement.VALUE_TYPE_STRING ) )
+                    {
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_BOOL ) )
+                    {
+                        if ( !valueIsEmpty && !SectionFormUtils.isBoolean( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, i18n.getString( "invalid_boolean" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_DATE ) )
+                    {
+                        if ( !SectionFormUtils.isDate( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, i18n.getString( "invalid_date" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_INT )
+                        && numberType.equals( DataElement.VALUE_TYPE_NUMBER ) )
+                    {
+                        if ( !SectionFormUtils.isNumber( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, i18n.getString( "invalid_number" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_INT )
+                        && numberType.equals( DataElement.VALUE_TYPE_INT ) )
+                    {
+                        if ( !SectionFormUtils.isInteger( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, i18n.getString( "invalid_integer" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_INT )
+                        && numberType.equals( DataElement.VALUE_TYPE_POSITIVE_INT ) )
+                    {
+                        if ( !SectionFormUtils.isPositiveInteger( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, i18n.getString( "invalid_positive_integer" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_INT )
+                        && numberType.equals( DataElement.VALUE_TYPE_NEGATIVE_INT ) )
+                    {
+                        if ( !SectionFormUtils.isNegativeInteger( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, i18n.getString( "invalid_negative_integer" ) );
+                        }
+                    }
+                }
+
+                // nothing entered
+                if ( valueIsEmpty || !correctType )
                 {
                     if ( dataValue != null )
                     {
                         dataValueService.deleteDataValue( dataValue );
                     }
-
-                    continue;
                 }
 
-                if ( dataValue == null )
+                if ( correctType && !valueIsEmpty )
                 {
-                    needsValidation = true;
-
-                    dataValue = new DataValue( dataElement, period, organisationUnit, value, storedBy, new Date(),
-                        null, optionCombo );
-                    dataValueService.addDataValue( dataValue );
-                }
-                else
-                {
-                    if ( !dataValue.getValue().equals( value ) )
+                    if ( dataValue == null )
                     {
                         needsValidation = true;
 
-                        dataValue.setValue( value );
-                        dataValue.setTimestamp( new Date() );
-                        dataValue.setStoredBy( storedBy );
+                        dataValue = new DataValue( dataElement, period, organisationUnit, value, storedBy, new Date(),
+                            null, optionCombo );
+                        dataValueService.addDataValue( dataValue );
+                    }
+                    else
+                    {
+                        if ( !dataValue.getValue().equals( value ) )
+                        {
+                            needsValidation = true;
 
-                        dataValueService.updateDataValue( dataValue );
+                            dataValue.setValue( value );
+                            dataValue.setTimestamp( new Date() );
+                            dataValue.setStoredBy( storedBy );
+
+                            dataValueService.updateDataValue( dataValue );
+                        }
                     }
                 }
             }
@@ -331,13 +406,19 @@ public class SaveSectionFormAction
             registrationService.deleteCompleteDataSetRegistration( registration );
         }
 
+        if ( typeViolations.size() > 0 )
+        {
+            needsValidation = true;
+        }
+
         dataValues = sectionFormUtils.getDataValueMap( organisationUnit, dataSet, period );
 
         validationViolations = sectionFormUtils.getValidationViolations( organisationUnit, dataSet, period );
 
         validationRuleViolations = sectionFormUtils.getValidationRuleViolations( organisationUnit, dataSet, period );
 
-        if ( needsValidation && (validationViolations.size() > 0 || validationRuleViolations.size() > 0) )
+        if ( needsValidation
+            && (!validationViolations.isEmpty() || !validationRuleViolations.isEmpty() || !typeViolations.isEmpty()) )
         {
             return ERROR;
         }
