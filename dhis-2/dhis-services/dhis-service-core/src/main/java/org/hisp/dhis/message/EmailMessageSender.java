@@ -58,6 +58,7 @@ public class EmailMessageSender
     private static final int SMTP_PORT = 587;
     private static final String FROM_ADDRESS = "noreply@dhis2.org";
     private static final String SUBJECT_PREFX = "[DHIS2] ";
+    private static final String LB = System.getProperty( "line.separator" );
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -82,7 +83,7 @@ public class EmailMessageSender
     // -------------------------------------------------------------------------
 
     @Override
-    public void sendMessage( String subject, String text, Set<User> users )
+    public void sendMessage( String subject, String text, User sender, Set<User> users )
     {
         String hostName = StringUtils.trimToNull( (String) systemSettingManager.getSystemSetting( KEY_EMAIL_HOST_NAME ) );
         String username = StringUtils.trimToNull( (String) systemSettingManager.getSystemSetting( KEY_EMAIL_USERNAME ) );
@@ -92,6 +93,12 @@ public class EmailMessageSender
         {
             return;
         }
+
+        text = sender == null ? text : ( text + LB + LB + 
+            sender.getName() + LB + 
+            sender.getOrganisationUnitsName() + LB +
+            ( sender.getEmail() != null ? ( sender.getEmail() + LB ) : StringUtils.EMPTY ) +
+            ( sender.getPhoneNumber() != null ? ( sender.getPhoneNumber() + LB ) : StringUtils.EMPTY ) );
         
         Map<User,Serializable> settings = userService.getUserSettings( KEY_MESSAGE_EMAIL_NOTIFICATION, false );
         

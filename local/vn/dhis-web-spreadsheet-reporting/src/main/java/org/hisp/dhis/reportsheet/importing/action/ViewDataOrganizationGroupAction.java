@@ -94,6 +94,8 @@ public class ViewDataOrganizationGroupAction
     private void setUpImportItems( ImportReport importReport, OrganisationUnit selectedUnit,
         List<ImportItem> importItemsSource, List<ImportItem> importItemsDest )
     {
+        int row = 0;
+        
         for ( OrganisationUnitGroup organisationUnitGroup : importReport.getOrganisationUnitGroups() )
         {
             List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( getOrganisationUnits(
@@ -101,23 +103,23 @@ public class ViewDataOrganizationGroupAction
 
             Collections.sort( organisationUnits, new OrganisationUnitNameComparator() );
 
-            int row = 0;
-
+            row ++;
+            
             for ( OrganisationUnit o : organisationUnits )
             {
                 for ( ImportItem importItem : importItemsSource )
                 {
                     ImportItem item = new ImportItem();
-                    
+
                     item.setSheetNo( importItem.getSheetNo() );
-                    item.setRow( importItem.getRow() + row );
+                    item.setRow( importItem.getRow() + row + 1 );
                     item.setColumn( importItem.getColumn() );
                     item.setExpression( o.getId() + "_" + importItem.getExpression() );
 
                     importItemsDest.add( item );
                 }
 
-                row++;
+                row ++;
             }
         }
     }

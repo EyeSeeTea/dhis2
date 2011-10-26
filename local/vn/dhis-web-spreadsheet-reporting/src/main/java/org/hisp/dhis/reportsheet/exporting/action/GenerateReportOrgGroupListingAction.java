@@ -152,8 +152,8 @@ public class GenerateReportOrgGroupListingAction
                 if ( reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.ORGANISATION )
                     && (!organisationUnits.isEmpty()) )
                 {
-                    ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( organisationUnitGroup
-                        .getName() ), ExcelUtils.TEXT, sheet, this.csText12BoldCenter );
+                    ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), organisationUnitGroup.getName(),
+                        ExcelUtils.TEXT, sheet, this.csText12BoldCenter );
                 }
                 else if ( reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.SERIAL )
                     && (!organisationUnits.isEmpty()) )
@@ -175,22 +175,22 @@ public class GenerateReportOrgGroupListingAction
                     }
                     else if ( reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.SERIAL ) )
                     {
-                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( serial ),
-                            ExcelUtils.NUMBER, sheet, this.csTextSerial );
+                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), serial + "", ExcelUtils.NUMBER,
+                            sheet, this.csTextSerial );
                     }
                     else if ( reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.DATAELEMENT ) )
                     {
                         double value = this.getDataValue( reportItem, o );
 
-                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( value ),
-                            ExcelUtils.NUMBER, sheet, this.csNumber );
+                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), value + "", ExcelUtils.NUMBER,
+                            sheet, this.csNumber );
                     }
                     else if ( reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.INDICATOR ) )
                     {
                         double value = this.getIndicatorValue( reportItem, o );
 
-                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( value ),
-                            ExcelUtils.NUMBER, sheet, this.csNumber );
+                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), value + "", ExcelUtils.NUMBER,
+                            sheet, this.csNumber );
                     }
 
                     rowBegin++;
@@ -210,8 +210,8 @@ public class GenerateReportOrgGroupListingAction
                 }
             }
 
-            if ( (reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.DATAELEMENT ) || reportItem
-                .getItemType().equalsIgnoreCase( ExportItem.TYPE.INDICATOR ))
+            if ( (reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.DATAELEMENT ) || reportItem.getItemType()
+                .equalsIgnoreCase( ExportItem.TYPE.INDICATOR ))
                 && !totalFormula.equals( PREFIX_FORMULA_SUM ) )
             {
                 totalFormula = totalFormula.substring( 0, totalFormula.length() - 1 ) + ")";
