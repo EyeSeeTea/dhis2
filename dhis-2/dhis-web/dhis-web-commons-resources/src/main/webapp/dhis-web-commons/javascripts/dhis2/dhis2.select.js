@@ -80,13 +80,13 @@ dhis2.select.filterWithKey = function( $select, key, caseSensitive )
 
         if ( caseSensitive )
         {
-            $select_ghost_matched = $select_ghost_options.filter( ':contains(' + key + ')' );
-            $select_not_matched = $select_options.filter( ':not( :contains(' + key + ') )' );
+            $select_ghost_matched = $select_ghost_options.filter( dhis2.util.jqTextFilterCaseSensitive( key, false ) );
+            $select_not_matched = $select_options.filter( dhis2.util.jqTextFilterCaseSensitive( key, true ) );
         }
         else
         {
-            $select_ghost_matched = $select_ghost_options.filter( ':containsNC(' + key + ')' );
-            $select_not_matched = $select_options.filter( ':not( :containsNC(' + key + ') )' );
+            $select_ghost_matched = $select_ghost_options.filter( dhis2.util.jqTextFilter( key, false ) );
+            $select_not_matched = $select_options.filter( dhis2.util.jqTextFilter( key, true ) );
         }
 
         dhis2.select.moveSorted( $select_ghost, $select_not_matched );
@@ -99,8 +99,8 @@ dhis2.select.filterWithKey = function( $select, key, caseSensitive )
  * sorted fashion. Both the select and array is assumed to be sorted to start
  * with.
  * 
- * @param $select {jQuery} A select which acts as the target
- * @param $array {jQuery} An array of child elements to move
+ * @param $select {jQuery} A select which acts as the target
+ * @param $array {jQuery} An array of child elements to move
  */
 dhis2.select.moveSorted = function( $select, $array )
 {
@@ -158,7 +158,7 @@ dhis2.select.move = function( $select, $array )
 /**
  * Mark all options in a select as selected.
  * 
- * @param $select {jQuery} The select
+ * @param $select {jQuery} The select
  */
 dhis2.select.selectAll = function( $select )
 {
@@ -168,7 +168,7 @@ dhis2.select.selectAll = function( $select )
 /**
  * Mark all options as not selected.
  * 
- * @param $select {jQuery} The select
+ * @param $select {jQuery} The select
  */
 dhis2.select.selectNone = function( $select )
 {
