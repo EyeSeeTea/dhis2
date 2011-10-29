@@ -97,4 +97,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
   </bean>
 
+  <bean id="org.hisp.dhis.light.singleevents.action.PopulateSingleEventsDataAction" class="org.hisp.dhis.light.singleevents.action.PopulateSingleEventsDataAction">
+    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+    <property name="userService" ref="org.hisp.dhis.user.UserService" />
+    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
+    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+  </bean>
+
 </beans>
