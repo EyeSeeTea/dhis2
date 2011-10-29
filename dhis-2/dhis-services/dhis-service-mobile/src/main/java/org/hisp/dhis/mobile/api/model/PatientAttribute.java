@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.util;
+package org.hisp.dhis.mobile.api.model;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,34 +27,65 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.junit.Test;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-import static junit.framework.Assert.*;
+import javax.xml.bind.annotation.XmlAttribute;
 
-/**
- * @author Lars Helge Overland
- * @version $Id$
- */
-public class CodecUtilsTest
+public class PatientAttribute
+    implements DataStreamSerializable
 {
-    @Test
-    public void testEncrypt()
+    private String name;
+
+    private String value;
+
+    public PatientAttribute( String name, String value )
     {
-        assertEquals( "ZGhpcw==", CodecUtils.encryptBase64( "dhis" ) );
+        this.name = name;
+        this.value = value;
     }
 
-    @Test
-    public void testDecrypt()
+    public PatientAttribute()
     {
-        assertEquals( "dhis", CodecUtils.decryptBase64( "ZGhpcw==" ) );
     }
-    
-    @Test
-    public void testFilenameEncode()
+
+    @XmlAttribute
+    public String getName()
     {
-        assertEquals( "foobar", CodecUtils.filenameEncode( "foo?%*bar" ) );
-        assertEquals( "foobar", CodecUtils.filenameEncode( "%foo/:|bar<>" ) );
-        assertEquals( "foobar", CodecUtils.filenameEncode( "?foo.bar/" ) );
-        assertEquals( "foobar", CodecUtils.filenameEncode( "'foo'bar'" ) );
+        return name;
     }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    @XmlAttribute
+    public String getValue()
+    {
+        return value;
+    }
+
+    public void setValue( String value )
+    {
+        this.value = value;
+    }
+
+    @Override
+    public void serialize( DataOutputStream dout )
+        throws IOException
+    {
+        dout.writeUTF( this.name );
+        dout.writeUTF( this.value );
+    }
+
+    @Override
+    public void deSerialize( DataInputStream dataInputStream )
+        throws IOException
+    {
+        name = dataInputStream.readUTF();
+        value = dataInputStream.readUTF();
+    }
+
 }

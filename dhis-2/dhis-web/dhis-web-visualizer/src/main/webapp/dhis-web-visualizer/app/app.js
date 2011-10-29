@@ -27,6 +27,7 @@ DV.conf = {
             }
         },        
         chart: {
+            x: 'x',
             series: 'series',
             category: 'category',
             filter: 'filter',
@@ -41,13 +42,18 @@ DV.conf = {
     },
     style: {
         label: {
-            period: 'font:bold 11px arial; color:#444; line-height:20px',
+            period_group: 'font:bold 11px arial; color:#444; line-height:20px'
         }
     },
     layout: {
         west_cmp_width: 380,
         west_width: 424
-    }
+    },
+    data: [
+        {x: 'Category 1', 'Series 1': 41, 'Series 2': 69, 'Series 3': 63, 'Series 4': 51},
+        {x: 'Category 2', 'Series 1': 51, 'Series 2': 42, 'Series 3': 58, 'Series 4': 52},
+        {x: 'Category 3', 'Series 1': 44, 'Series 2': 71, 'Series 3': 62, 'Series 4': 54}
+    ]
 };
 
 Ext.Loader.setConfig({enabled: true});
@@ -66,10 +72,7 @@ Ext.onReady( function() {
     DV.init = Ext.JSON.decode(r.responseText);
     
     DV.init.initialize = function(vp) {
-        var s = vp.query('combobox[name="' + DV.conf.finals.chart.series + '"]')[0];
-        s.filter(s, vp);
-        var c = vp.query('combobox[name="' + DV.conf.finals.chart.category + '"]')[0];
-        c.filter(c, vp);
+        DV.util.combobox.filter.category(vp);
         
         DV.store.column = DV.store.defaultChartStore;
         DV.store.column_stacked = DV.store.defaultChartStore;
@@ -78,11 +81,7 @@ Ext.onReady( function() {
         DV.store.area = DV.store.defaultChartStore;
         DV.store.pie = DV.store.defaultChartStore;
         
-        DV.data.data = [
-            {x: 'Category 1', 'Series 1': 41, 'Series 2': 69, 'Series 3': 63, 'Series 4': 51},
-            {x: 'Category 2', 'Series 1': 51, 'Series 2': 42, 'Series 3': 58, 'Series 4': 52},
-            {x: 'Category 3', 'Series 1': 44, 'Series 2': 71, 'Series 3': 62, 'Series 4': 54},
-        ];
+        DV.data.data = DV.conf.data;
         
         DV.chart.init = true;
         DV.store.getChartStore(true);
@@ -260,7 +259,7 @@ Ext.onReady( function() {
                                 a.push(DV.util.chart.getEncodedSeriesName(item.name));
                             });
                         }
-                    });
+                    });                    
                     return a;
                 },
                 getNameById: function(id) {
@@ -335,6 +334,82 @@ Ext.onReady( function() {
                     }
                     return a;
                 }
+            }
+        },
+        combobox: {
+            filter: {
+                clearValue: function(v, cb, i, d) {
+                    if (v === cb.getValue()) {
+                        cb.clearValue();
+                    }
+                    else if ((v === i || v === d) && (cb.getValue() === i || cb.getValue() === d)) {
+                        cb.clearValue();
+                    }
+                },
+                category: function(vp) {
+                    var cbs = vp.query('combobox[name="' + DV.conf.finals.chart.series + '"]')[0],
+                        cbc = vp.query('combobox[name="' + DV.conf.finals.chart.category + '"]')[0],
+                        cbf = vp.query('combobox[name="' + DV.conf.finals.chart.filter + '"]')[0],
+                        v = cbs.getValue(),
+                        i = DV.conf.finals.dimension.indicator.value,
+                        d = DV.conf.finals.dimension.dataelement.value,
+                        p = DV.conf.finals.dimension.period.value,
+                        o = DV.conf.finals.dimension.organisationunit.value,
+                        index = 0;
+                        
+                    this.clearValue(v, cbc, i, d);
+                    this.clearValue(v, cbf, i, d);
+                    
+                    cbc.filterArray = [!(v === i || v === d), !(v === i || v === d), !(v === p), !(v === o)];
+                    cbc.store.filterBy( function(r) {
+                        return cbc.filterArray[index++];
+                    });
+                    
+                    this.filter(vp);
+                },                
+                filter: function(vp) {
+                    var cbc = vp.query('combobox[name="' + DV.conf.finals.chart.category + '"]')[0],
+                        cbf = vp.query('combobox[name="' + DV.conf.finals.chart.filter + '"]')[0],
+                        v = cbc.getValue(),
+                        i = DV.conf.finals.dimension.indicator.value,
+                        d = DV.conf.finals.dimension.dataelement.value,
+                        p = DV.conf.finals.dimension.period.value,
+                        o = DV.conf.finals.dimension.organisationunit.value,
+                        index = 0;
+                        
+                    this.clearValue(v, cbf, i, d);
+                        
+                    cbf.filterArray = Ext.Array.clone(cbc.filterArray);
+                    cbf.filterArray[0] = cbf.filterArray[0] ? !(v === i || v === d) : false;
+                    cbf.filterArray[1] = cbf.filterArray[1] ? !(v === i || v === d) : false;
+                    cbf.filterArray[2] = cbf.filterArray[2] ? !(v === p) : false;
+                    cbf.filterArray[3] = cbf.filterArray[3] ? !(v === o) : false;
+                    
+                    cbf.store.filterBy( function(r) {
+                        return cbf.filterArray[index++];
+                    });
+                }
+            }
+        },
+        number: {
+            isInteger: function(n) {
+                var str = new String(n);
+                if (str.indexOf('.') > -1) {
+                    var d = str.substr(str.indexOf('.') + 1);
+                    return (d.length === 1 && d == '0');
+                }
+                return false;
+            },
+            allValuesAreIntegers: function(values) {
+                for (var i = 0; i < values.length; i++) {
+                    if (!this.isInteger(values[i].v)) {
+                        return false;
+                    }
+                }
+                return true;
+            },
+            getChartAxisFormatRenderer: function() {
+                return this.allValuesAreIntegers(DV.value.values) ? '0' : '0.0';
             }
         }
     };
@@ -414,8 +489,13 @@ Ext.onReady( function() {
                 fields: keys,
                 data: DV.data.data
             });
-            this.chart.bottom = keys.slice(0, 1);
-            this.chart.left = keys.slice(1, keys.length);
+            this.chart.bottom = [DV.conf.finals.chart.x];
+            this.chart.left = keys.slice(0);
+            for (var i = 0; i < this.chart.left.length; i++) {
+                if (this.chart.left[i] === DV.conf.finals.chart.x) {
+                    this.chart.left.splice(i, 1);
+                }
+            }
             
             if (exe) {
                 DV.chart.getChart(true);
@@ -478,12 +558,12 @@ Ext.onReady( function() {
             this.indiment = DV.util.dimension[i].getNames();
             this.period = DV.util.dimension[p].getNames();
             this.organisationunit = DV.util.dimension[o].getNames();
-            
+
             if (!this.indiment.length || !this.period.length || !this.organisationunit.length) {
                 alert('form is not complete');
                 return;
             }
-    
+            
             this.indicator = this.indiment;
             this.dataelement = this.indiment;
             
@@ -492,7 +572,7 @@ Ext.onReady( function() {
             this.filter.data = this[this.filter.dimension].slice(0,1);
             
             if (exe) {
-                DV.data.getValues(true);
+                DV.value.getValues(true);
             }
         },
         getIndiment: function() {
@@ -517,8 +597,8 @@ Ext.onReady( function() {
         }
     };
     
-    DV.data = {
-        values: null,        
+    DV.value = {
+        values: [],
         getValues: function(exe) {
             var params = [],
                 indicator = DV.conf.finals.dimension.indicator.value,
@@ -541,14 +621,14 @@ Ext.onReady( function() {
             Ext.Ajax.request({
                 url: baseUrl,
                 success: function(r) {
-                    DV.data.values = Ext.JSON.decode(r.responseText).values;
+                    DV.value.values = Ext.JSON.decode(r.responseText).values;
                     
-                    if (!DV.data.values.length) {
+                    if (!DV.value.values.length) {
                         alert('no data values');
                         return;
-                    }
+                    }              
                     
-                    Ext.Array.each(DV.data.values, function(item) {
+                    Ext.Array.each(DV.value.values, function(item) {
                         item[indiment] = DV.store[indiment].available.storage[item.i].name;
                         item[DV.conf.finals.dimension.period.value] = DV.util.dimension.period.getNameById(item.p);
                         item[DV.conf.finals.dimension.organisationunit.value] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
@@ -558,24 +638,29 @@ Ext.onReady( function() {
                         DV.data.getData(true);
                     }
                     else {
-                        return DV.data.values;
+                        return DV.value.values;
                     }                    
                 }
             });
-        },        
+        }
+    };        
+    
+    DV.data = {
         data: [],        
         getData: function(exe) {
-            this.data = [];
-            
+            this.data = [];  
+			
             Ext.Array.each(DV.state.category.data, function(item) {
-                DV.data.data.push({x: item});
+                var obj = {};
+                obj[DV.conf.finals.chart.x] = item;
+                DV.data.data.push(obj);
             });
-            
+			
             Ext.Array.each(DV.data.data, function(item) {
                 for (var i = 0; i < DV.state.series.data.length; i++) {
-                    for (var j = 0; j < DV.data.values.length; j++) {
-                        if (DV.data.values[j][DV.state.category.dimension] === item.x && DV.data.values[j][DV.state.series.dimension] === DV.state.series.data[i]) {
-                            item[DV.data.values[j][DV.state.series.dimension]] = parseFloat(DV.data.values[j].v);
+                    for (var j = 0; j < DV.value.values.length; j++) {
+                        if (DV.value.values[j][DV.state.category.dimension] === item[DV.conf.finals.chart.x] && DV.value.values[j][DV.state.series.dimension] === DV.state.series.data[i]) {
+                            item[DV.value.values[j][DV.state.series.dimension]] = parseFloat(DV.value.values[j].v);
                             break;
                         }
                     }
@@ -622,11 +707,11 @@ Ext.onReady( function() {
                         position: 'left',
                         minimum: 0,
                         fields: DV.store.chart.left,
-                        label: {
-                            renderer: Ext.util.Format.numberRenderer('0,0')
-                        },
                         grid: {
                             even: DV.util.chart.getGrid()
+                        },
+                        label: {
+                            renderer: Ext.util.Format.numberRenderer(DV.util.number.getChartAxisFormatRenderer())
                         }
                     },
                     {
@@ -674,7 +759,7 @@ Ext.onReady( function() {
                         minimum: 0,
                         fields: DV.store.chart.bottom,
                         label: {
-                            renderer: Ext.util.Format.numberRenderer('0,0')
+                            renderer: Ext.util.Format.numberRenderer(DV.util.number.getChartAxisFormatRenderer())
                         },
                         grid: {
                             even: DV.util.chart.getGrid()
@@ -713,7 +798,7 @@ Ext.onReady( function() {
                         minimum: 0,
                         fields: DV.store.chart.left,
                         label: {
-                            renderer: Ext.util.Format.numberRenderer('0,0')
+                            renderer: Ext.util.Format.numberRenderer(DV.util.number.getChartAxisFormatRenderer())
                         },
                         grid: {
                             even: DV.util.chart.getGrid()
@@ -744,7 +829,7 @@ Ext.onReady( function() {
                         minimum: 0,
                         fields: DV.store.chart.left,
                         label: {
-                            renderer: Ext.util.Format.numberRenderer('0,0')
+                            renderer: Ext.util.Format.numberRenderer(DV.util.number.getChartAxisFormatRenderer())
                         },
                         grid: {
                             even: DV.util.chart.getGrid()
@@ -825,12 +910,9 @@ Ext.onReady( function() {
                 items: [
                     {
                         xtype: 'toolbar',
-                        layout: 'anchor',
                         height: 44,
                         style: 'padding-top:2px; border-style:none',
                         defaults: {
-                            xtype: 'button',
-                            width: 40,
                             height: 40,
                             toggleGroup: 'chartsettings',
                             handler: DV.util.button.toggleHandler,
@@ -846,43 +928,57 @@ Ext.onReady( function() {
                             {
                                 xtype: 'label',
                                 text: 'Chart type',
-                                style: 'font-size:11px; font-weight:bold; padding:0 8px 0 10px'
+                                style: 'font-size:11px; font-weight:bold; padding:12px 8px 0 10px'
                             },
                             {
+								xtype: 'button',
                                 icon: 'images/column.png',
                                 name: DV.conf.finals.chart.column,
                                 tooltip: 'Column chart',
+								width: 40,
                                 pressed: true
                             },
                             {
+								xtype: 'button',
                                 icon: 'images/column-stacked.png',
                                 name: DV.conf.finals.chart.column_stacked,
-                                tooltip: 'Stacked column chart'
+                                tooltip: 'Stacked column chart',
+								width: 40
                             },
                             {
+								xtype: 'button',
                                 icon: 'images/bar.png',
                                 name: DV.conf.finals.chart.bar,
-                                tooltip: 'Bar chart'
+                                tooltip: 'Bar chart',
+								width: 40
                             },
                             {
+								xtype: 'button',
                                 icon: 'images/bar-stacked.png',
                                 name: DV.conf.finals.chart.bar_stacked,
-                                tooltip: 'Stacked bar chart'
+                                tooltip: 'Stacked bar chart',
+								width: 40
                             },
                             {
+								xtype: 'button',
                                 icon: 'images/line.png',
                                 name: DV.conf.finals.chart.line,
-                                tooltip: 'Line chart'
+                                tooltip: 'Line chart',
+								width: 40
                             },
                             {
+								xtype: 'button',
                                 icon: 'images/area.png',
                                 name: DV.conf.finals.chart.area,
-                                tooltip: 'Area chart'
+                                tooltip: 'Area chart',
+								width: 40
                             },
                             {
+								xtype: 'button',
                                 icon: 'images/pie.png',
                                 name: DV.conf.finals.chart.pie,
-                                tooltip: 'Pie chart'
+                                tooltip: 'Pie chart',
+								width: 40
                             }
                         ]
                     },                    
@@ -890,19 +986,17 @@ Ext.onReady( function() {
                         xtype: 'toolbar',
                         id: 'chartsettings_tb',
                         height: 48,
-                        style: 'padding:4px 0 0 8px; border-left:0 none; border-right:0 none; border-bottom:0 none',
                         items: [
                             {
                                 xtype: 'panel',
                                 bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
-                                layout: 'anchor',
                                 items: [
                                     {
                                         xtype: 'label',
                                         text: 'Series',
                                         style: 'font-size:11px; font-weight:bold; padding:0 3px'
                                     },
-                                    { html: '<div style="height:2px"></div>', bodyStyle: 'border-style:none;background-color:transparent' },
+                                    { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
                                     {
                                         xtype: 'combobox',
                                         name: DV.conf.finals.chart.series,
@@ -914,48 +1008,12 @@ Ext.onReady( function() {
                                         width: (DV.conf.layout.west_cmp_width / 3) + 4,
                                         store: DV.store.dimension(),
                                         value: DV.conf.finals.dimension.indicator.value,
-                                        filter: function(cb, vp) {
-                                            var v = cb.getValue(),
-                                                c = vp.query('combobox[name="' + DV.conf.finals.chart.category + '"]')[0],
-                                                f = vp.query('combobox[name="' + DV.conf.finals.chart.filter + '"]')[0],
-                                                i = DV.conf.finals.dimension.indicator.value,
-                                                d = DV.conf.finals.dimension.dataelement.value,
-                                                p = DV.conf.finals.dimension.period.value,
-                                                o = DV.conf.finals.dimension.organisationunit.value,
-                                                index = 0;
-                                            
-                                            if (v === i || v === d) {
-                                                cb.filterArray = [false, false, true, true];
-                                            }
-                                            else if (v === p) {
-                                                cb.filterArray = [true, true, false, true];
-                                            }
-                                            else if (v === o) {
-                                                cb.filterArray = [true, true, true, false];
-                                            }
-                                            
-                                            var fn = function(cmp) {
-                                                cmp.store.filterBy( function(r) {
-                                                    return cb.filterArray[index++];
-                                                });
-                                                if (v === cmp.getValue()) {
-                                                    cmp.clearValue();
-                                                }
-                                                else if ((v === i || v === d) && (cmp.getValue() === i || cmp.getValue() === d)) {
-                                                    cmp.clearValue();
-                                                }
-                                            };
-                                            
-                                            fn(c);                                    
-                                            index = 0;
-                                            fn(f);
-                                        },
                                         listeners: {
                                             afterrender: function(cb) {
                                                 DV.state[cb.name].cmp = cb;
                                             },
-                                            select: function(cb) {
-                                                cb.filter(cb, DV.viewport);
+                                            select: function() {
+                                                DV.util.combobox.filter.category(DV.viewport);
                                             }
                                         }
                                     }
@@ -964,14 +1022,13 @@ Ext.onReady( function() {
                             {
                                 xtype: 'panel',
                                 bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
-                                layout: 'anchor',
                                 items: [
                                     {
                                         xtype: 'label',
                                         text: 'Category',
                                         style: 'font-size:11px; font-weight:bold; padding:0 3px'
                                     },
-                                    { html: '<div style="height:2px"></div>', bodyStyle: 'border-style:none;background-color:transparent' },
+                                    { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
                                     {
                                         xtype: 'combobox',
                                         name: DV.conf.finals.chart.category,
@@ -984,46 +1041,12 @@ Ext.onReady( function() {
                                         width: (DV.conf.layout.west_cmp_width / 3) + 4,
                                         store: DV.store.dimension(),
                                         value: DV.conf.finals.dimension.period.value,
-                                        filter: function(cb, vp) {
-                                            var v = cb.getValue(),
-                                                s = vp.query('combobox[name="' + DV.conf.finals.chart.series + '"]')[0],
-                                                f = vp.query('combobox[name="' + DV.conf.finals.chart.filter + '"]')[0],
-                                                i = DV.conf.finals.dimension.indicator.value,
-                                                d = DV.conf.finals.dimension.dataelement.value,
-                                                p = DV.conf.finals.dimension.period.value,
-                                                o = DV.conf.finals.dimension.organisationunit.value,
-                                                index = 0;
-                                            
-                                            cb.filterArray = Ext.Array.clone(s.filterArray);
-                                            
-                                            if (cb.getValue() === i || cb.getValue() === d) {
-                                                cb.filterArray[0] = false;
-                                                cb.filterArray[1] = false;
-                                            }
-                                            else if (cb.getValue() === p) {
-                                                cb.filterArray[2] = false;
-                                            }
-                                            else if (cb.getValue() === o) {
-                                                cb.filterArray[3] = false;
-                                            }
-                                            
-                                            f.store.filterBy( function(r) {
-                                                return cb.filterArray[index++];
-                                            });
-                                            if (v === f.getValue()) {
-                                                f.clearValue();
-                                            }
-                                            else if ((v === i || v === d) && (f.getValue() === i || f.getValue() === d)) {
-                                                f.clearValue();
-                                            }
-                                        },
                                         listeners: {
                                             afterrender: function(cb) {
                                                 DV.state[cb.name].cmp = cb;
                                             },
                                             select: function(cb) {
-                                                cb.filter(cb, DV.viewport);
-                                                DV.state.category.dimension = cb.getValue();
+                                                DV.util.combobox.filter.filter(DV.viewport);
                                             }
                                         }
                                     }
@@ -1032,14 +1055,13 @@ Ext.onReady( function() {
                             {
                                 xtype: 'panel',
                                 bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
-                                layout: 'anchor',
                                 items: [
                                     {
                                         xtype: 'label',
                                         text: 'Filter',
                                         style: 'font-size:11px; font-weight:bold; padding:0 3px'
                                     },
-                                    { html: '<div style="height:2px"></div>', bodyStyle: 'border-style:none;background-color:transparent' },
+                                    { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
                                     {
                                         xtype: 'combobox',
                                         name: DV.conf.finals.chart.filter,
@@ -1075,6 +1097,7 @@ Ext.onReady( function() {
                                 name: DV.conf.finals.dimension.indicator.value,
                                 title: '<a href="javascript:DV.util.fieldset.toggleIndicator();" class="dv-fieldset-title-link">Indicators</a>',
                                 collapsible: true,
+								width: DV.conf.layout.west_cmp_width + 22,
                                 items: [
                                     {
                                         xtype: 'combobox',
@@ -1398,7 +1421,7 @@ Ext.onReady( function() {
                                                     {
                                                         xtype: 'label',
                                                         text: 'Months',
-                                                        style: DV.conf.style.label.period
+                                                        style: DV.conf.style.label.period_group
                                                     },
                                                     {
                                                         xtype: 'checkbox',
@@ -1436,7 +1459,7 @@ Ext.onReady( function() {
                                                     {
                                                         xtype: 'label',
                                                         text: 'Quarters',
-                                                        style: DV.conf.style.label.period
+                                                        style: DV.conf.style.label.period_group
                                                     },
                                                     {
                                                         xtype: 'checkbox',
@@ -1473,7 +1496,7 @@ Ext.onReady( function() {
                                                     {
                                                         xtype: 'label',
                                                         text: 'Years',
-                                                        style: DV.conf.style.label.period
+                                                        style: DV.conf.style.label.period_group
                                                     },
                                                     {
                                                         xtype: 'checkbox',
@@ -1540,7 +1563,7 @@ Ext.onReady( function() {
                                                     v.menu.destroy();
                                                 }
                                                 v.menu = Ext.create('Ext.menu.Menu', {
-                                                    id: 'treepanel-contextmenu',
+                                                    id: 'treepanel-contextmenu'
                                                 });
                                                 if (!r.data.leaf) {
                                                     v.menu.add({
@@ -1667,7 +1690,7 @@ Ext.onReady( function() {
                                                 //DV.conf.finals.dimension.organisationunit.value,
                                                 //'v'
                                             //],
-                                            //data: DV.data.values
+                                            //data: DV.value.values
                                         //})
                                     //}
                                 //]

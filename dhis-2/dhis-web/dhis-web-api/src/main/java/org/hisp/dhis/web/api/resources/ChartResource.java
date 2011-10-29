@@ -56,9 +56,9 @@ public class ChartResource
     }
 
     @GET
-    @Path( "/{id}" )
+    @Path( "/{id}/{width}/{height}" )
     @Produces( ContextUtils.CONTENT_TYPE_PNG )
-    public Response getChart( @PathParam("id") Integer id )
+    public Response getChart( @PathParam("id") Integer id, @PathParam("width") final Integer width, @PathParam("height") final Integer height )
         throws Exception
     {
         final JFreeChart jFreeChart = chartService.getJFreeChart( id, i18nManager.getI18nFormat() );
@@ -73,7 +73,7 @@ public class ChartResource
             public void write( OutputStream out )
                 throws IOException, WebApplicationException
             {
-                ChartUtilities.writeChartAsPNG( out, jFreeChart, 600, 400, true, 0 );
+                ChartUtilities.writeChartAsPNG( out, jFreeChart, width, height, true, 0 );
             }
         } ).build();
     }
@@ -96,7 +96,7 @@ public class ChartResource
         
         final String filename = CodecUtils.filenameEncode( indicator.getName() + ".png" );
         
-        final JFreeChart jFreeChart = chartService.getPeriodJFreeChart( indicator, unit, title, i18nManager.getI18nFormat() );
+        final JFreeChart jFreeChart = chartService.getJFreePeriodChart( indicator, unit, title, i18nManager.getI18nFormat() );
         
         return ResponseUtils.response( true, filename, false ).entity( new StreamingOutput()
         {
@@ -126,7 +126,7 @@ public class ChartResource
         
         final String filename = CodecUtils.filenameEncode( indicator.getName() + ".png" );
         
-        final JFreeChart jFreeChart = chartService.getOrganisationUnitJFreeChart( indicator, unit, title, i18nManager.getI18nFormat() );
+        final JFreeChart jFreeChart = chartService.getJFreeOrganisationUnitChart( indicator, unit, title, i18nManager.getI18nFormat() );
         
         return ResponseUtils.response( true, filename, false ).entity( new StreamingOutput()
         {
