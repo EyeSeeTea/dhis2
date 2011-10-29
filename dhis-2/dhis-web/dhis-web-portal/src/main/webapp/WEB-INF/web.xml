@@ -69,7 +69,7 @@
     <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
     <init-param>
       <param-name>com.sun.jersey.config.property.packages</param-name>
-      <param-value>org.hisp.dhis.web.api.resources</param-value>
+      <param-value>org.hisp.dhis.web.api.resources,org.hisp.dhis.mobile.web.resources</param-value>
     </init-param>
     <init-param>
       <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>

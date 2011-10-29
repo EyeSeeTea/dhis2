@@ -104,7 +104,7 @@
     border-style: none;
 }
 
-/* Multiselect /*(custom) transparent row hover */
+/* Multiselect (custom) transparent row hover */
 #indicator_fs .x-boundlist-item-over, #dataelement_fs .x-boundlist-item-over {
     background-color: transparent;
     border-color: #fff;
@@ -148,6 +148,12 @@
     border-width: 2px;
 }
 
+/* Toolbar separator */
+.x-toolbar .x-toolbar-separator-horizontal {
+    height: 15px;
+    border-right: 1px solid #f2f2f2;
+}
+
 /* Tooltip */
 .x-tip {
     -moz-border-radius: 3px 3px 3px 3px;
@@ -183,6 +189,9 @@ li {
 /* Second toolbar */
 #chartsettings_tb {
     background: #eee;
+    padding: 4px 0 0 8px;
+    border-style: none;
+    border-top: 1px dashed #bbb;
 }
 
 /* Multiselect dock border radius */
@@ -269,4 +278,3 @@ li {
     padding-left: 19px;
     background-image: url('../images/datatable.png');
 }
-    

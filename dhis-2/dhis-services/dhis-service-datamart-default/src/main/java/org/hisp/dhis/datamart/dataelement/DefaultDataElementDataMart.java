@@ -38,6 +38,7 @@ import java.util.concurrent.Future;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
+import org.amplecode.quick.StatementManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.aggregation.AggregatedDataValue;
@@ -130,6 +131,13 @@ public class DefaultDataElementDataMart
         this.averageBoolAggregator = averageBooleanDataElementAggregator;
     }
     
+    private StatementManager statementManager;
+
+    public void setStatementManager( StatementManager statementManager )
+    {
+        this.statementManager = statementManager;
+    }
+
     // -------------------------------------------------------------------------
     // DataMart functionality
     // -------------------------------------------------------------------------
@@ -138,6 +146,8 @@ public class DefaultDataElementDataMart
     public Future<?> exportDataValues( Collection<DataElementOperand> operands, Collection<Period> periods, 
         Collection<OrganisationUnit> organisationUnits, DataElementOperandList operandList, String key )
     {
+        statementManager.initialise(); // Running in separate thread
+        
         final BatchHandler<AggregatedDataValue> batchHandler = batchHandlerFactory.createBatchHandler( AggregatedDataValueBatchHandler.class ).init();
         
         final BatchHandler<Object> cacheHandler = inMemoryBatchHandlerFactory.createBatchHandler( GenericBatchHandler.class ).setTableName( AGGREGATEDDATA_CACHE_PREFIX + key ).init();
@@ -162,11 +172,13 @@ public class DefaultDataElementDataMart
                 
                 final Map<DataElementOperand, Double> valueMap = new HashMap<DataElementOperand, Double>();
                 
-                valueMap.putAll( sumIntAggregator.getAggregatedValues( sumIntOperands, period, unit, level, hierarchy, key ) );
-                valueMap.putAll( averageIntAggregator.getAggregatedValues( averageIntOperands, period, unit, level, hierarchy, key ) );
-                valueMap.putAll( averageIntSingleValueAggregator.getAggregatedValues( averageIntSingleValueOperands, period, unit, level, hierarchy, key ) );
-                valueMap.putAll( sumBoolAggregator.getAggregatedValues( sumBoolOperands, period, unit, level, hierarchy, key ) );
-                valueMap.putAll( averageBoolAggregator.getAggregatedValues( averageBoolOperands, period, unit, level, hierarchy, key ) );
+                final Collection<Integer> orgUnitChildren = hierarchy.getChildren( unit.getId() );
+                
+                valueMap.putAll( sumIntAggregator.getAggregatedValues( sumIntOperands, period, level, orgUnitChildren, key ) );
+                valueMap.putAll( averageIntAggregator.getAggregatedValues( averageIntOperands, period, level, orgUnitChildren, key ) );
+                valueMap.putAll( averageIntSingleValueAggregator.getAggregatedValues( averageIntSingleValueOperands, period, level, orgUnitChildren, key ) );
+                valueMap.putAll( sumBoolAggregator.getAggregatedValues( sumBoolOperands, period, level, orgUnitChildren, key ) );
+                valueMap.putAll( averageBoolAggregator.getAggregatedValues( averageBoolOperands, period, level, orgUnitChildren, key ) );
                 
                 if ( valueMap.size() > 0 )
                 {
@@ -203,6 +215,8 @@ public class DefaultDataElementDataMart
         
         cacheHandler.flush();
 
+        statementManager.destroy();
+        
         log.info( "Data element export task done" );
         
         return null;
