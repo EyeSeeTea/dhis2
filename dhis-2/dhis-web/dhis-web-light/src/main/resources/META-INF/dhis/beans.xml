@@ -93,7 +93,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
   <!-- Single Events -->
     
-  <bean id="org.hisp.dhis.light.singleevents.action.GetSingleEventsAction" class="org.hisp.dhis.light.singleevents.action.GetSingleEventsAction">
+  <bean id="org.hisp.dhis.light.singleevents.action.GetSelectOrgUnitSingleEventsAction" class="org.hisp.dhis.light.singleevents.action.GetSelectOrgUnitSingleEventsAction">
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
   </bean>
 

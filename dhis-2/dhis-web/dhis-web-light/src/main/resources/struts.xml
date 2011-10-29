@@ -93,9 +93,9 @@
     
     <!-- Single Events -->
 	
-	<action name="singleEvents" class="org.hisp.dhis.light.singleevents.action.GetSingleEventsAction">
+	<action name="selectOrgUnitSingleEvents" class="org.hisp.dhis.light.singleevents.action.GetSelectOrgUnitSingleEventsAction">
       <result name="success" type="velocity">/dhis-web-light/main.vm</result>
-      <param name="page">/dhis-web-light/singleEvents.vm</param>
+      <param name="page">/dhis-web-light/selectOrgUnitSingleEvents.vm</param>
     </action>
 
   </package>
