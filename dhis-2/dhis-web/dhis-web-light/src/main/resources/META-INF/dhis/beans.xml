@@ -97,15 +97,12 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
   </bean>
   
-  <bean id="org.hisp.dhis.light.singleevents.SingleEventsService" class="org.hisp.dhis.light.singleevents.SingleEventsService">
-  </bean>
-  
   <bean id="org.hisp.dhis.light.singleevents.action.GetSingleEventsAction" class="org.hisp.dhis.light.singleevents.action.GetSingleEventsAction">
-    <property name="singleEventsService" ref="org.hisp.dhis.light.singleevents.SingleEventsService" />
+    <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
   </bean>
   
   <bean id="org.hisp.dhis.light.singleevents.action.GetSingleEventChoicesAction" class="org.hisp.dhis.light.singleevents.action.GetSingleEventChoicesAction">
-    <property name="singleEventsService" ref="org.hisp.dhis.light.singleevents.SingleEventsService" />
+    <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
   </bean>
 
   <bean id="org.hisp.dhis.light.singleevents.action.PopulateSingleEventsDataAction" class="org.hisp.dhis.light.singleevents.action.PopulateSingleEventsDataAction">
@@ -113,6 +110,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+    <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+	<property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
   </bean>
 
 </beans>

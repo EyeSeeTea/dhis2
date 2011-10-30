@@ -27,12 +27,10 @@
 
 package org.hisp.dhis.light.singleevents.action;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.light.singleevents.SingleEventsService;
-import org.hisp.dhis.singleevents.SingleEvent;
-
+import java.util.Collection;
+import java.util.HashSet;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -44,12 +42,12 @@ public class GetSingleEventsAction implements Action {
 	// Dependencies
 	// -------------------------------------------------------------------------
 
-	private SingleEventsService singleEventsService;
-	
-	public void setSingleEventsService( SingleEventsService singleEventsService )
-	{
-		this.singleEventsService = singleEventsService;
-	}
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
 	
 	// -------------------------------------------------------------------------
 	// Input & Output
@@ -66,9 +64,9 @@ public class GetSingleEventsAction implements Action {
     	return this.organisationUnitId;
     }
 
-	private List<SingleEvent> singleEvents = new ArrayList<SingleEvent>();
+	private Collection<Program> singleEvents = new HashSet<Program>();
 	
-	public List<SingleEvent> getSingleEvents() {
+	public Collection<Program> getSingleEvents() {
 		return singleEvents;
 	}
 	
@@ -78,9 +76,8 @@ public class GetSingleEventsAction implements Action {
 
 	@Override
 	public String execute() {
-	
-		singleEvents = (List<SingleEvent>) singleEventsService.getAllSingleEvents();
-
+		boolean singleEvent = true;
+		singleEvents = programService.getPrograms(singleEvent);
 		return SUCCESS;
 	}
 }

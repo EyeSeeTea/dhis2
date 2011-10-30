@@ -27,8 +27,7 @@
 
 package org.hisp.dhis.light.singleevents.action;
 
-import org.hisp.dhis.light.singleevents.SingleEventsService;
-
+import org.hisp.dhis.program.ProgramService;
 import com.opensymphony.xwork2.Action;
 
 /**
@@ -40,12 +39,12 @@ public class GetSingleEventChoicesAction implements Action {
 	// Dependencies
 	// -------------------------------------------------------------------------
 	
-	private SingleEventsService singleEventsService;
-	
-	public void setSingleEventsService( SingleEventsService singleEventsService )
-	{
-		this.singleEventsService = singleEventsService;
-	}
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
 	
 	// -------------------------------------------------------------------------
 	// Input & Output
@@ -80,9 +79,7 @@ public class GetSingleEventChoicesAction implements Action {
 
 	@Override
 	public String execute() {
-
-		eventName = singleEventsService.getEventById(singleEventId).getName();
-		
+		eventName = programService.getProgram(singleEventId).getName();
 		return SUCCESS;
 	}
 }

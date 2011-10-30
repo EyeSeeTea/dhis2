@@ -36,6 +36,10 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -74,6 +78,20 @@ public class PopulateSingleEventsDataAction implements Action {
     public void setPeriodService( PeriodService periodService )
     {
         this.periodService = periodService;
+    }
+    
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+
+    private ProgramStageService programStageService;
+
+    public void setProgramStageService( ProgramStageService programStageService )
+    {
+        this.programStageService = programStageService;
     }
 
 	
@@ -117,6 +135,52 @@ public class PopulateSingleEventsDataAction implements Action {
 		admin.addOrganisationUnit(organisationUnit1);
 		admin.addOrganisationUnit(organisationUnit2);
 		userService.updateUser(admin);
+		
+		// Create Single-event programs
+		
+		Program program = new Program();
+		
+        program.setName( "Birth" );
+        program.setDescription( "Birth" );
+        program.setVersion( 1 );
+        program.setDateOfEnrollmentDescription( "" );
+        program.setDateOfIncidentDescription( "Date of birth" );
+        program.setMaxDaysAllowedInputData( 60 );
+        program.setSingleEvent( true );
+
+        programService.saveProgram( program );
+        
+        ProgramStage programStage = new ProgramStage();
+
+        programStage.setName( "Single-Event" + " " + "Birth" );
+        programStage.setDescription( "Birth" );
+        programStage.setStageInProgram( program.getProgramStages().size() + 1 );
+        programStage.setProgram( program );
+        programStage.setMinDaysFromStart( 0 );
+
+        programStageService.saveProgramStage( programStage );
+        
+		Program program2 = new Program();
+		
+        program2.setName( "Death");
+        program2.setDescription( "Death" );
+        program2.setVersion( 1 );
+        program2.setDateOfEnrollmentDescription( "" );
+        program2.setDateOfIncidentDescription( "Date of death" );
+        program2.setMaxDaysAllowedInputData( 60 );
+        program2.setSingleEvent( true );
+
+        programService.saveProgram( program2 );
+        
+        ProgramStage programStage2 = new ProgramStage();
+
+        programStage2.setName( "Single-Event" + " " + "Death" );
+        programStage2.setDescription( "Death" );
+        programStage2.setStageInProgram( program.getProgramStages().size() + 1 );
+        programStage2.setProgram( program );
+        programStage2.setMinDaysFromStart( 0 );
+
+        programStageService.saveProgramStage( programStage );
 		
 		return SUCCESS;
 	}
