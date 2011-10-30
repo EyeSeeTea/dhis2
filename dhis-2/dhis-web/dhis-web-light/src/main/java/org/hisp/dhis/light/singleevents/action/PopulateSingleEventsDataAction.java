@@ -84,26 +84,38 @@ public class PopulateSingleEventsDataAction implements Action {
 	@Override
 	public String execute() {
 		
-		// Create dataset
+		// Create datasets
 		PeriodType periodType = periodService.getPeriodTypeByName( "Daily" );
-		DataSet dataSet = new DataSet( "Dataset", "DD", null, periodType );
-        dataSet.setMobile( true );
-        dataSet.setVersion( 1 );
-        int datasetId = dataSetService.addDataSet( dataSet );
-		dataSet = dataSetService.getDataSet(datasetId);
+		DataSet dataSet1 = new DataSet( "Dataset1", "DD1", null, periodType );
+        dataSet1.setMobile( true );
+        dataSet1.setVersion( 1 );
+        int datasetId1 = dataSetService.addDataSet( dataSet1 );
+		dataSet1 = dataSetService.getDataSet(datasetId1);
+		
+		DataSet dataSet2 = new DataSet( "Dataset2", "DD2", null, periodType );
+        dataSet2.setMobile( true );
+        dataSet2.setVersion( 1 );
+        int datasetId2 = dataSetService.addDataSet( dataSet2 );
+		dataSet2 = dataSetService.getDataSet(datasetId2);
         
-        // Create orgunit
-		OrganisationUnit organisationUnit = new OrganisationUnit( "Andeby", "ab", null, new Date(), null, true, null );
-		organisationUnit.addDataSet(dataSet);
+        // Create orgunits
+		OrganisationUnit organisationUnit1 = new OrganisationUnit( "Andeby", "ab", null, new Date(), null, true, null );
+		organisationUnit1.addDataSet(dataSet1);
+		int id1 = organisationUnitService.addOrganisationUnit( organisationUnit1 );
 		
-		int id = organisationUnitService.addOrganisationUnit( organisationUnit );
-		organisationUnit = organisationUnitService.getOrganisationUnit(id);
+		OrganisationUnit organisationUnit2 = new OrganisationUnit( "Gåseby", "gb", null, new Date(), null, true, null );
+		organisationUnit2.addDataSet(dataSet2);
+		int id2 = organisationUnitService.addOrganisationUnit( organisationUnit2 );
 		
-		// Add orgunit to user
+		organisationUnit1 = organisationUnitService.getOrganisationUnit(id1);
+		organisationUnit2 = organisationUnitService.getOrganisationUnit(id2);
+		
+		// Add orgunits to user
 		Collection<User> users = userService.getAllUsers();
 		User admin = users.iterator().next();
 		
-		admin.addOrganisationUnit(organisationUnit);
+		admin.addOrganisationUnit(organisationUnit1);
+		admin.addOrganisationUnit(organisationUnit2);
 		userService.updateUser(admin);
 		
 		return SUCCESS;
