@@ -38,7 +38,7 @@ public class SingleEvent implements Serializable
 	 * Determines if a de-serialized file is compatible with this class.
 	 */
 	private static final long serialVersionUID = 1L;
-	private int id;
+	private Integer id;
     private String eventName;
 
     // -------------------------------------------------------------------------
@@ -91,12 +91,12 @@ public class SingleEvent implements Serializable
     // Setters and getters
     // -------------------------------------------------------------------------
  
-    public int getId()
+    public Integer getId()
     {
     	return id;
     }
     
-    public void setId( int id)
+    public void setId( Integer id)
     {
     	this.id = id;
     }

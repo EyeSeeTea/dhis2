@@ -1,10 +1,13 @@
 
-<h2>$i18n.getString( "available_organisation_units" )</h2>
+<h2>Single Events</h2>
 
 <p>
 <ul>
-#foreach( $organisationUnit in $organisationUnits )
-	<li><a href="selectDataSet.action?organisationUnitId=$organisationUnit.id">$!encoder.htmlEncode( ${organisationUnit.name} )</a></li>
+#foreach( $singleEvent in $singleEvents )
+		<li><a href="getSingleEventChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEvent.getId()">
+				$singleEvent.getName()
+			</a>
+		</li>
 #end
 </ul>
 </p>

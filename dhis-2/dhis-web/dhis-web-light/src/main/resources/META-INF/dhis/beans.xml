@@ -96,6 +96,17 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <bean id="org.hisp.dhis.light.singleevents.action.GetSelectOrgUnitSingleEventsAction" class="org.hisp.dhis.light.singleevents.action.GetSelectOrgUnitSingleEventsAction">
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
   </bean>
+  
+  <bean id="org.hisp.dhis.light.singleevents.SingleEventsService" class="org.hisp.dhis.light.singleevents.SingleEventsService">
+  </bean>
+  
+  <bean id="org.hisp.dhis.light.singleevents.action.GetSingleEventsAction" class="org.hisp.dhis.light.singleevents.action.GetSingleEventsAction">
+    <property name="singleEventsService" ref="org.hisp.dhis.light.singleevents.SingleEventsService" />
+  </bean>
+  
+  <bean id="org.hisp.dhis.light.singleevents.action.GetSingleEventChoicesAction" class="org.hisp.dhis.light.singleevents.action.GetSingleEventChoicesAction">
+    <property name="singleEventsService" ref="org.hisp.dhis.light.singleevents.SingleEventsService" />
+  </bean>
 
   <bean id="org.hisp.dhis.light.singleevents.action.PopulateSingleEventsDataAction" class="org.hisp.dhis.light.singleevents.action.PopulateSingleEventsDataAction">
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />

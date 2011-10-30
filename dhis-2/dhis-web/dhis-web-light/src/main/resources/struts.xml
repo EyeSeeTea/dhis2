@@ -98,6 +98,16 @@
       <param name="page">/dhis-web-light/selectOrgUnitSingleEvents.vm</param>
     </action>
     
+    <action name="singleEvents" class="org.hisp.dhis.light.singleevents.action.GetSingleEventsAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/singleEvents.vm</param>
+    </action>
+    
+    <action name="getSingleEventChoices" class="org.hisp.dhis.light.singleevents.action.GetSingleEventChoicesAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/singleEventChoices.vm</param>
+    </action>
+    
     <action name="populateEvents" class="org.hisp.dhis.light.singleevents.action.PopulateSingleEventsDataAction">
       <result name="success" type="redirect">/mobile/index.action</result>
     </action>

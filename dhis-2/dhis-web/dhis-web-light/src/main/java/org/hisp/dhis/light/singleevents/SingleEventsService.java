@@ -56,4 +56,22 @@ public class SingleEventsService
 		
 		return col;
 	}
+	
+	public SingleEvent getEventById(Integer id){
+		
+		SingleEvent death = new SingleEvent();
+		SingleEvent birth = new SingleEvent();
+		
+		death.setId(1);
+		death.setName("Death");
+		
+		birth.setId(2);
+		birth.setName("Birth");
+			
+		if(id == 1){
+			return death;
+		}else{
+			return birth;
+		}
+	}
 }

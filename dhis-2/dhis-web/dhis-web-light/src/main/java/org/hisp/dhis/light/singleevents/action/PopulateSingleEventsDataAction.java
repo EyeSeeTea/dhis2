@@ -103,7 +103,7 @@ public class PopulateSingleEventsDataAction implements Action {
 		organisationUnit1.addDataSet(dataSet1);
 		int id1 = organisationUnitService.addOrganisationUnit( organisationUnit1 );
 		
-		OrganisationUnit organisationUnit2 = new OrganisationUnit( "Gåseby", "gb", null, new Date(), null, true, null );
+		OrganisationUnit organisationUnit2 = new OrganisationUnit( "Gaseby", "gb", null, new Date(), null, true, null );
 		organisationUnit2.addDataSet(dataSet2);
 		int id2 = organisationUnitService.addOrganisationUnit( organisationUnit2 );
 		

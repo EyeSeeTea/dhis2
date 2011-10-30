@@ -27,23 +27,19 @@
 
 package org.hisp.dhis.light.singleevents.action;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hisp.dhis.light.singleevents.SingleEventsService;
-import org.hisp.dhis.singleevents.SingleEvent;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Group1 Fall 2011
  */
-public class GetSingleEventsAction implements Action {
+public class GetSingleEventChoicesAction implements Action {
 	
 	// -------------------------------------------------------------------------
 	// Dependencies
 	// -------------------------------------------------------------------------
-
+	
 	private SingleEventsService singleEventsService;
 	
 	public void setSingleEventsService( SingleEventsService singleEventsService )
@@ -65,22 +61,28 @@ public class GetSingleEventsAction implements Action {
     public Integer getOrganisationUnitId(){
     	return this.organisationUnitId;
     }
-
-	private List<SingleEvent> singleEvents = new ArrayList<SingleEvent>();
-	
-	public List<SingleEvent> getSingleEvents() {
-		return singleEvents;
-	}
-	
+    
+    private Integer singleEventId;
+    
+    public void setSingleEventId( Integer singleEventId){
+    	this.singleEventId = singleEventId;
+    }
+    
+    private String eventName;
+    
+    public String getEventName(){
+    	return this.eventName;
+    }
+    
 	// -------------------------------------------------------------------------
 	// Action Implementation
 	// -------------------------------------------------------------------------
 
 	@Override
 	public String execute() {
-	
-		singleEvents = (List<SingleEvent>) singleEventsService.getAllSingleEvents();
 
+		eventName = singleEventsService.getEventById(singleEventId).getName();
+		
 		return SUCCESS;
 	}
 }
