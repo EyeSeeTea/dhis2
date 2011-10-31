@@ -107,7 +107,7 @@ Ext.onReady( function() {
             },
             getXY: function() {
                 var c = Ext.getCmp('center');
-                return {x: c.x + 15, y: c.y + 45};
+                return {x: c.x + 15, y: c.y + 43};
             }
         },
         multiselect: {
@@ -1187,7 +1187,8 @@ Ext.onReady( function() {
                                                     '->',
                                                     {
                                                         xtype: 'button',
-                                                        text: '>',
+                                                        icon: 'images/arrowright.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableIndicators"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedIndicators"]'));
@@ -1195,12 +1196,14 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'button',
-                                                        text: '>>',
+                                                        icon: 'images/arrowrightdouble.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.selectAll(DV.util.getCmp('multiselect[name="availableIndicators"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedIndicators"]'));
                                                         }
-                                                    }
+                                                    },
+                                                    ' '
                                                 ],
                                                 listeners: {
                                                     afterrender: function(ms) {
@@ -1222,9 +1225,11 @@ Ext.onReady( function() {
                                                 queryMode: 'local',
                                                 store: DV.store.indicator.selected,
                                                 tbar: [
+                                                    ' ',
                                                     {
                                                         xtype: 'button',
-                                                        text: '<<',
+                                                        icon: 'images/arrowleftdouble.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.unselectAll(DV.util.getCmp('multiselect[name="availableIndicators"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedIndicators"]'));
@@ -1232,7 +1237,8 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'button',
-                                                        text: '<',
+                                                        icon: 'images/arrowleft.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableIndicators"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedIndicators"]'));
@@ -1336,7 +1342,8 @@ Ext.onReady( function() {
                                                     '->',
                                                     {
                                                         xtype: 'button',
-                                                        text: '>',
+                                                        icon: 'images/arrowright.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableDataElements"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedDataElements"]'));
@@ -1344,12 +1351,14 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'button',
-                                                        text: '>>',
+                                                        icon: 'images/arrowrightdouble.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.selectAll(DV.util.getCmp('multiselect[name="availableDataElements"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedDataElements"]'));
                                                         }
-                                                    }
+                                                    },
+                                                    ' '
                                                 ],
                                                 listeners: {
                                                     afterrender: function(ms) {
@@ -1371,9 +1380,11 @@ Ext.onReady( function() {
                                                 queryMode: 'remote',
                                                 store: DV.store.dataelement.selected,
                                                 tbar: [
+                                                    ' ',
                                                     {
                                                         xtype: 'button',
-                                                        text: '<<',
+                                                        icon: 'images/arrowleftdouble.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.unselectAll(DV.util.getCmp('multiselect[name="availableDataElements"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedDataElements"]'));
@@ -1381,7 +1392,8 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'button',
-                                                        text: '<',
+                                                        icon: 'images/arrowleft.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableDataElements"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedDataElements"]'));
