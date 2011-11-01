@@ -26,17 +26,26 @@
  */
 
 package org.hisp.dhis.light.singleevents.action;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
@@ -52,6 +61,20 @@ public class PopulateSingleEventsDataAction implements Action {
     // Dependencies
     // -------------------------------------------------------------------------
 
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+    
+    private PatientService patientService;
+
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
+    }
+    
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -130,6 +153,9 @@ public class PopulateSingleEventsDataAction implements Action {
 		organisationUnit1 = organisationUnitService.getOrganisationUnit(id1);
 		organisationUnit2 = organisationUnitService.getOrganisationUnit(id2);
 		
+		Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
+		organisationUnits.add(organisationUnit1);
+		
 		// Add orgunits to user
 		Collection<User> users = userService.getAllUsers();
 		User admin = users.iterator().next();
@@ -149,6 +175,7 @@ public class PopulateSingleEventsDataAction implements Action {
         program.setDateOfIncidentDescription( "Date of birth" );
         program.setMaxDaysAllowedInputData( 60 );
         program.setSingleEvent( true );
+        program.setOrganisationUnits(organisationUnits);
 
         programService.saveProgram( program );
         
@@ -171,6 +198,7 @@ public class PopulateSingleEventsDataAction implements Action {
         program2.setDateOfIncidentDescription( "Date of death" );
         program2.setMaxDaysAllowedInputData( 60 );
         program2.setSingleEvent( true );
+        program2.setOrganisationUnits(organisationUnits);
 
         programService.saveProgram( program2 );
         
@@ -181,8 +209,82 @@ public class PopulateSingleEventsDataAction implements Action {
         programStage2.setStageInProgram( program.getProgramStages().size() + 1 );
         programStage2.setProgram( program );
         programStage2.setMinDaysFromStart( 0 );
-
-        programStageService.saveProgramStage( programStage );
+        
+        ArrayList<String> patients = new ArrayList<String>();
+        patients.add("Donald Duck");
+        patients.add("Dolly Duck");
+        patients.add("Doffen Duck");
+        patients.add("Dole Duck");
+        patients.add("Ole Duck");
+        patients.add("Mikke Mus");
+        patients.add("Langbein");
+        patients.add("Petter Smart");
+        patients.add("SvartePetter");
+        patients.add("Onkel Skrue");
+        patients.add("Darkwing Duck");
+        patients.add("Minni Mus");
+        patients.add("Fetter Anton");
+        patients.add("Bestemor Duck");
+        patients.add("Klodrik");
+        patients.add("Rikerud");
+        patients.add("Magica fra Tryll");
+        patients.add("Klaus Knegg");
+        patients.add("Pluto");
+        patients.add("Politimester Fiks");
+        patients.add("Anton Duck");
+        patients.add("Hetti");
+        patients.add("Netti");
+        patients.add("Letti");
+        patients.add("Nabo Jensen");
+        patients.add("Klara Ku");
+        patients.add("Rotor McKvakk");
+        patients.add("Snipp");
+        patients.add("Snapp");
+        patients.add("B-Gjeng:176-167");
+        patients.add("B-Gjeng:176-671");
+        patients.add("B-Gjeng:176-761");
+        patients.add("Bestefar B");
+        
+        // var to check if date sorts correct
+        int i = 0;
+        // var to alternate which program to enroll
+        boolean alternate = true;
+        
+        for(String item : patients){
+        	
+        	alternate = (alternate) ? false : true;
+        	i++;
+        	
+        	Program pro = (alternate) ? program : program2;
+        	
+	        Patient p = new Patient();
+	        p.setIsDead( false );
+	        p.setFirstName( item );
+	        p.setBirthDate(new Date());
+	        p.setGender(Patient.MALE);
+	        p.setDobType(Patient.DOB_TYPE_VERIFIED);
+	        p.setOrganisationUnit(organisationUnit1);
+	        p.setRegistrationDate(new Date());
+	        
+	        patientService.savePatient(p);
+	        
+	        ProgramInstance programInstance = new ProgramInstance();
+	        programInstance.setEnrollmentDate( new Date() );
+	        Date date = new Date();
+	        Calendar cal = Calendar.getInstance();
+	        cal.setTime(date);
+	        cal.add(Calendar.DAY_OF_MONTH, -i);
+	        date = cal.getTime();
+	        programInstance.setDateOfIncident(date);
+	        programInstance.setProgram( pro );
+	        programInstance.setPatient( p );
+	        programInstance.setCompleted( false );
+	
+	        programInstanceService.addProgramInstance( programInstance );
+	
+	        p.getPrograms().add( pro );
+	        patientService.updatePatient( p );
+        }
 		
 		return SUCCESS;
 	}

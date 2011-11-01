@@ -26,24 +26,49 @@
  */
 
 package org.hisp.dhis.light.singleevents.action;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
+
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Group1 Fall 2011
  */
-public class GetSingleEventChoicesAction implements Action {
+public class GetRecentlyRegisteredSingleEventsAction implements Action {
 	
 	// -------------------------------------------------------------------------
 	// Dependencies
 	// -------------------------------------------------------------------------
-	
+    
     private ProgramService programService;
 
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
+    }
+    
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+    
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
     }
 	
 	// -------------------------------------------------------------------------
@@ -77,13 +102,44 @@ public class GetSingleEventChoicesAction implements Action {
     	return this.eventName;
     }
     
+	private List<Patient> recentPatients = new ArrayList<Patient>();
+	
+	public List<Patient> getRecentPatients() {
+		return recentPatients;
+	}
+    
+	 static final Comparator<ProgramInstance> OrderByDate =
+             new Comparator<ProgramInstance>() {
+		 public int compare(ProgramInstance i1, ProgramInstance i2) {
+			 return i1.getDateOfIncident().compareTo(i2.getDateOfIncident());
+		 }
+	 };
+	
 	// -------------------------------------------------------------------------
 	// Action Implementation
 	// -------------------------------------------------------------------------
 
 	@Override
 	public String execute() {
-		eventName = programService.getProgram(singleEventId).getName();
+		
+		OrganisationUnit org = organisationUnitService.getOrganisationUnit(organisationUnitId);
+		Program pro = programService.getProgram(singleEventId);
+		
+		recentPatients.clear();
+		
+		List<ProgramInstance> proInst = (List<ProgramInstance>) programInstanceService.getProgramInstances(pro, org);
+		if(!proInst.isEmpty())
+		{
+			Collections.sort(proInst, OrderByDate);
+			proInst = proInst.subList(0, 6);
+			
+			for (ProgramInstance instItem : proInst)
+			{
+				recentPatients.add(instItem.getPatient());
+			}
+		}
+		eventName = pro.getName();
+		
 		return SUCCESS;
 	}
 }

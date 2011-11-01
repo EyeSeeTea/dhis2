@@ -4,6 +4,8 @@
 <p>
 <ul>
 	<li>Register $eventName</li>
+	<li><a href="GetRecentlyRegisteredSingleEvents.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">
+	Recently registered</a></li>
 </ul>
 </p>
 
