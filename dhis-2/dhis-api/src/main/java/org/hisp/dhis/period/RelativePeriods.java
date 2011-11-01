@@ -95,11 +95,23 @@ public class RelativePeriods
         "month11",
         "month12" };
     
+    public static final String[] BIMONTHS_LAST_6 = {
+        "bimonth1",
+        "bimonth2",
+        "bimonth3",
+        "bimonth4",
+        "bimonth5",
+        "bimonth6" };
+    
     public static final String[] QUARTERS_THIS_YEAR = {
         "quarter1",
         "quarter2",
         "quarter3",
         "quarter4" };
+    
+    public static final String[] SIXMONHTS_LAST_2 = {
+        "sixmonth1",
+        "sixmonth2" };
 
     public static final String[] QUARTERS_LAST_YEAR = {
         "quarter1_last_year",
@@ -154,7 +166,7 @@ public class RelativePeriods
     
     /**
      * @param reportingMonth reporting month
-     * @param reportingBimonth reporting bimonth
+     * @param reportingBimonth reporting bi-month
      * @param reportingQuarter reporting quarter
      * @param monthsThisYear months this year
      * @param quartersThisYear quarters this year
@@ -164,12 +176,14 @@ public class RelativePeriods
      * @param lastYear last year
      * @param last5Years last 5 years
      * @param last12Months last 12 months
+     * @param last6BiMonths last 6 bi-months
      * @param last4Quarters last 4 quarters
+     * @param last2SixMonths last 2 six-months
      */
     public RelativePeriods( boolean reportingMonth, boolean reportingBimonth, boolean reportingQuarter,
         boolean monthsThisYear, boolean quartersThisYear, boolean thisYear,
         boolean monthsLastYear, boolean quartersLastYear, boolean lastYear, boolean last5Years,
-        boolean last12Months, boolean last4Quarters )
+        boolean last12Months, boolean last6BiMonths, boolean last4Quarters, boolean last2SixMonths )
     {
         this.reportingMonth = reportingMonth;
         this.reportingBimonth = reportingBimonth;
@@ -182,7 +196,9 @@ public class RelativePeriods
         this.lastYear = lastYear;
         this.last5Years = last5Years;
         this.last12Months = last12Months;
+        this.last6BiMonths = last6BiMonths;
         this.last4Quarters = last4Quarters;
+        this.last2SixMonths = last2SixMonths;
     }
 
     // -------------------------------------------------------------------------
@@ -205,7 +221,10 @@ public class RelativePeriods
         this.lastYear = false;
         this.last5Years = false;
         this.last12Months = false;
+        this.last6BiMonths = false;
         this.last4Quarters = false;
+        this.last2SixMonths = false;
+        
         return this;
     }
 
@@ -332,10 +351,20 @@ public class RelativePeriods
         {
             periods.addAll( getRelativePeriodList( new MonthlyPeriodType().generateRollingPeriods( date ), MONTHS_LAST_12, dynamicNames, format ) );
         }
-                
+        
+        if ( isLast6BiMonths() )
+        {
+            periods.addAll( getRelativePeriodList( new BiMonthlyPeriodType().generateRollingPeriods( date ), BIMONTHS_LAST_6, dynamicNames, format ) );
+        }
+        
         if ( isLast4Quarters() )
         {
             periods.addAll( getRelativePeriodList( new QuarterlyPeriodType().generateRollingPeriods( date ), QUARTERS_THIS_YEAR, dynamicNames, format ) );
+        }
+        
+        if ( isLast2SixMonths() )
+        {
+            periods.addAll( getRelativePeriodList( new SixMonthlyPeriodType().generateRollingPeriods( date ), SIXMONHTS_LAST_2, dynamicNames, format ) );
         }
         
         date = getDate( MONTHS_IN_YEAR, date );
