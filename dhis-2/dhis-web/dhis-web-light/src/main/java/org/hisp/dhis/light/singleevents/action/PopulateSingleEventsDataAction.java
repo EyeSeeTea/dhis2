@@ -119,10 +119,12 @@ public class PopulateSingleEventsDataAction implements Action {
         // Create orgunits
 		OrganisationUnit organisationUnit1 = new OrganisationUnit( "Andeby", "ab", null, new Date(), null, true, null );
 		organisationUnit1.addDataSet(dataSet1);
+		organisationUnit1.setHasPatients(true);
 		int id1 = organisationUnitService.addOrganisationUnit( organisationUnit1 );
 		
 		OrganisationUnit organisationUnit2 = new OrganisationUnit( "Gaseby", "gb", null, new Date(), null, true, null );
 		organisationUnit2.addDataSet(dataSet2);
+		organisationUnit2.setHasPatients(true);
 		int id2 = organisationUnitService.addOrganisationUnit( organisationUnit2 );
 		
 		organisationUnit1 = organisationUnitService.getOrganisationUnit(id1);
