@@ -138,7 +138,11 @@ public class RelativePeriods
     
     private Boolean last12Months = false;
     
+    private Boolean last6BiMonths = false;
+    
     private Boolean last4Quarters = false;
+    
+    private Boolean last2SixMonths = false;
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -621,6 +625,16 @@ public class RelativePeriods
         this.last12Months = last12Months;
     }
 
+    public Boolean getLast6BiMonths()
+    {
+        return last6BiMonths;
+    }
+
+    public void setLast6BiMonths( Boolean last6BiMonths )
+    {
+        this.last6BiMonths = last6BiMonths;
+    }
+
     public Boolean getLast4Quarters()
     {
         return last4Quarters;
@@ -629,6 +643,16 @@ public class RelativePeriods
     public void setLast4Quarters( Boolean last4Quarters )
     {
         this.last4Quarters = last4Quarters;
+    }
+
+    public Boolean getLast2SixMonths()
+    {
+        return last2SixMonths;
+    }
+
+    public void setLast2SixMonths( Boolean last2SixMonths )
+    {
+        this.last2SixMonths = last2SixMonths;
     }
 
     // -------------------------------------------------------------------------
@@ -653,7 +677,9 @@ public class RelativePeriods
         result = prime * result + ( ( lastYear == null ) ? 0 : lastYear.hashCode() );
         result = prime * result + ( ( last5Years == null ) ? 0 : last5Years.hashCode() );
         result = prime * result + ( ( last12Months == null ) ? 0 : last12Months.hashCode() );
+        result = prime * result + ( ( last6BiMonths == null ) ? 0 : last6BiMonths.hashCode() );
         result = prime * result + ( ( last4Quarters == null ) ? 0 : last4Quarters.hashCode() );
+        result = prime * result + ( ( last2SixMonths == null ) ? 0 : last2SixMonths.hashCode() );
         
         return result;
     }
@@ -810,6 +836,18 @@ public class RelativePeriods
             return false;
         }
 
+        if ( last6BiMonths == null )
+        {
+            if ( other.last6BiMonths != null )
+            {
+                return false;
+            }
+        }
+        else if ( !last6BiMonths.equals( other.last6BiMonths ) )
+        {
+            return false;
+        }
+
         if ( last4Quarters == null )
         {
             if ( other.last4Quarters != null )
@@ -818,6 +856,18 @@ public class RelativePeriods
             }
         }
         else if ( !last4Quarters.equals( other.last4Quarters ) )
+        {
+            return false;
+        }
+
+        if ( last2SixMonths == null )
+        {
+            if ( other.last2SixMonths != null )
+            {
+                return false;
+            }
+        }
+        else if ( !last2SixMonths.equals( other.last2SixMonths ) )
         {
             return false;
         }
