@@ -332,7 +332,7 @@ public class RelativePeriods
         {
             periods.addAll( getRelativePeriodList( new MonthlyPeriodType().generateRollingPeriods( date ), MONTHS_LAST_12, dynamicNames, format ) );
         }
-        
+                
         if ( isLast4Quarters() )
         {
             periods.addAll( getRelativePeriodList( new QuarterlyPeriodType().generateRollingPeriods( date ), QUARTERS_THIS_YEAR, dynamicNames, format ) );
