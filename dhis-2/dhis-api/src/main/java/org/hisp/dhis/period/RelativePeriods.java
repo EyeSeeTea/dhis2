@@ -506,11 +506,21 @@ public class RelativePeriods
         return last12Months != null && last12Months;
     }
     
+    public boolean isLast6BiMonths()
+    {
+        return last6BiMonths != null && last6BiMonths;
+    }
+    
     public boolean isLast4Quarters()
     {
         return last4Quarters != null && last4Quarters;
     }
         
+    public boolean isLast2SixMonths()
+    {
+        return last2SixMonths != null && last2SixMonths;
+    }
+    
     // -------------------------------------------------------------------------
     // Getters & setters
     // -------------------------------------------------------------------------
