@@ -3,7 +3,9 @@
 
 <p>
 <ul>
-	<li>Register $eventName</li>
+	<li>
+		<a href="registerNewBeneficiary.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">Register $eventName</a>
+	</li>
 	<li><a href="GetRecentlyRegisteredSingleEvents.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">
 	Recently registered</a></li>
 </ul>

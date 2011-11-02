@@ -1,0 +1,66 @@
+
+<h2>Register new beneficiary</h2>
+
+<form method="post" action="addBeneficiary.action">
+	<div class="header-box" align="center">
+		<p style="text-align: left;">
+		
+			<input type="hidden" name="organisationUnitId" value="$organisationUnitId" />
+		
+	    	<label>Date of Registration (yyyy-MM-dd)</label>
+	    	<input type="text" maxlength="255" size="24" name="registrationDate" value="$todayDate" />
+	    	
+	    	<label>Full Name</label>	
+	    	<input type="text" maxlength="255" size="24" name="fullName" />
+	    	
+	    	<label>Gender</label>
+	    	<br />    	
+	    	<select name="gender">
+	    		<option value="please_select">[Please select]</option>
+				<option value="M">Male</option>
+				<option value="F">Female</option>
+				<option value="T">Transgender</option>
+			</select>
+			
+			<br />
+			
+			<label>DOB Type</label>
+			<br />
+			<select name="dobType">
+				<option value="p">[Please select]</option>
+				<option value="V">Verified</option>
+				<option value="D">Declared</option>
+			</select>
+			
+			<br />
+			
+			<label>Date of Birth (yyyy-MM-dd)</label>
+			<input type="text" maxlength="255" size="24" name="birthDate" />
+			
+			<label>Blood Group</label>
+			<br />
+			<select name="bloodGroup">
+				<option value="please_select">[Please select]</option>
+				<option value="A+">A+</option>
+				<option value="A-">A-</option>
+				<option value="AB+">AB+</option>
+				<option value="AB-">AB-</option>
+				<option value="B+">B+</option>
+				<option value="B-">B-</option>
+				<option value="O+">O+</option>
+				<option value="O-">O-</option>
+			</select>
+			
+			<br />
+			
+			<input type="submit" value="Submit" />
+	    </p>
+	</div>
+</form>
+
+<div id="footer">
+<h2>$i18n.getString( "navigate_to" )</h2>
+<ul>
+	<li><a href="index.action">$i18n.getString("home")</a></li>
+</ul>
+</div>

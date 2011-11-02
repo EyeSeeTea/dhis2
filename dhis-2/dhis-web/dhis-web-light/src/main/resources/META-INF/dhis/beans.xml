@@ -105,6 +105,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
   </bean>
   
+  <bean id="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
+  	<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+	<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
+  </bean>
+  
   <bean id="org.hisp.dhis.light.singleevents.action.GetRecentlyRegisteredSingleEventsAction" class="org.hisp.dhis.light.singleevents.action.GetRecentlyRegisteredSingleEventsAction">
     <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
