@@ -35,6 +35,10 @@ import java.util.Set;
 
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -48,6 +52,8 @@ import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramStageDataElementService;
 import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
@@ -116,7 +122,27 @@ public class PopulateSingleEventsDataAction implements Action {
     {
         this.programStageService = programStageService;
     }
+    
+    private DataElementService dataElementService;
 
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
+    
+    private DataElementCategoryService dataElementCategoryService;
+
+    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
+    {
+        this.dataElementCategoryService = dataElementCategoryService;
+    }
+    
+    private ProgramStageDataElementService programStageDataElementService;
+
+    public void setProgramStageDataElementService( ProgramStageDataElementService programStageDataElementService )
+    {
+        this.programStageDataElementService = programStageDataElementService;
+    }
 	
 	// -------------------------------------------------------------------------
 	// Action Implementation
@@ -181,13 +207,13 @@ public class PopulateSingleEventsDataAction implements Action {
         
         ProgramStage programStage = new ProgramStage();
 
-        programStage.setName( "Single-Event" + " " + "Birth" );
+        programStage.setName( "Single-Event Birth" );
         programStage.setDescription( "Birth" );
         programStage.setStageInProgram( program.getProgramStages().size() + 1 );
         programStage.setProgram( program );
         programStage.setMinDaysFromStart( 0 );
 
-        programStageService.saveProgramStage( programStage );
+        int progID = programStageService.saveProgramStage( programStage );
         
 		Program program2 = new Program();
 		
@@ -204,53 +230,97 @@ public class PopulateSingleEventsDataAction implements Action {
         
         ProgramStage programStage2 = new ProgramStage();
 
-        programStage2.setName( "Single-Event" + " " + "Death" );
+        programStage2.setName( "Single-Event Death" );
         programStage2.setDescription( "Death" );
         programStage2.setStageInProgram( program.getProgramStages().size() + 1 );
         programStage2.setProgram( program );
         programStage2.setMinDaysFromStart( 0 );
         
-        ArrayList<String> patients = new ArrayList<String>();
-        patients.add("Donald Duck");
-        patients.add("Dolly Duck");
-        patients.add("Doffen Duck");
-        patients.add("Dole Duck");
-        patients.add("Ole Duck");
-        patients.add("Mikke Mus");
-        patients.add("Langbein");
-        patients.add("Petter Smart");
-        patients.add("SvartePetter");
-        patients.add("Onkel Skrue");
-        patients.add("Darkwing Duck");
-        patients.add("Minni Mus");
-        patients.add("Fetter Anton");
-        patients.add("Bestemor Duck");
-        patients.add("Klodrik");
-        patients.add("Rikerud");
-        patients.add("Magica fra Tryll");
-        patients.add("Klaus Knegg");
-        patients.add("Pluto");
-        patients.add("Politimester Fiks");
-        patients.add("Anton Duck");
-        patients.add("Hetti");
-        patients.add("Netti");
-        patients.add("Letti");
-        patients.add("Nabo Jensen");
-        patients.add("Klara Ku");
-        patients.add("Rotor McKvakk");
-        patients.add("Snipp");
-        patients.add("Snapp");
-        patients.add("B-Gjeng:176-167");
-        patients.add("B-Gjeng:176-671");
-        patients.add("B-Gjeng:176-761");
-        patients.add("Bestefar B");
+        programStageService.saveProgramStage( programStage2 );
+		
+        programStage = programStageService.getProgramStage(progID);
+        
+        // Create Dataelements
+		DataElement dataElement = new DataElement();
+        
+		DataElementCategoryCombo categoryCombo = dataElementCategoryService.getDataElementCategoryComboByName(DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME);
+		
+		dataElement.setName( "Date of Death" );
+        dataElement.setShortName( "DOD" );
+        dataElement.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElement.setType( DataElement.VALUE_TYPE_DATE );
+        dataElement.setCategoryCombo(categoryCombo );
+        dataElement.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement.setActive(true);
+        int elementID = dataElementService.addDataElement( dataElement );
+        
+        dataElement = dataElementService.getDataElement(elementID);
+        
+        ProgramStageDataElement programStageDataElement = new ProgramStageDataElement( programStage, dataElement, true, 1 );
+        programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+        
+        class Name {
+        	private String firstName;
+        	private String middleName;
+        	private String lastName;
+			
+        	public Name(String firstName, String middleName, String lastName){
+        		this.firstName = firstName;
+        		this.middleName = middleName;
+        		this.lastName = lastName;
+        	}
+        	
+        	public Name(String firstName, String lastName){
+        		this.firstName = firstName;
+        		this.lastName = lastName;
+        	}
+        	
+        	public Name(String firstName){
+        		this.firstName = firstName;
+        	}
+        }
+        
+        ArrayList<Name> patients = new ArrayList<Name>();
+        patients.add(new Name("Donald","Duck"));
+        patients.add(new Name("Magica","Fra","Tryll"));
+        patients.add(new Name("Dolly","Duck"));
+        patients.add(new Name("Doffen","Duck"));
+        patients.add(new Name("Dole","Duck"));
+        patients.add(new Name("Ole","Duck"));
+        patients.add(new Name("Mikke","Mus"));
+        patients.add(new Name("Langbein"));
+        patients.add(new Name("Petter","Smart"));
+        patients.add(new Name("SvartePetter"));
+        patients.add(new Name("Onkel","Skrue"));
+        patients.add(new Name("Darkwing","Duck"));
+        patients.add(new Name("Minne","Mus"));
+        patients.add(new Name("Fetter","Anton"));
+        patients.add(new Name("Bestemor","Duck"));
+        patients.add(new Name("Klodrik"));
+        patients.add(new Name("Rikerud"));
+        patients.add(new Name("Klasu","Knegg"));
+        patients.add(new Name("Pluto"));
+        patients.add(new Name("Politimester","Fiks"));
+        patients.add(new Name("Anton","Duck"));
+        patients.add(new Name("Hetti"));
+        patients.add(new Name("Netti"));
+        patients.add(new Name("Letti"));
+        patients.add(new Name("Nabo","Jensen"));
+        patients.add(new Name("Klara","Ku"));
+        patients.add(new Name("Rotor","McKvakk"));
+        patients.add(new Name("Snipp"));
+        patients.add(new Name("Snapp"));
+        patients.add(new Name("B-Gjeng","176-167"));
+        patients.add(new Name("B-Gjeng","176-671"));
+        patients.add(new Name("B-Gjeng","176-761"));
+        patients.add(new Name("Bestefar","B"));
         
         // var to check if date sorts correct
         int i = 0;
         // var to alternate which program to enroll
         boolean alternate = true;
         
-        for(String item : patients){
+        for(Name item : patients){
         	
         	alternate = (alternate) ? false : true;
         	i++;
@@ -258,8 +328,10 @@ public class PopulateSingleEventsDataAction implements Action {
         	Program pro = (alternate) ? program : program2;
         	
 	        Patient p = new Patient();
-	        p.setIsDead( false );
-	        p.setFirstName( item );
+	        p.setIsDead(false);
+	        p.setFirstName(item.firstName);
+	        p.setMiddleName(item.middleName);
+	        p.setLastName(item.lastName);
 	        p.setBirthDate(new Date());
 	        p.setGender(Patient.MALE);
 	        p.setDobType(Patient.DOB_TYPE_VERIFIED);

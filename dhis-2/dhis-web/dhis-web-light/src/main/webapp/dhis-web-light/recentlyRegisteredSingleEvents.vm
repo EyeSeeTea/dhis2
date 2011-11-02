@@ -4,7 +4,10 @@
 <p>
 <ul>
 #foreach( $patient in $recentPatients )
-		<li>$patient.getFirstName()</li>
+		<li><a href="EditRecentlyRegistered.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId&patientId=$patient.getId()">
+		$patient.getFullName()
+		</a>
+		</li>
 #end
 </ul>
 </p>

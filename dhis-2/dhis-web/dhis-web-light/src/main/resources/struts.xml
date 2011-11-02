@@ -122,12 +122,15 @@
       <result name="success" type="velocity">/dhis-web-light/main.vm</result>
       <param name="page">/dhis-web-light/recentlyRegisteredSingleEvents.vm</param>
     </action>
- 
+    
+    <action name="EditRecentlyRegistered" class="org.hisp.dhis.light.singleevents.action.GetRecentlyEditChoicesAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/recentlyEditChoices.vm</param>
+    </action>
+
     <action name="populateEvents" class="org.hisp.dhis.light.singleevents.action.PopulateSingleEventsDataAction">
       <result name="success" type="redirect">/mobile/index.action</result>
     </action>
-    
-    
 
   </package>
 </struts>

@@ -111,7 +111,7 @@ public class GetRecentlyRegisteredSingleEventsAction implements Action {
 	 static final Comparator<ProgramInstance> OrderByDate =
              new Comparator<ProgramInstance>() {
 		 public int compare(ProgramInstance i1, ProgramInstance i2) {
-			 return i1.getDateOfIncident().compareTo(i2.getDateOfIncident());
+			 return i2.getDateOfIncident().compareTo(i1.getDateOfIncident());
 		 }
 	 };
 	
@@ -139,7 +139,7 @@ public class GetRecentlyRegisteredSingleEventsAction implements Action {
 			}
 		}
 		eventName = pro.getName();
-		
+
 		return SUCCESS;
 	}
 }
