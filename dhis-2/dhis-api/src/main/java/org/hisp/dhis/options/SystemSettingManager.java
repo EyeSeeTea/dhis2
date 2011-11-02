@@ -60,6 +60,7 @@ public interface SystemSettingManager
     final String KEY_EMAIL_HOST_NAME = "keyEmailHostName";
     final String KEY_EMAIL_USERNAME = "keyEmailUsername";
     final String KEY_EMAIL_PASSWORD = "keyEmailPassword";
+    final String KEY_SCHEDULED_PERIOD_TYPES = "keyScheduledPeriodTypes";
     
     final int DEFAULT_MAX_NUMBER_OF_ATTEMPTS = 20;
     final int DEFAULT_TIMEFRAME_MINUTES = 1;
