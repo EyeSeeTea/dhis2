@@ -194,11 +194,11 @@ public class PopulateSingleEventsDataAction implements Action {
 		
 		Program program = new Program();
 		
-        program.setName( "Birth" );
-        program.setDescription( "Birth" );
+        program.setName( "Death" );
+        program.setDescription( "Death" );
         program.setVersion( 1 );
         program.setDateOfEnrollmentDescription( "" );
-        program.setDateOfIncidentDescription( "Date of birth" );
+        program.setDateOfIncidentDescription( "Date of Death" );
         program.setMaxDaysAllowedInputData( 60 );
         program.setSingleEvent( true );
         program.setOrganisationUnits(organisationUnits);
@@ -207,8 +207,8 @@ public class PopulateSingleEventsDataAction implements Action {
         
         ProgramStage programStage = new ProgramStage();
 
-        programStage.setName( "Single-Event Birth" );
-        programStage.setDescription( "Birth" );
+        programStage.setName( "Single-Event Death" );
+        programStage.setDescription( "Death" );
         programStage.setStageInProgram( program.getProgramStages().size() + 1 );
         programStage.setProgram( program );
         programStage.setMinDaysFromStart( 0 );
@@ -217,11 +217,11 @@ public class PopulateSingleEventsDataAction implements Action {
         
 		Program program2 = new Program();
 		
-        program2.setName( "Death");
-        program2.setDescription( "Death" );
+        program2.setName( "Birth");
+        program2.setDescription( "Birth" );
         program2.setVersion( 1 );
         program2.setDateOfEnrollmentDescription( "" );
-        program2.setDateOfIncidentDescription( "Date of death" );
+        program2.setDateOfIncidentDescription( "Date of Birth" );
         program2.setMaxDaysAllowedInputData( 60 );
         program2.setSingleEvent( true );
         program2.setOrganisationUnits(organisationUnits);
@@ -230,10 +230,10 @@ public class PopulateSingleEventsDataAction implements Action {
         
         ProgramStage programStage2 = new ProgramStage();
 
-        programStage2.setName( "Single-Event Death" );
+        programStage2.setName( "Single-Event Birth" );
         programStage2.setDescription( "Death" );
-        programStage2.setStageInProgram( program.getProgramStages().size() + 1 );
-        programStage2.setProgram( program );
+        programStage2.setStageInProgram( program2.getProgramStages().size() + 1 );
+        programStage2.setProgram( program2 );
         programStage2.setMinDaysFromStart( 0 );
         
         programStageService.saveProgramStage( programStage2 );
@@ -252,11 +252,102 @@ public class PopulateSingleEventsDataAction implements Action {
         dataElement.setCategoryCombo(categoryCombo );
         dataElement.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
         dataElement.setActive(true);
+        
         int elementID = dataElementService.addDataElement( dataElement );
         
+        DataElement dataElement2 = new DataElement();
+		dataElement2.setName( "Probable Cause" );
+        dataElement2.setShortName( "PC" );
+        dataElement2.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElement2.setType( DataElement.VALUE_TYPE_STRING );
+        dataElement2.setCategoryCombo(categoryCombo );
+        dataElement2.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement2.setActive(true);
+        
+        int elementID2 = dataElementService.addDataElement( dataElement2 );
+        
+        DataElement dataElement3 = new DataElement();
+		dataElement3.setName( "Bool" );
+        dataElement3.setShortName( "Bo" );
+        dataElement3.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElement3.setType( DataElement.VALUE_TYPE_BOOL );
+        dataElement3.setCategoryCombo(categoryCombo );
+        dataElement3.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement3.setActive(true);
+        
+        int elementID3 = dataElementService.addDataElement( dataElement3 );
+        
+        DataElement dataElement4 = new DataElement();
+		dataElement4.setName( "Positive int" );
+        dataElement4.setShortName( "Pos" );
+        dataElement4.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElement4.setType( DataElement.VALUE_TYPE_POSITIVE_INT );
+        dataElement4.setCategoryCombo(categoryCombo );
+        dataElement4.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement4.setActive(true);
+        
+        int elementID4 = dataElementService.addDataElement( dataElement4 );
+        
+        DataElement dataElement5 = new DataElement();
+		dataElement5.setName( "Negative int" );
+        dataElement5.setShortName( "Neg" );
+        dataElement5.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElement5.setType( DataElement.VALUE_TYPE_NEGATIVE_INT );
+        dataElement5.setCategoryCombo(categoryCombo );
+        dataElement5.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement5.setActive(true);
+        
+        int elementID5 = dataElementService.addDataElement( dataElement5 );
+        
+        DataElement dataElement6 = new DataElement();
+		dataElement6.setName( "Number" );
+        dataElement6.setShortName( "Nu" );
+        dataElement6.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElement6.setType( DataElement.VALUE_TYPE_NUMBER );
+        dataElement6.setCategoryCombo(categoryCombo );
+        dataElement6.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement6.setActive(true);
+        
+        int elementID6 = dataElementService.addDataElement( dataElement6 );
+        
+        DataElement dataElement7 = new DataElement();
+		dataElement7.setName( "Int" );
+        dataElement7.setShortName( "In" );
+        dataElement7.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElement7.setType( DataElement.VALUE_TYPE_INT );
+        dataElement7.setCategoryCombo(categoryCombo );
+        dataElement7.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement7.setActive(true);
+        
+        int elementID7 = dataElementService.addDataElement( dataElement7 );
+        
         dataElement = dataElementService.getDataElement(elementID);
+        dataElement2 = dataElementService.getDataElement(elementID2);
+        dataElement3 = dataElementService.getDataElement(elementID3);
+        dataElement4 = dataElementService.getDataElement(elementID4);
+        dataElement5 = dataElementService.getDataElement(elementID5);
+        dataElement6 = dataElementService.getDataElement(elementID6);
+        dataElement7 = dataElementService.getDataElement(elementID7);
         
         ProgramStageDataElement programStageDataElement = new ProgramStageDataElement( programStage, dataElement, true, 1 );
+        programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+        
+        programStageDataElement = new ProgramStageDataElement( programStage, dataElement2, true, 2 );
+        programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+        
+        programStageDataElement = new ProgramStageDataElement( programStage, dataElement3, true, 3 );
+        programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+        
+        programStageDataElement = new ProgramStageDataElement( programStage, dataElement4, true, 4 );
+        programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+        
+        programStageDataElement = new ProgramStageDataElement( programStage, dataElement5, true, 5 );
+        programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+        
+        programStageDataElement = new ProgramStageDataElement( programStage, dataElement6, true, 6 );
+        programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+        
+        programStageDataElement = new ProgramStageDataElement( programStage, dataElement7, true, 7 );
         programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         
         class Name {
