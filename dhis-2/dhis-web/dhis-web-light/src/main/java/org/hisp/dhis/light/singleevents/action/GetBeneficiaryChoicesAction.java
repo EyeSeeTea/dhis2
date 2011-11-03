@@ -27,17 +27,13 @@
 
 package org.hisp.dhis.light.singleevents.action;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.hisp.dhis.program.ProgramService;
-
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Group1 Fall 2011
  */
-public class RegisterNewBeneficiaryAction implements Action {
+public class GetBeneficiaryChoicesAction implements Action {
 	
 	// -------------------------------------------------------------------------
 	// Dependencies
@@ -85,15 +81,6 @@ public class RegisterNewBeneficiaryAction implements Action {
 	// Action Implementation
 	// -------------------------------------------------------------------------
 
-    private String todayDate;
-    
-    public String getTodayDate(){
-    	SimpleDateFormat dateFormatYYYYMMDD = new SimpleDateFormat("yyyy-MM-dd");
-    	Date d = new Date();
-    	todayDate = dateFormatYYYYMMDD.format(d);
-    	return todayDate;
-    }
-    
 	@Override
 	public String execute() {
 		eventName = programService.getProgram(singleEventId).getName();

@@ -46,7 +46,7 @@ public class GetRecentlyEditChoicesAction implements Action {
     }
     
     public Integer getOrganisationUnitId(){
-    	return this.organisationUnitId;
+    	return organisationUnitId;
     }
     
     private Integer singleEventId;
@@ -56,15 +56,26 @@ public class GetRecentlyEditChoicesAction implements Action {
     }
     
     public Integer getSingleEventId(){
-    	return this.singleEventId;
+    	return singleEventId;
     }
     
     private String eventName;
     
     public String getEventName(){
-    	return this.eventName;
+    	return eventName;
     }
 	
+    private Integer patientId;
+    
+    public void setPatientId( Integer patientId )
+    {
+    	this.patientId = patientId;
+    }
+    
+    public Integer getPatientId(){
+    	return patientId;
+    }
+    
 	// -------------------------------------------------------------------------
 	// Action Implementation
 	// -------------------------------------------------------------------------

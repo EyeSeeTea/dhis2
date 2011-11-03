@@ -1,5 +1,5 @@
 
-<h2>Register new beneficiary</h2>
+<h2>Single Event: $eventName</h2>
 
 <form method="post" action="addBeneficiary.action">
 	<div class="header-box" align="center">

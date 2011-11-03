@@ -105,11 +105,28 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
   </bean>
   
-  <bean id="org.hisp.dhis.light.singleevents.action.GetRecentlyEditChoicesAction" class="org.hisp.dhis.light.singleevents.action.GetRecentlyEditChoicesAction">
+  <bean id="org.hisp.dhis.light.singleevents.action.GetBeneficiaryChoicesAction" class="org.hisp.dhis.light.singleevents.action.GetBeneficiaryChoicesAction">
+    <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
   </bean>
   
+  <bean id="org.hisp.dhis.light.singleevents.action.RegisterNewBeneficiaryAction" class="org.hisp.dhis.light.singleevents.action.RegisterNewBeneficiaryAction">
+    <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+  </bean>
+
+  <bean id="org.hisp.dhis.light.singleevents.action.GetRecentlyEditChoicesAction" class="org.hisp.dhis.light.singleevents.action.GetRecentlyEditChoicesAction">
+  </bean>
+
   <bean id="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
   	<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+	<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
+  </bean>
+  
+  <bean id="org.hisp.dhis.light.singleevents.action.UpdateBeneficiaryAction" class="org.hisp.dhis.light.singleevents.action.UpdateBeneficiaryAction">
+  	<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+	<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
+  </bean>
+  
+  <bean id="org.hisp.dhis.light.singleevents.action.EditBeneficiaryAction" class="org.hisp.dhis.light.singleevents.action.EditBeneficiaryAction">
 	<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
   </bean>
   

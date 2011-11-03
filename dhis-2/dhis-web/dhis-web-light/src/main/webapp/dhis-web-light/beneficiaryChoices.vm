@@ -1,0 +1,18 @@
+
+<h2>Single Event: $eventName</h2>
+
+<p>
+<ul>
+	<li>Find beneficiary</li>
+	<li>
+		<a href="registerNewBeneficiary.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">New beneficiary</a>
+	</li>
+</ul>
+</p>
+
+<div id="footer">
+<h2>$i18n.getString( "navigate_to" )</h2>
+<ul>
+	<li><a href="index.action">$i18n.getString("home")</a></li>
+</ul>
+</div>

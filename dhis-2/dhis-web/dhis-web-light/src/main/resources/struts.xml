@@ -108,6 +108,11 @@
       <param name="page">/dhis-web-light/singleEventChoices.vm</param>
     </action>
     
+    <action name="getBeneficiaryChoices" class="org.hisp.dhis.light.singleevents.action.GetBeneficiaryChoicesAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/beneficiaryChoices.vm</param>
+    </action>
+    
     <action name="registerNewBeneficiary" class="org.hisp.dhis.light.singleevents.action.RegisterNewBeneficiaryAction">
       <result name="success" type="velocity">/dhis-web-light/main.vm</result>
       <param name="page">/dhis-web-light/newBeneficiary.vm</param>
@@ -116,6 +121,15 @@
     <action name="addBeneficiary" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
       <result name="success" type="redirect">/mobile/index.action</result>
       <param name="page">/dhis-web-light/newBeneficiary.vm</param>
+    </action>
+    
+    <action name="updateBeneficiary" class="org.hisp.dhis.light.singleevents.action.UpdateBeneficiaryAction">
+      <result name="success" type="redirect">/mobile/index.action</result>
+    </action>
+    
+     <action name="editBeneficiary" class="org.hisp.dhis.light.singleevents.action.EditBeneficiaryAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/editBeneficiary.vm</param>
     </action>
     
     <action name="GetRecentlyRegisteredSingleEvents" class="org.hisp.dhis.light.singleevents.action.GetRecentlyRegisteredSingleEventsAction">

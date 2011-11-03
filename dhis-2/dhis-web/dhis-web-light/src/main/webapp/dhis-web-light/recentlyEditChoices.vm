@@ -3,7 +3,10 @@
 
 <p>
 <ul>
-		<li>Edit Person Details</li>
+		<li>
+			<a href="editBeneficiary.action?patientId=$patientId">
+				Edit Person Details
+			</li>
 		<li>Edit Single Event Details</li>
 </ul>
 </p>

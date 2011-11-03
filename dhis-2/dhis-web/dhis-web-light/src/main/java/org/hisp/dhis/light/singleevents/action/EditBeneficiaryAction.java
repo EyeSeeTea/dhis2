@@ -30,73 +30,97 @@ package org.hisp.dhis.light.singleevents.action;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Group1 Fall 2011
  */
-public class RegisterNewBeneficiaryAction implements Action {
+public class EditBeneficiaryAction implements Action  {
 	
 	// -------------------------------------------------------------------------
 	// Dependencies
 	// -------------------------------------------------------------------------
-	
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
+    
+    private PatientService patientService;
+    
+    public void setPatientService( PatientService patientService )
     {
-        this.programService = programService;
+    	this.patientService = patientService;
     }
-	
-	// -------------------------------------------------------------------------
+    
+    // -------------------------------------------------------------------------
 	// Input & Output
-	// -------------------------------------------------------------------------
-	
-    private Integer organisationUnitId;
-
-    public void setOrganisationUnitId( Integer organisationUnitId )
+	// -------------------------------------------------------------------------   
+    
+    private Integer patientId;
+    
+    public void setPatientId( Integer patientId )
     {
-        this.organisationUnitId = organisationUnitId;
+    	this.patientId = patientId;
     }
+    
+    public Integer getPatientId()
+    {
+    	return patientId;
+    }
+    
+    private Patient patient;
+    
+    public Patient getPatient(){
+    	return patient;
+    }
+    
+    private OrganisationUnit organisationUnit;
+    
+    public OrganisationUnit getOrganisationUnit()
+    {
+    	return organisationUnit;
+    }
+    
+    private Integer organisationUnitId;
     
     public Integer getOrganisationUnitId(){
-    	return this.organisationUnitId;
+    	return organisationUnitId;
+    }
+
+    private String birthDate;
+    
+    public String getBirthDate()
+    {
+        return birthDate;
     }
     
-    private Integer singleEventId;
+    private String registrationDate;
     
-    public void setSingleEventId( Integer singleEventId){
-    	this.singleEventId = singleEventId;
+    public String getRegistrationDate(){
+    	return registrationDate;
     }
-    
-    public Integer getSingleEventId(){
-    	return this.singleEventId;
-    }
-    
-    private String eventName;
-    
-    public String getEventName(){
-    	return this.eventName;
-    }
-    
+       
 	// -------------------------------------------------------------------------
 	// Action Implementation
 	// -------------------------------------------------------------------------
-
-    private String todayDate;
-    
-    public String getTodayDate(){
-    	SimpleDateFormat dateFormatYYYYMMDD = new SimpleDateFormat("yyyy-MM-dd");
-    	Date d = new Date();
-    	todayDate = dateFormatYYYYMMDD.format(d);
-    	return todayDate;
-    }
     
 	@Override
 	public String execute() {
-		eventName = programService.getProgram(singleEventId).getName();
+		
+		patient = patientService.getPatient(patientId);
+        
+        organisationUnit = patient.getOrganisationUnit();
+        
+        organisationUnitId = organisationUnit.getId();
+        
+        Date date = patient.getBirthDate();
+        SimpleDateFormat DFyyyyMMdd = new SimpleDateFormat("yyyy-MM-dd");
+        
+        birthDate = DFyyyyMMdd.format(date);
+        
+        date = patient.getRegistrationDate();
+        registrationDate = DFyyyyMMdd.format(date);
+        
 		return SUCCESS;
 	}
 }

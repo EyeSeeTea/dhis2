@@ -4,7 +4,7 @@
 <p>
 <ul>
 	<li>
-		<a href="registerNewBeneficiary.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">Register $eventName</a>
+		<a href="getBeneficiaryChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">Register $eventName</a>
 	</li>
 	<li><a href="GetRecentlyRegisteredSingleEvents.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">
 	Recently registered</a></li>
