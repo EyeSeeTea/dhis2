@@ -1,4 +1,8 @@
-package org.hisp.dhis.reportsheet;
+package org.hisp.dhis.reportsheet.utils;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -26,81 +30,45 @@ package org.hisp.dhis.reportsheet;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class ExportReportCategory
-    extends ExportReport
+public class NumberUtils
 {
-    private List<DataElementGroupOrder> dataElementOrders;
+    // DecimalFormatNumber for VN as same as Locale.GERMAN's one.
+    private static DecimalFormat df = null;
+
+    // This pattern used for VN
+    public static final String PATTERN_DECIMAL_FORMAT1 = "#,##0.############";
+    
+    // This pattern is default in DHIS2    
+    public static final String PATTERN_DECIMAL_FORMAT2 = "#0.############";
 
     // -------------------------------------------------------------------------
-    // Constructors
+    //
     // -------------------------------------------------------------------------
 
-    public ExportReportCategory()
+    public static void resetDecimalFormatByLocale( Locale locale )
     {
-        super();
+        df = (DecimalFormat) NumberFormat.getInstance( locale );
     }
 
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
-
-    public List<DataElementGroupOrder> getDataElementOrders()
+    public static void applyPatternDecimalFormat( String pattern )
     {
-        return dataElementOrders;
+        df.applyPattern( pattern == null ? PATTERN_DECIMAL_FORMAT1 : pattern );
     }
 
-    public void setDataElementOrders( List<DataElementGroupOrder> dataElementOrders )
+    public static String getFormattedNumber( String input )
     {
-        this.dataElementOrders = dataElementOrders;
-    }
-
-    @Override
-    public String getReportType()
-    {
-        return ExportReport.TYPE.CATEGORY;
-    }
-
-    @Override
-    public boolean isCategory()
-    {
-        return true;
-    }
-
-    @Override
-    public boolean isNormal()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isOrgUnitGroupListing()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isPeriodColumnListing()
-    {
-        return false;
-    }
-
-    @Override
-    public List<String> getItemTypes()
-    {
-        List<String> types = new ArrayList<String>();
-        types.add( ExportItem.TYPE.DATAELEMENT );
-        types.add( ExportItem.TYPE.DATAELEMENT_CODE );
-        types.add( ExportItem.TYPE.DATAELEMENT_NAME );
-        types.add( ExportItem.TYPE.FORMULA_EXCEL);
-        types.add( ExportItem.TYPE.SERIAL );
-
-        return types;
+        try
+        {
+            return df.format( Double.parseDouble( input ) );
+        }
+        catch ( NumberFormatException nfe )
+        {
+            return input;
+        }
     }
 }
