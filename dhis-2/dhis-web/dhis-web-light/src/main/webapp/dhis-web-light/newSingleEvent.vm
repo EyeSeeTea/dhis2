@@ -1,0 +1,40 @@
+<h2>Single Event: $eventName</h2>
+
+<form method="post" action="addSingleEvent.action">
+	<div class="header-box" align="center">
+		<p style="text-align: left;">
+		
+		#foreach( $element in $programStageDataElements )
+				
+				<label>$element.getDataElement().getName() #if($element.getDataElement().getType() == "date") (yyyy-mm-dd) #end</label>
+				
+				#if ($element.getDataElement().getType() == "bool")
+					<br />
+			    	<select name="$element.getDataElement().getName()">
+					<option value="please_select">[Please select]</option>
+					<option value="Yes">Yes</option>
+					<option value="No">No</option>
+					</select>
+					<br />
+				#else
+					<input type="text" maxlength="255" size="24" value="$element.getDataElement().getType()" name="$element.getDataElement().getName()" />
+				#end
+				
+		#end
+		
+		<input type="hidden" name="organisationUnitId" value="$organisationUnitId" />
+		<input type="hidden" name="singleEventId" value="$singleEventId" />
+		<input type="hidden" name="patientId" value="$patientId" />
+		
+		<input type="submit" value="Submit" />
+	    </p>
+	</div>
+</form>
+
+<div id="footer">
+<h2>$i18n.getString( "navigate_to" )</h2>
+<ul>
+	<li><a href="index.action">$i18n.getString("home")</a></li>
+</ul>
+</div>
+

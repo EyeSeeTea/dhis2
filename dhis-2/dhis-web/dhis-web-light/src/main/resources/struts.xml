@@ -119,15 +119,20 @@
     </action>
     
     <action name="addBeneficiary" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
-      <result name="success" type="redirect">/mobile/index.action</result>
-      <param name="page">/dhis-web-light/newBeneficiary.vm</param>
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/newSingleEvent.vm</param>
+    </action>
+    
+     <action name="addSingleEvent" class="org.hisp.dhis.light.singleevents.action.AddSingleEventAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/singleEventReturnpage.vm</param>
     </action>
     
     <action name="updateBeneficiary" class="org.hisp.dhis.light.singleevents.action.UpdateBeneficiaryAction">
       <result name="success" type="redirect">/mobile/index.action</result>
     </action>
     
-     <action name="editBeneficiary" class="org.hisp.dhis.light.singleevents.action.EditBeneficiaryAction">
+    <action name="editBeneficiary" class="org.hisp.dhis.light.singleevents.action.EditBeneficiaryAction">
       <result name="success" type="velocity">/dhis-web-light/main.vm</result>
       <param name="page">/dhis-web-light/editBeneficiary.vm</param>
     </action>

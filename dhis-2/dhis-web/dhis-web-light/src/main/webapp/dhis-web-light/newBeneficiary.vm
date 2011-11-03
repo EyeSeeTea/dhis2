@@ -6,6 +6,7 @@
 		<p style="text-align: left;">
 		
 			<input type="hidden" name="organisationUnitId" value="$organisationUnitId" />
+			<input type="hidden" name="singleEventId" value="$singleEventId" />
 		
 	    	<label>Date of Registration (yyyy-MM-dd)</label>
 	    	<input type="text" maxlength="255" size="24" name="registrationDate" value="$todayDate" />

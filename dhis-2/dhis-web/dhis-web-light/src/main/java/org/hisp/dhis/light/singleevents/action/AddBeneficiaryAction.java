@@ -27,11 +27,18 @@
 
 package org.hisp.dhis.light.singleevents.action;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElement;
 
 import com.opensymphony.xwork2.Action;
 
@@ -63,10 +70,17 @@ public class AddBeneficiaryAction implements Action  {
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
-    }    
+    }
+    
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
     
     // -------------------------------------------------------------------------
-	// Input
+	// Input Output
 	// -------------------------------------------------------------------------   
     
     private Integer organisationUnitId;
@@ -120,10 +134,33 @@ public class AddBeneficiaryAction implements Action  {
     	this.registrationDate = registrationDate;
     }
     
-	// -------------------------------------------------------------------------
-	// Output
-	// -------------------------------------------------------------------------
-  
+    private Integer singleEventId;
+    
+    public void setSingleEventId( Integer singleEventId){
+    	this.singleEventId = singleEventId;
+    }
+    
+    public Integer getSingleEventId(){
+    	return this.singleEventId;
+    }
+    
+    private String eventName;
+    
+    public String getEventName(){
+    	return this.eventName;
+    }
+    
+    private Integer patientId;
+    
+    public Integer getPatientId(){
+    	return this.patientId;
+    }
+    
+    private Set<ProgramStageDataElement> programStageDataElements = new HashSet<ProgramStageDataElement>();
+    
+    public Set<ProgramStageDataElement> getProgramStageDataElements(){
+    	return this.programStageDataElements;
+    }
     
 	// -------------------------------------------------------------------------
 	// Action Implementation
@@ -184,8 +221,15 @@ public class AddBeneficiaryAction implements Action  {
         registrationDate = registrationDate.trim();
         patient.setRegistrationDate( format.parseDate( registrationDate ) );
         
-        patientService.savePatient(patient);
+        patientId = patientService.savePatient(patient);
         
+        // ---------------------------------------------------------------------
+        // Set Data for SingleEventForm
+        // ---------------------------------------------------------------------
+        Program program = programService.getProgram(singleEventId);
+        eventName = program.getName();
+        ProgramStage programStage = program.getProgramStages().iterator().next();
+        programStageDataElements = programStage.getProgramStageDataElements();
 		return SUCCESS;
 	}
 }
