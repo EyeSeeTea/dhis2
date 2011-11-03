@@ -1,10 +1,11 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.dataelement.hibernate;
 
 
-import java.util.Date;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2005, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +15,7 @@ import java.util.Date;
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
+ * * Neither the name of the <ORGANIZATION> nor the names of its contributors may
  *   be used to endorse or promote products derived from this software without
  *   specific prior written permission.
  *
@@ -29,19 +30,37 @@ import java.util.Date;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-public interface IdentifiableObject
-    extends ImportableObject
+/**
+ *
+ * @author bobj
+ * @version created 02-Nov-2011
+ */
+public class HibernateDataElementCategoryOptionComboStore
+    extends HibernateGenericStore<DataElementCategoryOptionCombo>
 {
-    public abstract int getId();
+    @Override
+    public final int save( DataElementCategoryOptionCombo catoptcombo )
+    {
+        catoptcombo.setAutoFields();
 
-    public abstract String getUuid();
+        return (Integer) sessionFactory.getCurrentSession().save( catoptcombo );
+    }
 
-    public abstract String getUid();
+    @Override
+    public final void update( DataElementCategoryOptionCombo catoptcombo )
+    {
+        catoptcombo.setAutoFields();
 
-    public abstract String getName();
+        sessionFactory.getCurrentSession().update( catoptcombo );
+    }
 
-    public abstract String getCode();
+    @Override
+    public final void saveOrUpdate( DataElementCategoryOptionCombo catoptcombo )
+    {
 
-    public abstract Date getLastUpdated();
+        catoptcombo.setAutoFields();
+
+        sessionFactory.getCurrentSession().saveOrUpdate( catoptcombo );
+    }
+
 }

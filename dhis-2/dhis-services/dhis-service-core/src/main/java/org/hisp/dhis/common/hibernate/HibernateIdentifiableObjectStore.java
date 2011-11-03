@@ -1,10 +1,12 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.common.hibernate;
 
 
-import java.util.Date;
+import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2005, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -14,7 +16,7 @@ import java.util.Date;
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
+ * * Neither the name of the <ORGANIZATION> nor the names of its contributors may
  *   be used to endorse or promote products derived from this software without
  *   specific prior written permission.
  *
@@ -30,18 +32,37 @@ import java.util.Date;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface IdentifiableObject
-    extends ImportableObject
+/**
+ *
+ * @author bobj
+ * @version created 01-Nov-2011
+ */
+public class HibernateIdentifiableObjectStore<T extends AbstractIdentifiableObject>
+    extends HibernateGenericStore<T> implements GenericIdentifiableObjectStore<T>
 {
-    public abstract int getId();
+    @Override
+    public final int save( T object )
+    {
+        object.setAutoFields();
 
-    public abstract String getUuid();
+        return (Integer) sessionFactory.getCurrentSession().save( object );
+    }
 
-    public abstract String getUid();
+    @Override
+    public final void update( T object )
+    {
+        object.setAutoFields();
 
-    public abstract String getName();
+        sessionFactory.getCurrentSession().update( object );
+    }
 
-    public abstract String getCode();
+    @Override
+    public final void saveOrUpdate( T object )
+    {
 
-    public abstract Date getLastUpdated();
+        object.setAutoFields();
+
+        sessionFactory.getCurrentSession().saveOrUpdate( object );
+    }
+
 }
