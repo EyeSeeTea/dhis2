@@ -54,7 +54,8 @@ DV.conf = {
     },
     layout: {
         west_cmp_width: 380,
-        west_width: 424
+        west_width: 424,
+        east_tbar_height: 27
     }
 };
 
@@ -87,7 +88,6 @@ Ext.onReady( function() {
         
         DV.chart.data = DV.conf.init.data;
         
-        //DV.chart.init = true;
         DV.exe.execute(true, DV.init.isInit);
     };
     
@@ -95,7 +95,8 @@ Ext.onReady( function() {
         charttype: [],
         dimension: {
             period: []
-        }
+        },
+        datatable: null
     };
     
     DV.util = {
@@ -962,9 +963,8 @@ Ext.onReady( function() {
         datatable: null,
         getDataTable: function(exe) {
             this.datatable = Ext.create('Ext.grid.Panel', {
-                scroll: 'auto',
-                height: 500,
-                width: 500,
+                height: DV.util.viewport.getSize().y - DV.conf.layout.east_tbar_height,
+                scroll: 'vertical',
                 cls: 'dv-datatable',
                 columns: [
                     {
@@ -975,7 +975,7 @@ Ext.onReady( function() {
                     {
                         text: DV.conf.finals.dimension.period.rawvalue,
                         dataIndex: DV.conf.finals.dimension.period.value,
-                        width: 150
+                        width: 100
                     },
                     {
                         text: DV.conf.finals.dimension.organisationunit.rawvalue,
@@ -988,7 +988,12 @@ Ext.onReady( function() {
                         width: 80
                     }
                 ],
-                store: DV.store.datatable
+                store: DV.store.datatable,
+                listeners: {
+                    afterrender: function() {
+                        DV.cmp.datatable = this;
+                    }
+                }
             });
             
             if (exe) {
@@ -1002,7 +1007,6 @@ Ext.onReady( function() {
             var c = DV.util.getCmp('panel[region="east"]');
             c.removeAll(true);
             c.add(this.datatable);
-console.log(c);
         }            
     };
     
@@ -1014,6 +1018,9 @@ console.log(c);
             else {
                 DV.state.getState(exe);
             }
+        },
+        datatable: function(exe) {
+            DV.store.getDataTableStore(exe);
         }
     };
         
@@ -1782,19 +1789,13 @@ console.log(c);
                         text: 'Data table',
                         cls: 'x-btn-text-icon',
                         icon: 'images/datatable.png',
-                        toggleGroup: 'datatable',
                         handler: function(b) {
                             var p = DV.util.getCmp('panel[region="east"]');
                             if (p.collapsed && p.items.length) {
-alert(1);                                
                                 p.expand();
-                            }
-                            else if (p.collapsed && !p.items.length) {
-alert(2);                                
-                                b.toggle();
+                                DV.exe.datatable(true);
                             }
                             else {
-alert(3);                                
                                 p.collapse();
                             }
                         }
@@ -1823,9 +1824,9 @@ alert(3);
                 preventHeader: true,
                 collapsible: true,
                 collapseMode: 'mini',
-                width: 400,
+                width: 498,
                 tbar: {
-                    height: 27,
+                    height: DV.conf.layout.east_tbar_height,
                     items: [
                         ' ',
                         {
@@ -1843,6 +1844,10 @@ alert(3);
             },
             resize: function(vp) {
                 vp.query('panel[region="west"]')[0].setWidth(DV.conf.layout.west_width);
+                
+                if (DV.cmp.datatable) {
+                    DV.cmp.datatable.setHeight(DV.util.viewport.getSize().y - DV.conf.layout.east_tbar_height);
+                }
             }
         }
     });
