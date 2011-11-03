@@ -27,12 +27,16 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.period.PeriodType.getPeriodTypeByName;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
+import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.i18n.I18nFormat;
 
 /**
@@ -95,11 +99,23 @@ public class RelativePeriods
         "month11",
         "month12" };
     
+    public static final String[] BIMONTHS_LAST_6 = {
+        "bimonth1",
+        "bimonth2",
+        "bimonth3",
+        "bimonth4",
+        "bimonth5",
+        "bimonth6" };
+    
     public static final String[] QUARTERS_THIS_YEAR = {
         "quarter1",
         "quarter2",
         "quarter3",
         "quarter4" };
+    
+    public static final String[] SIXMONHTS_LAST_2 = {
+        "sixmonth1",
+        "sixmonth2" };
 
     public static final String[] QUARTERS_LAST_YEAR = {
         "quarter1_last_year",
@@ -138,7 +154,11 @@ public class RelativePeriods
     
     private Boolean last12Months = false;
     
+    private Boolean last6BiMonths = false;
+    
     private Boolean last4Quarters = false;
+    
+    private Boolean last2SixMonths = false;
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -150,7 +170,7 @@ public class RelativePeriods
     
     /**
      * @param reportingMonth reporting month
-     * @param reportingBimonth reporting bimonth
+     * @param reportingBimonth reporting bi-month
      * @param reportingQuarter reporting quarter
      * @param monthsThisYear months this year
      * @param quartersThisYear quarters this year
@@ -160,12 +180,14 @@ public class RelativePeriods
      * @param lastYear last year
      * @param last5Years last 5 years
      * @param last12Months last 12 months
+     * @param last6BiMonths last 6 bi-months
      * @param last4Quarters last 4 quarters
+     * @param last2SixMonths last 2 six-months
      */
     public RelativePeriods( boolean reportingMonth, boolean reportingBimonth, boolean reportingQuarter,
         boolean monthsThisYear, boolean quartersThisYear, boolean thisYear,
         boolean monthsLastYear, boolean quartersLastYear, boolean lastYear, boolean last5Years,
-        boolean last12Months, boolean last4Quarters )
+        boolean last12Months, boolean last6BiMonths, boolean last4Quarters, boolean last2SixMonths )
     {
         this.reportingMonth = reportingMonth;
         this.reportingBimonth = reportingBimonth;
@@ -178,7 +200,9 @@ public class RelativePeriods
         this.lastYear = lastYear;
         this.last5Years = last5Years;
         this.last12Months = last12Months;
+        this.last6BiMonths = last6BiMonths;
         this.last4Quarters = last4Quarters;
+        this.last2SixMonths = last2SixMonths;
     }
 
     // -------------------------------------------------------------------------
@@ -201,7 +225,10 @@ public class RelativePeriods
         this.lastYear = false;
         this.last5Years = false;
         this.last12Months = false;
+        this.last6BiMonths = false;
         this.last4Quarters = false;
+        this.last2SixMonths = false;
+        
         return this;
     }
 
@@ -329,9 +356,19 @@ public class RelativePeriods
             periods.addAll( getRelativePeriodList( new MonthlyPeriodType().generateRollingPeriods( date ), MONTHS_LAST_12, dynamicNames, format ) );
         }
         
+        if ( isLast6BiMonths() )
+        {
+            periods.addAll( getRelativePeriodList( new BiMonthlyPeriodType().generateRollingPeriods( date ), BIMONTHS_LAST_6, dynamicNames, format ) );
+        }
+        
         if ( isLast4Quarters() )
         {
             periods.addAll( getRelativePeriodList( new QuarterlyPeriodType().generateRollingPeriods( date ), QUARTERS_THIS_YEAR, dynamicNames, format ) );
+        }
+        
+        if ( isLast2SixMonths() )
+        {
+            periods.addAll( getRelativePeriodList( new SixMonthlyPeriodType().generateRollingPeriods( date ), SIXMONHTS_LAST_2, dynamicNames, format ) );
         }
         
         date = getDate( MONTHS_IN_YEAR, date );
@@ -446,7 +483,40 @@ public class RelativePeriods
         
         return cal.getTime();
     }
+
+    /**
+     * Creates an instance of RelativePeriods based on the scheduledPeriodTypes
+     * set from Configuration.
+     * 
+     * @param config the Configuration object.
+     * @return a RelativePeriods instance.
+     */
+    public RelativePeriods getRelativePeriods( Set<String> periodTypes )
+    {
+        RelativePeriods relatives = new RelativePeriods();
+        
+        if ( periodTypes == null || periodTypes.isEmpty() )
+        {
+            relatives.setLast12Months( true );
+            relatives.setLast4Quarters( true );
+            relatives.setLastYear( true );
+        }
+        else
+        {
+            relatives.setLast12Months( periodTypes.contains( MonthlyPeriodType.NAME ) );
+            relatives.setLast6BiMonths( periodTypes.contains( BiMonthlyPeriodType.NAME ) );
+            relatives.setLast4Quarters( periodTypes.contains( QuarterlyPeriodType.NAME ) );
+            relatives.setLast2SixMonths( periodTypes.contains( SixMonthlyPeriodType.NAME ) );
+            relatives.setLastYear( periodTypes.contains( YearlyPeriodType.NAME ) );
+        }
+        
+        return relatives;
+    }
     
+    // -------------------------------------------------------------------------
+    // Is methods
+    // -------------------------------------------------------------------------
+
     public boolean isReportingMonth()
     {
         return reportingMonth != null && reportingMonth;
@@ -502,11 +572,21 @@ public class RelativePeriods
         return last12Months != null && last12Months;
     }
     
+    public boolean isLast6BiMonths()
+    {
+        return last6BiMonths != null && last6BiMonths;
+    }
+    
     public boolean isLast4Quarters()
     {
         return last4Quarters != null && last4Quarters;
     }
         
+    public boolean isLast2SixMonths()
+    {
+        return last2SixMonths != null && last2SixMonths;
+    }
+    
     // -------------------------------------------------------------------------
     // Getters & setters
     // -------------------------------------------------------------------------
@@ -621,6 +701,16 @@ public class RelativePeriods
         this.last12Months = last12Months;
     }
 
+    public Boolean getLast6BiMonths()
+    {
+        return last6BiMonths;
+    }
+
+    public void setLast6BiMonths( Boolean last6BiMonths )
+    {
+        this.last6BiMonths = last6BiMonths;
+    }
+
     public Boolean getLast4Quarters()
     {
         return last4Quarters;
@@ -629,6 +719,16 @@ public class RelativePeriods
     public void setLast4Quarters( Boolean last4Quarters )
     {
         this.last4Quarters = last4Quarters;
+    }
+
+    public Boolean getLast2SixMonths()
+    {
+        return last2SixMonths;
+    }
+
+    public void setLast2SixMonths( Boolean last2SixMonths )
+    {
+        this.last2SixMonths = last2SixMonths;
     }
 
     // -------------------------------------------------------------------------
@@ -653,7 +753,9 @@ public class RelativePeriods
         result = prime * result + ( ( lastYear == null ) ? 0 : lastYear.hashCode() );
         result = prime * result + ( ( last5Years == null ) ? 0 : last5Years.hashCode() );
         result = prime * result + ( ( last12Months == null ) ? 0 : last12Months.hashCode() );
+        result = prime * result + ( ( last6BiMonths == null ) ? 0 : last6BiMonths.hashCode() );
         result = prime * result + ( ( last4Quarters == null ) ? 0 : last4Quarters.hashCode() );
+        result = prime * result + ( ( last2SixMonths == null ) ? 0 : last2SixMonths.hashCode() );
         
         return result;
     }
@@ -810,6 +912,18 @@ public class RelativePeriods
             return false;
         }
 
+        if ( last6BiMonths == null )
+        {
+            if ( other.last6BiMonths != null )
+            {
+                return false;
+            }
+        }
+        else if ( !last6BiMonths.equals( other.last6BiMonths ) )
+        {
+            return false;
+        }
+
         if ( last4Quarters == null )
         {
             if ( other.last4Quarters != null )
@@ -818,6 +932,18 @@ public class RelativePeriods
             }
         }
         else if ( !last4Quarters.equals( other.last4Quarters ) )
+        {
+            return false;
+        }
+
+        if ( last2SixMonths == null )
+        {
+            if ( other.last2SixMonths != null )
+            {
+                return false;
+            }
+        }
+        else if ( !last2SixMonths.equals( other.last2SixMonths ) )
         {
             return false;
         }

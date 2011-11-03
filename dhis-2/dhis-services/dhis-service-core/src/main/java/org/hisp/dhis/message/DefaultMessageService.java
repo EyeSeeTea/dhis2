@@ -94,19 +94,26 @@ public class DefaultMessageService
             users.addAll( userGroup.getMembers() );
         }
 
+        User sender = currentUserService.getCurrentUser();
+        
+        if ( sender != null )
+        {
+            users.add( sender );
+        }
+        
         // ---------------------------------------------------------------------
         // Instantiate message, content and user messages
         // ---------------------------------------------------------------------
 
-        User sender = currentUserService.getCurrentUser();
-        
         MessageConversation conversation = new MessageConversation( subject, sender );
         
         conversation.addMessage( new Message( text, metaData, sender ) );
         
         for ( User user : users )
         {
-            conversation.addUserMessage( new UserMessage( user ) );        
+            boolean read = user != null && user.equals( sender );
+            
+            conversation.addUserMessage( new UserMessage( user, read ) );        
         }
         
         int id = saveMessageConversation( conversation );

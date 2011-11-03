@@ -39,12 +39,12 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementStore;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 import org.hisp.dhis.system.objectmapper.DataElementOperandMapper;
 import org.hisp.dhis.system.util.ConversionUtils;
@@ -56,7 +56,7 @@ import org.hisp.dhis.system.util.TextUtils;
  *          larshelg $
  */
 public class HibernateDataElementStore
-    extends HibernateGenericStore<DataElement>
+    extends HibernateIdentifiableObjectStore<DataElement>
     implements DataElementStore
 {
     // -------------------------------------------------------------------------
@@ -74,18 +74,16 @@ public class HibernateDataElementStore
     // DataElement
     // -------------------------------------------------------------------------
 
+    @Override
     public int addDataElement( DataElement dataElement )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        return (Integer) session.save( dataElement );
+        return this.save( dataElement );
     }
 
+    @Override
     public void updateDataElement( DataElement dataElement )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.update( dataElement );
+        this.update( dataElement );
     }
 
     public void deleteDataElement( DataElement dataElement )

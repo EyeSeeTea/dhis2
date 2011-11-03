@@ -105,8 +105,8 @@ public class ExportReportPeriodColumnListing
     public List<String> getItemTypes()
     {
         List<String> types = new ArrayList<String>();
-        types.add( ExportItem.TYPE.INDICATOR );
         types.add( ExportItem.TYPE.DATAELEMENT );
+        types.add( ExportItem.TYPE.INDICATOR );
 
         return types;
     }
