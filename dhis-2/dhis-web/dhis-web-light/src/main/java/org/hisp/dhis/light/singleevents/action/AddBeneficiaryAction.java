@@ -27,9 +27,9 @@
 
 package org.hisp.dhis.light.singleevents.action;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -156,11 +156,18 @@ public class AddBeneficiaryAction implements Action  {
     	return this.patientId;
     }
     
-    private Set<ProgramStageDataElement> programStageDataElements = new HashSet<ProgramStageDataElement>();
+    private ArrayList<ProgramStageDataElement> programStageDataElements = new ArrayList<ProgramStageDataElement>();
     
-    public Set<ProgramStageDataElement> getProgramStageDataElements(){
+    public ArrayList<ProgramStageDataElement> getProgramStageDataElements(){
     	return this.programStageDataElements;
     }
+    
+	 static final Comparator<ProgramStageDataElement> OrderBySortOrder =
+             new Comparator<ProgramStageDataElement>() {
+		 public int compare(ProgramStageDataElement i1, ProgramStageDataElement i2) {
+			 return i1.getSortOrder().compareTo(i2.getSortOrder());
+		 }
+	 };
     
 	// -------------------------------------------------------------------------
 	// Action Implementation
@@ -229,7 +236,9 @@ public class AddBeneficiaryAction implements Action  {
         Program program = programService.getProgram(singleEventId);
         eventName = program.getName();
         ProgramStage programStage = program.getProgramStages().iterator().next();
-        programStageDataElements = programStage.getProgramStageDataElements();
-		return SUCCESS;
+        programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
+        Collections.sort(programStageDataElements, OrderBySortOrder);
+        
+        return SUCCESS;
 	}
 }

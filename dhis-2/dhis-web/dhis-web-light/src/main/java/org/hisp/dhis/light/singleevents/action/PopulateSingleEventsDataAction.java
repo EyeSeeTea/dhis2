@@ -330,24 +330,31 @@ public class PopulateSingleEventsDataAction implements Action {
         dataElement7 = dataElementService.getDataElement(elementID7);
         
         ProgramStageDataElement programStageDataElement = new ProgramStageDataElement( programStage, dataElement, true, 1 );
+        programStageDataElement.setSortOrder(1);
         programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         
         programStageDataElement = new ProgramStageDataElement( programStage, dataElement2, true, 2 );
+        programStageDataElement.setSortOrder(2);
         programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         
         programStageDataElement = new ProgramStageDataElement( programStage, dataElement3, true, 3 );
+        programStageDataElement.setSortOrder(4);
         programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         
         programStageDataElement = new ProgramStageDataElement( programStage, dataElement4, true, 4 );
+        programStageDataElement.setSortOrder(3);
         programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         
         programStageDataElement = new ProgramStageDataElement( programStage, dataElement5, true, 5 );
+        programStageDataElement.setSortOrder(5);
         programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         
         programStageDataElement = new ProgramStageDataElement( programStage, dataElement6, true, 6 );
+        programStageDataElement.setSortOrder(6);
         programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         
         programStageDataElement = new ProgramStageDataElement( programStage, dataElement7, true, 7 );
+        programStageDataElement.setSortOrder(7);
         programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         
         class Name {

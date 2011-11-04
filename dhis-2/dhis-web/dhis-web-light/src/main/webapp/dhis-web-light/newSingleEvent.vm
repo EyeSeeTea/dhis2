@@ -10,14 +10,14 @@
 				
 				#if ($element.getDataElement().getType() == "bool")
 					<br />
-			    	<select name="$element.getDataElement().getName()">
+			    	<select name="dynForm">
 					<option value="please_select">[Please select]</option>
-					<option value="Yes">Yes</option>
-					<option value="No">No</option>
+					<option value="true">Yes</option>
+					<option value="false">No</option>
 					</select>
 					<br />
 				#else
-					<input type="text" maxlength="255" size="24" value="$element.getDataElement().getType()" name="$element.getDataElement().getName()" />
+					<input type="text" maxlength="255" size="24" value="$element.getDataElement().getType()" name="dynForm" />
 				#end
 				
 		#end
