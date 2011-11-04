@@ -178,7 +178,7 @@ public class AddBeneficiaryAction implements Action  {
 		
 		Patient patient = new Patient();
 		
-		 // ---------------------------------------------------------------------
+		// ---------------------------------------------------------------------
         // Set FirstName, MiddleName, LastName by FullName
         // ---------------------------------------------------------------------
 
@@ -220,7 +220,9 @@ public class AddBeneficiaryAction implements Action  {
 		patient.setGender( gender );		
 		patient.setDobType( dobType );
 		patient.setIsDead( false );
-		patient.setBloodGroup( bloodGroup );
+		if(!bloodGroup.equalsIgnoreCase("please_select")){
+			patient.setBloodGroup( bloodGroup );
+		}
 		
         birthDate = birthDate.trim();
         patient.setBirthDate( format.parseDate( birthDate ) );

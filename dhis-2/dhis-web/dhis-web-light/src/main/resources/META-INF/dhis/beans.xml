@@ -114,6 +114,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   </bean>
 
   <bean id="org.hisp.dhis.light.singleevents.action.GetRecentlyEditChoicesAction" class="org.hisp.dhis.light.singleevents.action.GetRecentlyEditChoicesAction">
+  	<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
   </bean>
 
   <bean id="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">

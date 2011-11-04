@@ -5,7 +5,9 @@
 <ul>
 	<li>Find beneficiary</li>
 	<li>
-		<a href="registerNewBeneficiary.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">New beneficiary</a>
+		<a href="registerNewBeneficiary.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">
+		New beneficiary
+		</a>
 	</li>
 </ul>
 </p>

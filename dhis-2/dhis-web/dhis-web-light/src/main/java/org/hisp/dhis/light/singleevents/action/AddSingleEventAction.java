@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
@@ -57,13 +56,6 @@ public class AddSingleEventAction implements Action  {
 	// -------------------------------------------------------------------------
 	// Dependencies
 	// -------------------------------------------------------------------------
-    
-    private I18nFormat format;
-    
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
 	
 	private ProgramInstanceService programInstanceService;
 

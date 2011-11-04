@@ -9,13 +9,27 @@
 			
 			<input type="hidden" name="patientId" value="$patientId" />
 		
+	    	
+	    	#if ( $invalidRegistrationDate )
+	    	<label style="color:red;">Date of Registration (yyyy-MM-dd). The date entered is not valid.</label>
+	    	#else
 	    	<label>Date of Registration (yyyy-MM-dd)</label>
+	    	#end
 	    	<input type="text" maxlength="255" size="24" name="registrationDate" value="$registrationDate" />
 	    	
-	    	<label>Full Name</label>	
+	    	#if ( $fullNameIsToLong )
+	    	<label style="color:red;">Full Name. The name must be between 7 and 50 characters</label>
+	    	#else
+	    	<label>Full Name</label>
+	    	#end
 	    	<input type="text" maxlength="255" size="24" name="fullName" value="$patient.getFullName()" />
 	    	
+	    	
+	    	#if ( $noGender )
+	    	<label style="color:red;">Gender. Please select a gender.</label>
+	    	#else
 	    	<label>Gender</label>
+	    	#end
 	    	<br />    	
 	    	<select name="gender">
 	    		<option value="please_select">[Please select]</option>
@@ -42,7 +56,11 @@
 			
 			<br />
 			
+			#if ( $noDobType )
+			<label style="color:red;">DOB Type. Please select a DOB type.</label>
+			#else
 			<label>DOB Type</label>
+			#end					
 			<br />
 			<select name="dobType">
 				<option value="p">[Please select]</option>
@@ -63,7 +81,11 @@
 			
 			<br />
 			
-			<label>Date of Birth (yyyy-MM-dd)</label>
+			#if ( $invalidBirthDate )
+	    	<label style="color:red;">Date of Birth (yyyy-MM-dd). The date entered is not valid.</label>
+	    	#else
+	    	<label>Date of Birth (yyyy-MM-dd)</label>
+	    	#end
 			<input type="text" maxlength="255" size="24" name="birthDate" value="$birthDate" />
 			
 			<label>Blood Group</label>
@@ -82,10 +104,10 @@
 				#else
 				<option value="A-">A-</option>
 				#end
-				
+
 				#if ($patient.getBloodGroup() == "AB+")
 				<option value="AB+" selected="selected">AB+</option>
-				# else
+				#else
 				<option value="AB+">AB+</option>
 				#end
 				

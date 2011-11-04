@@ -26,6 +26,8 @@
  */
 
 package org.hisp.dhis.light.singleevents.action;
+import org.hisp.dhis.program.ProgramService;
+
 import com.opensymphony.xwork2.Action;
 
 public class GetRecentlyEditChoicesAction implements Action {
@@ -33,6 +35,13 @@ public class GetRecentlyEditChoicesAction implements Action {
 	// -------------------------------------------------------------------------
 	// Dependencies
 	// -------------------------------------------------------------------------
+	
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
 	
 	// -------------------------------------------------------------------------
 	// Input & Output
@@ -82,7 +91,7 @@ public class GetRecentlyEditChoicesAction implements Action {
 
 	@Override
 	public String execute() {
-
+		eventName = programService.getProgram(singleEventId).getName();
 		return SUCCESS;
 	}
 

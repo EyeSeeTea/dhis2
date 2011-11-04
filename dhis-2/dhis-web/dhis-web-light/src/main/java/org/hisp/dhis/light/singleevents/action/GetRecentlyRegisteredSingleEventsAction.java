@@ -131,7 +131,10 @@ public class GetRecentlyRegisteredSingleEventsAction implements Action {
 		if(!proInst.isEmpty())
 		{
 			Collections.sort(proInst, OrderByDate);
-			proInst = proInst.subList(0, 6);
+			if(proInst.size() > 6)
+			{
+				proInst = proInst.subList(0, 6);
+			}
 			
 			for (ProgramInstance instItem : proInst)
 			{

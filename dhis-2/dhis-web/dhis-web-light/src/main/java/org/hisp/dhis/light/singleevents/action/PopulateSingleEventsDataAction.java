@@ -181,6 +181,7 @@ public class PopulateSingleEventsDataAction implements Action {
 		
 		Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
 		organisationUnits.add(organisationUnit1);
+		organisationUnits.add(organisationUnit2);
 		
 		// Add orgunits to user
 		Collection<User> users = userService.getAllUsers();
@@ -189,7 +190,7 @@ public class PopulateSingleEventsDataAction implements Action {
 		admin.addOrganisationUnit(organisationUnit1);
 		admin.addOrganisationUnit(organisationUnit2);
 		userService.updateUser(admin);
-		
+
 		// Create Single-event programs
 		
 		Program program = new Program();
@@ -321,6 +322,28 @@ public class PopulateSingleEventsDataAction implements Action {
         
         int elementID7 = dataElementService.addDataElement( dataElement7 );
         
+        DataElement dataElement8 = new DataElement();
+		dataElement8.setName( "Date of Birth" );
+        dataElement8.setShortName( "DOB" );
+        dataElement8.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElement8.setType( DataElement.VALUE_TYPE_DATE );
+        dataElement8.setCategoryCombo(categoryCombo );
+        dataElement8.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement8.setActive(true);
+        
+        int elementID8 = dataElementService.addDataElement( dataElement8 );
+        
+        DataElement dataElement9 = new DataElement();
+		dataElement9.setName( "Probable Cause of birth" );
+        dataElement9.setShortName( "PCOB" );
+        dataElement9.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElement9.setType( DataElement.VALUE_TYPE_STRING );
+        dataElement9.setCategoryCombo(categoryCombo );
+        dataElement9.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
+        dataElement9.setActive(true);
+        
+        int elementID9 = dataElementService.addDataElement( dataElement9 );
+        
         dataElement = dataElementService.getDataElement(elementID);
         dataElement2 = dataElementService.getDataElement(elementID2);
         dataElement3 = dataElementService.getDataElement(elementID3);
@@ -328,6 +351,8 @@ public class PopulateSingleEventsDataAction implements Action {
         dataElement5 = dataElementService.getDataElement(elementID5);
         dataElement6 = dataElementService.getDataElement(elementID6);
         dataElement7 = dataElementService.getDataElement(elementID7);
+        dataElement8 = dataElementService.getDataElement(elementID8);
+        dataElement9 = dataElementService.getDataElement(elementID9);
         
         ProgramStageDataElement programStageDataElement = new ProgramStageDataElement( programStage, dataElement, true, 1 );
         programStageDataElement.setSortOrder(1);
@@ -355,6 +380,14 @@ public class PopulateSingleEventsDataAction implements Action {
         
         programStageDataElement = new ProgramStageDataElement( programStage, dataElement7, true, 7 );
         programStageDataElement.setSortOrder(7);
+        programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+        
+        programStageDataElement = new ProgramStageDataElement( programStage2, dataElement8, true, 1 );
+        programStageDataElement.setSortOrder(1);
+        programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+        
+        programStageDataElement = new ProgramStageDataElement( programStage2, dataElement9, true, 2 );
+        programStageDataElement.setSortOrder(2);
         programStageDataElementService.addProgramStageDataElement( programStageDataElement );
         
         class Name {

@@ -6,6 +6,7 @@
 		<li>
 			<a href="editBeneficiary.action?patientId=$patientId">
 				Edit Person Details
+			</a>
 			</li>
 		<li>Edit Single Event Details</li>
 </ul>

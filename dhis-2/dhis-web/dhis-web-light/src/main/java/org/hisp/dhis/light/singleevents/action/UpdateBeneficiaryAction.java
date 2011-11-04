@@ -27,6 +27,8 @@
 
 package org.hisp.dhis.light.singleevents.action;
 
+import java.util.Date;
+
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -66,7 +68,7 @@ public class UpdateBeneficiaryAction implements Action  {
     }    
     
     // -------------------------------------------------------------------------
-	// Input
+	// Input & Output
 	// -------------------------------------------------------------------------   
     
     private Integer organisationUnitId;
@@ -82,6 +84,13 @@ public class UpdateBeneficiaryAction implements Action  {
     {
     	this.patientId = patientId;
     }
+    
+    private Patient patient;
+    
+    public Patient getPatient()
+    {
+    	return patient;
+    }
 
     private String fullName;
     
@@ -95,6 +104,11 @@ public class UpdateBeneficiaryAction implements Action  {
     public void setBirthDate( String birthDate )
     {
         this.birthDate = birthDate;
+    }
+    
+    public String getBirthDate()
+    {
+    	return birthDate;
     }
 
     private Character dobType;
@@ -123,10 +137,113 @@ public class UpdateBeneficiaryAction implements Action  {
     	this.registrationDate = registrationDate;
     }
     
+    public String getRegistrationDate()
+    {
+    	return registrationDate;
+    }
+    
 	// -------------------------------------------------------------------------
-	// Output
+	// Validation
 	// -------------------------------------------------------------------------
-  
+    
+    private Date rD,bD;
+    
+    private boolean fullNameIsToLong;
+    private boolean invalidRegistrationDate;
+    private boolean invalidBirthDate;
+    private boolean noGender;
+    private boolean noDobType;
+    
+    public boolean getFullNameIsToLong()
+    {
+    	return fullNameIsToLong;
+    }
+    
+    public boolean getInvalidRegistrationDate()
+    {
+    	return invalidRegistrationDate;
+    }
+    
+    public boolean getInvalidBirthDate()
+    {
+    	return invalidBirthDate;
+    }
+    
+    public boolean getNoGender()
+    {
+    	return noGender;
+    }
+    
+    public boolean getNoDobType()
+    {
+    	return noDobType;
+    }
+    
+    private boolean validate()
+    {
+    	boolean valid = true;
+    	
+    	if(validateStringLength(fullName,7,50) == false){
+    		fullNameIsToLong = true;
+    		valid = false;
+    	}
+    	
+    	if(validateDateNotNull(rD) == false){
+    		invalidRegistrationDate = true;
+    		valid = false;
+    	}
+    	
+    	if(validateDateNotNull(bD) == false){
+    		invalidBirthDate = true;
+    		valid = false;
+    	}
+    	
+    	if(validateDropDown(gender) == false){
+    		noGender = true;
+    		valid = false;
+    	}
+    	
+    	if(validateDropDown(dobType) == false){
+    		noDobType = true;
+    		valid = false;
+    	}
+    	
+    	return valid;
+    }
+    
+    private boolean validateStringLength(String s, int min, int max)
+    {
+    	if((s.length() >= min) && (s.length() <= max)){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+    
+    
+    private boolean validateDateNotNull(Date d){
+    	if(d == null){
+    	return false;
+    	}else{
+    		return true;
+    	}
+    }
+    
+    private boolean validateDropDown(String s){
+    	if(s.equalsIgnoreCase("please_select")){
+    		return false;
+    	}else{
+    		return true;
+    	}
+    }
+    
+    private boolean validateDropDown(Character c){
+    	if(c.equals('p')){
+    		return false;
+    	}else{
+    		return true;
+    	}
+    }
     
 	// -------------------------------------------------------------------------
 	// Action Implementation
@@ -135,7 +252,13 @@ public class UpdateBeneficiaryAction implements Action  {
 	@Override
 	public String execute() {
 		
-		Patient patient = patientService.getPatient(patientId);
+		fullNameIsToLong = false;
+	    invalidRegistrationDate = false;
+	    invalidBirthDate = false;
+	    noGender = false;
+	    noDobType = false;
+		
+		patient = patientService.getPatient(patientId);
 		
 		 // ---------------------------------------------------------------------
         // Set FirstName, MiddleName, LastName by FullName
@@ -173,22 +296,30 @@ public class UpdateBeneficiaryAction implements Action  {
         // Set Other information for patient
         // ---------------------------------------------------------------------
         
-		OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
-		
-		patient.setOrganisationUnit( organisationUnit );
+
 		patient.setGender( gender );		
 		patient.setDobType( dobType );
 		patient.setIsDead( false );
-		patient.setBloodGroup( bloodGroup );
+		if(!bloodGroup.equalsIgnoreCase("please_select")){
+			patient.setBloodGroup( bloodGroup );
+		}
 		
         birthDate = birthDate.trim();
-        patient.setBirthDate( format.parseDate( birthDate ) );
+        bD = format.parseDate( birthDate );
+        patient.setBirthDate( bD );
         
         registrationDate = registrationDate.trim();
-        patient.setRegistrationDate( format.parseDate( registrationDate ) );
+        rD = format.parseDate( registrationDate );
+        patient.setRegistrationDate( rD );
         
-        patientService.updatePatient(patient);
-        
-		return SUCCESS;
+		if(validate() == false){
+			return ERROR;
+		}else{
+			OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );		
+			patient.setOrganisationUnit( organisationUnit );
+			patientService.updatePatient(patient);
+			return SUCCESS;
+		}
+		
 	}
 }
