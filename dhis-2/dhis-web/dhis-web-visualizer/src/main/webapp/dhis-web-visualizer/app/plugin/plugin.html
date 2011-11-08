@@ -1,26 +1,31 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../lib/ext/resources/css/ext-all-gray.css" />
-    <link rel="stylesheet" type="text/css" href="../css/plugin.css" />
     <script type="text/javascript" src="../lib/ext/ext-all.js"></script>
-    <script type="text/javascript" src="plugin.js"></script>    
+    <script type="text/javascript" src="plugin.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="../css/plugin.css" />
 </head>
 
 <body>
 	
+	<h1>My web site with embedded charts</h1>
 	<div id="bar_chart_1"></div>
 	
 	<script>
 		Ext.onReady( function() {
+			var url = 'http://localhost:8180/dhis/dhis-web-visualizer/app';
+			
 			DHIS.getChart({
 				type: 'column',
-				indicators: [359596,359596],
+				indicators: [52486],
 				periods: ['monthsThisYear'],
 				organisationunits: [525],
 				series: 'indicator',
 				category: 'period',
 				filter: 'organisationunit',
-				div: 'bar_chart_1'
+				div: 'bar_chart_1',
+				url: url
 			});
 		});
 	</script>

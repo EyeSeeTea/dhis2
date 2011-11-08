@@ -39,20 +39,11 @@ DHIS.conf = {
             area: 'area',
             pie: 'pie'
         }
-    },
-    style: {
-        label: {
-            period_group: 'font:bold 11px arial; color:#444; line-height:20px'
-        }
-    },
-    layout: {
-        west_cmp_width: 380,
-        west_width: 424,
-        east_tbar_height: 27
     }
 };
 
 Ext.onReady( function() {
+	
     DHIS.initialize = function() {
         DHIS.store.column = DHIS.store.defaultChartStore;
         DHIS.store.column_stacked = DHIS.store.defaultChartStore;
@@ -65,127 +56,6 @@ Ext.onReady( function() {
     };
     
     DHIS.util = {
-        getCmp: function(q) {
-            return DHIS.viewport.query(q)[0];
-        },
-        viewport: {
-            getSize: function() {
-                var c = Ext.getCmp('center');
-                return {x: c.getWidth(), y: c.getHeight()};
-            },
-            getXY: function() {
-                var c = Ext.getCmp('center');
-                return {x: c.x + 15, y: c.y + 43};
-            }
-        },
-        multiselect: {
-            select: function(a, s) {
-                var selected = a.getValue();
-                if (selected.length) {
-                    var array = [];
-                    Ext.Array.each(selected, function(item) {
-                        array.push({id: item, shortName: a.store.getAt(a.store.find('id', item)).data.shortName});
-                    });
-                    s.store.add(array);
-                }
-                this.filterAvailable(a, s);
-            },            
-            selectAll: function(a, s) {
-                var array = [];
-                a.store.each( function(r) {
-                    array.push({id: r.data.id, shortName: r.data.shortName});
-                });
-                s.store.add(array);
-                this.filterAvailable(a, s);
-            },            
-            unselect: function(a, s) {
-                var selected = s.getValue();
-                if (selected.length) {
-                    Ext.Array.each(selected, function(item) {
-                        s.store.remove(s.store.getAt(s.store.find('id', item)));
-                    });                    
-                    this.filterAvailable(a, s);
-                }
-            },
-            unselectAll: function(a, s) {
-                s.store.removeAll();
-                a.store.clearFilter();
-            },
-            filterAvailable: function(a, s) {
-                a.store.filterBy( function(r) {
-                    var filter = true;
-                    s.store.each( function(r2) {
-                        if (r.data.id === r2.data.id) {
-                            filter = false;
-                        }
-                    });
-                    return filter;
-                });
-            }
-        },
-        fieldset: {
-            collapseOthers: function(name) {
-                for (var p in DHIS.conf.finals.dimension) {
-                    if (DHIS.conf.finals.dimension[p].value !== name) {
-                        DHIS.util.getCmp('fieldset[name="' + DHIS.conf.finals.dimension[p].value + '"]').collapse();
-                    }
-                }
-            },
-            toggleIndicator: function() {
-                DHIS.util.getCmp('fieldset[name="' + DHIS.conf.finals.dimension.indicator.value + '"]').toggle();
-            },
-            toggleDataElement: function() {
-                DHIS.util.getCmp('fieldset[name="' + DHIS.conf.finals.dimension.dataelement.value + '"]').toggle();
-            },
-            togglePeriod: function() {
-                DHIS.util.getCmp('fieldset[name="' + DHIS.conf.finals.dimension.period.value + '"]').toggle();
-            },
-            toggleOrganisationUnit: function() {
-                DHIS.util.getCmp('fieldset[name="' + DHIS.conf.finals.dimension.organisationunit.value + '"]').toggle();
-            }
-        },
-        button: {
-            getValue: function() {
-                for (var i = 0; i < DHIS.cmp.charttype.length; i++) {
-                    if (DHIS.cmp.charttype[i].pressed) {
-                        return DHIS.cmp.charttype[i].name;
-                    }
-                }
-            },
-            toggleHandler: function(b) {
-                if (!b.pressed) {
-                    b.toggle();
-                }
-            }
-        },
-        store: {
-            addToStorage: function(s) {
-                s.each( function(r) {
-                    if (!s.storage[r.data.id]) {
-                        s.storage[r.data.id] = {id: r.data.id, shortName: r.data.shortName, name: r.data.shortName, parent: s.parent};
-                    }
-                });
-            },
-            loadFromStorage: function(s) {
-                var items = [];
-                s.removeAll();
-                for (var obj in s.storage) {
-                    if (s.storage[obj].parent === s.parent) {
-                        items.push(s.storage[obj]);
-                    }
-                }
-                items = Ext.Array.sort(items);
-                s.add(items);
-            },
-            containsParent: function(s) {
-                for (var obj in s.storage) {
-                    if (s.storage[obj].parent === s.parent) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        },
         dimension: {
             indicator: {
                 getUrl: function(isFilter) {
@@ -289,7 +159,8 @@ Ext.onReady( function() {
             getEncodedSeriesName: function(text) {
                 return text.replace(/\./g,'');
             },
-            getLegend: function(len) {
+            getLegend: function() {
+				var len = DHIS.state.series.data.length;
                 return {
                     position: len > 6 ? 'right' : 'top',
                     boxStroke: '#ffffff',
@@ -319,78 +190,6 @@ Ext.onReady( function() {
                 }
             }
         },
-        combobox: {
-            filter: {
-                clearValue: function(v, cb, i, d) {
-                    if (v === cb.getValue()) {
-                        cb.clearValue();
-                    }
-                    else if ((v === i || v === d) && (cb.getValue() === i || cb.getValue() === d)) {
-                        cb.clearValue();
-                    }
-                },
-                category: function(vp) {
-                    var cbs = vp.query('combobox[name="' + DHIS.conf.finals.chart.series + '"]')[0],
-                        cbc = vp.query('combobox[name="' + DHIS.conf.finals.chart.category + '"]')[0],
-                        cbf = vp.query('combobox[name="' + DHIS.conf.finals.chart.filter + '"]')[0],
-                        v = cbs.getValue(),
-                        i = DHIS.conf.finals.dimension.indicator.value,
-                        d = DHIS.conf.finals.dimension.dataelement.value,
-                        p = DHIS.conf.finals.dimension.period.value,
-                        o = DHIS.conf.finals.dimension.organisationunit.value,
-                        index = 0;
-                        
-                    this.clearValue(v, cbc, i, d);
-                    this.clearValue(v, cbf, i, d);
-                    
-                    cbc.filterArray = [!(v === i || v === d), !(v === i || v === d), !(v === p), !(v === o)];
-                    cbc.store.filterBy( function(r) {
-                        return cbc.filterArray[index++];
-                    });
-                    
-                    this.filter(vp);
-                },                
-                filter: function(vp) {
-                    var cbc = vp.query('combobox[name="' + DHIS.conf.finals.chart.category + '"]')[0],
-                        cbf = vp.query('combobox[name="' + DHIS.conf.finals.chart.filter + '"]')[0],
-                        v = cbc.getValue(),
-                        i = DHIS.conf.finals.dimension.indicator.value,
-                        d = DHIS.conf.finals.dimension.dataelement.value,
-                        p = DHIS.conf.finals.dimension.period.value,
-                        o = DHIS.conf.finals.dimension.organisationunit.value,
-                        index = 0;
-                        
-                    this.clearValue(v, cbf, i, d);
-                        
-                    cbf.filterArray = Ext.Array.clone(cbc.filterArray);
-                    cbf.filterArray[0] = cbf.filterArray[0] ? !(v === i || v === d) : false;
-                    cbf.filterArray[1] = cbf.filterArray[1] ? !(v === i || v === d) : false;
-                    cbf.filterArray[2] = cbf.filterArray[2] ? !(v === p) : false;
-                    cbf.filterArray[3] = cbf.filterArray[3] ? !(v === o) : false;
-                    
-                    cbf.store.filterBy( function(r) {
-                        return cbf.filterArray[index++];
-                    });
-                }
-            }
-        },
-		window: {
-			datatable: {
-				getHeight: function() {
-					if (DHIS.value.values.length) {
-						if (Ext.isWindows && Ext.isGecko) {
-							return 22 * DHIS.value.values.length + 57;
-						}
-						else if (Ext.isWindows && Ext.isIE) {
-							return 21 * DHIS.value.values.length + 58;
-						}
-						else {
-							return 21 * DHIS.value.values.length + 57;
-						}
-					}
-				}
-			}
-		},
         number: {
             isInteger: function(n) {
                 var str = new String(n);
@@ -411,30 +210,18 @@ Ext.onReady( function() {
             getChartAxisFormatRenderer: function() {
                 return this.allValuesAreIntegers(DHIS.value.values) ? '0' : '0.0';
             }
+        },
+        string: {
+            extendUrl: function(url) {
+                if (url.charAt(url.length-1) !== '/') {
+                    url += '/';
+                }
+                return url;
+            }
         }
     };
     
     DHIS.store = {
-        datatable: null,
-        getDataTableStore: function(exe) {
-            this.datatable = Ext.create('Ext.data.Store', {
-                fields: [
-                    DHIS.state.getIndiment().value,
-                    DHIS.conf.finals.dimension.period.value,
-                    DHIS.conf.finals.dimension.organisationunit.value,
-                    'v'
-                ],
-                data: DHIS.value.values
-            });
-            
-            if (exe) {
-                DHIS.datatable.getDataTable(true);
-            }
-            else {
-                return this.datatable;
-            }
-            
-        },
         chart: null,
         getChartStore: function() {
             this[DHIS.state.type]();
@@ -474,22 +261,16 @@ Ext.onReady( function() {
     DHIS.state = {
 		conf: null,
         type: DHIS.conf.finals.chart.column,
-        indiment: [],
-        period: [],
-        organisationunit: [],
         series: {
-            cmp: null,
-            dimension: DHIS.conf.finals.dimension.indicator.value,
+            dimension: null,
             data: []
         },
         category: {
-            cmp: null,
-            dimension: DHIS.conf.finals.dimension.period.value,
+            dimension: null,
             data: []
         },
         filter: {
-            cmp: null,
-            dimension: DHIS.conf.finals.dimension.organisationunit.value,
+            dimension: null,
             data: []
         },
         getState: function(conf) {
@@ -499,17 +280,6 @@ Ext.onReady( function() {
             this.series.dimension = conf.series;
             this.category.dimension = conf.category;
             this.filter.dimension = conf.filter;
-            
-            //DHIS.getChart({
-				//type: 'column',
-				//indicators: [359596,359596],
-				//periods: ['monthsThisYear'],
-				//organisationunits: [525],
-				//series: 'i',
-				//category: 'p',
-				//filter: 'o',
-				//div: 'bar_chart_1'
-			//});
             
 			DHIS.value.getValues();
         },
@@ -528,11 +298,11 @@ Ext.onReady( function() {
             this.period = null;
             this.organisationunit = null;
             this.series.dimension = null;
-            this.series.data = null;
+            this.series.data = [];
             this.category.dimension = null;
-            this.category.data = null;
+            this.category.data = [];
             this.filter.dimension = null;
-            this.filter.data = null;
+            this.filter.data = [];
         }
     };
     
@@ -551,13 +321,11 @@ Ext.onReady( function() {
             params = params.concat(DHIS.util.dimension[series].getUrl());
             params = params.concat(DHIS.util.dimension[category].getUrl());
             params = params.concat(DHIS.util.dimension[filter].getUrl(true));
-alert(params);            
-            
-            var baseUrl = DHIS.conf.finals.ajax.url_visualizer + url + '.action';
+                        
+            var baseUrl = DHIS.util.string.extendUrl(DHIS.state.conf.url) + url + '.action';
             Ext.Array.each(params, function(item) {
                 baseUrl = Ext.String.urlAppend(baseUrl, item);
             });
-alert(baseUrl);            
             
             Ext.Ajax.request({
                 url: baseUrl,
@@ -570,6 +338,14 @@ alert(baseUrl);
                     }
                     
                     Ext.Array.each(DHIS.value.values, function(item) {
+						item.indicator = item.in;
+						item.dataelement = item.in;
+						item.period = item.pn;
+						item.organisationunit = item.on;
+						
+						DHIS.state.series.data.push(item[DHIS.state.series.dimension]);
+						DHIS.state.category.data.push(item[DHIS.state.category.dimension]);
+						DHIS.state.filter.data.push(item[DHIS.state.filter.dimension]);
                         item.v = parseFloat(item.v);
                     });
                     
@@ -606,13 +382,12 @@ alert(baseUrl);
         chart: null,
         getChart: function() {
             this[DHIS.state.type]();
-			this.reload();
         },
         column: function(stacked) {
             this.chart = Ext.create('Ext.chart.Chart', {
-				renderTo: DV.state.conf.div,
-                width: DHIS.util.viewport.getSize().x,
-                height: DHIS.util.viewport.getSize().y,
+				renderTo: DHIS.state.conf.div,
+                width: 1400,
+                height: 500,
                 animate: true,
                 store: DHIS.store.chart,
                 legend: DHIS.util.chart.getLegend(DHIS.state.series.data.length),
@@ -631,7 +406,7 @@ alert(baseUrl);
                         }
                     },
                     {
-                        title: DHIS.init.isInit ? 'Categories' : DHIS.conf.finals.dimension[DHIS.state.category.dimension].rawvalue,
+                        title: DHIS.conf.finals.dimension[DHIS.state.category.dimension].rawvalue,
                         type: 'Category',
                         position: 'bottom',
                         fields: DHIS.store.chart.bottom
