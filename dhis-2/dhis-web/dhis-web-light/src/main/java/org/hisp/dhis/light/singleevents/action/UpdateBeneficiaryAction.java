@@ -154,7 +154,9 @@ public class UpdateBeneficiaryAction implements Action  {
     private boolean invalidBirthDate;
     private boolean noGender;
     private boolean noDobType;
-    private boolean noBloodGroup;
+    private boolean invalidDobType;
+    private boolean invalidBloodGroup;
+    private boolean invalidGender;
     
     public boolean getFullNameIsToLong()
     {
@@ -186,9 +188,19 @@ public class UpdateBeneficiaryAction implements Action  {
     	return noDobType;
     }
     
-    public boolean getNoBloodGroup()
+    public boolean getInvalidDobType()
     {
-    	return noBloodGroup;
+    	return invalidDobType;
+    }
+    
+    public boolean getInvalidGender()
+    {
+    	return invalidGender;
+    }
+    
+    public boolean getInvalidBloodGroup()
+    {
+    	return invalidBloodGroup;
     }
     
     private boolean validate()
@@ -197,36 +209,55 @@ public class UpdateBeneficiaryAction implements Action  {
     	
     	if(validateStringLength(fullName,7,50) == false){
     		fullNameIsToLong = true;
+    		System.out.println("validateStringLength");
     		valid = false;
     	}
     	
     	if(validName(fullName) == false){
     		invalidFullName = true;
+    		System.out.println("validName");
     		valid = false;
     	}
     	
     	if(validateDateNotNull(rD) == false){
     		invalidRegistrationDate = true;
+    		System.out.println("validateDateNotNull rD");
     		valid = false;
     	}
     	
     	if(validateDateNotNull(bD) == false){
     		invalidBirthDate = true;
+    		System.out.println("validateDateNotNull bD");
     		valid = false;
     	}
     	
     	if(validateDropDown(gender) == false){
     		noGender = true;
+    		System.out.println("validateDropDown gender");
     		valid = false;
     	}
     	
     	if(validateDropDown(dobType) == false){
     		noDobType = true;
+    		System.out.println("validateDropDown dobtype");
     		valid = false;
     	}
     	
-    	if(validateDropDown(bloodGroup) == false){
-    		noBloodGroup = true;
+    	if(validateDobType(dobType) == false){
+    		invalidDobType = true;
+    		System.out.println("validateDobType");
+    		valid = false;
+    	}
+    	
+    	if(validateGender(gender) == false){
+    		invalidGender = true;
+    		System.out.println("validateGender");
+    		valid = false;
+    	}
+    	
+    	if(validateBloodGroup(bloodGroup) == false){
+    		invalidBloodGroup = true;
+    		System.out.println("validateBloodGroup");
     		valid = false;
     	}
     	
@@ -275,6 +306,33 @@ public class UpdateBeneficiaryAction implements Action  {
     	}
     }
     
+    private boolean validateDobType(Character c)
+    {
+    	if(c == 'D' || c == 'V'){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+
+    private boolean validateGender(String s)
+    {
+    	if(s.equals("M") || s.equals("F") || s.equals("T")){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+    
+    private boolean validateBloodGroup(String s)
+    {
+    	if(s.matches("^\\w{1,2}\\-?\\+?$") || s.equalsIgnoreCase("please_select")){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+    
 	// -------------------------------------------------------------------------
 	// Action Implementation
 	// -------------------------------------------------------------------------
@@ -288,7 +346,9 @@ public class UpdateBeneficiaryAction implements Action  {
 	    invalidBirthDate = false;
 	    noGender = false;
 	    noDobType = false;
-	    noBloodGroup = false;
+	    invalidDobType = false;
+	    invalidBloodGroup = false;
+	    invalidGender = false;
 		
 		patient = patientService.getPatient(patientId);
 		

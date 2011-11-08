@@ -28,9 +28,11 @@
 	    	
 	    	
 	    	#if ( $noGender )
-	    	<label style="color:red;">Gender. Please select a gender.</label>
+	    		<label style="color:red;">Gender. Please select a gender</label>
+	    	#elseif ( $invalidGender )
+	    		<label style="color:red;">Gender. The gender entered is not valid</label>
 	    	#else
-	    	<label>Gender</label>
+	    		<label>Gender</label>
 	    	#end
 	    	<br />    	
 	    	<select name="gender">
@@ -59,9 +61,11 @@
 			<br />
 			
 			#if ( $noDobType )
-			<label style="color:red;">DOB Type. Please select a DOB type.</label>
+				<label style="color:red;">DOB Type. Please select a DOB type</label>
+			#elseif ( $invalidDobType )
+				<label style="color:red;">DOB Type. The DOB type entered is not valid</label>
 			#else
-			<label>DOB Type</label>
+				<label>DOB Type</label>
 			#end					
 			<br />
 			<select name="dobType">
@@ -84,14 +88,14 @@
 			<br />
 			
 			#if ( $invalidBirthDate )
-	    	<label style="color:red;">Date of Birth (yyyy-MM-dd). The date entered is not valid.</label>
+	    	<label style="color:red;">Date of Birth (yyyy-MM-dd). The date entered is not valid</label>
 	    	#else
 	    	<label>Date of Birth (yyyy-MM-dd)</label>
 	    	#end
 			<input type="text" maxlength="255" size="24" name="birthDate" value="$birthDate" />
 			
-			#if ( $noBloodGroup )
-	    	<label style="color:red;">Blood Group. Please select a blood group.</label>
+			#if ( $invalidBloodGroup )
+	    	<label style="color:red;">Blood Group. The blood group entered is not valid</label>
 	    	#else
 			<label>Blood Group</label>
 			#end
