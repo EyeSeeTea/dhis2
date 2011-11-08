@@ -209,55 +209,46 @@ public class UpdateBeneficiaryAction implements Action  {
     	
     	if(validateStringLength(fullName,7,50) == false){
     		fullNameIsToLong = true;
-    		System.out.println("validateStringLength");
     		valid = false;
     	}
     	
     	if(validName(fullName) == false){
     		invalidFullName = true;
-    		System.out.println("validName");
     		valid = false;
     	}
     	
     	if(validateDateNotNull(rD) == false){
     		invalidRegistrationDate = true;
-    		System.out.println("validateDateNotNull rD");
     		valid = false;
     	}
     	
     	if(validateDateNotNull(bD) == false){
     		invalidBirthDate = true;
-    		System.out.println("validateDateNotNull bD");
     		valid = false;
     	}
     	
     	if(validateDropDown(gender) == false){
     		noGender = true;
-    		System.out.println("validateDropDown gender");
     		valid = false;
     	}
     	
     	if(validateDropDown(dobType) == false){
     		noDobType = true;
-    		System.out.println("validateDropDown dobtype");
     		valid = false;
     	}
     	
     	if(validateDobType(dobType) == false){
     		invalidDobType = true;
-    		System.out.println("validateDobType");
     		valid = false;
     	}
     	
     	if(validateGender(gender) == false){
     		invalidGender = true;
-    		System.out.println("validateGender");
     		valid = false;
     	}
     	
     	if(validateBloodGroup(bloodGroup) == false){
     		invalidBloodGroup = true;
-    		System.out.println("validateBloodGroup");
     		valid = false;
     	}
     	
