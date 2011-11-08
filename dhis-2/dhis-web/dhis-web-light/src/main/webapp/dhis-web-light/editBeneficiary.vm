@@ -11,16 +11,18 @@
 		
 	    	
 	    	#if ( $invalidRegistrationDate )
-	    	<label style="color:red;">Date of Registration (yyyy-MM-dd). The date entered is not valid.</label>
+	    		<label style="color:red;">Date of Registration (yyyy-MM-dd). The date entered is not valid.</label>
 	    	#else
-	    	<label>Date of Registration (yyyy-MM-dd)</label>
+	    		<label>Date of Registration (yyyy-MM-dd)</label>
 	    	#end
 	    	<input type="text" maxlength="255" size="24" name="registrationDate" value="$registrationDate" />
 	    	
 	    	#if ( $fullNameIsToLong )
-	    	<label style="color:red;">Full Name. The name must be between 7 and 50 characters</label>
+	    		<label style="color:red;">Full Name. The name must be between 7 and 50 characters</label>
+	    	#elseif( $invalidFullName )
+	    		<label style="color:red;">Full Name. The name entered is not valid</label>
 	    	#else
-	    	<label>Full Name</label>
+	    		<label>Full Name</label>
 	    	#end
 	    	<input type="text" maxlength="255" size="24" name="fullName" value="$patient.getFullName()" />
 	    	
@@ -88,7 +90,11 @@
 	    	#end
 			<input type="text" maxlength="255" size="24" name="birthDate" value="$birthDate" />
 			
+			#if ( $noBloodGroup )
+	    	<label style="color:red;">Blood Group. Please select a blood group.</label>
+	    	#else
 			<label>Blood Group</label>
+			#end
 			<br />
 			<select name="bloodGroup">
 				<option value="please_select">[Please select]</option>

@@ -149,14 +149,21 @@ public class UpdateBeneficiaryAction implements Action  {
     private Date rD,bD;
     
     private boolean fullNameIsToLong;
+    private boolean invalidFullName;
     private boolean invalidRegistrationDate;
     private boolean invalidBirthDate;
     private boolean noGender;
     private boolean noDobType;
+    private boolean noBloodGroup;
     
     public boolean getFullNameIsToLong()
     {
     	return fullNameIsToLong;
+    }
+    
+    public boolean getInvalidFullName()
+    {
+    	return invalidFullName;
     }
     
     public boolean getInvalidRegistrationDate()
@@ -179,12 +186,22 @@ public class UpdateBeneficiaryAction implements Action  {
     	return noDobType;
     }
     
+    public boolean getNoBloodGroup()
+    {
+    	return noBloodGroup;
+    }
+    
     private boolean validate()
     {
     	boolean valid = true;
     	
     	if(validateStringLength(fullName,7,50) == false){
     		fullNameIsToLong = true;
+    		valid = false;
+    	}
+    	
+    	if(validName(fullName) == false){
+    		invalidFullName = true;
     		valid = false;
     	}
     	
@@ -208,6 +225,11 @@ public class UpdateBeneficiaryAction implements Action  {
     		valid = false;
     	}
     	
+    	if(validateDropDown(bloodGroup) == false){
+    		noBloodGroup = true;
+    		valid = false;
+    	}
+    	
     	return valid;
     }
     
@@ -220,10 +242,18 @@ public class UpdateBeneficiaryAction implements Action  {
     	}
     }
     
+    private boolean validName(String s)
+    {
+    	if(s.matches("^\\w+[\\w*\\s?-?.?'?]*$")){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
     
     private boolean validateDateNotNull(Date d){
     	if(d == null){
-    	return false;
+    		return false;
     	}else{
     		return true;
     	}
@@ -253,10 +283,12 @@ public class UpdateBeneficiaryAction implements Action  {
 	public String execute() {
 		
 		fullNameIsToLong = false;
+		invalidFullName = false;
 	    invalidRegistrationDate = false;
 	    invalidBirthDate = false;
 	    noGender = false;
 	    noDobType = false;
+	    noBloodGroup = false;
 		
 		patient = patientService.getPatient(patientId);
 		
