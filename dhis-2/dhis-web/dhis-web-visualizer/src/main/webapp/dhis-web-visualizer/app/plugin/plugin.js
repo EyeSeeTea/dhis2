@@ -119,14 +119,14 @@ Ext.onReady( function() {
                 };
             },
             line: {
-                getSeriesArray: function() {
+                getSeriesArray: function(project) {
                     var a = [];
-                    for (var i = 0; i < DHIS.store.chart.left.length; i++) {
+                    for (var i = 0; i < project.store.left.length; i++) {
                         a.push({
                             type: 'line',
                             axis: 'left',
-                            xField: DHIS.store.chart.bottom,
-                            yField: DHIS.store.chart.left[i]
+                            xField: project.store.bottom,
+                            yField: project.store.left[i]
                         });
                     }
                     return a;
@@ -166,7 +166,6 @@ Ext.onReady( function() {
     
     DHIS.store = {
         getChartStore: function(project) {
-alert("getchartstore");
             this[project.state.type](project);
         },
         defaultChartStore: function(project) {
@@ -194,8 +193,8 @@ alert("getchartstore");
                 fields: properties,
                 data: project.data
             });
-            project.left = properties.slice(0, 1);
-            project.bottom = properties.slice(1, properties.length);
+            project.store.left = properties.slice(0, 1);
+            project.store.bottom = properties.slice(1, properties.length);
             
 			DHIS.chart.getChart(project);
         }
@@ -430,7 +429,7 @@ alert("getchartstore");
         bar_stacked: function(project) {
             this.bar(project);
         },
-        line: function() {
+        line: function(project) {
             var el = Ext.get(project.state.conf.div);
             project.chart = Ext.create('Ext.chart.Chart', {
 				renderTo: project.state.conf.div,
@@ -445,7 +444,7 @@ alert("getchartstore");
                         type: 'Numeric',
                         position: 'left',
                         minimum: 0,
-                        fields: project.store.chart.left,
+                        fields: project.store.left,
                         label: {
                             renderer: Ext.util.Format.numberRenderer(DHIS.util.number.getChartAxisFormatRenderer(project.values))
                         },
@@ -457,10 +456,10 @@ alert("getchartstore");
                         title: DHIS.conf.finals.dimension[project.state.category.dimension].rawvalue,
                         type: 'Category',
                         position: 'bottom',
-                        fields: project.store.chart.bottom
+                        fields: project.store.bottom
                     }
                 ],
-                series: DHIS.util.chart.line.getSeriesArray()
+                series: DHIS.util.chart.line.getSeriesArray(project)
             });
         },
         area: function() {
@@ -548,7 +547,6 @@ alert("getchartstore");
         queue: [],
         addToQueue: function(obj) {
             DHIS.exe.queue.push(obj);
-            alert("q-len: " + DHIS.exe.queue.length + "\nallow: " + DHIS.exe.allow);
             
             if (DHIS.exe.allow) {
                 DHIS.exe.allow = false;
@@ -557,7 +555,6 @@ alert("getchartstore");
         },
         execute: function() {
             if (this.queue.length) {
-alert(DHIS.exe.queue[0].div);
                 DHIS.state.getState(this.queue.shift());
             }
 		}
