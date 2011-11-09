@@ -10,7 +10,8 @@
 <body>
 	
 	<h1>My web site with embedded charts</h1>
-	<div id="bar_chart_1"></div>
+	<div id="chart1"></div>
+	<div id="chart2"></div>
 	
 	<script>
 		Ext.onReady( function() {
@@ -18,15 +19,29 @@
 			
 			DHIS.getChart({
 				type: 'column',
+				indicators: [52486, 52487],
+				periods: ['monthsThisYear'],
+				organisationunits: [525],
+				series: 'indicator',
+				category: 'period',
+				filter: 'organisationunit',
+				div: 'chart1',
+				url: url
+			});
+            
+            DHIS.getChart({
+				type: 'bar',
 				indicators: [52486],
 				periods: ['monthsThisYear'],
 				organisationunits: [525],
 				series: 'indicator',
 				category: 'period',
 				filter: 'organisationunit',
-				div: 'bar_chart_1',
+				div: 'chart2',
 				url: url
 			});
+			
+	
 		});
 	</script>
 	

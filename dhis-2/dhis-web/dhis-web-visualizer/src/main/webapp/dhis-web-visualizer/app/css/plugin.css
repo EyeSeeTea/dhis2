@@ -7,9 +7,16 @@ h1 {
 	margin-bottom: 30px;
 }
 
-#bar_chart_1 {
-	height: 600px;
-	width: 1500px;
-	padding: 50px;
+#chart1 {
+	height: 350px;
+	width: 1000px;
+    margin-bottom: 50px;
 	border: 1px solid #ccc;
+}
+
+#chart2 {
+	height: 350px;
+	width: 1000px;
+    margin-bottom: 50px;
+	border: 1px solid #aaa;
 }
