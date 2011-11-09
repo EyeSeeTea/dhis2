@@ -27,6 +27,7 @@
 
 package org.hisp.dhis.light.singleevents.action;
 
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -79,6 +80,7 @@ public class AddBeneficiaryAction implements Action  {
         this.programService = programService;
     }
     
+    
     // -------------------------------------------------------------------------
 	// Input Output
 	// -------------------------------------------------------------------------   
@@ -93,12 +95,22 @@ public class AddBeneficiaryAction implements Action  {
     public Integer getOrganisationUnitId(){
     	return this.organisationUnitId;
     }
+    //
+    private Patient patient;
+    public Patient getPatient()
+    {
+    	return patient;
+    }
 
     private String fullName;
     
     public void setFullName( String fullName )
     {
         this.fullName = fullName;
+    }
+    
+    public String getFullName(){
+    	return fullName;
     }
 
     private String birthDate;
@@ -107,12 +119,21 @@ public class AddBeneficiaryAction implements Action  {
     {
         this.birthDate = birthDate;
     }
+    
+    public String getBirthDate()
+    {
+    	return birthDate;
+    }
 
     private Character dobType;
     
     public void setDobType( Character dobType )
     {
     	this.dobType = dobType;
+    }
+    //
+    public char getDobType(){
+    	return dobType;
     }
 
     private String gender;
@@ -121,17 +142,30 @@ public class AddBeneficiaryAction implements Action  {
     {
     	this.gender = gender;
     }
+    //
+    public String getGender(){
+    	return gender;
+    }
 
     private String bloodGroup;
     
     public void setBloodGroup( String bloodGroup ){
     	this.bloodGroup = bloodGroup;
     }
+    //
+    public String getBloodGroup(){
+    	return bloodGroup;
+    }
     
     private String registrationDate;
     
     public void setRegistrationDate( String registrationDate ){
     	this.registrationDate = registrationDate;
+    }
+    
+    public String getRegistrationDate()
+    {
+    	return registrationDate;
     }
     
     private Integer singleEventId;
@@ -170,14 +204,211 @@ public class AddBeneficiaryAction implements Action  {
 	 };
     
 	// -------------------------------------------------------------------------
+	// Validation
+	// -------------------------------------------------------------------------
+
+    private Date rD,bD;
+    
+    private boolean fullNameIsToLong;
+    private boolean invalidFullName;
+    private boolean invalidRegistrationDate;
+    private boolean invalidBirthDate;
+    private boolean noGender;
+    private boolean noDobType;
+    private boolean invalidDobType;
+    private boolean invalidBloodGroup;
+    private boolean invalidGender;
+    
+    public boolean getFullNameIsToLong()
+    {
+    	return fullNameIsToLong;
+    }
+    
+    public boolean getInvalidFullName()
+    {
+    	return invalidFullName;
+    }
+    
+    public boolean getInvalidRegistrationDate()
+    {
+    	return invalidRegistrationDate;
+    }
+    
+    public boolean getInvalidBirthDate()
+    {
+    	return invalidBirthDate;
+    }
+    
+    public boolean getNoGender()
+    {
+    	return noGender;
+    }
+    
+    public boolean getNoDobType()
+    {
+    	return noDobType;
+    }
+    
+    public boolean getInvalidDobType()
+    {
+    	return invalidDobType;
+    }
+    
+    public boolean getInvalidGender()
+    {
+    	return invalidGender;
+    }
+    
+    public boolean getInvalidBloodGroup()
+    {
+    	return invalidBloodGroup;
+    }
+    
+    private boolean validate()
+    {
+    	boolean valid = true;
+    	
+    	if(validateStringLength(fullName,7,50) == false){
+    		fullNameIsToLong = true;
+    		valid = false;
+    	}
+    	
+    	if(validName(fullName) == false){
+    		invalidFullName = true;
+    		valid = false;
+    	}
+    	
+    	if(validateDateNotNull(rD) == false){
+    		invalidRegistrationDate = true;
+    		valid = false;
+    	}
+    	
+    	if(validateDateNotNull(bD) == false){
+    		System.out.println("bD");
+    		invalidBirthDate = true;
+    		valid = false;
+    	}
+    	
+    	if(validateDropDown(gender) == false){
+    		noGender = true;
+    		valid = false;
+    	}
+    	
+    	if(validateDropDown(dobType) == false){
+    		noDobType = true;
+    		valid = false;
+    	}
+    	
+    	if(validateDobType(dobType) == false){
+    		invalidDobType = true;
+    		valid = false;
+    	}
+    	
+    	if(validateGender(gender) == false){
+    		invalidGender = true;
+    		valid = false;
+    	}
+    	
+    	if(validateBloodGroup(bloodGroup) == false){
+    		invalidBloodGroup = true;
+    		valid = false;
+    	}
+    	
+    	return valid;
+    }
+    
+    private boolean validateStringLength(String s, int min, int max)
+    {
+    	if((s.length() >= min) && (s.length() <= max)){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+    
+    private boolean validName(String s)
+    {
+    	if(s.matches("^[A-Za-zÀ-ÿ]+[[A-Za-zÀ-ÿ]*\\s?-?.?'?]*$")){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+    
+    private boolean validateDateNotNull(Date d){
+    	if(d == null){
+    		return false;
+    	}else{
+    		return true;
+    	}
+    }
+    
+    private boolean validateDropDown(String s){
+    	if(s.equalsIgnoreCase("please_select")){
+    		return false;
+    	}else{
+    		return true;
+    	}
+    }
+    
+    private boolean validateDropDown(Character c){
+    	if(c.equals('p')){
+    		return false;
+    	}else{
+    		return true;
+    	}
+    }
+    
+    private boolean validateDobType(Character c)
+    {
+    	if(c == 'D' || c == 'V'){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+
+    private boolean validateGender(String s)
+    {
+    	if(s.equals("M") || s.equals("F") || s.equals("T")){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+    
+    private boolean validateBloodGroup(String s)
+    {
+    	if(s.matches("^\\w{1,2}\\-?\\+?$") || s.equalsIgnoreCase("please_select")){
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+    
+
+
+
+	// -------------------------------------------------------------------------
 	// Action Implementation
 	// -------------------------------------------------------------------------
     
 	@Override
 	public String execute() {
-		
+		//
+	    eventName = programService.getProgram(singleEventId).getName();
+	    
+		fullNameIsToLong = false;
+		invalidFullName = false;
+	    invalidRegistrationDate = false;
+	    invalidBirthDate = false;
+	    noGender = false;
+	    noDobType = false;
+	    invalidDobType = false;
+	    invalidBloodGroup = false;
+	    invalidGender = false;
+
 		Patient patient = new Patient();
-		
 		// ---------------------------------------------------------------------
         // Set FirstName, MiddleName, LastName by FullName
         // ---------------------------------------------------------------------
@@ -205,7 +436,6 @@ public class AddBeneficiaryAction implements Action  {
                 lastName = fullName.substring( endIndex + 1, fullName.length() );
             }
         }
-        
         patient.setFirstName( firstName );
         patient.setMiddleName( middleName );
         patient.setLastName( lastName );
@@ -223,24 +453,29 @@ public class AddBeneficiaryAction implements Action  {
 		if(!bloodGroup.equalsIgnoreCase("please_select")){
 			patient.setBloodGroup( bloodGroup );
 		}
-		
         birthDate = birthDate.trim();
-        patient.setBirthDate( format.parseDate( birthDate ) );
+        bD = format.parseDate( birthDate );
+        patient.setBirthDate( bD );
         
         registrationDate = registrationDate.trim();
-        patient.setRegistrationDate( format.parseDate( registrationDate ) );
+        rD = format.parseDate( registrationDate );
+        patient.setRegistrationDate( rD );
         
-        patientId = patientService.savePatient(patient);
-        
-        // ---------------------------------------------------------------------
-        // Set Data for SingleEventForm
-        // ---------------------------------------------------------------------
-        Program program = programService.getProgram(singleEventId);
-        eventName = program.getName();
-        ProgramStage programStage = program.getProgramStages().iterator().next();
-        programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
-        Collections.sort(programStageDataElements, OrderBySortOrder);
-        
-        return SUCCESS;
+		if(validate() == false) {
+			return ERROR;
+		}else{
+	        patientId = patientService.savePatient(patient);
+	        
+	        // ---------------------------------------------------------------------
+	        // Set Data for SingleEventForm
+	        // ---------------------------------------------------------------------
+	        Program program = programService.getProgram(singleEventId);
+	        eventName = program.getName();
+	        ProgramStage programStage = program.getProgramStages().iterator().next();
+	        programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
+	        Collections.sort(programStageDataElements, OrderBySortOrder);
+	        
+	        return SUCCESS;
+		}
 	}
 }

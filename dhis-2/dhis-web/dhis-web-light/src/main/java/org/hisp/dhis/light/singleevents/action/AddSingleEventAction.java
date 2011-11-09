@@ -129,11 +129,11 @@ public class AddSingleEventAction implements Action  {
     private String dynForm[];
 
     public void setDynForm(String[] dynForm) {
-       this.dynForm = dynForm;
+    	this.dynForm = dynForm;
     }
     
 	 static final Comparator<ProgramStageDataElement> OrderBySortOrder =
-             new Comparator<ProgramStageDataElement>() {
+		 	new Comparator<ProgramStageDataElement>() {
 		 public int compare(ProgramStageDataElement i1, ProgramStageDataElement i2) {
 			 return i1.getSortOrder().compareTo(i2.getSortOrder());
 		 }
@@ -174,6 +174,7 @@ public class AddSingleEventAction implements Action  {
         int i = 0;
 		for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
 			DataElement dataElement = programStageDataElement.getDataElement();
+			//dataElement.getType()
 			
 	        PatientDataValue patientDataValue = new PatientDataValue();
 	        patientDataValue.setDataElement(dataElement);

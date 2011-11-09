@@ -8,48 +8,159 @@
 			<input type="hidden" name="organisationUnitId" value="$organisationUnitId" />
 			<input type="hidden" name="singleEventId" value="$singleEventId" />
 		
-	    	<label>Date of Registration (yyyy-MM-dd)</label>
-	    	<input type="text" maxlength="255" size="24" name="registrationDate" value="$todayDate" />
+		
+	    	#if ( $invalidRegistrationDate )
+	    		<label style="color:red;">Date of Registration (yyyy-MM-dd). The date entered is not valid.</label>
+	    	#else
+	    		<label>Date of Registration (yyyy-MM-dd)</label>
+	    	#end
+	    	#if($registrationDate)
+	    		<input type="date" maxlength="255" size="24" name="registrationDate" value="$registrationDate" />
+	    	#else
+	    		<input type="date" maxlength="255" size="24" name="registrationDate" value="" />
+	    	#end
 	    	
-	    	<label>Full Name</label>	
-	    	<input type="text" maxlength="255" size="24" name="fullName" />
+	    	#if ( $fullNameIsToLong )
+	    		<label style="color:red;">Full Name. The name must be between 7 and 50 characters</label>
+	    	#elseif( $invalidFullName )
+	    		<label style="color:red;">Full Name. The name entered is not valid</label>
+	    	#else
+	    		<label>Full Name</label>
+	    	#end
+	    	#if ($fullName)
+		    	<input type="text" maxlength="255" size="24" name="fullName" value="$fullName" />
+	    	#else
+	    		<input type="text" maxlength="255" size="24" name="fullName" value="" />
+	    	#end
 	    	
-	    	<label>Gender</label>
+	    	#if ( $noGender )
+	    		<label style="color:red;">Gender. Please select a gender</label>
+	    	#elseif ( $invalidGender )
+	    		<label style="color:red;">Gender. The gender entered is not valid</label>
+	    	#else
+	    		<label>Gender</label>
+	    	#end
 	    	<br />    	
 	    	<select name="gender">
 	    		<option value="please_select">[Please select]</option>
-				<option value="M">Male</option>
-				<option value="F">Female</option>
-				<option value="T">Transgender</option>
+	    		
+	    		#if ($gender == "M")
+					<option value="M" selected="selected">Male</option>
+				#else
+					<option value="M">Male</option>
+				#end
+				
+				#if ($gender == "F")
+					<option value="F" selected="selected">Female</option>
+				#else
+					<option value="F">Female</option>
+				#end
+				
+				#if ($gender == "T")
+					<option value="T" selected="selected">Transgender</option>
+				#else
+					<option value="T">Transgender</option>
+				#end
+				
 			</select>
 			
 			<br />
 			
-			<label>DOB Type</label>
+			#if ( $noDobType )
+				<label style="color:red;">DOB Type. Please select a DOB type</label>
+			#elseif ( $invalidDobType )
+				<label style="color:red;">DOB Type. The DOB type entered is not valid</label>
+			#else
+				<label>DOB Type</label>
+			#end
 			<br />
 			<select name="dobType">
 				<option value="p">[Please select]</option>
-				<option value="V">Verified</option>
-				<option value="D">Declared</option>
+				
+				#if ($dobType == "V")
+					<option value="V" selected="selected">Verified</option>
+				#else
+					<option value="V">Verified</option>
+				#end
+				
+				#if ($dobType == "D")
+					<option value="D" selected="selected">Declared</option>
+				#else
+					<option value="D">Declared</option>
+				#end
+				
 			</select>
-			
+			 
 			<br />
 			
-			<label>Date of Birth (yyyy-MM-dd)</label>
-			<input type="text" maxlength="255" size="24" name="birthDate" />
+			#if ( $invalidBirthDate )
+	    		<label style="color:red;">Date of Birth (yyyy-MM-dd). The date entered is not valid</label>
+	    	#else
+	    		<label>Date of Birth (yyyy-MM-dd)</label>
+	    	#end
+	    	#if($birthDate)
+				<input type="text" maxlength="255" size="24" name="birthDate" value="$birthDate"/>
+			#else
+				<input type="text" maxlength="255" size="24" name="birthDate" value=""/>
+			#end
 			
-			<label>Blood Group</label>
+			#if ( $invalidBloodGroup )
+	    		<label style="color:red;">Blood Group. The blood group entered is not valid</label>
+	    	#else
+				<label>Blood Group</label>
+			#end
 			<br />
 			<select name="bloodGroup">
 				<option value="please_select">[Please select]</option>
-				<option value="A+">A+</option>
-				<option value="A-">A-</option>
-				<option value="AB+">AB+</option>
-				<option value="AB-">AB-</option>
-				<option value="B+">B+</option>
-				<option value="B-">B-</option>
-				<option value="O+">O+</option>
-				<option value="O-">O-</option>
+				
+				#if ($bloodGroup == "A+")
+					<option value="A+" selected="selected">A+</option>
+				#else
+					<option value="A+">A+</option>
+				#end
+				
+				#if ($bloodGroup == "A-")
+					<option value="A-" selected="selected">A-</option>
+				#else
+					<option value="A-">A-</option>
+				#end
+
+				#if ($bloodGroup == "AB+")
+					<option value="AB+" selected="selected">AB+</option>
+				#else
+					<option value="AB+">AB+</option>
+				#end
+				
+				#if ($bloodGroup == "AB-")
+					<option value="AB-" selected="selected">AB-</option>
+				#else
+					<option value="AB-">AB-</option>
+				#end
+				
+				#if ($bloodGroup == "B+")
+					<option value="B+" selected="selected">B+</option>
+				#else
+					<option value="B+">B+</option>
+				#end
+				
+				#if ($bloodGroup == "B-")
+					<option value="B-" selected="selected">B-</option>
+				#else
+					<option value="B-">B-</option>
+				#end
+				
+				#if ($bloodGroup == "O+")
+					<option value="O+" selected="selected">O+</option>
+				#else
+					<option value="O+">O+</option>
+				#end
+				
+				#if ($bloodGroup == "O-")
+					<option value="O-" selected="selected">O-</option>
+				#else
+					<option value="O-">O-</option>
+				#end
+				
 			</select>
 			
 			<br />
