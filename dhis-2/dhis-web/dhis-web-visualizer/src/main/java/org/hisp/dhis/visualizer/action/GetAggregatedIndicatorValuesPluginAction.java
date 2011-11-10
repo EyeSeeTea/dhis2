@@ -103,63 +103,63 @@ public class GetAggregatedIndicatorValuesPluginAction
     {
         this.organisationUnitIds = organisationUnitIds;
     }
-    
+
     private boolean lastMonth;
 
     public void setLastMonth( boolean lastMonth )
     {
         this.lastMonth = lastMonth;
     }
-    
+
     private boolean monthsThisYear;
 
     public void setMonthsThisYear( boolean monthsThisYear )
     {
         this.monthsThisYear = monthsThisYear;
     }
-    
+
     private boolean monthsLastYear;
 
     public void setMonthsLastYear( boolean monthsLastYear )
     {
         this.monthsLastYear = monthsLastYear;
     }
-    
+
     private boolean lastQuarter;
 
     public void setLastQuarter( boolean lastQuarter )
     {
         this.lastQuarter = lastQuarter;
     }
-    
+
     private boolean quartersThisYear;
 
     public void setQuartersThisYear( boolean quartersThisYear )
     {
         this.quartersThisYear = quartersThisYear;
     }
-    
+
     private boolean quartersLastYear;
 
     public void setQuartersLastYear( boolean quartersLastYear )
     {
         this.quartersLastYear = quartersLastYear;
     }
-    
+
     private boolean thisYear;
 
     public void setThisYear( boolean thisYear )
     {
         this.thisYear = thisYear;
     }
-    
+
     private boolean lastYear;
 
     public void setLastYear( boolean lastYear )
     {
         this.lastYear = lastYear;
     }
-    
+
     private boolean lastFiveYears;
 
     public void setLastFiveYears( boolean lastFiveYears )
@@ -185,9 +185,10 @@ public class GetAggregatedIndicatorValuesPluginAction
     public String execute()
         throws Exception
     {
-        if ( indicatorIds != null && organisationUnitIds != null &&
-            ( lastMonth || monthsThisYear || monthsLastYear || lastQuarter || quartersThisYear ||
-                quartersLastYear || thisYear || lastYear || lastFiveYears ) )
+        if ( indicatorIds != null
+            && organisationUnitIds != null
+            && (lastMonth || monthsThisYear || monthsLastYear || lastQuarter || quartersThisYear || quartersLastYear
+                || thisYear || lastYear || lastFiveYears) )
         {
             RelativePeriods rp = new RelativePeriods();
             rp.setReportingMonth( lastMonth );
@@ -199,16 +200,16 @@ public class GetAggregatedIndicatorValuesPluginAction
             rp.setThisYear( thisYear );
             rp.setLastYear( lastYear );
             rp.setLast5Years( lastFiveYears );
-            
+
             Collection<Period> periods = periodService.reloadPeriods( rp.getRelativePeriods() );
-            
+
             Collection<Integer> periodIds = new ArrayList<Integer>();
-            
+
             for ( Period period : periods )
             {
                 periodIds.add( period.getId() );
             }
-            
+
             object = aggregatedDataValueService.getAggregatedIndicatorValues( indicatorIds, periodIds,
                 organisationUnitIds );
 
