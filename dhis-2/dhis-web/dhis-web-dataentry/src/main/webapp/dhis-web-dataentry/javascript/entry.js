@@ -36,7 +36,7 @@ function updateIndicators()
         {
 	        var value = eval( expression );
 	        
-	        value = isNaN( value ) ? '-' : Math.round( value );
+	        value = isNaN( value ) ? '-' : roundTo( value, 1 );
 	
 	        $( this ).attr( 'value', value );
         }
@@ -86,6 +86,9 @@ function generateExpression( expression )
  */
 function saveVal( dataElementId, optionComboId )
 {
+	dataElementId = parseInt( dataElementId );
+	optionComboId = parseInt( optionComboId );
+	
     var dataElementName = getDataElementName( dataElementId );
     var fieldId = '#' + dataElementId + '-' + optionComboId + '-val';
     var value = $( fieldId ).val();
