@@ -121,9 +121,15 @@
     <action name="addBeneficiary" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
       <result name="success" type="velocity">/dhis-web-light/main.vm</result>
       <param name="page">/dhis-web-light/newSingleEvent.vm</param>
+	</action>
+	<!--
+	<action name="addBeneficiary" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/newSingleEvent.vm</param>
       <result name="error" type="velocity">/dhis-web-light/main.vm</result>
       <param name="page">/dhis-web-light/newBeneficiary.vm</param>
-    </action>
+	</action>
+	-->
     
      <action name="addSingleEvent" class="org.hisp.dhis.light.singleevents.action.AddSingleEventAction">
       <result name="success" type="velocity">/dhis-web-light/main.vm</result>
