@@ -146,18 +146,24 @@
 
 /* Button border */
 .x-btn-default-toolbar-small {
-    border-width: 1px;
+    -moz-border-radius: 2px 2px 2px 2px;
+    -webkit-border-radius: 2px 2px 2px 2px;
+    -o-border-radius: 2px 2px 2px 2px;
+    -ms-border-radius: 2px 2px 2px 2px;
+    -khtml-border-radius: 2px 2px 2px 2px;
+    border-radius: 2px 2px 2px 2px;
+    border-width: 1px;    
 }
 
 .x-btn-default-toolbar-small-over {
-    -moz-border-radius: 3px 3px 3px 3px;
-    -webkit-border-radius: 3px 3px 3px 3px;
-    -o-border-radius: 3px 3px 3px 3px;
-    -ms-border-radius: 3px 3px 3px 3px;
-    -khtml-border-radius: 3px 3px 3px 3px;
-    border-radius: 3px 3px 3px 3px;
+    -moz-border-radius: 2px 2px 2px 2px;
+    -webkit-border-radius: 2px 2px 2px 2px;
+    -o-border-radius: 2px 2px 2px 2px;
+    -ms-border-radius: 2px 2px 2px 2px;
+    -khtml-border-radius: 2px 2px 2px 2px;
+    border-radius: 2px 2px 2px 2px;
     border-color: #aaa;
-    border-style: double;
+    border-style: solid;
     border-width: 1px;
 }
 
@@ -170,6 +176,19 @@
 .x-toolbar .x-toolbar-separator-horizontal {
     height: 15px;
     border-right: 1px solid #f2f2f2;
+}
+
+/* Toolbar background */
+.x-toolbar-default {
+    border-color: #D0D0D0;
+    background-image: none;
+    background-color: #f3f3f3;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ececec), color-stop(100%, #f3f3f3));
+    background-image: -webkit-linear-gradient(top, #ececec,#f3f3f3);
+    background-image: -moz-linear-gradient(top, #ececec,#f3f3f3);
+    background-image: -o-linear-gradient(top, #ececec,#f3f3f3);
+    background-image: -ms-linear-gradient(top, #ececec,#f3f3f3);
+    background-image: linear-gradient(top, #ececec,#f3f3f3);
 }
 
 /* Tooltip */
@@ -206,7 +225,7 @@ li {
 
 /* Second toolbar */
 #chartsettings_tb {
-    background: #eee;
+    background: #f3f3f3;
     padding: 5px 0 0 8px;
     border-style: none;
     border-top: 1px dashed #ccc;
@@ -296,6 +315,18 @@ li {
     border-style: solid;
     border-color: #aaa;
 }
+
+/* Update button */
+#update_b, #datatable_b {
+    border-width: 1px;
+    padding: 3px 1px 3px 4px;
+}
+
+#resizeleft_b {
+    border-width: 1px;
+    padding: 3px;
+}
+
 
 /* Fieldset */
 .dv-fieldset-title-link {
