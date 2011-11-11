@@ -1814,7 +1814,8 @@ Ext.onReady( function() {
                         '->',
                         {
                             xtype: 'button',
-                            text: 'Exit',
+							id: 'exit_b',
+                            text: '<b style="color:#444">Exit</b>',
                             cls: 'x-btn-text-icon',
                             icon: 'images/exit.png',
                             handler: function() {
