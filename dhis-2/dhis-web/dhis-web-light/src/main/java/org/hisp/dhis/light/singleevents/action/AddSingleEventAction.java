@@ -174,8 +174,7 @@ public class AddSingleEventAction implements Action  {
         int i = 0;
 		for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
 			DataElement dataElement = programStageDataElement.getDataElement();
-			System.out.println("Type: "+dataElement.getType().toString());
-			
+
 	        PatientDataValue patientDataValue = new PatientDataValue();
 	        patientDataValue.setDataElement(dataElement);
 	        patientDataValue.setProgramStageInstance(programStageInstance);

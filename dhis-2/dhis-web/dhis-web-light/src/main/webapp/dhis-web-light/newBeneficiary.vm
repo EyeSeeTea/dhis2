@@ -99,9 +99,9 @@
 	    		<label>Date of Birth (yyyy-MM-dd)</label>
 	    	#end
 	    	#if($birthDate)
-				<input type="text" maxlength="255" size="24" name="birthDate" value="$birthDate"/>
+				<input type="date" maxlength="255" size="24" name="birthDate" value="$birthDate"/>
 			#else
-				<input type="text" maxlength="255" size="24" name="birthDate" value=""/>
+				<input type="date" maxlength="255" size="24" name="birthDate" value=""/>
 			#end
 			
 			#if ( $invalidBloodGroup )

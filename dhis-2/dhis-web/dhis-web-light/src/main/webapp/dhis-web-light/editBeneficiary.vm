@@ -14,7 +14,7 @@
 	    	#else
 	    		<label>Date of Registration (yyyy-MM-dd)</label>
 	    	#end
-	    	<input type="text" maxlength="255" size="24" name="registrationDate" value="$registrationDate" />
+	    	<input type="date" maxlength="255" size="24" name="registrationDate" value="$registrationDate" />
 	    	
 	    	#if ( $fullNameIsToLong )
 	    		<label style="color:red;">Full Name. The name must be between 7 and 50 characters</label>
@@ -91,7 +91,7 @@
 	    	#else
 	    		<label>Date of Birth (yyyy-MM-dd)</label>
 	    	#end
-			<input type="text" maxlength="255" size="24" name="birthDate" value="$birthDate" />
+			<input type="date" maxlength="255" size="24" name="birthDate" value="$birthDate" />
 			
 			#if ( $invalidBloodGroup )
 	    		<label style="color:red;">Blood Group. The blood group entered is not valid</label>

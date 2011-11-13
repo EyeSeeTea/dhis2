@@ -463,10 +463,8 @@ public class AddBeneficiaryAction implements Action  {
         
         
 		if(validate() == false) {
-			System.out.println("ERROR");
 			return ERROR;
 		}else{
-			System.out.println("SUCCESS");
 	        patientId = patientService.savePatient(patient);
 	        
 	        // ---------------------------------------------------------------------
@@ -480,19 +478,6 @@ public class AddBeneficiaryAction implements Action  {
 	        
 	        return SUCCESS;
 		}
-        
-        /*patientId = patientService.savePatient(patient);
-        
-        // ---------------------------------------------------------------------
-        // Set Data for SingleEventForm
-        // ---------------------------------------------------------------------
-        Program program = programService.getProgram(singleEventId);
-        eventName = program.getName();
-        ProgramStage programStage = program.getProgramStages().iterator().next();
-        programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
-        Collections.sort(programStageDataElements, OrderBySortOrder);
-        
-        return SUCCESS;*/
         
 	}
 }

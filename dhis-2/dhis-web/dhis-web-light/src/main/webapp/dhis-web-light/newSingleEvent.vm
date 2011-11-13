@@ -16,8 +16,11 @@
 					<option value="false">No</option>
 					</select>
 					<br />
+				#elseif ($element.getDataElement().getType() == "date")
+					<input type="date" maxlength="255" size="24" value="$element.getDataElement().getType()" name="dynForm" />
 				#else
 					<input type="text" maxlength="255" size="24" value="$element.getDataElement().getType()" name="dynForm" />
+				
 				#end
 				
 		#end
