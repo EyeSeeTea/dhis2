@@ -15,6 +15,7 @@
 <div id="footer">
 <h2>$i18n.getString( "navigate_to" )</h2>
 <ul>
+	<li><a href="getSingleEventChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">$i18n.getString("Back")</a></li>
 	<li><a href="index.action">$i18n.getString("home")</a></li>
 </ul>
 </div>
