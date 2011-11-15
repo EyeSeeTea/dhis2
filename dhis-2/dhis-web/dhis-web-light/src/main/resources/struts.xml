@@ -133,7 +133,7 @@
     
      <action name="addSingleEvent" class="org.hisp.dhis.light.singleevents.action.AddSingleEventAction">
       <result name="success" type="velocity">/dhis-web-light/main.vm</result>
-      <param name="page">/dhis-web-light/singleEventReturnpage.vm</param>
+      <param name="page">/dhis-web-light/singleEventResultForm.vm</param>
     </action>
     
     <action name="updateBeneficiary" class="org.hisp.dhis.light.singleevents.action.UpdateBeneficiaryAction">
