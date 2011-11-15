@@ -5,10 +5,10 @@
 <ul>
 		<li>
 			<a href="editBeneficiary.action?patientId=$patientId">
-				Edit Person Details
+				$i18n.getString("Edit Person Details")
 			</a>
 			</li>
-		<li>Edit Single Event Details</li>
+		<li>$i18n.getString("Edit Single Event Details")</li>
 </ul>
 </p>
 

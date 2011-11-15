@@ -3,10 +3,10 @@
 
 <p>
 <ul>
-	<li>Find beneficiary</li>
+	<li>$i18n.getString("Find beneficiary")</li>
 	<li>
 		<a href="registerNewBeneficiary.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">
-		New beneficiary
+		$i18n.getString("New beneficiary")
 		</a>
 	</li>
 </ul>
