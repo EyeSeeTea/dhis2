@@ -768,7 +768,7 @@ Ext.onReady( function() {
             this.chart = Ext.create('Ext.chart.Chart', {
                 animate: true,
                 store: DV.store.chart,
-                insetPadding: 20,
+                insetPadding: 25,
                 items: [{
                     type: 'text',
                     text: DV.init.isInit ? 'Example chart' : DV.state.filter.data[0],
@@ -777,7 +777,7 @@ Ext.onReady( function() {
                     width: 300,
                     height: 20,
                     x: 41,
-                    y: 10
+                    y: 15
                 }],
                 legend: DV.util.chart.getLegend(),
                 axes: [
@@ -795,7 +795,6 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        title: DV.init.isInit ? 'Category' : '',
                         type: 'Category',
                         position: 'bottom',
                         fields: DV.store.chart.bottom,
@@ -1838,7 +1837,14 @@ Ext.onReady( function() {
                             cls: 'x-btn-text-icon',
                             icon: 'images/exportimage.png',
                             handler: function(b) {
-                                document.getElementById('svgField').value = document.getElementsByTagName('svg')[0].parentNode.innerHTML;
+                                var svg = document.getElementsByTagName('svg');
+                                
+                                if (svg.length < 1) {
+                                    alert('Please use Chrome, Firefox, Opera or Safari to export image');
+                                    return;
+                                }
+                                
+                                document.getElementById('svgField').value = svg[0].parentNode.innerHTML;
                                 document.getElementById('widthField').value = DV.util.viewport.getSize().x - 100;
                                 document.getElementById('heightField').value = DV.util.viewport.getSize().y - 100;
                                 
