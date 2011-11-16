@@ -343,11 +343,13 @@ Ext.onReady( function() {
             getEncodedSeriesName: function(text) {
                 return text.replace(/\./g,'');
             },
-            getLegend: function(len) {
+            getLegend: function() {
+                var len = DV.state.series.data.length;
                 return {
                     position: len > 6 ? 'right' : 'top',
                     boxStroke: '#ffffff',
-                    boxStrokeWidth: 0
+                    boxStrokeWidth: 0,
+                    padding: 0
                 };
             },
             getGrid: function() {
@@ -358,6 +360,9 @@ Ext.onReady( function() {
                     'stroke-width': 0.2
                 };
             },
+            //getTitlePosition: function(title) {
+                //var w = DV.util.viewport.getSize().x;
+                //var p = (w/2) - ((title.length/2) * 
             line: {
                 getSeriesArray: function() {
                     var a = [];
@@ -616,6 +621,7 @@ Ext.onReady( function() {
             dimension: DV.conf.finals.dimension.organisationunit.value,
             data: []
         },
+        svg: null,
         getState: function(exe) {
             this.resetState();
             
@@ -760,14 +766,23 @@ Ext.onReady( function() {
         },
         column: function(stacked) {
             this.chart = Ext.create('Ext.chart.Chart', {
-                width: DV.util.viewport.getSize().x,
-                height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
-                legend: DV.util.chart.getLegend(DV.state.series.data.length),
+                insetPadding: 20,
+                items: [{
+                    type: 'text',
+                    text: DV.init.isInit ? 'Example chart' : DV.state.filter.data[0],
+                    font: 'bold 15px arial',
+                    fill: '#222',
+                    width: 300,
+                    height: 20,
+                    x: 41,
+                    y: 10
+                }],
+                legend: DV.util.chart.getLegend(),
                 axes: [
                     {
-                        title: 'Value',
+                        title: DV.init.isInit ? 'Value' : '',
                         type: 'Numeric',
                         position: 'left',
                         minimum: 0,
@@ -780,7 +795,7 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        title: DV.init.isInit ? 'Categories' : DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
+                        title: DV.init.isInit ? 'Category' : '',
                         type: 'Category',
                         position: 'bottom',
                         fields: DV.store.chart.bottom,
@@ -810,7 +825,7 @@ Ext.onReady( function() {
                 height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
-                legend: DV.util.chart.getLegend(DV.state.series.data.length),
+                legend: DV.util.chart.getLegend(),
                 axes: [
                     {
                         title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
@@ -855,7 +870,7 @@ Ext.onReady( function() {
                 height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
-                legend: DV.util.chart.getLegend(DV.state.series.data.length),
+                legend: DV.util.chart.getLegend(),
                 axes: [
                     {
                         title: 'Value',
@@ -887,7 +902,7 @@ Ext.onReady( function() {
                 height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
-                legend: DV.util.chart.getLegend(DV.state.series.data.length),
+                legend: DV.util.chart.getLegend(),
                 axes: [
                     {
                         title: 'Value',
@@ -928,7 +943,7 @@ Ext.onReady( function() {
                 animate: true,
                 shadow: true,
                 store: DV.store.chart,
-                legend: DV.util.chart.getLegend(DV.state.category.data.length),
+                legend: DV.util.chart.getLegend(),
                 insetPadding: 60,
                 series: [{
                     type: 'pie',
@@ -957,10 +972,11 @@ Ext.onReady( function() {
             });
         },
         reload: function() {
-            var c = Ext.getCmp('center');
+            var c = Ext.getCmp('center'),
+                t = null;
             c.removeAll(true);
             c.add(this.chart);
-            c.down('label').setText(DV.state.filter.data[0] || 'Example chart');
+            DV.state.filter.data[0] = DV.state.filter.data[0] ? DV.state.filter.data[0] : 'Example chart';
             
             if (!DV.init.isInit) {
                 DV.store.getDataTableStore(true);
@@ -1815,12 +1831,22 @@ Ext.onReady( function() {
                                 }
                             }
                         },
-                        '-',' ',' ',
                         {
-                            xtype: 'label',
-                            text: 'Example chart',
-                            style: 'font-weight:bold; padding:0 4px;'
-                        },
+                            xtype: 'button',
+                            id: 'exportpng_b',
+                            text: '<b style="color:#444">Export image</b>',
+                            cls: 'x-btn-text-icon',
+                            icon: 'images/exportimage.png',
+                            handler: function(b) {
+                                document.getElementById('svgField').value = document.getElementsByTagName('svg')[0].parentNode.innerHTML;
+                                document.getElementById('widthField').value = DV.util.viewport.getSize().x - 100;
+                                document.getElementById('heightField').value = DV.util.viewport.getSize().y - 100;
+                                
+                                var exportForm = document.getElementById('exportPNGForm');
+                                exportForm.action = '../exportImage.action';
+                                exportForm.submit();
+                            }
+                        }, '-',
                         '->',
                         {
                             xtype: 'button',
