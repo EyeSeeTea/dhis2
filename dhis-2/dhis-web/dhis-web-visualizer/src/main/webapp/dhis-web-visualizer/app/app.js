@@ -827,13 +827,11 @@ Ext.onReady( function() {
                 legend: DV.util.chart.getLegend(),
                 axes: [
                     {
-                        title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
                         type: 'Category',
                         position: 'left',
                         fields: DV.store.chart.left
                     },
                     {
-                        title: 'Value',
                         type: 'Numeric',
                         position: 'bottom',
                         minimum: 0,
@@ -872,7 +870,6 @@ Ext.onReady( function() {
                 legend: DV.util.chart.getLegend(),
                 axes: [
                     {
-                        title: 'Value',
                         type: 'Numeric',
                         position: 'left',
                         minimum: 0,
@@ -885,7 +882,6 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
                         type: 'Category',
                         position: 'bottom',
                         fields: DV.store.chart.bottom,
@@ -904,7 +900,6 @@ Ext.onReady( function() {
                 legend: DV.util.chart.getLegend(),
                 axes: [
                     {
-                        title: 'Value',
                         type: 'Numeric',
                         position: 'left',
                         minimum: 0,
@@ -917,7 +912,6 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
                         type: 'Category',
                         position: 'bottom',
                         fields: DV.store.chart.bottom,
@@ -1801,7 +1795,7 @@ Ext.onReady( function() {
                                     p.collapse();
                                 }
                             }
-                        },'-',
+                        },
                         {
                             xtype: 'button',
                             id: 'update_b',
@@ -1828,18 +1822,18 @@ Ext.onReady( function() {
                                     p.collapse();
                                 }
                             }
-                        },
+                        },'-',
                         {
                             xtype: 'button',
                             id: 'exportpng_b',
-                            text: '<b style="color:#444">Export image</b>',
+                            text: '<b style="color:#444">Save as image</b>',
                             cls: 'x-btn-text-icon',
                             icon: 'images/exportimage.png',
                             handler: function(b) {
                                 var svg = document.getElementsByTagName('svg');
                                 
                                 if (svg.length < 1) {
-                                    alert('Please use Chrome, Firefox, Opera or Safari to export image');
+                                    alert('Please use Chrome, Firefox, Opera or Safari to export images');
                                     return;
                                 }
                                 
