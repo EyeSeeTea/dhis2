@@ -66,7 +66,8 @@ DV.conf = {
         west_cmp_width: 380,
         west_width: 424,
         center_tbar_height: 31,
-        east_tbar_height: 31
+        east_tbar_height: 31,
+        east_gridcolumn_height: 30
     }
 };
 
@@ -982,30 +983,35 @@ Ext.onReady( function() {
         datatable: null,
         getDataTable: function(exe) {
             this.datatable = Ext.create('Ext.grid.Panel', {
-                height: DV.util.viewport.getSize().y - DV.conf.layout.east_tbar_height,
+                id: 'datatable_g',
+                height: DV.util.viewport.getSize().y - 1,
                 scroll: 'vertical',
                 cls: 'dv-datatable',
                 columns: [
                     {
                         text: DV.state.getIndiment().rawvalue,
                         dataIndex: DV.state.getIndiment().value,
-                        width: 150
+                        width: 150,
+                        height: DV.conf.layout.east_gridcolumn_height
                     },
                     {
                         text: DV.conf.finals.dimension.period.rawvalue,
                         dataIndex: DV.conf.finals.dimension.period.value,
                         width: 100,
+                        height: DV.conf.layout.east_gridcolumn_height,
                         sortable: false
                     },
                     {
                         text: DV.conf.finals.dimension.organisationunit.rawvalue,
                         dataIndex: DV.conf.finals.dimension.organisationunit.value,
-                        width: 150
+                        width: 150,
+                        height: DV.conf.layout.east_gridcolumn_height
                     },
                     {
                         text: 'Value',
                         dataIndex: 'v',
-                        width: 80
+                        width: 80,
+                        height: DV.conf.layout.east_gridcolumn_height
                     }
                 ],
                 store: DV.store.datatable,
@@ -1763,11 +1769,11 @@ Ext.onReady( function() {
                 listeners: {
                     collapse: function(p) {                    
                         p.collapsed = true;
-                        DV.util.getCmp('button[name="resizeleft"]').setText('<span style="font-weight:bold">>>></span>');
+                        DV.util.getCmp('button[name="resizeleft"]').setText('>>>');
                     },
                     expand: function(p) {
                         p.collapsed = false;
-                        DV.util.getCmp('button[name="resizeleft"]').setText('<span style="font-weight:bold"><<<</span>');
+                        DV.util.getCmp('button[name="resizeleft"]').setText('<<<');
                     }
                 }
             },
@@ -1860,18 +1866,18 @@ Ext.onReady( function() {
                 collapsible: true,
                 collapsed: true,
                 collapseMode: 'mini',
-                width: 498,
-                tbar: {
-                    height: DV.conf.layout.east_tbar_height,
-                    items: [
-                        ' ',
-                        {
-                            xtype: 'label',
-                            text: 'Data table',
-                            style: 'font-weight:bold; color:#444; padding:0 4px'
-                        }
-                    ]
-                }
+                width: 498
+                //tbar: {
+                    //height: DV.conf.layout.east_tbar_height,
+                    //items: [
+                        //' ',
+                        //{
+                            //xtype: 'label',
+                            //text: 'Data table',
+                            //style: 'font-weight:bold; color:#444; padding:0 4px'
+                        //}
+                    //]
+                //}
             }
         ],
         listeners: {

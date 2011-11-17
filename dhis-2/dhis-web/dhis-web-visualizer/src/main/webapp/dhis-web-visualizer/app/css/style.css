@@ -159,7 +159,6 @@
     -khtml-border-radius: 2px 2px 2px 2px;
     border-radius: 2px 2px 2px 2px;
     border-width: 1px;
-    color:green;
 }
 
 .x-btn-default-toolbar-small-over {
@@ -172,7 +171,6 @@
     border-color: #aaa;
     border-style: solid;
     border-width: 1px;
-    color:red;
 }
 
 /* Button font-family */
@@ -362,6 +360,10 @@ li {
     border-style: none;
 }
 
+#datatable_g .x-fit-item {
+    border-top: 1px solid #d0d0d0;
+}
+
 /* Button - toolbar */
 .dv-btn-toolbar {
     border-width: 1px;
@@ -375,5 +377,3 @@ li {
 .dv-btn-toolbar-text-2 {
     color: #555;
 }
-
-
