@@ -118,22 +118,29 @@
       <param name="page">/dhis-web-light/newBeneficiary.vm</param>
     </action>
     
-    <action name="addBeneficiary" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
-      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
-      <param name="page">/dhis-web-light/newSingleEvent.vm</param>
-	</action>
 	<!--
 	<action name="addBeneficiary" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
-      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
-      <param name="page">/dhis-web-light/newSingleEvent.vm</param>
-      <result name="error" type="velocity">/dhis-web-light/main.vm</result>
-      <param name="page">/dhis-web-light/newBeneficiary.vm</param>
+      <result name="success" type="velocity">
+      	<param name="location">/dhis-web-light/main.vm</param>
+      	<param name="page">/dhis-web-light/newSingleEvent.vm</param>
+      </result>
+      <result name="error" type="velocity">
+      	<param name="location">/dhis-web-light/main.vm</param>
+      	<param name="page">/dhis-web-light/newBeneficiary.vm</param>
+      </result>
 	</action>
 	-->
+	
+	<action name="addBeneficiary" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
+      <result name="success" type="velocity">/dhis-web-light/newSingleEvent.vm</result>
+	  <result name="error" type="velocity">/dhis-web-light/newBeneficiary.vm</result>
+	</action>
+	
     
-     <action name="addSingleEvent" class="org.hisp.dhis.light.singleevents.action.AddSingleEventAction">
-      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
-      <param name="page">/dhis-web-light/singleEventResultForm.vm</param>
+    <action name="addSingleEvent" class="org.hisp.dhis.light.singleevents.action.AddSingleEventAction">
+      <result name="success" type="redirect">/mobile/index.action</result>
+      <result name="error" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/newSingleEvent.vm</param>
     </action>
     
     <action name="updateBeneficiary" class="org.hisp.dhis.light.singleevents.action.UpdateBeneficiaryAction">

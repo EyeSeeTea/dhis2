@@ -102,7 +102,6 @@ public class AddSingleEventAction implements Action  {
     // -------------------------------------------------------------------------
 	// Input Output
 	// -------------------------------------------------------------------------   
-
     private Integer singleEventId;
     
     public void setSingleEventId( Integer singleEventId ){
@@ -113,6 +112,18 @@ public class AddSingleEventAction implements Action  {
     
     public void  setPatientId( Integer patientId ){
     	this.patientId = patientId;
+    }
+    //
+    private Patient patient;
+    public Patient getPatient()
+    {
+    	return patient;
+    }
+    
+    private String eventName;
+    
+    public String getEventName(){
+    	return this.eventName;
     }
     
     private Integer organisationUnitId;
@@ -127,9 +138,14 @@ public class AddSingleEventAction implements Action  {
     }
     
     private String dynForm[];
-
+    
     public void setDynForm(String[] dynForm) {
     	this.dynForm = dynForm;
+    }
+    
+    public String[] getDynForm()
+    {
+    	return dynForm;
     }
     
 	 static final Comparator<ProgramStageDataElement> OrderBySortOrder =
@@ -137,7 +153,83 @@ public class AddSingleEventAction implements Action  {
 		 public int compare(ProgramStageDataElement i1, ProgramStageDataElement i2) {
 			 return i1.getSortOrder().compareTo(i2.getSortOrder());
 		 }
-	 };
+	};
+	 
+	// -------------------------------------------------------------------------
+	// Validation
+	// -------------------------------------------------------------------------
+    
+    private ArrayList<String> invalid = new ArrayList();
+    
+    public ArrayList getInvalid()
+    {
+    	return invalid;
+    }
+    
+	private boolean validDate(String s)
+	{
+		boolean valid;
+
+		if(s.matches("\\d*-\\d*-\\d*")) {
+			valid = true;
+    	} else {
+    		valid = false;
+    	}
+		
+		return valid;
+	}
+	
+	private boolean validString(String s)
+	{
+		boolean valid;
+
+		if(s.matches("\\w*")) {
+			valid = true;
+    	} else {
+    		valid = false;
+    	}
+		
+		return valid;
+	}
+	
+	private boolean validNumber(String s)
+	{
+		boolean valid;
+
+		if(s.matches("\\d*")) {
+			valid = true;
+    	} else {
+    		valid = false;
+    	}
+		
+		return valid;
+	}
+	
+	private boolean validBool(String s)
+	{
+		boolean valid;
+
+		if(s.matches("true|false")) {
+			valid = true;
+    	} else {
+    		valid = false;
+    	}
+		
+		return valid;
+	}
+	
+	private boolean validGenericType(String s)
+	{
+		boolean valid;
+
+		if(s.matches(".*")) {
+			valid = true;
+    	} else {
+    		valid = false;
+    	}
+		
+		return valid;
+	}
     
 	// -------------------------------------------------------------------------
 	// Action Implementation
@@ -145,6 +237,7 @@ public class AddSingleEventAction implements Action  {
     
 	@Override
 	public String execute() {
+		eventName = programService.getProgram(singleEventId).getName();
 
 		Program program = programService.getProgram(singleEventId);
 		Patient patient = patientService.getPatient(patientId) ;
@@ -171,10 +264,50 @@ public class AddSingleEventAction implements Action  {
 		ArrayList<ProgramStageDataElement> programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
 		Collections.sort(programStageDataElements, OrderBySortOrder);
         
+		boolean valid = true;
+		
         int i = 0;
 		for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
 			DataElement dataElement = programStageDataElement.getDataElement();
-
+			
+			// Validation ---------------------------------------
+			System.out.print("Type: "+dataElement.getType().toString());
+			System.out.print(" Value: "+dynForm[i].toString());
+			System.out.println(" Name: "+dataElement.getName().toString());
+			
+			if(dataElement.getType().toString() == "date") {
+				if(validDate(dynForm[i].toString()) == false) {
+					valid = false;
+					invalid.add(dataElement.getShortName().toString());
+				}
+				
+			} else if(dataElement.getType().toString() == "string") {
+				if(validString(dynForm[i].toString()) == false) {
+					valid = false;
+					invalid.add(dataElement.getShortName().toString());
+				}
+				
+			} else if(dataElement.getType().toString() == "number") {
+				if(validNumber(dynForm[i].toString()) == false) {
+					valid = false;
+					invalid.add(dataElement.getShortName().toString());
+				}
+				
+			} else if(dataElement.getType().toString() == "bool") {
+				if(validBool(dynForm[i].toString()) == false) {
+					valid = false;
+					invalid.add(dataElement.getShortName().toString());
+				}
+				
+			} else {
+				if(validGenericType(dynForm[i].toString()) == false) {
+					valid = false;
+					invalid.add(dataElement.getShortName().toString());
+				}
+			}
+			
+			// End Validation ---------------------------------------
+			
 	        PatientDataValue patientDataValue = new PatientDataValue();
 	        patientDataValue.setDataElement(dataElement);
 	        patientDataValue.setProgramStageInstance(programStageInstance);
@@ -183,7 +316,11 @@ public class AddSingleEventAction implements Action  {
 			patientDataValueService.savePatientDataValue(patientDataValue);
 			i++;
 		}
-
-		return SUCCESS;
+		
+		if(valid) {
+			return SUCCESS;
+		} else {
+			return ERROR;
+		}
 	}
 }
