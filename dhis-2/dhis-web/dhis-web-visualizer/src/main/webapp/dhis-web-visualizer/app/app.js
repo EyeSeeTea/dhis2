@@ -1867,17 +1867,6 @@ Ext.onReady( function() {
                 collapsed: true,
                 collapseMode: 'mini',
                 width: 498
-                //tbar: {
-                    //height: DV.conf.layout.east_tbar_height,
-                    //items: [
-                        //' ',
-                        //{
-                            //xtype: 'label',
-                            //text: 'Data table',
-                            //style: 'font-weight:bold; color:#444; padding:0 4px'
-                        //}
-                    //]
-                //}
             }
         ],
         listeners: {
