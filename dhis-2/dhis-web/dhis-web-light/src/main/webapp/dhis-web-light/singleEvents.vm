@@ -5,7 +5,7 @@
 <ul>
 #foreach( $singleEvent in $singleEvents )
 		<li><a href="getSingleEventChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEvent.getId()">
-				$singleEvent.getName()
+				$i18n.getString("$singleEvent.getName()")
 			</a>
 		</li>
 #end

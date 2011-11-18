@@ -14,9 +14,9 @@
 				#if ($element.getDataElement().getType() == "bool")
 					<br />
 			    	<select name="dynForm">
-					<option value="please_select">[Please select]</option>
-					<option value="true">Yes</option>
-					<option value="false">No</option>
+					<option value="please_select">$i18n.getString("[Please select]")</option>
+					<option value="true">$i18n.getString("Yes")</option>
+					<option value="false">$i18n.getString("No")</option>
 					</select>
 					<br />
 				#elseif ($element.getDataElement().getType() == "date")
@@ -32,7 +32,7 @@
 		<input type="hidden" name="singleEventId" value="$singleEventId" />
 		<input type="hidden" name="patientId" value="$patientId" />
 		
-		<input type="submit" value="Submit" />
+		<input type="submit" value=$i18n.getString("Submit") />
 	    </p>
 	</div>
 </form>
