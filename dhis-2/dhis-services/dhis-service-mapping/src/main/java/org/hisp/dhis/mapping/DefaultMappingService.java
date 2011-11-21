@@ -27,6 +27,11 @@ package org.hisp.dhis.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.options.SystemSettingManager.AGGREGATION_STRATEGY_BATCH;
+import static org.hisp.dhis.options.SystemSettingManager.AGGREGATION_STRATEGY_REAL_TIME;
+import static org.hisp.dhis.options.SystemSettingManager.DEFAULT_AGGREGATION_STRATEGY;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_AGGREGATION_STRATEGY;
+
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -55,8 +60,6 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserSettingService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
-
-import static org.hisp.dhis.options.SystemSettingManager.*;
 
 /**
  * @author Jan Henrik Overland
@@ -169,8 +172,8 @@ public class DefaultMappingService
 
         if ( parentOrganisationUnitId != null && level != null )
         {
-            organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level, organisationUnitService
-                .getOrganisationUnit( parentOrganisationUnitId ) );
+            organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level,
+                organisationUnitService.getOrganisationUnit( parentOrganisationUnitId ) );
         }
         else if ( level != null )
         {
@@ -209,10 +212,10 @@ public class DefaultMappingService
     {
         String aggregationStrategy = (String) systemSettingManager.getSystemSetting( KEY_AGGREGATION_STRATEGY,
             DEFAULT_AGGREGATION_STRATEGY );
-
+        
         Assert.isTrue( !(period != null && (startDate != null || endDate != null)) );
         Assert.isTrue( !(aggregationStrategy.equals( AGGREGATION_STRATEGY_BATCH ) && period == null) );
-        Assert.isTrue( !(indicatorId == null || parentOrganisationUnitId == null || level == null) );
+        Assert.isTrue( indicatorId != null && parentOrganisationUnitId != null && level != null );
 
         Collection<AggregatedMapValue> values = new HashSet<AggregatedMapValue>();
 

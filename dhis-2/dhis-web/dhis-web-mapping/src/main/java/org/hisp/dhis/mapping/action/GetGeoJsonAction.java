@@ -27,6 +27,7 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -35,6 +36,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.filter.OrganisationUnitWithCoordinatesFilter;
+import org.hisp.dhis.system.filter.OrganisationUnitWithValidPointCoordinateFilter;
 import org.hisp.dhis.system.util.FilterUtils;
 
 import com.opensymphony.xwork2.Action;
@@ -104,27 +106,40 @@ public class GetGeoJsonAction
 
         level = level == null ? organisationUnitService.getLevelOfOrganisationUnit( parent ) : level;
 
-        object = organisationUnitService.getOrganisationUnitsAtLevel( level, parent );
-
-        FilterUtils.filter( object, new OrganisationUnitWithCoordinatesFilter() );
+        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level,
+            parent );
         
-        String returnType = object.size() > 0 ? object.iterator().next().getFeatureType() : NONE;
+        FilterUtils.filter( organisationUnits, new OrganisationUnitWithCoordinatesFilter() );
 
-        if ( returnType.equals( OrganisationUnit.FEATURETYPE_POINT  ) )
+        FilterUtils.filter( organisationUnits, new OrganisationUnitWithValidPointCoordinateFilter() );
+
+        OrganisationUnitGroupSet typeGroupSet = organisationUnitGroupService
+            .getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE );
+        
+        object = new ArrayList<OrganisationUnit>();
+
+        for ( OrganisationUnit unit : organisationUnits )
         {
-            OrganisationUnitGroupSet typeGroupSet = organisationUnitGroupService
-                .getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE );
-            
-            for ( OrganisationUnit organisationUnit : object )
+            if ( unit.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) )
             {
-                if ( organisationUnit.getFeatureType() != null
-                    && organisationUnit.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) )
-                {
-                    organisationUnit.setType( organisationUnit.getGroupNameInGroupSet( typeGroupSet ) );
-                }
+                unit.setType( unit.getGroupNameInGroupSet( typeGroupSet ) );
             }
+            
+            else
+            {
+                object.add( unit );
+            }
+
+        }
+        
+        for ( OrganisationUnit unit : organisationUnits )
+        {
+            if ( unit.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) )
+            {
+                object.add( unit );
+            }            
         }
 
-        return returnType;
+        return SUCCESS;
     }
 }

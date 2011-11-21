@@ -37,7 +37,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.system.util.UUIdUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -97,11 +96,6 @@ public class DefaultDataElementCategoryService
 
     public int addDataElementCategory( DataElementCategory dataElementCategory )
     {
-        if ( dataElementCategory != null && dataElementCategory.getUuid() == null )
-        {
-            dataElementCategory.setUuid( UUIdUtils.getUUId() );
-        }
-
         return dataElementCategoryStore.save( dataElementCategory );
     }
 
@@ -149,11 +143,6 @@ public class DefaultDataElementCategoryService
 
     public int addDataElementCategoryOption( DataElementCategoryOption dataElementCategoryOption )
     {
-        if ( dataElementCategoryOption != null && dataElementCategoryOption.getUuid() == null )
-        {
-            dataElementCategoryOption.setUuid( UUIdUtils.getUUId() );
-        }
-
         return dataElementCategoryOptionStore.save( dataElementCategoryOption );
     }
 
@@ -249,12 +238,7 @@ public class DefaultDataElementCategoryService
     // -------------------------------------------------------------------------
 
     public int addDataElementCategoryOptionCombo( DataElementCategoryOptionCombo dataElementCategoryOptionCombo )
-    {
-        if ( dataElementCategoryOptionCombo != null && dataElementCategoryOptionCombo.getUuid() == null )
-        {
-            dataElementCategoryOptionCombo.setUuid( UUIdUtils.getUUId() );
-        }
-
+    {        
         return dataElementCategoryOptionComboStore.save( dataElementCategoryOptionCombo );
     }
 

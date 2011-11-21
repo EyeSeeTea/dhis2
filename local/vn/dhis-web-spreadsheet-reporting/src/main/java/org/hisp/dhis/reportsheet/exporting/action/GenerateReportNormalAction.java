@@ -32,8 +32,8 @@ import java.util.Collection;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.reportsheet.ExportReport;
 import org.hisp.dhis.reportsheet.ExportItem;
+import org.hisp.dhis.reportsheet.ExportReport;
 import org.hisp.dhis.reportsheet.ExportReportNormal;
 import org.hisp.dhis.reportsheet.exporting.AbstractGenerateExcelReportSupport;
 import org.hisp.dhis.reportsheet.utils.ExcelUtils;
@@ -64,13 +64,6 @@ public class GenerateReportNormalAction
             Collection<ExportItem> exportReportItems = exportReportInstance.getExportItemBySheet( sheetNo );
 
             this.generateOutPutFile( exportReportItems, organisationUnit, sheet );
-        }
-
-        for ( Integer sheetNo : exportReportService.getSheets( selectionManager.getSelectedReportId() ) )
-        {
-            Sheet sheet = this.templateWorkbook.getSheetAt( sheetNo - 1 );
-
-            this.recalculatingFormula( sheet );
         }
     }
 

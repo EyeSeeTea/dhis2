@@ -47,9 +47,16 @@ public class VelocityManager
         velocity = new VelocityEngine();
         velocity.setProperty( Velocity.RESOURCE_LOADER, RESOURCE_LOADER_NAME );
         velocity.setProperty( RESOURCE_LOADER_NAME + ".resource.loader.class", ClasspathResourceLoader.class.getName() );
+        velocity.setProperty( "runtime.log.logsystem.log4j.logger", "console" );
+        velocity.setProperty( "runtime.log", "" );
         velocity.init();
     }
 
+    public VelocityEngine getEngine()
+    {
+        return velocity;
+    }
+    
     public String render( Object object, String template )
     {
         try

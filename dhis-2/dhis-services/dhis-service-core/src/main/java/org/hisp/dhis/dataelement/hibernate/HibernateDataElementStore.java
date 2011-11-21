@@ -30,7 +30,9 @@ package org.hisp.dhis.dataelement.hibernate;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.amplecode.quick.StatementManager;
@@ -39,16 +41,17 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementStore;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 import org.hisp.dhis.system.objectmapper.DataElementOperandMapper;
 import org.hisp.dhis.system.util.ConversionUtils;
 import org.hisp.dhis.system.util.TextUtils;
+import org.springframework.jdbc.core.RowCallbackHandler;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -56,7 +59,7 @@ import org.hisp.dhis.system.util.TextUtils;
  *          larshelg $
  */
 public class HibernateDataElementStore
-    extends HibernateGenericStore<DataElement>
+    extends HibernateIdentifiableObjectStore<DataElement>
     implements DataElementStore
 {
     // -------------------------------------------------------------------------
@@ -69,23 +72,21 @@ public class HibernateDataElementStore
     {
         this.statementManager = statementManager;
     }
-
+    
     // -------------------------------------------------------------------------
     // DataElement
     // -------------------------------------------------------------------------
 
+    @Override
     public int addDataElement( DataElement dataElement )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        return (Integer) session.save( dataElement );
+        return this.save( dataElement );
     }
 
+    @Override
     public void updateDataElement( DataElement dataElement )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.update( dataElement );
+        this.update( dataElement );
     }
 
     public void deleteDataElement( DataElement dataElement )
@@ -246,7 +247,7 @@ public class HibernateDataElementStore
     {
         String hql = "from DataElement d where d.groupSets.size > 0";
 
-        return getQuery( hql ).list();
+        return getQuery( hql ).setCacheable( true ).list();
     }
 
     public void setZeroIsSignificantForDataElements( Collection<Integer> dataElementIds )
@@ -276,6 +277,7 @@ public class HibernateDataElementStore
         Criteria criteria = getCriteria();
         criteria.add( Restrictions.eq( "zeroIsSignificant", zeroIsSignificant ) );
         criteria.add( Restrictions.eq( "type", DataElement.VALUE_TYPE_INT ) );
+        criteria.setCacheable( true );
 
         return criteria.list();
     }
@@ -285,7 +287,7 @@ public class HibernateDataElementStore
     {
         String hql = "from DataElement d where d.groups.size = 0";
 
-        return getQuery( hql ).list();
+        return getQuery( hql ).setCacheable( true ).list();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -293,7 +295,7 @@ public class HibernateDataElementStore
     {
         String hql = "from DataElement d where d.dataSets.size = 0";
 
-        return getQuery( hql ).list();
+        return getQuery( hql ).setCacheable( true ).list();
     }
 
     @SuppressWarnings( "unchecked" )
@@ -301,7 +303,7 @@ public class HibernateDataElementStore
     {
         String hql = "from DataElement d where d.dataSets.size > 0";
 
-        return getQuery( hql ).list();
+        return getQuery( hql ).setCacheable( true ).list();
     }
 
     public boolean dataElementExists( int id )
@@ -350,6 +352,32 @@ public class HibernateDataElementStore
     public int getDataElementCountByName( String name )
     {
         return getCountByName( name );
+    }
+    
+    public Map<Integer, Set<Integer>> getDataElementCategoryOptionCombos()
+    {
+        final String sql = "select de.dataelementid, coc.categoryoptioncomboid from dataelement de " +
+            "join categorycombos_optioncombos coc on de.categorycomboid=coc.categorycomboid";
+        
+        final Map<Integer, Set<Integer>> sets = new HashMap<Integer, Set<Integer>>();
+        
+        jdbcTemplate.query( sql, new RowCallbackHandler()
+        {
+            @Override
+            public void processRow( ResultSet rs )
+                throws SQLException
+            {
+                int dataElementId = rs.getInt( 1 );
+                int categoryOptionComboId = rs.getInt( 2 );
+                
+                Set<Integer> set = sets.get( dataElementId ) != null ? sets.get( dataElementId ) : new HashSet<Integer>();
+                
+                set.add( categoryOptionComboId );                
+                sets.put( dataElementId, set );
+            }
+        } );
+        
+        return sets;
     }
 
     // -------------------------------------------------------------------------

@@ -170,7 +170,7 @@ function trim( string )
  */
 function isChecked( checkboxId )
 {
-	return jQuery( "#" + checkboxId ) && jQuery( "#" + checkboxId ).attr("checked");   
+	return jQuery( "#" + checkboxId ).length && jQuery( "#" + checkboxId ).is( ":checked" );   
 }
 
 /**
@@ -1394,7 +1394,10 @@ function relativePeriodsChecked()
          isChecked( "thisYear" ) ||
          isChecked( "monthsLastYear" ) ||
          isChecked( "quartersLastYear" ) ||
-         isChecked( "lastYear" ) )
+         isChecked( "lastYear" ) ||
+         isChecked( "last5Years" ) ||
+         isChecked( "last12Months" ) ||
+         isChecked( "last4Quarters" ) )
     {
         return true;
     }
@@ -1478,4 +1481,19 @@ function isZeroNumber( value )
 function getRandomNumber()
 {
 	return Math.floor( 1000000 * Math.random() );
+}
+
+/**
+ * Rounds the given number to the given number of decimals.
+ */
+function roundTo( number, decimals )
+{
+	if ( number == null || isNaN( number ) || decimals == null || isNaN( decimals ) )
+	{
+		return number;
+	}
+	
+	var factor = Math.pow( 10, decimals );
+		
+	return ( Math.round( number * factor ) / factor );
 }

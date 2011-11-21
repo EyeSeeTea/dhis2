@@ -116,6 +116,8 @@
 			class="org.hisp.dhis.patient.action.patientattribute.RemovePatientAttributeAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="requiredAuthorities">F_PATIENTATTRIBUTE_DELETE</param>
 		</action>
 
@@ -211,6 +213,8 @@
 			class="org.hisp.dhis.patient.action.program.RemoveProgramAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseError.vm</result>
 			<param name="requiredAuthorities">F_PROGRAM_DELETE</param>
 		</action>
 
@@ -387,6 +391,7 @@
 				/dhis-web-maintenance-patient/addProgramStageForm.vm</param>
 			<param name="menu">/dhis-web-maintenance-patient/patientAndProgramMenu.vm</param>
 			<param name="javascripts">javascript/commons.js,javascript/programStage.js</param>
+			<param name="stylesheets">/dhis-web-maintenance-patient/style/basic.css</param>
 			<param name="requiredAuthorities">F_PROGRAMSTAGE_ADD</param>
 		</action>
 
@@ -420,6 +425,7 @@
 				/dhis-web-maintenance-patient/updateProgramStageForm.vm</param>
 			<param name="menu">/dhis-web-maintenance-patient/patientAndProgramMenu.vm</param>
 			<param name="javascripts">javascript/commons.js,javascript/programStage.js</param>
+			<param name="stylesheets">/dhis-web-maintenance-patient/style/basic.css</param>
 			<param name="requiredAuthorities">F_PROGRAMSTAGE_UPDATE</param>
 		</action>
 

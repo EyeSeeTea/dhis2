@@ -1,5 +1,12 @@
 DV = {};
 DV.conf = {
+    init: {
+        data: [
+            {x: 'Category 1', 'Series 1': 41, 'Series 2': 69, 'Series 3': 63, 'Series 4': 51},
+            {x: 'Category 2', 'Series 1': 51, 'Series 2': 42, 'Series 3': 58, 'Series 4': 52},
+            {x: 'Category 3', 'Series 1': 44, 'Series 2': 71, 'Series 3': 62, 'Series 4': 54}
+        ]
+    },
     finals: {
         ajax: {
             url_visualizer: '../',
@@ -40,6 +47,16 @@ DV.conf = {
             pie: 'pie'
         }
     },
+    chart: {
+        axis: {
+            label: {
+                rotate: {
+                    degrees: 330
+                }
+            }
+        },
+        inset: 30
+    },
     style: {
         label: {
             period_group: 'font:bold 11px arial; color:#444; line-height:20px'
@@ -47,13 +64,11 @@ DV.conf = {
     },
     layout: {
         west_cmp_width: 380,
-        west_width: 424
-    },
-    data: [
-        {x: 'Category 1', 'Series 1': 41, 'Series 2': 69, 'Series 3': 63, 'Series 4': 51},
-        {x: 'Category 2', 'Series 1': 51, 'Series 2': 42, 'Series 3': 58, 'Series 4': 52},
-        {x: 'Category 3', 'Series 1': 44, 'Series 2': 71, 'Series 3': 62, 'Series 4': 54}
-    ]
+        west_width: 424,
+        center_tbar_height: 31,
+        east_tbar_height: 31,
+        east_gridcolumn_height: 30
+    }
 };
 
 Ext.Loader.setConfig({enabled: true});
@@ -70,7 +85,7 @@ Ext.onReady( function() {
         success: function(r) {
             
     DV.init = Ext.JSON.decode(r.responseText);
-    
+    DV.init.isInit = true;
     DV.init.initialize = function(vp) {
         DV.util.combobox.filter.category(vp);
         
@@ -81,12 +96,19 @@ Ext.onReady( function() {
         DV.store.area = DV.store.defaultChartStore;
         DV.store.pie = DV.store.defaultChartStore;
         
-        DV.data.data = DV.conf.data;
+        DV.chart.data = DV.conf.init.data;
         
-        DV.chart.init = true;
-        DV.store.getChartStore(true);
+        DV.exe.execute(true, DV.init.isInit);
     };
-        
+    
+    DV.cmp = {
+        charttype: [],
+        dimension: {
+            period: []
+        },
+        datatable: null
+    };
+    
     DV.util = {
         getCmp: function(q) {
             return DV.viewport.query(q)[0];
@@ -95,6 +117,10 @@ Ext.onReady( function() {
             getSize: function() {
                 var c = Ext.getCmp('center');
                 return {x: c.getWidth(), y: c.getHeight()};
+            },
+            getXY: function() {
+                var c = Ext.getCmp('center');
+                return {x: c.x + 15, y: c.y + 43};
             }
         },
         multiselect: {
@@ -164,11 +190,10 @@ Ext.onReady( function() {
             }
         },
         button: {
-            cmp: [],
             getValue: function() {
-                for (var i = 0; i < this.cmp.length; i++) {
-                    if (this.cmp[i].pressed) {
-                        return this.cmp[i].name;
+                for (var i = 0; i < DV.cmp.charttype.length; i++) {
+                    if (DV.cmp.charttype[i].pressed) {
+                        return DV.cmp.charttype[i].name;
                     }
                 }
             },
@@ -215,11 +240,14 @@ Ext.onReady( function() {
                     });
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
-                getNames: function() {
+                getNames: function(exception) {
                     var a = [];
                     DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
                         a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
                     });
+                    if (exception && !a.length) {
+                        alert('No indicators selected');
+                    }
                     return a;
                 }
             },
@@ -231,35 +259,43 @@ Ext.onReady( function() {
                     });
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
-                getNames: function() {
+                getNames: function(exception) {
                     var a = [];
                     DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
                         a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
                     });
+                    if (exception && !a.length) {
+                        alert('No data elements selected');
+                    }
                     return a;
                 }
             },
             period: {
                 getUrl: function(isFilter) {
                     var a = [],
-                        cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period.value + '"]').cmp;
+                        cmp = DV.cmp.dimension.period;
                     for (var i = 0; i < cmp.length; i++) {
                         if (cmp[i].getValue()) {
-                            a.push(cmp[i].paramName + '=true');
+                            Ext.Array.each(DV.init.system.periods[cmp[i].paramName], function(item) {
+                                a.push('periodIds=' + item.id);
+                            });
                         }
                     }
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
-                getNames: function() {
+                getNames: function(exception) {
                     var a = [],
-                        cmp = DV.util.getCmp('fieldset[name="' + DV.conf.finals.dimension.period.value + '"]').cmp;
+                        cmp = DV.cmp.dimension.period;
                     Ext.Array.each(cmp, function(item) {
                         if (item.getValue()) {
                             Ext.Array.each(DV.init.system.periods[item.paramName], function(item) {
                                 a.push(DV.util.chart.getEncodedSeriesName(item.name));
                             });
                         }
-                    });                    
+                    });
+                    if (exception && !a.length) {
+                        alert('No periods selected');
+                    }
                     return a;
                 },
                 getNameById: function(id) {
@@ -287,7 +323,7 @@ Ext.onReady( function() {
                     });
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
-                getNames: function() {
+                getNames: function(exception) {
                     var a = [],
                         treepanel = DV.util.getCmp('treepanel'),
                         selection = treepanel.getSelectionModel().getSelection();
@@ -298,7 +334,10 @@ Ext.onReady( function() {
                     Ext.Array.each(selection, function(r) {
                         a.push(DV.util.chart.getEncodedSeriesName(r.data.text));
                     });
-                    return a;
+                    if (exception && !a.length) {
+                        alert('No organisation units selected');
+                    }
+                    return a;                        
                 }
             }
         },
@@ -307,10 +346,12 @@ Ext.onReady( function() {
                 return text.replace(/\./g,'');
             },
             getLegend: function(len) {
+                len = len ? len : DV.state.series.data.length;
                 return {
                     position: len > 6 ? 'right' : 'top',
                     boxStroke: '#ffffff',
-                    boxStrokeWidth: 0
+                    boxStrokeWidth: 0,
+                    padding: 0
                 };
             },
             getGrid: function() {
@@ -319,6 +360,18 @@ Ext.onReady( function() {
                     fill: '#f1f1f1',
                     stroke: '#aaa',
                     'stroke-width': 0.2
+                };
+            },
+            getTitle: function() {
+                return {
+                    type: 'text',
+                    text: DV.init.isInit ? 'Example chart' : DV.state.filter.data[0],
+                    font: 'bold 15px arial',
+                    fill: '#222',
+                    width: 300,
+                    height: 20,
+                    x: 28,
+                    y: 16
                 };
             },
             line: {
@@ -391,6 +444,23 @@ Ext.onReady( function() {
                 }
             }
         },
+		window: {
+			datatable: {
+				getHeight: function() {
+					if (DV.value.values.length) {
+						if (Ext.isWindows && Ext.isGecko) {
+							return 22 * DV.value.values.length + 57;
+						}
+						else if (Ext.isWindows && Ext.isIE) {
+							return 21 * DV.value.values.length + 58;
+						}
+						else {
+							return 21 * DV.value.values.length + 57;
+						}
+					}
+				}
+			}
+		},
         number: {
             isInteger: function(n) {
                 var str = new String(n);
@@ -476,18 +546,38 @@ Ext.onReady( function() {
                 data: []
             })
         },
+        datatable: null,
+        getDataTableStore: function(exe) {
+            this.datatable = Ext.create('Ext.data.Store', {
+                fields: [
+                    DV.state.getIndiment().value,
+                    DV.conf.finals.dimension.period.value,
+                    DV.conf.finals.dimension.organisationunit.value,
+                    'v'
+                ],
+                data: DV.value.values
+            });
+            
+            if (exe) {
+                DV.datatable.getDataTable(true);
+            }
+            else {
+                return this.datatable;
+            }
+            
+        },
         chart: null,
         getChartStore: function(exe) {
             this[DV.state.type](exe);
         },
         defaultChartStore: function(exe) {
             var keys = [];
-            Ext.Array.each(DV.data.data, function(item) {
+            Ext.Array.each(DV.chart.data, function(item) {
                 keys = Ext.Array.merge(keys, Ext.Object.getKeys(item));
             });
             this.chart = Ext.create('Ext.data.Store', {
                 fields: keys,
-                data: DV.data.data
+                data: DV.chart.data
             });
             this.chart.bottom = [DV.conf.finals.chart.x];
             this.chart.left = keys.slice(0);
@@ -501,14 +591,14 @@ Ext.onReady( function() {
                 DV.chart.getChart(true);
             }
             else {
-                return DV.store.chart;
+                return this.chart;
             }
         },
         bar: function(exe) {
-            var properties = Ext.Object.getKeys(DV.data.data[0]);
+            var properties = Ext.Object.getKeys(DV.chart.data[0]);
             this.chart = Ext.create('Ext.data.Store', {
                 fields: properties,
-                data: DV.data.data
+                data: DV.chart.data
             });
             this.chart.left = properties.slice(0, 1);
             this.chart.bottom = properties.slice(1, properties.length);
@@ -542,6 +632,7 @@ Ext.onReady( function() {
             dimension: DV.conf.finals.dimension.organisationunit.value,
             data: []
         },
+        svg: null,
         getState: function(exe) {
             this.resetState();
             
@@ -550,17 +641,16 @@ Ext.onReady( function() {
             this.series.dimension = this.series.cmp.getValue();
             this.category.dimension = this.category.cmp.getValue();
             this.filter.dimension = this.filter.cmp.getValue();
-            
+                        
             var i = this.getIndiment().value,
                 p = DV.conf.finals.dimension.period.value,
                 o = DV.conf.finals.dimension.organisationunit.value;
+                
+            this.indiment = DV.util.dimension[i].getNames(true);
+            this.period = DV.util.dimension[p].getNames(true);
+            this.organisationunit = DV.util.dimension[o].getNames(true);
             
-            this.indiment = DV.util.dimension[i].getNames();
-            this.period = DV.util.dimension[p].getNames();
-            this.organisationunit = DV.util.dimension[o].getNames();
-
             if (!this.indiment.length || !this.period.length || !this.organisationunit.length) {
-                alert('form is not complete');
                 return;
             }
             
@@ -614,9 +704,9 @@ Ext.onReady( function() {
             params = params.concat(DV.util.dimension[filter].getUrl(true));
             
             var baseUrl = DV.conf.finals.ajax.url_visualizer + url + '.action';
-            for (var i = 0; i < params.length; i++) {
-                baseUrl = Ext.String.urlAppend(baseUrl, params[i]);
-            }
+            Ext.Array.each(params, function(item) {
+                baseUrl = Ext.String.urlAppend(baseUrl, item);
+            });
             
             Ext.Ajax.request({
                 url: baseUrl,
@@ -626,41 +716,42 @@ Ext.onReady( function() {
                     if (!DV.value.values.length) {
                         alert('no data values');
                         return;
-                    }              
+                    }
                     
                     Ext.Array.each(DV.value.values, function(item) {
                         item[indiment] = DV.store[indiment].available.storage[item.i].name;
                         item[DV.conf.finals.dimension.period.value] = DV.util.dimension.period.getNameById(item.p);
                         item[DV.conf.finals.dimension.organisationunit.value] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
+                        item.v = parseFloat(item.v);
                     });
                     
                     if (exe) {
-                        DV.data.getData(true);
+                        DV.chart.getData(true);
                     }
                     else {
                         return DV.value.values;
-                    }                    
+                    }
                 }
             });
         }
-    };        
+    };
     
-    DV.data = {
+    DV.chart = {
         data: [],        
         getData: function(exe) {
-            this.data = [];  
+            this.data = [];
 			
             Ext.Array.each(DV.state.category.data, function(item) {
                 var obj = {};
                 obj[DV.conf.finals.chart.x] = item;
-                DV.data.data.push(obj);
+                DV.chart.data.push(obj);
             });
-			
-            Ext.Array.each(DV.data.data, function(item) {
+            
+            Ext.Array.each(DV.chart.data, function(item) {
                 for (var i = 0; i < DV.state.series.data.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
                         if (DV.value.values[j][DV.state.category.dimension] === item[DV.conf.finals.chart.x] && DV.value.values[j][DV.state.series.dimension] === DV.state.series.data[i]) {
-                            item[DV.value.values[j][DV.state.series.dimension]] = parseFloat(DV.value.values[j].v);
+                            item[DV.value.values[j][DV.state.series.dimension]] = DV.value.values[j].v;
                             break;
                         }
                     }
@@ -671,18 +762,9 @@ Ext.onReady( function() {
                 DV.store.getChartStore(true);
             }
             else {
-                return DV.data.data;
+                return this.data;
             }
-        }
-    };
-    
-    DV.chart = {
-        init: false,
-        isInit: function() {
-            var bool = this.init ? true : false;
-            this.init = false;
-            return bool;
-        },
+        },        
         chart: null,
         getChart: function(exe) {
             this[DV.state.type]();
@@ -695,14 +777,13 @@ Ext.onReady( function() {
         },
         column: function(stacked) {
             this.chart = Ext.create('Ext.chart.Chart', {
-                width: DV.util.viewport.getSize().x,
-                height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
-                legend: DV.util.chart.getLegend(DV.state.series.data.length),
+                insetPadding: DV.conf.chart.inset,
+                items: DV.util.chart.getTitle(),
+                legend: DV.util.chart.getLegend(),
                 axes: [
                     {
-                        title: 'Value',
                         type: 'Numeric',
                         position: 'left',
                         minimum: 0,
@@ -715,10 +796,10 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        title: this.isInit() ? 'Categories' : DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
                         type: 'Category',
                         position: 'bottom',
-                        fields: DV.store.chart.bottom
+                        fields: DV.store.chart.bottom,
+                        label: DV.conf.chart.axis.label
                     }
                 ],
                 series: [
@@ -740,20 +821,18 @@ Ext.onReady( function() {
         },
         bar: function(stacked) {
             this.chart = Ext.create('Ext.chart.Chart', {
-                width: DV.util.viewport.getSize().x,
-                height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
-                legend: DV.util.chart.getLegend(DV.state.series.data.length),
+                insetPadding: DV.conf.chart.inset,
+                items: DV.util.chart.getTitle(),
+                legend: DV.util.chart.getLegend(),
                 axes: [
                     {
-                        title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
                         type: 'Category',
                         position: 'left',
                         fields: DV.store.chart.left
                     },
                     {
-                        title: 'Value',
                         type: 'Numeric',
                         position: 'bottom',
                         minimum: 0,
@@ -785,14 +864,13 @@ Ext.onReady( function() {
         },
         line: function() {
             this.chart = Ext.create('Ext.chart.Chart', {
-                width: DV.util.viewport.getSize().x,
-                height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
-                legend: DV.util.chart.getLegend(DV.state.series.data.length),
+                insetPadding: DV.conf.chart.inset,
+                items: DV.util.chart.getTitle(),
+                legend: DV.util.chart.getLegend(),
                 axes: [
                     {
-                        title: 'Value',
                         type: 'Numeric',
                         position: 'left',
                         minimum: 0,
@@ -805,10 +883,10 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
                         type: 'Category',
                         position: 'bottom',
-                        fields: DV.store.chart.bottom
+                        fields: DV.store.chart.bottom,
+                        label: DV.conf.chart.axis.label
                     }
                 ],
                 series: DV.util.chart.line.getSeriesArray()
@@ -816,14 +894,13 @@ Ext.onReady( function() {
         },
         area: function() {
             this.chart = Ext.create('Ext.chart.Chart', {
-                width: DV.util.viewport.getSize().x,
-                height: DV.util.viewport.getSize().y,
                 animate: true,
                 store: DV.store.chart,
-                legend: DV.util.chart.getLegend(DV.state.series.data.length),
+                insetPadding: DV.conf.chart.inset,
+                items: DV.util.chart.getTitle(),
+                legend: DV.util.chart.getLegend(),
                 axes: [
                     {
-                        title: 'Value',
                         type: 'Numeric',
                         position: 'left',
                         minimum: 0,
@@ -836,10 +913,10 @@ Ext.onReady( function() {
                         }
                     },
                     {
-                        title: DV.conf.finals.dimension[DV.state.category.dimension].rawvalue,
                         type: 'Category',
                         position: 'bottom',
-                        fields: DV.store.chart.bottom
+                        fields: DV.store.chart.bottom,
+                        label: DV.conf.chart.axis.label
                     }
                 ],
                 series: [{
@@ -855,13 +932,12 @@ Ext.onReady( function() {
         },
         pie: function() {
             this.chart = Ext.create('Ext.chart.Chart', {
-                width: DV.util.viewport.getSize().x,
-                height: DV.util.viewport.getSize().y,
                 animate: true,
                 shadow: true,
                 store: DV.store.chart,
-                legend: DV.util.chart.getLegend(DV.state.category.data.length),
                 insetPadding: 60,
+                items: DV.util.chart.getTitle(),
+                legend: DV.util.chart.getLegend(DV.state.category.data.length),
                 series: [{
                     type: 'pie',
                     field: DV.store.chart.left[0],
@@ -889,10 +965,88 @@ Ext.onReady( function() {
             });
         },
         reload: function() {
-            var c = Ext.getCmp('center');
+            var c = Ext.getCmp('center'),
+                t = null;
             c.removeAll(true);
             c.add(this.chart);
-            c.down('label').setText(DV.state.filter.data[0] || 'Example chart');
+            DV.state.filter.data[0] = DV.state.filter.data[0] ? DV.state.filter.data[0] : 'Example chart';
+            
+            if (!DV.init.isInit) {
+                DV.store.getDataTableStore(true);
+            }
+            
+            DV.init.isInit = false;
+        }
+    };
+    
+    DV.datatable = {
+        datatable: null,
+        getDataTable: function(exe) {
+            this.datatable = Ext.create('Ext.grid.Panel', {
+                id: 'datatable_g',
+                height: DV.util.viewport.getSize().y - 1,
+                scroll: 'vertical',
+                cls: 'dv-datatable',
+                columns: [
+                    {
+                        text: DV.state.getIndiment().rawvalue,
+                        dataIndex: DV.state.getIndiment().value,
+                        width: 150,
+                        height: DV.conf.layout.east_gridcolumn_height
+                    },
+                    {
+                        text: DV.conf.finals.dimension.period.rawvalue,
+                        dataIndex: DV.conf.finals.dimension.period.value,
+                        width: 100,
+                        height: DV.conf.layout.east_gridcolumn_height,
+                        sortable: false
+                    },
+                    {
+                        text: DV.conf.finals.dimension.organisationunit.rawvalue,
+                        dataIndex: DV.conf.finals.dimension.organisationunit.value,
+                        width: 150,
+                        height: DV.conf.layout.east_gridcolumn_height
+                    },
+                    {
+                        text: 'Value',
+                        dataIndex: 'v',
+                        width: 80,
+                        height: DV.conf.layout.east_gridcolumn_height
+                    }
+                ],
+                store: DV.store.datatable,
+                listeners: {
+                    afterrender: function() {
+                        DV.cmp.datatable = this;
+                    }
+                }
+            });
+            
+            if (exe) {
+                this.reload();
+            }
+            else {
+                return this.datatable;
+            }
+        },
+        reload: function() {
+            var c = DV.util.getCmp('panel[region="east"]');
+            c.removeAll(true);
+            c.add(this.datatable);
+        }            
+    };
+    
+    DV.exe = {
+        execute: function(exe, init) {
+            if (init) {
+                DV.store.getChartStore(exe);
+            }
+            else {
+                DV.state.getState(exe);
+            }
+        },
+        datatable: function(exe) {
+            DV.store.getDataTableStore(exe);
         }
     };
         
@@ -905,13 +1059,11 @@ Ext.onReady( function() {
                 preventHeader: true,
                 collapsible: true,
                 collapseMode: 'mini',
-                resizable: true,
-                resizeHandles: 'e',
                 items: [
                     {
                         xtype: 'toolbar',
-                        height: 44,
-                        style: 'padding-top:2px; border-style:none',
+                        height: 45,
+                        style: 'padding-top:1px; border-style:none',
                         defaults: {
                             height: 40,
                             toggleGroup: 'chartsettings',
@@ -919,7 +1071,7 @@ Ext.onReady( function() {
                             listeners: {
                                 afterrender: function(b) {
                                     if (b.xtype === 'button') {
-                                        DV.util.button.cmp.push(b);
+                                        DV.cmp.charttype.push(b);
                                     }
                                 }
                             }
@@ -928,7 +1080,7 @@ Ext.onReady( function() {
                             {
                                 xtype: 'label',
                                 text: 'Chart type',
-                                style: 'font-size:11px; font-weight:bold; padding:12px 8px 0 10px'
+                                style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 10px'
                             },
                             {
 								xtype: 'button',
@@ -1165,7 +1317,8 @@ Ext.onReady( function() {
                                                     '->',
                                                     {
                                                         xtype: 'button',
-                                                        text: '>',
+                                                        icon: 'images/arrowright.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableIndicators"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedIndicators"]'));
@@ -1173,12 +1326,14 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'button',
-                                                        text: '>>',
+                                                        icon: 'images/arrowrightdouble.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.selectAll(DV.util.getCmp('multiselect[name="availableIndicators"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedIndicators"]'));
                                                         }
-                                                    }
+                                                    },
+                                                    ' '
                                                 ],
                                                 listeners: {
                                                     afterrender: function(ms) {
@@ -1200,9 +1355,11 @@ Ext.onReady( function() {
                                                 queryMode: 'local',
                                                 store: DV.store.indicator.selected,
                                                 tbar: [
+                                                    ' ',
                                                     {
                                                         xtype: 'button',
-                                                        text: '<<',
+                                                        icon: 'images/arrowleftdouble.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.unselectAll(DV.util.getCmp('multiselect[name="availableIndicators"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedIndicators"]'));
@@ -1210,7 +1367,8 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'button',
-                                                        text: '<',
+                                                        icon: 'images/arrowleft.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableIndicators"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedIndicators"]'));
@@ -1314,7 +1472,8 @@ Ext.onReady( function() {
                                                     '->',
                                                     {
                                                         xtype: 'button',
-                                                        text: '>',
+                                                        icon: 'images/arrowright.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.select(DV.util.getCmp('multiselect[name="availableDataElements"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedDataElements"]'));
@@ -1322,12 +1481,14 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'button',
-                                                        text: '>>',
+                                                        icon: 'images/arrowrightdouble.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.selectAll(DV.util.getCmp('multiselect[name="availableDataElements"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedDataElements"]'));
                                                         }
-                                                    }
+                                                    },
+                                                    ' '
                                                 ],
                                                 listeners: {
                                                     afterrender: function(ms) {
@@ -1349,9 +1510,11 @@ Ext.onReady( function() {
                                                 queryMode: 'remote',
                                                 store: DV.store.dataelement.selected,
                                                 tbar: [
+                                                    ' ',
                                                     {
                                                         xtype: 'button',
-                                                        text: '<<',
+                                                        icon: 'images/arrowleftdouble.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.unselectAll(DV.util.getCmp('multiselect[name="availableDataElements"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedDataElements"]'));
@@ -1359,7 +1522,8 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'button',
-                                                        text: '<',
+                                                        icon: 'images/arrowleft.png',
+                                                        width: 22,
                                                         handler: function() {
                                                             DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableDataElements"]'),
                                                                 DV.util.getCmp('multiselect[name="selectedDataElements"]'));
@@ -1388,7 +1552,7 @@ Ext.onReady( function() {
                                         DV.util.fieldset.collapseOthers(this.name);
                                     }
                                 }
-                            },                            
+                            },
                             {
                                 xtype: 'fieldset',
                                 id: 'period_fs',
@@ -1410,9 +1574,9 @@ Ext.onReady( function() {
                                                 defaults: {
                                                     labelSeparator: '',
                                                     listeners: {
-                                                        afterrender: function(chb) {
+                                                        added: function(chb) {
                                                             if (chb.xtype === 'checkbox') {
-                                                                chb.up('fieldset').cmp.push(chb);
+                                                                DV.cmp.dimension.period.push(chb);
                                                             }
                                                         }
                                                     }
@@ -1450,7 +1614,7 @@ Ext.onReady( function() {
                                                     listeners: {
                                                         afterrender: function(chb) {
                                                             if (chb.xtype === 'checkbox') {
-                                                                chb.up('fieldset').cmp.push(chb);
+                                                                DV.cmp.dimension.period.push(chb);
                                                             }
                                                         }
                                                     }
@@ -1487,7 +1651,7 @@ Ext.onReady( function() {
                                                     listeners: {
                                                         afterrender: function(chb) {
                                                             if (chb.xtype === 'checkbox') {
-                                                                chb.up('fieldset').cmp.push(chb);
+                                                                DV.cmp.dimension.period.push(chb);
                                                             }
                                                         }
                                                     }
@@ -1605,11 +1769,11 @@ Ext.onReady( function() {
                 listeners: {
                     collapse: function(p) {                    
                         p.collapsed = true;
-                        DV.util.getCmp('button[name="resize"]').setText('<span style="font-weight:bold">>>></span>');
+                        DV.util.getCmp('button[name="resizeleft"]').setText('>>>');
                     },
                     expand: function(p) {
                         p.collapsed = false;
-                        DV.util.getCmp('button[name="resize"]').setText('<span style="font-weight:bold"><<<</span>');
+                        DV.util.getCmp('button[name="resizeleft"]').setText('<<<');
                     }
                 }
             },
@@ -1618,110 +1782,132 @@ Ext.onReady( function() {
                 region: 'center',
                 layout: 'fit',
                 bodyStyle: 'padding:10px',
-                tbar: [
-                    {
-                        xtype: 'button',
-                        name: 'resize',
-                        text: '<span style="font-weight:bold"><<<</span>',
-                        tooltip: 'Show/hide panel',
-                        handler: function() {
-                            var p = DV.util.getCmp('panel[region="west"]');
-                            if (p.collapsed) {
-                                p.expand();
+                tbar: {
+                    xtype: 'toolbar',
+                    height: DV.conf.layout.center_tbar_height,
+                    items: [
+                        {
+                            xtype: 'button',
+							cls: 'dv-btn-toolbar',
+                            name: 'resizeleft',
+                            text: '<span class="dv-btn-toolbar-text-2"><<<</span>',
+                            tooltip: 'Show/hide chart settings',
+                            handler: function() {
+                                var p = DV.util.getCmp('panel[region="west"]');
+                                if (p.collapsed) {
+                                    p.expand();
+                                }
+                                else {
+                                    p.collapse();
+                                }
                             }
-                            else {
-                                p.collapse();
+                        },
+                        {
+                            xtype: 'button',
+							cls: 'dv-btn-toolbar',
+                            text: '<span class="dv-btn-toolbar-text-1">Update</span>',
+                            handler: function() {
+                                DV.exe.execute(true, DV.init.isInit);
+                            }
+                        },
+                        {
+                            xtype: 'button',
+							cls: 'dv-btn-toolbar',
+                            text: '<span class="dv-btn-toolbar-text-2">Data table</span>',
+                            handler: function(b) {
+                                var p = DV.util.getCmp('panel[region="east"]');
+                                if (p.collapsed && p.items.length) {
+                                    p.expand();
+                                    DV.exe.datatable(true);
+                                }
+                                else {
+                                    p.collapse();
+                                }
+                            }
+                        },
+                        {
+                            xtype: 'button',
+							cls: 'dv-btn-toolbar',
+                            text: '<span class="dv-btn-toolbar-text-2">Save as..</span>',
+                            execute: function(type) {
+                                var svg = document.getElementsByTagName('svg');
+                                
+                                if (svg.length < 1) {
+                                    alert('Please use Chrome, Firefox, Opera or Safari to export images');
+                                    return;
+                                }
+                                
+                                document.getElementById('titleField').value = DV.state.filter.data[0];
+                                document.getElementById('svgField').value = svg[0].parentNode.innerHTML;
+                                document.getElementById('typeField').value = type;
+                                
+                                var exportForm = document.getElementById('exportForm');
+                                exportForm.action = '../exportImage.action';
+                                
+                                if (svg[0].parentNode.innerHTML && type) {
+                                    exportForm.submit();
+                                }
+                                else {
+                                    alert("No svg/format");
+                                }
+                            },
+                            listeners: {
+                                afterrender: function(b) {
+                                    this.menu = Ext.create('Ext.menu.Menu', {
+                                        items: [
+                                            {
+                                                text: 'PNG',
+                                                iconCls: 'dv-menu-toolbar-png',
+                                                minWidth: 80,
+                                                handler: function() {
+                                                    b.execute('png');
+                                                }
+                                            },
+                                            {
+                                                text: 'PDF',
+                                                iconCls: 'dv-menu-toolbar-pdf',
+                                                minWidth: 80,
+                                                handler: function() {
+                                                    b.execute('pdf');
+                                                }
+                                            }
+                                        ]                                            
+                                    });
+                                }
+                            }
+                        },
+                        '->',
+                        {
+                            xtype: 'button',
+							cls: 'dv-btn-toolbar',
+                            text: '<span class="dv-btn-toolbar-text-2">Exit</span>',
+                            handler: function() {
+                                window.location.href = DV.conf.finals.ajax.url_portal + 'redirect.action';
                             }
                         }
-                    },
-                    ' ',
-                    {
-                        xtype: 'button',
-                        text: 'Update',
-                        cls: 'x-btn-text-icon',
-                        icon: 'images/refresh.png',
-                        handler: function() {
-                            DV.state.getState(true);
-                        }
-                    },
-                    //{
-                        //xtype: 'button',
-                        //text: 'Data table',
-                        //cls: 'x-btn-text-icon',
-                        //icon: 'images/datatable.png',
-                        //handler: function() {
-                            //Ext.create('Ext.window.Window', {
-                                //title: 'Data table',
-                                //layout: 'fit',
-                                //iconCls: 'dv-window-title-datatable',
-                                //width: 580,
-                                //height: DV.viewport.getHeight() / 1.5,
-                                //items: [
-                                    //{
-                                        //xtype: 'grid',
-                                        //layout: 'vbox',
-                                        //scroll: 'vertical',
-                                        //columns: [
-                                            //{
-                                                //text: DV.conf.finals.dimension.indicator.rawvalue,
-                                                //dataIndex: DV.conf.finals.dimension.indicator.value,
-                                                //width: 150
-                                            //},
-                                            //{
-                                                //text: DV.conf.finals.dimension.period.rawvalue,
-                                                //dataIndex: DV.conf.finals.dimension.period.value,
-                                                //width: 150
-                                            //},
-                                            //{
-                                                //text: DV.conf.finals.dimension.organisationunit.rawvalue,
-                                                //dataIndex: DV.conf.finals.dimension.organisationunit.value,
-                                                //width: 150
-                                            //},
-                                            //{
-                                                //text: 'Value',
-                                                //dataIndex: 'v',
-                                                //width: 100
-                                            //}
-                                        //],
-                                        //store: Ext.create('Ext.data.Store', {
-                                            //fields: [
-                                                //DV.conf.finals.dimension.indicator.value,
-                                                //DV.conf.finals.dimension.period.value,
-                                                //DV.conf.finals.dimension.organisationunit.value,
-                                                //'v'
-                                            //],
-                                            //data: DV.value.values
-                                        //})
-                                    //}
-                                //]
-                            //}).show();
-                        //}
-                    //},
-                    '-',' ',
-                    {
-                        xtype: 'label',
-                        text: 'Example chart',
-                        style: 'font-weight:bold; padding:0 4px'
-                    },
-                    '->',
-                    {
-                        xtype: 'button',
-                        text: 'Exit',
-                        cls: 'x-btn-text-icon',
-                        icon: 'images/exit.png',
-                        handler: function() {
-                            window.location.href = DV.conf.finals.ajax.url_portal + 'redirect.action';
-                        }
-                    }
-                ]
+                    
+                    ]
+                }
+            },
+            {
+                region: 'east',
+                preventHeader: true,
+                collapsible: true,
+                collapsed: true,
+                collapseMode: 'mini',
+                width: 498
             }
         ],
         listeners: {
             afterrender: function(vp) {
                 DV.init.initialize(vp);
             },
-            resize: function() {
-                this.query('panel[region="west"]')[0].setWidth(DV.conf.layout.west_width);
+            resize: function(vp) {
+                vp.query('panel[region="west"]')[0].setWidth(DV.conf.layout.west_width);
+                
+                if (DV.cmp.datatable) {
+                    DV.cmp.datatable.setHeight(DV.util.viewport.getSize().y - DV.conf.layout.east_tbar_height);
+                }
             }
         }
     });

@@ -1,11 +1,38 @@
 
 #set( $Integer = 0 )
 
-<h2>$encoder.htmlEncode( $dataSet.name )</h2>
+#if( $dataSet.alternativeName )
+	#set( $dataSetName = $dataSet.alternativeName )
+#else
+	#set( $dataSetName = $dataSet.name )
+#end
 
-#if( $validationRuleViolations.size() > 0 )
+<h2>$encoder.htmlEncode( $dataSetName )</h2>
+
+#set( $validationRuleViolationsSize = $validationRuleViolations.size() )
+#set( $validationViolationsSize = $validationViolations.size() )
+#set( $typeViolationsSize = $typeViolations.size() )
+
+#if( $validationRuleViolationsSize > 0 || $validationViolationsSize > 0 || $typeViolationsSize > 0 )
 <div class="header-box" align="center">
-	<h3 style="text-align: left; background-color: #990000; color: white;">Validation Rule Violations</h3>
+	<h3 style="text-align: left; background-color: #990000; color: white;">$i18n.getString("warnings_and_errors")</h3>
+	<p style="text-align: left;">
+		#if( $validationRuleViolationsSize > 0 )
+			$validationRuleViolationsSize $i18n.getString("validation_rule_violation_warnings"). <br />
+		#end
+		#if( $validationViolationsSize > 0 )
+			$validationViolationsSize $i18n.getString("minmax_violation_warnings"). <br />
+		#end
+		#if( $typeViolationsSize > 0 )
+			$typeViolationsSize $i18n.getString("type_violation_errors"). <br />
+		#end
+	</p>
+</div>
+#end
+
+#if( $validationRuleViolationsSize > 0 )
+<div class="header-box" align="center">
+	<h3 style="text-align: left; background-color: #990000; color: white;">$i18n.getString("validation_rule_violations")</h3>
 	<p style="text-align: left;">
 	#foreach( $validationRuleViolation in $validationRuleViolations )
 		$validationRuleViolation <br />
@@ -26,24 +53,53 @@
 	<h3 style="text-align: left;">$sectionName</h3>
 	<p style="text-align: left;">
 		#foreach( $dataElement in $dataElements)
+			#if( $dataElement.shortName )
+				#set( $dataElementName = $dataElement.shortName )
+			#else
+				#set( $dataElementName = $dataElement.name )
+			#end
+
 			#foreach( $optionCombo in $dataElement.categoryCombo.optionCombos )
 				#set( $key = "DE${dataElement.id}OC${optionCombo.id}" )
-				<label>$dataElement.name #if($optionCombo.name!="(default)")$optionCombo.name#end</label>
+
+				<label>$encoder.htmlEncode( $dataElementName ) #if( $optionCombo.name!="(default)")$encoder.htmlEncode( $optionCombo.name )#end</label>
 
 				#if( $validationViolations.get( $key ) )
-				#set( $validationViolation = $validationViolations.get( $key ) )
+					#set( $validationViolation = $validationViolations.get( $key ) )
 
-                #if( $sectionFormUtils.valueHigher( $validationViolation.value, $validationViolation.max ) )
-                    <br /><span style="color: #990000;">Too high (max $validationViolation.max)</span>
-                #elseif( $sectionFormUtils.valueLower( $validationViolation.value, $validationViolation.min ) )
-                    <br /><span style="color: red;">Too low (min $validationViolation.min)</span>
-                #else
-                    <br /><span style="color: red;">Not a number</span>
+	                #if( $formUtils.valueHigher( $validationViolation.value, $validationViolation.max ) )
+	                    <br /><span style="color: #990000;">Too high (max $validationViolation.max)</span>
+	                #elseif( $formUtils.valueLower( $validationViolation.value, $validationViolation.min ) )
+	                    <br /><span style="color: red;">Too low (min $validationViolation.min)</span>
+	                #else
+	                    <br /><span style="color: red;">Not a number</span>
+	                #end
                 #end
 
+				#if( $typeViolations.get( $key ) )
+					#set( $typeViolation = $typeViolations.get( $key ) )
+                    <br /><span style="color: #990000;">$typeViolation</span>
                 #end
 
-				<input type="number" size="24" name="$key" value="$!dataValues.get($key)" /> <br />
+				#if( $dataElement.type == "string" )
+					<input type="text" maxlength="255" size="24" name="$key" value="$!dataValues.get($key)" />
+				#elseif( $dataElement.type == "bool" )
+					<select name="$key" style="width: 100%;">
+						<option value="">[ No Value ]</option>
+						<option value="true" #if($!dataValues.get($key) == "true")selected="selected"#end>Yes</option>
+						<option value="false" #if($!dataValues.get($key) == "false")selected="selected"#end>No</option>
+					</select>
+				#elseif( $dataElement.type == "date" )
+					<input type="date" maxlength="255" size="24" name="$key" value="$!dataValues.get($key)" />
+				#elseif( $dataElement.type == "int" && $dataElement.numberType == "number" )
+					<input type="text" maxlength="255" size="24" name="$key" value="$!dataValues.get($key)" />
+				#elseif( $dataElement.type == "int" && $dataElement.numberType == "int" )
+					<input type="text" maxlength="255" size="24" name="$key" value="$!dataValues.get($key)" />
+				#elseif( $dataElement.type == "int" && $dataElement.numberType == "positiveNumber" )
+					<input type="text" maxlength="255" size="24" name="$key" value="$!dataValues.get($key)" />
+				#elseif( $dataElement.type == "int" && $dataElement.numberType == "negativeNumber" )
+					<input type="text" maxlength="255" size="24" name="$key" value="$!dataValues.get($key)" />
+				#end
 			#end
 		#end
 	</p>

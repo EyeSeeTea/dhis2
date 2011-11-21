@@ -2,6 +2,10 @@
  ExtJS overrides
  ****************/
 
+.x-body {
+	font-family: arial, ubuntu;
+}
+
 /* Combobox empty text */
 .x-form-empty-field, textarea.x-form-empty-field {
     font-size: 10px;
@@ -18,9 +22,14 @@
     font-size: 10px;
 }
 
+/* General font */
+.x-form-item, .x-form-field, .x-form-display-field  {
+	font: normal 10px arial, ubuntu;
+}
+
 /* Combobox field label font */
 .x-form-item-label {
-    font: 11px arial;
+    font: 11px arial, ubuntu;
     color: #111;
 }
 
@@ -38,11 +47,13 @@
     -ms-border-radius: 2px 2px 2px 2px;
     -khtml-border-radius: 2px 2px 2px 2px;
     border-radius: 2px 2px 2px 2px;
+    padding-top: 8px;
     padding-bottom: 4px;
 }
 
 .x-fieldset-header {
-    font-size: 11px/15px;
+    font-size: 11px;
+	font-family: arial, ubuntu;
     font-weight: bold;
     color: #000;
     padding: 0 7px 0 5px;
@@ -85,7 +96,7 @@
 
 /* Tree panel font */
 .x-grid-row .x-grid-cell {
-    font: 10px arial;
+    font: 10px arial, ubuntu;
     color: #222;
 }
 
@@ -104,20 +115,23 @@
     border-style: none;
 }
 
-/* Multiselect (custom) transparent row hover */
-#indicator_fs .x-boundlist-item-over, #dataelement_fs .x-boundlist-item-over {
-    background-color: transparent;
-    border-color: #fff;
+/* Boundlist (multiselect, comboboxlist etc) */
+.x-boundlist-item {
+    color: #333;
+    padding: 2px 2px 2px 4px;
 }
-#indicator_fs .x-boundlist-selected, #dataelement_fs .x-boundlist-selected {
+.x-boundlist-item-over {
+    background-color: #eee;
+    border-color: #ddd;
+}
+.x-boundlist-selected {
     background-color: #d3d3d3;
     border-color: #b3abaa;
 }
 
-/* List (combo, multiselect etc) style */
-.x-boundlist-item {
-    color:#333;
-    padding: 2px 2px 2px 4px;
+/* Checkbox icons */
+.x-form-checkbox, .x-form-radio {
+    background-image: url('../images/checkbox.gif');
 }
 
 /* Checkbox box label */
@@ -131,27 +145,60 @@
     width: 32px !important;
 }
 
+.x-btn-default-toolbar-small-icon .x-btn-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.x-btn-arrow {
+    background-image: url('../images/arrow.png');
+}
+
 /* Button border */
 .x-btn-default-toolbar-small {
-    border-width: 2px;
+    -moz-border-radius: 2px 2px 2px 2px;
+    -webkit-border-radius: 2px 2px 2px 2px;
+    -o-border-radius: 2px 2px 2px 2px;
+    -ms-border-radius: 2px 2px 2px 2px;
+    -khtml-border-radius: 2px 2px 2px 2px;
+    border-radius: 2px 2px 2px 2px;
+    border-width: 1px;
 }
 
 .x-btn-default-toolbar-small-over {
-    -moz-border-radius: 3px 3px 3px 3px;
-    -webkit-border-radius: 3px 3px 3px 3px;
-    -o-border-radius: 3px 3px 3px 3px;
-    -ms-border-radius: 3px 3px 3px 3px;
-    -khtml-border-radius: 3px 3px 3px 3px;
-    border-radius: 3px 3px 3px 3px;
+    -moz-border-radius: 2px 2px 2px 2px;
+    -webkit-border-radius: 2px 2px 2px 2px;
+    -o-border-radius: 2px 2px 2px 2px;
+    -ms-border-radius: 2px 2px 2px 2px;
+    -khtml-border-radius: 2px 2px 2px 2px;
+    border-radius: 2px 2px 2px 2px;
     border-color: #aaa;
-    border-style: double;
-    border-width: 2px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+/* Button font-family */
+.x-btn-default-toolbar-small .x-btn-inner {
+	font-family: arial, ubuntu;
 }
 
 /* Toolbar separator */
 .x-toolbar .x-toolbar-separator-horizontal {
     height: 15px;
     border-right: 1px solid #f2f2f2;
+}
+
+/* Toolbar background */
+.x-toolbar-default {
+    border-color: #D0D0D0;
+    background-image: none;
+    background-color: #f3f3f3;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f1f1f1), color-stop(100%, #f5f5f5));
+    background-image: -webkit-linear-gradient(top, #f1f1f1,#f5f5f5);
+    background-image: -moz-linear-gradient(top, #f1f1f1,#f5f5f5);
+    background-image: -o-linear-gradient(top, #f1f1f1,#f5f5f5);
+    background-image: -ms-linear-gradient(top, #f1f1f1,#f5f5f5);
+    background-image: linear-gradient(top, #f1f1f1,#f5f5f5);
 }
 
 /* Tooltip */
@@ -173,12 +220,22 @@
     text-align: center;
 }
 
+/* Grid datatable column header */
+.x-column-header {
+	font: normal 11px arial, ubuntu;
+}
+
+/* Grid datatable column chooser */
+.x-column-header-over .x-column-header-trigger, .x-column-header-open .x-column-header-trigger {
+    display: none;
+}
+
 /****************
  Data Visualizer
  ***************/
 
 body {
-    font: normal 11px arial,ubuntu;
+    font: normal 11px arial, ubuntu;
 }
 
 li {
@@ -188,10 +245,10 @@ li {
 
 /* Second toolbar */
 #chartsettings_tb {
-    background: #eee;
-    padding: 4px 0 0 8px;
+    background: #f5f5f5;
+    padding: 5px 0 0 8px;
     border-style: none;
-    border-top: 1px dashed #bbb;
+    border-top: 1px dashed #ccc;
 }
 
 /* Multiselect dock border radius */
@@ -231,6 +288,25 @@ li {
 	border-top-right-radius: 2px;
 }
 
+/* Multiselect boundlist */
+#availableIndicators .x-boundlist-item-over, #availableDataElements .x-boundlist-item-over {
+    background-color: transparent;
+    border-color: transparent;
+}
+#availableIndicators .x-boundlist-selected, #availableDataElements .x-boundlist-selected {
+    background-color: #d3d3d3;
+    border-color: #b3abaa;
+}
+
+#selectedIndicators .x-boundlist-item-over, #selectedDataElements .x-boundlist-item-over {
+    background-color: transparent;
+    border-color: transparent;
+}
+#selectedIndicators .x-boundlist-selected, #selectedDataElements .x-boundlist-selected {
+    background-color: #d3d3d3;
+    border-color: #b3abaa;
+}
+
 /* Treepanel contextmenu */
 #treepanel-contextmenu {
     -moz-border-radius: 2px 2px 2px 2px;
@@ -244,6 +320,10 @@ li {
     border-color: #aaa;
 }
 
+.x-menu-item-link {
+    padding: 3px 5px 4px 35px;
+}
+
 .x-menu-item-active .x-menu-item-link {
     -moz-border-radius: 2px 2px 2px 2px;
     -webkit-border-radius: 2px 2px 2px 2px;
@@ -254,7 +334,7 @@ li {
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;
-}
+}    
 
 /* Fieldset */
 .dv-fieldset-title-link {
@@ -269,7 +349,7 @@ li {
 
 /* Chart tips */
 .dv-chart-tips {
-    font: normal 13px arial;
+    font: normal 13px arial, ubuntu;
     padding: 0 0 3px 3px;
 }
 
@@ -277,4 +357,35 @@ li {
 .dv-window-title-datatable {
     padding-left: 19px;
     background-image: url('../images/datatable.png');
+}
+
+/* Grid datatable */
+.dv-datatable .x-grid-header-ct {
+    border-style: none;
+}
+
+#datatable_g .x-fit-item {
+    border-top: 1px solid #d0d0d0;
+}
+
+/* Button - toolbar */
+.dv-btn-toolbar {
+    border-width: 1px;
+    padding: 3px;
+}
+
+.dv-btn-toolbar-text-1 {
+    color: #333;
+    font-weight: bold;
+}
+.dv-btn-toolbar-text-2 {
+    color: #444;
+}
+
+.dv-menu-toolbar-png {
+    background-image:url('../images/png.png');
+}
+
+.dv-menu-toolbar-pdf {
+    background-image:url('../images/pdf.png');
 }

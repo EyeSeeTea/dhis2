@@ -118,6 +118,8 @@ public class OrganisationUnit
     private transient boolean currentParent;
 
     private transient String type;
+    
+    private transient String[] groupNames;
 
     /**
      * Set of the dynamic attributes values that belong to this
@@ -440,6 +442,16 @@ public class OrganisationUnit
 
         return set;
     }
+    
+    public boolean isPolygon()
+    {
+        return ( featureType.equals( FEATURETYPE_MULTIPOLYGON ) || featureType.equals( FEATURETYPE_POLYGON ) );
+    }
+    
+    public boolean isPoint()
+    {
+        return featureType.equals( FEATURETYPE_POINT );
+    }
 
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
@@ -742,5 +754,15 @@ public class OrganisationUnit
     public void setAttributeValues( Set<AttributeValue> attributeValues )
     {
         this.attributeValues = attributeValues;
+    }
+
+    public String[] getGroupNames()
+    {
+        return groupNames;
+    }
+
+    public void setGroupNames( String[] groupNames )
+    {
+        this.groupNames = groupNames;
     }
 }

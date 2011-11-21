@@ -99,11 +99,6 @@ public class DefaultDataElementService
 
     public int addDataElement( DataElement dataElement )
     {
-        if ( dataElement.getUuid() == null )
-        {
-            dataElement.setUuid( UUIdUtils.getUUId() );
-        }
-
         dataElement.setLastUpdated( new Date() );
 
         int id = dataElementStore.addDataElement( dataElement );
@@ -326,17 +321,17 @@ public class DefaultDataElementService
 
     public Collection<DataElement> getDataElementsLikeName( String name )
     {
-        return dataElementStore.getDataElementsLikeName( name );
+        return i18n( i18nService, dataElementStore.getDataElementsLikeName( name ) );
     }
 
     public Collection<DataElement> getDataElementsBetween( int first, int max )
     {
-        return dataElementStore.getDataElementsBetween( first, max );
+        return i18n( i18nService, dataElementStore.getDataElementsBetween( first, max ) );
     }
 
     public Collection<DataElement> getDataElementsBetweenByName( String name, int first, int max )
     {
-        return dataElementStore.getDataElementsBetweenByName( name, first, max );
+        return i18n( i18nService, dataElementStore.getDataElementsBetweenByName( name, first, max ) );
     }
 
     public int getDataElementCount()
@@ -354,6 +349,11 @@ public class DefaultDataElementService
         return i18n( i18nService, dataElementStore.getDataElementsByDataSets( dataSets ) );
     }
 
+    public Map<Integer, Set<Integer>> getDataElementCategoryOptionCombos()
+    {
+        return dataElementStore.getDataElementCategoryOptionCombos();
+    }
+    
     // -------------------------------------------------------------------------
     // DataElementGroup
     // -------------------------------------------------------------------------

@@ -49,7 +49,6 @@ import org.hisp.dhis.system.util.AuditLogUtil;
 import org.hisp.dhis.system.util.ConversionUtils;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.system.util.UUIdUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.version.VersionService;
@@ -97,15 +96,9 @@ public class DefaultOrganisationUnitService
     // OrganisationUnit
     // -------------------------------------------------------------------------
 
+    @Override
     public int addOrganisationUnit( OrganisationUnit organisationUnit )
     {
-        if ( organisationUnit.getUuid() == null )
-        {
-            organisationUnit.setUuid( UUIdUtils.getUUId() );
-        }
-
-        organisationUnit.setLastUpdated( new Date() );
-
         int id = organisationUnitStore.save( organisationUnit );
 
         log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_ADD,

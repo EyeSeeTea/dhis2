@@ -270,6 +270,7 @@ public class CaseAggregationResultAction
                             {
                                 DataValue dvalue = new DataValue( dElement, period, orgUnit, "", storedBy, new Date(),
                                     null, optionCombo );
+                                
                                 dvalue.setValue( dataValue.getValue() + " " + i18n.getString( "old_value" ) );
 
                                 dataValueService.deleteDataValue( dataValue );
@@ -321,10 +322,7 @@ public class CaseAggregationResultAction
             period = periodType.getNextPeriod( period );
             periods.add( period );
         }
-
-        period = periodType.createPeriod( endPeriod.getStartDate() );
-        periods.add( period );
-
+        
         return periods;
     }
 

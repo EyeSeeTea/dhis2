@@ -27,12 +27,13 @@ package org.hisp.dhis.mobile.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.Properties;
+
+import com.opensymphony.xwork2.Action;
 
 public class MobileSettingsAction implements Action
 {
@@ -371,10 +372,12 @@ public class MobileSettingsAction implements Action
             props.setProperty( "settings.delete_after_processing", "yes" );
             props.setProperty( "settings.send_mode", "async" );
             props.store( new FileWriter( configFile ), "SMS Server Configuration" );
-        } else
+        } 
+        else
         {
             props.load( new FileReader( configFile ) );
         }
+        
         return SUCCESS;
     }
 }

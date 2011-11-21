@@ -134,12 +134,14 @@ public class DefaultResourceTableService
 
     public void generateOrganisationUnitStructures()
     {
-        resourceTableStore.createOrganisationUnitStructure();
+        int maxLevel = organisationUnitService.getMaxOfOrganisationUnitLevels();
+        
+        resourceTableStore.createOrganisationUnitStructure( maxLevel );
 
         BatchHandler<Object> batchHandler = batchHandlerFactory.createBatchHandler( GenericBatchHandler.class ).
             setTableName( ResourceTableStore.TABLE_NAME_ORGANISATION_UNIT_STRUCTURE ).init();
         
-        for ( int i = 0; i < 8; i++ )
+        for ( int i = 0; i < maxLevel; i++ )
         {
             int level = i + 1;
 
@@ -147,10 +149,10 @@ public class DefaultResourceTableService
 
             for ( OrganisationUnit unit : units )
             {
-                List<String> structure = new ArrayList<String>();
+                List<Integer> structure = new ArrayList<Integer>();
 
-                structure.add( String.valueOf( unit.getId() ) );
-                structure.add( String.valueOf( level ) );
+                structure.add( unit.getId() );
+                structure.add( level );
 
                 Map<Integer, Integer> identifiers = new HashMap<Integer, Integer>();
 
@@ -160,16 +162,12 @@ public class DefaultResourceTableService
 
                     unit = unit.getParent();
                 }
-
-                structure.add( String.valueOf( identifiers.get( 1 ) != null ? identifiers.get( 1 ) : "0" ) ); //TODO improve
-                structure.add( String.valueOf( identifiers.get( 2 ) != null ? identifiers.get( 2 ) : "0" ) );
-                structure.add( String.valueOf( identifiers.get( 3 ) != null ? identifiers.get( 3 ) : "0" ) );
-                structure.add( String.valueOf( identifiers.get( 4 ) != null ? identifiers.get( 4 ) : "0" ) );
-                structure.add( String.valueOf( identifiers.get( 5 ) != null ? identifiers.get( 5 ) : "0" ) );
-                structure.add( String.valueOf( identifiers.get( 6 ) != null ? identifiers.get( 6 ) : "0" ) );
-                structure.add( String.valueOf( identifiers.get( 7 ) != null ? identifiers.get( 7 ) : "0" ) );
-                structure.add( String.valueOf( identifiers.get( 8 ) != null ? identifiers.get( 8 ) : "0" ) );
-
+               
+                for (int k = 1 ; k <= maxLevel ; k ++ )
+                {
+                    structure.add( identifiers.get( k ) );
+                }
+                
                 batchHandler.addObject( structure );
             }
         }

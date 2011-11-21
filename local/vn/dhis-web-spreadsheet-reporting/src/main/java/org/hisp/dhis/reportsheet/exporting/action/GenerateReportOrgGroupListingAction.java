@@ -41,8 +41,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.reportsheet.ExportReport;
 import org.hisp.dhis.reportsheet.ExportItem;
+import org.hisp.dhis.reportsheet.ExportReport;
 import org.hisp.dhis.reportsheet.ExportReportOganiztionGroupListing;
 import org.hisp.dhis.reportsheet.exporting.AbstractGenerateExcelReportSupport;
 import org.hisp.dhis.reportsheet.utils.ExcelUtils;
@@ -93,14 +93,6 @@ public class GenerateReportOrgGroupListingAction
             Collection<ExportItem> exportReportItems = exportReportInstance.getExportItemBySheet( sheetNo );
 
             generateOutPutFile( exportReportInstance, orgUniGroupAtLevels, exportReportItems, organisationUnit, sheet );
-
-        }
-
-        for ( Integer sheetNo : exportReportService.getSheets( selectionManager.getSelectedReportId() ) )
-        {
-            Sheet sheet = this.templateWorkbook.getSheetAt( sheetNo - 1 );
-
-            this.recalculatingFormula( sheet );
         }
     }
 
@@ -112,9 +104,11 @@ public class GenerateReportOrgGroupListingAction
         Map<OrganisationUnitGroup, OrganisationUnitLevel> orgUniGroupAtLevels,
         Collection<ExportItem> exportReportItems, OrganisationUnit organisationUnit, Sheet sheet )
     {
+        List<OrganisationUnit> childrens = new ArrayList<OrganisationUnit>( organisationUnit.getChildren() );
 
         for ( ExportItem reportItem : exportReportItems )
         {
+            int run = 0;
             int chapperNo = 0;
             int firstRow = reportItem.getRow();
             int rowBegin = firstRow + 1;
@@ -123,26 +117,22 @@ public class GenerateReportOrgGroupListingAction
 
             for ( OrganisationUnitGroup organisationUnitGroup : exportReport.getOrganisationUnitGroups() )
             {
-                OrganisationUnitLevel organisationUnitLevel = orgUniGroupAtLevels.get( organisationUnitGroup );
-
-                List<OrganisationUnit> organisationUnitsAtLevel = new ArrayList<OrganisationUnit>();
-
-                List<OrganisationUnit> childrenOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnit
-                    .getChildren() );
-
                 List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( organisationUnitGroup
                     .getMembers() );
 
+                OrganisationUnitLevel organisationUnitLevel = orgUniGroupAtLevels.get( organisationUnitGroup );
+
                 if ( organisationUnitLevel != null )
                 {
-                    organisationUnitsAtLevel = new ArrayList<OrganisationUnit>( organisationUnitService
-                        .getOrganisationUnitsAtLevel( organisationUnitLevel.getLevel(), organisationUnit ) );
+                    List<OrganisationUnit> organisationUnitsAtLevel = new ArrayList<OrganisationUnit>(
+                        organisationUnitService.getOrganisationUnitsAtLevel( organisationUnitLevel.getLevel(),
+                            organisationUnit ) );
 
                     organisationUnits.retainAll( organisationUnitsAtLevel );
                 }
                 else
                 {
-                    organisationUnits.retainAll( childrenOrganisationUnits );
+                    organisationUnits.retainAll( childrens );
                 }
 
                 Collections.sort( organisationUnits, new OrganisationUnitNameComparator() );
@@ -152,8 +142,8 @@ public class GenerateReportOrgGroupListingAction
                 if ( reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.ORGANISATION )
                     && (!organisationUnits.isEmpty()) )
                 {
-                    ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( organisationUnitGroup
-                        .getName() ), ExcelUtils.TEXT, sheet, this.csText12BoldCenter );
+                    ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), organisationUnitGroup.getName(),
+                        ExcelUtils.TEXT, sheet, this.csText12BoldCenter );
                 }
                 else if ( reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.SERIAL )
                     && (!organisationUnits.isEmpty()) )
@@ -163,6 +153,7 @@ public class GenerateReportOrgGroupListingAction
                     chapperNo++;
                 }
 
+                run++;
                 rowBegin++;
                 int serial = 1;
 
@@ -175,24 +166,31 @@ public class GenerateReportOrgGroupListingAction
                     }
                     else if ( reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.SERIAL ) )
                     {
-                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( serial ),
-                            ExcelUtils.NUMBER, sheet, this.csTextSerial );
+                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), serial + "", ExcelUtils.NUMBER,
+                            sheet, this.csTextSerial );
                     }
                     else if ( reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.DATAELEMENT ) )
                     {
                         double value = this.getDataValue( reportItem, o );
 
-                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( value ),
-                            ExcelUtils.NUMBER, sheet, this.csNumber );
+                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), value + "", ExcelUtils.NUMBER,
+                            sheet, this.csNumber );
                     }
                     else if ( reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.INDICATOR ) )
                     {
                         double value = this.getIndicatorValue( reportItem, o );
 
-                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), String.valueOf( value ),
-                            ExcelUtils.NUMBER, sheet, this.csNumber );
+                        ExcelUtils.writeValueByPOI( rowBegin, reportItem.getColumn(), value + "", ExcelUtils.NUMBER,
+                            sheet, this.csNumber );
+                    }
+                    else
+                    // FORMULA_EXCEL
+                    {
+                        ExcelUtils.writeFormulaByPOI( rowBegin, reportItem.getColumn(), ExcelUtils
+                            .generateExcelFormula( reportItem.getExpression(), run, run ), sheet, this.csFormula );
                     }
 
+                    run++;
                     rowBegin++;
                     serial++;
                 }
@@ -201,7 +199,7 @@ public class GenerateReportOrgGroupListingAction
                     .getItemType().equalsIgnoreCase( ExportItem.TYPE.INDICATOR ))
                     && (!organisationUnits.isEmpty()) )
                 {
-                    String columnName = ExcelUtils.convertColNumberToColName( reportItem.getColumn() );
+                    String columnName = ExcelUtils.convertColumnNumberToName( reportItem.getColumn() );
                     String formula = "SUM(" + columnName + (beginChapter + 1) + ":" + columnName + (rowBegin - 1) + ")";
 
                     ExcelUtils.writeFormulaByPOI( beginChapter, reportItem.getColumn(), formula, sheet, this.csFormula );
@@ -210,8 +208,8 @@ public class GenerateReportOrgGroupListingAction
                 }
             }
 
-            if ( (reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.DATAELEMENT ) || reportItem
-                .getItemType().equalsIgnoreCase( ExportItem.TYPE.INDICATOR ))
+            if ( (reportItem.getItemType().equalsIgnoreCase( ExportItem.TYPE.DATAELEMENT ) || reportItem.getItemType()
+                .equalsIgnoreCase( ExportItem.TYPE.INDICATOR ))
                 && !totalFormula.equals( PREFIX_FORMULA_SUM ) )
             {
                 totalFormula = totalFormula.substring( 0, totalFormula.length() - 1 ) + ")";
@@ -220,5 +218,4 @@ public class GenerateReportOrgGroupListingAction
             }
         }
     }
-
 }

@@ -34,10 +34,13 @@ import java.security.SecureRandom;
  */
 public class CodeGenerator
 {
-    public static final String allowedChars = "0123456789" + "abcdefghijklmnopqrstuvwxyz"
+    public static final String letters = "abcdefghijklmnopqrstuvwxyz"
         + "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    
+    public static final String allowedChars = "0123456789" + letters;
 
-    public static final int codeSize = 11;
+    public static final int NUMBER_OF_CODEPOINTS = allowedChars.length();
+    public static final int CODESIZE = 11;
 
     /**
      * Generates a pseudo random string using the allowed characters
@@ -49,10 +52,14 @@ public class CodeGenerator
         // Using the system default algorithm and seed
         SecureRandom sr = new SecureRandom();
 
-        char[] randomChars = new char[11];
-        for ( int i = 0; i < codeSize; ++i )
+        char[] randomChars = new char[CODESIZE];
+        
+        // first char should be a letter
+        randomChars[0] = letters.charAt( sr.nextInt( letters.length() ) );
+        
+        for ( int i = 1; i < CODESIZE; ++i )
         {
-            randomChars[i] = allowedChars.charAt( sr.nextInt( 61 ) );
+            randomChars[i] = allowedChars.charAt( sr.nextInt( NUMBER_OF_CODEPOINTS ) );
         }
         return new String( randomChars );
     }

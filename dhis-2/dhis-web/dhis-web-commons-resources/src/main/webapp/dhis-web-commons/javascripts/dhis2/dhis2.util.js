@@ -31,7 +31,7 @@ dhis2['util'] = dhis2['util'] || {};
 /**
  * Creates namespace object based on path
  * 
- * @param path {String} The path of the namespace, i.e. 'a.b.c'
+ * @param path {String}ï¿½The path of the namespace, i.e. 'a.b.c'
  * 
  * @returns {object} Namespace object
  */
@@ -52,22 +52,87 @@ dhis2.util.namespace = function( path )
 };
 
 /**
+ * Escape function for regular expressions.
+ */
+dhis2.util.escape = function( text )
+{
+    return text.replace( /[-[\]{}()*+?.,\/\\^$|#\s]/g, "\\$&" );
+};
+
+/**
+ * jQuery cannot correctly filter strings with () in them, so here is a fix
+ * until jQuery gets updated.
+ */
+dhis2.util.jqTextFilterCaseSensitive = function( key, not )
+{
+    key = dhis2.util.escape(key);
+    not = not || false;
+
+    if ( not )
+    {
+        return function( i, el )
+        {
+            return !!!$( el ).text().match( "" + key );
+        };
+    }
+    else
+    {
+        return function( i, el )
+        {
+            return !!$( el ).text().match( "" + key );
+        };
+    }
+};
+
+dhis2.util.jqTextFilter = function( key, not )
+{
+    key = dhis2.util.escape(key).toLowerCase();
+    not = not || false;
+
+    if ( not )
+    {
+        return function( i, el )
+        {
+            return !!!$( el ).text().toLowerCase().match( "" + key );
+        };
+    }
+    else
+    {
+        return function( i, el )
+        {
+            return !!$( el ).text().toLowerCase().match( "" + key );
+        };
+    }
+};
+
+/**
  * adds ':containsNC' to filtering.
  * $(sel).find(':containsNC(key)').doSomething();
  */
-$.expr[":"].containsNC = function( el, i, m )
+$.expr[":"].containsNC = function( a, i, m, r )
 {
-    // http://www.west-wind.com/weblog/posts/2008/Oct/24/Using-jQuery-to-search-Content-and-creating-custom-Selector-Filters
-    var search = m[3];
+    var search = dhis2.util.escape( m[3] );
+    return jQuery( a ).text().toUpperCase().indexOf( m[search].toUpperCase() ) >= 0;
+};
 
-    if ( !search )
-    {
-        return false;
-    }
+/**
+ * adds ':regex' to filtering, use to filter by regular expression
+ */
+$.expr[":"].regex = function( a, i, m, r )
+{
+    var re = new RegExp( m[3], 'i' );
+    return re.test( jQuery( a ).text() );
+};
 
-    search = dhis2.util.escape( search );
-
-    return eval( '/' + search + '/i' ).test( $( el ).text() );
+/**
+ * adds ':regex' to filtering, use to filter by regular expression
+ * 
+ * (this is the case sensitive version)
+ */
+$.expr[":"].regexCS = function( a, i, m, r )
+{
+    var re = new RegExp( m[3] );
+    return re.test( jQuery( a ).text() );
 };
 
 /**
@@ -98,12 +163,4 @@ window.log = function( str )
     {
         console.log( str );
     }
-};
-
-/**
- * Escape function for regular expressions.
- */
-dhis2.util.escape = function( text )
-{
-    return text.replace( /[-[\]{}()*+?.,\/\\^$|#\s]/g, "\\$&" );
 };

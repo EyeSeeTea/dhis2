@@ -27,19 +27,20 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.AbstractNameableObject;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A DataElement is a definition (meta-information about) of the entities that
@@ -50,15 +51,16 @@ import org.hisp.dhis.period.YearlyPeriodType;
  * children. The sum of the children represent the same entity as the parent.
  * Hiearchies of DataElements are used to give more fine- or course-grained
  * representations of the entities.
- * 
+ * <p/>
  * DataElement acts as a DimensionSet in the dynamic dimensional model, and as a
  * DimensionOption in the static DataElement dimension.
- * 
+ *
  * @author Kristian Nordal
  * @version $Id: DataElement.java 5540 2008-08-19 10:47:07Z larshelg $
  */
-public class DataElement
-    extends AbstractNameableObject
+@XmlRootElement( name = "dataElement" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class DataElement extends AbstractNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -89,8 +91,11 @@ public class DataElement
 
     public static final String AGGREGATION_OPERATOR_COUNT = "count";
 
+    /**
+     * The name to appear in forms.
+     */
     private String formName;
-    
+
     /**
      * If this DataElement is active or not (enabled or disabled).
      */
@@ -120,11 +125,6 @@ public class DataElement
     private String aggregationOperator;
 
     /**
-     * A Collection of children DataElements.
-     */
-    private Set<DataElement> children = new HashSet<DataElement>();
-
-    /**
      * A combination of categories to capture data.
      */
     private DataElementCategoryCombo categoryCombo;
@@ -138,11 +138,6 @@ public class DataElement
      * URL for lookup of additional information on the web.
      */
     private String url;
-
-    /**
-     * The date this data element was last updated.
-     */
-    private Date lastUpdated;
 
     /**
      * The data element groups which this
@@ -206,7 +201,7 @@ public class DataElement
             return false;
         }
 
-        if ( !(o instanceof DataElement) )
+        if ( !( o instanceof DataElement ) )
         {
             return false;
         }
@@ -261,7 +256,7 @@ public class DataElement
      */
     public String getDetailedNumberType()
     {
-        return (type != null && type.equals( VALUE_TYPE_INT ) && numberType != null) ? numberType : type;
+        return ( type != null && type.equals( VALUE_TYPE_INT ) && numberType != null ) ? numberType : type;
     }
 
     /**
@@ -349,9 +344,20 @@ public class DataElement
         return false;
     }
 
+    /**
+     * Returns the domain type, or the default domain type if it does not exist.
+     */
     public String getDomainTypeNullSafe()
     {
         return domainType != null ? domainType : DOMAIN_TYPE_AGGREGATE;
+    }
+
+    /**
+     * Returns the form name, or the name if it does not exist.
+     */
+    public String getFormNameFallback()
+    {
+        return formName != null && !formName.isEmpty() ? formName : name;
     }
 
     public String toJSON()
@@ -365,11 +371,6 @@ public class DataElement
         result.append( ",\"type\":\"" + StringEscapeUtils.escapeJavaScript( this.type ) + "\"" );
         result.append( "}" );
         return result.toString();
-    }
-    
-    public String getFormNameFallback()
-    {
-        return formName != null && !formName.isEmpty() ? formName : name;
     }
 
     // -------------------------------------------------------------------------
@@ -426,16 +427,6 @@ public class DataElement
         this.aggregationOperator = aggregationOperator;
     }
 
-    public Set<DataElement> getChildren()
-    {
-        return children;
-    }
-
-    public void setChildren( Set<DataElement> children )
-    {
-        this.children = children;
-    }
-
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
@@ -464,16 +455,6 @@ public class DataElement
     public void setUrl( String url )
     {
         this.url = url;
-    }
-
-    public Date getLastUpdated()
-    {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated( Date lastUpdated )
-    {
-        this.lastUpdated = lastUpdated;
     }
 
     public Set<DataElementGroup> getGroups()

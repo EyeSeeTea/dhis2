@@ -47,7 +47,8 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
-import org.hisp.dhis.light.dataentry.utils.SectionFormUtils;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.light.dataentry.utils.FormUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
@@ -124,16 +125,23 @@ public class SaveSectionFormAction
         this.periodService = periodService;
     }
 
-    private SectionFormUtils sectionFormUtils;
+    private FormUtils formUtils;
 
-    public void setSectionFormUtils( SectionFormUtils sectionFormUtils )
+    public void setFormUtils( FormUtils formUtils )
     {
-        this.sectionFormUtils = sectionFormUtils;
+        this.formUtils = formUtils;
     }
 
-    public SectionFormUtils getSectionFormUtils()
+    public FormUtils getFormUtils()
     {
-        return sectionFormUtils;
+        return formUtils;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -204,6 +212,13 @@ public class SaveSectionFormAction
         return validationRuleViolations;
     }
 
+    private Map<String, String> typeViolations = new HashMap<String, String>();
+
+    public Map<String, String> getTypeViolations()
+    {
+        return typeViolations;
+    }
+
     private Boolean complete = false;
 
     public void setComplete( Boolean complete )
@@ -271,36 +286,103 @@ public class SaveSectionFormAction
                     .getDataValue( organisationUnit, dataElement, period, optionCombo );
 
                 value = value.trim();
+                Boolean valueIsEmpty = (value == null || value.length() == 0);
 
-                if ( value == null || value.length() == 0 || !SectionFormUtils.isInteger( value ) )
+                // validate types
+                Boolean correctType = true;
+                String type = dataElement.getType();
+                String numberType = dataElement.getNumberType();
+
+                if ( !valueIsEmpty )
+                {
+                    if ( type.equals( DataElement.VALUE_TYPE_STRING ) )
+                    {
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_BOOL ) )
+                    {
+                        if ( !valueIsEmpty && !FormUtils.isBoolean( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, value + " " + i18n.getString( "is_invalid_boolean" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_DATE ) )
+                    {
+                        if ( !FormUtils.isDate( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, value + " " + i18n.getString( "is_invalid_date" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_INT )
+                        && numberType.equals( DataElement.VALUE_TYPE_NUMBER ) )
+                    {
+                        if ( !FormUtils.isNumber( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, value + " " + i18n.getString( "is_invalid_number" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_INT )
+                        && numberType.equals( DataElement.VALUE_TYPE_INT ) )
+                    {
+                        if ( !FormUtils.isInteger( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, value + " " + i18n.getString( "is_invalid_integer" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_INT )
+                        && numberType.equals( DataElement.VALUE_TYPE_POSITIVE_INT ) )
+                    {
+                        if ( !FormUtils.isPositiveInteger( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, value + " " + i18n.getString( "is_invalid_positive_integer" ) );
+                        }
+                    }
+                    else if ( type.equals( DataElement.VALUE_TYPE_INT )
+                        && numberType.equals( DataElement.VALUE_TYPE_NEGATIVE_INT ) )
+                    {
+                        if ( !FormUtils.isNegativeInteger( value ) )
+                        {
+                            correctType = false;
+                            typeViolations.put( key, value + " " + i18n.getString( "is_invalid_negative_integer" ) );
+                        }
+                    }
+                }
+
+                // nothing entered
+                if ( valueIsEmpty || !correctType )
                 {
                     if ( dataValue != null )
                     {
                         dataValueService.deleteDataValue( dataValue );
                     }
-
-                    continue;
                 }
 
-                if ( dataValue == null )
+                if ( correctType && !valueIsEmpty )
                 {
-                    needsValidation = true;
-
-                    dataValue = new DataValue( dataElement, period, organisationUnit, value, storedBy, new Date(),
-                        null, optionCombo );
-                    dataValueService.addDataValue( dataValue );
-                }
-                else
-                {
-                    if ( !dataValue.getValue().equals( value ) )
+                    if ( dataValue == null )
                     {
                         needsValidation = true;
 
-                        dataValue.setValue( value );
-                        dataValue.setTimestamp( new Date() );
-                        dataValue.setStoredBy( storedBy );
+                        dataValue = new DataValue( dataElement, period, organisationUnit, value, storedBy, new Date(),
+                            null, optionCombo );
+                        dataValueService.addDataValue( dataValue );
+                    }
+                    else
+                    {
+                        if ( !dataValue.getValue().equals( value ) )
+                        {
+                            needsValidation = true;
 
-                        dataValueService.updateDataValue( dataValue );
+                            dataValue.setValue( value );
+                            dataValue.setTimestamp( new Date() );
+                            dataValue.setStoredBy( storedBy );
+
+                            dataValueService.updateDataValue( dataValue );
+                        }
                     }
                 }
             }
@@ -316,6 +398,7 @@ public class SaveSectionFormAction
             registration.setPeriod( period );
             registration.setSource( organisationUnit );
             registration.setDate( new Date() );
+            registration.setStoredBy( storedBy );
 
             registrationService.saveCompleteDataSetRegistration( registration );
         }
@@ -324,16 +407,24 @@ public class SaveSectionFormAction
             registrationService.deleteCompleteDataSetRegistration( registration );
         }
 
-        dataValues = sectionFormUtils.getDataValueMap( organisationUnit, dataSet, period );
+        if ( typeViolations.size() > 0 )
+        {
+            needsValidation = true;
+        }
 
-        validationViolations = sectionFormUtils.getValidationViolations( organisationUnit, dataSet, period );
+        dataValues = formUtils.getDataValueMap( organisationUnit, dataSet, period );
 
-        validationRuleViolations = sectionFormUtils.getValidationRuleViolations( organisationUnit, dataSet, period );
+        validationViolations = formUtils.getValidationViolations( organisationUnit, dataSet, period );
 
-        if ( needsValidation && (validationViolations.size() > 0 || validationRuleViolations.size() > 0) )
+        validationRuleViolations = formUtils.getValidationRuleViolations( organisationUnit, dataSet, period );
+
+        if ( needsValidation
+            && (!validationViolations.isEmpty() || !validationRuleViolations.isEmpty() || !typeViolations.isEmpty()) )
         {
             return ERROR;
         }
+
+        validated = true;
 
         return SUCCESS;
     }

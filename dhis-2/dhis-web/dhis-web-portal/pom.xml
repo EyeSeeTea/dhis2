@@ -19,6 +19,11 @@
   
   <dependencies>
     
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+	</dependency>
+	
     <!-- DHIS -->
     
     <dependency>
@@ -141,6 +146,12 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-web-api</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>
+    <dependency>
+      <groupId>org.hisp.dhis</groupId>
+      <artifactId>dhis-web-api2</artifactId>
       <version>${project.version}</version>
       <type>war</type>
     </dependency>

@@ -37,6 +37,7 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.JPEGTranscoder;
 import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.apache.fop.svg.PDFTranscoder;
 
 /**
  * @author Tran Thanh Tri
@@ -48,19 +49,19 @@ public class SVGUtils
     {
         if ( width == null || width < 10 )
         {
-            width = 500;
+            width = 1190;
         }
 
         if ( height == null || height < 10 )
         {
-            height = 500;
+            height = 880;
         }
 
         PNGTranscoder t = new PNGTranscoder();
 
         t.addTranscodingHint( PNGTranscoder.KEY_HEIGHT, new Float( height ) );
         t.addTranscodingHint( PNGTranscoder.KEY_WIDTH, new Float( width ) );
-        t.addTranscodingHint( JPEGTranscoder.KEY_BACKGROUND_COLOR, Color.WHITE );
+        t.addTranscodingHint( PNGTranscoder.KEY_BACKGROUND_COLOR, Color.WHITE );
 
         TranscoderInput input = new TranscoderInput( new StringReader( buffer.toString() ) );
 
@@ -69,17 +70,17 @@ public class SVGUtils
         t.transcode( input, output );
     }
 
-    public static void convertToJPEG( StringBuffer buffer, OutputStream out, Integer width, Integer height )
+    public static void convertToJPG( StringBuffer buffer, OutputStream out, Integer width, Integer height )
         throws TranscoderException, IOException
     {
         if ( width == null || width < 10 )
         {
-            width = 500;
+            width = 1190;
         }
 
         if ( height == null || height < 10 )
         {
-            height = 500;
+            height = 880;
         }
 
         JPEGTranscoder t = new JPEGTranscoder();
@@ -93,5 +94,17 @@ public class SVGUtils
         TranscoderOutput output = new TranscoderOutput( out );
 
         t.transcode( input, output );
+    }
+    
+    public static void convertToPDF( StringBuffer buffer, OutputStream out, Integer width, Integer height )
+        throws TranscoderException, IOException
+    {
+        PDFTranscoder p = new PDFTranscoder();
+
+        TranscoderInput input = new TranscoderInput( new StringReader( buffer.toString() ) );
+
+        TranscoderOutput output = new TranscoderOutput( out );
+
+        p.transcode( input, output );
     }
 }

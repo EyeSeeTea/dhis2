@@ -34,8 +34,17 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		scope="prototype">
 		<property name="aggregatedDataValueService"
 			ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
-        <property name="periodService"
-            ref="org.hisp.dhis.period.PeriodService" />
+	</bean>
+
+	<bean id="org.hisp.dhis.visualizer.action.GetAggregatedIndicatorValuesPluginAction"
+		class="org.hisp.dhis.visualizer.action.GetAggregatedIndicatorValuesPluginAction"
+		scope="prototype">
+		<property name="aggregatedDataValueService"
+			ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
+		<property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
+		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+		<property name="organisationUnitService"
+			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
 	</bean>
     
     <!-- AggregatedDataValue -->
@@ -45,8 +54,22 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         scope="prototype">
         <property name="aggregatedDataValueService"
             ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
-        <property name="periodService"
-            ref="org.hisp.dhis.period.PeriodService" />
     </bean>
+
+	<bean id="org.hisp.dhis.visualizer.action.GetAggregatedDataValuesPluginAction"
+		class="org.hisp.dhis.visualizer.action.GetAggregatedDataValuesPluginAction"
+		scope="prototype">
+		<property name="aggregatedDataValueService"
+			ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
+		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+		<property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+		<property name="organisationUnitService"
+			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+	</bean>
+
+	<!-- Export -->
+
+	<bean id="org.hisp.dhis.visualizer.action.ExportImageAction" class="org.hisp.dhis.visualizer.action.ExportImageAction"
+		scope="prototype"/>
 	
 </beans>

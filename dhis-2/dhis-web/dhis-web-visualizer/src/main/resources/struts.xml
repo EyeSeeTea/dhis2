@@ -28,7 +28,7 @@
 		<action name="getOrganisationUnitChildren"
 			class="org.hisp.dhis.visualizer.action.GetOrganisationUnitChildrenAction">
 			<result name="success" type="velocity-json">
-				/dhis-web-visualizer/jsonOrganisationUnitChildren.vm</result>
+				/dhis-web-visualizer/jsonminOrganisationUnitChildren.vm</result>
 		</action>
 
         <!-- AggregatedIndicatorValue -->
@@ -37,6 +37,12 @@
             class="org.hisp.dhis.visualizer.action.GetAggregatedIndicatorValuesAction">
             <result name="success" type="velocity-json">
                 /dhis-web-visualizer/jsonminAggregatedIndicatorValues.vm</result>
+        </action>
+
+        <action name="getAggregatedIndicatorValuesPlugin"
+            class="org.hisp.dhis.visualizer.action.GetAggregatedIndicatorValuesPluginAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-visualizer/jsonminAggregatedIndicatorValuesPlugin.vm</result>
         </action>
 
         <!-- AggregatedDataValue -->
@@ -48,6 +54,18 @@
             <result name="none" type="velocity-json">
                 /dhis-web-visualizer/void.vm</result>
         </action>
+
+        <action name="getAggregatedDataValuesPlugin"
+            class="org.hisp.dhis.visualizer.action.GetAggregatedDataValuesPluginAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-visualizer/jsonminAggregatedDataValuesPlugin.vm</result>
+        </action>
+
+        <!-- Export -->
+
+		<action name="exportImage" class="org.hisp.dhis.visualizer.action.ExportImageAction">
+			<result name="success" type="outputStreamResult"/>
+		</action>
 		
 	</package>
 </struts>

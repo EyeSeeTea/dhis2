@@ -1,7 +1,7 @@
 package org.hisp.dhis.mobile.service;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,26 +28,16 @@ package org.hisp.dhis.mobile.service;
  */
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import org.hisp.dhis.mobile.api.model.DataElement;
+
+import org.hisp.dhis.api.mobile.model.DataElement;
+import org.hisp.dhis.api.mobile.model.Model;
+import org.hisp.dhis.api.mobile.model.ModelList;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.mobile.api.model.Model;
-import org.hisp.dhis.mobile.api.model.ModelList;
-import org.springframework.beans.factory.annotation.Required;
 
 public class ModelMapping
 {
-    private DataElementCategoryService categoryService;
-
-    @Required
-    public void setCategoryService( org.hisp.dhis.dataelement.DataElementCategoryService categoryService )
-    {
-        this.categoryService = categoryService;
-    }
-
     public DataElement getDataElement( org.hisp.dhis.dataelement.DataElement dataElement )
     {
         DataElement de = new DataElement();

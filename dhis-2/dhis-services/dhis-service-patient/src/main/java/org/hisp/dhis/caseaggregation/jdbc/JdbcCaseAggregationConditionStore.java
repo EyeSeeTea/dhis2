@@ -29,8 +29,9 @@ package org.hisp.dhis.caseaggregation.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
@@ -70,11 +71,11 @@ public class JdbcCaseAggregationConditionStore
     // -------------------------------------------------------------------------
 
     @Override
-    public Collection<Integer> executeSQL( String sql )
+    public List<Integer> executeSQL( String sql )
     {
         StatementHolder holder = statementManager.getHolder();
 
-        Collection<Integer> patientIds = new HashSet<Integer>();
+        List<Integer> patientIds = new ArrayList<Integer>();
 
         try
         {
@@ -94,6 +95,7 @@ public class JdbcCaseAggregationConditionStore
         }
         catch ( Exception ex )
         {
+            ex.printStackTrace();
             return null;
         }
         finally

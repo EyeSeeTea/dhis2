@@ -224,6 +224,12 @@
       <result name="success" type="outputStreamResult" />
     </action>
 	
+	<action name="validateReport" class="org.hisp.dhis.reporting.reportviewer.action.ValidateReportAction">	  
+      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      <result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
+      <param name="onExceptionReturn">plainTextError</param>
+    </action>
+	
 	<!-- ReportGroup -->
 	
     <action name="reportGroup" class="org.hisp.dhis.reporting.reportgroup.action.GetReportGroupListAction">
@@ -517,23 +523,6 @@
 
     <action name="getOrgUnitDistributionChart" class="org.hisp.dhis.reporting.orgunitdistribution.action.GetOrgUnitDistributionChartAction">
       <result name="success" type="chart"></result>
-    </action>
-	
-	<!-- Scheduling -->
-
-    <action name="viewScheduledTasks" class="org.hisp.dhis.reporting.scheduling.action.ScheduleTasksAction">
-      <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-reporting/viewScheduledTasks.vm</param>
-      <param name="menu">/dhis-web-reporting/menu.vm</param>
-      <param name="statusOnly">true</param>
-      <param name="requiredAuthorities">F_SCHEDULING_ADMIN</param>
-    </action>
-
-    <action name="scheduleTasks" class="org.hisp.dhis.reporting.scheduling.action.ScheduleTasksAction">
-      <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-reporting/viewScheduledTasks.vm</param>
-      <param name="menu">/dhis-web-reporting/menu.vm</param>
-      <param name="requiredAuthorities">F_SCHEDULING_ADMIN</param>
     </action>
 	
 	<!-- Datamart CSV Export -->

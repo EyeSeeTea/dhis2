@@ -42,7 +42,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.datamart.DataElementOperandList;
-import org.hisp.dhis.datamart.aggregation.cache.AggregationCache;
 import org.hisp.dhis.datamart.crosstab.CrossTabService;
 import org.hisp.dhis.datamart.dataelement.DataElementDataMart;
 import org.hisp.dhis.datamart.indicator.IndicatorDataMart;
@@ -72,13 +71,6 @@ public class DefaultDataMartEngine
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    protected AggregationCache aggregationCache;
-
-    public void setAggregationCache( AggregationCache aggregationCache )
-    {
-        this.aggregationCache = aggregationCache;
-    }
 
     private AggregatedDataValueService aggregatedDataValueService;
 
@@ -170,12 +162,20 @@ public class DefaultDataMartEngine
         Collection<Period> periods = periodService.getPeriods( periodIds );
         List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnits( organisationUnitIds ) );
         Collection<DataElement> dataElements = dataElementService.getDataElements( dataElementIds );
-        
+
+        clock.logTime( "Retrieved objects" );
+
+        // ---------------------------------------------------------------------
+        // Filter objects
+        // ---------------------------------------------------------------------
+
         organisationUnitService.filterOrganisationUnitsWithoutData( organisationUnits );
         Collections.shuffle( organisationUnits );
         FilterUtils.filter( dataElements, new AggregatableDataElementFilter() );
         expressionService.filterInvalidIndicators( indicators );
-        
+
+        clock.logTime( "Filtered objects" );
+
         // ---------------------------------------------------------------------
         // Explode indicator expressions
         // ---------------------------------------------------------------------
@@ -185,7 +185,9 @@ public class DefaultDataMartEngine
             indicator.setExplodedNumerator( expressionService.explodeExpression( indicator.getNumerator() ) );
             indicator.setExplodedDenominator( expressionService.explodeExpression( indicator.getDenominator() ) );
         }
-        
+
+        clock.logTime( "Exploded indicator expressions" );
+
         // ---------------------------------------------------------------------
         // Get operands
         // ---------------------------------------------------------------------
@@ -197,7 +199,7 @@ public class DefaultDataMartEngine
         allOperands.addAll( dataElementOperands );
         allOperands.addAll( indicatorOperands );
 
-        clock.logTime( "Filtered data elements, number of operands: " + allOperands.size() );
+        clock.logTime( "Retrieved operands: " + allOperands.size() );
 
         // ---------------------------------------------------------------------
         // Filter out future periods
@@ -260,21 +262,19 @@ public class DefaultDataMartEngine
         clock.logTime( "Dropped potential indexes" );
         
         // ---------------------------------------------------------------------
-        // Delete existing aggregated data
+        // Delete existing aggregated datavalues
         // ---------------------------------------------------------------------
 
         if ( completeExport )
         {
             aggregatedDataValueService.deleteAggregatedDataValues( periodIds );
-            aggregatedDataValueService.deleteAggregatedIndicatorValues( periodIds );
         }
         else
         {
             aggregatedDataValueService.deleteAggregatedDataValues( dataElementIds, periodIds, organisationUnitIds );
-            aggregatedDataValueService.deleteAggregatedIndicatorValues( indicatorIds, periodIds, organisationUnitIds );
         }
 
-        clock.logTime( "Deleted existing aggregated data" );
+        clock.logTime( "Deleted existing aggregated datavalues" );
         
         // ---------------------------------------------------------------------
         // Export data element values
@@ -305,6 +305,21 @@ public class DefaultDataMartEngine
         crossTabService.dropCrossTabTable( key );
         
         clock.logTime( "Dropped crosstab table" );
+
+        // ---------------------------------------------------------------------
+        // Delete existing aggregated indicatorvalues
+        // ---------------------------------------------------------------------
+
+        if ( completeExport )
+        {
+            aggregatedDataValueService.deleteAggregatedIndicatorValues( periodIds );
+        }
+        else
+        {
+            aggregatedDataValueService.deleteAggregatedIndicatorValues( indicatorIds, periodIds, organisationUnitIds );
+        }
+
+        clock.logTime( "Deleted existing aggregated indicatorvalues" );
         
         // ---------------------------------------------------------------------
         // Export indicator values
@@ -344,8 +359,6 @@ public class DefaultDataMartEngine
             
             clock.logTime( "Created indexes" );
         }
-
-        aggregationCache.clearCache();
 
         clock.logTime( "Data mart export process completed" );
     }
