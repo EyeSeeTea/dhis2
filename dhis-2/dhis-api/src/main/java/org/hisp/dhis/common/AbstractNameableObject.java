@@ -27,6 +27,8 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import javax.xml.bind.annotation.*;
 
 /**
@@ -71,7 +73,8 @@ public abstract class AbstractNameableObject
         this.description = description;
     }
 
-    @XmlElement
+    @XmlAttribute
+    @JsonProperty
     public String getAlternativeName()
     {
         return alternativeName;
@@ -82,7 +85,8 @@ public abstract class AbstractNameableObject
         this.alternativeName = alternativeName;
     }
 
-    @XmlElement
+    @XmlAttribute
+    @JsonProperty
     public String getShortName()
     {
         return shortName;
@@ -94,6 +98,7 @@ public abstract class AbstractNameableObject
     }
 
     @XmlElement
+    @JsonProperty
     public String getDescription()
     {
         return description;

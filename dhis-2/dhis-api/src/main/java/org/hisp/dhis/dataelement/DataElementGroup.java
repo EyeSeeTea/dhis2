@@ -27,17 +27,23 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.AbstractIdentifiableObject;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
-
-/**o
+/**
+ * o
+ *
  * @author Kristian Nordal
  * @version $Id: DataElementGroup.java 5540 2008-08-19 10:47:07Z larshelg $
  */
-public class DataElementGroup
-    extends AbstractIdentifiableObject
+@XmlRootElement( name = "dataElementGroup" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class DataElementGroup extends AbstractIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -47,7 +53,7 @@ public class DataElementGroup
     private Set<DataElement> members = new HashSet<DataElement>();
 
     private DataElementGroupSet groupSet;
-    
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -70,13 +76,13 @@ public class DataElementGroup
         members.add( dataElement );
         dataElement.getGroups().add( this );
     }
-    
+
     public void removeDataElement( DataElement dataElement )
     {
         members.remove( dataElement );
         dataElement.getGroups().remove( this );
     }
-    
+
     public void updateDataElements( Set<DataElement> updates )
     {
         for ( DataElement dataElement : new HashSet<DataElement>( members ) )
@@ -86,13 +92,13 @@ public class DataElementGroup
                 removeDataElement( dataElement );
             }
         }
-        
+
         for ( DataElement dataElement : updates )
         {
             addDataElement( dataElement );
         }
     }
-    
+
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------

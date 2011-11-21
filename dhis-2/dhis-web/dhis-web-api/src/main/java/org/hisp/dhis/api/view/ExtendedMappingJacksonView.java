@@ -67,8 +67,7 @@ public class ExtendedMappingJacksonView extends MappingJacksonJsonView
         AnnotationIntrospector jaxAnnotationIntrospector = new JaxbAnnotationIntrospector();
         AnnotationIntrospector pair = new AnnotationIntrospector.Pair( jacksonAnnotationIntrospector, jaxAnnotationIntrospector );
 
-        objectMapper.getDeserializationConfig().setAnnotationIntrospector( pair );
-        objectMapper.getSerializationConfig().setAnnotationIntrospector( pair );
+        objectMapper.setAnnotationIntrospector( pair );
 
         JsonFactory jf = objectMapper.getJsonFactory();
         JsonGenerator jg = jf.createJsonGenerator( response.getOutputStream(), JsonEncoding.UTF8 );

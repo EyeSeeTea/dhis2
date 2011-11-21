@@ -242,13 +242,6 @@ public class DataElementCategoryCombo
         this.name = name;
     }
 
-    @XmlElement
-    @JsonProperty
-    public String getDaddleDoodle()
-    {
-        return "balls";
-    }
-
     public List<DataElementCategory> getCategories()
     {
         return categories;

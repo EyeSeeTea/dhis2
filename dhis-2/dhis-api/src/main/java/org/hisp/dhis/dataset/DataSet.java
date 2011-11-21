@@ -27,9 +27,6 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.hisp.dhis.common.AbstractNameableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
@@ -38,20 +35,28 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * This class is used for defining the standardized DataSets. A DataSet consists
  * of a collection of DataElements.
- * 
+ *
  * @author Kristian Nordal
  * @version $Id: DataSet.java 6255 2008-11-10 16:01:24Z larshelg $
  */
+@XmlRootElement( name = "dataSet" )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public class DataSet
     extends AbstractNameableObject
 {
     public static final String TYPE_DEFAULT = "default";
     public static final String TYPE_SECTION = "section";
     public static final String TYPE_CUSTOM = "custom";
-    
+
     /**
      * Determines if a de-serialized file is compatible with this class.
      */
@@ -72,7 +77,7 @@ public class DataSet
      * output purposes, such as calculated fields in forms and reports.
      */
     private Set<Indicator> indicators = new HashSet<Indicator>();
-    
+
     /**
      * The DataElementOperands for which data must be entered in order for the
      * DataSet to be considered as complete.
@@ -113,7 +118,7 @@ public class DataSet
      * Indicating version number.
      */
     private Integer version;
-    
+
     // -------------------------------------------------------------------------
     // Contructors
     // -------------------------------------------------------------------------
@@ -157,13 +162,13 @@ public class DataSet
         sources.add( unit );
         unit.getDataSets().add( this );
     }
-    
+
     public void removeOrganisationUnit( OrganisationUnit unit )
     {
         sources.remove( unit );
         unit.getDataSets().remove( this );
     }
-    
+
     public void updateOrganisationUnits( Set<OrganisationUnit> updates )
     {
         for ( OrganisationUnit unit : new HashSet<OrganisationUnit>( sources ) )
@@ -173,25 +178,25 @@ public class DataSet
                 removeOrganisationUnit( unit );
             }
         }
-        
+
         for ( OrganisationUnit unit : updates )
         {
             addOrganisationUnit( unit );
         }
     }
-    
+
     public void addDataElement( DataElement dataElement )
     {
         dataElements.add( dataElement );
         dataElement.getDataSets().add( this );
     }
-    
+
     public void removeDataElement( DataElement dataElement )
     {
         dataElements.remove( dataElement );
         dataElement.getDataSets().remove( dataElement );
     }
-    
+
     public void updateDataElements( Set<DataElement> updates )
     {
         for ( DataElement dataElement : new HashSet<DataElement>( dataElements ) )
@@ -201,49 +206,49 @@ public class DataSet
                 removeDataElement( dataElement );
             }
         }
-        
+
         for ( DataElement dataElement : updates )
         {
             addDataElement( dataElement );
         }
     }
-    
+
     public boolean hasDataEntryForm()
     {
         return dataEntryForm != null;
     }
-    
+
     public boolean hasSections()
     {
         return sections != null && sections.size() > 0;
     }
-    
+
     public boolean isMobile()
     {
         return mobile != null && mobile;
     }
-    
+
     public String getDataSetType()
     {
         if ( hasDataEntryForm() )
         {
             return TYPE_CUSTOM;
         }
-        
+
         if ( hasSections() )
         {
             return TYPE_SECTION;
         }
-        
+
         return TYPE_DEFAULT;
     }
-    
+
     public DataSet increaseVersion()
     {
         version = version != null ? version + 1 : 1;
         return this;
     }
-    
+
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -377,12 +382,12 @@ public class DataSet
         return sections;
     }
 
-    public void setMobile(Boolean mobile) 
+    public void setMobile( Boolean mobile )
     {
         this.mobile = mobile;
     }
-	
-    public Boolean getMobile() 
+
+    public Boolean getMobile()
     {
         return mobile;
     }
