@@ -28,15 +28,16 @@ package org.hisp.dhis.dataelement;
  */
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.adapter.AbstractIdentifiableXmlAdapter;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -201,7 +202,7 @@ public class DataElement extends AbstractNameableObject
             return false;
         }
 
-        if ( !( o instanceof DataElement ) )
+        if ( !(o instanceof DataElement) )
         {
             return false;
         }
@@ -256,7 +257,7 @@ public class DataElement extends AbstractNameableObject
      */
     public String getDetailedNumberType()
     {
-        return ( type != null && type.equals( VALUE_TYPE_INT ) && numberType != null ) ? numberType : type;
+        return (type != null && type.equals( VALUE_TYPE_INT ) && numberType != null) ? numberType : type;
     }
 
     /**
@@ -377,6 +378,8 @@ public class DataElement extends AbstractNameableObject
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @XmlElement
+    @JsonProperty
     public String getFormName()
     {
         return formName;
@@ -387,6 +390,8 @@ public class DataElement extends AbstractNameableObject
         this.formName = formName;
     }
 
+    @XmlElement
+    @JsonProperty
     public boolean isActive()
     {
         return active;
@@ -397,6 +402,8 @@ public class DataElement extends AbstractNameableObject
         this.active = active;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getDomainType()
     {
         return domainType;
@@ -407,6 +414,8 @@ public class DataElement extends AbstractNameableObject
         this.domainType = domainType;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getType()
     {
         return type;
@@ -417,6 +426,8 @@ public class DataElement extends AbstractNameableObject
         this.type = type;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getAggregationOperator()
     {
         return aggregationOperator;
@@ -427,6 +438,8 @@ public class DataElement extends AbstractNameableObject
         this.aggregationOperator = aggregationOperator;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( AbstractIdentifiableXmlAdapter.class )
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
@@ -437,6 +450,8 @@ public class DataElement extends AbstractNameableObject
         this.categoryCombo = categoryCombo;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -447,6 +462,8 @@ public class DataElement extends AbstractNameableObject
         this.sortOrder = sortOrder;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getUrl()
     {
         return url;
@@ -487,6 +504,8 @@ public class DataElement extends AbstractNameableObject
         this.aggregationLevels = aggregationLevels;
     }
 
+    @XmlElement
+    @JsonProperty
     public Boolean getZeroIsSignificant()
     {
         return zeroIsSignificant;
@@ -497,6 +516,8 @@ public class DataElement extends AbstractNameableObject
         this.zeroIsSignificant = zeroIsSignificant;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getNumberType()
     {
         return numberType;

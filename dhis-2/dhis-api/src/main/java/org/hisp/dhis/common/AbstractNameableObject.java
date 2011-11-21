@@ -27,9 +27,13 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import javax.xml.bind.annotation.*;
+
 /**
  * @author Bob Jolliffe
  */
+@XmlRootElement( name = "nameableObject" )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public abstract class AbstractNameableObject
     extends AbstractIdentifiableObject implements NameableObject
 {
@@ -58,7 +62,7 @@ public abstract class AbstractNameableObject
     }
 
     public AbstractNameableObject( int id, String uuid, String name, String alternativeName, String shortName,
-        String code, String description )
+                                   String code, String description )
     {
         super( id, uuid, name );
         this.alternativeName = alternativeName;
@@ -67,6 +71,7 @@ public abstract class AbstractNameableObject
         this.description = description;
     }
 
+    @XmlElement
     public String getAlternativeName()
     {
         return alternativeName;
@@ -77,6 +82,7 @@ public abstract class AbstractNameableObject
         this.alternativeName = alternativeName;
     }
 
+    @XmlElement
     public String getShortName()
     {
         return shortName;
@@ -87,6 +93,7 @@ public abstract class AbstractNameableObject
         this.shortName = shortName;
     }
 
+    @XmlElement
     public String getDescription()
     {
         return description;

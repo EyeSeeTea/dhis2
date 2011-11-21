@@ -29,11 +29,9 @@ package org.hisp.dhis.common;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.annotate.JsonProperty;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import java.util.*;
 
 /**
@@ -41,6 +39,7 @@ import java.util.*;
  */
 @XmlRootElement( name = "identifiableObject" )
 @XmlAccessorType( value = XmlAccessType.NONE )
+@XmlType( propOrder = {"id", "uid", "name", "code", "lastUpdated"} )
 public abstract class AbstractIdentifiableObject
     implements IdentifiableObject
 {
@@ -93,6 +92,7 @@ public abstract class AbstractIdentifiableObject
     }
 
     @XmlAttribute
+    @JsonProperty
     @Override
     public int getId()
     {
@@ -116,6 +116,7 @@ public abstract class AbstractIdentifiableObject
     }
 
     @XmlAttribute
+    @JsonProperty
     @Override
     public String getUid()
     {
@@ -128,6 +129,7 @@ public abstract class AbstractIdentifiableObject
     }
 
     @XmlAttribute
+    @JsonProperty
     @Override
     public String getCode()
     {
@@ -140,6 +142,7 @@ public abstract class AbstractIdentifiableObject
     }
 
     @XmlAttribute
+    @JsonProperty
     @Override
     public String getName()
     {
@@ -152,6 +155,8 @@ public abstract class AbstractIdentifiableObject
     }
 
     @XmlAttribute
+    @JsonProperty
+    @Override
     public Date getLastUpdated()
     {
         return lastUpdated;
@@ -243,7 +248,8 @@ public abstract class AbstractIdentifiableObject
             {
                 log.warn( object.getClass() + ": Duplicate code " + code );
                 map.remove( code );
-            } else
+            }
+            else
             {
                 map.put( code, internalId );
             }

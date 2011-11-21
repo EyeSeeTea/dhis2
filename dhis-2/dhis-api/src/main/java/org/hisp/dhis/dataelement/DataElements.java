@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.controller;
+package org.hisp.dhis.dataelement;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -27,39 +27,38 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dataelement.DataElements;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.codehaus.jackson.annotate.JsonProperty;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
+import java.util.List;
 
-@Controller
-@RequestMapping( value = "/dataElements" )
-public class DataElementController
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+@XmlRootElement( name = "dataElements" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class DataElements
 {
-    @Autowired
-    private DataElementService dataElementService;
+    private List<DataElement> dataElements = new ArrayList<DataElement>();
 
-    @RequestMapping( method = RequestMethod.GET )
-    public DataElements getDataElements()
+    public DataElements()
     {
-        DataElements dataElements = new DataElements();
-        dataElements.setDataElements( new ArrayList<DataElement>( dataElementService.getAllActiveDataElements() ) );
 
+    }
+
+    @XmlElement( name = "dataElement" )
+    @JsonProperty( value = "dataElements" )
+    public List<DataElement> getDataElements()
+    {
         return dataElements;
     }
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public DataElement getDataElement( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public void setDataElements( List<DataElement> dataElements )
     {
-        DataElement dataElement = dataElementService.getDataElement( uid );
-
-        return dataElement;
+        this.dataElements = dataElements;
     }
 }
