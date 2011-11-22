@@ -27,23 +27,27 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
-import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
-
 /**
  * DataElementGroupSet is a set of DataElementGroups. It is by default
  * exclusive, in the sense that a DataElement can only be a member of one or
  * zero of the DataElementGroups in a DataElementGroupSet.
- * 
+ *
  * @author Lars Helge Overland
  */
-public class DataElementGroupSet
-    extends AbstractIdentifiableObject
+@XmlRootElement( name = "dataElementGroupSet" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class DataElementGroupSet extends AbstractIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

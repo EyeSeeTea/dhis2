@@ -29,6 +29,8 @@ package org.hisp.dhis.dataelement;
 
 import org.hisp.dhis.common.AbstractNameableObject;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashSet;
 import java.util.Set;
@@ -37,6 +39,7 @@ import java.util.Set;
  * @author Abyot Asalefew
  */
 @XmlRootElement( name = "dataElementCategoryOption" )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public class DataElementCategoryOption extends AbstractNameableObject
 {
     /**

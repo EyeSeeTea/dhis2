@@ -23,15 +23,21 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementOperand;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementOperand;
 
+@XmlRootElement( name = "section" )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public class Section
     implements Serializable
 {
@@ -47,7 +53,7 @@ public class Section
     private DataSet dataSet;
 
     private List<DataElement> dataElements = new ArrayList<DataElement>();
-    
+
     private Set<DataElementOperand> greyedFields = new HashSet<DataElementOperand>();
 
     private int sortOrder;
@@ -62,7 +68,7 @@ public class Section
 
     public Section( String name, String title, DataSet dataSet, List<DataElement> dataElements, Set<DataElementOperand> greyedFields )
     {
-        this.name = name;      
+        this.name = name;
         this.dataSet = dataSet;
         this.dataElements = dataElements;
         this.greyedFields = greyedFields;
@@ -89,24 +95,24 @@ public class Section
 
         return false;
     }
-    
+
     public boolean categorComboIsInvalid()
     {
         if ( dataElements != null && dataElements.size() > 0 )
         {
             DataElementCategoryCombo categoryCombo = null;
-            
+
             for ( DataElement element : dataElements )
             {
                 if ( categoryCombo != null && !categoryCombo.equals( element.getCategoryCombo() ) )
                 {
                     return true;
                 }
-                
+
                 categoryCombo = element.getCategoryCombo();
             }
         }
-        
+
         return false;
     }
 
@@ -196,7 +202,7 @@ public class Section
     public void addDataElement( DataElement dataElement )
     {
         this.dataElements.add( dataElement );
-    }  
+    }
 
     public int getSortOrder()
     {

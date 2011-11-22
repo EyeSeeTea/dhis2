@@ -27,23 +27,25 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hisp.dhis.common.AbstractIdentifiableObject;
 import org.hisp.dhis.concept.Concept;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Category is a dimension of a data element. DataElements can have sets of
  * dimensions (known as CategoryCombos). An Example of a Category might be
  * "Sex". The Category could have two (or more) CategoryOptions such as "Male"
  * and "Female".
- * 
+ *
  * @author Abyot Asalefew
  */
-@XmlRootElement(name = "dataElementCategory")
+@XmlRootElement( name = "dataElementCategory" )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public class DataElementCategory extends AbstractIdentifiableObject
 {
     /**
@@ -96,10 +98,10 @@ public class DataElementCategory extends AbstractIdentifiableObject
                 return categoryOption;
             }
         }
-        
+
         return null;
     }
-    
+
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // -------------------------------------------------------------------------

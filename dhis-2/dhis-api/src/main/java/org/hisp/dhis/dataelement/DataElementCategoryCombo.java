@@ -32,8 +32,8 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.AbstractIdentifiableObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.JsonListSerializer;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
+import org.hisp.dhis.common.adapter.JsonListSerializer;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -41,7 +41,6 @@ import java.util.*;
 
 /**
  * @author Abyot Aselefew
- * @version $Id$
  */
 @XmlRootElement( name = "dataElementCategoryCombo" )
 @XmlAccessorType( value = XmlAccessType.NONE )

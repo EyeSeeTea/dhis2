@@ -34,9 +34,7 @@ import org.hisp.dhis.common.AbstractNameableObject;
 import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonListSerializer;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
 
@@ -44,6 +42,7 @@ import java.util.*;
  * @author Abyot Aselefew
  */
 @XmlRootElement( name = "dataElementCategoryOptionCombo" )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public class DataElementCategoryOptionCombo extends AbstractNameableObject
 {
     /**
