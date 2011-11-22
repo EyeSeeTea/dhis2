@@ -27,17 +27,17 @@ package org.hisp.dhis.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.adapter.*;
 import org.hisp.dhis.dataset.DataSet;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Lars Helge Overland
@@ -71,8 +71,6 @@ public class Indicator extends AbstractNameableObject
     private Integer sortOrder;
 
     private String url;
-
-    private Date lastUpdated;
 
     private Set<IndicatorGroup> groups = new HashSet<IndicatorGroup>();
 
@@ -163,6 +161,8 @@ public class Indicator extends AbstractNameableObject
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @XmlElement
+    @JsonProperty
     public Boolean getAnnualized()
     {
         return annualized;
@@ -173,6 +173,9 @@ public class Indicator extends AbstractNameableObject
         this.annualized = annualized;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public IndicatorType getIndicatorType()
     {
         return indicatorType;
@@ -183,6 +186,8 @@ public class Indicator extends AbstractNameableObject
         this.indicatorType = indicatorType;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getNumerator()
     {
         return numerator;
@@ -193,6 +198,8 @@ public class Indicator extends AbstractNameableObject
         this.numerator = numerator;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getNumeratorDescription()
     {
         return numeratorDescription;
@@ -203,6 +210,8 @@ public class Indicator extends AbstractNameableObject
         this.numeratorDescription = numeratorDescription;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getExplodedNumerator()
     {
         return explodedNumerator;
@@ -213,6 +222,8 @@ public class Indicator extends AbstractNameableObject
         this.explodedNumerator = explodedNumerator;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getDenominator()
     {
         return denominator;
@@ -223,6 +234,8 @@ public class Indicator extends AbstractNameableObject
         this.denominator = denominator;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getDenominatorDescription()
     {
         return denominatorDescription;
@@ -233,6 +246,8 @@ public class Indicator extends AbstractNameableObject
         this.denominatorDescription = denominatorDescription;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getExplodedDenominator()
     {
         return explodedDenominator;
@@ -243,6 +258,8 @@ public class Indicator extends AbstractNameableObject
         this.explodedDenominator = explodedDenominator;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -253,16 +270,8 @@ public class Indicator extends AbstractNameableObject
         this.sortOrder = sortOrder;
     }
 
-    public Date getLastUpdated()
-    {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated( Date lastUpdated )
-    {
-        this.lastUpdated = lastUpdated;
-    }
-
+    @XmlElement
+    @JsonProperty
     public String getUrl()
     {
         return url;
@@ -273,6 +282,10 @@ public class Indicator extends AbstractNameableObject
         this.url = url;
     }
 
+    @XmlElementWrapper( name = "groups" )
+    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlElement( name = "group" )
+    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<IndicatorGroup> getGroups()
     {
         return groups;
@@ -283,6 +296,10 @@ public class Indicator extends AbstractNameableObject
         this.groups = groups;
     }
 
+    @XmlElementWrapper( name = "dataSets" )
+    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @XmlElement( name = "dataSet" )
+    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<DataSet> getDataSets()
     {
         return dataSets;

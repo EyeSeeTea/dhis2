@@ -27,17 +27,20 @@ package org.hisp.dhis.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.AbstractIdentifiableObject;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
-
 /**
  * @author Lars Helge Overland
- * @version $Id: IndicatorGroup.java 5296 2008-05-29 16:06:14Z larshelg $
  */
-public class IndicatorGroup
-    extends AbstractIdentifiableObject
+@XmlRootElement( name = "indicatorGroup" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class IndicatorGroup extends AbstractIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -47,7 +50,7 @@ public class IndicatorGroup
     private Set<Indicator> members = new HashSet<Indicator>();
 
     private IndicatorGroupSet groupSet;
-    
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -70,13 +73,13 @@ public class IndicatorGroup
         members.add( indicator );
         indicator.getGroups().remove( this );
     }
-    
+
     public void removeIndicator( Indicator indicator )
     {
         members.remove( indicator );
         indicator.getGroups().remove( this );
     }
-    
+
     public void updateIndicators( Set<Indicator> updates )
     {
         for ( Indicator indicator : new HashSet<Indicator>( members ) )
@@ -86,13 +89,13 @@ public class IndicatorGroup
                 removeIndicator( indicator );
             }
         }
-        
+
         for ( Indicator indicator : updates )
         {
             addIndicator( indicator );
         }
     }
-    
+
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------

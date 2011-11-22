@@ -28,13 +28,15 @@ package org.hisp.dhis.dataelement;
  */
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.AbstractIdentifiableObject;
 import org.hisp.dhis.common.CombinationGenerator;
+import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonListSerializer;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
 
 /**
@@ -52,16 +54,6 @@ public class DataElementCategoryCombo
     private static final long serialVersionUID = 1549406078091077760L;
 
     public static final String DEFAULT_CATEGORY_COMBO_NAME = "default";
-
-    /**
-     * The database internal identifier.
-     */
-    private int id;
-
-    /**
-     * The name.
-     */
-    private String name;
 
     /**
      * A set with categories.
@@ -222,26 +214,17 @@ public class DataElementCategoryCombo
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public int getId()
+    @XmlElement
+    @JsonProperty
+    public String getFab()
     {
-        return id;
+        return "fab";
     }
 
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
+    @XmlElementWrapper( name = "categories" )
+    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlElement( name = "category" )
+    @JsonSerialize( using = JsonListSerializer.class )
     public List<DataElementCategory> getCategories()
     {
         return categories;
@@ -252,6 +235,10 @@ public class DataElementCategoryCombo
         this.categories = categories;
     }
 
+    @XmlElementWrapper( name = "optionCombos" )
+    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlElement( name = "optionCombo" )
+    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<DataElementCategoryOptionCombo> getOptionCombos()
     {
         return optionCombos;

@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.controller;
+package org.hisp.dhis.indicator;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -27,39 +27,38 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.indicator.Indicators;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
+import java.util.List;
 
-@Controller
-@RequestMapping( value = "/indicators" )
-public class IndicatorController
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+@XmlRootElement( name = "indicators" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class Indicators
 {
-    @Autowired
-    private IndicatorService indicatorService;
+    private List<Indicator> indicators = new ArrayList<Indicator>();
 
-    @RequestMapping( method = RequestMethod.GET )
-    public Indicators getIndicators()
+    public Indicators() {
+
+    }
+
+    @XmlElement( name = "indicator" )
+    @JsonProperty( value = "indicators" )
+    public List<Indicator> getIndicators()
     {
-        Indicators indicators = new Indicators();
-        indicators.setIndicators( new ArrayList<Indicator>( indicatorService.getAllIndicators() ) );
-
         return indicators;
     }
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public Indicator getIndicator( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public void setIndicators( List<Indicator> indicators )
     {
-        Indicator indicator = indicatorService.getIndicator( uid );
-
-        return indicator;
+        this.indicators = indicators;
     }
 }

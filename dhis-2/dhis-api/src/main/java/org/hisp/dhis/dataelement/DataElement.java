@@ -32,8 +32,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.AbstractNameableObject;
-import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.AbstractNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
@@ -442,6 +441,7 @@ public class DataElement extends AbstractNameableObject
 
     @XmlElement
     @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
@@ -477,8 +477,9 @@ public class DataElement extends AbstractNameableObject
     }
 
     @XmlElementWrapper( name = "groups" )
-//    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
     @XmlElement( name = "group" )
+    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<DataElementGroup> getGroups()
     {
         return groups;
@@ -490,8 +491,9 @@ public class DataElement extends AbstractNameableObject
     }
 
     @XmlElementWrapper( name = "dataSets" )
-//    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
     @XmlElement( name = "dataSet" )
+    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -502,6 +504,8 @@ public class DataElement extends AbstractNameableObject
         this.dataSets = dataSets;
     }
 
+    @XmlElementWrapper( name = "aggregationLevels" )
+    @XmlElement( name = "aggregationLevel" )
     public List<Integer> getAggregationLevels()
     {
         return aggregationLevels;

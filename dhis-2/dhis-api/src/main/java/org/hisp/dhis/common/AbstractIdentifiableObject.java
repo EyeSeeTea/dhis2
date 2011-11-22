@@ -30,6 +30,8 @@ package org.hisp.dhis.common;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.adapter.JsonDateSerializer;
 
 import javax.xml.bind.annotation.*;
 import java.util.*;
@@ -93,7 +95,6 @@ public abstract class AbstractIdentifiableObject
 
     @XmlAttribute
     @JsonProperty
-    @Override
     public int getId()
     {
         return id;
@@ -117,7 +118,6 @@ public abstract class AbstractIdentifiableObject
 
     @XmlAttribute
     @JsonProperty
-    @Override
     public String getUid()
     {
         return uid;
@@ -130,7 +130,6 @@ public abstract class AbstractIdentifiableObject
 
     @XmlAttribute
     @JsonProperty
-    @Override
     public String getCode()
     {
         return code;
@@ -143,7 +142,6 @@ public abstract class AbstractIdentifiableObject
 
     @XmlAttribute
     @JsonProperty
-    @Override
     public String getName()
     {
         return name;
@@ -156,7 +154,7 @@ public abstract class AbstractIdentifiableObject
 
     @XmlAttribute
     @JsonProperty
-    @Override
+    @JsonSerialize( using = JsonDateSerializer.class )
     public Date getLastUpdated()
     {
         return lastUpdated;

@@ -27,17 +27,17 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.AbstractNameableObject;
+
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.common.AbstractNameableObject;
-
 /**
  * @author Abyot Asalefew
- * @version $Id$
  */
-public class DataElementCategoryOption
-    extends AbstractNameableObject
+@XmlRootElement( name = "dataElementCategoryOption" )
+public class DataElementCategoryOption extends AbstractNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

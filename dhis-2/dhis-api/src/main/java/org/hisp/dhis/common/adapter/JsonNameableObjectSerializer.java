@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.controller;
+package org.hisp.dhis.common.adapter;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -27,39 +27,42 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.indicator.Indicators;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.map.JsonSerializer;
+import org.codehaus.jackson.map.SerializerProvider;
+import org.hisp.dhis.common.NameableObject;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
+import java.io.IOException;
 
-@Controller
-@RequestMapping( value = "/indicators" )
-public class IndicatorController
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class JsonNameableObjectSerializer extends JsonSerializer<NameableObject>
 {
-    @Autowired
-    private IndicatorService indicatorService;
-
-    @RequestMapping( method = RequestMethod.GET )
-    public Indicators getIndicators()
+    /**
+     * Jackson doesn't seem to see the downcasted object, so we need to manually write the values.
+     * TODO fix this.
+     */
+    @Override
+    public void serialize( NameableObject nameableObject, JsonGenerator jgen, SerializerProvider provider ) throws IOException, JsonProcessingException
     {
-        Indicators indicators = new Indicators();
-        indicators.setIndicators( new ArrayList<Indicator>( indicatorService.getAllIndicators() ) );
+        jgen.writeStartObject();
 
-        return indicators;
-    }
+        jgen.writeNumberField( "id", nameableObject.getId() );
+        jgen.writeStringField( "uid", nameableObject.getUid() );
+        jgen.writeStringField( "name", nameableObject.getName() );
+        jgen.writeStringField( "code", nameableObject.getCode() );
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public Indicator getIndicator( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
-    {
-        Indicator indicator = indicatorService.getIndicator( uid );
+        jgen.writeFieldName( "lastUpdated" );
 
-        return indicator;
+        JsonDateSerializer jsonDateSerializer = new JsonDateSerializer();
+        jsonDateSerializer.serialize( nameableObject.getLastUpdated(), jgen, provider );
+
+        jgen.writeStringField( "shortName", nameableObject.getShortName() );
+        jgen.writeStringField( "alternativeName", nameableObject.getAlternativeName() );
+        jgen.writeStringField( "description", nameableObject.getDescription() );
+
+        jgen.writeEndObject();
     }
 }

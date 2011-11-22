@@ -33,6 +33,8 @@ import java.util.List;
 import org.hisp.dhis.common.AbstractIdentifiableObject;
 import org.hisp.dhis.concept.Concept;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * A Category is a dimension of a data element. DataElements can have sets of
  * dimensions (known as CategoryCombos). An Example of a Category might be
@@ -40,10 +42,9 @@ import org.hisp.dhis.concept.Concept;
  * and "Female".
  * 
  * @author Abyot Asalefew
- * @version $Id DataElementCategory.java Aug 25, 2010 duyhieu$
  */
-public class DataElementCategory
-    extends AbstractIdentifiableObject
+@XmlRootElement(name = "dataElementCategory")
+public class DataElementCategory extends AbstractIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

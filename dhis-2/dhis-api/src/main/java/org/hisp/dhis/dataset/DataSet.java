@@ -46,12 +46,10 @@ import java.util.Set;
  * of a collection of DataElements.
  *
  * @author Kristian Nordal
- * @version $Id: DataSet.java 6255 2008-11-10 16:01:24Z larshelg $
  */
 @XmlRootElement( name = "dataSet" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class DataSet
-    extends AbstractNameableObject
+public class DataSet extends AbstractNameableObject
 {
     public static final String TYPE_DEFAULT = "default";
     public static final String TYPE_SECTION = "section";
