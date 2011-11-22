@@ -29,18 +29,23 @@ package org.hisp.dhis.constant;
 
 import org.hisp.dhis.common.AbstractIdentifiableObject;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * @author Dang Duy Hieu
  * @version $Id Constant.java June 29, 2011$
  */
-public class Constant
-    extends AbstractIdentifiableObject
-{   
+@XmlRootElement( name = "constant" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class Constant extends AbstractIdentifiableObject
+{
     /**
      * Determines if a de-serialized file is compatible with this class.
      */
     private static final long serialVersionUID = -8420671741149847205L;
-    
+
     // -------------------------------------------------------------------------
     // Variables
     // -------------------------------------------------------------------------

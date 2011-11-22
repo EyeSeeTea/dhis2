@@ -27,16 +27,6 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.AbstractNameableObject;
@@ -45,12 +35,19 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
 import org.hisp.dhis.user.User;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author Kristian Nordal
- * @version $Id: OrganisationUnit.java 6251 2008-11-10 14:37:05Z larshelg $
  */
-public class OrganisationUnit
-    extends AbstractNameableObject
+@XmlRootElement( name = "organisationUnit" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class OrganisationUnit extends AbstractNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -118,7 +115,7 @@ public class OrganisationUnit
     private transient boolean currentParent;
 
     private transient String type;
-    
+
     private transient String[] groupNames;
 
     /**
@@ -150,7 +147,7 @@ public class OrganisationUnit
      * @param comment
      */
     public OrganisationUnit( String name, String shortName, String code, Date openingDate, Date closedDate,
-        boolean active, String comment )
+                             boolean active, String comment )
     {
         this.name = name;
         this.shortName = shortName;
@@ -172,7 +169,7 @@ public class OrganisationUnit
      * @param comment
      */
     public OrganisationUnit( String name, OrganisationUnit parent, String shortName, String code, Date openingDate,
-        Date closedDate, boolean active, String comment )
+                             Date closedDate, boolean active, String comment )
     {
         this.name = name;
         this.parent = parent;
@@ -382,7 +379,7 @@ public class OrganisationUnit
 
         return group != null ? group.getName() : null;
     }
-    
+
     public String getAncestorNames()
     {
         StringBuilder builder = new StringBuilder( name );
@@ -442,12 +439,12 @@ public class OrganisationUnit
 
         return set;
     }
-    
+
     public boolean isPolygon()
     {
-        return ( featureType.equals( FEATURETYPE_MULTIPOLYGON ) || featureType.equals( FEATURETYPE_POLYGON ) );
+        return (featureType.equals( FEATURETYPE_MULTIPOLYGON ) || featureType.equals( FEATURETYPE_POLYGON ));
     }
-    
+
     public boolean isPoint()
     {
         return featureType.equals( FEATURETYPE_POINT );

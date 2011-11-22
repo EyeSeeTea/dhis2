@@ -40,8 +40,7 @@ import java.util.Set;
  */
 @XmlRootElement( name = "attribute" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class Attribute
-    extends AbstractIdentifiableObject
+public class Attribute extends AbstractIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

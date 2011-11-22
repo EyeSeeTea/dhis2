@@ -29,6 +29,10 @@ package org.hisp.dhis.concept;
 
 import org.hisp.dhis.common.AbstractIdentifiableObject;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * A Concept Name is a short name which is used as an attribute name
  * when representing a data value in xml which does not use
@@ -37,10 +41,10 @@ import org.hisp.dhis.common.AbstractIdentifiableObject;
  * SDMX-HD is one such case.
  * 
  * @author Dang Duy Hieu
- * @version $Id Concept.java Aug 25, 2010$
  */
-public class Concept
-    extends AbstractIdentifiableObject
+@XmlRootElement( name = "concept" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class Concept extends AbstractIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

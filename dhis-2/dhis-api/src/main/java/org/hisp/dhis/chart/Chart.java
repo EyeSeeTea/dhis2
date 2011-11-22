@@ -27,11 +27,6 @@ package org.hisp.dhis.chart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.hisp.dhis.common.AbstractIdentifiableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
@@ -41,9 +36,19 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.RelativePeriods;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * @author Lars Helge Overland
  */
+@XmlRootElement( name = "chart" )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public class Chart
     extends AbstractIdentifiableObject
 {
