@@ -36,6 +36,7 @@ import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.HashSet;
 import java.util.Set;
+import org.hisp.dhis.concept.Concept;
 
 /**
  * @author Abyot Asalefew
@@ -52,6 +53,8 @@ public class DataElementCategoryOption extends AbstractNameableObject
     public static final String DEFAULT_NAME = "default";
 
     private DataElementCategory category;
+    
+    private Concept concept;
 
     private Set<DataElementCategoryOptionCombo> categoryOptionCombos = new HashSet<DataElementCategoryOptionCombo>();
 
@@ -138,6 +141,14 @@ public class DataElementCategoryOption extends AbstractNameableObject
     public void setCategory( DataElementCategory category )
     {
         this.category = category;
+    }
+
+    public Concept getConcept() {
+        return concept;
+    }
+
+    public void setConcept(Concept concept) {
+        this.concept = concept;
     }
 
     @XmlElementWrapper( name = "categoryOptionCombos" )
