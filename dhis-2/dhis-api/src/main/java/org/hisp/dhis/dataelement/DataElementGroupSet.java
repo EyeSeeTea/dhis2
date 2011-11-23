@@ -27,12 +27,15 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectListSerializer;
 import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -186,6 +189,8 @@ public class DataElementGroupSet extends AbstractIdentifiableObject
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @XmlElement
+    @JsonProperty
     public String getDescription()
     {
         return description;
@@ -196,6 +201,8 @@ public class DataElementGroupSet extends AbstractIdentifiableObject
         this.description = description;
     }
 
+    @XmlElement
+    @JsonProperty
     public Boolean isCompulsory()
     {
         if ( compulsory == null )
@@ -211,6 +218,10 @@ public class DataElementGroupSet extends AbstractIdentifiableObject
         this.compulsory = compulsory;
     }
 
+    @XmlElementWrapper( name = "members" )
+    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlElement( name = "member" )
+    @JsonSerialize( using = JsonIdentifiableObjectListSerializer.class )
     public List<DataElementGroup> getMembers()
     {
         return members;

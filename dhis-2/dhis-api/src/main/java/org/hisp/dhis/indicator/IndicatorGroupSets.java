@@ -1,4 +1,4 @@
-package org.hisp.dhis.common.adapter;
+package org.hisp.dhis.indicator;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -27,32 +27,39 @@ package org.hisp.dhis.common.adapter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.JsonSerializer;
-import org.codehaus.jackson.map.SerializerProvider;
-import org.hisp.dhis.common.IdentifiableObject;
 
-import java.io.IOException;
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class JsonListSerializer extends JsonSerializer<List<IdentifiableObject>>
+@XmlRootElement( name = "indicatorGroupSets" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class IndicatorGroupSets
 {
-    @Override
-    public void serialize( List<IdentifiableObject> identifiableObjects, JsonGenerator jgen, SerializerProvider provider ) throws IOException, JsonProcessingException
+    private List<IndicatorGroupSet> indicatorGroupSets = new ArrayList<IndicatorGroupSet>();
+
+    public IndicatorGroupSets()
     {
-        JsonIdentifiableObjectSerializer jsonIdentifiableObjectSerializer = new JsonIdentifiableObjectSerializer();
 
-        jgen.writeStartArray();
+    }
 
-        for ( IdentifiableObject identifiableObject : identifiableObjects )
-        {
-            jsonIdentifiableObjectSerializer.serialize( identifiableObject, jgen, provider );
-        }
+    @XmlElement( name = "indicatorGroupSet" )
+    @JsonProperty( value = "indicatorGroupSets" )
+    public List<IndicatorGroupSet> getIndicatorGroupSets()
+    {
+        return indicatorGroupSets;
+    }
 
-        jgen.writeEndArray();
+    public void setIndicatorGroupSets( List<IndicatorGroupSet> indicatorGroupSets )
+    {
+        this.indicatorGroupSets = indicatorGroupSets;
     }
 }

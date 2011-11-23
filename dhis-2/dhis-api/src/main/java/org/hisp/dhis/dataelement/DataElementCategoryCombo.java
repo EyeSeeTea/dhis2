@@ -33,7 +33,7 @@ import org.hisp.dhis.common.AbstractIdentifiableObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
-import org.hisp.dhis.common.adapter.JsonListSerializer;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectListSerializer;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -223,7 +223,7 @@ public class DataElementCategoryCombo
     @XmlElementWrapper( name = "categories" )
     @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
     @XmlElement( name = "category" )
-    @JsonSerialize( using = JsonListSerializer.class )
+    @JsonSerialize( using = JsonIdentifiableObjectListSerializer.class )
     public List<DataElementCategory> getCategories()
     {
         return categories;
