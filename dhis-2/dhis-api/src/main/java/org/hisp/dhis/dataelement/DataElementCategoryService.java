@@ -71,10 +71,18 @@ public interface DataElementCategoryService
     /**
      * Returns a DataElementCategory.
      * 
-     * @param id the id of the DataElementCTEGORY to return.
+     * @param id the id of the DataElementCategory to return.
      * @return the DataElementCategory with the given id, or null if no match.
      */
     DataElementCategory getDataElementCategory( int id );
+
+    /**
+     * Returns a DataElementCategory.
+     * 
+     * @param uid the uid of the DataElementCategory to return.
+     * @return the DataElementCategory with the given uid, or null if no match.
+     */
+    DataElementCategory getDataElementCategory( String uid );
     
     /**
      * Retrieves the DataElementCategories with the given identifiers.
@@ -133,6 +141,14 @@ public interface DataElementCategoryService
      * @return the DataElementCategoryOption with the given id, or null if no match.
      */
     DataElementCategoryOption getDataElementCategoryOption( int id );
+
+    /**
+     * Returns a DataElementCategoryOption.
+     * 
+     * @param uid the id of the DataElementCategoryOption to return.
+     * @return the DataElementCategoryOption with the given uid, or null if no match.
+     */
+    DataElementCategoryOption getDataElementCategoryOption( String uid );
     
     /**
      * Retrieves the DataElementCategoryOptions with the given identifiers.
@@ -190,6 +206,14 @@ public interface DataElementCategoryService
      * @return the DataElementCategoryCombo.
      */
     DataElementCategoryCombo getDataElementCategoryCombo( int id );
+
+    /**
+     * Retrieves a DataElementCategoryCombo with the given uid.
+     * 
+     * @param uid the identifier of the DataElementCategoryCombo to retrieve.
+     * @return the DataElementCategoryCombo.
+     */
+    DataElementCategoryCombo getDataElementCategoryCombo( String uid );
     
     /**
      * Retrieves the DataElementCategoryCombo with the given identifiers.
@@ -244,15 +268,20 @@ public interface DataElementCategoryService
     void deleteDataElementCategoryOptionCombo( DataElementCategoryOptionCombo dataElementCategoryOptionCombo );
 
     /**
-     * Retrieves a DataElementCategoryOptionCombo with the given identifier.
+     * Retrieves the DataElementCategoryOptionCombo with the given identifier.
      * 
      * @param id the identifier of the DataElementCategoryOptionCombo.
      * @return the DataElementCategoryOptionCombo.
      */
     DataElementCategoryOptionCombo getDataElementCategoryOptionCombo( int id );
 
-    DataElementCategoryOptionCombo getDataElementCategoryOptionCombo( String uuid );
-
+    /**
+     * Retrieves the DataElementCategoryOptionCombo with the given uid.
+     * 
+     * @param uid the uid of the DataElementCategoryOptionCombo.
+     * @return the DataElementCategoryOptionCombo.
+     */
+    DataElementCategoryOptionCombo getDataElementCategoryOptionCombo( String uid );
 
     /**
      * Retrieves the DataElementCategoryOptionCombos with the given identifiers.

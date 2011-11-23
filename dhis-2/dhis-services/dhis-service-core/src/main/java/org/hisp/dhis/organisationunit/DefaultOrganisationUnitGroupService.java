@@ -98,9 +98,9 @@ public class DefaultOrganisationUnitGroupService
             } );
     }
 
-    public OrganisationUnitGroup getOrganisationUnitGroup( String uuid )
+    public OrganisationUnitGroup getOrganisationUnitGroup( String uid )
     {
-        return organisationUnitGroupStore.getByUuid( uuid );
+        return organisationUnitGroupStore.getByUid( uid );
     }
 
     public OrganisationUnitGroup getOrganisationUnitGroupByName( String name )
@@ -135,6 +135,11 @@ public class DefaultOrganisationUnitGroupService
     public OrganisationUnitGroupSet getOrganisationUnitGroupSet( int id )
     {
         return organisationUnitGroupSetStore.get( id );
+    }
+
+    public OrganisationUnitGroupSet getOrganisationUnitGroupSet( String uid )
+    {
+        return organisationUnitGroupSetStore.getByUid( uid );
     }
     
     public Collection<OrganisationUnitGroupSet> getOrganisationUnitGroupSets( final Collection<Integer> identifiers )
