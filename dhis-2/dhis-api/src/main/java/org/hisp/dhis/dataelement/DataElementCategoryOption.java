@@ -27,11 +27,13 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.adapter.*;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -124,6 +126,10 @@ public class DataElementCategoryOption extends AbstractNameableObject
         return name;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @JsonProperty
+    @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public DataElementCategory getCategory()
     {
         return category;
@@ -134,6 +140,10 @@ public class DataElementCategoryOption extends AbstractNameableObject
         this.category = category;
     }
 
+    @XmlElementWrapper( name = "categoryOptionCombos" )
+    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @XmlElement( name = "categoryOptionCombo" )
+    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<DataElementCategoryOptionCombo> getCategoryOptionCombos()
     {
         return categoryOptionCombos;

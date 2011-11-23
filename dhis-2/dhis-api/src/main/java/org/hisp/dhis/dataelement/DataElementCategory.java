@@ -27,12 +27,17 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.AbstractNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSerializer;
+import org.hisp.dhis.common.adapter.JsonNameableObjectListSerializer;
 import org.hisp.dhis.concept.Concept;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -145,6 +150,10 @@ public class DataElementCategory extends AbstractIdentifiableObject
     // Getters and setters
     // ------------------------------------------------------------------------
 
+    @XmlElementWrapper( name = "categoryOptions" )
+    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @XmlElement( name = "categoryOption" )
+    @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<DataElementCategoryOption> getCategoryOptions()
     {
         return categoryOptions;
@@ -155,6 +164,15 @@ public class DataElementCategory extends AbstractIdentifiableObject
         this.categoryOptions = categoryOptions;
     }
 
+    /**
+     * TODO Null problem here.. should investigate
+     */
+
+/*    @XmlElement
+    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @JsonProperty
+    @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
+*/
     public Concept getConcept()
     {
         return concept;

@@ -213,13 +213,6 @@ public class DataElementCategoryCombo
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @XmlElement
-    @JsonProperty
-    public String getFab()
-    {
-        return "fab";
-    }
-
     @XmlElementWrapper( name = "categories" )
     @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
     @XmlElement( name = "category" )

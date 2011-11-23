@@ -34,42 +34,25 @@ import org.codehaus.jackson.map.SerializerProvider;
 import org.hisp.dhis.common.NameableObject;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class JsonNameableObjectSerializer extends JsonSerializer<NameableObject>
+public class JsonNameableObjectListSerializer extends JsonSerializer<List<NameableObject>>
 {
-    /**
-     * Jackson doesn't seem to see the downcasted object, so we need to manually write the values.
-     * TODO fix this.
-     */
     @Override
-    public void serialize( NameableObject nameableObject, JsonGenerator jgen, SerializerProvider provider ) throws IOException, JsonProcessingException
+    public void serialize( List<NameableObject> nameableObjects, JsonGenerator jgen, SerializerProvider provider ) throws IOException, JsonProcessingException
     {
-        if ( nameableObject != null )
+        JsonNameableObjectSerializer jsonNameableObjectSerializer = new JsonNameableObjectSerializer();
+
+        jgen.writeStartArray();
+
+        for ( NameableObject nameableObject : nameableObjects )
         {
-            jgen.writeStartObject();
-
-            jgen.writeNumberField( "id", nameableObject.getId() );
-            jgen.writeStringField( "uid", nameableObject.getUid() );
-            jgen.writeStringField( "name", nameableObject.getName() );
-            jgen.writeStringField( "code", nameableObject.getCode() );
-
-            jgen.writeFieldName( "lastUpdated" );
-
-            JsonDateSerializer jsonDateSerializer = new JsonDateSerializer();
-            jsonDateSerializer.serialize( nameableObject.getLastUpdated(), jgen, provider );
-
-            jgen.writeStringField( "shortName", nameableObject.getShortName() );
-            jgen.writeStringField( "alternativeName", nameableObject.getAlternativeName() );
-            jgen.writeStringField( "description", nameableObject.getDescription() );
-
-            jgen.writeEndObject();
+            jsonNameableObjectSerializer.serialize( nameableObject, jgen, provider );
         }
-        else
-        {
-            jgen.writeNull();
-        }
+
+        jgen.writeEndArray();
     }
 }

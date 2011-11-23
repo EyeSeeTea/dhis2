@@ -47,18 +47,23 @@ public class JsonIdentifiableObjectSerializer extends JsonSerializer<Identifiabl
     @Override
     public void serialize( IdentifiableObject value, JsonGenerator jgen, SerializerProvider provider ) throws IOException, JsonProcessingException
     {
-        jgen.writeStartObject();
+        if ( value != null )
+        {
+            jgen.writeStartObject();
 
-        jgen.writeNumberField( "id", value.getId() );
-        jgen.writeStringField( "uid", value.getUid() );
-        jgen.writeStringField( "name", value.getName() );
-        jgen.writeStringField( "code", value.getCode() );
+            jgen.writeNumberField( "id", value.getId() );
+            jgen.writeStringField( "uid", value.getUid() );
+            jgen.writeStringField( "name", value.getName() );
+            jgen.writeStringField( "code", value.getCode() );
 
-        jgen.writeFieldName( "lastUpdated" );
+            jgen.writeFieldName( "lastUpdated" );
 
-        JsonDateSerializer jsonDateSerializer = new JsonDateSerializer();
-        jsonDateSerializer.serialize( value.getLastUpdated(), jgen, provider );
+            JsonDateSerializer jsonDateSerializer = new JsonDateSerializer();
+            jsonDateSerializer.serialize( value.getLastUpdated(), jgen, provider );
 
-        jgen.writeEndObject();
+            jgen.writeEndObject();
+        } else {
+            jgen.writeNull();            
+        }
     }
 }

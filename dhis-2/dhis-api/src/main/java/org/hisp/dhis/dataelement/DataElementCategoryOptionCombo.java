@@ -32,7 +32,9 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.AbstractNameableObject;
 import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.JsonIdentifiableObjectListSerializer;
+import org.hisp.dhis.common.adapter.AbstractNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSerializer;
+import org.hisp.dhis.common.adapter.JsonNameableObjectListSerializer;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -292,7 +294,9 @@ public class DataElementCategoryOptionCombo extends AbstractNameableObject
     }
 
     @XmlElement
+    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
     @JsonProperty
+    @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
@@ -304,9 +308,10 @@ public class DataElementCategoryOptionCombo extends AbstractNameableObject
     }
 
     @XmlElementWrapper( name = "categoryOptions" )
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
     @XmlElement( name = "categoryOption" )
-    @JsonSerialize( using = JsonIdentifiableObjectListSerializer.class )
+    @JsonProperty
+    @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<DataElementCategoryOption> getCategoryOptions()
     {
         return categoryOptions;
