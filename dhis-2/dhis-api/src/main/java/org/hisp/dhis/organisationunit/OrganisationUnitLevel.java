@@ -35,7 +35,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 @XmlRootElement( name = "organisationUnitLevel" )
 @XmlAccessorType( value = XmlAccessType.NONE )

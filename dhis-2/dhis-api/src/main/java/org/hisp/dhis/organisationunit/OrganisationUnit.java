@@ -28,8 +28,13 @@ package org.hisp.dhis.organisationunit;
  */
 
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.adapter.AbstractNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonDateSerializer;
+import org.hisp.dhis.common.adapter.JsonNameableObjectSerializer;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
@@ -37,7 +42,9 @@ import org.hisp.dhis.user.User;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -503,6 +510,9 @@ public class OrganisationUnit extends AbstractNameableObject
         this.children = children;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonNameableObjectSerializer.class )
     public OrganisationUnit getParent()
     {
         return parent;
@@ -511,26 +521,6 @@ public class OrganisationUnit extends AbstractNameableObject
     public void setParent( OrganisationUnit parent )
     {
         this.parent = parent;
-    }
-
-    public String getShortName()
-    {
-        return shortName;
-    }
-
-    public void setShortName( String shortName )
-    {
-        this.shortName = shortName;
-    }
-
-    public String getCode()
-    {
-        return code;
-    }
-
-    public void setCode( String code )
-    {
-        this.code = code;
     }
 
     public String getAlternativeName()
@@ -543,6 +533,9 @@ public class OrganisationUnit extends AbstractNameableObject
         throw new UnsupportedOperationException( "Cannot set alternativename on OrganisationUnit: " + alternativeName );
     }
 
+    @XmlElement
+    @JsonProperty
+    @JsonSerialize( using = JsonDateSerializer.class )
     public Date getOpeningDate()
     {
         return openingDate;
@@ -553,6 +546,9 @@ public class OrganisationUnit extends AbstractNameableObject
         this.openingDate = openingDate;
     }
 
+    @XmlElement
+    @JsonProperty
+    @JsonSerialize( using = JsonDateSerializer.class )
     public Date getClosedDate()
     {
         return closedDate;
@@ -563,6 +559,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.closedDate = closedDate;
     }
 
+    @XmlElement
+    @JsonProperty
     public boolean isActive()
     {
         return active;
@@ -573,6 +571,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.active = active;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getComment()
     {
         return comment;
@@ -583,6 +583,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.comment = comment;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getGeoCode()
     {
         return geoCode;
@@ -593,6 +595,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.geoCode = geoCode;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getFeatureType()
     {
         return featureType;
@@ -603,6 +607,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.featureType = featureType;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getCoordinates()
     {
         return coordinates;
@@ -613,6 +619,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.coordinates = coordinates;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getUrl()
     {
         return url;
@@ -621,16 +629,6 @@ public class OrganisationUnit extends AbstractNameableObject
     public void setUrl( String url )
     {
         this.url = url;
-    }
-
-    public Date getLastUpdated()
-    {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated( Date lastUpdated )
-    {
-        this.lastUpdated = lastUpdated;
     }
 
     public Set<OrganisationUnitGroup> getGroups()
@@ -663,6 +661,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.users = users;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getContactPerson()
     {
         return contactPerson;
@@ -673,6 +673,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.contactPerson = contactPerson;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getAddress()
     {
         return address;
@@ -683,6 +685,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.address = address;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getEmail()
     {
         return email;
@@ -693,6 +697,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.email = email;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getPhoneNumber()
     {
         return phoneNumber;
@@ -703,6 +709,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.phoneNumber = phoneNumber;
     }
 
+    @XmlElement
+    @JsonProperty
     public Boolean getHasPatients()
     {
         return hasPatients;
@@ -713,6 +721,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.hasPatients = hasPatients;
     }
 
+    @XmlElement
+    @JsonProperty
     public int getLevel()
     {
         return level;
@@ -723,6 +733,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.level = level;
     }
 
+    @XmlElement
+    @JsonProperty
     public boolean isCurrentParent()
     {
         return currentParent;
@@ -733,6 +745,8 @@ public class OrganisationUnit extends AbstractNameableObject
         this.currentParent = currentParent;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getType()
     {
         return type;
