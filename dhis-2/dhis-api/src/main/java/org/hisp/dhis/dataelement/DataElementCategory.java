@@ -166,7 +166,7 @@ public class DataElementCategory extends BaseIdentifiableObject
      */
 
 /*    @XmlElement
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
 */

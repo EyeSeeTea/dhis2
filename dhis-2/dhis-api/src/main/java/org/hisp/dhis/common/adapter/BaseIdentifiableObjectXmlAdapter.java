@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class BaseIdentifiableObjectXmlAdapter extends XmlAdapter<BaseIdentifiableObject, BaseIdentifiableObject>
 {
     @Override
-    public BaseIdentifiableObject unmarshal( BaseIdentifiableObject abstractIdentifiableObject ) throws Exception
+    public BaseIdentifiableObject unmarshal( BaseIdentifiableObject baseIdentifiableObject ) throws Exception
     {
         throw new NotImplementedException();
     }

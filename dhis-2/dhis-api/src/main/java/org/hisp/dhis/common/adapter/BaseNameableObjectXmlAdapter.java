@@ -38,7 +38,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class BaseNameableObjectXmlAdapter extends XmlAdapter<BaseNameableObject, BaseNameableObject>
 {
     @Override
-    public BaseNameableObject unmarshal( BaseNameableObject abstractNameableObject ) throws Exception
+    public BaseNameableObject unmarshal( BaseNameableObject baseNameableObject ) throws Exception
     {
         throw new NotImplementedException();
     }
