@@ -27,13 +27,19 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.ImportableObject;
+import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonDateSerializer;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -171,6 +177,8 @@ public class CompleteDataSetRegistration
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @XmlElement
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     public DataSet getDataSet()
     {
         return dataSet;
@@ -181,6 +189,8 @@ public class CompleteDataSetRegistration
         this.dataSet = dataSet;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     public Period getPeriod()
     {
         return period;
@@ -191,6 +201,8 @@ public class CompleteDataSetRegistration
         this.period = period;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     public OrganisationUnit getSource()
     {
         return source;
@@ -201,6 +213,9 @@ public class CompleteDataSetRegistration
         this.source = source;
     }
 
+    @XmlElement
+    @JsonProperty
+    @JsonSerialize( using = JsonDateSerializer.class )
     public Date getDate()
     {
         return date;
@@ -211,6 +226,8 @@ public class CompleteDataSetRegistration
         this.date = date;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getStoredBy()
     {
         return storedBy;
