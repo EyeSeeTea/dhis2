@@ -48,6 +48,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * @author Kristian Nordal
@@ -98,8 +99,6 @@ public class OrganisationUnit extends AbstractNameableObject
     private String coordinates;
 
     private String url;
-
-    private Date lastUpdated;
 
     private Set<OrganisationUnitGroup> groups = new HashSet<OrganisationUnitGroup>();
 
@@ -522,7 +521,7 @@ public class OrganisationUnit extends AbstractNameableObject
     {
         this.parent = parent;
     }
-
+    
     public String getAlternativeName()
     {
         return getShortName();

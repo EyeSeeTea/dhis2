@@ -36,7 +36,7 @@ import javax.xml.bind.annotation.*;
  */
 @XmlRootElement( name = "nameableObject" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public abstract class AbstractNameableObject
+public class AbstractNameableObject
     extends AbstractIdentifiableObject implements NameableObject
 {
     /**
