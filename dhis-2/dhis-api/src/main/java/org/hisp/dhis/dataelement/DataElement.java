@@ -441,7 +441,6 @@ public class DataElement extends BaseNameableObject
 
     @XmlElement
     @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
-    @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;

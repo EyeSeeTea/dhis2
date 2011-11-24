@@ -27,7 +27,13 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
+import org.hisp.dhis.common.adapter.JsonNameableObjectSetSerializer;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
@@ -35,9 +41,8 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -295,6 +300,11 @@ public class DataSet extends BaseNameableObject
         return periodType;
     }
 
+    public void setPeriodType( PeriodType periodType )
+    {
+        this.periodType = periodType;
+    }
+
     public DataEntryForm getDataEntryForm()
     {
         return dataEntryForm;
@@ -305,11 +315,10 @@ public class DataSet extends BaseNameableObject
         this.dataEntryForm = dataEntryForm;
     }
 
-    public void setPeriodType( PeriodType periodType )
-    {
-        this.periodType = periodType;
-    }
-
+    @XmlElementWrapper( name = "dataElements" )
+    @XmlElement( name = "dataElement" )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<DataElement> getDataElements()
     {
         return dataElements;
@@ -320,6 +329,10 @@ public class DataSet extends BaseNameableObject
         this.dataElements = dataElements;
     }
 
+    @XmlElementWrapper( name = "indicators" )
+    @XmlElement( name = "indicator" )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<Indicator> getIndicators()
     {
         return indicators;
@@ -330,6 +343,8 @@ public class DataSet extends BaseNameableObject
         this.indicators = indicators;
     }
 
+    @XmlElement
+    @JsonProperty
     public Set<DataElementOperand> getCompulsoryDataElementOperands()
     {
         return compulsoryDataElementOperands;
@@ -340,6 +355,10 @@ public class DataSet extends BaseNameableObject
         this.compulsoryDataElementOperands = compulsoryDataElementOperands;
     }
 
+    @XmlElementWrapper( name = "sources" )
+    @XmlElement( name = "source" )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<OrganisationUnit> getSources()
     {
         return sources;
@@ -350,6 +369,8 @@ public class DataSet extends BaseNameableObject
         this.sources = sources;
     }
 
+    @XmlElement
+    @JsonProperty
     public Boolean getLocked()
     {
         return locked;
@@ -360,6 +381,8 @@ public class DataSet extends BaseNameableObject
         this.locked = locked;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -370,14 +393,23 @@ public class DataSet extends BaseNameableObject
         this.sortOrder = sortOrder;
     }
 
+/*    @XmlElementWrapper( name = "sections" )
+    @XmlElement( name = "section" ) */
+    public Set<Section> getSections()
+    {
+        return sections;
+    }
+
     public void setSections( Set<Section> sections )
     {
         this.sections = sections;
     }
 
-    public Set<Section> getSections()
+    @XmlElement
+    @JsonProperty
+    public Boolean getMobile()
     {
-        return sections;
+        return mobile;
     }
 
     public void setMobile( Boolean mobile )
@@ -385,11 +417,8 @@ public class DataSet extends BaseNameableObject
         this.mobile = mobile;
     }
 
-    public Boolean getMobile()
-    {
-        return mobile;
-    }
-
+    @XmlElement
+    @JsonProperty
     public Integer getVersion()
     {
         return version;

@@ -23,13 +23,17 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectListSerializer;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -159,6 +163,8 @@ public class Section
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @XmlAttribute
+    @JsonProperty
     public int getId()
     {
         return id;
@@ -169,6 +175,8 @@ public class Section
         this.id = id;
     }
 
+    @XmlAttribute
+    @JsonProperty
     public String getName()
     {
         return name;
@@ -179,6 +187,8 @@ public class Section
         this.name = name;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     public DataSet getDataSet()
     {
         return dataSet;
@@ -189,6 +199,10 @@ public class Section
         this.dataSet = dataSet;
     }
 
+    @XmlElementWrapper( name = "dataElements" )
+    @XmlElement( name = "dataElement" )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonIdentifiableObjectListSerializer.class )
     public List<DataElement> getDataElements()
     {
         return dataElements;
@@ -204,6 +218,8 @@ public class Section
         this.dataElements.add( dataElement );
     }
 
+    @XmlElement
+    @JsonProperty
     public int getSortOrder()
     {
         return sortOrder;
@@ -214,13 +230,16 @@ public class Section
         this.sortOrder = sortOrder;
     }
 
-    public void setGreyedFields( Set<DataElementOperand> greyedFields )
-    {
-        this.greyedFields = greyedFields;
-    }
-
+    @XmlElementWrapper(name = "greyedFields")
+    @XmlElement(name = "greyedField")
+    @JsonProperty
     public Set<DataElementOperand> getGreyedFields()
     {
         return greyedFields;
+    }
+
+    public void setGreyedFields( Set<DataElementOperand> greyedFields )
+    {
+        this.greyedFields = greyedFields;
     }
 }
