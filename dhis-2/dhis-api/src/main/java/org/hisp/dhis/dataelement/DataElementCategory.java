@@ -27,12 +27,9 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.AbstractNameableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSerializer;
+import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonNameableObjectListSerializer;
 import org.hisp.dhis.concept.Concept;
 
@@ -151,7 +148,7 @@ public class DataElementCategory extends BaseIdentifiableObject
     // ------------------------------------------------------------------------
 
     @XmlElementWrapper( name = "categoryOptions" )
-    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElement( name = "categoryOption" )
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<DataElementCategoryOption> getCategoryOptions()

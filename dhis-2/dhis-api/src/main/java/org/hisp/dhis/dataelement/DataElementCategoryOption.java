@@ -130,7 +130,7 @@ public class DataElementCategoryOption extends BaseNameableObject
     }
 
     @XmlElement
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public DataElementCategory getCategory()
@@ -152,7 +152,7 @@ public class DataElementCategoryOption extends BaseNameableObject
     }
 
     @XmlElementWrapper( name = "categoryOptionCombos" )
-    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElement( name = "categoryOptionCombo" )
     @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<DataElementCategoryOptionCombo> getCategoryOptionCombos()

@@ -28,36 +28,36 @@ package org.hisp.dhis.common.adapter;
  */
 
 import org.apache.commons.lang.NotImplementedException;
-import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class AbstractNameableObjectXmlAdapter extends XmlAdapter<BaseNameableObject, BaseNameableObject>
+public class BaseIdentifiableObjectXmlAdapter extends XmlAdapter<BaseIdentifiableObject, BaseIdentifiableObject>
 {
     @Override
-    public BaseNameableObject unmarshal( BaseNameableObject abstractNameableObject ) throws Exception
+    public BaseIdentifiableObject unmarshal( BaseIdentifiableObject abstractIdentifiableObject ) throws Exception
     {
         throw new NotImplementedException();
     }
 
     @Override
-    public BaseNameableObject marshal( BaseNameableObject abstractNameableObject ) throws Exception
+    public BaseIdentifiableObject marshal( BaseIdentifiableObject baseIdentifiableObject ) throws Exception
     {
-        if ( abstractNameableObject != null )
+        if ( baseIdentifiableObject != null )
         {
-            AbstractNameableObject ano = new AbstractNameableObject();
+            BaseIdentifiableObject bio = new BaseIdentifiableObject();
 
-            ano.setId( abstractNameableObject.getId() );
-            ano.setUid( abstractNameableObject.getUid() );
-            ano.setName( abstractNameableObject.getName() );
-            ano.setShortName( abstractNameableObject.getShortName() );
-            ano.setAlternativeName( abstractNameableObject.getAlternativeName() );
-            ano.setLastUpdated( abstractNameableObject.getLastUpdated() );
+            bio.setId( baseIdentifiableObject.getId() );
+            bio.setUid( baseIdentifiableObject.getUid() );
+            bio.setUuid( baseIdentifiableObject.getUuid() );
+            bio.setCode( baseIdentifiableObject.getCode() );
+            bio.setName( baseIdentifiableObject.getName() );
+            bio.setLastUpdated( baseIdentifiableObject.getLastUpdated() );
 
-            return ano;
+            return bio;
         }
 
         return null;

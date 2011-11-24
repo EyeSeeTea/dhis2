@@ -27,11 +27,10 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.CombinationGenerator;
-import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectListSerializer;
 
@@ -214,7 +213,7 @@ public class DataElementCategoryCombo
     // -------------------------------------------------------------------------
 
     @XmlElementWrapper( name = "categories" )
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @XmlElement( name = "category" )
     @JsonSerialize( using = JsonIdentifiableObjectListSerializer.class )
     public List<DataElementCategory> getCategories()
@@ -228,7 +227,7 @@ public class DataElementCategoryCombo
     }
 
     @XmlElementWrapper( name = "optionCombos" )
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @XmlElement( name = "optionCombo" )
     @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<DataElementCategoryOptionCombo> getOptionCombos()

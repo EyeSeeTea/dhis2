@@ -174,7 +174,7 @@ public class Indicator extends BaseNameableObject
     }
 
     @XmlElement
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public IndicatorType getIndicatorType()
     {
@@ -283,7 +283,7 @@ public class Indicator extends BaseNameableObject
     }
 
     @XmlElementWrapper( name = "groups" )
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @XmlElement( name = "group" )
     @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<IndicatorGroup> getGroups()
@@ -297,7 +297,7 @@ public class Indicator extends BaseNameableObject
     }
 
     @XmlElementWrapper( name = "dataSets" )
-    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElement( name = "dataSet" )
     @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<DataSet> getDataSets()

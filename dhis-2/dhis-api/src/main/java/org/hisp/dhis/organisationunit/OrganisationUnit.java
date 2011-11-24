@@ -32,9 +32,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseNameableObject;
-import org.hisp.dhis.common.adapter.AbstractNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonDateSerializer;
-import org.hisp.dhis.common.adapter.JsonNameableObjectSerializer;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
@@ -48,7 +47,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * @author Kristian Nordal
@@ -510,7 +508,7 @@ public class OrganisationUnit extends BaseNameableObject
     }
 
     @XmlElement
-    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
 /*     @JsonSerialize( using = JsonNameableObjectSerializer.class ) */
     public OrganisationUnit getParent()
     {

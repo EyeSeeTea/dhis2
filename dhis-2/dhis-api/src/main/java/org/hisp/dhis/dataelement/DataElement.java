@@ -440,7 +440,7 @@ public class DataElement extends BaseNameableObject
     }
 
     @XmlElement
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public DataElementCategoryCombo getCategoryCombo()
     {
@@ -478,7 +478,7 @@ public class DataElement extends BaseNameableObject
 
     @XmlElementWrapper( name = "groups" )
     @XmlElement( name = "group" )
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<DataElementGroup> getGroups()
     {
@@ -492,7 +492,7 @@ public class DataElement extends BaseNameableObject
 
     @XmlElementWrapper( name = "dataSets" )
     @XmlElement( name = "dataSet" )
-    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<DataSet> getDataSets()
     {

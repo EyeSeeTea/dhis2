@@ -29,7 +29,7 @@ package org.hisp.dhis.dataelement;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
 
 import javax.xml.bind.annotation.*;
@@ -145,7 +145,7 @@ public class DataElementGroup extends BaseIdentifiableObject
     // -------------------------------------------------------------------------
 
     @XmlElementWrapper( name = "members" )
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @XmlElement( name = "member" )
     @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<DataElement> getMembers()

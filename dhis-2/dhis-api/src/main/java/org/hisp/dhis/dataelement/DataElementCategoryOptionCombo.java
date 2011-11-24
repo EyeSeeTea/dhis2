@@ -31,8 +31,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseNameableObject;
-import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.AbstractNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSerializer;
 import org.hisp.dhis.common.adapter.JsonNameableObjectListSerializer;
 
@@ -294,7 +294,7 @@ public class DataElementCategoryOptionCombo extends BaseNameableObject
     }
 
     @XmlElement
-    @XmlJavaTypeAdapter( AbstractIdentifiableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public DataElementCategoryCombo getCategoryCombo()
@@ -308,7 +308,7 @@ public class DataElementCategoryOptionCombo extends BaseNameableObject
     }
 
     @XmlElementWrapper( name = "categoryOptions" )
-    @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElement( name = "categoryOption" )
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )

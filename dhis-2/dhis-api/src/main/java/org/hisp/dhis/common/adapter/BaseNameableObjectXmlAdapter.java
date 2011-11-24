@@ -28,24 +28,42 @@ package org.hisp.dhis.common.adapter;
  */
 
 import org.apache.commons.lang.NotImplementedException;
-import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class AbstractIdentifiableObjectXmlAdapter extends XmlAdapter<BaseIdentifiableObject, BaseIdentifiableObject>
+public class BaseNameableObjectXmlAdapter extends XmlAdapter<BaseNameableObject, BaseNameableObject>
 {
     @Override
-    public BaseIdentifiableObject unmarshal( BaseIdentifiableObject abstractIdentifiableObject ) throws Exception
+    public BaseNameableObject unmarshal( BaseNameableObject abstractNameableObject ) throws Exception
     {
         throw new NotImplementedException();
     }
 
     @Override
-    public BaseIdentifiableObject marshal( BaseIdentifiableObject abstractIdentifiableObject ) throws Exception
+    public BaseNameableObject marshal( BaseNameableObject baseNameableObject ) throws Exception
     {
-        return (BaseIdentifiableObject) abstractIdentifiableObject;
+        if ( baseNameableObject != null )
+        {
+            BaseNameableObject bno = new BaseNameableObject();
+
+            bno.setId( baseNameableObject.getId() );
+            bno.setUid( baseNameableObject.getUid() );
+            bno.setUuid( baseNameableObject.getUuid() );
+            bno.setCode( baseNameableObject.getCode() );
+            bno.setName( baseNameableObject.getName() );
+            bno.setLastUpdated( baseNameableObject.getLastUpdated() );
+
+            bno.setShortName( baseNameableObject.getShortName() );
+            bno.setAlternativeName( baseNameableObject.getAlternativeName() );
+            bno.setDescription( baseNameableObject.getDescription() );
+
+            return bno;
+        }
+
+        return null;
     }
 }
