@@ -36,8 +36,8 @@ import javax.xml.bind.annotation.*;
  */
 @XmlRootElement( name = "nameableObject" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class AbstractNameableObject
-    extends AbstractIdentifiableObject implements NameableObject
+public class BaseNameableObject
+    extends BaseIdentifiableObject implements NameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -59,11 +59,11 @@ public class AbstractNameableObject
      */
     protected String description;
 
-    public AbstractNameableObject()
+    public BaseNameableObject()
     {
     }
 
-    public AbstractNameableObject( int id, String uuid, String name, String alternativeName, String shortName,
+    public BaseNameableObject( int id, String uuid, String name, String alternativeName, String shortName,
                                    String code, String description )
     {
         super( id, uuid, name );

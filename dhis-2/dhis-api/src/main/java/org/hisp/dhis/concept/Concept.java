@@ -27,7 +27,7 @@ package org.hisp.dhis.concept;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -44,7 +44,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement( name = "concept" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class Concept extends AbstractIdentifiableObject
+public class Concept extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

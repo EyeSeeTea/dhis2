@@ -29,7 +29,7 @@ package org.hisp.dhis.dataelement;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectListSerializer;
 import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
@@ -50,7 +50,7 @@ import java.util.List;
  */
 @XmlRootElement( name = "dataElementGroupSet" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class DataElementGroupSet extends AbstractIdentifiableObject
+public class DataElementGroupSet extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

@@ -27,7 +27,7 @@
 
 package org.hisp.dhis.attribute;
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -40,7 +40,7 @@ import java.util.Set;
  */
 @XmlRootElement( name = "attribute" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class Attribute extends AbstractIdentifiableObject
+public class Attribute extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

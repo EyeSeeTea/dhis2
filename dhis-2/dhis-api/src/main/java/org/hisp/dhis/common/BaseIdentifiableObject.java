@@ -40,7 +40,7 @@ import java.util.*;
 @XmlRootElement( name = "identifiableObject" )
 @XmlAccessorType( value = XmlAccessType.NONE )
 @XmlType( propOrder = {"id", "uid", "name", "code", "lastUpdated"} )
-public abstract class AbstractIdentifiableObject
+public class BaseIdentifiableObject
     implements IdentifiableObject
 {
     /**
@@ -78,11 +78,11 @@ public abstract class AbstractIdentifiableObject
      */
     private Date lastUpdated;
 
-    public AbstractIdentifiableObject()
+    public BaseIdentifiableObject()
     {
     }
 
-    public AbstractIdentifiableObject( int id, String uuid, String name )
+    public BaseIdentifiableObject( int id, String uuid, String name )
     {
         this.id = id;
         this.uuid = uuid;
@@ -185,7 +185,7 @@ public abstract class AbstractIdentifiableObject
      * @param objects the IdentifiableObjects to put in the map
      * @return the map
      */
-    public static Map<String, Integer> getUUIDMap( Collection<? extends AbstractIdentifiableObject> objects )
+    public static Map<String, Integer> getUUIDMap( Collection<? extends BaseIdentifiableObject> objects )
     {
         Map<String, Integer> map = new HashMap<String, Integer>();
         for ( IdentifiableObject object : objects )
@@ -205,7 +205,7 @@ public abstract class AbstractIdentifiableObject
      * @param objects the IdentifiableObjects to put in the map
      * @return the map
      */
-    public static Map<String, Integer> getUIDMap( Collection<? extends AbstractIdentifiableObject> objects )
+    public static Map<String, Integer> getUIDMap( Collection<? extends BaseIdentifiableObject> objects )
     {
         Map<String, Integer> map = new HashMap<String, Integer>();
         for ( IdentifiableObject object : objects )
@@ -225,7 +225,7 @@ public abstract class AbstractIdentifiableObject
      * @param objects the NameableObjects to put in the map
      * @return the map
      */
-    public static Map<String, Integer> getCodeMap( Collection<? extends AbstractNameableObject> objects )
+    public static Map<String, Integer> getCodeMap( Collection<? extends BaseNameableObject> objects )
     {
         Map<String, Integer> map = new HashMap<String, Integer>();
         for ( NameableObject object : objects )

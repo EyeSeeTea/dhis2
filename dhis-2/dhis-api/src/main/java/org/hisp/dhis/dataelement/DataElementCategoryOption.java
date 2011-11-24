@@ -29,7 +29,7 @@ package org.hisp.dhis.dataelement;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.adapter.*;
 
 import javax.xml.bind.annotation.*;
@@ -43,7 +43,7 @@ import org.hisp.dhis.concept.Concept;
  */
 @XmlRootElement( name = "dataElementCategoryOption" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class DataElementCategoryOption extends AbstractNameableObject
+public class DataElementCategoryOption extends BaseNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

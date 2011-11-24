@@ -27,7 +27,7 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitGroupNameComparator;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -40,7 +40,7 @@ import java.util.*;
  */
 @XmlRootElement( name = "organisationUnitGroupSet" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class OrganisationUnitGroupSet extends AbstractIdentifiableObject
+public class OrganisationUnitGroupSet extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

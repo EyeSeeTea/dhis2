@@ -28,7 +28,7 @@ package org.hisp.dhis.indicator;
  */
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
 
@@ -42,7 +42,7 @@ import java.util.Set;
  */
 @XmlRootElement( name = "indicatorGroup" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class IndicatorGroup extends AbstractIdentifiableObject
+public class IndicatorGroup extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

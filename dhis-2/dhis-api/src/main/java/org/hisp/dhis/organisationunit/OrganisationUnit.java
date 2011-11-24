@@ -31,7 +31,7 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
-import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.adapter.AbstractNameableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonDateSerializer;
 import org.hisp.dhis.common.adapter.JsonNameableObjectSerializer;
@@ -55,7 +55,7 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @XmlRootElement( name = "organisationUnit" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class OrganisationUnit extends AbstractNameableObject
+public class OrganisationUnit extends BaseNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

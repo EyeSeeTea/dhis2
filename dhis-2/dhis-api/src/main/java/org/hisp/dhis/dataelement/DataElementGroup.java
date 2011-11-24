@@ -28,7 +28,7 @@ package org.hisp.dhis.dataelement;
  */
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
 
@@ -45,7 +45,7 @@ import java.util.Set;
  */
 @XmlRootElement( name = "dataElementGroup" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class DataElementGroup extends AbstractIdentifiableObject
+public class DataElementGroup extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

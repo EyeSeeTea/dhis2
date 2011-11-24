@@ -31,7 +31,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
-import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.adapter.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.PeriodType;
@@ -62,7 +62,7 @@ import java.util.Set;
  */
 @XmlRootElement( name = "dataElement" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class DataElement extends AbstractNameableObject
+public class DataElement extends BaseNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

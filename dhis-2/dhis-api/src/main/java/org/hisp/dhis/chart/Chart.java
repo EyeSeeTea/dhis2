@@ -27,7 +27,7 @@ package org.hisp.dhis.chart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -50,7 +50,7 @@ import java.util.Set;
 @XmlRootElement( name = "chart" )
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class Chart
-    extends AbstractIdentifiableObject
+    extends BaseIdentifiableObject
 {
     private static final long serialVersionUID = 2570074075484545534L;
 

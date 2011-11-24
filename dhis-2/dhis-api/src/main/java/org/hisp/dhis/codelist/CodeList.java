@@ -1,6 +1,6 @@
 package org.hisp.dhis.codelist;
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -14,7 +14,7 @@ import java.util.List;
  */
 @XmlRootElement( name = "codeList" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class CodeList<T extends AbstractIdentifiableObject>
+public class CodeList<T extends BaseIdentifiableObject>
 {
     private List<T> list = new ArrayList<T>();
 

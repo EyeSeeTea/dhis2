@@ -30,7 +30,7 @@ package org.hisp.dhis.dataelement;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.adapter.AbstractIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.AbstractNameableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSerializer;
@@ -45,7 +45,7 @@ import java.util.*;
  */
 @XmlRootElement( name = "dataElementCategoryOptionCombo" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class DataElementCategoryOptionCombo extends AbstractNameableObject
+public class DataElementCategoryOptionCombo extends BaseNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

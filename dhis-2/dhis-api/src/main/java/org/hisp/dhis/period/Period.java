@@ -31,7 +31,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Weighted;
 
 /**
@@ -39,7 +39,7 @@ import org.hisp.dhis.common.Weighted;
  * @version $Id: Period.java 5277 2008-05-27 15:48:42Z larshelg $
  */
 public class Period
-    extends AbstractNameableObject implements Weighted
+    extends BaseNameableObject implements Weighted
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

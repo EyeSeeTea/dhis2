@@ -27,7 +27,7 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
@@ -49,7 +49,7 @@ import java.util.Set;
  */
 @XmlRootElement( name = "dataSet" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class DataSet extends AbstractNameableObject
+public class DataSet extends BaseNameableObject
 {
     public static final String TYPE_DEFAULT = "default";
     public static final String TYPE_SECTION = "section";

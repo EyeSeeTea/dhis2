@@ -30,7 +30,7 @@ package org.hisp.dhis.indicator;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
-import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.adapter.*;
 import org.hisp.dhis.dataset.DataSet;
 
@@ -45,7 +45,7 @@ import java.util.Set;
  */
 @XmlRootElement( name = "indicator" )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class Indicator extends AbstractNameableObject
+public class Indicator extends BaseNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
