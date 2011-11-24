@@ -46,14 +46,20 @@ public class AbstractNameableObjectXmlAdapter extends XmlAdapter<AbstractNameabl
     @Override
     public AbstractNameableObject marshal( AbstractNameableObject abstractNameableObject ) throws Exception
     {
-        AbstractNameableObject ano = new AbstractNameableObject();
-        ano.setId( abstractNameableObject.getId());
-        ano.setUid(abstractNameableObject.getUid());
-        ano.setName(abstractNameableObject.getName());
-        ano.setShortName(abstractNameableObject.getShortName());
-        ano.setAlternativeName(abstractNameableObject.getAlternativeName());
-        ano.setLastUpdated( abstractNameableObject.getLastUpdated());
-        
-        return ano;
+        if ( abstractNameableObject != null )
+        {
+            AbstractNameableObject ano = new AbstractNameableObject();
+
+            ano.setId( abstractNameableObject.getId() );
+            ano.setUid( abstractNameableObject.getUid() );
+            ano.setName( abstractNameableObject.getName() );
+            ano.setShortName( abstractNameableObject.getShortName() );
+            ano.setAlternativeName( abstractNameableObject.getAlternativeName() );
+            ano.setLastUpdated( abstractNameableObject.getLastUpdated() );
+
+            return ano;
+        }
+
+        return null;
     }
 }

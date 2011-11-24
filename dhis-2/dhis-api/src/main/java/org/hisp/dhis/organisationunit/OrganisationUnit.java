@@ -511,7 +511,7 @@ public class OrganisationUnit extends AbstractNameableObject
 
     @XmlElement
     @XmlJavaTypeAdapter( AbstractNameableObjectXmlAdapter.class )
-    @JsonSerialize( using = JsonNameableObjectSerializer.class )
+/*     @JsonSerialize( using = JsonNameableObjectSerializer.class ) */
     public OrganisationUnit getParent()
     {
         return parent;
