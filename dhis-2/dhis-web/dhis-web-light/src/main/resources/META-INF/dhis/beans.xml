@@ -154,18 +154,4 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
   </bean>
 
-  <bean id="org.hisp.dhis.light.singleevents.action.PopulateSingleEventsDataAction" class="org.hisp.dhis.light.singleevents.action.PopulateSingleEventsDataAction">
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-    <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
-	<property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
-	<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
-	<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
-	<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-	<property name="dataElementCategoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-	<property name="programStageDataElementService" ref="org.hisp.dhis.program.ProgramStageDataElementService" />
-  </bean>
-
 </beans>
