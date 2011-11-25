@@ -101,17 +101,6 @@ public class BaseIdentifiableObject
         this.id = id;
     }
 
-    @Override
-    public String getUuid()
-    {
-        return uuid;
-    }
-
-    public void setUuid( String uuid )
-    {
-        this.uuid = uuid;
-    }
-
     @XmlAttribute
     @JsonProperty
     public String getUid()
@@ -171,32 +160,7 @@ public class BaseIdentifiableObject
             setUid( CodeGenerator.generateCode() );
         }
 
-        if ( uuid == null )
-        {
-            setUuid( UUID.randomUUID().toString().toUpperCase() );
-        }
-
         setLastUpdated( new Date() );
-    }
-
-    /**
-     * Get a map of uuids to internal identifiers
-     *
-     * @param objects the IdentifiableObjects to put in the map
-     * @return the map
-     */
-    public static Map<String, Integer> getUUIDMap( Collection<? extends BaseIdentifiableObject> objects )
-    {
-        Map<String, Integer> map = new HashMap<String, Integer>();
-        for ( IdentifiableObject object : objects )
-        {
-            String uuid = object.getUuid();
-            int internalId = object.getId();
-
-            map.put( uuid, internalId );
-        }
-
-        return map;
     }
 
     /**

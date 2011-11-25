@@ -52,7 +52,6 @@ public class BaseNameableObjectXmlAdapter extends XmlAdapter<BaseNameableObject,
 
             bno.setId( baseNameableObject.getId() );
             bno.setUid( baseNameableObject.getUid() );
-            bno.setUuid( baseNameableObject.getUuid() );
             bno.setCode( baseNameableObject.getCode() );
             bno.setName( baseNameableObject.getName() );
             bno.setLastUpdated( baseNameableObject.getLastUpdated() );

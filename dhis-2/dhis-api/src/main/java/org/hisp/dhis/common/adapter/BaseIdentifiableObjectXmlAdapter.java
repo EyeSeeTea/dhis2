@@ -52,7 +52,6 @@ public class BaseIdentifiableObjectXmlAdapter extends XmlAdapter<BaseIdentifiabl
 
             bio.setId( baseIdentifiableObject.getId() );
             bio.setUid( baseIdentifiableObject.getUid() );
-            bio.setUuid( baseIdentifiableObject.getUuid() );
             bio.setCode( baseIdentifiableObject.getCode() );
             bio.setName( baseIdentifiableObject.getName() );
             bio.setLastUpdated( baseIdentifiableObject.getLastUpdated() );
