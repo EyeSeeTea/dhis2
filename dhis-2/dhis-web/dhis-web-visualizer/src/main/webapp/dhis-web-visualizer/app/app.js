@@ -73,11 +73,6 @@ DV.conf = {
     layout: {
         west_width: 424,
         west_fieldset_width: 402,
-        //west_fieldset_cmp_width: 358,
-        //west_fieldset_sub_cmp_width: 358,
-        //west_fieldset_multiselect_width: 
-        //west_fieldset_sub2_width: 336,
-        //west_fieldset_sub3_width: 123,
         center_tbar_height: 31,
         east_tbar_height: 31,
         east_gridcolumn_height: 30
@@ -116,7 +111,10 @@ Ext.onReady( function() {
     
     DV.cmp = {
         charttype: [],
+        settings: {},
         dimension: {
+            indicator: {},
+            dataelement: {},
             period: []
         },
         fieldset: {},
@@ -247,44 +245,69 @@ Ext.onReady( function() {
             }
         },
         dimension: {
-            indicator: {
+            data: {
                 getUrl: function(isFilter) {
                     var a = [];
-                    DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
+                    DV.cmp.dimension.indicator.selected.store.each( function(r) {
                         a.push('indicatorIds=' + r.data.id);
                     });
-                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
-                },
-                getNames: function(exception) {
-                    var a = [];
-                    DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
-                        a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
-                    });
-                    if (exception && !a.length) {
-                        alert('No indicators selected');
-                    }
-                    return a;
-                }
-            },
-            dataelement: {
-                getUrl: function(isFilter) {
-                    var a = [];
-                    DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
+                    DV.cmp.dimension.dataelement.selected.store.each( function(r) {
                         a.push('dataElementIds=' + r.data.id);
                     });
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
                 getNames: function(exception) {
                     var a = [];
-                    DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
+                    DV.cmp.dimension.indicator.selected.store.each( function(r) {
+                        a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
+                    });
+                    DV.cmp.dimension.dataelement.selected.store.each( function(r) {
                         a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
                     });
                     if (exception && !a.length) {
-                        alert('No data elements selected');
+                        alert('No indicators or data elements selected');
                     }
                     return a;
                 }
             },
+            //indicator: {
+                //getUrl: function(isFilter) {
+                    //var a = [];
+                    //DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
+                        //a.push('indicatorIds=' + r.data.id);
+                    //});
+                    //return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+                //},
+                //getNames: function(exception) {
+                    //var a = [];
+                    //DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
+                        //a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
+                    //});
+                    //if (exception && !a.length) {
+                        //alert('No indicators selected');
+                    //}
+                    //return a;
+                //}
+            //},
+            //dataelement: {
+                //getUrl: function(isFilter) {
+                    //var a = [];
+                    //DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
+                        //a.push('dataElementIds=' + r.data.id);
+                    //});
+                    //return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+                //},
+                //getNames: function(exception) {
+                    //var a = [];
+                    //DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
+                        //a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
+                    //});
+                    //if (exception && !a.length) {
+                        //alert('No data elements selected');
+                    //}
+                    //return a;
+                //}
+            //},
             period: {
                 getUrl: function(isFilter) {
                     var a = [],
@@ -410,25 +433,21 @@ Ext.onReady( function() {
                     if (v === cb.getValue()) {
                         cb.clearValue();
                     }
-                    else if ((v === i || v === d) && (cb.getValue() === i || cb.getValue() === d)) {
-                        cb.clearValue();
-                    }
                 },
                 category: function(vp) {
-                    var cbs = vp.query('combobox[name="' + DV.conf.finals.chart.series + '"]')[0],
-                        cbc = vp.query('combobox[name="' + DV.conf.finals.chart.category + '"]')[0],
-                        cbf = vp.query('combobox[name="' + DV.conf.finals.chart.filter + '"]')[0],
+                    var cbs = DV.cmp.settings.series,
+                        cbc = DV.cmp.settings.category,
+                        cbf = DV.cmp.settings.filter,
                         v = cbs.getValue(),
-                        i = DV.conf.finals.dimension.indicator.value,
-                        d = DV.conf.finals.dimension.dataelement.value,
+                        d = DV.conf.finals.dimension.data.value,
                         p = DV.conf.finals.dimension.period.value,
                         o = DV.conf.finals.dimension.organisationunit.value,
                         index = 0;
                         
-                    this.clearValue(v, cbc, i, d);
-                    this.clearValue(v, cbf, i, d);
+                    this.clearValue(v, cbc);
+                    this.clearValue(v, cbf);
                     
-                    cbc.filterArray = [!(v === i || v === d), !(v === i || v === d), !(v === p), !(v === o)];
+                    cbc.filterArray = [!(v === d), !(v === p), !(v === o)];
                     cbc.store.filterBy( function(r) {
                         return cbc.filterArray[index++];
                     });
@@ -436,22 +455,20 @@ Ext.onReady( function() {
                     this.filter(vp);
                 },                
                 filter: function(vp) {
-                    var cbc = vp.query('combobox[name="' + DV.conf.finals.chart.category + '"]')[0],
-                        cbf = vp.query('combobox[name="' + DV.conf.finals.chart.filter + '"]')[0],
+                    var cbc = DV.cmp.settings.category,
+                        cbf = DV.cmp.settings.filter,
                         v = cbc.getValue(),
-                        i = DV.conf.finals.dimension.indicator.value,
-                        d = DV.conf.finals.dimension.dataelement.value,
+                        d = DV.conf.finals.dimension.data.value,
                         p = DV.conf.finals.dimension.period.value,
                         o = DV.conf.finals.dimension.organisationunit.value,
                         index = 0;
                         
-                    this.clearValue(v, cbf, i, d);
+                    this.clearValue(v, cbf);
                         
                     cbf.filterArray = Ext.Array.clone(cbc.filterArray);
-                    cbf.filterArray[0] = cbf.filterArray[0] ? !(v === i || v === d) : false;
-                    cbf.filterArray[1] = cbf.filterArray[1] ? !(v === i || v === d) : false;
-                    cbf.filterArray[2] = cbf.filterArray[2] ? !(v === p) : false;
-                    cbf.filterArray[3] = cbf.filterArray[3] ? !(v === o) : false;
+                    cbf.filterArray[0] = cbf.filterArray[0] ? !(v === d) : false;
+                    cbf.filterArray[1] = cbf.filterArray[1] ? !(v === p) : false;
+                    cbf.filterArray[2] = cbf.filterArray[2] ? !(v === o) : false;
                     
                     cbf.store.filterBy( function(r) {
                         return cbf.filterArray[index++];
@@ -504,8 +521,7 @@ Ext.onReady( function() {
             return Ext.create('Ext.data.Store', {
                 fields: ['id', 'name'],
                 data: [
-                    {id: DV.conf.finals.dimension.indicator.value, name: DV.conf.finals.dimension.indicator.rawvalue},
-                    {id: DV.conf.finals.dimension.dataelement.value, name: DV.conf.finals.dimension.dataelement.rawvalue},
+                    {id: DV.conf.finals.dimension.data.value, name: DV.conf.finals.dimension.data.rawvalue},
                     {id: DV.conf.finals.dimension.period.value, name: DV.conf.finals.dimension.period.rawvalue},
                     {id: DV.conf.finals.dimension.organisationunit.value, name: DV.conf.finals.dimension.organisationunit.rawvalue}
                 ]
@@ -633,35 +649,31 @@ Ext.onReady( function() {
         period: [],
         organisationunit: [],
         series: {
-            cmp: null,
-            dimension: DV.conf.finals.dimension.indicator.value,
+            dimension: DV.conf.finals.dimension.data.value,
             data: []
         },
         category: {
-            cmp: null,
             dimension: DV.conf.finals.dimension.period.value,
             data: []
         },
         filter: {
-            cmp: null,
             dimension: DV.conf.finals.dimension.organisationunit.value,
             data: []
         },
-        svg: null,
         getState: function(exe) {
             this.resetState();
             
             this.type = DV.util.button.getValue();
             
-            this.series.dimension = this.series.cmp.getValue();
-            this.category.dimension = this.category.cmp.getValue();
-            this.filter.dimension = this.filter.cmp.getValue();
-                        
-            var i = this.getIndiment().value,
+            this.series.dimension = DV.cmp.settings.series.getValue();
+            this.category.dimension = DV.cmp.settings.category.getValue();
+            this.filter.dimension = DV.cmp.settings.filter.getValue();
+            
+            var d = DV.conf.finals.dimension.data.value,
                 p = DV.conf.finals.dimension.period.value,
                 o = DV.conf.finals.dimension.organisationunit.value;
                 
-            this.indiment = DV.util.dimension[i].getNames(true);
+            this.indiment = DV.util.dimension[d].getNames(true);
             this.period = DV.util.dimension[p].getNames(true);
             this.organisationunit = DV.util.dimension[o].getNames(true);
             
@@ -712,7 +724,8 @@ Ext.onReady( function() {
                 category = DV.state.category.dimension,
                 filter = DV.state.filter.dimension,
                 indiment = DV.state.getIndiment().value,
-                url = DV.state.isIndicator() ? DV.conf.finals.ajax.url_indicator : DV.conf.finals.ajax.url_dataelement;
+                //url = DV.state.isIndicator() ? DV.conf.finals.ajax.url_indicator : DV.conf.finals.ajax.url_dataelement;
+                url = 'getAggregatedValues';
                 
             params = params.concat(DV.util.dimension[series].getUrl());
             params = params.concat(DV.util.dimension[category].getUrl());
@@ -1174,10 +1187,10 @@ Ext.onReady( function() {
                                         displayField: 'name',
                                         width: (DV.conf.layout.west_fieldset_width / 3) - 4,
                                         store: DV.store.dimension(),
-                                        value: DV.conf.finals.dimension.indicator.value,
+                                        value: DV.conf.finals.dimension.data.value,
                                         listeners: {
-                                            afterrender: function(cb) {
-                                                DV.state[cb.name].cmp = cb;
+                                            afterrender: function() {
+                                                DV.cmp.settings.series = this;
                                             },
                                             select: function() {
                                                 DV.util.combobox.filter.category(DV.viewport);
@@ -1210,7 +1223,7 @@ Ext.onReady( function() {
                                         value: DV.conf.finals.dimension.period.value,
                                         listeners: {
                                             afterrender: function(cb) {
-                                                DV.state[cb.name].cmp = cb;
+                                                DV.cmp.settings.category = this;
                                             },
                                             select: function(cb) {
                                                 DV.util.combobox.filter.filter(DV.viewport);
@@ -1243,9 +1256,9 @@ Ext.onReady( function() {
                                         value: DV.conf.finals.dimension.organisationunit.value,
                                         listeners: {
                                             afterrender: function(cb) {
-                                                DV.state[cb.name].cmp = cb;
+                                                DV.cmp.settings.filter = this;
                                             },
-                                            select: function(cb) {                     
+                                            select: function(cb) {
                                                 DV.state.filter.dimension = cb.getValue();
                                             }
                                         }
@@ -1359,9 +1372,11 @@ Ext.onReady( function() {
                                                             ' '
                                                         ],
                                                         listeners: {
-                                                            afterrender: function(ms) {
-                                                                ms.boundList.on('itemdblclick', function() {
-                                                                    DV.util.multiselect.select(ms, DV.util.getCmp('multiselect[name="selectedIndicators"]'));
+                                                            afterrender: function() {
+                                                                DV.cmp.dimension.indicator.available = this;
+                                                                
+                                                                this.boundList.on('itemdblclick', function() {
+                                                                    DV.util.multiselect.select(this, DV.cmp.dimension.indicator.selected);
                                                                 });
                                                             }
                                                         }
@@ -1405,9 +1420,11 @@ Ext.onReady( function() {
                                                             }
                                                         ],
                                                         listeners: {
-                                                            afterrender: function(ms) {
-                                                                ms.boundList.on('itemdblclick', function() {
-                                                                    DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableIndicators"]'), ms);
+                                                            afterrender: function() {
+                                                                DV.cmp.dimension.indicator.selected = this;
+                                                                
+                                                                this.boundList.on('itemdblclick', function() {
+                                                                    DV.util.multiselect.unselect(DV.cmp.dimension.indicator.available, this);
                                                                 });
                                                             }
                                                         }
@@ -1517,9 +1534,11 @@ Ext.onReady( function() {
                                                             ' '
                                                         ],
                                                         listeners: {
-                                                            afterrender: function(ms) {
-                                                                ms.boundList.on('itemdblclick', function() {
-                                                                    DV.util.multiselect.select(ms, DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                                                            afterrender: function() {
+                                                                DV.cmp.dimension.dataelement.available = this;
+                                                                
+                                                                this.boundList.on('itemdblclick', function() {
+                                                                    DV.util.multiselect.select(this, DV.cmp.dimension.dataelement.selected);
                                                                 });
                                                             }
                                                         }
@@ -1563,9 +1582,11 @@ Ext.onReady( function() {
                                                             }
                                                         ],
                                                         listeners: {
-                                                            afterrender: function(ms) {
-                                                                ms.boundList.on('itemdblclick', function() {
-                                                                    DV.util.multiselect.unselect(DV.util.getCmp('multiselect[name="availableDataElements"]'), ms);
+                                                            afterrender: function() {
+                                                                DV.cmp.dimension.dataelement.selected = this;
+                                                                
+                                                                this.boundList.on('itemdblclick', function() {
+                                                                    DV.util.multiselect.unselect(DV.cmp.dimension.dataelement.available, this);
                                                                 });
                                                             }
                                                         }
