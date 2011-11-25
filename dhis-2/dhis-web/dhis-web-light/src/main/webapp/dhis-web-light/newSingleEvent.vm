@@ -1,0 +1,46 @@
+<h2>Single Event: $eventName</h2>
+
+<form method="post" action="addSingleEvent.action">
+	<div class="header-box" align="center">
+		<p style="text-align: left;">
+		
+		#foreach( $element in $programStageDataElements )
+				
+				#foreach( $invalidShort in $invalid )
+					<label>$element.getDataElement().getName() == $invalidShort</label>
+				#end
+				<label>$element.getDataElement().getName() #if($element.getDataElement().getType() == "date") (yyyy-mm-dd) #end</label>
+				
+				#if ($element.getDataElement().getType() == "bool")
+					<br />
+			    	<select name="dynForm">
+					<option value="please_select">$i18n.getString("[Please select]")</option>
+					<option value="true">$i18n.getString("Yes")</option>
+					<option value="false">$i18n.getString("No")</option>
+					</select>
+					<br />
+				#elseif ($element.getDataElement().getType() == "date")
+					<input type="date" maxlength="255" size="24" value="$element.getDataElement().getType()" name="dynForm" />
+				#else
+					<input type="text" maxlength="255" size="24" value="$element.getDataElement().getType()" name="dynForm" />
+				
+				#end
+				
+		#end
+		
+		<input type="hidden" name="organisationUnitId" value="$organisationUnitId" />
+		<input type="hidden" name="singleEventId" value="$singleEventId" />
+		<input type="hidden" name="patientId" value="$patientId" />
+		
+		<input type="submit" value=$i18n.getString("Submit") />
+	    </p>
+	</div>
+</form>
+
+<div id="footer">
+<h2>$i18n.getString( "navigate_to" )</h2>
+<ul>
+	<li><a href="registerNewBeneficiary.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">$i18n.getString("Back")</a></li>
+	<li><a href="index.action">$i18n.getString("home")</a></li>
+</ul>
+</div>

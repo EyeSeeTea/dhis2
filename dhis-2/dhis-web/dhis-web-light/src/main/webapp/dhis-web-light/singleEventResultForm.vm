@@ -1,0 +1,20 @@
+<h2>$i18n.getString( "Result" )</h2>
+
+<p>
+	<ul>
+		$i18n.getString( "The registration was successful!" )
+	</ul>
+</p>
+
+
+<div id="footer">
+<h2>$i18n.getString( "navigate_to" )</h2>
+<ul>
+	<li><a href="GetRecentlyRegisteredSingleEvents.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">
+	$i18n.getString("Recently registered")</a></li>
+	<li><a href="getBeneficiaryChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">
+	$i18n.getString("Register a new event")</a></li>
+	<li><a href="singleEvents.action?organisationUnitId=$organisationUnitId">$i18n.getString("Register another event")</a></li>
+	<li><a href="index.action">$i18n.getString("home")</a></li>
+</ul>
+</div>

@@ -90,6 +90,80 @@
     <action name="saveSettingsForm" class="org.hisp.dhis.light.action.settings.action.SaveSettingsFormAction">
       <result name="success" type="redirect">/mobile/index.action</result>
     </action>
+    
+    <!-- Single Events -->
+	
+	<action name="selectOrgUnitSingleEvents" class="org.hisp.dhis.light.singleevents.action.GetSelectOrgUnitSingleEventsAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/selectOrgUnitSingleEvents.vm</param>
+    </action>
+    
+    <action name="singleEvents" class="org.hisp.dhis.light.singleevents.action.GetSingleEventsAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/singleEvents.vm</param>
+    </action>
+    
+    <action name="getSingleEventChoices" class="org.hisp.dhis.light.singleevents.action.GetSingleEventChoicesAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/singleEventChoices.vm</param>
+    </action>
+    
+    <action name="getBeneficiaryChoices" class="org.hisp.dhis.light.singleevents.action.GetBeneficiaryChoicesAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/beneficiaryChoices.vm</param>
+    </action>
+    
+    <action name="registerNewBeneficiary" class="org.hisp.dhis.light.singleevents.action.RegisterNewBeneficiaryAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/newBeneficiary.vm</param>
+    </action>
+    
+	<!--
+	<action name="addBeneficiary" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
+      <result name="success" type="velocity">
+      	<param name="location">/dhis-web-light/main.vm</param>
+      	<param name="page">/dhis-web-light/newSingleEvent.vm</param>
+      </result>
+      <result name="error" type="velocity">
+      	<param name="location">/dhis-web-light/main.vm</param>
+      	<param name="page">/dhis-web-light/newBeneficiary.vm</param>
+      </result>
+	</action>
+	-->
+	
+	<action name="addBeneficiary" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
+      <result name="success" type="velocity">/dhis-web-light/newSingleEvent.vm</result>
+	  <result name="error" type="velocity">/dhis-web-light/newBeneficiary.vm</result>
+	</action>
+	
+    
+    <action name="addSingleEvent" class="org.hisp.dhis.light.singleevents.action.AddSingleEventAction">
+      <!--<result name="success" type="redirect">/mobile/index.action</result>-->
+      <result name="success" type="velocity">/dhis-web-light/singleEventResultForm.vm</result>
+      <result name="error" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/newSingleEvent.vm</param>
+    </action>
+    
+    <action name="updateBeneficiary" class="org.hisp.dhis.light.singleevents.action.UpdateBeneficiaryAction">
+      <result name="success" type="redirect">/mobile/index.action</result>
+      <result name="error" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/editBeneficiary.vm</param>
+    </action>
+    
+    <action name="editBeneficiary" class="org.hisp.dhis.light.singleevents.action.EditBeneficiaryAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/editBeneficiary.vm</param>
+    </action>
+    
+    <action name="GetRecentlyRegisteredSingleEvents" class="org.hisp.dhis.light.singleevents.action.GetRecentlyRegisteredSingleEventsAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/recentlyRegisteredSingleEvents.vm</param>
+    </action>
+    
+    <action name="EditRecentlyRegistered" class="org.hisp.dhis.light.singleevents.action.GetRecentlyEditChoicesAction">
+      <result name="success" type="velocity">/dhis-web-light/main.vm</result>
+      <param name="page">/dhis-web-light/recentlyEditChoices.vm</param>
+    </action>
 
   </package>
 </struts>

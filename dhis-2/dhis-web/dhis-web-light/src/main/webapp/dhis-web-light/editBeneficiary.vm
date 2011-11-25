@@ -1,0 +1,168 @@
+
+<h2>Edit Beneficiary</h2>
+
+<form method="post" action="updateBeneficiary.action">
+	<div class="header-box" align="center">
+		<p style="text-align: left;">
+		
+			<input type="hidden" name="organisationUnitId" value="$organisationUnitId" />
+			<input type="hidden" name="patientId" value="$patientId" />
+		
+	    	
+	    	#if ( $invalidRegistrationDate )
+	    		<label style="color:red;">$i18n.getString("Date of Registration (yyyy-MM-dd). The date entered is not valid.")</label>
+	    	#else
+	    		<label>$i18n.getString("Date of Registration (yyyy-MM-dd)")</label>
+	    	#end
+	    	<input type="date" maxlength="255" size="24" name="registrationDate" value="$registrationDate" />
+	    	
+	    	#if ( $fullNameIsToLong )
+	    		<label style="color:red;">$i18n.getString("Full Name. The name must be between 7 and 50 characters")</label>
+	    	#elseif( $invalidFullName )
+	    		<label style="color:red;">$i18n.getString("Full Name. The name entered is not valid")</label>
+	    	#else
+	    		<label>$i18n.getString("Full Name")</label>
+	    	#end
+	    	<input type="text" maxlength="255" size="24" name="fullName" value="$patient.getFullName()" />
+	    	
+	    	
+	    	#if ( $noGender )
+	    		<label style="color:red;">$i18n.getString("Gender. Please select a gender")</label>
+	    	#elseif ( $invalidGender )
+	    		<label style="color:red;">$i18n.getString("Gender. The gender entered is not valid")</label>
+	    	#else
+	    		<label>$i18n.getString("Gender")</label>
+	    	#end
+	    	<br />    	
+	    	<select name="gender">
+	    		<option value="please_select">[Please select]</option>
+	    		
+	    		#if ($patient.getGender() == "M")
+					<option value="M" selected="selected">$i18n.getString("Male")</option>
+				#else
+					<option value="M">$i18n.getString("Male")</option>
+				#end
+				
+				#if ($patient.getGender() == "F")
+					<option value="F" selected="selected">$i18n.getString("Female")</option>
+				#else
+					<option value="F">$i18n.getString("Female")</option>
+				#end
+				
+				#if ($patient.getGender() == "T")
+					<option value="T" selected="selected">$i18n.getString("Transgender")</option>
+				#else
+					<option value="T">$i18n.getString("Transgender")</option>
+				#end
+				
+			</select>
+			
+			<br />
+			
+			#if ( $noDobType )
+				<label style="color:red;">$i18n.getString("DOB Type. Please select a DOB type")</label>
+			#elseif ( $invalidDobType )
+				<label style="color:red;">$i18n.getString("DOB Type. The DOB type entered is not valid")</label>
+			#else
+				<label>$i18n.getString("DOB Type")</label>
+			#end					
+			<br />
+			<select name="dobType">
+				<option value="p">$i18n.getString("[Please select]")</option>
+				
+				#if ($patient.getDobType() == "V")
+					<option value="V" selected="selected">$i18n.getString("Verified")</option>
+				#else
+					<option value="V">$i18n.getString("Verified")</option>
+				#end
+				
+				#if ($patient.getDobType() == "D")
+					<option value="D" selected="selected">$i18n.getString("Declared")</option>
+				#else
+					<option value="D">$i18n.getString("Declared")</option>
+				#end
+				
+			</select>
+			
+			<br />
+			
+			#if ( $invalidBirthDate )
+	    		<label style="color:red;">$i18n.getString("Date of Birth (yyyy-MM-dd). The date entered is not valid")</label>
+	    	#else
+	    		<label>$i18n.getString("Date of Birth (yyyy-MM-dd)")</label>
+	    	#end
+			<input type="date" maxlength="255" size="24" name="birthDate" value="$birthDate" />
+			
+			#if ( $invalidBloodGroup )
+	    		<label style="color:red;">$i18n.getString("Blood Group. The blood group entered is not valid")</label>
+	    	#else
+				<label>$i18n.getString("Blood Group")</label>
+			#end
+			<br />
+			<select name="bloodGroup">
+				<option value="please_select">$i18n.getString("[Please select]")</option>
+				
+				#if ($patient.getBloodGroup() == "A+")
+					<option value="A+" selected="selected">A+</option>
+				#else
+					<option value="A+">A+</option>
+				#end
+				
+				#if ($patient.getBloodGroup() == "A-")
+					<option value="A-" selected="selected">A-</option>
+				#else
+					<option value="A-">A-</option>
+				#end
+
+				#if ($patient.getBloodGroup() == "AB+")
+					<option value="AB+" selected="selected">AB+</option>
+				#else
+					<option value="AB+">AB+</option>
+				#end
+				
+				#if ($patient.getBloodGroup() == "AB-")
+					<option value="AB-" selected="selected">AB-</option>
+				#else
+					<option value="AB-">AB-</option>
+				#end
+				
+				#if ($patient.getBloodGroup() == "B+")
+					<option value="B+" selected="selected">B+</option>
+				#else
+					<option value="B+">B+</option>
+				#end
+				
+				#if ($patient.getBloodGroup() == "B-")
+					<option value="B-" selected="selected">B-</option>
+				#else
+					<option value="B-">B-</option>
+				#end
+				
+				#if ($patient.getBloodGroup() == "O+")
+					<option value="O+" selected="selected">O+</option>
+				#else
+					<option value="O+">O+</option>
+				#end
+				
+				#if ($patient.getBloodGroup() == "O-")
+					<option value="O-" selected="selected">O-</option>
+				#else
+					<option value="O-">O-</option>
+				#end
+				
+			</select>
+			
+			<br />
+			
+			<input type="submit" value=$i18n.getString("Submit") />
+	    </p>
+	</div>
+</form>
+
+<div id="footer">
+<h2>$i18n.getString( "navigate_to" )</h2>
+<ul>
+	<li><a href="EditRecentlyRegistered.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId&patientId=$patientId">$i18n.getString("Back")</a></li>
+	<li><a href="index.action">$i18n.getString("home")</a></li>
+</ul>
+</div>
