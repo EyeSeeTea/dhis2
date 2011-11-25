@@ -56,7 +56,7 @@ public class IndicatorGroupSetController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public IndicatorGroupSet getIndicatorGroupSet( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public IndicatorGroupSet getIndicatorGroupSet( @PathVariable( "uid" ) String uid, HttpServletRequest request )
     {
         IndicatorGroupSet indicatorGroupSet = indicatorService.getIndicatorGroupSet( uid );
 

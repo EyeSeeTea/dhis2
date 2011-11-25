@@ -82,7 +82,6 @@ public interface DataSetStore
      */
     DataSet getDataSet( String uid );
 
-    
     /**
      * Returns the DataSet with the given name.
      * 

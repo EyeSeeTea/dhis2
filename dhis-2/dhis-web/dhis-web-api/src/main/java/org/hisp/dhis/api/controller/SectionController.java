@@ -36,10 +36,10 @@ public class SectionController
         return sections;
     }
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public Section getDataSet( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    @RequestMapping( value = "/{id}", method = RequestMethod.GET )
+    public Section getDataSet( @PathVariable( "id" ) Integer id, HttpServletRequest request )
     {
-        Section section = sectionService.getSection( uid );
+        Section section = sectionService.getSection( id );
 
         return section;
     }

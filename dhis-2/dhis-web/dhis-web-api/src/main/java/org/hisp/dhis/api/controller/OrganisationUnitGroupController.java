@@ -37,7 +37,7 @@ public class OrganisationUnitGroupController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public OrganisationUnitGroup getOrganisationUnit( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public OrganisationUnitGroup getOrganisationUnit( @PathVariable( "uid" ) String uid, HttpServletRequest request )
     {
         OrganisationUnitGroup organisationUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( uid );
 

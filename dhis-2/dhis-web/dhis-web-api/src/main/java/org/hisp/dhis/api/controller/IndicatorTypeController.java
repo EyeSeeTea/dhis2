@@ -56,7 +56,7 @@ public class IndicatorTypeController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public IndicatorType getIndicator( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public IndicatorType getIndicator( @PathVariable( "uid" ) String uid, HttpServletRequest request )
     {
         IndicatorType indicatorType = indicatorService.getIndicatorType( uid );
 

@@ -54,7 +54,7 @@ public class IndicatorGroupController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public IndicatorGroup getIndicatorGroup( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public IndicatorGroup getIndicatorGroup( @PathVariable( "uid" ) String uid, HttpServletRequest request )
     {
         IndicatorGroup indicatorGroup = indicatorService.getIndicatorGroup( uid );
 

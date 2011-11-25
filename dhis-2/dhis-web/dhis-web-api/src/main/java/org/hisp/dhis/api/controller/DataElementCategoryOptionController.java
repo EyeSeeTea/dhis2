@@ -36,7 +36,7 @@ public class DataElementCategoryOptionController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public DataElementCategoryOption getDataElementCategoryOption( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public DataElementCategoryOption getDataElementCategoryOption( @PathVariable( "uid" ) String uid, HttpServletRequest request )
     {
         DataElementCategoryOption dataElementCategoryOption = dataElementCategoryService.getDataElementCategoryOption( uid );
 

@@ -36,7 +36,7 @@ public class DataElementCategoryOptionComboController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public DataElementCategoryOptionCombo getDataElementCategoryCombo( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public DataElementCategoryOptionCombo getDataElementCategoryCombo( @PathVariable( "uid" ) String uid, HttpServletRequest request )
     {
         DataElementCategoryOptionCombo dataElementCategoryOptionCombo = dataElementCategoryService.getDataElementCategoryOptionCombo( uid );
 

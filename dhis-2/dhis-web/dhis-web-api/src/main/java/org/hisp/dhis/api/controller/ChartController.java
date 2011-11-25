@@ -59,7 +59,7 @@ public class ChartController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public Chart getChart( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public Chart getChart( @PathVariable( "uid" ) String uid, HttpServletRequest request )
     {
         Chart chart = chartService.getChart( uid );
 

@@ -40,7 +40,7 @@ public class CompleteDataSetRegistrationController
 
     /*
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public Chart getChart( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public Chart getChart( @PathVariable( "uid" ) String uid, HttpServletRequest request )
     {
         CompleteDataSetRegistration completeDataSetRegistration = completeDataSetRegistrationService.getCompleteDataSetRegistration(  )
         Chart chart = chartService.getChart( uid );

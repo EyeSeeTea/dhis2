@@ -56,7 +56,7 @@ public class DataElementGroupSetController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public DataElementGroupSet getDataElementGroupSet( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public DataElementGroupSet getDataElementGroupSet( @PathVariable( "uid" ) String uid, HttpServletRequest request )
     {
         DataElementGroupSet dataElementGroupSet = dataElementService.getDataElementGroupSet( uid );
 

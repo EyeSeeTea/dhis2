@@ -56,7 +56,7 @@ public class DataElementController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public DataElement getDataElement( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public DataElement getDataElement( @PathVariable( "uid" ) String uid, HttpServletRequest request )
     {
         DataElement dataElement = dataElementService.getDataElement( uid );
 
