@@ -93,11 +93,6 @@ public class DataSet extends BaseNameableObject
     private Set<OrganisationUnit> sources = new HashSet<OrganisationUnit>();
 
     /**
-     * Property indicating whether the DataSet is locked for data entry.
-     */
-    private Boolean locked = false;
-
-    /**
      * The Sections associated with the DataSet.
      */
     private Set<Section> sections = new HashSet<Section>();
@@ -110,7 +105,7 @@ public class DataSet extends BaseNameableObject
     /**
      * Property indicating if the dataset could be collected using mobile data entry.
      */
-    private Boolean mobile = false;
+    private boolean mobile;
 
     /**
      * Indicating custom data entry form.
@@ -224,11 +219,6 @@ public class DataSet extends BaseNameableObject
     public boolean hasSections()
     {
         return sections != null && sections.size() > 0;
-    }
-
-    public boolean isMobile()
-    {
-        return mobile != null && mobile;
     }
 
     public String getDataSetType()
@@ -371,18 +361,6 @@ public class DataSet extends BaseNameableObject
 
     @XmlElement
     @JsonProperty
-    public Boolean getLocked()
-    {
-        return locked;
-    }
-
-    public void setLocked( Boolean locked )
-    {
-        this.locked = locked;
-    }
-
-    @XmlElement
-    @JsonProperty
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -407,12 +385,12 @@ public class DataSet extends BaseNameableObject
 
     @XmlElement
     @JsonProperty
-    public Boolean getMobile()
+    public boolean isMobile()
     {
         return mobile;
     }
 
-    public void setMobile( Boolean mobile )
+    public void setMobile( boolean mobile )
     {
         this.mobile = mobile;
     }

@@ -121,6 +121,11 @@ public class DefaultDataElementCategoryService
         return dataElementCategoryStore.get( id );
     }
 
+    public DataElementCategory getDataElementCategory( String uid )
+    {
+        return dataElementCategoryStore.getByUid( uid );
+    }
+
     public Collection<DataElementCategory> getDataElementCategories( final Collection<Integer> identifiers )
     {
         Collection<DataElementCategory> categories = getAllDataElementCategories();
@@ -161,6 +166,11 @@ public class DefaultDataElementCategoryService
     public DataElementCategoryOption getDataElementCategoryOption( int id )
     {
         return dataElementCategoryOptionStore.get( id );
+    }
+
+    public DataElementCategoryOption getDataElementCategoryOption( String uid )
+    {
+        return dataElementCategoryOptionStore.getByUid( uid );
     }
 
     public DataElementCategoryOption getDataElementCategoryOptionByName( String name )
@@ -215,6 +225,11 @@ public class DefaultDataElementCategoryService
     {
         return dataElementCategoryComboStore.get( id );
     }
+
+    public DataElementCategoryCombo getDataElementCategoryCombo( String uid )
+    {
+        return dataElementCategoryComboStore.getByUid( uid );
+    }
     
     public Collection<DataElementCategoryCombo> getDataElementCategoryCombos( final Collection<Integer> identifiers )
     {
@@ -259,8 +274,9 @@ public class DefaultDataElementCategoryService
         return dataElementCategoryOptionComboStore.get( id );
     }
 
-    public DataElementCategoryOptionCombo getDataElementCategoryOptionCombo( String uuid ) {
-        return dataElementCategoryOptionComboStore.getByUuid( uuid );
+    public DataElementCategoryOptionCombo getDataElementCategoryOptionCombo( String uid )
+    {
+        return dataElementCategoryOptionComboStore.getByUid( uid );
     }
 
     public Collection<DataElementCategoryOptionCombo> getDataElementCategoryOptionCombos(

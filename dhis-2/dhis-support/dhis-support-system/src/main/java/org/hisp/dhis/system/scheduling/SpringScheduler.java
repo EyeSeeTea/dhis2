@@ -28,6 +28,7 @@ package org.hisp.dhis.system.scheduling;
  */
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
@@ -74,17 +75,15 @@ public class SpringScheduler
         taskExecutor.execute( task );
     }
     
-    public boolean scheduleTask( Runnable task, String cronExpr )
-    {
-        String key = task != null ? task.getClass().getName() : null;
-        
+    public boolean scheduleTask( String key, Runnable task, String cronExpr )
+    {        
         if ( key != null && !futures.containsKey( key ) )
         {
             ScheduledFuture<?> future = taskScheduler.schedule( task, new CronTrigger( cronExpr ) );
             
             futures.put( key, future );
             
-            log.info( "Scheduled task of type: " + key );
+            log.info( "Scheduled task with key: " + key + " and cron: " + cronExpr );
             
             return true;
         }
@@ -92,10 +91,8 @@ public class SpringScheduler
         return false;
     }
     
-    public boolean stopTask( Class<? extends Runnable> taskClass )
-    {
-        String key = taskClass != null ? taskClass.getName() : null;
-        
+    public boolean stopTask( String key )
+    {        
         if ( key != null )
         {
             ScheduledFuture<?> future = futures.get( key );
@@ -104,18 +101,34 @@ public class SpringScheduler
             
             futures.remove( key );
             
-            log.info( "Stopped task of type: " + taskClass.getName() );
+            log.info( "Stopped task with key: " + key + " successfully: " + result );
             
             return result;
         }
         
         return false;
-    }    
-
-    public String getTaskStatus( Class<? extends Runnable> taskClass )
+    }
+    
+    public void stopAllTasks()
     {
-        String key = taskClass != null ? taskClass.getName() : null;
+        Iterator<String> keys = futures.keySet().iterator();
         
+        while ( keys.hasNext() )
+        {
+            String key = keys.next();
+            
+            ScheduledFuture<?> future = futures.get( key );
+            
+            boolean result = future != null ? future.cancel( true ) : false;
+            
+            keys.remove();
+            
+            log.info( "Stopped task with key: " + key + " successfully: " + result );
+        }
+    }
+
+    public String getTaskStatus( String key )
+    {        
         ScheduledFuture<?> future = futures.get( key );
         
         if ( future == null )

@@ -92,7 +92,6 @@ public class DataElementBatchHandler
     
     protected void setColumns()
     {
-        statementBuilder.setColumn( "uuid" );
         statementBuilder.setColumn( "name" );
         statementBuilder.setColumn( "alternativename" );
         statementBuilder.setColumn( "shortname" );
@@ -104,12 +103,12 @@ public class DataElementBatchHandler
         statementBuilder.setColumn( "aggregationtype" );
         statementBuilder.setColumn( "categorycomboid" );
         statementBuilder.setColumn( "sortorder" );
+        statementBuilder.setColumn( "zeroissignificant" );
         statementBuilder.setColumn( "lastupdated" );
     }
     
     protected void setValues( DataElement dataElement )
-    {        
-        statementBuilder.setValue( dataElement.getUuid() );
+    {
         statementBuilder.setValue( dataElement.getName() );
         statementBuilder.setValue( dataElement.getAlternativeName() );
         statementBuilder.setValue( dataElement.getShortName() );
@@ -121,6 +120,7 @@ public class DataElementBatchHandler
         statementBuilder.setValue( dataElement.getAggregationOperator() );
         statementBuilder.setValue( dataElement.getCategoryCombo().getId() );
         statementBuilder.setValue( dataElement.getSortOrder() );
+        statementBuilder.setValue( dataElement.isZeroIsSignificant() );
         statementBuilder.setValue( dataElement.getLastUpdated() );
     }
 }

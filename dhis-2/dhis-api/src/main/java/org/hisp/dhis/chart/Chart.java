@@ -109,17 +109,17 @@ public class Chart
 
     private String dimension;
 
-    private Boolean hideLegend;
+    private boolean hideLegend;
 
-    private Boolean verticalLabels;
+    private boolean verticalLabels;
 
-    private Boolean horizontalPlotOrientation;
+    private boolean horizontalPlotOrientation;
 
-    private Boolean regression;
+    private boolean regression;
 
-    private Boolean targetLine;
+    private boolean targetLine;
 
-    private Boolean hideSubtitle;
+    private boolean hideSubtitle;
 
     private Double targetLineValue;
 
@@ -139,7 +139,7 @@ public class Chart
 
     private RelativePeriods relatives;
 
-    private Boolean userOrganisationUnit;
+    private boolean userOrganisationUnit;
 
     // -------------------------------------------------------------------------
     // Transient properties
@@ -270,31 +270,6 @@ public class Chart
         return this.dimension != null && this.dimension.equals( dimension );
     }
 
-    public boolean isHideLegend()
-    {
-        return hideLegend != null && hideLegend;
-    }
-
-    public boolean isVerticalLabels()
-    {
-        return verticalLabels != null && verticalLabels;
-    }
-
-    public boolean isHorizontalPlotOrientation()
-    {
-        return horizontalPlotOrientation != null && horizontalPlotOrientation;
-    }
-
-    public boolean isRegression()
-    {
-        return regression != null && regression;
-    }
-
-    public boolean isTargetLine()
-    {
-        return targetLine != null && targetLine;
-    }
-
     public int getWidth()
     {
         return isSize( SIZE_WIDE ) ? 1000 : 700;
@@ -303,11 +278,6 @@ public class Chart
     public int getHeight()
     {
         return isSize( SIZE_TALL ) ? 800 : 500;
-    }
-
-    public boolean isUserOrganisationUnit()
-    {
-        return userOrganisationUnit != null && userOrganisationUnit;
     }
 
     // -------------------------------------------------------------------------
@@ -376,60 +346,60 @@ public class Chart
 
     @XmlElement
     @JsonProperty
-    public Boolean getHideLegend()
+    public boolean isHideLegend()
     {
         return hideLegend;
     }
 
-    public void setHideLegend( Boolean hideLegend )
+    public void setHideLegend( boolean hideLegend )
     {
         this.hideLegend = hideLegend;
     }
 
     @XmlElement
     @JsonProperty
-    public Boolean getVerticalLabels()
+    public boolean isVerticalLabels()
     {
         return verticalLabels;
     }
 
-    public void setVerticalLabels( Boolean verticalLabels )
+    public void setVerticalLabels( boolean verticalLabels )
     {
         this.verticalLabels = verticalLabels;
     }
 
     @XmlElement
     @JsonProperty
-    public Boolean getHorizontalPlotOrientation()
+    public boolean isHorizontalPlotOrientation()
     {
         return horizontalPlotOrientation;
     }
 
-    public void setHorizontalPlotOrientation( Boolean horizontalPlotOrientation )
+    public void setHorizontalPlotOrientation( boolean horizontalPlotOrientation )
     {
         this.horizontalPlotOrientation = horizontalPlotOrientation;
     }
 
     @XmlElement
     @JsonProperty
-    public Boolean getRegression()
+    public boolean isRegression()
     {
         return regression;
     }
 
-    public void setRegression( Boolean regression )
+    public void setRegression( boolean regression )
     {
         this.regression = regression;
     }
 
     @XmlElement
     @JsonProperty
-    public Boolean getTargetLine()
+    public boolean isTargetLine()
     {
         return targetLine;
     }
 
-    public void setTargetLine( Boolean targetLine )
+    public void setTargetLine( boolean targetLine )
     {
         this.targetLine = targetLine;
     }
@@ -448,30 +418,20 @@ public class Chart
 
     @XmlElement
     @JsonProperty
-    public String getTargetLineLabel()
-    {
-        if ( targetLineLabel == null || targetLineLabel.trim().length() == 0 )
-        {
-            targetLineLabel = "Target Line";
-        }
-
-        return targetLineLabel;
-    }
-
     public void setTargetLineLabel( String targetLineLabel )
     {
         this.targetLineLabel = targetLineLabel;
     }
 
+    public String getTargetLineLabel()
+    {
+        return targetLineLabel;
+    }
+
     @XmlElement
     @JsonProperty
-    public Boolean getHideSubtitle()
+    public boolean isHideSubtitle()
     {
-        if ( hideSubtitle == null )
-        {
-            return Boolean.FALSE;
-        }
-
         return hideSubtitle;
     }
 
@@ -572,12 +532,12 @@ public class Chart
 
     @XmlElement
     @JsonProperty
-    public Boolean getUserOrganisationUnit()
+    public boolean isUserOrganisationUnit()
     {
         return userOrganisationUnit;
     }
 
-    public void setUserOrganisationUnit( Boolean userOrganisationUnit )
+    public void setUserOrganisationUnit( boolean userOrganisationUnit )
     {
         this.userOrganisationUnit = userOrganisationUnit;
     }

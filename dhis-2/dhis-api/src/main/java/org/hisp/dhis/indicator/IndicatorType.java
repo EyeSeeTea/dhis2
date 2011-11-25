@@ -49,7 +49,7 @@ public class IndicatorType extends BaseIdentifiableObject
 
     private int factor;
 
-    private Boolean number;
+    private boolean number;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -123,12 +123,12 @@ public class IndicatorType extends BaseIdentifiableObject
 
     @XmlElement
     @JsonProperty
-    public Boolean getNumber()
+    public boolean isNumber()
     {
-        return number != null && number;
+        return number;
     }
 
-    public void setNumber( Boolean number )
+    public void setNumber( boolean number )
     {
         this.number = number;
     }

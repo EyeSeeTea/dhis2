@@ -33,7 +33,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.UUID;
 
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
@@ -105,18 +104,6 @@ public class IdentityPopulator
                     }
 
                     count = 0;
-
-                    resultSet = statement.executeQuery( "SELECT * from " + table + " WHERE uuid IS NULL" );
-                    while ( resultSet.next() )
-                    {
-                        ++count;
-                        resultSet.updateString( "uuid", UUID.randomUUID().toString() );
-                        resultSet.updateRow();
-                    }
-                    if ( count > 0 )
-                    {
-                        log.info( count + " uuids updated on " + table );
-                    }
 
                     Timestamp now = new Timestamp( new Date().getTime() );
 

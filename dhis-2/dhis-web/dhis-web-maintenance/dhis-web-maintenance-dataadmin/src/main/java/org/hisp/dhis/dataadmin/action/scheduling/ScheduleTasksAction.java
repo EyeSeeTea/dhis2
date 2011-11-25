@@ -30,7 +30,9 @@ package org.hisp.dhis.dataadmin.action.scheduling;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_SCHEDULED_PERIOD_TYPES;
 import static org.hisp.dhis.options.SystemSettingManager.*;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.options.SystemSettingManager;
@@ -45,6 +47,9 @@ import com.opensymphony.xwork2.Action;
 public class ScheduleTasksAction
     implements Action
 {
+    private static final String STRATEGY_LAST_12_DAILY = "last12Daily";
+    private static final String STRATEGY_LAST_6_DAILY_6_TO_12_WEEKLY = "last6Daily6To12Weekly";
+        
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -74,18 +79,30 @@ public class ScheduleTasksAction
         this.execute = execute;
     }
     
-    private boolean statusOnly = false;
+    private boolean schedule;
 
-    public void setStatusOnly( boolean statusOnly )
+    public void setSchedule( boolean schedule )
     {
-        this.statusOnly = statusOnly;
+        this.schedule = schedule;
     }
-    
+
     private Set<String> scheduledPeriodTypes = new HashSet<String>();
 
     public void setScheduledPeriodTypes( Set<String> scheduledPeriodTypes )
     {
         this.scheduledPeriodTypes = scheduledPeriodTypes;
+    }
+    
+    private String dataMartStrategy;
+
+    public String getDataMartStrategy()
+    {
+        return dataMartStrategy;
+    }
+
+    public void setDataMartStrategy( String dataMartStrategy )
+    {
+        this.dataMartStrategy = dataMartStrategy;
     }
 
     // -------------------------------------------------------------------------
@@ -124,24 +141,35 @@ public class ScheduleTasksAction
         {
             schedulingManager.executeTasks();
         }
-        else if ( !statusOnly )
+        else if ( schedule )
         {
             systemSettingManager.saveSystemSetting( KEY_SCHEDULED_PERIOD_TYPES, (HashSet<String>) scheduledPeriodTypes );
             
             if ( Scheduler.STATUS_RUNNING.equals( schedulingManager.getTaskStatus() ) )
             {
-                systemSettingManager.saveSystemSetting( KEY_DATAMART_TASK, new Boolean( false ) );
-                systemSettingManager.saveSystemSetting( KEY_DATASETCOMPLETENESS_TASK, new Boolean( false ) );
-                
                 schedulingManager.stopTasks();
             }
             else
             {
-                systemSettingManager.saveSystemSetting( KEY_DATAMART_TASK, new Boolean( true) );
-                systemSettingManager.saveSystemSetting( KEY_DATASETCOMPLETENESS_TASK, new Boolean( true ) );
+                Map<String, String> keyCronMap = new HashMap<String, String>();
                 
-                schedulingManager.scheduleTasks();
+                if ( STRATEGY_LAST_12_DAILY.equals( dataMartStrategy ) )
+                {
+                    keyCronMap.put( SchedulingManager.TASK_DATAMART_LAST_12_MONTHS, Scheduler.CRON_DAILY_0AM );
+                }
+                else if ( STRATEGY_LAST_6_DAILY_6_TO_12_WEEKLY.equals( dataMartStrategy ) )
+                {
+                    keyCronMap.put( SchedulingManager.TASK_DATAMART_LAST_6_MONTS, Scheduler.CRON_DAILY_0AM_EXCEPT_SUNDAY );
+                    keyCronMap.put( SchedulingManager.TASK_DATAMART_FROM_6_TO_12_MONTS, Scheduler.CRON_WEEKLY_SUNDAY_0AM );
+                }
+                
+                schedulingManager.scheduleTasks( keyCronMap );
             }
+        }
+        else
+        {
+            dataMartStrategy = schedulingManager.getScheduledTasks().containsKey( SchedulingManager.TASK_DATAMART_LAST_12_MONTHS ) ? 
+                STRATEGY_LAST_12_DAILY : STRATEGY_LAST_6_DAILY_6_TO_12_WEEKLY;
         }
 
         status = schedulingManager.getTaskStatus();        

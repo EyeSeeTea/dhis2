@@ -90,23 +90,24 @@ public class DataSetBatchHandler
 
     protected void setColumns()
     {
-        statementBuilder.setColumn( "uuid" );
         statementBuilder.setColumn( "name" );
         statementBuilder.setColumn( "shortName" );
         statementBuilder.setColumn( "code" );
         statementBuilder.setColumn( "periodtypeid" );
         statementBuilder.setColumn( "sortorder" );
+        statementBuilder.setColumn( "mobile" );
         statementBuilder.setColumn( "dataEntryForm" );
     }
 
     protected void setValues( DataSet dataSet )
     {
-        statementBuilder.setValue( dataSet.getUuid() );
         statementBuilder.setValue( dataSet.getName() );
         statementBuilder.setValue( dataSet.getShortName() );
         statementBuilder.setValue( dataSet.getCode() );
         statementBuilder.setValue( dataSet.getPeriodType().getId() );
         statementBuilder.setValue( dataSet.getSortOrder() );
+        statementBuilder.setValue( dataSet.isMobile() );
         statementBuilder.setValue( dataSet.getDataEntryForm() != null ? dataSet.getDataEntryForm().getId() : null );
+        
     }
 }

@@ -90,7 +90,6 @@ public class OrganisationUnitBatchHandler
     
     protected void setColumns()
     {
-        statementBuilder.setColumn( "uuid" );
         statementBuilder.setColumn( "name" );
         statementBuilder.setColumn( "parentid" );
         statementBuilder.setColumn( "shortname" );
@@ -103,11 +102,11 @@ public class OrganisationUnitBatchHandler
         statementBuilder.setColumn( "featuretype" );
         statementBuilder.setColumn( "coordinates" );
         statementBuilder.setColumn( "lastupdated" );
+        statementBuilder.setColumn( "haspatients" );
     }
     
     protected void setValues( OrganisationUnit unit )
     {
-        statementBuilder.setValue( unit.getUuid() );
         statementBuilder.setValue( unit.getName() );        
         statementBuilder.setValue( unit.getParent() != null ? unit.getParent().getId() : null );
         statementBuilder.setValue( unit.getShortName() );
@@ -120,5 +119,6 @@ public class OrganisationUnitBatchHandler
         statementBuilder.setValue( unit.getFeatureType() );
         statementBuilder.setValue( unit.getCoordinates() );
         statementBuilder.setValue( unit.getLastUpdated() );
+        statementBuilder.setValue( unit.isHasPatients() );
     }
 }

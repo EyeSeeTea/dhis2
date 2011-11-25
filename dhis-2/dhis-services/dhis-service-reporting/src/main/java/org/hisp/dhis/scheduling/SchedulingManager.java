@@ -27,20 +27,26 @@ package org.hisp.dhis.scheduling;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Set;
+import java.util.Map;
 
 /**
  * @author Lars Helge Overland
  */
 public interface SchedulingManager
 {
+    final String TASK_DATAMART_LAST_12_MONTHS = "dataMartLast12MonthsTask";
+    final String TASK_DATAMART_LAST_6_MONTS = "dataMartLast6MonthsTask";
+    final String TASK_DATAMART_FROM_6_TO_12_MONTS = "dataMartFrom6To12MonthsTask";
+    
     void scheduleTasks();
+    
+    void scheduleTasks( Map<String, String> keyCronMap );
     
     void stopTasks();
     
     void executeTasks();
     
-    String getTaskStatus();
+    Map<String, String> getScheduledTasks();
     
-    Set<String> getScheduledTaskKeys();
+    String getTaskStatus();   
 }
