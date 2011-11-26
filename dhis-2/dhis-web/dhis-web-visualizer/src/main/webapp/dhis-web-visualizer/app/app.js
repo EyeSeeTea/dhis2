@@ -12,8 +12,7 @@ DV.conf = {
             url_visualizer: '../',
             url_commons: '../../dhis-web-commons-ajax-json/',
             url_portal: '../../dhis-web-portal/',
-            url_indicator: 'getAggregatedIndicatorValues',
-            url_dataelement: 'getAggregatedDataValues'
+            url_data: 'getAggregatedValues.action'
         },        
         dimension: {
             data: {
@@ -272,44 +271,6 @@ Ext.onReady( function() {
                     return a;
                 }
             },
-            //indicator: {
-                //getUrl: function(isFilter) {
-                    //var a = [];
-                    //DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
-                        //a.push('indicatorIds=' + r.data.id);
-                    //});
-                    //return (isFilter && a.length > 1) ? a.slice(0,1) : a;
-                //},
-                //getNames: function(exception) {
-                    //var a = [];
-                    //DV.util.getCmp('multiselect[name="selectedIndicators"]').store.each( function(r) {
-                        //a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
-                    //});
-                    //if (exception && !a.length) {
-                        //alert('No indicators selected');
-                    //}
-                    //return a;
-                //}
-            //},
-            //dataelement: {
-                //getUrl: function(isFilter) {
-                    //var a = [];
-                    //DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
-                        //a.push('dataElementIds=' + r.data.id);
-                    //});
-                    //return (isFilter && a.length > 1) ? a.slice(0,1) : a;
-                //},
-                //getNames: function(exception) {
-                    //var a = [];
-                    //DV.util.getCmp('multiselect[name="selectedDataElements"]').store.each( function(r) {
-                        //a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
-                    //});
-                    //if (exception && !a.length) {
-                        //alert('No data elements selected');
-                    //}
-                    //return a;
-                //}
-            //},
             period: {
                 getUrl: function(isFilter) {
                     var a = [],
@@ -703,7 +664,7 @@ Ext.onReady( function() {
             params = params.concat(DV.util.dimension[DV.state.category.dimension].getUrl());
             params = params.concat(DV.util.dimension[DV.state.filter.dimension].getUrl(true));
             
-            var baseUrl = DV.conf.finals.ajax.url_visualizer + 'getAggregatedValues.action';
+            var baseUrl = DV.conf.finals.ajax.url_visualizer + DV.conf.finals.ajax.url_data;
             Ext.Array.each(params, function(item) {
                 baseUrl = Ext.String.urlAppend(baseUrl, item);
             });
