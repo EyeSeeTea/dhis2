@@ -261,9 +261,11 @@ Ext.onReady( function() {
                     DV.cmp.dimension.indicator.selected.store.each( function(r) {
                         a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
                     });
-                    DV.cmp.dimension.dataelement.selected.store.each( function(r) {
-                        a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
-                    });
+                    if (DV.cmp.dimension.dataelement.selected.store) {
+                        DV.cmp.dimension.dataelement.selected.store.each( function(r) {
+                            a.push(DV.util.chart.getEncodedSeriesName(r.data.shortName));
+                        });
+                    }
                     if (exception && !a.length) {
                         alert('No indicators or data elements selected');
                     }
@@ -384,7 +386,7 @@ Ext.onReady( function() {
                 return text.replace(/\./g,'');
             },
             getLegend: function(len) {
-                len = len ? len : DV.state.series.data.length;
+                len = len ? len : DV.state.series.names.length;
                 return {
                     position: len > 6 ? 'right' : 'top',
                     boxStroke: '#ffffff',
@@ -403,7 +405,7 @@ Ext.onReady( function() {
             getTitle: function() {
                 return {
                     type: 'text',
-                    text: DV.init.isInit ? 'Example chart' : DV.state.filter.data[0],
+                    text: DV.init.isInit ? 'Example chart' : DV.state.filter.names[0],
                     font: 'bold 15px arial',
                     fill: '#222',
                     width: 300,
@@ -581,7 +583,7 @@ Ext.onReady( function() {
         getDataTableStore: function(exe) {
             this.datatable = Ext.create('Ext.data.Store', {
                 fields: [
-                    DV.state.getIndiment().value,
+                    DV.conf.finals.dimension.data.value,
                     DV.conf.finals.dimension.period.value,
                     DV.conf.finals.dimension.organisationunit.value,
                     'v'
@@ -645,20 +647,17 @@ Ext.onReady( function() {
     
     DV.state = {
         type: DV.conf.finals.chart.column,
-        indiment: [],
-        period: [],
-        organisationunit: [],
         series: {
             dimension: DV.conf.finals.dimension.data.value,
-            data: []
+            names: []
         },
         category: {
             dimension: DV.conf.finals.dimension.period.value,
-            data: []
+            names: []
         },
         filter: {
             dimension: DV.conf.finals.dimension.organisationunit.value,
-            data: []
+            names: []
         },
         getState: function(exe) {
             this.resetState();
@@ -666,45 +665,24 @@ Ext.onReady( function() {
             this.type = DV.util.button.getValue();
             
             this.series.dimension = DV.cmp.settings.series.getValue();
+            this.series.names = DV.util.dimension[this.series.dimension].getNames(true);
+            
             this.category.dimension = DV.cmp.settings.category.getValue();
+            this.category.names = DV.util.dimension[this.category.dimension].getNames(true);
+            
             this.filter.dimension = DV.cmp.settings.filter.getValue();
+            this.filter.names = DV.util.dimension[this.filter.dimension].getNames(true).slice(0,1);
             
-            var d = DV.conf.finals.dimension.data.value,
-                p = DV.conf.finals.dimension.period.value,
-                o = DV.conf.finals.dimension.organisationunit.value;
-                
-            this.indiment = DV.util.dimension[d].getNames(true);
-            this.period = DV.util.dimension[p].getNames(true);
-            this.organisationunit = DV.util.dimension[o].getNames(true);
-            
-            if (!this.indiment.length || !this.period.length || !this.organisationunit.length) {
+            if (!this.series.names.length || !this.category.names.length || !this.filter.names.length) {
                 return;
             }
-            
-            this.indicator = this.indiment;
-            this.dataelement = this.indiment;
-            
-            this.series.data = this[this.series.dimension];
-            this.category.data = this[this.category.dimension];
-            this.filter.data = this[this.filter.dimension].slice(0,1);
             
             if (exe) {
                 DV.value.getValues(true);
             }
         },
-        getIndiment: function() {
-            var i = DV.conf.finals.dimension.indicator.value;
-            return (this.series.dimension === i || this.category.dimension === i || this.filter.dimension === i) ?
-                DV.conf.finals.dimension.indicator : DV.conf.finals.dimension.dataelement;
-        },
-        isIndicator: function() {
-            var i = DV.conf.finals.dimension.indicator.value;
-            return (this.series.dimension === i || this.category.dimension === i || this.filter.dimension === i);
-        },
         resetState: function() {
-            this.indiment = null;
-            this.period = null;
-            this.organisationunit = null;
+            this.type = null;
             this.series.dimension = null;
             this.series.data = null;
             this.category.dimension = null;
@@ -718,20 +696,14 @@ Ext.onReady( function() {
         values: [],
         getValues: function(exe) {
             var params = [],
-                indicator = DV.conf.finals.dimension.indicator.value,
-                dataelement = DV.conf.finals.dimension.dataelement.value,
-                series = DV.state.series.dimension,
-                category = DV.state.category.dimension,
-                filter = DV.state.filter.dimension,
-                indiment = DV.state.getIndiment().value,
-                //url = DV.state.isIndicator() ? DV.conf.finals.ajax.url_indicator : DV.conf.finals.ajax.url_dataelement;
-                url = 'getAggregatedValues';
+                i = DV.conf.finals.dimension.indicator.value,
+                d = DV.conf.finals.dimension.dataelement.value;
                 
-            params = params.concat(DV.util.dimension[series].getUrl());
-            params = params.concat(DV.util.dimension[category].getUrl());
-            params = params.concat(DV.util.dimension[filter].getUrl(true));
+            params = params.concat(DV.util.dimension[DV.state.series.dimension].getUrl());
+            params = params.concat(DV.util.dimension[DV.state.category.dimension].getUrl());
+            params = params.concat(DV.util.dimension[DV.state.filter.dimension].getUrl(true));
             
-            var baseUrl = DV.conf.finals.ajax.url_visualizer + url + '.action';
+            var baseUrl = DV.conf.finals.ajax.url_visualizer + 'getAggregatedValues.action';
             Ext.Array.each(params, function(item) {
                 baseUrl = Ext.String.urlAppend(baseUrl, item);
             });
@@ -746,8 +718,10 @@ Ext.onReady( function() {
                         return;
                     }
                     
+                    var storage = Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);
+
                     Ext.Array.each(DV.value.values, function(item) {
-                        item[indiment] = DV.store[indiment].available.storage[item.i].name;
+                        item[DV.conf.finals.dimension.data.value] = storage[item.d].name;
                         item[DV.conf.finals.dimension.period.value] = DV.util.dimension.period.getNameById(item.p);
                         item[DV.conf.finals.dimension.organisationunit.value] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
                         item.v = parseFloat(item.v);
@@ -769,16 +743,16 @@ Ext.onReady( function() {
         getData: function(exe) {
             this.data = [];
 			
-            Ext.Array.each(DV.state.category.data, function(item) {
+            Ext.Array.each(DV.state.category.names, function(item) {
                 var obj = {};
                 obj[DV.conf.finals.chart.x] = item;
                 DV.chart.data.push(obj);
             });
             
             Ext.Array.each(DV.chart.data, function(item) {
-                for (var i = 0; i < DV.state.series.data.length; i++) {
+                for (var i = 0; i < DV.state.series.names.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
-                        if (DV.value.values[j][DV.state.category.dimension] === item[DV.conf.finals.chart.x] && DV.value.values[j][DV.state.series.dimension] === DV.state.series.data[i]) {
+                        if (DV.value.values[j][DV.state.category.dimension] === item[DV.conf.finals.chart.x] && DV.value.values[j][DV.state.series.dimension] === DV.state.series.names[i]) {
                             item[DV.value.values[j][DV.state.series.dimension]] = DV.value.values[j].v;
                             break;
                         }
@@ -997,7 +971,7 @@ Ext.onReady( function() {
                 t = null;
             c.removeAll(true);
             c.add(this.chart);
-            DV.state.filter.data[0] = DV.state.filter.data[0] ? DV.state.filter.data[0] : 'Example chart';
+            DV.state.filter.names[0] = DV.state.filter.names[0] ? DV.state.filter.names[0] : 'Example chart';
             
             if (!DV.init.isInit) {
                 DV.store.getDataTableStore(true);
@@ -1017,8 +991,8 @@ Ext.onReady( function() {
                 cls: 'dv-datatable',
                 columns: [
                     {
-                        text: DV.state.getIndiment().rawvalue,
-                        dataIndex: DV.state.getIndiment().value,
+                        text: DV.conf.finals.dimension.data.rawvalue,
+                        dataIndex: DV.conf.finals.dimension.data.value,
                         width: 150,
                         height: DV.conf.layout.east_gridcolumn_height
                     },
@@ -1372,12 +1346,13 @@ Ext.onReady( function() {
                                                             ' '
                                                         ],
                                                         listeners: {
-                                                            afterrender: function() {
+                                                            added: function() {
                                                                 DV.cmp.dimension.indicator.available = this;
-                                                                
+                                                            },
+                                                            afterrender: function() {
                                                                 this.boundList.on('itemdblclick', function() {
                                                                     DV.util.multiselect.select(this, DV.cmp.dimension.indicator.selected);
-                                                                });
+                                                                }, this);
                                                             }
                                                         }
                                                     },                                            
@@ -1420,12 +1395,13 @@ Ext.onReady( function() {
                                                             }
                                                         ],
                                                         listeners: {
-                                                            afterrender: function() {
+                                                            added: function() {
                                                                 DV.cmp.dimension.indicator.selected = this;
-                                                                
+                                                            },
+                                                            afterrender: function() {
                                                                 this.boundList.on('itemdblclick', function() {
                                                                     DV.util.multiselect.unselect(DV.cmp.dimension.indicator.available, this);
-                                                                });
+                                                                }, this);
                                                             }
                                                         }
                                                     }
@@ -1496,8 +1472,7 @@ Ext.onReady( function() {
                                                 layout: 'column',
                                                 bodyStyle: 'border-style:none',
                                                 items: [
-                                                    {
-                                                        xtype: 'multiselect',
+                                                    Ext.create('Ext.ux.form.MultiSelect', {
                                                         id: 'availableDataElements',
                                                         name: 'availableDataElements',
                                                         cls: 'multiselect',
@@ -1534,15 +1509,16 @@ Ext.onReady( function() {
                                                             ' '
                                                         ],
                                                         listeners: {
-                                                            afterrender: function() {
+                                                            added: function() {
                                                                 DV.cmp.dimension.dataelement.available = this;
-                                                                
+                                                            },                                                                
+                                                            afterrender: function() {
                                                                 this.boundList.on('itemdblclick', function() {
                                                                     DV.util.multiselect.select(this, DV.cmp.dimension.dataelement.selected);
-                                                                });
+                                                                }, this);
                                                             }
                                                         }
-                                                    },                                            
+                                                    }),                                            
                                                     {
                                                         xtype: 'multiselect',
                                                         id: 'selectedDataElements',
@@ -1582,12 +1558,13 @@ Ext.onReady( function() {
                                                             }
                                                         ],
                                                         listeners: {
-                                                            afterrender: function() {
+                                                            added: function() {
                                                                 DV.cmp.dimension.dataelement.selected = this;
-                                                                
+                                                            },          
+                                                            afterrender: function() {
                                                                 this.boundList.on('itemdblclick', function() {
                                                                     DV.util.multiselect.unselect(DV.cmp.dimension.dataelement.available, this);
-                                                                });
+                                                                }, this);
                                                             }
                                                         }
                                                     }

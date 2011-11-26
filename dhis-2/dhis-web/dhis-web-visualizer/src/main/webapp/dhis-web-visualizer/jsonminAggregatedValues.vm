@@ -6,7 +6,7 @@
 #if ( $indicatorSize > 0 )
 #foreach( $value in $indicatorValues )
 
-	{"v":"$!{value.value}","i":"$!{value.indicatorId}","p":"$!{value.periodId}","o":"$!{value.organisationUnitId}"}
+	{"v":"$!{value.value}","d":"$!{value.indicatorId}","p":"$!{value.periodId}","o":"$!{value.organisationUnitId}"}
 	#if( $velocityCount < $indicatorSize ),#end
 	
 #end
@@ -17,7 +17,7 @@
 #if ( $indicatorSize > 0 ),#end
 #foreach( $value in $dataValues )
 
-	{"v":"$!{value.value}","i":"$!{value.indicatorId}","p":"$!{value.periodId}","o":"$!{value.organisationUnitId}"}
+	{"v":"$!{value.value}","d":"$!{value.dataElementId}","p":"$!{value.periodId}","o":"$!{value.organisationUnitId}"}
 	#if( $velocityCount < $dataSize ),#end
 
 #end

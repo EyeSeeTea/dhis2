@@ -28,11 +28,11 @@ package org.hisp.dhis.visualizer.action;
  */
 
 import java.util.Collection;
+import java.util.HashSet;
 
 import org.hisp.dhis.aggregation.AggregatedDataValue;
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
-import org.hisp.dhis.dataelement.DataElement;
 
 import com.opensymphony.xwork2.Action;
 
@@ -64,9 +64,9 @@ public class GetAggregatedValuesAction
         this.indicatorIds = indicatorIds;
     }
     
-    private Collection<DataElement> dataElementIds;
+    private Collection<Integer> dataElementIds;
 
-    public void setDataElementIds( Collection<DataElement> dataElementIds )
+    public void setDataElementIds( Collection<Integer> dataElementIds )
     {
         this.dataElementIds = dataElementIds;
     }
@@ -89,14 +89,14 @@ public class GetAggregatedValuesAction
     // Output
     // -------------------------------------------------------------------------
 
-    private Collection<AggregatedIndicatorValue> indicatorValues;
+    private Collection<AggregatedIndicatorValue> indicatorValues = new HashSet<AggregatedIndicatorValue>();
     
     public Collection<AggregatedIndicatorValue> getIndicatorValues()
     {
         return indicatorValues;
     }
 
-    private Collection<AggregatedDataValue> dataValues;
+    private Collection<AggregatedDataValue> dataValues = new HashSet<AggregatedDataValue>();
 
     public Collection<AggregatedDataValue> getDataValues()
     {
@@ -120,7 +120,7 @@ public class GetAggregatedValuesAction
             
             if ( dataElementIds != null )
             {
-                dataValues = aggregatedDataValueService.getAggregatedDataValues( indicatorIds, periodIds,
+                dataValues = aggregatedDataValueService.getAggregatedDataValues( dataElementIds, periodIds,
                     organisationUnitIds );
             }
         }
