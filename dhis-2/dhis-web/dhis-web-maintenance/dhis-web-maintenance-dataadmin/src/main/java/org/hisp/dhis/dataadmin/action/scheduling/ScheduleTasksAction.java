@@ -27,13 +27,20 @@ package org.hisp.dhis.dataadmin.action.scheduling;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.options.SystemSettingManager.DEFAULT_SCHEDULED_PERIOD_TYPES;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_ORGUNITGROUPSET_AGG_LEVEL;
+import static org.hisp.dhis.options.SystemSettingManager.DEFAULT_ORGUNITGROUPSET_AGG_LEVEL;
 import static org.hisp.dhis.options.SystemSettingManager.KEY_SCHEDULED_PERIOD_TYPES;
-import static org.hisp.dhis.options.SystemSettingManager.*;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.options.SystemSettingManager;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.scheduling.SchedulingManager;
 import org.hisp.dhis.system.scheduling.Scheduler;
 
@@ -45,6 +52,9 @@ import com.opensymphony.xwork2.Action;
 public class ScheduleTasksAction
     implements Action
 {
+    private static final String STRATEGY_LAST_12_DAILY = "last12Daily";
+    private static final String STRATEGY_LAST_6_DAILY_6_TO_12_WEEKLY = "last6Daily6To12Weekly";
+        
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -63,6 +73,13 @@ public class ScheduleTasksAction
         this.schedulingManager = schedulingManager;
     }
     
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -74,18 +91,47 @@ public class ScheduleTasksAction
         this.execute = execute;
     }
     
-    private boolean statusOnly = false;
+    private boolean schedule;
 
-    public void setStatusOnly( boolean statusOnly )
+    public void setSchedule( boolean schedule )
     {
-        this.statusOnly = statusOnly;
+        this.schedule = schedule;
     }
-    
+
     private Set<String> scheduledPeriodTypes = new HashSet<String>();
+
+    public Set<String> getScheduledPeriodTypes()
+    {
+        return scheduledPeriodTypes;
+    }
 
     public void setScheduledPeriodTypes( Set<String> scheduledPeriodTypes )
     {
         this.scheduledPeriodTypes = scheduledPeriodTypes;
+    }
+    
+    private Integer orgUnitGroupSetAggLevel;
+    
+    public Integer getOrgUnitGroupSetAggLevel()
+    {
+        return orgUnitGroupSetAggLevel;
+    }
+
+    public void setOrgUnitGroupSetAggLevel( Integer orgUnitGroupSetAggLevel )
+    {
+        this.orgUnitGroupSetAggLevel = orgUnitGroupSetAggLevel;
+    }
+
+    private String dataMartStrategy;
+
+    public String getDataMartStrategy()
+    {
+        return dataMartStrategy;
+    }
+
+    public void setDataMartStrategy( String dataMartStrategy )
+    {
+        this.dataMartStrategy = dataMartStrategy;
     }
 
     // -------------------------------------------------------------------------
@@ -105,12 +151,12 @@ public class ScheduleTasksAction
     {
         return running;
     }
-    
-    private Set<String> periodTypes = new HashSet<String>();
+        
+    private List<OrganisationUnitLevel> levels;
 
-    public Set<String> getPeriodTypes()
+    public List<OrganisationUnitLevel> getLevels()
     {
-        return periodTypes;
+        return levels;
     }
 
     // -------------------------------------------------------------------------
@@ -124,29 +170,43 @@ public class ScheduleTasksAction
         {
             schedulingManager.executeTasks();
         }
-        else if ( !statusOnly )
+        else if ( schedule )
         {
             systemSettingManager.saveSystemSetting( KEY_SCHEDULED_PERIOD_TYPES, (HashSet<String>) scheduledPeriodTypes );
+            systemSettingManager.saveSystemSetting( KEY_ORGUNITGROUPSET_AGG_LEVEL, orgUnitGroupSetAggLevel );
             
             if ( Scheduler.STATUS_RUNNING.equals( schedulingManager.getTaskStatus() ) )
             {
-                systemSettingManager.saveSystemSetting( KEY_DATAMART_TASK, new Boolean( false ) );
-                systemSettingManager.saveSystemSetting( KEY_DATASETCOMPLETENESS_TASK, new Boolean( false ) );
-                
                 schedulingManager.stopTasks();
             }
             else
             {
-                systemSettingManager.saveSystemSetting( KEY_DATAMART_TASK, new Boolean( true) );
-                systemSettingManager.saveSystemSetting( KEY_DATASETCOMPLETENESS_TASK, new Boolean( true ) );
+                Map<String, String> keyCronMap = new HashMap<String, String>();
                 
-                schedulingManager.scheduleTasks();
+                if ( STRATEGY_LAST_12_DAILY.equals( dataMartStrategy ) )
+                {
+                    keyCronMap.put( SchedulingManager.TASK_DATAMART_LAST_12_MONTHS, Scheduler.CRON_DAILY_0AM );
+                }
+                else if ( STRATEGY_LAST_6_DAILY_6_TO_12_WEEKLY.equals( dataMartStrategy ) )
+                {
+                    keyCronMap.put( SchedulingManager.TASK_DATAMART_LAST_6_MONTS, Scheduler.CRON_DAILY_0AM_EXCEPT_SUNDAY );
+                    keyCronMap.put( SchedulingManager.TASK_DATAMART_FROM_6_TO_12_MONTS, Scheduler.CRON_WEEKLY_SUNDAY_0AM );
+                }
+                
+                schedulingManager.scheduleTasks( keyCronMap );
             }
+        }
+        else
+        {
+            scheduledPeriodTypes = (Set<String>) systemSettingManager.getSystemSetting( KEY_SCHEDULED_PERIOD_TYPES, DEFAULT_SCHEDULED_PERIOD_TYPES );
+            orgUnitGroupSetAggLevel = (Integer) systemSettingManager.getSystemSetting( KEY_ORGUNITGROUPSET_AGG_LEVEL, DEFAULT_ORGUNITGROUPSET_AGG_LEVEL );
+            dataMartStrategy = schedulingManager.getScheduledTasks().containsKey( SchedulingManager.TASK_DATAMART_LAST_12_MONTHS ) ? 
+                STRATEGY_LAST_12_DAILY : STRATEGY_LAST_6_DAILY_6_TO_12_WEEKLY;
         }
 
         status = schedulingManager.getTaskStatus();        
         running = Scheduler.STATUS_RUNNING.equals( status );
-        periodTypes = (Set<String>) systemSettingManager.getSystemSetting( KEY_SCHEDULED_PERIOD_TYPES, DEFAULT_SCHEDULED_PERIOD_TYPES );
+        levels = organisationUnitService.getOrganisationUnitLevels();
         
         return SUCCESS;
     }

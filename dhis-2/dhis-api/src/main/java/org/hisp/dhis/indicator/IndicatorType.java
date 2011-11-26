@@ -27,14 +27,20 @@ package org.hisp.dhis.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: IndicatorType.java 5296 2008-05-29 16:06:14Z larshelg $
  */
-public class IndicatorType
-    extends AbstractIdentifiableObject
+@XmlRootElement( name = "indicatorType" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class IndicatorType extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -43,7 +49,7 @@ public class IndicatorType
 
     private int factor;
 
-    private Boolean number;
+    private boolean number;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -103,6 +109,8 @@ public class IndicatorType
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @XmlElement
+    @JsonProperty
     public int getFactor()
     {
         return factor;
@@ -113,12 +121,14 @@ public class IndicatorType
         this.factor = factor;
     }
 
-    public Boolean getNumber()
+    @XmlElement
+    @JsonProperty
+    public boolean isNumber()
     {
-        return number != null && number;
+        return number;
     }
 
-    public void setNumber( Boolean number )
+    public void setNumber( boolean number )
     {
         this.number = number;
     }

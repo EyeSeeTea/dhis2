@@ -1,7 +1,7 @@
-package org.hisp.dhis.scheduling;
+package org.hisp.dhis.indicator;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,28 +27,39 @@ package org.hisp.dhis.scheduling;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class Runnables
-    implements Runnable
+@XmlRootElement( name = "indicatorGroupSets" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class IndicatorGroupSets
 {
-    private List<Runnable> runnables = new ArrayList<Runnable>();
-    
-    public void addRunnable( Runnable runnable )
+    private List<IndicatorGroupSet> indicatorGroupSets = new ArrayList<IndicatorGroupSet>();
+
+    public IndicatorGroupSets()
     {
-        this.runnables.add( runnable );
+
     }
-    
-    @Override
-    public void run()
+
+    @XmlElement( name = "indicatorGroupSet" )
+    @JsonProperty( value = "indicatorGroupSets" )
+    public List<IndicatorGroupSet> getIndicatorGroupSets()
     {
-        for ( Runnable runnable : runnables )
-        {
-            runnable.run();
-        }
-    }    
+        return indicatorGroupSets;
+    }
+
+    public void setIndicatorGroupSets( List<IndicatorGroupSet> indicatorGroupSets )
+    {
+        this.indicatorGroupSets = indicatorGroupSets;
+    }
 }

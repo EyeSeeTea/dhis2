@@ -27,10 +27,13 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.hisp.dhis.common.AbstractNameableObject;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
+import org.hisp.dhis.common.adapter.JsonNameableObjectSetSerializer;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
@@ -38,20 +41,25 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
 
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * This class is used for defining the standardized DataSets. A DataSet consists
  * of a collection of DataElements.
- * 
+ *
  * @author Kristian Nordal
- * @version $Id: DataSet.java 6255 2008-11-10 16:01:24Z larshelg $
  */
-public class DataSet
-    extends AbstractNameableObject
+@XmlRootElement( name = "dataSet" )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class DataSet extends BaseNameableObject
 {
     public static final String TYPE_DEFAULT = "default";
     public static final String TYPE_SECTION = "section";
     public static final String TYPE_CUSTOM = "custom";
-    
+
     /**
      * Determines if a de-serialized file is compatible with this class.
      */
@@ -72,7 +80,7 @@ public class DataSet
      * output purposes, such as calculated fields in forms and reports.
      */
     private Set<Indicator> indicators = new HashSet<Indicator>();
-    
+
     /**
      * The DataElementOperands for which data must be entered in order for the
      * DataSet to be considered as complete.
@@ -83,11 +91,6 @@ public class DataSet
      * All Sources that register data with this DataSet.
      */
     private Set<OrganisationUnit> sources = new HashSet<OrganisationUnit>();
-
-    /**
-     * Property indicating whether the DataSet is locked for data entry.
-     */
-    private Boolean locked = false;
 
     /**
      * The Sections associated with the DataSet.
@@ -102,7 +105,7 @@ public class DataSet
     /**
      * Property indicating if the dataset could be collected using mobile data entry.
      */
-    private Boolean mobile = false;
+    private boolean mobile;
 
     /**
      * Indicating custom data entry form.
@@ -113,7 +116,7 @@ public class DataSet
      * Indicating version number.
      */
     private Integer version;
-    
+
     // -------------------------------------------------------------------------
     // Contructors
     // -------------------------------------------------------------------------
@@ -157,13 +160,13 @@ public class DataSet
         sources.add( unit );
         unit.getDataSets().add( this );
     }
-    
+
     public void removeOrganisationUnit( OrganisationUnit unit )
     {
         sources.remove( unit );
         unit.getDataSets().remove( this );
     }
-    
+
     public void updateOrganisationUnits( Set<OrganisationUnit> updates )
     {
         for ( OrganisationUnit unit : new HashSet<OrganisationUnit>( sources ) )
@@ -173,25 +176,25 @@ public class DataSet
                 removeOrganisationUnit( unit );
             }
         }
-        
+
         for ( OrganisationUnit unit : updates )
         {
             addOrganisationUnit( unit );
         }
     }
-    
+
     public void addDataElement( DataElement dataElement )
     {
         dataElements.add( dataElement );
         dataElement.getDataSets().add( this );
     }
-    
+
     public void removeDataElement( DataElement dataElement )
     {
         dataElements.remove( dataElement );
         dataElement.getDataSets().remove( dataElement );
     }
-    
+
     public void updateDataElements( Set<DataElement> updates )
     {
         for ( DataElement dataElement : new HashSet<DataElement>( dataElements ) )
@@ -201,49 +204,44 @@ public class DataSet
                 removeDataElement( dataElement );
             }
         }
-        
+
         for ( DataElement dataElement : updates )
         {
             addDataElement( dataElement );
         }
     }
-    
+
     public boolean hasDataEntryForm()
     {
         return dataEntryForm != null;
     }
-    
+
     public boolean hasSections()
     {
         return sections != null && sections.size() > 0;
     }
-    
-    public boolean isMobile()
-    {
-        return mobile != null && mobile;
-    }
-    
+
     public String getDataSetType()
     {
         if ( hasDataEntryForm() )
         {
             return TYPE_CUSTOM;
         }
-        
+
         if ( hasSections() )
         {
             return TYPE_SECTION;
         }
-        
+
         return TYPE_DEFAULT;
     }
-    
+
     public DataSet increaseVersion()
     {
         version = version != null ? version + 1 : 1;
         return this;
     }
-    
+
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -292,6 +290,11 @@ public class DataSet
         return periodType;
     }
 
+    public void setPeriodType( PeriodType periodType )
+    {
+        this.periodType = periodType;
+    }
+
     public DataEntryForm getDataEntryForm()
     {
         return dataEntryForm;
@@ -302,11 +305,10 @@ public class DataSet
         this.dataEntryForm = dataEntryForm;
     }
 
-    public void setPeriodType( PeriodType periodType )
-    {
-        this.periodType = periodType;
-    }
-
+    @XmlElementWrapper( name = "dataElements" )
+    @XmlElement( name = "dataElement" )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<DataElement> getDataElements()
     {
         return dataElements;
@@ -317,6 +319,10 @@ public class DataSet
         this.dataElements = dataElements;
     }
 
+    @XmlElementWrapper( name = "indicators" )
+    @XmlElement( name = "indicator" )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<Indicator> getIndicators()
     {
         return indicators;
@@ -327,6 +333,8 @@ public class DataSet
         this.indicators = indicators;
     }
 
+    @XmlElement
+    @JsonProperty
     public Set<DataElementOperand> getCompulsoryDataElementOperands()
     {
         return compulsoryDataElementOperands;
@@ -337,6 +345,10 @@ public class DataSet
         this.compulsoryDataElementOperands = compulsoryDataElementOperands;
     }
 
+    @XmlElementWrapper( name = "sources" )
+    @XmlElement( name = "source" )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<OrganisationUnit> getSources()
     {
         return sources;
@@ -347,16 +359,8 @@ public class DataSet
         this.sources = sources;
     }
 
-    public Boolean getLocked()
-    {
-        return locked;
-    }
-
-    public void setLocked( Boolean locked )
-    {
-        this.locked = locked;
-    }
-
+    @XmlElement
+    @JsonProperty
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -367,26 +371,32 @@ public class DataSet
         this.sortOrder = sortOrder;
     }
 
-    public void setSections( Set<Section> sections )
-    {
-        this.sections = sections;
-    }
-
+/*  @XmlElementWrapper( name = "sections" )
+    @XmlElement( name = "section" ) */
     public Set<Section> getSections()
     {
         return sections;
     }
 
-    public void setMobile(Boolean mobile) 
+    public void setSections( Set<Section> sections )
     {
-        this.mobile = mobile;
+        this.sections = sections;
     }
-	
-    public Boolean getMobile() 
+
+    @XmlElement
+    @JsonProperty
+    public boolean isMobile()
     {
         return mobile;
     }
 
+    public void setMobile( boolean mobile )
+    {
+        this.mobile = mobile;
+    }
+
+    @XmlElement
+    @JsonProperty
     public Integer getVersion()
     {
         return version;

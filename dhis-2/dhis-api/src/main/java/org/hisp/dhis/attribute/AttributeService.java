@@ -40,47 +40,49 @@ public interface AttributeService
     // Attribute
     // -------------------------------------------------------------------------
 
-    public void addAttribute( Attribute attribute );
+    void addAttribute( Attribute attribute );
 
-    public void updateAttribute( Attribute attribute );
+    void updateAttribute( Attribute attribute );
 
-    public void deleteAttribute( Attribute attribute );
+    void deleteAttribute( Attribute attribute );
 
-    public Attribute getAttribute( int id );
+    Attribute getAttribute( int id );
 
-    public Attribute getAttributeByName( String name );
+    Attribute getAttribute( String uid );
 
-    public Set<Attribute> getAllAttributes();
+    Attribute getAttributeByName( String name );
 
-    public Set<Attribute> getDataElementAttributes();
+    Set<Attribute> getAllAttributes();
 
-    public Set<Attribute> getIndicatorAttributes();
+    Set<Attribute> getDataElementAttributes();
 
-    public Set<Attribute> getOrganisationUnitAttributes();
+    Set<Attribute> getIndicatorAttributes();
 
-    public Set<Attribute> getUserAttributes();
+    Set<Attribute> getOrganisationUnitAttributes();
 
-    public int getAttributeCount();
+    Set<Attribute> getUserAttributes();
 
-    public int getAttributeCountByName( String name );
+    int getAttributeCount();
 
-    public Set<Attribute> getAttributesBetween( int first, int max );
+    int getAttributeCountByName( String name );
 
-    public Set<Attribute> getAttributesBetweenByName( String name, int first, int max );
+    Set<Attribute> getAttributesBetween( int first, int max );
+
+    Set<Attribute> getAttributesBetweenByName( String name, int first, int max );
 
     // -------------------------------------------------------------------------
     // AttributeValue
     // -------------------------------------------------------------------------
 
-    public void addAttributeValue( AttributeValue attributeValue );
+    void addAttributeValue( AttributeValue attributeValue );
 
-    public void updateAttributeValue( AttributeValue attributeValue );
+    void updateAttributeValue( AttributeValue attributeValue );
 
-    public void deleteAttributeValue( AttributeValue attributeValue );
+    void deleteAttributeValue( AttributeValue attributeValue );
 
-    public AttributeValue getAttributeValue( int id );
+    AttributeValue getAttributeValue( int id );
 
-    public Set<AttributeValue> getAllAttributeValues();
+    Set<AttributeValue> getAllAttributeValues();
 
-    public int getAttributeValueCount();
+    int getAttributeValueCount();
 }
