@@ -30,10 +30,10 @@ package org.hisp.dhis.light.singleevents.action;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.hisp.dhis.light.dataentry.utils.FormUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
-import org.hisp.dhis.system.filter.OrganisationUnitWithDataSetsFilter;
-import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import com.opensymphony.xwork2.Action;
@@ -52,6 +52,18 @@ public class GetSelectOrgUnitSingleEventsAction implements Action {
 	public void setCurrentUserService(CurrentUserService currentUserService) {
 		this.currentUserService = currentUserService;
 	}
+	
+    private FormUtils formUtils;
+
+    public void setFormUtils( FormUtils formUtils )
+    {
+        this.formUtils = formUtils;
+    }
+
+    public FormUtils getFormUtils()
+    {
+        return formUtils;
+    }
 
 	// -------------------------------------------------------------------------
 	// Input & Output
@@ -71,15 +83,12 @@ public class GetSelectOrgUnitSingleEventsAction implements Action {
 	public String execute() {
 		User user = currentUserService.getCurrentUser();
 
-		if (user != null) {
-			organisationUnits = new ArrayList<OrganisationUnit>(
-					user.getOrganisationUnits());
-			Collections.sort(organisationUnits,
-					new OrganisationUnitNameComparator());
-			FilterUtils.filter(organisationUnits,
-					new OrganisationUnitWithDataSetsFilter());
-		}
-
+        if ( user != null )
+        {
+            organisationUnits = new ArrayList<OrganisationUnit>( user.getOrganisationUnits() );
+            Collections.sort( organisationUnits, new OrganisationUnitNameComparator() );
+        }
+		
 		return SUCCESS;
 	}
 }
