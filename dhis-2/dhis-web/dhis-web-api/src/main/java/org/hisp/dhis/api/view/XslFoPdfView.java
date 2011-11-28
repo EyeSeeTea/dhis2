@@ -4,6 +4,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.URIResolver;
 import java.io.PrintWriter;
 import java.util.Map;
 
@@ -14,9 +15,21 @@ public class XslFoPdfView extends AbstractUrlBasedView
 {
     public static final String DEFAULT_CONTENT_TYPE = "application/pdf";
 
+    private URIResolver uriResolver;
+
     public XslFoPdfView()
     {
         setContentType( DEFAULT_CONTENT_TYPE );
+    }
+
+    public URIResolver getUriResolver()
+    {
+        return uriResolver;
+    }
+
+    public void setUriResolver( URIResolver uriResolver )
+    {
+        this.uriResolver = uriResolver;
     }
 
     @Override

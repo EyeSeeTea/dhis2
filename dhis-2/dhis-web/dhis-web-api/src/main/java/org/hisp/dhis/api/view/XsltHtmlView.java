@@ -11,6 +11,7 @@ import javax.xml.bind.util.JAXBSource;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.OutputStream;
@@ -23,13 +24,29 @@ public class XsltHtmlView extends AbstractUrlBasedView
 {
     public static final String DEFAULT_CONTENT_TYPE = "text/html";
 
+    private URIResolver uriResolver;
+
     public XsltHtmlView()
     {
         setContentType( DEFAULT_CONTENT_TYPE );
+
+        URIResolver uriResolver = new ClassPathUriResolver( "/templates/xslt/" );
+        setUriResolver( uriResolver );
+    }
+
+    public URIResolver getUriResolver()
+    {
+        return uriResolver;
+    }
+
+    public void setUriResolver( URIResolver uriResolver )
+    {
+        this.uriResolver = uriResolver;
     }
 
     @Override
-    protected void renderMergedOutputModel( Map<String, Object> model, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    protected void renderMergedOutputModel( Map<String, Object> model, HttpServletRequest request, HttpServletResponse response )
+        throws Exception
     {
         response.setContentType( getContentType() );
         model = ViewUtils.filterModel( model );
@@ -45,12 +62,14 @@ public class XsltHtmlView extends AbstractUrlBasedView
         marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
         marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
 
-        ClassPathResource classPathResource = new ClassPathResource(getUrl());
+        ClassPathResource classPathResource = new ClassPathResource( getUrl() );
 
         Source xmlSource = new JAXBSource( context, domainModel );
         Source xsltSource = new StreamSource( classPathResource.getInputStream() );
 
         TransformerFactory factory = TransformerFactory.newInstance();
+        factory.setURIResolver( uriResolver );
+
         Transformer transformer = factory.newTransformer( xsltSource );
 
         OutputStream output = response.getOutputStream();
