@@ -16,6 +16,7 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.OutputStream;
 import java.util.Map;
+import org.amplecode.staxwax.transformer.LoggingErrorListener;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -70,6 +71,7 @@ public class XsltHtmlView extends AbstractUrlBasedView
 
         TransformerFactory factory = TransformerFactory.newInstance();
         factory.setURIResolver( uriResolver );
+        factory.setErrorListener( new LoggingErrorListener());
 
         Transformer transformer = factory.newTransformer( xsltSource );
 

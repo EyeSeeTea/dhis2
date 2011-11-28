@@ -17,6 +17,7 @@
     
     <!-- wild card will catch root element -->
     <xsl:template match="*">
+        <xsl:message>Rendering <xsl:value-of select="$elements"/></xsl:message>
         <h1><xsl:value-of select="$title"/></h1>
         <table border="1">
             <xsl:for-each select="./child::*">
