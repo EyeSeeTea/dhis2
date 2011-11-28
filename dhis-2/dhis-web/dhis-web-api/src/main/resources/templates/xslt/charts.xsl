@@ -6,8 +6,16 @@
     <html>
       <body>
         <h1>CHARTS!</h1>
+
+        <ul>
+          <xsl:apply-templates />
+        </ul>
       </body>
     </html>
 
+  </xsl:template>
+
+  <xsl:template match="chart">
+    <li><xsl:value-of select="@name"/></li>
   </xsl:template>
 </xsl:stylesheet>

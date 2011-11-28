@@ -47,14 +47,8 @@ public class XsltHtmlView extends AbstractUrlBasedView
 
         ClassPathResource classPathResource = new ClassPathResource(getUrl());
 
-        if(classPathResource.exists()) {
-            System.out.println("Hooray");
-        } else {
-            System.err.println("Path " + classPathResource.getPath() + " does not exist");
-        }
-
         Source xmlSource = new JAXBSource( context, domainModel );
-        Source xsltSource = new StreamSource( XsltHtmlView.class.getResourceAsStream( getUrl() ) );
+        Source xsltSource = new StreamSource( classPathResource.getInputStream() );
 
         TransformerFactory factory = TransformerFactory.newInstance();
         Transformer transformer = factory.newTransformer( xsltSource );
