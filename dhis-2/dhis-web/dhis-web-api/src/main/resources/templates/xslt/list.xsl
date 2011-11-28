@@ -5,19 +5,23 @@
         <xd:desc>
             <xd:p><xd:b>Created on:</xd:b> Nov 28, 2011</xd:p>
             <xd:p><xd:b>Author:</xd:b> bobj</xd:p>
-            <xd:p>DXF2 Charts renderer</xd:p>
+            <xd:p>DXF2 Indicators renderer</xd:p>
         </xd:desc>
     </xd:doc>
     
     <xsl:include href="identifiable-row.xsl"/>
     <xsl:include href="html-wrapper.xsl" />
+
+    <xsl:param name="title" />
+    <xsl:param name="elements" />
     
-    <xsl:template match="charts">
-        <h1>Charts</h1>
+    <!-- wild card will catch root element -->
+    <xsl:template match="*">
+        <h1><xsl:value-of select="$title"/></h1>
         <table border="1">
-            <xsl:for-each select="chart">
+            <xsl:for-each select="./child::*">
                 <xsl:call-template name="identifiable-row">
-                    <xsl:with-param name="root">charts</xsl:with-param>
+                    <xsl:with-param name="root"><xsl:value-of select="$elements"/></xsl:with-param>
                 </xsl:call-template>
             </xsl:for-each>
         </table>

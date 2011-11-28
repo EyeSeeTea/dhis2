@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.ui.Model;
 
 /**
@@ -36,7 +38,13 @@ public class OrganisationUnitController
 
         model.addAttribute( "model", organisationUnits );
         
-        return "organisationUnits";
+        Map<String,String> xsltParams = new HashMap<String,String>();
+        xsltParams.put( "title", "Organisation Units");
+        xsltParams.put( "elements", "organisationUnits");
+        
+        model.addAttribute( "xslt-params", xsltParams);
+
+        return "list";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )

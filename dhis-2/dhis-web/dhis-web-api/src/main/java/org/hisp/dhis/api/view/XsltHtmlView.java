@@ -50,7 +50,7 @@ public class XsltHtmlView extends AbstractUrlBasedView
     {
         response.setContentType( getContentType() );
         model = ViewUtils.filterModel( model );
-
+        
         Object domainModel = model.get( "model" );
 
         if ( domainModel == null )
@@ -74,6 +74,18 @@ public class XsltHtmlView extends AbstractUrlBasedView
         Transformer transformer = factory.newTransformer( xsltSource );
 
         OutputStream output = response.getOutputStream();
+
+        // pass on any parameters set in xslt-params
+        Map<String,String> params = (Map<String,String>) model.get("xslt-params");
+        if (params != null)
+        {
+          for (Map.Entry<String, String> entry : params.entrySet()) 
+          {
+          	transformer.setParameter( entry.getKey(), entry.getValue());
+          }
+        }
+        
         transformer.transform( xmlSource, new StreamResult( output ) );
+    
     }
 }
