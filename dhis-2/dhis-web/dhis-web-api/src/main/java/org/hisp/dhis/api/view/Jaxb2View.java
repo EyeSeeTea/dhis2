@@ -14,32 +14,37 @@ import java.util.Map;
 /**
  * @author mortenoh
  */
-public class Jaxb2View extends AbstractView {
+public class Jaxb2View extends AbstractView
+{
     public static final String DEFAULT_CONTENT_TYPE = "application/xml";
 
-    public Jaxb2View() {
-        setContentType(DEFAULT_CONTENT_TYPE);
+    public Jaxb2View()
+    {
+        setContentType( DEFAULT_CONTENT_TYPE );
     }
 
     @Override
-    protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        response.setContentType(getContentType());
+    protected void renderMergedOutputModel( Map<String, Object> model, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    {
+        response.setContentType( getContentType() );
 
-        Object value = filterModel(model);
+        Object value = filterModel( model );
 
-        if (value instanceof Map) {
+        if ( value instanceof Map )
+        {
             Map map = (Map) value;
 
-            if (map.size() == 1) {
+            if ( map.size() == 1 )
+            {
                 value = map.values().toArray()[0];
             }
         }
 
         OutputStream outputStream = response.getOutputStream();
-        JAXBContext context = JAXBContext.newInstance(value.getClass());
+        JAXBContext context = JAXBContext.newInstance( value.getClass() );
         Marshaller marshaller = context.createMarshaller();
-        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+        marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
+        marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
 
 //        Marshaller.Listener listener = new IdentifiableObjectListener(request);
 //        marshaller.setListener(listener);
@@ -51,15 +56,18 @@ public class Jaxb2View extends AbstractView {
                 "\n<?xml-stylesheet type=\"text/xsl\" href=\"dhis-web-api/xslt/chart.xslt\"?>\n");
         */
 
-        marshaller.marshal(value, outputStream);
+        marshaller.marshal( value, outputStream );
     }
 
-    protected Object filterModel(Map<String, Object> model) {
-        Map<String, Object> result = new HashMap<String, Object>(model.size());
+    protected Object filterModel( Map<String, Object> model )
+    {
+        Map<String, Object> result = new HashMap<String, Object>( model.size() );
 
-        for (Map.Entry<String, Object> entry : model.entrySet()) {
-            if (!(entry.getValue() instanceof BindingResult)) {
-                result.put(entry.getKey(), entry.getValue());
+        for ( Map.Entry<String, Object> entry : model.entrySet() )
+        {
+            if ( !(entry.getValue() instanceof BindingResult) )
+            {
+                result.put( entry.getKey(), entry.getValue() );
             }
         }
 
