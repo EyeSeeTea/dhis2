@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import org.springframework.ui.Model;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -28,19 +29,23 @@ public class OrganisationUnitController
     }
 
     @RequestMapping( method = RequestMethod.GET )
-    public OrganisationUnits getOrganisationUnits()
+    public String getOrganisationUnits(Model model)
     {
         OrganisationUnits organisationUnits = new OrganisationUnits();
         organisationUnits.setOrganisationUnits( new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnits() ) );
 
-        return organisationUnits;
+        model.addAttribute( "model", organisationUnits );
+        
+        return "organisationUnits";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public OrganisationUnit getOrganisationUnit( @PathVariable( "uid" ) String uid, HttpServletRequest request )
+    public String getOrganisationUnit( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( uid );
 
-        return organisationUnit;
+        model.addAttribute( "model", organisationUnit );
+
+        return "organisationUnit";
     }
 }

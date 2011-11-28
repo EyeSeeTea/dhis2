@@ -10,6 +10,7 @@
     </xd:doc>
 
     <xsl:include href="html-wrapper.xsl" />
+    <xsl:include href="identifiable-row.xsl"/>
     
     <xsl:template match="chart">
         <div class="chart">
@@ -96,7 +97,43 @@
                     </td>
                 </tr>
             </table>
+            
+            <xsl:apply-templates select="organisationUnits|dataElements|indicators"/>
+            
         </div>        
+    </xsl:template>
+    
+    <xsl:template match="organisationUnits">
+        <h3>OrganisationUnits</h3>
+        <table border="1">
+            <xsl:for-each select="organisationUnit">
+                <xsl:call-template name="identifiable-row">
+                    <xsl:with-param name="root">../organisationUnits</xsl:with-param>
+                </xsl:call-template>
+            </xsl:for-each>
+        </table>
+    </xsl:template>
+    
+    <xsl:template match="dataElements">
+        <h3>DataElements</h3>
+        <table border="1">
+            <xsl:for-each select="dataElement">
+                <xsl:call-template name="identifiable-row">
+                    <xsl:with-param name="root">../dataElements</xsl:with-param>
+                </xsl:call-template>
+            </xsl:for-each>
+        </table>
+    </xsl:template>
+
+    <xsl:template match="indicators">
+        <h3>Indicators</h3>
+        <table border="1">
+            <xsl:for-each select="indicator">
+                <xsl:call-template name="identifiable-row">
+                    <xsl:with-param name="root">../indicators</xsl:with-param>
+                </xsl:call-template>
+            </xsl:for-each>
+        </table>
     </xsl:template>
     
 </xsl:stylesheet>

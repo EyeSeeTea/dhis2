@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import org.springframework.ui.Model;
 
 @Controller
 @RequestMapping( value = "/indicators" )
@@ -47,19 +48,23 @@ public class IndicatorController
     private IndicatorService indicatorService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public Indicators getIndicators()
+    public String getIndicators(Model model)
     {
         Indicators indicators = new Indicators();
         indicators.setIndicators( new ArrayList<Indicator>( indicatorService.getAllIndicators() ) );
 
-        return indicators;
+        model.addAttribute( "model", indicators );
+        
+        return "indicators";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public Indicator getIndicator( @PathVariable( "uid" ) String uid, HttpServletRequest request )
+    public String getIndicator( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         Indicator indicator = indicatorService.getIndicator( uid );
 
-        return indicator;
+        model.addAttribute( "model", indicator );
+        
+        return "indicator";
     }
 }
