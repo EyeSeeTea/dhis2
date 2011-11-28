@@ -50,6 +50,7 @@ public class XsltHtmlView extends AbstractUrlBasedView
     {
         response.setContentType( getContentType() );
         model = ViewUtils.filterModel( model );
+
         Object domainModel = model.get( "model" );
 
         if ( domainModel == null )

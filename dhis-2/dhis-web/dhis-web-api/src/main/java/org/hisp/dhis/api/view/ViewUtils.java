@@ -2,6 +2,7 @@ package org.hisp.dhis.api.view;
 
 import org.springframework.validation.BindingResult;
 
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,5 +25,4 @@ public class ViewUtils
 
         return result;
     }
-
 }

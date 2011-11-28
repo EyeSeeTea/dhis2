@@ -51,7 +51,8 @@ public class ClassPathUriResolver implements URIResolver
         try
         {
             source = new StreamSource( classPathResource.getInputStream() );
-        } catch ( IOException e )
+        }
+        catch ( IOException e )
         {
             new TransformerException( "IOException while reading " + url + "." );
         }
