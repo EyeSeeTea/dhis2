@@ -8,7 +8,7 @@
     <fo:root>
       <fo:layout-master-set>
         <fo:simple-page-master master-name="A4">
-          <fo:region-body />
+          <fo:region-body margin="1in" />
         </fo:simple-page-master>
       </fo:layout-master-set>
       <fo:page-sequence master-reference="A4">
