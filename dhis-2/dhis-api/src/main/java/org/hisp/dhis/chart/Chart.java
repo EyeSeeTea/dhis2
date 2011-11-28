@@ -442,7 +442,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "indicators" )
-    @XmlElement
+    @XmlElement(name = "indicator")
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<Indicator> getIndicators()
@@ -457,7 +457,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "dataElements" )
-    @XmlElement
+    @XmlElement(name = "dataElement")
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<DataElement> getDataElements()
@@ -472,7 +472,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "dataSets" )
-    @XmlElement
+    @XmlElement(name = "dataSet")
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<DataSet> getDataSets()
@@ -497,7 +497,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "organisationUnits" )
-    @XmlElement
+    @XmlElement(name = "organisationUnit")
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<OrganisationUnit> getOrganisationUnits()
@@ -554,7 +554,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "allPeriods" )
-    @XmlElement
+    @XmlElement(name = "allPeriod")
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<Period> getAllPeriods()
@@ -582,7 +582,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "allOrganisationUnits" )
-    @XmlElement
+    @XmlElement(name = "allOrganisationUnit")
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<OrganisationUnit> getAllOrganisationUnits()
