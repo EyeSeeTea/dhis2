@@ -9,6 +9,8 @@
         </xd:desc>
     </xd:doc>
 
+    <xsl:include href="html-wrapper.xsl" />
+    
     <xsl:template match="chart">
         <div class="chart">
             <h2>

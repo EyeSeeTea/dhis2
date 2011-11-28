@@ -9,21 +9,11 @@
         </xd:desc>
     </xd:doc>
     
-    <xsl:output method="html"/>
-
     <xsl:include href="identifiable-row.xsl"/>
-    <xsl:template match="/">
-        <html>
-            <head></head>
-            <body>
-                <xsl:apply-templates />
-            </body>
-        </html>
-    </xsl:template>
+    <xsl:include href="html-wrapper.xsl" />
     
     <xsl:template match="charts">
         <h1>Charts</h1>
-        <p>Some CSS required!</p>
         <table border="1">
             <xsl:for-each select="chart">
                 <xsl:call-template name="identifiable-row">
