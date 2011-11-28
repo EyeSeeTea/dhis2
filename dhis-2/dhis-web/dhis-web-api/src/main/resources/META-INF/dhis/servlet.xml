@@ -46,7 +46,7 @@
 
         <bean name="xslFoPdfViewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
           <property name="prefix" value="/templates/xslfo/" />
-          <property name="suffix" value=".fo" />
+          <property name="suffix" value=".xsl" />
           <property name="viewClass" value="org.hisp.dhis.api.view.XslFoPdfView" />
         </bean>
       </list>

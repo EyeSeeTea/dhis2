@@ -63,8 +63,8 @@ public class XslFoPdfView extends AbstractUrlBasedView
 
         ClassPathResource classPathResource = new ClassPathResource( getUrl() );
 
-        //Source xmlSource = new JAXBSource( context, domainModel );
-        Source foSource = new StreamSource( classPathResource.getInputStream() );
+        Source xmlSource = new JAXBSource( context, domainModel );
+        Source xsltSource = new StreamSource( classPathResource.getInputStream() );
 
         FopFactory fopFactory = FopFactory.newInstance();
         Fop fop = fopFactory.newFop( MimeConstants.MIME_PDF, response.getOutputStream() );
@@ -72,9 +72,9 @@ public class XslFoPdfView extends AbstractUrlBasedView
         TransformerFactory factory = TransformerFactory.newInstance();
         factory.setURIResolver( uriResolver );
 
-        Transformer transformer = factory.newTransformer();
+        Transformer transformer = factory.newTransformer( xsltSource );
 
         Result result = new SAXResult( fop.getDefaultHandler() );
-        transformer.transform( foSource, result );
+        transformer.transform( xmlSource, result );
     }
 }
