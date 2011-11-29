@@ -4,16 +4,21 @@
 
    <parent>
     <groupId>org.hisp.dhis</groupId>
-    <artifactId>dhis-web-maintenance</artifactId>
+    <artifactId>dhis-web</artifactId>
     <version>2.6-SNAPSHOT</version>
   </parent>
   
 
-  <artifactId>dhis-web-maintenance-mobile</artifactId>
+  <artifactId>dhis-web-api-mobile</artifactId>
   <packaging>war</packaging>
-  <name>DHIS Mobile</name>
+  <name>DHIS Mobile API</name>
 
   <dependencies>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>	
 
     <!-- DHIS -->
     <dependency>
@@ -29,17 +34,15 @@
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-mobile</artifactId>
     </dependency>
+
+
     <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-json</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-spring</artifactId>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-oxm</artifactId>
     </dependency>
     <dependency>
       <groupId>com.jcraft</groupId>
@@ -49,7 +52,7 @@
   </dependencies>
 
   <properties>
-    <rootDir>../../../</rootDir>
+    <rootDir>../../</rootDir>
   </properties>
 </project>
 
