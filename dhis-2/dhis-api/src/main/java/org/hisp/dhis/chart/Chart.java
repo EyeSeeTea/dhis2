@@ -163,15 +163,15 @@ public class Chart
     // Transient properties
     // -------------------------------------------------------------------------
 
-            private transient I18nFormat format;
+    private transient I18nFormat format;
 
-            private List<Period> relativePeriods = new ArrayList<Period>();
+    private List<Period> relativePeriods = new ArrayList<Period>();
 
-            private List<Period> allPeriods = new ArrayList<Period>();
+    private List<Period> allPeriods = new ArrayList<Period>();
 
-            private OrganisationUnit organisationUnit;
+    private OrganisationUnit organisationUnit;
 
-            private List<OrganisationUnit> allOrganisationUnits = new ArrayList<OrganisationUnit>();
+    private List<OrganisationUnit> allOrganisationUnits = new ArrayList<OrganisationUnit>();
 
     // -------------------------------------------------------------------------
     // Constructors
