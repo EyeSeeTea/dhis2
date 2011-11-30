@@ -1,5 +1,5 @@
 
-<h2>Single Event: $eventName</h2>
+<h2>$i18n.getString("single_event"): $eventName</h2>
 
 <form method="post" action="addBeneficiary.action">
 	<div class="header-box" align="center">
@@ -9,9 +9,11 @@
 			<input type="hidden" name="singleEventId" value="$singleEventId" />
 		
 	    	#if ( $invalidRegistrationDate )
-	    		<label style="color:red;">Date of Registration (yyyy-MM-dd). The date entered is not valid.</label>
+	    		<label style="color:red;">
+	    			$i18n.getString("date_of_registration"). $i18n.getString("is_invalid_date2")
+	    		</label>
 	    	#else
-	    		<label>Date of Registration (yyyy-MM-dd)</label>
+	    		<label>$i18n.getString("date_of_registration")</label>
 	    	#end
 	    	#if($registrationDate)
 	    		<input type="date" maxlength="255" size="24" name="registrationDate" value="$registrationDate" />
@@ -20,11 +22,15 @@
 	    	#end
 	    	
 	    	#if ( $fullNameIsToLong )
-	    		<label style="color:red;">Full Name. The name must be between 7 and 50 characters</label>
+	    		<label style="color:red;">
+	    			$i18n.getString("full_name"). $i18n.getString("is_invalid_name_length")
+	    		</label>
 	    	#elseif( $invalidFullName )
-	    		<label style="color:red;">Full Name. The name entered is not valid</label>
+	    		<label style="color:red;">
+	    			$i18n.getString("full_name"). $i18n.getString("is_invalid_name")
+	    		</label>
 	    	#else
-	    		<label>Full Name</label>
+	    		<label>$i18n.getString("full_name")</label>
 	    	#end
 	    	#if ($fullName)
 		    	<input type="text" maxlength="255" size="24" name="fullName" value="$fullName" />
@@ -33,32 +39,36 @@
 	    	#end
 	    	
 	    	#if ( $noGender )
-	    		<label style="color:red;">Gender. Please select a gender</label>
+	    		<label style="color:red;">
+	    			$i18n.getString("gender"). $i18n.getString("select_gender")
+	    		</label>
 	    	#elseif ( $invalidGender )
-	    		<label style="color:red;">Gender. The gender entered is not valid</label>
+	    		<label style="color:red;">
+	    			$i18n.getString("gender"). $i18n.getString("is_invalid_gender")
+	    		</label>
 	    	#else
-	    		<label>Gender</label>
+	    		<label>$i18n.getString("gender")</label>
 	    	#end
 	    	<br />    	
 	    	<select name="gender">
-	    		<option value="please_select">[Please select]</option>
+	    		<option value="please_select">$i18n.getString("please_select")</option>
 	    		
 	    		#if ($gender == "M")
-					<option value="M" selected="selected">Male</option>
+					<option value="M" selected="selected">$i18n.getString("male")</option>
 				#else
-					<option value="M">Male</option>
+					<option value="M">$i18n.getString("male")</option>
 				#end
 				
 				#if ($gender == "F")
-					<option value="F" selected="selected">Female</option>
+					<option value="F" selected="selected">$i18n.getString("female")</option>
 				#else
-					<option value="F">Female</option>
+					<option value="F">$i18n.getString("female")</option>
 				#end
 				
 				#if ($gender == "T")
-					<option value="T" selected="selected">Transgender</option>
+					<option value="T" selected="selected">$i18n.getString("transgender")</option>
 				#else
-					<option value="T">Transgender</option>
+					<option value="T">$i18n.getString("transgender")</option>
 				#end
 				
 			</select>
@@ -66,26 +76,30 @@
 			<br />
 			
 			#if ( $noDobType )
-				<label style="color:red;">DOB Type. Please select a DOB type</label>
+				<label style="color:red;">
+					$i18n.getString("dob_type"). $i18n.getString("select_dob")
+				</label>
 			#elseif ( $invalidDobType )
-				<label style="color:red;">DOB Type. The DOB type entered is not valid</label>
+				<label style="color:red;">
+					$i18n.getString("dob_type"). $i18n.getString("is_invalid_dob_type")
+				</label>
 			#else
-				<label>DOB Type</label>
+				<label>$i18n.getString("dob_type")</label>
 			#end
 			<br />
 			<select name="dobType">
-				<option value="p">[Please select]</option>
+				<option value="p">$i18n.getString("please_select")</option>
 				
 				#if ($dobType == "V")
-					<option value="V" selected="selected">Verified</option>
+					<option value="V" selected="selected">$i18n.getString("verified")</option>
 				#else
-					<option value="V">Verified</option>
+					<option value="V">$i18n.getString("verified")</option>
 				#end
 				
 				#if ($dobType == "D")
-					<option value="D" selected="selected">Declared</option>
+					<option value="D" selected="selected">$i18n.getString("declared")</option>
 				#else
-					<option value="D">Declared</option>
+					<option value="D">$i18n.getString("declared")</option>
 				#end
 				
 			</select>
@@ -93,9 +107,11 @@
 			<br />
 			
 			#if ( $invalidBirthDate )
-	    		<label style="color:red;">Date of Birth (yyyy-MM-dd). The date entered is not valid</label>
+	    		<label style="color:red;">
+	    			$i18n.getString("date_of_birth"). $i18n.getString("is_invalid_date2")</label>
+	    		</label>
 	    	#else
-	    		<label>Date of Birth (yyyy-MM-dd)</label>
+	    		<label>$i18n.getString("date_of_birth")</label>
 	    	#end
 	    	#if($birthDate)
 				<input type="date" maxlength="255" size="24" name="birthDate" value="$birthDate"/>
@@ -104,67 +120,69 @@
 			#end
 			
 			#if ( $invalidBloodGroup )
-	    		<label style="color:red;">Blood Group. The blood group entered is not valid</label>
+	    		<label style="color:red;">
+	    			$i18n.getString("blood_group"). $i18n.getString("is_invalid_blood_group")
+	    		</label>
 	    	#else
-				<label>Blood Group</label>
+				<label>$i18n.getString("blood_group")</label>
 			#end
 			<br />
 			<select name="bloodGroup">
-				<option value="please_select">[Please select]</option>
+				<option value="please_select">$i18n.getString("please_select")</option>
 				
 				#if ($bloodGroup == "A+")
-					<option value="A+" selected="selected">A+</option>
+					<option value="A+" selected="selected">$i18n.getString("bg_a_pluss")</option>
 				#else
-					<option value="A+">A+</option>
+					<option value="A+">$i18n.getString("bg_a_pluss")</option>
 				#end
 				
 				#if ($bloodGroup == "A-")
-					<option value="A-" selected="selected">A-</option>
+					<option value="A-" selected="selected">$i18n.getString("bg_a_minus")</option>
 				#else
-					<option value="A-">A-</option>
+					<option value="A-">$i18n.getString("bg_a_minus")</option>
 				#end
 
 				#if ($bloodGroup == "AB+")
-					<option value="AB+" selected="selected">AB+</option>
+					<option value="AB+" selected="selected">$i18n.getString("bg_ab_pluss")</option>
 				#else
-					<option value="AB+">AB+</option>
+					<option value="AB+">$i18n.getString("bg_ab_pluss")</option>
 				#end
 				
 				#if ($bloodGroup == "AB-")
-					<option value="AB-" selected="selected">AB-</option>
+					<option value="AB-" selected="selected">$i18n.getString("bg_ab_minus")</option>
 				#else
-					<option value="AB-">AB-</option>
+					<option value="AB-">$i18n.getString("bg_ab_minus")</option>
 				#end
 				
 				#if ($bloodGroup == "B+")
-					<option value="B+" selected="selected">B+</option>
+					<option value="B+" selected="selected">$i18n.getString("bg_b_pluss")</option>
 				#else
-					<option value="B+">B+</option>
+					<option value="B+">$i18n.getString("bg_b_pluss")</option>
 				#end
 				
 				#if ($bloodGroup == "B-")
-					<option value="B-" selected="selected">B-</option>
+					<option value="B-" selected="selected">$i18n.getString("bg_b_minus")</option>
 				#else
-					<option value="B-">B-</option>
+					<option value="B-">$i18n.getString("bg_b_minus")</option>
 				#end
 				
 				#if ($bloodGroup == "O+")
-					<option value="O+" selected="selected">O+</option>
+					<option value="O+" selected="selected">$i18n.getString("bg_o_pluss")</option>
 				#else
-					<option value="O+">O+</option>
+					<option value="O+">$i18n.getString("bg_o_pluss")</option>
 				#end
 				
 				#if ($bloodGroup == "O-")
-					<option value="O-" selected="selected">O-</option>
+					<option value="O-" selected="selected">$i18n.getString("bg_o_minus")</option>
 				#else
-					<option value="O-">O-</option>
+					<option value="O-">$i18n.getString("bg_o_minus")</option>
 				#end
 				
 			</select>
 			
 			<br />
 			
-			<input type="submit" value="Submit" />
+			<input type="submit" value="$i18n.getString("submit")" />
 	    </p>
 	</div>
 </form>
@@ -172,7 +190,7 @@
 <div id="footer">
 <h2>$i18n.getString( "navigate_to" )</h2>
 <ul>
-	<li><a href="getBeneficiaryChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">$i18n.getString("Back")</a></li>
+	<li><a href="getBeneficiaryChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">$i18n.getString("beneficiary_options")</a></li>
 	<li><a href="index.action">$i18n.getString("home")</a></li>
 </ul>
 </div>

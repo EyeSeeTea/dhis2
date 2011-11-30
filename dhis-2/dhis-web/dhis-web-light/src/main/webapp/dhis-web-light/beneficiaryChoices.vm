@@ -1,12 +1,12 @@
 
-<h2>Single Event: $eventName</h2>
+<h2>$i18n.getString("single_event"): $eventName</h2>
 
 <p>
 <ul>
-	<li>$i18n.getString("Find beneficiary")</li>
+	<li>$i18n.getString("find_beneficiary")</li>
 	<li>
 		<a href="registerNewBeneficiary.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">
-		$i18n.getString("New beneficiary")
+		$i18n.getString("new_beneficiary")
 		</a>
 	</li>
 </ul>
@@ -15,7 +15,7 @@
 <div id="footer">
 <h2>$i18n.getString( "navigate_to" )</h2>
 <ul>
-	<li><a href="getSingleEventChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">$i18n.getString("Back")</a></li>
+	<li><a href="getSingleEventChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">$i18n.getString("single_event_options")</a></li>
 	<li><a href="index.action">$i18n.getString("home")</a></li>
 </ul>
 </div>

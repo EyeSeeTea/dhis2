@@ -142,6 +142,7 @@ public class UpdateBeneficiaryAction implements Action  {
     	return registrationDate;
     }
     
+    
 	// -------------------------------------------------------------------------
 	// Validation
 	// -------------------------------------------------------------------------
@@ -266,7 +267,7 @@ public class UpdateBeneficiaryAction implements Action  {
     
     private boolean validName(String s)
     {
-    	if(s.matches("^[A-Za-z]+[[A-Za-z]*\\s?-?.?'?]*$")){
+    	if(s.matches("^[\\p{L}|\\s]*$")){
     		return true;
     	}else{
     		return false;

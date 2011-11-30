@@ -99,6 +99,16 @@ public class EditBeneficiaryAction implements Action  {
     public String getRegistrationDate(){
     	return registrationDate;
     }
+    
+    private Integer singleEventId;
+    
+    public void setSingleEventId( Integer singleEventId){
+    	this.singleEventId = singleEventId;
+    }
+    
+    public Integer getSingleEventId(){
+    	return this.singleEventId;
+    }
        
 	// -------------------------------------------------------------------------
 	// Action Implementation

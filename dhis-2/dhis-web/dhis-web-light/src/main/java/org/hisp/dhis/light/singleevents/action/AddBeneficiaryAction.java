@@ -282,7 +282,6 @@ public class AddBeneficiaryAction implements Action  {
     	}
     	
     	if(validateDateNotNull(bD) == false){
-    		System.out.println("bD");
     		invalidBirthDate = true;
     		valid = false;
     	}
@@ -326,7 +325,7 @@ public class AddBeneficiaryAction implements Action  {
     
     private boolean validName(String s)
     {
-    	if(s.matches("^[A-Za-z]+[[A-Za-z]*\\s?-?.?'?]*$")){
+    	if(s.matches("^[\\p{L}|\\s]*$")){
     		return true;
     	}else{
     		return false;
