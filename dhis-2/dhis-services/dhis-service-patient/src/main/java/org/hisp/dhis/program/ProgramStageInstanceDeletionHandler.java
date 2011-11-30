@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,82 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.programstage;
+package org.hisp.dhis.program;
 
-import org.hisp.dhis.common.DeleteNotAllowedException;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.program.ProgramStageService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @modified Tran Thanh Tri
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version $Id: ProgramStageInstanceDeletionHandler.java Nov 30, 2011 10:20:41
+ *          AM $
  */
-public class RemoveProgramStageAction
-    implements Action
+public class ProgramStageInstanceDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramStageService programStageService;
+    private JdbcTemplate jdbcTemplate;
 
-    public void setProgramStageService( ProgramStageService programStageService )
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
     {
-        this.programStageService = programStageService;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Implementation methods
     // -------------------------------------------------------------------------
 
-    private int id;
-
-    public void setId( int id )
+    @Override
+    public String getClassName()
     {
-        this.id = id;
+        return ProgramStageDataElement.class.getSimpleName();
     }
 
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
+    @Override
+    public String allowDeleteProgramStage( ProgramStage programStage )
     {
-        this.i18n = i18n;
-    }
+        String sql = "SELECT COUNT(*) " + "FROM programstageinstance " + "WHERE programstageid=" + programStage.getId();
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
+        return jdbcTemplate.queryForInt( sql ) == 0 ? null : ERROR;
 
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        try
-        {
-            programStageService.deleteProgramStage( programStageService.getProgramStage( id ) );
-        }
-        catch ( DeleteNotAllowedException ex )
-        {
-            if ( ex.getErrorCode().equals( DeleteNotAllowedException.ERROR_ASSOCIATED_BY_OTHER_OBJECTS ) )
-            {
-                message = i18n.getString( "object_not_deleted_associated_by_objects" ) + " " + ex.getMessage();
-
-                return ERROR;
-            }
-        }
-        return SUCCESS;
     }
 }
