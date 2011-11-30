@@ -8,58 +8,57 @@
 			<input type="hidden" name="organisationUnitId" value="$organisationUnitId" />
 			<input type="hidden" name="singleEventId" value="$singleEventId" />
 		
-		
 	    	#if ( $invalidRegistrationDate )
-	    		<label style="color:red;">$i18n.getString("Date of Registration (yyyy-MM-dd). The date entered is not valid").</label>
+	    		<label style="color:red;">Date of Registration (yyyy-MM-dd). The date entered is not valid.</label>
 	    	#else
-	    		<label>$i18n.getString("Date of Registration (yyyy-MM-dd)")</label>
+	    		<label>Date of Registration (yyyy-MM-dd)</label>
 	    	#end
 	    	#if($registrationDate)
-	    		<input type="date" maxlength="255" size="24" name="registrationDate" value="$i18n.getString("$registrationDate") />
+	    		<input type="date" maxlength="255" size="24" name="registrationDate" value="$registrationDate" />
 	    	#else
 	    		<input type="date" maxlength="255" size="24" name="registrationDate" value="" />
 	    	#end
 	    	
 	    	#if ( $fullNameIsToLong )
-	    		<label style="color:red;">$i18n.getString("Full Name. The name must be between 7 and 50 characters")</label>
+	    		<label style="color:red;">Full Name. The name must be between 7 and 50 characters</label>
 	    	#elseif( $invalidFullName )
-	    		<label style="color:red;">$i18n.getString("Full Name. The name entered is not valid")</label>
+	    		<label style="color:red;">Full Name. The name entered is not valid</label>
 	    	#else
-	    		<label>$i18n.getString("Full Name")</label>
+	    		<label>Full Name</label>
 	    	#end
 	    	#if ($fullName)
-		    	<input type="text" maxlength="255" size="24" name="fullName" value=$i18n.getString("$fullName") />
+		    	<input type="text" maxlength="255" size="24" name="fullName" value="$fullName" />
 	    	#else
 	    		<input type="text" maxlength="255" size="24" name="fullName" value="" />
 	    	#end
 	    	
 	    	#if ( $noGender )
-	    		<label style="color:red;">$i18n.getString("Gender. Please select a gender")</label>
+	    		<label style="color:red;">Gender. Please select a gender</label>
 	    	#elseif ( $invalidGender )
-	    		<label style="color:red;">$i18n.getString("Gender. The gender entered is not valid")</label>
+	    		<label style="color:red;">Gender. The gender entered is not valid</label>
 	    	#else
-	    		<label>$i18n.getString("Gender")</label>
+	    		<label>Gender</label>
 	    	#end
 	    	<br />    	
 	    	<select name="gender">
-	    		<option value="please_select">$i18n.getString("[Please select]")</option>
+	    		<option value="please_select">[Please select]</option>
 	    		
 	    		#if ($gender == "M")
-					<option value="M" selected="selected">$i18n.getString("Male")</option>
+					<option value="M" selected="selected">Male</option>
 				#else
-					<option value="M">$i18n.getString("Male")</option>
+					<option value="M">Male</option>
 				#end
 				
 				#if ($gender == "F")
-					<option value="F" selected="selected">$i18n.getString("Female")</option>
+					<option value="F" selected="selected">Female</option>
 				#else
-					<option value="F">$i18n.getString("Female")</option>
+					<option value="F">Female</option>
 				#end
 				
 				#if ($gender == "T")
-					<option value="T" selected="selected">$i18n.getString("Transgender")</option>
+					<option value="T" selected="selected">Transgender</option>
 				#else
-					<option value="T">$i18n.getString("Transgender")</option>
+					<option value="T">Transgender</option>
 				#end
 				
 			</select>
@@ -67,26 +66,26 @@
 			<br />
 			
 			#if ( $noDobType )
-				<label style="color:red;">$i18n.getString("DOB Type. Please select a DOB type")</label>
+				<label style="color:red;">DOB Type. Please select a DOB type</label>
 			#elseif ( $invalidDobType )
-				<label style="color:red;">$i18n.getString("DOB Type. The DOB type entered is not valid")</label>
+				<label style="color:red;">DOB Type. The DOB type entered is not valid</label>
 			#else
-				<label>$i18n.getString("DOB Type")</label>
+				<label>DOB Type</label>
 			#end
 			<br />
 			<select name="dobType">
-				<option value="p">$i18n.getString("[Please select]")</option>
+				<option value="p">[Please select]</option>
 				
 				#if ($dobType == "V")
-					<option value="V" selected="selected">$i18n.getString("Verified")</option>
+					<option value="V" selected="selected">Verified</option>
 				#else
-					<option value="V">$i18n.getString("Verified")</option>
+					<option value="V">Verified</option>
 				#end
 				
 				#if ($dobType == "D")
-					<option value="D" selected="selected">$i18n.getString("Declared")</option>
+					<option value="D" selected="selected">Declared</option>
 				#else
-					<option value="D">$i18n.getString("Declared")</option>
+					<option value="D">Declared</option>
 				#end
 				
 			</select>
@@ -94,24 +93,24 @@
 			<br />
 			
 			#if ( $invalidBirthDate )
-	    		<label style="color:red;">$i18n.getString("Date of Birth (yyyy-MM-dd). The date entered is not valid")</label>
+	    		<label style="color:red;">Date of Birth (yyyy-MM-dd). The date entered is not valid</label>
 	    	#else
-	    		<label>$i18n.getString("Date of Birth (yyyy-MM-dd)")</label>
+	    		<label>Date of Birth (yyyy-MM-dd)</label>
 	    	#end
 	    	#if($birthDate)
-				<input type="date" maxlength="255" size="24" name="birthDate" value=$i18n.getString("$birthDate")/>
+				<input type="date" maxlength="255" size="24" name="birthDate" value="$birthDate"/>
 			#else
 				<input type="date" maxlength="255" size="24" name="birthDate" value=""/>
 			#end
 			
 			#if ( $invalidBloodGroup )
-	    		<label style="color:red;">$i18n.getString("Blood Group. The blood group entered is not valid")</label>
+	    		<label style="color:red;">Blood Group. The blood group entered is not valid</label>
 	    	#else
-				<label>$i18n.getString("Blood Group")</label>
+				<label>Blood Group</label>
 			#end
 			<br />
 			<select name="bloodGroup">
-				<option value="please_select">$i18n.getString("[Please select]")</option>
+				<option value="please_select">[Please select]</option>
 				
 				#if ($bloodGroup == "A+")
 					<option value="A+" selected="selected">A+</option>
@@ -165,7 +164,7 @@
 			
 			<br />
 			
-			<input type="submit" value=$i18n.getString("Submit") />
+			<input type="submit" value="Submit" />
 	    </p>
 	</div>
 </form>

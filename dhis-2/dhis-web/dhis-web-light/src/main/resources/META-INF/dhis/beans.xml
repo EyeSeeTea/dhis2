@@ -154,5 +154,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
     <property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
   </bean>
+  
+  <bean id="org.hisp.dhis.light.singleevents.action.RegisterNewSingleEventAction" class="org.hisp.dhis.light.singleevents.action.RegisterNewSingleEventAction">
+    <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+  </bean>
+  
+  <bean id="org.hisp.dhis.light.singleevents.action.RenderResultPageAction" class="org.hisp.dhis.light.singleevents.action.RenderResultPageAction">
+    <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+  </bean>
 
 </beans>

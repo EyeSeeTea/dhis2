@@ -16,7 +16,7 @@
 
 <div id="content" align="center" style="text-align: left;">
 
-#parse( $page )
-
+	#parse( $page )
+	
 </div>
 </body>

@@ -108,12 +108,16 @@ public class AddSingleEventAction implements Action  {
     	this.singleEventId = singleEventId;
     }
     
+    public Integer getSingleEventId(){
+    	return singleEventId;
+    }
+    
     private Integer patientId;
     
     public void  setPatientId( Integer patientId ){
     	this.patientId = patientId;
     }
-    //
+ 
     private Patient patient;
     public Patient getPatient()
     {
@@ -159,9 +163,9 @@ public class AddSingleEventAction implements Action  {
 	// Validation
 	// -------------------------------------------------------------------------
     
-    private ArrayList<String> invalid = new ArrayList();
+    private ArrayList<String> invalid = new ArrayList<String>();
     
-    public ArrayList getInvalid()
+    public ArrayList<String> getInvalid()
     {
     	return invalid;
     }

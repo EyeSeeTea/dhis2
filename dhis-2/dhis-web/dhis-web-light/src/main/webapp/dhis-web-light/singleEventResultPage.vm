@@ -2,7 +2,7 @@
 
 <p>
 	<ul>
-		$i18n.getString( "The registration was successful!" )
+		The registration was successful!
 	</ul>
 </p>
 
@@ -13,8 +13,7 @@
 	<li><a href="GetRecentlyRegisteredSingleEvents.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">
 	$i18n.getString("Recently registered")</a></li>
 	<li><a href="getBeneficiaryChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId">
-	$i18n.getString("Register a new event")</a></li>
-	<li><a href="singleEvents.action?organisationUnitId=$organisationUnitId">$i18n.getString("Register another event")</a></li>
+	$i18n.getString("Register a new single event")</a></li>
 	<li><a href="index.action">$i18n.getString("home")</a></li>
 </ul>
 </div>

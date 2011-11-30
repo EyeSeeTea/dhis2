@@ -29,16 +29,13 @@ package org.hisp.dhis.light.singleevents.action;
 
 import java.util.Date;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 
 import com.opensymphony.xwork2.Action;
@@ -95,8 +92,9 @@ public class AddBeneficiaryAction implements Action  {
     public Integer getOrganisationUnitId(){
     	return this.organisationUnitId;
     }
-    //
+    
     private Patient patient;
+    
     public Patient getPatient()
     {
     	return patient;
@@ -328,7 +326,7 @@ public class AddBeneficiaryAction implements Action  {
     
     private boolean validName(String s)
     {
-    	if(s.matches("^[A-Za-zÀ-ÿ]+[[A-Za-zÀ-ÿ]*\\s?-?.?'?]*$")){
+    	if(s.matches("^[A-Za-z]+[[A-Za-z]*\\s?-?.?'?]*$")){
     		return true;
     	}else{
     		return false;
@@ -466,16 +464,6 @@ public class AddBeneficiaryAction implements Action  {
 			return ERROR;
 		}else{
 	        patientId = patientService.savePatient(patient);
-	        
-	        // ---------------------------------------------------------------------
-	        // Set Data for SingleEventForm
-	        // ---------------------------------------------------------------------
-	        Program program = programService.getProgram(singleEventId);
-	        eventName = program.getName();
-	        ProgramStage programStage = program.getProgramStages().iterator().next();
-	        programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
-	        Collections.sort(programStageDataElements, OrderBySortOrder);
-	        
 	        return SUCCESS;
 		}
         

@@ -5,12 +5,12 @@
 		<p style="text-align: left;">
 		
 		#foreach( $element in $programStageDataElements )
-				
+
 				#foreach( $invalidShort in $invalid )
 					<label>$element.getDataElement().getName() == $invalidShort</label>
 				#end
 				<label>$element.getDataElement().getName() #if($element.getDataElement().getType() == "date") (yyyy-mm-dd) #end</label>
-				
+
 				#if ($element.getDataElement().getType() == "bool")
 					<br />
 			    	<select name="dynForm">

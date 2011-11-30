@@ -266,7 +266,7 @@ public class UpdateBeneficiaryAction implements Action  {
     
     private boolean validName(String s)
     {
-    	if(s.matches("^[A-Za-zÀ-ÿ]+[[A-Za-zÀ-ÿ]*\\s?-?.?'?]*$")){
+    	if(s.matches("^[A-Za-z]+[[A-Za-z]*\\s?-?.?'?]*$")){
     		return true;
     	}else{
     		return false;
