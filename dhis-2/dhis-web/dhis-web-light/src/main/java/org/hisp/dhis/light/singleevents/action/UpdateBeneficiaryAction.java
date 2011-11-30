@@ -380,7 +380,6 @@ public class UpdateBeneficiaryAction implements Action  {
         // Set Other information for patient
         // ---------------------------------------------------------------------
         
-
 		patient.setGender( gender );		
 		patient.setDobType( dobType );
 		patient.setIsDead( false );

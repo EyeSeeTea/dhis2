@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.light.dataentry.utils.FormUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
@@ -99,9 +101,29 @@ public class AddSingleEventAction implements Action  {
         this.organisationUnitService = organisationUnitService;
     }
     
+    private FormUtils formUtils;
+
+    public void setFormUtils( FormUtils formUtils )
+    {
+        this.formUtils = formUtils;
+    }
+
+    public FormUtils getFormUtils()
+    {
+        return formUtils;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+    
     // -------------------------------------------------------------------------
 	// Input Output
-	// -------------------------------------------------------------------------   
+	// -------------------------------------------------------------------------
+    
     private Integer singleEventId;
     
     public void setSingleEventId( Integer singleEventId ){
@@ -152,6 +174,12 @@ public class AddSingleEventAction implements Action  {
     	return dynForm;
     }
     
+    private ArrayList<ProgramStageDataElement> programStageDataElements = new ArrayList<ProgramStageDataElement>();
+    
+    public ArrayList<ProgramStageDataElement> getProgramStageDataElements(){
+    	return this.programStageDataElements;
+    }
+    
 	 static final Comparator<ProgramStageDataElement> OrderBySortOrder =
 		 	new Comparator<ProgramStageDataElement>() {
 		 public int compare(ProgramStageDataElement i1, ProgramStageDataElement i2) {
@@ -162,78 +190,32 @@ public class AddSingleEventAction implements Action  {
 	// -------------------------------------------------------------------------
 	// Validation
 	// -------------------------------------------------------------------------
+	
+	public class Validate {	
+		private Integer _id;
+		private String _errormessage;
+		
+		public String getErrorMessage(){
+			return this._errormessage;
+		}
+		public Integer getId(){
+			return this._id;
+		}
+		
+		public Validate(Integer id, String errormessage)
+		{
+			this._id = id;
+			this._errormessage = errormessage;
+		}
+		
+	}
+	
+	private ArrayList<Validate> validList = new ArrayList<Validate>();
     
-    private ArrayList<String> invalid = new ArrayList<String>();
-    
-    public ArrayList<String> getInvalid()
+    public ArrayList<Validate> getValidList()
     {
-    	return invalid;
+    	return this.validList;
     }
-    
-	private boolean validDate(String s)
-	{
-		boolean valid;
-
-		if(s.matches("\\d*-\\d*-\\d*")) {
-			valid = true;
-    	} else {
-    		valid = false;
-    	}
-		
-		return valid;
-	}
-	
-	private boolean validString(String s)
-	{
-		boolean valid;
-
-		if(s.matches("\\w*")) {
-			valid = true;
-    	} else {
-    		valid = false;
-    	}
-		
-		return valid;
-	}
-	
-	private boolean validNumber(String s)
-	{
-		boolean valid;
-
-		if(s.matches("\\d*")) {
-			valid = true;
-    	} else {
-    		valid = false;
-    	}
-		
-		return valid;
-	}
-	
-	private boolean validBool(String s)
-	{
-		boolean valid;
-
-		if(s.matches("true|false")) {
-			valid = true;
-    	} else {
-    		valid = false;
-    	}
-		
-		return valid;
-	}
-	
-	private boolean validGenericType(String s)
-	{
-		boolean valid;
-
-		if(s.matches(".*")) {
-			valid = true;
-    	} else {
-    		valid = false;
-    	}
-		
-		return valid;
-	}
     
 	// -------------------------------------------------------------------------
 	// Action Implementation
@@ -265,63 +247,97 @@ public class AddSingleEventAction implements Action  {
         programStageInstance.setCompleted(false);
         programStageInstanceService.addProgramStageInstance(programStageInstance);
         
-		ArrayList<ProgramStageDataElement> programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
+        programStageDataElements.clear();
+		programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
 		Collections.sort(programStageDataElements, OrderBySortOrder);
         
-		boolean valid = true;
+		// -------------------------------------------------------------------------
+		// Validation
+		// -------------------------------------------------------------------------
 		
+		boolean valid = true;
+		validList.clear();
         int i = 0;
 		for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
+			
 			DataElement dataElement = programStageDataElement.getDataElement();
+			String value = dynForm[i];
+			String type = dataElement.getType();
+			String numbertype = dataElement.getNumberType();
 			
-			// Validation ---------------------------------------
-			System.out.print("Type: "+dataElement.getType().toString());
-			System.out.print(" Value: "+dynForm[i].toString());
-			System.out.println(" Name: "+dataElement.getName().toString());
+			if(value.isEmpty()) {
+					validList.add(new Validate(dataElement.getId(),i18n.getString( "is_required" )));
+					valid = false;
+				
+			} else if(type.equals( DataElement.VALUE_TYPE_DATE)) {
+				if(!FormUtils.isDate( value )) {
+					validList.add(new Validate(dataElement.getId(), value+ " " +i18n.getString( "is_invalid_date" )));
+					valid = false;
+				}
+				
+			} else if(type.equals( DataElement.VALUE_TYPE_STRING)) {
+				if(!value.matches("^[\\p{L}|\\s]*$")) {
+					validList.add(new Validate(dataElement.getId(), value+" "+i18n.getString( "is_invalid_string" )));
+					valid = false;
+				}
+				
+			} else if(type.equals( DataElement.VALUE_TYPE_INT)) {
+				
+				if(numbertype.equals(DataElement.VALUE_TYPE_POSITIVE_INT))
+				{
+					if(!FormUtils.isPositiveInteger( value )) {
+						validList.add(new Validate(dataElement.getId(), value+" "+i18n.getString( "is_invalid_positive_integer" )));
+						valid = false;
+					}
+				}
+				
+				if(numbertype.equals(DataElement.VALUE_TYPE_NEGATIVE_INT))
+				{
+					if(!FormUtils.isNegativeInteger( value )) {
+						validList.add(new Validate(dataElement.getId(), value+" "+i18n.getString( "is_invalid_negative_integer" )));
+						valid = false;
+					}
+				}
+				
+				if(numbertype.equals(DataElement.VALUE_TYPE_INT))
+				{
+					if(!FormUtils.isInteger( value )) {
+						validList.add(new Validate(dataElement.getId(), value+" "+i18n.getString( "is_invalid_integer" )));
+						valid = false;
+					}
+				}
+				
+				if(numbertype.equals(DataElement.VALUE_TYPE_NUMBER))
+				{
+					if(!FormUtils.isNumber( value )) {
+						validList.add(new Validate(dataElement.getId(), value+" "+i18n.getString( "is_invalid_number" )));
+						valid = false;
+					}
+				}
 			
-			if(dataElement.getType().toString() == "date") {
-				if(validDate(dynForm[i].toString()) == false) {
+			} else if(type.equals( DataElement.VALUE_TYPE_BOOL)) {
+				if(!FormUtils.isBoolean( value )) {
+					validList.add(new Validate(dataElement.getId(), value+" "+i18n.getString( "is_invalid_boolean" )));
 					valid = false;
-					invalid.add(dataElement.getShortName().toString());
-				}
-				
-			} else if(dataElement.getType().toString() == "string") {
-				if(validString(dynForm[i].toString()) == false) {
-					valid = false;
-					invalid.add(dataElement.getShortName().toString());
-				}
-				
-			} else if(dataElement.getType().toString() == "number") {
-				if(validNumber(dynForm[i].toString()) == false) {
-					valid = false;
-					invalid.add(dataElement.getShortName().toString());
-				}
-				
-			} else if(dataElement.getType().toString() == "bool") {
-				if(validBool(dynForm[i].toString()) == false) {
-					valid = false;
-					invalid.add(dataElement.getShortName().toString());
-				}
-				
-			} else {
-				if(validGenericType(dynForm[i].toString()) == false) {
-					valid = false;
-					invalid.add(dataElement.getShortName().toString());
 				}
 			}
-			
-			// End Validation ---------------------------------------
-			
-	        PatientDataValue patientDataValue = new PatientDataValue();
-	        patientDataValue.setDataElement(dataElement);
-	        patientDataValue.setProgramStageInstance(programStageInstance);
-	        patientDataValue.setOrganisationUnit(organisationUnit);
-	        patientDataValue.setValue(dynForm[i]);
-			patientDataValueService.savePatientDataValue(patientDataValue);
 			i++;
 		}
 		
 		if(valid) {
+			i = 0;
+			for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
+				DataElement dataElement = programStageDataElement.getDataElement();
+			
+				PatientDataValue patientDataValue = new PatientDataValue();
+				patientDataValue.setDataElement(dataElement);
+				patientDataValue.setProgramStageInstance(programStageInstance);
+				patientDataValue.setOrganisationUnit(organisationUnit);
+				patientDataValue.setValue(dynForm[i]);
+				patientDataValueService.savePatientDataValue(patientDataValue);
+				i++;
+			}
+			
 			return SUCCESS;
 		} else {
 			return ERROR;

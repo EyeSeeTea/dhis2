@@ -6,26 +6,25 @@
 		
 		#foreach( $element in $programStageDataElements )
 
-				#foreach( $invalidShort in $invalid )
-					<label>$element.getDataElement().getName() == $invalidShort</label>
-				#end
 				<label>$element.getDataElement().getName() #if($element.getDataElement().getType() == "date") (yyyy-mm-dd) #end</label>
-
+				
+				#foreach( $validate in $validList )				
+					#if($element.getDataElement().getId() == $validate.id)<label style="color:red;"> $validate.getErrorMessage() </label> #end
+				#end
+	
 				#if ($element.getDataElement().getType() == "bool")
 					<br />
 			    	<select name="dynForm">
-					<option value="please_select">$i18n.getString("[Please select]")</option>
+					<option value="please_select">$i18n.getString("Please_select")</option>
 					<option value="true">$i18n.getString("Yes")</option>
 					<option value="false">$i18n.getString("No")</option>
 					</select>
 					<br />
 				#elseif ($element.getDataElement().getType() == "date")
-					<input type="date" maxlength="255" size="24" value="$element.getDataElement().getType()" name="dynForm" />
+					<input type="date" maxlength="255" size="24" name="dynForm" />
 				#else
-					<input type="text" maxlength="255" size="24" value="$element.getDataElement().getType()" name="dynForm" />
-				
-				#end
-				
+					<input type="text" maxlength="255" size="24" name="dynForm" />
+				#end	
 		#end
 		
 		<input type="hidden" name="organisationUnitId" value="$organisationUnitId" />
