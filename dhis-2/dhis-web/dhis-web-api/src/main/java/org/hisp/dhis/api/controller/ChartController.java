@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,19 +58,18 @@ public class ChartController
         charts.setCharts( new ArrayList<Chart>( chartService.getAllCharts() ) );
 
         model.addAttribute( "model", charts );
-        
-        Map<String,String> xsltParams = new HashMap<String,String>();
-        xsltParams.put( "title", "Charts");
-        xsltParams.put( "elements", "charts");
-        
-        model.addAttribute( "xslt-params", xsltParams);
-        
+
+        Map<String, String> xsltParams = new HashMap<String, String>();
+        xsltParams.put( "title", "Charts" );
+        xsltParams.put( "elements", "charts" );
+
+        model.addAttribute( "xslt-params", xsltParams );
 
         return "list";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getChart( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
+    public String getChart( @PathVariable( "uid" ) String uid, Model model )
     {
         Chart chart = chartService.getChart( uid );
 

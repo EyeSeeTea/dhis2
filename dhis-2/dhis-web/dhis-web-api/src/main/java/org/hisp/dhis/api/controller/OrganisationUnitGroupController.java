@@ -5,12 +5,14 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroups;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -22,25 +24,30 @@ public class OrganisationUnitGroupController
     @Autowired
     private OrganisationUnitGroupService organisationUnitGroupService;
 
-    public OrganisationUnitGroupController()
-    {
-
-    }
-
     @RequestMapping( method = RequestMethod.GET )
-    public OrganisationUnitGroups getOrganisationUnits()
+    public String getOrganisationUnits( Model model )
     {
         OrganisationUnitGroups organisationUnitGroups = new OrganisationUnitGroups();
         organisationUnitGroups.setOrganisationUnitGroups( new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService.getAllOrganisationUnitGroups() ) );
 
-        return organisationUnitGroups;
+        model.addAttribute( "model", organisationUnitGroups );
+
+        Map<String, String> xsltParams = new HashMap<String, String>();
+        xsltParams.put( "title", "OrganisationUnitGroups" );
+        xsltParams.put( "elements", "organisationUnitGroups" );
+
+        model.addAttribute( "xslt-params", xsltParams );
+
+        return "list";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public OrganisationUnitGroup getOrganisationUnit( @PathVariable( "uid" ) String uid, HttpServletRequest request )
+    public String getOrganisationUnit( @PathVariable( "uid" ) String uid, Model model )
     {
         OrganisationUnitGroup organisationUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( uid );
 
-        return organisationUnitGroup;
+        model.addAttribute( "model", organisationUnitGroup );
+
+        return "organisationUnitGroup";
     }
 }

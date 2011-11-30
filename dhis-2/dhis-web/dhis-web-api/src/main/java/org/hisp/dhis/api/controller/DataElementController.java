@@ -32,12 +32,14 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.DataElements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping( value = "/dataElements" )
@@ -47,19 +49,29 @@ public class DataElementController
     private DataElementService dataElementService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public DataElements getDataElements()
+    public String getDataElements( Model model )
     {
         DataElements dataElements = new DataElements();
         dataElements.setDataElements( new ArrayList<DataElement>( dataElementService.getAllActiveDataElements() ) );
 
-        return dataElements;
+        model.addAttribute( "model", dataElements );
+
+        Map<String, String> xsltParams = new HashMap<String, String>();
+        xsltParams.put( "title", "DataElements" );
+        xsltParams.put( "elements", "dataElements" );
+
+        model.addAttribute( "xslt-params", xsltParams );
+
+        return "list";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public DataElement getDataElement( @PathVariable( "uid" ) String uid, HttpServletRequest request )
+    public String getDataElement( @PathVariable( "uid" ) String uid, Model model )
     {
         DataElement dataElement = dataElementService.getDataElement( uid );
 
-        return dataElement;
+        model.addAttribute( "model", dataElement );
+
+        return "dataElement";
     }
 }

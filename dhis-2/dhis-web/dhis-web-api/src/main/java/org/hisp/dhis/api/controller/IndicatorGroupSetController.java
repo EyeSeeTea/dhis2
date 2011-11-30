@@ -32,13 +32,18 @@ import org.hisp.dhis.indicator.IndicatorGroupSets;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
 @Controller
 @RequestMapping( value = "/indicatorGroupSets" )
 public class IndicatorGroupSetController
@@ -47,19 +52,29 @@ public class IndicatorGroupSetController
     private IndicatorService indicatorService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public IndicatorGroupSets getIndicatorGroupSets()
+    public String getIndicatorGroupSets( Model model )
     {
         IndicatorGroupSets indicatorGroupSets = new IndicatorGroupSets();
         indicatorGroupSets.setIndicatorGroupSets( new ArrayList<IndicatorGroupSet>( indicatorService.getAllIndicatorGroupSets() ) );
 
-        return indicatorGroupSets;
+        model.addAttribute( "model", indicatorGroupSets );
+
+        Map<String, String> xsltParams = new HashMap<String, String>();
+        xsltParams.put( "title", "IndicatorGroupSets" );
+        xsltParams.put( "elements", "indicatorGroupSets" );
+
+        model.addAttribute( "xslt-params", xsltParams );
+
+        return "list";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public IndicatorGroupSet getIndicatorGroupSet( @PathVariable( "uid" ) String uid, HttpServletRequest request )
+    public String getIndicatorGroupSet( @PathVariable( "uid" ) String uid, Model model )
     {
         IndicatorGroupSet indicatorGroupSet = indicatorService.getIndicatorGroupSet( uid );
 
-        return indicatorGroupSet;
+        model.addAttribute( "model", indicatorGroupSet );
+
+        return "indicatorGroupSet";
     }
 }

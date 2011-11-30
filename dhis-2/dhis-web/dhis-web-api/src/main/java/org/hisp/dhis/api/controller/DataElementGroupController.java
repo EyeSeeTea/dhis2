@@ -32,12 +32,14 @@ import org.hisp.dhis.dataelement.DataElementGroups;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping( value = "/dataElementGroups" )
@@ -47,19 +49,29 @@ public class DataElementGroupController
     private DataElementService dataElementService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public DataElementGroups getDataElementGroups()
+    public String getDataElementGroups( Model model )
     {
         DataElementGroups dataElementGroups = new DataElementGroups();
         dataElementGroups.setDataElementGroups( new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() ) );
 
-        return dataElementGroups;
+        model.addAttribute( "model", dataElementGroups );
+
+        Map<String, String> xsltParams = new HashMap<String, String>();
+        xsltParams.put( "title", "DataElementGroups" );
+        xsltParams.put( "elements", "dataElementGroups" );
+
+        model.addAttribute( "xslt-params", xsltParams );
+
+        return "list";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public DataElementGroup getDataElementGroup( @PathVariable( "uid" ) String uid, HttpServletRequest request )
+    public String getDataElementGroup( @PathVariable( "uid" ) String uid, Model model )
     {
         DataElementGroup dataElementGroup = dataElementService.getDataElementGroup( uid );
 
-        return dataElementGroup;
+        model.addAttribute( "model", dataElementGroup );
+
+        return "dataElementGroup";
     }
 }

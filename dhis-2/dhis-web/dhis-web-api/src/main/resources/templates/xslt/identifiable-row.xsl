@@ -33,11 +33,17 @@
             </td>
             <td>
                 <xsl:element name="a">
+                    <xsl:attribute name="href"><xsl:value-of select="concat($root,'/',@id,'.jsonp')"/></xsl:attribute>
+                    <xsl:text>jsonp</xsl:text>
+                </xsl:element>
+            </td>
+            <td>
+                <xsl:element name="a">
                     <xsl:attribute name="href"><xsl:value-of select="concat($root,'/',@id,'.pdf')"/></xsl:attribute>
                     <xsl:text>pdf</xsl:text>
                 </xsl:element>
             </td>
         </tr>
     </xsl:template>
-    
+
 </xsl:stylesheet>

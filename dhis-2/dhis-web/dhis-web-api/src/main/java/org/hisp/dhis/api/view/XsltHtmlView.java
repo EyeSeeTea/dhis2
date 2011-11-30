@@ -1,5 +1,6 @@
 package org.hisp.dhis.api.view;
 
+import org.amplecode.staxwax.transformer.LoggingErrorListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
@@ -16,7 +17,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.OutputStream;
 import java.util.Map;
-import org.amplecode.staxwax.transformer.LoggingErrorListener;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -51,17 +51,17 @@ public class XsltHtmlView extends AbstractUrlBasedView
     {
         response.setContentType( getContentType() );
         model = ViewUtils.filterModel( model );
-        
+
         Object domainModel = model.get( "model" );
 
         if ( domainModel == null )
         {
-            // throw exception
+            // TODO throw exception
         }
 
         JAXBContext context = JAXBContext.newInstance( domainModel.getClass() );
         Marshaller marshaller = context.createMarshaller();
-        marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
+        marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, false );
         marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
 
         ClassPathResource classPathResource = new ClassPathResource( getUrl() );
@@ -71,23 +71,23 @@ public class XsltHtmlView extends AbstractUrlBasedView
 
         TransformerFactory factory = TransformerFactory.newInstance();
         factory.setURIResolver( uriResolver );
-        factory.setErrorListener( new LoggingErrorListener());
+        factory.setErrorListener( new LoggingErrorListener() );
 
         Transformer transformer = factory.newTransformer( xsltSource );
 
         OutputStream output = response.getOutputStream();
 
         // pass on any parameters set in xslt-params
-        Map<String,String> params = (Map<String,String>) model.get("xslt-params");
-        if (params != null)
+        Map<String, String> params = (Map<String, String>) model.get( "xslt-params" );
+        if ( params != null )
         {
-          for (Map.Entry<String, String> entry : params.entrySet()) 
-          {
-          	transformer.setParameter( entry.getKey(), entry.getValue());
-          }
+            for ( Map.Entry<String, String> entry : params.entrySet() )
+            {
+                transformer.setParameter( entry.getKey(), entry.getValue() );
+            }
         }
-        
+
         transformer.transform( xmlSource, new StreamResult( output ) );
-    
+
     }
 }

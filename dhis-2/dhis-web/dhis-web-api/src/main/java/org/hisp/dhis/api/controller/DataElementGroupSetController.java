@@ -32,13 +32,18 @@ import org.hisp.dhis.dataelement.DataElementGroupSets;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
 @Controller
 @RequestMapping( value = "/dataElementGroupSets" )
 public class DataElementGroupSetController
@@ -47,19 +52,29 @@ public class DataElementGroupSetController
     private DataElementService dataElementService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public DataElementGroupSets getDataElementGroupSets()
+    public String getDataElementGroupSets( Model model )
     {
         DataElementGroupSets dataElementGroupSets = new DataElementGroupSets();
         dataElementGroupSets.setDataElementGroupSets( new ArrayList<DataElementGroupSet>( dataElementService.getAllDataElementGroupSets() ) );
 
-        return dataElementGroupSets;
+        model.addAttribute( "model", dataElementGroupSets );
+
+        Map<String, String> xsltParams = new HashMap<String, String>();
+        xsltParams.put( "title", "DataElementGroupSets" );
+        xsltParams.put( "elements", "dataElementGroupSets" );
+
+        model.addAttribute( "xslt-params", xsltParams );
+
+        return "list";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public DataElementGroupSet getDataElementGroupSet( @PathVariable( "uid" ) String uid, HttpServletRequest request )
+    public String getDataElementGroupSet( @PathVariable( "uid" ) String uid, Model model )
     {
         DataElementGroupSet dataElementGroupSet = dataElementService.getDataElementGroupSet( uid );
 
-        return dataElementGroupSet;
+        model.addAttribute( "model", dataElementGroupSet );
+
+        return "dataElementGroupSet";
     }
 }

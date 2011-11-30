@@ -32,16 +32,18 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.Indicators;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import org.springframework.ui.Model;
 
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
 @Controller
 @RequestMapping( value = "/indicators" )
 public class IndicatorController
@@ -50,29 +52,29 @@ public class IndicatorController
     private IndicatorService indicatorService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getIndicators(Model model)
+    public String getIndicators( Model model )
     {
         Indicators indicators = new Indicators();
         indicators.setIndicators( new ArrayList<Indicator>( indicatorService.getAllIndicators() ) );
 
         model.addAttribute( "model", indicators );
-        
-        Map<String,String> xsltParams = new HashMap<String,String>();
-        xsltParams.put( "title", "Indicators");
-        xsltParams.put( "elements", "indicators");
-        
-        model.addAttribute( "xslt-params", xsltParams);
+
+        Map<String, String> xsltParams = new HashMap<String, String>();
+        xsltParams.put( "title", "Indicators" );
+        xsltParams.put( "elements", "indicators" );
+
+        model.addAttribute( "xslt-params", xsltParams );
 
         return "list";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getIndicator( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
+    public String getIndicator( @PathVariable( "uid" ) String uid, Model model )
     {
         Indicator indicator = indicatorService.getIndicator( uid );
 
         model.addAttribute( "model", indicator );
-        
+
         return "indicator";
     }
 }

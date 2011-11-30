@@ -32,12 +32,14 @@ import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -50,19 +52,29 @@ public class UserController
     private UserService userService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public Users getUsers()
+    public String getUsers( Model model )
     {
         Users users = new Users();
         users.setUsers( new ArrayList<User>( userService.getAllUsers() ) );
 
-        return users;
+        model.addAttribute( "model", users );
+
+        Map<String, String> xsltParams = new HashMap<String, String>();
+        xsltParams.put( "title", "Users" );
+        xsltParams.put( "elements", "users" );
+
+        model.addAttribute( "xslt-params", xsltParams );
+
+        return "list";
     }
 
     @RequestMapping( value = "/{id}", method = RequestMethod.GET )
-    public User getUser( @PathVariable( "id" ) Integer id, HttpServletRequest request )
+    public String getUser( @PathVariable( "id" ) Integer id, Model model )
     {
         User user = userService.getUser( id );
 
-        return user;
+        model.addAttribute( "model", user );
+
+        return "user";
     }
 }
