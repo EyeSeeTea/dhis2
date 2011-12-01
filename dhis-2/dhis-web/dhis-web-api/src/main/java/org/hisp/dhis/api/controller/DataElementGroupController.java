@@ -38,8 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 @Controller
 @RequestMapping( value = "/dataElementGroups" )
@@ -56,13 +54,7 @@ public class DataElementGroupController
 
         model.addAttribute( "model", dataElementGroups );
 
-        Map<String, String> xsltParams = new HashMap<String, String>();
-        xsltParams.put( "title", "DataElementGroups" );
-        xsltParams.put( "elements", "dataElementGroups" );
-
-        model.addAttribute( "xslt-params", xsltParams );
-
-        return "list";
+        return "dataElementGroups";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )

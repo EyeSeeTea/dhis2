@@ -38,8 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -59,13 +57,7 @@ public class IndicatorController
 
         model.addAttribute( "model", indicators );
 
-        Map<String, String> xsltParams = new HashMap<String, String>();
-        xsltParams.put( "title", "Indicators" );
-        xsltParams.put( "elements", "indicators" );
-
-        model.addAttribute( "xslt-params", xsltParams );
-
-        return "list";
+        return "indicators";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )

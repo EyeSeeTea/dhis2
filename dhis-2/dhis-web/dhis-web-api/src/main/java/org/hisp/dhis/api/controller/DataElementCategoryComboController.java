@@ -59,13 +59,7 @@ public class DataElementCategoryComboController
 
         model.addAttribute( "model", dataElementCategoryCombos );
 
-        Map<String, String> xsltParams = new HashMap<String, String>();
-        xsltParams.put( "title", "DataElementCategoryCombos" );
-        xsltParams.put( "elements", "dataElementCategoryCombos" );
-
-        model.addAttribute( "xslt-params", xsltParams );
-
-        return "list";
+        return "dataElementCategoryCombos";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )

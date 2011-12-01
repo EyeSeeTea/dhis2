@@ -38,8 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 @Controller
 @RequestMapping( value = "/dataElements" )
@@ -56,13 +54,7 @@ public class DataElementController
 
         model.addAttribute( "model", dataElements );
 
-        Map<String, String> xsltParams = new HashMap<String, String>();
-        xsltParams.put( "title", "DataElements" );
-        xsltParams.put( "elements", "dataElements" );
-
-        model.addAttribute( "xslt-params", xsltParams );
-
-        return "list";
+        return "dataElements";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )

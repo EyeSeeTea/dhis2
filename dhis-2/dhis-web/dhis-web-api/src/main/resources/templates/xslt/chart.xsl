@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl" version="1.0">
-    <xd:doc scope="stylesheet">
-        <xd:desc>
-            <xd:p><xd:b>Created on:</xd:b> Nov 28, 2011</xd:p>
-            <xd:p><xd:b>Author:</xd:b> bobj</xd:p>
-            <xd:p></xd:p>
-        </xd:desc>
-    </xd:doc>
-
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
     <xsl:include href="html-wrapper.xsl" />
     <xsl:include href="identifiable-row.xsl"/>
-    
+
     <xsl:template match="chart">
         <div class="chart">
             <h2>
@@ -97,13 +88,14 @@
                     </td>
                 </tr>
             </table>
-            
+
             <xsl:apply-templates select="organisationUnits|dataElements|indicators"/>
-            
-        </div>        
+
+        </div>
     </xsl:template>
-    
+
     <xsl:template match="organisationUnits">
+        <xsl:if test="count(child::*) > 0">
         <h3>OrganisationUnits</h3>
         <table border="1">
             <xsl:for-each select="organisationUnit">
@@ -112,9 +104,11 @@
                 </xsl:call-template>
             </xsl:for-each>
         </table>
+        </xsl:if>
     </xsl:template>
-    
+
     <xsl:template match="dataElements">
+        <xsl:if test="count(child::*) > 0">
         <h3>DataElements</h3>
         <table border="1">
             <xsl:for-each select="dataElement">
@@ -123,9 +117,11 @@
                 </xsl:call-template>
             </xsl:for-each>
         </table>
+        </xsl:if>
     </xsl:template>
 
     <xsl:template match="indicators">
+        <xsl:if test="count(child::*) > 0">
         <h3>Indicators</h3>
         <table border="1">
             <xsl:for-each select="indicator">
@@ -134,6 +130,7 @@
                 </xsl:call-template>
             </xsl:for-each>
         </table>
+        </xsl:if>
     </xsl:template>
-    
+
 </xsl:stylesheet>

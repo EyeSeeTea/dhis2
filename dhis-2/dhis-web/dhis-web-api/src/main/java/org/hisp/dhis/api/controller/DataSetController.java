@@ -39,8 +39,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -57,15 +55,10 @@ public class DataSetController
     {
         DataSets dataSets = new DataSets();
         dataSets.setDataSets( new ArrayList<DataSet>( dataSetService.getAllDataSets() ) );
+
         model.addAttribute( "model", dataSets );
 
-        Map<String, String> xsltParams = new HashMap<String, String>();
-        xsltParams.put( "title", "DataSets" );
-        xsltParams.put( "elements", "dataSets" );
-
-        model.addAttribute( "xslt-params", xsltParams );
-
-        return "list";
+        return "dataSets";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
