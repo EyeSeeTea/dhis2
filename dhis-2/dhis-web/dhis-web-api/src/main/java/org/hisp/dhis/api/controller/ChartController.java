@@ -59,13 +59,7 @@ public class ChartController
 
         model.addAttribute( "model", charts );
 
-        Map<String, String> xsltParams = new HashMap<String, String>();
-        xsltParams.put( "title", "Charts" );
-        xsltParams.put( "elements", "charts" );
-
-        model.addAttribute( "xslt-params", xsltParams );
-
-        return "list";
+        return "charts";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
