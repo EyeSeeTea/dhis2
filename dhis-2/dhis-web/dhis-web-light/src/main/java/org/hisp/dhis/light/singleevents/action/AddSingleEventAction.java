@@ -139,6 +139,10 @@ public class AddSingleEventAction implements Action  {
     public void  setPatientId( Integer patientId ){
     	this.patientId = patientId;
     }
+    
+    public Integer getPatientId(){
+    	return this.patientId;
+    }
  
     private Patient patient;
     public Patient getPatient()
@@ -230,23 +234,6 @@ public class AddSingleEventAction implements Action  {
 		ProgramStage programStage = program.getProgramStages().iterator().next();
 		OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit(organisationUnitId);
 
-        ProgramInstance programInstance = new ProgramInstance();
-        programInstance.setEnrollmentDate( new Date() );
-        programInstance.setDateOfIncident( new Date() );
-        programInstance.setProgram( program );
-        programInstance.setPatient( patient );
-        programInstance.setCompleted( false );
-
-        programInstanceService.addProgramInstance( programInstance );
-        
-        ProgramStageInstance programStageInstance = new ProgramStageInstance();
-        programStageInstance.setProgramInstance(programInstance);
-        programStageInstance.setProgramStage(programStage);
-        programStageInstance.setDueDate(new Date());
-        programStageInstance.setExecutionDate(new Date());
-        programStageInstance.setCompleted(false);
-        programStageInstanceService.addProgramStageInstance(programStageInstance);
-        
 		programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
 		Collections.sort(programStageDataElements, OrderBySortOrder);
         
@@ -324,6 +311,24 @@ public class AddSingleEventAction implements Action  {
 		}
 		
 		if(valid) {
+			
+	        ProgramInstance programInstance = new ProgramInstance();
+	        programInstance.setEnrollmentDate( new Date() );
+	        programInstance.setDateOfIncident( new Date() );
+	        programInstance.setProgram( program );
+	        programInstance.setPatient( patient );
+	        programInstance.setCompleted( false );
+
+	        programInstanceService.addProgramInstance( programInstance );
+	        
+	        ProgramStageInstance programStageInstance = new ProgramStageInstance();
+	        programStageInstance.setProgramInstance(programInstance);
+	        programStageInstance.setProgramStage(programStage);
+	        programStageInstance.setDueDate(new Date());
+	        programStageInstance.setExecutionDate(new Date());
+	        programStageInstance.setCompleted(false);
+			programStageInstanceService.addProgramStageInstance(programStageInstance);
+			
 			i = 0;
 			for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
 				DataElement dataElement = programStageDataElement.getDataElement();

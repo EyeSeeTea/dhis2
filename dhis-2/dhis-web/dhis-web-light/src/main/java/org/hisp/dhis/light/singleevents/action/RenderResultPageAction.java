@@ -27,6 +27,7 @@
 
 package org.hisp.dhis.light.singleevents.action;
 
+import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.ProgramService;
 import com.opensymphony.xwork2.Action;
 
@@ -44,6 +45,13 @@ public class RenderResultPageAction implements Action {
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
+    }
+    
+    private PatientService patientService;
+    
+    public void setPatientService( PatientService patientService )
+    {
+    	this.patientService = patientService;
     }
 	
 	// -------------------------------------------------------------------------
@@ -71,10 +79,22 @@ public class RenderResultPageAction implements Action {
     	return this.singleEventId;
     }
     
+    private Integer patientId;
+    
+    public void  setPatientId( Integer patientId ){
+    	this.patientId = patientId;
+    }
+    
     private String eventName;
     
     public String getEventName(){
     	return this.eventName;
+    }
+    
+    private String patientName;
+    
+    public String getPatientName(){
+    	return this.patientName;
     }
     
 	// -------------------------------------------------------------------------
@@ -84,6 +104,7 @@ public class RenderResultPageAction implements Action {
 	@Override
 	public String execute() {
 		eventName = programService.getProgram(singleEventId).getName();
+		patientName = patientService.getPatient(patientId).getFullName();
 		return SUCCESS;
 	}
 }

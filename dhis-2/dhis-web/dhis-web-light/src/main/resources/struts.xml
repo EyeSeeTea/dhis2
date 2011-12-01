@@ -130,7 +130,7 @@
     </action>
 	
     <action name="addSingleEvent" class="org.hisp.dhis.light.singleevents.action.AddSingleEventAction">
-      <result name="success" type="redirect">/mobile/resultPage.action?organisationUnitId=${organisationUnitId}&amp;singleEventId=${singleEventId}</result>
+      <result name="success" type="redirect">/mobile/resultPage.action?organisationUnitId=${organisationUnitId}&amp;patientId=${patientId}&amp;singleEventId=${singleEventId}&amp;Eventtype="Reg"</result>
       <result name="error" type="velocity">/dhis-web-light/main.vm</result>
       <param name="page">/dhis-web-light/newSingleEvent.vm</param>
     </action>

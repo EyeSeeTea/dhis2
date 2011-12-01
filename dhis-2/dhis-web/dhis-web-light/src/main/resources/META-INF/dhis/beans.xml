@@ -161,6 +161,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   
   <bean id="org.hisp.dhis.light.singleevents.action.RenderResultPageAction" class="org.hisp.dhis.light.singleevents.action.RenderResultPageAction">
     <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+    <property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
   </bean>
 
 </beans>
