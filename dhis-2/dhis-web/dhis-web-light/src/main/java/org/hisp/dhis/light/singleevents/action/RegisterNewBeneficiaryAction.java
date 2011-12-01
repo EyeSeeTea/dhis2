@@ -28,8 +28,17 @@
 package org.hisp.dhis.light.singleevents.action;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeGroup;
+import org.hisp.dhis.patient.PatientAttributeGroupService;
+import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.patient.comparator.PatientAttributeGroupSortOrderComparator;
 import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
@@ -48,6 +57,20 @@ public class RegisterNewBeneficiaryAction implements Action {
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
+    }
+    
+    private PatientAttributeService patientAttributeService;
+
+    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    {
+        this.patientAttributeService = patientAttributeService;
+    }
+    
+    private PatientAttributeGroupService patientAttributeGroupService;
+
+    public void setPatientAttributeGroupService( PatientAttributeGroupService patientAttributeGroupService )
+    {
+        this.patientAttributeGroupService = patientAttributeGroupService;
     }
 	
 	// -------------------------------------------------------------------------
@@ -93,6 +116,20 @@ public class RegisterNewBeneficiaryAction implements Action {
     	return fromAddBeneficiary;
     }
     
+    private List<PatientAttributeGroup> attributeGroups;
+    
+    public List<PatientAttributeGroup> getAttributeGroups()
+    {
+        return attributeGroups;
+    }
+    
+    private Collection<PatientAttribute> noGroupAttributes;
+
+    public Collection<PatientAttribute> getNoGroupAttributes()
+    {
+        return noGroupAttributes;
+    }
+    
 	// -------------------------------------------------------------------------
 	// Action Implementation
 	// -------------------------------------------------------------------------
@@ -108,6 +145,14 @@ public class RegisterNewBeneficiaryAction implements Action {
     
 	@Override
 	public String execute() {
+		
+        noGroupAttributes = patientAttributeService.getPatientAttributesNotGroup();
+        // Create a sort order ???
+
+        attributeGroups = new ArrayList<PatientAttributeGroup>( patientAttributeGroupService
+            .getAllPatientAttributeGroups() );
+        Collections.sort( attributeGroups, new PatientAttributeGroupSortOrderComparator() );
+		
 		eventName = programService.getProgram(singleEventId).getName();
 		return SUCCESS;
 	}

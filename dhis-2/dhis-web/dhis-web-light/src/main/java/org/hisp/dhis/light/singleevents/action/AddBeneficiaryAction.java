@@ -27,16 +27,30 @@
 
 package org.hisp.dhis.light.singleevents.action;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang.math.NumberUtils;
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.light.dataentry.utils.FormUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeGroup;
+import org.hisp.dhis.patient.PatientAttributeGroupService;
+import org.hisp.dhis.patient.PatientAttributeOption;
+import org.hisp.dhis.patient.PatientAttributeOptionService;
+import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patient.comparator.PatientAttributeGroupSortOrderComparator;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStageDataElement;
 
 import com.opensymphony.xwork2.Action;
 
@@ -77,6 +91,26 @@ public class AddBeneficiaryAction implements Action  {
         this.programService = programService;
     }
     
+    private PatientAttributeService patientAttributeService;
+
+    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    {
+        this.patientAttributeService = patientAttributeService;
+    }
+    
+    private PatientAttributeGroupService patientAttributeGroupService;
+
+    public void setPatientAttributeGroupService( PatientAttributeGroupService patientAttributeGroupService )
+    {
+        this.patientAttributeGroupService = patientAttributeGroupService;
+    }
+    
+    private PatientAttributeOptionService patientAttributeOptionService;
+    
+    public void setPatientAttributeOptionService( PatientAttributeOptionService patientAttributeOptionService )
+    {
+        this.patientAttributeOptionService = patientAttributeOptionService;
+    }
     
     // -------------------------------------------------------------------------
 	// Input Output
@@ -188,18 +222,37 @@ public class AddBeneficiaryAction implements Action  {
     	return this.patientId;
     }
     
-    private ArrayList<ProgramStageDataElement> programStageDataElements = new ArrayList<ProgramStageDataElement>();
+    private List<PatientAttributeGroup> attributeGroups;
     
-    public ArrayList<ProgramStageDataElement> getProgramStageDataElements(){
-    	return this.programStageDataElements;
+    public List<PatientAttributeGroup> getAttributeGroups()
+    {
+        return attributeGroups;
     }
     
-	 static final Comparator<ProgramStageDataElement> OrderBySortOrder =
-             new Comparator<ProgramStageDataElement>() {
-		 public int compare(ProgramStageDataElement i1, ProgramStageDataElement i2) {
-			 return i1.getSortOrder().compareTo(i2.getSortOrder());
-		 }
-	 };
+    private Collection<PatientAttribute> noGroupAttributes;
+
+    public Collection<PatientAttribute> getNoGroupAttributes()
+    {
+        return noGroupAttributes;
+    }
+    
+    private String dynForm[];
+    
+    public void setDynForm(String[] dynForm) {
+    	this.dynForm = dynForm;
+    }
+    
+    public String[] getDynForm()
+    {
+    	return dynForm;
+    }
+    
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
     
 	// -------------------------------------------------------------------------
 	// Validation
@@ -216,6 +269,13 @@ public class AddBeneficiaryAction implements Action  {
     private boolean invalidDobType;
     private boolean invalidBloodGroup;
     private boolean invalidGender;
+       
+	private ArrayList<Validate> validList = new ArrayList<Validate>();
+    
+    public ArrayList<Validate> getValidList()
+    {
+    	return this.validList;
+    }
     
     public boolean getFullNameIsToLong()
     {
@@ -316,20 +376,12 @@ public class AddBeneficiaryAction implements Action  {
     
     private boolean validateStringLength(String s, int min, int max)
     {
-    	if((s.length() >= min) && (s.length() <= max)){
-    		return true;
-    	}else{
-    		return false;
-    	}
+    	return ((s.length() >= min) && (s.length() <= max));
     }
     
     private boolean validName(String s)
     {
-    	if(s.matches("^[\\p{L}|\\s]*$")){
-    		return true;
-    	}else{
-    		return false;
-    	}
+    	return (s.matches("^[\\p{L}|\\s]*$"));
     }
     
     private boolean validateDateNotNull(Date d){
@@ -384,7 +436,73 @@ public class AddBeneficiaryAction implements Action  {
     }
     
 
-
+    private boolean validateDynForm(String value, PatientAttribute patientAttribute){
+    	
+    	boolean valid = true;
+    	
+    	String type = patientAttribute.getValueType();
+    	Integer id = patientAttribute.getId();
+    	
+		if(value.isEmpty()){
+			if(patientAttribute.isMandatory()){
+				validList.add(new Validate(id, i18n.getString( "is_required" )));
+				valid = false;
+			}
+		}else if(type.equals("DATE")){
+			if(!FormUtils.isDate( value )) {
+				validList.add(new Validate(id, value+" "+i18n.getString( "is_invalid_date" )));
+				valid = false;
+			}
+		}else if(type.equals("TEXT")){
+			if(!value.matches("^[\\p{L}|\\s]*$")) {
+				validList.add(new Validate(id, value+" "+i18n.getString( "is_invalid_string" )));
+				valid = false;
+			}
+		}else if(type.equals("NUMBER")){
+			if(!FormUtils.isNumber( value )) {
+				validList.add(new Validate(id, value+" "+i18n.getString( "is_invalid_number" )));
+				valid = false;
+			}
+		}else if(type.equals("YES/NO")){
+			if(!FormUtils.isBoolean( value )) {
+				validList.add(new Validate(id, value+" "+i18n.getString( "is_invalid_boolean" )));
+				valid = false;
+			}
+		}else if(type.equals("COMBO")){
+			Set<PatientAttributeOption> attributeOptions = patientAttribute.getAttributeOptions();
+			boolean contains = false;
+			for(PatientAttributeOption attributeOption : attributeOptions){
+				if(attributeOption.getId() ==  NumberUtils.toInt( value, 0 ) ){	
+					contains = true;
+				}
+			}
+			if(!contains){
+				validList.add(new Validate(id, value));
+			}
+			valid = contains;
+		}
+    	
+    	return valid;
+    }
+    
+	public class Validate {	
+		private Integer _id;
+		private String _errormessage;
+		
+		public String getErrorMessage(){
+			return this._errormessage;
+		}
+		public Integer getId(){
+			return this._id;
+		}
+		
+		public Validate(Integer id, String errormessage)
+		{
+			this._id = id;
+			this._errormessage = errormessage;
+		}
+		
+	}
 
 	// -------------------------------------------------------------------------
 	// Action Implementation
@@ -458,11 +576,95 @@ public class AddBeneficiaryAction implements Action  {
         rD = format.parseDate( registrationDate );
         patient.setRegistrationDate( rD );
         
+        // ---------------------------------------------------------------------
+        // Dynamic form
+        // ---------------------------------------------------------------------
         
-		if(validate() == false) {
+        noGroupAttributes = patientAttributeService.getPatientAttributesNotGroup();
+        // Create a sort order ???
+
+        attributeGroups = new ArrayList<PatientAttributeGroup>( patientAttributeGroupService
+            .getAllPatientAttributeGroups() );
+        Collections.sort( attributeGroups, new PatientAttributeGroupSortOrderComparator() );
+        
+        boolean validInGroup = true;
+        List<PatientAttributeValue> patientAttributeValues = new ArrayList<PatientAttributeValue>();
+        PatientAttributeValue attributeValue = null;
+        validList.clear();
+        int i = 0;
+        
+        //Attributes in groups
+        
+        for (PatientAttributeGroup patientAttributeGroup : attributeGroups) {
+        	List<PatientAttribute> patientAttributeList = patientAttributeGroup.getAttributes();
+        	for(PatientAttribute patientAttribute : patientAttributeList){
+        		       		
+        		String value = dynForm[i];
+        		
+   			 	if(!validateDynForm(value, patientAttribute)){
+   			 		validInGroup = false;
+   			 	}
+    			
+    			if(validInGroup){
+    				attributeValue = new PatientAttributeValue();
+                    attributeValue.setPatient( patient );
+                    attributeValue.setPatientAttribute( patientAttribute );
+                    
+                    if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( patientAttribute.getValueType() ) )
+                    {
+                        PatientAttributeOption option = patientAttributeOptionService.get( NumberUtils.toInt( value, 0 ) );
+                        if ( option != null )
+                        {
+                            attributeValue.setPatientAttributeOption( option );
+                            attributeValue.setValue( option.getName() );
+                        }
+                    }
+                    else
+                    {
+                        attributeValue.setValue( value.trim() );
+                    }
+                    patientAttributeValues.add( attributeValue );
+    			}
+        		
+        		i++;
+        	}
+		}
+        
+        //Attributes not in groups
+        
+        boolean validNoGroup = true;
+        
+        for (PatientAttribute patientAttribute : noGroupAttributes) {
+			String value = dynForm[i];			
+			
+			 if(!validateDynForm(value, patientAttribute)){
+				 validNoGroup = false;
+			 }
+						 
+			if(validNoGroup){
+				attributeValue = new PatientAttributeValue();
+                attributeValue.setPatient( patient );
+                attributeValue.setPatientAttribute( patientAttribute );
+                
+                if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( patientAttribute.getValueType() ) ){
+                    PatientAttributeOption option = patientAttributeOptionService.get( NumberUtils.toInt( value, 0 ) );
+                    if ( option != null ){
+                        attributeValue.setPatientAttributeOption( option );
+                        attributeValue.setValue( option.getName() );
+                    }
+                }else{
+                    attributeValue.setValue( value.trim() );
+                }
+                patientAttributeValues.add( attributeValue );
+			}
+			
+        	i++;
+		}
+        
+		if((validate() == false)||(!validNoGroup)||(!validInGroup)) {
 			return ERROR;
 		}else{
-	        patientId = patientService.savePatient(patient);
+	        patientId = patientService.createPatient( patient, 0, 0,patientAttributeValues );
 	        return SUCCESS;
 		}
         
