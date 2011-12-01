@@ -147,7 +147,6 @@ public class RegisterNewBeneficiaryAction implements Action {
 	public String execute() {
 		
         noGroupAttributes = patientAttributeService.getPatientAttributesNotGroup();
-        // Create a sort order ???
 
         attributeGroups = new ArrayList<PatientAttributeGroup>( patientAttributeGroupService
             .getAllPatientAttributeGroups() );

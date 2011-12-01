@@ -9,8 +9,9 @@
 			<input type="hidden" name="singleEventId" value="$singleEventId" />
 		
 	    	#if ( $invalidRegistrationDate )
+	    		<label>$i18n.getString("date_of_registration") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
 	    		<label style="color:red;">
-	    			$i18n.getString("date_of_registration"). $i18n.getString("is_invalid_date2") 
+	    			$!registrationDate $i18n.getString("is_invalid_date")
 	    		</label>
 	    	#else
 	    		<label>$i18n.getString("date_of_registration") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
@@ -22,12 +23,14 @@
 	    	#end
 	    	
 	    	#if ( $fullNameIsToLong )
+	    		<label>$i18n.getString("full_name") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
 	    		<label style="color:red;">
-	    			$i18n.getString("full_name"). $i18n.getString("is_invalid_name_length")
+	    			$i18n.getString("is_invalid_name_length")
 	    		</label>
 	    	#elseif( $invalidFullName )
+	    		<label>$i18n.getString("full_name") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
 	    		<label style="color:red;">
-	    			$i18n.getString("full_name"). $i18n.getString("is_invalid_name")
+	    			$!fullName $i18n.getString("is_invalid_name")
 	    		</label>
 	    	#else
 	    		<label>$i18n.getString("full_name") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
@@ -39,12 +42,14 @@
 	    	#end
 	    	
 	    	#if ( $noGender )
+	    		<label>$i18n.getString("gender") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
 	    		<label style="color:red;">
-	    			$i18n.getString("gender"). $i18n.getString("select_gender")
+	    			$i18n.getString("is_required")
 	    		</label>
 	    	#elseif ( $invalidGender )
+	    		<label>$i18n.getString("gender") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
 	    		<label style="color:red;">
-	    			$i18n.getString("gender"). $i18n.getString("is_invalid_gender")
+	    			$!gender $i18n.getString("is_invalid_gender")
 	    		</label>
 	    	#else
 	    		<label>$i18n.getString("gender") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
@@ -76,12 +81,14 @@
 			<br />
 			
 			#if ( $noDobType )
+				<label>$i18n.getString("dob_type") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
 				<label style="color:red;">
-					$i18n.getString("dob_type"). $i18n.getString("select_dob")
+					$i18n.getString("is_required")
 				</label>
 			#elseif ( $invalidDobType )
+				<label>$i18n.getString("dob_type") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
 				<label style="color:red;">
-					$i18n.getString("dob_type"). $i18n.getString("is_invalid_dob_type")
+					$!dobType $i18n.getString("is_invalid_dob_type")
 				</label>
 			#else
 				<label>$i18n.getString("dob_type") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
@@ -107,8 +114,9 @@
 			<br />
 			
 			#if ( $invalidBirthDate )
+				<label>$i18n.getString("date_of_birth") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
 	    		<label style="color:red;">
-	    			$i18n.getString("date_of_birth"). $i18n.getString("is_invalid_date2")</label>
+	    			$!birthDate $i18n.getString("is_invalid_date")</label>
 	    		</label>
 	    	#else
 	    		<label>$i18n.getString("date_of_birth") <em title="$i18n.getString( 'required' )" style="color:red;">*</em></label>
@@ -120,8 +128,9 @@
 			#end
 			
 			#if ( $invalidBloodGroup )
+				<label>$i18n.getString("blood_group")</label>
 	    		<label style="color:red;">
-	    			$i18n.getString("blood_group"). $i18n.getString("is_invalid_blood_group")
+	    			$!bloodGroup $i18n.getString("is_invalid_blood_group")
 	    		</label>
 	    	#else
 				<label>$i18n.getString("blood_group")</label>

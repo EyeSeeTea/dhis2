@@ -581,7 +581,6 @@ public class AddBeneficiaryAction implements Action  {
         // ---------------------------------------------------------------------
         
         noGroupAttributes = patientAttributeService.getPatientAttributesNotGroup();
-        // Create a sort order ???
 
         attributeGroups = new ArrayList<PatientAttributeGroup>( patientAttributeGroupService
             .getAllPatientAttributeGroups() );
