@@ -247,7 +247,6 @@ public class AddSingleEventAction implements Action  {
         programStageInstance.setCompleted(false);
         programStageInstanceService.addProgramStageInstance(programStageInstance);
         
-        programStageDataElements.clear();
 		programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
 		Collections.sort(programStageDataElements, OrderBySortOrder);
         
