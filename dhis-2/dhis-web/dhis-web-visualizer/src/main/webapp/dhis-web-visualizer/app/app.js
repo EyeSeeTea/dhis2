@@ -430,7 +430,7 @@ Ext.onReady( function() {
                         },
                         {
                             type: 'text',
-                            text: DV.state.series.names[0],
+                            text: DV.store.chart.left[0],
                             font: 'bold 13px arial',
                             fill: '#777',
                             width: 300,
@@ -524,7 +524,7 @@ Ext.onReady( function() {
         },
         string: {
             getEncodedString: function(text) {
-                return text.replace(/[^a-zA-Z 0-9]+/g,'');
+                return text.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'');
             }
         }
     };
@@ -756,7 +756,6 @@ Ext.onReady( function() {
         data: [],        
         getData: function(exe) {
             this.data = [];
-			
             Ext.Array.each(DV.state.category.names, function(item) {
                 var obj = {};
                 obj[DV.conf.finals.chart.x] = item;
