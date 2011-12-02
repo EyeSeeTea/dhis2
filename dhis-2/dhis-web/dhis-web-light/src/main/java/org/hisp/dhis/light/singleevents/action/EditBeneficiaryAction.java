@@ -213,13 +213,11 @@ public class EditBeneficiaryAction implements Action  {
         		try{
         			if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( patientAttribute.getValueType() ) ){
         				PatientAttributeOption option = attributeValue.getPatientAttributeOption();
-        				System.out.println("COMBO id: "+option.getId());
         				Integer id = option.getId();
         				dynForm[i] = id.toString();
         			}else if (attributeValue.getValue().equals("")){
         				dynForm[i] = "";
         			}else{
-        				System.out.println("attribute value: "+attributeValue.getValue());
         				dynForm[i] = attributeValue.getValue();
         			}
         		}catch (NullPointerException e){
@@ -235,13 +233,11 @@ public class EditBeneficiaryAction implements Action  {
     		try{
     			if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( patientAttribute.getValueType() ) ){
     				PatientAttributeOption option = attributeValue.getPatientAttributeOption();
-    				System.out.println("COMBO id: "+option.getId());
     				Integer id = option.getId();
     				dynForm[i] = id.toString();
     			}else if (attributeValue.getValue().equals("")){
     				dynForm[i] = "";
     			}else{
-    				System.out.println("attribute value: "+attributeValue.getValue());
     				dynForm[i] = attributeValue.getValue();
     			}
     		}catch (NullPointerException e){
