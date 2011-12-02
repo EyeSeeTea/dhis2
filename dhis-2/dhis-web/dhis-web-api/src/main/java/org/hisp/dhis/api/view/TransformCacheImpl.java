@@ -54,9 +54,9 @@ public class TransformCacheImpl implements TransformCache
 
     static final String MODEL2FOP = "model2fop.xsl"; 
 
-    static final String HTMLXSLT_RESOURCE = "/templates/xslt";
+    static final String HTMLXSLT_RESOURCE = "/templates/xslt/";
 
-    static final String FOPXSLT_RESOURCE = "/templates/xslfo";
+    static final String FOPXSLT_RESOURCE = "/templates/xslfo/";
     
     static private TransformCache instance;
     
@@ -72,9 +72,9 @@ public class TransformCacheImpl implements TransformCache
         factory.setErrorListener( errorListener );
 
         Source model2html = 
-            new StreamSource(new ClassPathResource( HTMLXSLT_RESOURCE + "/" + MODEL2HTML ).getInputStream());
+            new StreamSource(new ClassPathResource( HTMLXSLT_RESOURCE + MODEL2HTML ).getInputStream());
         Source model2fop = 
-            new StreamSource(new ClassPathResource( FOPXSLT_RESOURCE + "/" + MODEL2FOP ).getInputStream());
+            new StreamSource(new ClassPathResource( FOPXSLT_RESOURCE + MODEL2FOP ).getInputStream());
 
         factory.setURIResolver(  new ClassPathUriResolver(HTMLXSLT_RESOURCE));
         htmlCachedTransform = factory.newTemplates( model2html );

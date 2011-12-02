@@ -2,13 +2,12 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 
   <xsl:include href="identifiable-row.xsl"/>
-  
-  <xsl:param name="elements"/>
-  <xsl:param name="title"/>
 
-  <xsl:template name="list">
+  <!-- match all plural elements -->
+  <xsl:template match="charts|dataElements|indicators|organisationUnits">
+    <xsl:variable name="elements" select="local-name()" />
     <h1>
-      <xsl:value-of select="$title"/>
+      <xsl:value-of select="$elements"/>
     </h1>
 
     <table border="1">

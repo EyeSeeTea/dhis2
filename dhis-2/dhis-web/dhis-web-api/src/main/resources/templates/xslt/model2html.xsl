@@ -2,8 +2,19 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     version="1.0">
     
-    <xsl:template match="/">
-        <h1>Hello World</h1>
-    </xsl:template>
+    <xsl:output method="html"/>
     
+    <!-- html page level settings -->
+    <xsl:include href="html-wrapper.xsl"/>
+    
+    <!-- for list views -->
+    <xsl:include href="list.xsl"/>
+    
+    <!-- for rendering elements -->
+    <xsl:include href="chart.xsl"/>
+    <xsl:include href="dataElement.xsl"/>
+    <xsl:include href="indicator.xsl"/>
+    <xsl:include href="organisationUnit.xsl"/>
+    <!-- etc ... -->
+        
 </xsl:stylesheet>
