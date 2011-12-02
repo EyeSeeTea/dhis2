@@ -3,12 +3,11 @@
   <xsl:include href="html-wrapper.xsl" />
   <xsl:include href="identifiable-row.xsl" />
 
-  <xsl:template match="dataElement">
-    <div class="dataElement">
+  <xsl:template match="indicator">
+    <div class="indicator">
       <h2>
         <xsl:value-of select="@name" />
       </h2>
-
       <table border="1">
         <tr>
           <td>ID</td>
@@ -25,19 +24,37 @@
         <tr>
           <td>Short Name</td>
           <td>
-            <xsl:value-of select="@shortName" />
+            <xsl:value-of select="shortName" />
           </td>
         </tr>
         <tr>
-          <td>Type</td>
+          <td>Denominator</td>
           <td>
-            <xsl:value-of select="type" />
+            <xsl:value-of select="denominator" />
           </td>
         </tr>
         <tr>
-          <td>Zero is Significant</td>
+          <td>Denominator Description</td>
           <td>
-            <xsl:value-of select="zeroIsSignificant" />
+            <xsl:value-of select="denominatorDescription" />
+          </td>
+        </tr>
+        <tr>
+          <td>Numerator</td>
+          <td>
+            <xsl:value-of select="numerator" />
+          </td>
+        </tr>
+        <tr>
+          <td>Numerator Description</td>
+          <td>
+            <xsl:value-of select="numeratorDescription" />
+          </td>
+        </tr>
+        <tr>
+          <td>Annualized</td>
+          <td>
+            <xsl:value-of select="annualized" />
           </td>
         </tr>
         <tr>
@@ -46,43 +63,18 @@
             <xsl:value-of select="sortOrder" />
           </td>
         </tr>
-        <tr>
-          <td>Active</td>
-          <td>
-            <xsl:value-of select="active" />
-          </td>
-        </tr>
-        <tr>
-          <td>Aggregation Operator</td>
-          <td>
-            <xsl:value-of select="aggregationOperator" />
-          </td>
-        </tr>
-        <tr>
-          <td>Domain Type</td>
-          <td>
-            <xsl:value-of select="domainType" />
-          </td>
-        </tr>
+
       </table>
 
-      <xsl:apply-templates select="categoryCombo|groups|dataSets" />
-    </div>
-  </xsl:template>
+      <xsl:apply-templates select="groups|dataSets" />
 
-  <xsl:template match="categoryCombo">
-    <h3>DataElementCategoryCombo</h3>
-    <table border="1" class="categoryCombo">
-      <xsl:call-template name="identifiable-row">
-        <xsl:with-param name="root">../categoryCombo</xsl:with-param>
-      </xsl:call-template>
-    </table>
+    </div>
   </xsl:template>
 
   <xsl:template match="groups">
     <xsl:if test="count(child::*) > 0">
-      <h3>DataElementGroups</h3>
-      <table border="1" class="dataElementGroups">
+      <h3>Indicator Groups</h3>
+      <table border="1" class="indicatorGroups">
         <xsl:for-each select="group">
           <xsl:call-template name="identifiable-row">
             <xsl:with-param name="root">../groups</xsl:with-param>
