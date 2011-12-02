@@ -5,10 +5,7 @@
   <xsl:include href="html-wrapper.xsl" />
   <xsl:include href="list.xsl" />
 
-  <xsl:param name="title">OrganisationUnits</xsl:param>
+  <xsl:param name="title">Organisation Units</xsl:param>
   <xsl:param name="elements">organisationUnits</xsl:param>
 
-  <xsl:template match="organisationUnit">
-    <xsl:apply-templates />
-  </xsl:template>
 </xsl:stylesheet>

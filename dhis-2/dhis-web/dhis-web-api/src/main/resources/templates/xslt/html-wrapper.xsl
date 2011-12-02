@@ -3,7 +3,6 @@
   <xsl:output method="html" />
 
   <xsl:template match="/">
-
     <html>
       <head>
         <title>DHIS Web-API</title>
@@ -16,6 +15,6 @@
       </body>
 
     </html>
-
   </xsl:template>
+
 </xsl:stylesheet>

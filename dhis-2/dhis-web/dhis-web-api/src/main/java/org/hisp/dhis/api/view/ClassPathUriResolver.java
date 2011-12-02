@@ -43,7 +43,7 @@ public class ClassPathUriResolver implements URIResolver
 
         if ( !classPathResource.exists() )
         {
-            new TransformerException( "Resource " + url + " does not exist in classpath." );
+            throw (new TransformerException( "Resource " + url + " does not exist in classpath." ));
         }
 
         Source source = null;
@@ -54,7 +54,7 @@ public class ClassPathUriResolver implements URIResolver
         }
         catch ( IOException e )
         {
-            new TransformerException( "IOException while reading " + url + "." );
+            throw (new TransformerException( "IOException while reading " + url + "." ));
         }
 
         return source;

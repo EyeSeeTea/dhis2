@@ -1,7 +1,5 @@
 package org.hisp.dhis.api.view;
 
-import org.amplecode.staxwax.transformer.LoggingErrorListener;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,12 +9,10 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.util.JAXBSource;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 import java.io.OutputStream;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -24,25 +20,18 @@ import java.util.Map;
 public class XsltHtmlView extends AbstractUrlBasedView
 {
     public static final String DEFAULT_CONTENT_TYPE = "text/html";
+    
+    @Autowired
+    private TransformCache transformCache;
 
-    private URIResolver uriResolver;
+    public void setTransformCache( TransformCache transformCache )
+    {
+        this.transformCache = transformCache;
+    }
 
     public XsltHtmlView()
     {
         setContentType( DEFAULT_CONTENT_TYPE );
-
-        URIResolver uriResolver = new ClassPathUriResolver( "/templates/xslt/" );
-        setUriResolver( uriResolver );
-    }
-
-    public URIResolver getUriResolver()
-    {
-        return uriResolver;
-    }
-
-    public void setUriResolver( URIResolver uriResolver )
-    {
-        this.uriResolver = uriResolver;
     }
 
     @Override
@@ -64,16 +53,9 @@ public class XsltHtmlView extends AbstractUrlBasedView
         marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, false );
         marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
 
-        ClassPathResource classPathResource = new ClassPathResource( getUrl() );
-
         Source xmlSource = new JAXBSource( context, domainModel );
-        Source xsltSource = new StreamSource( classPathResource.getInputStream() );
 
-        TransformerFactory factory = TransformerFactory.newInstance();
-        factory.setURIResolver( uriResolver );
-        factory.setErrorListener( new LoggingErrorListener() );
-
-        Transformer transformer = factory.newTransformer( xsltSource );
+        Transformer transformer = transformCache.getHtmlTransformer();
 
         OutputStream output = response.getOutputStream();
 
