@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -65,16 +66,20 @@ public class DataElementController
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
     @ResponseStatus( value = HttpStatus.CREATED )
-    public void postDataElementXML( InputStream input ) throws Exception
+    public void postDataElementXML( HttpServletResponse response, InputStream input ) throws Exception
     {
         System.err.println( "POST request on DataElement using XML." );
+
+        // response.setHeader("Location", "/spittles/" + spittle.getId());
     }
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
     @ResponseStatus( value = HttpStatus.CREATED )
-    public void postDataElementJSON( InputStream input ) throws Exception
+    public void postDataElementJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
         System.err.println( "POST request on DataElement using JSON." );
+
+        // response.setHeader("Location", "/spittles/" + spittle.getId());
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
@@ -88,21 +93,21 @@ public class DataElementController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
-    @ResponseStatus( value = HttpStatus.OK )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void deleteDataElement( @PathVariable( "uid" ) String uid )
     {
         System.err.println( "DELETE request on DataElement with UID = " + uid );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/xml, text/xml"} )
-    @ResponseStatus( value = HttpStatus.OK )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void putDataElementXML( @PathVariable( "uid" ) String uid, InputStream input )
     {
         System.err.println( "PUT request on DataElement with UID = " + uid + " using XML." );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/json"} )
-    @ResponseStatus( value = HttpStatus.OK )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void putDataElementJSON( @PathVariable( "uid" ) String uid, InputStream input )
     {
         System.err.println( "PUT request on DataElement with UID = " + uid + " using JSON." );
