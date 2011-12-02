@@ -119,7 +119,7 @@
     </action>
 	
 	<action name="addBeneficiary" class="org.hisp.dhis.light.singleevents.action.AddBeneficiaryAction">
-      <result name="success" type="redirect">/mobile/newSingleEvent.action?organisationUnitId=${organisationUnitId}&amp;patientId=${patientId}&amp;singleEventId=${singleEventId}&amp;update=false</result>
+      <result name="success" type="redirect">/mobile/newSingleEvent.action?organisationUnitId=${organisationUnitId}&amp;patientId=${patientId}&amp;singleEventId=${singleEventId}&amp;update=false&amp;resultString=newSingleEvent</result>
       <result name="error" type="velocity">/dhis-web-light/main.vm</result>
 	  <param name="page">/dhis-web-light/newBeneficiary.vm</param>
 	</action>
@@ -130,7 +130,7 @@
     </action>
 	
     <action name="addSingleEvent" class="org.hisp.dhis.light.singleevents.action.AddSingleEventAction">
-      <result name="success" type="redirect">/mobile/resultPage.action?organisationUnitId=${organisationUnitId}&amp;patientId=${patientId}&amp;singleEventId=${singleEventId}&amp;update=${update}</result>
+      <result name="success" type="redirect">/mobile/resultPage.action?organisationUnitId=${organisationUnitId}&amp;patientId=${patientId}&amp;singleEventId=${singleEventId}&amp;resultString=${resultString}</result>
       <result name="error" type="velocity">/dhis-web-light/main.vm</result>
       <param name="page">/dhis-web-light/newSingleEvent.vm</param>
     </action>
@@ -141,7 +141,7 @@
     </action>
     
     <action name="updateBeneficiary" class="org.hisp.dhis.light.singleevents.action.UpdateBeneficiaryAction">
-      <result name="success" type="redirect">/mobile/index.action</result>
+      <result name="success" type="redirect">/mobile/resultPage.action?organisationUnitId=${organisationUnitId}&amp;patientId=${patient.getId()}&amp;singleEventId=${singleEventId}&amp;resultString=updateBeneficiary</result>
       <result name="error" type="velocity">/dhis-web-light/main.vm</result>
       <param name="page">/dhis-web-light/editBeneficiary.vm</param>
     </action>

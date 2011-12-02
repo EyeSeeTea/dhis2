@@ -219,6 +219,15 @@ public class UpdateBeneficiaryAction implements Action  {
         this.i18n = i18n;
     }
     
+    private Integer singleEventId;
+    
+    public void setSingleEventId( Integer singleEventId){
+    	this.singleEventId = singleEventId;
+    }
+    
+    public Integer getSingleEventId(){
+    	return this.singleEventId;
+    }
     
 	// -------------------------------------------------------------------------
 	// Validation

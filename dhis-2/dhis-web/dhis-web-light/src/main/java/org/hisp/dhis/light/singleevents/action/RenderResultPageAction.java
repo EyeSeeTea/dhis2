@@ -97,16 +97,14 @@ public class RenderResultPageAction implements Action {
     	return this.patientName;
     }
     
-    private boolean update;
+    private String resultString;
     
-    public void setUpdate( boolean update )
-    {
-    	this.update = update;
+    public void setResultString(String resultString){
+    	this.resultString = resultString;
     }
     
-    public boolean getUpdate()
-    {
-    	return this.update;
+    public String getResultString(){
+    	return this.resultString;
     }
     
 	// -------------------------------------------------------------------------

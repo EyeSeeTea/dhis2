@@ -203,6 +203,16 @@ public class AddSingleEventAction implements Action  {
     	return dynForm;
     }
     
+    private String resultString;
+    
+    public void setResultString(String resultString){
+    	this.resultString = resultString;
+    }
+    
+    public String getResultString(){
+    	return this.resultString;
+    }
+    
     private ArrayList<ProgramStageDataElement> programStageDataElements = new ArrayList<ProgramStageDataElement>();
     
     public ArrayList<ProgramStageDataElement> getProgramStageDataElements(){
@@ -384,6 +394,11 @@ public class AddSingleEventAction implements Action  {
 				}
 	        }
 
+	        if(update){
+	        	setResultString("updateSingleEvent");
+	        }else{
+	        	setResultString("newSingleEvent");
+	        }	        	
 			return SUCCESS;
 		} else {
 			return ERROR;
