@@ -28,11 +28,23 @@
 package org.hisp.dhis.light.singleevents.action;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeGroup;
+import org.hisp.dhis.patient.PatientAttributeGroupService;
+import org.hisp.dhis.patient.PatientAttributeOption;
+import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patient.comparator.PatientAttributeGroupSortOrderComparator;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
+import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -50,6 +62,27 @@ public class EditBeneficiaryAction implements Action  {
     public void setPatientService( PatientService patientService )
     {
     	this.patientService = patientService;
+    }
+    
+    private PatientAttributeService patientAttributeService;
+
+    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    {
+        this.patientAttributeService = patientAttributeService;
+    }
+    
+    private PatientAttributeGroupService patientAttributeGroupService;
+
+    public void setPatientAttributeGroupService( PatientAttributeGroupService patientAttributeGroupService )
+    {
+        this.patientAttributeGroupService = patientAttributeGroupService;
+    }
+    
+    private PatientAttributeValueService patientAttributeValueService;
+    
+    public void setPatientAttributeValueService( PatientAttributeValueService patientAttributeValueService )
+    {
+        this.patientAttributeValueService = patientAttributeValueService;
     }
     
     // -------------------------------------------------------------------------
@@ -110,6 +143,31 @@ public class EditBeneficiaryAction implements Action  {
     	return this.singleEventId;
     }
        
+    private List<PatientAttributeGroup> attributeGroups;
+    
+    public List<PatientAttributeGroup> getAttributeGroups()
+    {
+        return attributeGroups;
+    }
+    
+    private Collection<PatientAttribute> noGroupAttributes;
+
+    public Collection<PatientAttribute> getNoGroupAttributes()
+    {
+        return noGroupAttributes;
+    }
+    
+    private String dynForm[];
+    
+    public void setDynForm(String[] dynForm) {
+    	this.dynForm = dynForm;
+    }
+    
+    public String[] getDynForm()
+    {
+    	return dynForm;
+    }
+        
 	// -------------------------------------------------------------------------
 	// Action Implementation
 	// -------------------------------------------------------------------------
@@ -130,6 +188,68 @@ public class EditBeneficiaryAction implements Action  {
         
         date = patient.getRegistrationDate();
         registrationDate = DFyyyyMMdd.format(date);
+        
+        noGroupAttributes = patientAttributeService.getPatientAttributesNotGroup();
+
+        attributeGroups = new ArrayList<PatientAttributeGroup>( patientAttributeGroupService
+            .getAllPatientAttributeGroups() );
+        Collections.sort( attributeGroups, new PatientAttributeGroupSortOrderComparator() );
+        
+        int size = noGroupAttributes.size();
+        
+        for (PatientAttributeGroup patientAttributeGroup : attributeGroups) {
+        	size += patientAttributeGroup.getAttributes().size();
+        }
+
+        dynForm = new String[size];
+        
+        int i = 0;
+        
+        for (PatientAttributeGroup patientAttributeGroup : attributeGroups) {
+        	List<PatientAttribute> patientAttributeList = patientAttributeGroup.getAttributes();
+        	for(PatientAttribute patientAttribute : patientAttributeList){
+        		PatientAttributeValue attributeValue = patientAttributeValueService.getPatientAttributeValue( patient, patientAttribute );
+
+        		try{
+        			if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( patientAttribute.getValueType() ) ){
+        				PatientAttributeOption option = attributeValue.getPatientAttributeOption();
+        				System.out.println("COMBO id: "+option.getId());
+        				Integer id = option.getId();
+        				dynForm[i] = id.toString();
+        			}else if (attributeValue.getValue().equals("")){
+        				dynForm[i] = "";
+        			}else{
+        				System.out.println("attribute value: "+attributeValue.getValue());
+        				dynForm[i] = attributeValue.getValue();
+        			}
+        		}catch (NullPointerException e){
+        			dynForm[i] = "";
+        		}
+        		i++;
+        	}
+        }
+        
+        for (PatientAttribute patientAttribute : noGroupAttributes){
+    		PatientAttributeValue attributeValue = patientAttributeValueService.getPatientAttributeValue( patient, patientAttribute );
+
+    		try{
+    			if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( patientAttribute.getValueType() ) ){
+    				PatientAttributeOption option = attributeValue.getPatientAttributeOption();
+    				System.out.println("COMBO id: "+option.getId());
+    				Integer id = option.getId();
+    				dynForm[i] = id.toString();
+    			}else if (attributeValue.getValue().equals("")){
+    				dynForm[i] = "";
+    			}else{
+    				System.out.println("attribute value: "+attributeValue.getValue());
+    				dynForm[i] = attributeValue.getValue();
+    			}
+    		}catch (NullPointerException e){
+    			dynForm[i] = "";
+    		}
+    		i++;
+        }
+        
         
 		return SUCCESS;
 	}

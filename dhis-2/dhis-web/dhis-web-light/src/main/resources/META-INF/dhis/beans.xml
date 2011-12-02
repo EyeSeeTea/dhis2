@@ -139,10 +139,17 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   <bean id="org.hisp.dhis.light.singleevents.action.UpdateBeneficiaryAction" class="org.hisp.dhis.light.singleevents.action.UpdateBeneficiaryAction">
   	<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
 	<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
+	<property name="patientAttributeService" ref="org.hisp.dhis.patient.PatientAttributeService" />
+	<property name="patientAttributeGroupService" ref="org.hisp.dhis.patient.PatientAttributeGroupService" />
+	<property name="patientAttributeOptionService" ref="org.hisp.dhis.patient.PatientAttributeOptionService" />
+	<property name="patientAttributeValueService" ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService" />
   </bean>
   
   <bean id="org.hisp.dhis.light.singleevents.action.EditBeneficiaryAction" class="org.hisp.dhis.light.singleevents.action.EditBeneficiaryAction">
 	<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
+	<property name="patientAttributeService" ref="org.hisp.dhis.patient.PatientAttributeService" />
+	<property name="patientAttributeGroupService" ref="org.hisp.dhis.patient.PatientAttributeGroupService" />
+	<property name="patientAttributeValueService" ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService" />
   </bean>
   
   <bean id="org.hisp.dhis.light.singleevents.action.AddSingleEventAction" class="org.hisp.dhis.light.singleevents.action.AddSingleEventAction">
