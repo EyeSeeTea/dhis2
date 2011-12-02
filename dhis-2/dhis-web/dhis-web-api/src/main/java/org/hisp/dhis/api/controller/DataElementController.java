@@ -31,14 +31,20 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.DataElements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
 @Controller
 @RequestMapping( value = "/dataElements" )
 public class DataElementController
@@ -57,6 +63,20 @@ public class DataElementController
         return "dataElements";
     }
 
+    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
+    @ResponseStatus( value = HttpStatus.CREATED )
+    public void postDataElementXML( InputStream input ) throws Exception
+    {
+        System.err.println( "POST request on DataElement using XML." );
+    }
+
+    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
+    @ResponseStatus( value = HttpStatus.CREATED )
+    public void postDataElementJSON( InputStream input ) throws Exception
+    {
+        System.err.println( "POST request on DataElement using JSON." );
+    }
+
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
     public String getDataElement( @PathVariable( "uid" ) String uid, Model model )
     {
@@ -65,5 +85,26 @@ public class DataElementController
         model.addAttribute( "model", dataElement );
 
         return "dataElement";
+    }
+
+    @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
+    @ResponseStatus( value = HttpStatus.OK )
+    public void deleteDataElement( @PathVariable( "uid" ) String uid )
+    {
+        System.err.println( "DELETE request on DataElement with UID = " + uid );
+    }
+
+    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/xml, text/xml"} )
+    @ResponseStatus( value = HttpStatus.OK )
+    public void putDataElementXML( @PathVariable( "uid" ) String uid, InputStream input )
+    {
+        System.err.println( "PUT request on DataElement with UID = " + uid + " using XML." );
+    }
+
+    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/json"} )
+    @ResponseStatus( value = HttpStatus.OK )
+    public void putDataElementJSON( @PathVariable( "uid" ) String uid, InputStream input )
+    {
+        System.err.println( "PUT request on DataElement with UID = " + uid + " using JSON." );
     }
 }
