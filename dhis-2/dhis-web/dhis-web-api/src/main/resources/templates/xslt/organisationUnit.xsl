@@ -3,12 +3,11 @@
   <xsl:include href="html-wrapper.xsl" />
   <xsl:include href="identifiable-row.xsl" />
 
-  <xsl:template match="dataElement">
-    <div class="dataElement">
+  <xsl:template match="dataSet">
+    <div class="dataSet">
       <h2>
         <xsl:value-of select="@name" />
       </h2>
-
       <table border="1">
         <tr>
           <td>ID</td>
@@ -25,25 +24,19 @@
         <tr>
           <td>Short Name</td>
           <td>
-            <xsl:value-of select="@shortName" />
+            <xsl:value-of select="shortName" />
           </td>
         </tr>
         <tr>
-          <td>Type</td>
+          <td>Opening Date</td>
           <td>
-            <xsl:value-of select="type" />
+            <xsl:value-of select="openingDate" />
           </td>
         </tr>
         <tr>
-          <td>Zero is Significant</td>
+          <td>Level</td>
           <td>
-            <xsl:value-of select="zeroIsSignificant" />
-          </td>
-        </tr>
-        <tr>
-          <td>Sort Order</td>
-          <td>
-            <xsl:value-of select="sortOrder" />
+            <xsl:value-of select="level" />
           </td>
         </tr>
         <tr>
@@ -53,39 +46,41 @@
           </td>
         </tr>
         <tr>
-          <td>Aggregation Operator</td>
+          <td>Current Parent</td>
           <td>
-            <xsl:value-of select="aggregationOperator" />
+            <xsl:value-of select="currentParent" />
           </td>
         </tr>
         <tr>
-          <td>Domain Type</td>
+          <td>Has Patients</td>
           <td>
-            <xsl:value-of select="domainType" />
+            <xsl:value-of select="hasPatients" />
           </td>
         </tr>
+
       </table>
 
-      <xsl:apply-templates select="categoryCombo|groups|dataSets" />
+      <xsl:apply-templates select="parent|groups|dataSets" />
+
     </div>
   </xsl:template>
 
-  <xsl:template match="categoryCombo">
-    <h3>DataElementCategoryCombo</h3>
-    <table border="1" class="categoryCombo">
+  <xsl:template match="parent">
+    <h3>Parent OrganisationUnit</h3>
+    <table border="1" class="organisationUnits">
       <xsl:call-template name="identifiable-row">
-        <xsl:with-param name="root">../dataElementCategoryCombos</xsl:with-param>
+        <xsl:with-param name="root">../organisationUnits</xsl:with-param>
       </xsl:call-template>
     </table>
   </xsl:template>
 
   <xsl:template match="groups">
     <xsl:if test="count(child::*) > 0">
-      <h3>DataElementGroups</h3>
-      <table border="1" class="dataElementGroups">
+      <h3>OrganisationUnit Groups</h3>
+      <table border="1" class="organisationUnitGroups">
         <xsl:for-each select="group">
           <xsl:call-template name="identifiable-row">
-            <xsl:with-param name="root">../dataElementGroups</xsl:with-param>
+            <xsl:with-param name="root">../organisationUnitGroups</xsl:with-param>
           </xsl:call-template>
         </xsl:for-each>
       </table>
