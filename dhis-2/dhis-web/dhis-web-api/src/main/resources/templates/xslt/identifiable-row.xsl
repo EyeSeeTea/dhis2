@@ -10,7 +10,7 @@
     </xd:doc>
 
     <xsl:template name="identifiable-row">
-        <xsl:param name="root" />
+        <xsl:variable name="root" select="concat(local-name(.),'s')" />
         <tr>
             <td><xsl:value-of select="@name"/></td>
             <td>

@@ -6,17 +6,13 @@
   <!-- match all plural elements -->
   <xsl:template match="charts|dataElements|indicators|organisationUnits">
     <xsl:variable name="elements" select="local-name()" />
-    <h1>
+    <h3>
       <xsl:value-of select="$elements"/>
-    </h1>
+    </h3>
 
     <table border="1">
       <xsl:for-each select="child::*">
-        <xsl:call-template name="identifiable-row">
-          <xsl:with-param name="root">
-            <xsl:value-of select="$elements"/>
-          </xsl:with-param>
-        </xsl:call-template>
+        <xsl:call-template name="identifiable-row"/>
       </xsl:for-each>
     </table>
   </xsl:template>
