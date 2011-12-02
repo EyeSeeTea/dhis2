@@ -34,7 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -62,14 +65,14 @@ public class DataElementController
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
     @ResponseStatus( value = HttpStatus.CREATED )
-    public void postDataElementXML( @RequestBody InputStream input ) throws Exception
+    public void postDataElementXML( InputStream input ) throws Exception
     {
         System.err.println( "POST request on DataElement using XML." );
     }
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
     @ResponseStatus( value = HttpStatus.CREATED )
-    public void postDataElementJSON( @RequestBody InputStream input ) throws Exception
+    public void postDataElementJSON( InputStream input ) throws Exception
     {
         System.err.println( "POST request on DataElement using JSON." );
     }
@@ -93,14 +96,14 @@ public class DataElementController
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/xml, text/xml"} )
     @ResponseStatus( value = HttpStatus.OK )
-    public void putDataElementXML( @PathVariable( "uid" ) String uid, @RequestBody InputStream input )
+    public void putDataElementXML( @PathVariable( "uid" ) String uid, InputStream input )
     {
         System.err.println( "PUT request on DataElement with UID = " + uid + " using XML." );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/json"} )
     @ResponseStatus( value = HttpStatus.OK )
-    public void putDataElementJSON( @PathVariable( "uid" ) String uid, @RequestBody InputStream input )
+    public void putDataElementJSON( @PathVariable( "uid" ) String uid, InputStream input )
     {
         System.err.println( "PUT request on DataElement with UID = " + uid + " using JSON." );
     }
