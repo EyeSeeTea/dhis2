@@ -123,6 +123,11 @@ public class UpdateBeneficiaryAction implements Action  {
         this.organisationUnitId = organisationUnitId;
     }
     
+    public Integer getOrganisationUnitId()
+    {
+        return this.organisationUnitId;
+    }
+    
     private Integer patientId;
     
     public void setPatientId( Integer patientId )
@@ -428,7 +433,7 @@ public class UpdateBeneficiaryAction implements Action  {
 				valid = false;
 			}
 		}else if(type.equals("TEXT")){
-			if(!value.matches("^[\\p{L}|\\s]*$")) {
+			if(!value.matches("^[\\p{L}|\\s|0-9]*$")) {
 				validList.add(new Validate(id, value+" "+i18n.getString( "is_invalid_string" )));
 				valid = false;
 			}
@@ -562,6 +567,7 @@ public class UpdateBeneficiaryAction implements Action  {
                     	valuesForSave.add( attributeValue );
                     }else
                     {
+                    	boolean resetCombo = false;
                     	if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( patientAttribute.getValueType() ) )
                     	{
                     		PatientAttributeOption option = patientAttributeOptionService.get( NumberUtils.toInt( value, 0 ) );
@@ -569,6 +575,8 @@ public class UpdateBeneficiaryAction implements Action  {
                     		{
                     			attributeValue.setPatientAttributeOption( option );
                     			attributeValue.setValue( option.getName() );
+                    		}else{
+                    			resetCombo = true;
                     		}
                     	}
                     	else
@@ -576,7 +584,9 @@ public class UpdateBeneficiaryAction implements Action  {
                     		attributeValue.setValue( value.trim() );
                     	}
                     	valuesForUpdate.add( attributeValue );
-                    	valuesForDelete.remove( attributeValue );
+                    	if(!resetCombo){
+                    		valuesForDelete.remove( attributeValue );
+                    	}
                     }
     			}
         		i++;
@@ -624,6 +634,7 @@ public class UpdateBeneficiaryAction implements Action  {
                 	valuesForSave.add( attributeValue );
                 }else
                 {
+                	boolean resetCombo = false;
                 	if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( patientAttribute.getValueType() ) )
                 	{
                 		PatientAttributeOption option = patientAttributeOptionService.get( NumberUtils.toInt( value, 0 ) );
@@ -631,6 +642,8 @@ public class UpdateBeneficiaryAction implements Action  {
                 		{
                 			attributeValue.setPatientAttributeOption( option );
                 			attributeValue.setValue( option.getName() );
+                		}else{
+                			resetCombo = true;
                 		}
                 	}
                 	else
@@ -638,7 +651,9 @@ public class UpdateBeneficiaryAction implements Action  {
                 		attributeValue.setValue( value.trim() );
                 	}
                 	valuesForUpdate.add( attributeValue );
-                	valuesForDelete.remove( attributeValue );
+                	if(!resetCombo){
+                		valuesForDelete.remove( attributeValue );
+                	}
                 }
 			}
 			

@@ -454,7 +454,7 @@ public class AddBeneficiaryAction implements Action  {
 				valid = false;
 			}
 		}else if(type.equals("TEXT")){
-			if(!value.matches("^[\\p{L}|\\s]*$")) {
+			if(!value.matches("^[\\p{L}|\\s|0-9]*$")) {
 				validList.add(new Validate(id, value+" "+i18n.getString( "is_invalid_string" )));
 				valid = false;
 			}

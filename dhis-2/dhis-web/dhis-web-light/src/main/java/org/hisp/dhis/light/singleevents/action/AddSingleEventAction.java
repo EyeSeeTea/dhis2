@@ -298,7 +298,7 @@ public class AddSingleEventAction implements Action  {
 				}
 				
 			} else if(type.equals( DataElement.VALUE_TYPE_STRING)) {
-				if(!value.matches("^[\\p{L}|\\s]*$")) {
+				if(!value.matches("^[\\p{L}|\\s|0-9]*$")) {
 					validList.add(new Validate(dataElement.getId(), value+" "+i18n.getString( "is_invalid_string" )));
 					valid = false;
 				}
