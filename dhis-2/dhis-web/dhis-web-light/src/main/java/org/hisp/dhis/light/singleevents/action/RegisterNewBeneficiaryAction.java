@@ -104,18 +104,6 @@ public class RegisterNewBeneficiaryAction implements Action {
     	return this.eventName;
     }
     
-	private String fromAddBeneficiary;
-    
-    @SuppressWarnings("unused")
-	private void setFromAddBeneficiary(String fromAddBeneficiary){
-    	this.fromAddBeneficiary = fromAddBeneficiary;
-    }
-    
-    @SuppressWarnings("unused")
-	private String getFromAddBeneficiary(){
-    	return fromAddBeneficiary;
-    }
-    
     private List<PatientAttributeGroup> attributeGroups;
     
     public List<PatientAttributeGroup> getAttributeGroups()

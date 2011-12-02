@@ -3,9 +3,9 @@
 <p>
 	<ul>
 		#if($update == false)
-		Single event $eventName was added to patient $patientName.
+			Single event $eventName was added to patient $patientName.
 		#else
-		Single event $eventName registered to patient $patientName is updated. 
+			Single event $eventName registered to patient $patientName is updated. 
 		#end
 	</ul>
 </p>

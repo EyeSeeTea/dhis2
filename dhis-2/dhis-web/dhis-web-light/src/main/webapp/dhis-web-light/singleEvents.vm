@@ -4,7 +4,8 @@
 <p>
 <ul>
 #foreach( $singleEvent in $singleEvents )
-		<li><a href="getSingleEventChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEvent.getId()">
+		<li>
+			<a href="getSingleEventChoices.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEvent.getId()">
 				$singleEvent.getName()
 			</a>
 		</li>
