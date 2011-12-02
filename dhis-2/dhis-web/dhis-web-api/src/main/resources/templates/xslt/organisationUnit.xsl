@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-  <xsl:template match="dataSet">
-    <div class="dataSet">
+  <xsl:template match="organisationUnit">
+    <div class="organisationUnit">
       <h2>
         <xsl:value-of select="@name" />
       </h2>
@@ -64,10 +64,8 @@
 
   <xsl:template match="parent">
     <h3>Parent OrganisationUnit</h3>
-    <table border="1" class="organisationUnits">
-      <xsl:call-template name="identifiable-row">
-        <xsl:with-param name="root">../organisationUnits</xsl:with-param>
-      </xsl:call-template>
+    <table>
+      <xsl:apply-templates select="." mode="row"/>
     </table>
   </xsl:template>
 
@@ -75,11 +73,7 @@
     <xsl:if test="count(child::*) > 0">
       <h3>OrganisationUnit Groups</h3>
       <table border="1" class="organisationUnitGroups">
-        <xsl:for-each select="group">
-          <xsl:call-template name="identifiable-row">
-            <xsl:with-param name="root">../organisationUnitGroups</xsl:with-param>
-          </xsl:call-template>
-        </xsl:for-each>
+        <xsl:apply-templates select="child::*" mode="row"/>
       </table>
     </xsl:if>
   </xsl:template>
@@ -88,11 +82,7 @@
     <xsl:if test="count(child::*) > 0">
       <h3>DataSets</h3>
       <table border="1" class="dataSets">
-        <xsl:for-each select="dataSet">
-          <xsl:call-template name="identifiable-row">
-            <xsl:with-param name="root">../dataSets</xsl:with-param>
-          </xsl:call-template>
-        </xsl:for-each>
+        <xsl:apply-templates select="child::*" mode="row"/>
       </table>
     </xsl:if>
   </xsl:template>

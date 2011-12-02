@@ -94,27 +94,19 @@
 
     <xsl:template match="organisationUnits">
         <xsl:if test="count(child::*) > 0">
-        <h3>OrganisationUnits</h3>
-        <table border="1">
-            <xsl:for-each select="organisationUnit">
-                <xsl:call-template name="identifiable-row">
-                    <xsl:with-param name="root">../organisationUnits</xsl:with-param>
-                </xsl:call-template>
-            </xsl:for-each>
-        </table>
+            <h3>OrganisationUnits</h3>
+            <table border="1">
+                <xsl:apply-templates select="child::*" mode="row"/>
+            </table>
         </xsl:if>
     </xsl:template>
 
     <xsl:template match="dataElements">
         <xsl:if test="count(child::*) > 0">
-        <h3>DataElements</h3>
-        <table border="1">
-            <xsl:for-each select="dataElement">
-                <xsl:call-template name="identifiable-row">
-                    <xsl:with-param name="root">../dataElements</xsl:with-param>
-                </xsl:call-template>
-            </xsl:for-each>
-        </table>
+            <h3>DataElements</h3>
+            <table border="1">
+                <xsl:apply-templates select="child::*" mode="row"/>
+            </table>
         </xsl:if>
     </xsl:template>
 
@@ -122,11 +114,7 @@
         <xsl:if test="count(child::*) > 0">
         <h3>Indicators</h3>
         <table border="1">
-            <xsl:for-each select="indicator">
-                <xsl:call-template name="identifiable-row">
-                    <xsl:with-param name="root">../indicators</xsl:with-param>
-                </xsl:call-template>
-            </xsl:for-each>
+            <xsl:apply-templates select="child::*" mode="row"/>
         </table>
         </xsl:if>
     </xsl:template>

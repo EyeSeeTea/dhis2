@@ -71,9 +71,7 @@
   <xsl:template match="categoryCombo">
     <h3>DataElementCategoryCombo</h3>
     <table border="1" class="categoryCombo">
-      <xsl:call-template name="identifiable-row">
-        <xsl:with-param name="root">../dataElementCategoryCombos</xsl:with-param>
-      </xsl:call-template>
+      <xsl:apply-templates select="child::*" mode="row"/>
     </table>
   </xsl:template>
 
@@ -81,11 +79,7 @@
     <xsl:if test="count(child::*) > 0">
       <h3>DataElementGroups</h3>
       <table border="1" class="dataElementGroups">
-        <xsl:for-each select="group">
-          <xsl:call-template name="identifiable-row">
-            <xsl:with-param name="root">../dataElementGroups</xsl:with-param>
-          </xsl:call-template>
-        </xsl:for-each>
+        <xsl:apply-templates select="child::*" mode="row"/>
       </table>
     </xsl:if>
   </xsl:template>
@@ -94,11 +88,7 @@
     <xsl:if test="count(child::*) > 0">
       <h3>DataSets</h3>
       <table border="1" class="dataSets">
-        <xsl:for-each select="dataSet">
-          <xsl:call-template name="identifiable-row">
-            <xsl:with-param name="root">../dataSets</xsl:with-param>
-          </xsl:call-template>
-        </xsl:for-each>
+        <xsl:apply-templates select="child::*" mode="row"/>
       </table>
     </xsl:if>
   </xsl:template>

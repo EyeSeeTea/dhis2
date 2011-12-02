@@ -4,16 +4,14 @@
   <xsl:include href="identifiable-row.xsl"/>
 
   <!-- match all plural elements -->
-  <xsl:template match="charts|dataElements|indicators|organisationUnits">
+  <xsl:template match="charts|dataElements|indicators|organisationUnits|categories|categoryCombos|categoryOptions|dataElementGroups|dataElementGroupSets">
     <xsl:variable name="elements" select="local-name()" />
     <h3>
       <xsl:value-of select="$elements"/>
     </h3>
 
     <table border="1">
-      <xsl:for-each select="child::*">
-        <xsl:call-template name="identifiable-row"/>
-      </xsl:for-each>
+        <xsl:apply-templates select="child::*" mode="row"/>
     </table>
   </xsl:template>
 

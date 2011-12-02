@@ -9,8 +9,8 @@
         </xd:desc>
     </xd:doc>
 
-    <xsl:template name="identifiable-row">
-        <xsl:variable name="root" select="concat(local-name(.),'s')" />
+    <xsl:template match="*" mode="row">
+        <xsl:variable name="root" select="concat('/api/',local-name(.),'s')" />
         <tr>
             <td><xsl:value-of select="@name"/></td>
             <td>

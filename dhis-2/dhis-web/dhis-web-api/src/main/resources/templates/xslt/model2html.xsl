@@ -15,6 +15,7 @@
     <xsl:include href="dataElement.xsl"/>
     <xsl:include href="indicator.xsl"/>
     <xsl:include href="organisationUnit.xsl"/>
+    <xsl:include href="dataSet.xsl"/>
     <!-- etc ... -->
         
 </xsl:stylesheet>

@@ -49,11 +49,7 @@
     <xsl:if test="count(child::*) > 0">
       <h3>DataElements</h3>
       <table border="1" class="dataElements">
-        <xsl:for-each select="dataElement">
-          <xsl:call-template name="identifiable-row">
-            <xsl:with-param name="root">../dataElements</xsl:with-param>
-          </xsl:call-template>
-        </xsl:for-each>
+          <xsl:apply-templates mode="row"/>
       </table>
     </xsl:if>
   </xsl:template>
@@ -62,11 +58,7 @@
     <xsl:if test="count(child::*) > 0">
       <h3>Indicators</h3>
       <table border="1" class="indicator">
-        <xsl:for-each select="indicator">
-          <xsl:call-template name="identifiable-row">
-            <xsl:with-param name="root">../indicators</xsl:with-param>
-          </xsl:call-template>
-        </xsl:for-each>
+        <xsl:apply-templates select="child::*" mode="row"/>
       </table>
     </xsl:if>
   </xsl:template>
@@ -75,11 +67,7 @@
     <xsl:if test="count(child::*) > 0">
       <h3>OrganisationUnits</h3>
       <table border="1" class="sources">
-        <xsl:for-each select="source">
-          <xsl:call-template name="identifiable-row">
-            <xsl:with-param name="root">../sources</xsl:with-param>
-          </xsl:call-template>
-        </xsl:for-each>
+        <xsl:apply-templates select="child::*" mode="row"/>
       </table>
     </xsl:if>
   </xsl:template>
