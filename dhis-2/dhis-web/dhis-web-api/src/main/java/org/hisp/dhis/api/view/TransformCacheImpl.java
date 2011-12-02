@@ -2,6 +2,8 @@ package org.hisp.dhis.api.view;
 
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -39,6 +41,7 @@ import org.springframework.stereotype.Component;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 /**
  *
  * @author bobj
@@ -55,11 +58,13 @@ public class TransformCacheImpl implements TransformCache
 
     static final String FOPXSLT_RESOURCE = "/templates/xslfo";
     
+    static private TransformCache instance;
+    
     private Templates htmlCachedTransform;
 
     private Templates fopCachedTransform;
     
-    TransformCacheImpl() throws IOException, TransformerConfigurationException
+    private TransformCacheImpl() throws IOException, TransformerConfigurationException
     {
         ErrorListener errorListener = new LoggingErrorListener();
         
@@ -76,6 +81,21 @@ public class TransformCacheImpl implements TransformCache
         factory.setURIResolver(  new ClassPathUriResolver(FOPXSLT_RESOURCE));
         fopCachedTransform = factory.newTemplates( model2fop );   
     }
+    
+    static TransformCache instance() {
+        if (instance == null) {
+            try
+            {
+                instance = new TransformCacheImpl();
+            } catch ( Exception ex )
+            {
+                Logger.getLogger( TransformCacheImpl.class.getName() ).log( Level.SEVERE, null, ex );
+            }
+        }
+        return instance;
+    }
+        
+    
 
     @Override
     public Transformer getHtmlTransformer()

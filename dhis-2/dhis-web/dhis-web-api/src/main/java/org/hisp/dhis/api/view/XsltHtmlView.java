@@ -12,26 +12,17 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.stream.StreamResult;
 import java.io.OutputStream;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class XsltHtmlView extends AbstractUrlBasedView
 {
-    public static final String DEFAULT_CONTENT_TYPE = "text/html";
+    public static final String HTML_CONTENT_TYPE = "text/html";
     
-    @Autowired
-    private TransformCache transformCache;
-
-    public void setTransformCache( TransformCache transformCache )
-    {
-        this.transformCache = transformCache;
-    }
-
     public XsltHtmlView()
     {
-        setContentType( DEFAULT_CONTENT_TYPE );
+        setContentType( HTML_CONTENT_TYPE );
     }
 
     @Override
@@ -55,7 +46,7 @@ public class XsltHtmlView extends AbstractUrlBasedView
 
         Source xmlSource = new JAXBSource( context, domainModel );
 
-        Transformer transformer = transformCache.getHtmlTransformer();
+        Transformer transformer = TransformCacheImpl.instance().getHtmlTransformer();
 
         OutputStream output = response.getOutputStream();
 
