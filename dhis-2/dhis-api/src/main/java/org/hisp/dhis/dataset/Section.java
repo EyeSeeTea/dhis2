@@ -231,8 +231,8 @@ public class Section
         this.sortOrder = sortOrder;
     }
 
-    @XmlElementWrapper(name = "greyedFields")
-    @XmlElement(name = "greyedField")
+    @XmlElementWrapper( name = "greyedFields" )
+    @XmlElement( name = "greyedField" )
     @JsonProperty
     public Set<DataElementOperand> getGreyedFields()
     {

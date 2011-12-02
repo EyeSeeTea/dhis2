@@ -31,9 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSetPopulator;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.system.filter.OrganisationUnitWithCoordinatesFilter;
 import org.hisp.dhis.system.filter.OrganisationUnitWithValidPointCoordinateFilter;
@@ -57,13 +54,6 @@ public class GetGeoJsonAction
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
-    }
-
-    private OrganisationUnitGroupService organisationUnitGroupService;
-
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
     }
 
     // -------------------------------------------------------------------------
@@ -108,36 +98,27 @@ public class GetGeoJsonAction
 
         Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsAtLevel( level,
             parent );
-        
+
         FilterUtils.filter( organisationUnits, new OrganisationUnitWithCoordinatesFilter() );
 
         FilterUtils.filter( organisationUnits, new OrganisationUnitWithValidPointCoordinateFilter() );
 
-        OrganisationUnitGroupSet typeGroupSet = organisationUnitGroupService
-            .getOrganisationUnitGroupSetByName( OrganisationUnitGroupSetPopulator.NAME_TYPE );
-        
         object = new ArrayList<OrganisationUnit>();
 
         for ( OrganisationUnit unit : organisationUnits )
         {
-            if ( unit.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) )
-            {
-                unit.setType( unit.getGroupNameInGroupSet( typeGroupSet ) );
-            }
-            
-            else
+            if ( !unit.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) )
             {
                 object.add( unit );
             }
-
         }
-        
+
         for ( OrganisationUnit unit : organisationUnits )
         {
             if ( unit.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) )
             {
                 object.add( unit );
-            }            
+            }
         }
 
         return SUCCESS;

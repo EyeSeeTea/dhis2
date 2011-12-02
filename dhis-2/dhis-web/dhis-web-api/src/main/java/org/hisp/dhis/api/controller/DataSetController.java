@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 /**
@@ -62,7 +61,7 @@ public class DataSetController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getDataSet( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
+    public String getDataSet( @PathVariable( "uid" ) String uid, Model model )
     {
         DataSet dataSet = dataSetService.getDataSet( uid );
 

@@ -58,46 +58,36 @@ public class Chart
     private static final long serialVersionUID = 2570074075484545534L;
 
     public static final String DIMENSION_PERIOD_INDICATOR = "period";
-
     public static final String DIMENSION_ORGANISATIONUNIT_INDICATOR = "organisationUnit";
-
     public static final String DIMENSION_INDICATOR_PERIOD = "indicator";
-
     public static final String DIMENSION_PERIOD_DATAELEMENT = "period_dataElement";
-
     public static final String DIMENSION_ORGANISATIONUNIT_DATAELEMENT = "organisationUnit_dataElement";
-
     public static final String DIMENSION_DATAELEMENT_PERIOD = "dataElement_period";
-
     public static final String DIMENSION_PERIOD_COMPLETENESS = "period_completeness";
-
     public static final String DIMENSION_ORGANISATIONUNIT_COMPLETENESS = "organisationUnit_completeness";
-
     public static final String DIMENSION_COMPLETENESS_PERIOD = "completeness_period";
 
-    public static final String TYPE_BAR = "bar";
-
     public static final String TYPE_BAR3D = "bar3d";
-
-    public static final String TYPE_STACKED_BAR = "stackedBar";
-
     public static final String TYPE_STACKED_BAR3D = "stackedBar3d";
-
-    public static final String TYPE_LINE = "line";
-
     public static final String TYPE_LINE3D = "line3d";
-
-    public static final String TYPE_PIE = "pie";
-
     public static final String TYPE_PIE3D = "pie3d";
 
     public static final String SIZE_NORMAL = "normal";
-
     public static final String SIZE_WIDE = "wide";
-
     public static final String SIZE_TALL = "tall";
 
-    private int id;
+    public static final String TYPE = "tall";
+    public static final String TYPE_COLUMN = "column";
+    public static final String TYPE_STACKED_COLUMN = "stackedColumn";
+    public static final String TYPE_BAR = "bar";
+    public static final String TYPE_STACKED_BAR = "stackedBar";
+    public static final String TYPE_LINE = "line";
+    public static final String TYPE_AREA = "area";
+    public static final String TYPE_PIE = "pie";
+
+    public static final String DIMENSION_DATA = "data";
+    public static final String DIMENSION_PERIOD = "period";
+    public static final String DIMENSION_ORGANISATIONUNIT = "organisationUnit";
 
     private String domainAxixLabel;
 
@@ -108,6 +98,12 @@ public class Chart
     private String size;
 
     private String dimension;
+
+    private String series;
+
+    private String category;
+
+    private String filter;
 
     private boolean hideLegend;
 
@@ -346,6 +342,42 @@ public class Chart
 
     @XmlElement
     @JsonProperty
+    public String getSeries()
+    {
+        return series;
+    }
+
+    public void setSeries( String series )
+    {
+        this.series = series;
+    }
+
+    @XmlElement
+    @JsonProperty
+    public String getCategory()
+    {
+        return category;
+    }
+
+    public void setCategory( String category )
+    {
+        this.category = category;
+    }
+
+    @XmlElement
+    @JsonProperty
+    public String getFilter()
+    {
+        return filter;
+    }
+
+    public void setFilter( String filter )
+    {
+        this.filter = filter;
+    }
+
+    @XmlElement
+    @JsonProperty
     public boolean isHideLegend()
     {
         return hideLegend;
@@ -442,7 +474,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "indicators" )
-    @XmlElement(name = "indicator")
+    @XmlElement( name = "indicator" )
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<Indicator> getIndicators()
@@ -457,7 +489,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "dataElements" )
-    @XmlElement(name = "dataElement")
+    @XmlElement( name = "dataElement" )
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<DataElement> getDataElements()
@@ -472,7 +504,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "dataSets" )
-    @XmlElement(name = "dataSet")
+    @XmlElement( name = "dataSet" )
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<DataSet> getDataSets()
@@ -497,7 +529,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "organisationUnits" )
-    @XmlElement(name = "organisationUnit")
+    @XmlElement( name = "organisationUnit" )
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<OrganisationUnit> getOrganisationUnits()
@@ -554,7 +586,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "allPeriods" )
-    @XmlElement(name = "allPeriod")
+    @XmlElement( name = "allPeriod" )
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<Period> getAllPeriods()
@@ -567,9 +599,6 @@ public class Chart
         this.allPeriods = allPeriods;
     }
 
-    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
-    @XmlElement
-    @JsonProperty
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
@@ -582,7 +611,7 @@ public class Chart
 
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "allOrganisationUnits" )
-    @XmlElement(name = "allOrganisationUnit")
+    @XmlElement( name = "allOrganisationUnit" )
     @JsonProperty
     @JsonSerialize( using = JsonNameableObjectListSerializer.class )
     public List<OrganisationUnit> getAllOrganisationUnits()

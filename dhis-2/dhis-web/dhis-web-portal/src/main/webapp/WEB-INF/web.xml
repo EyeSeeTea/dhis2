@@ -46,6 +46,11 @@
 
   <filter-mapping>
     <filter-name>OpenSessionInViewFilter</filter-name>
+    <url-pattern>/api/*</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>OpenSessionInViewFilter</filter-name>
     <url-pattern>/api2/*</url-pattern>
   </filter-mapping>
 
