@@ -3,9 +3,9 @@
 
 <p>
 <ul>
-#foreach( $patient in $recentPatients )
-		<li><a href="EditRecentlyRegistered.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId&patientId=$patient.getId()">
-		$patient.getFullName()
+#foreach( $instance in $proInst )
+		<li><a href="EditRecentlyRegistered.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId&patientId=$instance.getPatient().getId()&instId=$instance.getId()">
+		$instance.getPatient().getFullName()
 		</a>
 		</li>
 #end

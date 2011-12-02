@@ -29,10 +29,18 @@ package org.hisp.dhis.light.singleevents.action;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -52,6 +60,33 @@ public class RegisterNewSingleEventAction implements Action  {
         this.programService = programService;
     }
     
+    private PatientDataValueService patientDataValueService;
+
+    public void setPatientDataValueService( PatientDataValueService patientDataValueService )
+    {
+        this.patientDataValueService = patientDataValueService;
+    }
+    
+	private ProgramStageInstanceService programStageInstanceService;
+
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
+    {
+        this.programStageInstanceService = programStageInstanceService;
+    }
+    
+	private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+    
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
     
     // -------------------------------------------------------------------------
 	// Input Output
@@ -93,6 +128,37 @@ public class RegisterNewSingleEventAction implements Action  {
     	this.patientId = patientId;
     }
     
+    private Integer instId;
+    
+    public void setInstId( Integer instId )
+    {
+    	this.instId = instId;
+    }
+    
+    public Integer getInstId()
+    {
+    	return this.instId;
+    }
+    
+    private boolean update;
+    
+    public void setUpdate( boolean update )
+    {
+    	this.update = update;
+    }
+    
+    public boolean getUpdate()
+    {
+    	return this.update;
+    }
+    
+    private List<String> dynForm = new ArrayList<String>(100);
+
+    public List<String> getDynForm()
+    {
+    	return dynForm;
+    }
+    
     private ArrayList<ProgramStageDataElement> programStageDataElements = new ArrayList<ProgramStageDataElement>();
     
     public ArrayList<ProgramStageDataElement> getProgramStageDataElements(){
@@ -117,11 +183,27 @@ public class RegisterNewSingleEventAction implements Action  {
         // ---------------------------------------------------------------------
         // Set Data for SingleEventForm
         // ---------------------------------------------------------------------
+		
 		Program program = programService.getProgram(singleEventId);
 	    eventName = program.getName();
+	    OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit(organisationUnitId);
         ProgramStage programStage = program.getProgramStages().iterator().next(); // Fetch first, There exists only 1!
         programStageDataElements = new ArrayList<ProgramStageDataElement>(programStage.getProgramStageDataElements());
         Collections.sort(programStageDataElements, OrderBySortOrder);
+		
+        dynForm.clear();
+        
+        if(update)
+		{
+			ProgramInstance programInstance = programInstanceService.getProgramInstance(instId);
+			ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance(programInstance, programStage);
+
+			int i = 0;
+			for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
+				dynForm.add(i,patientDataValueService.getPatientDataValue(programStageInstance, programStageDataElement.getDataElement(), organisationUnit).getValue());
+			i++;
+			}
+		}
 
         return SUCCESS;
 	}

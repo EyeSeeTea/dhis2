@@ -8,7 +8,11 @@
 				$i18n.getString("edit_person_details")
 			</a>
 			</li>
-		<li>$i18n.getString("edit_single_event_details")</li>
+		<li>
+			<a href="newSingleEvent.action?organisationUnitId=${organisationUnitId}&amp;patientId=${patientId}&amp;singleEventId=${singleEventId}&amp;instId=${instId}&amp;update=true">
+				$i18n.getString("edit_single_event_details")
+			</a>
+			</li>
 </ul>
 </p>
 

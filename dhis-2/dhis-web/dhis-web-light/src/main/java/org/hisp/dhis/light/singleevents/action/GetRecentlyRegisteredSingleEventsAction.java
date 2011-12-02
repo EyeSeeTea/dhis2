@@ -30,10 +30,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
@@ -102,10 +100,10 @@ public class GetRecentlyRegisteredSingleEventsAction implements Action {
     	return this.eventName;
     }
     
-	private List<Patient> recentPatients = new ArrayList<Patient>();
+	private List<ProgramInstance> proInst = new ArrayList<ProgramInstance>();
 	
-	public List<Patient> getRecentPatients() {
-		return recentPatients;
+	public List<ProgramInstance> getProInst() {
+		return this.proInst;
 	}
     
 	 static final Comparator<ProgramInstance> OrderByDate =
@@ -124,10 +122,11 @@ public class GetRecentlyRegisteredSingleEventsAction implements Action {
 		
 		OrganisationUnit org = organisationUnitService.getOrganisationUnit(organisationUnitId);
 		Program pro = programService.getProgram(singleEventId);
+		eventName = pro.getName();
 		
-		recentPatients.clear();
+		proInst.clear();
+		proInst = (List<ProgramInstance>) programInstanceService.getProgramInstances(pro, org);
 		
-		List<ProgramInstance> proInst = (List<ProgramInstance>) programInstanceService.getProgramInstances(pro, org);
 		if(!proInst.isEmpty())
 		{
 			Collections.sort(proInst, OrderByDate);
@@ -135,14 +134,8 @@ public class GetRecentlyRegisteredSingleEventsAction implements Action {
 			{
 				proInst = proInst.subList(0, 6);
 			}
-			
-			for (ProgramInstance instItem : proInst)
-			{
-				recentPatients.add(instItem.getPatient());
-			}
 		}
-		eventName = pro.getName();
-
+		
 		return SUCCESS;
 	}
 }

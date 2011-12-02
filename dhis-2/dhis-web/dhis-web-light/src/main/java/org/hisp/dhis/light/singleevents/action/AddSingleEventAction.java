@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.light.dataentry.utils.FormUtils;
@@ -167,13 +168,37 @@ public class AddSingleEventAction implements Action  {
     	return this.organisationUnitId;
     }
     
-    private String dynForm[];
+    private boolean update;
     
-    public void setDynForm(String[] dynForm) {
+    public void setUpdate( boolean update )
+    {
+    	this.update = update;
+    }
+    
+    public boolean getUpdate()
+    {
+    	return this.update;
+    }
+    
+    private Integer instId;
+    
+    public void setInstId( Integer instId )
+    {
+    	this.instId = instId;
+    }
+    
+    public Integer getInstId()
+    {
+    	return this.instId;
+    }
+    
+    private List<String> dynForm = new ArrayList<String>() ;
+    
+    public void setDynForm(List<String> dynForm) {
     	this.dynForm = dynForm;
     }
     
-    public String[] getDynForm()
+    public List<String> getDynForm()
     {
     	return dynForm;
     }
@@ -227,10 +252,11 @@ public class AddSingleEventAction implements Action  {
     
 	@Override
 	public String execute() {
-		eventName = programService.getProgram(singleEventId).getName();
-
+		
 		Program program = programService.getProgram(singleEventId);
-		Patient patient = patientService.getPatient(patientId) ;
+		eventName = program.getName();
+		
+		Patient patient = patientService.getPatient(patientId);
 		ProgramStage programStage = program.getProgramStages().iterator().next();
 		OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit(organisationUnitId);
 
@@ -247,7 +273,7 @@ public class AddSingleEventAction implements Action  {
 		for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
 			
 			DataElement dataElement = programStageDataElement.getDataElement();
-			String value = dynForm[i];
+			String value = dynForm.get(i).trim();
 			String type = dataElement.getType();
 			String numbertype = dataElement.getNumberType();
 			
@@ -311,37 +337,53 @@ public class AddSingleEventAction implements Action  {
 		}
 		
 		if(valid) {
-			
-	        ProgramInstance programInstance = new ProgramInstance();
-	        programInstance.setEnrollmentDate( new Date() );
-	        programInstance.setDateOfIncident( new Date() );
-	        programInstance.setProgram( program );
-	        programInstance.setPatient( patient );
-	        programInstance.setCompleted( false );
 
-	        programInstanceService.addProgramInstance( programInstance );
-	        
-	        ProgramStageInstance programStageInstance = new ProgramStageInstance();
-	        programStageInstance.setProgramInstance(programInstance);
-	        programStageInstance.setProgramStage(programStage);
-	        programStageInstance.setDueDate(new Date());
-	        programStageInstance.setExecutionDate(new Date());
-	        programStageInstance.setCompleted(false);
-			programStageInstanceService.addProgramStageInstance(programStageInstance);
-			
-			i = 0;
-			for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
-				DataElement dataElement = programStageDataElement.getDataElement();
-			
-				PatientDataValue patientDataValue = new PatientDataValue();
-				patientDataValue.setDataElement(dataElement);
-				patientDataValue.setProgramStageInstance(programStageInstance);
-				patientDataValue.setOrganisationUnit(organisationUnit);
-				patientDataValue.setValue(dynForm[i]);
-				patientDataValueService.savePatientDataValue(patientDataValue);
-				i++;
-			}
-			
+	        if(!update)
+	        {
+		        ProgramInstance programInstance = new ProgramInstance();
+		        programInstance.setEnrollmentDate( new Date() );
+		        programInstance.setDateOfIncident( new Date() );
+		        programInstance.setProgram( program );
+		        programInstance.setPatient( patient );
+		        programInstance.setCompleted( false );
+	        	programInstanceService.addProgramInstance( programInstance );
+	        		
+		        ProgramStageInstance programStageInstance = new ProgramStageInstance();
+		        programStageInstance.setProgramInstance(programInstance);
+		        programStageInstance.setProgramStage(programStage);
+		        programStageInstance.setDueDate(new Date());
+		        programStageInstance.setExecutionDate(new Date());
+		        programStageInstance.setCompleted(false);
+				programStageInstanceService.addProgramStageInstance(programStageInstance);
+				
+				i = 0;
+				for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
+					DataElement dataElement = programStageDataElement.getDataElement();
+				
+					PatientDataValue patientDataValue = new PatientDataValue();
+					patientDataValue.setDataElement(dataElement);
+					patientDataValue.setProgramStageInstance(programStageInstance);
+					patientDataValue.setOrganisationUnit(organisationUnit);
+					patientDataValue.setValue(dynForm.get(i).trim());
+					patientDataValueService.savePatientDataValue(patientDataValue);
+					i++;
+				}
+	        }
+	        else
+	        {
+				ProgramInstance programInstance = programInstanceService.getProgramInstance(instId);
+				programStage = program.getProgramStages().iterator().next(); // Fetch first, There exists only 1!
+				ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance(programInstance, programStage);
+	        	
+				i = 0;
+				for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
+					PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue(programStageInstance, programStageDataElement.getDataElement(), organisationUnit);
+					patientDataValue.setValue(dynForm.get(i).trim());
+					patientDataValueService.updatePatientDataValue(patientDataValue);
+					i++;
+				}
+	        }
+
 			return SUCCESS;
 		} else {
 			return ERROR;

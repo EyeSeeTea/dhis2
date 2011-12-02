@@ -17,14 +17,14 @@
 					<br />
 			    	<select name="dynForm">
 					<option value="please_select">$i18n.getString("please_select")</option>
-					<option value="true" #if($!dynForm[$i] == "true") selected="selected" #end >$i18n.getString("Yes")</option>
-					<option value="false" #if($!dynForm[$i] == "false") selected="selected" #end>$i18n.getString("No")</option>
+					<option value="true" #if($dynForm.isEmpty() == false) #if($!dynForm.get($i) == "true") selected="selected" #end #end >$i18n.getString("Yes")</option>
+					<option value="false" #if($dynForm.isEmpty() == false) #if($!dynForm.get($i) == "false") selected="selected" #end #end >$i18n.getString("No")</option>
 					</select>
 					<br />
 				#elseif ($element.getDataElement().getType() == "date")
-					<input type="date" maxlength="255" size="24" name="dynForm" value="$!dynForm[$i]" />
+					<input type="date" maxlength="255" size="24" name="dynForm" value="#if($dynForm.isEmpty() == false)$!dynForm.get($i)#end" />
 				#else
-					<input type="text" maxlength="255" size="24" name="dynForm" value="$!dynForm[$i]" />
+					<input type="text" maxlength="255" size="24" name="dynForm" value="#if($dynForm.isEmpty() == false)$!dynForm.get($i)#end" />
 				#end
 				#set( $i = $i + 1)
 		#end
@@ -32,7 +32,10 @@
 		<input type="hidden" name="organisationUnitId" value="$organisationUnitId" />
 		<input type="hidden" name="singleEventId" value="$singleEventId" />
 		<input type="hidden" name="patientId" value="$patientId" />
-		
+		#if($update) 
+			<input type="hidden" name="update" value="$update" />
+			<input type="hidden" name="instId" value="$instId" />
+		#end
 		<input type="submit" value=$i18n.getString("Submit") />
 	    </p>
 	</div>

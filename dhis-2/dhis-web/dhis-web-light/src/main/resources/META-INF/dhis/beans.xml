@@ -161,7 +161,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
   </bean>
   
   <bean id="org.hisp.dhis.light.singleevents.action.RegisterNewSingleEventAction" class="org.hisp.dhis.light.singleevents.action.RegisterNewSingleEventAction">
+    <property name="patientDataValueService" ref="org.hisp.dhis.patientdatavalue.PatientDataValueService" />
     <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+    <property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
+    <property name="programStageInstanceService" ref="org.hisp.dhis.program.ProgramStageInstanceService" />
+    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
   </bean>
   
   <bean id="org.hisp.dhis.light.singleevents.action.RenderResultPageAction" class="org.hisp.dhis.light.singleevents.action.RenderResultPageAction">

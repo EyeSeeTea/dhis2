@@ -85,6 +85,17 @@ public class GetRecentlyEditChoicesAction implements Action {
     	return patientId;
     }
     
+    private Integer instId;
+    
+    public void setInstId( Integer instId )
+    {
+    	this.instId = instId;
+    }
+    
+    public Integer getInstId(){
+    	return instId;
+    }
+    
 	// -------------------------------------------------------------------------
 	// Action Implementation
 	// -------------------------------------------------------------------------
