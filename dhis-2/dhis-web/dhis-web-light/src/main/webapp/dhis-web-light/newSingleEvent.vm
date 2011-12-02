@@ -32,10 +32,9 @@
 		<input type="hidden" name="organisationUnitId" value="$organisationUnitId" />
 		<input type="hidden" name="singleEventId" value="$singleEventId" />
 		<input type="hidden" name="patientId" value="$patientId" />
-		#if($update) 
-			<input type="hidden" name="update" value="$update" />
-			<input type="hidden" name="instId" value="$instId" />
-		#end
+		<input type="hidden" name="update" value="$update" />
+		<input type="hidden" name="instId" value="$instId" />
+
 		<input type="submit" value=$i18n.getString("Submit") />
 	    </p>
 	</div>
@@ -44,6 +43,12 @@
 <div id="footer">
 <h2>$i18n.getString( "navigate_to" )</h2>
 <ul>
+	#if($update) 
+		<li><a href="EditRecentlyRegistered.action?organisationUnitId=$organisationUnitId&singleEventId=$singleEventId&patientId=$patientId&instId=$instId">
+		$i18n.getString("recently_registered_options")
+		</a>
+		</li>
+	#end
 	<li><a href="index.action">$i18n.getString("home")</a></li>
 </ul>
 </div>

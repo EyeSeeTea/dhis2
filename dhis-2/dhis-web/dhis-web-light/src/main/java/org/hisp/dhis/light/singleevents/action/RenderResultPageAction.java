@@ -97,6 +97,18 @@ public class RenderResultPageAction implements Action {
     	return this.patientName;
     }
     
+    private boolean update;
+    
+    public void setUpdate( boolean update )
+    {
+    	this.update = update;
+    }
+    
+    public boolean getUpdate()
+    {
+    	return this.update;
+    }
+    
 	// -------------------------------------------------------------------------
 	// Action Implementation
 	// -------------------------------------------------------------------------

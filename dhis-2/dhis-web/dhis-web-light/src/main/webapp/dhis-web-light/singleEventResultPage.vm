@@ -2,7 +2,11 @@
 
 <p>
 	<ul>
-		Single event $eventName was added to patient $patientName
+		#if($update == false)
+		Single event $eventName was added to patient $patientName.
+		#else
+		Single event $eventName registered to patient $patientName is updated. 
+		#end
 	</ul>
 </p>
 
