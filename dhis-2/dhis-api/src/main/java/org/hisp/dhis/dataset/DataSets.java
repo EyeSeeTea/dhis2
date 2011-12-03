@@ -1,6 +1,7 @@
 package org.hisp.dhis.dataset;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +16,7 @@ import java.util.List;
  */
 @XmlRootElement( name = "dataSets", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class DataSets
+public class DataSets extends BaseLinkableObject
 {
     private List<DataSet> dataSets = new ArrayList<DataSet>();
 

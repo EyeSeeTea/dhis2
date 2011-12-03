@@ -1,6 +1,7 @@
 package org.hisp.dhis.organisationunit;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +16,7 @@ import java.util.List;
  */
 @XmlRootElement( name = "organisationUnits", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class OrganisationUnits
+public class OrganisationUnits extends BaseLinkableObject
 {
     private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
 
