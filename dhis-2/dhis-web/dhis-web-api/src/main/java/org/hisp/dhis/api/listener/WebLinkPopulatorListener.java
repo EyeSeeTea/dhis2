@@ -205,6 +205,133 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
         {
             populateDataElementGroupSet( (DataElementGroupSet) source, true );
         }
+        else if ( source instanceof DataElementCategories )
+        {
+            populateDataElementCategories( (DataElementCategories) source, true );
+        }
+        else if ( source instanceof DataElementCategory )
+        {
+            populateDataElementCategory( (DataElementCategory) source, true );
+        }
+        else if ( source instanceof DataElementCategoryCombos )
+        {
+            populateDataElementCategoryCombos( (DataElementCategoryCombos) source, true );
+        }
+        else if ( source instanceof DataElementCategoryCombo )
+        {
+            populateDataElementCategoryCombo( (DataElementCategoryCombo) source, true );
+        }
+        else if ( source instanceof DataElementCategoryOptions )
+        {
+            populateDataElementCategoryOptions( (DataElementCategoryOptions) source, true );
+        }
+        else if ( source instanceof DataElementCategoryOption )
+        {
+            populateDataElementCategoryOption( (DataElementCategoryOption) source, true );
+        }
+        else if ( source instanceof DataElementCategoryOptionCombos )
+        {
+            populateDataElementCategoryOptionCombos( (DataElementCategoryOptionCombos) source, true );
+        }
+        else if ( source instanceof DataElementCategoryOptionCombo )
+        {
+            populateDataElementCategoryOptionCombo( (DataElementCategoryOptionCombo) source, true );
+        }
+    }
+
+    private void populateDataElementCategories( DataElementCategories dataElementCategories, boolean root )
+    {
+        dataElementCategories.setLink( getBasePath( DataElementCategories.class ) );
+
+        if ( root )
+        {
+            for ( DataElementCategory dataElementCategory : dataElementCategories.getDataElementCategories() )
+            {
+                populateDataElementCategory( dataElementCategory, false );
+            }
+        }
+    }
+
+    private void populateDataElementCategory( DataElementCategory dataElementCategory, boolean root )
+    {
+        dataElementCategory.setLink( getPathWithUid( dataElementCategory ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( dataElementCategory.getCategoryOptions() );
+        }
+    }
+
+    private void populateDataElementCategoryCombos( DataElementCategoryCombos dataElementCategoryCombos, boolean root )
+    {
+        dataElementCategoryCombos.setLink( getBasePath( DataElementCategoryCombos.class ) );
+
+        if ( root )
+        {
+            for ( DataElementCategoryCombo dataElementCategoryCombo : dataElementCategoryCombos.getDataElementCategoryCombos() )
+            {
+                populateDataElementCategoryCombo( dataElementCategoryCombo, false );
+            }
+        }
+    }
+
+    private void populateDataElementCategoryCombo( DataElementCategoryCombo dataElementCategoryCombo, boolean root )
+    {
+        dataElementCategoryCombo.setLink( getPathWithUid( dataElementCategoryCombo ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( dataElementCategoryCombo.getOptionCombos() );
+            handleIdentifiableObjectCollection( dataElementCategoryCombo.getCategories() );
+        }
+    }
+
+    private void populateDataElementCategoryOptions( DataElementCategoryOptions dataElementCategoryOptions, boolean root )
+    {
+        dataElementCategoryOptions.setLink( getBasePath( DataElementCategoryOptions.class ) );
+
+        if ( root )
+        {
+            for ( DataElementCategoryOption dataElementCategoryOption : dataElementCategoryOptions.getDataElementCategoryOptions() )
+            {
+                populateDataElementCategoryOption( dataElementCategoryOption, false );
+            }
+        }
+    }
+
+    private void populateDataElementCategoryOption( DataElementCategoryOption dataElementCategoryOption, boolean root )
+    {
+        dataElementCategoryOption.setLink( getPathWithUid( dataElementCategoryOption ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( dataElementCategoryOption.getCategoryOptionCombos() );
+            populateIdentifiableObject( dataElementCategoryOption.getCategory() );
+        }
+    }
+
+    private void populateDataElementCategoryOptionCombos( DataElementCategoryOptionCombos dataElementCategoryOptionCombos, boolean root )
+    {
+        dataElementCategoryOptionCombos.setLink( getBasePath( DataElementCategoryOptionCombos.class ) );
+
+        if ( root )
+        {
+            for ( DataElementCategoryOptionCombo dataElementCategoryOptionCombo : dataElementCategoryOptionCombos.getDataElementCategoryOptionCombos() )
+            {
+                populateDataElementCategoryOptionCombo( dataElementCategoryOptionCombo, false );
+            }
+        }
+    }
+
+    private void populateDataElementCategoryOptionCombo( DataElementCategoryOptionCombo dataElementCategoryOptionCombo, boolean root )
+    {
+        dataElementCategoryOptionCombo.setLink( getPathWithUid( dataElementCategoryOptionCombo ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( dataElementCategoryOptionCombo.getCategoryOptions() );
+            populateIdentifiableObject( dataElementCategoryOptionCombo.getCategoryCombo() );
+        }
     }
 
     private void populateDataElements( DataElements dataElements, boolean root )

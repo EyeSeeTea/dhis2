@@ -27,6 +27,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.listener.WebLinkPopulatorListener;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombos;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -56,6 +57,9 @@ public class DataElementCategoryOptionComboController
         DataElementCategoryOptionCombos dataElementCategoryOptionCombos = new DataElementCategoryOptionCombos();
         dataElementCategoryOptionCombos.setDataElementCategoryOptionCombos( new ArrayList<DataElementCategoryOptionCombo>( dataElementCategoryService.getAllDataElementCategoryOptionCombos() ) );
 
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( dataElementCategoryOptionCombos );
+
         model.addAttribute( "model", dataElementCategoryOptionCombos );
 
         return "dataElementCategoryOptionCombos";
@@ -65,6 +69,9 @@ public class DataElementCategoryOptionComboController
     public String getDataElementCategoryCombo( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         DataElementCategoryOptionCombo dataElementCategoryOptionCombo = dataElementCategoryService.getDataElementCategoryOptionCombo( uid );
+
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( dataElementCategoryOptionCombo );
 
         model.addAttribute( "model", dataElementCategoryOptionCombo );
 

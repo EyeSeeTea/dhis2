@@ -27,6 +27,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.listener.WebLinkPopulatorListener;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryCombos;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -39,8 +40,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -58,6 +57,9 @@ public class DataElementCategoryComboController
         DataElementCategoryCombos dataElementCategoryCombos = new DataElementCategoryCombos();
         dataElementCategoryCombos.setDataElementCategoryCombos( new ArrayList<DataElementCategoryCombo>( dataElementCategoryService.getAllDataElementCategoryCombos() ) );
 
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( dataElementCategoryCombos );
+
         model.addAttribute( "model", dataElementCategoryCombos );
 
         return "dataElementCategoryCombos";
@@ -67,6 +69,9 @@ public class DataElementCategoryComboController
     public String getDataElementCategoryCombo( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         DataElementCategoryCombo dataElementCategoryCombo = dataElementCategoryService.getDataElementCategoryCombo( uid );
+
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( dataElementCategoryCombo );
 
         model.addAttribute( "model", dataElementCategoryCombo );
 
