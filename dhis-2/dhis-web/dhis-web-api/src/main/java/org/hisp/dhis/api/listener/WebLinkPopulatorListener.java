@@ -631,7 +631,16 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
             rootPath = buffer.toString();
         }
 
-        return rootPath + "/" + resourcePaths.get( clazz );
+        String resourcePath = resourcePaths.get( clazz );
+
+        // in some cases, the class is a dynamic subclass (usually subclassed with javaassist), so
+        // we need to fetch the superClass instead.
+        if ( resourcePath == null )
+        {
+            resourcePath = resourcePaths.get( clazz.getSuperclass() );
+        }
+
+        return rootPath + "/" + resourcePath;
     }
 
 
