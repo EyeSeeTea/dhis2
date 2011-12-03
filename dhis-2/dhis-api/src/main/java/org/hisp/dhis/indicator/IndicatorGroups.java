@@ -27,8 +27,8 @@ package org.hisp.dhis.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -43,14 +43,9 @@ import java.util.List;
  */
 @XmlRootElement( name = "indicatorGroups", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class IndicatorGroups
+public class IndicatorGroups extends BaseLinkableObject
 {
     private List<IndicatorGroup> indicatorGroups = new ArrayList<IndicatorGroup>();
-
-    public IndicatorGroups()
-    {
-
-    }
 
     @XmlElement( name = "indicatorGroup" )
     @JsonProperty( value = "indicatorGroups" )

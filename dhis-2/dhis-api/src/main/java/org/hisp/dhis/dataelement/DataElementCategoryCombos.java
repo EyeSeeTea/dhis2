@@ -1,6 +1,7 @@
 package org.hisp.dhis.dataelement;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,14 +16,9 @@ import java.util.List;
  */
 @XmlRootElement( name = "dataElementCategoryCombos", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class DataElementCategoryCombos
+public class DataElementCategoryCombos extends BaseLinkableObject
 {
     private List<DataElementCategoryCombo> dataElementCategoryCombos = new ArrayList<DataElementCategoryCombo>();
-
-    public DataElementCategoryCombos()
-    {
-
-    }
 
     @XmlElement( name = "dataElementCategoryCombo" )
     @JsonProperty( value = "dataElementCategoryCombos" )

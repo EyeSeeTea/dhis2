@@ -48,10 +48,6 @@ public class Indicators extends BaseLinkableObject
 {
     private List<Indicator> indicators = new ArrayList<Indicator>();
 
-    public Indicators() {
-
-    }
-
     @XmlElement( name = "indicator" )
     @JsonProperty( value = "indicators" )
     public List<Indicator> getIndicators()
