@@ -1,7 +1,5 @@
-package org.hisp.dhis.concept;
-
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,82 +25,37 @@ package org.hisp.dhis.concept;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.BaseIdentifiableObject;
+package org.hisp.dhis.attribute;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A Concept Name is a short name which is used as an attribute name
- * when representing a data value in xml which does not use
- * category-option-combo, eg. <DataElement='3' AGE='2' SEX='1' Value='23' />
- * 
- * SDMX-HD is one such case.
- * 
- * @author Dang Duy Hieu
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@XmlRootElement( name = "concept", namespace = Dxf2Namespace.NAMESPACE )
+@XmlRootElement( name = "attributes", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class Concept extends BaseIdentifiableObject
+public class Attributes extends BaseLinkableObject
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = 5017726436040704261L;
+    private List<Attribute> attributes = new ArrayList<Attribute>();
 
-    public static String DEFAULT_CONCEPT_NAME = "default";
-    
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
-
-    public Concept()
+    @XmlElement( name = "attribute" )
+    @JsonProperty( value = "attributes" )
+    public List<Attribute> getAttributes()
     {
+        return attributes;
     }
 
-    public Concept( String name )
+    public void setAttributes( List<Attribute> attributes )
     {
-        this.name = name;
-    }
-
-    // -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        return name.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
-            return true;
-        }
-
-        if ( o == null )
-        {
-            return false;
-        }
-
-        if ( !(o instanceof Concept) )
-        {
-            return false;
-        }
-
-        final Concept other = (Concept) o;
-
-        return name.equals( other.getName() );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[" + name + "]";
+        this.attributes = attributes;
     }
 }
