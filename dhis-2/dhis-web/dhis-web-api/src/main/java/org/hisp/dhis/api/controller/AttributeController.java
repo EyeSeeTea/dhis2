@@ -1,3 +1,5 @@
+package org.hisp.dhis.api.controller;
+
 /*
  * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
@@ -25,74 +27,46 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.attribute;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.Attributes;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@XmlRootElement( name = "attributeValue" )
-@XmlAccessorType( value = XmlAccessType.NONE )
-public class AttributeValue
-    implements Serializable
+@Controller
+@RequestMapping( value = "/attributes" )
+public class AttributeController
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = -6625127769248931066L;
+    @Autowired
+    private AttributeService attributeService;
 
-    private int id;
-
-    private Attribute attribute;
-
-    private String value;
-
-    public AttributeValue()
+    @RequestMapping( method = RequestMethod.GET )
+    public String getAttributes( Model model )
     {
+        Attributes attributes = new Attributes();
+        attributes.setAttributes( new ArrayList<Attribute>( attributeService.getAllAttributes() ) );
 
+        model.addAttribute( "model", attributes );
+
+        return "attributes";
     }
 
-    public AttributeValue( String value )
+    @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
+    public String getAttribute( @PathVariable( "uid" ) String uid, Model model )
     {
-        this.value = value;
-    }
+        Attribute attribute = attributeService.getAttribute( uid );
 
-    public int getId()
-    {
-        return id;
-    }
+        model.addAttribute( "model", attribute );
 
-    public Attribute getAttribute()
-    {
-        return attribute;
-    }
-
-    public void setAttribute( Attribute attribute )
-    {
-        this.attribute = attribute;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    @XmlElement
-    @JsonProperty
-    public String getValue()
-    {
-        return value;
-    }
-
-    public void setValue( String value )
-    {
-        this.value = value;
+        return "attribute";
     }
 }
