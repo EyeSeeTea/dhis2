@@ -1,6 +1,6 @@
 package org.hisp.dhis.api.controller;
 
-import org.hisp.dhis.api.listener.WebLinkPopulatorListener;
+import org.hisp.dhis.api.utils.WebLinkPopulatorListener;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.OrganisationUnits;
