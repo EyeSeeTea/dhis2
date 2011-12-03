@@ -49,7 +49,6 @@ public class BaseLinkableObject implements LinkableObject
         return link;
     }
 
-    @Override
     public void setLink( String link )
     {
         this.link = link;
