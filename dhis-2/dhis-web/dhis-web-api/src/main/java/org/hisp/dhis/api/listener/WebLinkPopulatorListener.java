@@ -141,6 +141,251 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
         {
             populateOrganisationUnit( (OrganisationUnit) source, true );
         }
+        else if ( source instanceof OrganisationUnitGroups )
+        {
+            populateOrganisationUnitGroups( (OrganisationUnitGroups) source, true );
+        }
+        else if ( source instanceof OrganisationUnitGroup )
+        {
+            populateOrganisationUnitGroup( (OrganisationUnitGroup) source, true );
+        }
+        else if ( source instanceof OrganisationUnitGroupSets )
+        {
+            populateOrganisationUnitGroupSets( (OrganisationUnitGroupSets) source, true );
+        }
+        else if ( source instanceof OrganisationUnitGroupSet )
+        {
+            populateOrganisationUnitGroupSet( (OrganisationUnitGroupSet) source, true );
+        }
+        else if ( source instanceof Indicators )
+        {
+            populateIndicators( (Indicators) source, true );
+        }
+        else if ( source instanceof Indicator )
+        {
+            populateIndicator( (Indicator) source, true );
+        }
+        else if ( source instanceof IndicatorGroups )
+        {
+            populateIndicatorGroups( (IndicatorGroups) source, true );
+        }
+        else if ( source instanceof IndicatorGroup )
+        {
+            populateIndicatorGroup( (IndicatorGroup) source, true );
+        }
+        else if ( source instanceof IndicatorGroupSets )
+        {
+            populateIndicatorGroupSets( (IndicatorGroupSets) source, true );
+        }
+        else if ( source instanceof IndicatorGroupSet )
+        {
+            populateIndicatorGroupSet( (IndicatorGroupSet) source, true );
+        }
+        else if ( source instanceof DataElements )
+        {
+            populateDataElements( (DataElements) source, true );
+        }
+        else if ( source instanceof DataElement )
+        {
+            populateDataElement( (DataElement) source, true );
+        }
+        else if ( source instanceof DataElementGroups )
+        {
+            populateDataElementGroups( (DataElementGroups) source, true );
+        }
+        else if ( source instanceof DataElementGroup )
+        {
+            populateDataElementGroup( (DataElementGroup) source, true );
+        }
+        else if ( source instanceof DataElementGroupSets )
+        {
+            populateDataElementGroupSets( (DataElementGroupSets) source, true );
+        }
+        else if ( source instanceof DataElementGroupSet )
+        {
+            populateDataElementGroupSet( (DataElementGroupSet) source, true );
+        }
+    }
+
+    private void populateDataElements( DataElements dataElements, boolean root )
+    {
+        dataElements.setLink( getBasePath( DataElements.class ) );
+
+        if ( root )
+        {
+            for ( DataElement dataElement : dataElements.getDataElements() )
+            {
+                populateDataElement( dataElement, false );
+            }
+        }
+    }
+
+    private void populateDataElement( DataElement dataElement, boolean root )
+    {
+        dataElement.setLink( getPathWithUid( dataElement ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( dataElement.getGroups() );
+            handleIdentifiableObjectCollection( dataElement.getDataSets() );
+            populateIdentifiableObject( dataElement.getCategoryCombo() );
+        }
+    }
+
+    private void populateDataElementGroups( DataElementGroups dataElementGroups, boolean root )
+    {
+        dataElementGroups.setLink( getBasePath( DataElementGroups.class ) );
+
+        if ( root )
+        {
+            for ( DataElementGroup dataElementGroup : dataElementGroups.getDataElementGroups() )
+            {
+                populateDataElementGroup( dataElementGroup, false );
+            }
+        }
+    }
+
+    private void populateDataElementGroup( DataElementGroup dataElementGroup, boolean root )
+    {
+        dataElementGroup.setLink( getPathWithUid( dataElementGroup ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( dataElementGroup.getMembers() );
+            populateIdentifiableObject( dataElementGroup.getGroupSet() );
+        }
+    }
+
+    private void populateDataElementGroupSets( DataElementGroupSets dataElementGroupSets, boolean root )
+    {
+        dataElementGroupSets.setLink( getBasePath( DataElementGroupSets.class ) );
+
+        if ( root )
+        {
+            for ( DataElementGroupSet dataElementGroupSet : dataElementGroupSets.getDataElementGroupSets() )
+            {
+                populateDataElementGroupSet( dataElementGroupSet, false );
+            }
+        }
+    }
+
+    private void populateDataElementGroupSet( DataElementGroupSet dataElementGroupSet, boolean root )
+    {
+        dataElementGroupSet.setLink( getPathWithUid( dataElementGroupSet ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( dataElementGroupSet.getMembers() );
+        }
+    }
+
+    private void populateIndicators( Indicators indicators, boolean root )
+    {
+        indicators.setLink( getBasePath( Indicators.class ) );
+
+        for ( Indicator indicator : indicators.getIndicators() )
+        {
+            populateIndicator( indicator, false );
+        }
+    }
+
+    private void populateIndicator( Indicator indicator, boolean root )
+    {
+        indicator.setLink( getPathWithUid( indicator ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( indicator.getGroups() );
+            handleIdentifiableObjectCollection( indicator.getDataSets() );
+        }
+    }
+
+    private void populateIndicatorGroups( IndicatorGroups indicatorGroups, boolean root )
+    {
+        indicatorGroups.setLink( getBasePath( IndicatorGroups.class ) );
+
+        for ( IndicatorGroup indicatorGroup : indicatorGroups.getIndicatorGroups() )
+        {
+            populateIndicatorGroup( indicatorGroup, false );
+        }
+    }
+
+    private void populateIndicatorGroup( IndicatorGroup indicatorGroup, boolean root )
+    {
+        indicatorGroup.setLink( getPathWithUid( indicatorGroup ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( indicatorGroup.getMembers() );
+            populateIdentifiableObject( indicatorGroup.getGroupSet() );
+        }
+    }
+
+    private void populateIndicatorGroupSets( IndicatorGroupSets indicatorGroupSets, boolean root )
+    {
+        indicatorGroupSets.setLink( getBasePath( IndicatorGroupSets.class ) );
+
+        for ( IndicatorGroupSet indicatorGroupSet : indicatorGroupSets.getIndicatorGroupSets() )
+        {
+            populateIndicatorGroupSet( indicatorGroupSet, false );
+        }
+    }
+
+    private void populateIndicatorGroupSet( IndicatorGroupSet indicatorGroupSet, boolean root )
+    {
+        indicatorGroupSet.setLink( getPathWithUid( indicatorGroupSet ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( indicatorGroupSet.getMembers() );
+        }
+    }
+
+    private void populateOrganisationUnitGroups( OrganisationUnitGroups organisationUnitGroups, boolean root )
+    {
+        organisationUnitGroups.setLink( getBasePath( OrganisationUnitGroups.class ) );
+
+        if ( root )
+        {
+            for ( OrganisationUnitGroup organisationUnitGroup : organisationUnitGroups.getOrganisationUnitGroups() )
+            {
+                populateOrganisationUnitGroup( organisationUnitGroup, false );
+            }
+        }
+    }
+
+    private void populateOrganisationUnitGroup( OrganisationUnitGroup organisationUnitGroup, boolean root )
+    {
+        organisationUnitGroup.setLink( getPathWithUid( organisationUnitGroup ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( organisationUnitGroup.getMembers() );
+            populateIdentifiableObject( organisationUnitGroup.getGroupSet() );
+        }
+    }
+
+    private void populateOrganisationUnitGroupSets( OrganisationUnitGroupSets organisationUnitGroupSets, boolean root )
+    {
+        organisationUnitGroupSets.setLink( getBasePath( OrganisationUnitGroupSets.class ) );
+
+        if ( root )
+        {
+            for ( OrganisationUnitGroupSet organisationUnitGroupSet : organisationUnitGroupSets.getOrganisationUnitGroupSets() )
+            {
+                populateOrganisationUnitGroupSet( organisationUnitGroupSet, false );
+            }
+        }
+    }
+
+    private void populateOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet, boolean root )
+    {
+        organisationUnitGroupSet.setLink( getPathWithUid( organisationUnitGroupSet ) );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( organisationUnitGroupSet.getOrganisationUnitGroups() );
+        }
     }
 
     private void populateOrganisationUnits( OrganisationUnits organisationUnits, boolean root )

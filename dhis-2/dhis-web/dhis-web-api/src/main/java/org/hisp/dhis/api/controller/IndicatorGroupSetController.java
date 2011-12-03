@@ -27,6 +27,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.listener.WebLinkPopulatorListener;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorGroupSets;
 import org.hisp.dhis.indicator.IndicatorService;
@@ -56,6 +57,9 @@ public class IndicatorGroupSetController
         IndicatorGroupSets indicatorGroupSets = new IndicatorGroupSets();
         indicatorGroupSets.setIndicatorGroupSets( new ArrayList<IndicatorGroupSet>( indicatorService.getAllIndicatorGroupSets() ) );
 
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( indicatorGroupSets );
+
         model.addAttribute( "model", indicatorGroupSets );
 
         return "indicatorGroupSets";
@@ -65,6 +69,9 @@ public class IndicatorGroupSetController
     public String getIndicatorGroupSet( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         IndicatorGroupSet indicatorGroupSet = indicatorService.getIndicatorGroupSet( uid );
+
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( indicatorGroupSet );
 
         model.addAttribute( "model", indicatorGroupSet );
 

@@ -27,6 +27,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.listener.WebLinkPopulatorListener;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.Indicators;
@@ -56,6 +57,9 @@ public class IndicatorController
         Indicators indicators = new Indicators();
         indicators.setIndicators( new ArrayList<Indicator>( indicatorService.getAllIndicators() ) );
 
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( indicators );
+
         model.addAttribute( "model", indicators );
 
         return "indicators";
@@ -65,6 +69,9 @@ public class IndicatorController
     public String getIndicator( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         Indicator indicator = indicatorService.getIndicator( uid );
+
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( indicator );
 
         model.addAttribute( "model", indicator );
 

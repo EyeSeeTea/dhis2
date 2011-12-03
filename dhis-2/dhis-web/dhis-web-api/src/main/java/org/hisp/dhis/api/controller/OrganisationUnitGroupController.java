@@ -1,5 +1,6 @@
 package org.hisp.dhis.api.controller;
 
+import org.hisp.dhis.api.listener.WebLinkPopulatorListener;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroups;
@@ -29,6 +30,9 @@ public class OrganisationUnitGroupController
         OrganisationUnitGroups organisationUnitGroups = new OrganisationUnitGroups();
         organisationUnitGroups.setOrganisationUnitGroups( new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService.getAllOrganisationUnitGroups() ) );
 
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( organisationUnitGroups );
+
         model.addAttribute( "model", organisationUnitGroups );
 
         return "organisationUnitGroups";
@@ -38,6 +42,10 @@ public class OrganisationUnitGroupController
     public String getOrganisationUnit( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         OrganisationUnitGroup organisationUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( uid );
+
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( organisationUnitGroup );
+
 
         model.addAttribute( "model", organisationUnitGroup );
 

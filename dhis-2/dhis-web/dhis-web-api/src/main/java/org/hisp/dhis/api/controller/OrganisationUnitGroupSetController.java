@@ -27,6 +27,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.listener.WebLinkPopulatorListener;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSets;
@@ -56,6 +57,9 @@ public class OrganisationUnitGroupSetController
         OrganisationUnitGroupSets organisationUnitGroupSets = new OrganisationUnitGroupSets();
         organisationUnitGroupSets.setOrganisationUnitGroupSets( new ArrayList<OrganisationUnitGroupSet>( organisationUnitGroupService.getAllOrganisationUnitGroupSets() ) );
 
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( organisationUnitGroupSets );
+
         model.addAttribute( "model", organisationUnitGroupSets );
 
         return "organisationUnitGroupSets";
@@ -65,6 +69,9 @@ public class OrganisationUnitGroupSetController
     public String getOrganisationUnitGroupSet( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         OrganisationUnitGroupSet organisationUnitGroupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( uid );
+
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( organisationUnitGroupSet );
 
         model.addAttribute( "model", organisationUnitGroupSet );
 

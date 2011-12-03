@@ -27,6 +27,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.listener.WebLinkPopulatorListener;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.Users;
@@ -56,6 +57,9 @@ public class UserController
         Users users = new Users();
         users.setUsers( new ArrayList<User>( userService.getAllUsers() ) );
 
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( users );
+
         model.addAttribute( "model", users );
 
         return "users";
@@ -65,6 +69,9 @@ public class UserController
     public String getUser( @PathVariable( "id" ) Integer id, Model model, HttpServletRequest request )
     {
         User user = userService.getUser( id );
+
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( user );
 
         model.addAttribute( "model", user );
 

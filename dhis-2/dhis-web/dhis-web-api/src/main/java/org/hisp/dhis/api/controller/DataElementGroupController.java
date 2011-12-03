@@ -27,6 +27,7 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.listener.WebLinkPopulatorListener;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroups;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -53,6 +54,9 @@ public class DataElementGroupController
         DataElementGroups dataElementGroups = new DataElementGroups();
         dataElementGroups.setDataElementGroups( new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() ) );
 
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( dataElementGroups );
+
         model.addAttribute( "model", dataElementGroups );
 
         return "dataElementGroups";
@@ -62,6 +66,9 @@ public class DataElementGroupController
     public String getDataElementGroup( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         DataElementGroup dataElementGroup = dataElementService.getDataElementGroup( uid );
+
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( dataElementGroup );
 
         model.addAttribute( "model", dataElementGroup );
 
