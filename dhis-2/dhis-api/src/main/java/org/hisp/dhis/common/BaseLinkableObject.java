@@ -27,10 +27,31 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlAttribute;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface LinkableObject
+public class BaseLinkableObject implements LinkableObject
 {
-    public String getLink();
+    /**
+     * As part of the marshalling process, this field can be set to indicate a link to this
+     * identifiable object (will be used on the web layer for navigating the REST API)
+     */
+    private String link;
+
+    @XmlAttribute
+    @JsonProperty
+    public String getLink()
+    {
+        return link;
+    }
+
+    @Override
+    public void setLink( String link )
+    {
+        this.link = link;
+    }
 }

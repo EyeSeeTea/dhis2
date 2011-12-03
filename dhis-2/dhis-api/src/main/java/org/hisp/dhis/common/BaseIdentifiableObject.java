@@ -42,8 +42,8 @@ import java.util.Map;
  */
 @XmlRootElement( name = "identifiableObject", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-@XmlType( propOrder = {"uid", "name", "code", "lastUpdated", "link"} )
-public class BaseIdentifiableObject
+@XmlType( propOrder = {"uid", "name", "code", "lastUpdated" } )
+public class BaseIdentifiableObject extends BaseLinkableObject
     implements IdentifiableObject
 {
     /**
@@ -80,12 +80,6 @@ public class BaseIdentifiableObject
      * The date this object was last updated.
      */
     private Date lastUpdated;
-
-    /**
-     * As part of the marshalling process, this field can be set to indicate a link to this
-     * identifiable object (will be used on the web layer for navigating the REST API)
-     */
-    private String link;
 
     public BaseIdentifiableObject()
     {
@@ -156,18 +150,6 @@ public class BaseIdentifiableObject
     public void setLastUpdated( Date lastUpdated )
     {
         this.lastUpdated = lastUpdated;
-    }
-
-    @XmlAttribute
-    @JsonProperty
-    public String getLink()
-    {
-        return link;
-    }
-
-    public void setLink( String link )
-    {
-        this.link = link;
     }
 
     /**
