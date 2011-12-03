@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 /**
@@ -50,7 +51,7 @@ public class OrganisationUnitGroupSetController
     private OrganisationUnitGroupService organisationUnitGroupService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getOrganisationUnitGroupSets( Model model )
+    public String getOrganisationUnitGroupSets( Model model, HttpServletRequest request )
     {
         OrganisationUnitGroupSets organisationUnitGroupSets = new OrganisationUnitGroupSets();
         organisationUnitGroupSets.setOrganisationUnitGroupSets( new ArrayList<OrganisationUnitGroupSet>( organisationUnitGroupService.getAllOrganisationUnitGroupSets() ) );
@@ -61,7 +62,7 @@ public class OrganisationUnitGroupSetController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getOrganisationUnitGroupSet( @PathVariable( "uid" ) String uid, Model model )
+    public String getOrganisationUnitGroupSet( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         OrganisationUnitGroupSet organisationUnitGroupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( uid );
 

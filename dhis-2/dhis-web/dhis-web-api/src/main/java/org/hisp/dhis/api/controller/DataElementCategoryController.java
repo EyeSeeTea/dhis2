@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 /**
@@ -50,7 +51,7 @@ public class DataElementCategoryController
     private DataElementCategoryService dataElementCategoryService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getDataElementCategories( Model model )
+    public String getDataElementCategories( Model model, HttpServletRequest request )
     {
         DataElementCategories dataElementCategories = new DataElementCategories();
         dataElementCategories.setDataElementCategories( new ArrayList<DataElementCategory>( dataElementCategoryService.getAllDataElementCategories() ) );
@@ -61,7 +62,7 @@ public class DataElementCategoryController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getDataElementCategory( @PathVariable( "uid" ) String uid, Model model )
+    public String getDataElementCategory( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         DataElementCategory dataElementCategory = dataElementCategoryService.getDataElementCategory( uid );
 

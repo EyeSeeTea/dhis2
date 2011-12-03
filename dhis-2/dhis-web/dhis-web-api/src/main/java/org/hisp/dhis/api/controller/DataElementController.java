@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ public class DataElementController
     private DataElementService dataElementService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getDataElements( Model model )
+    public String getDataElements( Model model, HttpServletRequest request )
     {
         DataElements dataElements = new DataElements();
         dataElements.setDataElements( new ArrayList<DataElement>( dataElementService.getAllActiveDataElements() ) );
@@ -83,7 +84,7 @@ public class DataElementController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getDataElement( @PathVariable( "uid" ) String uid, Model model )
+    public String getDataElement( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         DataElement dataElement = dataElementService.getDataElement( uid );
 

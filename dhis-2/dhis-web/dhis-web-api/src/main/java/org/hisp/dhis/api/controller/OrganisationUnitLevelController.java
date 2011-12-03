@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 /**
@@ -50,7 +51,7 @@ public class OrganisationUnitLevelController
     private OrganisationUnitService organisationUnitService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getOrganisationUnitLevels( Model model )
+    public String getOrganisationUnitLevels( Model model, HttpServletRequest request )
     {
         OrganisationUnitLevels organisationUnitLevels = new OrganisationUnitLevels();
         organisationUnitLevels.setOrganisationUnitLevels( new ArrayList<OrganisationUnitLevel>( organisationUnitService.getOrganisationUnitLevels() ) );
@@ -61,7 +62,7 @@ public class OrganisationUnitLevelController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getOrganisationUnit( @PathVariable( "uid" ) String uid, Model model )
+    public String getOrganisationUnit( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         OrganisationUnitLevel organisationUnitLevel = organisationUnitService.getOrganisationUnitLevel( uid );
 

@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 /**
@@ -50,7 +51,7 @@ public class IndicatorController
     private IndicatorService indicatorService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getIndicators( Model model )
+    public String getIndicators( Model model, HttpServletRequest request )
     {
         Indicators indicators = new Indicators();
         indicators.setIndicators( new ArrayList<Indicator>( indicatorService.getAllIndicators() ) );
@@ -61,7 +62,7 @@ public class IndicatorController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getIndicator( @PathVariable( "uid" ) String uid, Model model )
+    public String getIndicator( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         Indicator indicator = indicatorService.getIndicator( uid );
 

@@ -29,6 +29,7 @@ package org.hisp.dhis.indicator;
 
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -43,7 +44,7 @@ import java.util.List;
  */
 @XmlRootElement( name = "indicators", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class Indicators
+public class Indicators extends BaseLinkableObject
 {
     private List<Indicator> indicators = new ArrayList<Indicator>();
 

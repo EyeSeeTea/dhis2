@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
 /**
@@ -50,7 +51,7 @@ public class AttributeController
     private AttributeService attributeService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getAttributes( Model model )
+    public String getAttributes( Model model, HttpServletRequest request )
     {
         Attributes attributes = new Attributes();
         attributes.setAttributes( new ArrayList<Attribute>( attributeService.getAllAttributes() ) );
@@ -61,7 +62,7 @@ public class AttributeController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getAttribute( @PathVariable( "uid" ) String uid, Model model )
+    public String getAttribute( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         Attribute attribute = attributeService.getAttribute( uid );
 

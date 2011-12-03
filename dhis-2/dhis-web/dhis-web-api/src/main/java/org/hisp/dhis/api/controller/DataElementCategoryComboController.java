@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class DataElementCategoryComboController
     private DataElementCategoryService dataElementCategoryService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getDataElementCategoryCombos( Model model )
+    public String getDataElementCategoryCombos( Model model, HttpServletRequest request )
     {
         DataElementCategoryCombos dataElementCategoryCombos = new DataElementCategoryCombos();
         dataElementCategoryCombos.setDataElementCategoryCombos( new ArrayList<DataElementCategoryCombo>( dataElementCategoryService.getAllDataElementCategoryCombos() ) );
@@ -63,7 +64,7 @@ public class DataElementCategoryComboController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getDataElementCategoryCombo( @PathVariable( "uid" ) String uid, Model model )
+    public String getDataElementCategoryCombo( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         DataElementCategoryCombo dataElementCategoryCombo = dataElementCategoryService.getDataElementCategoryCombo( uid );
 
