@@ -1,8 +1,7 @@
-@javax.xml.bind.annotation.XmlSchema( 
-    namespace = "http://dhis2.org/schema/dxf/2.0-SNAPSHOT",
+@javax.xml.bind.annotation.XmlSchema(
+    namespace = "http://dhis2.org/schema/dxf/2.0",
     elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED )
-
-package org.hisp.dhis.importexport.dxf2.model;
+package org.hisp.dhis;
 
 /*
  * Copyright (c) 2011, University of Oslo

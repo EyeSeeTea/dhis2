@@ -19,7 +19,7 @@ import java.util.Map;
 public class XsltHtmlView extends AbstractUrlBasedView
 {
     public static final String HTML_CONTENT_TYPE = "text/html";
-    
+
     public XsltHtmlView()
     {
         setContentType( HTML_CONTENT_TYPE );
