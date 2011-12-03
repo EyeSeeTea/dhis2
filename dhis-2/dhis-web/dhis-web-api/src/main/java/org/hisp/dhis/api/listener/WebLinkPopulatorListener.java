@@ -24,6 +24,8 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
 
     private static Map<Class, String> resourcePaths = new HashMap<Class, String>();
 
+    private String rootPath = null;
+
     static
     {
         resourcePaths.put( Charts.class, "charts" );
@@ -77,7 +79,7 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
     {
         if ( root )
         {
-            chart.setLink( getBasePath( Chart.class ) + "/" + chart.getUid() );
+            chart.setLink( getPath( chart ) );
 
             handleIdentifiableObjectCollection( chart.getIndicators() );
             handleIdentifiableObjectCollection( chart.getDataElements() );
@@ -89,7 +91,7 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
         }
         else
         {
-            chart.setLink( getBasePath( Chart.class ) + "/" + chart.getUid() );
+            chart.setLink( getPath( chart ) );
         }
     }
 
@@ -103,25 +105,34 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
 
     private void populateIdentifiableObject( BaseIdentifiableObject baseIdentifiableObject )
     {
-        baseIdentifiableObject.setLink( getBasePath( baseIdentifiableObject.getClass() ) + "/" + baseIdentifiableObject.getUid() );
+        baseIdentifiableObject.setLink( getPath( baseIdentifiableObject ) );
+    }
+
+    private String getPath( BaseIdentifiableObject baseIdentifiableObject )
+    {
+        return getBasePath( baseIdentifiableObject.getClass() ) + "/" + baseIdentifiableObject.getUid();
     }
 
     private String getBasePath( Class clazz )
     {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append( request.getScheme() );
-
-        buffer.append( "://" + request.getServerName() );
-
-        if ( request.getServerPort() != 80 || request.getServerPort() != 443 )
+        if ( rootPath == null )
         {
-            buffer.append( ":" + request.getServerPort() );
+            StringBuffer buffer = new StringBuffer();
+            buffer.append( request.getScheme() );
+
+            buffer.append( "://" + request.getServerName() );
+
+            if ( request.getServerPort() != 80 || request.getServerPort() != 443 )
+            {
+                buffer.append( ":" + request.getServerPort() );
+            }
+
+            buffer.append( request.getServletPath() );
+
+            rootPath = buffer.toString();
         }
 
-        buffer.append( request.getServletPath() );
-        buffer.append( "/" + resourcePaths.get( clazz ) );
-
-        return buffer.toString();
+        return rootPath + "/" + resourcePaths.get( clazz );
     }
 
 
