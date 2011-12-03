@@ -29,6 +29,7 @@ package org.hisp.dhis.attribute;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -40,7 +41,7 @@ import java.util.Set;
 /**
  * @author mortenoh
  */
-@XmlRootElement( name = "attribute" )
+@XmlRootElement( name = "attribute", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class Attribute extends BaseIdentifiableObject
 {

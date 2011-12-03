@@ -37,7 +37,7 @@ import java.util.*;
 /**
  * @author Bob Jolliffe
  */
-@XmlRootElement( name = "identifiableObject" )
+@XmlRootElement( name = "identifiableObject", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
 @XmlType( propOrder = {"uid", "name", "code", "lastUpdated"} )
 public class BaseIdentifiableObject

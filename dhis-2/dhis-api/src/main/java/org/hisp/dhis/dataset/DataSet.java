@@ -30,6 +30,7 @@ package org.hisp.dhis.dataset;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
@@ -52,7 +53,7 @@ import java.util.Set;
  *
  * @author Kristian Nordal
  */
-@XmlRootElement( name = "dataSet" )
+@XmlRootElement( name = "dataSet", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class DataSet extends BaseNameableObject
 {

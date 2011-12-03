@@ -1,6 +1,7 @@
 package org.hisp.dhis.dataset;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.Dxf2Namespace;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@XmlRootElement( name = "dataSets" )
+@XmlRootElement( name = "dataSets", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class DataSets
 {

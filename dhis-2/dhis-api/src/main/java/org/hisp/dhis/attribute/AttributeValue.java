@@ -28,6 +28,7 @@
 package org.hisp.dhis.attribute;
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.Dxf2Namespace;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -38,7 +39,7 @@ import java.io.Serializable;
 /**
  * @author mortenoh
  */
-@XmlRootElement( name = "attributeValue" )
+@XmlRootElement( name = "attributeValue", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class AttributeValue
     implements Serializable
