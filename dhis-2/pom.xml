@@ -24,7 +24,6 @@
 
   <modules>
     <module>dhis-api</module>
-    <module>dhis-service-api</module>
     <module>dhis-services</module>
     <module>dhis-dxf2</module>
     <module>dhis-support</module>
