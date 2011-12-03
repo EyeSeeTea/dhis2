@@ -29,11 +29,9 @@ package org.hisp.dhis.chart;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.LinkableObject;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,9 +40,11 @@ import java.util.List;
  */
 @XmlRootElement( name = "charts", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class Charts
+public class Charts implements LinkableObject
 {
     private List<Chart> charts = new ArrayList<Chart>();
+
+    private String link;
 
     @XmlElement( name = "chart" )
     @JsonProperty( value = "charts" )
@@ -56,5 +56,19 @@ public class Charts
     public void setCharts( List<Chart> charts )
     {
         this.charts = charts;
+    }
+
+    @XmlAttribute
+    @JsonProperty
+    @Override
+    public String getLink()
+    {
+        return link;
+    }
+
+    @Override
+    public void setLink( String link )
+    {
+        this.link = link;
     }
 }

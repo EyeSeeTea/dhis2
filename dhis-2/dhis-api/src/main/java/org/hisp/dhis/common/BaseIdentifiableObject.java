@@ -32,14 +32,17 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.adapter.JsonDateSerializer;
 
 import javax.xml.bind.annotation.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Bob Jolliffe
  */
 @XmlRootElement( name = "identifiableObject", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-@XmlType( propOrder = {"uid", "name", "code", "lastUpdated"} )
+@XmlType( propOrder = {"uid", "name", "code", "lastUpdated", "link"} )
 public class BaseIdentifiableObject
     implements IdentifiableObject
 {
@@ -78,6 +81,12 @@ public class BaseIdentifiableObject
      */
     private Date lastUpdated;
 
+    /**
+     * As part of the marshalling process, this field can be set to indicate a link to this
+     * identifiable object (will be used on the web layer for navigating the REST API)
+     */
+    private String link;
+
     public BaseIdentifiableObject()
     {
     }
@@ -100,8 +109,8 @@ public class BaseIdentifiableObject
     }
 
     @XmlID
-    @XmlAttribute(name = "id")
-    @JsonProperty(value = "id")
+    @XmlAttribute( name = "id" )
+    @JsonProperty( value = "id" )
     public String getUid()
     {
         return uid;
@@ -147,6 +156,18 @@ public class BaseIdentifiableObject
     public void setLastUpdated( Date lastUpdated )
     {
         this.lastUpdated = lastUpdated;
+    }
+
+    @XmlAttribute
+    @JsonProperty
+    public String getLink()
+    {
+        return link;
+    }
+
+    public void setLink( String link )
+    {
+        this.link = link;
     }
 
     /**
