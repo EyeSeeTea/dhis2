@@ -41,7 +41,6 @@ import org.hisp.dhis.indicator.*;
 import org.hisp.dhis.organisationunit.*;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.Users;
-import org.springframework.web.util.UrlPathHelper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.Marshaller;
@@ -411,9 +410,12 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
     {
         indicators.setLink( getBasePath( Indicators.class ) );
 
-        for ( Indicator indicator : indicators.getIndicators() )
+        if ( root )
         {
-            populateIndicator( indicator, false );
+            for ( Indicator indicator : indicators.getIndicators() )
+            {
+                populateIndicator( indicator, false );
+            }
         }
     }
 
@@ -432,9 +434,12 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
     {
         indicatorGroups.setLink( getBasePath( IndicatorGroups.class ) );
 
-        for ( IndicatorGroup indicatorGroup : indicatorGroups.getIndicatorGroups() )
+        if ( root )
         {
-            populateIndicatorGroup( indicatorGroup, false );
+            for ( IndicatorGroup indicatorGroup : indicatorGroups.getIndicatorGroups() )
+            {
+                populateIndicatorGroup( indicatorGroup, false );
+            }
         }
     }
 
@@ -453,9 +458,12 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
     {
         indicatorGroupSets.setLink( getBasePath( IndicatorGroupSets.class ) );
 
-        for ( IndicatorGroupSet indicatorGroupSet : indicatorGroupSets.getIndicatorGroupSets() )
+        if ( root )
         {
-            populateIndicatorGroupSet( indicatorGroupSet, false );
+            for ( IndicatorGroupSet indicatorGroupSet : indicatorGroupSets.getIndicatorGroupSets() )
+            {
+                populateIndicatorGroupSet( indicatorGroupSet, false );
+            }
         }
     }
 
@@ -617,20 +625,20 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
     {
         if ( rootPath == null )
         {
-            StringBuffer buffer = new StringBuffer();
-            buffer.append( request.getScheme() );
+            StringBuilder builder = new StringBuilder();
 
-            buffer.append( "://" + request.getServerName() );
+            builder.append( request.getScheme() );
+            builder.append( "://" ).append( request.getServerName() );
 
             if ( request.getServerPort() != 80 && request.getServerPort() != 443 )
             {
-                buffer.append( ":" + request.getServerPort() );
+                builder.append( ":" ).append( request.getServerPort() );
             }
 
-            buffer.append( request.getContextPath() );
-            buffer.append( request.getServletPath() );
+            builder.append( request.getContextPath() );
+            builder.append( request.getServletPath() );
 
-            rootPath = buffer.toString();
+            rootPath = builder.toString();
         }
 
         String resourcePath = resourcePaths.get( clazz );
