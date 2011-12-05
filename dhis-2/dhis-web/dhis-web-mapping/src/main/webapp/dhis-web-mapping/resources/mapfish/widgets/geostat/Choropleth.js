@@ -1648,7 +1648,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
 	},
     
     loadGeoJson: function() {
-        G.vars.mask.msg = G.i18n.loading_geojson;
+        G.vars.mask.msg = G.i18n.loading;
         G.vars.mask.show();
         G.vars.activeWidget = this;
         this.updateValues = false;
@@ -1663,7 +1663,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
 
     classify: function(exception, lockPosition) {
         if (this.formValidation.validateForm.apply(this, [exception])) {
-            G.vars.mask.msg = G.i18n.aggregating_map_values;
+            G.vars.mask.msg = G.i18n.loading;
             G.vars.mask.show();
             
             G.vars.lockPosition = lockPosition;
