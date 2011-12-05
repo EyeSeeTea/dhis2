@@ -75,8 +75,7 @@ public class Chart
     public static final String SIZE_NORMAL = "normal";        
     public static final String SIZE_WIDE = "wide";    
     public static final String SIZE_TALL = "tall";
-        
-    public static final String TYPE = "tall";    
+
     public static final String TYPE_COLUMN = "column";    
     public static final String TYPE_STACKED_COLUMN = "stackedColumn";    
     public static final String TYPE_BAR = "bar";    
