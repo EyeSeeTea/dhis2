@@ -32,15 +32,18 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.adapter.JsonDateSerializer;
 
 import javax.xml.bind.annotation.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Bob Jolliffe
  */
-@XmlRootElement( name = "identifiableObject" )
+@XmlRootElement( name = "identifiableObject", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-@XmlType( propOrder = {"id", "uid", "name", "code", "lastUpdated"} )
-public class BaseIdentifiableObject
+@XmlType( propOrder = {"uid", "name", "code", "lastUpdated" } )
+public class BaseIdentifiableObject extends BaseLinkableObject
     implements IdentifiableObject
 {
     /**
@@ -89,8 +92,6 @@ public class BaseIdentifiableObject
         this.name = name;
     }
 
-    @XmlAttribute
-    @JsonProperty
     public int getId()
     {
         return id;
@@ -101,8 +102,9 @@ public class BaseIdentifiableObject
         this.id = id;
     }
 
-    @XmlAttribute
-    @JsonProperty
+    @XmlID
+    @XmlAttribute( name = "id" )
+    @JsonProperty( value = "id" )
     public String getUid()
     {
         return uid;

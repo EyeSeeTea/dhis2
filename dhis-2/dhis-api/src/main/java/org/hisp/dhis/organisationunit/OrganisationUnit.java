@@ -33,17 +33,14 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseNameableObject;
-import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.JsonDateSerializer;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.*;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
 import org.hisp.dhis.user.User;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -52,7 +49,7 @@ import java.util.regex.Pattern;
 /**
  * @author Kristian Nordal
  */
-@XmlRootElement( name = "organisationUnit" )
+@XmlRootElement( name = "organisationUnit", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class OrganisationUnit extends BaseNameableObject
 {
@@ -505,7 +502,7 @@ public class OrganisationUnit extends BaseNameableObject
 
     @XmlElement
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
-/*     @JsonSerialize( using = JsonNameableObjectSerializer.class ) */
+    @JsonSerialize( using = JsonNameableObjectSerializer.class )
     public OrganisationUnit getParent()
     {
         return parent;
@@ -515,7 +512,7 @@ public class OrganisationUnit extends BaseNameableObject
     {
         this.parent = parent;
     }
-    
+
     public String getAlternativeName()
     {
         return getShortName();
@@ -624,6 +621,10 @@ public class OrganisationUnit extends BaseNameableObject
         this.url = url;
     }
 
+    @XmlElementWrapper( name = "groups" )
+    @XmlElement( name = "group" )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<OrganisationUnitGroup> getGroups()
     {
         return groups;
@@ -634,6 +635,10 @@ public class OrganisationUnit extends BaseNameableObject
         this.groups = groups;
     }
 
+    @XmlElementWrapper( name = "dataSets" )
+    @XmlElement( name = "dataSet" )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -644,6 +649,7 @@ public class OrganisationUnit extends BaseNameableObject
         this.dataSets = dataSets;
     }
 
+    // TODO expose this when marshalling?
     public Set<User> getUsers()
     {
         return users;

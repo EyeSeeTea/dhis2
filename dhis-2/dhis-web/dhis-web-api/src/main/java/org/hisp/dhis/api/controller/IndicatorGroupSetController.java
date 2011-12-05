@@ -27,11 +27,13 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.utils.WebLinkPopulatorListener;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorGroupSets;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,6 +41,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
 @Controller
 @RequestMapping( value = "/indicatorGroupSets" )
 public class IndicatorGroupSetController
@@ -47,19 +52,29 @@ public class IndicatorGroupSetController
     private IndicatorService indicatorService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public IndicatorGroupSets getIndicatorGroupSets()
+    public String getIndicatorGroupSets( Model model, HttpServletRequest request )
     {
         IndicatorGroupSets indicatorGroupSets = new IndicatorGroupSets();
         indicatorGroupSets.setIndicatorGroupSets( new ArrayList<IndicatorGroupSet>( indicatorService.getAllIndicatorGroupSets() ) );
 
-        return indicatorGroupSets;
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( indicatorGroupSets );
+
+        model.addAttribute( "model", indicatorGroupSets );
+
+        return "indicatorGroupSets";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public IndicatorGroupSet getIndicatorGroupSet( @PathVariable( "uid" ) Integer uid, HttpServletRequest request )
+    public String getIndicatorGroupSet( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
     {
         IndicatorGroupSet indicatorGroupSet = indicatorService.getIndicatorGroupSet( uid );
 
-        return indicatorGroupSet;
+        WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+        listener.beforeMarshal( indicatorGroupSet );
+
+        model.addAttribute( "model", indicatorGroupSet );
+
+        return "indicatorGroupSet";
     }
 }

@@ -48,14 +48,12 @@ import org.hisp.dhis.aggregation.AggregatedDataValueStore;
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
 import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.aggregation.StoreIterator;
-import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.period.Period;
@@ -65,12 +63,13 @@ import org.hisp.dhis.system.objectmapper.AggregatedIndicatorMapValueRowMapper;
 import org.hisp.dhis.system.objectmapper.AggregatedIndicatorValueRowMapper;
 import org.hisp.dhis.system.objectmapper.DataValueRowMapper;
 import org.hisp.dhis.system.objectmapper.DeflatedDataValueRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Lars Helge Overland
  */
 public class JdbcAggregatedDataValueStore
-    extends HibernateGenericStore<CaseAggregationCondition> implements AggregatedDataValueStore
+ implements AggregatedDataValueStore
 {
     private int FETCH_SIZE = 1000; // Number of rows to fetch from db for large resultset
 
@@ -85,6 +84,13 @@ public class JdbcAggregatedDataValueStore
     public void setStatementManager( StatementManager statementManager )
     {
         this.statementManager = statementManager;
+    }
+
+    protected JdbcTemplate jdbcTemplate;
+    
+    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
+    {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     // -------------------------------------------------------------------------
@@ -433,12 +439,13 @@ public class JdbcAggregatedDataValueStore
     public Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, Collection<Integer> organisationUnitIds )
     {
         final String sql = 
-            "SELECT a.periodid, o.organisationunitid, o.name, a.value " +
+            "SELECT a.periodid, o.organisationunitid, o.name, SUM(a.value) AS value " +
             "FROM aggregateddatavalue AS a " +
             "JOIN organisationunit AS o ON (a.organisationunitid=o.organisationunitid) " +
             "WHERE a.dataelementid  = " + dataElementId + " " +
             "AND a.periodid = " + periodId + " " + 
-            "AND a.organisationunitid IN (" + getCommaDelimitedString( organisationUnitIds ) + ")";
+            "AND a.organisationunitid IN (" + getCommaDelimitedString( organisationUnitIds ) + ") " +
+            "GROUP BY a.periodid, o.organisationunitid, o.name";
         
         return jdbcTemplate.query( sql, new AggregatedDataMapValueRowMapper() );        
     }
@@ -446,12 +453,13 @@ public class JdbcAggregatedDataValueStore
     public Collection<AggregatedMapValue> getAggregatedDataMapValues( Collection<Integer> dataElementIds, int periodId, int organisationUnitId )
     {
         final String sql = 
-            "SELECT d.name, a.value, a.periodid " +
+            "SELECT d.name, a.periodid, SUM(a.value) AS value " +
             "FROM aggregateddatavalue AS a " +
             "JOIN dataelement AS d ON (a.dataelementid = d.dataelementid) " +
             "WHERE a.dataelementid IN (" + getCommaDelimitedString( dataElementIds ) + ") " +
             "AND a.periodid = " + periodId + " " + 
-            "AND a.organisationunitid = " + organisationUnitId;
+            "AND a.organisationunitid = " + organisationUnitId + " " +
+            "GROUP BY d.name, a.periodid";
         
         return jdbcTemplate.query( sql, new org.springframework.jdbc.core.RowMapper<AggregatedMapValue>()
         {
@@ -460,8 +468,8 @@ public class JdbcAggregatedDataValueStore
             {
                 AggregatedMapValue value = new AggregatedMapValue();
                 value.setDataElementName( resultSet.getString( 1 ) );
-                value.setValue( resultSet.getDouble( 2 ) );
-                value.setPeriodId( resultSet.getInt( 3 ) );                
+                value.setPeriodId( resultSet.getInt( 2 ) );
+                value.setValue( resultSet.getDouble( 3 ) );
                 return value;
             }
         } );

@@ -89,8 +89,8 @@ mapfish.GeoStat = OpenLayers.Class({
         if (!doc || !doc.documentElement) {
             doc = request.responseText;
         }
-        
-        if (G.vars.activeWidget != symbol) {
+                
+        if (doc.length && G.vars.activeWidget != symbol) {
             doc = G.util.geoJsonDecode(doc);
         }
         
