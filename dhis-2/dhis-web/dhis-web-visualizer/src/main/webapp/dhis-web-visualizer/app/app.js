@@ -86,18 +86,16 @@ Ext.onReady( function() {
             
     DV.init = Ext.JSON.decode(r.responseText);
     DV.init.isInit = true;
+    
     DV.init.initialize = function() {
-        DV.util.combobox.filter.category();
-        
+        DV.util.combobox.filter.category();        
         DV.store.column = DV.store.defaultChartStore;
         DV.store.column_stacked = DV.store.defaultChartStore;
         DV.store.bar_stacked = DV.store.bar;
         DV.store.line = DV.store.defaultChartStore;
         DV.store.area = DV.store.defaultChartStore;
-        DV.store.pie = DV.store.defaultChartStore;
-        
-        DV.chart.data = DV.conf.init.data;
-        
+        DV.store.pie = DV.store.defaultChartStore;        
+        DV.chart.data = DV.conf.init.data;        
         DV.exe.execute(true, DV.init.isInit);
     };
     
@@ -109,10 +107,12 @@ Ext.onReady( function() {
         dimension: {
             indicator: {},
             dataelement: {},
-            period: []
+            period: [],
+            organisationunit: {}
         },
-        datatable: null,
-        toolbar: {}
+        toolbar: {
+            menuitem: {}
+        }
     };
     
     DV.util = {
@@ -304,11 +304,11 @@ Ext.onReady( function() {
             organisationunit: {
                 getUrl: function(isFilter) {
                     var a = [],
-                        treepanel = DV.util.getCmp('treepanel'),
-                        selection = treepanel.getSelectionModel().getSelection();
+                        tp = DV.cmp.dimension.organisationunit.treepanel,
+                        selection = tp.getSelectionModel().getSelection();
                     if (!selection.length) {
-                        selection = [treepanel.getRootNode()];
-                        treepanel.selectRoot();
+                        selection = [tp.getRootNode()];
+                        tp.selectRoot();
                     }
                     Ext.Array.each(selection, function(r) {
                         a.push('organisationUnitIds=' + r.data.id);
@@ -317,11 +317,11 @@ Ext.onReady( function() {
                 },
                 getNames: function(exception) {
                     var a = [],
-                        treepanel = DV.util.getCmp('treepanel'),
-                        selection = treepanel.getSelectionModel().getSelection();
+                        tp = DV.cmp.dimension.organisationunit.treepanel,
+                        selection = tp.getSelectionModel().getSelection();
                     if (!selection.length) {
-                        selection = [treepanel.getRootNode()];
-                        treepanel.selectRoot();
+                        selection = [tp.getRootNode()];
+                        tp.selectRoot();
                     }
                     Ext.Array.each(selection, function(r) {
                         a.push(DV.util.string.getEncodedString(r.data.text));
@@ -556,8 +556,7 @@ Ext.onReady( function() {
                 listeners: {
                     load: function(s) {
                         DV.util.store.addToStorage(s);
-                        DV.util.multiselect.filterAvailable(DV.util.getCmp('multiselect[name="availableIndicators"]'),
-                            DV.util.getCmp('multiselect[name="selectedIndicators"]'));
+                        DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
                     }
                 }
             }),
@@ -581,8 +580,7 @@ Ext.onReady( function() {
                 listeners: {
                     load: function(s) {
                         DV.util.store.addToStorage(s);
-                        DV.util.multiselect.filterAvailable(DV.util.getCmp('multiselect[name="availableDataElements"]'),
-                            DV.util.getCmp('multiselect[name="selectedDataElements"]'));
+                        DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
                     }
                 }
             }),
@@ -738,7 +736,7 @@ Ext.onReady( function() {
                     Ext.Array.each(DV.value.values, function(item) {
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(storage[item.d].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.p));
-                        item[DV.conf.finals.dimension.organisationunit.value] = DV.util.getCmp('treepanel').store.getNodeById(item.o).data.text;
+                        item[DV.conf.finals.dimension.organisationunit.value] = DV.cmp.dimension.organisationunit.treepanel.store.getNodeById(item.o).data.text;
                         item.v = parseFloat(item.v);
                     });
                     
@@ -1015,12 +1013,7 @@ Ext.onReady( function() {
                         height: DV.conf.layout.east_gridcolumn_height
                     }
                 ],
-                store: DV.store.datatable,
-                listeners: {
-                    afterrender: function() {
-                        DV.cmp.datatable = this;
-                    }
-                }
+                store: DV.store.datatable
             });
             
             if (exe) {
@@ -1734,6 +1727,9 @@ Ext.onReady( function() {
                                             }
                                         }),
                                         listeners: {
+                                            added: function() {
+                                                DV.cmp.dimension.organisationunit.treepanel = this;
+                                            },
                                             itemcontextmenu: function(v, r, h, i, e) {
                                                 if (v.menu) {
                                                     v.menu.destroy();
@@ -1769,7 +1765,7 @@ Ext.onReady( function() {
                                     },
                                     expand: function(fs) {
                                         DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period]);
-                                        var tp = fs.down('treepanel');
+                                        var tp = DV.cmp.dimension.organisationunit.treepanel;
                                         if (!tp.isRendered) {
                                             tp.isRendered = true;
                                             tp.getRootNode().expand();
@@ -1787,11 +1783,11 @@ Ext.onReady( function() {
                     },
                     collapse: function() {                    
                         this.collapsed = true;
-                        DV.util.getCmp('button[name="resizewest"]').setText('>>>');
+                        DV.cmp.toolbar.resizewest.setText('>>>');
                     },
                     expand: function() {
                         this.collapsed = false;
-                        DV.util.getCmp('button[name="resizewest"]').setText('<<<');
+                        DV.cmp.toolbar.resizewest.setText('<<<');
                     }
                 }
             },
@@ -1817,6 +1813,11 @@ Ext.onReady( function() {
                                 }
                                 else {
                                     p.collapse();
+                                }
+                            },
+                            listeners: {
+                                added: function() {
+                                    DV.cmp.toolbar.resizewest = this;
                                 }
                             }
                         },
@@ -1851,6 +1852,11 @@ Ext.onReady( function() {
                                                         p.collapse();
                                                     }
                                                     DV.cmp.toolbar.resizeeast.show();
+                                                },
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.toolbar.menuitem.datatable = this;
+                                                    }
                                                 }
                                             }
                                         ]                                            
@@ -1859,10 +1865,10 @@ Ext.onReady( function() {
                             },
                             handler: function() {
                                 if (DV.cmp.region.east.items.length) {
-                                    this.menu.down('menuitem').enable();
+                                    DV.cmp.toolbar.menuitem.datatable.enable();
                                 }
                                 else {
-                                    this.menu.down('menuitem').disable();
+                                    DV.cmp.toolbar.menuitem.datatable.disable();
                                 }
                             }
                         },
@@ -1974,8 +1980,8 @@ Ext.onReady( function() {
             resize: function(vp) {
                 DV.cmp.region.west.setWidth(DV.conf.layout.west_width);
                 
-                if (DV.cmp.datatable) {
-                    DV.cmp.datatable.setHeight(DV.util.viewport.getSize().y - DV.conf.layout.east_tbar_height);
+                if (DV.datatable.datatable) {
+                    DV.datatable.datatable.setHeight(DV.util.viewport.getSize().y - DV.conf.layout.east_tbar_height);
                 }
             }
         }
