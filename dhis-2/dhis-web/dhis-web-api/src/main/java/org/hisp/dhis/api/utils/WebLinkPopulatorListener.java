@@ -38,6 +38,8 @@ import org.hisp.dhis.dataset.CompleteDataSetRegistrations;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSets;
 import org.hisp.dhis.indicator.*;
+import org.hisp.dhis.mapping.MapView;
+import org.hisp.dhis.mapping.Maps;
 import org.hisp.dhis.organisationunit.*;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.Users;
@@ -51,7 +53,8 @@ import java.util.Map;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class WebLinkPopulatorListener extends Marshaller.Listener
+public class WebLinkPopulatorListener
+    extends Marshaller.Listener
 {
     private HttpServletRequest request;
 
@@ -66,6 +69,9 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
 
         resourcePaths.put( Charts.class, "charts" );
         resourcePaths.put( Chart.class, "charts" );
+
+        resourcePaths.put( Maps.class, "maps" );
+        resourcePaths.put( MapView.class, "maps" );
 
         resourcePaths.put( CompleteDataSetRegistrations.class, "completeDataSetRegistrations" );
         resourcePaths.put( CompleteDataSetRegistration.class, "completeDataSetRegistrations" );
@@ -652,7 +658,7 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
         return getBasePath( baseIdentifiableObject.getClass() ) + "/" + baseIdentifiableObject.getUid();
     }
 
-    private String getBasePath( Class clazz )
+    private String getBasePath( Class<?> clazz )
     {
         if ( rootPath == null )
         {
@@ -674,7 +680,8 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
 
         String resourcePath = resourcePaths.get( clazz );
 
-        // in some cases, the class is a dynamic subclass (usually subclassed with javaassist), so
+        // in some cases, the class is a dynamic subclass (usually subclassed
+        // with javaassist), so
         // we need to fetch the superClass instead.
         if ( resourcePath == null )
         {
@@ -684,19 +691,4 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
         return rootPath + "/" + resourcePath;
     }
 
-
-/*
-    private String getCalculatedBasePath()
-    {
-        String path = request.getRequestURL().toString();
-        path = StringUtils.stripFilenameExtension( path );
-
-        while ( path.lastIndexOf( "/" ) == path.length() - 1 )
-        {
-            path = path.substring( 0, path.length() - 1 );
-        }
-
-        return path;
-    }
-*/
 }
