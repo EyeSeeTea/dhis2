@@ -104,7 +104,7 @@ public class ChartController
 
     @RequestMapping( value = "/{uid}.png", method = RequestMethod.GET )
     public void getChartPNG( @PathVariable( "uid" ) String uid, @RequestParam( value = "width", defaultValue = "700", required = false ) int width,
-                             @RequestParam( value = "height", defaultValue = "500", required = false ) Integer height,
+                             @RequestParam( value = "height", defaultValue = "500", required = false ) int height,
                              HttpServletResponse response ) throws IOException
     {
         I18nFormat i18nFormat = new MockI18nFormat();
@@ -117,7 +117,7 @@ public class ChartController
 
     @RequestMapping( value = "/{uid}.jpg", method = RequestMethod.GET )
     public void getChartJPG( @PathVariable( "uid" ) String uid, @RequestParam( value = "width", defaultValue = "700", required = false ) int width,
-                             @RequestParam( value = "height", defaultValue = "500", required = false ) Integer height,
+                             @RequestParam( value = "height", defaultValue = "500", required = false ) int height,
                              HttpServletResponse response ) throws IOException
     {
         I18nFormat i18nFormat = new MockI18nFormat();
