@@ -31,26 +31,26 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
-import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.common.IdentifiableObject;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class JsonNameableObjectListSerializer extends JsonSerializer<List<NameableObject>>
+public class JsonIdentifiableObjectCollectionSerializer extends JsonSerializer<Collection<IdentifiableObject>>
 {
     @Override
-    public void serialize( List<NameableObject> nameableObjects, JsonGenerator jgen, SerializerProvider provider ) throws IOException, JsonProcessingException
+    public void serialize( Collection<IdentifiableObject> identifiableObjects, JsonGenerator jgen, SerializerProvider provider ) throws IOException, JsonProcessingException
     {
-        JsonNameableObjectSerializer jsonNameableObjectSerializer = new JsonNameableObjectSerializer();
+        JsonIdentifiableObjectSerializer jsonIdentifiableObjectSerializer = new JsonIdentifiableObjectSerializer();
 
         jgen.writeStartArray();
 
-        for ( NameableObject nameableObject : nameableObjects )
+        for ( IdentifiableObject identifiableObject : identifiableObjects )
         {
-            jsonNameableObjectSerializer.serialize( nameableObject, jgen, provider );
+            jsonIdentifiableObjectSerializer.serialize( identifiableObject, jgen, provider );
         }
 
         jgen.writeEndArray();

@@ -470,7 +470,7 @@ public class DataElement extends BaseNameableObject
     @XmlElementWrapper( name = "dataElementGroups" )
     @XmlElement( name = "dataElementGroup" )
     @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
-    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
+    @JsonSerialize( using = JsonIdentifiableObjectCollectionSerializer.class )
     public Set<DataElementGroup> getGroups()
     {
         return groups;
@@ -484,7 +484,7 @@ public class DataElement extends BaseNameableObject
     @XmlElementWrapper( name = "dataSets" )
     @XmlElement( name = "dataSet" )
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
-    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
+    @JsonSerialize( using = JsonNameableObjectCollectionSerializer.class )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -533,7 +533,7 @@ public class DataElement extends BaseNameableObject
 
     @XmlElementWrapper( name = "attributeValues" )
     @XmlElement( name = "attributeValue" )
-    @JsonSerialize( using = JsonSetSerializer.class )
+    @JsonSerialize( using = JsonCollectionSerializer.class )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

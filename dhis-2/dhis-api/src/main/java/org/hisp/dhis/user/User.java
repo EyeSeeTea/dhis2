@@ -33,7 +33,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
-import org.hisp.dhis.common.adapter.JsonSetSerializer;
+import org.hisp.dhis.common.adapter.JsonCollectionSerializer;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 import javax.xml.bind.annotation.*;
@@ -283,7 +283,7 @@ public class User
 
     @XmlElementWrapper( name = "attributeValues" )
     @XmlElement( name = "attributeValue" )
-    @JsonSerialize( using = JsonSetSerializer.class )
+    @JsonSerialize( using = JsonCollectionSerializer.class )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;
