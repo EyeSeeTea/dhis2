@@ -27,19 +27,28 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-
-import javax.servlet.http.HttpServletRequest;
-
+import org.hisp.dhis.api.utils.IdentifiableObjectParams;
+import org.hisp.dhis.api.utils.WebLinkPopulatorListener;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.chart.Charts;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.period.Period;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -52,10 +61,16 @@ public class ChartController
     private ChartService chartService;
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getCharts( Model model, HttpServletRequest request )
+    public String getCharts( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
         Charts charts = new Charts();
         charts.setCharts( new ArrayList<Chart>( chartService.getAllCharts() ) );
+
+        if ( params.hasLinks() )
+        {
+            WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+            listener.beforeMarshal( charts );
+        }
 
         model.addAttribute( "model", charts );
 
@@ -63,12 +78,67 @@ public class ChartController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getChart( @PathVariable( "uid" ) String uid, Model model, HttpServletRequest request )
+    public String getChart( @PathVariable( "uid" ) String uid, IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
         Chart chart = chartService.getChart( uid );
+
+        if ( params.hasLinks() )
+        {
+            WebLinkPopulatorListener listener = new WebLinkPopulatorListener( request );
+            listener.beforeMarshal( chart );
+        }
 
         model.addAttribute( "model", chart );
 
         return "chart";
+    }
+
+    private class MockI18nFormat
+        extends I18nFormat
+    {
+        public MockI18nFormat()
+        {
+            super( null );
+        }
+
+        @Override
+        public String formatPeriod( Period period )
+        {
+            String name = period.getStartDate() + "-" + period.getEndDate();
+
+            return name.toLowerCase().trim();
+        }
+
+        @Override
+        public String formatDate( Date date )
+        {
+            return date.toString().toLowerCase().trim();
+        }
+    }
+
+    @RequestMapping( value = "/{uid}.png", method = RequestMethod.GET )
+    public void getChartPNG( @PathVariable( "uid" ) String uid, @RequestParam( value = "width", defaultValue = "700", required = false ) int width,
+                             @RequestParam( value = "height", defaultValue = "500", required = false ) int height,
+                             HttpServletResponse response ) throws IOException
+    {
+        I18nFormat i18nFormat = new MockI18nFormat();
+
+        JFreeChart chart = chartService.getJFreeChart( uid, i18nFormat );
+
+        response.setContentType( "image/png" );
+        ChartUtilities.writeChartAsPNG( response.getOutputStream(), chart, width, height );
+    }
+
+    @RequestMapping( value = "/{uid}.jpg", method = RequestMethod.GET )
+    public void getChartJPG( @PathVariable( "uid" ) String uid, @RequestParam( value = "width", defaultValue = "700", required = false ) int width,
+                             @RequestParam( value = "height", defaultValue = "500", required = false ) int height,
+                             HttpServletResponse response ) throws IOException
+    {
+        I18nFormat i18nFormat = new MockI18nFormat();
+
+        JFreeChart chart = chartService.getJFreeChart( uid, i18nFormat );
+
+        response.setContentType( "image/jpg" );
+        ChartUtilities.writeChartAsJPEG( response.getOutputStream(), chart, width, height );
     }
 }
