@@ -28,6 +28,7 @@ package org.hisp.dhis.common;
  */
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
@@ -44,6 +45,7 @@ public class BaseLinkableObject implements LinkableObject
 
     @XmlAttribute
     @JsonProperty
+    @JsonSerialize( include = JsonSerialize.Inclusion.NON_NULL )
     public String getLink()
     {
         return link;
