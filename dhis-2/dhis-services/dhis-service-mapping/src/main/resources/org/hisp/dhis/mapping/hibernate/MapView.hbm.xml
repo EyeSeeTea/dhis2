@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC
   "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-  "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+  "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd"
+  [<!ENTITY identifiableProperties SYSTEM "classpath://org/hisp/dhis/common/identifiableProperties.hbm">]
+>
 
 <hibernate-mapping>
   <class name="org.hisp.dhis.mapping.MapView" table="mapview">
@@ -9,8 +11,7 @@
     <id name="id" column="mapviewid">
       <generator class="native" />
     </id>
-
-    <property name="name" />
+    &identifiableProperties;
 
     <many-to-one name="user" class="org.hisp.dhis.user.User" column="userid" foreign-key="fk_mapview_userid" />
 
@@ -34,10 +35,6 @@
       foreign-key="fk_mapview_periodtypeid" />
 
     <many-to-one name="period" class="org.hisp.dhis.period.Period" column="periodid" foreign-key="fk_mapview_periodid" />
-
-    <property name="startDate" />
-
-    <property name="endDate" />
 
     <many-to-one name="parentOrganisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit"
       column="parentorganisationunitid" foreign-key="fk_mapview_parentorganisationunitid" />

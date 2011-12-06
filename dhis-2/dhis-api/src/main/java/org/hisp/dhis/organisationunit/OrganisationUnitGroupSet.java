@@ -27,24 +27,24 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSetSerializer;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitGroupNameComparator;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.*;
 
 /**
  * @author Kristian Nordal
- * @version $Id: OrganisationUnitGroupSet.java 1905 2006-09-23 14:34:55Z
- *          torgeilo $
  */
-public class OrganisationUnitGroupSet
-    extends AbstractIdentifiableObject
+@XmlRootElement( name = "organisationUnitGroupSet", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class OrganisationUnitGroupSet extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -54,7 +54,7 @@ public class OrganisationUnitGroupSet
     private static final Comparator<OrganisationUnitGroup> COMPARATOR = new OrganisationUnitGroupNameComparator();
 
     private Set<OrganisationUnitGroup> organisationUnitGroups = new HashSet<OrganisationUnitGroup>();
-    
+
     private String description;
 
     private boolean compulsory;
@@ -126,7 +126,7 @@ public class OrganisationUnitGroupSet
         List<OrganisationUnitGroup> sortedGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroups );
 
         Collections.sort( sortedGroups, COMPARATOR );
-   
+
         return sortedGroups;
     }
 
@@ -173,6 +173,8 @@ public class OrganisationUnitGroupSet
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @XmlElement
+    @JsonProperty
     public String getDescription()
     {
         return description;
@@ -183,6 +185,8 @@ public class OrganisationUnitGroupSet
         this.description = description;
     }
 
+    @XmlElement
+    @JsonProperty
     public boolean isCompulsory()
     {
         return compulsory;
@@ -193,6 +197,10 @@ public class OrganisationUnitGroupSet
         this.compulsory = compulsory;
     }
 
+    @XmlElementWrapper( name = "organisationUnitGroups" )
+    @XmlElement( name = "organisationUnitGroup" )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<OrganisationUnitGroup> getOrganisationUnitGroups()
     {
         return organisationUnitGroups;

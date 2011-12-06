@@ -78,6 +78,12 @@
             </result>
         </action>
 
+		<action name="getFacilityInfo"
+			class="org.hisp.dhis.mapping.action.GetOrganisationUnitInfoFacilityAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-mapping/jsonminFacilityInfo.vm</result>
+		</action>
+
         <!-- OrganisationUnitLevel -->
 
         <action name="getOrganisationUnitLevels"
@@ -329,6 +335,11 @@
         <action name="getGeoJson"
             class="org.hisp.dhis.mapping.action.GetGeoJsonAction">
             <result name="success" type="velocity-json">/dhis-web-mapping/geojson.vm</result>
+        </action>
+
+        <action name="getGeoJsonWithValues"
+            class="org.hisp.dhis.mapping.action.GetGeoJsonWithValuesAction">
+            <result name="success" type="velocity-json">/dhis-web-mapping/geojsonmin.vm</result>
         </action>
 
         <action name="getGeoJsonFacilities"

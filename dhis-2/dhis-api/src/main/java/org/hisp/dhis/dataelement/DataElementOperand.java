@@ -27,20 +27,28 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonNameableObjectSerializer;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
-
 /**
  * This object can act both as a hydrated persisted object and as a wrapper
  * object (but not both at the same time).
- * 
+ *
  * @author Abyot Asalefew
- * @version $Id$
  */
+@XmlRootElement( name = "dataElementOperand", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public class DataElementOperand
     implements Serializable, Comparable<DataElementOperand>
 {
@@ -51,10 +59,10 @@ public class DataElementOperand
 
     public static final String SEPARATOR = ".";
     public static final String NAME_TOTAL = "(Total)";
-    
+
     private static final String TYPE_VALUE = "value";
     private static final String TYPE_TOTAL = "total";
-    
+
     private static final String SPACE = " ";
     private static final String COLUMN_PREFIX = "de";
     private static final String COLUMN_SEPARATOR = "_";
@@ -88,7 +96,7 @@ public class DataElementOperand
     private List<Integer> aggregationLevels = new ArrayList<Integer>();
 
     private int frequencyOrder;
-    
+
     private String operandType;
 
     // -------------------------------------------------------------------------
@@ -121,7 +129,7 @@ public class DataElementOperand
     }
 
     public DataElementOperand( int dataElementId, int optionComboId, String operandName, String valueType,
-        String aggregationOperator, List<Integer> aggregationLevels, int frequencyOrder )
+                               String aggregationOperator, List<Integer> aggregationLevels, int frequencyOrder )
     {
         this.dataElementId = dataElementId;
         this.optionComboId = optionComboId;
@@ -141,11 +149,11 @@ public class DataElementOperand
      * Tests whether the hierarchy level of the OrganisationUnit associated with
      * the relevant DataValue is equal to or higher than the relevant
      * aggregation level. Returns true if no aggregation levels exist.
-     * 
+     *
      * @param organisationUnitLevel the hierarchy level of the aggregation
-     *        OrganisationUnit.
-     * @param dataValueLevel the hierarchy level of the OrganisationUnit
-     *        associated with the relevant DataValue.
+     *                              OrganisationUnit.
+     * @param dataValueLevel        the hierarchy level of the OrganisationUnit
+     *                              associated with the relevant DataValue.
      */
     public boolean aggregationLevelIsValid( int organisationUnitLevel, int dataValueLevel )
     {
@@ -164,9 +172,9 @@ public class DataElementOperand
      * aggregation level will be the next in ascending order after the
      * organisation unit level. If no aggregation levels lower than the
      * organisation unit level exist, null is returned.
-     * 
+     *
      * @param organisationUnitLevel the hiearchy level of the relevant
-     *        OrganisationUnit.
+     *                              OrganisationUnit.
      */
     public Integer getRelevantAggregationLevel( int organisationUnitLevel )
     {
@@ -186,7 +194,7 @@ public class DataElementOperand
     /**
      * Returns an id based on the DataElement and the
      * DataElementCategoryOptionCombo.
-     * 
+     *
      * @return the id.
      */
     public String getPersistedId()
@@ -196,19 +204,19 @@ public class DataElementOperand
 
     /**
      * Returns a database-friendly name.
-     * 
+     *
      * @return the name.
      */
     public String getColumnName()
     {
         return COLUMN_PREFIX + dataElementId + COLUMN_SEPARATOR + optionComboId;
     }
-    
+
     /**
      * Returns a pretty-print name based on the given data element and category
      * option combo.
-     * 
-     * @param dataElement the data element.
+     *
+     * @param dataElement         the data element.
      * @param categoryOptionCombo the category option combo.
      * @return the name.
      */
@@ -218,28 +226,28 @@ public class DataElementOperand
         {
             return null;
         }
-        
+
         if ( categoryOptionCombo == null ) // Total
         {
             return dataElement.getName() + SPACE + NAME_TOTAL;
         }
-        
+
         return categoryOptionCombo.isDefault() ? dataElement.getName() : dataElement.getName() + SPACE + categoryOptionCombo.getName();
     }
-    
+
     /**
      * Returns a pretty name, requires the operand to be in persistent mode.
-     * 
+     *
      * @return the name.
      */
     public String getPrettyName()
     {
         return getPrettyName( dataElement, categoryOptionCombo );
     }
-    
+
     /**
      * Indicators whether this operand represents a total value or not.
-     * 
+     *
      * @return true or false.
      */
     public boolean isTotal()
@@ -249,12 +257,12 @@ public class DataElementOperand
 
     /**
      * Updates all transient properties.
-     * 
+     *
      * @param dataElement
      * @param categoryOptionCombo
      */
     public void updateProperties( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo )
-    {        
+    {
         this.dataElementId = dataElement.getId();
         this.optionComboId = categoryOptionCombo.getId();
         this.operandId = dataElement.getId() + SEPARATOR + categoryOptionCombo.getId();
@@ -267,9 +275,8 @@ public class DataElementOperand
 
     /**
      * Updates all transient properties.
-     * 
+     *
      * @param dataElement
-     * @param categoryOptionCombo
      */
     public void updateProperties( DataElement dataElement )
     {
@@ -279,13 +286,13 @@ public class DataElementOperand
         this.aggregationOperator = dataElement.getAggregationOperator();
         this.frequencyOrder = dataElement.getFrequencyOrder();
         this.aggregationLevels = new ArrayList<Integer>( dataElement.getAggregationLevels() );
-        this.valueType = dataElement.getType();        
+        this.valueType = dataElement.getType();
     }
 
     /**
      * Generates a DataElementOperand based on the given formula. The formula
      * needs to be on the form "[<dataelementid>.<categoryoptioncomboid>]".
-     * 
+     *
      * @param formula the formula.
      * @return a DataElementOperand.
      */
@@ -293,22 +300,22 @@ public class DataElementOperand
         throws NumberFormatException
     {
         formula = formula.replaceAll( "[\\[\\]]", "" );
-        
+
         int dataElementId = 0;
         int categoryOptionComboId = 0;
         String operandType = null;
-        
+
         if ( formula.contains( SEPARATOR ) ) // Value
         {
             dataElementId = Integer.parseInt( formula.substring( 0, formula.indexOf( SEPARATOR ) ) );
             categoryOptionComboId = Integer.parseInt( formula.substring( formula.indexOf( SEPARATOR ) + 1, formula.length() ) );
-            
+
             operandType = TYPE_VALUE;
         }
         else // Total
         {
             dataElementId = Integer.parseInt( formula );
-            
+
             operandType = TYPE_TOTAL;
         }
 
@@ -316,7 +323,7 @@ public class DataElementOperand
         operand.setDataElementId( dataElementId );
         operand.setOptionComboId( categoryOptionComboId );
         operand.setOperandType( operandType );
-        
+
         return operand;
     }
 
@@ -334,6 +341,10 @@ public class DataElementOperand
         this.id = id;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @JsonProperty
+    @JsonSerialize( using = JsonNameableObjectSerializer.class )
     public DataElement getDataElement()
     {
         return dataElement;
@@ -344,6 +355,10 @@ public class DataElementOperand
         this.dataElement = dataElement;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @JsonProperty
+    @JsonSerialize( using = JsonNameableObjectSerializer.class )
     public DataElementCategoryOptionCombo getCategoryOptionCombo()
     {
         return categoryOptionCombo;

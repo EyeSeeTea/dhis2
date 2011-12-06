@@ -28,15 +28,18 @@ package org.hisp.dhis.dataelement;
  */
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
-import org.hisp.dhis.common.AbstractNameableObject;
+import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -58,9 +61,9 @@ import java.util.Set;
  * @author Kristian Nordal
  * @version $Id: DataElement.java 5540 2008-08-19 10:47:07Z larshelg $
  */
-@XmlRootElement( name = "dataElement" )
+@XmlRootElement( name = "dataElement", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class DataElement extends AbstractNameableObject
+public class DataElement extends BaseNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -201,7 +204,7 @@ public class DataElement extends AbstractNameableObject
             return false;
         }
 
-        if ( !( o instanceof DataElement ) )
+        if ( !(o instanceof DataElement) )
         {
             return false;
         }
@@ -256,7 +259,7 @@ public class DataElement extends AbstractNameableObject
      */
     public String getDetailedNumberType()
     {
-        return ( type != null && type.equals( VALUE_TYPE_INT ) && numberType != null ) ? numberType : type;
+        return (type != null && type.equals( VALUE_TYPE_INT ) && numberType != null) ? numberType : type;
     }
 
     /**
@@ -368,6 +371,8 @@ public class DataElement extends AbstractNameableObject
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @XmlElement
+    @JsonProperty
     public String getFormName()
     {
         return formName;
@@ -378,6 +383,8 @@ public class DataElement extends AbstractNameableObject
         this.formName = formName;
     }
 
+    @XmlElement
+    @JsonProperty
     public boolean isActive()
     {
         return active;
@@ -388,6 +395,8 @@ public class DataElement extends AbstractNameableObject
         this.active = active;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getDomainType()
     {
         return domainType;
@@ -398,6 +407,8 @@ public class DataElement extends AbstractNameableObject
         this.domainType = domainType;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getType()
     {
         return type;
@@ -408,6 +419,8 @@ public class DataElement extends AbstractNameableObject
         this.type = type;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getAggregationOperator()
     {
         return aggregationOperator;
@@ -418,6 +431,8 @@ public class DataElement extends AbstractNameableObject
         this.aggregationOperator = aggregationOperator;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
@@ -438,6 +453,8 @@ public class DataElement extends AbstractNameableObject
         this.sortOrder = sortOrder;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getUrl()
     {
         return url;
@@ -448,6 +465,10 @@ public class DataElement extends AbstractNameableObject
         this.url = url;
     }
 
+    @XmlElementWrapper( name = "groups" )
+    @XmlElement( name = "group" )
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<DataElementGroup> getGroups()
     {
         return groups;
@@ -458,6 +479,10 @@ public class DataElement extends AbstractNameableObject
         this.groups = groups;
     }
 
+    @XmlElementWrapper( name = "dataSets" )
+    @XmlElement( name = "dataSet" )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -468,6 +493,8 @@ public class DataElement extends AbstractNameableObject
         this.dataSets = dataSets;
     }
 
+    @XmlElementWrapper( name = "aggregationLevels" )
+    @XmlElement( name = "aggregationLevel" )
     public List<Integer> getAggregationLevels()
     {
         return aggregationLevels;
@@ -478,6 +505,8 @@ public class DataElement extends AbstractNameableObject
         this.aggregationLevels = aggregationLevels;
     }
 
+    @XmlElement
+    @JsonProperty
     public boolean isZeroIsSignificant()
     {
         return zeroIsSignificant;
@@ -488,6 +517,8 @@ public class DataElement extends AbstractNameableObject
         this.zeroIsSignificant = zeroIsSignificant;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getNumberType()
     {
         return numberType;

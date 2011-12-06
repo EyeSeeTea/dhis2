@@ -217,10 +217,19 @@ public interface AggregatedDataValueStore
      * 
      * @param dataElementId the DataElement identifier.
      * @param periodId the Period identifier.
-     * @param level the OrganisationUnit level.
+     * @param organisationUnitIds the set of OrganisationUnit identifiers.
      */
-    Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, int level );
+    Collection<AggregatedMapValue> getAggregatedDataMapValues( int dataElementId, int periodId, Collection<Integer> organisationUnitIds );
 
+    /**
+     * Retrieves the AggregatedDataMapValues for the given arguments.
+     * 
+     * @param dataElementIds the set of DataElement identifiers.
+     * @param periodId the Period identifier.
+     * @param organisationUnitId the OrganisationUnit identifier.
+     */
+    Collection<AggregatedMapValue> getAggregatedDataMapValues( Collection<Integer> dataElementIds, int periodId, int organisationUnitId );
+    
     // ----------------------------------------------------------------------
     // AggregatedIndicatorValue
     // ----------------------------------------------------------------------
@@ -310,28 +319,9 @@ public interface AggregatedDataValueStore
      * 
      * @param indicatorId the Indicator identifier.
      * @param periodId the Period identifier.
-     * @param level the OrganisationUnit level.
+     * @param organisationUnitIds the collection of OrganisationUnit identifiers.
      */
-    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, int level );
-    
-    /**
-     * Retrieves the AggregatedIndicatorMapValues for the given arguments.
-     * 
-     * @param indicatorId the Indicator identifier.
-     * @param periodId the Period identifier.
-     * @param level the OrganisationUnit level.
-     * @param OrganisationUnitId the id of the organisationUnit.
-     */
-    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, int level, int organisationUnitId );
-    
-    /**
-     * Retrieves the AggregatedIndicatorMapValues for the given arguments.
-     * 
-     * @param indicatorId the Indicator identifier.
-     * @param periodId the Period identifier.
-     * @param level the OrganisationUnit level.
-     */
-    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, Collection<Integer> periodIds, int level, int organisationUnitId );
+    Collection<AggregatedMapValue> getAggregatedIndicatorMapValues( int indicatorId, int periodId, Collection<Integer> organisationUnitIds );
     
     // ----------------------------------------------------------------------
     // DataValue

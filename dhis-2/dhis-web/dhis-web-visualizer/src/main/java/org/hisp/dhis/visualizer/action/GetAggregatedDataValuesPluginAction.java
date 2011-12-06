@@ -104,65 +104,65 @@ public class GetAggregatedDataValuesPluginAction
         this.organisationUnitIds = organisationUnitIds;
     }
 
-    private Boolean lastMonth;
+    private boolean lastMonth;
 
-    public void setLastMonth( Boolean lastMonth )
+    public void setLastMonth( boolean lastMonth )
     {
         this.lastMonth = lastMonth;
     }
 
-    private Boolean monthsThisYear;
+    private boolean monthsThisYear;
 
-    public void setMonthsThisYear( Boolean monthsThisYear )
+    public void setMonthsThisYear( boolean monthsThisYear )
     {
         this.monthsThisYear = monthsThisYear;
     }
 
-    private Boolean monthsLastYear;
+    private boolean monthsLastYear;
 
-    public void setMonthsLastYear( Boolean monthsLastYear )
+    public void setMonthsLastYear( boolean monthsLastYear )
     {
         this.monthsLastYear = monthsLastYear;
     }
 
-    private Boolean lastQuarter;
+    private boolean lastQuarter;
 
-    public void setLastQuarter( Boolean lastQuarter )
+    public void setLastQuarter( boolean lastQuarter )
     {
         this.lastQuarter = lastQuarter;
     }
 
-    private Boolean quartersThisYear;
+    private boolean quartersThisYear;
 
-    public void setQuartersThisYear( Boolean quartersThisYear )
+    public void setQuartersThisYear( boolean quartersThisYear )
     {
         this.quartersThisYear = quartersThisYear;
     }
 
-    private Boolean quartersLastYear;
+    private boolean quartersLastYear;
 
-    public void setQuartersLastYear( Boolean quartersLastYear )
+    public void setQuartersLastYear( boolean quartersLastYear )
     {
         this.quartersLastYear = quartersLastYear;
     }
 
-    private Boolean thisYear;
+    private boolean thisYear;
 
-    public void setThisYear( Boolean thisYear )
+    public void setThisYear( boolean thisYear )
     {
         this.thisYear = thisYear;
     }
 
-    private Boolean lastYear;
+    private boolean lastYear;
 
-    public void setLastYear( Boolean lastYear )
+    public void setLastYear( boolean lastYear )
     {
         this.lastYear = lastYear;
     }
 
-    private Boolean lastFiveYears;
+    private boolean lastFiveYears;
 
-    public void setLastFiveYears( Boolean lastFiveYears )
+    public void setLastFiveYears( boolean lastFiveYears )
     {
         this.lastFiveYears = lastFiveYears;
     }
@@ -211,7 +211,7 @@ public class GetAggregatedDataValuesPluginAction
             }
 
             object = aggregatedDataValueService
-                .getAggregatedDataValues( dataElementIds, periodIds, organisationUnitIds );
+                .getAggregatedDataValueTotals( dataElementIds, periodIds, organisationUnitIds );
 
             for ( AggregatedDataValue value : object )
             {
@@ -219,7 +219,6 @@ public class GetAggregatedDataValuesPluginAction
                 value.setPeriodName( format.formatPeriod( periodService.getPeriod( value.getPeriodId() ) ) );
                 value.setOrganisationUnitName( organisationUnitService.getOrganisationUnit(
                     value.getOrganisationUnitId() ).getName() );
-
             }
         }
 

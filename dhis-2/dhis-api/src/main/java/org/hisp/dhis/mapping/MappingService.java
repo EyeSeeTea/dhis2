@@ -28,11 +28,10 @@ package org.hisp.dhis.mapping;
  */
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Set;
 
 import org.hisp.dhis.aggregation.AggregatedMapValue;
-import org.hisp.dhis.period.Period;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
  * @author Jan Henrik Overland
@@ -74,15 +73,19 @@ public interface MappingService
     // IndicatorMapValue
     // -------------------------------------------------------------------------
 
-    Collection<AggregatedMapValue> getIndicatorMapValues( Integer indicatorId, Period period, Date startDate,
-        Date endDate, Integer parentOrganisationUnitId, Integer level );
+    Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId, int parentOrganisationUnitId,
+        Integer level );
+
+    Collection<AggregatedMapValue> getIndicatorMapValues( int indicatorId, int periodId, Collection<OrganisationUnit> units );
 
     // -------------------------------------------------------------------------
     // DataMapValue
     // -------------------------------------------------------------------------
 
-    Collection<AggregatedMapValue> getDataElementMapValues( Integer dataElementId, Period period, Date startDate,
-        Date endDate, Integer parentOrganisationUnitId, Integer level );
+    Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId,
+        int parentOrganisationUnitId, Integer level );
+
+    Collection<AggregatedMapValue> getDataElementMapValues( int dataElementId, int periodId, Collection<OrganisationUnit> units );
 
     Collection<AggregatedMapValue> getInfrastructuralDataElementMapValues( Integer periodId, Integer organisationUnitId );
 
@@ -133,10 +136,10 @@ public interface MappingService
     int addMapView( MapView mapView );
 
     void addMapView( String name, boolean system, String mapValueType, Integer indicatorGroupId, Integer indicatorId,
-        Integer dataElementGroupId, Integer dataElementId, String periodTypeName, Integer periodId, String startDate,
-        String endDate, Integer parentOrganisationUnitId, Integer organisationUnitLevel, String mapLegendType,
-        Integer method, Integer classes, String bounds, String colorLow, String colorHigh, Integer mapLegendSetId,
-        Integer radiusLow, Integer radiusHigh, String longitude, String latitude, int zoom );
+        Integer dataElementGroupId, Integer dataElementId, String periodTypeName, Integer periodId,
+        Integer parentOrganisationUnitId, Integer organisationUnitLevel, String mapLegendType, Integer method,
+        Integer classes, String bounds, String colorLow, String colorHigh, Integer mapLegendSetId, Integer radiusLow,
+        Integer radiusHigh, String longitude, String latitude, int zoom );
 
     void updateMapView( MapView mapView );
 
@@ -144,6 +147,8 @@ public interface MappingService
 
     MapView getMapView( int id );
 
+    MapView getMapView( String uid );
+    
     MapView getMapViewByName( String name );
 
     Collection<MapView> getAllMapViews();

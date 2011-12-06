@@ -46,7 +46,7 @@
 
   <filter-mapping>
     <filter-name>OpenSessionInViewFilter</filter-name>
-    <url-pattern>/api2/*</url-pattern>
+    <url-pattern>/api/*</url-pattern>
   </filter-mapping>
 
   <filter-mapping>
@@ -68,20 +68,6 @@
 
   <!-- For the dhis-web-api module -->
   <servlet>
-    <servlet-name>jerseyServlet</servlet-name>
-    <servlet-class>com.sun.jersey.spi.spring.container.servlet.SpringServlet</servlet-class>
-    <init-param>
-      <param-name>com.sun.jersey.config.property.packages</param-name>
-      <param-value>org.hisp.dhis.web.api.resources,org.hisp.dhis.mobile.web.resources</param-value>
-    </init-param>
-    <init-param>
-      <param-name>com.sun.jersey.spi.container.ContainerRequestFilters</param-name>
-      <param-value>org.hisp.dhis.web.api.HtmlPromotingUriConnegFilter</param-value>
-    </init-param>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-
-  <servlet>
     <servlet-name>webapiServlet</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
     <init-param>
@@ -90,11 +76,6 @@
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
-
-  <servlet-mapping>
-    <servlet-name>jerseyServlet</servlet-name>
-    <url-pattern>/api2/*</url-pattern>
-  </servlet-mapping>
 
   <servlet-mapping>
     <servlet-name>webapiServlet</servlet-name>

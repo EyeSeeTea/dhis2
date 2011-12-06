@@ -27,14 +27,21 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
-public class OrganisationUnitLevel
-    extends AbstractIdentifiableObject
+@XmlRootElement( name = "organisationUnitLevel", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class OrganisationUnitLevel extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -42,15 +49,15 @@ public class OrganisationUnitLevel
     private static final long serialVersionUID = 1599124366660090489L;
 
     private int level;
-    
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
     public OrganisationUnitLevel()
-    {   
+    {
     }
-    
+
     public OrganisationUnitLevel( int level, String name )
     {
         this.level = level;
@@ -65,12 +72,12 @@ public class OrganisationUnitLevel
     public int hashCode()
     {
         final int prime = 31;
-        
+
         int result = 1;
-        
+
         result = prime * result + level;
-        result = prime * result + ( ( name == null ) ? 0 : name.hashCode() );
-        
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+
         return result;
     }
 
@@ -81,26 +88,28 @@ public class OrganisationUnitLevel
         {
             return true;
         }
-        
+
         if ( object == null )
         {
             return false;
         }
-        
+
         if ( getClass() != object.getClass() )
         {
             return false;
         }
-        
+
         final OrganisationUnitLevel other = (OrganisationUnitLevel) object;
-        
+
         return level == other.level && name.equals( other.name );
     }
-    
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @XmlElement
+    @JsonProperty
     public int getLevel()
     {
         return level;

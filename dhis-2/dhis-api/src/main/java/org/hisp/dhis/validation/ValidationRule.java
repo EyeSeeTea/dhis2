@@ -27,20 +27,25 @@ package org.hisp.dhis.validation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.Operator;
 import org.hisp.dhis.period.PeriodType;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Kristian Nordal
- * @version $Id: ValidationRule.java 5434 2008-06-18 18:57:59Z larshelg $
  */
+@XmlRootElement( name = "validationRule", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public class ValidationRule
-    extends AbstractIdentifiableObject
+    extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -49,31 +54,31 @@ public class ValidationRule
 
     public static final String TYPE_STATISTICAL = "statistical";
     public static final String TYPE_ABSOLUTE = "absolute";
-    
+
     private String description;
-    
+
     private String type;
 
     private Operator operator;
-    
+
     private Expression leftSide;
-    
+
     private Expression rightSide;
-    
+
     private Set<ValidationRuleGroup> groups = new HashSet<ValidationRuleGroup>();
-    
-    private PeriodType periodType; 
-    
+
+    private PeriodType periodType;
+
     // -------------------------------------------------------------------------
     // Constructors
     // ------------------------------------------------------------------------- 
-    
+
     public ValidationRule()
     {
     }
 
-    public ValidationRule( String name, String description, String type, 
-        Operator operator, Expression leftSide, Expression rightSide )
+    public ValidationRule( String name, String description, String type,
+                           Operator operator, Expression leftSide, Expression rightSide )
     {
         this.name = name;
         this.description = description;
@@ -86,7 +91,7 @@ public class ValidationRule
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // ------------------------------------------------------------------------- 
-    
+
     public boolean equals( Object object )
     {
         if ( this == object )
@@ -97,7 +102,7 @@ public class ValidationRule
         {
             return false;
         }
-        else if ( !( object instanceof ValidationRule ) )
+        else if ( !(object instanceof ValidationRule) )
         {
             return false;
         }
@@ -117,7 +122,7 @@ public class ValidationRule
     {
         return "[" + name + "]";
     }
-    
+
     public void clearExpressions()
     {
         this.leftSide = null;
@@ -137,7 +142,7 @@ public class ValidationRule
     {
         this.description = description;
     }
-    
+
     public Operator getOperator()
     {
         return operator;

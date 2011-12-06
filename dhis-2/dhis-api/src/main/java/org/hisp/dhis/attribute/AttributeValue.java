@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,11 +27,20 @@
 
 package org.hisp.dhis.attribute;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.Dxf2Namespace;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
  * @author mortenoh
  */
+@XmlRootElement( name = "attributeValue", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public class AttributeValue
     implements Serializable
 {
@@ -70,12 +79,14 @@ public class AttributeValue
     {
         this.attribute = attribute;
     }
-    
+
     public void setId( int id )
     {
         this.id = id;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getValue()
     {
         return value;

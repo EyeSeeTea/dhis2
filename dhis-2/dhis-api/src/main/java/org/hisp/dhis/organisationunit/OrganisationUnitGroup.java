@@ -27,18 +27,25 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSerializer;
+import org.hisp.dhis.common.adapter.JsonNameableObjectSetSerializer;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
-
 /**
  * @author Kristian Nordal
- * @version $Id: OrganisationUnitGroup.java 5296 2008-05-29 16:06:14Z larshelg $
  */
-
-public class OrganisationUnitGroup
-    extends AbstractIdentifiableObject
+@XmlRootElement( name = "organisationUnitGroup", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class OrganisationUnitGroup extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -46,7 +53,7 @@ public class OrganisationUnitGroup
     private static final long serialVersionUID = -1131637847640209166L;
 
     private Set<OrganisationUnit> members = new HashSet<OrganisationUnit>();
-    
+
     private OrganisationUnitGroupSet groupSet;
 
     // -------------------------------------------------------------------------
@@ -61,7 +68,7 @@ public class OrganisationUnitGroup
     {
         this.name = name;
     }
-    
+
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
@@ -71,13 +78,13 @@ public class OrganisationUnitGroup
         members.add( unit );
         unit.getGroups().add( this );
     }
-    
+
     public void removeOrganisationUnit( OrganisationUnit unit )
     {
         members.remove( unit );
         unit.getGroups().remove( this );
     }
-    
+
     public void updateOrganisationUnits( Set<OrganisationUnit> updates )
     {
         for ( OrganisationUnit unit : new HashSet<OrganisationUnit>( members ) )
@@ -87,7 +94,7 @@ public class OrganisationUnitGroup
                 removeOrganisationUnit( unit );
             }
         }
-        
+
         for ( OrganisationUnit unit : updates )
         {
             addOrganisationUnit( unit );
@@ -137,6 +144,10 @@ public class OrganisationUnitGroup
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @XmlElementWrapper( name = "members" )
+    @XmlElement( name = "member" )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
     public Set<OrganisationUnit> getMembers()
     {
         return members;
@@ -147,6 +158,9 @@ public class OrganisationUnitGroup
         this.members = members;
     }
 
+    @XmlElement
+    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
+    @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public OrganisationUnitGroupSet getGroupSet()
     {
         return groupSet;

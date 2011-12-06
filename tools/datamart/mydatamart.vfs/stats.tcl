@@ -161,8 +161,7 @@ proc showstats {parent} {
     
     grid [ttk::button $synchframe.getpeerdata -text [mc "Download %s data from peers" [dhisdb::getLevelName db [::dhisdb::getLevelByOrgunit db $::dhis(myorgunitid)]]] \
 	      -command [list synchData [dhisdb::getParentOrgUnit db $::dhis(myorgunitid)] [::dhisdb::getLevelByOrgunit db $::dhis(myorgunitid)] ] ] \
-	-column 0 -row 4 -columnspan 3 -sticky new
-    
+	-column 0 -row 4 -columnspan 3 -sticky new    
     
     grid $synchframe -row 0 -column 1 -rowspan 2 -padx 20 -pady 20 -sticky nsew
     grid $dvframe -row 0 -column 0 -padx 20 -pady 10

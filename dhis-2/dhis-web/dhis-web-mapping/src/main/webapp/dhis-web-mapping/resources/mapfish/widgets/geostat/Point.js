@@ -154,6 +154,12 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                                 fieldLabel: 'Greater than',
                                 width: G.conf.combo_number_width_small,
                                 listeners: {
+                                    'afterrender': {
+                                        scope: this,
+                                        fn: function(nf) {
+                                            this.filtering.cmp.gt = nf;
+                                        }
+                                    },
                                     'change': {
                                         scope: this,
                                         fn: function(nf) {
@@ -167,6 +173,12 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                                 fieldLabel: 'Lower than',
                                 width: G.conf.combo_number_width_small,
                                 listeners: {
+                                    'afterrender': {
+                                        scope: this,
+                                        fn: function(nf) {
+                                            this.filtering.cmp.lt = nf;
+                                        }
+                                    },
                                     'change': {
                                         scope: this,
                                         fn: function(nf) {
@@ -187,6 +199,14 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                         scope: this,
                         handler: function() {
                             this.filtering.filter.call(this);
+                        },
+                        listeners: {
+                            'afterrender': {
+                                scope: this,
+                                fn: function(b) {
+                                    this.filtering.cmp.button = b;
+                                }
+                            }
                         }
                     }
                 ],
@@ -660,42 +680,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
             }
         });
         
-        this.cmp.startDate = new Ext.form.DateField({
-            fieldLabel: G.i18n.start_date,
-            format: 'Y-m-d',
-            hidden: true,
-            width: G.conf.combo_width,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(df, date) {
-                        this.cmp.mapview.clearValue();
-                        this.updateValues = true;
-                        this.cmp.endDate.setMinValue(date);
-                        this.classify(false, true);
-                    }
-                }
-            }
-        });
-        
-        this.cmp.endDate = new Ext.form.DateField({
-            fieldLabel: G.i18n.end_date,
-            format: 'Y-m-d',
-            hidden: true,
-            width: G.conf.combo_width,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(df, date) {
-                        this.cmp.mapview.clearValue();
-                        this.updateValues = true;
-                        this.cmp.startDate.setMaxValue(date);
-                        this.classify(false, true);
-                    }
-                }
-            }
-        });
-        
         this.cmp.mapLegendType = new Ext.form.ComboBox({
             editable: false,
             valueField: 'value',
@@ -982,8 +966,6 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                             this.cmp.dataElement,
                             this.cmp.periodType,
                             this.cmp.period,
-                            this.cmp.startDate,
-                            this.cmp.endDate,
                             { html: '<div class="thematic-br">' },
                             { html: '<div class="window-info">Legend options</div>' },
                             this.cmp.mapLegendType,
@@ -1052,101 +1034,110 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                 }
                 
                 scope.featureOptions.menu = new Ext.menu.Menu({
-                    showInfo: function() {
-                        if (scope.featureOptions.info) {
-                            scope.featureOptions.info.destroy();
-                        }
-                        
-                        scope.featureOptions.info = new Ext.Window({
-                            title: '<span class="window-information-title">Facility information sheet</span>',
-                            layout: 'table',
-                            width: G.conf.window_width + 178,
-                            height: G.util.getMultiSelectHeight() + 100,
-                            bodyStyle: 'background-color:#fff',
-                            defaults: {
-                                bodyStyle: 'vertical-align:top',
-                                labelSeparator: G.conf.labelseparator,
-                                emptyText: G.conf.emptytext
-                            },
-                            layoutConfig: {
-                                columns: 2
-                            },
-                            items: [
-                                {
-                                    xtype: 'panel',
-                                    layout: 'anchor',
-                                    bodyStyle: 'padding:8px 4px 8px 8px',
-                                    width: 160,
+                    showInfo: function() {                        
+                        Ext.Ajax.request({
+                            url: G.conf.path_mapping + 'getFacilityInfo' + G.conf.type,
+                            method: 'POST',
+                            params: {id: feature.attributes.id},
+                            success: function(r) {
+                                var ou = Ext.util.JSON.decode(r.responseText);
+                                
+                                if (scope.featureOptions.info) {
+                                    scope.featureOptions.info.destroy();
+                                }
+                                
+                                scope.featureOptions.info = new Ext.Window({
+                                    title: '<span class="window-information-title">Facility information sheet</span>',
+                                    layout: 'table',
+                                    width: G.conf.window_width + 178,
+                                    height: G.util.getMultiSelectHeight() + 100,
+                                    bodyStyle: 'background-color:#fff',
+                                    defaults: {
+                                        bodyStyle: 'vertical-align:top',
+                                        labelSeparator: G.conf.labelseparator,
+                                        emptyText: G.conf.emptytext
+                                    },
+                                    layoutConfig: {
+                                        columns: 2
+                                    },
                                     items: [
-                                        {html: '<div class="window-info">' + G.i18n.name + '<p style="font-weight:normal">' + feature.attributes.name + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.type + '<p style="font-weight:normal">' + feature.attributes.type + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.code + '<p style="font-weight:normal">' + feature.attributes.code + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.address + '<p style="font-weight:normal">' + feature.attributes.ad + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.contact_person + '<p style="font-weight:normal">' + feature.attributes.cp + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.email + '<p style="font-weight:normal">' + feature.attributes.em + '</p></div>'},
-                                        {html: '<div class="window-info">' + G.i18n.phone_number + '<p style="font-weight:normal">' + feature.attributes.pn + '</p></div>'}
-                                    ]
-                                },
-                                {
-                                    xtype: 'form',
-                                    bodyStyle: 'padding:8px 8px 8px 4px',
-                                    width: G.conf.window_width + 20,
-                                    labelWidth: G.conf.label_width,
-                                    items: [
-                                        {html: '<div class="window-info">' + G.i18n.infrastructural_data + '</div>'},
                                         {
-                                            xtype: 'combo',
-                                            name: 'period',
-                                            fieldLabel: G.i18n.period,
-                                            typeAhead: true,
-                                            editable: false,
-                                            valueField: 'id',
-                                            displayField: 'name',
-                                            mode: 'remote',
-                                            forceSelection: true,
-                                            triggerAction: 'all',
-                                            selectOnFocus: true,
-                                            width: G.conf.combo_width,
-                                            store: G.stores.infrastructuralPeriodsByType,
-                                            lockPosition: false,
-                                            listeners: {
-                                                'select': function(cb) {
-                                                    scope.infrastructuralPeriod = cb.getValue();
-                                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
-                                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                                                    scope.stores.infrastructuralDataElementMapValue.load();
-                                                }
-                                            }
+                                            xtype: 'panel',
+                                            layout: 'anchor',
+                                            bodyStyle: 'padding:8px 4px 8px 8px',
+                                            width: 160,
+                                            items: [
+                                                {html: '<div class="window-info">' + G.i18n.name + '<p style="font-weight:normal">' + feature.attributes.name + '</p></div>'},
+                                                {html: '<div class="window-info">' + G.i18n.type + '<p style="font-weight:normal">' + ou.ty + '</p></div>'},
+                                                {html: '<div class="window-info">' + G.i18n.code + '<p style="font-weight:normal">' + ou.co + '</p></div>'},
+                                                {html: '<div class="window-info">' + G.i18n.address + '<p style="font-weight:normal">' + ou.ad + '</p></div>'},
+                                                {html: '<div class="window-info">' + G.i18n.contact_person + '<p style="font-weight:normal">' + ou.cp + '</p></div>'},
+                                                {html: '<div class="window-info">' + G.i18n.email + '<p style="font-weight:normal">' + ou.em + '</p></div>'},
+                                                {html: '<div class="window-info">' + G.i18n.phone_number + '<p style="font-weight:normal">' + ou.pn + '</p></div>'}
+                                            ]
                                         },
-                                        {html: '<div style="padding:4px 0 0 0"></div>'},
                                         {
-                                            xtype: 'grid',
-                                            height: G.util.getMultiSelectHeight(),
-                                            width: 242,
-                                            cm: new Ext.grid.ColumnModel({
-                                                columns: [
-                                                    {id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
-                                                    {id: 'value', header: 'Value', dataIndex: 'value', sortable: true, width: 50}
-                                                ]
-                                            }),
-                                            disableSelection: true,
-                                            viewConfig: {forceFit: true},
-                                            store: scope.stores.infrastructuralDataElementMapValue
+                                            xtype: 'form',
+                                            bodyStyle: 'padding:8px 8px 8px 4px',
+                                            width: G.conf.window_width + 20,
+                                            labelWidth: G.conf.label_width,
+                                            items: [
+                                                {html: '<div class="window-info">' + G.i18n.infrastructural_data + '</div>'},
+                                                {
+                                                    xtype: 'combo',
+                                                    name: 'period',
+                                                    fieldLabel: G.i18n.period,
+                                                    typeAhead: true,
+                                                    editable: false,
+                                                    valueField: 'id',
+                                                    displayField: 'name',
+                                                    mode: 'remote',
+                                                    forceSelection: true,
+                                                    triggerAction: 'all',
+                                                    selectOnFocus: true,
+                                                    width: G.conf.combo_width,
+                                                    store: G.stores.infrastructuralPeriodsByType,
+                                                    lockPosition: false,
+                                                    listeners: {
+                                                        'select': function(cb) {
+                                                            scope.infrastructuralPeriod = cb.getValue();
+                                                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
+                                                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+                                                            scope.stores.infrastructuralDataElementMapValue.load();
+                                                        }
+                                                    }
+                                                },
+                                                {html: '<div style="padding:4px 0 0 0"></div>'},
+                                                {
+                                                    xtype: 'grid',
+                                                    height: G.util.getMultiSelectHeight(),
+                                                    width: 242,
+                                                    cm: new Ext.grid.ColumnModel({
+                                                        columns: [
+                                                            {id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
+                                                            {id: 'value', header: 'Value', dataIndex: 'value', sortable: true, width: 50}
+                                                        ]
+                                                    }),
+                                                    disableSelection: true,
+                                                    viewConfig: {forceFit: true},
+                                                    store: scope.stores.infrastructuralDataElementMapValue
+                                                }
+                                            ]
                                         }
                                     ]
+                                });
+            
+                                if (scope.infrastructuralPeriod) {
+                                    scope.featureOptions.info.find('name', 'period')[0].setValue(scope.infrastructuralPeriod);
+                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', scope.infrastructuralPeriod);
+                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+                                    scope.stores.infrastructuralDataElementMapValue.load();
                                 }
-                            ]
+                                scope.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
+                                scope.featureOptions.info.show();
+                                scope.featureOptions.menu.destroy();
+                            }
                         });
-    
-                        if (scope.infrastructuralPeriod) {
-                            scope.featureOptions.info.find('name', 'period')[0].setValue(scope.infrastructuralPeriod);
-                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', scope.infrastructuralPeriod);
-                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                            scope.stores.infrastructuralDataElementMapValue.load();
-                        }
-                        scope.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
-                        scope.featureOptions.info.show();
-                        scope.featureOptions.menu.destroy();
                     },
                     showRelocate: function() {
                         if (scope.featureOptions.coordinate) {
@@ -1223,7 +1214,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                 scope.featureOptions.menu.showAt([G.vars.mouseMove.x, G.vars.mouseMove.y]);
             }
             else {
-                if (feature.attributes.hasChildrenWithCoordinates) {
+                if (feature.attributes.hcwc) {
                     if (G.vars.locateFeatureWindow) {
                         G.vars.locateFeatureWindow.destroy();
                     }
@@ -1313,40 +1304,22 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
         return obj;
     },
     
-    prepareMapViewDateType: function() {
-        var obj = {};
-        if (G.system.mapDateType.isFixed()) {
-            this.cmp.periodType.show();
-            this.cmp.period.show();
-            this.cmp.startDate.hide();
-            this.cmp.endDate.hide();
-            obj.components = {
-                c1: this.cmp.periodType,
-                c2: this.cmp.period
-            };
-            obj.stores = {
-                c1: G.stores.periodType,
-                c2: this.stores.periodsByType
-            };
-            obj.mapView = {
-                c1: 'periodTypeId',
-                c2: 'periodId'
-            };
-        }
-        else if (G.system.mapDateType.isStartEnd()) {
-            this.cmp.periodType.hide();
-            this.cmp.period.hide();
-            this.cmp.startDate.show();
-            this.cmp.endDate.show();
-            obj.components = {
-                c1: this.cmp.startDate,
-                c2: this.cmp.endDate
-            };
-            obj.mapView = {
-                c1: 'startDate',
-                c2: 'endDate'
-            };
-        }
+    prepareMapViewPeriod: function() {
+        var obj = {};        
+        this.cmp.periodType.show();
+        this.cmp.period.show();
+        obj.components = {
+            c1: this.cmp.periodType,
+            c2: this.cmp.period
+        };
+        obj.stores = {
+            c1: G.stores.periodType,
+            c2: this.stores.periodsByType
+        };
+        obj.mapView = {
+            c1: 'periodTypeId',
+            c2: 'periodId'
+        };
         return obj;
     },
     
@@ -1388,23 +1361,15 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                 obj.components.valueType.setValue(this.mapView[obj.mapView.valueType]);
                 obj.components.valueType.currentValue = this.mapView[obj.mapView.valueType];
                 
-                obj = this.prepareMapViewDateType();
-                if (G.system.mapDateType.isFixed()) {
-                    if (obj.stores.c1.isLoaded) {
-                        dateTypeGroupStoreCallback.call(this);
-                    }
-                    else {
-                        obj.stores.c1.load({scope: this, callback: function() {
-                            dateTypeGroupStoreCallback.call(this);
-                        }});
-                    }
+                obj = this.prepareMapViewPeriod();
+                if (obj.stores.c1.isLoaded) {
+                    dateTypeGroupStoreCallback.call(this);
                 }
-                else if (G.system.mapDateType.isStartEnd()) {
-                    obj.components.c1.setValue(new Date(this.mapView[obj.mapView.c1]));
-                    obj.components.c2.setValue(new Date(this.mapView[obj.mapView.c2]));
-                    
-                    this.setMapViewLegend();
-                }                
+                else {
+                    obj.stores.c1.load({scope: this, callback: function() {
+                        dateTypeGroupStoreCallback.call(this);
+                    }});
+                }
             }});
         }
         
@@ -1512,7 +1477,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
 					colors[colors.length-1].setFromHex(mapLegends[i].color);
                     names.push(mapLegends[i].name);
 					bounds.push(mapLegends[i].endValue);
-				}              
+				}
 
 				this.colorInterpolation = colors;
 				this.bounds = bounds;
@@ -1542,18 +1507,10 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                     return false;
                 }
             }
-
-            if (G.system.mapDateType.isFixed()) {
-                if (!this.cmp.period.getValue()) {
-                    this.window.cmp.apply.disable();
-                    return false;
-                }
-            }
-            else {
-                if (!this.cmp.startDate.getValue() || !this.cmp.endDate.getValue()) {
-                    this.window.cmp.apply.disable();
-                    return false;
-                }
+            
+            if (!this.cmp.period.getValue()) {
+                this.window.cmp.apply.disable();
+                return false;
             }
 
             if (!this.cmp.parent.selectedNode || !this.cmp.level.getValue()) {
@@ -1611,12 +1568,9 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                 dataElementGroupId: this.valueType.isDataElement() ? this.cmp.dataElementGroup.getValue() : null,
                 dataElementId: this.valueType.isDataElement() ? this.cmp.dataElement.getValue() : null,
 				dataElementName: this.valueType.isDataElement() ? this.cmp.dataElement.getRawValue() : null,
-                mapDateType: G.system.mapDateType.value,
-                periodTypeId: G.system.mapDateType.isFixed() ? this.cmp.periodType.getValue() : null,
-                periodId: G.system.mapDateType.isFixed() ? this.cmp.period.getValue() : null,
-                periodName: G.system.mapDateType.isFixed() ? this.cmp.period.getRawValue() : null,
-                startDate: G.system.mapDateType.isStartEnd() ? this.cmp.startDate.getRawValue() : null,
-                endDate: G.system.mapDateType.isStartEnd() ? this.cmp.endDate.getRawValue() : null,
+                periodTypeId: this.cmp.periodType.getValue(),
+                periodId: this.cmp.period.getValue(),
+                periodName: this.cmp.period.getRawValue(),
                 parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
                 parentOrganisationUnitLevel: this.organisationUnitSelection.parent.level,
                 parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
@@ -1640,7 +1594,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
         getLegendInfo: function() {
             return {
                 name: this.valueType.isIndicator() ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-                time: G.system.mapDateType.isFixed() ? this.cmp.period.getRawValue() : this.cmp.startDate.getRawValue() + ' to ' + this.cmp.endDate.getRawValue(),
+                time: this.cmp.period.getRawValue(),
                 map: this.organisationUnitSelection.level.name + ' / ' + this.organisationUnitSelection.parent.name
             };
         },
@@ -1649,8 +1603,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
 			return {
 				mapValueTypeValue: this.cmp.mapValueType.getValue() == G.conf.map_value_type_indicator ?
 					this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-				dateValue: G.system.mapDateType.isFixed() ?
-					this.cmp.period.getRawValue() : new Date(this.cmp.startDate.getRawValue()).format('Y M j') + ' - ' + new Date(this.cmp.endDate.getRawValue()).format('Y M j')
+				dateValue: this.cmp.period.getRawValue()
 			};
 		},
         
@@ -1665,12 +1618,9 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
             this.cmp.dataElementGroup.clearValue();
             this.cmp.dataElement.clearValue();
             
-            G.system.mapDateType.setFixed();
-            this.prepareMapViewDateType();
+            this.prepareMapViewPeriod();
             this.cmp.periodType.clearValue();
             this.cmp.period.clearValue();
-            this.cmp.startDate.reset();
-            this.cmp.endDate.reset();
             
             this.cmp.level.clearValue();
             this.cmp.parent.reset();
@@ -1698,20 +1648,22 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
 	},
     
     loadGeoJson: function() {
-        G.vars.mask.msg = G.i18n.loading_geojson;
+        G.vars.mask.msg = G.i18n.loading;
         G.vars.mask.show();
         G.vars.activeWidget = this;
-        this.updateValues = true;
+        this.updateValues = false;
         
-        this.setUrl(G.conf.path_mapping + 'getGeoJson.action?' +
-            'parentId=' + this.organisationUnitSelection.parent.id +
-            '&level=' + this.organisationUnitSelection.level.level
-        );
+        var url = G.conf.path_mapping + 'getGeoJsonWithValues.action?' + 
+            'periodId=' + this.cmp.period.getValue() +
+            '&parentId=' + this.organisationUnitSelection.parent.id +
+            '&level=' + this.organisationUnitSelection.level.level;            
+        url += this.valueType.isIndicator() ? '&indicatorId=' + this.cmp.indicator.getValue() : '&dataElementId=' + this.cmp.dataElement.getValue();
+        this.setUrl(url);
     },
 
     classify: function(exception, lockPosition) {
         if (this.formValidation.validateForm.apply(this, [exception])) {
-            G.vars.mask.msg = G.i18n.aggregating_map_values;
+            G.vars.mask.msg = G.i18n.loading;
             G.vars.mask.show();
             
             G.vars.lockPosition = lockPosition;
@@ -1729,9 +1681,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                 var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
                 var params = {
                     id: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : this.cmp.dataElement.getValue(),
-                    periodId: G.system.mapDateType.isFixed() ? this.cmp.period.getValue() : null,
-                    startDate: G.system.mapDateType.isStartEnd() ? new Date(this.cmp.startDate.getValue()).format('Y-m-d') : null,
-                    endDate: G.system.mapDateType.isStartEnd() ? new Date(this.cmp.endDate.getValue()).format('Y-m-d') : null,
+                    periodId: this.cmp.period.getValue(),
                     parentId: this.organisationUnitSelection.parent.id,
                     level: this.organisationUnitSelection.level.level
                 };
@@ -1742,7 +1692,7 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                     params: params,
                     scope: this,
                     success: function(r) {
-                        var mapvalues = Ext.util.JSON.decode(r.responseText).mapValues;
+                        var mapvalues = G.util.mapValueDecode(r);
                         
                         if (!this.layer.features.length) {
                             Ext.message.msg(false, 'No coordinates found');
@@ -1755,15 +1705,16 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
                             G.vars.mask.hide();
                             return;
                         }
-
-                        for (var i = 0; i < mapvalues.length; i++) {
-                            for (var j = 0; j < this.layer.features.length; j++) {
-                                if (mapvalues[i].orgUnitName == this.layer.features[j].attributes.name) {
-                                    this.layer.features[j].attributes.value = parseFloat(mapvalues[i].value);
-                                    this.layer.features[j].attributes.labelString = this.layer.features[j].attributes.name + ' (' + this.layer.features[j].attributes.value + ')';
-                                    this.layer.features[j].attributes.fixedName = G.util.cutString(this.layer.features[j].attributes.name, 30);
+                        
+                        for (var j = 0; j < this.layer.features.length; j++) {
+                            for (var i = 0; i < mapvalues.length; i++) {
+                                if (this.layer.features[j].attributes.id == mapvalues[i].oi) {
+                                    this.layer.features[j].attributes.value = parseFloat(mapvalues[i].v);
                                     break;
                                 }
+                            }
+                            if (!this.layer.features[j].attributes.value) {
+                                this.layer.features[j].attributes.value = 0;
                             }
                         }
                         
@@ -1779,6 +1730,12 @@ mapfish.widgets.geostat.Point = Ext.extend(Ext.Panel, {
     },
 
     applyValues: function() {
+        for (var i = 0, f; i < this.layer.features.length; i++) {
+            f = this.layer.features[i];
+            f.attributes.labelString = f.attributes.name + ' (' + f.attributes.value + ')';
+            f.attributes.fixedName = G.util.cutString(f.attributes.name, 30);
+        }
+
         this.button.menu.find('name','history')[0].addItem(this);
         
 		var options = {

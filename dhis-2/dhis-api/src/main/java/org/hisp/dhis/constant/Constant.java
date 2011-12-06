@@ -27,20 +27,26 @@ package org.hisp.dhis.constant;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AbstractIdentifiableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Dang Duy Hieu
  * @version $Id Constant.java June 29, 2011$
  */
-public class Constant
-    extends AbstractIdentifiableObject
-{   
+@XmlRootElement( name = "constant", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class Constant extends BaseIdentifiableObject
+{
     /**
      * Determines if a de-serialized file is compatible with this class.
      */
     private static final long serialVersionUID = -8420671741149847205L;
-    
+
     // -------------------------------------------------------------------------
     // Variables
     // -------------------------------------------------------------------------

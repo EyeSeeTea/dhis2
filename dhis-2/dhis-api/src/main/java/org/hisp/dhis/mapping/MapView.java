@@ -27,6 +27,14 @@ package org.hisp.dhis.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.indicator.Indicator;
@@ -41,12 +49,13 @@ import org.hisp.dhis.user.User;
  * @author Jan Henrik Overland
  * @version $Id$
  */
+@XmlRootElement( name = "map", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( XmlAccessType.NONE )
 public class MapView
+    extends BaseIdentifiableObject
 {
-    private int id;
+    private static final long serialVersionUID = 1866358818802275436L;
 
-    private String name;
-    
     private User user;
 
     private String mapValueType;
@@ -64,10 +73,6 @@ public class MapView
     private PeriodType periodType;
 
     private Period period;
-
-    private String startDate;
-
-    private String endDate;
 
     private OrganisationUnit parentOrganisationUnit;
 
@@ -101,12 +106,11 @@ public class MapView
     {
     }
 
-    public MapView( String name, User user, String mapValueType, IndicatorGroup indicatorGroup,
-        Indicator indicator, DataElementGroup dataElementGroup, DataElement dataElement, String mapDateType,
-        PeriodType periodType, Period period, String startDate, String endDate,
-        OrganisationUnit parentOrganisationUnit, OrganisationUnitLevel organisationUnitLevel, String mapLegendType,
-        Integer method, Integer classes, String bounds, String colorLow, String colorHigh, MapLegendSet mapLegendSet,
-        Integer radiusLow, Integer radiusHigh, String longitude, String latitude, int zoom )
+    public MapView( String name, User user, String mapValueType, IndicatorGroup indicatorGroup, Indicator indicator,
+        DataElementGroup dataElementGroup, DataElement dataElement, String mapDateType, PeriodType periodType,
+        Period period, OrganisationUnit parentOrganisationUnit, OrganisationUnitLevel organisationUnitLevel,
+        String mapLegendType, Integer method, Integer classes, String bounds, String colorLow, String colorHigh,
+        MapLegendSet mapLegendSet, Integer radiusLow, Integer radiusHigh, String longitude, String latitude, int zoom )
     {
         this.name = name;
         this.user = user;
@@ -118,8 +122,6 @@ public class MapView
         this.mapDateType = mapDateType;
         this.periodType = periodType;
         this.period = period;
-        this.startDate = startDate;
-        this.endDate = endDate;
         this.parentOrganisationUnit = parentOrganisationUnit;
         this.organisationUnitLevel = organisationUnitLevel;
         this.mapLegendType = mapLegendType;
@@ -182,26 +184,8 @@ public class MapView
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
+    @XmlElement
+    @JsonProperty
     public User getUser()
     {
         return user;
@@ -212,6 +196,8 @@ public class MapView
         this.user = user;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getMapValueType()
     {
         return mapValueType;
@@ -222,6 +208,8 @@ public class MapView
         this.mapValueType = mapValueType;
     }
 
+    @XmlElement
+    @JsonProperty
     public IndicatorGroup getIndicatorGroup()
     {
         return indicatorGroup;
@@ -232,6 +220,8 @@ public class MapView
         this.indicatorGroup = indicatorGroup;
     }
 
+    @XmlElement
+    @JsonProperty
     public Indicator getIndicator()
     {
         return indicator;
@@ -242,6 +232,8 @@ public class MapView
         this.indicator = indicator;
     }
 
+    @XmlElement
+    @JsonProperty
     public DataElementGroup getDataElementGroup()
     {
         return dataElementGroup;
@@ -252,6 +244,8 @@ public class MapView
         this.dataElementGroup = dataElementGroup;
     }
 
+    @XmlElement
+    @JsonProperty
     public DataElement getDataElement()
     {
         return dataElement;
@@ -262,6 +256,8 @@ public class MapView
         this.dataElement = dataElement;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getMapDateType()
     {
         return mapDateType;
@@ -282,6 +278,8 @@ public class MapView
         this.periodType = periodType;
     }
 
+    @XmlElement
+    @JsonProperty
     public Period getPeriod()
     {
         return period;
@@ -292,26 +290,8 @@ public class MapView
         this.period = period;
     }
 
-    public String getStartDate()
-    {
-        return startDate;
-    }
-
-    public void setStartDate( String startDate )
-    {
-        this.startDate = startDate;
-    }
-
-    public String getEndDate()
-    {
-        return endDate;
-    }
-
-    public void setEndDate( String endDate )
-    {
-        this.endDate = endDate;
-    }
-
+    @XmlElement
+    @JsonProperty
     public OrganisationUnit getParentOrganisationUnit()
     {
         return parentOrganisationUnit;
@@ -322,6 +302,8 @@ public class MapView
         this.parentOrganisationUnit = parentOrganisationUnit;
     }
 
+    @XmlElement
+    @JsonProperty
     public OrganisationUnitLevel getOrganisationUnitLevel()
     {
         return organisationUnitLevel;
@@ -332,6 +314,8 @@ public class MapView
         this.organisationUnitLevel = organisationUnitLevel;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getMapLegendType()
     {
         return mapLegendType;
@@ -342,6 +326,8 @@ public class MapView
         this.mapLegendType = mapLegendType;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getMethod()
     {
         return method;
@@ -352,6 +338,8 @@ public class MapView
         this.method = method;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getClasses()
     {
         return classes;
@@ -362,6 +350,8 @@ public class MapView
         this.classes = classes;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getBounds()
     {
         return bounds;
@@ -372,6 +362,8 @@ public class MapView
         this.bounds = bounds;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getColorLow()
     {
         return colorLow;
@@ -382,6 +374,8 @@ public class MapView
         this.colorLow = colorLow;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getColorHigh()
     {
         return colorHigh;
@@ -392,6 +386,8 @@ public class MapView
         this.colorHigh = colorHigh;
     }
 
+    @XmlElement
+    @JsonProperty
     public MapLegendSet getMapLegendSet()
     {
         return mapLegendSet;
@@ -402,6 +398,8 @@ public class MapView
         this.mapLegendSet = mapLegendSet;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getRadiusLow()
     {
         return radiusLow;
@@ -412,6 +410,8 @@ public class MapView
         this.radiusLow = radiusLow;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getRadiusHigh()
     {
         return radiusHigh;
@@ -422,6 +422,8 @@ public class MapView
         this.radiusHigh = radiusHigh;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getLongitude()
     {
         return longitude;
@@ -432,6 +434,8 @@ public class MapView
         this.longitude = longitude;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getLatitude()
     {
         return latitude;
@@ -442,6 +446,8 @@ public class MapView
         this.latitude = latitude;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getZoom()
     {
         return zoom;
