@@ -237,6 +237,37 @@ public class WebLinkPopulatorListener extends Marshaller.Listener
         {
             populateDataElementCategoryOptionCombo( (DataElementCategoryOptionCombo) source, true );
         }
+        else if ( source instanceof Attributes )
+        {
+            populateAttributes( (Attributes) source, true );
+        }
+        else if ( source instanceof Attribute )
+        {
+            populateAttribute( (Attribute) source, true );
+        }
+    }
+
+    private void populateAttributes( Attributes attributes, boolean root )
+    {
+        attributes.setLink( getBasePath( Attributes.class ) );
+
+        if ( root )
+        {
+            for ( Attribute attribute : attributes.getAttributes() )
+            {
+                populateAttribute( attribute, false );
+            }
+        }
+    }
+
+    private void populateAttribute( Attribute attribute, boolean root )
+    {
+        attribute.setLink( getPathWithUid( attribute ) );
+
+        if ( root )
+        {
+
+        }
     }
 
     private void populateDataElementCategories( DataElementCategories dataElementCategories, boolean root )
