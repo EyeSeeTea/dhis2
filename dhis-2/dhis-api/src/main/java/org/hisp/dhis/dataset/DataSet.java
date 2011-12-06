@@ -357,6 +357,8 @@ public class DataSet extends BaseNameableObject
         this.sources = sources;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getSortOrder()
     {
         return sortOrder;

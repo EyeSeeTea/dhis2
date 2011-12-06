@@ -443,6 +443,8 @@ public class DataElement extends BaseNameableObject
         this.categoryCombo = categoryCombo;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getSortOrder()
     {
         return sortOrder;

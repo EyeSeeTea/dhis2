@@ -217,6 +217,8 @@ public class Section
         this.dataElements.add( dataElement );
     }
 
+    @XmlElement
+    @JsonProperty
     public int getSortOrder()
     {
         return sortOrder;

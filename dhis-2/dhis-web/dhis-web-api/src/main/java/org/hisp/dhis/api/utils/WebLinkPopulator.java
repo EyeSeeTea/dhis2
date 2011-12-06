@@ -746,11 +746,11 @@ public class WebLinkPopulator
         StringBuilder builder = new StringBuilder();
         builder.append( request.getScheme() );
 
-        builder.append( "://" + request.getServerName() );
+        builder.append( "://" ).append( request.getServerName() );
 
         if ( request.getServerPort() != 80 && request.getServerPort() != 443 )
         {
-            builder.append( ":" + request.getServerPort() );
+            builder.append( ":" ).append( request.getServerPort() );
         }
 
         builder.append( request.getContextPath() );
