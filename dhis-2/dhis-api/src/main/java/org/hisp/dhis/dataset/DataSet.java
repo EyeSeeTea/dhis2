@@ -346,8 +346,8 @@ public class DataSet extends BaseNameableObject
         this.compulsoryDataElementOperands = compulsoryDataElementOperands;
     }
 
-    @XmlElementWrapper( name = "sources" )
-    @XmlElement( name = "source" )
+    @XmlElementWrapper( name = "organisationUnits" )
+    @XmlElement( name = "organisationUnit" )
     @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<OrganisationUnit> getSources()
