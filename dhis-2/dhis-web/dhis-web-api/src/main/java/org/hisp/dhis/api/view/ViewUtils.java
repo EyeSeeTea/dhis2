@@ -27,6 +27,7 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.utils.IdentifiableObjectParams;
 import org.springframework.validation.BindingResult;
 
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public class ViewUtils
 
         for ( Map.Entry<String, Object> entry : model.entrySet() )
         {
-            if ( !(entry.getValue() instanceof BindingResult) )
+            if ( !(entry.getValue() instanceof BindingResult) && !(entry.getValue() instanceof IdentifiableObjectParams) )
             {
                 result.put( entry.getKey(), entry.getValue() );
             }
