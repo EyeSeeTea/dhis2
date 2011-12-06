@@ -158,7 +158,7 @@ public class OrganisationUnitGroup extends BaseIdentifiableObject
         this.members = members;
     }
 
-    @XmlElement
+    @XmlElement( name = "organisationUnitGroupSet" )
     @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
     public OrganisationUnitGroupSet getGroupSet()

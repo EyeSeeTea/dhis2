@@ -116,17 +116,21 @@ public class OrganisationUnit extends BaseNameableObject
 
     private transient boolean currentParent;
 
-    private transient String type;
-
-    private transient String[] groupNames;
-    
-    private transient Double value;
-
     /**
      * Set of the dynamic attributes values that belong to this
      * organisationUnit.
      */
     private Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
+
+    /*
+     * Transient fields
+     */
+
+    private transient String type;
+
+    private transient String[] groupNames;
+    
+    private transient Double value;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -621,8 +625,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.url = url;
     }
 
-    @XmlElementWrapper( name = "groups" )
-    @XmlElement( name = "group" )
+    @XmlElementWrapper( name = "organisationUnitGroups" )
+    @XmlElement( name = "organisationUnitGroup" )
     @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<OrganisationUnitGroup> getGroups()
