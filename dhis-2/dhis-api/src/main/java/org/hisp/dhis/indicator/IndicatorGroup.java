@@ -143,9 +143,9 @@ public class IndicatorGroup extends BaseIdentifiableObject
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @XmlElementWrapper( name = "members" )
+    @XmlElementWrapper( name = "indicators" )
     @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
-    @XmlElement( name = "member" )
+    @XmlElement( name = "indicator" )
     @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
     public Set<Indicator> getMembers()
     {
