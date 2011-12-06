@@ -34,6 +34,7 @@ import org.hisp.dhis.attribute.Attributes;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.Charts;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrations;
