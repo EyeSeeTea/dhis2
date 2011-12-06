@@ -22,7 +22,18 @@
           <td> <xsl:value-of select="@code" /> </td>
         </tr>
       </table>
+
+      <xsl:apply-templates select="d:dataElements"/>
     </div>
+  </xsl:template>
+
+  <xsl:template match="d:dataElements">
+    <xsl:if test="count(child::*) > 0">
+      <h3>DataElements</h3>
+      <table border="1" class="dataElements">
+        <xsl:apply-templates select="child::*" mode="row"/>
+      </table>
+    </xsl:if>
   </xsl:template>
 
 </xsl:stylesheet>
