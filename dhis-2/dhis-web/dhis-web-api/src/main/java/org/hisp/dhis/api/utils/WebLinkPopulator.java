@@ -31,6 +31,7 @@ import javassist.util.proxy.ProxyObject;
 import org.hisp.dhis.api.webdomain.Resource;
 import org.hisp.dhis.api.webdomain.Resources;
 import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.attribute.Attributes;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.Charts;
@@ -49,6 +50,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -431,6 +433,7 @@ public class WebLinkPopulator
         {
             handleIdentifiableObjectCollection( dataElement.getGroups() );
             handleIdentifiableObjectCollection( dataElement.getDataSets() );
+            handleAttributeValueCollection( dataElement.getAttributeValues() );
             populateIdentifiableObject( dataElement.getCategoryCombo() );
         }
     }
@@ -503,6 +506,7 @@ public class WebLinkPopulator
         {
             handleIdentifiableObjectCollection( indicator.getGroups() );
             handleIdentifiableObjectCollection( indicator.getDataSets() );
+            handleAttributeValueCollection( indicator.getAttributeValues() );
         }
     }
 
@@ -623,6 +627,7 @@ public class WebLinkPopulator
             populateIdentifiableObject( organisationUnit.getParent() );
             handleIdentifiableObjectCollection( organisationUnit.getDataSets() );
             handleIdentifiableObjectCollection( organisationUnit.getGroups() );
+            handleAttributeValueCollection( organisationUnit.getAttributeValues() );
         }
     }
 
@@ -675,6 +680,17 @@ public class WebLinkPopulator
             handleIdentifiableObjectCollection( chart.getOrganisationUnits() );
             handleIdentifiableObjectCollection( chart.getDataSets() );
             handleIdentifiableObjectCollection( chart.getPeriods() );
+        }
+    }
+
+    private void handleAttributeValueCollection( Set<AttributeValue> attributeValues )
+    {
+        if ( attributeValues != null )
+        {
+            for ( AttributeValue attributeValue : attributeValues )
+            {
+                populateIdentifiableObject( attributeValue.getAttribute() );
+            }
         }
     }
 
