@@ -5,7 +5,7 @@
     >
     
     <xsl:template match="d:map">
-        <div class="d:map">
+        <div class="map">
             <h2>Map <xsl:value-of select="@name"/></h2>
             <table border="1">
                 <tr>
