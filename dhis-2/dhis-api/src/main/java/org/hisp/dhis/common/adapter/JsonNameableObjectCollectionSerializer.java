@@ -28,29 +28,28 @@ package org.hisp.dhis.common.adapter;
  */
 
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
-import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.NameableObject;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class JsonIdentifiableObjectSetSerializer extends JsonSerializer<Set<IdentifiableObject>>
+public class JsonNameableObjectCollectionSerializer extends JsonSerializer<Collection<NameableObject>>
 {
     @Override
-    public void serialize( Set<IdentifiableObject> identifiableObjects, JsonGenerator jgen, SerializerProvider provider ) throws IOException, JsonProcessingException
+    public void serialize( Collection<NameableObject> nameableObjects, JsonGenerator jgen, SerializerProvider provider ) throws IOException
     {
-        JsonIdentifiableObjectSerializer jsonIdentifiableObjectSerializer = new JsonIdentifiableObjectSerializer();
+        JsonNameableObjectSerializer jsonNameableObjectSerializer = new JsonNameableObjectSerializer();
 
         jgen.writeStartArray();
 
-        for ( IdentifiableObject identifiableObject : identifiableObjects )
+        for ( NameableObject nameableObject : nameableObjects )
         {
-            jsonIdentifiableObjectSerializer.serialize( identifiableObject, jgen, provider );
+            jsonNameableObjectSerializer.serialize( nameableObject, jgen, provider );
         }
 
         jgen.writeEndArray();

@@ -34,15 +34,15 @@ import org.codehaus.jackson.map.SerializerProvider;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class RequestMethodListJsonSerializer extends JsonSerializer<List<RequestMethod>>
+public class RequestMethodCollectionJsonSerializer extends JsonSerializer<Collection<RequestMethod>>
 {
     @Override
-    public void serialize( List<RequestMethod> requestMethods, JsonGenerator jgen, SerializerProvider serializerProvider )
+    public void serialize( Collection<RequestMethod> requestMethods, JsonGenerator jgen, SerializerProvider serializerProvider )
         throws IOException, JsonProcessingException
     {
         jgen.writeStartArray();

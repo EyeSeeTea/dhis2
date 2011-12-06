@@ -1,4 +1,4 @@
-package org.hisp.dhis.common.adapter;
+package org.hisp.dhis.api.adapter;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -28,26 +28,26 @@ package org.hisp.dhis.common.adapter;
  */
 
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.JsonSerializer;
 import org.codehaus.jackson.map.SerializerProvider;
+import org.springframework.http.MediaType;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class JsonSetSerializer extends JsonSerializer<Set<Object>>
+public class MediaTypeCollecctionJsonSerializer extends JsonSerializer<Collection<MediaType>>
 {
     @Override
-    public void serialize( Set<Object> objects, JsonGenerator jgen, SerializerProvider provider ) throws IOException, JsonProcessingException
+    public void serialize( Collection<MediaType> mediaTypes, JsonGenerator jgen, SerializerProvider serializerProvider ) throws IOException
     {
         jgen.writeStartArray();
 
-        for ( Object object : objects )
+        for ( MediaType mediaType : mediaTypes )
         {
-            jgen.writeObject( object );
+            jgen.writeString( mediaType.toString() );
         }
 
         jgen.writeEndArray();
