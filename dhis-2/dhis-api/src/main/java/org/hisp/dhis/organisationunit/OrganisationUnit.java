@@ -112,10 +112,6 @@ public class OrganisationUnit extends BaseNameableObject
 
     private boolean hasPatients;
 
-    private transient int level;
-
-    private transient boolean currentParent;
-
     /**
      * Set of the dynamic attributes values that belong to this
      * organisationUnit.
@@ -125,6 +121,10 @@ public class OrganisationUnit extends BaseNameableObject
     /*
      * Transient fields
      */
+
+    private transient boolean currentParent;
+
+    private transient int level;
 
     private transient String type;
 
@@ -724,8 +724,6 @@ public class OrganisationUnit extends BaseNameableObject
         this.hasPatients = hasPatients;
     }
 
-    @XmlElement
-    @JsonProperty
     public int getLevel()
     {
         return level;
