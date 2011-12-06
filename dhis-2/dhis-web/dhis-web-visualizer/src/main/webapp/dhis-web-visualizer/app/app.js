@@ -133,7 +133,7 @@ Ext.onReady( function() {
                 if (selected.length) {
                     var array = [];
                     Ext.Array.each(selected, function(item) {
-                        array.push({id: item, shortName: a.store.getAt(a.store.find('id', item)).data.shortName});
+                        array.push({id: item, s: a.store.getAt(a.store.find('id', item)).data.s});
                     });
                     s.store.add(array);
                 }
@@ -142,7 +142,7 @@ Ext.onReady( function() {
             selectAll: function(a, s) {
                 var array = [];
                 a.store.each( function(r) {
-                    array.push({id: r.data.id, shortName: r.data.shortName});
+                    array.push({id: r.data.id, s: r.data.s});
                 });
                 s.store.add(array);
                 this.filterAvailable(a, s);
@@ -209,7 +209,7 @@ Ext.onReady( function() {
             addToStorage: function(s) {
                 s.each( function(r) {
                     if (!s.storage[r.data.id]) {
-                        s.storage[r.data.id] = {id: r.data.id, shortName: r.data.shortName, name: r.data.shortName, parent: s.parent};
+                        s.storage[r.data.id] = {id: r.data.id, s: r.data.s, name: r.data.s, parent: s.parent};
                     }
                 });
             },
@@ -223,7 +223,7 @@ Ext.onReady( function() {
                 }
                 items = Ext.Array.sort(items);
                 s.add(items);
-                s.sort('shortName', 'ASC');
+                s.sort('s', 'ASC');
             },
             containsParent: function(s) {
                 for (var obj in s.storage) {
@@ -249,11 +249,11 @@ Ext.onReady( function() {
                 getNames: function(exception) {
                     var a = [];
                     DV.cmp.dimension.indicator.selected.store.each( function(r) {
-                        a.push(DV.util.string.getEncodedString(r.data.shortName));
+                        a.push(DV.util.string.getEncodedString(r.data.s));
                     });
                     if (DV.cmp.dimension.dataelement.selected.store) {
                         DV.cmp.dimension.dataelement.selected.store.each( function(r) {
-                            a.push(DV.util.string.getEncodedString(r.data.shortName));
+                            a.push(DV.util.string.getEncodedString(r.data.s));
                         });
                     }
                     if (exception && !a.length) {
@@ -527,6 +527,16 @@ Ext.onReady( function() {
             getEncodedString: function(text) {
                 return text.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'');
             }
+        },
+        value: {
+            jsonfy: function(r) {
+                r = Ext.JSON.decode(r.responseText);
+                var values = [];
+                for (var i = 0; i < r.length; i++) {
+                    values.push({v: r[i][0], d: r[i][1], p: r[i][2], o: r[i][3]});
+                }
+                return values;
+            }
         }
     };
     
@@ -543,7 +553,7 @@ Ext.onReady( function() {
         },        
         indicator: {
             available: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'shortName'],
+                fields: ['id', 'name', 's'],
                 proxy: {
                     type: 'ajax',
                     url: DV.conf.finals.ajax.url_commons + 'getIndicatorsMinified.action',
@@ -561,13 +571,13 @@ Ext.onReady( function() {
                 }
             }),
             selected: Ext.create('Ext.data.Store', {
-                fields: ['id', 'shortName'],
+                fields: ['id', 's'],
                 data: []
             })
         },
         dataelement: {
             available: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'shortName'],
+                fields: ['id', 'name', 's'],
                 proxy: {
                     type: 'ajax',
                     url: DV.conf.finals.ajax.url_commons + 'getDataElementsMinified.action',
@@ -585,7 +595,7 @@ Ext.onReady( function() {
                 }
             }),
             selected: Ext.create('Ext.data.Store', {
-                fields: ['id', 'shortName'],
+                fields: ['id', 's'],
                 data: []
             })
         },
@@ -723,7 +733,7 @@ Ext.onReady( function() {
             Ext.Ajax.request({
                 url: baseUrl,
                 success: function(r) {
-                    DV.value.values = Ext.JSON.decode(r.responseText).values;
+                    DV.value.values = DV.util.value.jsonfy(r);
                     
                     if (!DV.value.values.length) {
                         DV.mask.hide();
@@ -731,8 +741,7 @@ Ext.onReady( function() {
                         return;
                     }
                     
-                    var storage = Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);
-                    
+                    var storage = Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);                    
                     Ext.Array.each(DV.value.values, function(item) {
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(storage[item.d].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.p));
@@ -1297,7 +1306,7 @@ Ext.onReady( function() {
                                                 name: 'availableIndicators',
                                                 cls: 'multiselect',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
-                                                displayField: 'shortName',
+                                                displayField: 's',
                                                 valueField: 'id',
                                                 queryMode: 'remote',
                                                 store: DV.store.indicator.available,
@@ -1343,7 +1352,7 @@ Ext.onReady( function() {
                                                 name: 'selectedIndicators',
                                                 cls: 'multiselect',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
-                                                displayField: 'shortName',
+                                                displayField: 's',
                                                 valueField: 'id',
                                                 ddReorder: true,
                                                 queryMode: 'local',
@@ -1456,7 +1465,7 @@ Ext.onReady( function() {
                                                 name: 'availableDataElements',
                                                 cls: 'multiselect',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
-                                                displayField: 'shortName',
+                                                displayField: 's',
                                                 valueField: 'id',
                                                 queryMode: 'remote',
                                                 store: DV.store.dataelement.available,
@@ -1502,7 +1511,7 @@ Ext.onReady( function() {
                                                 name: 'selectedDataElements',
                                                 cls: 'multiselect',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
-                                                displayField: 'shortName',
+                                                displayField: 's',
                                                 valueField: 'id',
                                                 ddReorder: true,
                                                 queryMode: 'remote',
