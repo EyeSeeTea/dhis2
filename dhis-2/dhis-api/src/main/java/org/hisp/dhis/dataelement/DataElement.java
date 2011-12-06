@@ -529,6 +529,9 @@ public class DataElement extends BaseNameableObject
         this.numberType = numberType;
     }
 
+    @XmlElementWrapper( name = "attributeValues" )
+    @XmlElement( name = "attributeValue" )
+    @JsonSerialize( using = JsonSetSerializer.class )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

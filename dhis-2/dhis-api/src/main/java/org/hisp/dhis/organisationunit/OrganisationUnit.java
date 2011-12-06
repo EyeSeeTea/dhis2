@@ -758,6 +758,9 @@ public class OrganisationUnit extends BaseNameableObject
         this.type = type;
     }
 
+    @XmlElementWrapper( name = "attributeValues" )
+    @XmlElement( name = "attributeValue" )
+    @JsonSerialize( using = JsonSetSerializer.class )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

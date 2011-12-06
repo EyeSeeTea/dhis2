@@ -55,7 +55,6 @@ import java.util.Map;
  */
 public class WebLinkPopulator
 {
-
     /**
      * Custom linkable object -> path mappings
      */
