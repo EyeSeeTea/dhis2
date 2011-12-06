@@ -170,7 +170,7 @@ Ext.onReady( function() {
                     });
                     return filter;
                 });
-                a.store.sort();
+                a.store.sort('s', 'ASC');
             }
         },
         fieldset: {
