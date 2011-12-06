@@ -18,8 +18,8 @@
           <td> <xsl:value-of select="@lastUpdated" /> </td>
         </tr>
         <tr>
-          <td>Short Name</td>
-          <td> <xsl:value-of select="@shortName" /> </td>
+          <td>Code</td>
+          <td> <xsl:value-of select="@code" /> </td>
         </tr>
       </table>
     </div>
