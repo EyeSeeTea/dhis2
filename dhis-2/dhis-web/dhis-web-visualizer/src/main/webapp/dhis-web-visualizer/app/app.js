@@ -170,6 +170,7 @@ Ext.onReady( function() {
                     });
                     return filter;
                 });
+                a.store.sort();
             }
         },
         fieldset: {
@@ -221,7 +222,6 @@ Ext.onReady( function() {
                         items.push(s.storage[obj]);
                     }
                 }
-                items = Ext.Array.sort(items);
                 s.add(items);
                 s.sort('s', 'ASC');
             },
