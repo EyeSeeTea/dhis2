@@ -101,7 +101,7 @@ Ext.onReady( function() {
                 len = len ? len : 1;
                 return {
                     position: len > 5 ? 'right' : 'top',
-                    labelFont: '15px arial',
+                    labelFont: '11px arial',
                     boxStroke: '#ffffff',
                     boxStrokeWidth: 0,
                     padding: 0
@@ -119,7 +119,7 @@ Ext.onReady( function() {
                 return {
                     type: 'text',
                     text: DHIS.state.state.filter.names[0],
-                    font: 'bold 15px arial',
+                    font: 'bold 13px arial',
                     fill: '#222',
                     width: 300,
                     height: 20,
@@ -145,15 +145,15 @@ Ext.onReady( function() {
             label: {
                 getCategoryLabel: function() {
                     return {
-                        font: '14px arial',
+                        font: '11px arial',
                         rotate: {
-                            degrees: 315
+                            degrees: 320
                         }
                     };
                 },
                 getNumericLabel: function(values) {
                     return {
-                        font: '13px arial',
+                        font: '11px arial',
                         renderer: Ext.util.Format.numberRenderer(DHIS.util.number.getChartAxisFormatRenderer(values))
                     };
                 }
@@ -161,7 +161,7 @@ Ext.onReady( function() {
             bar: {
                 getCategoryLabel: function() {
                     return {
-                        font: '14px arial'
+                        font: '11px arial'
                     };
                 }
             },
@@ -185,7 +185,7 @@ Ext.onReady( function() {
                         {
                             type: 'text',
                             text: title,
-                            font: 'bold 15px arial',
+                            font: 'bold 13px arial',
                             fill: '#222',
                             width: 300,
                             height: 20,
@@ -195,7 +195,7 @@ Ext.onReady( function() {
                         {
                             type: 'text',
                             text: subtitle,
-                            font: 'bold 13px arial',
+                            font: 'bold 11px arial',
                             fill: '#777',
                             width: 300,
                             height: 20,
