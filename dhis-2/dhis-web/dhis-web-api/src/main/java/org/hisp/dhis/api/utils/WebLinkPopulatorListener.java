@@ -27,6 +27,8 @@ package org.hisp.dhis.api.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.view.Resource;
+import org.hisp.dhis.api.view.Resources;
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.Attributes;
 import org.hisp.dhis.chart.Chart;
@@ -64,6 +66,8 @@ public class WebLinkPopulatorListener
 
     static
     {
+        resourcePaths.put( Resources.class, "resources" );
+
         resourcePaths.put( Attributes.class, "attributes" );
         resourcePaths.put( Attribute.class, "attributes" );
 
@@ -123,7 +127,11 @@ public class WebLinkPopulatorListener
     @Override
     public void beforeMarshal( Object source )
     {
-        if ( source instanceof Charts )
+        if ( source instanceof Resources )
+        {
+            populateResources( (Resources) source );
+        }
+        else if ( source instanceof Charts )
         {
             populateCharts( (Charts) source, true );
         }
@@ -250,6 +258,16 @@ public class WebLinkPopulatorListener
         else if ( source instanceof Attribute )
         {
             populateAttribute( (Attribute) source, true );
+        }
+    }
+
+    private void populateResources( Resources resources )
+    {
+        resources.setLink( getBasePath( Resources.class ) );
+
+        for ( Resource resource : resources.getResources() )
+        {
+            resource.setLink( getBasePath( resource.getClazz() ) );
         }
     }
 
