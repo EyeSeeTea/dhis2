@@ -10,6 +10,9 @@
     <!-- html page level settings -->
     <xsl:include href="html-wrapper.xsl"/>
 
+    <!-- for resource 'directory' -->
+    <xsl:include href="resource.xsl"/>
+  
     <!-- for list views -->
     <xsl:include href="list.xsl"/>
 
