@@ -7,8 +7,11 @@
   <xsl:include href="identifiable-row.xsl"/>
 
   <!-- match all plural elements -->
-  <!-- TODO: make an attribute for this -->
-  <xsl:template match="d:maps|d:charts|d:categories|d:categoryCombos|d:categoryOptions|d:categoryOptionCombos|d:dataElements|d:indicators|d:organisationUnits|d:dataElementGroups|d:dataElementGroupSets|d:indicatorGroups|d:indicatorGroupSets|d:organisationUnitGroups|d:organisationUnitGroupSets">
+  <xsl:template match="d:maps|d:charts|d:categories|d:categoryCombos|
+    d:categoryOptions|d:categoryOptionCombos|d:dataElements|d:indicators|
+    d:organisationUnits|d:dataElementGroups|d:dataElementGroupSets|
+    d:indicatorGroups|d:indicatorGroupSets|d:organisationUnitGroups|
+    d:organisationUnitGroupSets">
     <h3> <xsl:value-of select="local-name()"/> </h3>
 
     <table border="1">
