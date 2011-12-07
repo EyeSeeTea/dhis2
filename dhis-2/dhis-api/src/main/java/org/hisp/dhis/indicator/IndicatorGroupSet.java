@@ -37,7 +37,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.JsonIdentifiableObjectListSerializer;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectCollectionSerializer;
 import org.hisp.dhis.indicator.comparator.IndicatorGroupNameComparator;
 
 import javax.xml.bind.annotation.*;
@@ -220,10 +220,10 @@ public class IndicatorGroupSet extends BaseIdentifiableObject
         this.compulsory = compulsory;
     }
 
-    @XmlElementWrapper( name = "members" )
+    @XmlElementWrapper( name = "indicatorGroups" )
     @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
-    @XmlElement( name = "member" )
-    @JsonSerialize( using = JsonIdentifiableObjectListSerializer.class )
+    @XmlElement( name = "indicatorGroup" )
+    @JsonSerialize( using = JsonIdentifiableObjectCollectionSerializer.class )
     public List<IndicatorGroup> getMembers()
     {
         return members;

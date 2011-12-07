@@ -30,7 +30,6 @@ package org.hisp.dhis.organisationunit;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
@@ -112,21 +111,25 @@ public class OrganisationUnit extends BaseNameableObject
 
     private boolean hasPatients;
 
-    private transient int level;
+    /**
+     * Set of the dynamic attributes values that belong to this
+     * organisationUnit.
+     */
+    private Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
+
+    /*
+     * Transient fields
+     */
 
     private transient boolean currentParent;
+
+    private transient int level;
 
     private transient String type;
 
     private transient String[] groupNames;
     
     private transient Double value;
-
-    /**
-     * Set of the dynamic attributes values that belong to this
-     * organisationUnit.
-     */
-    private Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -621,10 +624,10 @@ public class OrganisationUnit extends BaseNameableObject
         this.url = url;
     }
 
-    @XmlElementWrapper( name = "groups" )
-    @XmlElement( name = "group" )
+    @XmlElementWrapper( name = "organisationUnitGroups" )
+    @XmlElement( name = "organisationUnitGroup" )
     @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
-    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
+    @JsonSerialize( using = JsonIdentifiableObjectCollectionSerializer.class )
     public Set<OrganisationUnitGroup> getGroups()
     {
         return groups;
@@ -638,7 +641,7 @@ public class OrganisationUnit extends BaseNameableObject
     @XmlElementWrapper( name = "dataSets" )
     @XmlElement( name = "dataSet" )
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
-    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
+    @JsonSerialize( using = JsonNameableObjectCollectionSerializer.class )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -720,8 +723,6 @@ public class OrganisationUnit extends BaseNameableObject
         this.hasPatients = hasPatients;
     }
 
-    @XmlElement
-    @JsonProperty
     public int getLevel()
     {
         return level;
@@ -756,6 +757,10 @@ public class OrganisationUnit extends BaseNameableObject
         this.type = type;
     }
 
+    @XmlElementWrapper( name = "attributes" )
+    @XmlElement( name = "attribute" )
+    @JsonProperty( value = "attributes" )
+    @JsonSerialize( using = JsonCollectionSerializer.class )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

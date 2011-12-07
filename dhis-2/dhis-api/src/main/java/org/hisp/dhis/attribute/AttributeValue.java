@@ -32,14 +32,14 @@ import org.hisp.dhis.common.Dxf2Namespace;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
  * @author mortenoh
  */
-@XmlRootElement( name = "attributeValue", namespace = Dxf2Namespace.NAMESPACE )
+@XmlRootElement( name = "attribute", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class AttributeValue
     implements Serializable
@@ -70,6 +70,29 @@ public class AttributeValue
         return id;
     }
 
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    @XmlAttribute
+    @JsonProperty
+    public String getAttributeTypeRef()
+    {
+        return attribute.getUid();
+    }
+
+    @XmlAttribute( name = "name" )
+    @JsonProperty( value = "name" )
+    public String getAttributeName()
+    {
+        return attribute.getName();
+    }
+
+    /*    @XmlElement( name = "attributeType" )
+@XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
+@JsonSerialize( using = JsonIdentifiableObjectSerializer.class )
+@JsonProperty( value = "attributeType" ) */
     public Attribute getAttribute()
     {
         return attribute;
@@ -80,12 +103,7 @@ public class AttributeValue
         this.attribute = attribute;
     }
 
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    @XmlElement
+    @XmlAttribute
     @JsonProperty
     public String getValue()
     {

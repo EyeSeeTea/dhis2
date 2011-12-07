@@ -41,7 +41,7 @@ import java.util.Set;
 /**
  * @author mortenoh
  */
-@XmlRootElement( name = "attribute", namespace = Dxf2Namespace.NAMESPACE )
+@XmlRootElement( name = "attributeType", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class Attribute extends BaseIdentifiableObject
 {
@@ -159,6 +159,8 @@ public class Attribute extends BaseIdentifiableObject
         this.attributeValues = attributeValues;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getSortOrder()
     {
         return sortOrder;

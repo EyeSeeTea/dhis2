@@ -42,7 +42,6 @@ import java.util.Set;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: Indicator.java 5540 2008-08-19 10:47:07Z larshelg $
  */
 @XmlRootElement( name = "indicator", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
@@ -254,6 +253,8 @@ public class Indicator extends BaseNameableObject
         this.explodedDenominator = explodedDenominator;
     }
 
+    @XmlElement
+    @JsonProperty
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -276,10 +277,10 @@ public class Indicator extends BaseNameableObject
         this.url = url;
     }
 
-    @XmlElementWrapper( name = "groups" )
+    @XmlElementWrapper( name = "indicatorGroups" )
     @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
-    @XmlElement( name = "group" )
-    @JsonSerialize( using = JsonIdentifiableObjectSetSerializer.class )
+    @XmlElement( name = "indicatorGroup" )
+    @JsonSerialize( using = JsonIdentifiableObjectCollectionSerializer.class )
     public Set<IndicatorGroup> getGroups()
     {
         return groups;
@@ -293,7 +294,7 @@ public class Indicator extends BaseNameableObject
     @XmlElementWrapper( name = "dataSets" )
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElement( name = "dataSet" )
-    @JsonSerialize( using = JsonNameableObjectSetSerializer.class )
+    @JsonSerialize( using = JsonNameableObjectCollectionSerializer.class )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -304,6 +305,10 @@ public class Indicator extends BaseNameableObject
         this.dataSets = dataSets;
     }
 
+    @XmlElementWrapper( name = "attributes" )
+    @XmlElement( name = "attribute" )
+    @JsonProperty( value = "attributes" )
+    @JsonSerialize( using = JsonCollectionSerializer.class )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

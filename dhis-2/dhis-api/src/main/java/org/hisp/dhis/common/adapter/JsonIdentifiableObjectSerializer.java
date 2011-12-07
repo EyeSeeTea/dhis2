@@ -51,7 +51,7 @@ public class JsonIdentifiableObjectSerializer extends JsonSerializer<Identifiabl
         {
             jgen.writeStartObject();
 
-            jgen.writeStringField( "uid", value.getUid() );
+            jgen.writeStringField( "id", value.getUid() );
             jgen.writeStringField( "name", value.getName() );
 
             jgen.writeFieldName( "lastUpdated" );

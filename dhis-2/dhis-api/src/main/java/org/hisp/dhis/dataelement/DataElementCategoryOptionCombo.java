@@ -35,7 +35,7 @@ import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.JsonIdentifiableObjectSerializer;
-import org.hisp.dhis.common.adapter.JsonNameableObjectListSerializer;
+import org.hisp.dhis.common.adapter.JsonNameableObjectCollectionSerializer;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -44,7 +44,7 @@ import java.util.*;
 /**
  * @author Abyot Aselefew
  */
-@XmlRootElement( name = "dataElementCategoryOptionCombo", namespace = Dxf2Namespace.NAMESPACE )
+@XmlRootElement( name = "categoryOptionCombo", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class DataElementCategoryOptionCombo extends BaseNameableObject
 {
@@ -312,7 +312,7 @@ public class DataElementCategoryOptionCombo extends BaseNameableObject
     @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElement( name = "categoryOption" )
     @JsonProperty
-    @JsonSerialize( using = JsonNameableObjectListSerializer.class )
+    @JsonSerialize( using = JsonNameableObjectCollectionSerializer.class )
     public List<DataElementCategoryOption> getCategoryOptions()
     {
         return categoryOptions;

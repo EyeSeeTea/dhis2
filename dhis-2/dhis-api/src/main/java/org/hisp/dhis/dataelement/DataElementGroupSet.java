@@ -32,7 +32,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.JsonIdentifiableObjectListSerializer;
+import org.hisp.dhis.common.adapter.JsonIdentifiableObjectCollectionSerializer;
 import org.hisp.dhis.dataelement.comparator.DataElementGroupNameComparator;
 
 import javax.xml.bind.annotation.*;
@@ -219,10 +219,10 @@ public class DataElementGroupSet extends BaseIdentifiableObject
         this.compulsory = compulsory;
     }
 
-    @XmlElementWrapper( name = "members" )
+    @XmlElementWrapper( name = "dataElementGroups" )
     @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
-    @XmlElement( name = "member" )
-    @JsonSerialize( using = JsonIdentifiableObjectListSerializer.class )
+    @XmlElement( name = "dataElementGroup" )
+    @JsonSerialize( using = JsonIdentifiableObjectCollectionSerializer.class )
     public List<DataElementGroup> getMembers()
     {
         return members;
