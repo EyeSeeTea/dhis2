@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
-                xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:d="http://dhis2.org/schema/dxf/2.0"
-    >
-
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:d="http://dhis2.org/schema/dxf/2.0"
+  >
+  
   <xsl:template match="d:indicator">
     <div class="indicator">
       <h2>
@@ -67,11 +67,12 @@
 
       </table>
 
-      <xsl:apply-templates select="d:indicatorGroups|d:dataSets" mode="indicator" />
+      <xsl:apply-templates select="d:indicatorGroups|d:dataSets" />
+
     </div>
   </xsl:template>
 
-  <xsl:template match="d:indicatorGroups" mode="indicator">
+  <xsl:template match="d:indicatorGroups" >
     <xsl:if test="count(child::*) > 0">
       <h3>Indicator Groups</h3>
       <table border="1" class="indicatorGroups">
