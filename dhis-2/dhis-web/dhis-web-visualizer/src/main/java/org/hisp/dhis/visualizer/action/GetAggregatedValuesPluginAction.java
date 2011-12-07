@@ -224,7 +224,7 @@ public class GetAggregatedValuesPluginAction
             rp.setLastYear( lastYear );
             rp.setLast5Years( lastFiveYears );
 
-            Collection<Period> periods = rp.getRelativePeriods();
+            Collection<Period> periods = periodService.reloadPeriods( rp.getRelativePeriods() );
 
             Collection<Integer> periodIds = new ArrayList<Integer>();
 

@@ -25,7 +25,7 @@ indicators          [integer]                           (Required*) Indicator id
 dataelements        [integer]                           (Required*) Data element ids. Required if no indicators are provided.
 periods             [string]        'monthsThisYear'    (Optional) Relative period names.
 organisationunits   [integer]                           (Required) Organisation unit ids.
-series              string          'indicator'         (Optional) Series: 'indicator', 'dataelement', 'period' or 'organisationunit'
+series              string          'data'              (Optional) Series: 'data', 'period' or 'organisationunit'
 category            string          'period'            (Optional) Category: 'indicator', 'dataelement', 'period' or 'organisationunit'
 filter              string          'organisationunit'  (Optional) Filter: 'indicator', 'dataelement', 'period' or 'organisationunit'
 el                  string                              (Required) The element to render the chart.
@@ -36,7 +36,7 @@ url                 string                              (Required) The web servi
 */
 			
 			DHIS.getChart({
-				indicators: [31664],
+				dataelements: [20914],
 				organisationunits: [18],
 				el: 'chart1',
 				url: url

@@ -5,10 +5,13 @@ DHIS.conf = {
             url_visualizer: '../',
             url_commons: '../../dhis-web-commons-ajax-json/',
             url_portal: '../../dhis-web-portal/',
-            url_indicator: 'getAggregatedIndicatorValuesPlugin',
-            url_dataelement: 'getAggregatedDataValuesPlugin'
+            url_data: 'getAggregatedValuesPlugin'
         },        
         dimension: {
+            data: {
+                value: 'data',
+                rawvalue: 'Data'
+            },
             indicator: {
                 value: 'indicator',
                 rawvalue: 'Indicator'
@@ -59,18 +62,12 @@ Ext.onReady( function() {
     
     DHIS.util = {
         dimension: {
-            indicator: {
+            data: {
                 getUrl: function(isFilter) {
                     var a = [];
                     Ext.Array.each(DHIS.state.state.conf.indicators, function(r) {
                         a.push('indicatorIds=' + r);
                     });
-                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
-                }
-            },
-            dataelement: {
-                getUrl: function(isFilter) {
-                    var a = [];
                     Ext.Array.each(DHIS.state.state.conf.dataelements, function(r) {
                         a.push('dataElementIds=' + r);
                     });
@@ -247,6 +244,16 @@ Ext.onReady( function() {
                 }
                 return url;
             }
+        },
+        value: {
+            jsonfy: function(r) {
+                r = Ext.JSON.decode(r.responseText);
+                var values = [];
+                for (var i = 0; i < r.length; i++) {
+                    values.push({v: r[i][0], data: r[i][2], period: r[i][4], organisationunit: r[i][6]});
+                }
+                return values;
+            }
         }
     };
     
@@ -304,15 +311,6 @@ Ext.onReady( function() {
                     filter: {
                         dimension: null,
                         names: []
-                    },
-                    getIndiment: function() {
-                        var i = DHIS.conf.finals.dimension.indicator.value;
-                        return (this.series.dimension === i || this.category.dimension === i || this.filter.dimension === i) ?
-                            DHIS.conf.finals.dimension.indicator : DHIS.conf.finals.dimension.dataelement;
-                    },
-                    isIndicator: function() {
-                        var i = DHIS.conf.finals.dimension.indicator.value;
-                        return (this.series.dimension === i || this.category.dimension === i || this.filter.dimension === i);
                     }
                 }
             };
@@ -323,7 +321,7 @@ Ext.onReady( function() {
                 indicators: [],
                 periods: ['monthsThisYear'],
                 organisationunits: [],
-                series: 'indicator',
+                series: 'data',
                 category: 'period',
                 filter: 'organisationunit',
                 el: '',
@@ -346,20 +344,12 @@ Ext.onReady( function() {
     
     DHIS.value = {
         getValues: function(project) {
-            var params = [],
-                indicator = DHIS.conf.finals.dimension.indicator.value,
-                dataelement = DHIS.conf.finals.dimension.dataelement.value,
-                series = project.state.series.dimension,
-                category = project.state.category.dimension,
-                filter = project.state.filter.dimension,
-                indiment = project.state.getIndiment().value,
-                url = project.state.isIndicator() ? DHIS.conf.finals.ajax.url_indicator : DHIS.conf.finals.ajax.url_dataelement;
-                
-            params = params.concat(DHIS.util.dimension[series].getUrl());
-            params = params.concat(DHIS.util.dimension[category].getUrl());
-            params = params.concat(DHIS.util.dimension[filter].getUrl(true));
+            var params = [];                
+            params = params.concat(DHIS.util.dimension[project.state.series.dimension].getUrl());
+            params = params.concat(DHIS.util.dimension[project.state.category.dimension].getUrl());
+            params = params.concat(DHIS.util.dimension[project.state.filter.dimension].getUrl(true));
                         
-            var baseUrl = DHIS.util.string.extendUrl(project.state.conf.url) + url + '.action';
+            var baseUrl = DHIS.util.string.extendUrl(project.state.conf.url) + DHIS.conf.finals.ajax.url_data + '.action';
             Ext.Array.each(params, function(item) {
                 baseUrl = Ext.String.urlAppend(baseUrl, item);
             });
@@ -367,7 +357,7 @@ Ext.onReady( function() {
             Ext.Ajax.request({
                 url: baseUrl,
                 success: function(r) {
-                    project.values = Ext.JSON.decode(r.responseText).values;
+                    project.values = DHIS.util.value.jsonfy(r);
                     
                     if (!project.values.length) {
                         alert('No data values');
@@ -375,11 +365,6 @@ Ext.onReady( function() {
                     }
                     
                     Ext.Array.each(project.values, function(item) {
-						item.indicator = item.in;
-						item.dataelement = item.in;
-						item.period = item.pn;
-						item.organisationunit = item.on;
-                        
                         Ext.Array.include(project.state.series.names, DHIS.util.string.getEncodedString(item[project.state.series.dimension]));
                         Ext.Array.include(project.state.category.names, DHIS.util.string.getEncodedString(item[project.state.category.dimension]));
                         Ext.Array.include(project.state.filter.names, DHIS.util.string.getEncodedString(item[project.state.filter.dimension]));
