@@ -90,7 +90,7 @@ public class Resources extends BaseLinkableObject
     private void generateResources()
     {
         RequestMethod[] defaultRequestMethods = new RequestMethod[]{
-            RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE
+            RequestMethod.GET /* , RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE */
         };
 
         MediaType[] defaultMediaTypes = new MediaType[]{
