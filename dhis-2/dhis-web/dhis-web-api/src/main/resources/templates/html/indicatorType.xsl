@@ -5,7 +5,7 @@
     >
 
   <xsl:template match="d:indicatorType">
-    <div class="indicator">
+    <div class="indicatorType">
       <h2>
         <xsl:value-of select="@name" />
       </h2>

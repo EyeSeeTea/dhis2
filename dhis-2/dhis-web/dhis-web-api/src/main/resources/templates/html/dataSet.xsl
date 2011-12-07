@@ -33,7 +33,7 @@
 
       </table>
 
-      <xsl:apply-templates select="d:dataElements|d:indicators|d:sources" />
+      <xsl:apply-templates select="d:dataElements|d:indicators|d:organisationUnits" />
 
     </div>
   </xsl:template>
@@ -50,16 +50,16 @@
   <xsl:template match="d:indicators">
     <xsl:if test="count(child::*) > 0">
       <h3>Indicators</h3>
-      <table border="1" class="indicator">
+      <table border="1" class="indicators">
         <xsl:apply-templates select="child::*" mode="row"/>
       </table>
     </xsl:if>
   </xsl:template>
 
-  <xsl:template match="d:sources">
+  <xsl:template match="d:organisationUnits">
     <xsl:if test="count(child::*) > 0">
       <h3>OrganisationUnits</h3>
-      <table border="1" class="sources">
+      <table border="1" class="organisationUnits">
         <xsl:apply-templates select="child::*" mode="row"/>
       </table>
     </xsl:if>
