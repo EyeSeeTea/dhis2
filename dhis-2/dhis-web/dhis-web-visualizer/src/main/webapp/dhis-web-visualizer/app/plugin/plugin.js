@@ -250,7 +250,12 @@ Ext.onReady( function() {
                 r = Ext.JSON.decode(r.responseText);
                 var values = [];
                 for (var i = 0; i < r.length; i++) {
-                    values.push({v: r[i][0], data: r[i][2], period: r[i][4], organisationunit: r[i][6]});
+                    var obj = {};
+                    obj.v = r[i][0];
+                    obj[DHIS.conf.finals.dimension.data.value] = r[i][1];
+                    obj[DHIS.conf.finals.dimension.period.value] = r[i][2];
+                    obj[DHIS.conf.finals.dimension.organisationunit.value] = r[i][3];
+                    values.push(obj);
                 }
                 return values;
             }
@@ -371,8 +376,7 @@ Ext.onReady( function() {
                         item.v = parseFloat(item.v);
                     });
                     
-                    DHIS.state.state = project.state;
-                    
+                    DHIS.state.state = project.state;                    
 					DHIS.chart.getData(project);
                 }
             });

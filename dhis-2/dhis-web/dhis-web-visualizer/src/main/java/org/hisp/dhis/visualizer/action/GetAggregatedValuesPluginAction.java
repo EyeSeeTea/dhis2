@@ -240,7 +240,7 @@ public class GetAggregatedValuesPluginAction
 
                 for ( AggregatedIndicatorValue value : indicatorValues )
                 {
-                    value.setIndicatorName( indicatorService.getIndicator( value.getIndicatorId() ).getName() );
+                    value.setIndicatorName( indicatorService.getIndicator( value.getIndicatorId() ).getShortName() );
                     value.setPeriodName( format.formatPeriod( periodService.getPeriod( value.getPeriodId() ) ) );
                     value.setOrganisationUnitName( organisationUnitService.getOrganisationUnit(
                         value.getOrganisationUnitId() ).getName() );
@@ -254,7 +254,7 @@ public class GetAggregatedValuesPluginAction
 
                 for ( AggregatedDataValue value : dataValues )
                 {
-                    value.setDataElementName( dataElementService.getDataElement( value.getDataElementId() ).getName() );
+                    value.setDataElementName( dataElementService.getDataElement( value.getDataElementId() ).getShortName() );
                     value.setPeriodName( format.formatPeriod( periodService.getPeriod( value.getPeriodId() ) ) );
                     value.setOrganisationUnitName( organisationUnitService.getOrganisationUnit(
                         value.getOrganisationUnitId() ).getName() );
