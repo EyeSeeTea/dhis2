@@ -68,7 +68,6 @@
       </table>
 
       <xsl:apply-templates select="d:indicatorGroups|d:dataSets" mode="indicator" />
-
     </div>
   </xsl:template>
 

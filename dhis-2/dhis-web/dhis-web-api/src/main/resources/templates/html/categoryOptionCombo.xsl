@@ -19,14 +19,14 @@
         </tr>
       </table>
 
-      <xsl:apply-templates select="d:categoryOptions|d:categoryCombo"/>
+      <xsl:apply-templates select="d:categoryCombo|d:categoryOptions"/>
     </div>
   </xsl:template>
 
   <xsl:template match="d:categoryCombo">
     <h3>CategoryCombo</h3>
     <table border="1" class="categoryCombo">
-      <xsl:apply-templates select="child::*" mode="row"/>
+      <xsl:apply-templates select="." mode="row"/>
     </table>
   </xsl:template>
 
