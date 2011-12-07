@@ -67,12 +67,12 @@
 
       </table>
 
-      <xsl:apply-templates select="d:groups|d:dataSets" mode="indicator" />
+      <xsl:apply-templates select="d:indicatorGroups|d:dataSets" mode="indicator" />
 
     </div>
   </xsl:template>
 
-  <xsl:template match="d:groups" mode="indicator">
+  <xsl:template match="d:indicatorGroups" mode="indicator">
     <xsl:if test="count(child::*) > 0">
       <h3>Indicator Groups</h3>
       <table border="1" class="indicatorGroups">
