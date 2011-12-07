@@ -51,7 +51,7 @@
   </xsl:template>
 
   <xsl:template match="d:categoryCombo">
-    <h3>DataElementCategoryCombo</h3>
+    <h3>CategoryCombo</h3>
     <table border="1" class="categoryCombo">
       <xsl:apply-templates select="child::*" mode="row"/>
     </table>

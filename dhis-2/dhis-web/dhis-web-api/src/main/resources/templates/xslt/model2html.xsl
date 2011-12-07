@@ -16,6 +16,10 @@
     <!-- for rendering elements -->
     <xsl:include href="map.xsl"/>
     <xsl:include href="chart.xsl"/>
+    <xsl:include href="category.xsl" />
+    <xsl:include href="categoryOption.xsl" />
+    <xsl:include href="categoryCombo.xsl" />
+    <xsl:include href="categoryOptionCombo.xsl" />
     <xsl:include href="dataElement.xsl"/>
     <xsl:include href="dataElementGroup.xsl"/>
     <xsl:include href="dataElementGroupSet.xsl"/>
