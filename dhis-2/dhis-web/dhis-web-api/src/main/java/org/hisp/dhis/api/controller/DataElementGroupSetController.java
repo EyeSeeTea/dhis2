@@ -52,6 +52,10 @@ public class DataElementGroupSetController
     @Autowired
     private DataElementService dataElementService;
 
+    //-------------------------------------------------------------------------------------------------------
+    // GET
+    //-------------------------------------------------------------------------------------------------------
+
     @RequestMapping( method = RequestMethod.GET )
     public String getDataElementGroupSets( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {

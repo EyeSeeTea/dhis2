@@ -38,6 +38,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class IndexController
 {
+    //-------------------------------------------------------------------------------------------------------
+    // GET
+    //-------------------------------------------------------------------------------------------------------
+
     @RequestMapping( value = "/api", method = RequestMethod.GET )
     public String getIndex( Model model )
     {

@@ -52,6 +52,10 @@ public class CategoryOptionComboController
     @Autowired
     private DataElementCategoryService dataElementCategoryService;
 
+    //-------------------------------------------------------------------------------------------------------
+    // GET
+    //-------------------------------------------------------------------------------------------------------
+
     @RequestMapping( method = RequestMethod.GET )
     public String getCategoryOptionCombos( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {

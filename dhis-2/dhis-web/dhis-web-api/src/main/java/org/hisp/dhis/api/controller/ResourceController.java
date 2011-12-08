@@ -44,6 +44,10 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping( value = "/resources" )
 public class ResourceController
 {
+    //-------------------------------------------------------------------------------------------------------
+    // GET
+    //-------------------------------------------------------------------------------------------------------
+
     @RequestMapping( method = RequestMethod.GET )
     public String getResources( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {

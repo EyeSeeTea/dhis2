@@ -60,6 +60,10 @@ public class ChartController
     @Autowired
     private ChartService chartService;
 
+    //-------------------------------------------------------------------------------------------------------
+    // GET
+    //-------------------------------------------------------------------------------------------------------
+
     @RequestMapping( method = RequestMethod.GET )
     public String getCharts( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {

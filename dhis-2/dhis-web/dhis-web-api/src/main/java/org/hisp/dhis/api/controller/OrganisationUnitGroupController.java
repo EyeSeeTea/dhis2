@@ -25,6 +25,10 @@ public class OrganisationUnitGroupController
     @Autowired
     private OrganisationUnitGroupService organisationUnitGroupService;
 
+    //-------------------------------------------------------------------------------------------------------
+    // GET
+    //-------------------------------------------------------------------------------------------------------
+
     @RequestMapping( method = RequestMethod.GET )
     public String getOrganisationUnits( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {

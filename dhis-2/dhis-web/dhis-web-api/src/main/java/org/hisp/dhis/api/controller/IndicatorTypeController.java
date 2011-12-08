@@ -52,6 +52,10 @@ public class IndicatorTypeController
     @Autowired
     private IndicatorService indicatorService;
 
+    //-------------------------------------------------------------------------------------------------------
+    // GET
+    //-------------------------------------------------------------------------------------------------------
+
     @RequestMapping( method = RequestMethod.GET )
     public String getIndicatorTypes( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {

@@ -52,6 +52,10 @@ public class IndicatorGroupController
     @Autowired
     private IndicatorService indicatorService;
 
+    //-------------------------------------------------------------------------------------------------------
+    // GET
+    //-------------------------------------------------------------------------------------------------------
+
     @RequestMapping( method = RequestMethod.GET )
     public String getIndicatorGroups( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
