@@ -51,9 +51,11 @@ import java.util.ArrayList;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/categories" )
+@RequestMapping( value = CategoryController.RESOURCE_PATH )
 public class CategoryController
 {
+    public static final String RESOURCE_PATH = "/categories";
+
     @Autowired
     private DataElementCategoryService dataElementCategoryService;
 

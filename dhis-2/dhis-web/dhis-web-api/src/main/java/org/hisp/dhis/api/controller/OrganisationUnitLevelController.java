@@ -51,9 +51,11 @@ import java.util.ArrayList;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/organisationUnitLevels" )
+@RequestMapping( value = OrganisationUnitLevelController.RESOURCE_PATH )
 public class OrganisationUnitLevelController
 {
+    public static final String RESOURCE_PATH = "/organisationUnitLevels";
+
     @Autowired
     private OrganisationUnitService organisationUnitService;
 

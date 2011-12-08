@@ -41,9 +41,11 @@ import javax.servlet.http.HttpServletRequest;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/resources" )
+@RequestMapping( value = ResourceController.RESOURCE_PATH )
 public class ResourceController
 {
+    public static final String RESOURCE_PATH = "/resources";
+
     //-------------------------------------------------------------------------------------------------------
     // GET
     //-------------------------------------------------------------------------------------------------------

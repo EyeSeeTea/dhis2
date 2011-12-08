@@ -51,9 +51,11 @@ import java.util.ArrayList;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/dataElements" )
+@RequestMapping( value = DataElementController.RESOURCE_PATH )
 public class DataElementController
 {
+    public static final String RESOURCE_PATH = "/dataElements";
+
     @Autowired
     private DataElementService dataElementService;
 

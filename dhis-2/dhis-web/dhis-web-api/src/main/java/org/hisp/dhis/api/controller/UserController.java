@@ -51,9 +51,11 @@ import java.util.ArrayList;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/users" )
+@RequestMapping( value = UserController.RESOURCE_PATH )
 public class UserController
 {
+    public static final String RESOURCE_PATH = "/users";
+
     @Autowired
     private UserService userService;
 

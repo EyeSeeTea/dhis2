@@ -51,9 +51,11 @@ import java.util.ArrayList;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/indicators" )
+@RequestMapping( value = IndicatorController.RESOURCE_PATH )
 public class IndicatorController
 {
+    public static final String RESOURCE_PATH = "/indicators";
+
     @Autowired
     private IndicatorService indicatorService;
 

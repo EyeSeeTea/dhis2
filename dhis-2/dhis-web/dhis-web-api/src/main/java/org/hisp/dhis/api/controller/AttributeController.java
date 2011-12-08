@@ -206,8 +206,6 @@ public class AttributeController
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
     public void deleteAttribute( @PathVariable( "uid" ) String uid, HttpServletResponse response ) throws Exception
     {
-        //throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
-
         Attribute attribute = attributeService.getAttribute( uid );
 
         if ( attribute == null )

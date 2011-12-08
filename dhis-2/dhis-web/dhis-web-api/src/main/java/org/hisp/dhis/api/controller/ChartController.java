@@ -54,9 +54,11 @@ import java.util.Date;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/charts" )
+@RequestMapping( value = ChartController.RESOURCE_PATH )
 public class ChartController
 {
+    public static final String RESOURCE_PATH = "/charts";
+
     @Autowired
     private ChartService chartService;
 

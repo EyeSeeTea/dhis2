@@ -51,9 +51,11 @@ import java.util.ArrayList;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/categoryCombos" )
+@RequestMapping( value = CategoryComboController.RESOURCE_PATH )
 public class CategoryComboController
 {
+    public static final String RESOURCE_PATH = "/categoryCombos";
+
     @Autowired
     private DataElementCategoryService dataElementCategoryService;
 

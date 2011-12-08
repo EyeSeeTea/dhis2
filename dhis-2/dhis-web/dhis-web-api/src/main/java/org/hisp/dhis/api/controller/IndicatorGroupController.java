@@ -46,9 +46,11 @@ import java.util.ArrayList;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/indicatorGroups" )
+@RequestMapping( value = IndicatorGroupController.RESOURCE_PATH )
 public class IndicatorGroupController
 {
+    public static final String RESOURCE_PATH = "/indicatorGroups";
+
     @Autowired
     private IndicatorService indicatorService;
 

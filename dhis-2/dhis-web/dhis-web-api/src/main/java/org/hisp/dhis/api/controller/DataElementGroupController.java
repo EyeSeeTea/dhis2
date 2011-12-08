@@ -48,9 +48,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 @Controller
-@RequestMapping( value = "/dataElementGroups" )
+@RequestMapping( value = DataElementGroupController.RESOURCE_PATH )
 public class DataElementGroupController
 {
+    public static final String RESOURCE_PATH = "/dataElementGroups";
+
     @Autowired
     private DataElementService dataElementService;
 
