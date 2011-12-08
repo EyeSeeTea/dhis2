@@ -22,7 +22,7 @@ import java.util.ArrayList;
 @RequestMapping( value = OrganisationUnitGroupController.RESOURCE_PATH )
 public class OrganisationUnitGroupController
 {
-    public static final String RESOURCE_PATH = "/organisationUnits";
+    public static final String RESOURCE_PATH = "/organisationUnitGroups";
 
     @Autowired
     private OrganisationUnitGroupService organisationUnitGroupService;
