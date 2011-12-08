@@ -29,18 +29,17 @@ package org.hisp.dhis.api.controller;
 
 import org.hisp.dhis.api.utils.IdentifiableObjectParams;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
+import org.hisp.dhis.api.view.JacksonUtils;
+import org.hisp.dhis.api.view.Jaxb2Utils;
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.attribute.Attributes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,13 +50,13 @@ import java.util.ArrayList;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "/attributes" )
+@RequestMapping( value = AttributeController.RESOURCE_PATH )
 public class AttributeController
 {
+    public static final String RESOURCE_PATH = "/attributes";
+
     @Autowired
     private AttributeService attributeService;
-
-    // response.setHeader( "Location", "/attributes/" + attribute.getUid() );
 
     //-------------------------------------------------------------------------------------------------------
     // GET
@@ -101,17 +100,45 @@ public class AttributeController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
     public void postAttributeXML( HttpServletResponse response, InputStream input ) throws Exception
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+        Attribute attribute = (Attribute) Jaxb2Utils.unmarshal( Attribute.class, input );
+        postAttribute( attribute, response );
     }
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
     public void postAttributeJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+        Attribute attribute = JacksonUtils.readValueAs( Attribute.class, input );
+        postAttribute( attribute, response );
+    }
+
+    public void postAttribute( Attribute attribute, HttpServletResponse response )
+    {
+        if ( attribute == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_IMPLEMENTED );
+        }
+        else
+        {
+            try
+            {
+                attributeService.addAttribute( attribute );
+
+                if ( attribute.getUid() == null )
+                {
+                    response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                }
+                else
+                {
+                    response.setStatus( HttpServletResponse.SC_CREATED );
+                    response.setHeader( "Location", AttributeController.RESOURCE_PATH + "/" + attribute.getUid() );
+                }
+            } catch ( Exception e )
+            {
+                response.setStatus( HttpServletResponse.SC_CONFLICT );
+            }
+        }
     }
 
     //-------------------------------------------------------------------------------------------------------
@@ -119,17 +146,57 @@ public class AttributeController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/xml, text/xml"} )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void putAttributeXML( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    public void putAttributeXML( @PathVariable( "uid" ) String uid, InputStream input, HttpServletResponse response ) throws Exception
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
+        Attribute updateAttribute = (Attribute) Jaxb2Utils.unmarshal( Attribute.class, input );
+        updateAttribute.setUid( uid );
+        putAttribute( updateAttribute, response );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/json"} )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void putAttributeJSON( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    public void putAttributeJSON( @PathVariable( "uid" ) String uid, InputStream input, HttpServletResponse response ) throws Exception
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
+        Attribute updateAttribute = JacksonUtils.readValueAs( Attribute.class, input );
+        updateAttribute.setUid( uid );
+        putAttribute( updateAttribute, response );
+    }
+
+    public void putAttribute( Attribute updatedAttribute, HttpServletResponse response )
+    {
+        Attribute attribute = attributeService.getAttribute( updatedAttribute.getUid() );
+
+        if ( updatedAttribute == null || attribute == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_IMPLEMENTED );
+        }
+        else
+        {
+            attribute.setName( updatedAttribute.getName() );
+            attribute.setCode( updatedAttribute.getCode() );
+            attribute.setDataElementAttribute( updatedAttribute.isDataElementAttribute() );
+            attribute.setIndicatorAttribute( updatedAttribute.isIndicatorAttribute() );
+            attribute.setOrganisationUnitAttribute( updatedAttribute.isOrganisationUnitAttribute() );
+            attribute.setMandatory( updatedAttribute.isMandatory() );
+            attribute.setAttributeValues( updatedAttribute.getAttributeValues() );
+
+            try
+            {
+                attributeService.updateAttribute( attribute );
+
+                if ( updatedAttribute.getUid() == null )
+                {
+                    response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                }
+                else
+                {
+                    response.setStatus( HttpServletResponse.SC_NO_CONTENT );
+                    response.setHeader( "Location", AttributeController.RESOURCE_PATH + "/" + updatedAttribute.getUid() );
+                }
+            } catch ( Exception e )
+            {
+                response.setStatus( HttpServletResponse.SC_CONFLICT );
+            }
+        }
     }
 
     //-------------------------------------------------------------------------------------------------------
@@ -137,9 +204,20 @@ public class AttributeController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void deleteAttribute( @PathVariable( "uid" ) String uid ) throws Exception
+    public void deleteAttribute( @PathVariable( "uid" ) String uid, HttpServletResponse response ) throws Exception
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
+        //throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
+
+        Attribute attribute = attributeService.getAttribute( uid );
+
+        if ( attribute == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+        }
+        else
+        {
+            response.setStatus( HttpServletResponse.SC_NO_CONTENT );
+            attributeService.deleteAttribute( attribute );
+        }
     }
 }

@@ -31,6 +31,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import java.io.InputStream;
 
 public class Jaxb2Utils
 {
@@ -44,5 +46,21 @@ public class Jaxb2Utils
         marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
 
         return marshaller;
+    }
+
+    public static Unmarshaller createUnmarshaller( Class<?> clazz )
+        throws JAXBException
+    {
+        JAXBContext context = JAXBContext.newInstance( clazz );
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+
+        return unmarshaller;
+    }
+
+    public static <T> T unmarshal( Class<?> clazz, InputStream input ) throws JAXBException
+    {
+        Unmarshaller unmarshaller = Jaxb2Utils.createUnmarshaller( clazz );
+
+        return (T) unmarshaller.unmarshal( input );
     }
 }
