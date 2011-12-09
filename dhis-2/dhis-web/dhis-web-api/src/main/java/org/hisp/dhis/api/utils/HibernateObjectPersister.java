@@ -27,9 +27,20 @@ package org.hisp.dhis.api.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.indicator.IndicatorGroupSet;
+import org.hisp.dhis.indicator.IndicatorType;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +61,12 @@ public class HibernateObjectPersister implements ObjectPersister
 
     @Autowired
     private DataSetService dataSetService;
+
+    @Override
+    public void persistAttribute( Attribute attribute )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 
     public void persistDataElement( DataElement dataElement )
     {
@@ -79,5 +96,107 @@ public class HibernateObjectPersister implements ObjectPersister
         }
 
         dataElementService.updateDataElement( dataElement );
+    }
+
+    @Override
+    public void persistDataElementGroup( DataElementGroup dataElementGroup )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistDataElementGroupSet( DataElementGroupSet dataElementGroupSet )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistCategory( DataElementCategory category )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistCategoryOption( DataElementCategoryOption categoryOption )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistCategoryCombo( DataElementCategoryCombo categoryCombo )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistIndicator( Indicator indicator )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistIndicatorType( IndicatorType indicatorType )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistIndicatorGroup( IndicatorGroup indicatorGroup )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistIndicatorGroupSet( IndicatorGroupSet indicatorGroupSet )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistOrganisationUnitLevel( OrganisationUnitLevel organisationUnitLevel )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistOrganisationUnitGroup( OrganisationUnitGroup organisationUnitGroup )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistDataSet( DataSet dataSet )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistChart( Chart chart )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void persistUser( User user )
+    {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 }
