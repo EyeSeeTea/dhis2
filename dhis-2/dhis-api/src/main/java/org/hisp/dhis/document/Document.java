@@ -27,26 +27,33 @@ package org.hisp.dhis.document;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.Dxf2Namespace;
+
+import javax.xml.bind.annotation.*;
+
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
+@XmlRootElement( name = "dataElement", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
 public class Document
 {
     private int id;
-    
+
     private String name;
-    
+
     private String url;
-    
+
     private boolean external;
-    
+
     private String contentType;
-    
+
     public Document()
-    {   
+    {
     }
-    
+
     public Document( String name, String url, boolean external, String contentType )
     {
         this.name = name;
@@ -59,7 +66,7 @@ public class Document
     public int hashCode()
     {
         return name.hashCode();
-    }    
+    }
 
     @Override
     public boolean equals( Object object )
@@ -68,19 +75,19 @@ public class Document
         {
             return true;
         }
-        
+
         if ( object == null )
         {
             return false;
         }
-        
+
         if ( getClass() != object.getClass() )
         {
             return false;
         }
-        
+
         final Document other = (Document) object;
-    
+
         return name.equals( other.name );
     }
 
@@ -94,6 +101,8 @@ public class Document
         this.id = id;
     }
 
+    @XmlAttribute
+    @JsonProperty
     public String getName()
     {
         return name;
@@ -104,6 +113,8 @@ public class Document
         this.name = name;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getUrl()
     {
         return url;
@@ -114,6 +125,8 @@ public class Document
         this.url = url;
     }
 
+    @XmlElement
+    @JsonProperty
     public boolean isExternal()
     {
         return external;
@@ -124,6 +137,8 @@ public class Document
         this.external = external;
     }
 
+    @XmlElement
+    @JsonProperty
     public String getContentType()
     {
         return contentType;
