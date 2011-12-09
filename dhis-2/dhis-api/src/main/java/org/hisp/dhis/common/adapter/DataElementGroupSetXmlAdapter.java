@@ -28,34 +28,33 @@ package org.hisp.dhis.common.adapter;
  */
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.dataelement.DataElementGroupSet;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.UUID;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class BaseIdentifiableObjectXmlAdapter extends XmlAdapter<BaseIdentifiableObject, BaseIdentifiableObject>
+public class DataElementGroupSetXmlAdapter extends XmlAdapter<BaseIdentifiableObject, DataElementGroupSet>
 {
+    private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
+
     @Override
-    public BaseIdentifiableObject unmarshal( BaseIdentifiableObject baseIdentifiableObject ) throws Exception
+    public DataElementGroupSet unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
     {
-        return baseIdentifiableObject;
+        DataElementGroupSet dataElementGroupSet = new DataElementGroupSet();
+
+        dataElementGroupSet.setUid( identifiableObject.getUid() );
+        dataElementGroupSet.setLastUpdated( identifiableObject.getLastUpdated() );
+        dataElementGroupSet.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
+
+        return dataElementGroupSet;
     }
 
     @Override
-    public BaseIdentifiableObject marshal( BaseIdentifiableObject baseIdentifiableObject ) throws Exception
+    public BaseIdentifiableObject marshal( DataElementGroupSet dataElementGroupSet ) throws Exception
     {
-        if ( baseIdentifiableObject != null )
-        {
-            BaseIdentifiableObject bio = new BaseIdentifiableObject();
-
-            bio.setUid( baseIdentifiableObject.getUid() );
-            bio.setName( baseIdentifiableObject.getName() );
-            bio.setLastUpdated( baseIdentifiableObject.getLastUpdated() );
-
-            return bio;
-        }
-
-        return null;
+        return baseIdentifiableObjectXmlAdapter.marshal( dataElementGroupSet );
     }
 }

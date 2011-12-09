@@ -27,42 +27,34 @@ package org.hisp.dhis.common.adapter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.lang.NotImplementedException;
-import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.dataelement.DataElementGroup;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.UUID;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class BaseNameableObjectXmlAdapter extends XmlAdapter<BaseNameableObject, BaseNameableObject>
+public class DataElementGroupXmlAdapter extends XmlAdapter<BaseIdentifiableObject, DataElementGroup>
 {
+    private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
+
     @Override
-    public BaseNameableObject unmarshal( BaseNameableObject baseNameableObject ) throws Exception
+    public DataElementGroup unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
     {
-        throw new NotImplementedException();
+        DataElementGroup dataElementGroup = new DataElementGroup();
+
+        dataElementGroup.setUid( identifiableObject.getUid() );
+        dataElementGroup.setLastUpdated( identifiableObject.getLastUpdated() );
+        dataElementGroup.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
+
+        return dataElementGroup;
     }
 
     @Override
-    public BaseNameableObject marshal( BaseNameableObject baseNameableObject ) throws Exception
+    public BaseIdentifiableObject marshal( DataElementGroup dataElementGroup ) throws Exception
     {
-        if ( baseNameableObject != null )
-        {
-            BaseNameableObject bno = new BaseNameableObject();
-
-            bno.setUid( baseNameableObject.getUid() );
-            bno.setCode( baseNameableObject.getCode() );
-            bno.setName( baseNameableObject.getName() );
-            bno.setLastUpdated( baseNameableObject.getLastUpdated() );
-            bno.setLink( baseNameableObject.getLink() );
-
-            bno.setShortName( baseNameableObject.getShortName() );
-            bno.setAlternativeName( baseNameableObject.getAlternativeName() );
-            bno.setDescription( baseNameableObject.getDescription() );
-
-            return bno;
-        }
-
-        return null;
+        return baseIdentifiableObjectXmlAdapter.marshal( dataElementGroup );
     }
 }

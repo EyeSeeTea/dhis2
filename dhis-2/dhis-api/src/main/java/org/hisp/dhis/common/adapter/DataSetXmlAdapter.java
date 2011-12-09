@@ -28,34 +28,33 @@ package org.hisp.dhis.common.adapter;
  */
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.dataset.DataSet;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.UUID;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class BaseIdentifiableObjectXmlAdapter extends XmlAdapter<BaseIdentifiableObject, BaseIdentifiableObject>
+public class DataSetXmlAdapter extends XmlAdapter<BaseIdentifiableObject, DataSet>
 {
+    private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
+
     @Override
-    public BaseIdentifiableObject unmarshal( BaseIdentifiableObject baseIdentifiableObject ) throws Exception
+    public DataSet unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
     {
-        return baseIdentifiableObject;
+        DataSet dataSet = new DataSet();
+
+        dataSet.setUid( identifiableObject.getUid() );
+        dataSet.setLastUpdated( identifiableObject.getLastUpdated() );
+        dataSet.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
+
+        return dataSet;
     }
 
     @Override
-    public BaseIdentifiableObject marshal( BaseIdentifiableObject baseIdentifiableObject ) throws Exception
+    public BaseIdentifiableObject marshal( DataSet dataSet ) throws Exception
     {
-        if ( baseIdentifiableObject != null )
-        {
-            BaseIdentifiableObject bio = new BaseIdentifiableObject();
-
-            bio.setUid( baseIdentifiableObject.getUid() );
-            bio.setName( baseIdentifiableObject.getName() );
-            bio.setLastUpdated( baseIdentifiableObject.getLastUpdated() );
-
-            return bio;
-        }
-
-        return null;
+        return baseIdentifiableObjectXmlAdapter.marshal( dataSet );
     }
 }

@@ -27,6 +27,7 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.adapter.JsonDateSerializer;
@@ -102,7 +103,6 @@ public class BaseIdentifiableObject extends BaseLinkableObject
         this.id = id;
     }
 
-    @XmlID
     @XmlAttribute( name = "id" )
     @JsonProperty( value = "id" )
     public String getUid()
@@ -115,7 +115,7 @@ public class BaseIdentifiableObject extends BaseLinkableObject
         this.uid = uid;
     }
 
-    @XmlAttribute
+    @XmlAttribute(required = false)
     @JsonProperty
     @JsonSerialize( include = JsonSerialize.Inclusion.NON_NULL )
     public String getCode()
@@ -128,8 +128,9 @@ public class BaseIdentifiableObject extends BaseLinkableObject
         this.code = code;
     }
 
-    @XmlAttribute
+    @XmlAttribute(required = false)
     @JsonProperty
+    @JsonSerialize( include = JsonSerialize.Inclusion.NON_NULL )
     public String getName()
     {
         return name;
@@ -140,9 +141,9 @@ public class BaseIdentifiableObject extends BaseLinkableObject
         this.name = name;
     }
 
-    @XmlAttribute
+    @XmlAttribute(required = false)
     @JsonProperty
-    @JsonSerialize( using = JsonDateSerializer.class )
+    @JsonSerialize( include = JsonSerialize.Inclusion.NON_NULL )
     public Date getLastUpdated()
     {
         return lastUpdated;

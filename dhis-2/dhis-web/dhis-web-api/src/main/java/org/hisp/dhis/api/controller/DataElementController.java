@@ -28,10 +28,13 @@ package org.hisp.dhis.api.controller;
  */
 
 import org.hisp.dhis.api.utils.IdentifiableObjectParams;
+import org.hisp.dhis.api.utils.ObjectPersister;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
+import org.hisp.dhis.api.view.Jaxb2Utils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataelement.DataElements;
+import org.hisp.dhis.dataset.DataSetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -58,6 +61,12 @@ public class DataElementController
 
     @Autowired
     private DataElementService dataElementService;
+
+    @Autowired
+    private DataSetService dataSetService;
+
+    @Autowired
+    private ObjectPersister objectPersister;
 
     //-------------------------------------------------------------------------------------------------------
     // GET
@@ -101,17 +110,47 @@ public class DataElementController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
     public void postDataElementXML( HttpServletResponse response, InputStream input ) throws Exception
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+        DataElement dataElement = Jaxb2Utils.unmarshal( DataElement.class, input );
+        postDataElement( dataElement, response );
     }
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
     public void postDataElementJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+        //DataElement dataElement = JacksonUtils.readValueAs( DataElement.class, input );
+        //postDataElement( dataElement, response );
+    }
+
+    public void postDataElement( DataElement dataElement, HttpServletResponse response )
+    {
+        if ( dataElement == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_IMPLEMENTED );
+        }
+        else
+        {
+            try
+            {
+                objectPersister.persistDataElement( dataElement );
+
+                if ( dataElement.getUid() == null )
+                {
+                    response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                }
+                else
+                {
+                    response.setStatus( HttpServletResponse.SC_CREATED );
+                    response.setHeader( "Location", DataElementController.RESOURCE_PATH + "/" + dataElement.getUid() );
+                }
+            } catch ( Exception e )
+            {
+                e.printStackTrace();
+                response.setStatus( HttpServletResponse.SC_CONFLICT );
+            }
+        }
     }
 
     //-------------------------------------------------------------------------------------------------------
