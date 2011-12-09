@@ -132,7 +132,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore" class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementCategoryOptionComboStore">
+  <bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -238,16 +238,19 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
   <bean id="org.hisp.dhis.version.VersionStore" class="org.hisp.dhis.version.hibernate.HibernateVersionStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="clazz" value="org.hisp.dhis.version.Version" />
+    <property name="cacheable" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.attribute.AttributeStore" class="org.hisp.dhis.attribute.hibernate.HibernateAttributeStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="clazz" value="org.hisp.dhis.attribute.Attribute" />
+    <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.attribute.AttributeValueStore" class="org.hisp.dhis.attribute.hibernate.HibernateAttributeValueStore">
+  <bean id="org.hisp.dhis.attribute.AttributeValueStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="clazz" value="org.hisp.dhis.attribute.AttributeValue" />
+    <property name="cacheable" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.options.SystemSettingStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">

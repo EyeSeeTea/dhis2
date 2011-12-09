@@ -1,5 +1,7 @@
 package org.hisp.dhis.document;
 
+import org.hisp.dhis.common.BaseIdentifiableObject;
+
 /*
  * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
@@ -39,11 +41,8 @@ import javax.xml.bind.annotation.*;
 @XmlRootElement( name = "dataElement", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class Document
+    extends BaseIdentifiableObject
 {
-    private int id;
-
-    private String name;
-
     private String url;
 
     private boolean external;
@@ -89,28 +88,6 @@ public class Document
         final Document other = (Document) object;
 
         return name.equals( other.name );
-    }
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    @XmlAttribute
-    @JsonProperty
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
     }
 
     @XmlElement
