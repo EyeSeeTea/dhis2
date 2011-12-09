@@ -1,19 +1,7 @@
-package org.hisp.dhis.mapping;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.hisp.dhis.common.BaseLinkableObject;
-import org.hisp.dhis.common.Dxf2Namespace;
+package org.hisp.dhis.common.adapter;
 
 /*
- * Copyright (c) 2011, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,22 +27,34 @@ import org.hisp.dhis.common.Dxf2Namespace;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-@XmlRootElement( name = "maps", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
-public class Maps extends BaseLinkableObject
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.dataelement.DataElement;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.UUID;
+
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class DataElementXmlAdapter extends XmlAdapter<BaseIdentifiableObject, DataElement>
 {
-    private List<MapView> maps = new ArrayList<MapView>();
+    private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
 
-    @XmlElement( name = "map" )
-    @JsonProperty( value = "maps" )
-    public List<MapView> getMaps()
+    @Override
+    public DataElement unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
     {
-        return maps;
+        DataElement dataElement = new DataElement();
+
+        dataElement.setUid( identifiableObject.getUid() );
+        dataElement.setLastUpdated( identifiableObject.getLastUpdated() );
+        dataElement.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
+
+        return dataElement;
     }
 
-    public void setMaps( List<MapView> maps )
+    @Override
+    public BaseIdentifiableObject marshal( DataElement dataElement ) throws Exception
     {
-        this.maps = maps;
+        return baseIdentifiableObjectXmlAdapter.marshal( dataElement );
     }
-
 }
