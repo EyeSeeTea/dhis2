@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.view;
+package org.hisp.dhis.common.adapter;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -28,46 +28,33 @@ package org.hisp.dhis.api.view;
  */
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
-import org.hisp.dhis.common.adapter.DataElementGroupXmlAdapter;
-import org.hisp.dhis.common.adapter.DataSetXmlAdapter;
 import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataset.DataSet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
-import java.io.InputStream;
+import java.util.UUID;
 
-public class Jaxb2Utils
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class DataElementGroupXmlAdapter extends XmlAdapter<BaseIdentifiableObject, DataElementGroup>
 {
-    public static Marshaller createMarshaller( Object domainModel, HttpServletRequest request )
-        throws JAXBException
+    private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
+
+    @Override
+    public DataElementGroup unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
     {
-        JAXBContext context = JAXBContext.newInstance( domainModel.getClass() );
+        DataElementGroup dataElementGroup = new DataElementGroup();
 
-        Marshaller marshaller = context.createMarshaller();
-        marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, false );
-        marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+        dataElementGroup.setUid( identifiableObject.getUid() );
+        dataElementGroup.setLastUpdated( identifiableObject.getLastUpdated() );
+        dataElementGroup.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
 
-        return marshaller;
+        return dataElementGroup;
     }
 
-    public static Unmarshaller createUnmarshaller( Class<?> clazz )
-        throws JAXBException
+    @Override
+    public BaseIdentifiableObject marshal( DataElementGroup dataElementGroup ) throws Exception
     {
-        JAXBContext context = JAXBContext.newInstance( clazz );
-
-        Unmarshaller unmarshaller = context.createUnmarshaller();
-
-        return unmarshaller;
-    }
-
-    public static <T> T unmarshal( Class<?> clazz, InputStream input ) throws JAXBException
-    {
-        return (T) Jaxb2Utils.createUnmarshaller( clazz ).unmarshal( input );
+        return baseIdentifiableObjectXmlAdapter.marshal( dataElementGroup );
     }
 }
