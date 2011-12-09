@@ -1,5 +1,7 @@
+package org.hisp.dhis.common.adapter;
+
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,19 +27,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.dataelement.DataElement;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.UUID;
+
 /**
- * @author bobj
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+public class DataElementXmlAdapter extends XmlAdapter<BaseIdentifiableObject, DataElement>
+{
+    private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
 
-@XmlSchema(
-    namespace = "http://dhis2.org/schema/dxf/2.0",
-    xmlns = {   
-         @XmlNs(namespaceURI = "http://dhis2.org/schema/dxf/2.0", prefix = "d")  
-    },
-    elementFormDefault = XmlNsForm.QUALIFIED) 
+    @Override
+    public DataElement unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
+    {
+        DataElement dataElement = new DataElement();
 
-package org.hisp.dhis.codelist;
+        dataElement.setUid( identifiableObject.getUid() );
+        dataElement.setLastUpdated( identifiableObject.getLastUpdated() );
+        dataElement.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
 
-import javax.xml.bind.annotation.XmlSchema;
-import javax.xml.bind.annotation.XmlNs;
-import javax.xml.bind.annotation.XmlNsForm;
+        return dataElement;
+    }
+
+    @Override
+    public BaseIdentifiableObject marshal( DataElement dataElement ) throws Exception
+    {
+        return baseIdentifiableObjectXmlAdapter.marshal( dataElement );
+    }
+}

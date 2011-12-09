@@ -1,3 +1,5 @@
+package org.hisp.dhis.common.adapter;
+
 /*
  * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
@@ -25,43 +27,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.attribute;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseLinkableObject;
-import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.AttributeXmlAdapter;
+import org.hisp.dhis.period.Period;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.ArrayList;
-import java.util.List;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.UUID;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@XmlRootElement( name = "attributeTypes", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
-public class Attributes extends BaseLinkableObject
+public class PeriodXmlAdapter extends XmlAdapter<BaseIdentifiableObject, Period>
 {
-    private List<Attribute> attributes = new ArrayList<Attribute>();
+    private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
 
-    @XmlElement( name = "attributeType" )
-    @XmlJavaTypeAdapter( AttributeXmlAdapter.class )
-    @JsonProperty( value = "attributeTypes" )
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    public List<Attribute> getAttributes()
+    @Override
+    public Period unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
     {
-        return attributes;
+        Period period = new Period();
+
+        period.setUid( identifiableObject.getUid() );
+        period.setLastUpdated( identifiableObject.getLastUpdated() );
+        period.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
+
+        return period;
     }
 
-    public void setAttributes( List<Attribute> attributes )
+    @Override
+    public BaseIdentifiableObject marshal( Period period ) throws Exception
     {
-        this.attributes = attributes;
+        return baseIdentifiableObjectXmlAdapter.marshal( period );
     }
 }
