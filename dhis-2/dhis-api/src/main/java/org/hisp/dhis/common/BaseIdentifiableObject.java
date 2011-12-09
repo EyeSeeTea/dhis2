@@ -82,6 +82,10 @@ public class BaseIdentifiableObject extends BaseLinkableObject
      */
     private Date lastUpdated;
 
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
     public BaseIdentifiableObject()
     {
     }
@@ -92,6 +96,10 @@ public class BaseIdentifiableObject extends BaseLinkableObject
         this.uuid = uuid;
         this.name = name;
     }
+
+    // -------------------------------------------------------------------------
+    // Setters and getters
+    // -------------------------------------------------------------------------
 
     public int getId()
     {
@@ -153,6 +161,10 @@ public class BaseIdentifiableObject extends BaseLinkableObject
     {
         this.lastUpdated = lastUpdated;
     }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
 
     /**
      * Set auto-generated fields on save or update

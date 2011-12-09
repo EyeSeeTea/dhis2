@@ -1,7 +1,7 @@
-package org.hisp.dhis.common.hibernate;
+package org.hisp.dhis.common.adapter;
 
 /*
- * Copyright (c) 2004-2005, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,7 +11,7 @@ package org.hisp.dhis.common.hibernate;
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * * Neither the name of the <ORGANIZATION> nor the names of its contributors may
+ * * Neither the name of the HISP project nor the names of its contributors may
  *   be used to endorse or promote products derived from this software without
  *   specific prior written permission.
  *
@@ -27,35 +27,35 @@ package org.hisp.dhis.common.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.common.BaseNameableObject;
+
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * @author bobj
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class HibernateIdentifiableObjectStore<T extends BaseIdentifiableObject>
-    extends HibernateGenericStore<T>
-    implements GenericIdentifiableObjectStore<T>
+public class BaseNameableObjectXmlAdapter extends XmlAdapter<BaseNameableObject, BaseNameableObject>
 {
     @Override
-    public final int save( T object )
+    public BaseNameableObject unmarshal( BaseNameableObject baseIdentifiableObject ) throws Exception
     {
-        object.setAutoFields();
-        return super.save( object );
+        return baseIdentifiableObject;
     }
 
     @Override
-    public final void update( T object )
+    public BaseNameableObject marshal( BaseNameableObject baseIdentifiableObject ) throws Exception
     {
-        object.setAutoFields();
-        super.update( object );
-    }
+        if ( baseIdentifiableObject != null )
+        {
+            BaseNameableObject bio = new BaseNameableObject();
 
-    @Override
-    public final void saveOrUpdate( T object )
-    {
-        object.setAutoFields();
-        super.saveOrUpdate( object );
+            bio.setUid( baseIdentifiableObject.getUid() );
+            bio.setName( baseIdentifiableObject.getName() );
+            bio.setLastUpdated( baseIdentifiableObject.getLastUpdated() );
+
+            return bio;
+        }
+
+        return null;
     }
 }
