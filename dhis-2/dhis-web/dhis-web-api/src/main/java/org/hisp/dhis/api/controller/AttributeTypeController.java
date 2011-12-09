@@ -50,10 +50,10 @@ import java.util.ArrayList;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = AttributeController.RESOURCE_PATH )
-public class AttributeController
+@RequestMapping( value = AttributeTypeController.RESOURCE_PATH )
+public class AttributeTypeController
 {
-    public static final String RESOURCE_PATH = "/attributes";
+    public static final String RESOURCE_PATH = "/attributeTypes";
 
     @Autowired
     private AttributeService attributeService;
@@ -63,7 +63,7 @@ public class AttributeController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getAttributes( IdentifiableObjectParams params, Model model, HttpServletRequest request )
+    public String getAttributeTypes( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
         Attributes attributes = new Attributes();
         attributes.setAttributes( new ArrayList<Attribute>( attributeService.getAllAttributes() ) );
@@ -76,11 +76,11 @@ public class AttributeController
 
         model.addAttribute( "model", attributes );
 
-        return "attributes";
+        return "attributeTypes";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getAttribute( @PathVariable( "uid" ) String uid, IdentifiableObjectParams params, Model model, HttpServletRequest request )
+    public String getAttributeType( @PathVariable( "uid" ) String uid, IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
         Attribute attribute = attributeService.getAttribute( uid );
 
@@ -92,7 +92,7 @@ public class AttributeController
 
         model.addAttribute( "model", attribute );
 
-        return "attribute";
+        return "attributeType";
     }
 
     //-------------------------------------------------------------------------------------------------------
@@ -100,20 +100,20 @@ public class AttributeController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
-    public void postAttributeXML( HttpServletResponse response, InputStream input ) throws Exception
+    public void postAttributeTypeXML( HttpServletResponse response, InputStream input ) throws Exception
     {
         Attribute attribute = (Attribute) Jaxb2Utils.unmarshal( Attribute.class, input );
-        postAttribute( attribute, response );
+        postAttributeType( attribute, response );
     }
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
-    public void postAttributeJSON( HttpServletResponse response, InputStream input ) throws Exception
+    public void postAttributeTypeJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
         Attribute attribute = JacksonUtils.readValueAs( Attribute.class, input );
-        postAttribute( attribute, response );
+        postAttributeType( attribute, response );
     }
 
-    public void postAttribute( Attribute attribute, HttpServletResponse response )
+    public void postAttributeType( Attribute attribute, HttpServletResponse response )
     {
         if ( attribute == null )
         {
@@ -132,7 +132,7 @@ public class AttributeController
                 else
                 {
                     response.setStatus( HttpServletResponse.SC_CREATED );
-                    response.setHeader( "Location", AttributeController.RESOURCE_PATH + "/" + attribute.getUid() );
+                    response.setHeader( "Location", AttributeTypeController.RESOURCE_PATH + "/" + attribute.getUid() );
                 }
             } catch ( Exception e )
             {
@@ -146,22 +146,22 @@ public class AttributeController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/xml, text/xml"} )
-    public void putAttributeXML( @PathVariable( "uid" ) String uid, InputStream input, HttpServletResponse response ) throws Exception
+    public void putAttributeTypeXML( @PathVariable( "uid" ) String uid, InputStream input, HttpServletResponse response ) throws Exception
     {
         Attribute updateAttribute = (Attribute) Jaxb2Utils.unmarshal( Attribute.class, input );
         updateAttribute.setUid( uid );
-        putAttribute( updateAttribute, response );
+        putAttributeType( updateAttribute, response );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/json"} )
-    public void putAttributeJSON( @PathVariable( "uid" ) String uid, InputStream input, HttpServletResponse response ) throws Exception
+    public void putAttributeTypeJSON( @PathVariable( "uid" ) String uid, InputStream input, HttpServletResponse response ) throws Exception
     {
         Attribute updateAttribute = JacksonUtils.readValueAs( Attribute.class, input );
         updateAttribute.setUid( uid );
-        putAttribute( updateAttribute, response );
+        putAttributeType( updateAttribute, response );
     }
 
-    public void putAttribute( Attribute updatedAttribute, HttpServletResponse response )
+    public void putAttributeType( Attribute updatedAttribute, HttpServletResponse response )
     {
         Attribute attribute = attributeService.getAttribute( updatedAttribute.getUid() );
 
@@ -190,7 +190,7 @@ public class AttributeController
                 else
                 {
                     response.setStatus( HttpServletResponse.SC_NO_CONTENT );
-                    response.setHeader( "Location", AttributeController.RESOURCE_PATH + "/" + updatedAttribute.getUid() );
+                    response.setHeader( "Location", AttributeTypeController.RESOURCE_PATH + "/" + updatedAttribute.getUid() );
                 }
             } catch ( Exception e )
             {
@@ -204,7 +204,7 @@ public class AttributeController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
-    public void deleteAttribute( @PathVariable( "uid" ) String uid, HttpServletResponse response ) throws Exception
+    public void deleteAttributeType( @PathVariable( "uid" ) String uid, HttpServletResponse response ) throws Exception
     {
         Attribute attribute = attributeService.getAttribute( uid );
 

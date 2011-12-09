@@ -52,6 +52,7 @@ public class BaseIdentifiableObjectXmlAdapter extends XmlAdapter<BaseIdentifiabl
             bio.setUid( baseIdentifiableObject.getUid() );
             bio.setName( baseIdentifiableObject.getName() );
             bio.setLastUpdated( baseIdentifiableObject.getLastUpdated() );
+            bio.setLink( baseIdentifiableObject.getLink() );
 
             return bio;
         }

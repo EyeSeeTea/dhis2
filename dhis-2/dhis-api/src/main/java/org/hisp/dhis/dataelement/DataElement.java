@@ -29,10 +29,11 @@ package org.hisp.dhis.dataelement;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
 import org.hisp.dhis.common.adapter.CategoryComboXmlAdapter;
 import org.hisp.dhis.common.adapter.DataElementGroupXmlAdapter;
 import org.hisp.dhis.common.adapter.DataSetXmlAdapter;
@@ -435,6 +436,8 @@ public class DataElement extends BaseNameableObject
 
     @XmlElement
     @XmlJavaTypeAdapter( CategoryComboXmlAdapter.class )
+    @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
@@ -472,6 +475,8 @@ public class DataElement extends BaseNameableObject
     @XmlElementWrapper( name = "dataElementGroups" )
     @XmlElement( name = "dataElementGroup" )
     @XmlJavaTypeAdapter( DataElementGroupXmlAdapter.class )
+    @JsonProperty( value = "dataElementGroups" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public Set<DataElementGroup> getGroups()
     {
         return groups;
@@ -485,6 +490,7 @@ public class DataElement extends BaseNameableObject
     @XmlElementWrapper( name = "dataSets" )
     @XmlElement( name = "dataSet" )
     @XmlJavaTypeAdapter( DataSetXmlAdapter.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -533,6 +539,7 @@ public class DataElement extends BaseNameableObject
 
     @XmlElementWrapper( name = "attributes" )
     @XmlElement( name = "attribute" )
+    @JsonProperty( value = "attributes" )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

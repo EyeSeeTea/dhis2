@@ -6,6 +6,8 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.introspect.JacksonAnnotationIntrospector;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
@@ -23,10 +25,17 @@ public class JacksonUtils
         ObjectMapper objectMapper = new ObjectMapper();
 
         AnnotationIntrospector jacksonAnnotationIntrospector = new JacksonAnnotationIntrospector();
-        AnnotationIntrospector jaxAnnotationIntrospector = new JaxbAnnotationIntrospector();
-        AnnotationIntrospector pair = new AnnotationIntrospector.Pair( jacksonAnnotationIntrospector, jaxAnnotationIntrospector );
+        //AnnotationIntrospector jaxAnnotationIntrospector = new JaxbAnnotationIntrospector();
+        //AnnotationIntrospector pair = new AnnotationIntrospector.Pair( jacksonAnnotationIntrospector, jaxAnnotationIntrospector );
 
-        objectMapper.setAnnotationIntrospector( pair );
+        objectMapper.setAnnotationIntrospector( jacksonAnnotationIntrospector );
+        objectMapper.setSerializationInclusion( JsonSerialize.Inclusion.NON_NULL );
+        objectMapper.configure( SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, false );
+        objectMapper.configure( SerializationConfig.Feature.WRITE_EMPTY_JSON_ARRAYS, false );
+        objectMapper.configure( SerializationConfig.Feature.FAIL_ON_EMPTY_BEANS, false );
+        objectMapper.configure( SerializationConfig.Feature.AUTO_DETECT_FIELDS, false );
+        objectMapper.configure( SerializationConfig.Feature.AUTO_DETECT_GETTERS, false );
+        objectMapper.configure( SerializationConfig.Feature.AUTO_DETECT_IS_GETTERS, false );
 
         JsonFactory factory = objectMapper.getJsonFactory();
         factory.enable( JsonGenerator.Feature.QUOTE_FIELD_NAMES );

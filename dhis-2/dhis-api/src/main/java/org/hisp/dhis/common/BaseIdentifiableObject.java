@@ -43,7 +43,6 @@ import java.util.Map;
  */
 @XmlRootElement( name = "identifiableObject", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-@XmlType( propOrder = {"uid", "name", "code", "lastUpdated" } )
 public class BaseIdentifiableObject extends BaseLinkableObject
     implements IdentifiableObject
 {
@@ -125,7 +124,6 @@ public class BaseIdentifiableObject extends BaseLinkableObject
 
     @XmlAttribute(required = false)
     @JsonProperty
-    @JsonSerialize( include = JsonSerialize.Inclusion.NON_NULL )
     public String getCode()
     {
         return code;
@@ -138,7 +136,6 @@ public class BaseIdentifiableObject extends BaseLinkableObject
 
     @XmlAttribute(required = false)
     @JsonProperty
-    @JsonSerialize( include = JsonSerialize.Inclusion.NON_NULL )
     public String getName()
     {
         return name;
@@ -151,7 +148,6 @@ public class BaseIdentifiableObject extends BaseLinkableObject
 
     @XmlAttribute(required = false)
     @JsonProperty
-    @JsonSerialize( include = JsonSerialize.Inclusion.NON_NULL )
     public Date getLastUpdated()
     {
         return lastUpdated;

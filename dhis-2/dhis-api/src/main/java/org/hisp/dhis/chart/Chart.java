@@ -280,8 +280,8 @@ public class Chart
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @XmlElement
-    @JsonProperty
+    @XmlElement( name = "domainAxisLabel" )
+    @JsonProperty( value = "domainAxisLabel" )
     public String getDomainAxixLabel()
     {
         return domainAxixLabel;
@@ -476,7 +476,7 @@ public class Chart
     @XmlElementWrapper( name = "indicators" )
     @XmlElement( name = "indicator" )
     @JsonProperty
-    @JsonSerialize( using = JsonNameableObjectCollectionSerializer.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public List<Indicator> getIndicators()
     {
         return indicators;
@@ -487,11 +487,11 @@ public class Chart
         this.indicators = indicators;
     }
 
-    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "dataElements" )
     @XmlElement( name = "dataElement" )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @JsonProperty
-    @JsonSerialize( using = JsonNameableObjectCollectionSerializer.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public List<DataElement> getDataElements()
     {
         return dataElements;
@@ -502,11 +502,11 @@ public class Chart
         this.dataElements = dataElements;
     }
 
-    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @XmlElementWrapper( name = "dataSets" )
     @XmlElement( name = "dataSet" )
+    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
     @JsonProperty
-    @JsonSerialize( using = JsonNameableObjectCollectionSerializer.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public List<DataSet> getDataSets()
     {
         return dataSets;
