@@ -66,8 +66,6 @@ public class HibernateObjectPersister implements ObjectPersister
 
         dataElementService.addDataElement( dataElement );
 
-        System.err.println( "UID: " + dataElement.getUid() );
-
         for ( DataElementGroup dataElementGroup : dataElementGroups )
         {
             dataElementGroup = dataElementService.getDataElementGroup( dataElementGroup.getUid() );
