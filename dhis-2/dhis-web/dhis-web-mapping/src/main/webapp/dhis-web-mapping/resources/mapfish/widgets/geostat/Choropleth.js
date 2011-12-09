@@ -87,6 +87,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
     featureStorage: [],
     
     filtering: {
+        scope: this,
         cache: [],
         options: {
             gt: null,
@@ -95,7 +96,14 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
         cmp: {
             gt: null,
             lt: null,
-            button: null
+            button: null,
+            window: null
+        },
+        isFiltered: function() {
+            if (this.cmp.gt.getValue() || this.cmp.lt.getValue()) {
+                return true;
+            }
+            return false;
         },
         filter: function() {
             var gt = this.filtering.options.gt;
@@ -133,105 +141,103 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             }
             this.layer.removeAllFeatures();
             this.layer.addFeatures(add);
+            this.coreComp.updateLegend(this.filtering.isFiltered());
         },
         showFilteringWindow: function() {
-            var window = new Ext.Window({
-                title: '<span class="window-filter-title">Organisation unit filter</span>',
-                layout: 'fit',
-                autoHeight: true,
-                height: 'auto',
-                width: G.conf.window_width,
-                items: [
-                    {
-                        xtype: 'form',
-                        bodyStyle:'padding:8px',
-                        autoHeight: true,
-                        height: 'auto',
-                        labelWidth: G.conf.label_width,
-                        items: [
-                            { html: 'Show organisation units where <b>value</b> is..' },
-                            { html: '<div class="window-p"></div>' },
-                            {
-                                xtype: 'numberfield',
-                                fieldLabel: 'Greater than',
-                                width: G.conf.combo_number_width_small,
-                                listeners: {
-                                    'afterrender': {
-                                        scope: this,
-                                        fn: function(nf) {
-                                            this.filtering.cmp.gt = nf;
+            if (!this.filtering.cmp.window) {
+                this.filtering.cmp.window = new Ext.Window({
+                    title: '<span class="window-filter-title">Organisation unit filter</span>',
+                    layout: 'fit',
+                    closeAction: 'hide',
+                    autoHeight: true,
+                    height: 'auto',
+                    width: G.conf.window_width,
+                    items: [
+                        {
+                            xtype: 'form',
+                            bodyStyle:'padding:8px',
+                            autoHeight: true,
+                            height: 'auto',
+                            labelWidth: G.conf.label_width,
+                            items: [
+                                { html: 'Show organisation units where <b>value</b> is..' },
+                                { html: '<div class="window-p"></div>' },
+                                {
+                                    xtype: 'numberfield',
+                                    fieldLabel: 'Greater than',
+                                    width: G.conf.combo_number_width_small,
+                                    listeners: {
+                                        'afterrender': {
+                                            scope: this,
+                                            fn: function(nf) {
+                                                this.filtering.cmp.gt = nf;
+                                            }
+                                        },
+                                        'change': {
+                                            scope: this,
+                                            fn: function(nf) {
+                                                this.filtering.options.gt = nf.getValue();
+                                            }
                                         }
-                                    },
-                                    'change': {
-                                        scope: this,
-                                        fn: function(nf) {
-                                            this.filtering.options.gt = nf.getValue();
+                                    }
+                                },
+                                {
+                                    xtype: 'numberfield',
+                                    fieldLabel: 'Lower than',
+                                    width: G.conf.combo_number_width_small,
+                                    listeners: {
+                                        'afterrender': {
+                                            scope: this,
+                                            fn: function(nf) {
+                                                this.filtering.cmp.lt = nf;
+                                            }
+                                        },
+                                        'change': {
+                                            scope: this,
+                                            fn: function(nf) {
+                                                this.filtering.options.lt = nf.getValue();
+                                            }
                                         }
                                     }
                                 }
+                            ]
+                        }
+                    ],
+                    bbar: [
+                        '->',
+                        {
+                            xtype: 'button',
+                            text: G.i18n.update,
+                            iconCls: 'icon-assign',
+                            scope: this,
+                            handler: function() {
+                                this.filtering.filter.call(this);
                             },
-                            {
-                                xtype: 'numberfield',
-                                fieldLabel: 'Lower than',
-                                width: G.conf.combo_number_width_small,
-                                listeners: {
-                                    'afterrender': {
-                                        scope: this,
-                                        fn: function(nf) {
-                                            this.filtering.cmp.lt = nf;
-                                        }
-                                    },
-                                    'change': {
-                                        scope: this,
-                                        fn: function(nf) {
-                                            this.filtering.options.lt = nf.getValue();
-                                        }
+                            listeners: {
+                                'afterrender': {
+                                    scope: this,
+                                    fn: function(b) {
+                                        this.filtering.cmp.button = b;
                                     }
                                 }
                             }
-                        ]
-                    }
-                ],
-                bbar: [
-                    '->',
-                    {
-                        xtype: 'button',
-                        text: G.i18n.update,
-                        iconCls: 'icon-assign',
-                        scope: this,
-                        handler: function() {
-                            this.filtering.filter.call(this);
-                        },
-                        listeners: {
-                            'afterrender': {
-                                scope: this,
-                                fn: function(b) {
-                                    this.filtering.cmp.button = b;
-                                }
+                        }
+                    ],
+                    listeners: {
+                        'afterrender': {
+                            scope: this,
+                            fn: function() {
+                                this.filtering.cache = this.layer.features.slice(0);
                             }
                         }
                     }
-                ],
-                listeners: {
-                    'afterrender': {
-                        scope: this,
-                        fn: function() {
-                            this.filtering.cache = this.layer.features.slice(0);
-                        }
-                    },
-                    'close': {
-                        scope: this,
-                        fn: function() {
-                            this.layer.removeAllFeatures();
-                            this.layer.addFeatures(this.filtering.cache);
-                            this.filtering.options.gt = null;
-                            this.filtering.options.lt = null;
-                        }
-                    }
-                }
-            });
-            window.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
-            window.show();
+                });
+                this.filtering.cmp.window.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
+                this.filtering.cmp.window.show();
+            }
+            else {
+                this.filtering.cmp.window.show();
+            }
         }
     },
     
