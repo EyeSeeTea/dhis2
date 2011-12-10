@@ -45,14 +45,22 @@ public interface DocumentService
      * @return the generated identifier.
      */
     int saveDocument( Document document );
-    
+
     /**
      * Retrieves the Document with the given identifier.
-     * 
+     *
      * @param id the identifier of the Document.
      * @return the Document.
      */
     Document getDocument( int id );
+
+    /**
+     * Retrieves the Document with the given identifier.
+     *
+     * @param uid the identifier of the Document.
+     * @return the Document.
+     */
+    Document getDocument( String uid );
 
     /**
      * Deletes a Document.
