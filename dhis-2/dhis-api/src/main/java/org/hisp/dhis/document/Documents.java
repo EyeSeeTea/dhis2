@@ -30,6 +30,7 @@ package org.hisp.dhis.document;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.adapter.DocumentXmlAdapter;
 
@@ -46,7 +47,7 @@ import java.util.List;
  */
 @XmlRootElement( name = "documents", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class Documents
+public class Documents extends BaseLinkableObject
 {
     private List<Document> documents = new ArrayList<Document>();
 

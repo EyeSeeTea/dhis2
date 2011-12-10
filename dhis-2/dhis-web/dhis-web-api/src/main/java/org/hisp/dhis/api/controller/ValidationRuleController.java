@@ -80,10 +80,10 @@ public class ValidationRuleController
         return "validationRules";
     }
 
-    @RequestMapping( value = "/{id}", method = RequestMethod.GET )
-    public String getValidationRule( @PathVariable( "id" ) Integer id, IdentifiableObjectParams params, Model model, HttpServletRequest request )
+    @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
+    public String getValidationRule( @PathVariable( "uid" ) String uid, IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
-        ValidationRule validationRule = validationRuleService.getValidationRule( id );
+        ValidationRule validationRule = validationRuleService.getValidationRule( uid );
 
         if ( params.hasLinks() )
         {
