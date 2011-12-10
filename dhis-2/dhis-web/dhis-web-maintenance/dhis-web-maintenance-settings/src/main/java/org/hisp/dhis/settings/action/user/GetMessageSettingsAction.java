@@ -28,6 +28,7 @@ package org.hisp.dhis.settings.action.user;
  */
 
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
+import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_SMS_NOTIFICATION;
 
 import org.hisp.dhis.user.UserSettingService;
 
@@ -38,7 +39,7 @@ import com.opensymphony.xwork2.Action;
  * @version $Id$
  * 
  */
-public class GetEmailSettingsAction
+public class GetMessageSettingsAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -63,6 +64,13 @@ public class GetEmailSettingsAction
         return messageEmailNotification;
     }
 
+    private Boolean messageSmsNotification;
+
+    public Boolean getMessageSmsNotification()
+    {
+        return messageSmsNotification;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -75,6 +83,8 @@ public class GetEmailSettingsAction
         // ---------------------------------------------------------------------
 
         messageEmailNotification = (Boolean) userSettingService.getUserSetting( KEY_MESSAGE_EMAIL_NOTIFICATION, false );
+
+        messageSmsNotification = (Boolean) userSettingService.getUserSetting( KEY_MESSAGE_SMS_NOTIFICATION, false );
 
         return SUCCESS;
     }

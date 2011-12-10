@@ -1,7 +1,7 @@
-package org.hisp.dhis.dataset;
+package org.hisp.dhis.aggregation;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,36 +27,31 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.hisp.dhis.common.BaseLinkableObject;
-import org.hisp.dhis.common.Dxf2Namespace;
-
-/**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
-@XmlRootElement( name = "completeDataSetRegistrations", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
-public class CompleteDataSetRegistrations extends BaseLinkableObject
+public class DefaultAggregatedOrgUnitDataValueService
+    implements AggregatedOrgUnitDataValueService
 {
-    private List<CompleteDataSetRegistration> completeDataSetRegistrations = new ArrayList<CompleteDataSetRegistration>();
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+    
+    private AggregatedOrgUnitDataValueStore aggregatedDataValueStore;
 
-    @XmlElement( name = "completeDataSetRegistration" )
-    @JsonProperty( value = "completeDataSetRegistrations" )
-    public List<CompleteDataSetRegistration> getCompleteDataSetRegistrations()
+    public void setAggregatedDataValueStore( AggregatedOrgUnitDataValueStore aggregatedDataValueStore )
     {
-        return completeDataSetRegistrations;
+        this.aggregatedDataValueStore = aggregatedDataValueStore;
     }
 
-    public void setCompleteDataSetRegistrations( List<CompleteDataSetRegistration> completeDataSetRegistrations )
+    // -------------------------------------------------------------------------
+    // AggregatedOrgUnitDataValueService implementation
+    // -------------------------------------------------------------------------
+    
+    public void createIndex( boolean dataElement, boolean indicator )
     {
-        this.completeDataSetRegistrations = completeDataSetRegistrations;
+        aggregatedDataValueStore.createIndex( dataElement, indicator );
+    }
+    
+    public void dropIndex( boolean dataElement, boolean indicator )
+    {
+        aggregatedDataValueStore.dropIndex( dataElement, indicator );
     }
 }
