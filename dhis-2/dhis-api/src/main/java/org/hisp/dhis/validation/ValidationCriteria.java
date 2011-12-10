@@ -27,20 +27,11 @@
 
 package org.hisp.dhis.validation;
 
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.Dxf2Namespace;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  * @author Lars Helge Overland
+ * @version $Id$
  */
-@XmlRootElement( name = "validationCriteria", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
 public class ValidationCriteria
-    extends BaseIdentifiableObject
 {
     public static final int OPERATOR_LESS_THAN = -1;
 
@@ -51,6 +42,10 @@ public class ValidationCriteria
     // -------------------------------------------------------------------------
     // Fields
     // -------------------------------------------------------------------------
+
+    private int id;
+
+    private String name;
 
     private String description;
 
@@ -99,6 +94,26 @@ public class ValidationCriteria
     // -------------------------------------------------------------------------
     // Getters && Setters
     // -------------------------------------------------------------------------
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
 
     public String getDescription()
     {
