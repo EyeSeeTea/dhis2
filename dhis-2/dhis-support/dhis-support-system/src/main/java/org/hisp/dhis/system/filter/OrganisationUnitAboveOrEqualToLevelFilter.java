@@ -1,4 +1,4 @@
-package org.hisp.dhis.aggregation;
+package org.hisp.dhis.system.filter;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -27,19 +27,29 @@ package org.hisp.dhis.aggregation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.system.util.Filter;
 
-public interface AggregatedOrgUnitDataValueStore
+/**
+ * Retains organisation units which are above or at the same level as the level
+ * given in the constructor. This filter must be invoked inside a transactional
+ * context in order to work.
+ * 
+ * @author Lars Helge Overland
+ */
+public class OrganisationUnitAboveOrEqualToLevelFilter
+    implements Filter<OrganisationUnit>
 {
-    void deleteAggregatedDataValues( Collection<Integer> dataElementIds, Collection<Integer> periodIds, Collection<Integer> organisationUnitIds );
+    private int level;
     
-    void deleteAggregatedDataValues( Collection<Integer> periodIds );
+    public OrganisationUnitAboveOrEqualToLevelFilter( int level )
+    {
+        this.level = level;
+    }
     
-    void createIndex( boolean dataElement, boolean indicator );
-    
-    void dropIndex( boolean dataElement, boolean indicator );
-    
-    void deleteAggregatedIndicatorValues( Collection<Integer> indicatorIds, Collection<Integer> periodIds, Collection<Integer> organisationUnitIds );
-    
-    void deleteAggregatedIndicatorValues( Collection<Integer> periodIds );
+    @Override
+    public boolean retain( OrganisationUnit object )
+    {
+        return object != null &&  object.getOrganisationUnitLevel() >= level;
+    }
 }

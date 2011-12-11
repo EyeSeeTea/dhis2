@@ -1,4 +1,4 @@
-package org.hisp.dhis.aggregation;
+package org.hisp.dhis.organisationunit.hibernate;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -29,17 +29,20 @@ package org.hisp.dhis.aggregation;
 
 import java.util.Collection;
 
-public interface AggregatedOrgUnitDataValueStore
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupStore;
+
+/**
+ * @author Lars Helge Overland
+ */
+public class HibernateOrganisationUnitGroupStore
+    extends HibernateIdentifiableObjectStore<OrganisationUnitGroup>
+        implements OrganisationUnitGroupStore
 {
-    void deleteAggregatedDataValues( Collection<Integer> dataElementIds, Collection<Integer> periodIds, Collection<Integer> organisationUnitIds );
-    
-    void deleteAggregatedDataValues( Collection<Integer> periodIds );
-    
-    void createIndex( boolean dataElement, boolean indicator );
-    
-    void dropIndex( boolean dataElement, boolean indicator );
-    
-    void deleteAggregatedIndicatorValues( Collection<Integer> indicatorIds, Collection<Integer> periodIds, Collection<Integer> organisationUnitIds );
-    
-    void deleteAggregatedIndicatorValues( Collection<Integer> periodIds );
+    @SuppressWarnings( "unchecked" )
+    public Collection<OrganisationUnitGroup> getOrganisationUnitGroupsWithGroupSets()
+    {
+        return getQuery( "from OrganisationUnitGroup o where o.groupSet is not null" ).list();
+    }
 }

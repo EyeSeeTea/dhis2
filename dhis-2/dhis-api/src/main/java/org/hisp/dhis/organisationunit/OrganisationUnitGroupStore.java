@@ -1,4 +1,4 @@
-package org.hisp.dhis.aggregation;
+package org.hisp.dhis.organisationunit;
 
 /*
  * Copyright (c) 2004-2010, University of Oslo
@@ -29,17 +29,13 @@ package org.hisp.dhis.aggregation;
 
 import java.util.Collection;
 
-public interface AggregatedOrgUnitDataValueStore
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+
+/**
+ * @author Lars Helge Overland
+ */
+public interface OrganisationUnitGroupStore
+    extends GenericIdentifiableObjectStore<OrganisationUnitGroup>
 {
-    void deleteAggregatedDataValues( Collection<Integer> dataElementIds, Collection<Integer> periodIds, Collection<Integer> organisationUnitIds );
-    
-    void deleteAggregatedDataValues( Collection<Integer> periodIds );
-    
-    void createIndex( boolean dataElement, boolean indicator );
-    
-    void dropIndex( boolean dataElement, boolean indicator );
-    
-    void deleteAggregatedIndicatorValues( Collection<Integer> indicatorIds, Collection<Integer> periodIds, Collection<Integer> organisationUnitIds );
-    
-    void deleteAggregatedIndicatorValues( Collection<Integer> periodIds );
+    Collection<OrganisationUnitGroup> getOrganisationUnitGroupsWithGroupSets();
 }
