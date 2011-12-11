@@ -253,6 +253,8 @@ public class DefaultDataMartEngine
         
         clock.logTime( "Populated crosstab table" );
 
+        final boolean isIndicators = indicators != null && indicators.size() > 0;
+        
         // ---------------------------------------------------------------------
         // 1. Create aggregated data cache
         // ---------------------------------------------------------------------
@@ -265,8 +267,6 @@ public class DefaultDataMartEngine
         // 2. Drop potential indexes
         // ---------------------------------------------------------------------
 
-        final boolean isIndicators = indicators != null && indicators.size() > 0;
-        
         aggregatedDataValueService.dropIndex( true, isIndicators );
         
         clock.logTime( "Dropped potential indexes" );
@@ -404,6 +404,8 @@ public class DefaultDataMartEngine
 
             state.setMessage( "exporting_data_for_data_elements" );
 
+            // TODO filter org units and add groups
+            
             organisationUnitPages = new PaginatedList<OrganisationUnit>( organisationUnits ).setNumberOfPages( cpuCores ).getPages();
             
             if ( allOperands.size() > 0 )
