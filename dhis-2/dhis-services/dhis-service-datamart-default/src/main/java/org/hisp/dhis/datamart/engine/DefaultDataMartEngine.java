@@ -50,7 +50,9 @@ import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.jdbc.batchhandler.AggregatedDataValueBatchHandler;
+import org.hisp.dhis.jdbc.batchhandler.AggregatedIndicatorValueBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.AggregatedOrgUnitDataValueBatchHandler;
+import org.hisp.dhis.jdbc.batchhandler.AggregatedOrgUnitIndicatorValueBatchHandler;
 import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -358,7 +360,8 @@ public class DefaultDataMartEngine
 
             for ( List<OrganisationUnit> organisationUnitPage : organisationUnitPages )
             {
-                futures.add( indicatorDataMart.exportIndicatorValues( indicators, periods, organisationUnitPage, indicatorOperands, key ) );
+                futures.add( indicatorDataMart.exportIndicatorValues( indicators, periods, organisationUnitPage,
+                    null, indicatorOperands, AggregatedIndicatorValueBatchHandler.class, key ) );
             }
 
             ConcurrentUtils.waitForCompletion( futures );
@@ -468,7 +471,22 @@ public class DefaultDataMartEngine
             // 6. Export indicator values
             // ---------------------------------------------------------------------
 
-            //TODO fix
+            state.setMessage( "exporting_data_for_indicators" );
+
+            if ( isIndicators )
+            {
+                List<Future<?>> futures = new ArrayList<Future<?>>();
+
+                for ( List<OrganisationUnit> organisationUnitPage : organisationUnitPages )
+                {
+                    futures.add( indicatorDataMart.exportIndicatorValues( indicators, periods, organisationUnitPage,
+                        organisationUnitGroups, indicatorOperands, AggregatedOrgUnitIndicatorValueBatchHandler.class, key ) );
+                }
+
+                ConcurrentUtils.waitForCompletion( futures );
+                
+                clock.logTime( "Exported values for indicators (" + indicators.size() + "), number of pages: " + organisationUnitPages.size() );
+            }
 
             // ---------------------------------------------------------------------
             // 7. Drop aggregated data cache
