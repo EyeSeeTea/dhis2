@@ -508,7 +508,8 @@ public class DefaultMappingService
     {
         if ( mapView != null )
         {
-            mapView.getParentOrganisationUnit().setLevel( mapView.getParentOrganisationUnit().getOrganisationUnitLevel() );
+            mapView.getParentOrganisationUnit().setLevel( organisationUnitService.getLevelOfOrganisationUnit( 
+                mapView.getParentOrganisationUnit().getId() ) );
         }
     }
 
@@ -527,7 +528,8 @@ public class DefaultMappingService
         {
             for ( MapView mapView : mapViews )
             {
-                mapView.getParentOrganisationUnit().setLevel( mapView.getParentOrganisationUnit().getOrganisationUnitLevel() );
+                mapView.getParentOrganisationUnit().setLevel( organisationUnitService.getLevelOfOrganisationUnit( 
+                    mapView.getParentOrganisationUnit().getId() ) );
             }
         }
 
@@ -542,7 +544,8 @@ public class DefaultMappingService
 
         for ( MapView mapView : mapViews )
         {
-            mapView.getParentOrganisationUnit().setLevel( mapView.getParentOrganisationUnit().getOrganisationUnitLevel() );
+            mapView.getParentOrganisationUnit().setLevel( organisationUnitService.getLevelOfOrganisationUnit( 
+                mapView.getParentOrganisationUnit().getId() ) );
         }
 
         return mapViews;

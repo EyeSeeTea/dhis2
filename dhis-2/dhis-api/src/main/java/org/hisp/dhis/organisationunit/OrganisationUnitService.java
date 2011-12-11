@@ -159,6 +159,13 @@ public interface OrganisationUnitService
     Collection<OrganisationUnit> getRootOrganisationUnits();
 
     /**
+     * Returns the level of the organisation unit with the given identifier.
+     * 
+     * @return the level of the organisation unit with the given identifier.
+     */
+    int getLevelOfOrganisationUnit( int id );
+    
+    /**
      * Returns all OrganisationUnits which are part of the subtree of the
      * OrganisationUnit with the given identifer and have no children.
      *

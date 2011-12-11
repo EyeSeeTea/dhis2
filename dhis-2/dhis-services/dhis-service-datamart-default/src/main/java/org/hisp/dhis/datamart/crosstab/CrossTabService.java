@@ -35,6 +35,7 @@ import java.util.concurrent.Future;
 
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datamart.CrossTabDataValue;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 
 /**
  * @author Lars Helge Overland
@@ -86,6 +87,25 @@ public interface CrossTabService
      * @param key the key used in the table name.
      */
     void dropAggregatedDataCache( String key );
+
+    /**
+     * Creates a table which functions as a cache for aggregated org unit data 
+     * element values with columns for period identifier, organisation unit 
+     * identifier, organisation unit group identifier followed by one column for 
+     * each DataElementOperand in the given list.
+     *  
+     * @param operands the list of DataElementOperands.
+     * @param group the OrganisationUnit group.
+     * @param key the key to use in table name.
+     */
+    void createAggregatedOrgUnitDataCache( List<DataElementOperand> operands, OrganisationUnitGroup group, String key );
+
+    /**
+     * Drops the aggregated org unit data cache table.
+     * 
+     * @param key the key used in the table name.
+     */
+    void dropAggregatedOrgUnitDataCache( String key );
     
     /**
      * Gets all CrossTabDataValues for the given collection of period ids and source ids.
@@ -121,4 +141,18 @@ public interface CrossTabService
      */
     Map<DataElementOperand, Double> getAggregatedDataCacheValue( Collection<DataElementOperand> operands, 
         int periodId, int sourceId, String key );
+
+    /**
+     * Gets a map of DataElementOperands and corresponding Double aggregated data
+     * element value from the cache table.
+     * 
+     * @param operands the list of DataElementOperand to return map entries for.
+     * @param periodId the period identifier.
+     * @param sourceId the organisation unit identifier.
+     * @param organisationUnitGroupId the organisation unit group identifier.
+     * @param key the key to use in the table name.
+     * @return a map of DataElementOperands and aggregated values.
+     */
+    Map<DataElementOperand, Double> getAggregatedOrgUnitDataCacheValue( Collection<DataElementOperand> operands, 
+        int periodId, int sourceId, int organisationUnitGroupId, String key );
 }

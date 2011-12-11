@@ -87,7 +87,7 @@ public class DefaultDataPruneService
         if ( organisationUnit.getParent() != null )
         {
             OrganisationUnitLevel level = organisationUnitService
-                .getOrganisationUnitLevelByLevel( organisationUnit.getParent().getOrganisationUnitLevel() );
+                .getOrganisationUnitLevelByLevel( organisationUnitService.getLevelOfOrganisationUnit( organisationUnit.getParent().getId() ) );
 
             if ( level != null )
             {

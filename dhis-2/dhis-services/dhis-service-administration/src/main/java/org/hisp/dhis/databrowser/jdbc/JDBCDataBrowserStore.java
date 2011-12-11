@@ -350,7 +350,7 @@ public class JDBCDataBrowserStore
             maxLevel = organisationUnitService.getMaxOfOrganisationUnitLevels();
         }
 
-        int curLevel = organisationUnitService.getOrganisationUnit( orgUnitSelected ).getOrganisationUnitLevel();
+        int curLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnitSelected );
         int loopSize = betweenPeriodIds.size();
 
         String descendantQuery = this.setUpQueryGetDescendants( curLevel, maxLevel, orgUnitSelected );
