@@ -50,11 +50,16 @@ import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.jdbc.batchhandler.AggregatedDataValueBatchHandler;
+import org.hisp.dhis.jdbc.batchhandler.AggregatedOrgUnitDataValueBatchHandler;
+import org.hisp.dhis.options.SystemSettingManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.system.filter.AggregatableDataElementFilter;
+import org.hisp.dhis.system.filter.OrganisationUnitAboveOrEqualToLevelFilter;
 import org.hisp.dhis.system.filter.PastAndCurrentPeriodFilter;
 import org.hisp.dhis.system.util.Clock;
 import org.hisp.dhis.system.util.ConcurrentUtils;
@@ -63,6 +68,8 @@ import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.PaginatedList;
 import org.hisp.dhis.system.util.SystemUtils;
 import org.springframework.transaction.annotation.Transactional;
+
+import static org.hisp.dhis.options.SystemSettingManager.*;
 
 /**
  * @author Lars Helge Overland
@@ -150,6 +157,20 @@ public class DefaultDataMartEngine
     {
         this.organisationUnitService = organisationUnitService;
     }
+    
+    private OrganisationUnitGroupService organisationUnitGroupService;
+
+    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
+    {
+        this.organisationUnitGroupService = organisationUnitGroupService;
+    }
+    
+    private SystemSettingManager systemSettingManager;
+
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    {
+        this.systemSettingManager = systemSettingManager;
+    }
 
     // -------------------------------------------------------------------------
     // DataMartEngine implementation
@@ -171,6 +192,7 @@ public class DefaultDataMartEngine
         Collection<Indicator> indicators = indicatorService.getIndicators( indicatorIds );
         Collection<Period> periods = periodService.getPeriods( periodIds );
         List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnits( organisationUnitIds ) );
+        Collection<OrganisationUnitGroup> organisationUnitGroups = organisationUnitGroupService.getOrganisationUnitGroups( organisationUnitGroupIds );
         Collection<DataElement> dataElements = dataElementService.getDataElements( dataElementIds );
 
         clock.logTime( "Retrieved objects" );
@@ -365,13 +387,15 @@ public class DefaultDataMartEngine
 
         final boolean isGroups = organisationUnitGroupIds != null && organisationUnitGroupIds.size() > 0;
         
-        if ( isGroups )
+        final int groupLevel = (Integer) systemSettingManager.getSystemSetting( KEY_ORGUNITGROUPSET_AGG_LEVEL, DEFAULT_ORGUNITGROUPSET_AGG_LEVEL );
+        
+        if ( isGroups && groupLevel > 0 )
         {
             // -----------------------------------------------------------------
             // 1. Create aggregated data cache
             // -----------------------------------------------------------------
             
-            crossTabService.createAggregatedDataCache( indicatorOperands, key ); //TODO fix
+            crossTabService.createAggregatedOrgUnitDataCache( indicatorOperands, key );
             
             clock.logTime( "Created aggregated org unit data cache" );
             
@@ -404,9 +428,11 @@ public class DefaultDataMartEngine
 
             state.setMessage( "exporting_data_for_data_elements" );
 
-            // TODO filter org units and add groups
+            Collection<OrganisationUnit> groupOrganisationUnits = new HashSet<OrganisationUnit>( organisationUnits );
             
-            organisationUnitPages = new PaginatedList<OrganisationUnit>( organisationUnits ).setNumberOfPages( cpuCores ).getPages();
+            FilterUtils.filter( groupOrganisationUnits, new OrganisationUnitAboveOrEqualToLevelFilter( groupLevel ) );
+            
+            organisationUnitPages = new PaginatedList<OrganisationUnit>( groupOrganisationUnits ).setNumberOfPages( cpuCores ).getPages();
             
             if ( allOperands.size() > 0 )
             {
@@ -415,7 +441,7 @@ public class DefaultDataMartEngine
                 for ( List<OrganisationUnit> organisationUnitPage : organisationUnitPages )
                 {
                     futures.add( dataElementDataMart.exportDataValues( allOperands, periods, organisationUnitPage, 
-                        null, new DataElementOperandList( indicatorOperands ), AggregatedDataValueBatchHandler.class, key ) );
+                        organisationUnitGroups, new DataElementOperandList( indicatorOperands ), AggregatedOrgUnitDataValueBatchHandler.class, key ) );
                 }
 
                 ConcurrentUtils.waitForCompletion( futures );
@@ -448,7 +474,7 @@ public class DefaultDataMartEngine
             // 7. Drop aggregated data cache
             // ---------------------------------------------------------------------
 
-            crossTabService.dropAggregatedDataCache( key );
+            crossTabService.dropAggregatedOrgUnitDataCache( key );
             
             clock.logTime( "Dropped aggregated org unit data cache" );
 

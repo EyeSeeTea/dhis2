@@ -33,7 +33,6 @@ import java.util.Map;
 
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datamart.CrossTabDataValue;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 
 /**
  * @author Lars Helge Overland
@@ -84,10 +83,9 @@ public interface CrossTabStore
      * each DataElementOperand in the given list.
      *  
      * @param operands the list of DataElementOperands.
-     * @param group the OrganisationUnit group.
      * @param key the key to use in table name.
      */
-    void createAggregatedOrgUnitDataCache( List<DataElementOperand> operands, OrganisationUnitGroup group, String key );
+    void createAggregatedOrgUnitDataCache( List<DataElementOperand> operands, String key );
 
     /**
      * Drops the aggregated org unit data cache table.

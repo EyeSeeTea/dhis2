@@ -41,7 +41,6 @@ import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.datamart.CrossTabDataValue;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 
 /**
  * @author Lars Helge Overland
@@ -109,7 +108,7 @@ public class JDBCCrossTabStore
         statementManager.getHolder().executeUpdate( "DROP TABLE IF EXISTS " + AGGREGATEDDATA_CACHE_PREFIX + key );
     }
 
-    public void createAggregatedOrgUnitDataCache( List<DataElementOperand> operands, OrganisationUnitGroup group, String key )
+    public void createAggregatedOrgUnitDataCache( List<DataElementOperand> operands, String key )
     {
         final StringBuffer sql = new StringBuffer( "CREATE TABLE " + AGGREGATEDORGUNITDATA_CACHE_PREFIX + key + " ( " );
         
