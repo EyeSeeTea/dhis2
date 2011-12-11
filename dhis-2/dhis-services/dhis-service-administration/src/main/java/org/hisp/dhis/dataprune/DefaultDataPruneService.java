@@ -87,14 +87,14 @@ public class DefaultDataPruneService
         if ( organisationUnit.getParent() != null )
         {
             OrganisationUnitLevel level = organisationUnitService
-                .getOrganisationUnitLevelByLevel( organisationUnitService.getLevelOfOrganisationUnit( organisationUnit
-                    .getParent() ) );
+                .getOrganisationUnitLevelByLevel( organisationUnit.getParent().getOrganisationUnitLevel() );
 
             if ( level != null )
             {
                 organisationUnitService.deleteOrganisationUnitLevel( level );
             }
         }
+        
         if ( organisationUnit.getParent().getParent() != null )
         {
             deleteLevels( organisationUnit.getParent() );

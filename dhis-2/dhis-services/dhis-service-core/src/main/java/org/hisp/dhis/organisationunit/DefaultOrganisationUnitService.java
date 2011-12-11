@@ -323,7 +323,7 @@ public class DefaultOrganisationUnitService
             throw new IllegalArgumentException( "Level must be greater than zero" );
         }
 
-        int parentLevel = getLevelOfOrganisationUnit( parent );
+        int parentLevel = parent.getOrganisationUnitLevel();
 
         if ( level < parentLevel )
         {
@@ -364,27 +364,6 @@ public class DefaultOrganisationUnitService
                 addOrganisationUnitChildrenAtLevel( child, currentLevel + 1, targetLevel, result );
             }
         }
-    }
-
-    public int getLevelOfOrganisationUnit( int id )
-    {
-        return getLevelOfOrganisationUnit( getOrganisationUnit( id ) );
-    }
-
-    public int getLevelOfOrganisationUnit( OrganisationUnit organisationUnit )
-    {
-        int level = 1;
-
-        OrganisationUnit parent = organisationUnit.getParent();
-
-        while ( parent != null )
-        {
-            ++level;
-
-            parent = parent.getParent();
-        }
-
-        return level;
     }
 
     public int getNumberOfOrganisationalLevels()

@@ -164,7 +164,7 @@ public class MemoryAggregationCache
             return level;
         }
                 
-        level = organisationUnitService.getLevelOfOrganisationUnit( id );
+        level = organisationUnitService.getOrganisationUnit( id ).getOrganisationUnitLevel();
         
         cache = ( cache == null ) ? new HashMap<String, Integer>() : cache;
         

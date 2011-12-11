@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
+import org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueService;
 import org.hisp.dhis.common.ProcessState;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -78,6 +79,13 @@ public class DefaultDataMartEngine
     public void setAggregatedDataValueService( AggregatedDataValueService aggregatedDataValueService )
     {
         this.aggregatedDataValueService = aggregatedDataValueService;
+    }
+    
+    private AggregatedOrgUnitDataValueService aggregatedOrgUnitDataValueService;
+
+    public void setAggregatedOrgUnitDataValueService( AggregatedOrgUnitDataValueService aggregatedOrgUnitDataValueService )
+    {
+        this.aggregatedOrgUnitDataValueService = aggregatedOrgUnitDataValueService;
     }
 
     private CrossTabService crossTabService;
@@ -149,7 +157,8 @@ public class DefaultDataMartEngine
 
     @Transactional
     public void export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
-        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, boolean completeExport, ProcessState state )
+        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, Collection<Integer> organisationUnitGroupIds, 
+        boolean completeExport, ProcessState state )
     {
         final int cpuCores = SystemUtils.getCpuCores();
         
@@ -245,7 +254,7 @@ public class DefaultDataMartEngine
         clock.logTime( "Populated crosstab table" );
 
         // ---------------------------------------------------------------------
-        // Create aggregated data cache
+        // 1. Create aggregated data cache
         // ---------------------------------------------------------------------
 
         crossTabService.createAggregatedDataCache( indicatorOperands, key );
@@ -253,7 +262,7 @@ public class DefaultDataMartEngine
         clock.logTime( "Created aggregated data cache" );
         
         // ---------------------------------------------------------------------
-        // Drop potential indexes
+        // 2. Drop potential indexes
         // ---------------------------------------------------------------------
 
         final boolean isIndicators = indicators != null && indicators.size() > 0;
@@ -263,7 +272,7 @@ public class DefaultDataMartEngine
         clock.logTime( "Dropped potential indexes" );
         
         // ---------------------------------------------------------------------
-        // Delete existing aggregated datavalues
+        // 3. Delete existing aggregated datavalues
         // ---------------------------------------------------------------------
 
         if ( completeExport )
@@ -278,7 +287,7 @@ public class DefaultDataMartEngine
         clock.logTime( "Deleted existing aggregated datavalues" );
         
         // ---------------------------------------------------------------------
-        // Export data element values
+        // 4. Export data element values
         // ---------------------------------------------------------------------
 
         state.setMessage( "exporting_data_for_data_elements" );
@@ -301,15 +310,7 @@ public class DefaultDataMartEngine
         }
 
         // ---------------------------------------------------------------------
-        // Drop crosstab table
-        // ---------------------------------------------------------------------
-
-        crossTabService.dropCrossTabTable( key );
-        
-        clock.logTime( "Dropped crosstab table" );
-
-        // ---------------------------------------------------------------------
-        // Delete existing aggregated indicatorvalues
+        // 5. Delete existing aggregated indicatorvalues
         // ---------------------------------------------------------------------
 
         if ( completeExport )
@@ -324,7 +325,7 @@ public class DefaultDataMartEngine
         clock.logTime( "Deleted existing aggregated indicatorvalues" );
         
         // ---------------------------------------------------------------------
-        // Export indicator values
+        // 6. Export indicator values
         // ---------------------------------------------------------------------
 
         state.setMessage( "exporting_data_for_indicators" );
@@ -344,7 +345,7 @@ public class DefaultDataMartEngine
         }
 
         // ---------------------------------------------------------------------
-        // Drop aggregated data cache
+        // 7. Drop aggregated data cache
         // ---------------------------------------------------------------------
 
         crossTabService.dropAggregatedDataCache( key );
@@ -352,7 +353,7 @@ public class DefaultDataMartEngine
         clock.logTime( "Dropped aggregated data cache" );
 
         // ---------------------------------------------------------------------
-        // Create potential indexes
+        // 8. Create potential indexes
         // ---------------------------------------------------------------------
 
         if ( completeExport )
@@ -361,6 +362,113 @@ public class DefaultDataMartEngine
             
             clock.logTime( "Created indexes" );
         }
+
+        final boolean isGroups = organisationUnitGroupIds != null && organisationUnitGroupIds.size() > 0;
+        
+        if ( isGroups )
+        {
+            // -----------------------------------------------------------------
+            // 1. Create aggregated data cache
+            // -----------------------------------------------------------------
+            
+            crossTabService.createAggregatedDataCache( indicatorOperands, key ); //TODO fix
+            
+            clock.logTime( "Created aggregated org unit data cache" );
+            
+            // -----------------------------------------------------------------
+            // 2. Drop potential indexes
+            // -----------------------------------------------------------------
+
+            aggregatedOrgUnitDataValueService.dropIndex( true, isIndicators );
+
+            clock.logTime( "Dropped potential org unit indexes" );
+
+            // ---------------------------------------------------------------------
+            // 3. Delete existing aggregated datavalues
+            // ---------------------------------------------------------------------
+
+            if ( completeExport )
+            {
+                aggregatedOrgUnitDataValueService.deleteAggregatedDataValues( periodIds );
+            }
+            else
+            {
+                aggregatedOrgUnitDataValueService.deleteAggregatedDataValues( dataElementIds, periodIds, organisationUnitIds );
+            }
+
+            clock.logTime( "Deleted existing aggregated org unit datavalues" );
+
+            // ---------------------------------------------------------------------
+            // 4. Export data element values
+            // ---------------------------------------------------------------------
+
+            state.setMessage( "exporting_data_for_data_elements" );
+
+            organisationUnitPages = new PaginatedList<OrganisationUnit>( organisationUnits ).setNumberOfPages( cpuCores ).getPages();
+            
+            if ( allOperands.size() > 0 )
+            {
+                List<Future<?>> futures = new ArrayList<Future<?>>();
+                
+                for ( List<OrganisationUnit> organisationUnitPage : organisationUnitPages )
+                {
+                    futures.add( dataElementDataMart.exportDataValues( allOperands, periods, organisationUnitPage, 
+                        null, new DataElementOperandList( indicatorOperands ), AggregatedDataValueBatchHandler.class, key ) );
+                }
+
+                ConcurrentUtils.waitForCompletion( futures );
+                
+                clock.logTime( "Exported values for data element operands (" + allOperands.size() + "), number of pages: " + organisationUnitPages.size() );
+            }
+
+            // ---------------------------------------------------------------------
+            // 5. Delete existing aggregated indicatorvalues
+            // ---------------------------------------------------------------------
+
+            if ( completeExport )
+            {
+                aggregatedOrgUnitDataValueService.deleteAggregatedIndicatorValues( periodIds );
+            }
+            else
+            {
+                aggregatedOrgUnitDataValueService.deleteAggregatedIndicatorValues( indicatorIds, periodIds, organisationUnitIds );
+            }
+
+            clock.logTime( "Deleted existing aggregated org unit indicatorvalues" );
+
+            // ---------------------------------------------------------------------
+            // 6. Export indicator values
+            // ---------------------------------------------------------------------
+
+            //TODO fix
+
+            // ---------------------------------------------------------------------
+            // 7. Drop aggregated data cache
+            // ---------------------------------------------------------------------
+
+            crossTabService.dropAggregatedDataCache( key );
+            
+            clock.logTime( "Dropped aggregated org unit data cache" );
+
+            // ---------------------------------------------------------------------
+            // 8. Create potential indexes
+            // ---------------------------------------------------------------------
+
+            if ( completeExport )
+            {
+                aggregatedOrgUnitDataValueService.createIndex( true, isIndicators );
+                
+                clock.logTime( "Created org unit indexes" );
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // Drop crosstab table
+        // ---------------------------------------------------------------------
+
+        crossTabService.dropCrossTabTable( key );
+        
+        clock.logTime( "Dropped crosstab table" );
 
         clock.logTime( "Data mart export process completed" );
     }
