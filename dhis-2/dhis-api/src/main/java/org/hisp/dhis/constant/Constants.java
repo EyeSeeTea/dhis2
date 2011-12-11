@@ -27,48 +27,42 @@ package org.hisp.dhis.constant;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Map;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseLinkableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.ConstantXmlAdapter;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author Dang Duy Hieu
- * @version $Id ConstantService.java June 29, 2011$
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface ConstantService
+@XmlRootElement( name = "constants", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class Constants extends BaseLinkableObject
 {
-    String ID = ConstantService.class.getName();
+    private List<Constant> constants = new ArrayList<Constant>();
 
-    // -------------------------------------------------------------------------
-    // Concept
-    // -------------------------------------------------------------------------
+    @XmlElement( name = "constant" )
+    @XmlJavaTypeAdapter( ConstantXmlAdapter.class )
+    @JsonProperty( value = "constants" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    public List<Constant> getConstants()
+    {
+        return constants;
+    }
 
-    int saveConstant( Constant constant );
-
-    void deleteConstant( Constant constant );
-
-    void updateConstant( Constant constant );
-
-    Constant getConstant( int constantId );
-
-    public Constant getConstant( String uid );
-
-    Constant getConstantByName( String constantName );
-
-    Collection<Constant> getAllConstants();
-
-    Map<Integer, Double> getConstantMap();
-
-    Map<String, Double> getConstantParameterMap();
-
-    // -------------------------------------------------------------------------
-    // Constant expanding
-    // -------------------------------------------------------------------------
-
-    Collection<Constant> getConstantsBetween( int first, int max );
-
-    Collection<Constant> getConstantsBetweenByName( String name, int first, int max );
-
-    int getConstantCount();
-
-    int getConstantCountByName( String name );
+    public void setConstants( List<Constant> constants )
+    {
+        this.constants = constants;
+    }
 }
