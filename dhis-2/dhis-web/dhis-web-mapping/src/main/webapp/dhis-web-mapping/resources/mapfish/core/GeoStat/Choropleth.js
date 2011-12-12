@@ -132,7 +132,7 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
         mapfish.GeoStat.prototype.applyClassification.apply(this, arguments);
     },
 
-    updateLegend: function(isFiltered) {
+    updateLegend: function() {
         if (!this.legendDiv) {
             return;
         }
@@ -140,11 +140,11 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
         var info = this.widget.formValues.getLegendInfo.call(this.widget);
         var element;
         this.legendDiv.update("");
+        
         for (var p in info) {
             element = document.createElement("div");
             element.style.height = "14px";
             element.innerHTML = info[p];
-            element.innerHTML += isFiltered && p === 'map' ? ' (filtered)' : '';
             this.legendDiv.appendChild(element);
             
             element = document.createElement("div");
