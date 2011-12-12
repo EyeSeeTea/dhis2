@@ -6,13 +6,18 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroups;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
@@ -62,5 +67,52 @@ public class OrganisationUnitGroupController
         model.addAttribute( "model", organisationUnitGroup );
 
         return "organisationUnitGroup";
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+    // POST
+    //-------------------------------------------------------------------------------------------------------
+
+    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
+    @ResponseStatus( value = HttpStatus.CREATED )
+    public void postOrganisationUnitGroupXML( HttpServletResponse response, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+    }
+
+    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
+    @ResponseStatus( value = HttpStatus.CREATED )
+    public void postOrganisationUnitGroupJSON( HttpServletResponse response, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+    // PUT
+    //-------------------------------------------------------------------------------------------------------
+
+    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/xml, text/xml"} )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void putOrganisationUnitGroupXML( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
+    }
+
+    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/json"} )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void putOrganisationUnitGroupJSON( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+    // DELETE
+    //-------------------------------------------------------------------------------------------------------
+
+    @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void deleteOrganisationUnitGroup( @PathVariable( "uid" ) String uid ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
     }
 }
