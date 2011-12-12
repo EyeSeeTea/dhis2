@@ -80,7 +80,8 @@ DV.conf = {
         west_fieldset_width: 402,
         center_tbar_height: 31,
         east_tbar_height: 31,
-        east_gridcolumn_height: 30
+        east_gridcolumn_height: 30,
+        form_label_width: 85
     }
 };
 
@@ -125,7 +126,8 @@ Ext.onReady( function() {
         },
         toolbar: {
             menuitem: {}
-        }
+        },
+        favorite: {}
     };
     
     DV.util = {
@@ -1849,6 +1851,100 @@ Ext.onReady( function() {
                             text: '<span class="dv-btn-toolbar-text-1">Update</span>',
                             handler: function() {
                                 DV.exe.execute(true, DV.init.isInit);
+                            }
+                        },
+                        {
+                            xtype: 'button',
+							cls: 'dv-btn-toolbar',
+                            text: '<span class="dv-btn-toolbar-text-1">Fav</span>',
+                            listeners: {
+                                afterrender: function(b) {
+                                    this.menu = Ext.create('Ext.menu.Menu', {
+                                        shadowOffset: 1,
+                                        items: [
+                                            {
+                                                text: 'Manage favorites',
+                                                iconCls: 'dv-menu-item-datatable',
+                                                minWidth: 100,
+                                                handler: function() {
+                                                    if (DV.cmp.favorite.window) {
+                                                        DV.cmp.favorite.window.show();
+                                                    }
+                                                    else {
+                                                        DV.cmp.favorite.window = Ext.create('Ext.window.Window', {
+                                                            title: 'Manage favorites',
+                                                            bodyStyle: 'padding:8px; background-color:#fff',
+                                                            layout: 'fit',
+                                                            closeAction: 'hide',
+                                                            width: 500,
+                                                            items: [
+                                                                {
+                                                                    xtype: 'form',
+                                                                    bodyStyle: 'border-style:none',
+                                                                    labelWidth: DV.conf.layout.form_label_width,
+                                                                    items: [
+                                                                        {
+                                                                            xtype: 'textfield',
+                                                                            fieldLabel: 'Name',
+                                                                            listeners: {
+                                                                                added: function() {
+                                                                                    DV.cmp.favorite.name = this;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    xtype: 'grid',
+                                                                    height: 400,
+                                                                    width: 316,
+                                                                    scroll: 'vertical',
+                                                                    multiSelect: true,
+                                                                    columns: [
+                                                                        {
+                                                                            text: 'Name',
+                                                                            dataIndex: DV.conf.finals.dimension.data.value,
+                                                                            width: 200,
+                                                                            style: 'display:none'
+                                                                        },
+                                                                        {
+                                                                            text: 'Created',
+                                                                            dataIndex: DV.conf.finals.dimension.period.value,
+                                                                            width: 100,
+                                                                            style: 'display:none'
+                                                                        }
+                                                                    ],
+                                                                    store: DV.store.datatable,
+                                                                    tbar: [
+                                                                        {
+                                                                            icon: 'images/exit.png',
+                                                                            handler: function() {
+                                                                                console.log(DV.cmp.favorite.grid);
+                                                                            }
+                                                                        }
+                                                                    ],
+                                                                    listeners: {
+                                                                        added: function() {
+                                                                            DV.cmp.favorite.grid = this;
+                                                                        },
+                                                                        itemclick: function(g, r) {
+                                                                            this.record = r;
+                                                                        }
+                                                                    }
+                                                                }                                                                    
+                                                            ]
+                                                        }).show();
+                                                    }
+                                                },
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.toolbar.menuitem.datatable = this;
+                                                    }
+                                                }
+                                            }
+                                        ]                                            
+                                    });
+                                }
                             }
                         },
                         {

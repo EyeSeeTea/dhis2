@@ -225,6 +225,11 @@
 	font: normal 11px arial, ubuntu;
 }
 
+/* Grid row/cell text position */
+.x-grid-cell-inner {
+    line-height: 15px;
+}
+
 /* Grid datatable column chooser */
 .x-column-header-over .x-column-header-trigger, .x-column-header-open .x-column-header-trigger {
     display: none;
