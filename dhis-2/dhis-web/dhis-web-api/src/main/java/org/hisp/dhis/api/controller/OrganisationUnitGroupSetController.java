@@ -36,6 +36,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -106,6 +107,7 @@ public class OrganisationUnitGroupSetController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_WEBAPI_CREATE')" )
     public void postOrganisationUnitGroupSetXML( HttpServletResponse response, InputStream input ) throws Exception
     {
         OrganisationUnitGroupSet organisationUnitGroupSet = Jaxb2Utils.unmarshal( OrganisationUnitGroupSet.class, input );
@@ -113,6 +115,7 @@ public class OrganisationUnitGroupSetController
     }
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_WEBAPI_CREATE')" )
     public void postOrganisationUnitGroupSetJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
