@@ -1,7 +1,9 @@
 package org.hisp.dhis.api.controller;
 
 import org.hisp.dhis.api.utils.IdentifiableObjectParams;
+import org.hisp.dhis.api.utils.ObjectPersister;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
+import org.hisp.dhis.api.view.Jaxb2Utils;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroups;
@@ -31,6 +33,9 @@ public class OrganisationUnitGroupController
 
     @Autowired
     private OrganisationUnitGroupService organisationUnitGroupService;
+
+    @Autowired
+    private ObjectPersister objectPersister;
 
     //-------------------------------------------------------------------------------------------------------
     // GET
@@ -74,17 +79,45 @@ public class OrganisationUnitGroupController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
     public void postOrganisationUnitGroupXML( HttpServletResponse response, InputStream input ) throws Exception
+    {
+        OrganisationUnitGroup organisationUnitGroup = Jaxb2Utils.unmarshal( OrganisationUnitGroup.class, input );
+
+        postOrganisationUnitGroup( organisationUnitGroup, response );
+    }
+
+    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
+    public void postOrganisationUnitGroupJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
     }
 
-    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
-    public void postOrganisationUnitGroupJSON( HttpServletResponse response, InputStream input ) throws Exception
+    public void postOrganisationUnitGroup( OrganisationUnitGroup organisationUnitGroup, HttpServletResponse response )
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+        if ( organisationUnitGroup == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_IMPLEMENTED );
+        }
+        else
+        {
+            try
+            {
+                organisationUnitGroup = objectPersister.persistOrganisationUnitGroup( organisationUnitGroup );
+
+                if ( organisationUnitGroup.getUid() == null )
+                {
+                    response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                }
+                else
+                {
+                    response.setStatus( HttpServletResponse.SC_CREATED );
+                    response.setHeader( "Location", DataElementController.RESOURCE_PATH + "/" + organisationUnitGroup.getUid() );
+                }
+            } catch ( Exception e )
+            {
+                response.setStatus( HttpServletResponse.SC_CONFLICT );
+            }
+        }
     }
 
     //-------------------------------------------------------------------------------------------------------

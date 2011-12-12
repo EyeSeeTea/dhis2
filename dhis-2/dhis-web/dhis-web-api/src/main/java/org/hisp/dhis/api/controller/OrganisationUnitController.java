@@ -1,7 +1,9 @@
 package org.hisp.dhis.api.controller;
 
 import org.hisp.dhis.api.utils.IdentifiableObjectParams;
+import org.hisp.dhis.api.utils.ObjectPersister;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
+import org.hisp.dhis.api.view.Jaxb2Utils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.OrganisationUnits;
@@ -31,6 +33,9 @@ public class OrganisationUnitController
 
     @Autowired
     private OrganisationUnitService organisationUnitService;
+
+    @Autowired
+    private ObjectPersister objectPersister;
 
     //-------------------------------------------------------------------------------------------------------
     // GET
@@ -82,17 +87,44 @@ public class OrganisationUnitController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
     public void postOrganisationUnitXML( HttpServletResponse response, InputStream input ) throws Exception
+    {
+        OrganisationUnit organisationUnit = Jaxb2Utils.unmarshal( OrganisationUnit.class, input );
+        postOrganisationUnit( organisationUnit, response );
+    }
+
+    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
+    public void postOrganisationUnitJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
     }
 
-    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
-    public void postOrganisationUnitJSON( HttpServletResponse response, InputStream input ) throws Exception
+    public void postOrganisationUnit( OrganisationUnit organisationUnit, HttpServletResponse response )
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+        if ( organisationUnit == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_IMPLEMENTED );
+        }
+        else
+        {
+            try
+            {
+                organisationUnit = objectPersister.persistOrganisationUnit( organisationUnit );
+
+                if ( organisationUnit.getUid() == null )
+                {
+                    response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                }
+                else
+                {
+                    response.setStatus( HttpServletResponse.SC_CREATED );
+                    response.setHeader( "Location", DataElementController.RESOURCE_PATH + "/" + organisationUnit.getUid() );
+                }
+            } catch ( Exception e )
+            {
+                response.setStatus( HttpServletResponse.SC_CONFLICT );
+            }
+        }
     }
 
     //-------------------------------------------------------------------------------------------------------

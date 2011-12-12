@@ -71,6 +71,8 @@ public class HibernateObjectPersister implements ObjectPersister
         Collection<DataSet> dataSets = new ArrayList<DataSet>( dataElement.getDataSets() );
         dataElement.getGroups().clear();
         dataElement.getDataSets().clear();
+        dataElement.getAttributeValues().clear();
+        dataElement.setCategoryCombo( null );
 
         dataElementService.addDataElement( dataElement );
 
@@ -101,20 +103,22 @@ public class HibernateObjectPersister implements ObjectPersister
     public DataElementGroup persistDataElementGroup( DataElementGroup dataElementGroup )
     {
         Collection<DataElement> dataElements = new ArrayList<DataElement>( dataElementGroup.getMembers() );
+        DataElementGroupSet dataElementGroupSet = dataElementGroup.getGroupSet();
         dataElementGroup.getMembers().clear();
+        dataElementGroup.setGroupSet( null );
 
         dataElementService.addDataElementGroup( dataElementGroup );
-
-        if ( dataElementGroup.getGroupSet() != null )
-        {
-            DataElementGroupSet dataElementGroupSet = dataElementService.getDataElementGroupSet( dataElementGroup.getGroupSet().getUid() );
-            dataElementGroup.setGroupSet( dataElementGroupSet );
-        }
 
         for ( DataElement dataElement : dataElements )
         {
             dataElement = dataElementService.getDataElement( dataElement.getUid() );
             dataElementGroup.addDataElement( dataElement );
+        }
+
+        if ( dataElementGroupSet != null )
+        {
+            dataElementGroupSet = dataElementService.getDataElementGroupSet( dataElementGroup.getGroupSet().getUid() );
+            dataElementGroup.setGroupSet( dataElementGroupSet );
         }
 
         dataElementService.updateDataElementGroup( dataElementGroup );
@@ -144,24 +148,92 @@ public class HibernateObjectPersister implements ObjectPersister
     @Override
     public OrganisationUnit persistOrganisationUnit( OrganisationUnit organisationUnit )
     {
+        Collection<OrganisationUnitGroup> organisationUnitGroups = new ArrayList<OrganisationUnitGroup>( organisationUnit.getGroups() );
+        Collection<DataSet> dataSets = new ArrayList<DataSet>( organisationUnit.getDataSets() );
+        OrganisationUnit parent = organisationUnit.getParent();
+
+        organisationUnit.getGroups().clear();
+        organisationUnit.getDataSets().clear();
+        organisationUnit.setParent( null );
+        organisationUnit.getAttributeValues().clear();
+
+        organisationUnitService.addOrganisationUnit( organisationUnit );
+
+        for ( OrganisationUnitGroup organisationUnitGroup : organisationUnitGroups )
+        {
+            organisationUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( organisationUnitGroup.getUid() );
+            organisationUnit.addOrganisationUnitGroup( organisationUnitGroup );
+        }
+
+        for ( DataSet dataSet : dataSets )
+        {
+            dataSet = dataSetService.getDataSet( dataSet.getUid() );
+            organisationUnit.addDataSet( dataSet );
+        }
+
+        if ( parent != null )
+        {
+            parent = organisationUnitService.getOrganisationUnit( parent.getUid() );
+            organisationUnit.setParent( parent );
+        }
+
+        organisationUnitService.updateOrganisationUnit( organisationUnit );
+
         return organisationUnit;
     }
 
     @Override
     public OrganisationUnitLevel persistOrganisationUnitLevel( OrganisationUnitLevel organisationUnitLevel )
     {
+        organisationUnitService.addOrganisationUnitLevel( organisationUnitLevel );
+
         return organisationUnitLevel;
     }
 
     @Override
     public OrganisationUnitGroup persistOrganisationUnitGroup( OrganisationUnitGroup organisationUnitGroup )
     {
+        Collection<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>( organisationUnitGroup.getMembers() );
+        OrganisationUnitGroupSet organisationUnitGroupSet = organisationUnitGroup.getGroupSet();
+
+        organisationUnitGroup.getMembers().clear();
+        organisationUnitGroup.setGroupSet( null );
+
+        organisationUnitGroupService.addOrganisationUnitGroup( organisationUnitGroup );
+
+        for ( OrganisationUnit organisationUnit : organisationUnits )
+        {
+            organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnit.getUid() );
+            organisationUnitGroup.addOrganisationUnit( organisationUnit );
+        }
+
+        if ( organisationUnitGroupSet != null )
+        {
+            organisationUnitGroupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( organisationUnitGroupSet.getUid() );
+            organisationUnitGroupSet.addOrganisationUnitGroup( organisationUnitGroup );
+        }
+
+        organisationUnitGroupService.updateOrganisationUnitGroup( organisationUnitGroup );
+
         return organisationUnitGroup;
     }
 
     @Override
     public OrganisationUnitGroupSet persistOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet )
     {
+        Collection<OrganisationUnitGroup> organisationUnitGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupSet.getOrganisationUnitGroups() );
+        organisationUnitGroupSet.getOrganisationUnitGroups().clear();
+
+        organisationUnitGroupService.addOrganisationUnitGroupSet( organisationUnitGroupSet );
+
+        for ( OrganisationUnitGroup organisationUnitGroup : organisationUnitGroups )
+        {
+            organisationUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( organisationUnitGroup.getUid() );
+            organisationUnitGroupSet.addOrganisationUnitGroup( organisationUnitGroup );
+        }
+
+        organisationUnitGroupService.updateOrganisationUnitGroupSet( organisationUnitGroupSet );
+
         return organisationUnitGroupSet;
     }
 }

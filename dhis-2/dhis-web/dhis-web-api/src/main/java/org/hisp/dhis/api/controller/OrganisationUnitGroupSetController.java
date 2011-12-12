@@ -28,7 +28,9 @@ package org.hisp.dhis.api.controller;
  */
 
 import org.hisp.dhis.api.utils.IdentifiableObjectParams;
+import org.hisp.dhis.api.utils.ObjectPersister;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
+import org.hisp.dhis.api.view.Jaxb2Utils;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSets;
@@ -58,6 +60,9 @@ public class OrganisationUnitGroupSetController
 
     @Autowired
     private OrganisationUnitGroupService organisationUnitGroupService;
+
+    @Autowired
+    private ObjectPersister objectPersister;
 
     //-------------------------------------------------------------------------------------------------------
     // GET
@@ -101,17 +106,44 @@ public class OrganisationUnitGroupSetController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
     public void postOrganisationUnitGroupSetXML( HttpServletResponse response, InputStream input ) throws Exception
+    {
+        OrganisationUnitGroupSet organisationUnitGroupSet = Jaxb2Utils.unmarshal( OrganisationUnitGroupSet.class, input );
+        postOrganisationUnitGroupSet( organisationUnitGroupSet, response );
+    }
+
+    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
+    public void postOrganisationUnitGroupSetJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
     }
 
-    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
-    public void postOrganisationUnitGroupSetJSON( HttpServletResponse response, InputStream input ) throws Exception
+    public void postOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet, HttpServletResponse response )
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+        if ( organisationUnitGroupSet == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_IMPLEMENTED );
+        }
+        else
+        {
+            try
+            {
+                organisationUnitGroupSet = objectPersister.persistOrganisationUnitGroupSet( organisationUnitGroupSet );
+
+                if ( organisationUnitGroupSet.getUid() == null )
+                {
+                    response.setStatus( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                }
+                else
+                {
+                    response.setStatus( HttpServletResponse.SC_CREATED );
+                    response.setHeader( "Location", DataElementController.RESOURCE_PATH + "/" + organisationUnitGroupSet.getUid() );
+                }
+            } catch ( Exception e )
+            {
+                response.setStatus( HttpServletResponse.SC_CONFLICT );
+            }
+        }
     }
 
     //-------------------------------------------------------------------------------------------------------
