@@ -93,7 +93,7 @@ public class DocumentController
 
         model.addAttribute( "model", document );
 
-        return "validationRule";
+        return "document";
     }
 
     //-------------------------------------------------------------------------------------------------------

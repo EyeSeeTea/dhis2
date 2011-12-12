@@ -93,7 +93,7 @@ public class SqlViewController
 
         model.addAttribute( "model", sqlView );
 
-        return "indicator";
+        return "sqlView";
     }
 
     //-------------------------------------------------------------------------------------------------------

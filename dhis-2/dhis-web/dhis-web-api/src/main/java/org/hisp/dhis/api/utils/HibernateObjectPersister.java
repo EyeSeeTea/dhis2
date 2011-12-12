@@ -27,22 +27,14 @@ package org.hisp.dhis.api.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorType;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.user.User;
+import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.organisationunit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,6 +43,7 @@ import java.util.Collection;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Component
+@Transactional
 public class HibernateObjectPersister implements ObjectPersister
 {
     @Autowired
@@ -62,26 +55,30 @@ public class HibernateObjectPersister implements ObjectPersister
     @Autowired
     private DataSetService dataSetService;
 
+    @Autowired
+    private IndicatorService indicatorService;
+
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+
+    @Autowired
+    private OrganisationUnitGroupService organisationUnitGroupService;
+
     @Override
-    public void persistAttribute( Attribute attribute )
+    public DataElement persistDataElement( DataElement dataElement )
     {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    public void persistDataElement( DataElement dataElement )
-    {
-        if ( dataElement.getCategoryCombo() != null )
-        {
-            DataElementCategoryCombo dataElementCategoryCombo = dataElementCategoryService.getDataElementCategoryCombo( dataElement.getCategoryCombo().getUid() );
-            dataElement.setCategoryCombo( dataElementCategoryCombo );
-        }
-
         Collection<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>( dataElement.getGroups() );
         Collection<DataSet> dataSets = new ArrayList<DataSet>( dataElement.getDataSets() );
         dataElement.getGroups().clear();
         dataElement.getDataSets().clear();
 
         dataElementService.addDataElement( dataElement );
+
+        if ( dataElement.getCategoryCombo() != null )
+        {
+            DataElementCategoryCombo dataElementCategoryCombo = dataElementCategoryService.getDataElementCategoryCombo( dataElement.getCategoryCombo().getUid() );
+            dataElement.setCategoryCombo( dataElementCategoryCombo );
+        }
 
         for ( DataElementGroup dataElementGroup : dataElementGroups )
         {
@@ -96,107 +93,75 @@ public class HibernateObjectPersister implements ObjectPersister
         }
 
         dataElementService.updateDataElement( dataElement );
+
+        return dataElement;
     }
 
     @Override
-    public void persistDataElementGroup( DataElementGroup dataElementGroup )
+    public DataElementGroup persistDataElementGroup( DataElementGroup dataElementGroup )
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        Collection<DataElement> dataElements = new ArrayList<DataElement>( dataElementGroup.getMembers() );
+        dataElementGroup.getMembers().clear();
+
+        dataElementService.addDataElementGroup( dataElementGroup );
+
+        if ( dataElementGroup.getGroupSet() != null )
+        {
+            DataElementGroupSet dataElementGroupSet = dataElementService.getDataElementGroupSet( dataElementGroup.getGroupSet().getUid() );
+            dataElementGroup.setGroupSet( dataElementGroupSet );
+        }
+
+        for ( DataElement dataElement : dataElements )
+        {
+            dataElement = dataElementService.getDataElement( dataElement.getUid() );
+            dataElementGroup.addDataElement( dataElement );
+        }
+
+        dataElementService.updateDataElementGroup( dataElementGroup );
+
+        return dataElementGroup;
     }
 
     @Override
-    public void persistDataElementGroupSet( DataElementGroupSet dataElementGroupSet )
+    public DataElementGroupSet persistDataElementGroupSet( DataElementGroupSet dataElementGroupSet )
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        Collection<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>( dataElementGroupSet.getMembers() );
+        dataElementGroupSet.getMembers().clear();
+
+        dataElementService.addDataElementGroupSet( dataElementGroupSet );
+
+        for ( DataElementGroup dataElementGroup : dataElementGroups )
+        {
+            dataElementGroup = dataElementService.getDataElementGroup( dataElementGroup.getUid() );
+            dataElementGroupSet.addDataElementGroup( dataElementGroup );
+        }
+
+        dataElementService.updateDataElementGroupSet( dataElementGroupSet );
+
+        return dataElementGroupSet;
     }
 
     @Override
-    public void persistCategory( DataElementCategory category )
+    public OrganisationUnit persistOrganisationUnit( OrganisationUnit organisationUnit )
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        return organisationUnit;
     }
 
     @Override
-    public void persistCategoryOption( DataElementCategoryOption categoryOption )
+    public OrganisationUnitLevel persistOrganisationUnitLevel( OrganisationUnitLevel organisationUnitLevel )
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        return organisationUnitLevel;
     }
 
     @Override
-    public void persistCategoryCombo( DataElementCategoryCombo categoryCombo )
+    public OrganisationUnitGroup persistOrganisationUnitGroup( OrganisationUnitGroup organisationUnitGroup )
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+        return organisationUnitGroup;
     }
 
     @Override
-    public void persistCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
+    public OrganisationUnitGroupSet persistOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet )
     {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistIndicator( Indicator indicator )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistIndicatorType( IndicatorType indicatorType )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistIndicatorGroup( IndicatorGroup indicatorGroup )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistIndicatorGroupSet( IndicatorGroupSet indicatorGroupSet )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistOrganisationUnit( OrganisationUnit organisationUnit )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistOrganisationUnitLevel( OrganisationUnitLevel organisationUnitLevel )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistOrganisationUnitGroup( OrganisationUnitGroup organisationUnitGroup )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistDataSet( DataSet dataSet )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistChart( Chart chart )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    @Override
-    public void persistUser( User user )
-    {
-        //To change body of implemented methods use File | Settings | File Templates.
+        return organisationUnitGroupSet;
     }
 }

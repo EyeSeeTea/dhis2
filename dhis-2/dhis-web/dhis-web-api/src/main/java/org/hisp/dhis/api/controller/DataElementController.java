@@ -37,6 +37,7 @@ import org.hisp.dhis.dataelement.DataElements;
 import org.hisp.dhis.dataset.DataSetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -110,6 +111,7 @@ public class DataElementController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_WEBAPI_CREATE')" )
     public void postDataElementXML( HttpServletResponse response, InputStream input ) throws Exception
     {
         DataElement dataElement = Jaxb2Utils.unmarshal( DataElement.class, input );
@@ -117,6 +119,7 @@ public class DataElementController
     }
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_WEBAPI_CREATE')" )
     public void postDataElementJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
@@ -134,7 +137,7 @@ public class DataElementController
         {
             try
             {
-                objectPersister.persistDataElement( dataElement );
+                dataElement = objectPersister.persistDataElement( dataElement );
 
                 if ( dataElement.getUid() == null )
                 {
@@ -147,7 +150,6 @@ public class DataElementController
                 }
             } catch ( Exception e )
             {
-                e.printStackTrace();
                 response.setStatus( HttpServletResponse.SC_CONFLICT );
             }
         }
@@ -159,6 +161,7 @@ public class DataElementController
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/xml, text/xml"} )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_WEBAPI_UPDATE')" )
     public void putDataElementXML( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
@@ -166,6 +169,7 @@ public class DataElementController
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/json"} )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_WEBAPI_UPDATE')" )
     public void putDataElementJSON( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
@@ -177,8 +181,16 @@ public class DataElementController
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_WEBAPI_DELETE')" )
     public void deleteDataElement( @PathVariable( "uid" ) String uid ) throws Exception
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
+        // throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
+
+        DataElement dataElement = dataElementService.getDataElement( uid );
+
+        if ( dataElement != null )
+        {
+            dataElementService.deleteDataElement( dataElement );
+        }
     }
 }
