@@ -38,13 +38,23 @@ import org.hisp.dhis.chart.Charts;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.constant.Constants;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSets;
+import org.hisp.dhis.document.Document;
+import org.hisp.dhis.document.Documents;
 import org.hisp.dhis.indicator.*;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.mapping.Maps;
 import org.hisp.dhis.organisationunit.*;
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViews;
+import org.hisp.dhis.validation.ValidationRule;
+import org.hisp.dhis.validation.ValidationRuleGroup;
+import org.hisp.dhis.validation.ValidationRuleGroups;
+import org.hisp.dhis.validation.ValidationRules;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
@@ -64,6 +74,9 @@ public class WebLinkPopulator
 
     static
     {
+        resourcePaths.put( Attributes.class, "attributeTypes" );
+        resourcePaths.put( Attribute.class, "attributeTypes" );
+
         resourcePaths.put( DataElementCategories.class, "categories" );
         resourcePaths.put( DataElementCategory.class, "categories" );
 
@@ -236,7 +249,161 @@ public class WebLinkPopulator
         {
             populateMap( (MapView) source, true );
         }
+        else if ( source instanceof Documents )
+        {
+            populateDocuments( (Documents) source, true );
+        }
+        else if ( source instanceof Document )
+        {
+            populateDocument( (Document) source, true );
+        }
+        else if ( source instanceof ValidationRules )
+        {
+            populateValidationRules( (ValidationRules) source, true );
+        }
+        else if ( source instanceof ValidationRule )
+        {
+            populateValidationRule( (ValidationRule) source, true );
+        }
+        else if ( source instanceof ValidationRuleGroups )
+        {
+            populateValidationRuleGroups( (ValidationRuleGroups) source, true );
+        }
+        else if ( source instanceof ValidationRuleGroup )
+        {
+            populateValidationRuleGroup( (ValidationRuleGroup) source, true );
+        }
+        else if ( source instanceof Constants )
+        {
+            populateConstants( (Constants) source, true );
+        }
+        else if ( source instanceof Constant )
+        {
+            populateConstant( (Constant) source, true );
+        }
+        else if ( source instanceof SqlViews )
+        {
+            populateSqlViews( (SqlViews) source, true );
+        }
+        else if ( source instanceof SqlView )
+        {
+            populateSqlView( (SqlView) source, true );
+        }
+    }
 
+    private void populateSqlViews( SqlViews sqlViews, boolean root )
+    {
+        sqlViews.setLink( getBasePath( sqlViews.getClass() ) );
+
+        if ( root )
+        {
+            for ( SqlView sqlView : sqlViews.getSqlViews() )
+            {
+                populateSqlView( sqlView, false );
+            }
+        }
+    }
+
+    private void populateSqlView( SqlView sqlView, boolean root )
+    {
+        populateIdentifiableObject( sqlView );
+
+        if ( root )
+        {
+
+        }
+    }
+
+    private void populateConstants( Constants constants, boolean root )
+    {
+        constants.setLink( getBasePath( constants.getClass() ) );
+
+        if ( root )
+        {
+            for ( Constant constant : constants.getConstants() )
+            {
+                populateConstant( constant, false );
+            }
+        }
+    }
+
+    private void populateConstant( Constant constant, boolean root )
+    {
+        populateIdentifiableObject( constant );
+
+        if ( root )
+        {
+
+        }
+    }
+
+    private void populateDocuments( Documents documents, boolean root )
+    {
+        documents.setLink( getBasePath( documents.getClass() ) );
+
+        if ( root )
+        {
+            for ( Document document : documents.getDocuments() )
+            {
+                populateDocument( document, false );
+            }
+        }
+    }
+
+    private void populateDocument( Document document, boolean root )
+    {
+        populateIdentifiableObject( document );
+
+        if ( root )
+        {
+
+        }
+    }
+
+    private void populateValidationRules( ValidationRules validationRules, boolean root )
+    {
+        validationRules.setLink( getBasePath( validationRules.getClass() ) );
+
+        if ( root )
+        {
+            for ( ValidationRule validationRule : validationRules.getValidationRules() )
+            {
+                populateValidationRule( validationRule, false );
+            }
+        }
+    }
+
+    private void populateValidationRule( ValidationRule validationRule, boolean root )
+    {
+        populateIdentifiableObject( validationRule );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( validationRule.getGroups() );
+        }
+    }
+
+    private void populateValidationRuleGroups( ValidationRuleGroups validationRuleGroups, boolean root )
+    {
+        validationRuleGroups.setLink( getBasePath( validationRuleGroups.getClass() ) );
+
+        if ( root )
+        {
+            for ( ValidationRuleGroup validationRuleGroup : validationRuleGroups.getValidationRuleGroups() )
+            {
+                populateValidationRuleGroup( validationRuleGroup, false );
+            }
+        }
+    }
+
+    private void populateValidationRuleGroup( ValidationRuleGroup validationRuleGroup, boolean root )
+    {
+        populateIdentifiableObject( validationRuleGroup );
+
+        if ( root )
+        {
+            handleIdentifiableObjectCollection( validationRuleGroup.getMembers() );
+        }
     }
 
     private void populateIndicatorTypes( IndicatorTypes indicatorTypes, boolean root )
@@ -719,7 +886,9 @@ public class WebLinkPopulator
     private void populateIdentifiableObject( BaseIdentifiableObject baseIdentifiableObject )
     {
         if ( baseIdentifiableObject != null )
+        {
             baseIdentifiableObject.setLink( getPathWithUid( baseIdentifiableObject ) );
+        }
     }
 
     private String getPathWithUid( BaseIdentifiableObject baseIdentifiableObject )

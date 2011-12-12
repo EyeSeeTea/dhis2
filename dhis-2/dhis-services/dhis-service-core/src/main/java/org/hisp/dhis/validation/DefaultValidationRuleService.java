@@ -117,7 +117,7 @@ public class DefaultValidationRuleService
     public Grid getAggregateValidationResult( Collection<ValidationResult> results, List<Period> periods,
         List<OrganisationUnit> sources )
     {
-        int number = validationRuleStore.getNumberOfValidationRules();
+        int number = validationRuleStore.getCount();
 
         Grid grid = new ListGrid();
 
@@ -377,12 +377,12 @@ public class DefaultValidationRuleService
 
     public int saveValidationRule( ValidationRule validationRule )
     {
-        return validationRuleStore.saveValidationRule( validationRule );
+        return validationRuleStore.save( validationRule );
     }
 
     public void updateValidationRule( ValidationRule validationRule )
     {
-        validationRuleStore.updateValidationRule( validationRule );
+        validationRuleStore.update( validationRule );
     }
 
     public void deleteValidationRule( ValidationRule validationRule )
@@ -393,6 +393,11 @@ public class DefaultValidationRuleService
     public ValidationRule getValidationRule( int id )
     {
         return validationRuleStore.get( id );
+    }
+
+    public ValidationRule getValidationRule( String uid )
+    {
+        return validationRuleStore.getByUid( uid );
     }
 
     public ValidationRule getValidationRuleByName( String name )
@@ -450,6 +455,11 @@ public class DefaultValidationRuleService
     public ValidationRuleGroup getValidationRuleGroup( int id )
     {
         return validationRuleGroupStore.get( id );
+    }
+
+    public ValidationRuleGroup getValidationRuleGroup( String uid )
+    {
+        return validationRuleGroupStore.getByUid( uid );
     }
 
     public Collection<ValidationRuleGroup> getAllValidationRuleGroups()

@@ -49,6 +49,8 @@ public interface SqlViewService
 
     SqlView getSqlView( int viewId );
 
+    SqlView getSqlViewByUid( String uid );
+
     SqlView getSqlView( String viewName );
 
     Collection<SqlView> getAllSqlViews();

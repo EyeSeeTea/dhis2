@@ -27,10 +27,9 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
 import javax.xml.bind.annotation.XmlAttribute;
+
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -45,7 +44,6 @@ public class BaseLinkableObject implements LinkableObject
 
     @XmlAttribute
     @JsonProperty
-    @JsonSerialize( include = JsonSerialize.Inclusion.NON_NULL )
     public String getLink()
     {
         return link;

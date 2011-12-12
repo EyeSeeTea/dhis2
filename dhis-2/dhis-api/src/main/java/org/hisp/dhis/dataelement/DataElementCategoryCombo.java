@@ -27,12 +27,13 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.BaseIdentifiableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.JsonIdentifiableObjectCollectionSerializer;
+import org.hisp.dhis.common.adapter.CategoryOptionComboXmlAdapter;
+import org.hisp.dhis.common.adapter.CategoryXmlAdapter;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -213,9 +214,10 @@ public class DataElementCategoryCombo
     // -------------------------------------------------------------------------
 
     @XmlElementWrapper( name = "categories" )
-    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
     @XmlElement( name = "category" )
-    @JsonSerialize( using = JsonIdentifiableObjectCollectionSerializer.class )
+    @XmlJavaTypeAdapter( CategoryXmlAdapter.class )
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public List<DataElementCategory> getCategories()
     {
         return categories;
@@ -226,10 +228,11 @@ public class DataElementCategoryCombo
         this.categories = categories;
     }
 
-    @XmlElementWrapper( name = "optionCombos" )
-    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
-    @XmlElement( name = "optionCombo" )
-    @JsonSerialize( using = JsonIdentifiableObjectCollectionSerializer.class )
+    @XmlElementWrapper( name = "categoryOptionCombos" )
+    @XmlElement( name = "categoryOptionCombo" )
+    @XmlJavaTypeAdapter( CategoryOptionComboXmlAdapter.class )
+    @JsonProperty( value = "categoryOptionCombo" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public Set<DataElementCategoryOptionCombo> getOptionCombos()
     {
         return optionCombos;

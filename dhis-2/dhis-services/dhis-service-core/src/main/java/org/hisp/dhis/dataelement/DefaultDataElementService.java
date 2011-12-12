@@ -32,7 +32,6 @@ import static org.hisp.dhis.i18n.I18nUtils.i18n;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,7 +40,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.common.comparator.CategoryComboSizeComparator;
+import org.hisp.dhis.dataelement.comparator.DataElementCategoryComboSizeComparator;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 import org.hisp.dhis.i18n.I18nService;
@@ -97,8 +96,6 @@ public class DefaultDataElementService
 
     public int addDataElement( DataElement dataElement )
     {
-        dataElement.setLastUpdated( new Date() );
-
         int id = dataElementStore.save( dataElement );
 
         i18nService.addObject( dataElement );
@@ -108,8 +105,6 @@ public class DefaultDataElementService
 
     public void updateDataElement( DataElement dataElement )
     {
-        dataElement.setLastUpdated( new Date() );
-
         dataElementStore.update( dataElement );
 
         i18nService.verify( dataElement );
@@ -282,7 +277,7 @@ public class DefaultDataElementService
 
         List<DataElementCategoryCombo> listCategoryCombos = new ArrayList<DataElementCategoryCombo>( setCategoryCombos );
 
-        Collections.sort( listCategoryCombos, new CategoryComboSizeComparator() );
+        Collections.sort( listCategoryCombos, new DataElementCategoryComboSizeComparator() );
 
         return listCategoryCombos;
     }
@@ -319,27 +314,27 @@ public class DefaultDataElementService
 
     public Collection<DataElement> getDataElementsLikeName( String name )
     {
-        return i18n( i18nService, dataElementStore.getDataElementsLikeName( name ) );
+        return i18n( i18nService, dataElementStore.getLikeName( name ) );
     }
 
     public Collection<DataElement> getDataElementsBetween( int first, int max )
     {
-        return i18n( i18nService, dataElementStore.getDataElementsBetween( first, max ) );
+        return i18n( i18nService, dataElementStore.getBetween( first, max ) );
     }
 
     public Collection<DataElement> getDataElementsBetweenByName( String name, int first, int max )
     {
-        return i18n( i18nService, dataElementStore.getDataElementsBetweenByName( name, first, max ) );
+        return i18n( i18nService, dataElementStore.getBetweenByName( name, first, max ) );
     }
 
     public int getDataElementCount()
     {
-        return dataElementStore.getDataElementCount();
+        return dataElementStore.getCount();
     }
 
     public int getDataElementCountByName( String name )
     {
-        return dataElementStore.getDataElementCountByName( name );
+        return dataElementStore.getCountByName( name );
     }
 
     public Collection<DataElement> getDataElementsByDataSets( Collection<DataSet> dataSets )

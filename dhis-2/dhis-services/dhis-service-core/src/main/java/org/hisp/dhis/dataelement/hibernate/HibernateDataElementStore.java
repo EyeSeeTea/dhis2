@@ -41,12 +41,12 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementStore;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.system.objectmapper.DataElementOperandMapper;
 import org.hisp.dhis.system.util.ConversionUtils;
 import org.hisp.dhis.system.util.TextUtils;
@@ -58,7 +58,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
  *          larshelg $
  */
 public class HibernateDataElementStore
-    extends HibernateGenericStore<DataElement>
+    extends HibernateIdentifiableObjectStore<DataElement>
     implements DataElementStore
 {
     // -------------------------------------------------------------------------
@@ -246,31 +246,6 @@ public class HibernateDataElementStore
             ConversionUtils.getIdentifiers( DataSet.class, dataSets ) ).list();
     }
 
-    public Collection<DataElement> getDataElementsLikeName( String name )
-    {
-        return getLikeName( name );
-    }
-
-    public Collection<DataElement> getDataElementsBetween( int first, int max )
-    {
-        return getBetween( first, max );
-    }
-
-    public Collection<DataElement> getDataElementsBetweenByName( String name, int first, int max )
-    {
-        return getBetweenByName( name, first, max );
-    }
-
-    public int getDataElementCount()
-    {
-        return getCount();
-    }
-
-    public int getDataElementCountByName( String name )
-    {
-        return getCountByName( name );
-    }
-    
     public Map<Integer, Set<Integer>> getDataElementCategoryOptionCombos()
     {
         final String sql = "select de.dataelementid, coc.categoryoptioncomboid from dataelement de " +

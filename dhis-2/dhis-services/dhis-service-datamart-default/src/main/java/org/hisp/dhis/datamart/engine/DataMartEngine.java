@@ -28,14 +28,22 @@ package org.hisp.dhis.datamart.engine;
  */
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hisp.dhis.common.ProcessState;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 
 /**
  * @author Lars Helge Overland
  */
 public interface DataMartEngine
 {
+    final Set<OrganisationUnitGroup> DUMMY_ORG_UNIT_GROUPS = new HashSet<OrganisationUnitGroup>()
+    { {
+        add( null );
+    } };
+    
     /**
      * Exports aggregated values to the data mart tables.
      * 
@@ -43,9 +51,11 @@ public interface DataMartEngine
      * @param indicatorIds the indicator identifiers.
      * @param periodIds the period identifiers.
      * @param organisationUnitIds the organisation unit identifiers.
+     * @param organisationUnitGroupIds the organisation unit group identifiers.
      * @param completeExport indicates whether this is a complete export.
      * @param processState the state object.
      */
     void export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
-        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, boolean completeExport, ProcessState processState );
+        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, Collection<Integer> organisationUnitGroupIds,
+        boolean completeExport, ProcessState processState );
 }

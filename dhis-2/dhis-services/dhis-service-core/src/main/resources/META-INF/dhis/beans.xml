@@ -132,7 +132,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore" class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementCategoryOptionComboStore">
+  <bean id="org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -153,13 +153,12 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitStore" class="org.hisp.dhis.organisationunit.hibernate.HibernateOrganisationUnitStore">
     <property name="clazz" value="org.hisp.dhis.organisationunit.OrganisationUnit" />
     <property name="sessionFactory" ref="sessionFactory" />
-    <property name="statementManager" ref="statementManager" />
     <property name="jdbcTemplate" ref="jdbcTemplate" />
     <property name="cacheable" value="true" />
     <property name="orgLevelStore" ref="org.hisp.dhis.organisationunit.OrganisationUnitLevelStore" />
   </bean>
 
-  <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+  <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupStore" class="org.hisp.dhis.organisationunit.hibernate.HibernateOrganisationUnitGroupStore">
     <property name="clazz" value="org.hisp.dhis.organisationunit.OrganisationUnitGroup" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -203,6 +202,11 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 	<property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
+  <bean id="org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueStore" class="org.hisp.dhis.aggregation.jdbc.JdbcAggregatedOrgUnitDataValueStore">
+    <property name="statementManager" ref="statementManager" />
+	<property name="jdbcTemplate" ref="jdbcTemplate" />
+  </bean>
+
   <bean id="org.hisp.dhis.user.UserAuthorityGroupStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="clazz" value="org.hisp.dhis.user.UserAuthorityGroup" />
     <property name="sessionFactory" ref="sessionFactory" />
@@ -238,16 +242,19 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
   <bean id="org.hisp.dhis.version.VersionStore" class="org.hisp.dhis.version.hibernate.HibernateVersionStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="clazz" value="org.hisp.dhis.version.Version" />
+    <property name="cacheable" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.attribute.AttributeStore" class="org.hisp.dhis.attribute.hibernate.HibernateAttributeStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="clazz" value="org.hisp.dhis.attribute.Attribute" />
+    <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.attribute.AttributeValueStore" class="org.hisp.dhis.attribute.hibernate.HibernateAttributeValueStore">
+  <bean id="org.hisp.dhis.attribute.AttributeValueStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="clazz" value="org.hisp.dhis.attribute.AttributeValue" />
+    <property name="cacheable" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.options.SystemSettingStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
@@ -442,6 +449,10 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 
   <bean id="org.hisp.dhis.aggregation.AggregatedDataValueService" class="org.hisp.dhis.aggregation.DefaultAggregatedDataValueService">
     <property name="aggregatedDataValueStore" ref="org.hisp.dhis.aggregation.AggregatedDataValueStore" />
+  </bean>
+
+  <bean id="org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueService" class="org.hisp.dhis.aggregation.DefaultAggregatedOrgUnitDataValueService">
+    <property name="aggregatedDataValueStore" ref="org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueStore" />
   </bean>
 
   <bean id="org.hisp.dhis.message.MessageService" class="org.hisp.dhis.message.DefaultMessageService">

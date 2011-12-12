@@ -27,22 +27,23 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.common.adapter.JsonDateSerializer;
-
-import javax.xml.bind.annotation.*;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * @author Bob Jolliffe
  */
 @XmlRootElement( name = "identifiableObject", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-@XmlType( propOrder = {"uid", "name", "code", "lastUpdated" } )
 public class BaseIdentifiableObject extends BaseLinkableObject
     implements IdentifiableObject
 {
@@ -81,6 +82,10 @@ public class BaseIdentifiableObject extends BaseLinkableObject
      */
     private Date lastUpdated;
 
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
     public BaseIdentifiableObject()
     {
     }
@@ -92,6 +97,10 @@ public class BaseIdentifiableObject extends BaseLinkableObject
         this.name = name;
     }
 
+    // -------------------------------------------------------------------------
+    // Setters and getters
+    // -------------------------------------------------------------------------
+
     public int getId()
     {
         return id;
@@ -102,7 +111,6 @@ public class BaseIdentifiableObject extends BaseLinkableObject
         this.id = id;
     }
 
-    @XmlID
     @XmlAttribute( name = "id" )
     @JsonProperty( value = "id" )
     public String getUid()
@@ -115,9 +123,8 @@ public class BaseIdentifiableObject extends BaseLinkableObject
         this.uid = uid;
     }
 
-    @XmlAttribute
+    @XmlAttribute(required = false)
     @JsonProperty
-    @JsonSerialize( include = JsonSerialize.Inclusion.NON_NULL )
     public String getCode()
     {
         return code;
@@ -128,7 +135,7 @@ public class BaseIdentifiableObject extends BaseLinkableObject
         this.code = code;
     }
 
-    @XmlAttribute
+    @XmlAttribute(required = false)
     @JsonProperty
     public String getName()
     {
@@ -140,9 +147,8 @@ public class BaseIdentifiableObject extends BaseLinkableObject
         this.name = name;
     }
 
-    @XmlAttribute
+    @XmlAttribute(required = false)
     @JsonProperty
-    @JsonSerialize( using = JsonDateSerializer.class )
     public Date getLastUpdated()
     {
         return lastUpdated;
@@ -152,6 +158,10 @@ public class BaseIdentifiableObject extends BaseLinkableObject
     {
         this.lastUpdated = lastUpdated;
     }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
 
     /**
      * Set auto-generated fields on save or update

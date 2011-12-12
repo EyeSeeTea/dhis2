@@ -27,18 +27,17 @@ package org.hisp.dhis.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.i18n.I18nUtils.i18n;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-
-import static org.hisp.dhis.i18n.I18nUtils.i18n;
 
 /**
  * @author Lars Helge Overland
@@ -93,9 +92,7 @@ public class DefaultIndicatorService
 
     public int addIndicator( Indicator indicator )
     {
-        indicator.setLastUpdated( new Date() );
-
-        int id = indicatorStore.addIndicator( indicator );
+        int id = indicatorStore.save( indicator );
 
         i18nService.addObject( indicator );
 
@@ -104,9 +101,7 @@ public class DefaultIndicatorService
 
     public void updateIndicator( Indicator indicator )
     {
-        indicator.setLastUpdated( new Date() );
-
-        indicatorStore.updateIndicator( indicator );
+        indicatorStore.update( indicator );
 
         i18nService.verify( indicator );
     }
@@ -115,22 +110,22 @@ public class DefaultIndicatorService
     {
         i18nService.removeObject( indicator );
 
-        indicatorStore.deleteIndicator( indicator );
+        indicatorStore.delete( indicator );
     }
 
     public Indicator getIndicator( int id )
     {
-        return i18n( i18nService, indicatorStore.getIndicator( id ) );
+        return i18n( i18nService, indicatorStore.get( id ) );
     }
 
     public Indicator getIndicator( String uid )
     {
-        return i18n( i18nService, indicatorStore.getIndicator( uid ) );
+        return i18n( i18nService, indicatorStore.getByUid( uid ) );
     }
 
     public Collection<Indicator> getAllIndicators()
     {
-        return i18n( i18nService, indicatorStore.getAllIndicators() );
+        return i18n( i18nService, indicatorStore.getAll() );
     }
 
     public Collection<Indicator> getIndicators( final Collection<Integer> identifiers )
@@ -148,22 +143,22 @@ public class DefaultIndicatorService
 
     public Indicator getIndicatorByName( String name )
     {
-        return i18n( i18nService, indicatorStore.getIndicatorByName( name ) );
+        return i18n( i18nService, indicatorStore.getByName( name ) );
     }
 
     public Indicator getIndicatorByShortName( String shortName )
     {
-        return i18n( i18nService, indicatorStore.getIndicatorByShortName( shortName ) );
+        return i18n( i18nService, indicatorStore.getByShortName( shortName ) );
     }
 
     public Indicator getIndicatorByAlternativeName( String alternativeName )
     {
-        return i18n( i18nService, indicatorStore.getIndicatorByAlternativeName( alternativeName ) );
+        return i18n( i18nService, indicatorStore.getByAlternativeName( alternativeName ) );
     }
 
     public Indicator getIndicatorByCode( String code )
     {
-        return i18n( i18nService, indicatorStore.getIndicatorByCode( code ) );
+        return i18n( i18nService, indicatorStore.getByCode( code ) );
     }
 
     public Collection<Indicator> getIndicatorsWithGroupSets()
@@ -183,27 +178,27 @@ public class DefaultIndicatorService
 
     public int getIndicatorCount()
     {
-        return indicatorStore.getIndicatorCount();
+        return indicatorStore.getCount();
     }
 
     public int getIndicatorCountByName( String name )
     {
-        return indicatorStore.getIndicatorCountByName( name );
+        return indicatorStore.getCountByName( name );
     }
 
     public Collection<Indicator> getIndicatorsLikeName( String name )
     {
-        return i18n( i18nService, indicatorStore.getIndicatorsLikeName( name ) );
+        return i18n( i18nService, indicatorStore.getLikeName( name ) );
     }
 
     public Collection<Indicator> getIndicatorsBetween( int first, int max )
     {
-        return i18n( i18nService, indicatorStore.getIndicatorsBetween( first, max ) );
+        return i18n( i18nService, indicatorStore.getBetween( first, max ) );
     }
 
     public Collection<Indicator> getIndicatorsBetweenByName( String name, int first, int max )
     {
-        return i18n( i18nService, indicatorStore.getIndicatorsBetweenByName( name, first, max ) );
+        return i18n( i18nService, indicatorStore.getBetweenByName( name, first, max ) );
     }
 
     // -------------------------------------------------------------------------

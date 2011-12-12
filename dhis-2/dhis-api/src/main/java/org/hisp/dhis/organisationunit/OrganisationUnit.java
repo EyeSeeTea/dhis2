@@ -31,9 +31,12 @@ import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.*;
+import org.hisp.dhis.common.adapter.DataSetXmlAdapter;
+import org.hisp.dhis.common.adapter.OrganisationUnitGroupXmlAdapter;
+import org.hisp.dhis.common.adapter.OrganisationUnitXmlAdapter;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitNameComparator;
@@ -128,7 +131,7 @@ public class OrganisationUnit extends BaseNameableObject
     private transient String type;
 
     private transient String[] groupNames;
-    
+
     private transient Double value;
 
     // -------------------------------------------------------------------------
@@ -440,9 +443,25 @@ public class OrganisationUnit extends BaseNameableObject
         return set;
     }
 
+    public int getOrganisationUnitLevel()
+    {
+        int currentLevel = 1;
+
+        OrganisationUnit thisParent = this.parent;
+
+        while ( thisParent != null )
+        {
+            ++currentLevel;
+
+            thisParent = thisParent.getParent();
+        }
+
+        return currentLevel;
+    }
+
     public boolean isPolygon()
     {
-        return (featureType.equals( FEATURETYPE_MULTIPOLYGON ) || featureType.equals( FEATURETYPE_POLYGON ));
+        return featureType.equals( FEATURETYPE_MULTIPOLYGON ) || featureType.equals( FEATURETYPE_POLYGON );
     }
 
     public boolean isPoint()
@@ -504,8 +523,9 @@ public class OrganisationUnit extends BaseNameableObject
     }
 
     @XmlElement
-    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
-    @JsonSerialize( using = JsonNameableObjectSerializer.class )
+    @XmlJavaTypeAdapter( OrganisationUnitXmlAdapter.class )
+    @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     public OrganisationUnit getParent()
     {
         return parent;
@@ -528,7 +548,6 @@ public class OrganisationUnit extends BaseNameableObject
 
     @XmlElement
     @JsonProperty
-    @JsonSerialize( using = JsonDateSerializer.class )
     public Date getOpeningDate()
     {
         return openingDate;
@@ -541,7 +560,6 @@ public class OrganisationUnit extends BaseNameableObject
 
     @XmlElement
     @JsonProperty
-    @JsonSerialize( using = JsonDateSerializer.class )
     public Date getClosedDate()
     {
         return closedDate;
@@ -626,8 +644,9 @@ public class OrganisationUnit extends BaseNameableObject
 
     @XmlElementWrapper( name = "organisationUnitGroups" )
     @XmlElement( name = "organisationUnitGroup" )
-    @XmlJavaTypeAdapter( BaseIdentifiableObjectXmlAdapter.class )
-    @JsonSerialize( using = JsonIdentifiableObjectCollectionSerializer.class )
+    @XmlJavaTypeAdapter( OrganisationUnitGroupXmlAdapter.class )
+    @JsonProperty( value = "organisationUnitGroups" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public Set<OrganisationUnitGroup> getGroups()
     {
         return groups;
@@ -640,8 +659,9 @@ public class OrganisationUnit extends BaseNameableObject
 
     @XmlElementWrapper( name = "dataSets" )
     @XmlElement( name = "dataSet" )
-    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
-    @JsonSerialize( using = JsonNameableObjectCollectionSerializer.class )
+    @XmlJavaTypeAdapter( DataSetXmlAdapter.class )
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -723,16 +743,6 @@ public class OrganisationUnit extends BaseNameableObject
         this.hasPatients = hasPatients;
     }
 
-    public int getLevel()
-    {
-        return level;
-    }
-
-    public void setLevel( int level )
-    {
-        this.level = level;
-    }
-
     @XmlElement
     @JsonProperty
     public boolean isCurrentParent()
@@ -760,7 +770,6 @@ public class OrganisationUnit extends BaseNameableObject
     @XmlElementWrapper( name = "attributes" )
     @XmlElement( name = "attribute" )
     @JsonProperty( value = "attributes" )
-    @JsonSerialize( using = JsonCollectionSerializer.class )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;
@@ -769,6 +778,16 @@ public class OrganisationUnit extends BaseNameableObject
     public void setAttributeValues( Set<AttributeValue> attributeValues )
     {
         this.attributeValues = attributeValues;
+    }
+
+    public int getLevel()
+    {
+        return level;
+    }
+
+    public void setLevel( int level )
+    {
+        this.level = level;
     }
 
     public String[] getGroupNames()

@@ -27,19 +27,24 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.BaseNameableObjectXmlAdapter;
-import org.hisp.dhis.common.adapter.JsonNameableObjectSerializer;
-
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
+import org.apache.commons.lang.StringEscapeUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.CategoryOptionComboXmlAdapter;
+import org.hisp.dhis.common.adapter.DataElementXmlAdapter;
 
 /**
  * This object can act both as a hydrated persisted object and as a wrapper
@@ -342,9 +347,9 @@ public class DataElementOperand
     }
 
     @XmlElement
-    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( DataElementXmlAdapter.class )
     @JsonProperty
-    @JsonSerialize( using = JsonNameableObjectSerializer.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public DataElement getDataElement()
     {
         return dataElement;
@@ -356,9 +361,9 @@ public class DataElementOperand
     }
 
     @XmlElement
-    @XmlJavaTypeAdapter( BaseNameableObjectXmlAdapter.class )
+    @XmlJavaTypeAdapter( CategoryOptionComboXmlAdapter.class )
     @JsonProperty
-    @JsonSerialize( using = JsonNameableObjectSerializer.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public DataElementCategoryOptionCombo getCategoryOptionCombo()
     {
         return categoryOptionCombo;
