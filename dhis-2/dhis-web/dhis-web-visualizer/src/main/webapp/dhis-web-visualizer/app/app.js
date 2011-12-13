@@ -81,7 +81,7 @@ DV.conf = {
         center_tbar_height: 31,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
-        form_label_width: 85
+        form_label_width: 70
     }
 };
 
@@ -1168,6 +1168,7 @@ Ext.onReady( function() {
                                     { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
                                     {
                                         xtype: 'combobox',
+                                        cls: 'dv-combo',
                                         name: DV.conf.finals.chart.series,
                                         emptyText: 'Series',
                                         queryMode: 'local',
@@ -1200,6 +1201,7 @@ Ext.onReady( function() {
                                     { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
                                     {
                                         xtype: 'combobox',
+                                        cls: 'dv-combo',
                                         name: DV.conf.finals.chart.category,
                                         emptyText: 'Category',
                                         queryMode: 'local',
@@ -1233,6 +1235,7 @@ Ext.onReady( function() {
                                     { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
                                     {
                                         xtype: 'combobox',
+                                        cls: 'dv-combo',
                                         name: DV.conf.finals.chart.filter,
                                         emptyText: 'Filter',
                                         queryMode: 'local',
@@ -1270,13 +1273,14 @@ Ext.onReady( function() {
                                 items: [
                                     {
                                         xtype: 'combobox',
+                                        cls: 'dv-combo',
                                         style: 'margin-bottom:8px',
                                         width: DV.conf.layout.west_fieldset_width - 22,
                                         valueField: 'id',
                                         displayField: 'name',
                                         fieldLabel: 'Select group',
                                         labelStyle: 'padding-left:7px;',
-                                        labelWidth: 110,
+                                        labelWidth: 90,
                                         editable: false,
                                         queryMode: 'remote',
                                         store: Ext.create('Ext.data.Store', {
@@ -1430,13 +1434,14 @@ Ext.onReady( function() {
                                 items: [
                                     {
                                         xtype: 'combobox',
+                                        cls: 'dv-combo',
                                         style: 'margin-bottom:8px',
                                         width: DV.conf.layout.west_fieldset_width - 22,
                                         valueField: 'id',
                                         displayField: 'name',
                                         fieldLabel: 'Select group',
                                         labelStyle: 'padding-left:7px;',
-                                        labelWidth: 110,
+                                        labelWidth: 90,
                                         editable: false,
                                         queryMode: 'remote',
                                         store: Ext.create('Ext.data.Store', {
@@ -1881,11 +1886,14 @@ Ext.onReady( function() {
                                                                 {
                                                                     xtype: 'form',
                                                                     bodyStyle: 'border-style:none',
-                                                                    labelWidth: DV.conf.layout.form_label_width,
                                                                     items: [
                                                                         {
                                                                             xtype: 'textfield',
                                                                             fieldLabel: 'Name',
+                                                                            labelWidth: DV.conf.layout.form_label_width,
+                                                                            labelStyle: 'padding-left:5px',
+                                                                            width: 300,
+                                                                            height: 25,
                                                                             listeners: {
                                                                                 added: function() {
                                                                                     DV.cmp.favorite.name = this;
@@ -1917,9 +1925,15 @@ Ext.onReady( function() {
                                                                     store: DV.store.datatable,
                                                                     tbar: [
                                                                         {
-                                                                            icon: 'images/exit.png',
+                                                                            text: 'Delete',
+                                                                            disabled: true,
                                                                             handler: function() {
-                                                                                console.log(DV.cmp.favorite.grid);
+                                                                                console.log(DV.cmp.favorite.grid.getSelectionModel().getSelection());
+                                                                            },
+                                                                            listeners: {
+                                                                                added: function() {
+                                                                                    DV.cmp.favorite.del = this;
+                                                                                }
                                                                             }
                                                                         }
                                                                     ],
@@ -1928,7 +1942,12 @@ Ext.onReady( function() {
                                                                             DV.cmp.favorite.grid = this;
                                                                         },
                                                                         itemclick: function(g, r) {
-                                                                            this.record = r;
+                                                                            if (this.getSelectionModel().getSelection().length) {
+                                                                                DV.cmp.favorite.del.enable();
+                                                                            }
+                                                                            else {
+                                                                                DV.cmp.favorite.del.disable();
+                                                                            }
                                                                         }
                                                                     }
                                                                 }                                                                    

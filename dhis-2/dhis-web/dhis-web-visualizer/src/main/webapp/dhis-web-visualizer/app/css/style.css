@@ -22,6 +22,13 @@
     font-size: 10px;
 }
 
+/* Combobox border-radius */
+.dv-combo input {
+    -webkit-border-top-left-radius: 2px;
+    -moz-border-radius-topleft: 2px;
+    border-top-left-radius: 2px;
+}
+
 /* General font */
 .x-form-item, .x-form-field, .x-form-display-field  {
 	font: normal 10px arial, ubuntu;
@@ -103,6 +110,34 @@
 /* Tree panel node height */
 .x-tree-panel .x-grid-row .x-grid-cell-inner {
     height: 17px;
+}
+
+/* Tree panel selected row background */
+.x-grid-row-selected .x-grid-cell, .x-grid-row-selected .x-grid-rowwrap-div {
+    background-image: none;
+    background-color: #dddddd;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dddddd), color-stop(100%, #e1e1e1));
+    background-image: -webkit-linear-gradient(top, #dddddd,#e1e1e1);
+    background-image: -moz-linear-gradient(top, #dddddd,#e1e1e1);
+    background-image: -o-linear-gradient(top, #dddddd,#e1e1e1);
+    background-image: -ms-linear-gradient(top, #dddddd,#e1e1e1);
+    background-image: linear-gradient(top, #dddddd,#e1e1e1);
+    -moz-border-radius: 2px 2px 2px 2px;
+    -webkit-border-radius: 2px 2px 2px 2px;
+    -o-border-radius: 2px 2px 2px 2px;
+    -ms-border-radius: 2px 2px 2px 2px;
+    -khtml-border-radius: 2px 2px 2px 2px;
+    border-radius: 2px 2px 2px 2px;
+}
+
+/* Tree panel hover row background */
+.x-grid-cell {
+    -moz-border-radius: 2px 2px 2px 2px;
+    -webkit-border-radius: 2px 2px 2px 2px;
+    -o-border-radius: 2px 2px 2px 2px;
+    -ms-border-radius: 2px 2px 2px 2px;
+    -khtml-border-radius: 2px 2px 2px 2px;
+    border-radius: 2px 2px 2px 2px;
 }
 
 /* (Tree)Panel border */
