@@ -27,100 +27,73 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.api.utils.IdentifiableObjectParams;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
-import org.hisp.dhis.chart.Chart;
-import org.hisp.dhis.chart.ChartService;
-import org.hisp.dhis.chart.Charts;
-import org.hisp.dhis.i18n.I18nManager;
-import org.hisp.dhis.i18n.I18nManagerException;
-import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.JFreeChart;
+import org.hisp.dhis.report.Report;
+import org.hisp.dhis.report.ReportService;
+import org.hisp.dhis.report.Reports;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
-/**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
 @Controller
-@RequestMapping( value = ChartController.RESOURCE_PATH )
-public class ChartController
+@RequestMapping( value = ReportController.RESOURCE_PATH )
+public class ReportController
 {
-    public static final String RESOURCE_PATH = "/charts";
+    public static final String RESOURCE_PATH = "/reports";
 
     @Autowired
-    private ChartService chartService;
-
-    @Autowired
-    private I18nManager i18nManager;
+    public ReportService reportService;
 
     //-------------------------------------------------------------------------------------------------------
     // GET
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getCharts( IdentifiableObjectParams params, Model model, HttpServletRequest request )
+    public String getReports( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
-        Charts charts = new Charts();
-        charts.setCharts( new ArrayList<Chart>( chartService.getAllCharts() ) );
+        Reports reports = new Reports();
+
+        if ( params.hasNoPaging() )
+        {
+            reports.setReports( new ArrayList<Report>( reportService.getAllReports() ) );
+        }
+        else
+        {
+            reports.setReports( new ArrayList<Report>( reportService.getAllReports() ) );
+        }
 
         if ( params.hasLinks() )
         {
             WebLinkPopulator listener = new WebLinkPopulator( request );
-            listener.addLinks( charts );
+            listener.addLinks( reports );
         }
 
-        model.addAttribute( "model", charts );
+        model.addAttribute( "model", reports );
 
-        return "charts";
+        return "reports";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getChart( @PathVariable( "uid" ) String uid, IdentifiableObjectParams params, Model model, HttpServletRequest request )
+    public String getReport( @PathVariable( "uid" ) String uid, IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
-        Chart chart = chartService.getChart( uid );
+        Report report = reportService.getReport( uid );
 
         if ( params.hasLinks() )
         {
             WebLinkPopulator listener = new WebLinkPopulator( request );
-            listener.addLinks( chart );
+            listener.addLinks( report );
         }
 
-        model.addAttribute( "model", chart );
+        model.addAttribute( "model", report );
 
-        return "chart";
-    }
-
-    @RequestMapping( value = "/{uid}.png", method = RequestMethod.GET )
-    public void getChartPNG( @PathVariable( "uid" ) String uid, @RequestParam( value = "width", defaultValue = "700", required = false ) int width,
-                             @RequestParam( value = "height", defaultValue = "500", required = false ) int height,
-                             HttpServletResponse response ) throws IOException, I18nManagerException
-    {
-        JFreeChart chart = chartService.getJFreeChart( uid, i18nManager.getI18nFormat() );
-
-        response.setContentType( "image/png" );
-        ChartUtilities.writeChartAsPNG( response.getOutputStream(), chart, width, height );
-    }
-
-    @RequestMapping( value = "/{uid}.jpg", method = RequestMethod.GET )
-    public void getChartJPG( @PathVariable( "uid" ) String uid, @RequestParam( value = "width", defaultValue = "700", required = false ) int width,
-                             @RequestParam( value = "height", defaultValue = "500", required = false ) int height,
-                             HttpServletResponse response ) throws IOException, I18nManagerException
-    {
-        JFreeChart chart = chartService.getJFreeChart( uid, i18nManager.getI18nFormat() );
-
-        response.setContentType( "image/jpg" );
-        ChartUtilities.writeChartAsJPEG( response.getOutputStream(), chart, width, height );
+        return "report";
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.view;
+package org.hisp.dhis.common.adapter;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -27,41 +27,35 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.InputStream;
+import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-public class Jaxb2Utils
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.report.Report;
+
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class ReportXmlAdapter extends XmlAdapter<BaseIdentifiableObject, Report>
 {
-    public static Marshaller createMarshaller( Object domainModel, HttpServletRequest request )
-        throws JAXBException
+    private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
+
+    @Override
+    public Report unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
     {
-        JAXBContext context = JAXBContext.newInstance( domainModel.getClass() );
+        Report report = new Report();
 
-        Marshaller marshaller = context.createMarshaller();
-        marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, false );
-        marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
+        report.setUid( identifiableObject.getUid() );
+        report.setLastUpdated( identifiableObject.getLastUpdated() );
+        report.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
 
-        return marshaller;
+        return report;
     }
 
-    public static Unmarshaller createUnmarshaller( Class<?> clazz )
-        throws JAXBException
+    @Override
+    public BaseIdentifiableObject marshal( Report report ) throws Exception
     {
-        JAXBContext context = JAXBContext.newInstance( clazz );
-
-        Unmarshaller unmarshaller = context.createUnmarshaller();
-
-        return unmarshaller;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T unmarshal( Class<?> clazz, InputStream input ) throws JAXBException
-    {
-        return (T) Jaxb2Utils.createUnmarshaller( clazz ).unmarshal( input );
+        return baseIdentifiableObjectXmlAdapter.marshal( report );
     }
 }

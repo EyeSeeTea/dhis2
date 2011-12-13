@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.view;
+package org.hisp.dhis.report;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -27,41 +27,40 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-public class Jaxb2Utils
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseLinkableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.ReportXmlAdapter;
+
+@XmlRootElement( name = "reports", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class Reports 
+    extends BaseLinkableObject
 {
-    public static Marshaller createMarshaller( Object domainModel, HttpServletRequest request )
-        throws JAXBException
+    private List<Report> reports = new ArrayList<Report>();
+
+    @XmlElement( name = "report" )
+    @XmlJavaTypeAdapter( ReportXmlAdapter.class )
+    @JsonProperty( value = "reports" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    public List<Report> getReports()
     {
-        JAXBContext context = JAXBContext.newInstance( domainModel.getClass() );
-
-        Marshaller marshaller = context.createMarshaller();
-        marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, false );
-        marshaller.setProperty( Marshaller.JAXB_ENCODING, "UTF-8" );
-
-        return marshaller;
+        return reports;
     }
 
-    public static Unmarshaller createUnmarshaller( Class<?> clazz )
-        throws JAXBException
+    public void setReports( List<Report> reports )
     {
-        JAXBContext context = JAXBContext.newInstance( clazz );
-
-        Unmarshaller unmarshaller = context.createUnmarshaller();
-
-        return unmarshaller;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T unmarshal( Class<?> clazz, InputStream input ) throws JAXBException
-    {
-        return (T) Jaxb2Utils.createUnmarshaller( clazz ).unmarshal( input );
+        this.reports = reports;
     }
 }
