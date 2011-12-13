@@ -70,11 +70,6 @@ DV.conf = {
     chart: {
         inset: 30
     },
-    style: {
-        label: {
-            period_group: 'font:bold 11px arial; color:#444; line-height:20px'
-        }
-    },
     layout: {
         west_width: 424,
         west_fieldset_width: 402,
@@ -1616,7 +1611,7 @@ Ext.onReady( function() {
                                                     {
                                                         xtype: 'label',
                                                         text: 'Months',
-                                                        style: DV.conf.style.label.period_group
+                                                        cls: 'dv-label-period-heading'
                                                     },
                                                     {
                                                         xtype: 'checkbox',
@@ -1654,7 +1649,7 @@ Ext.onReady( function() {
                                                     {
                                                         xtype: 'label',
                                                         text: 'Quarters',
-                                                        style: DV.conf.style.label.period_group
+                                                        cls: 'dv-label-period-heading'
                                                     },
                                                     {
                                                         xtype: 'checkbox',
@@ -1691,7 +1686,7 @@ Ext.onReady( function() {
                                                     {
                                                         xtype: 'label',
                                                         text: 'Years',
-                                                        style: DV.conf.style.label.period_group
+                                                        cls: 'dv-label-period-heading'
                                                     },
                                                     {
                                                         xtype: 'checkbox',
@@ -1836,7 +1831,7 @@ Ext.onReady( function() {
                         {
                             xtype: 'button',
                             name: 'resizewest',
-							cls: 'dv-toolbar-btn-text-2',
+							cls: 'dv-toolbar-btn-2',
                             text: '<<<',
                             tooltip: 'Show/hide chart settings',
                             handler: function() {
@@ -1864,7 +1859,7 @@ Ext.onReady( function() {
                         },
                         {
                             xtype: 'button',
-							cls: 'dv-toolbar-btn-text-2',
+							cls: 'dv-toolbar-btn-2',
                             text: 'Fav',
                             listeners: {
                                 afterrender: function(b) {
@@ -1972,7 +1967,7 @@ Ext.onReady( function() {
                         },
                         {
                             xtype: 'button',
-							cls: 'dv-toolbar-btn-text-2',
+							cls: 'dv-toolbar-btn-2',
                             text: 'Show..',
                             listeners: {
                                 afterrender: function(b) {
@@ -2015,7 +2010,7 @@ Ext.onReady( function() {
                         },
                         {
                             xtype: 'button',
-							cls: 'dv-toolbar-btn-text-2',
+							cls: 'dv-toolbar-btn-2',
                             text: 'Save as..',
                             execute: function(type) {
                                 var svg = document.getElementsByTagName('svg');
@@ -2068,7 +2063,7 @@ Ext.onReady( function() {
                         '->',
                         {
                             xtype: 'button',
-							cls: 'dv-toolbar-btn-text-2',
+							cls: 'dv-toolbar-btn-2',
                             text: 'Exit',
                             handler: function() {
                                 window.location.href = DV.conf.finals.ajax.url_portal + 'redirect.action';
@@ -2077,7 +2072,7 @@ Ext.onReady( function() {
                         {
                             xtype: 'button',
                             name: 'resizeeast',
-							cls: 'dv-toolbar-btn-text-2',
+							cls: 'dv-toolbar-btn-2',
                             text: '>>>',
                             tooltip: 'Hide data table',
                             hidden: true,

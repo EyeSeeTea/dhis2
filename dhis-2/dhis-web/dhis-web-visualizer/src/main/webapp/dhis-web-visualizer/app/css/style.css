@@ -1,8 +1,4 @@
-/****************
- ExtJS overrides
- ****************/
-
-body * {
+body {
     font: normal 10px arial, ubuntu;
 }
 
@@ -179,7 +175,7 @@ body * {
     font-weight: bold;
 }
 .dv-toolbar .dv-toolbar-btn-2 * {
-    color: green;
+    color: #444;
 }
 
 /* Button chart image */
@@ -388,6 +384,14 @@ body * {
 .dv-window-title-datatable {
     padding-left: 19px;
     background-image: url('../images/datatable.png');
+}
+
+/* Label heading periods */
+.dv-label-period-heading {
+    font-size: 11px;
+    font-weight: bold;
+    color:#666;
+    line-height:20px;
 }
 
 /* Grid datatable */
