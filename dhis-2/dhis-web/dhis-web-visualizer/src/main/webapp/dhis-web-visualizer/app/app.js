@@ -25,7 +25,8 @@ DV.conf = {
             url_visualizer: '../',
             url_commons: '../../dhis-web-commons-ajax-json/',
             url_portal: '../../dhis-web-portal/',
-            url_data: 'getAggregatedValues.action'
+            url_get_data: 'getAggregatedValues.action',
+            url_delete_favorites: 'deleteFavorites.action'
         },        
         dimension: {
             data: {
@@ -547,6 +548,25 @@ Ext.onReady( function() {
                 }
                 return values;
             }
+        },
+        crud: {
+            favorite: {
+                c: function() {
+                    
+                },
+                d: function(fids) {
+                    var baseurl = DV.conf.finals.ajax.url_delete_favorites;
+                    Ext.Array.each(fids, function(item) {
+                        baseurl = Ext.String.urlAppend(baseurl, 'favoriteIds=' + item.get('v'));
+                    });
+                    
+                    //Ext.Ajax.request({
+                        //url: baseurl,
+                        //success: function(r) { // delete from local store
+                        //}
+                    //}); 
+                }
+            }
         }
     };
     
@@ -735,13 +755,13 @@ Ext.onReady( function() {
             params = params.concat(DV.util.dimension[DV.state.category.dimension].getUrl());
             params = params.concat(DV.util.dimension[DV.state.filter.dimension].getUrl(true));
             
-            var baseUrl = DV.conf.finals.ajax.url_visualizer + DV.conf.finals.ajax.url_data;
+            var baseurl = DV.conf.finals.ajax.url_visualizer + DV.conf.finals.ajax.url_get_data;
             Ext.Array.each(params, function(item) {
-                baseUrl = Ext.String.urlAppend(baseUrl, item);
+                baseurl = Ext.String.urlAppend(baseurl, item);
             });
             
             Ext.Ajax.request({
-                url: baseUrl,
+                url: baseurl,
                 success: function(r) {
                     DV.value.values = DV.util.value.jsonfy(r);
                     
@@ -1959,7 +1979,10 @@ Ext.onReady( function() {
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 disabled: true,
                                                                                 handler: function() {
-                                                                                    console.log(DV.cmp.favorite.grid.getSelectionModel().getSelection());
+                                                                                    var s = DV.cmp.favorite.grid.getSelectionModel().getSelection();
+                                                                                    if (s.length) {
+                                                                                        DV.util.crud.favorite.d(s);
+                                                                                    }
                                                                                 },
                                                                                 listeners: {
                                                                                     added: function() {
