@@ -555,7 +555,7 @@ Ext.onReady( function() {
                     
                 },
                 d: function(fids) {
-                    var baseurl = DV.conf.finals.ajax.url_delete_favorites;
+                    var baseurl = DV.conf.finals.ajax.url_visualizer + DV.conf.finals.ajax.url_delete_favorites;
                     Ext.Array.each(fids, function(item) {
                         baseurl = Ext.String.urlAppend(baseurl, 'favoriteIds=' + item.get('v'));
                     });
@@ -692,7 +692,26 @@ Ext.onReady( function() {
             else {
                 return DV.store.chart;
             }
-        }
+        },
+        favorite: Ext.create('Ext.data.Store', {
+            fields: ['id', 'name', 's'],
+            proxy: {
+                type: 'ajax',
+                url: DV.conf.finals.ajax.url_visualizer + 'getIndicatorsMinified.action',
+                reader: {
+                    type: 'json',
+                    root: 'indicators'
+                }
+            },
+            storage: {},
+            listeners: {
+                load: function(s) {
+                    DV.util.store.addToStorage(s);
+                    DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+                }
+            }
+        })
+            
     };
     
     DV.state = {
@@ -1915,6 +1934,14 @@ Ext.onReady( function() {
                                                                             listeners: {
                                                                                 added: function() {
                                                                                     DV.cmp.favorite.name = this;
+                                                                                },
+                                                                                change: function() {
+                                                                                    if (this.getValue()) {
+                                                                                        DV.cmp.favorite.save.enable();
+                                                                                    }
+                                                                                    else {
+                                                                                        DV.cmp.favorite.save.disable();
+                                                                                    }
                                                                                 }
                                                                             }
                                                                         }
@@ -2017,7 +2044,13 @@ Ext.onReady( function() {
                                                                 items: [
                                                                     '->',
                                                                     {
-                                                                        text: 'Save'
+                                                                        text: 'Save',
+                                                                        disabled: true,
+                                                                        listeners: {
+                                                                            added: function() {
+                                                                                DV.cmp.favorite.save = this;
+                                                                            }
+                                                                        }
                                                                     }
                                                                 ]
                                                             }                                                                    
