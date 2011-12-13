@@ -1944,7 +1944,7 @@ Ext.onReady( function() {
                                                                     tbar: {
                                                                         id: 'favorite_t',
                                                                         cls: 'dv-toolbar',
-                                                                        height: 29,
+                                                                        height: 30,
                                                                         defaults: {
                                                                             height: 24
                                                                         },
