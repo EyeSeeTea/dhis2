@@ -1726,6 +1726,7 @@ Ext.onReady( function() {
                                 items: [
                                     {
                                         xtype: 'treepanel',
+                                        cls: 'dv-tree',
                                         height: 300,
                                         width: DV.conf.layout.west_fieldset_width - 22,
                                         autoScroll: true,
@@ -1879,7 +1880,6 @@ Ext.onReady( function() {
                                                             bodyStyle: 'padding:8px; background-color:#fff',
                                                             layout: 'fit',
                                                             closeAction: 'hide',
-                                                            width: 500,
                                                             items: [
                                                                 {
                                                                     xtype: 'form',
@@ -1887,11 +1887,11 @@ Ext.onReady( function() {
                                                                     items: [
                                                                         {
                                                                             xtype: 'textfield',
+                                                                            cls: 'dv-textfield',
                                                                             fieldLabel: 'Name',
                                                                             labelWidth: DV.conf.layout.form_label_width,
                                                                             labelStyle: 'padding-left:5px',
                                                                             width: 300,
-                                                                            height: 25,
                                                                             listeners: {
                                                                                 added: function() {
                                                                                     DV.cmp.favorite.name = this;
@@ -1903,38 +1903,72 @@ Ext.onReady( function() {
                                                                 {
                                                                     xtype: 'grid',
                                                                     height: 400,
-                                                                    width: 316,
+                                                                    width: 300,
                                                                     scroll: 'vertical',
                                                                     multiSelect: true,
                                                                     columns: [
                                                                         {
                                                                             text: 'Name',
-                                                                            dataIndex: DV.conf.finals.dimension.data.value,
+                                                                            dataIndex: DV.conf.finals.dimension.period.value,
                                                                             width: 200,
                                                                             style: 'display:none'
                                                                         },
                                                                         {
-                                                                            text: 'Created',
-                                                                            dataIndex: DV.conf.finals.dimension.period.value,
+                                                                            text: 'jeje',
+                                                                            dataIndex: DV.conf.finals.dimension.organisationunit.value,
                                                                             width: 100,
                                                                             style: 'display:none'
                                                                         }
                                                                     ],
                                                                     store: DV.store.datatable,
-                                                                    tbar: [
-                                                                        {
-                                                                            text: 'Delete',
-                                                                            disabled: true,
-                                                                            handler: function() {
-                                                                                console.log(DV.cmp.favorite.grid.getSelectionModel().getSelection());
+                                                                    tbar: {
+                                                                        id: 'favorite_t',
+                                                                        cls: 'dv-toolbar',
+                                                                        height: 29,
+                                                                        defaults: {
+                                                                            height: 24
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                text: 'Show..',
+                                                                                cls: 'dv-toolbar-btn-2',
+                                                                                handler: function() {
+                                                                                    console.log(DV.cmp.favorite.grid.getSelectionModel().getSelection());
+                                                                                },
+                                                                                listeners: {
+                                                                                    added: function() {
+                                                                                        DV.cmp.favorite.del = this;
+                                                                                    }
+                                                                                }
                                                                             },
-                                                                            listeners: {
-                                                                                added: function() {
-                                                                                    DV.cmp.favorite.del = this;
+                                                                            {
+                                                                                text: 'Sort by..',
+                                                                                cls: 'dv-toolbar-btn-2',
+                                                                                handler: function() {
+                                                                                    console.log(DV.cmp.favorite.grid.getSelectionModel().getSelection());
+                                                                                },
+                                                                                listeners: {
+                                                                                    added: function() {
+                                                                                        DV.cmp.favorite.del = this;
+                                                                                    }
+                                                                                }
+                                                                            },
+                                                                            '->',
+                                                                            {
+                                                                                text: 'Delete',
+                                                                                cls: 'dv-toolbar-btn-2',
+                                                                                disabled: true,
+                                                                                handler: function() {
+                                                                                    console.log(DV.cmp.favorite.grid.getSelectionModel().getSelection());
+                                                                                },
+                                                                                listeners: {
+                                                                                    added: function() {
+                                                                                        DV.cmp.favorite.del = this;
+                                                                                    }
                                                                                 }
                                                                             }
-                                                                        }
-                                                                    ],
+                                                                        ]
+                                                                    },
                                                                     listeners: {
                                                                         added: function() {
                                                                             DV.cmp.favorite.grid = this;
@@ -1949,7 +1983,20 @@ Ext.onReady( function() {
                                                                         }
                                                                     }
                                                                 }                                                                    
-                                                            ]
+                                                            ],
+                                                            bbar: {
+                                                                cls: 'dv-toolbar',
+                                                                height: 29,
+                                                                defaults: {
+                                                                    height: 24
+                                                                },
+                                                                items: [
+                                                                    '->',
+                                                                    {
+                                                                        text: 'Save'
+                                                                    }
+                                                                ]
+                                                            }                                                                    
                                                         }).show();
                                                     }
                                                 },
