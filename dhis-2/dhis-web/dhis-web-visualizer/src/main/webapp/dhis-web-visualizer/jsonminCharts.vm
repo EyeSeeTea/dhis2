@@ -1,0 +1,2 @@
+#set( $size = $object.size() )
+[#foreach( $obj in $object )["$!{obj.id}","$encoder.jsonEncode(${obj.name})","$!{iv.type}","$!{iv.series}","$!{iv.category}","$!{iv.filter}"]#if( $velocityCount < $indicatorSize ),#end#end]
