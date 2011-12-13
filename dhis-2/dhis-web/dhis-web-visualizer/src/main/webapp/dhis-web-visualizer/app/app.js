@@ -1001,7 +1001,6 @@ Ext.onReady( function() {
         datatable: null,
         getDataTable: function(exe) {
             this.datatable = Ext.create('Ext.grid.Panel', {
-                id: 'datatable_g',
                 height: DV.util.viewport.getSize().y - 1,
                 scroll: 'vertical',
                 cls: 'dv-datatable',
@@ -1869,7 +1868,7 @@ Ext.onReady( function() {
                                             {
                                                 text: 'Manage favorites',
                                                 iconCls: 'dv-menu-item-datatable',
-                                                minWidth: 100,
+                                                minWidth: 130,
                                                 handler: function() {
                                                     if (DV.cmp.favorite.window) {
                                                         DV.cmp.favorite.window.show();

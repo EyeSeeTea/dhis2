@@ -143,7 +143,9 @@ body {
 /* Boundlist (multiselect, comboboxlist etc) */
 .x-boundlist-item {
     color: #333;
+/*
     padding: 2px 2px 2px 4px;
+*/
     font-size: 10px;
 }
 .x-boundlist-item-over {
@@ -259,6 +261,7 @@ body {
 /* Grid row/cell text position */
 .x-grid-cell-inner {
     line-height: 15px;
+    font-size: 10px;
 }
 
 /* Grid datatable column chooser */
@@ -394,12 +397,13 @@ body {
     line-height:20px;
 }
 
-/* Grid datatable */
+/* Grid datatable columns */
 .dv-datatable .x-grid-header-ct {
     border-style: none;
 }
 
-#datatable_g .x-fit-item {
+/* Grid datatable first row border top */
+.dv-datatable .x-fit-item {
     border-top: 1px solid #d0d0d0;
 }
 
