@@ -2,14 +2,14 @@
  ExtJS overrides
  ****************/
 
-.x-body {
-	font-family: arial, ubuntu;
+body * {
+    font: normal 10px arial, ubuntu;
 }
 
 /* Combobox empty text */
 .x-form-empty-field, textarea.x-form-empty-field {
-    font-size: 10px;
-    color: #777;
+    font-size: 20px;
+    color: red;
 }
 
 /* Combobox text position*/
@@ -29,9 +29,9 @@
     border-top-left-radius: 2px;
 }
 
-/* General font */
-.x-form-item, .x-form-field, .x-form-display-field  {
-	font: normal 10px arial, ubuntu;
+/* Combobox text position */
+.dv-combo .x-form-text {
+    padding-left: 4px;
 }
 
 /* Combobox field label font */
@@ -58,14 +58,10 @@
     padding-bottom: 4px;
 }
 
+/* Fieldset header */
 .x-fieldset-header {
-    font-size: 11px;
-	font-family: arial, ubuntu;
-    font-weight: bold;
-    color: #000;
-    padding: 0 7px 0 5px;
+    padding-right: 7px;
 }
-
 .x-fieldset-header .x-fieldset-header-text {
     padding-left: 3px;
 }
@@ -80,7 +76,6 @@
 .x-tool-over .x-tool-toggle {
     background-position: -25px -60px;
 }
-
 .x-panel-collapsed .x-tool-over .x-tool-toggle, .x-fieldset-collapsed .x-tool-over .x-tool-toggle {
     background-position: -25px -75px;
 }
@@ -101,9 +96,8 @@
     background-position: -25px -60px;
 }
 
-/* Tree panel font */
+/* Tree panel font color */
 .x-grid-row .x-grid-cell {
-    font: 10px arial, ubuntu;
     color: #222;
 }
 
@@ -140,7 +134,7 @@
     border-radius: 2px 2px 2px 2px;
 }
 
-/* (Tree)Panel border */
+/* (Tree) Panel border */
 .x-panel .x-grid-body {
     border-style: none;
 }
@@ -154,6 +148,7 @@
 .x-boundlist-item {
     color: #333;
     padding: 2px 2px 2px 4px;
+    font-size: 10px;
 }
 .x-boundlist-item-over {
     background-color: #eee;
@@ -172,19 +167,29 @@
 /* Checkbox box label */
 .x-form-cb-label-after {
     padding-left: 3px;
-    font: 11px arial, ubuntu;
+    font-size: 11px;
+}
+
+/* Button dv-toolbar font size */
+.dv-toolbar * {
+    font-size: 11px;
+}
+.dv-toolbar .dv-toolbar-btn-1 * {
+    color: #111;
+    font-weight: bold;
+}
+.dv-toolbar .dv-toolbar-btn-2 * {
+    color: green;
 }
 
 /* Button chart image */
 .x-btn-default-toolbar-small-icon button {
     width: 32px !important;
 }
-
 .x-btn-default-toolbar-small-icon .x-btn-icon {
     width: 32px;
     height: 32px;
 }
-
 .x-btn-arrow {
     background-image: url('../images/arrow.png');
 }
@@ -210,11 +215,6 @@
     border-color: #aaa;
     border-style: solid;
     border-width: 1px;
-}
-
-/* Button font-family */
-.x-btn-default-toolbar-small .x-btn-inner {
-	font-family: arial, ubuntu;
 }
 
 /* Toolbar separator */
@@ -256,8 +256,8 @@
 }
 
 /* Grid datatable column header */
-.x-column-header {
-	font: normal 11px arial, ubuntu;
+.x-column-header-inner .x-column-header-text {
+	font-size: 11px;
 }
 
 /* Grid row/cell text position */
@@ -270,19 +270,6 @@
     display: none;
 }
 
-/****************
- Data Visualizer
- ***************/
-
-body {
-    font: normal 11px arial, ubuntu;
-}
-
-li {
-   font-size: 10px;
-   color: #000;
-}
-
 /* Second toolbar */
 #chartsettings_tb {
     background: #f5f5f5;
@@ -292,7 +279,7 @@ li {
 }
 
 /* Multiselect dock border radius */
-#availableIndicators .x-docked-top {    
+.dv-toolbar-multiselect-left .x-docked-top {    
     -o-border-top-left-radius: 2px;
 	-icab-border-top-left-radius: 2px;
 	-khtml-border-top-left-radius: 2px;
@@ -301,16 +288,7 @@ li {
 	border-top-left-radius: 2px;
 }
 
-#availableDataElements .x-docked-top { 
-    -o-border-top-left-radius: 2px;
-	-icab-border-top-left-radius: 2px;
-	-khtml-border-top-left-radius: 2px;
-    -moz-border-radius-topleft: 2px;
-	-webkit-border-top-left-radius: 2px;
-	border-top-left-radius: 2px;
-}
-
-#selectedIndicators .x-docked-top { 
+.dv-toolbar-multiselect-right .x-docked-top { 
     -o-border-top-right-radius: 2px;
 	-icab-border-top-right-radius: 2px;
 	-khtml-border-top-right-radius: 2px;
@@ -319,30 +297,31 @@ li {
 	border-top-right-radius: 2px;
 }
 
-#selectedDataElements .x-docked-top { 
-    -o-border-top-right-radius: 2px;
-	-icab-border-top-right-radius: 2px;
-	-khtml-border-top-right-radius: 2px;
-    -moz-border-radius-topright: 2px;
-	-webkit-border-top-right-radius: 2px;
-	border-top-right-radius: 2px;
+/* Multiselect docked bar font size */
+.dv-toolbar-multiselect-left .dv-toolbar-multiselect-left-label {
+    font-size: 11px;
+    padding-left: 5px;
+}
+.dv-toolbar-multiselect-right .dv-toolbar-multiselect-right-label {
+    font-size: 11px;
+    padding-right: 5px;
 }
 
 /* Multiselect boundlist */
-#availableIndicators .x-boundlist-item-over, #availableDataElements .x-boundlist-item-over {
+.dv-toolbar-multiselect-left .x-boundlist-item-over {
     background-color: transparent;
     border-color: transparent;
 }
-#availableIndicators .x-boundlist-selected, #availableDataElements .x-boundlist-selected {
+.dv-toolbar-multiselect-left .x-boundlist-selected {
     background-color: #d3d3d3;
     border-color: #b3abaa;
 }
 
-#selectedIndicators .x-boundlist-item-over, #selectedDataElements .x-boundlist-item-over {
+.dv-toolbar-multiselect-right .x-boundlist-item-over {
     background-color: transparent;
     border-color: transparent;
 }
-#selectedIndicators .x-boundlist-selected, #selectedDataElements .x-boundlist-selected {
+.dv-toolbar-multiselect-right .x-boundlist-selected {
     background-color: #d3d3d3;
     border-color: #b3abaa;
 }
@@ -389,11 +368,8 @@ li {
 /* Fieldset */
 .dv-fieldset-title-link {
     color:#000;
-    text-decoration:none;
-}
-
-.dv-fieldset-title-link-sub {
-    color:#555;
+    font-size: 11px;
+    font-weight: bold;
     text-decoration:none;
 }
 
@@ -404,7 +380,7 @@ li {
 
 /* Chart tips */
 .dv-chart-tips {
-    font: normal 13px arial, ubuntu;
+    font-size: 13px;
     padding: 0 0 3px 3px;
 }
 
@@ -423,20 +399,7 @@ li {
     border-top: 1px solid #d0d0d0;
 }
 
-/* Button - toolbar */
-.dv-btn-toolbar {
-    border-width: 1px;
-    padding: 3px;
-}
-
-.dv-btn-toolbar-text-1 {
-    color: #333;
-    font-weight: bold;
-}
-.dv-btn-toolbar-text-2 {
-    color: #444;
-}
-
+/* Menu item icon */
 .dv-menu-item-png {
     background-image:url('../images/png.png');
 }

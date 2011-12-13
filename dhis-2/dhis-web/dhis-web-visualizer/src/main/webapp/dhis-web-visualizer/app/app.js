@@ -1323,7 +1323,7 @@ Ext.onReady( function() {
                                                 xtype: 'multiselect',
                                                 id: 'availableIndicators',
                                                 name: 'availableIndicators',
-                                                cls: 'multiselect',
+                                                cls: 'dv-toolbar-multiselect-left',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
                                                 displayField: 's',
                                                 valueField: 'id',
@@ -1333,7 +1333,7 @@ Ext.onReady( function() {
                                                     {
                                                         xtype: 'label',
                                                         text: 'Available indicators',
-                                                        style: 'padding-left:5px'
+                                                        cls: 'dv-toolbar-multiselect-left-label'
                                                     },
                                                     '->',
                                                     {
@@ -1369,7 +1369,7 @@ Ext.onReady( function() {
                                                 xtype: 'multiselect',
                                                 id: 'selectedIndicators',
                                                 name: 'selectedIndicators',
-                                                cls: 'multiselect',
+                                                cls: 'dv-toolbar-multiselect-right',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
                                                 displayField: 's',
                                                 valueField: 'id',
@@ -1398,7 +1398,7 @@ Ext.onReady( function() {
                                                     {
                                                         xtype: 'label',
                                                         text: 'Selected indicators',
-                                                        style: 'padding-right:5px'
+                                                        cls: 'dv-toolbar-multiselect-right-label'
                                                     }
                                                 ],
                                                 listeners: {
@@ -1483,7 +1483,7 @@ Ext.onReady( function() {
                                             Ext.create('Ext.ux.form.MultiSelect', {
                                                 id: 'availableDataElements',
                                                 name: 'availableDataElements',
-                                                cls: 'multiselect',
+                                                cls: 'dv-toolbar-multiselect-left',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
                                                 displayField: 's',
                                                 valueField: 'id',
@@ -1493,7 +1493,7 @@ Ext.onReady( function() {
                                                     {
                                                         xtype: 'label',
                                                         text: 'Available data elements',
-                                                        style: 'padding-left:5px'
+                                                        cls: 'dv-toolbar-multiselect-left-label'
                                                     },
                                                     '->',
                                                     {
@@ -1529,7 +1529,7 @@ Ext.onReady( function() {
                                                 xtype: 'multiselect',
                                                 id: 'selectedDataElements',
                                                 name: 'selectedDataElements',
-                                                cls: 'multiselect',
+                                                cls: 'dv-toolbar-multiselect-right',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
                                                 displayField: 's',
                                                 valueField: 'id',
@@ -1558,7 +1558,7 @@ Ext.onReady( function() {
                                                     {
                                                         xtype: 'label',
                                                         text: 'Selected data elements',
-                                                        style: 'padding-right:5px'
+                                                        cls: 'dv-toolbar-multiselect-right-label'
                                                     }
                                                 ],
                                                 listeners: {
@@ -1827,13 +1827,17 @@ Ext.onReady( function() {
                 bodyStyle: 'padding:10px',
                 tbar: {
                     xtype: 'toolbar',
+                    cls: 'dv-toolbar',
                     height: DV.conf.layout.center_tbar_height,
+                    defaults: {
+                        height: 26
+                    },
                     items: [
                         {
                             xtype: 'button',
-							cls: 'dv-btn-toolbar',
                             name: 'resizewest',
-                            text: '<span class="dv-btn-toolbar-text-2"><<<</span>',
+							cls: 'dv-toolbar-btn-text-2',
+                            text: '<<<',
                             tooltip: 'Show/hide chart settings',
                             handler: function() {
                                 var p = DV.cmp.region.west;
@@ -1852,16 +1856,16 @@ Ext.onReady( function() {
                         },
                         {
                             xtype: 'button',
-							cls: 'dv-btn-toolbar',
-                            text: '<span class="dv-btn-toolbar-text-1">Update</span>',
+							cls: 'dv-toolbar-btn-1',
+                            text: 'Update',
                             handler: function() {
                                 DV.exe.execute(true, DV.init.isInit);
                             }
                         },
                         {
                             xtype: 'button',
-							cls: 'dv-btn-toolbar',
-                            text: '<span class="dv-btn-toolbar-text-1">Fav</span>',
+							cls: 'dv-toolbar-btn-text-2',
+                            text: 'Fav',
                             listeners: {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
@@ -1968,8 +1972,8 @@ Ext.onReady( function() {
                         },
                         {
                             xtype: 'button',
-							cls: 'dv-btn-toolbar',
-                            text: '<span class="dv-btn-toolbar-text-2">Show..</span>',
+							cls: 'dv-toolbar-btn-text-2',
+                            text: 'Show..',
                             listeners: {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
@@ -2011,8 +2015,8 @@ Ext.onReady( function() {
                         },
                         {
                             xtype: 'button',
-							cls: 'dv-btn-toolbar',
-                            text: '<span class="dv-btn-toolbar-text-2">Save as..</span>',
+							cls: 'dv-toolbar-btn-text-2',
+                            text: 'Save as..',
                             execute: function(type) {
                                 var svg = document.getElementsByTagName('svg');
                                 
@@ -2064,17 +2068,17 @@ Ext.onReady( function() {
                         '->',
                         {
                             xtype: 'button',
-							cls: 'dv-btn-toolbar',
-                            text: '<span class="dv-btn-toolbar-text-2">Exit</span>',
+							cls: 'dv-toolbar-btn-text-2',
+                            text: 'Exit',
                             handler: function() {
                                 window.location.href = DV.conf.finals.ajax.url_portal + 'redirect.action';
                             }
                         },
                         {
                             xtype: 'button',
-							cls: 'dv-btn-toolbar',
                             name: 'resizeeast',
-                            text: '<span class="dv-btn-toolbar-text-2">>>></span>',
+							cls: 'dv-toolbar-btn-text-2',
+                            text: '>>>',
                             tooltip: 'Hide data table',
                             hidden: true,
                             handler: function() {
