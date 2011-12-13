@@ -1,5 +1,32 @@
 package org.hisp.dhis.mapgeneration;
 
+/*
+ * Copyright (c) 2011, University of Oslo
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * * Neither the name of the HISP project nor the names of its contributors may
+ *   be used to endorse or promote products derived from this software without
+ *   specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import net.sf.json.JSONException;
 
 import org.codehaus.jackson.JsonNode;
@@ -42,9 +69,8 @@ public class GeoToolsPrimitiveFromJsonFactory
      */
     public static Coordinate createCoordinateFromJson( JsonNode json )
     {
-
         // Parse the double values from the json and create the coordinate
-        return new Coordinate( json.get( 0 ).getValueAsDouble(), json.get( 1 ).getValueAsDouble() );
+        return new Coordinate( json.get( 0 ).asDouble(), json.get( 1 ).asDouble() );
     }
 
     /**
@@ -58,12 +84,17 @@ public class GeoToolsPrimitiveFromJsonFactory
     public static MultiPolygon createMultiPolygonFromJson( JsonNode json )
     {
         // Native array of polygons to pass to GeoFactory
-        Polygon[] polygons = new Polygon[json.size()];
+        Polygon[] polygons = new Polygon[MapUtils.getNonEmptyNodes( json )];
 
         // Read all the polygons from the json array
         for ( int i = 0; i < json.size(); i++ )
         {
-            polygons[i] = createPolygonFromJson( json.get( i ) );
+            JsonNode node = json.get( i );
+            
+            if ( MapUtils.nodeIsNonEmpty( node ) )
+            {
+                polygons[i] = createPolygonFromJson( node );
+            }
         }
 
         // Create the multi-polygon from factory
@@ -78,7 +109,6 @@ public class GeoToolsPrimitiveFromJsonFactory
      */
     public static Polygon createPolygonFromJson( JsonNode json )
     {
-
         // Get the json array of coordinates representing the shell and make a
         // linear-ring out of them
         JsonNode shell = json.get( 0 );
@@ -97,7 +127,11 @@ public class GeoToolsPrimitiveFromJsonFactory
             for ( int i = 1; i < shell.size(); i++ )
             {
                 JsonNode hole = json.get( i );
-                holes[i] = createLinearRingFromJson( hole );
+                
+                if ( hole != null && hole.size() > 0 )
+                {
+                    holes[i] = createLinearRingFromJson( hole );
+                }
             }
         }
 
@@ -114,12 +148,17 @@ public class GeoToolsPrimitiveFromJsonFactory
     public static LinearRing createLinearRingFromJson( JsonNode json )
     {
         // Native array of coordinates to pass to GeoFactory
-        Coordinate[] coords = new Coordinate[json.size()];
+        Coordinate[] coords = new Coordinate[MapUtils.getNonEmptyNodes( json )];
 
         // Read the json array of coordinates
         for ( int i = 0; i < json.size(); i++ )
         {
-            coords[i] = createCoordinateFromJson( json.get( i ) );
+            JsonNode node = json.get( i );
+            
+            if ( MapUtils.nodeIsNonEmpty( node ) )
+            {
+                coords[i] = createCoordinateFromJson( node );
+            }
         }
 
         // Create the linear-ring from factory

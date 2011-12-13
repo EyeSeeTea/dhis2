@@ -1,7 +1,7 @@
-package org.hisp.dhis.mapgeneration;
+package org.hisp.dhis.report;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,73 +30,37 @@ package org.hisp.dhis.mapgeneration;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.mapping.MapView;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-/**
- * The Map class represents a single map that may contain several layers.
- * 
- * @author Kjetil Andresen <kjetand@ifi.uio.no>
- */
-public class Map
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseLinkableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.ReportXmlAdapter;
+
+@XmlRootElement( name = "reports", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class Reports 
+    extends BaseLinkableObject
 {
-    private List<MapView> mapViews;
+    private List<Report> reports = new ArrayList<Report>();
 
-    /**
-     * Construct an initially empty map.
-     */
-    public Map()
+    @XmlElement( name = "report" )
+    @XmlJavaTypeAdapter( ReportXmlAdapter.class )
+    @JsonProperty( value = "reports" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    public List<Report> getReports()
     {
-        mapViews = new ArrayList<MapView>();
+        return reports;
     }
 
-    /**
-     * Construct a map with a single initial layer.
-     * 
-     * @param mapView the initial layer
-     */
-    public Map( MapView mapView )
+    public void setReports( List<Report> reports )
     {
-        mapViews = new ArrayList<MapView>();
-        mapViews.add( mapView );
-    }
-
-    /**
-     * Construct a map with a given list of predefined layers.
-     * 
-     * @param mapViews the list of layers
-     */
-    public Map( List<MapView> mapViews )
-    {
-        this.mapViews = mapViews;
-    }
-
-    /**
-     * Add a layer to this map.
-     * 
-     * @param mapView the layer
-     */
-    public void addMapView( MapView mapView )
-    {
-        mapViews.add( mapView );
-    }
-
-    /**
-     * Add a list of layers to this map.
-     * 
-     * @param mapViews the list of layers
-     */
-    public void addMapViews( List<MapView> mapViews )
-    {
-        this.mapViews.addAll( mapViews );
-    }
-
-    /**
-     * Gets all the layers currently associated with this map.
-     * 
-     * @return the list of layers
-     */
-    public List<MapView> getMapViews()
-    {
-        return mapViews;
+        this.reports = reports;
     }
 }

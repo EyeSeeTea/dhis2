@@ -1,7 +1,7 @@
-package org.hisp.dhis.mapgeneration;
+package org.hisp.dhis.common.adapter;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,76 +27,35 @@ package org.hisp.dhis.mapgeneration;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
-import org.hisp.dhis.mapping.MapView;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.report.Report;
 
 /**
- * The Map class represents a single map that may contain several layers.
- * 
- * @author Kjetil Andresen <kjetand@ifi.uio.no>
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class Map
+public class ReportXmlAdapter extends XmlAdapter<BaseIdentifiableObject, Report>
 {
-    private List<MapView> mapViews;
+    private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
 
-    /**
-     * Construct an initially empty map.
-     */
-    public Map()
+    @Override
+    public Report unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
     {
-        mapViews = new ArrayList<MapView>();
+        Report report = new Report();
+
+        report.setUid( identifiableObject.getUid() );
+        report.setLastUpdated( identifiableObject.getLastUpdated() );
+        report.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
+
+        return report;
     }
 
-    /**
-     * Construct a map with a single initial layer.
-     * 
-     * @param mapView the initial layer
-     */
-    public Map( MapView mapView )
+    @Override
+    public BaseIdentifiableObject marshal( Report report ) throws Exception
     {
-        mapViews = new ArrayList<MapView>();
-        mapViews.add( mapView );
-    }
-
-    /**
-     * Construct a map with a given list of predefined layers.
-     * 
-     * @param mapViews the list of layers
-     */
-    public Map( List<MapView> mapViews )
-    {
-        this.mapViews = mapViews;
-    }
-
-    /**
-     * Add a layer to this map.
-     * 
-     * @param mapView the layer
-     */
-    public void addMapView( MapView mapView )
-    {
-        mapViews.add( mapView );
-    }
-
-    /**
-     * Add a list of layers to this map.
-     * 
-     * @param mapViews the list of layers
-     */
-    public void addMapViews( List<MapView> mapViews )
-    {
-        this.mapViews.addAll( mapViews );
-    }
-
-    /**
-     * Gets all the layers currently associated with this map.
-     * 
-     * @return the list of layers
-     */
-    public List<MapView> getMapViews()
-    {
-        return mapViews;
+        return baseIdentifiableObjectXmlAdapter.marshal( report );
     }
 }

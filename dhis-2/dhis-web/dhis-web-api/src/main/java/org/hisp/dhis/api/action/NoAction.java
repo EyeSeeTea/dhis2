@@ -1,11 +1,7 @@
-package org.hisp.dhis.reportsheet.utils;
-
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Locale;
+package org.hisp.dhis.api.action;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,44 +27,17 @@ import java.util.Locale;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.opensymphony.xwork2.Action;
+
 /**
- * @author Dang Duy Hieu
- * @version $Id$
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class NumberUtils
+public class NoAction
+    implements Action
 {
-    // DecimalFormatNumber for VN as same as Locale.GERMAN's one.
-    private static DecimalFormat df = null;
-
-    // This pattern used for VN
-    public static final String PATTERN_DECIMAL_FORMAT1 = "#,##0.######";
-    
-    // This pattern is default in DHIS2    
-    public static final String PATTERN_DECIMAL_FORMAT2 = "#0.######";
-
-    // -------------------------------------------------------------------------
-    //
-    // -------------------------------------------------------------------------
-
-    public static void resetDecimalFormatByLocale( Locale locale )
+    public String execute()
+        throws Exception
     {
-        df = (DecimalFormat) NumberFormat.getInstance( locale );
-    }
-
-    public static void applyPatternDecimalFormat( String pattern )
-    {
-        df.applyPattern( pattern == null ? PATTERN_DECIMAL_FORMAT1 : pattern );
-    }
-
-    public static String getFormattedNumber( String input )
-    {
-        try
-        {
-            return df.format( Double.parseDouble( input ) );
-        }
-        catch ( NumberFormatException nfe )
-        {
-            return input;
-        }
+        return SUCCESS;
     }
 }
