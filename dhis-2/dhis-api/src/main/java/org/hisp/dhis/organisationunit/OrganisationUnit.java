@@ -55,25 +55,19 @@ import java.util.regex.Pattern;
 @XmlAccessorType( value = XmlAccessType.NONE )
 public class OrganisationUnit extends BaseNameableObject
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
     private static final long serialVersionUID = 1228298379303894619L;
-
+    
     public static final String FEATURETYPE_NONE = "None";
-
     public static final String FEATURETYPE_MULTIPOLYGON = "MultiPolygon";
-
     public static final String FEATURETYPE_POLYGON = "Polygon";
-
     public static final String FEATURETYPE_POINT = "Point";
-
     public static final String RESULTTYPE_SYMBOL = "Symbol";
 
+    private static final List<String> FEATURETYPES = Arrays.asList( FEATURETYPE_NONE, FEATURETYPE_MULTIPOLYGON, FEATURETYPE_POLYGON, FEATURETYPE_POINT );
+    
     private static final Comparator<OrganisationUnit> COMPARATOR = new OrganisationUnitNameComparator();
 
     private static final Pattern JSON_COORDINATE_PATTERN = Pattern.compile( "(\\[{3}.*?\\]{3})" );
-
     private static final Pattern COORDINATE_PATTERN = Pattern.compile( "([\\-0-9.]+,[\\-0-9.]+)" );
 
     private static final String NAME_SEPARATOR = " - ";
@@ -276,6 +270,11 @@ public class OrganisationUnit extends BaseNameableObject
     {
         return coordinates != null && coordinates.trim().length() > 0;
     }
+    
+    public boolean hasFeatureType()
+    {
+        return featureType != null && FEATURETYPES.contains( featureType );
+    }
 
     public List<CoordinatesTuple> getCoordinatesAsList()
     {
@@ -455,9 +454,25 @@ public class OrganisationUnit extends BaseNameableObject
         return set;
     }
 
+    public int getOrganisationUnitLevel()
+    {
+        int currentLevel = 1;
+
+        OrganisationUnit thisParent = this.parent;
+
+        while ( thisParent != null )
+        {
+            ++currentLevel;
+
+            thisParent = thisParent.getParent();
+        }
+
+        return currentLevel;
+    }
+
     public boolean isPolygon()
     {
-        return (featureType.equals( FEATURETYPE_MULTIPOLYGON ) || featureType.equals( FEATURETYPE_POLYGON ));
+        return featureType.equals( FEATURETYPE_MULTIPOLYGON ) || featureType.equals( FEATURETYPE_POLYGON );
     }
 
     public boolean isPoint()

@@ -27,7 +27,8 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.springframework.web.servlet.view.AbstractUrlBasedView;
+import java.io.OutputStream;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,8 +37,8 @@ import javax.xml.bind.util.JAXBSource;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.stream.StreamResult;
-import java.io.OutputStream;
-import java.util.Map;
+
+import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -52,6 +53,7 @@ public class XsltHtmlView extends AbstractUrlBasedView
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void renderMergedOutputModel( Map<String, Object> model, HttpServletRequest request, HttpServletResponse response )
         throws Exception
     {
@@ -75,6 +77,7 @@ public class XsltHtmlView extends AbstractUrlBasedView
 
         // pass on any parameters set in xslt-params
         Map<String, String> params = (Map<String, String>) model.get( "xslt-params" );
+        
         if ( params != null )
         {
             for ( Map.Entry<String, String> entry : params.entrySet() )

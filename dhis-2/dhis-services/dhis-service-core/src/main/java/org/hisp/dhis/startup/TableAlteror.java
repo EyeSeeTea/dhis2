@@ -115,6 +115,10 @@ public class TableAlteror
         // mapping
         executeSql( "DROP TABLE maporganisationunitrelation" );
         executeSql( "ALTER TABLE mapview DROP COLUMN mapid" );
+        executeSql( "ALTER TABLE mapview DROP COLUMN startdate" );
+        executeSql( "ALTER TABLE mapview DROP COLUMN enddate" );
+        executeSql( "ALTER TABLE mapview DROP COLUMN mapsource" );
+        executeSql( "ALTER TABLE mapview DROP COLUMN mapsourcetype" );
         executeSql( "DROP TABLE map" );
         executeSql( "DELETE FROM systemsetting WHERE name = 'longitude'" );
         executeSql( "DELETE FROM systemsetting WHERE name = 'latitude'" );
@@ -283,6 +287,7 @@ public class TableAlteror
 
         // message
 
+        executeSql( "ALTER TABLE messageconversation DROP COLUMN messageconversationkey" );
         executeSql( "ALTER TABLE message DROP COLUMN messagesubject" );
         executeSql( "ALTER TABLE usermessage DROP COLUMN messagedate" );
         executeSql( "DROP TABLE message_usermessages" );

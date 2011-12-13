@@ -1,5 +1,32 @@
 package org.hisp.dhis.mapgeneration;
 
+/*
+ * Copyright (c) 2004-2010, University of Oslo
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * * Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ * * Neither the name of the HISP project nor the names of its contributors may
+ *   be used to endorse or promote products derived from this software without
+ *   specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -7,6 +34,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.aggregation.AggregatedMapValue;
 import org.hisp.dhis.mapgeneration.IntervalSet.DistributionStrategy;
 import org.hisp.dhis.mapping.MapView;
@@ -110,7 +138,6 @@ public class GeoToolsMapGenerationService
 
     private InternalMapLayer buildSingleInternalMapLayer( MapView mapView )
     {
-
         Assert.isTrue( mapView != null );
         Assert.isTrue( mapView.getMapValueType() != null );
 
@@ -128,16 +155,16 @@ public class GeoToolsMapGenerationService
 
         // Get the low and high colors, typically in hexadecimal form, e.g.
         // '#ff3200' is an orange color
-        Color colorLow = Utilities.createColorFromString( mapView.getColorLow() != null ? mapView.getColorLow()
+        Color colorLow = MapUtils.createColorFromString( StringUtils.trimToNull( mapView.getColorLow() ) != null ? mapView.getColorLow()
             : DEFAULT_COLOR_LOW );
-        Color colorHigh = Utilities.createColorFromString( mapView.getColorHigh() != null ? mapView.getColorHigh()
+        Color colorHigh = MapUtils.createColorFromString( StringUtils.trimToNull( mapView.getColorHigh() ) != null ? mapView.getColorHigh()
             : DEFAULT_COLOR_HIGH );
 
         // TODO MapView should be extended to feature opacity
         float opacity = DEFAULT_OPACITY;
 
         // TODO MapView should be extended to feature stroke color
-        Color strokeColor = Utilities.createColorFromString( DEFAULT_STROKE_COLOR );
+        Color strokeColor = MapUtils.createColorFromString( DEFAULT_STROKE_COLOR );
 
         // TODO MapView might be extended to feature stroke width
         int strokeWidth = DEFAULT_STROKE_WIDTH;
@@ -156,8 +183,7 @@ public class GeoToolsMapGenerationService
 
         // Get the aggregated map values
         // TODO Might make version of getIndicatorMapValues that takes Indicator
-        // and
-        // parent OrganisationUnit *directly*, i.e. not from ID-s, since we have
+        // and parent OrganisationUnit *directly*, i.e. not from ID-s, since we have
         // them
         // NOTE There is no need to provide startDate and endDate as period is
         // set
@@ -194,26 +220,27 @@ public class GeoToolsMapGenerationService
     private List<GeoToolsMapObject> buildGeoToolsMapObjectsForMapLayer( InternalMapLayer mapLayer,
         Collection<AggregatedMapValue> mapValues )
     {
-
         // Create a list of map objects
         List<GeoToolsMapObject> mapObjects = new LinkedList<GeoToolsMapObject>();
 
         // Build internal map objects for each map value
         for ( AggregatedMapValue mapValue : mapValues )
         {
-            mapObjects.add( buildSingleGeoToolsMapObjectForMapLayer( mapLayer, mapValue ) );
+            // Get the org unit for this map value
+            OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( mapValue.getOrganisationUnitId() );
+
+            if ( orgUnit != null && orgUnit.hasCoordinates() && orgUnit.hasFeatureType() )
+            {
+                mapObjects.add( buildSingleGeoToolsMapObjectForMapLayer( mapLayer, mapValue, orgUnit ) );
+            }
         }
 
         return mapObjects;
     }
 
     private GeoToolsMapObject buildSingleGeoToolsMapObjectForMapLayer( InternalMapLayer mapLayer,
-        AggregatedMapValue mapValue )
+        AggregatedMapValue mapValue, OrganisationUnit orgUnit )
     {
-
-        // Get the org unit for this map value
-        OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( mapValue.getOrganisationUnitId() );
-
         // Create and setup an internal map object
         GeoToolsMapObject mapObject = new GeoToolsMapObject();
         mapObject.setName( orgUnit.getName() );
@@ -237,7 +264,6 @@ public class GeoToolsMapGenerationService
 
     private BufferedImage combineLegendAndMapImages( BufferedImage legendImage, BufferedImage mapImage )
     {
-
         Assert.isTrue( legendImage != null );
         Assert.isTrue( mapImage != null );
         Assert.isTrue( legendImage.getType() == mapImage.getType() );
