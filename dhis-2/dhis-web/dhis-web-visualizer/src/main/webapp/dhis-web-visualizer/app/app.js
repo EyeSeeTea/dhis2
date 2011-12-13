@@ -76,7 +76,7 @@ DV.conf = {
         center_tbar_height: 31,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
-        form_label_width: 70
+        form_label_width: 45
     }
 };
 
@@ -1890,7 +1890,7 @@ Ext.onReady( function() {
                                                                             cls: 'dv-textfield',
                                                                             fieldLabel: 'Name',
                                                                             labelWidth: DV.conf.layout.form_label_width,
-                                                                            labelStyle: 'padding-left:5px',
+                                                                            labelStyle: 'padding-left:5px; line-height:18px',
                                                                             width: 300,
                                                                             listeners: {
                                                                                 added: function() {
@@ -1902,8 +1902,8 @@ Ext.onReady( function() {
                                                                 },
                                                                 {
                                                                     xtype: 'grid',
-                                                                    height: 400,
                                                                     width: 300,
+                                                                    maxHeight: 400,
                                                                     scroll: 'vertical',
                                                                     multiSelect: true,
                                                                     columns: [
@@ -1974,6 +1974,7 @@ Ext.onReady( function() {
                                                                             DV.cmp.favorite.grid = this;
                                                                         },
                                                                         itemclick: function(g, r) {
+                                                                            DV.cmp.favorite.name.setValue(r.get('period'));
                                                                             if (this.getSelectionModel().getSelection().length) {
                                                                                 DV.cmp.favorite.del.enable();
                                                                             }
