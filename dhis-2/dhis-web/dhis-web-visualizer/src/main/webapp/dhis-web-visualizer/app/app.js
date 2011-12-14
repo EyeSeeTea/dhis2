@@ -24,6 +24,7 @@ DV.conf = {
         ajax: {
             path_visualizer: '../',
             path_commons: '../../dhis-web-commons-ajax-json/',
+            path_api: '../../api/',
             path_portal: '../../dhis-web-portal/',
             initialize: 'initialize.action',
             redirect: 'redirect.action',
@@ -36,7 +37,7 @@ DV.conf = {
             organisationunitchildren_get: 'getOrganisationUnitChildren.action',
             favorite_addorupdate: 'addOrUpdateChart.action',
             favorite_get: 'getChart.action',
-            favorite_getall: 'getAllCharts.action',
+            favorite_getall: 'charts.json?links=false',
             favorite_delete: 'deleteCharts.action'
         },        
         dimension: {
@@ -298,7 +299,6 @@ Ext.onReady( function() {
                     DV.cmp.dimension.indicator.selected.store.each( function(r) {
                         a.push('indicatorIds=' + r.data.id);
                     });
-alert(1);                    
                     DV.cmp.dimension.dataelement.selected.store.each( function(r) {
                         a.push('dataElementIds=' + r.data.id);
                     });
@@ -642,12 +642,13 @@ alert(1);
             favorite: {
                 create: function() {
                     var params = DV.state.getParams();
-return;                    
+                    params.name = DV.cmp.favorite.name.getValue();
                     Ext.Ajax.request({
                         url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_addorupdate,
                         params: params,
                         success: function() {
-                            DV.store.favorites.load();
+                            alert("success");
+                            //DV.store.favorites.load();
                         }
                     });
                 },
@@ -805,13 +806,13 @@ return;
             }
         },
         favorite: Ext.create('Ext.data.Store', {
-            fields: ['id', 'name'],
+            fields: ['id', 'name', 'lastUpdated'],
             proxy: {
                 type: 'ajax',
-                url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.indicatorgroup_get,
+                url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_getall,
                 reader: {
                     type: 'json',
-                    root: 'indicatorGroups'
+                    root: 'charts'
                 }
             },
             autoLoad: true,
@@ -893,7 +894,6 @@ return;
             obj.dataElementIds = this.dataelementIds;
             obj.organisationUnitIds = this.organisationunitIds;
             obj = Ext.Object.merge(obj, this.relativePeriods);
-console.log(obj);            
             return obj;            
         },
         resetState: function() {
@@ -2109,7 +2109,7 @@ console.log(obj);
                                                                         },
                                                                         {
                                                                             text: 'jeje',
-                                                                            dataIndex: 'id',
+                                                                            dataIndex: 'lastUpdated',
                                                                             width: 100,
                                                                             style: 'display:none'
                                                                         }
