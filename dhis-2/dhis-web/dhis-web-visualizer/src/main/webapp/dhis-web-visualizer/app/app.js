@@ -661,31 +661,35 @@ Ext.onReady( function() {
                 },
                 read: {
                     getFavorite: function(id, fn) {
-                        if (!Ext.isNumber(parseInt(id))) {
-                            alert('Invalid id');
-                            return;
-                        }
+                        //if (!Ext.isNumber(parseInt(id))) {
+                            //alert('Invalid id');
+                            //return;
+                        //}
                         
-                        Ext.Ajax.request({
-                            url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_get,
-                            params: {id: id},
-                            scope: this,
-                            success: fn
-                        });
+                        //Ext.Ajax.request({
+                            //url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_get,
+                            //params: {id: id},
+                            //scope: this,
+                            //success: fn
+                        //});
                     }
                 },
                 update: function() {
                     DV.util.crud.favorite.create(true);
                 },
-                del: function(selection, fn) {
-                    var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_delete;
-                    Ext.Array.each(fids, function(item) {
-                        baseurl = Ext.String.urlAppend(baseurl, 'uids=' + item.get('v'));
+                delete: function() {
+                    DV.util.mask.setMask(DV.cmp.favorite.window, 'Deleting...');
+                    var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_delete,
+                        selection = DV.cmp.favorite.grid.getSelectionModel().getSelection();
+                    Ext.Array.each(selection, function(item) {
+                        baseurl = Ext.String.urlAppend(baseurl, 'uids=' + item.data.id);
                     });
-                    
                     Ext.Ajax.request({
                         url: baseurl,
-                        success: fn
+                        success: function() {
+                            DV.store.favorite.load();
+                            DV.mask.hide();
+                        }
                     }); 
                 }
             }
@@ -2086,7 +2090,6 @@ Ext.onReady( function() {
                                                                             cls: 'dv-textfield',
                                                                             fieldLabel: 'Name',
                                                                             labelWidth: DV.conf.layout.form_label_width,
-                                                                            labelStyle: 'padding-left:5px; line-height:20px',
                                                                             width: 300,
                                                                             listeners: {
                                                                                 added: function() {
@@ -2114,13 +2117,13 @@ Ext.onReady( function() {
                                                                         {
                                                                             text: 'Name',
                                                                             dataIndex: 'name',
-                                                                            width: 200,
+                                                                            width: 173,
                                                                             style: 'display:none'
                                                                         },
                                                                         {
                                                                             text: 'jeje',
                                                                             dataIndex: 'lastUpdated',
-                                                                            width: 100,
+                                                                            width: 127,
                                                                             style: 'display:none'
                                                                         }
                                                                     ],
@@ -2163,23 +2166,8 @@ Ext.onReady( function() {
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 disabled: true,
                                                                                 handler: function() {
-                                                                                    var s = DV.cmp.favorite.grid.getSelectionModel().getSelection();
-                                                                                    if (s.length) {
-                                                                                        
-                                                                                        
-                                                                                        
-                                                                                        
-                                                                                        
-                                                                                        
-                                                                                        
-                                                                                        DV.util.crud.favorite.del(s, function() {
-                                                                                            var store = DV.store.favorite;
-                                                                                            for (var i = 0; i < selection.length; i++) {
-                                                                                                store.remove(store.getAt(store.find('uid', selection[i])));
-                                                                                            }
-                                                                                            console.log('Deletion complete');
-                                                                                        });
-                                                                                    }
+                                                                                    DV.util.crud.favorite.delete();
+                                                                                    DV.cmp.favorite.name.setValue('');
                                                                                 },
                                                                                 listeners: {
                                                                                     added: function() {
@@ -2247,6 +2235,7 @@ Ext.onReady( function() {
                                                                                                 handler: function() {
                                                                                                     this.up('window').close();
                                                                                                     DV.util.crud.favorite.update();
+                                                                                                    DV.cmp.favorite.name.setValue('');
                                                                                                 }
                                                                                             }
                                                                                         ]
@@ -2256,6 +2245,7 @@ Ext.onReady( function() {
                                                                                 }
                                                                                 else {
                                                                                     DV.util.crud.favorite.create();
+                                                                                    DV.cmp.favorite.name.setValue('');
                                                                                 }                                                                                    
                                                                             }
                                                                             else {

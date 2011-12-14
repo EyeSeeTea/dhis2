@@ -54,7 +54,7 @@ public class DeleteChartsAction
 
     private Collection<String> uids;
 
-    public void setUid( Collection<String> uids )
+    public void setUids( Collection<String> uids )
     {
         this.uids = uids;
     }

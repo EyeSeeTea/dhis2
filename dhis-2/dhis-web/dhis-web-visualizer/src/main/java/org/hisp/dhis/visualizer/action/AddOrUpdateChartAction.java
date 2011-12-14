@@ -29,7 +29,6 @@ package org.hisp.dhis.visualizer.action;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
@@ -39,8 +38,6 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.RelativePeriods;
 
 import com.opensymphony.xwork2.Action;
@@ -74,13 +71,6 @@ public class AddOrUpdateChartAction
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
-    }
-
-    private PeriodService periodService;
-
-    public void setPeriodService( PeriodService periodService )
-    {
-        this.periodService = periodService;
     }
 
     private OrganisationUnitService organisationUnitService;
