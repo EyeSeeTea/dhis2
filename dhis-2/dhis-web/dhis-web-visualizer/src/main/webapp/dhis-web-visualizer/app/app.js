@@ -22,11 +22,22 @@ DV.conf = {
     },
     finals: {
         ajax: {
-            url_visualizer: '../',
-            url_commons: '../../dhis-web-commons-ajax-json/',
-            url_portal: '../../dhis-web-portal/',
-            url_get_data: 'getAggregatedValues.action',
-            url_delete_favorites: 'deleteFavorites.action'
+            path_visualizer: '../',
+            path_commons: '../../dhis-web-commons-ajax-json/',
+            path_portal: '../../dhis-web-portal/',
+            initialize: 'initialize.action',
+            redirect: 'redirect.action',
+            data_get: 'getAggregatedValues.action',
+            indicator_get: 'getIndicatorsMinified.action',
+            indicatorgroup_get: 'getIndicatorGroupsMinified.action',
+            dataelement_get: 'getDataElementsMinified.action',
+            dataelementgroup_get: 'getDataElementGroupsMinified.action',
+            dataelement_get: 'getDataElementsMinified.action',
+            organisationunitchildren_get: 'getOrganisationUnitChildren.action',
+            favorite_addorupdate: 'addOrUpdateChart.action',
+            favorite_get: 'getChart.action',
+            favorite_getall: 'getAllCharts.action',
+            favorite_delete: 'deleteCharts.action'
         },        
         dimension: {
             data: {
@@ -89,9 +100,9 @@ Ext.onReady( function() {
     Ext.override(Ext.form.FieldSet,{setExpanded:function(a){var b=this,c=b.checkboxCmp,d=b.toggleCmp,e;a=!!a;if(c){c.setValue(a)}if(d){d.setType(a?"up":"down")}if(a){e="expand";b.removeCls(b.baseCls+"-collapsed")}else{e="collapse";b.addCls(b.baseCls+"-collapsed")}b.collapsed=!a;b.doComponentLayout();b.fireEvent(e,b);return b}});
     Ext.QuickTips.init();
     document.body.oncontextmenu = function(){return false;};
-
+    
     Ext.Ajax.request({
-        url: DV.conf.finals.ajax.url_visualizer + 'initialize.action',
+        url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.initialize,
         success: function(r) {
             
     DV.init = DV.conf.init.jsonfy(r);
@@ -136,6 +147,12 @@ Ext.onReady( function() {
             },
             getXY: function() {
                 return {x: DV.cmp.region.center.x + 15, y: DV.cmp.region.center.y + 43};
+            },
+            getPageCenterX: function(cmp) {
+                return ((screen.width/2)-(cmp.width/2));
+            },
+            getPageCenterY: function(cmp) {
+                return ((screen.height/2)-((cmp.height/2)-100));
             }
         },
         multiselect: {
@@ -551,11 +568,26 @@ Ext.onReady( function() {
         },
         crud: {
             favorite: {
-                c: function() {
+                create: function() {
                     
                 },
-                d: function(fids) {
-                    var baseurl = DV.conf.finals.ajax.url_visualizer + DV.conf.finals.ajax.url_delete_favorites;
+                read: {
+                    getFavorite: function(id, fn) {
+                        if (!Ext.isNumber(parseInt(id))) {
+                            alert('Invalid id');
+                            return;
+                        }
+                        
+                        Ext.Ajax.request({
+                            url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_get,
+                            params: {id: id},
+                            scope: this,
+                            success: fn
+                        });
+                    }
+                },      
+                del: function(fids) {
+                    var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_delete;
                     Ext.Array.each(fids, function(item) {
                         baseurl = Ext.String.urlAppend(baseurl, 'favoriteIds=' + item.get('v'));
                     });
@@ -586,7 +618,7 @@ Ext.onReady( function() {
                 fields: ['id', 'name', 's'],
                 proxy: {
                     type: 'ajax',
-                    url: DV.conf.finals.ajax.url_commons + 'getIndicatorsMinified.action',
+                    url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.indicator_get,
                     reader: {
                         type: 'json',
                         root: 'indicators'
@@ -610,7 +642,7 @@ Ext.onReady( function() {
                 fields: ['id', 'name', 's'],
                 proxy: {
                     type: 'ajax',
-                    url: DV.conf.finals.ajax.url_commons + 'getDataElementsMinified.action',
+                    url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.dataelement_get,
                     reader: {
                         type: 'json',
                         root: 'dataElements'
@@ -694,20 +726,21 @@ Ext.onReady( function() {
             }
         },
         favorite: Ext.create('Ext.data.Store', {
-            fields: ['id', 'name', 's'],
+            fields: ['id', 'name'],
             proxy: {
                 type: 'ajax',
-                url: DV.conf.finals.ajax.url_visualizer + 'getIndicatorsMinified.action',
+                url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.indicatorgroup_get,
                 reader: {
                     type: 'json',
-                    root: 'indicators'
+                    root: 'indicatorGroups'
                 }
             },
+            autoLoad: true,
             storage: {},
             listeners: {
                 load: function(s) {
-                    DV.util.store.addToStorage(s);
-                    DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+                    //DV.util.store.addToStorage(s);
+                    //DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
                 }
             }
         })
@@ -774,7 +807,7 @@ Ext.onReady( function() {
             params = params.concat(DV.util.dimension[DV.state.category.dimension].getUrl());
             params = params.concat(DV.util.dimension[DV.state.filter.dimension].getUrl(true));
             
-            var baseurl = DV.conf.finals.ajax.url_visualizer + DV.conf.finals.ajax.url_get_data;
+            var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.data_get;
             Ext.Array.each(params, function(item) {
                 baseurl = Ext.String.urlAppend(baseurl, item);
             });
@@ -1320,7 +1353,7 @@ Ext.onReady( function() {
                                             fields: ['id', 'name', 'index'],
                                             proxy: {
                                                 type: 'ajax',
-                                                url: DV.conf.finals.ajax.url_commons + 'getIndicatorGroupsMinified.action',
+                                                url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.indicatorgroup_get,
                                                 reader: {
                                                     type: 'json',
                                                     root: 'indicatorGroups'
@@ -1481,7 +1514,7 @@ Ext.onReady( function() {
                                             fields: ['id', 'name', 'index'],
                                             proxy: {
                                                 type: 'ajax',
-                                                url: DV.conf.finals.ajax.url_commons + 'getDataElementGroupsMinified.action',
+                                                url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.dataelementgroup_get,
                                                 reader: {
                                                     type: 'json',
                                                     root: 'dataElementGroups'
@@ -1781,7 +1814,7 @@ Ext.onReady( function() {
                                         store: Ext.create('Ext.data.TreeStore', {
                                             proxy: {
                                                 type: 'ajax',
-                                                url: DV.conf.finals.ajax.url_visualizer + 'getOrganisationUnitChildren.action'
+                                                url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunitchildren_get,
                                             },
                                             root: {
                                                 id: DV.init.system.rootNode.id,
@@ -1919,6 +1952,7 @@ Ext.onReady( function() {
                                                             bodyStyle: 'padding:8px; background-color:#fff',
                                                             layout: 'fit',
                                                             closeAction: 'hide',
+                                                            modal: true,
                                                             items: [
                                                                 {
                                                                     xtype: 'form',
@@ -1956,18 +1990,18 @@ Ext.onReady( function() {
                                                                     columns: [
                                                                         {
                                                                             text: 'Name',
-                                                                            dataIndex: DV.conf.finals.dimension.period.value,
+                                                                            dataIndex: 'name',
                                                                             width: 200,
                                                                             style: 'display:none'
                                                                         },
                                                                         {
                                                                             text: 'jeje',
-                                                                            dataIndex: DV.conf.finals.dimension.organisationunit.value,
+                                                                            dataIndex: 'id',
                                                                             width: 100,
                                                                             style: 'display:none'
                                                                         }
                                                                     ],
-                                                                    store: DV.store.datatable,
+                                                                    store: DV.store.favorite,
                                                                     tbar: {
                                                                         id: 'favorite_t',
                                                                         cls: 'dv-toolbar',
@@ -2046,6 +2080,9 @@ Ext.onReady( function() {
                                                                     {
                                                                         text: 'Save',
                                                                         disabled: true,
+                                                                        handler: function() {
+                                                                            //if (DV.cmp.favorite.name.getValue())
+                                                                        },
                                                                         listeners: {
                                                                             added: function() {
                                                                                 DV.cmp.favorite.save = this;
@@ -2054,7 +2091,10 @@ Ext.onReady( function() {
                                                                     }
                                                                 ]
                                                             }                                                                    
-                                                        }).show();
+                                                        });
+                                                        var w = DV.cmp.favorite.window;
+                                                        w.setPosition((screen.width/2)-160, 200, true);
+                                                        w.show();
                                                     }
                                                 },
                                                 listeners: {
@@ -2169,7 +2209,7 @@ Ext.onReady( function() {
 							cls: 'dv-toolbar-btn-2',
                             text: 'Exit',
                             handler: function() {
-                                window.location.href = DV.conf.finals.ajax.url_portal + 'redirect.action';
+                                window.location.href = DV.conf.finals.ajax.path_portal + DV.conf.finals.ajax.redirect;
                             }
                         },
                         {
