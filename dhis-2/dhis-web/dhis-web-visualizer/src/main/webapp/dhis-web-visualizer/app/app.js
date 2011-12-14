@@ -1984,7 +1984,7 @@ Ext.onReady( function() {
                                                                 {
                                                                     xtype: 'grid',
                                                                     width: 300,
-                                                                    maxHeight: 400,
+                                                                    height: 350,
                                                                     scroll: 'vertical',
                                                                     multiSelect: true,
                                                                     columns: [
@@ -2058,16 +2058,19 @@ Ext.onReady( function() {
                                                                             DV.cmp.favorite.grid = this;
                                                                         },
                                                                         itemclick: function(g, r) {
-                                                                            DV.cmp.favorite.name.setValue(r.get('period'));
+                                                                            DV.cmp.favorite.name.setValue(r.get('name'));
                                                                             if (this.getSelectionModel().getSelection().length) {
                                                                                 DV.cmp.favorite.del.enable();
                                                                             }
                                                                             else {
                                                                                 DV.cmp.favorite.del.disable();
                                                                             }
+                                                                        },
+                                                                        itemdblclick: function() {
+                                                                            DV.cmp.favorite.save.handler();
                                                                         }
                                                                     }
-                                                                }                                                                    
+                                                                }
                                                             ],
                                                             bbar: {
                                                                 cls: 'dv-toolbar',
@@ -2078,10 +2081,49 @@ Ext.onReady( function() {
                                                                 items: [
                                                                     '->',
                                                                     {
+                                                                        xtype:'button',
                                                                         text: 'Save',
                                                                         disabled: true,
                                                                         handler: function() {
-                                                                            //if (DV.cmp.favorite.name.getValue())
+                                                                            if (DV.cmp.favorite.name.getValue()) {
+                                                                                if (DV.store.favorite.find('name', DV.cmp.favorite.name.getValue()) != -1) {
+                                                                                    var w = Ext.create('Ext.window.Window', {
+                                                                                        title: 'Save favorite',
+                                                                                        minWidth: 170,
+                                                                                        width: 170,
+                                                                                        bodyStyle: 'padding:12px; background-color:#fff',
+                                                                                        modal: true,
+                                                                                        items: [
+                                                                                            {
+                                                                                                html: 'Do you want to overwrite?',
+                                                                                                bodyStyle: 'border-style:none'
+                                                                                            }
+                                                                                        ],
+                                                                                        bbar: [
+                                                                                            {
+                                                                                                text: 'Cancel',
+                                                                                                handler: function() {
+                                                                                                    this.up('window').close();
+                                                                                                }
+                                                                                            },
+                                                                                            '->',
+                                                                                            {
+                                                                                                text: 'Overwrite',
+                                                                                                handler: function() {
+                                                                                                    alert("TODO overwrite favorite");
+                                                                                                    this.up('window').close();
+                                                                                                }
+                                                                                            }
+                                                                                        ]
+                                                                                    });
+                                                                                    w.setPosition((screen.width/2)-85, 310, true);
+                                                                                    w.show();
+                                                                                }
+                                                                            }
+                                                                            else {
+                                                                                alert('Name is required');
+                                                                                return;
+                                                                            }
                                                                         },
                                                                         listeners: {
                                                                             added: function() {

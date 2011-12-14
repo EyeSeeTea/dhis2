@@ -35,6 +35,7 @@ import com.opensymphony.xwork2.Action;
  * @author Jan Henrik Overland
  */
 public class DeleteChartsAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies

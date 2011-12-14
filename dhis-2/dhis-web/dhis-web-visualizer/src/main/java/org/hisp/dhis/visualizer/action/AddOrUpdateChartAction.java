@@ -92,11 +92,11 @@ public class AddOrUpdateChartAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String uid;
 
-    public void setId( Integer id )
+    public void setUid( String uid )
     {
-        this.id = id;
+        this.uid = uid;
     }
 
     private String name;
@@ -171,9 +171,9 @@ public class AddOrUpdateChartAction
     {
         Chart chart = null;
 
-        if ( id != null )
+        if ( uid != null )
         {
-            chart = chartService.getChart( id );
+            chart = chartService.getChart( uid );
         }
         else
         {
