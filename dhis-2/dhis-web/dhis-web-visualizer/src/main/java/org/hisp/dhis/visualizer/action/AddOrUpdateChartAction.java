@@ -27,10 +27,19 @@ package org.hisp.dhis.visualizer.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -43,34 +52,157 @@ public class AddOrUpdateChartAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
+
     private ChartService chartService;
 
     public void setChartService( ChartService chartService )
     {
         this.chartService = chartService;
     }
-    
+
+    private IndicatorService indicatorService;
+
+    public void setIndicatorService( IndicatorService indicatorService )
+    {
+        this.indicatorService = indicatorService;
+    }
+
+    private DataElementService dataElementService;
+
+    public void setDataElementService( DataElementService dataElementService )
+    {
+        this.dataElementService = dataElementService;
+    }
+
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
+    }
+
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
-    
+
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
     private String name;
-    
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
     private String type;
-    
+
+    public void setType( String type )
+    {
+        this.type = type;
+    }
+
     private String series;
-    
+
+    public void setSeries( String series )
+    {
+        this.series = series;
+    }
+
     private String category;
-    
+
+    public void setCategory( String category )
+    {
+        this.category = category;
+    }
+
     private String filter;
-    
+
+    public void setFilter( String filter )
+    {
+        this.filter = filter;
+    }
+
     private Collection<Integer> indicatorIds;
-    
+
+    public void setIndicatorIds( Collection<Integer> indicatorIds )
+    {
+        this.indicatorIds = indicatorIds;
+    }
+
     private Collection<Integer> dataElementIds;
-    
+
+    public void setDataElementIds( Collection<Integer> dataElementIds )
+    {
+        this.dataElementIds = dataElementIds;
+    }
+
     private Collection<Integer> periodIds;
-    
+
+    public void setPeriodIds( Collection<Integer> periodIds )
+    {
+        this.periodIds = periodIds;
+    }
+
     private Collection<Integer> organisationUnitIds;
-    
+
+    public void setOrganisationUnitIds( Collection<Integer> organisationUnitIds )
+    {
+        this.organisationUnitIds = organisationUnitIds;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        Chart chart = null;
+
+        if ( id != null )
+        {
+            chart = chartService.getChart( id );
+        }
+        else
+        {
+            chart = new Chart();
+        }
+
+        chart.setName( name );
+        chart.setType( type );
+        chart.setSeries( series );
+        chart.setCategory( category );
+        chart.setFilter( filter );
+
+        if ( indicatorIds != null )
+        {
+            chart.setIndicators( new ArrayList<Indicator>( indicatorService.getIndicators( indicatorIds ) ) );
+        }
+
+        if ( dataElementIds != null )
+        {
+            chart.setDataElements( new ArrayList<DataElement>( dataElementService.getDataElements( dataElementIds ) ) );
+        }
+
+        chart
+            .setPeriods( periodService.reloadPeriods( new ArrayList<Period>( periodService.getPeriods( periodIds ) ) ) );
+        chart.setOrganisationUnits( new ArrayList<OrganisationUnit>( organisationUnitService
+            .getOrganisationUnits( organisationUnitIds ) ) );
+
+        chartService.saveOrUpdate( chart );
+
+        return SUCCESS;
+    }
 }

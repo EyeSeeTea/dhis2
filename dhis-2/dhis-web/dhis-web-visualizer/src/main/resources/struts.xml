@@ -49,7 +49,19 @@
                 /dhis-web-visualizer/void.vm</result>
         </action>
 
-        <!-- Aggregated values -->
+        <!-- Chart -->
+
+        <action name="addOrUpdateChart"
+            class="org.hisp.dhis.visualizer.action.AddOrUpdateChartAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-visualizer/void.vm</result>
+        </action>
+
+        <action name="getChart"
+            class="org.hisp.dhis.visualizer.action.GetChartAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-visualizer/jsonminChart.vm</result>
+        </action>
 
         <action name="getAllCharts"
             class="org.hisp.dhis.visualizer.action.GetAllChartsAction">
