@@ -263,12 +263,42 @@ Ext.onReady( function() {
             }
         },
         dimension: {
+            indicator: {
+                getIds: function(exception) {
+                    var a = [];
+                    DV.cmp.dimension.indicator.selected.store.each( function(r) {
+                        a.push(r.data.id);
+                    });
+                    if (exception && !a.length) {
+                        alert('No indicators selected');
+                    }
+                    return a;
+                }
+            },
+            dataelement: {
+                getIds: function(exception) {
+                    if (DV.cmp.dimension.dataelement.selected.store) {
+                        var a = [];
+                        DV.cmp.dimension.dataelement.selected.store.each( function(r) {
+                            a.push(r.data.id);
+                        });
+                        if (exception && !a.length) {
+                            alert('No data elements selected');
+                        }
+                        return a;
+                    }
+                    else {
+                        alert('Data element store does not exist');
+                    }
+                }
+            },
             data: {
                 getUrl: function(isFilter) {
                     var a = [];
                     DV.cmp.dimension.indicator.selected.store.each( function(r) {
                         a.push('indicatorIds=' + r.data.id);
                     });
+alert(1);                    
                     DV.cmp.dimension.dataelement.selected.store.each( function(r) {
                         a.push('dataElementIds=' + r.data.id);
                     });
@@ -288,7 +318,7 @@ Ext.onReady( function() {
                         alert('No indicators or data elements selected');
                     }
                     return a;
-                }
+                }                    
             },
             period: {
                 getUrl: function(isFilter) {
@@ -327,7 +357,33 @@ Ext.onReady( function() {
                             }
                         };
                     }
-                }
+                },
+                getIds: function(exception) {
+                    var a = [],
+                        cmp = DV.cmp.dimension.period;
+                    Ext.Array.each(cmp, function(item) {
+                        if (item.getValue()) {
+                            a.push(item.paramName);
+                        }
+                    });
+                    if (exception && !a.length) {
+                        alert('No periods selected');
+                    }
+                    return a;
+                },
+                getRelativePeriodObject: function(exception) {
+                    var a = {},
+                        cmp = DV.cmp.dimension.period,
+                        valid = false;
+                    Ext.Array.each(cmp, function(item) {
+                        a[item.paramName] = item.getValue();
+                        valid = item.getValue() ? true : valid;
+                    });
+                    if (exception && !valid) {
+                        alert('No periods selected');
+                    }
+                    return a;
+                }   
             },
             organisationunit: {
                 getUrl: function(isFilter) {
@@ -357,8 +413,24 @@ Ext.onReady( function() {
                     if (exception && !a.length) {
                         alert('No organisation units selected');
                     }
-                    return a;                        
-                }
+                    return a;
+                },
+                getIds: function(exception) {
+                    var a = [],
+                        tp = DV.cmp.dimension.organisationunit.treepanel,
+                        selection = tp.getSelectionModel().getSelection();
+                    if (!selection.length) {
+                        selection = [tp.getRootNode()];
+                        tp.selectRoot();
+                    }
+                    Ext.Array.each(selection, function(r) {
+                        a.push(DV.util.string.getEncodedString(r.data.id));
+                    });
+                    if (exception && !a.length) {
+                        alert('No organisation units selected');
+                    }
+                    return a;
+                }                    
             }
         },
         chart: {
@@ -569,7 +641,15 @@ Ext.onReady( function() {
         crud: {
             favorite: {
                 create: function() {
-                    
+                    var params = DV.state.getParams();
+return;                    
+                    Ext.Ajax.request({
+                        url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_addorupdate,
+                        params: params,
+                        success: function() {
+                            DV.store.favorites.load();
+                        }
+                    });
                 },
                 read: {
                     getFavorite: function(id, fn) {
@@ -760,30 +840,61 @@ Ext.onReady( function() {
             dimension: DV.conf.finals.dimension.organisationunit.value,
             names: []
         },
+        indicatorIds: [],
+        dataelementIds: [],
+        relativePeriods: {},
+        organisationunitIds: [],
         isRendered: false,
         getState: function(exe) {
             this.resetState();
             
-            this.type = DV.util.button.getValue();
+            var tmp_series_dimension = DV.cmp.settings.series.getValue();
+            var tmp_series_names = DV.util.dimension[tmp_series_dimension].getNames(true);
             
-            this.series.dimension = DV.cmp.settings.series.getValue();
-            this.series.names = DV.util.dimension[this.series.dimension].getNames(true);
+            var tmp_category_dimension = DV.cmp.settings.category.getValue();
+            var tmp_category_names = DV.util.dimension[tmp_category_dimension].getNames(true);
             
-            this.category.dimension = DV.cmp.settings.category.getValue();
-            this.category.names = DV.util.dimension[this.category.dimension].getNames(true);
+            var tmp_filter_dimension = DV.cmp.settings.filter.getValue();
+            var tmp_filter_names = DV.util.dimension[tmp_filter_dimension].getNames(true).slice(0,1);
             
-            this.filter.dimension = DV.cmp.settings.filter.getValue();
-            this.filter.names = DV.util.dimension[this.filter.dimension].getNames(true).slice(0,1);
-            
-            if (!this.series.names.length || !this.category.names.length || !this.filter.names.length) {
+            if (!tmp_series_names.length || !tmp_category_names.length || !tmp_filter_names.length) {
                 return;
             }
+            
+            this.type = DV.util.button.getValue();
+            
+            this.series.dimension = tmp_series_dimension;
+            this.series.names = tmp_series_names;
+            
+            this.category.dimension = tmp_category_dimension;
+            this.category.names = tmp_category_names;
+            
+            this.filter.dimension = tmp_filter_dimension;
+            this.filter.names = tmp_filter_names;
+            
+            this.indicatorIds = DV.util.dimension.indicator.getIds();
+            this.dataelementIds = DV.util.dimension.dataelement.getIds();
+            this.relativePeriods = DV.util.dimension.period.getRelativePeriodObject();
+            this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
             
             this.isRendered = true;
             
             if (exe) {
                 DV.value.getValues(true);
             }
+        },
+        getParams: function() {
+            var obj = {};
+            obj.type = this.type;
+            obj.series = this.series.dimension;
+            obj.category = this.category.dimension;
+            obj.filter = this.filter.dimension;
+            obj.indicatorIds = this.indicatorIds;
+            obj.dataElementIds = this.dataelementIds;
+            obj.organisationUnitIds = this.organisationunitIds;
+            obj = Ext.Object.merge(obj, this.relativePeriods);
+console.log(obj);            
+            return obj;            
         },
         resetState: function() {
             this.type = null;
@@ -1711,7 +1822,7 @@ Ext.onReady( function() {
                                                 defaults: {
                                                     labelSeparator: '',
                                                     listeners: {
-                                                        afterrender: function(chb) {
+                                                        added: function(chb) {
                                                             if (chb.xtype === 'checkbox') {
                                                                 DV.cmp.dimension.period.push(chb);
                                                             }
@@ -1748,7 +1859,7 @@ Ext.onReady( function() {
                                                 defaults: {
                                                     labelSeparator: '',
                                                     listeners: {
-                                                        afterrender: function(chb) {
+                                                        added: function(chb) {
                                                             if (chb.xtype === 'checkbox') {
                                                                 DV.cmp.dimension.period.push(chb);
                                                             }
@@ -2126,8 +2237,7 @@ Ext.onReady( function() {
                                                                                                 text: 'Overwrite',
                                                                                                 handler: function() {
                                                                                                     this.up('window').close();
-                                                                                                    //DV.util.crud.favorite.create
-                                                                                                    //alert("TODO overwrite favorite");
+                                                                                                    DV.util.crud.favorite.update();
                                                                                                 }
                                                                                             }
                                                                                         ]
@@ -2135,6 +2245,9 @@ Ext.onReady( function() {
                                                                                     w.setPosition((screen.width/2)-75, 310, true);
                                                                                     w.show();
                                                                                 }
+                                                                                else {
+                                                                                    DV.util.crud.favorite.create();
+                                                                                }                                                                                    
                                                                             }
                                                                             else {
                                                                                 alert('Name is required');
