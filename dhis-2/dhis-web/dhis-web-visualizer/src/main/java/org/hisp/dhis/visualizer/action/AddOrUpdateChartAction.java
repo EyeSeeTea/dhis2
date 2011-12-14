@@ -29,6 +29,7 @@ package org.hisp.dhis.visualizer.action;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
@@ -40,6 +41,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.RelativePeriods;
 
 import com.opensymphony.xwork2.Action;
 
@@ -147,12 +149,68 @@ public class AddOrUpdateChartAction
     {
         this.dataElementIds = dataElementIds;
     }
-
-    private Collection<Integer> periodIds;
-
-    public void setPeriodIds( Collection<Integer> periodIds )
+    
+    private boolean lastMonth;
+    
+    public boolean getLastMonth()
     {
-        this.periodIds = periodIds;
+        return lastMonth;
+    }
+
+    private boolean monthsThisYear;
+
+    public boolean getMonthsThisYear()
+    {
+        return monthsThisYear;
+    }
+    
+    private boolean monthsLastYear;
+
+    public boolean getMonthsLastYear()
+    {
+        return monthsLastYear;
+    }
+    
+    private boolean lastQuarter;
+
+    public boolean getLastQuarter()
+    {
+        return lastQuarter;
+    }
+    
+    private boolean quartersThisYear;
+
+    public boolean getQuartersThisYear()
+    {
+        return quartersThisYear;
+    }
+    
+    private boolean quartersLastYear;
+
+    public boolean getQuartersLastYear()
+    {
+        return quartersLastYear;
+    }
+    
+    private boolean thisYear;
+
+    public boolean getThisYear()
+    {
+        return thisYear;
+    }
+    
+    private boolean lastYear;
+
+    public boolean getLastYear()
+    {
+        return lastYear;
+    }
+    
+    private boolean lastFiveYears;
+
+    public boolean getLastFiveYears()
+    {
+        return lastFiveYears;
     }
 
     private Collection<Integer> organisationUnitIds;
@@ -195,9 +253,20 @@ public class AddOrUpdateChartAction
         {
             chart.setDataElements( new ArrayList<DataElement>( dataElementService.getDataElements( dataElementIds ) ) );
         }
+        
+        RelativePeriods rp = new RelativePeriods();
+        rp.setReportingMonth( lastMonth );
+        rp.setMonthsThisYear( monthsThisYear );
+        rp.setMonthsLastYear( monthsLastYear );
+        rp.setReportingQuarter( lastQuarter );
+        rp.setQuartersThisYear( quartersThisYear );
+        rp.setQuartersLastYear( quartersLastYear );
+        rp.setThisYear( thisYear );
+        rp.setLastYear( lastYear );
+        rp.setLast5Years( lastFiveYears );
+        
+        chart.setRelatives( rp );
 
-        chart
-            .setPeriods( periodService.reloadPeriods( new ArrayList<Period>( periodService.getPeriods( periodIds ) ) ) );
         chart.setOrganisationUnits( new ArrayList<OrganisationUnit>( organisationUnitService
             .getOrganisationUnits( organisationUnitIds ) ) );
 
