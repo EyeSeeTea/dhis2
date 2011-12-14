@@ -469,13 +469,15 @@ body {
 
 /* Textfield */
 .dv-textfield .x-form-field {  
-    height: 25px;
+    height: 26px;
     padding-left: 4px;
     -moz-border-radius: 2px 2px 2px 2px;
     -webkit-border-radius: 2px 2px 2px 2px;
     -o-border-radius: 2px 2px 2px 2px;
     -ms-border-radius: 2px 2px 2px 2px;
     -khtml-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;  
+    border-radius: 2px 2px 2px 2px;
+    font-size: 11px;
+    color: #333;
 }
 

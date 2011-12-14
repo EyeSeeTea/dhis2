@@ -433,6 +433,15 @@ Ext.onReady( function() {
                 }                    
             }
         },
+        mask: {
+            setMask: function(cmp, str) {
+                if (DV.mask) {
+                    DV.mask.hide();
+                }
+                DV.mask = new Ext.LoadMask(cmp, {msg: str});
+                DV.mask.show();
+            }
+        },
         chart: {
             getLegend: function(len) {
                 len = len ? len : DV.store.chart.left.length;
@@ -471,13 +480,6 @@ Ext.onReady( function() {
                     renderer: function(item) {
                     }
                 };
-            },
-            setMask: function(str) {
-                if (DV.mask) {
-                    DV.mask.hide();
-                }
-                DV.mask = new Ext.LoadMask(DV.chart.chart, {msg: str});
-                DV.mask.show();
             },
             label: {
                 getCategoryLabel: function() {
@@ -640,15 +642,20 @@ Ext.onReady( function() {
         },
         crud: {
             favorite: {
-                create: function() {
+                create: function(update) {
+                    DV.util.mask.setMask(DV.cmp.favorite.window, 'Saving...');
                     var params = DV.state.getParams();
                     params.name = DV.cmp.favorite.name.getValue();
+                    if (update) {
+                        var store = DV.store.favorite;
+                        params.uid = store.getAt(store.find('name', params.name)).data.id;
+                    }
                     Ext.Ajax.request({
                         url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_addorupdate,
                         params: params,
                         success: function() {
-                            alert("success");
-                            //DV.store.favorites.load();
+                            DV.store.favorite.load();
+                            DV.mask.hide();
                         }
                     });
                 },
@@ -666,7 +673,10 @@ Ext.onReady( function() {
                             success: fn
                         });
                     }
-                },      
+                },
+                update: function() {
+                    DV.util.crud.favorite.create(true);
+                },
                 del: function(selection, fn) {
                     var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_delete;
                     Ext.Array.each(fids, function(item) {
@@ -910,7 +920,7 @@ Ext.onReady( function() {
     DV.value = {
         values: [],
         getValues: function(exe) {
-            DV.util.chart.setMask('Loading...');
+            DV.util.mask.setMask(DV.chart.chart, 'Loading...');
             
             var params = [],
                 i = DV.conf.finals.dimension.indicator.value,
@@ -2076,7 +2086,7 @@ Ext.onReady( function() {
                                                                             cls: 'dv-textfield',
                                                                             fieldLabel: 'Name',
                                                                             labelWidth: DV.conf.layout.form_label_width,
-                                                                            labelStyle: 'padding-left:5px; line-height:18px',
+                                                                            labelStyle: 'padding-left:5px; line-height:20px',
                                                                             width: 300,
                                                                             listeners: {
                                                                                 added: function() {
@@ -2207,7 +2217,6 @@ Ext.onReady( function() {
                                                                 items: [
                                                                     '->',
                                                                     {
-                                                                        xtype:'button',
                                                                         text: 'Save',
                                                                         disabled: true,
                                                                         handler: function() {
@@ -2242,7 +2251,7 @@ Ext.onReady( function() {
                                                                                             }
                                                                                         ]
                                                                                     });
-                                                                                    w.setPosition((screen.width/2)-75, 310, true);
+                                                                                    w.setPosition((screen.width/2)-50, 310, true);
                                                                                     w.show();
                                                                                 }
                                                                                 else {
@@ -2264,7 +2273,7 @@ Ext.onReady( function() {
                                                             }                                                                    
                                                         });
                                                         var w = DV.cmp.favorite.window;
-                                                        w.setPosition((screen.width/2)-160, 200, true);
+                                                        w.setPosition((screen.width/2)-160, 150, true);
                                                         w.show();
                                                     }
                                                 },
