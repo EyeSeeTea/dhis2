@@ -105,7 +105,6 @@ public class ProgramInstance
 
         return enrollmentDate.equals( other.getEnrollmentDate() ) && patient.equals( other.getPatient() )
             && program.equals( other.getProgram() );
-
     }
 
     @Override
