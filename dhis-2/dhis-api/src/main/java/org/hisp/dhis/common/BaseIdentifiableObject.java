@@ -58,7 +58,7 @@ public class BaseIdentifiableObject extends BaseLinkableObject
     protected int id;
 
     /**
-     * The Unique Identifer for this Object.
+     * The Unique Identifier for this Object.
      */
     protected String uid;
 
@@ -75,7 +75,7 @@ public class BaseIdentifiableObject extends BaseLinkableObject
     /**
      * The date this object was last updated.
      */
-    private Date lastUpdated;
+    protected Date lastUpdated;
 
     // -------------------------------------------------------------------------
     // Constructors

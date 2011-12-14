@@ -28,13 +28,17 @@ package org.hisp.dhis.user;
  */
 
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.UserXmlAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +52,9 @@ public class Users extends BaseLinkableObject
     private List<User> users = new ArrayList<User>();
 
     @XmlElement( name = "user" )
+    @XmlJavaTypeAdapter( UserXmlAdapter.class )
     @JsonProperty( value = "users" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public List<User> getUsers()
     {
         return users;

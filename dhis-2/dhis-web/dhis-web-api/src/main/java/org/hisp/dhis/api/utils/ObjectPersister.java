@@ -27,60 +27,30 @@ package org.hisp.dhis.api.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.chart.Chart;
-import org.hisp.dhis.dataelement.*;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorType;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.user.User;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface ObjectPersister
 {
-    public void persistAttribute( Attribute attribute );
+    public DataElement persistDataElement( DataElement dataElement );
 
-    public void persistDataElement( DataElement dataElement );
+    public DataElementGroup persistDataElementGroup( DataElementGroup dataElementGroup );
 
-    public void persistDataElementGroup( DataElementGroup dataElementGroup );
+    public DataElementGroupSet persistDataElementGroupSet( DataElementGroupSet dataElementGroupSet );
 
-    public void persistDataElementGroupSet( DataElementGroupSet dataElementGroupSet );
+    public OrganisationUnit persistOrganisationUnit( OrganisationUnit organisationUnit );
 
-    public void persistCategory( DataElementCategory category );
+    public OrganisationUnitLevel persistOrganisationUnitLevel( OrganisationUnitLevel organisationUnitLevel );
 
-    public void persistCategoryOption( DataElementCategoryOption categoryOption );
+    public OrganisationUnitGroup persistOrganisationUnitGroup( OrganisationUnitGroup organisationUnitGroup );
 
-    public void persistCategoryCombo( DataElementCategoryCombo categoryCombo );
-
-    public void persistCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo );
-
-    public void persistIndicator( Indicator indicator );
-
-    public void persistIndicatorType( IndicatorType indicatorType );
-
-    public void persistIndicatorGroup( IndicatorGroup indicatorGroup );
-
-    public void persistIndicatorGroupSet( IndicatorGroupSet indicatorGroupSet );
-
-    public void persistOrganisationUnit( OrganisationUnit organisationUnit );
-
-    public void persistOrganisationUnitLevel( OrganisationUnitLevel organisationUnitLevel );
-
-    public void persistOrganisationUnitGroup( OrganisationUnitGroup organisationUnitGroup );
-
-    public void persistOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet );
-
-    public void persistDataSet( DataSet dataSet );
-
-    public void persistChart( Chart chart );
-
-    public void persistUser( User user );
+    public OrganisationUnitGroupSet persistOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet );
 }

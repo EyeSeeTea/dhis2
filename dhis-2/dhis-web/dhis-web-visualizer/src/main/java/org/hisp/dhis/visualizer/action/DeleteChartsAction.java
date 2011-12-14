@@ -39,7 +39,7 @@ public class DeleteChartsAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
+    
     private ChartService chartService;
 
     public void setChartService( ChartService chartService )
