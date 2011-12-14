@@ -642,11 +642,11 @@ Ext.onReady( function() {
         },
         crud: {
             favorite: {
-                create: function(update) {
+                create: function(fn, isUpdate) {
                     DV.util.mask.setMask(DV.cmp.favorite.window, 'Saving...');
                     var params = DV.state.getParams();
                     params.name = DV.cmp.favorite.name.getValue();
-                    if (update) {
+                    if (isUpdate) {
                         var store = DV.store.favorite;
                         params.uid = store.getAt(store.find('name', params.name)).data.id;
                     }
@@ -654,8 +654,12 @@ Ext.onReady( function() {
                         url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_addorupdate,
                         params: params,
                         success: function() {
-                            DV.store.favorite.load();
-                            DV.mask.hide();
+                            DV.store.favorite.load({callback: function() {
+                                DV.mask.hide();
+                                if (fn) {
+                                    fn();
+                                }
+                            }});
                         }
                     });
                 },
@@ -674,10 +678,10 @@ Ext.onReady( function() {
                         //});
                     }
                 },
-                update: function() {
-                    DV.util.crud.favorite.create(true);
+                update: function(fn) {
+                    DV.util.crud.favorite.create(fn, true);
                 },
-                delete: function() {
+                delete: function(fn) {
                     DV.util.mask.setMask(DV.cmp.favorite.window, 'Deleting...');
                     var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_delete,
                         selection = DV.cmp.favorite.grid.getSelectionModel().getSelection();
@@ -687,8 +691,12 @@ Ext.onReady( function() {
                     Ext.Ajax.request({
                         url: baseurl,
                         success: function() {
-                            DV.store.favorite.load();
-                            DV.mask.hide();
+                            DV.store.favorite.load({callback: function() {
+                                DV.mask.hide();
+                                if (fn) {
+                                    fn();
+                                }
+                            }});
                         }
                     }); 
                 }
@@ -829,12 +837,11 @@ Ext.onReady( function() {
                     root: 'charts'
                 }
             },
-            autoLoad: true,
+            isLoaded: false,
             storage: {},
             listeners: {
                 load: function(s) {
-                    //DV.util.store.addToStorage(s);
-                    //DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+                    s.sort('lastUpdated', 'DESC');
                 }
             }
         })
@@ -2166,8 +2173,9 @@ Ext.onReady( function() {
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 disabled: true,
                                                                                 handler: function() {
-                                                                                    DV.util.crud.favorite.delete();
-                                                                                    DV.cmp.favorite.name.setValue('');
+                                                                                    DV.util.crud.favorite.delete(function() {
+                                                                                        DV.cmp.favorite.name.setValue('');
+                                                                                    });
                                                                                 },
                                                                                 listeners: {
                                                                                     added: function() {
@@ -2234,8 +2242,10 @@ Ext.onReady( function() {
                                                                                                 text: 'Overwrite',
                                                                                                 handler: function() {
                                                                                                     this.up('window').close();
-                                                                                                    DV.util.crud.favorite.update();
-                                                                                                    DV.cmp.favorite.name.setValue('');
+                                                                                                    DV.util.crud.favorite.update(function() {
+                                                                                                        DV.cmp.favorite.name.setValue('');
+                                                                                                    });
+                                                                                                    
                                                                                                 }
                                                                                             }
                                                                                         ]
@@ -2244,8 +2254,9 @@ Ext.onReady( function() {
                                                                                     w.show();
                                                                                 }
                                                                                 else {
-                                                                                    DV.util.crud.favorite.create();
-                                                                                    DV.cmp.favorite.name.setValue('');
+                                                                                    DV.util.crud.favorite.create(function() {
+                                                                                        DV.cmp.favorite.name.setValue('');
+                                                                                    });
                                                                                 }                                                                                    
                                                                             }
                                                                             else {
@@ -2260,7 +2271,14 @@ Ext.onReady( function() {
                                                                         }
                                                                     }
                                                                 ]
-                                                            }                                                                    
+                                                            },
+                                                            listeners: {
+                                                                show: function() {
+                                                                    if (!DV.store.favorite.isLoaded) {
+                                                                        DV.store.favorite.load();
+                                                                    }
+                                                                }
+                                                            }                                                                        
                                                         });
                                                         var w = DV.cmp.favorite.window;
                                                         w.setPosition((screen.width/2)-160, 150, true);
