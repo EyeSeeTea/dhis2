@@ -51,6 +51,7 @@ public class SmsConfigurationManagerImpl implements SmsConfigurationManager
             try
             {
                 smsConfigurable.initialize( smsConfiguration );
+                log.info( "Initialized " + smsConfigurable);
             }
             catch ( Throwable t )
             {

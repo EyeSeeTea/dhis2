@@ -29,12 +29,26 @@
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-administration</artifactId>
     </dependency>
-    <dependency>
+<!--     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-library</artifactId>
       <version>1.2.1</version>
       <scope>test</scope>
     </dependency>
+ -->
+        <!-- smslib -->
+    
+        <dependency>
+            <groupId>org.smslib</groupId>
+            <artifactId>smslib</artifactId>
+            <version>3.5.2-r2307</version>
+        </dependency>
+        <dependency>
+            <groupId>org.rxtx</groupId>
+            <artifactId>rxtx</artifactId>
+            <version>2.1.7</version>
+        </dependency>
+
   </dependencies>
 
   <properties>

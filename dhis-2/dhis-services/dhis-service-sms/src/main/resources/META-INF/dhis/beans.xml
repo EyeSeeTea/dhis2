@@ -14,8 +14,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
   
-  <!--  OutboundSmsService stub just logging invocations, replacing the deafult one or use as OutboundSmsTransportService.. Only for testing! -->
-  <bean id="TestOutboundSmsService" class="org.hisp.dhis.sms.outbound.TestOutboundSmsService" />
+  <!--  Only for testing! OutboundSmsService stub just logging invocations, replacing the deafult one or use as the OutboundSmsTransportService..  -->
+  <!--  <bean id="TestOutboundSmsService" class="org.hisp.dhis.sms.outbound.TestOutboundSmsService" /> -->
+
+  <bean id="SmsLibService" class="org.hisp.dhis.sms.smslib.SmsLibService" />
 
   <!--  SMS Message sender -->
 

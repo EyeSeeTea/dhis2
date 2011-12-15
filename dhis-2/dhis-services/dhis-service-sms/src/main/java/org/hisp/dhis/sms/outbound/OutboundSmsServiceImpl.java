@@ -84,13 +84,11 @@ public class OutboundSmsServiceImpl
         {
             transportService.sendMessage( sms );
             sms.setStatus( OutboundSmsStatus.SENT );
-            outboundSmsStore.save( sms );
         }
         catch ( SmsServiceException e )
         {
             log.info( "Exception sending message " + sms, e );
             sms.setStatus( OutboundSmsStatus.ERROR );
-            outboundSmsStore.save( sms );
         }
     }
 }
