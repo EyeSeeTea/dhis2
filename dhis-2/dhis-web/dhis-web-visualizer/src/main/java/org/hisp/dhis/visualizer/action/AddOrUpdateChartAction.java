@@ -142,65 +142,65 @@ public class AddOrUpdateChartAction
 
     private boolean lastMonth;
 
-    public boolean getLastMonth()
+    public void setLastMonth( boolean lastMonth )
     {
-        return lastMonth;
+        this.lastMonth = lastMonth;
     }
 
     private boolean monthsThisYear;
 
-    public boolean getMonthsThisYear()
+    public void setMonthsThisYear( boolean monthsThisYear )
     {
-        return monthsThisYear;
+        this.monthsThisYear = monthsThisYear;
     }
 
     private boolean monthsLastYear;
 
-    public boolean getMonthsLastYear()
+    public void setMonthsLastYear( boolean monthsLastYear )
     {
-        return monthsLastYear;
+        this.monthsLastYear = monthsLastYear;
     }
 
     private boolean lastQuarter;
 
-    public boolean getLastQuarter()
+    public void setLastQuarter( boolean lastQuarter )
     {
-        return lastQuarter;
+        this.lastQuarter = lastQuarter;
     }
 
     private boolean quartersThisYear;
 
-    public boolean getQuartersThisYear()
+    public void setQuartersThisYear( boolean quartersThisYear )
     {
-        return quartersThisYear;
+        this.quartersThisYear = quartersThisYear;
     }
 
     private boolean quartersLastYear;
 
-    public boolean getQuartersLastYear()
+    public void setQuartersLastYear( boolean quartersLastYear )
     {
-        return quartersLastYear;
+        this.quartersLastYear = quartersLastYear;
     }
 
     private boolean thisYear;
 
-    public boolean getThisYear()
+    public void setThisYear( boolean thisYear )
     {
-        return thisYear;
+        this.thisYear = thisYear;
     }
 
     private boolean lastYear;
 
-    public boolean getLastYear()
+    public void setLastYear( boolean lastYear )
     {
-        return lastYear;
+        this.lastYear = lastYear;
     }
 
     private boolean lastFiveYears;
 
-    public boolean getLastFiveYears()
+    public void setLastFiveYears( boolean lastFiveYears )
     {
-        return lastFiveYears;
+        this.lastFiveYears = lastFiveYears;
     }
 
     private Collection<Integer> organisationUnitIds;
