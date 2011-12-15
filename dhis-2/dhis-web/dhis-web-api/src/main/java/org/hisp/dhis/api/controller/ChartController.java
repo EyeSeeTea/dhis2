@@ -107,7 +107,7 @@ public class ChartController
         return "chart";
     }
 
-    @RequestMapping( value = "/{uid}/data.png", method = RequestMethod.GET )
+    @RequestMapping( value = {"/{uid}/data","/{uid}/data.png"}, method = RequestMethod.GET )
     public void getChartPng( @PathVariable( "uid" ) String uid,
                              @RequestParam( value = "width", defaultValue = "700", required = false ) int width,
                              @RequestParam( value = "height", defaultValue = "500", required = false ) int height,
