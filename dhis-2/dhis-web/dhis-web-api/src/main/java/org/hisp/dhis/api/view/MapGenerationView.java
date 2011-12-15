@@ -43,7 +43,7 @@ public class MapGenerationView
     extends AbstractView
 {
     @Autowired
-    MapGenerationService mapGenerationService;
+    private MapGenerationService mapGenerationService;
 
     public MapGenerationView()
     {
