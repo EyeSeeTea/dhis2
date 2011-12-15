@@ -1511,6 +1511,7 @@ Ext.onReady( function() {
                                                 
                                                 if (DV.util.store.containsParent(store)) {
                                                     DV.util.store.loadFromStorage(store);
+                                                    DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
                                                 }
                                                 else {
                                                     store.load({params: {id: cb.getValue()}});
@@ -1672,6 +1673,7 @@ Ext.onReady( function() {
                                                 
                                                 if (DV.util.store.containsParent(store)) {
                                                     DV.util.store.loadFromStorage(store);
+                                                    DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
                                                 }
                                                 else {
                                                     store.load({params: {id: cb.getValue()}});
