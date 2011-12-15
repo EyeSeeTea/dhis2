@@ -2123,13 +2123,11 @@ Ext.onReady( function() {
                                                                     multiSelect: true,
                                                                     columns: [
                                                                         {
-                                                                            text: 'Name',
                                                                             dataIndex: 'name',
                                                                             width: 189,
                                                                             style: 'display:none'
                                                                         },
                                                                         {
-                                                                            text: 'jeje',
                                                                             dataIndex: 'lastUpdated',
                                                                             width: 111,
                                                                             style: 'display:none'
@@ -2165,6 +2163,43 @@ Ext.onReady( function() {
                                                                                 listeners: {
                                                                                     added: function() {
                                                                                         DV.cmp.favorite.sortby = this;
+                                                                                    },
+                                                                                    afterrender: function(b) {
+                                                                                        this.addCls('dv-menu-togglegroup');
+                                                                                        this.menu = Ext.create('Ext.menu.Menu', {
+                                                                                            shadowOffset: 1,
+                                                                                            items: [
+                                                                                                {
+                                                                                                    xtype: 'radiogroup',
+                                                                                                    cls: 'dv-radiogroup',
+                                                                                                    columns: 1,
+                                                                                                    vertical: true,
+                                                                                                    items: [
+                                                                                                        {
+                                                                                                            boxLabel: 'Name',
+                                                                                                            name: 'sortby',
+                                                                                                            handler: function() {
+                                                                                                                if (this.getValue()) {
+                                                                                                                    DV.store.favorite.sort('name', 'ASC');
+                                                                                                                    this.up('menu').hide();
+                                                                                                                }
+                                                                                                            }
+                                                                                                        },
+                                                                                                        {
+                                                                                                            boxLabel: 'Last updated',
+                                                                                                            name: 'sortby',
+                                                                                                            checked: true,
+                                                                                                            handler: function() {
+                                                                                                                if (this.getValue()) {
+                                                                                                                    DV.store.favorite.sort('lastUpdated', 'DESC');
+                                                                                                                    this.up('menu').hide();
+                                                                                                                }
+                                                                                                            }
+                                                                                                        }
+                                                                                                    ]
+                                                                                                }
+                                                                                            ]
+                                                                                        });
                                                                                     }
                                                                                 }
                                                                             },
