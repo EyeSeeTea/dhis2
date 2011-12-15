@@ -27,13 +27,12 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.codehaus.jackson.annotate.JsonProperty;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.Weighted;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -121,7 +120,7 @@ public class Period
      * Copies the transient properties (name) from the argument Period
      * to this Period.
      *
-     * @param the Period to copy from.
+     * @param other Period to copy from.
      * @return this Period.
      */
     public Period copyTransientProperties( Period other )
@@ -259,16 +258,19 @@ public class Period
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public void setEndDate( Date endDate )
-    {
-        this.endDate = endDate;
-    }
-
+    @XmlElement
+    @JsonProperty
     public Date getEndDate()
     {
         return endDate;
     }
 
+    public void setEndDate( Date endDate )
+    {
+        this.endDate = endDate;
+    }
+
+    // TODO FIX THIS!
     public PeriodType getPeriodType()
     {
         return periodType;
@@ -279,6 +281,8 @@ public class Period
         this.periodType = periodType;
     }
 
+    @XmlElement
+    @JsonProperty
     public Date getStartDate()
     {
         return startDate;

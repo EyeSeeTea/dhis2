@@ -47,6 +47,9 @@ public interface ReportService
     public void renderReport( OutputStream out, Report report, Date reportingPeriod, 
         Integer organisationUnitId, String type, I18nFormat format );
     
+    void renderReport( OutputStream out, String reportUid, Date reportingPeriod,
+        String organisationUnitUid, String type, I18nFormat format );
+    
     /**
      * Saves a Report.
      * 
@@ -112,6 +115,8 @@ public interface ReportService
     void deleteReportGroup( ReportGroup reportGroup );
 
     ReportGroup getReportGroup( int id );
+
+    ReportGroup getReportGroup( String uid );
 
     ReportGroup getReportGroupByName( String name );
 

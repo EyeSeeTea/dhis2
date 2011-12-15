@@ -32,26 +32,22 @@ import org.hisp.dhis.api.utils.WebLinkPopulator;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.chart.Charts;
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.i18n.I18nManagerException;
-import org.hisp.dhis.period.Period;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -125,5 +121,52 @@ public class ChartController
 
         response.setContentType( "image/jpg" );
         ChartUtilities.writeChartAsJPEG( response.getOutputStream(), chart, width, height );
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+    // POST
+    //-------------------------------------------------------------------------------------------------------
+
+    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
+    @ResponseStatus( value = HttpStatus.CREATED )
+    public void postChartXML( HttpServletResponse response, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+    }
+
+    @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
+    @ResponseStatus( value = HttpStatus.CREATED )
+    public void postChartJSON( HttpServletResponse response, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+    // PUT
+    //-------------------------------------------------------------------------------------------------------
+
+    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/xml, text/xml"} )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void putChartXML( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
+    }
+
+    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/json"} )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void putChartJSON( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+    // DELETE
+    //-------------------------------------------------------------------------------------------------------
+
+    @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void deleteChart( @PathVariable( "uid" ) String uid ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
     }
 }

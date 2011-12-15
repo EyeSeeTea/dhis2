@@ -215,8 +215,7 @@ public class TableAlteror
         // orgunit shortname uniqueness
         executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_shortname_key" );
 
-        // update dataset-dataentryform association and programstage -
-        // dataentryform association
+        // update dataset-dataentryform association and programstage-cde association
         if ( updateDataSetAssociation() && updateProgramStageAssociation() )
         {
             // delete table dataentryformassociation
@@ -227,12 +226,16 @@ public class TableAlteror
         executeSql( "UPDATE patientattribute set inheritable=false where inheritable is null" );
         executeSql( "UPDATE dataelement set numbertype='number' where numbertype is null and valuetype='int'" );
 
-       // revert prepare aggregateXXXValue tables for offline diffs
+       // revert prepare aggregate*Value tables for offline diffs
 
         executeSql( "ALTER TABLE aggregateddatavalue DROP COLUMN modified");
         executeSql( "ALTER TABLE aggregatedindicatorvalue DROP COLUMN modified ");
         executeSql( "UPDATE indicatortype SET indicatornumber=false WHERE indicatornumber is null" );
 
+        // program
+        
+        executeSql( "ALTER TABLE programinstance ALTER COLUMN patientid DROP NOT NULL" );
+        
         // remove outdated relative periods
         
         executeSql( "ALTER TABLE reporttable DROP COLUMN last3months" );
@@ -287,7 +290,10 @@ public class TableAlteror
 
         // message
 
+        executeSql( "ALTER TABLE messageconversation DROP COLUMN messageconversationkey" );
         executeSql( "ALTER TABLE message DROP COLUMN messagesubject" );
+        executeSql( "ALTER TABLE message DROP COLUMN messagekey" );
+        executeSql( "ALTER TABLE message RENAME COLUMN sentdate TO lastupdated" );
         executeSql( "ALTER TABLE usermessage DROP COLUMN messagedate" );
         executeSql( "DROP TABLE message_usermessages" );
 
@@ -324,6 +330,46 @@ public class TableAlteror
         executeSql( "ALTER TABLE validationrule DROP COLUMN uuid" );
         executeSql( "ALTER TABLE validationrulegroup DROP COLUMN uuid" );
         
+        // replace null with false for boolean fields
+        
+        executeSql( "update chart set hidelegend = false where hidelegend is null" );
+        executeSql( "update chart set verticallabels = false where verticallabels is null" );
+        executeSql( "update chart set horizontalplotorientation = false where horizontalplotorientation is null" );
+        executeSql( "update chart set regression = false where regression is null" );
+        executeSql( "update chart set targetline = false where targetline is null" );
+        executeSql( "update chart set hidesubtitle = false where hidesubtitle is null" );
+        executeSql( "update chart set userorganisationunit = false where userorganisationunit is null" );
+        executeSql( "update indicator set annualized = false where annualized is null" );
+        executeSql( "update indicatortype set indicatornumber = false where indicatornumber is null" );
+        executeSql( "update dataset set mobile = false where mobile is null" );
+        executeSql( "update dataelement set zeroissignificant = false where zeroissignificant is null" );
+        executeSql( "update organisationunit set haspatients = false where haspatients is null" );
+
+        executeSql( "update reporttable set monthsthisyear = false where monthsthisyear is null" );
+        executeSql( "update reporttable set quartersthisyear = false where quartersthisyear is null" );
+        executeSql( "update reporttable set thisyear = false where thisyear is null" );
+        executeSql( "update reporttable set monthslastyear = false where monthslastyear is null" );
+        executeSql( "update reporttable set quartersthisyear = false where quartersthisyear is null" );
+        executeSql( "update reporttable set thisyear = false where thisyear is null" );
+        executeSql( "update reporttable set monthslastyear = false where monthslastyear is null" );
+        executeSql( "update reporttable set quarterslastyear = false where quarterslastyear is null" );
+        executeSql( "update reporttable set monthsthisyear = false where monthsthisyear is null" );
+        executeSql( "update reporttable set lastyear = false where lastyear is null" );
+        executeSql( "update reporttable set last5years = false where last5years is null" );
+        executeSql( "update reporttable set last4quarters = false where last4quarters is null" );
+        executeSql( "update reporttable set last12months = false where last12months is null" );
+
+        executeSql( "update chart set monthsthisyear = false where monthsthisyear is null" );
+        executeSql( "update chart set quartersthisyear = false where quartersthisyear is null" );
+        executeSql( "update chart set thisyear = false where thisyear is null" );
+        executeSql( "update chart set monthslastyear = false where monthslastyear is null" );
+        executeSql( "update chart set quartersthisyear = false where quartersthisyear is null" );
+        executeSql( "update chart set thisyear = false where thisyear is null" );
+        executeSql( "update chart set monthslastyear = false where monthslastyear is null" );
+        executeSql( "update chart set quarterslastyear = false where quarterslastyear is null" );
+        executeSql( "update chart set monthsthisyear = false where monthsthisyear is null" );
+        executeSql( "update chart set lastyear = false where lastyear is null" );
+
         log.info( "Tables updated" );
     }
 

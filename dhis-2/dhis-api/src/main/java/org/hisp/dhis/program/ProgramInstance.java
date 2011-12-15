@@ -83,43 +83,6 @@ public class ProgramInstance
     // hashCode and equals
     // -------------------------------------------------------------------------
 
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o )
-        {
-            return true;
-        }
-
-        if ( o == null )
-        {
-            return false;
-        }
-
-        if ( !(o instanceof ProgramInstance) )
-        {
-            return false;
-        }
-
-        final ProgramInstance other = (ProgramInstance) o;
-
-        return enrollmentDate.equals( other.getEnrollmentDate() ) && patient.equals( other.getPatient() )
-            && program.equals( other.getProgram() );
-
-    }
-
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-
-        result = result * prime + enrollmentDate.hashCode();
-        result = result * prime + patient.hashCode();
-        result = result * prime + program.hashCode();
-
-        return result;
-    }
 
     // -------------------------------------------------------------------------
     // Getters and setters
@@ -131,6 +94,91 @@ public class ProgramInstance
     public int getId()
     {
         return id;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        
+        result = prime * result + ( ( dateOfIncident == null) ? 0 : dateOfIncident.hashCode() );
+        result = prime * result + ( ( enrollmentDate == null) ? 0 : enrollmentDate.hashCode() );
+        result = prime * result + ( ( patient == null) ? 0 : patient.hashCode() );
+        result = prime * result + ( ( program == null) ? 0 : program.hashCode() );
+        
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+        
+        if ( obj == null )
+        {
+            return false;
+        }
+        
+        if ( getClass() != obj.getClass() )
+        {
+            return false;
+        }
+        
+        final ProgramInstance other = (ProgramInstance) obj;
+        
+        if ( dateOfIncident == null )
+        {
+            if ( other.dateOfIncident != null )
+            {
+                return false;
+            }
+        }
+        else if ( !dateOfIncident.equals( other.dateOfIncident ) )
+        {
+            return false;
+        }
+        
+        if ( enrollmentDate == null )
+        {
+            if ( other.enrollmentDate != null )
+            {
+                return false;
+            }
+        }
+        else if ( !enrollmentDate.equals( other.enrollmentDate ) )
+        {
+            return false;
+        }
+        
+        if ( patient == null )
+        {
+            if ( other.patient != null )
+            {
+                return false;
+            }
+        }
+        else if ( !patient.equals( other.patient ) )
+        {
+            return false;
+        }
+        
+        if ( program == null )
+        {
+            if ( other.program != null )
+            {
+                return false;
+            }
+        }
+        else if ( !program.equals( other.program ) )
+        {
+            return false;
+        }
+        
+        return true;
     }
 
     /**
@@ -262,14 +310,13 @@ public class ProgramInstance
     {
         this.attributes = attributes;
     }
-    
+
     // -------------------------------------------------------------------------
     // Convenience method
     // -------------------------------------------------------------------------
 
     public ProgramStageInstance getProgramStageInstanceByStage( int stage )
     {
-
         int count = 1;
 
         for ( ProgramStageInstance programInstanceStage : programStageInstances )
@@ -285,7 +332,5 @@ public class ProgramInstance
         }
 
         return null;
-
     }
-
 }

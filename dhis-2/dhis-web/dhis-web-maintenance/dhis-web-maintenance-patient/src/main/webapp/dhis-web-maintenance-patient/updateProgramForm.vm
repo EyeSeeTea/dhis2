@@ -43,6 +43,12 @@
 		<td></td>
 	 </tr>
 	 
+	 <tr>
+		<td><label>$i18n.getString( "anonymous" )</label></td>
+		<td><input type="checkbox" id="anonymous" name="anonymous" value='true' #if( $program.anonymous=='true' ) checked #end #if( $program.singleEvent=='false' ) disabled='disabled' #end #></td>
+		<td></td>
+	 </tr>
+		
 	  <tr>
 		<td><label>$i18n.getString( "version" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 		<td><input type="text" id="version" name="version" value="$program.version" style="width:30em" class="{validate:{required:true,number:true}}"></td>

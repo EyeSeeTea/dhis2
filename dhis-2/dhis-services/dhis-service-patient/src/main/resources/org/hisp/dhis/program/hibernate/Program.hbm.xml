@@ -38,6 +38,8 @@
     <property name="maxDaysAllowedInputData" />
 
     <property name="singleEvent" />
+    
+    <property name="anonymous" />
 
   </class>
 </hibernate-mapping>

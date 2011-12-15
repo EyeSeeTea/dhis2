@@ -10,9 +10,13 @@ function showProgramDetails( programId )
 		setInnerHTML( 'idField', json.program.id );
 		setInnerHTML( 'nameField', json.program.name );
 		setInnerHTML( 'descriptionField', json.program.description );
+		
 		var singleEvent = ( json.program.singleEvent == 'true') ? i18n_yes : i18n_no;
-				
-		setInnerHTML( 'singleEventField', singleEvent );   
+		setInnerHTML( 'singleEventField', singleEvent );  
+		
+		var anonymous = ( json.program.anonymous == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'anonymousField', anonymous );   		
+		
 		setInnerHTML( 'dateOfEnrollmentDescriptionField', json.program.dateOfEnrollmentDescription );   
 		setInnerHTML( 'dateOfIncidentDescriptionField', json.program.dateOfIncidentDescription );   		
 		setInnerHTML( 'programStageCountField',  json.program.programStageCount );
@@ -78,10 +82,13 @@ function singleEventOnChange()
 	if(checked)
 	{
 		disable('dateOfEnrollmentDescription');
+		enable('anonymous');
 	}
 	else
 	{
 		enable('dateOfEnrollmentDescription');
+		byId('anonymous').checked = false;
+		disable('anonymous');
 	}
 }
 
