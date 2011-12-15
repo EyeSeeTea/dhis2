@@ -26,6 +26,7 @@
     <xsl:include href="dataElement.xsl"/>
     <xsl:include href="dataElementGroup.xsl"/>
     <xsl:include href="dataElementGroupSet.xsl"/>
+    <xsl:include href="document.xsl"/>
     <xsl:include href="indicator.xsl"/>
     <xsl:include href="indicatorType.xsl"/>
     <xsl:include href="indicatorGroup.xsl"/>
@@ -41,6 +42,7 @@
     <xsl:include href="validationRuleGroup.xsl"/>
     <xsl:include href="sqlView.xsl"/>
     <xsl:include href="user.xsl"/>
+    <xsl:include href="grid.xsl"/>
     <!-- etc ... -->
 
 </xsl:stylesheet>

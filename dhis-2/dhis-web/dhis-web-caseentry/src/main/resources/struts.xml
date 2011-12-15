@@ -431,12 +431,21 @@
 				,javascript/anonymousRegistration.js
 				,javascript/entry.js
 				,../dhis-web-commons/javascripts/date.js</param>
+			<param name="stylesheets">../dhis-web-caseentry/style/patient.css</param>
 		</action>
 		
 		<action name="loadAnonymousPrograms"
 			class="org.hisp.dhis.caseentry.action.caseentry.LoadAnonymousProgramsAction">
 			<result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonPrograms.vm</result>
+		</action>
+		
+		<action name="removeCurrentEncounter"
+			class="org.hisp.dhis.caseentry.action.caseentry.RemoveCurrentEncounterAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseError.vm</result>
 		</action>
 		
 		<!-- Patient-Program Enrollment -->
