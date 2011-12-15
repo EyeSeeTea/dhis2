@@ -68,4 +68,16 @@ public class ClickatellGatewayConfig
         this.apiId = apiId;
     }
 
+    @Override
+    public boolean isInbound()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isOutbound()
+    {
+        return true;
+    }
+
 }

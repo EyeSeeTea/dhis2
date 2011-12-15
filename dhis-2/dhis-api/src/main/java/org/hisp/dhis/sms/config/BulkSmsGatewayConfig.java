@@ -1,6 +1,5 @@
 package org.hisp.dhis.sms.config;
 
-
 /*
  * Copyright (c) 2011, University of Oslo
  * All rights reserved.
@@ -35,8 +34,9 @@ public class BulkSmsGatewayConfig
     private static final long serialVersionUID = 5249703354480948250L;
 
     private String username;
+
     private String password;
-    
+
     public String getUsername()
     {
         return username;
@@ -56,5 +56,17 @@ public class BulkSmsGatewayConfig
     {
         this.password = password;
     }
-    
+
+    @Override
+    public boolean isInbound()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isOutbound()
+    {
+        return true;
+    }
+
 }

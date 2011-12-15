@@ -85,7 +85,7 @@ public class SmsConfiguration implements Serializable
     @XmlElements({
         @XmlElement(name = "bulksms", type = BulkSmsGatewayConfig.class),
         @XmlElement(name = "clickatell", type = ClickatellGatewayConfig.class),
-        @XmlElement(name = "modem", type = ModemGateway.class)})
+        @XmlElement(name = "modem", type = ModemGatewayConfig.class)})
     public List<SmsGatewayConfig> getGateways()
     {
         return gateways;

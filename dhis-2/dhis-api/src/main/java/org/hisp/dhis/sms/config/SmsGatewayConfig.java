@@ -47,5 +47,9 @@ public abstract class SmsGatewayConfig implements Serializable
     {
         this.name = name;
     }
+
+    public abstract boolean isInbound();
+
+    public abstract boolean isOutbound();
     
 }

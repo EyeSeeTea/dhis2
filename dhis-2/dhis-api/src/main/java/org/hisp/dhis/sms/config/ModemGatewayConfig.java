@@ -28,7 +28,7 @@ package org.hisp.dhis.sms.config;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public class ModemGateway
+public class ModemGatewayConfig
     extends SmsGatewayConfig
 {
 
