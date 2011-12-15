@@ -2190,8 +2190,8 @@ Ext.onReady( function() {
                                                                                         }
                                                                                         var w = Ext.create('Ext.window.Window', {
                                                                                             title: 'Delete favorites',
-                                                                                            bodyStyle: 'padding:12px; background-color:#fff; text-align:center',
-                                                                                            width: 160,
+                                                                                            width: 210,
+                                                                                            bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
                                                                                             modal: true,
                                                                                             items: [
                                                                                                 {
@@ -2222,7 +2222,7 @@ Ext.onReady( function() {
                                                                                                 }
                                                                                             ]
                                                                                         });
-                                                                                        w.setPosition((screen.width/2)-50, 310, true);
+                                                                                        w.setPosition((screen.width/2)-105, 310, true);
                                                                                         w.show();
                                                                                     }
                                                                                 },
@@ -2268,13 +2268,14 @@ Ext.onReady( function() {
                                                                             }
                                                                         },
                                                                         handler: function() {
-                                                                            if (DV.state.isRendered && DV.cmp.favorite.name.getValue()) {
-                                                                                if (DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue()) != -1) {
+                                                                            var value = DV.cmp.favorite.name.getValue();
+                                                                            if (DV.state.isRendered && value) {
+                                                                                if (DV.store.favorite.findExact('name', value) != -1) {
+                                                                                    var item = value.length > 35 ? (value.substr(0,35) + '...') : value;
                                                                                     var w = Ext.create('Ext.window.Window', {
                                                                                         title: 'Save favorite',
-                                                                                        minWidth: 160,
-                                                                                        width: 160,
-                                                                                        bodyStyle: 'padding:12px; background-color:#fff; text-align:center',
+                                                                                        width: 210,
+                                                                                        bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
                                                                                         modal: true,
                                                                                         items: [
                                                                                             {
@@ -2282,7 +2283,7 @@ Ext.onReady( function() {
                                                                                                 bodyStyle: 'border-style:none'
                                                                                             },
                                                                                             {
-                                                                                                html: '<br/>' + DV.cmp.favorite.name.getValue(),
+                                                                                                html: '<br/>' + item,
                                                                                                 cls: 'dv-window-confirm-list'
                                                                                             }
                                                                                         ],
@@ -2306,7 +2307,7 @@ Ext.onReady( function() {
                                                                                             }
                                                                                         ]
                                                                                     });
-                                                                                    w.setPosition((screen.width/2)-50, 310, true);
+                                                                                    w.setPosition((screen.width/2)-105, 310, true);
                                                                                     w.show();
                                                                                 }
                                                                                 else {
@@ -2334,7 +2335,7 @@ Ext.onReady( function() {
                                                             }                                                                        
                                                         });
                                                         var w = DV.cmp.favorite.window;
-                                                        w.setPosition((screen.width/2)-160, 150, true);
+                                                        w.setPosition((screen.width/2)-165, 150, true);
                                                         w.show();
                                                     }
                                                 },
