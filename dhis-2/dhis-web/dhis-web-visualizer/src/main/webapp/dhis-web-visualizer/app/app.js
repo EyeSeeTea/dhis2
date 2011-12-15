@@ -663,23 +663,23 @@ Ext.onReady( function() {
                         }
                     });
                 },
-                read: {
-                    getFavorite: function(id, fn) {
-                        //if (!Ext.isNumber(parseInt(id))) {
-                            //alert('Invalid id');
-                            //return;
-                        //}
-                        
-                        //Ext.Ajax.request({
-                            //url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_get,
-                            //params: {id: id},
-                            //scope: this,
-                            //success: fn
-                        //});
-                    }
-                },
                 update: function(fn) {
                     DV.util.crud.favorite.create(fn, true);
+                },
+                updateName: function(name) {
+                    DV.util.mask.setMask(DV.cmp.favorite.window, 'Renaming...');
+                    var r = DV.cmp.favorite.grid.getSelectionModel().getSelection()[0];
+                    Ext.Ajax.request({
+                        url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_addorupdate,
+                        params: {uid: r.data.id, name: name},
+                        success: function() {
+                            DV.store.favorite.load({callback: function() {
+                                DV.mask.hide();
+                                DV.cmp.favorite.grid.getSelectionModel().select(DV.store.favorite.getAt(DV.store.favorite.findExact('name', name)));
+                                DV.cmp.favorite.name.setValue(name);
+                            }});
+                        }
+                    });
                 },
                 delete: function(fn) {
                     DV.util.mask.setMask(DV.cmp.favorite.window, 'Deleting...');
@@ -2148,7 +2148,7 @@ Ext.onReady( function() {
                                                                                 text: 'Show..',
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 handler: function() {
-                                                                                    console.log(DV.cmp.favorite.grid.getSelectionModel().getSelection());
+                                                                                    
                                                                                 },
                                                                                 listeners: {
                                                                                     added: function() {
@@ -2160,7 +2160,7 @@ Ext.onReady( function() {
                                                                                 text: 'Sort by..',
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 handler: function() {
-                                                                                    console.log(DV.cmp.favorite.grid.getSelectionModel().getSelection());
+                                                                                    
                                                                                 },
                                                                                 listeners: {
                                                                                     added: function() {
@@ -2169,6 +2169,59 @@ Ext.onReady( function() {
                                                                                 }
                                                                             },
                                                                             '->',
+                                                                            {
+                                                                                text: 'Rename',
+                                                                                cls: 'dv-toolbar-btn-2',
+                                                                                disabled: true,
+                                                                                xable: function() {
+                                                                                    if (DV.cmp.favorite.grid.getSelectionModel().getSelection().length == 1) {
+                                                                                        DV.cmp.favorite.rename.enable();
+                                                                                    }
+                                                                                    else {
+                                                                                        DV.cmp.favorite.rename.disable();
+                                                                                    }
+                                                                                },
+                                                                                handler: function() {
+                                                                                    var selected = DV.cmp.favorite.grid.getSelectionModel().getSelection()[0];
+                                                                                    var w = Ext.create('Ext.window.Window', {
+                                                                                        title: 'Rename favorite',
+                                                                                        layout: 'fit',
+                                                                                        width: 210,
+                                                                                        bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
+                                                                                        modal: true,
+                                                                                        items: [
+                                                                                            {
+                                                                                                xtype: 'textfield',
+                                                                                                cls: 'dv-textfield',
+                                                                                                value: selected.data.name
+                                                                                            }                                                                                                  
+                                                                                        ],
+                                                                                        bbar: [
+                                                                                            {
+                                                                                                text: 'Cancel',
+                                                                                                handler: function() {
+                                                                                                    this.up('window').close();
+                                                                                                }
+                                                                                            },
+                                                                                            '->',
+                                                                                            {
+                                                                                                text: 'Rename',
+                                                                                                handler: function() {
+                                                                                                    DV.util.crud.favorite.updateName(this.up('window').down('textfield').getValue());
+                                                                                                    this.up('window').close();
+                                                                                                }
+                                                                                            }
+                                                                                        ]
+                                                                                    });
+                                                                                    w.setPosition((screen.width/2)-105, 310, true);
+                                                                                    w.show();
+                                                                                },
+                                                                                listeners: {
+                                                                                    added: function() {
+                                                                                        DV.cmp.favorite.rename = this;
+                                                                                    }
+                                                                                }
+                                                                            },
                                                                             {
                                                                                 text: 'Delete',
                                                                                 cls: 'dv-toolbar-btn-2',
@@ -2186,7 +2239,8 @@ Ext.onReady( function() {
                                                                                     if (sel.length) {
                                                                                         var str = '';
                                                                                         for (var i = 0; i < sel.length; i++) {
-                                                                                            str += '<br/>' + sel[i].data.name;
+                                                                                            var out = sel[i].data.name.length > 35 ? (sel[i].data.name.substr(0,35) + '...') : sel[i].data.name;
+                                                                                            str += '<br/>' + out;
                                                                                         }
                                                                                         var w = Ext.create('Ext.window.Window', {
                                                                                             title: 'Delete favorites',
@@ -2240,6 +2294,7 @@ Ext.onReady( function() {
                                                                         },
                                                                         itemclick: function(g, r) {
                                                                             DV.cmp.favorite.name.setValue(r.get('name'));
+                                                                            DV.cmp.favorite.rename.xable();
                                                                             DV.cmp.favorite.delete.xable();
                                                                         },
                                                                         itemdblclick: function() {
