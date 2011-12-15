@@ -688,7 +688,7 @@ Ext.onReady( function() {
                         }
                     });
                 },
-                delete: function(fn) {
+                del: function(fn) {
                     DV.util.mask.setMask(DV.cmp.favorite.window, 'Deleting...');
                     var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_delete,
                         selection = DV.cmp.favorite.grid.getSelectionModel().getSelection();
@@ -1965,7 +1965,7 @@ Ext.onReady( function() {
                                         store: Ext.create('Ext.data.TreeStore', {
                                             proxy: {
                                                 type: 'ajax',
-                                                url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunitchildren_get,
+                                                url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunitchildren_get
                                             },
                                             root: {
                                                 id: DV.init.system.rootNode.id,
@@ -2102,6 +2102,7 @@ Ext.onReady( function() {
                                                             title: 'Manage favorites',
                                                             bodyStyle: 'padding:8px; background-color:#fff',
                                                             layout: 'fit',
+															width: 328,
                                                             closeAction: 'hide',
                                                             modal: true,
                                                             items: [
@@ -2294,10 +2295,10 @@ Ext.onReady( function() {
                                                                                 disabled: true,
                                                                                 xable: function() {
                                                                                     if (DV.cmp.favorite.grid.getSelectionModel().getSelection().length) {
-                                                                                        DV.cmp.favorite.delete.enable();
+                                                                                        DV.cmp.favorite.del.enable();
                                                                                     }
                                                                                     else {
-                                                                                        DV.cmp.favorite.delete.disable();
+                                                                                        DV.cmp.favorite.del.disable();
                                                                                     }
                                                                                 },
                                                                                 handler: function() {
@@ -2335,7 +2336,7 @@ Ext.onReady( function() {
                                                                                                     text: 'Delete',
                                                                                                     handler: function() {
                                                                                                         this.up('window').close();
-                                                                                                        DV.util.crud.favorite.delete(function() {
+                                                                                                        DV.util.crud.favorite.del(function() {
                                                                                                             DV.cmp.favorite.name.setValue('');
                                                                                                         });                                                                                                        
                                                                                                     }
@@ -2348,7 +2349,7 @@ Ext.onReady( function() {
                                                                                 },
                                                                                 listeners: {
                                                                                     added: function() {
-                                                                                        DV.cmp.favorite.delete = this;
+                                                                                        DV.cmp.favorite.del = this;
                                                                                     }
                                                                                 }
                                                                             }
@@ -2361,7 +2362,7 @@ Ext.onReady( function() {
                                                                         itemclick: function(g, r) {
                                                                             DV.cmp.favorite.name.setValue(r.get('name'));
                                                                             DV.cmp.favorite.rename.button.xable();
-                                                                            DV.cmp.favorite.delete.xable();
+                                                                            DV.cmp.favorite.del.xable();
                                                                         },
                                                                         itemdblclick: function() {
                                                                             DV.cmp.favorite.save.handler();
