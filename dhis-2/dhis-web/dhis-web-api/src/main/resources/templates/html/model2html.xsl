@@ -37,4 +37,8 @@
     <xsl:include href="attributeType.xsl"/>
     <!-- etc ... -->
 
+    <!-- Config elements -->    
+
+    <xsl:include href="config/sms.xsl"/>
+
 </xsl:stylesheet>
