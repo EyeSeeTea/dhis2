@@ -838,10 +838,14 @@ Ext.onReady( function() {
                 }
             },
             isLoaded: false,
+            sorting: {
+                field: 'lastUpdated',
+                direction: 'DESC'
+            },
             storage: {},
             listeners: {
                 load: function(s) {
-                    s.sort('lastUpdated', 'DESC');
+                    s.sort(this.sorting.field, this.sorting.direction);
                     s.each(function(r) {
                         r.data.lastUpdated = r.data.lastUpdated.substr(0,16).replace('T',' ');
                         r.commit();
@@ -2143,18 +2147,6 @@ Ext.onReady( function() {
                                                                         },
                                                                         items: [
                                                                             {
-                                                                                text: 'Show..',
-                                                                                cls: 'dv-toolbar-btn-2',
-                                                                                handler: function() {
-                                                                                    
-                                                                                },
-                                                                                listeners: {
-                                                                                    added: function() {
-                                                                                        DV.cmp.favorite.show = this;
-                                                                                    }
-                                                                                }
-                                                                            },
-                                                                            {
                                                                                 text: 'Sort by..',
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 handler: function() {
@@ -2180,7 +2172,10 @@ Ext.onReady( function() {
                                                                                                             name: 'sortby',
                                                                                                             handler: function() {
                                                                                                                 if (this.getValue()) {
-                                                                                                                    DV.store.favorite.sort('name', 'ASC');
+                                                                                                                    var store = DV.store.favorite;
+                                                                                                                    store.sorting.field = 'name';
+                                                                                                                    store.sorting.direction = 'ASC';
+                                                                                                                    store.sort(store.sorting.field, store.sorting.direction);
                                                                                                                     this.up('menu').hide();
                                                                                                                 }
                                                                                                             }
@@ -2191,7 +2186,10 @@ Ext.onReady( function() {
                                                                                                             checked: true,
                                                                                                             handler: function() {
                                                                                                                 if (this.getValue()) {
-                                                                                                                    DV.store.favorite.sort('lastUpdated', 'DESC');
+                                                                                                                    var store = DV.store.favorite;
+                                                                                                                    store.sorting.field = 'lastUpdated';
+                                                                                                                    store.sorting.direction = 'DESC';
+                                                                                                                    store.sort(store.sorting.field, store.sorting.direction);
                                                                                                                     this.up('menu').hide();
                                                                                                                 }
                                                                                                             }
