@@ -44,7 +44,7 @@ public class AggregatedDataValue
     private static final long serialVersionUID = -6569434956128470844L;
 
     private int dataElementId;
-    
+
     private int categoryOptionComboId;
     
     private int periodId;
@@ -96,7 +96,7 @@ public class AggregatedDataValue
         this.modified = new Date();
     }
 
-        /**
+    /**
      * @param dataElementId data element id
      * @param categoryOptionComboId category option combo id
      * @param periodId period id
@@ -142,7 +142,7 @@ public class AggregatedDataValue
     // ----------------------------------------------------------------------
     // Getters and setters
     // ----------------------------------------------------------------------
-    
+
     public int getDataElementId()
     {
         return dataElementId;

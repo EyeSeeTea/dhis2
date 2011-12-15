@@ -6,12 +6,20 @@
 
   <xsl:template match="d:chart">
     <div class="chart">
-      <h2>Chart: <xsl:value-of select="@name"/> </h2>
-      <a href="{@link}.png"><img src="{@link}.png" style="border-style:solid; border-width: 1px; padding: 5px;" /></a>
+      <h2> <xsl:value-of select="@name"/> </h2>
+	  
+	  <table>
+		<tr>
+			<td>Data</td>
+			<td><a href="{@link}/data">png</a></td>
+		</tr>
+	  </table><br/>
+	  
+      <a href="{@link}/data"><img src="{@link}/data" style="border-style:solid; border-width: 1px; padding: 5px;" /></a>
 
       <h3>Details</h3>
 
-      <table border="1">
+      <table>
         <tr>
           <td>ID</td>
           <td> <xsl:value-of select="@id"/> </td>

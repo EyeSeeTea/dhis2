@@ -6,10 +6,17 @@
 
   <xsl:template match="d:report">
     <div class="report">
-      <h2>
-        <xsl:value-of select="@name" />
-      </h2>
-      <table border="1">
+      <h2> <xsl:value-of select="@name" /> </h2>
+	  
+	  <table>
+		<tr>
+			<td>Data</td>
+			<td><a href="{@link}/data">pdf</a></td>
+			<td><a href="{@link}/data.xls">xls</a></td>
+		</tr>
+	  </table><br/>
+	  
+      <table>
         <tr>
           <td>ID</td>
           <td> <xsl:value-of select="@id" /> </td>

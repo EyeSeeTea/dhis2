@@ -31,6 +31,7 @@ import org.hisp.dhis.api.utils.IdentifiableObjectParams;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.report.ReportService;
 import org.hisp.dhis.report.Reports;
@@ -48,6 +49,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 @Controller
@@ -111,10 +113,10 @@ public class ReportController
         return "report";
     }
 
-    @RequestMapping( value = {"/{uid}/data", "/{uid}/data.pdf"}, method = RequestMethod.GET )
+    @RequestMapping( value = {"/{uid}/data","/{uid}/data.pdf"}, method = RequestMethod.GET )
     public void getReportAsPdf( @PathVariable( "uid" ) String uid,
-                                @RequestParam( value = "organisationUnit", required = false ) String organisationUnitUid,
-                                @RequestParam( value = "period", required = false ) String period, HttpServletResponse response )
+                                @RequestParam( value = "ou", required = false ) String organisationUnitUid,
+                                @RequestParam( value = "pe", required = false ) String period, HttpServletResponse response )
         throws Exception
     {
         getReport( uid, organisationUnitUid, period, response, "pdf", ContextUtils.CONTENT_TYPE_PDF, false );
@@ -122,8 +124,8 @@ public class ReportController
 
     @RequestMapping( value = "/{uid}/data.xls", method = RequestMethod.GET )
     public void getReportAsXls( @PathVariable( "uid" ) String uid,
-                                @RequestParam( value = "organisationUnit", required = false ) String organisationUnitUid,
-                                @RequestParam( value = "period", required = false ) String period, HttpServletResponse response )
+                                @RequestParam( value = "ou", required = false ) String organisationUnitUid,
+                                @RequestParam( value = "pe", required = false ) String period, HttpServletResponse response )
         throws Exception
     {
         getReport( uid, organisationUnitUid, period, response, "xls", ContextUtils.CONTENT_TYPE_EXCEL, true );
@@ -144,7 +146,7 @@ public class ReportController
             organisationUnitUid = organisationUnitService.getRootOrganisationUnits().iterator().next().getUid();
         }
 
-        Date date = period != null ? DateUtils.getMediumDate( period ) : new Date();
+        Date date = period != null ? DateUtils.getMediumDate( period ) : new Cal().now().subtract( Calendar.MONTH, 1 ).time();
 
         reportService.renderReport( response.getOutputStream(), uid, date, organisationUnitUid, type,
             i18nManager.getI18nFormat() );
