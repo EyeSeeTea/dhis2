@@ -162,7 +162,7 @@ Ext.onReady( function() {
                 if (selected.length) {
                     var array = [];
                     Ext.Array.each(selected, function(item) {
-                        array.push({id: item, s: a.store.getAt(a.store.find('id', item)).data.s});
+                        array.push({id: item, s: a.store.getAt(a.store.findExact('id', item)).data.s});
                     });
                     s.store.add(array);
                 }
@@ -180,7 +180,7 @@ Ext.onReady( function() {
                 var selected = s.getValue();
                 if (selected.length) {
                     Ext.Array.each(selected, function(item) {
-                        s.store.remove(s.store.getAt(s.store.find('id', item)));
+                        s.store.remove(s.store.getAt(s.store.findExact('id', item)));
                     });                    
                     this.filterAvailable(a, s);
                 }
@@ -648,7 +648,7 @@ Ext.onReady( function() {
                     params.name = DV.cmp.favorite.name.getValue();
                     if (isUpdate) {
                         var store = DV.store.favorite;
-                        params.uid = store.getAt(store.find('name', params.name)).data.id;
+                        params.uid = store.getAt(store.findExact('name', params.name)).data.id;
                     }
                     Ext.Ajax.request({
                         url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_addorupdate,
@@ -842,6 +842,10 @@ Ext.onReady( function() {
             listeners: {
                 load: function(s) {
                     s.sort('lastUpdated', 'DESC');
+                    s.each(function(r) {
+                        r.data.lastUpdated = r.data.lastUpdated.substr(0,16).replace('T',' ');
+                        r.commit();
+                    });
                 }
             }
         })
@@ -2103,12 +2107,7 @@ Ext.onReady( function() {
                                                                                     DV.cmp.favorite.name = this;
                                                                                 },
                                                                                 change: function() {
-                                                                                    if (DV.state.isRendered && this.getValue()) {
-                                                                                        DV.cmp.favorite.save.enable();
-                                                                                    }
-                                                                                    else {
-                                                                                        DV.cmp.favorite.save.disable();
-                                                                                    }
+                                                                                    DV.cmp.favorite.save.xable();
                                                                                 }
                                                                             }
                                                                         }
@@ -2124,13 +2123,13 @@ Ext.onReady( function() {
                                                                         {
                                                                             text: 'Name',
                                                                             dataIndex: 'name',
-                                                                            width: 173,
+                                                                            width: 189,
                                                                             style: 'display:none'
                                                                         },
                                                                         {
                                                                             text: 'jeje',
                                                                             dataIndex: 'lastUpdated',
-                                                                            width: 127,
+                                                                            width: 111,
                                                                             style: 'display:none'
                                                                         }
                                                                     ],
@@ -2151,7 +2150,7 @@ Ext.onReady( function() {
                                                                                 },
                                                                                 listeners: {
                                                                                     added: function() {
-                                                                                        DV.cmp.favorite.del = this;
+                                                                                        DV.cmp.favorite.show = this;
                                                                                     }
                                                                                 }
                                                                             },
@@ -2163,7 +2162,7 @@ Ext.onReady( function() {
                                                                                 },
                                                                                 listeners: {
                                                                                     added: function() {
-                                                                                        DV.cmp.favorite.del = this;
+                                                                                        DV.cmp.favorite.sortby = this;
                                                                                     }
                                                                                 }
                                                                             },
@@ -2172,14 +2171,62 @@ Ext.onReady( function() {
                                                                                 text: 'Delete',
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 disabled: true,
+                                                                                xable: function() {
+                                                                                    if (DV.cmp.favorite.grid.getSelectionModel().getSelection().length) {
+                                                                                        DV.cmp.favorite.delete.enable();
+                                                                                    }
+                                                                                    else {
+                                                                                        DV.cmp.favorite.delete.disable();
+                                                                                    }
+                                                                                },
                                                                                 handler: function() {
-                                                                                    DV.util.crud.favorite.delete(function() {
-                                                                                        DV.cmp.favorite.name.setValue('');
-                                                                                    });
+                                                                                    var sel = DV.cmp.favorite.grid.getSelectionModel().getSelection();
+                                                                                    if (sel.length) {
+                                                                                        var str = '';
+                                                                                        for (var i = 0; i < sel.length; i++) {
+                                                                                            str += '<br/>' + sel[i].data.name;
+                                                                                        }
+                                                                                        var w = Ext.create('Ext.window.Window', {
+                                                                                            title: 'Delete favorites',
+                                                                                            bodyStyle: 'padding:12px; background-color:#fff; text-align:center',
+                                                                                            width: 160,
+                                                                                            modal: true,
+                                                                                            items: [
+                                                                                                {
+                                                                                                    html: 'Are you sure?',
+                                                                                                    bodyStyle: 'border-style:none'
+                                                                                                },
+                                                                                                {
+                                                                                                    html: str,
+                                                                                                    cls: 'dv-window-confirm-list'
+                                                                                                }                                                                                                    
+                                                                                            ],
+                                                                                            bbar: [
+                                                                                                {
+                                                                                                    text: 'Cancel',
+                                                                                                    handler: function() {
+                                                                                                        this.up('window').close();
+                                                                                                    }
+                                                                                                },
+                                                                                                '->',
+                                                                                                {
+                                                                                                    text: 'Delete',
+                                                                                                    handler: function() {
+                                                                                                        this.up('window').close();
+                                                                                                        DV.util.crud.favorite.delete(function() {
+                                                                                                            DV.cmp.favorite.name.setValue('');
+                                                                                                        });                                                                                                        
+                                                                                                    }
+                                                                                                }
+                                                                                            ]
+                                                                                        });
+                                                                                        w.setPosition((screen.width/2)-50, 310, true);
+                                                                                        w.show();
+                                                                                    }
                                                                                 },
                                                                                 listeners: {
                                                                                     added: function() {
-                                                                                        DV.cmp.favorite.del = this;
+                                                                                        DV.cmp.favorite.delete = this;
                                                                                     }
                                                                                 }
                                                                             }
@@ -2191,12 +2238,7 @@ Ext.onReady( function() {
                                                                         },
                                                                         itemclick: function(g, r) {
                                                                             DV.cmp.favorite.name.setValue(r.get('name'));
-                                                                            if (this.getSelectionModel().getSelection().length) {
-                                                                                DV.cmp.favorite.del.enable();
-                                                                            }
-                                                                            else {
-                                                                                DV.cmp.favorite.del.disable();
-                                                                            }
+                                                                            DV.cmp.favorite.delete.xable();
                                                                         },
                                                                         itemdblclick: function() {
                                                                             DV.cmp.favorite.save.handler();
@@ -2215,19 +2257,31 @@ Ext.onReady( function() {
                                                                     {
                                                                         text: 'Save',
                                                                         disabled: true,
+                                                                        xable: function() {
+                                                                            if (DV.state.isRendered && DV.cmp.favorite.name.getValue()) {
+                                                                                this.enable();
+                                                                            }
+                                                                            else {
+                                                                                this.disable();
+                                                                            }
+                                                                        },
                                                                         handler: function() {
-                                                                            if (DV.cmp.favorite.name.getValue()) {
-                                                                                if (DV.store.favorite.find('name', DV.cmp.favorite.name.getValue()) != -1) {
+                                                                            if (DV.state.isRendered && DV.cmp.favorite.name.getValue()) {
+                                                                                if (DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue()) != -1) {
                                                                                     var w = Ext.create('Ext.window.Window', {
                                                                                         title: 'Save favorite',
-                                                                                        minWidth: 150,
-                                                                                        width: 150,
+                                                                                        minWidth: 160,
+                                                                                        width: 160,
                                                                                         bodyStyle: 'padding:12px; background-color:#fff; text-align:center',
                                                                                         modal: true,
                                                                                         items: [
                                                                                             {
                                                                                                 html: 'Are you sure?',
                                                                                                 bodyStyle: 'border-style:none'
+                                                                                            },
+                                                                                            {
+                                                                                                html: '<br/>' + DV.cmp.favorite.name.getValue(),
+                                                                                                cls: 'dv-window-confirm-list'
                                                                                             }
                                                                                         ],
                                                                                         bbar: [
@@ -2259,10 +2313,6 @@ Ext.onReady( function() {
                                                                                     });
                                                                                 }                                                                                    
                                                                             }
-                                                                            else {
-                                                                                alert('Name is required');
-                                                                                return;
-                                                                            }
                                                                         },
                                                                         listeners: {
                                                                             added: function() {
@@ -2276,7 +2326,8 @@ Ext.onReady( function() {
                                                                 show: function() {
                                                                     if (!DV.store.favorite.isLoaded) {
                                                                         DV.store.favorite.load();
-                                                                    }
+                                                                    }                                                                    
+                                                                    DV.cmp.favorite.save.xable();
                                                                 }
                                                             }                                                                        
                                                         });

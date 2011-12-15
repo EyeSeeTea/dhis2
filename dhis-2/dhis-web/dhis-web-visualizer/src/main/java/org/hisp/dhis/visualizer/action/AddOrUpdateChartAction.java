@@ -139,9 +139,9 @@ public class AddOrUpdateChartAction
     {
         this.dataElementIds = dataElementIds;
     }
-    
+
     private boolean lastMonth;
-    
+
     public boolean getLastMonth()
     {
         return lastMonth;
@@ -153,49 +153,49 @@ public class AddOrUpdateChartAction
     {
         return monthsThisYear;
     }
-    
+
     private boolean monthsLastYear;
 
     public boolean getMonthsLastYear()
     {
         return monthsLastYear;
     }
-    
+
     private boolean lastQuarter;
 
     public boolean getLastQuarter()
     {
         return lastQuarter;
     }
-    
+
     private boolean quartersThisYear;
 
     public boolean getQuartersThisYear()
     {
         return quartersThisYear;
     }
-    
+
     private boolean quartersLastYear;
 
     public boolean getQuartersLastYear()
     {
         return quartersLastYear;
     }
-    
+
     private boolean thisYear;
 
     public boolean getThisYear()
     {
         return thisYear;
     }
-    
+
     private boolean lastYear;
 
     public boolean getLastYear()
     {
         return lastYear;
     }
-    
+
     private boolean lastFiveYears;
 
     public boolean getLastFiveYears()
@@ -228,11 +228,30 @@ public class AddOrUpdateChartAction
             chart = new Chart();
         }
 
-        chart.setName( name );
-        chart.setType( type );
-        chart.setSeries( series );
-        chart.setCategory( category );
-        chart.setFilter( filter );
+        if ( name != null )
+        {
+            chart.setName( name );
+        }
+
+        if ( type != null )
+        {
+            chart.setType( type );
+        }
+
+        if ( series != null )
+        {
+            chart.setSeries( series );
+        }
+
+        if ( category != null )
+        {
+            chart.setCategory( category );
+        }
+
+        if ( filter != null )
+        {
+            chart.setFilter( filter );
+        }
 
         if ( indicatorIds != null )
         {
@@ -243,22 +262,29 @@ public class AddOrUpdateChartAction
         {
             chart.setDataElements( new ArrayList<DataElement>( dataElementService.getDataElements( dataElementIds ) ) );
         }
-        
-        RelativePeriods rp = new RelativePeriods();
-        rp.setReportingMonth( lastMonth );
-        rp.setMonthsThisYear( monthsThisYear );
-        rp.setMonthsLastYear( monthsLastYear );
-        rp.setReportingQuarter( lastQuarter );
-        rp.setQuartersThisYear( quartersThisYear );
-        rp.setQuartersLastYear( quartersLastYear );
-        rp.setThisYear( thisYear );
-        rp.setLastYear( lastYear );
-        rp.setLast5Years( lastFiveYears );
-        
-        chart.setRelatives( rp );
 
-        chart.setOrganisationUnits( new ArrayList<OrganisationUnit>( organisationUnitService
-            .getOrganisationUnits( organisationUnitIds ) ) );
+        if ( lastMonth || monthsThisYear || monthsLastYear || lastQuarter || quartersThisYear || quartersLastYear
+            || thisYear || lastYear || lastFiveYears )
+        {
+            RelativePeriods rp = new RelativePeriods();
+            rp.setReportingMonth( lastMonth );
+            rp.setMonthsThisYear( monthsThisYear );
+            rp.setMonthsLastYear( monthsLastYear );
+            rp.setReportingQuarter( lastQuarter );
+            rp.setQuartersThisYear( quartersThisYear );
+            rp.setQuartersLastYear( quartersLastYear );
+            rp.setThisYear( thisYear );
+            rp.setLastYear( lastYear );
+            rp.setLast5Years( lastFiveYears );
+
+            chart.setRelatives( rp );
+        }
+
+        if ( organisationUnitIds != null )
+        {
+            chart.setOrganisationUnits( new ArrayList<OrganisationUnit>( organisationUnitService
+                .getOrganisationUnits( organisationUnitIds ) ) );
+        }
 
         chartService.saveOrUpdate( chart );
 
