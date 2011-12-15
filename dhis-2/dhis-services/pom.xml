@@ -27,7 +27,6 @@
     <module>dhis-service-patient</module>
     <module>dhis-service-mobile</module>
     <module>dhis-service-sms</module>
-    <!--module>dhis-service-smslib</module-->
   </modules>
   
   <dependencies>

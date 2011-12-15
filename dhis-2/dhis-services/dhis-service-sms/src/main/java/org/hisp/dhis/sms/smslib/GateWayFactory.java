@@ -14,7 +14,8 @@ import org.smslib.modem.SerialModemGateway;
 public class GateWayFactory
 {
 
-    public AGateway create(SmsGatewayConfig config) {
+    public AGateway create( SmsGatewayConfig config )
+    {
         if ( config instanceof BulkSmsGatewayConfig )
             return createBulkSmsGateway( (BulkSmsGatewayConfig) config );
         else if ( config instanceof ClickatellGatewayConfig )
@@ -22,10 +23,10 @@ public class GateWayFactory
         else if ( config instanceof ModemGatewayConfig )
             return createModemGateway( (ModemGatewayConfig) config );
 
-        throw new SmsServiceException( "Gateway config of unknown type: " + config.getClass().getName());
-        
+        throw new SmsServiceException( "Gateway config of unknown type: " + config.getClass().getName() );
+
     }
-    
+
     public AGateway createBulkSmsGateway( BulkSmsGatewayConfig config )
     {
         BulkSmsHTTPGateway gateway = new BulkSmsHTTPGateway( "bulksms.http.1", config.getUsername(),
@@ -64,8 +65,9 @@ public class GateWayFactory
         ClickatellHTTPGateway gateway = new ClickatellHTTPGateway( c.getName(), c.getApiId(), c.getUsername(),
             c.getPassword() );
         gateway.setOutbound( true );
-        gateway.setInbound( true );
+        gateway.setInbound( false );
         return gateway;
     }
+
 
 }
