@@ -135,7 +135,9 @@ Ext.onReady( function() {
         toolbar: {
             menuitem: {}
         },
-        favorite: {}
+        favorite: {
+            rename: {}
+        }
     };
     
     DV.util = {
@@ -667,6 +669,10 @@ Ext.onReady( function() {
                     DV.util.crud.favorite.create(fn, true);
                 },
                 updateName: function(name) {
+                    if (DV.store.favorite.findExact('name', name) != -1) {
+                        alert('Name is already in use');
+                        return;
+                    }
                     DV.util.mask.setMask(DV.cmp.favorite.window, 'Renaming...');
                     var r = DV.cmp.favorite.grid.getSelectionModel().getSelection()[0];
                     Ext.Ajax.request({
@@ -674,6 +680,7 @@ Ext.onReady( function() {
                         params: {uid: r.data.id, name: name},
                         success: function() {
                             DV.store.favorite.load({callback: function() {
+                                DV.cmp.favorite.rename.window.close();
                                 DV.mask.hide();
                                 DV.cmp.favorite.grid.getSelectionModel().select(DV.store.favorite.getAt(DV.store.favorite.findExact('name', name)));
                                 DV.cmp.favorite.name.setValue(name);
@@ -2208,10 +2215,10 @@ Ext.onReady( function() {
                                                                                 disabled: true,
                                                                                 xable: function() {
                                                                                     if (DV.cmp.favorite.grid.getSelectionModel().getSelection().length == 1) {
-                                                                                        DV.cmp.favorite.rename.enable();
+                                                                                        DV.cmp.favorite.rename.button.enable();
                                                                                     }
                                                                                     else {
-                                                                                        DV.cmp.favorite.rename.disable();
+                                                                                        DV.cmp.favorite.rename.button.disable();
                                                                                     }
                                                                                 },
                                                                                 handler: function() {
@@ -2222,12 +2229,21 @@ Ext.onReady( function() {
                                                                                         width: 210,
                                                                                         bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
                                                                                         modal: true,
+                                                                                        cmp: {},
                                                                                         items: [
                                                                                             {
                                                                                                 xtype: 'textfield',
                                                                                                 cls: 'dv-textfield',
-                                                                                                value: selected.data.name
-                                                                                            }                                                                                                  
+                                                                                                value: selected.data.name,
+                                                                                                listeners: {
+                                                                                                    added: function() {
+                                                                                                        this.up('window').cmp.name = this;
+                                                                                                    },
+                                                                                                    change: function() {
+                                                                                                        this.up('window').cmp.rename.xable();
+                                                                                                    }
+                                                                                                }
+                                                                                            }
                                                                                         ],
                                                                                         bbar: [
                                                                                             {
@@ -2239,19 +2255,36 @@ Ext.onReady( function() {
                                                                                             '->',
                                                                                             {
                                                                                                 text: 'Rename',
+                                                                                                xable: function() {
+                                                                                                    if (this.up('window').cmp.name.getValue()) {
+                                                                                                        this.enable();
+                                                                                                    }
+                                                                                                    else {
+                                                                                                        this.disable();
+                                                                                                    }
+                                                                                                },
                                                                                                 handler: function() {
-                                                                                                    DV.util.crud.favorite.updateName(this.up('window').down('textfield').getValue());
-                                                                                                    this.up('window').close();
+                                                                                                    DV.util.crud.favorite.updateName(this.up('window').cmp.name.getValue());
+                                                                                                },
+                                                                                                listeners: {
+                                                                                                    afterrender: function() {
+                                                                                                        this.up('window').cmp.rename = this;
+                                                                                                    }
                                                                                                 }
                                                                                             }
-                                                                                        ]
+                                                                                        ],
+                                                                                        listeners: {
+                                                                                            afterrender: function() {
+                                                                                                DV.cmp.favorite.rename.window = this;
+                                                                                            }
+                                                                                        }
                                                                                     });
                                                                                     w.setPosition((screen.width/2)-105, 310, true);
                                                                                     w.show();
                                                                                 },
                                                                                 listeners: {
                                                                                     added: function() {
-                                                                                        DV.cmp.favorite.rename = this;
+                                                                                        DV.cmp.favorite.rename.button = this;
                                                                                     }
                                                                                 }
                                                                             },
@@ -2327,7 +2360,7 @@ Ext.onReady( function() {
                                                                         },
                                                                         itemclick: function(g, r) {
                                                                             DV.cmp.favorite.name.setValue(r.get('name'));
-                                                                            DV.cmp.favorite.rename.xable();
+                                                                            DV.cmp.favorite.rename.button.xable();
                                                                             DV.cmp.favorite.delete.xable();
                                                                         },
                                                                         itemdblclick: function() {
