@@ -128,10 +128,11 @@ public class MapController
             OrganisationUnit unit = organisationUnitService.getOrganisationUnit( organisationUnitUid );
             
             level = organisationUnitService.getLevelOfOrganisationUnit( unit.getId() );
+            level++;
         }
         
         MapView mapView = mappingService.getIndicatorLastYearMapView( indicatorUid, organisationUnitUid, level );
-
+        
         renderMapViewPng( mapView, response );
     }
 
