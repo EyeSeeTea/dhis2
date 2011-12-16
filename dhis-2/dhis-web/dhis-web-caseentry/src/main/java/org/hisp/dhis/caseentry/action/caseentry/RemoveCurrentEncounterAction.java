@@ -29,8 +29,8 @@ package org.hisp.dhis.caseentry.action.caseentry;
 
 import org.hisp.dhis.common.DeleteNotAllowedException;
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramInstanceService;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -46,22 +46,22 @@ public class RemoveCurrentEncounterAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramInstanceService programInstanceService;
+    private ProgramStageInstanceService programStageInstanceService;
 
-    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
-        this.programInstanceService = programInstanceService;
+        this.programStageInstanceService = programStageInstanceService;
     }
 
     // --------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
-    private int programInstanceId;
+    private int programStageInstanceId;
 
-    public void setProgramInstanceId( int programInstanceId )
+    public void setProgramStageInstanceId( int programStageInstanceId )
     {
-        this.programInstanceId = programInstanceId;
+        this.programStageInstanceId = programStageInstanceId;
     }
 
     private I18n i18n;
@@ -91,9 +91,9 @@ public class RemoveCurrentEncounterAction
     {
         try
         {
-            ProgramInstance programInstance = programInstanceService.getProgramInstance( programInstanceId );
+            ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( programStageInstanceId );
 
-            programInstanceService.deleteProgramInstance( programInstance );
+            programStageInstanceService.deleteProgramStageInstance( programStageInstance );
         }
         catch ( DeleteNotAllowedException ex )
         {
