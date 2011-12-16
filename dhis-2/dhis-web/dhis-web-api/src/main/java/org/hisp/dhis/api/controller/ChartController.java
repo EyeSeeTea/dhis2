@@ -129,7 +129,7 @@ public class ChartController
         ChartUtilities.writeChartAsPNG( response.getOutputStream(), chart, width, height );
     }
 
-    @RequestMapping( value = "/data", method = RequestMethod.GET )
+    @RequestMapping( value = {"/data","/data.png"}, method = RequestMethod.GET )
     public void getChart( @RequestParam( value = "in" ) String indicatorUid, 
                           @RequestParam( value = "ou" ) String organisationUnitUid,
                           @RequestParam( value = "periods", required = false ) boolean periods,
