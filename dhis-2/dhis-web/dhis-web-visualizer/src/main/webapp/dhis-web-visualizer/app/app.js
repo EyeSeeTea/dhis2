@@ -2130,7 +2130,6 @@ Ext.onReady( function() {
                                                                 {
                                                                     xtype: 'grid',
                                                                     width: 332,
-                                                                    height: 350,
                                                                     scroll: 'vertical',
                                                                     multiSelect: true,
                                                                     columns: [
@@ -2145,6 +2144,13 @@ Ext.onReady( function() {
                                                                             style: 'display:none'
                                                                         }
                                                                     ],
+                                                                    setHeightInWindow: function(store) {
+                                                                        var h = (store.getTotalCount() * 23) + 30,
+                                                                            sh = DV.util.viewport.getSize().y * 0.8;
+                                                                        this.setHeight(h > sh ? sh : h);
+                                                                        this.doLayout();
+                                                                        this.up('window').doLayout();
+                                                                    },
                                                                     store: DV.store.favorite,
                                                                     tbar: {
                                                                         id: 'favorite_t',
@@ -2338,6 +2344,7 @@ Ext.onReady( function() {
                                                                                                         this.up('window').close();
                                                                                                         DV.util.crud.favorite.del(function() {
                                                                                                             DV.cmp.favorite.name.setValue('');
+                                                                                                            DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
                                                                                                         });                                                                                                        
                                                                                                     }
                                                                                                 }
@@ -2435,6 +2442,7 @@ Ext.onReady( function() {
                                                                                 else {
                                                                                     DV.util.crud.favorite.create(function() {
                                                                                         DV.cmp.favorite.name.setValue('');
+                                                                                        DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
                                                                                     });
                                                                                 }                                                                                    
                                                                             }
@@ -2450,6 +2458,7 @@ Ext.onReady( function() {
                                                             listeners: {
                                                                 show: function() {                                               
                                                                     DV.cmp.favorite.save.xable();
+                                                                    this.down('grid').setHeightInWindow(DV.store.favorite);
                                                                 }
                                                             }
                                                         });
