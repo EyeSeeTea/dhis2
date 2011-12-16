@@ -387,10 +387,11 @@ body {
     border-color: #aaa;
 }
 
+/* Menu item */
 .x-menu-item-link {
     padding: 4px 5px 4px 28px;
 }
-
+/* Menu item hover */
 .x-menu-item-active .x-menu-item-link {
     -moz-border-radius: 2px 2px 2px 2px;
     -webkit-border-radius: 2px 2px 2px 2px;
@@ -400,7 +401,12 @@ body {
     border-radius: 2px 2px 2px 2px;
     border-width: 1px;
     border-style: solid;
-    border-color: #aaa;
+    border-color: transparent;
+    background: #e1e1e1;
+}
+/* Menu item color */
+.x-menu-item-text {
+    color: #111;
 }
 
 /* Fieldset */
@@ -424,6 +430,10 @@ body {
 }
 
 /* Window */
+.dv-window-title-favorite {
+    padding-left: 19px;
+    background-image: url('../images/favorite.png');
+}
 .dv-window-title-datatable {
     padding-left: 19px;
     background-image: url('../images/datatable.png');
@@ -460,6 +470,10 @@ body {
     background-image:url('../images/datatable.png');
 }
 
+.dv-menu-item-edit {
+    background-image:url('../images/edit.png');
+}
+
 /* Textfield */
 .dv-textfield .x-form-field {  
     height: 26px;
@@ -490,12 +504,12 @@ body {
     padding-left: 7px;
 }
 .dv-radiogroup .x-form-cb-label-after {
-    padding-left: 13px;
-    font-size: 10px;
-    color: #333;
+    padding-left: 7px;
+    font-size: 11px;
+    color: #444;
 }
 .dv-radiogroup .x-form-radio-group {
-    padding-top: 4px;
+    padding-top: 5px;
 }
 
 /* DV menu grid icon/text position aligned with menuitem */
@@ -514,9 +528,5 @@ body {
 .dv-menugrid .x-grid-row-over .x-grid-cell {
     background-color: #e1e1e1;
 }
-/* Menu items now look like DV grid items */
-.x-menu-item-active .x-menu-item-link {
-    border-color: transparent;
-    background: #e1e1e1;
-}
+
 

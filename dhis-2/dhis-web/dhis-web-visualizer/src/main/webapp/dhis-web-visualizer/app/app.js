@@ -854,7 +854,7 @@ Ext.onReady( function() {
                     s.sort(this.sorting.field, this.sorting.direction);
                     s.each(function(r) {
                         r.data.lastUpdated = r.data.lastUpdated.substr(0,16).replace('T',' ');
-                        r.data.icon = '<img src="images/datatable.png" />';
+                        r.data.icon = '<img src="images/favorite.png" />';
                         r.commit();
                     });
                 }
@@ -2092,7 +2092,7 @@ Ext.onReady( function() {
                                         items: [
                                             {
                                                 text: 'Manage favorites',
-                                                iconCls: 'dv-menu-item-datatable',
+                                                iconCls: 'dv-menu-item-edit',
                                                 minWidth: 130,
                                                 handler: function() {
                                                     if (DV.cmp.favorite.window) {
@@ -2101,6 +2101,7 @@ Ext.onReady( function() {
                                                     else {
                                                         DV.cmp.favorite.window = Ext.create('Ext.window.Window', {
                                                             title: 'Manage favorites',
+                                                            iconCls: 'dv-window-title-favorite',
                                                             bodyStyle: 'padding:8px; background-color:#fff',
 															width: 360,
                                                             closeAction: 'hide',
@@ -2174,6 +2175,9 @@ Ext.onReady( function() {
                                                                                         this.addCls('dv-menu-togglegroup');
                                                                                         this.menu = Ext.create('Ext.menu.Menu', {
                                                                                             shadowOffset: 1,
+                                                                                            showSeparator: false,
+                                                                                            width: 115,
+                                                                                            height: 70,
                                                                                             items: [
                                                                                                 {
                                                                                                     xtype: 'radiogroup',
