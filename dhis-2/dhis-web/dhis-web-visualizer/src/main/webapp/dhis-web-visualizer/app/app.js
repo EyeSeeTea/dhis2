@@ -2102,8 +2102,7 @@ Ext.onReady( function() {
                                                         DV.cmp.favorite.window = Ext.create('Ext.window.Window', {
                                                             title: 'Manage favorites',
                                                             bodyStyle: 'padding:8px; background-color:#fff',
-                                                            layout: 'fit',
-															width: 328,
+															width: 360,
                                                             closeAction: 'hide',
                                                             modal: true,
                                                             items: [
@@ -2116,7 +2115,7 @@ Ext.onReady( function() {
                                                                             cls: 'dv-textfield',
                                                                             fieldLabel: 'Name',
                                                                             labelWidth: DV.conf.layout.form_label_width,
-                                                                            width: 300,
+                                                                            width: 332,
                                                                             listeners: {
                                                                                 added: function() {
                                                                                     DV.cmp.favorite.name = this;
@@ -2130,14 +2129,14 @@ Ext.onReady( function() {
                                                                 },
                                                                 {
                                                                     xtype: 'grid',
-                                                                    width: 300,
+                                                                    width: 332,
                                                                     height: 350,
                                                                     scroll: 'vertical',
                                                                     multiSelect: true,
                                                                     columns: [
                                                                         {
                                                                             dataIndex: 'name',
-                                                                            width: 189,
+                                                                            width: 221,
                                                                             style: 'display:none'
                                                                         },
                                                                         {
@@ -2484,7 +2483,7 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         dataIndex: 'lastUpdated',
-                                                        width: 106,
+                                                        width: 94,
                                                         style: 'display:none'
                                                     }
                                                 ],
