@@ -27,18 +27,27 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.common.GenericStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.user.User;
+
+import java.util.List;
 
 /**
  * @author Lars Helge Overland
  */
 public interface MessageConversationStore
-    extends GenericStore<MessageConversation>
+    extends GenericIdentifiableObjectStore<MessageConversation>
 {
-    List<MessageConversation> getMessageConversations( User user, int first, int max );
+    /**
+     * Returns a list of MessageConversations.
+     * 
+     * @param user the User for which the MessageConversations are sent to, or
+     *        all if null.
+     * @param first the first record number to return, or all if null.
+     * @param max the max number of records to return, or all if null.
+     * @return a list of MessageConversations.
+     */
+    List<MessageConversation> getMessageConversations( User user, Integer first, Integer max );
     
     long getUnreadUserMessageConversationCount( User user );
 }

@@ -849,12 +849,12 @@ Ext.onReady( function() {
                 field: 'lastUpdated',
                 direction: 'DESC'
             },
-            storage: {},
             listeners: {
                 load: function(s) {
                     s.sort(this.sorting.field, this.sorting.direction);
                     s.each(function(r) {
                         r.data.lastUpdated = r.data.lastUpdated.substr(0,16).replace('T',' ');
+                        r.data.icon = '<img src="images/datatable.png" />';
                         r.commit();
                     });
                 }
@@ -2088,6 +2088,7 @@ Ext.onReady( function() {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
                                         shadowOffset: 1,
+                                        showSeparator: false,
                                         items: [
                                             {
                                                 text: 'Manage favorites',
@@ -2448,13 +2449,10 @@ Ext.onReady( function() {
                                                                 ]
                                                             },
                                                             listeners: {
-                                                                show: function() {
-                                                                    if (!DV.store.favorite.isLoaded) {
-                                                                        DV.store.favorite.load();
-                                                                    }                                                                    
+                                                                show: function() {                                               
                                                                     DV.cmp.favorite.save.xable();
                                                                 }
-                                                            }                                                                        
+                                                            }
                                                         });
                                                         var w = DV.cmp.favorite.window;
                                                         w.setPosition((screen.width/2)-165, 150, true);
@@ -2466,8 +2464,52 @@ Ext.onReady( function() {
                                                         DV.cmp.toolbar.menuitem.datatable = this;
                                                     }
                                                 }
+                                            },
+                                            '-',
+                                            {
+                                                xtype: 'grid',
+                                                cls: 'dv-menugrid',
+                                                width: 340,
+                                                scroll: 'vertical',
+                                                columns: [
+                                                    {
+                                                        dataIndex: 'icon',
+                                                        width: 25,
+                                                        style: 'display:none'
+                                                    },
+                                                    {
+                                                        dataIndex: 'name',
+                                                        width: 209,
+                                                        style: 'display:none'
+                                                    },
+                                                    {
+                                                        dataIndex: 'lastUpdated',
+                                                        width: 106,
+                                                        style: 'display:none'
+                                                    }
+                                                ],
+                                                setHeightInMenu: function(store) {
+                                                    var h = store.getTotalCount() * 24,
+                                                        sh = DV.util.viewport.getSize().y * 0.8;
+                                                    this.setHeight(h > sh ? sh : h);
+                                                    this.doLayout();
+                                                    this.up('menu').doLayout();
+                                                },
+                                                store: DV.store.favorite
                                             }
-                                        ]                                            
+                                        ],
+                                        listeners: {
+                                            show: function() {
+                                                if (!DV.store.favorite.isLoaded) {
+                                                    DV.store.favorite.load({scope: this, callback: function() {
+                                                        this.down('grid').setHeightInMenu(DV.store.favorite);
+                                                    }});
+                                                }
+                                                else {
+                                                    this.down('grid').setHeightInMenu(DV.store.favorite);
+                                                }
+                                            }
+                                        }
                                     });
                                 }
                             }
@@ -2480,11 +2522,12 @@ Ext.onReady( function() {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
                                         shadowOffset: 1,
+                                        showSeparator: false,
                                         items: [
                                             {
                                                 text: 'Data table',
                                                 iconCls: 'dv-menu-item-datatable',
-                                                minWidth: 100,
+                                                minWidth: 90,
                                                 handler: function() {
                                                     var p = DV.cmp.region.east;
                                                     if (p.collapsed && p.items.length) {
@@ -2545,11 +2588,12 @@ Ext.onReady( function() {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
                                         shadowOffset: 1,
+                                        showSeparator: false,
                                         items: [
                                             {
                                                 text: 'Image (PNG)',
                                                 iconCls: 'dv-menu-item-png',
-                                                minWidth: 110,
+                                                minWidth: 105,
                                                 handler: function() {
                                                     b.execute(DV.conf.finals.image.png);
                                                 }
@@ -2557,7 +2601,7 @@ Ext.onReady( function() {
                                             {
                                                 text: 'PDF',
                                                 iconCls: 'dv-menu-item-pdf',
-                                                minWidth: 110,
+                                                minWidth: 105,
                                                 handler: function() {
                                                     b.execute(DV.conf.finals.image.pdf);
                                                 }

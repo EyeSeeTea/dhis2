@@ -7,7 +7,7 @@
   <xsl:include href="identifiable-row.xsl"/>
 
   <!-- match all plural elements -->
-  <xsl:template match="d:maps|d:charts|d:categories|d:categoryCombos|
+  <xsl:template match="d:resources|d:maps|d:charts|d:categories|d:categoryCombos|
     d:categoryOptions|d:categoryOptionCombos|d:dataElements|d:indicators|
     d:organisationUnits|d:dataElementGroups|d:dataElementGroupSets|
     d:documents|d:indicatorGroups|d:indicatorGroupSets|d:organisationUnitGroups|
@@ -15,7 +15,7 @@
     d:sqlViews|d:validationRules|d:validationRuleGroups|d:users|d:reportTables">
     <h3> <xsl:value-of select="local-name()"/> </h3>
 
-    <table border="1">
+    <table>
       <xsl:apply-templates select="child::*" mode="row"/>
     </table>
   </xsl:template>

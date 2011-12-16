@@ -388,7 +388,7 @@ body {
 }
 
 .x-menu-item-link {
-    padding: 3px 5px 4px 35px;
+    padding: 4px 5px 4px 28px;
 }
 
 .x-menu-item-active .x-menu-item-link {
@@ -498,5 +498,25 @@ body {
     padding-top: 4px;
 }
 
-
+/* DV menu grid icon/text position aligned with menuitem */
+.dv-menugrid .x-grid-cell-inner {
+    padding: 3px 3px;
+}
+/* DV menu grid item background now looks like a menuitem */
+.dv-menugrid .x-grid-row .x-grid-cell {
+    background-color: #f1f1f1;
+}
+/* DV menu grid background now looks like a menu*/
+.dv-menugrid .x-grid-view {
+    background-color: #f1f1f1;
+}
+/* DV menu grid item hover background color */
+.dv-menugrid .x-grid-row-over .x-grid-cell {
+    background-color: #e1e1e1;
+}
+/* Menu items now look like DV grid items */
+.x-menu-item-active .x-menu-item-link {
+    border-color: transparent;
+    background: #e1e1e1;
+}
 

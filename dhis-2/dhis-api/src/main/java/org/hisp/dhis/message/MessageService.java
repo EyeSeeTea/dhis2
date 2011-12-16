@@ -39,6 +39,7 @@ import org.hisp.dhis.user.User;
 public interface MessageService
 {
     final String ID = MessageService.class.getName();
+
     final String META_USER_AGENT = "User-agent: ";
     
     int sendMessage( String subject, String text, String metaData, Set<User> users );
@@ -52,12 +53,16 @@ public interface MessageService
     void updateMessageConversation( MessageConversation conversation );
     
     int sendCompletenessMessage( CompleteDataSetRegistration registration );
-    
+
     MessageConversation getMessageConversation( int id );
+
+    MessageConversation getMessageConversation( String uid );
     
     long getUnreadMessageConversationCount();
     
     long getUnreadMessageConversationCount( User user );
     
     List<MessageConversation> getMessageConversations( int first, int max );
+    
+    List<MessageConversation> getAllMessageConversations();
 }

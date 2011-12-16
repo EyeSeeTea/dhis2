@@ -5,11 +5,38 @@
   <xsl:template match="d:map">
     <div class="map">
       <h2><xsl:value-of select="@name"/></h2>
-      <a href="{@link}.png"><img src="{@link}.png" style="border-style:solid; border-width: 1px; padding: 5px;" /></a>
+	  
+	  <table>
+		<tr>
+			<td>Resource Data</td>
+			<td><a href="{@link}/data">png</a></td>
+		</tr>
+	  </table><br/>
+	  
+	  <table>
+		<tr>
+			<td>Dynamic Data</td>
+			<td><a href="data">png</a></td>
+		</tr>
+		<tr>
+			<td>in</td>
+			<td>indicator uid (req)</td>
+		</tr>
+		<tr>
+			<td>ou</td>
+			<td>organisation unit uid (req)</td>
+		</tr>
+		<tr>
+			<td>level</td>
+			<td>organisation unit level (opt)</td>
+		</tr>
+	  </table><br/>
+	  
+      <a href="{@link}/data"><img src="{@link}/data" style="border-style:solid; border-width: 1px; padding: 5px;" /></a>
 
       <h3>Details</h3>
 
-      <table border="1">
+      <table>
         <xsl:for-each select="attribute::*">
           <tr><td><xsl:value-of select="local-name()"/></td><td><xsl:value-of select="."/></td></tr>
         </xsl:for-each>

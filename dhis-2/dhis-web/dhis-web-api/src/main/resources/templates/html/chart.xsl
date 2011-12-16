@@ -6,12 +6,59 @@
 
   <xsl:template match="d:chart">
     <div class="chart">
-      <h2>Chart: <xsl:value-of select="@name"/> </h2>
-      <a href="{@link}.png"><img src="{@link}.png" style="border-style:solid; border-width: 1px; padding: 5px;" /></a>
+      <h2> <xsl:value-of select="@name"/> </h2>
+	  
+	  <table>
+		<tr>
+			<td>Resource Data</td>
+			<td><a href="{@link}/data">png</a></td>
+		</tr>
+		<tr>
+			<td>width</td>
+			<td>width in px (opt)</td>
+		</tr>
+		<tr>
+			<td>height</td>
+			<td>height in px (opt)</td>
+		</tr>
+	  </table><br/>
+	  
+	  <table>
+		<tr>
+			<td>Dynamic Data</td>
+			<td><a href="data">png</a></td>
+		</tr>
+		<tr>
+			<td>ou</td>
+			<td>organisation unit uid (req)</td>
+		</tr>
+		<tr>
+			<td>pe</td>
+			<td>period yyyy-MM-dd (req)</td>
+		</tr>
+		<tr>
+			<td>periods</td>
+			<td>use periods or org units (opt)</td>
+		</tr>
+		<tr>
+			<td>width</td>
+			<td>width in px (opt)</td>
+		</tr>
+		<tr>
+			<td>height</td>
+			<td>height in px (opt)</td>
+		</tr>
+		<tr>
+			<td>skipTitle</td>
+			<td>skip title (opt)</td>
+		</tr>
+	  </table><br/>
+	  
+      <a href="{@link}/data"><img src="{@link}/data" style="border-style:solid; border-width: 1px; padding: 5px;" /></a>
 
       <h3>Details</h3>
 
-      <table border="1">
+      <table>
         <tr>
           <td>ID</td>
           <td> <xsl:value-of select="@id"/> </td>

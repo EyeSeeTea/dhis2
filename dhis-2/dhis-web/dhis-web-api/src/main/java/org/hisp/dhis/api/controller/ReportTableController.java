@@ -32,6 +32,7 @@ import org.hisp.dhis.api.utils.WebLinkPopulator;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.reporttable.ReportTables;
@@ -49,6 +50,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 import static org.hisp.dhis.system.util.CodecUtils.filenameEncode;
@@ -115,8 +117,8 @@ public class ReportTableController
 
     @RequestMapping( value = "/{uid}/data", method = RequestMethod.GET )
     public String getReportTableData( @PathVariable( "uid" ) String uid, Model model,
-                                      @RequestParam( value = "organisationUnit", required = false ) String organisationUnitUid,
-                                      @RequestParam( value = "period", required = false ) String period,
+                                      @RequestParam( value = "ou", required = false ) String organisationUnitUid,
+                                      @RequestParam( value = "pe", required = false ) String period,
                                       HttpServletResponse response ) throws Exception
     {
         ReportTable reportTable = reportTableService.getReportTable( uid );
@@ -126,7 +128,7 @@ public class ReportTableController
             organisationUnitUid = organisationUnitService.getRootOrganisationUnits().iterator().next().getUid();
         }
 
-        Date date = period != null ? DateUtils.getMediumDate( period ) : new Date();
+        Date date = period != null ? DateUtils.getMediumDate( period ) : new Cal().now().subtract( Calendar.MONTH, 1 ).time();
 
         Grid grid = reportTableService.getReportTableGrid( uid, i18nManager.getI18nFormat(), date, organisationUnitUid );
 
@@ -137,8 +139,8 @@ public class ReportTableController
 
     @RequestMapping( value = "/{uid}/data.pdf", method = RequestMethod.GET )
     public void getReportTablePdf( @PathVariable( "uid" ) String uid,
-                                   @RequestParam( value = "organisationUnit", required = false ) String organisationUnitUid,
-                                   @RequestParam( value = "period", required = false ) String period,
+                                   @RequestParam( value = "ou", required = false ) String organisationUnitUid,
+                                   @RequestParam( value = "pe", required = false ) String period,
                                    HttpServletResponse response ) throws Exception
     {
         ReportTable reportTable = reportTableService.getReportTable( uid );
@@ -148,7 +150,7 @@ public class ReportTableController
             organisationUnitUid = organisationUnitService.getRootOrganisationUnits().iterator().next().getUid();
         }
 
-        Date date = period != null ? DateUtils.getMediumDate( period ) : new Date();
+        Date date = period != null ? DateUtils.getMediumDate( period ) : new Cal().now().subtract( Calendar.MONTH, 1 ).time();
 
         Grid grid = reportTableService.getReportTableGrid( uid, i18nManager.getI18nFormat(), date, organisationUnitUid );
 
@@ -160,8 +162,8 @@ public class ReportTableController
 
     @RequestMapping( value = "/{uid}/data.xls", method = RequestMethod.GET )
     public void getReportTableXls( @PathVariable( "uid" ) String uid,
-                                   @RequestParam( value = "organisationUnit", required = false ) String organisationUnitUid,
-                                   @RequestParam( value = "period", required = false ) String period,
+                                   @RequestParam( value = "ou", required = false ) String organisationUnitUid,
+                                   @RequestParam( value = "pe", required = false ) String period,
                                    HttpServletResponse response ) throws Exception
     {
         ReportTable reportTable = reportTableService.getReportTable( uid );
@@ -171,7 +173,7 @@ public class ReportTableController
             organisationUnitUid = organisationUnitService.getRootOrganisationUnits().iterator().next().getUid();
         }
 
-        Date date = period != null ? DateUtils.getMediumDate( period ) : new Date();
+        Date date = period != null ? DateUtils.getMediumDate( period ) : new Cal().now().subtract( Calendar.MONTH, 1 ).time();
 
         Grid grid = reportTableService.getReportTableGrid( uid, i18nManager.getI18nFormat(), date, organisationUnitUid );
 
@@ -183,8 +185,8 @@ public class ReportTableController
 
     @RequestMapping( value = "/{uid}/data.csv", method = RequestMethod.GET )
     public void getReportTableCsv( @PathVariable( "uid" ) String uid,
-                                   @RequestParam( value = "organisationUnit", required = false ) String organisationUnitUid,
-                                   @RequestParam( value = "period", required = false ) String period,
+                                   @RequestParam( value = "ou", required = false ) String organisationUnitUid,
+                                   @RequestParam( value = "pe", required = false ) String period,
                                    HttpServletResponse response ) throws Exception
     {
         ReportTable reportTable = reportTableService.getReportTable( uid );
@@ -194,7 +196,7 @@ public class ReportTableController
             organisationUnitUid = organisationUnitService.getRootOrganisationUnits().iterator().next().getUid();
         }
 
-        Date date = period != null ? DateUtils.getMediumDate( period ) : new Date();
+        Date date = period != null ? DateUtils.getMediumDate( period ) : new Cal().now().subtract( Calendar.MONTH, 1 ).time();
 
         Grid grid = reportTableService.getReportTableGrid( uid, i18nManager.getI18nFormat(), date, organisationUnitUid );
 

@@ -36,10 +36,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.api.utils.IdentifiableObjectParams;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
-import org.hisp.dhis.mapgeneration.MapGenerationService;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.mapping.Maps;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -48,17 +49,20 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
-@RequestMapping( value = "/maps" )
+@RequestMapping( value = MapController.RESOURCE_PATH )
 public class MapController
 {
+    public static final String RESOURCE_PATH = "/maps";
+    
     @Autowired
-    MapGenerationService mapGenerationService;
-
+    private MappingService mappingService;
+    
     @Autowired
-    MappingService mappingService;
+    private OrganisationUnitService organisationUnitService;
 
     //-------------------------------------------------------------------------------------------------------
     // GET
@@ -85,10 +89,6 @@ public class MapController
     public String getMap( @PathVariable String uid, IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
         MapView mapView = mappingService.getMapView( uid );
-
-        if (mapView == null) {
-            throw new IllegalArgumentException("No map with id " + uid);
-        }
         
         if ( params.hasLinks() )
         {
@@ -100,7 +100,34 @@ public class MapController
 
         return "map";
     }
+    
+    @RequestMapping( value = "/{uid}/data", method = RequestMethod.GET )
+    public String getMap( @PathVariable String uid, HttpServletRequest request, HttpServletResponse response )
+    {
+        String url = "forward:" + request.getRequestURI().replace( "/data", "" ) + ".png";
+        
+        return url;
+    }
+    
+    @RequestMapping( value = "/data", method = RequestMethod.GET )
+    public String getMap( Model model,
+        @RequestParam( value = "in" ) String indicatorUid, 
+        @RequestParam( value = "ou" ) String organisationUnitUid,
+        @RequestParam( value = "level", required = false ) Integer level )
+    {
+        if ( level == null )
+        {
+            OrganisationUnit unit = organisationUnitService.getOrganisationUnit( organisationUnitUid );
+            
+            level = organisationUnitService.getLevelOfOrganisationUnit( unit.getId() );
+        }
+        
+        MapView mapView = mappingService.getIndicatorLastYearMapView( indicatorUid, organisationUnitUid, level );
 
+        model.addAttribute( "model", mapView );
+
+        return "map";
+    }
 
     //-------------------------------------------------------------------------------------------------------
     // POST

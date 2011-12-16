@@ -27,8 +27,8 @@ package org.hisp.dhis.mobile.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.api.sms.SmsConfig;
-import org.hisp.dhis.api.sms.SmsService;
+import org.hisp.dhis.sms.SmsConfigurationManager;
+import org.hisp.dhis.sms.config.SmsConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -39,36 +39,30 @@ public class ShowMobileConfigurationFormAction implements Action {
 	// Dependencies
 	// -------------------------------------------------------------------------
 
-	@Autowired(required = false)
-	private SmsService smsService;
+	@Autowired
+        private SmsConfigurationManager smsConfigurationManager;
 
 	// -------------------------------------------------------------------------
 	// Output
 	// -------------------------------------------------------------------------
 
-	private SmsConfig smsConfig;
+	private SmsConfiguration smsConfig;
 
 	@Override
 	public String execute() throws Exception {
-		if (this.smsService != null) {
-			this.smsConfig = this.smsService.getConfig();
-		}
+	    smsConfig = smsConfigurationManager.getSmsConfiguration();
 		return SUCCESS;
 	}
 
 	public boolean getSmsServiceStatus() {
-		return this.smsService != null;
+		return this.smsConfig != null && this.smsConfig.isEnabled();
 	}
 
-	public void setSmsService(SmsService smsService) {
-		this.smsService = smsService;
-	}
-
-	public SmsConfig getSmsConfig() {
+	public SmsConfiguration getSmsConfig() {
 		return smsConfig;
 	}
 
-	public void setSmsConfig(SmsConfig smsConfig) {
+	public void setSmsConfig(SmsConfiguration smsConfig) {
 		this.smsConfig = smsConfig;
 	}
 }
