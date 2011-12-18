@@ -90,7 +90,9 @@ DV.conf = {
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
         form_label_width: 45,
-        window_confirm_width: 250
+        window_favorite_ypos: 100,
+        window_confirm_width: 250,
+        grid_favorite_width: 420
     }
 };
 
@@ -2094,7 +2096,6 @@ Ext.onReady( function() {
                                             {
                                                 text: 'Manage favorites',
                                                 iconCls: 'dv-menu-item-edit',
-                                                minWidth: 130,
                                                 handler: function() {
                                                     if (DV.cmp.favorite.window) {
                                                         DV.cmp.favorite.window.show();
@@ -2104,7 +2105,7 @@ Ext.onReady( function() {
                                                             title: 'Manage favorites',
                                                             iconCls: 'dv-window-title-favorite',
                                                             bodyStyle: 'padding:8px; background-color:#fff',
-															width: 360,
+															width: DV.conf.layout.grid_favorite_width,
                                                             closeAction: 'hide',
                                                             modal: true,
                                                             items: [
@@ -2117,7 +2118,7 @@ Ext.onReady( function() {
                                                                             cls: 'dv-textfield',
                                                                             fieldLabel: 'Name',
                                                                             labelWidth: DV.conf.layout.form_label_width,
-                                                                            width: 332,
+                                                                            width: DV.conf.layout.grid_favorite_width - 28,
                                                                             listeners: {
                                                                                 added: function() {
                                                                                     DV.cmp.favorite.name = this;
@@ -2131,13 +2132,13 @@ Ext.onReady( function() {
                                                                 },
                                                                 {
                                                                     xtype: 'grid',
-                                                                    width: 332,
+                                                                    width: DV.conf.layout.grid_favorite_width - 28,
                                                                     scroll: 'vertical',
                                                                     multiSelect: true,
                                                                     columns: [
                                                                         {
                                                                             dataIndex: 'name',
-                                                                            width: 221,
+                                                                            width: DV.conf.layout.grid_favorite_width - 139,
                                                                             style: 'display:none'
                                                                         },
                                                                         {
@@ -2296,7 +2297,7 @@ Ext.onReady( function() {
                                                                                             }
                                                                                         }
                                                                                     });
-                                                                                    w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), 250, true);
+                                                                                    w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
                                                                                     w.show();
                                                                                 },
                                                                                 listeners: {
@@ -2360,7 +2361,7 @@ Ext.onReady( function() {
                                                                                                 }
                                                                                             ]
                                                                                         });
-                                                                                        w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), 250, true);
+                                                                                        w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
                                                                                         w.show();
                                                                                     }
                                                                                 },
@@ -2446,7 +2447,7 @@ Ext.onReady( function() {
                                                                                             }
                                                                                         ]
                                                                                     });
-                                                                                    w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), 250, true);
+                                                                                    w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
                                                                                     w.show();
                                                                                 }
                                                                                 else {
@@ -2473,7 +2474,7 @@ Ext.onReady( function() {
                                                             }
                                                         });
                                                         var w = DV.cmp.favorite.window;
-                                                        w.setPosition((screen.width/2)-180, 150, true);
+                                                        w.setPosition((screen.width/2)-(DV.conf.layout.grid_favorite_width/2), DV.conf.layout.window_favorite_ypos, true);
                                                         w.show();
                                                     }
                                                 },
