@@ -2116,6 +2116,8 @@ Ext.onReady( function() {
                                                                         {
                                                                             xtype: 'textfield',
                                                                             cls: 'dv-textfield',
+                                                                            maxLength: 160,
+                                                                            enforceMaxLength: true,
                                                                             fieldLabel: 'Name',
                                                                             labelWidth: DV.conf.layout.form_label_width,
                                                                             width: DV.conf.layout.grid_favorite_width - 28,
@@ -2247,6 +2249,8 @@ Ext.onReady( function() {
                                                                                             {
                                                                                                 xtype: 'textfield',
                                                                                                 cls: 'dv-textfield',
+                                                                                                maxLength: 160,
+                                                                                                enforceMaxLength: true,
                                                                                                 value: selected.data.name,
                                                                                                 listeners: {
                                                                                                     added: function() {
