@@ -408,6 +408,7 @@ body {
 
 /* Menu */
 .x-menu-body {
+    border-color: #bbb;
     -moz-border-radius: 2px 2px 2px 2px;
     -webkit-border-radius: 2px 2px 2px 2px;
     -o-border-radius: 2px 2px 2px 2px;
