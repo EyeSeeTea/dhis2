@@ -2487,7 +2487,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'grid',
                                                 cls: 'dv-menugrid',
-                                                width: 340,
+                                                width: 420,
                                                 scroll: 'vertical',
                                                 columns: [
                                                     {
@@ -2497,7 +2497,7 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         dataIndex: 'name',
-                                                        width: 209,
+                                                        width: 289,
                                                         style: 'display:none'
                                                     },
                                                     {
