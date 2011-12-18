@@ -78,6 +78,10 @@ DV.conf = {
         image: {
             png: 'png',
             pdf: 'pdf'
+        },
+        cmd: {
+            init: 'init',
+            id: 'id'
         }
     },
     chart: {
@@ -110,7 +114,7 @@ Ext.onReady( function() {
         success: function(r) {
             
     DV.init = DV.conf.init.jsonfy(r);
-    DV.init.isInit = true;
+    DV.init.init = DV.conf.finals.cmd.init;
     
     DV.init.initialize = function() {
         DV.util.combobox.filter.category();        
@@ -121,7 +125,7 @@ Ext.onReady( function() {
         DV.store.area = DV.store.defaultChartStore;
         DV.store.pie = DV.store.defaultChartStore;        
         DV.chart.data = DV.conf.init.data;        
-        DV.exe.execute(true, DV.init.isInit);
+        DV.exe.execute(true, DV.init.init);
     };
     
     DV.cmp = {
@@ -469,7 +473,7 @@ Ext.onReady( function() {
             getTitle: function() {
                 return {
                     type: 'text',
-                    text: DV.init.isInit ? 'Example chart' : DV.state.filter.names[0],
+                    text: DV.init.init ? 'Example chart' : DV.state.filter.names[0],
                     font: 'bold 15px arial',
                     fill: '#222',
                     width: 300,
@@ -1211,12 +1215,12 @@ Ext.onReady( function() {
             DV.cmp.region.center.removeAll(true);
             DV.cmp.region.center.add(this.chart);
             
-            if (!DV.init.isInit) {
+            if (!DV.init.init) {
                 DV.mask.hide();
                 DV.store.getDataTableStore(true);
             }
             else {
-                DV.init.isInit = false;
+                DV.init.init = false;
             }
         }
     };
@@ -1272,9 +1276,14 @@ Ext.onReady( function() {
     };
     
     DV.exe = {
-        execute: function(exe, init) {
-            if (init) {
-                DV.store.getChartStore(exe);
+        execute: function(exe, cmd) {
+            if (cmd) {
+                if (cmd === DV.conf.finals.cmd.init) {
+                    DV.store.getChartStore(exe);
+                }
+                else if (cmd === DV.conf.finals.cmd.id) {
+                    DV.state.setState(cmd);
+                }
             }
             else {
                 DV.state.getState(exe);
@@ -2080,7 +2089,7 @@ Ext.onReady( function() {
 							cls: 'dv-toolbar-btn-1',
                             text: 'Update',
                             handler: function() {
-                                DV.exe.execute(true, DV.init.isInit);
+                                DV.exe.execute(true, DV.init.init);
                             }
                         },
                         {
@@ -2634,6 +2643,23 @@ Ext.onReady( function() {
                                 }
                             }
                         },
+                        
+                        
+                        
+                        
+                        
+                        {
+                            text: 'fn',
+                            handler: function() {
+                                DV.cmp.dimension.indicator.selected.store.add({id:1, s:'nissa'});
+                            }
+                        },
+                        
+                        
+                        
+                        
+                        
+                        
                         '->',
                         {
                             xtype: 'button',
