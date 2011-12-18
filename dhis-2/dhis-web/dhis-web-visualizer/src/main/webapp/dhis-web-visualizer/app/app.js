@@ -36,7 +36,7 @@ DV.conf = {
             dataelement_get: 'getDataElementsMinified.action',
             organisationunitchildren_get: 'getOrganisationUnitChildren.action',
             favorite_addorupdate: 'addOrUpdateChart.action',
-            favorite_get: 'getChart.action',
+            favorite_get: 'charts/',
             favorite_getall: 'charts.json?links=false',
             favorite_delete: 'deleteCharts.action'
         },        
@@ -357,6 +357,22 @@ Ext.onReady( function() {
                     }
                     return a;
                 },
+                getNamesByRelativePeriodsObject: function(rp) {
+                    var relatives = [],
+                        names = [];
+                    for (var r in rp) {
+                        if (rp[r]) {
+                            relatives.push(r);
+                        }
+                    }
+                    for (var i = 0; i < relatives.length; i++) {
+                        var r = DV.init.system.periods[relatives[i]];
+                        for (var j = 0; j < r.length; j++) {
+                            names.push(r[j].name);
+                        }
+                    }
+                    return names;
+                },                        
                 getNameById: function(id) {
                     for (var obj in DV.init.system.periods) {
                         var a = DV.init.system.periods[obj];
@@ -939,6 +955,67 @@ Ext.onReady( function() {
             obj = Ext.Object.merge(obj, this.relativePeriods);
             return obj;            
         },
+        setState: function(exe, id) {
+            if (id) {
+                Ext.Ajax.request({
+                    url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + id + '.json',
+                    scope: this,
+                    success: function(r) {
+                        var f = Ext.JSON.decode(r.responseText);
+                        f.names = {
+                            data: [],
+                            period: [],
+                            organisationunit: []
+                        };
+                        
+                        this.type = f.type;
+                        this.series.dimension = f.series;
+                        this.category.dimension = f.category;
+                        this.filter.dimension = f.filter;
+                        
+                        var indiment = [];
+                        if (f.indicators) {
+                            for (var i = 0; i < f.indicators.length; i++) {
+                                indiment.push(f.indicators[i]);
+                                this.indicatorIds.push(f.indicators[i].id);
+                            }
+                        }
+                        if (f.dataElements) {
+                            for (var i = 0; i < f.dataElements.length; i++) {
+                                indiment.push(f.dataElements[i]);
+                                this.dataelementIds.push(f.dataElements[i].id);
+                            }
+                        }
+                        for (var i = 0; i < indiment.length; i++) {
+                            f.names.data = indiment[i].name;
+                        }
+                        
+                        this.relativePeriods = f.relativePeriods;
+                        f.names.period = DV.util.dimension.period.getNamesByRelativePeriodsObject(this.relativePeriods);
+                        
+                        for (var i = 0; i < f.organisationUnits.length; i++) {
+                            this.organisationunitIds.push(f.organisationUnits[i].id);
+                            f.names.organisationunit.push(f.organisationUnits[i].name);
+                        }
+                        
+                        this.series.names = f.names[this.series.dimension];
+                        this.category.names = f.names[this.category.dimension];
+                        this.filter.names = f.names[this.filter.dimension];
+                        
+                        this.isRendered = true;
+                        
+                        if (exe) {
+                            DV.value.getValues(true);
+                        }
+                    }
+                });
+            }
+        },
+                        
+                        
+                
+                
+                
         resetState: function() {
             this.type = null;
             this.series.dimension = null;
@@ -2527,7 +2604,12 @@ Ext.onReady( function() {
                                                     this.doLayout();
                                                     this.up('menu').doLayout();
                                                 },
-                                                store: DV.store.favorite
+                                                store: DV.store.favorite,
+                                                listeners: {
+                                                    itemclick: function(g, r) {
+                                                        DV.state.setState(true, r.data.id);
+                                                    }
+                                                }
                                             }
                                         ],
                                         listeners: {
