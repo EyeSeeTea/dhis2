@@ -515,6 +515,9 @@ body {
 /* DV menu grid icon/text position aligned with menuitem */
 .dv-menugrid .x-grid-cell-inner {
     padding: 3px 3px;
+    font-size: 11px;
+    color: #444;
+    line-height: 16px;
 }
 /* DV menu grid item background now looks like a menuitem */
 .dv-menugrid .x-grid-row .x-grid-cell {
