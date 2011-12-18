@@ -89,7 +89,8 @@ DV.conf = {
         center_tbar_height: 31,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
-        form_label_width: 45
+        form_label_width: 45,
+        window_confirm_width: 250
     }
 };
 
@@ -2237,7 +2238,7 @@ Ext.onReady( function() {
                                                                                     var w = Ext.create('Ext.window.Window', {
                                                                                         title: 'Rename favorite',
                                                                                         layout: 'fit',
-                                                                                        width: 210,
+                                                                                        width: DV.conf.layout.window_confirm_width,
                                                                                         bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
                                                                                         modal: true,
                                                                                         cmp: {},
@@ -2295,7 +2296,7 @@ Ext.onReady( function() {
                                                                                             }
                                                                                         }
                                                                                     });
-                                                                                    w.setPosition((screen.width/2)-105, 250, true);
+                                                                                    w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), 250, true);
                                                                                     w.show();
                                                                                 },
                                                                                 listeners: {
@@ -2326,7 +2327,7 @@ Ext.onReady( function() {
                                                                                         }
                                                                                         var w = Ext.create('Ext.window.Window', {
                                                                                             title: 'Delete favorites',
-                                                                                            width: 210,
+                                                                                            width: DV.conf.layout.window_confirm_width,
                                                                                             bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
                                                                                             modal: true,
                                                                                             items: [
@@ -2359,7 +2360,7 @@ Ext.onReady( function() {
                                                                                                 }
                                                                                             ]
                                                                                         });
-                                                                                        w.setPosition((screen.width/2)-105, 250, true);
+                                                                                        w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), 250, true);
                                                                                         w.show();
                                                                                     }
                                                                                 },
@@ -2412,7 +2413,7 @@ Ext.onReady( function() {
                                                                                     var item = value.length > 35 ? (value.substr(0,35) + '...') : value;
                                                                                     var w = Ext.create('Ext.window.Window', {
                                                                                         title: 'Save favorite',
-                                                                                        width: 210,
+                                                                                        width: DV.conf.layout.window_confirm_width,
                                                                                         bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
                                                                                         modal: true,
                                                                                         items: [
@@ -2445,7 +2446,7 @@ Ext.onReady( function() {
                                                                                             }
                                                                                         ]
                                                                                     });
-                                                                                    w.setPosition((screen.width/2)-105, 250, true);
+                                                                                    w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), 250, true);
                                                                                     w.show();
                                                                                 }
                                                                                 else {
@@ -2501,12 +2502,12 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         dataIndex: 'lastUpdated',
-                                                        width: 94,
+                                                        width: 106,
                                                         style: 'display:none'
                                                     }
                                                 ],
                                                 setHeightInMenu: function(store) {
-                                                    var h = store.getTotalCount() * 24,
+                                                    var h = store.getTotalCount() * 26,
                                                         sh = DV.util.viewport.getSize().y * 0.8;
                                                     this.setHeight(h > sh ? sh : h);
                                                     this.doLayout();

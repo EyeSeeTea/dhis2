@@ -113,6 +113,7 @@ body {
 .x-grid-row-over {
     background-color: #f1f1f1;
 }
+
 .x-grid-row-over .x-grid-cell-first, .x-grid-row-selected .x-grid-cell-first {
     -moz-border-radius: 2px 0 0 2px;
     -webkit-border-radius: 2px 0 0 2px;
@@ -129,6 +130,47 @@ body {
     -ms-border-radius: 0 2px 2px 0;
     -khtml-border-radius: 0 2px 2px 0;
     border-radius: 0 2px 2px 0;
+}
+
+/* DV menu grid */
+.dv-menugrid .x-grid-cell {
+    border: 0 none;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+}
+.dv-menugrid .x-grid-cell-first {
+    border: 1px solid transparent;
+    border-right: 0 none;
+}
+.dv-menugrid .x-grid-cell-last {
+    border: 1px solid transparent;
+    border-left: 0 none;
+}
+    
+.dv-menugrid .x-grid-row-over .x-grid-cell, .dv-menugrid .x-grid-row-selected .x-grid-cell {
+    border: 0 none;
+    border-top: 1px solid #9d9d9d;
+    border-bottom: 1px solid #9d9d9d;
+}
+.dv-menugrid .x-grid-row-over .x-grid-cell-first, .dv-menugrid .x-grid-row-selected .x-grid-cell-first {
+    border: 1px solid #9d9d9d;
+    border-right: 0 none;
+    -moz-border-radius: 3px 0 0 3px;
+    -webkit-border-radius: 3px 0 0 3px;
+    -o-border-radius: 3px 0 0 3px;
+    -ms-border-radius: 3px 0 0 3px;
+    -khtml-border-radius: 3px 0 0 3px;
+    border-radius: 3px 0 0 3px;
+}
+.dv-menugrid .x-grid-row-over .x-grid-cell-last, .dv-menugrid .x-grid-row-selected .x-grid-cell-last {
+    border: 1px solid #9d9d9d;
+    border-left: 0 none;
+    -moz-border-radius: 0 3px 3px 0;
+    -webkit-border-radius: 0 3px 3px 0;
+    -o-border-radius: 0 3px 3px 0;
+    -ms-border-radius: 0 3px 3px 0;
+    -khtml-border-radius: 0 3px 3px 0;
+    border-radius: 0 3px 3px 0;
 }
 
 /* Tree panel node height */
@@ -391,19 +433,7 @@ body {
 .x-menu-item-link {
     padding: 4px 5px 4px 28px;
 }
-/* Menu item hover */
-.x-menu-item-active .x-menu-item-link {
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;
-    border-width: 1px;
-    border-style: solid;
-    border-color: transparent;
-    background: #e1e1e1;
-}
+
 /* Menu item color */
 .x-menu-item-text {
     color: #111;
@@ -514,7 +544,7 @@ body {
 
 /* DV menu grid icon/text position aligned with menuitem */
 .dv-menugrid .x-grid-cell-inner {
-    padding: 3px 3px;
+    padding: 4px 3px;
     font-size: 11px;
     color: #444;
     line-height: 16px;
@@ -529,7 +559,14 @@ body {
 }
 /* DV menu grid item hover background color */
 .dv-menugrid .x-grid-row-over .x-grid-cell {
-    background-color: #e1e1e1;
+    background-image: none;
+    background-color: #E6E6E6;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #eeeeee), color-stop(100%, #dcdcdc));
+    background-image: -webkit-linear-gradient(top, #eeeeee,#dcdcdc);
+    background-image: -moz-linear-gradient(top, #eeeeee,#dcdcdc);
+    background-image: -o-linear-gradient(top, #eeeeee,#dcdcdc);
+    background-image: -ms-linear-gradient(top, #eeeeee,#dcdcdc);
+    background-image: linear-gradient(top, #eeeeee,#dcdcdc);
 }
 
 
