@@ -2176,7 +2176,7 @@ Ext.onReady( function() {
                                                                                         this.menu = Ext.create('Ext.menu.Menu', {
                                                                                             shadowOffset: 1,
                                                                                             showSeparator: false,
-                                                                                            width: 115,
+                                                                                            width: 109,
                                                                                             height: 70,
                                                                                             items: [
                                                                                                 {
@@ -2266,8 +2266,10 @@ Ext.onReady( function() {
                                                                                             '->',
                                                                                             {
                                                                                                 text: 'Rename',
+                                                                                                disabled: true,
                                                                                                 xable: function() {
-                                                                                                    if (this.up('window').cmp.name.getValue()) {
+                                                                                                    var value = this.up('window').cmp.name.getValue();
+                                                                                                    if (value && value != DV.cmp.favorite.name.getValue()) {
                                                                                                         this.enable();
                                                                                                     }
                                                                                                     else {
@@ -2280,6 +2282,9 @@ Ext.onReady( function() {
                                                                                                 listeners: {
                                                                                                     afterrender: function() {
                                                                                                         this.up('window').cmp.rename = this;
+                                                                                                    },
+                                                                                                    change: function() {
+                                                                                                        this.xable();
                                                                                                     }
                                                                                                 }
                                                                                             }
@@ -2290,7 +2295,7 @@ Ext.onReady( function() {
                                                                                             }
                                                                                         }
                                                                                     });
-                                                                                    w.setPosition((screen.width/2)-105, 310, true);
+                                                                                    w.setPosition((screen.width/2)-105, 250, true);
                                                                                     w.show();
                                                                                 },
                                                                                 listeners: {
@@ -2354,7 +2359,7 @@ Ext.onReady( function() {
                                                                                                 }
                                                                                             ]
                                                                                         });
-                                                                                        w.setPosition((screen.width/2)-105, 310, true);
+                                                                                        w.setPosition((screen.width/2)-105, 250, true);
                                                                                         w.show();
                                                                                     }
                                                                                 },
@@ -2440,7 +2445,7 @@ Ext.onReady( function() {
                                                                                             }
                                                                                         ]
                                                                                     });
-                                                                                    w.setPosition((screen.width/2)-105, 310, true);
+                                                                                    w.setPosition((screen.width/2)-105, 250, true);
                                                                                     w.show();
                                                                                 }
                                                                                 else {
@@ -2467,7 +2472,7 @@ Ext.onReady( function() {
                                                             }
                                                         });
                                                         var w = DV.cmp.favorite.window;
-                                                        w.setPosition((screen.width/2)-165, 150, true);
+                                                        w.setPosition((screen.width/2)-180, 150, true);
                                                         w.show();
                                                     }
                                                 },
