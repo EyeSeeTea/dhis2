@@ -988,21 +988,26 @@ Ext.onReady( function() {
                             for (var i = 0; i < f.indicators.length; i++) {
                                 indiment.push(f.indicators[i]);
                                 this.indicatorIds.push(f.indicators[i].internalId);
-                                records.push({id: f.indicators[i].internalId, s: f.indicators[i].name});
+                                records.push({id: f.indicators[i].internalId, s: f.indicators[i].shortName});
                             }
                             DV.store.indicator.selected.removeAll();
                             DV.store.indicator.selected.add(records);
                         }
                         if (f.dataElements) {
+                            var records = [];
                             for (var i = 0; i < f.dataElements.length; i++) {
                                 indiment.push(f.dataElements[i]);
                                 this.dataelementIds.push(f.dataElements[i].internalId);
+                                records.push({id: f.dataElements[i].internalId, s: f.dataElements[i].shortName});
                             }
+                            DV.store.dataelement.selected.removeAll();
+                            DV.store.dataelement.selected.add(records);
                         }
                         for (var i = 0; i < indiment.length; i++) {
-                            f.names.data.push(indiment[i].name);
+                            f.names.data.push(indiment[i].shortName);
                             storage[indiment[i].internalId] = indiment[i];
-                        }                        
+                            storage[indiment[i].internalId].name = storage[indiment[i].internalId].shortName;
+                        }
                         
                         this.relativePeriods = f.relativePeriods;
                         DV.util.checkbox.setRelativePeriods(this.relativePeriods);
@@ -1029,11 +1034,15 @@ Ext.onReady( function() {
         resetState: function() {
             this.type = null;
             this.series.dimension = null;
-            this.series.names = null;
+            this.series.names = [];
             this.category.dimension = null;
-            this.category.names = null;
+            this.category.names = [];
             this.filter.dimension = null;
-            this.filter.names = null;
+            this.filter.names = [];
+            this.indicatorIds = [];
+            this.dataelementIds = [];
+            this.relativePeriods = {};
+            this.organisationunitIds = [];
         }
     };
     
@@ -1059,22 +1068,23 @@ Ext.onReady( function() {
                 url: baseurl,
                 success: function(r) {
                     DV.value.values = DV.util.value.jsonfy(r);
-                    
                     if (!DV.value.values.length) {
                         DV.mask.hide();
                         alert('No data values');
                         return;
                     }
                     
-                    storage = storage || Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);
-console.log(storage);                    
+                    if (!storage) {
+                        storage = Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);
+                        alert("ikke");
+                    }
+                    
                     Ext.Array.each(DV.value.values, function(item) {
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(storage[item.d].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.p));
                         item[DV.conf.finals.dimension.organisationunit.value] = DV.cmp.dimension.organisationunit.treepanel.store.getNodeById(item.o).data.text;
                         item.v = parseFloat(item.v);
                     });
-console.log(DV.value.values);
                     
                     if (exe) {
                         DV.chart.getData(true);
@@ -1096,7 +1106,7 @@ console.log(DV.value.values);
                 obj[DV.conf.finals.chart.x] = item;
                 DV.chart.data.push(obj);
             });
-console.log(DV.state);            
+            
             Ext.Array.each(DV.chart.data, function(item) {
                 for (var i = 0; i < DV.state.series.names.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
@@ -1107,7 +1117,6 @@ console.log(DV.state);
                     }
                 }
             });
-console.log(DV.chart.data);            
             
             if (exe) {
                 DV.store.getChartStore(true);
