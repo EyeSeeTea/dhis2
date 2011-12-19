@@ -231,16 +231,20 @@ Ext.onReady( function() {
             }
         },
         button: {
-            getValue: function() {
-                for (var i = 0; i < DV.cmp.charttype.length; i++) {
-                    if (DV.cmp.charttype[i].pressed) {
-                        return DV.cmp.charttype[i].name;
+            type: {
+                getValue: function() {
+                    for (var i = 0; i < DV.cmp.charttype.length; i++) {
+                        if (DV.cmp.charttype[i].pressed) {
+                            return DV.cmp.charttype[i].name;
+                        }
                     }
-                }
-            },
-            toggleHandler: function(b) {
-                if (!b.pressed) {
-                    b.toggle();
+                },
+                setValue: function(type) {
+                },
+                toggleHandler: function(b) {
+                    if (!b.pressed) {
+                        b.toggle();
+                    }
                 }
             }
         },
@@ -305,11 +309,11 @@ Ext.onReady( function() {
             data: {
                 getUrl: function(isFilter) {
                     var a = [];
-                    DV.cmp.dimension.indicator.selected.store.each( function(r) {
-                        a.push('indicatorIds=' + r.data.id);
+                    Ext.Array.each(DV.state.indicatorIds, function(r) {
+                        a.push('indicatorIds=' + r);
                     });
-                    DV.cmp.dimension.dataelement.selected.store.each( function(r) {
-                        a.push('dataElementIds=' + r.data.id);
+                    Ext.Array.each(DV.state.dataelementIds, function(r) {
+                        a.push('dataElementIds=' + r);
                     });
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
@@ -331,11 +335,10 @@ Ext.onReady( function() {
             },
             period: {
                 getUrl: function(isFilter) {
-                    var a = [],
-                        cmp = DV.cmp.dimension.period;
-                    for (var i = 0; i < cmp.length; i++) {
-                        if (cmp[i].getValue()) {
-                            Ext.Array.each(DV.init.system.periods[cmp[i].paramName], function(item) {
+                    var a = [];
+                    for (var r in DV.state.relativePeriods) {
+                        if (DV.state.relativePeriods[r]) {
+                            Ext.Array.each(DV.init.system.periods[r], function(item) {
                                 a.push('periodIds=' + item.id);
                             });
                         }
@@ -412,15 +415,9 @@ Ext.onReady( function() {
             },
             organisationunit: {
                 getUrl: function(isFilter) {
-                    var a = [],
-                        tp = DV.cmp.dimension.organisationunit.treepanel,
-                        selection = tp.getSelectionModel().getSelection();
-                    if (!selection.length) {
-                        selection = [tp.getRootNode()];
-                        tp.selectRoot();
-                    }
-                    Ext.Array.each(selection, function(r) {
-                        a.push('organisationUnitIds=' + r.data.id);
+                    var a = [];
+                    Ext.Array.each(DV.state.organisationunitIds, function(item) {
+                        a.push('organisationUnitIds=' + item);
                     });
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
@@ -629,6 +626,16 @@ Ext.onReady( function() {
                 }
             }
         },
+        checkbox: {
+            setRelativePeriods: function(rp) {
+                for (var r in rp) {
+                    var cmp = DV.util.getCmp('checkbox[paramName="' + r + '"]');
+                    if (cmp) {
+                        cmp.setValue(rp[r]);
+                    }
+                }
+            }
+        },                
         number: {
             isInteger: function(n) {
                 var str = new String(n);
@@ -921,7 +928,7 @@ Ext.onReady( function() {
                 return;
             }
             
-            this.type = DV.util.button.getValue();
+            this.type = DV.util.button.type.getValue();
             
             this.series.dimension = tmp_series_dimension;
             this.series.names = tmp_series_names;
@@ -938,7 +945,7 @@ Ext.onReady( function() {
             this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
             
             this.isRendered = true;
-            
+console.log(DV.state);            
             if (exe) {
                 DV.value.getValues(true);
             }
@@ -991,6 +998,7 @@ Ext.onReady( function() {
                         }
                         
                         this.relativePeriods = f.relativePeriods;
+                        DV.util.checkbox.setRelativePeriods(this.relativePeriods);
                         f.names.period = DV.util.dimension.period.getNamesByRelativePeriodsObject(this.relativePeriods);
                         
                         for (var i = 0; i < f.organisationUnits.length; i++) {
@@ -1003,6 +1011,7 @@ Ext.onReady( function() {
                         this.filter.names = f.names[this.filter.dimension];
                         
                         this.isRendered = true;
+console.log(DV.state);
                         
                         if (exe) {
                             DV.value.getValues(true);
@@ -1358,8 +1367,8 @@ Ext.onReady( function() {
                 if (cmd === DV.conf.finals.cmd.init) {
                     DV.store.getChartStore(exe);
                 }
-                else if (cmd === DV.conf.finals.cmd.id) {
-                    DV.state.setState(cmd);
+                else {
+                    DV.state.setState(true, cmd);
                 }
             }
             else {
@@ -1388,7 +1397,7 @@ Ext.onReady( function() {
                         defaults: {
                             height: 40,
                             toggleGroup: 'chartsettings',
-                            handler: DV.util.button.toggleHandler,
+                            handler: DV.util.button.type.toggleHandler,
                             listeners: {
                                 afterrender: function(b) {
                                     if (b.xtype === 'button') {
@@ -2607,7 +2616,7 @@ Ext.onReady( function() {
                                                 store: DV.store.favorite,
                                                 listeners: {
                                                     itemclick: function(g, r) {
-                                                        DV.state.setState(true, r.data.id);
+                                                        DV.exe.execute(true, r.data.id);
                                                     }
                                                 }
                                             }
