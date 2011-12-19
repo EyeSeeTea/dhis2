@@ -945,7 +945,7 @@ Ext.onReady( function() {
             this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
             
             this.isRendered = true;
-console.log(DV.state);            
+            
             if (exe) {
                 DV.value.getValues(true);
             }
@@ -964,6 +964,7 @@ console.log(DV.state);
         },
         setState: function(exe, id) {
             if (id) {
+                this.resetState();
                 Ext.Ajax.request({
                     url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + id + '.json',
                     scope: this,
@@ -974,35 +975,41 @@ console.log(DV.state);
                             period: [],
                             organisationunit: []
                         };
+                        var storage = {},
+                            indiment = [];
                         
                         this.type = f.type;
                         this.series.dimension = f.series;
                         this.category.dimension = f.category;
                         this.filter.dimension = f.filter;
                         
-                        var indiment = [];
                         if (f.indicators) {
+                            var records = [];
                             for (var i = 0; i < f.indicators.length; i++) {
                                 indiment.push(f.indicators[i]);
-                                this.indicatorIds.push(f.indicators[i].id);
+                                this.indicatorIds.push(f.indicators[i].internalId);
+                                records.push({id: f.indicators[i].internalId, s: f.indicators[i].name});
                             }
+                            DV.store.indicator.selected.removeAll();
+                            DV.store.indicator.selected.add(records);
                         }
                         if (f.dataElements) {
                             for (var i = 0; i < f.dataElements.length; i++) {
                                 indiment.push(f.dataElements[i]);
-                                this.dataelementIds.push(f.dataElements[i].id);
+                                this.dataelementIds.push(f.dataElements[i].internalId);
                             }
                         }
                         for (var i = 0; i < indiment.length; i++) {
-                            f.names.data = indiment[i].name;
-                        }
+                            f.names.data.push(indiment[i].name);
+                            storage[indiment[i].internalId] = indiment[i];
+                        }                        
                         
                         this.relativePeriods = f.relativePeriods;
                         DV.util.checkbox.setRelativePeriods(this.relativePeriods);
                         f.names.period = DV.util.dimension.period.getNamesByRelativePeriodsObject(this.relativePeriods);
                         
                         for (var i = 0; i < f.organisationUnits.length; i++) {
-                            this.organisationunitIds.push(f.organisationUnits[i].id);
+                            this.organisationunitIds.push(f.organisationUnits[i].internalId);
                             f.names.organisationunit.push(f.organisationUnits[i].name);
                         }
                         
@@ -1011,20 +1018,14 @@ console.log(DV.state);
                         this.filter.names = f.names[this.filter.dimension];
                         
                         this.isRendered = true;
-console.log(DV.state);
                         
                         if (exe) {
-                            DV.value.getValues(true);
+                            DV.value.getValues(true, storage);
                         }
                     }
                 });
             }
         },
-                        
-                        
-                
-                
-                
         resetState: function() {
             this.type = null;
             this.series.dimension = null;
@@ -1038,7 +1039,7 @@ console.log(DV.state);
     
     DV.value = {
         values: [],
-        getValues: function(exe) {
+        getValues: function(exe, storage) {
             DV.util.mask.setMask(DV.chart.chart, 'Loading...');
             
             var params = [],
@@ -1065,13 +1066,15 @@ console.log(DV.state);
                         return;
                     }
                     
-                    var storage = Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);                    
+                    storage = storage || Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);
+console.log(storage);                    
                     Ext.Array.each(DV.value.values, function(item) {
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(storage[item.d].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.p));
                         item[DV.conf.finals.dimension.organisationunit.value] = DV.cmp.dimension.organisationunit.treepanel.store.getNodeById(item.o).data.text;
                         item.v = parseFloat(item.v);
                     });
+console.log(DV.value.values);
                     
                     if (exe) {
                         DV.chart.getData(true);
@@ -1093,7 +1096,7 @@ console.log(DV.state);
                 obj[DV.conf.finals.chart.x] = item;
                 DV.chart.data.push(obj);
             });
-            
+console.log(DV.state);            
             Ext.Array.each(DV.chart.data, function(item) {
                 for (var i = 0; i < DV.state.series.names.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
@@ -1104,6 +1107,7 @@ console.log(DV.state);
                     }
                 }
             });
+console.log(DV.chart.data);            
             
             if (exe) {
                 DV.store.getChartStore(true);
@@ -2616,6 +2620,7 @@ console.log(DV.state);
                                                 store: DV.store.favorite,
                                                 listeners: {
                                                     itemclick: function(g, r) {
+                                                        this.up('menu').hide();
                                                         DV.exe.execute(true, r.data.id);
                                                     }
                                                 }
