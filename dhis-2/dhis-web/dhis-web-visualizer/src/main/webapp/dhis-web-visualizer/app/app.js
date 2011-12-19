@@ -946,6 +946,8 @@ Ext.onReady( function() {
             
             this.isRendered = true;
             
+            DV.util.mask.setMask(DV.chart.chart, 'Loading...');
+            
             if (exe) {
                 DV.value.getValues(true);
             }
@@ -965,11 +967,13 @@ Ext.onReady( function() {
         setState: function(exe, id) {
             if (id) {
                 this.resetState();
+                DV.util.mask.setMask(DV.chart.chart, 'Loading...');
+                
                 Ext.Ajax.request({
                     url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + id + '.json',
                     scope: this,
                     success: function(r) {
-                        var f = Ext.JSON.decode(r.responseText);
+                        var f = Ext.JSON.decode(r.responseText);                        
                         f.names = {
                             data: [],
                             period: [],
@@ -992,6 +996,7 @@ Ext.onReady( function() {
                             }
                             DV.store.indicator.selected.removeAll();
                             DV.store.indicator.selected.add(records);
+                            DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
                         }
                         if (f.dataElements) {
                             var records = [];
@@ -1002,6 +1007,7 @@ Ext.onReady( function() {
                             }
                             DV.store.dataelement.selected.removeAll();
                             DV.store.dataelement.selected.add(records);
+                            DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
                         }
                         for (var i = 0; i < indiment.length; i++) {
                             f.names.data.push(indiment[i].shortName);
@@ -1048,9 +1054,7 @@ Ext.onReady( function() {
     
     DV.value = {
         values: [],
-        getValues: function(exe, storage) {
-            DV.util.mask.setMask(DV.chart.chart, 'Loading...');
-            
+        getValues: function(exe, storage) {            
             var params = [],
                 i = DV.conf.finals.dimension.indicator.value,
                 d = DV.conf.finals.dimension.dataelement.value;
@@ -1076,7 +1080,6 @@ Ext.onReady( function() {
                     
                     if (!storage) {
                         storage = Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);
-                        alert("ikke");
                     }
                     
                     Ext.Array.each(DV.value.values, function(item) {
@@ -2748,23 +2751,6 @@ Ext.onReady( function() {
                                 }
                             }
                         },
-                        
-                        
-                        
-                        
-                        
-                        {
-                            text: 'fn',
-                            handler: function() {
-                                DV.cmp.dimension.indicator.selected.store.add({id:1, s:'nissa'});
-                            }
-                        },
-                        
-                        
-                        
-                        
-                        
-                        
                         '->',
                         {
                             xtype: 'button',
