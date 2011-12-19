@@ -9,12 +9,10 @@ DV.conf = {
         jsonfy: function(r) {
             r = Ext.JSON.decode(r.responseText);
             var obj = {system: {rootNode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}}};
-            var keys1 = ['lastMonth', 'monthsThisYear', 'monthsLastYear', 'lastQuarter', 'quartersThisYear', 'quartersLastYear', 'thisYear', 'lastYear', 'lastFiveYears'];
-            var keys2 = ['lm', 'mty', 'mly', 'lq', 'qty', 'qly', 'ty', 'ly', 'lfy'];
-            for (var i = 0; i < keys1.length; i++) {
-                obj.system.periods[keys1[i]] = [];
-                for (var j = 0; j < r.p[keys2[i]].length; j++) {
-                    obj.system.periods[keys1[i]].push({id: r.p[keys2[i]][j][0], name: r.p[keys2[i]][j][1]});
+            for (var relative in r.p) {
+                obj.system.periods[relative] = [];
+                for (var i = 0; i < r.p[relative].length; i++) {
+                    obj.system.periods[relative].push({id: r.p[relative][i][0], name: r.p[relative][i][1]});
                 }
             }
             return obj;
