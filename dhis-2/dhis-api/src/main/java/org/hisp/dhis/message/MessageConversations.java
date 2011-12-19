@@ -30,6 +30,7 @@ package org.hisp.dhis.message;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseLinkableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.adapter.MessageConversationXmlAdapter;
 
@@ -44,15 +45,15 @@ import java.util.List;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@XmlRootElement( name = "messages", namespace = Dxf2Namespace.NAMESPACE )
+@XmlRootElement( name = "messageConversations", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class MessageConversations
+public class MessageConversations extends BaseLinkableObject
 {
     private List<MessageConversation> messageConversations = new ArrayList<MessageConversation>();
 
-    @XmlElement( name = "message" )
+    @XmlElement( name = "messageConversation" )
     @XmlJavaTypeAdapter( MessageConversationXmlAdapter.class )
-    @JsonProperty( value = "messages" )
+    @JsonProperty( value = "messageConversations" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public List<MessageConversation> getMessageConversations()
     {

@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.view;
+package org.hisp.dhis.common.adapter;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -27,38 +27,34 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.mapgeneration.MapGenerationService;
-import org.hisp.dhis.mapping.MapView;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.web.servlet.view.AbstractView;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.message.Message;
 
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.awt.image.BufferedImage;
-import java.util.Map;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.UUID;
 
-public class MapGenerationView
-    extends AbstractView
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class MessageXmlAdapter extends XmlAdapter<BaseIdentifiableObject, Message>
 {
-    @Autowired
-    private MapGenerationService mapGenerationService;
+    private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
 
-    public MapGenerationView()
+    @Override
+    public Message unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
     {
-        super();
-        setContentType( "image/png" );
+        Message message = new Message();
+
+        message.setUid( identifiableObject.getUid() );
+        message.setLastUpdated( identifiableObject.getLastUpdated() );
+        message.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
+
+        return message;
     }
 
     @Override
-    protected void renderMergedOutputModel( Map<String, Object> model, HttpServletRequest request, HttpServletResponse response )
-        throws Exception
+    public BaseIdentifiableObject marshal( Message message ) throws Exception
     {
-        MapView mapView = (MapView) model.get( "model" );
-        BufferedImage image = mapGenerationService.generateMapImage( mapView );
-
-        response.setContentType( MediaType.IMAGE_PNG.toString() );
-        ImageIO.write( image, "PNG", response.getOutputStream() );
+        return baseIdentifiableObjectXmlAdapter.marshal( message );
     }
 }

@@ -29,23 +29,26 @@ package org.hisp.dhis.api.controller;
 
 import org.hisp.dhis.api.utils.IdentifiableObjectParams;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
+import org.hisp.dhis.api.view.Jaxb2Utils;
+import org.hisp.dhis.api.webdomain.Message;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageConversations;
 import org.hisp.dhis.message.MessageService;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.util.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -58,6 +61,9 @@ public class MessageConversationController
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private UserService userService;
 
     //-------------------------------------------------------------------------------------------------------
     // GET
@@ -97,49 +103,64 @@ public class MessageConversationController
     }
 
     //-------------------------------------------------------------------------------------------------------
-    // POST
+    // POST for new MessageConversation
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
-    public void postMessageConversationXML( HttpServletResponse response, InputStream input ) throws Exception
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_SEND_MESSAGE')" )
+    public void postMessageConversationXML( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws JAXBException
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
+        Message message = Jaxb2Utils.unmarshal( Message.class, input );
+
+        List<User> users = new ArrayList<User>( message.getUsers() );
+        message.getUsers().clear();
+
+        for ( User user : users )
+        {
+            user = userService.getUser( user.getUid() );
+            message.getUsers().add( user );
+        }
+
+        String metaData = MessageService.META_USER_AGENT + request.getHeader( ContextUtils.HEADER_USER_AGENT );
+
+        int id = messageService.sendMessage( message.getSubject(), message.getText(), metaData, message.getUsers() );
+        MessageConversation m = messageService.getMessageConversation( id );
+
+        response.setStatus( HttpServletResponse.SC_CREATED );
+        response.setHeader( "Location", MessageConversationController.RESOURCE_PATH + "/" + m.getUid() );
     }
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
-    @ResponseStatus( value = HttpStatus.CREATED )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_SEND_MESSAGE')" )
     public void postMessageConversationJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
     }
 
     //-------------------------------------------------------------------------------------------------------
-    // PUT
+    // POST for reply on existing MessageConversation
     //-------------------------------------------------------------------------------------------------------
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/xml, text/xml"} )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void putMessageConversationXML( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    @RequestMapping( value = "/{uid}", method = RequestMethod.POST )
+    public void postMessageConversationReply( @PathVariable( "uid" ) String uid, @RequestBody String body,
+                                              HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
-    }
+        String metaData = MessageService.META_USER_AGENT + request.getHeader( ContextUtils.HEADER_USER_AGENT );
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/json"} )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void putMessageConversationJSON( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
-    {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
+        MessageConversation messageConversation = messageService.getMessageConversation( uid );
+
+        messageService.sendReply( messageConversation, body, metaData );
     }
 
     //-------------------------------------------------------------------------------------------------------
-    // DELETE
+    // POST for feedback
     //-------------------------------------------------------------------------------------------------------
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void deleteMessageConversation( @PathVariable( "uid" ) String uid ) throws Exception
+    @RequestMapping( value = "/feedback", method = RequestMethod.POST )
+    public void postMessageConversationFeedback( @RequestParam( "subject" ) String subject, @RequestBody String body,
+                                                 HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
+        String metaData = MessageService.META_USER_AGENT + request.getHeader( ContextUtils.HEADER_USER_AGENT );
+
+        messageService.sendFeedback( subject, body, metaData );
     }
 }

@@ -109,17 +109,15 @@ public class DocumentController
         
         if ( document.isExternal() )
         {
-            String redirectUrl = response.encodeRedirectURL( document.getUrl() );
-            
-            response.sendRedirect( redirectUrl );
+            response.sendRedirect( response.encodeRedirectURL( document.getUrl() ) );
         }
         else
-        {
+        {            
+            ContextUtils.configureResponse( response, document.getContentType(), true, document.getUrl(), true );
+            
             InputStream in = locationManager.getInputStream( document.getUrl(), DocumentService.DIR );
 
             IOUtils.copy( in, response.getOutputStream() );
-            
-            ContextUtils.configureResponse( response, document.getContentType(), true, document.getUrl(), true );
         }
     }
 
