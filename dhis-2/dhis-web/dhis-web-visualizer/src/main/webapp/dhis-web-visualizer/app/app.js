@@ -2658,6 +2658,7 @@ Ext.onReady( function() {
                                                 store: DV.store.favorite,
                                                 listeners: {
                                                     itemclick: function(g, r) {
+                                                        g.getSelectionModel().select([], false);
                                                         this.up('menu').hide();
                                                         DV.exe.execute(true, r.data.id);
                                                     }

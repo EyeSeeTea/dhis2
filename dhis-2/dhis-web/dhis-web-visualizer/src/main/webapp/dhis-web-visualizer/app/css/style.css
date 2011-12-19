@@ -133,26 +133,35 @@ body {
 }
 
 /* DV menu grid */
-.dv-menugrid .x-grid-cell {
+.dv-menugrid .x-grid-row .x-grid-cell, .dv-menugrid .x-grid-row-selected .x-grid-cell {
     border: 0 none;
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
+    background: #f1f1f1;
 }
-.dv-menugrid .x-grid-cell-first {
+.dv-menugrid .x-grid-row .x-grid-cell-first, .dv-menugrid .x-grid-row-selected .x-grid-cell-first {
     border: 1px solid transparent;
     border-right: 0 none;
 }
-.dv-menugrid .x-grid-cell-last {
+.dv-menugrid .x-grid-row .x-grid-cell-last, .dv-menugrid .x-grid-row-selected .x-grid-cell-last {
     border: 1px solid transparent;
     border-left: 0 none;
 }
     
-.dv-menugrid .x-grid-row-over .x-grid-cell, .dv-menugrid .x-grid-row-selected .x-grid-cell {
+.dv-menugrid .x-grid-row-over .x-grid-cell {
     border: 0 none;
     border-top: 1px solid #9d9d9d;
     border-bottom: 1px solid #9d9d9d;
+    background-image: none;
+    background-color: #E6E6E6;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #eeeeee), color-stop(100%, #dcdcdc));
+    background-image: -webkit-linear-gradient(top, #eeeeee,#dcdcdc);
+    background-image: -moz-linear-gradient(top, #eeeeee,#dcdcdc);
+    background-image: -o-linear-gradient(top, #eeeeee,#dcdcdc);
+    background-image: -ms-linear-gradient(top, #eeeeee,#dcdcdc);
+    background-image: linear-gradient(top, #eeeeee,#dcdcdc);
 }
-.dv-menugrid .x-grid-row-over .x-grid-cell-first, .dv-menugrid .x-grid-row-selected .x-grid-cell-first {
+.dv-menugrid .x-grid-row-over .x-grid-cell-first {
     border: 1px solid #9d9d9d;
     border-right: 0 none;
     -moz-border-radius: 3px 0 0 3px;
@@ -162,7 +171,7 @@ body {
     -khtml-border-radius: 3px 0 0 3px;
     border-radius: 3px 0 0 3px;
 }
-.dv-menugrid .x-grid-row-over .x-grid-cell-last, .dv-menugrid .x-grid-row-selected .x-grid-cell-last {
+.dv-menugrid .x-grid-row-over .x-grid-cell-last {
     border: 1px solid #9d9d9d;
     border-left: 0 none;
     -moz-border-radius: 0 3px 3px 0;
@@ -179,7 +188,7 @@ body {
 }
 
 /* Tree panel selected row background */
-.dv-tree .x-grid-row-selected .x-grid-cell, .x-grid-row-selected .x-grid-rowwrap-div {
+.dv-tree .x-grid-row-selected .x-grid-cell, .dv-tree .x-grid-row-selected .x-grid-rowwrap-div {
     background-color: #e0e0e0;
     -moz-border-radius: 2px 2px 2px 2px;
     -webkit-border-radius: 2px 2px 2px 2px;
@@ -550,24 +559,8 @@ body {
     color: #444;
     line-height: 16px;
 }
-/* DV menu grid item background now looks like a menuitem */
-.dv-menugrid .x-grid-row .x-grid-cell {
-    background-color: #f1f1f1;
-}
+
 /* DV menu grid background now looks like a menu*/
 .dv-menugrid .x-grid-view {
     background-color: #f1f1f1;
 }
-/* DV menu grid item hover background color */
-.dv-menugrid .x-grid-row-over .x-grid-cell {
-    background-image: none;
-    background-color: #E6E6E6;
-    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #eeeeee), color-stop(100%, #dcdcdc));
-    background-image: -webkit-linear-gradient(top, #eeeeee,#dcdcdc);
-    background-image: -moz-linear-gradient(top, #eeeeee,#dcdcdc);
-    background-image: -o-linear-gradient(top, #eeeeee,#dcdcdc);
-    background-image: -ms-linear-gradient(top, #eeeeee,#dcdcdc);
-    background-image: linear-gradient(top, #eeeeee,#dcdcdc);
-}
-
-
