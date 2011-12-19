@@ -249,12 +249,19 @@ Ext.onReady( function() {
             }
         },
         store: {
-            addToStorage: function(s) {
+            addToStorage: function(s, records) {
                 s.each( function(r) {
                     if (!s.storage[r.data.id]) {
                         s.storage[r.data.id] = {id: r.data.id, s: r.data.s, name: r.data.s, parent: s.parent};
                     }
                 });
+                if (records) {
+                    Ext.Array.each(records, function(r) {
+                        if (!s.storage[r.data.id]) {
+                            s.storage[r.data.id] = {id: r.data.id, s: r.data.s, name: r.data.s, parent: s.parent};
+                        }
+                    });
+                }                        
             },
             loadFromStorage: function(s) {
                 var items = [];
@@ -751,10 +758,10 @@ Ext.onReady( function() {
                     {id: DV.conf.finals.dimension.organisationunit.value, name: DV.conf.finals.dimension.organisationunit.rawvalue}
                 ]
             });
-        },        
+        },
         indicator: {
             available: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 's'],
+                fields: ['id', 's'],
                 proxy: {
                     type: 'ajax',
                     url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.indicator_get,
@@ -778,7 +785,7 @@ Ext.onReady( function() {
         },
         dataelement: {
             available: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 's'],
+                fields: ['id', 's'],
                 proxy: {
                     type: 'ajax',
                     url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.dataelement_get,
@@ -887,10 +894,12 @@ Ext.onReady( function() {
                         r.data.icon = '<img src="images/favorite.png" />';
                         r.commit();
                     });
+                    if (!s.isLoaded) {
+                        s.isLoaded = true;
+                    }
                 }
             }
-        })
-            
+        })            
     };
     
     DV.state = {
@@ -944,8 +953,7 @@ Ext.onReady( function() {
             this.relativePeriods = DV.util.dimension.period.getRelativePeriodObject();
             this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
             
-            this.isRendered = true;
-            
+            this.isRendered = true;            
             DV.util.mask.setMask(DV.chart.chart, 'Loading...');
             
             if (exe) {
@@ -973,14 +981,13 @@ Ext.onReady( function() {
                     url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + id + '.json',
                     scope: this,
                     success: function(r) {
-                        var f = Ext.JSON.decode(r.responseText);                        
+                        var f = Ext.JSON.decode(r.responseText),
+                            indiment = [];
                         f.names = {
                             data: [],
                             period: [],
                             organisationunit: []
                         };
-                        var storage = {},
-                            indiment = [];
                         
                         this.type = f.type;
                         this.series.dimension = f.series;
@@ -992,10 +999,11 @@ Ext.onReady( function() {
                             for (var i = 0; i < f.indicators.length; i++) {
                                 indiment.push(f.indicators[i]);
                                 this.indicatorIds.push(f.indicators[i].internalId);
-                                records.push({id: f.indicators[i].internalId, s: f.indicators[i].shortName});
+                                records.push({id: f.indicators[i].internalId, s: f.indicators[i].shortName, name: f.indicators[i].shortName, parent: null});
                             }
                             DV.store.indicator.selected.removeAll();
                             DV.store.indicator.selected.add(records);
+                            DV.util.store.addToStorage(DV.store.indicator.available, records);
                             DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
                         }
                         if (f.dataElements) {
@@ -1003,16 +1011,15 @@ Ext.onReady( function() {
                             for (var i = 0; i < f.dataElements.length; i++) {
                                 indiment.push(f.dataElements[i]);
                                 this.dataelementIds.push(f.dataElements[i].internalId);
-                                records.push({id: f.dataElements[i].internalId, s: f.dataElements[i].shortName});
+                                records.push({id: f.dataElements[i].internalId, s: f.dataElements[i].shortName, name: f.dataElements[i].shortName, parent: null});
                             }
                             DV.store.dataelement.selected.removeAll();
                             DV.store.dataelement.selected.add(records);
+                            DV.util.store.addToStorage(DV.store.dataelement.available, records);
                             DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
                         }
                         for (var i = 0; i < indiment.length; i++) {
                             f.names.data.push(indiment[i].shortName);
-                            storage[indiment[i].internalId] = indiment[i];
-                            storage[indiment[i].internalId].name = storage[indiment[i].internalId].shortName;
                         }
                         
                         this.relativePeriods = f.relativePeriods;
@@ -1031,7 +1038,7 @@ Ext.onReady( function() {
                         this.isRendered = true;
                         
                         if (exe) {
-                            DV.value.getValues(true, storage);
+                            DV.value.getValues(true);
                         }
                     }
                 });
@@ -1054,7 +1061,7 @@ Ext.onReady( function() {
     
     DV.value = {
         values: [],
-        getValues: function(exe, storage) {            
+        getValues: function(exe) {            
             var params = [],
                 i = DV.conf.finals.dimension.indicator.value,
                 d = DV.conf.finals.dimension.dataelement.value;
@@ -1078,10 +1085,7 @@ Ext.onReady( function() {
                         return;
                     }
                     
-                    if (!storage) {
-                        storage = Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);
-                    }
-                    
+                    var storage = Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);
                     Ext.Array.each(DV.value.values, function(item) {
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(storage[item.d].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.p));
