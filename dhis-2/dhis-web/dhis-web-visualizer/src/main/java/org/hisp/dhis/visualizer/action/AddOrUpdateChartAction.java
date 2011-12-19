@@ -147,18 +147,11 @@ public class AddOrUpdateChartAction
         this.lastMonth = lastMonth;
     }
 
-    private boolean monthsThisYear;
+    private boolean last12Months;
 
-    public void setMonthsThisYear( boolean monthsThisYear )
+    public void setLast12Months( boolean last12Months )
     {
-        this.monthsThisYear = monthsThisYear;
-    }
-
-    private boolean monthsLastYear;
-
-    public void setMonthsLastYear( boolean monthsLastYear )
-    {
-        this.monthsLastYear = monthsLastYear;
+        this.last12Months = last12Months;
     }
 
     private boolean lastQuarter;
@@ -168,18 +161,25 @@ public class AddOrUpdateChartAction
         this.lastQuarter = lastQuarter;
     }
 
-    private boolean quartersThisYear;
+    private boolean last4Quarters;
 
-    public void setQuartersThisYear( boolean quartersThisYear )
+    public void setLast4Quarters( boolean last4Quarters )
     {
-        this.quartersThisYear = quartersThisYear;
+        this.last4Quarters = last4Quarters;
     }
 
-    private boolean quartersLastYear;
+    private boolean lastSixMonth;
 
-    public void setQuartersLastYear( boolean quartersLastYear )
+    public void setLastSixMonth( boolean lastSixMonth )
     {
-        this.quartersLastYear = quartersLastYear;
+        this.lastSixMonth = lastSixMonth;
+    }
+
+    private boolean last2SixMonths;
+
+    public void setLast2SixMonths( boolean last2SixMonths )
+    {
+        this.last2SixMonths = last2SixMonths;
     }
 
     private boolean thisYear;
@@ -189,18 +189,11 @@ public class AddOrUpdateChartAction
         this.thisYear = thisYear;
     }
 
-    private boolean lastYear;
+    private boolean last5Years;
 
-    public void setLastYear( boolean lastYear )
+    public void setLast5Years( boolean last5Years )
     {
-        this.lastYear = lastYear;
-    }
-
-    private boolean lastFiveYears;
-
-    public void setLastFiveYears( boolean lastFiveYears )
-    {
-        this.lastFiveYears = lastFiveYears;
+        this.last5Years = last5Years;
     }
 
     private Collection<Integer> organisationUnitIds;
@@ -263,19 +256,18 @@ public class AddOrUpdateChartAction
             chart.setDataElements( new ArrayList<DataElement>( dataElementService.getDataElements( dataElementIds ) ) );
         }
 
-        if ( lastMonth || monthsThisYear || monthsLastYear || lastQuarter || quartersThisYear || quartersLastYear
-            || thisYear || lastYear || lastFiveYears )
+        if ( lastMonth || last12Months || lastQuarter || last4Quarters || lastSixMonth || last2SixMonths
+            || thisYear || last5Years )
         {
             RelativePeriods rp = new RelativePeriods();
             rp.setReportingMonth( lastMonth );
-            rp.setMonthsThisYear( monthsThisYear );
-            rp.setMonthsLastYear( monthsLastYear );
+            rp.setLast12Months( last12Months );
             rp.setReportingQuarter( lastQuarter );
-            rp.setQuartersThisYear( quartersThisYear );
-            rp.setQuartersLastYear( quartersLastYear );
+            rp.setLast4Quarters( last4Quarters );
+            rp.setLastSixMonth( lastSixMonth );
+            rp.setLast2SixMonths( last2SixMonths );
             rp.setThisYear( thisYear );
-            rp.setLastYear( lastYear );
-            rp.setLast5Years( lastFiveYears );
+            rp.setLast5Years( last5Years );
 
             chart.setRelatives( rp );
         }

@@ -232,7 +232,7 @@ body {
 
 /* Checkbox box label */
 .x-form-cb-label-after {
-    padding-left: 3px;
+    padding-left: 1px;
     font-size: 11px;
 }
 

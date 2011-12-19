@@ -374,7 +374,7 @@ Ext.onReady( function() {
                         }
                     }
                     for (var i = 0; i < relatives.length; i++) {
-                        var r = DV.init.system.periods[relatives[i]];
+                        var r = DV.init.system.periods[relatives[i]] || [];
                         for (var j = 0; j < r.length; j++) {
                             names.push(r[j].name);
                         }
@@ -951,7 +951,7 @@ Ext.onReady( function() {
             this.relativePeriods = DV.util.dimension.period.getRelativePeriodObject();
             this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
             
-            this.isRendered = true;            
+            this.isRendered = true;
             DV.util.mask.setMask(DV.chart.chart, 'Loading...');
             
             if (exe) {
@@ -1934,7 +1934,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'panel',
                                                 layout: 'anchor',
-                                                bodyStyle: 'border-style:none; padding:0 40px 0 0px',
+                                                bodyStyle: 'border-style:none; padding:0 0 0 10px',
                                                 defaults: {
                                                     labelSeparator: '',
                                                     listeners: {
@@ -1958,21 +1958,16 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'checkbox',
-                                                        paramName: 'monthsThisYear',
-                                                        boxLabel: 'Months this year',
+                                                        paramName: 'last12Months',
+                                                        boxLabel: 'Last 12 months',
                                                         checked: true
-                                                    },
-                                                    {
-                                                        xtype: 'checkbox',
-                                                        paramName: 'monthsLastYear',
-                                                        boxLabel: 'Months last year'
                                                     }
                                                 ]
                                             },
                                             {
                                                 xtype: 'panel',
                                                 layout: 'anchor',
-                                                bodyStyle: 'border-style:none; padding-right:40px',
+                                                bodyStyle: 'border-style:none; padding:0 0 0 32px',
                                                 defaults: {
                                                     labelSeparator: '',
                                                     listeners: {
@@ -1996,20 +1991,54 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'checkbox',
-                                                        paramName: 'quartersThisYear',
-                                                        boxLabel: 'Quarters this year'
-                                                    },
-                                                    {
-                                                        xtype: 'checkbox',
-                                                        paramName: 'quartersLastYear',
-                                                        boxLabel: 'Quarters last year'
+                                                        paramName: 'last4Quarters',
+                                                        boxLabel: 'Last 4 quarters'
                                                     }
                                                 ]
                                             },
                                             {
                                                 xtype: 'panel',
                                                 layout: 'anchor',
-                                                bodyStyle: 'border-style:none',
+                                                bodyStyle: 'border-style:none; padding:0 0 0 32px',
+                                                defaults: {
+                                                    labelSeparator: '',
+                                                    listeners: {
+                                                        added: function(chb) {
+                                                            if (chb.xtype === 'checkbox') {
+                                                                DV.cmp.dimension.period.push(chb);
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                items: [
+                                                    {
+                                                        xtype: 'label',
+                                                        text: 'Six-months',
+                                                        cls: 'dv-label-period-heading'
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        paramName: 'lastSixMonth',
+                                                        boxLabel: 'Last six-month'
+                                                    },
+                                                    {
+                                                        xtype: 'checkbox',
+                                                        paramName: 'last2SixMonths',
+                                                        boxLabel: 'Last 2 six-months'
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'column',
+                                        bodyStyle: 'border-style:none',
+                                        items: [
+                                            {
+                                                xtype: 'panel',
+                                                layout: 'anchor',
+                                                bodyStyle: 'border-style:none; padding:5px 0 0 10px',
                                                 defaults: {
                                                     labelSeparator: '',
                                                     listeners: {
@@ -2028,17 +2057,12 @@ Ext.onReady( function() {
                                                     },
                                                     {
                                                         xtype: 'checkbox',
-                                                        paramName: 'thisYear',
-                                                        boxLabel: 'This year'
-                                                    },
-                                                    {
-                                                        xtype: 'checkbox',
                                                         paramName: 'lastYear',
                                                         boxLabel: 'Last year'
                                                     },
                                                     {
                                                         xtype: 'checkbox',
-                                                        paramName: 'lastFiveYears',
+                                                        paramName: 'last5Years',
                                                         boxLabel: 'Last 5 years'
                                                     }
                                                 ]
