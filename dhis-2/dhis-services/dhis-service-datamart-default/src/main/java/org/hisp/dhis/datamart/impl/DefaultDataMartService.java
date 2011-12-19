@@ -97,8 +97,7 @@ public class DefaultDataMartService
             getIdentifiers( Indicator.class, dataMartExport.getIndicators() ), 
             getIdentifiers( Period.class, allPeriods ),
             getIdentifiers( OrganisationUnit.class, dataMartExport.getOrganisationUnits() ),
-            null,
-            false, new OutputHolderState() );
+            null, false, new OutputHolderState() );
     }
 
  
@@ -111,18 +110,19 @@ public class DefaultDataMartService
     public void export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
         Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, RelativePeriods relatives )
     {
-        export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, relatives, false );
+        export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, null, relatives, false );
     }
 
     public void export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
-        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, RelativePeriods relatives, boolean completeExport )
+        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, Collection<Integer> organisationUnitGroupIds, 
+        RelativePeriods relatives, boolean completeExport )
     {
         if ( relatives != null )
         {
             periodIds.addAll( getIdentifiers( Period.class, periodService.reloadPeriods( relatives.getRelativePeriods() ) ) );
         }
         
-        dataMartEngine.export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, null, completeExport, new OutputHolderState() );
+        dataMartEngine.export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, organisationUnitGroupIds, completeExport, new OutputHolderState() );
     }
     
     // -------------------------------------------------------------------------

@@ -148,6 +148,7 @@ public class PeriodConverter
             }
             
             period.setId( Integer.parseInt( values.get( FIELD_ID ) ) );
+
             period.setStartDate( DateUtils.getMediumDate( values.get( FIELD_START_DATE ) ) );
             period.setEndDate( DateUtils.getMediumDate( values.get( FIELD_END_DATE ) ) );
 

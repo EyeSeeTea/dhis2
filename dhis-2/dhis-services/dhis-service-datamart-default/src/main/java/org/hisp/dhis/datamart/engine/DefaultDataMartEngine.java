@@ -186,6 +186,16 @@ public class DefaultDataMartEngine
         final int cpuCores = SystemUtils.getCpuCores();
         
         Clock clock = new Clock().startClock().logTime( "Data mart export process started, number of CPU cores: " + cpuCores );
+
+        // ---------------------------------------------------------------------
+        // Replace null with empty collection
+        // ---------------------------------------------------------------------
+
+        dataElementIds = dataElementIds != null ? dataElementIds : new ArrayList<Integer>();
+        indicatorIds = indicatorIds != null ? indicatorIds : new ArrayList<Integer>();
+        periodIds = periodIds != null ? periodIds : new ArrayList<Integer>();
+        organisationUnitIds = organisationUnitIds != null ? organisationUnitIds : new ArrayList<Integer>();
+        organisationUnitGroupIds = organisationUnitGroupIds != null ? organisationUnitGroupIds : new ArrayList<Integer>();
         
         // ---------------------------------------------------------------------
         // Get objects
@@ -388,7 +398,7 @@ public class DefaultDataMartEngine
             clock.logTime( "Created indexes" );
         }
 
-        final boolean isGroups = organisationUnitGroupIds != null && organisationUnitGroupIds.size() > 0;
+        final boolean isGroups = organisationUnitGroups != null && organisationUnitGroups.size() > 0;
         
         final int groupLevel = (Integer) systemSettingManager.getSystemSetting( KEY_ORGUNITGROUPSET_AGG_LEVEL, DEFAULT_ORGUNITGROUPSET_AGG_LEVEL );
         

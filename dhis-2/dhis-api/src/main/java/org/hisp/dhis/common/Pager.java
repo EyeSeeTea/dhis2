@@ -1,4 +1,4 @@
-package org.hisp.dhis.message;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -28,55 +28,104 @@ package org.hisp.dhis.message;
  */
 
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseLinkableObject;
-import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.common.adapter.MessageConversationXmlAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@XmlRootElement( name = "messageConversations", namespace = Dxf2Namespace.NAMESPACE )
+@XmlRootElement( name = "pager", namespace = Dxf2Namespace.NAMESPACE )
 @XmlAccessorType( value = XmlAccessType.NONE )
-public class MessageConversations extends BaseLinkableObject
+public class Pager
 {
-    private Pager pager;
+    public static final int DEFAULT_PAGE_SIZE = 50;
 
-    private List<MessageConversation> messageConversations = new ArrayList<MessageConversation>();
+    private int page = 1;
+
+    private int total = 0;
+
+    private int pageSize = Pager.DEFAULT_PAGE_SIZE;
+
+    public Pager()
+    {
+
+    }
+
+    public Pager( int page, int total )
+    {
+        this.page = page;
+        this.total = total;
+
+        if ( this.page > getPageCount() )
+        {
+            this.page = getPageCount();
+        }
+
+        if ( this.page < 1 )
+        {
+            this.page = 1;
+        }
+    }
+
+    public Pager( int page, int total, int pageSize )
+    {
+        this.page = page;
+        this.total = total;
+        this.pageSize = pageSize;
+
+        if ( this.page > getPageCount() )
+        {
+            this.page = getPageCount();
+        }
+
+        if ( this.page < 1 )
+        {
+            this.page = 1;
+        }
+    }
 
     @XmlElement
     @JsonProperty
-    public Pager getPager()
+    public int getPage()
     {
-        return pager;
+        return page;
     }
 
-    public void setPager( Pager pager )
+    @XmlElement
+    @JsonProperty
+    public int getTotal()
     {
-        this.pager = pager;
+        return total;
     }
 
-    @XmlElement( name = "messageConversation" )
-    @XmlJavaTypeAdapter( MessageConversationXmlAdapter.class )
-    @JsonProperty( value = "messageConversations" )
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    public List<MessageConversation> getMessageConversations()
+    @XmlElement
+    @JsonProperty
+    public int getPageSize()
     {
-        return messageConversations;
+        return pageSize;
     }
 
-    public void setMessageConversations( List<MessageConversation> messageConversations )
+    @XmlElement
+    @JsonProperty
+    public int getPageCount()
     {
-        this.messageConversations = messageConversations;
+        int pageCount = 1;
+        int totalTmp = total;
+
+        while ( totalTmp > pageSize )
+        {
+            totalTmp -= pageSize;
+            pageCount++;
+        }
+
+        return pageCount;
+    }
+
+    public int getOffset()
+    {
+        return (page * pageSize) - pageSize;
     }
 }
