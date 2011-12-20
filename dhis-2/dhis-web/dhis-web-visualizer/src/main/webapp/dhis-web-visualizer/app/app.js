@@ -996,6 +996,11 @@ Ext.onReady( function() {
                     url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + uid + '.json',
                     scope: this,
                     success: function(r) {
+                        if (!r.responseText) {
+                            DV.mask.hide();
+                            alert("Invalid uid parameter");
+                            return;
+                        }
                         var f = Ext.JSON.decode(r.responseText),
                             indiment = [];
                         f.names = {
