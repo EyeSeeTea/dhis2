@@ -260,9 +260,19 @@ public class Chart
         this.filter = filter;
     }
     
+    public boolean hasIndicators()
+    {
+        return indicators != null && indicators.size() > 0;
+    }
+    
+    public boolean hasDataElements()
+    {
+        return dataElements != null && dataElements.size() > 0;
+    }
+    
     public boolean isType( String type )
     {
-        return this.type != null && this.type.equals( type );
+        return type != null && type.equals( type );
     }
 
     public int getWidth()
