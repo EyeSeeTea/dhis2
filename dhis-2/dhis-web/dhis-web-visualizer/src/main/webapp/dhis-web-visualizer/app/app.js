@@ -705,7 +705,7 @@ Ext.onReady( function() {
                         var store = DV.store.favorite;
                         params.uid = store.getAt(store.findExact('name', params.name)).data.id;
                     }
-console.log(params);return;                    
+                    
                     Ext.Ajax.request({
                         url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_addorupdate,
                         params: params,
