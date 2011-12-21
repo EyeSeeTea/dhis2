@@ -241,6 +241,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE chart RENAME COLUMN title TO name" );
         executeSql( "ALTER TABLE chart ALTER COLUMN dimension DROP NOT NULL" );
         executeSql( "ALTER TABLE chart DROP COLUMN size" );
+        executeSql( "ALTER TABLE chart DROP COLUMN verticallabels" );
         
         // migrate charts from dimension to category, series, filter
         

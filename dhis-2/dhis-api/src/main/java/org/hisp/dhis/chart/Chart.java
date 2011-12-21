@@ -107,8 +107,6 @@ public class Chart
 
     private boolean hideLegend;
 
-    private boolean verticalLabels;
-
     private boolean horizontalPlotOrientation;
 
     private boolean regression;
@@ -434,18 +432,6 @@ public class Chart
     public void setHideLegend( boolean hideLegend )
     {
         this.hideLegend = hideLegend;
-    }
-
-    @XmlElement
-    @JsonProperty
-    public boolean isVerticalLabels()
-    {
-        return verticalLabels;
-    }
-
-    public void setVerticalLabels( boolean verticalLabels )
-    {
-        this.verticalLabels = verticalLabels;
     }
 
     @XmlElement

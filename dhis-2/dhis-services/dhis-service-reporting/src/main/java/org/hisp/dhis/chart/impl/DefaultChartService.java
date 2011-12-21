@@ -49,6 +49,7 @@ import org.apache.commons.math.MathException;
 import org.apache.commons.math.analysis.SplineInterpolator;
 import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.UnivariateRealInterpolator;
+import org.apache.commons.math.stat.regression.SimpleRegression;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartGroup;
@@ -247,7 +248,6 @@ public class DefaultChartService
         chart.setType( TYPE_LINE );
         chart.setDimensions( Chart.DIMENSION_DATA, Chart.DIMENSION_PERIOD, Chart.DIMENSION_ORGANISATIONUNIT );
         chart.setHideLegend( true );
-        chart.setVerticalLabels( true );
         chart.getIndicators().add( indicator );
         chart.setPeriods( periods );
         chart.setOrganisationUnit( unit );
@@ -274,7 +274,6 @@ public class DefaultChartService
         chart.setType( TYPE_BAR );
         chart.setDimensions( Chart.DIMENSION_DATA, Chart.DIMENSION_ORGANISATIONUNIT, Chart.DIMENSION_PERIOD );
         chart.setHideLegend( true );
-        chart.setVerticalLabels( true );
         chart.getIndicators().add( indicator );
         chart.setPeriods( periods );
         chart.setOrganisationUnits( parent.getSortedChildren() );
@@ -295,7 +294,6 @@ public class DefaultChartService
         chart.setType( TYPE_BAR );
         chart.setDimensions( series, category, filter );
         chart.setHideLegend( false );
-        chart.setVerticalLabels( true );
         chart.setHorizontalPlotOrientation( false );
         chart.setRegression( regression );
         chart.setIndicators( indicators );
@@ -650,8 +648,7 @@ public class DefaultChartService
         // ---------------------------------------------------------------------
 
         CategoryAxis xAxis = plot.getDomainAxis();
-        xAxis.setCategoryLabelPositions( chart.isVerticalLabels() ? CategoryLabelPositions.UP_45
-            : CategoryLabelPositions.STANDARD );
+        xAxis.setCategoryLabelPositions( CategoryLabelPositions.UP_45 );
         xAxis.setLabel( chart.getDomainAxixLabel() );
 
         ValueAxis yAxis = plot.getRangeAxis();
@@ -690,8 +687,7 @@ public class DefaultChartService
         plot.setOutlinePaint( Color.WHITE );
 
         CategoryAxis xAxis = plot.getDomainAxis();
-        xAxis.setCategoryLabelPositions( chart.isVerticalLabels() ? CategoryLabelPositions.UP_45
-            : CategoryLabelPositions.STANDARD );
+        xAxis.setCategoryLabelPositions( CategoryLabelPositions.UP_45 );
 
         stackedBarChart.getTitle().setFont( titleFont );
         stackedBarChart.addSubtitle( getSubTitle( chart ) );
@@ -745,21 +741,54 @@ public class DefaultChartService
     {
         Map<String, Double> valueMap = reportTableManager.getAggregatedValueMap( chart );
         
-        DefaultCategoryDataset dataSet = new DefaultCategoryDataset();
+        DefaultCategoryDataset regularDataSet = new DefaultCategoryDataset();
+        DefaultCategoryDataset regressionDataSet = new DefaultCategoryDataset();
+        
+        SimpleRegression regression = new SimpleRegression();
+        
+        double count = 0;
         
         for ( NameableObject series : chart.series() )
         {
             for ( NameableObject category : chart.category() )
             {
+                count++;
+                
                 String key = getIdentifier( Arrays.asList( series, category, chart.filter() ) );
                 
                 Double value = valueMap.get( key );
                 
-                dataSet.addValue( value, series.getName(), category.getName() );
+                regularDataSet.addValue( value, series.getName(), category.getName() );
+                
+                if ( chart.isRegression() && MathUtils.isEqual( value, MathUtils.ZERO ) )
+                {
+                    regression.addData( ++count, value );
+                }
             }
         }
         
-        return new CategoryDataset[] { dataSet, dataSet };
+        if ( chart.isRegression() ) // Period must be category
+        {
+            count = 0;
+            
+            for ( NameableObject series : chart.series() )
+            {
+                for ( NameableObject category : chart.category() )
+                {
+                    final double value = regression.predict( count++ );
+
+                    // Enough values must exist for regression
+
+                    if ( !Double.isNaN( value ) )
+                    {
+                        regressionDataSet.addValue( value, TREND_PREFIX + series.getName(), category.getName() );
+
+                    }
+                }
+            }
+        }
+        
+        return new CategoryDataset[] { regularDataSet, regressionDataSet };
     }
     
     /**
