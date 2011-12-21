@@ -68,14 +68,6 @@ public class Chart
     public static final String DIMENSION_PERIOD_DATAELEMENT = "period_dataElement";
     public static final String DIMENSION_ORGANISATIONUNIT_DATAELEMENT = "organisationUnit_dataElement";
     public static final String DIMENSION_DATAELEMENT_PERIOD = "dataElement_period";
-    public static final String DIMENSION_PERIOD_COMPLETENESS = "period_completeness";
-    public static final String DIMENSION_ORGANISATIONUNIT_COMPLETENESS = "organisationUnit_completeness";
-    public static final String DIMENSION_COMPLETENESS_PERIOD = "completeness_period";
-
-    //public static final String TYPE_BAR3D = "bar3d";
-    //public static final String TYPE_STACKED_BAR3D = "stackedBar3d";
-    //public static final String TYPE_LINE3D = "line3d";
-    //public static final String TYPE_PIE3D = "pie3d";
 
     public static final String SIZE_NORMAL = "normal";
     public static final String SIZE_WIDE = "wide";
@@ -260,6 +252,39 @@ public class Chart
         {
             period.setName( format.formatPeriod( period ) );
         }
+    }
+    
+    /**
+     * TODO This method is a temporary hack while we phase out the old chart UI.
+     */
+    public String getDimension()
+    {
+        if ( DIMENSION_DATA.equals( series ) && DIMENSION_PERIOD.equals( category ) && !indicators.isEmpty() )
+        {
+            return DIMENSION_PERIOD_INDICATOR;
+        }
+        else if ( DIMENSION_DATA.equals( series ) && DIMENSION_ORGANISATIONUNIT.equals( category ) && !indicators.isEmpty() )
+        {
+            return DIMENSION_ORGANISATIONUNIT_INDICATOR;
+        }
+        else if ( DIMENSION_PERIOD.equals( series ) && DIMENSION_DATA.equals( category ) && !indicators.isEmpty() )
+        {
+            return DIMENSION_INDICATOR_PERIOD;
+        }
+        else if ( DIMENSION_DATA.equals( series ) && DIMENSION_PERIOD.equals( category ) )
+        {
+            return DIMENSION_PERIOD_DATAELEMENT;
+        }
+        else if ( DIMENSION_DATA.equals( series ) && DIMENSION_ORGANISATIONUNIT.equals( category ) )
+        {
+            return DIMENSION_ORGANISATIONUNIT_DATAELEMENT;
+        }
+        else if ( DIMENSION_PERIOD.equals( series ) && DIMENSION_DATA.equals( category ) )
+        {
+            return DIMENSION_DATAELEMENT_PERIOD;
+        }
+        
+        return null;
     }
     
     // -------------------------------------------------------------------------
