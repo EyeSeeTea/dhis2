@@ -84,9 +84,9 @@ public class Chart
     public static final String TYPE_AREA = "area";
     public static final String TYPE_PIE = "pie";
 
-    public static final String DIMENSION_DATA = "data";
-    public static final String DIMENSION_PERIOD = "period";
-    public static final String DIMENSION_ORGANISATIONUNIT = "organisationUnit";
+    public static final String DIMENSION_DATA = "DATA";
+    public static final String DIMENSION_PERIOD = "PERIOD";
+    public static final String DIMENSION_ORGANISATIONUNIT = "ORGANISATIONUNIT";
 
     private String domainAxixLabel;
 
@@ -95,8 +95,6 @@ public class Chart
     private String type;
 
     private String size;
-
-    private String dimension;
 
     private String series;
 
@@ -250,6 +248,20 @@ public class Chart
     // Logic
     // -------------------------------------------------------------------------
 
+    /**
+     * Sets all dimensions for this chart.
+     * 
+     * @param series the series dimension.
+     * @param category the category dimension.
+     * @param filter the filter dimension.
+     */
+    public void setDimensions( String series, String category, String filter )
+    {
+        this.series = series;
+        this.category = category;
+        this.filter = filter;
+    }
+    
     public boolean isType( String type )
     {
         return this.type != null && this.type.equals( type );
@@ -258,11 +270,6 @@ public class Chart
     public boolean isSize( String size )
     {
         return this.size != null && this.size.equals( size );
-    }
-
-    public boolean isDimension( String dimension )
-    {
-        return this.dimension != null && this.dimension.equals( dimension );
     }
 
     public int getWidth()
@@ -325,18 +332,6 @@ public class Chart
     public void setSize( String size )
     {
         this.size = size;
-    }
-
-    @XmlElement
-    @JsonProperty
-    public String getDimension()
-    {
-        return dimension;
-    }
-
-    public void setDimension( String dimension )
-    {
-        this.dimension = dimension;
     }
 
     @XmlElement

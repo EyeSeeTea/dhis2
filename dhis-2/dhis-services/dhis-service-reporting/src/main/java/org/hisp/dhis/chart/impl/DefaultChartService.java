@@ -240,7 +240,7 @@ public class DefaultChartService
         }
 
         chart.setType( TYPE_LINE );
-        chart.setDimension( DIMENSION_PERIOD_INDICATOR );
+        chart.setDimensions( Chart.DIMENSION_DATA, Chart.DIMENSION_PERIOD, Chart.DIMENSION_ORGANISATIONUNIT );
         chart.setHideLegend( true );
         chart.setVerticalLabels( true );
         chart.getIndicators().add( indicator );
@@ -267,7 +267,7 @@ public class DefaultChartService
         }
 
         chart.setType( TYPE_BAR );
-        chart.setDimension( DIMENSION_ORGANISATIONUNIT_INDICATOR );
+        chart.setDimensions( Chart.DIMENSION_DATA, Chart.DIMENSION_ORGANISATIONUNIT, Chart.DIMENSION_PERIOD );
         chart.setHideLegend( true );
         chart.setVerticalLabels( true );
         chart.getIndicators().add( indicator );
@@ -281,7 +281,8 @@ public class DefaultChartService
     }
 
     public JFreeChart getJFreeChart( List<Indicator> indicators, List<DataElement> dataElements,
-                                     List<DataSet> dataSets, List<Period> periods, List<OrganisationUnit> organisationUnits, String dimension,
+                                     List<DataSet> dataSets, List<Period> periods, List<OrganisationUnit> organisationUnits, 
+                                     String series, String category, String filter,
                                      boolean regression, I18nFormat format )
     {
         Chart chart = new Chart();
@@ -300,7 +301,7 @@ public class DefaultChartService
         }
 
         chart.setType( TYPE_BAR );
-        chart.setDimension( dimension );
+        chart.setDimensions( series, category, filter );
         chart.setHideLegend( false );
         chart.setVerticalLabels( true );
         chart.setHorizontalPlotOrientation( false );
