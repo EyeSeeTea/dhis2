@@ -92,10 +92,6 @@
     	<td><input type="checkbox" id="hideLegend" name="hideLegend" value="true"#if( $!chart.hideLegend ) checked#end></td>
     </tr>
     <tr>
-        <td><label for="horizontalPlotOrientation">$i18n.getString( "horizontal_plot_orientation" )</label></td>
-        <td><input type="checkbox" id="horizontalPlotOrientation" name="horizontalPlotOrientation" value="true"#if( $!chart.horizontalPlotOrientation ) checked#end></td>
-    </tr>
-    <tr>
         <td><label for="regression">$i18n.getString( "include_regression_line" )</label></td>
         <td><input type="checkbox" id="regression" name="regression" value="true"#if( $!chart.regression ) checked#end></td>
     </tr>

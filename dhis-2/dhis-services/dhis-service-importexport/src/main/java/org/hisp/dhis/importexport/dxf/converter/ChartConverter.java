@@ -59,8 +59,6 @@ public class ChartConverter
     private static final String FIELD_TITLE = "title";
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_HIDE_LEGEND = "hideLegend";
-    private static final String FIELD_VERTICAL_LABELS = "verticalLabels";
-    private static final String FIELD_HORIZONTAL_PLOT_ORIENTATION = "horizontalPlotOrientation";
     private static final String FIELD_REGRESSION = "regression";
 
     private static final String FIELD_INDICATORS = "indicators";
@@ -136,8 +134,6 @@ public class ChartConverter
                 writer.writeElement( FIELD_TITLE,  chart.getName() );
                 writer.writeElement( FIELD_TYPE, chart.getType() );
                 writer.writeElement( FIELD_HIDE_LEGEND, String.valueOf( chart.isHideLegend() ) );
-                writer.writeElement( FIELD_VERTICAL_LABELS, String.valueOf( chart.isVerticalLabels() ) );
-                writer.writeElement( FIELD_HORIZONTAL_PLOT_ORIENTATION, String.valueOf( chart.isHorizontalPlotOrientation() ) );
                 writer.writeElement( FIELD_REGRESSION, String.valueOf( chart.isRegression() ) );                
 
                 writer.openElement( FIELD_INDICATORS );
@@ -204,12 +200,6 @@ public class ChartConverter
 
             reader.moveToStartElement( FIELD_HIDE_LEGEND );
             chart.setHideLegend( Boolean.parseBoolean( reader.getElementValue() ) );
-
-            reader.moveToStartElement( FIELD_VERTICAL_LABELS );
-            chart.setVerticalLabels( Boolean.parseBoolean( reader.getElementValue() ) );
-
-            reader.moveToStartElement( FIELD_HORIZONTAL_PLOT_ORIENTATION );
-            chart.setHorizontalPlotOrientation( Boolean.parseBoolean( reader.getElementValue() ) );
 
             reader.moveToStartElement( FIELD_REGRESSION );
             chart.setRegression( Boolean.parseBoolean( reader.getElementValue() ) );

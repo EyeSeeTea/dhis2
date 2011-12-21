@@ -294,7 +294,6 @@ public class DefaultChartService
         chart.setType( TYPE_BAR );
         chart.setDimensions( series, category, filter );
         chart.setHideLegend( false );
-        chart.setHorizontalPlotOrientation( false );
         chart.setRegression( regression );
         chart.setIndicators( indicators );
         chart.setDataElements( dataElements );
@@ -639,8 +638,7 @@ public class DefaultChartService
         // Plot orientation
         // ---------------------------------------------------------------------
 
-        plot.setOrientation( chart.isHorizontalPlotOrientation() ? PlotOrientation.HORIZONTAL
-            : PlotOrientation.VERTICAL );
+        plot.setOrientation( PlotOrientation.VERTICAL );
         plot.setDatasetRenderingOrder( DatasetRenderingOrder.FORWARD );
 
         // ---------------------------------------------------------------------
@@ -666,20 +664,17 @@ public class DefaultChartService
 
     private JFreeChart getStackedBarChart( Chart chart, CategoryDataset dataSet )
     {
-        PlotOrientation orientation = chart.isHorizontalPlotOrientation() ? PlotOrientation.HORIZONTAL
-            : PlotOrientation.VERTICAL;
-
         JFreeChart stackedBarChart = null;
 
         if ( chart.isType( TYPE_STACKED_BAR ) )
         {
             stackedBarChart = ChartFactory.createStackedBarChart( chart.getName(), chart.getDomainAxixLabel(),
-                chart.getRangeAxisLabel(), dataSet, orientation, true, false, false );
+                chart.getRangeAxisLabel(), dataSet, PlotOrientation.VERTICAL, true, false, false );
         }
         else
         {
             stackedBarChart = ChartFactory.createStackedBarChart3D( chart.getName(), chart.getDomainAxixLabel(),
-                chart.getRangeAxisLabel(), dataSet, orientation, true, false, false );
+                chart.getRangeAxisLabel(), dataSet, PlotOrientation.VERTICAL, true, false, false );
         }
 
         CategoryPlot plot = (CategoryPlot) stackedBarChart.getPlot();

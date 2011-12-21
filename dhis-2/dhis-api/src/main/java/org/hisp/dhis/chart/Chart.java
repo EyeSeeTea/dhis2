@@ -107,8 +107,6 @@ public class Chart
 
     private boolean hideLegend;
 
-    private boolean horizontalPlotOrientation;
-
     private boolean regression;
 
     private boolean targetLine;
@@ -432,18 +430,6 @@ public class Chart
     public void setHideLegend( boolean hideLegend )
     {
         this.hideLegend = hideLegend;
-    }
-
-    @XmlElement
-    @JsonProperty
-    public boolean isHorizontalPlotOrientation()
-    {
-        return horizontalPlotOrientation;
-    }
-
-    public void setHorizontalPlotOrientation( boolean horizontalPlotOrientation )
-    {
-        this.horizontalPlotOrientation = horizontalPlotOrientation;
     }
 
     @XmlElement

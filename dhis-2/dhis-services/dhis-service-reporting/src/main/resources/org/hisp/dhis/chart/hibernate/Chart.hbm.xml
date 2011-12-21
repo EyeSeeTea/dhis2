@@ -29,8 +29,6 @@
 
     <property name="hideLegend" not-null="true" />
 
-    <property name="horizontalPlotOrientation" not-null="true" />
-
     <property name="regression" not-null="true" />
 
     <property name="targetLine" not-null="true" />

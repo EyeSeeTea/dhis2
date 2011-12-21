@@ -178,20 +178,6 @@ public class SaveChartAction
         this.hideLegend = hideLegend;
     }
 
-    private boolean verticalLabels;
-
-    public void setVerticalLabels( boolean verticalLabels )
-    {
-        this.verticalLabels = verticalLabels;
-    }
-
-    private boolean horizontalPlotOrientation;
-
-    public void setHorizontalPlotOrientation( boolean horizontalPlotOrientation )
-    {
-        this.horizontalPlotOrientation = horizontalPlotOrientation;
-    }
-
     private boolean regression;
 
     public void setRegression( boolean regression )
@@ -377,8 +363,6 @@ public class SaveChartAction
         chart.setCategory( category );
         chart.setFilter( filter );
         chart.setHideLegend( hideLegend );
-        chart.setVerticalLabels( verticalLabels );
-        chart.setHorizontalPlotOrientation( horizontalPlotOrientation );
         chart.setRegression( regression );
         chart.setTargetLine( targetLine );
         chart.setTargetLineValue( targetLineValue );

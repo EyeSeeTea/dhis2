@@ -242,6 +242,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE chart ALTER COLUMN dimension DROP NOT NULL" );
         executeSql( "ALTER TABLE chart DROP COLUMN size" );
         executeSql( "ALTER TABLE chart DROP COLUMN verticallabels" );
+        executeSql( "ALTER TABLE chart DROP COLUMN horizontalplotorientation" );
         
         // migrate charts from dimension to category, series, filter
         

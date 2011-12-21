@@ -68,8 +68,6 @@ public class ChartImporter
         match.setName( object.getName() );
         match.setType( object.getType() );
         match.setHideLegend( object.isHideLegend() );
-        match.setVerticalLabels( object.isVerticalLabels() );
-        match.setHorizontalPlotOrientation( object.isHorizontalPlotOrientation() );
         match.setRegression( object.isRegression() );        
 
         match.getRelatives().setReportingMonth( object.getRelatives().isReportingMonth() );
@@ -101,14 +99,6 @@ public class ChartImporter
             return false;
         }
         if ( object.isHideLegend() != existing.isHideLegend() )
-        {
-            return false;
-        }
-        if ( object.isVerticalLabels() != existing.isVerticalLabels() )
-        {
-            return false;
-        }
-        if ( object.isHorizontalPlotOrientation() != existing.isHorizontalPlotOrientation() )
         {
             return false;
         }
