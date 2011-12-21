@@ -49,6 +49,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnits;
 import org.hisp.dhis.report.Reports;
 import org.hisp.dhis.reporttable.ReportTables;
 import org.hisp.dhis.sqlview.SqlViews;
+import org.hisp.dhis.user.UserGroups;
 import org.hisp.dhis.user.Users;
 import org.hisp.dhis.validation.ValidationRuleGroups;
 import org.hisp.dhis.validation.ValidationRules;
@@ -104,7 +105,7 @@ public class Resources extends BaseCollection
 
         MediaType[] defaultMediaTypes = new MediaType[]{
             MediaType.TEXT_HTML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON,
-            new MediaType( "application", "javascript" ), new MediaType( "application", "pdf" )
+            new MediaType( "application", "javascript" ) /* , new MediaType( "application", "pdf" ) */
         };
 
         List<RequestMethod> requestMethods = Arrays.asList( defaultRequestMethods );
@@ -135,6 +136,7 @@ public class Resources extends BaseCollection
         resources.add( new Resource( "ReportTables", ReportTables.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "SqlViews", SqlViews.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "Users", Users.class, requestMethods, mediaTypes ) );
+        resources.add( new Resource( "UserGroups", UserGroups.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "ValidationRules", ValidationRules.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "ValidationRuleGroups", ValidationRuleGroups.class, requestMethods, mediaTypes ) );
     }

@@ -1,5 +1,7 @@
+package org.hisp.dhis.user;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,33 +26,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.program;
 
-import java.util.Collection;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.common.BaseCollection;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.UserGroupXmlAdapter;
 
-import org.hisp.dhis.dataelement.DataElement;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author Viet Nguyen
- * 
- * @version $Id$
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface ProgramStageDataElementService
+@XmlRootElement( name = "userGroups", namespace = Dxf2Namespace.NAMESPACE )
+@XmlAccessorType( value = XmlAccessType.NONE )
+public class UserGroups extends BaseCollection
 {
-    String ID = ProgramStageInstanceService.class.getName();
+    private List<UserGroup> userGroups = new ArrayList<UserGroup>();
 
-    void addProgramStageDataElement( ProgramStageDataElement programStageDataElement );
-    
-    void updateProgramStageDataElement ( ProgramStageDataElement programStageDataElement );
+    @XmlElement( name = "userGroup" )
+    @XmlJavaTypeAdapter( UserGroupXmlAdapter.class )
+    @JsonProperty( value = "userGroups" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    public List<UserGroup> getUserGroups()
+    {
+        return userGroups;
+    }
 
-    void deleteProgramStageDataElement( ProgramStageDataElement programStageDataElement );
-    
-    ProgramStageDataElement get( ProgramStage programStage, DataElement dataElement );
-
-    Collection<ProgramStageDataElement> getAllProgramStageDataElements();
-
-    Collection<ProgramStageDataElement> get( ProgramStage programStage );
-    
-    Collection<DataElement> getListDataElement( ProgramStage programStage );
-    
+    public void setUserGroups( List<UserGroup> userGroups )
+    {
+        this.userGroups = userGroups;
+    }
 }

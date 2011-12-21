@@ -221,7 +221,15 @@ function unCheckALL( jQuerySelectorString )
  */
 function enable( elementId )
 {
-    jQuery( "#" + elementId ).removeAttr( "disabled" );
+	var hasDatePicker = jQuery("#" + elementId ).data("datepicker");
+	if( hasDatePicker == undefined)
+	{
+		jQuery( "#" + elementId ).removeAttr( "disabled" );
+	}
+	else
+	{
+		jQuery('#' + elementId ).datepicker( "enable" );
+	} 
 }
 
 function enableGroup( selectorJQueryString )
@@ -236,7 +244,15 @@ function enableGroup( selectorJQueryString )
  */
 function disable( elementId )
 {
-    jQuery( "#" + elementId ).attr("disabled", true );
+	var hasDatePicker = jQuery("#" + elementId ).data("datepicker");
+	if( hasDatePicker == undefined)
+	{
+		jQuery( "#" + elementId ).attr("disabled", true );
+	}
+	else
+	{
+		jQuery('#' + elementId ).datepicker( "disable" );
+	}    
 }
 
 function disableGroup( selectorJQueryString )
@@ -838,8 +854,9 @@ function datePicker( id )
 		buttonImage: '../images/calendar.png',
 		buttonImageOnly: true,
 		constrainInput: true,
-        yearRange: '-100:+100'
+        yearRange: '-100:+100',
 	});
+	jQuery( "#" + id ).attr("readonly", true );
 	s = jQuery("#" + id );		
 	if( s.val()=='' ) s.val( getCurrentDate() );		
 }
@@ -859,6 +876,7 @@ function datePicker( id, today )
 		constrainInput: true,
         yearRange: '-100:+100'
 	});
+	jQuery( "#" + id ).attr("readonly", true );
 	
 	if( today == undefined ) today = false;
 	
@@ -883,6 +901,7 @@ function datePickerjQuery( jQueryString )
 		constrainInput: true,
         yearRange: '-100:+100'
 	});		
+	jQuery( "#" + id ).attr("readonly", true );
 }
 
 /**
@@ -906,6 +925,7 @@ function datePickerValid( id, today )
 		constrainInput: true,
         yearRange: '-100:+100'
 	});
+	jQuery( "#" + id ).attr("readonly", true );
 	
 	if ( today == undefined )
 	{
@@ -958,6 +978,8 @@ function datePickerInRange ( startdate, enddate, setCurrentStartDate, setCurrent
 			dates.not(this).datepicker("option", option, date);
 		}
 	});
+	jQuery( "#" + startdate ).attr("disabled", true );
+	jQuery( "#" + enddate ).attr("disabled", true );
 
     $("#ui-datepicker-div").hide();
 }

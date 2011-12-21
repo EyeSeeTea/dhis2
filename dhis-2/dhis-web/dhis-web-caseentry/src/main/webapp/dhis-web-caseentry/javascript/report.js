@@ -17,7 +17,6 @@ function organisationUnitSelected( orgUnits )
 			disable('programId');
 			disable('startDate');
 			disable('endDate');
-			disable('endDate');
 			disable('generateBtn');
 		}
 		else
@@ -30,7 +29,6 @@ function organisationUnitSelected( orgUnits )
 			} 
 			enable('programId');
 			enable('startDate');
-			enable('endDate');
 			enable('endDate');
 			enable('generateBtn');
 		}

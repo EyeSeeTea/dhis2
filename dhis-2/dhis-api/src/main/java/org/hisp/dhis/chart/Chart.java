@@ -271,12 +271,12 @@ public class Chart
 
     public int getWidth()
     {
-        return isSize( SIZE_WIDE ) ? 1000 : 700;
+        return 700;
     }
 
     public int getHeight()
     {
-        return isSize( SIZE_TALL ) ? 800 : 500;
+        return 500;
     }
 
     // -------------------------------------------------------------------------
