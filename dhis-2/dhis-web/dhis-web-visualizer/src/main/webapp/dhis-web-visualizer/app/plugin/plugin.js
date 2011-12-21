@@ -703,8 +703,8 @@ Ext.onReady( function() {
     DHIS.exe = {
         allow: true,
         queue: [],
-        addToQueue: function(obj) {
-            DHIS.exe.queue.push(obj);            
+        addToQueue: function(conf) {
+            DHIS.exe.queue.push(conf);            
             if (DHIS.exe.allow) {
                 DHIS.exe.allow = false;
                 DHIS.exe.execute();
