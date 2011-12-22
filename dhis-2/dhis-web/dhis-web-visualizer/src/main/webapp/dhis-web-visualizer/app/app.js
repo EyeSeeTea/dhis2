@@ -2816,7 +2816,7 @@ Ext.onReady( function() {
                                     return;
                                 }
                                 
-                                document.getElementById('titleField').value = DV.state.filter.names[0];
+                                document.getElementById('titleField').value = DV.state.filter.names[0] || 'Example chart';
                                 document.getElementById('svgField').value = svg[0].parentNode.innerHTML;
                                 document.getElementById('typeField').value = type;
                                 
