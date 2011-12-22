@@ -712,7 +712,9 @@ Ext.onReady( function() {
                     params.xAxisLabel = DV.cmp.favorite.xaxislabel.getValue();
                     params.yAxisLabel = DV.cmp.favorite.yaxislabel.getValue();
                     params.targetLineValue = DV.cmp.favorite.targetlinevalue.getValue();
-                    params.targetLineLabel = params.targetLineValue && !DV.cmp.favorite.targetlinelabel.isDisabled() ? DV.cmp.favorite.targetlinelabel.getValue() : null;
+                    if (params.targetLineValue && !DV.cmp.favorite.targetlinelabel.isDisabled()) {
+                        params.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
+                    }
                     
                     if (isUpdate) {
                         var store = DV.store.favorite;
@@ -2365,9 +2367,10 @@ Ext.onReady( function() {
                                         bodyStyle: 'border:0 none',
                                         items: [
                                             {
-                                                xtype: 'textfield',
+                                                xtype: 'numberfield',
                                                 cls: 'dv-textfield-alt1',
                                                 style: 'margin-right:4px',
+                                                hideTrigger: true,
                                                 fieldLabel: 'Target line value',
                                                 labelAlign: 'top',
                                                 labelSeparator: '',
@@ -2503,6 +2506,10 @@ Ext.onReady( function() {
 															width: DV.conf.layout.grid_favorite_width,
                                                             closeAction: 'hide',
                                                             modal: true,
+                                                            resetForm: function() {
+                                                                DV.cmp.favorite.name.setValue('');
+                                                                DV.cmp.favorite.system.setValue(false);
+                                                            },
                                                             items: [
                                                                 {
                                                                     xtype: 'form',
@@ -2854,7 +2861,7 @@ Ext.onReady( function() {
                                                                                             {
                                                                                                 text: 'Cancel',
                                                                                                 handler: function() {
-                                                                                                    this.up('window').close();
+                                                                                                    DV.cmp.favorite.window.close();
                                                                                                 }
                                                                                             },
                                                                                             '->',
@@ -2863,7 +2870,7 @@ Ext.onReady( function() {
                                                                                                 handler: function() {
                                                                                                     this.up('window').close();
                                                                                                     DV.util.crud.favorite.update(function() {
-                                                                                                        DV.cmp.favorite.name.setValue('');
+                                                                                                        DV.cmp.favorite.window.resetForm();
                                                                                                     });
                                                                                                     
                                                                                                 }
@@ -2875,7 +2882,7 @@ Ext.onReady( function() {
                                                                                 }
                                                                                 else {
                                                                                     DV.util.crud.favorite.create(function() {
-                                                                                        DV.cmp.favorite.name.setValue('');
+                                                                                        DV.cmp.favorite.window.resetForm();
                                                                                         DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
                                                                                     });
                                                                                 }                                                                                    
