@@ -53,6 +53,7 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.mock.MockI18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
@@ -301,7 +302,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, true, false, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -359,7 +360,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, false, false, true, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, true, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -417,7 +418,7 @@ public class ReportTableTest
     {        
         ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, false, true, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, false, true, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -473,7 +474,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, true, true, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, true, true, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -503,7 +504,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, false, false, false, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, false, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -533,7 +534,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, true, false, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -575,7 +576,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, false, false, true, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, true, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -617,7 +618,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, false, true, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, false, true, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -659,7 +660,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            categoryCombo, true, true, false, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), categoryCombo, true, true, false, relatives, null, i18nFormat, "january_2000" );
         
         reportTable.init();
         
@@ -720,7 +721,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            categoryCombo, false, false, true, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), categoryCombo, false, false, true, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -777,7 +778,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            categoryCombo, true, false, true, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), categoryCombo, true, false, true, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -832,7 +833,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, true, false, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, true, false, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -874,7 +875,7 @@ public class ReportTableTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, false, false, true, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, true, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         
@@ -916,7 +917,7 @@ public class ReportTableTest
     {        
         ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, false, true, relatives, null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, false, true, relatives, null, i18nFormat, "january_2000" );
 
         reportTable.init();
         

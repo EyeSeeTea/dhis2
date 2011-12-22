@@ -35,6 +35,7 @@ import java.util.Map;
 import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -86,6 +87,34 @@ public class JDBCReportTableManager
 
     public Map<String, Double> getAggregatedValueMap( ReportTable reportTable )
     {
+        if ( reportTable.isOrganisationUnitGroupBased() )
+        {
+            return getAggregatedValueMapOrgUnitGroups( reportTable );
+        }
+        else
+        {
+            return getAggregatedValueMapOrgUnitHierarchy( reportTable );
+        }
+    }
+    
+    public Map<String, Double> getAggregatedValueMapOrgUnitGroups( ReportTable reportTable )
+    {
+        Map<String, Double> map = new HashMap<String, Double>();
+        
+        String dataElementIds = TextUtils.getCommaDelimitedString( 
+            ConversionUtils.getIdentifiers( DataElement.class, reportTable.getDataElements() ) );
+        String indicatorIds = TextUtils.getCommaDelimitedString( 
+            ConversionUtils.getIdentifiers( Indicator.class, reportTable.getIndicators() ) );
+        String periodIds = TextUtils.getCommaDelimitedString( 
+            ConversionUtils.getIdentifiers( Period.class, reportTable.getAllPeriods() ) );
+        String unitIds = TextUtils.getCommaDelimitedString( 
+            ConversionUtils.getIdentifiers( NameableObject.class, reportTable.getAllUnits() ) );
+        
+        return map;
+    }
+    
+    public Map<String, Double> getAggregatedValueMapOrgUnitHierarchy( ReportTable reportTable )
+    {
         Map<String, Double> map = new HashMap<String, Double>();
 
         String dataElementIds = TextUtils.getCommaDelimitedString( 
@@ -97,7 +126,7 @@ public class JDBCReportTableManager
         String periodIds = TextUtils.getCommaDelimitedString( 
             ConversionUtils.getIdentifiers( Period.class, reportTable.getAllPeriods() ) );
         String unitIds = TextUtils.getCommaDelimitedString( 
-            ConversionUtils.getIdentifiers( OrganisationUnit.class, reportTable.getAllUnits() ) );
+            ConversionUtils.getIdentifiers( NameableObject.class, reportTable.getAllUnits() ) );
 
         if ( reportTable.hasDataElements() )
         {

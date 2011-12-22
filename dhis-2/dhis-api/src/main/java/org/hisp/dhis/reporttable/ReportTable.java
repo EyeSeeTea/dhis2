@@ -54,6 +54,7 @@ import org.hisp.dhis.common.adapter.CategoryComboXmlAdapter;
 import org.hisp.dhis.common.adapter.DataElementXmlAdapter;
 import org.hisp.dhis.common.adapter.DataSetXmlAdapter;
 import org.hisp.dhis.common.adapter.IndicatorXmlAdapter;
+import org.hisp.dhis.common.adapter.OrganisationUnitGroupXmlAdapter;
 import org.hisp.dhis.common.adapter.OrganisationUnitXmlAdapter;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -63,6 +64,7 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.RelativePeriods;
@@ -187,6 +189,11 @@ public class ReportTable extends BaseIdentifiableObject
      */
     private List<OrganisationUnit> units = new ArrayList<OrganisationUnit>();
 
+    /**
+     * The list of OrganisationUnitGroups the ReportTable contains.
+     */
+    private List<OrganisationUnitGroup> organisationUnitGroups = new ArrayList<OrganisationUnitGroup>();
+    
     /**
      * The DataElementCategoryCombo for the ReportTable.
      */
@@ -340,7 +347,8 @@ public class ReportTable extends BaseIdentifiableObject
      */
     public ReportTable( String name, boolean regression, List<DataElement> dataElements, List<Indicator> indicators,
                         List<DataSet> dataSets, List<Period> periods, List<Period> relativePeriods, List<OrganisationUnit> units,
-                        List<OrganisationUnit> relativeUnits, DataElementCategoryCombo categoryCombo, boolean doIndicators,
+                        List<OrganisationUnit> relativeUnits, List<OrganisationUnitGroup> organisationUnitGroups,
+                        DataElementCategoryCombo categoryCombo, boolean doIndicators,
                         boolean doPeriods, boolean doUnits, RelativePeriods relatives, ReportParams reportParams,
                         I18nFormat i18nFormat, String reportingPeriodName )
     {
@@ -353,6 +361,7 @@ public class ReportTable extends BaseIdentifiableObject
         this.relativePeriods = relativePeriods;
         this.units = units;
         this.relativeUnits = relativeUnits;
+        this.organisationUnitGroups = organisationUnitGroups;
         this.categoryCombo = categoryCombo;
         this.doIndicators = doIndicators;
         this.doPeriods = doPeriods;
@@ -401,10 +410,17 @@ public class ReportTable extends BaseIdentifiableObject
 
         Collections.sort( allPeriods, new AscendingPeriodComparator() );
         setNames( allPeriods ); // Set names on periods
-
-        allUnits.addAll( units );
-        allUnits.addAll( relativeUnits );
-        allUnits = removeDuplicates( allUnits );
+        
+        if ( isOrganisationUnitGroupBased() )
+        {
+            allUnits.addAll( organisationUnitGroups );
+        }
+        else
+        {
+            allUnits.addAll( units );
+            allUnits.addAll( relativeUnits );
+            allUnits = removeDuplicates( allUnits );
+        }
 
         columns = new CombinationGenerator<NameableObject>( getArrays( true ) ).getCombinations();
         rows = new CombinationGenerator<NameableObject>( getArrays( false ) ).getCombinations();
@@ -665,6 +681,15 @@ public class ReportTable extends BaseIdentifiableObject
     {
         return parentOrganisationUnit != null ? parentOrganisationUnit.getName() : EMPTY;
     }
+    
+    /**
+     * Indicates whether this report table is based on organisation unit groups
+     * or the organisation unit hierarchy.
+     */
+    public boolean isOrganisationUnitGroupBased()
+    {
+        return organisationUnitGroups != null && organisationUnitGroups.size() > 0;
+    }
 
     // -------------------------------------------------------------------------
     // Supportive methods
@@ -910,6 +935,21 @@ public class ReportTable extends BaseIdentifiableObject
     public void setUnits( List<OrganisationUnit> units )
     {
         this.units = units;
+    }
+
+    @XmlElementWrapper( name = "organisationUnitGroups" )
+    @XmlElement( name = "organisationUnitGroup" )
+    @XmlJavaTypeAdapter( OrganisationUnitGroupXmlAdapter.class )
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseNameableObject.class )
+    public List<OrganisationUnitGroup> getOrganisationUnitGroups()
+    {
+        return organisationUnitGroups;
+    }
+
+    public void setOrganisationUnitGroups( List<OrganisationUnitGroup> organisationUnitGroups )
+    {
+        this.organisationUnitGroups = organisationUnitGroups;
     }
 
     @XmlElement
