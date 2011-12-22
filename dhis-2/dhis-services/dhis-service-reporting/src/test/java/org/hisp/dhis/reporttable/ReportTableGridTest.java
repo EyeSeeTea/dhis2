@@ -365,6 +365,8 @@ public class ReportTableGridTest
         indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdB, periodIdA, 8, unitIdA, groupIdB, 8, "", 1, 16, 0, 0 ) );
         indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdB, periodIdB, 8, unitIdA, groupIdA, 8, "", 1, 17, 0, 0 ) );
         indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdB, periodIdB, 8, unitIdA, groupIdB, 8, "", 1, 18, 0, 0 ) );
+        
+        indicatorOrgUnitValueBatchHandler.flush();
     }
     
     @Override
