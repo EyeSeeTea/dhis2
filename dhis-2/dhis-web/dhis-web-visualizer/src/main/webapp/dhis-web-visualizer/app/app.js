@@ -2484,6 +2484,23 @@ Ext.onReady( function() {
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
+                            text: 'Data table',
+                            handler: function() {
+                                var p = DV.cmp.region.east;
+                                if (p.collapsed && p.items.length) {
+                                    p.expand();
+                                    DV.cmp.toolbar.resizeeast.show();
+                                    DV.exe.datatable(true);
+                                }
+                                else {
+                                    p.collapse();
+                                    DV.cmp.toolbar.resizeeast.hide();
+                                }
+                            }
+                        },
+                        {
+                            xtype: 'button',
+							cls: 'dv-toolbar-btn-2',
                             text: 'Favorites..',
                             listeners: {
                                 afterrender: function(b) {
@@ -2505,6 +2522,7 @@ Ext.onReady( function() {
                                                             bodyStyle: 'padding:8px; background-color:#fff',
 															width: DV.conf.layout.grid_favorite_width,
                                                             closeAction: 'hide',
+                                                            resizable: false,
                                                             modal: true,
                                                             resetForm: function() {
                                                                 DV.cmp.favorite.name.setValue('');
@@ -2566,7 +2584,7 @@ Ext.onReady( function() {
                                                                     ],
                                                                     setHeightInWindow: function(store) {
                                                                         var h = (store.getCount() * 23) + 30,
-                                                                            sh = DV.util.viewport.getSize().y * 0.8;
+                                                                            sh = DV.util.viewport.getSize().y * 0.6;
                                                                         this.setHeight(h > sh ? sh : h);
                                                                         this.doLayout();
                                                                         this.up('window').doLayout();
@@ -2939,7 +2957,7 @@ Ext.onReady( function() {
                                                 ],
                                                 setHeightInMenu: function(store) {
                                                     var h = store.getCount() * 26,
-                                                        sh = DV.util.viewport.getSize().y * 0.8;
+                                                        sh = DV.util.viewport.getSize().y * 0.6;
                                                     this.setHeight(h > sh ? sh : h);
                                                     this.doLayout();
                                                     this.up('menu').doLayout();
@@ -2973,51 +2991,7 @@ Ext.onReady( function() {
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
-                            text: 'Data..',
-                            listeners: {
-                                afterrender: function(b) {
-                                    this.menu = Ext.create('Ext.menu.Menu', {
-                                        shadowOffset: 1,
-                                        showSeparator: false,
-                                        items: [
-                                            {
-                                                text: 'Data table',
-                                                iconCls: 'dv-menu-item-datatable',
-                                                minWidth: 90,
-                                                handler: function() {
-                                                    var p = DV.cmp.region.east;
-                                                    if (p.collapsed && p.items.length) {
-                                                        p.expand();
-                                                        DV.exe.datatable(true);
-                                                    }
-                                                    else {
-                                                        p.collapse();
-                                                    }
-                                                    DV.cmp.toolbar.resizeeast.show();
-                                                },
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.toolbar.menuitem.datatable = this;
-                                                    }
-                                                }
-                                            }
-                                        ]                                            
-                                    });
-                                }
-                            },
-                            handler: function() {
-                                if (DV.cmp.region.east.items.length) {
-                                    DV.cmp.toolbar.menuitem.datatable.enable();
-                                }
-                                else {
-                                    DV.cmp.toolbar.menuitem.datatable.disable();
-                                }
-                            }
-                        },
-                        {
-                            xtype: 'button',
-							cls: 'dv-toolbar-btn-2',
-                            text: 'Save as..',
+                            text: 'Download as..',
                             execute: function(type) {
                                 var svg = document.getElementsByTagName('svg');
                                 
