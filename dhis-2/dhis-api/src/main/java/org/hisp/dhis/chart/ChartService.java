@@ -27,9 +27,12 @@ package org.hisp.dhis.chart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -37,10 +40,6 @@ import org.hisp.dhis.period.Period;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.plot.PlotOrientation;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Lars Helge Overland
@@ -59,7 +58,7 @@ public interface ChartService
 
     JFreeChart getJFreeOrganisationUnitChart( Indicator indicator, OrganisationUnit parent, boolean title, I18nFormat format );
 
-    JFreeChart getJFreeChart( List<Indicator> indicators, List<DataElement> dataElements, List<DataSet> dataSets, List<Period> periods,
+    JFreeChart getJFreeChart( List<Indicator> indicators, List<DataElement> dataElements, List<Period> periods,
                               List<OrganisationUnit> organisationUnits, String series, String category, String filter, boolean regression, I18nFormat format );
 
     JFreeChart getJFreeChart( String name, PlotOrientation orientation, CategoryLabelPositions labelPositions,
@@ -91,33 +90,4 @@ public interface ChartService
     int getChartCount();
 
     int getChartCountByName( String name );
-
-    // -------------------------------------------------------------------------
-    // ChartGroup
-    // -------------------------------------------------------------------------
-
-    int addChartGroup( ChartGroup chartGroup );
-
-    void updateChartGroup( ChartGroup chartGroup );
-
-    void deleteChartGroup( ChartGroup chartGroup );
-
-    ChartGroup getChartGroup( int id );
-
-    ChartGroup getChartGroupByName( String name );
-
-    Collection<ChartGroup> getAllChartGroups();
-
-    Collection<ChartGroup> getChartGroups( final Collection<Integer> identifiers );
-
-    Collection<ChartGroup> getGroupsContainingChart( Chart chart );
-
-    int getChartGroupCount();
-
-    int getChartGroupCountByName( String name );
-
-    Collection<ChartGroup> getChartGroupsBetween( int first, int max );
-
-    Collection<ChartGroup> getChartGroupsBetweenByName( String name, int first, int max );
-
 }

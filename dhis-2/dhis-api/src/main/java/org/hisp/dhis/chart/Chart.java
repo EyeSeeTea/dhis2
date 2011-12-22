@@ -27,6 +27,17 @@ package org.hisp.dhis.chart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -45,13 +56,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.user.User;
-
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Lars Helge Overland
@@ -86,7 +90,7 @@ public class Chart
     public static final String DIMENSION_PERIOD = "PERIOD";
     public static final String DIMENSION_ORGANISATIONUNIT = "ORGANISATIONUNIT";
 
-    private String domainAxixLabel;
+    private String domainAxisLabel;
 
     private String rangeAxisLabel;
 
@@ -109,8 +113,6 @@ public class Chart
     private Double targetLineValue;
 
     private String targetLineLabel;
-
-    private Set<ChartGroup> groups = new HashSet<ChartGroup>();
 
     private List<Indicator> indicators = new ArrayList<Indicator>();
 
@@ -165,34 +167,6 @@ public class Chart
     // Logic
     // -------------------------------------------------------------------------
 
-    public void addChartGroup( ChartGroup group )
-    {
-        groups.add( group );
-        group.getMembers().add( this );
-    }
-
-    public void removeChartGroup( ChartGroup group )
-    {
-        groups.remove( group );
-        group.getMembers().remove( this );
-    }
-
-    public void updateChartGroups( Set<ChartGroup> updates )
-    {
-        for ( ChartGroup group : new HashSet<ChartGroup>( groups ) )
-        {
-            if ( !updates.contains( group ) )
-            {
-                removeChartGroup( group );
-            }
-        }
-
-        for ( ChartGroup group : updates )
-        {
-            addChartGroup( group );
-        }
-    }
-    
     public List<NameableObject> series()
     {
         return dimensionToList( series );
@@ -226,18 +200,19 @@ public class Chart
         
         if ( DIMENSION_DATA.equals( dimension ) )
         {
-            list.addAll( getDataElements() );
-            list.addAll( getIndicators() );
+            list.addAll( dataElements );
+            list.addAll( indicators );
         }
         else if ( DIMENSION_PERIOD.equals( dimension ) )
         {
             namePeriods( getRelativePeriods(), format );
             
-            list.addAll( getRelativePeriods() );
+            list.addAll( relativePeriods );
         }
         else if ( DIMENSION_ORGANISATIONUNIT.equals( dimension ) )
         {
-            list.addAll( getAllOrganisationUnits() );
+            list.addAll( organisationUnits );
+            list.addAll( organisationUnit != null ? Arrays.asList( organisationUnit ) : new ArrayList<NameableObject>() );
         }
         
         return list;
@@ -373,14 +348,14 @@ public class Chart
 
     @XmlElement( name = "domainAxisLabel" )
     @JsonProperty( value = "domainAxisLabel" )
-    public String getDomainAxixLabel()
+    public String getDomainAxisLabel()
     {
-        return domainAxixLabel;
+        return domainAxisLabel;
     }
 
-    public void setDomainAxixLabel( String domainAxixLabel )
+    public void setDomainAxisLabel( String domainAxisLabel )
     {
-        this.domainAxixLabel = domainAxixLabel;
+        this.domainAxisLabel = domainAxisLabel;
     }
 
     @XmlElement
@@ -637,16 +612,6 @@ public class Chart
     public void setAllOrganisationUnits( List<OrganisationUnit> allOrganisationUnits )
     {
         this.allOrganisationUnits = allOrganisationUnits;
-    }
-
-    public Set<ChartGroup> getGroups()
-    {
-        return groups;
-    }
-
-    public void setGroups( Set<ChartGroup> groups )
-    {
-        this.groups = groups;
     }
 
     @XmlElement

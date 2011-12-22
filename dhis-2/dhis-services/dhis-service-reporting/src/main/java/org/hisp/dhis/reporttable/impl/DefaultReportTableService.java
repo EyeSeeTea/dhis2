@@ -27,10 +27,33 @@ package org.hisp.dhis.reporttable.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.reporttable.ReportTable.ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME;
+import static org.hisp.dhis.reporttable.ReportTable.PARAM_ORGANISATIONUNIT_COLUMN_NAME;
+import static org.hisp.dhis.reporttable.ReportTable.PRETTY_COLUMNS;
+import static org.hisp.dhis.reporttable.ReportTable.REPORTING_MONTH_COLUMN_NAME;
+import static org.hisp.dhis.reporttable.ReportTable.SPACE;
+import static org.hisp.dhis.reporttable.ReportTable.TOTAL_COLUMN_NAME;
+import static org.hisp.dhis.reporttable.ReportTable.TOTAL_COLUMN_PRETTY_NAME;
+import static org.hisp.dhis.reporttable.ReportTable.columnEncode;
+import static org.hisp.dhis.reporttable.ReportTable.getColumnName;
+import static org.hisp.dhis.reporttable.ReportTable.getIdentifier;
+import static org.hisp.dhis.reporttable.ReportTable.getPrettyColumnName;
+import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.*;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.GridHeader;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.completeness.DataSetCompletenessService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
@@ -44,18 +67,12 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.report.ReportService;
 import org.hisp.dhis.reporttable.ReportTable;
-import org.hisp.dhis.reporttable.ReportTableGroup;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.reporttable.jdbc.ReportTableManager;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-
-import static org.hisp.dhis.reporttable.ReportTable.*;
-import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 
 /**
  * @author Lars Helge Overland
@@ -87,13 +104,6 @@ public class DefaultReportTableService
     public void setReportTableStore( GenericIdentifiableObjectStore<ReportTable> reportTableStore )
     {
         this.reportTableStore = reportTableStore;
-    }
-
-    private GenericIdentifiableObjectStore<ReportTableGroup> reportTableGroupStore;
-
-    public void setReportTableGroupStore( GenericIdentifiableObjectStore<ReportTableGroup> reportTableGroupStore )
-    {
-        this.reportTableGroupStore = reportTableGroupStore;
     }
 
     protected ReportService reportService;
@@ -160,6 +170,7 @@ public class DefaultReportTableService
     public Grid getReportTableGrid( String uid, I18nFormat format, Date reportingPeriod, String organisationUnitUid )
     {
         ReportTable reportTable = getReportTable( uid );
+        
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitUid );
 
         return getReportTableGrid( reportTable.getId(), format, reportingPeriod, organisationUnit.getId() );
@@ -261,97 +272,6 @@ public class DefaultReportTableService
     }
 
     // -------------------------------------------------------------------------
-    // ReportTableGroup
-    // -------------------------------------------------------------------------
-
-    public int addReportTableGroup( ReportTableGroup reportTableGroup )
-    {
-        return reportTableGroupStore.save( reportTableGroup );
-    }
-
-    public void updateReportTableGroup( ReportTableGroup reportTableGroup )
-    {
-        reportTableGroupStore.update( reportTableGroup );
-    }
-
-    public void deleteReportTableGroup( ReportTableGroup reportTableGroup )
-    {
-        reportTableGroupStore.delete( reportTableGroup );
-    }
-
-    public ReportTableGroup getReportTableGroup( int id )
-    {
-        return reportTableGroupStore.get( id );
-    }
-
-    public ReportTableGroup getReportTableGroup( String uid )
-    {
-        return reportTableGroupStore.getByUid( uid );
-    }
-
-    public ReportTableGroup getReportTableGroupByName( String name )
-    {
-        return reportTableGroupStore.getByName( name );
-    }
-
-    public Collection<ReportTableGroup> getAllReportTableGroups()
-    {
-        return reportTableGroupStore.getAll();
-    }
-
-    public Collection<ReportTableGroup> getReportTableGroups( final Collection<Integer> identifiers )
-    {
-        Collection<ReportTableGroup> groups = getAllReportTableGroups();
-
-        return identifiers == null ? groups : FilterUtils.filter( groups, new Filter<ReportTableGroup>()
-        {
-            public boolean retain( ReportTableGroup object )
-            {
-                return identifiers.contains( object.getId() );
-            }
-        } );
-    }
-
-    public Collection<ReportTableGroup> getGroupsContainingReportTable( ReportTable reportTable )
-    {
-        Collection<ReportTableGroup> groups = getAllReportTableGroups();
-
-        Iterator<ReportTableGroup> iterator = groups.iterator();
-
-        while ( iterator.hasNext() )
-        {
-            ReportTableGroup group = iterator.next();
-
-            if ( !group.getMembers().contains( reportTable ) )
-            {
-                iterator.remove();
-            }
-        }
-
-        return groups;
-    }
-
-    public int getReportTableGroupCount()
-    {
-        return reportTableGroupStore.getCount();
-    }
-
-    public int getReportTableGroupCountByName( String name )
-    {
-        return reportTableGroupStore.getCountByName( name );
-    }
-
-    public Collection<ReportTableGroup> getReportTableGroupsBetween( int first, int max )
-    {
-        return reportTableGroupStore.getBetween( first, max );
-    }
-
-    public Collection<ReportTableGroup> getReportTableGroupsBetweenByName( String name, int first, int max )
-    {
-        return reportTableGroupStore.getBetweenByName( name, first, max );
-    }
-
-    // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
@@ -400,7 +320,7 @@ public class DefaultReportTableService
             OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
             reportTable.getRelativeUnits().addAll(
                 new ArrayList<OrganisationUnit>( organisationUnitService.getLeafOrganisationUnits( organisationUnitId ) ) );
-            reportTable.setOrganisationUnitName( organisationUnit.getName() );
+            reportTable.setParentOrganisationUnit( organisationUnit );
 
             log.info( "Leaf parent organisation unit: " + organisationUnit.getName() );
         }
@@ -417,7 +337,7 @@ public class DefaultReportTableService
             reportTable.getRelativeUnits().addAll(
                 new ArrayList<OrganisationUnit>( organisationUnit.getGrandChildren() ) );
             reportTable.getRelativeUnits().add( organisationUnit );
-            reportTable.setOrganisationUnitName( organisationUnit.getName() );
+            reportTable.setParentOrganisationUnit( organisationUnit );
 
             log.info( "Grand parent organisation unit: " + organisationUnit.getName() );
         }
@@ -432,7 +352,7 @@ public class DefaultReportTableService
             organisationUnit.setCurrentParent( true );
             reportTable.getRelativeUnits().addAll( new ArrayList<OrganisationUnit>( organisationUnit.getChildren() ) );
             reportTable.getRelativeUnits().add( organisationUnit );
-            reportTable.setOrganisationUnitName( organisationUnit.getName() );
+            reportTable.setParentOrganisationUnit( organisationUnit );
 
             log.info( "Parent organisation unit: " + organisationUnit.getName() );
         }
@@ -445,7 +365,7 @@ public class DefaultReportTableService
         {
             OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
             reportTable.getRelativeUnits().add( organisationUnit );
-            reportTable.setOrganisationUnitName( organisationUnit.getName() );
+            reportTable.setParentOrganisationUnit( organisationUnit );
 
             log.info( "Organisation unit: " + organisationUnit.getName() );
         }
@@ -468,7 +388,7 @@ public class DefaultReportTableService
      */
     private Grid getGrid( ReportTable reportTable )
     {
-        String subtitle = StringUtils.trimToEmpty( reportTable.getOrganisationUnitName() ) + SPACE
+        String subtitle = StringUtils.trimToEmpty( reportTable.getParentOrganisationUnitName() ) + SPACE
             + StringUtils.trimToEmpty( reportTable.getReportingPeriodName() );
 
         Grid grid = new ListGrid().setTitle( reportTable.getName() ).setSubtitle( subtitle );
@@ -546,7 +466,7 @@ public class DefaultReportTableService
             }
 
             grid.addValue( reportTable.getReportingPeriodName() );
-            grid.addValue( reportTable.getOrganisationUnitName() );
+            grid.addValue( reportTable.getParentOrganisationUnitName() );
             grid.addValue( isCurrentParent( row ) ? YES : NO );
 
             for ( List<NameableObject> column : reportTable.getColumns() ) // Values

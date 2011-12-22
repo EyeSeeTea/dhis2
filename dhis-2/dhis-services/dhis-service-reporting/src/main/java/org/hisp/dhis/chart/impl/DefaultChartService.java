@@ -27,11 +27,15 @@ package org.hisp.dhis.chart.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.chart.Chart.TYPE_AREA;
 import static org.hisp.dhis.chart.Chart.TYPE_BAR;
+import static org.hisp.dhis.chart.Chart.TYPE_COLUMN;
 import static org.hisp.dhis.chart.Chart.TYPE_LINE;
 import static org.hisp.dhis.chart.Chart.TYPE_PIE;
 import static org.hisp.dhis.chart.Chart.TYPE_STACKED_BAR;
-import static org.hisp.dhis.chart.Chart.*;
+import static org.hisp.dhis.chart.Chart.TYPE_STACKED_COLUMN;
+import static org.hisp.dhis.options.SystemSettingManager.AGGREGATION_STRATEGY_REAL_TIME;
+import static org.hisp.dhis.options.SystemSettingManager.KEY_AGGREGATION_STRATEGY;
 import static org.hisp.dhis.reporttable.ReportTable.getIdentifier;
 import static org.hisp.dhis.system.util.ConversionUtils.getArray;
 
@@ -41,7 +45,6 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,15 +54,12 @@ import org.apache.commons.math.analysis.SplineInterpolator;
 import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.UnivariateRealInterpolator;
 import org.apache.commons.math.stat.regression.SimpleRegression;
-import org.hisp.dhis.aggregation.AggregationService;
 import org.hisp.dhis.chart.Chart;
-import org.hisp.dhis.chart.ChartGroup;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -116,8 +116,6 @@ public class DefaultChartService
     private static final Font labelFont = new Font( "Tahoma", Font.PLAIN, 10 );
 
     private static final String TREND_PREFIX = "Trend - ";
-    private static final String TITLE_SEPARATOR = " - ";
-    private static final String DEFAULT_TITLE_PIVOT_CHART = "Pivot Chart";
 
     private static final Color[] colors = {Color.decode( "#d54a4a" ), Color.decode( "#2e4e83" ),
         Color.decode( "#75e077" ), Color.decode( "#e3e274" ), Color.decode( "#e58c6d" ), Color.decode( "#df6ff3" ),
@@ -156,20 +154,6 @@ public class DefaultChartService
         this.minMaxDataElementService = minMaxDataElementService;
     }
 
-    private AggregationService aggregationService;
-
-    public void setAggregationService( AggregationService aggregationService )
-    {
-        this.aggregationService = aggregationService;
-    }
-
-    private SystemSettingManager systemSettingManager;
-
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
-    {
-        this.systemSettingManager = systemSettingManager;
-    }
-
     private CurrentUserService currentUserService;
 
     public void setCurrentUserService( CurrentUserService currentUserService )
@@ -177,18 +161,18 @@ public class DefaultChartService
         this.currentUserService = currentUserService;
     }
 
-    private GenericIdentifiableObjectStore<ChartGroup> chartGroupStore;
-
-    public void setChartGroupStore( GenericIdentifiableObjectStore<ChartGroup> chartGroupStore )
-    {
-        this.chartGroupStore = chartGroupStore;
-    }
-    
     private ReportTableManager reportTableManager;
 
     public void setReportTableManager( ReportTableManager reportTableManager )
     {
         this.reportTableManager = reportTableManager;
+    }
+
+    private SystemSettingManager systemSettingManager;
+
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    {
+        this.systemSettingManager = systemSettingManager;
     }
 
     // -------------------------------------------------------------------------
@@ -286,7 +270,7 @@ public class DefaultChartService
     }
 
     public JFreeChart getJFreeChart( List<Indicator> indicators, List<DataElement> dataElements,
-                                     List<DataSet> dataSets, List<Period> periods, List<OrganisationUnit> organisationUnits, 
+                                     List<Period> periods, List<OrganisationUnit> organisationUnits, 
                                      String series, String category, String filter,
                                      boolean regression, I18nFormat format )
     {
@@ -298,7 +282,6 @@ public class DefaultChartService
         chart.setRegression( regression );
         chart.setIndicators( indicators );
         chart.setDataElements( dataElements );
-        chart.setDataSets( dataSets );
         chart.setRelativePeriods( periods );
         chart.setOrganisationUnits( organisationUnits );
         chart.setFormat( format );
@@ -423,92 +406,6 @@ public class DefaultChartService
         JFreeChart jFreeChart = getBasicJFreeChart( plot );
 
         return jFreeChart;
-    }
-
-    // -------------------------------------------------------------------------
-    // ChartGroup
-    // -------------------------------------------------------------------------
-
-    public int addChartGroup( ChartGroup chartGroup )
-    {
-        return chartGroupStore.save( chartGroup );
-    }
-
-    public void updateChartGroup( ChartGroup chartGroup )
-    {
-        chartGroupStore.update( chartGroup );
-    }
-
-    public void deleteChartGroup( ChartGroup chartGroup )
-    {
-        chartGroupStore.delete( chartGroup );
-    }
-
-    public ChartGroup getChartGroup( int id )
-    {
-        return chartGroupStore.get( id );
-    }
-
-    public ChartGroup getChartGroupByName( String name )
-    {
-        return chartGroupStore.getByName( name );
-    }
-
-    public Collection<ChartGroup> getAllChartGroups()
-    {
-        return chartGroupStore.getAll();
-    }
-
-    public Collection<ChartGroup> getChartGroups( final Collection<Integer> identifiers )
-    {
-        Collection<ChartGroup> groups = getAllChartGroups();
-
-        return identifiers == null ? groups : FilterUtils.filter( groups, new Filter<ChartGroup>()
-        {
-            public boolean retain( ChartGroup object )
-            {
-                return identifiers.contains( object.getId() );
-            }
-        } );
-    }
-
-    public Collection<ChartGroup> getGroupsContainingChart( Chart chart )
-    {
-        Collection<ChartGroup> groups = getAllChartGroups();
-
-        Iterator<ChartGroup> iterator = groups.iterator();
-
-        while ( iterator.hasNext() )
-        {
-            ChartGroup group = iterator.next();
-
-            if ( !group.getMembers().contains( chart ) )
-            {
-                iterator.remove();
-            }
-        }
-
-        return groups;
-    }
-
-    public int getChartGroupCount()
-    {
-        return chartGroupStore.getCount();
-    }
-
-    public int getChartGroupCountByName( String name )
-    {
-        return chartGroupStore.getCountByName( name );
-    }
-
-    public Collection<ChartGroup> getChartGroupsBetween( int first, int max )
-    {
-        return chartGroupStore.getBetween( first, max );
-    }
-
-    public Collection<ChartGroup> getChartGroupsBetweenByName( String name, int first, int max )
-    {
-        return chartGroupStore.getBetweenByName( name, first, max );
     }
 
     // -------------------------------------------------------------------------
@@ -649,7 +546,7 @@ public class DefaultChartService
 
         CategoryAxis xAxis = plot.getDomainAxis();
         xAxis.setCategoryLabelPositions( CategoryLabelPositions.UP_45 );
-        xAxis.setLabel( chart.getDomainAxixLabel() );
+        xAxis.setLabel( chart.getDomainAxisLabel() );
 
         ValueAxis yAxis = plot.getRangeAxis();
         yAxis.setLabel( chart.getRangeAxisLabel() );
@@ -670,12 +567,12 @@ public class DefaultChartService
 
         if ( chart.isType( TYPE_STACKED_BAR ) )
         {
-            stackedBarChart = ChartFactory.createStackedBarChart( chart.getName(), chart.getDomainAxixLabel(),
+            stackedBarChart = ChartFactory.createStackedBarChart( chart.getName(), chart.getDomainAxisLabel(),
                 chart.getRangeAxisLabel(), dataSet, PlotOrientation.VERTICAL, true, false, false );
         }
         else
         {
-            stackedBarChart = ChartFactory.createStackedBarChart3D( chart.getName(), chart.getDomainAxixLabel(),
+            stackedBarChart = ChartFactory.createStackedBarChart3D( chart.getName(), chart.getDomainAxisLabel(),
                 chart.getRangeAxisLabel(), dataSet, PlotOrientation.VERTICAL, true, false, false );
         }
 
@@ -736,20 +633,29 @@ public class DefaultChartService
 
     private CategoryDataset[] getCategoryDataSet( Chart chart )
     {
-        Map<String, Double> valueMap = reportTableManager.getAggregatedValueMap( chart );
+        Map<String, Double> valueMap = null;
+        
+        if ( AGGREGATION_STRATEGY_REAL_TIME.equals( systemSettingManager.getSystemSetting( KEY_AGGREGATION_STRATEGY, AGGREGATION_STRATEGY_REAL_TIME ) ) )
+        {
+            valueMap = reportTableManager.getAggregatedValueMapRealTime( chart ); // Temp fix
+        }
+        else
+        {
+            valueMap = reportTableManager.getAggregatedValueMap( chart );
+        }        
         
         DefaultCategoryDataset regularDataSet = new DefaultCategoryDataset();
         DefaultCategoryDataset regressionDataSet = new DefaultCategoryDataset();
         
         SimpleRegression regression = new SimpleRegression();
         
-        double count = 0;
-        
         for ( NameableObject series : chart.series() )
         {
+            double categoryIndex = 0;
+            
             for ( NameableObject category : chart.category() )
-            {
-                count++;
+            {   
+                categoryIndex++;
                 
                 String key = getIdentifier( Arrays.asList( series, category, chart.filter() ) );
                 
@@ -757,25 +663,22 @@ public class DefaultChartService
                 
                 regularDataSet.addValue( value, series.getShortName(), category.getShortName() );
                 
-                if ( chart.isRegression() && MathUtils.isEqual( value, MathUtils.ZERO ) )
+                if ( chart.isRegression() && value != null && !MathUtils.isEqual( value, MathUtils.ZERO ) )
                 {
-                    regression.addData( ++count, value );
+                    regression.addData( categoryIndex, value );
                 }
             }
-        }
-        
-        if ( chart.isRegression() ) // Period must be category
-        {
-            count = 0;
             
-            for ( NameableObject series : chart.series() )
+            if ( chart.isRegression() ) // Period must be category
             {
+                categoryIndex = 0;
+                
                 for ( NameableObject category : chart.category() )
                 {
-                    final double value = regression.predict( count++ );
+                    final double value = regression.predict( categoryIndex++ );
 
                     // Enough values must exist for regression
-
+                    
                     if ( !Double.isNaN( value ) )
                     {
                         regressionDataSet.addValue( value, TREND_PREFIX + series.getShortName(), category.getShortName() );

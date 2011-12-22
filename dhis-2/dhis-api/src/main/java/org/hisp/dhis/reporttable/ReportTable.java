@@ -27,11 +27,34 @@ package org.hisp.dhis.reporttable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.common.*;
-import org.hisp.dhis.common.adapter.*;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseNameableObject;
+import org.hisp.dhis.common.CombinationGenerator;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.common.adapter.CategoryComboXmlAdapter;
+import org.hisp.dhis.common.adapter.DataElementXmlAdapter;
+import org.hisp.dhis.common.adapter.DataSetXmlAdapter;
+import org.hisp.dhis.common.adapter.IndicatorXmlAdapter;
+import org.hisp.dhis.common.adapter.OrganisationUnitXmlAdapter;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
@@ -44,10 +67,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.period.comparator.AscendingPeriodComparator;
-
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.*;
 
 /**
  * The ReportTable object represents a customizable database table. It has
@@ -169,11 +188,6 @@ public class ReportTable extends BaseIdentifiableObject
     private List<OrganisationUnit> units = new ArrayList<OrganisationUnit>();
 
     /**
-     * The list of OrganisationUnits the ReportTable contains.
-     */
-    private Set<ReportTableGroup> groups = new HashSet<ReportTableGroup>();
-
-    /**
      * The DataElementCategoryCombo for the ReportTable.
      */
     private DataElementCategoryCombo categoryCombo;
@@ -236,7 +250,7 @@ public class ReportTable extends BaseIdentifiableObject
     /**
      * Static OrganisationUnits and relative OrganisationUnits.
      */
-    private List<OrganisationUnit> allUnits = new ArrayList<OrganisationUnit>();
+    private List<NameableObject> allUnits = new ArrayList<NameableObject>();
 
     /**
      * All Indicatrs, including DateElements, Indicators and DataSets.
@@ -282,10 +296,10 @@ public class ReportTable extends BaseIdentifiableObject
     private String reportingPeriodName;
 
     /**
-     * The name of the (parent) organisation unit based on the report param.
+     * The parent organisation unit.
      */
-    private String organisationUnitName;
-
+    private OrganisationUnit parentOrganisationUnit;
+    
     /**
      * The category option combos derived from the dimension set.
      */
@@ -413,34 +427,6 @@ public class ReportTable extends BaseIdentifiableObject
     // Public methods
     // -------------------------------------------------------------------------
 
-    public void addReportTableGroup( ReportTableGroup group )
-    {
-        groups.add( group );
-        group.getMembers().add( this );
-    }
-
-    public void removeReportTableGroup( ReportTableGroup group )
-    {
-        groups.remove( group );
-        group.getMembers().remove( this );
-    }
-
-    public void updateReportTableGroups( Set<ReportTableGroup> updates )
-    {
-        for ( ReportTableGroup group : new HashSet<ReportTableGroup>( groups ) )
-        {
-            if ( !updates.contains( group ) )
-            {
-                removeReportTableGroup( group );
-            }
-        }
-
-        for ( ReportTableGroup group : updates )
-        {
-            addReportTableGroup( group );
-        }
-    }
-
     /**
      * Creates a map which contains mappings between the organisation unit
      * identifier and the name of the group this organisation unit is a member
@@ -458,9 +444,9 @@ public class ReportTable extends BaseIdentifiableObject
         {
             Map<Integer, String> map = new HashMap<Integer, String>();
 
-            for ( OrganisationUnit unit : allUnits )
+            for ( NameableObject unit : allUnits )
             {
-                map.put( unit.getId(), unit.getGroupNameInGroupSet( groupSet ) );
+                map.put( unit.getId(), ((OrganisationUnit) unit).getGroupNameInGroupSet( groupSet ) );
             }
 
             organisationUnitGroupMap.put( columnEncode( KEY_ORGUNIT_GROUPSET + groupSet.getName() ), map );
@@ -671,6 +657,14 @@ public class ReportTable extends BaseIdentifiableObject
     {
         return reportParams != null;
     }
+    
+    /**
+     * Returns the name of the parent organisation unit, or an empty string if null.
+     */
+    public String getParentOrganisationUnitName()
+    {
+        return parentOrganisationUnit != null ? parentOrganisationUnit.getName() : EMPTY;
+    }
 
     // -------------------------------------------------------------------------
     // Supportive methods
@@ -863,21 +857,6 @@ public class ReportTable extends BaseIdentifiableObject
         this.dataElements = dataElements;
     }
 
-    @XmlElementWrapper( name = "categoryOptionCombos" )
-    @XmlElement( name = "categoryOptionCombo" )
-    @XmlJavaTypeAdapter( CategoryOptionComboXmlAdapter.class )
-    @JsonProperty
-    @JsonSerialize( contentAs = BaseNameableObject.class )
-    public List<DataElementCategoryOptionCombo> getCategoryOptionCombos()
-    {
-        return categoryOptionCombos;
-    }
-
-    public void setCategoryOptionCombos( List<DataElementCategoryOptionCombo> categoryOptionCombos )
-    {
-        this.categoryOptionCombos = categoryOptionCombos;
-    }
-
     @XmlElementWrapper( name = "indicators" )
     @XmlElement( name = "indicator" )
     @XmlJavaTypeAdapter( IndicatorXmlAdapter.class )
@@ -1031,16 +1010,6 @@ public class ReportTable extends BaseIdentifiableObject
         this.topLimit = topLimit;
     }
 
-    public Set<ReportTableGroup> getGroups()
-    {
-        return groups;
-    }
-
-    public void setGroups( Set<ReportTableGroup> groups )
-    {
-        this.groups = groups;
-    }
-
     // -------------------------------------------------------------------------
     // Get- and set-methods for transient properties
     // -------------------------------------------------------------------------
@@ -1070,7 +1039,7 @@ public class ReportTable extends BaseIdentifiableObject
         this.relativeUnits = relativeUnits;
     }
 
-    public List<OrganisationUnit> getAllUnits()
+    public List<NameableObject> getAllUnits()
     {
         return allUnits;
     }
@@ -1093,16 +1062,6 @@ public class ReportTable extends BaseIdentifiableObject
     public void setReportingPeriodName( String reportingPeriodName )
     {
         this.reportingPeriodName = reportingPeriodName;
-    }
-
-    public String getOrganisationUnitName()
-    {
-        return organisationUnitName;
-    }
-
-    public void setOrganisationUnitName( String organisationUnitName )
-    {
-        this.organisationUnitName = organisationUnitName;
     }
 
     public List<List<NameableObject>> getColumns()
@@ -1128,5 +1087,25 @@ public class ReportTable extends BaseIdentifiableObject
     public List<String> getIndexCodeColumns()
     {
         return indexCodeColumns;
+    }
+    
+    public OrganisationUnit getParentOrganisationUnit()
+    {
+        return parentOrganisationUnit;
+    }
+
+    public void setParentOrganisationUnit( OrganisationUnit parentOrganisationUnit )
+    {
+        this.parentOrganisationUnit = parentOrganisationUnit;
+    }
+
+    public List<DataElementCategoryOptionCombo> getCategoryOptionCombos()
+    {
+        return categoryOptionCombos;
+    }
+
+    public void setCategoryOptionCombos( List<DataElementCategoryOptionCombo> categoryOptionCombos )
+    {
+        this.categoryOptionCombos = categoryOptionCombos;
     }
 }
