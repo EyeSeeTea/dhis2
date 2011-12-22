@@ -1099,7 +1099,6 @@ Ext.onReady( function() {
                         this.series.names = f.names[this.series.dimension];
                         this.category.names = f.names[this.category.dimension];
                         this.filter.names = f.names[this.filter.dimension];
-console.log(f);return;                        
                         
                         DV.cmp.favorite.trendline.setValue(f.regression);
                         DV.cmp.favorite.hidesubtitle.setValue(f.hideSubtitle);
