@@ -76,6 +76,7 @@ public class ReportTableTest
     private List<Period> periods;
     private List<Period> relativePeriods;
     private List<OrganisationUnit> units;
+    private List<OrganisationUnit> relativeUnits;
     private List<OrganisationUnitGroup> groups;
 
     private PeriodType montlyPeriodType;
@@ -126,6 +127,7 @@ public class ReportTableTest
         periods = new ArrayList<Period>();
         relativePeriods = new ArrayList<Period>();
         units = new ArrayList<OrganisationUnit>();
+        relativeUnits = new ArrayList<OrganisationUnit>();
         groups = new ArrayList<OrganisationUnitGroup>();
         
         montlyPeriodType = PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME );
@@ -201,6 +203,7 @@ public class ReportTableTest
         
         units.add( unitA );
         units.add( unitB );
+        relativeUnits.add( unitA );
         
         groupA = createOrganisationUnitGroup( 'A' );
         groupB = createOrganisationUnitGroup( 'B' );
@@ -349,7 +352,65 @@ public class ReportTableTest
         assertNotNull( getColumnName( a3 ) );
         assertEquals( "organisationunitgroupa_indicatorshorta", getColumnName( a3 ) );
     }
-    
+
+    @Test
+    public void testOrganisationUnitGroupReportTableA()
+    {
+        ReportTable reportTable = new ReportTable( "Embezzlement", false,
+            new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, new ArrayList<OrganisationUnit>(), relativeUnits, 
+            groups, null, true, true, false, relatives, null, i18nFormat, "january_2000" );
+
+        reportTable.init();
+        
+        List<String> indexColumns = reportTable.getIndexColumns();
+        
+        assertNotNull( indexColumns );
+        assertEquals( 1, indexColumns.size() );
+        assertTrue( indexColumns.contains( ReportTable.ORGANISATIONUNIT_ID ) );
+        
+        List<String> indexNameColumns = reportTable.getIndexNameColumns();
+
+        assertNotNull( indexNameColumns );
+        assertEquals( 1, indexNameColumns.size() );
+        assertTrue( indexNameColumns.contains( ReportTable.ORGANISATIONUNIT_NAME ) );
+        
+        List<List<NameableObject>> columns = reportTable.getColumns();
+
+        assertNotNull( columns ); 
+        assertEquals( 8, columns.size() );
+        
+        Iterator<List<NameableObject>> iterator = columns.iterator();
+        
+        assertEquals( getList( indicatorA, periodA ), iterator.next() );
+        assertEquals( getList( indicatorA, periodB ), iterator.next() );
+        assertEquals( getList( indicatorA, periodC ), iterator.next() );
+        assertEquals( getList( indicatorA, periodD ), iterator.next() );
+        assertEquals( getList( indicatorB, periodA ), iterator.next() );
+        assertEquals( getList( indicatorB, periodB ), iterator.next() );
+        assertEquals( getList( indicatorB, periodC ), iterator.next() );
+        assertEquals( getList( indicatorB, periodD ), iterator.next() );
+            
+        List<String> columnNames = getColumnNames( reportTable.getColumns() );
+        
+        assertNotNull( columnNames );        
+        assertEquals( 8, columnNames.size() );
+        
+        assertTrue( columnNames.contains( "indicatorshorta_reporting_month" ) );
+        assertTrue( columnNames.contains( "indicatorshorta_year" ) );
+        assertTrue( columnNames.contains( "indicatorshortb_reporting_month" ) );
+        assertTrue( columnNames.contains( "indicatorshortb_year" ) );
+        
+        List<List<NameableObject>> rows = reportTable.getRows();
+        
+        assertNotNull( rows );
+        assertEquals( 2, rows.size() );
+        
+        iterator = rows.iterator();
+        
+        assertEquals( getList( groupA ), iterator.next() );
+        assertEquals( getList( groupB ), iterator.next() );
+    }
+
     @Test
     public void testIndicatorReportTableA()
     {
