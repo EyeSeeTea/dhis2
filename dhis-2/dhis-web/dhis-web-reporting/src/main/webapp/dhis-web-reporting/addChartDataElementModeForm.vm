@@ -1,57 +1,4 @@
 <table>
-<!-- Periods -->
-
-<tr>
-    <th colspan="2">$i18n.getString( "category_y_available_periods" )</th>
-</tr>
-<tr>
-	<td>
-		<input type="button" style="width:60px" value="$i18n.getString( 'prev' )" onclick="getAvailablePeriods( 'periodType', 'availablePeriods', 'selectedPeriods', '-1' )" />
-		<input type="button" style="width:60px" value="$i18n.getString( 'next' )" onclick="getAvailablePeriods( 'periodType', 'availablePeriods', 'selectedPeriods', '1' )" />
-		<select id="periodType" name="periodType" style="min-width:478px" onchange="getAvailablePeriods( 'periodType', 'availablePeriods', 'selectedPeriods', '0' )">
-			<option value="">[ $i18n.getString( "select_period_type_all" ) ]</option>
-			#foreach ( $type in $periodTypes )
-				<option value="$type.name">$i18n.getString( $type.name )</option>
-			#end
-		</select>
-	</td>
-</tr>
-<tr>
-    <td colspan="2">
-        <select multiple size="6" id="availablePeriods" name="availablePeriods" style="min-width:600px" ondblclick="moveSelectedById( 'availablePeriods', 'selectedPeriods' )">
-            #foreach ( $period in $availablePeriods )
-                <option value="$period.externalId">$format.formatPeriod( $period )</option>
-            #end
-        </select>
-    </td>
-</tr>
-
-<tr>
-    <td colspan="2">
-        <input type="button" value="$i18n.getString( 'add_selected' )" title="$i18n.getString( 'add_selected' )" style="width:120px" onclick="moveSelectedById( 'availablePeriods', 'selectedPeriods' )" />
-        <input type="button" value="$i18n.getString( 'add_all' )" title="$i18n.getString( 'add_all' )" style="width:120px" onclick="moveAllById( 'availablePeriods', 'selectedPeriods' )" />
-        <input type="button" value="$i18n.getString( 'remove_selected' )" title="$i18n.getString( 'remove_selected' )" style="width:120px" onclick="moveSelectedById( 'selectedPeriods', 'availablePeriods' )" />
-        <input type="button" value="$i18n.getString( 'remove_all' )" title="$i18n.getString( 'remove_all' )" style="width:120px" onclick="moveAllById( 'selectedPeriods', 'availablePeriods' )" />
-    </td>
-</tr>
-
-<tr>
-    <th colspan="2">$i18n.getString( "category_y_selected_periods" )</th>
-</tr>
-
-<tr>
-    <td>
-        <select size="6" id="selectedPeriods" name="selectedPeriods" style="min-width:600px" multiple ondblclick="moveSelectedById( 'selectedPeriods', 'availablePeriods' )">               
-            #foreach ( $period in $selectedPeriods )
-                <option value="$period.externalId">$format.formatPeriod( $period )</option>
-            #end
-        </select>
-    </td>
-    <td></td>
-</tr>
-<tr>
-    <td colspan="2" style="height:15px"></td>
-</tr>
 <!-- Relative periods -->
 
 <tr>
@@ -59,21 +6,23 @@
 </tr>
 <tr>
 	<td>
-	    <label for="reportingMonth">$i18n.getString( "reporting_month" )</label>
-		<input type="checkbox" id="reportingMonth" name="reportingMonth" value="true"#if( $chart.relatives.isReportingMonth() ) checked#end>&nbsp;
-		<label for="monthsThisYear">$i18n.getString( "months_this_year" )</label>
-		<input type="checkbox" id="monthsThisYear" name="monthsThisYear" value="true""#if( $chart.relatives.isMonthsThisYear() ) checked#end>&nbsp;
-		<label for="quartersThisYear">$i18n.getString( "quarters_this_year" )</label>
-		<input type="checkbox" id="quartersThisYear" name="quartersThisYear" value="true"#if( $chart.relatives.isQuartersThisYear() ) checked#end>&nbsp;
+	    <label for="lastMonth">$i18n.getString( "last_month" )</label>
+		<input type="checkbox" id="lastMonth" name="lastMonth" value="true"#if( $chart.relatives.isReportingMonth() ) checked#end>&nbsp;
+		<label for="lastQuarter">$i18n.getString( "last_quarter" )</label>
+		<input type="checkbox" id="lastQuarter" name="lastQuarter" value="true""#if( $chart.relatives.isReportingQuarter() ) checked#end>&nbsp;
+		<label for="lastSixMonth">$i18n.getString( "last_six_month" )</label>
+		<input type="checkbox" id="lastSixMonth" name="lastSixMonth" value="true"#if( $chart.relatives.isLastSixMonth() ) checked#end>&nbsp;
 		<label for="thisYear">$i18n.getString( "this_year" )</label>
-		<input type="checkbox" id="thisYear" name="thisYear" value="true"#if( $chart.relatives.isThisYear() ) checked#end><br><br>
+		<input type="checkbox" id="thisYear" name="thisYear" value="true"#if( $chart.relatives.isThisYear() ) checked#end><br>
 		
-		<label for="monthsLastYear">$i18n.getString( "months_last_year" )</label>
-		<input type="checkbox" id="monthsLastYear" name="monthsLastYear" value="true""#if( $chart.relatives.isMonthsLastYear() ) checked#end>&nbsp;
-		<label for="quartersLastYear">$i18n.getString( "quarters_last_year" )</label>
-		<input type="checkbox" id="quartersLastYear" name="quartersLastYear" value="true"#if( $chart.relatives.isQuartersLastYear() ) checked#end>&nbsp;
-		<label for="lastYear">$i18n.getString( "last_year" )</label>
-		<input type="checkbox" id="lastYear" name="lastYear" value="true"#if( $chart.relatives.isLastYear() ) checked#end>         
+		<label for="last12Months">$i18n.getString( "last_12_months" )</label>
+		<input type="checkbox" id="last12Months" name="last12Months" value="true""#if( $chart.relatives.isLast12Months() ) checked#end>&nbsp;
+		<label for="last4Quarters">$i18n.getString( "last_4_quarters" )</label>
+		<input type="checkbox" id="last4Quarters" name="last4Quarters" value="true"#if( $chart.relatives.isLast4Quarters() ) checked#end>&nbsp;
+		<label for="last2SixMonths">$i18n.getString( "last_2_sixmonths" )</label>
+		<input type="checkbox" id="last2SixMonths" name="last2SixMonths" value="true"#if( $chart.relatives.isLast2SixMonths() ) checked#end>
+		<label for="last5Years">$i18n.getString( "last_5_years" )</label>
+		<input type="checkbox" id="last5Years" name="last5Years" value="true"#if( $chart.relatives.isLast5Years() ) checked#end>
     </td>
 </tr>
 <tr>

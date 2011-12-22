@@ -118,8 +118,6 @@ public class Chart
 
     private List<DataSet> dataSets = new ArrayList<DataSet>();
 
-    private List<Period> periods = new ArrayList<Period>();
-
     private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
 
     private RelativePeriods relatives;
@@ -135,8 +133,6 @@ public class Chart
     private transient I18nFormat format;
 
     private transient List<Period> relativePeriods = new ArrayList<Period>();
-
-    private transient List<Period> allPeriods = new ArrayList<Period>();
 
     private transient OrganisationUnit organisationUnit;
 
@@ -157,8 +153,6 @@ public class Chart
 
     public void init()
     {
-        allPeriods.addAll( periods );
-        allPeriods.addAll( relativePeriods );
         allOrganisationUnits.addAll( organisationUnits );
 
         if ( organisationUnit != null )
@@ -220,7 +214,7 @@ public class Chart
     {
         if ( DIMENSION_PERIOD.equals( filter ) )
         {
-            return format.formatPeriod( getAllPeriods().get( 0 ) );
+            return format.formatPeriod( getRelativePeriods().get( 0 ) );
         }
         
         return filter().getName();
@@ -237,9 +231,9 @@ public class Chart
         }
         else if ( DIMENSION_PERIOD.equals( dimension ) )
         {
-            namePeriods( getAllPeriods(), format );
+            namePeriods( getRelativePeriods(), format );
             
-            list.addAll( getAllPeriods() );
+            list.addAll( getRelativePeriods() );
         }
         else if ( DIMENSION_ORGANISATIONUNIT.equals( dimension ) )
         {
@@ -566,18 +560,6 @@ public class Chart
         this.dataSets = dataSets;
     }
 
-    @XmlElement
-    @JsonProperty
-    public List<Period> getPeriods()
-    {
-        return periods;
-    }
-
-    public void setPeriods( List<Period> periods )
-    {
-        this.periods = periods;
-    }
-
     @XmlElementWrapper( name = "organisationUnits" )
     @XmlElement( name = "organisationUnit" )
     @XmlJavaTypeAdapter( OrganisationUnitXmlAdapter.class )
@@ -635,16 +617,6 @@ public class Chart
     public void setRelativePeriods( List<Period> relativePeriods )
     {
         this.relativePeriods = relativePeriods;
-    }
-
-    public List<Period> getAllPeriods()
-    {
-        return allPeriods;
-    }
-
-    public void setAllPeriods( List<Period> allPeriods )
-    {
-        this.allPeriods = allPeriods;
     }
 
     public OrganisationUnit getOrganisationUnit()
