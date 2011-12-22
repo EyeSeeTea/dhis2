@@ -709,9 +709,15 @@ Ext.onReady( function() {
                     params.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
                     params.hideLegend = DV.cmp.favorite.hidelegend.getValue();
                     params.userOrganisationUnit = DV.cmp.favorite.userorganisationunit.getValue();
-                    params.xAxisLabel = DV.cmp.favorite.xaxislabel.getValue();
-                    params.yAxisLabel = DV.cmp.favorite.yaxislabel.getValue();
-                    params.targetLineValue = DV.cmp.favorite.targetlinevalue.getValue();
+                    if (DV.cmp.favorite.xaxislabel.getValue()) {
+                        params.xAxisLabel = DV.cmp.favorite.xaxislabel.getValue();
+                    }
+                    if (DV.cmp.favorite.yaxislabel.getValue()) {
+                        params.yAxisLabel = DV.cmp.favorite.yaxislabel.getValue();
+                    }
+                    if (DV.cmp.favorite.targetlinevalue.getValue()) {
+                        params.targetLineValue = DV.cmp.favorite.targetlinevalue.getValue();
+                    }
                     if (params.targetLineValue && !DV.cmp.favorite.targetlinelabel.isDisabled()) {
                         params.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
                     }
