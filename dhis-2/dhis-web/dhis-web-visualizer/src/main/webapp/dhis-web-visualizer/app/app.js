@@ -891,7 +891,7 @@ Ext.onReady( function() {
             }
         },
         favorite: Ext.create('Ext.data.Store', {
-            fields: ['id', 'name', 'lastUpdated'],
+            fields: ['id', 'name', 'lastUpdated', 'userId'],
             proxy: {
                 type: 'ajax',
                 url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_getall,
@@ -1127,7 +1127,7 @@ Ext.onReady( function() {
                     Ext.Array.each(DV.value.values, function(item) {
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(storage[item.d].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.p));
-                        item[DV.conf.finals.dimension.organisationunit.value] = DV.cmp.dimension.organisationunit.treepanel.findNameById(item.o);
+                        item[DV.conf.finals.dimension.organisationunit.value] = DV.util.string.getEncodedString(DV.cmp.dimension.organisationunit.treepanel.findNameById(item.o));
                         item.v = parseFloat(item.v);
                     });
                     

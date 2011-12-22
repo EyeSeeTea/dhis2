@@ -1,7 +1,7 @@
-package org.hisp.dhis.organisationunit;
+package org.hisp.dhis.visualizer.action;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,36 +27,50 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.chart.ChartService;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.hisp.dhis.common.BaseCollection;
-import org.hisp.dhis.common.Dxf2Namespace;
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Jan Henrik Overland
  */
-@XmlRootElement( name = "organisationUnitLevels", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
-public class OrganisationUnitLevels extends BaseCollection
+public class GetAllChartsAction
+    implements Action
 {
-    private List<OrganisationUnitLevel> organisationUnitLevels = new ArrayList<OrganisationUnitLevel>();
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    @XmlElement( name = "organisationUnitLevel" )
-    @JsonProperty( value = "organisationUnitLevels" )
-    public List<OrganisationUnitLevel> getOrganisationUnitLevels()
+    private ChartService chartService;
+
+    public void setChartService( ChartService chartService )
     {
-        return organisationUnitLevels;
+        this.chartService = chartService;
     }
 
-    public void setOrganisationUnitLevels( List<OrganisationUnitLevel> organisationUnitLevels )
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private Collection<Chart> object;
+
+    public Collection<Chart> getObject()
     {
-        this.organisationUnitLevels = organisationUnitLevels;
+        return object;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        object = chartService.getAllCharts();
+
+        return SUCCESS;
     }
 }
