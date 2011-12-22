@@ -248,14 +248,14 @@ public class AddOrUpdateChartAction
     
     private String xAxisLabel;
 
-    public void setxAxisLabel( String xAxisLabel )
+    public void setXAxisLabel( String xAxisLabel )
     {
         this.xAxisLabel = xAxisLabel;
     }
     
     private String yAxisLabel;
 
-    public void setyAxisLabel( String yAxisLabel )
+    public void setYAxisLabel( String yAxisLabel )
     {
         this.yAxisLabel = yAxisLabel;
     }
@@ -376,7 +376,7 @@ public class AddOrUpdateChartAction
         
         if ( xAxisLabel != null )
         {
-            chart.setDomainAxixLabel( xAxisLabel );
+            chart.setDomainAxisLabel( xAxisLabel );
         }
         
         if ( yAxisLabel != null )

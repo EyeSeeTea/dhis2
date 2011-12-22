@@ -917,6 +917,9 @@ Ext.onReady( function() {
                 field: 'lastUpdated',
                 direction: 'DESC'
             },
+            sortStore: function() {
+                this.sort(this.sorting.field, this.sorting.direction);
+            },
             listeners: {
                 load: function(s) {
                     s.filterBy(function(r) {
@@ -929,7 +932,7 @@ Ext.onReady( function() {
                         return false;
                     });
                         
-                    s.sort(this.sorting.field, this.sorting.direction);
+                    s.sortStore();
                     s.each(function(r) {
                         r.data.lastUpdated = r.data.lastUpdated.substr(0,16);
                         r.data.icon = '<img src="images/favorite.png" />';
@@ -1094,6 +1097,16 @@ Ext.onReady( function() {
                         this.series.names = f.names[this.series.dimension];
                         this.category.names = f.names[this.category.dimension];
                         this.filter.names = f.names[this.filter.dimension];
+                        
+                        DV.cmp.favorite.trendline.setValue(f.regression);
+                        DV.cmp.favorite.hidesubtitle.setValue(f.hideSubtitle);
+                        DV.cmp.favorite.hidelegend.setValue(f.hideLegend);
+                        DV.cmp.favorite.userorganisationunit.setValue(f.userOrganisationUnit);
+                        DV.cmp.favorite.xaxislabel.setValue(f.domainAxisLabel);
+                        DV.cmp.favorite.yaxislabel.setValue(f.rangeAxisLabel);
+                        DV.cmp.favorite.targetlinevalue.setValue(f.targetLineValue);
+                        DV.cmp.favorite.targetlinelabel.setValue(f.targetLineLabel);
+                        DV.cmp.favorite.targetlinelabel.xable();
                         
                         this.isRendered = true;
                         
@@ -2563,9 +2576,6 @@ Ext.onReady( function() {
                                                                             {
                                                                                 text: 'Sort by..',
                                                                                 cls: 'dv-toolbar-btn-2',
-                                                                                handler: function() {
-                                                                                    
-                                                                                },
                                                                                 listeners: {
                                                                                     added: function() {
                                                                                         DV.cmp.favorite.sortby = this;
@@ -2592,7 +2602,20 @@ Ext.onReady( function() {
                                                                                                                     var store = DV.store.favorite;
                                                                                                                     store.sorting.field = 'name';
                                                                                                                     store.sorting.direction = 'ASC';
-                                                                                                                    store.sort(store.sorting.field, store.sorting.direction);
+                                                                                                                    store.sortStore();
+                                                                                                                    this.up('menu').hide();
+                                                                                                                }
+                                                                                                            }
+                                                                                                        },
+                                                                                                        {
+                                                                                                            boxLabel: 'System',
+                                                                                                            name: 'sortby',
+                                                                                                            handler: function() {
+                                                                                                                if (this.getValue()) {
+                                                                                                                    var store = DV.store.favorite;
+                                                                                                                    store.sorting.field = 'userId';
+                                                                                                                    store.sorting.direction = 'ASC';
+                                                                                                                    store.sortStore();
                                                                                                                     this.up('menu').hide();
                                                                                                                 }
                                                                                                             }
@@ -2606,7 +2629,7 @@ Ext.onReady( function() {
                                                                                                                     var store = DV.store.favorite;
                                                                                                                     store.sorting.field = 'lastUpdated';
                                                                                                                     store.sorting.direction = 'DESC';
-                                                                                                                    store.sort(store.sorting.field, store.sorting.direction);
+                                                                                                                    store.sortStore();
                                                                                                                     this.up('menu').hide();
                                                                                                                 }
                                                                                                             }
