@@ -34,6 +34,7 @@ DV.conf = {
             dataelement_get: 'getDataElementsMinified.action',
             organisationunitchildren_get: 'getOrganisationUnitChildren.action',
             favorite_addorupdate: 'addOrUpdateChart.action',
+            favorite_addorupdatesystem: 'addOrUpdateSystemChart.action',            
             favorite_get: 'charts/',
             favorite_getall: 'charts.json?paging=false&links=false',
             favorite_delete: 'deleteCharts.action'
@@ -705,9 +706,10 @@ Ext.onReady( function() {
                         var store = DV.store.favorite;
                         params.uid = store.getAt(store.findExact('name', params.name)).data.id;
                     }
+                    var url = DV.cmp.favorite.isSystem.getValue() ? favorite_addorupdatesystem : favorite_addorupdate;
                     
                     Ext.Ajax.request({
-                        url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_addorupdate,
+                        url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax[url],
                         params: params,
                         success: function() {
                             DV.store.favorite.load({callback: function() {
@@ -2591,6 +2593,16 @@ Ext.onReady( function() {
                                                                     height: 24
                                                                 },
                                                                 items: [
+                                                                    ' ',
+                                                                    {
+                                                                        xtype: 'checkbox',
+                                                                        boxLabel: 'System',
+                                                                        listeners: {
+                                                                            added: function() {
+                                                                                DV.cmp.favorite.system = this;
+                                                                            }
+                                                                        }
+                                                                    },
                                                                     '->',
                                                                     {
                                                                         text: 'Save',

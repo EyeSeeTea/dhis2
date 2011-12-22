@@ -245,6 +245,15 @@ body {
     font-size: 11px;
 }
 
+/* DV toolbar checkbox */
+.dv-toolbar .x-form-cb-wrap {
+    padding-top: 5px;
+}
+.dv-toolbar .x-form-cb-label-after {
+    margin-left: 3px;
+    color: #333;
+}
+
 /* Button dv-toolbar font size */
 .dv-toolbar * {
     font-size: 11px;
