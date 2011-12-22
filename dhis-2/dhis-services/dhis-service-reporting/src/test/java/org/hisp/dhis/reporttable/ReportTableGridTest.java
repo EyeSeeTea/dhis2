@@ -63,6 +63,7 @@ import org.hisp.dhis.jdbc.batchhandler.DataSetCompletenessResultBatchHandler;
 import org.hisp.dhis.mock.MockI18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
@@ -88,6 +89,7 @@ public class ReportTableGridTest
     private List<Period> periods;
     private List<Period> relativePeriods;
     private List<OrganisationUnit> units;
+    private List<OrganisationUnitGroup> groups;
 
     private PeriodType montlyPeriodType;
 
@@ -118,6 +120,9 @@ public class ReportTableGridTest
     private OrganisationUnit unitA;
     private OrganisationUnit unitB;
     
+    private OrganisationUnitGroup groupA;
+    private OrganisationUnitGroup groupB;
+        
     private int dataElementIdA;
     private int dataElementIdB;
     
@@ -135,6 +140,9 @@ public class ReportTableGridTest
     
     private int unitIdA;
     private int unitIdB;
+    
+    private int groupIdA;
+    private int groupIdB;
         
     private I18nFormat i18nFormat;
     
@@ -158,6 +166,7 @@ public class ReportTableGridTest
         dataSetService = (DataSetService) getBean( DataSetService.ID );
         periodService = (PeriodService) getBean( PeriodService.ID );
         organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );
+        organisationUnitGroupService = (OrganisationUnitGroupService) getBean( OrganisationUnitGroupService.ID );
         
         batchHandlerFactory = (BatchHandlerFactory) getBean( "batchHandlerFactory" );
         
@@ -168,6 +177,7 @@ public class ReportTableGridTest
         periods = new ArrayList<Period>();
         relativePeriods = new ArrayList<Period>();
         units = new ArrayList<OrganisationUnit>();
+        groups = new ArrayList<OrganisationUnitGroup>();
         
         montlyPeriodType = PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME );       
         
@@ -275,6 +285,19 @@ public class ReportTableGridTest
         
         units.add( unitA );
         units.add( unitB );
+
+        // ---------------------------------------------------------------------
+        // Setup OrganisationUnitGroups
+        // ---------------------------------------------------------------------
+
+        groupA = createOrganisationUnitGroup( 'A' );
+        groupB = createOrganisationUnitGroup( 'B' );
+        
+        groupIdA = organisationUnitGroupService.addOrganisationUnitGroup( groupA );
+        groupIdB = organisationUnitGroupService.addOrganisationUnitGroup( groupB );
+        
+        groups.add( groupA );
+        groups.add( groupB );
         
         i18nFormat = new MockI18nFormat();
 

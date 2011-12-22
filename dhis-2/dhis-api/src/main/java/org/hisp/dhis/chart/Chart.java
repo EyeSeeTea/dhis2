@@ -468,14 +468,14 @@ public class Chart
 
     @XmlElement
     @JsonProperty
-    public void setTargetLineLabel( String targetLineLabel )
-    {
-        this.targetLineLabel = targetLineLabel;
-    }
-
     public String getTargetLineLabel()
     {
         return targetLineLabel;
+    }
+
+    public void setTargetLineLabel( String targetLineLabel )
+    {
+        this.targetLineLabel = targetLineLabel;
     }
 
     @XmlElement
