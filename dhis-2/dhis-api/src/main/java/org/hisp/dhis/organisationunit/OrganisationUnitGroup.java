@@ -80,6 +80,12 @@ public class OrganisationUnitGroup
         return name;
     }
     
+    @Override
+    public String getCode()
+    {
+        return name;
+    }
+    
     public void addOrganisationUnit( OrganisationUnit organisationUnit )
     {
         members.add( organisationUnit );

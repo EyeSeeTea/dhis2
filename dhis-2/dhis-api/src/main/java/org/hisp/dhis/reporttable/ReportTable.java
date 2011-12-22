@@ -100,6 +100,9 @@ public class ReportTable extends BaseIdentifiableObject
     public static final String ORGANISATIONUNIT_ID = "organisationunitid";
     public static final String ORGANISATIONUNIT_NAME = "organisationunitname";
     public static final String ORGANISATIONUNIT_CODE = "organisationunitcode";
+    public static final String ORGANISATIONUNITGROUP_ID = "organisationunitgroupid";
+    public static final String ORGANISATIONUNITGROUP_NAME = "organisationunitgroupname";
+    public static final String ORGANISATIONUNITGROUP_CODE = "organisationunitgroupcode";
     public static final String REPORTING_MONTH_COLUMN_NAME = "reporting_month_name";
     public static final String PARAM_ORGANISATIONUNIT_COLUMN_NAME = "param_organisationunit_name";
     public static final String ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME = "organisation_unit_is_parent";
@@ -128,6 +131,9 @@ public class ReportTable extends BaseIdentifiableObject
             put( ORGANISATIONUNIT_ID, "Organisation unit ID" );
             put( ORGANISATIONUNIT_NAME, "Organisation unit" );
             put( ORGANISATIONUNIT_CODE, "Organisation unit code" );
+            put( ORGANISATIONUNITGROUP_ID, "Organisation unit group ID" );
+            put( ORGANISATIONUNITGROUP_NAME, "Organisation unit group" );
+            put( ORGANISATIONUNITGROUP_CODE, "Organisation unit group code" );
             put( REPORTING_MONTH_COLUMN_NAME, "Reporting month" );
             put( PARAM_ORGANISATIONUNIT_COLUMN_NAME, "Organisation unit parameter" );
             put( ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME, "Organisation unit is parent" );
@@ -144,6 +150,7 @@ public class ReportTable extends BaseIdentifiableObject
             put( DataSet.class, DATASET_ID );
             put( Period.class, PERIOD_ID );
             put( OrganisationUnit.class, ORGANISATIONUNIT_ID );
+            put( OrganisationUnitGroup.class, ORGANISATIONUNITGROUP_ID );
         }
     };
 
