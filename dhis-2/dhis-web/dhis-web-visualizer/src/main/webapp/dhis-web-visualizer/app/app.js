@@ -1107,8 +1107,8 @@ Ext.onReady( function() {
                         DV.cmp.favorite.xaxislabel.setValue(f.domainAxisLabel);
                         DV.cmp.favorite.yaxislabel.setValue(f.rangeAxisLabel);
                         DV.cmp.favorite.targetlinevalue.setValue(f.targetLineValue);
-                        DV.cmp.favorite.targetlinelabel.setValue(f.targetLineLabel);
                         DV.cmp.favorite.targetlinelabel.xable();
+                        DV.cmp.favorite.targetlinelabel.setValue(f.targetLineLabel);
                         
                         this.isRendered = true;
                         
