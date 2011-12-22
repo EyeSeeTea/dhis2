@@ -202,6 +202,13 @@ public class AddOrUpdateChartAction
     {
         this.organisationUnitIds = organisationUnitIds;
     }
+    
+    private boolean system;
+
+    public void setSystem( boolean system )
+    {
+        this.system = system;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation

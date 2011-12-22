@@ -35,7 +35,7 @@ DV.conf = {
             organisationunitchildren_get: 'getOrganisationUnitChildren.action',
             favorite_addorupdate: 'addOrUpdateChart.action',
             favorite_get: 'charts/',
-            favorite_getall: 'charts.json?links=false',
+            favorite_getall: 'charts.json?paging=false&links=false',
             favorite_delete: 'deleteCharts.action'
         },        
         dimension: {
