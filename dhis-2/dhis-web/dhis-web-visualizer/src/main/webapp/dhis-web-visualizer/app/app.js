@@ -2522,6 +2522,7 @@ Ext.onReady( function() {
                                                             bodyStyle: 'padding:8px; background-color:#fff',
 															width: DV.conf.layout.grid_favorite_width,
                                                             closeAction: 'hide',
+                                                            resizable: false,
                                                             modal: true,
                                                             resetForm: function() {
                                                                 DV.cmp.favorite.name.setValue('');
@@ -2583,7 +2584,7 @@ Ext.onReady( function() {
                                                                     ],
                                                                     setHeightInWindow: function(store) {
                                                                         var h = (store.getCount() * 23) + 30,
-                                                                            sh = DV.util.viewport.getSize().y * 0.8;
+                                                                            sh = DV.util.viewport.getSize().y * 0.6;
                                                                         this.setHeight(h > sh ? sh : h);
                                                                         this.doLayout();
                                                                         this.up('window').doLayout();
@@ -2956,7 +2957,7 @@ Ext.onReady( function() {
                                                 ],
                                                 setHeightInMenu: function(store) {
                                                     var h = store.getCount() * 26,
-                                                        sh = DV.util.viewport.getSize().y * 0.8;
+                                                        sh = DV.util.viewport.getSize().y * 0.6;
                                                     this.setHeight(h > sh ? sh : h);
                                                     this.doLayout();
                                                     this.up('menu').doLayout();
@@ -2990,7 +2991,7 @@ Ext.onReady( function() {
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
-                            text: 'Save as..',
+                            text: 'Download as..',
                             execute: function(type) {
                                 var svg = document.getElementsByTagName('svg');
                                 
