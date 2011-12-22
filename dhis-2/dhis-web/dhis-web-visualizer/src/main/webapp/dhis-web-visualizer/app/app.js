@@ -91,7 +91,7 @@ DV.conf = {
         center_tbar_height: 31,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
-        form_label_width: 45,
+        form_label_width: 55,
         window_favorite_ypos: 100,
         window_confirm_width: 250,
         grid_favorite_width: 420
@@ -237,6 +237,9 @@ Ext.onReady( function() {
             },
             toggleOrganisationUnit: function() {
                 DV.cmp.fieldset.organisationunit.toggle();
+            },
+            toggleOptions: function() {
+                DV.cmp.fieldset.options.toggle();
             },
             collapseFieldsets: function(fieldsets) {
                 for (var i = 0; i < fieldsets.length; i++) {
@@ -702,6 +705,15 @@ Ext.onReady( function() {
                     DV.util.mask.setMask(DV.cmp.favorite.window, 'Saving...');
                     var params = DV.state.getParams();
                     params.name = DV.cmp.favorite.name.getValue();
+                    params.trendLine = DV.cmp.favorite.trendline.getValue();
+                    params.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
+                    params.hideLegend = DV.cmp.favorite.hidelegend.getValue();
+                    params.userOrganisationUnit = DV.cmp.favorite.userorganisationunit.getValue();
+                    params.xAxisLabel = DV.cmp.favorite.xaxislabel.getValue();
+                    params.yAxisLabel = DV.cmp.favorite.yaxislabel.getValue();
+                    params.targetLineValue = DV.cmp.favorite.targetlinevalue.getValue();
+                    params.targetLineLabel = params.targetLineValue && !DV.cmp.favorite.targetlinelabel.isDisabled() ? DV.cmp.favorite.targetlinelabel.getValue() : null;
+                    
                     if (isUpdate) {
                         var store = DV.store.favorite;
                         params.uid = store.getAt(store.findExact('name', params.name)).data.id;
@@ -1651,7 +1663,7 @@ Ext.onReady( function() {
                         items: [
                             {
                                 xtype: 'fieldset',
-                                id: 'indicator_fs',
+                                cls: 'dv-fieldset',
                                 name: DV.conf.finals.dimension.indicator.value,
                                 title: '<a href="javascript:DV.util.fieldset.toggleIndicator();" class="dv-fieldset-title-link">Indicators</a>',
                                 collapsible: true,
@@ -1807,13 +1819,13 @@ Ext.onReady( function() {
                                         DV.cmp.fieldset.indicator = this;
                                     },
                                     expand: function() {
-                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit]);
+                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit, DV.cmp.fieldset.options]);
                                     }
                                 }
                             },
                             {
                                 xtype: 'fieldset',
-                                id: 'dataelement_fs',
+                                cls: 'dv-fieldset',
                                 name: DV.conf.finals.dimension.dataelement.value,
                                 title: '<a href="javascript:DV.util.fieldset.toggleDataElement();" class="dv-fieldset-title-link">Data elements</a>',
                                 collapsed: true,
@@ -1968,13 +1980,13 @@ Ext.onReady( function() {
                                         DV.cmp.fieldset.dataelement = this;
                                     },
                                     expand: function() {
-                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit]);
+                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit, DV.cmp.fieldset.options]);
                                     }
                                 }
                             },
                             {
                                 xtype: 'fieldset',
-                                id: 'period_fs',
+                                cls: 'dv-fieldset',
                                 name: DV.conf.finals.dimension.period.value,
                                 title: '<a href="javascript:DV.util.fieldset.togglePeriod();" class="dv-fieldset-title-link">Periods</a>',
                                 collapsed: true,
@@ -2130,13 +2142,13 @@ Ext.onReady( function() {
                                         DV.cmp.fieldset.period = this;
                                     },
                                     expand: function() {
-                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.organisationunit]);
+                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.organisationunit, DV.cmp.fieldset.options]);
                                     }
                                 }
-                            },                            
+                            },
                             {
                                 xtype: 'fieldset',
-                                id: 'organisationunit_fs',
+                                cls: 'dv-fieldset',
                                 name: DV.conf.finals.dimension.organisationunit.value,
                                 title: '<a href="javascript:DV.util.fieldset.toggleOrganisationUnit();" class="dv-fieldset-title-link">Organisation units</a>',
                                 collapsed: true,
@@ -2218,13 +2230,179 @@ Ext.onReady( function() {
                                         DV.cmp.fieldset.organisationunit = this;
                                     },
                                     expand: function(fs) {
-                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period]);
+                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period, DV.cmp.fieldset.options]);
                                         var tp = DV.cmp.dimension.organisationunit.treepanel;
                                         if (!tp.isRendered) {
                                             tp.isRendered = true;
                                             tp.getRootNode().expand();
                                             tp.selectRoot();
                                         }
+                                    }
+                                }
+                            },
+                            {
+                                xtype: 'fieldset',
+                                cls: 'dv-fieldset',
+                                name: 'options',
+                                title: '<a href="javascript:DV.util.fieldset.toggleOptions();" class="dv-fieldset-title-link-alt1">Chart options</a>',
+                                collapsed: true,
+                                collapsible: true,
+                                items: [
+                                    {
+                                        html: 'NB! These fields are for the PNG version only',
+                                        bodyStyle: 'border:0 none; color:#555; font-style:italic; padding-bottom:10px'
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'column',
+                                        bodyStyle: 'border-style:none; padding-bottom:10px',
+                                        items: [
+                                            {
+                                                xtype: 'checkbox',
+                                                cls: 'dv-checkbox-alt1',
+                                                style: 'margin-right:26px',
+                                                boxLabel: 'Trend line',
+                                                labelWidth: DV.conf.layout.form_label_width,
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.favorite.trendline = this;
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                cls: 'dv-checkbox-alt1',
+                                                style: 'margin-right:26px',
+                                                boxLabel: 'Hide subtitle',
+                                                labelWidth: DV.conf.layout.form_label_width,
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.favorite.hidesubtitle = this;
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                cls: 'dv-checkbox-alt1',
+                                                style: 'margin-right:26px',
+                                                boxLabel: 'Hide legend',
+                                                labelWidth: DV.conf.layout.form_label_width,
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.favorite.hidelegend = this;
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                cls: 'dv-checkbox-alt1',
+                                                boxLabel: 'User orgunit',
+                                                labelWidth: DV.conf.layout.form_label_width,
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.favorite.userorganisationunit = this;
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'column',
+                                        bodyStyle: 'border:0 none; padding-bottom:8px',
+                                        items: [
+                                            {
+                                                xtype: 'textfield',
+                                                cls: 'dv-textfield-alt1',
+                                                style: 'margin-right:4px',
+                                                fieldLabel: 'X axis label',
+                                                labelAlign: 'top',
+                                                labelSeparator: '',
+                                                maxLength: 100,
+                                                enforceMaxLength: true,
+                                                labelWidth: DV.conf.layout.form_label_width,
+                                                width: 188,
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.favorite.xaxislabel = this;
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                xtype: 'textfield',
+                                                cls: 'dv-textfield-alt1',
+                                                fieldLabel: 'Y axis label',
+                                                labelAlign: 'top',
+                                                labelSeparator: '',
+                                                maxLength: 100,
+                                                enforceMaxLength: true,
+                                                labelWidth: DV.conf.layout.form_label_width,
+                                                width: 187,
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.favorite.yaxislabel = this;
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        layout: 'column',
+                                        bodyStyle: 'border:0 none',
+                                        items: [
+                                            {
+                                                xtype: 'textfield',
+                                                cls: 'dv-textfield-alt1',
+                                                style: 'margin-right:4px',
+                                                fieldLabel: 'Target line value',
+                                                labelAlign: 'top',
+                                                labelSeparator: '',
+                                                maxLength: 100,
+                                                enforceMaxLength: true,
+                                                width: 188,
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.favorite.targetlinevalue = this;
+                                                    },
+                                                    change: function() {
+                                                        DV.cmp.favorite.targetlinelabel.xable();
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                xtype: 'textfield',
+                                                cls: 'dv-textfield-alt1',
+                                                fieldLabel: 'Target line label',
+                                                labelAlign: 'top',
+                                                labelSeparator: '',
+                                                maxLength: 100,
+                                                enforceMaxLength: true,
+                                                width: 187,
+                                                disabled: true,
+                                                xable: function() {
+                                                    if (DV.cmp.favorite.targetlinevalue.getValue()) {
+                                                        this.enable();
+                                                    }
+                                                    else {
+                                                        this.disable();
+                                                    }
+                                                },
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.favorite.targetlinelabel = this;
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ],
+                                listeners: {
+                                    afterrender: function() {
+                                        DV.cmp.fieldset.options = this;
+                                    },
+                                    expand: function() {
+                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit]);
                                     }
                                 }
                             }
@@ -2320,9 +2498,9 @@ Ext.onReady( function() {
                                                                         {
                                                                             xtype: 'textfield',
                                                                             cls: 'dv-textfield',
+                                                                            fieldLabel: 'Name',
                                                                             maxLength: 160,
                                                                             enforceMaxLength: true,
-                                                                            fieldLabel: 'Name',
                                                                             labelWidth: DV.conf.layout.form_label_width,
                                                                             width: DV.conf.layout.grid_favorite_width - 28,
                                                                             listeners: {
@@ -2331,6 +2509,19 @@ Ext.onReady( function() {
                                                                                 },
                                                                                 change: function() {
                                                                                     DV.cmp.favorite.save.xable();
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            xtype: 'checkbox',
+                                                                            cls: 'dv-checkbox',
+                                                                            style: 'padding-bottom:2px',
+                                                                            fieldLabel: 'System',
+                                                                            labelWidth: DV.conf.layout.form_label_width,
+                                                                            disabled: !DV.init.system.user.isAdmin,
+                                                                            listeners: {
+                                                                                added: function() {
+                                                                                    DV.cmp.favorite.system = this;
                                                                                 }
                                                                             }
                                                                         }
@@ -2586,7 +2777,8 @@ Ext.onReady( function() {
                                                                             DV.cmp.favorite.grid = this;
                                                                         },
                                                                         itemclick: function(g, r) {
-                                                                            DV.cmp.favorite.name.setValue(r.get('name'));
+                                                                            DV.cmp.favorite.name.setValue(r.data.name);
+                                                                            DV.cmp.favorite.system.setValue(r.data.userId ? false : true);
                                                                             DV.cmp.favorite.rename.button.xable();
                                                                             DV.cmp.favorite.del.xable();
                                                                         },
@@ -2603,18 +2795,6 @@ Ext.onReady( function() {
                                                                     height: 24
                                                                 },
                                                                 items: [
-                                                                    ' ',
-                                                                    {
-                                                                        xtype: 'checkbox',
-                                                                        boxLabel: 'System',
-                                                                        disabled: !DV.init.system.user.isAdmin,
-                                                                        disabledCls: 'dv-invisible',
-                                                                        listeners: {
-                                                                            added: function() {
-                                                                                DV.cmp.favorite.system = this;
-                                                                            }
-                                                                        }
-                                                                    },
                                                                     '->',
                                                                     {
                                                                         text: 'Save',
