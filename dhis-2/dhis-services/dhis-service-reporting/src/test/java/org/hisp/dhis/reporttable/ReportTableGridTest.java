@@ -59,6 +59,8 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.jdbc.batchhandler.AggregatedDataValueBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.AggregatedIndicatorValueBatchHandler;
+import org.hisp.dhis.jdbc.batchhandler.AggregatedOrgUnitDataValueBatchHandler;
+import org.hisp.dhis.jdbc.batchhandler.AggregatedOrgUnitIndicatorValueBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataSetCompletenessResultBatchHandler;
 import org.hisp.dhis.mock.MockI18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -339,6 +341,30 @@ public class ReportTableGridTest
         completenessBatchHandler.addObject( new DataSetCompletenessResult( dataSetIdB, periodIdB, null, unitIdB, null, 100, 18, 18 ) );
         
         completenessBatchHandler.flush();
+        
+        BatchHandler<AggregatedDataValue> dataValueOrgUnitBatchHandler = batchHandlerFactory.createBatchHandler( AggregatedOrgUnitDataValueBatchHandler.class ).init();
+        
+        dataValueOrgUnitBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdA, periodIdA, 8, unitIdA, groupIdA, 8, 11 ) );
+        dataValueOrgUnitBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdA, periodIdA, 8, unitIdA, groupIdB, 8, 12 ) );
+        dataValueOrgUnitBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdA, periodIdB, 8, unitIdA, groupIdA, 8, 13 ) );
+        dataValueOrgUnitBatchHandler.addObject( new AggregatedDataValue( dataElementIdA, categoryOptionComboIdA, periodIdB, 8, unitIdA, groupIdB, 8, 14 ) );
+        dataValueOrgUnitBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdA, periodIdA, 8, unitIdA, groupIdA, 8, 15 ) );
+        dataValueOrgUnitBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdA, periodIdA, 8, unitIdA, groupIdB, 8, 16 ) );
+        dataValueOrgUnitBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdA, periodIdB, 8, unitIdA, groupIdA, 8, 17 ) );
+        dataValueOrgUnitBatchHandler.addObject( new AggregatedDataValue( dataElementIdB, categoryOptionComboIdA, periodIdB, 8, unitIdA, groupIdB, 8, 18 ) );
+        
+        dataValueOrgUnitBatchHandler.flush();
+        
+        BatchHandler<AggregatedIndicatorValue> indicatorOrgUnitValueBatchHandler = batchHandlerFactory.createBatchHandler( AggregatedOrgUnitIndicatorValueBatchHandler.class ).init();
+        
+        indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdA, periodIdA, 8, unitIdA, groupIdA, 8, "", 1, 11, 0, 0 ) );
+        indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdA, periodIdA, 8, unitIdA, groupIdB, 8, "", 1, 12, 0, 0 ) );
+        indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdA, periodIdB, 8, unitIdA, groupIdA, 8, "", 1, 13, 0, 0 ) );
+        indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdA, periodIdB, 8, unitIdA, groupIdB, 8, "", 1, 14, 0, 0 ) );
+        indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdB, periodIdA, 8, unitIdA, groupIdA, 8, "", 1, 15, 0, 0 ) );
+        indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdB, periodIdA, 8, unitIdA, groupIdB, 8, "", 1, 16, 0, 0 ) );
+        indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdB, periodIdB, 8, unitIdA, groupIdA, 8, "", 1, 17, 0, 0 ) );
+        indicatorOrgUnitValueBatchHandler.addObject( new AggregatedIndicatorValue( indicatorIdB, periodIdB, 8, unitIdA, groupIdB, 8, "", 1, 18, 0, 0 ) );
     }
     
     @Override
