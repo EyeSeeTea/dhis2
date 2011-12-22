@@ -62,6 +62,7 @@ import org.hisp.dhis.jdbc.batchhandler.AggregatedIndicatorValueBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataSetCompletenessResultBatchHandler;
 import org.hisp.dhis.mock.MockI18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
@@ -337,7 +338,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
-            null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -359,7 +360,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -383,7 +384,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -405,7 +406,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
-            null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -427,7 +428,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -451,7 +452,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -473,7 +474,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
-            null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -495,7 +496,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -519,7 +520,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             new ArrayList<DataElement>(), new ArrayList<Indicator>(), dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -554,7 +555,7 @@ public class ReportTableGridTest
         
         ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
-            categoryComboA, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), categoryComboA, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -597,7 +598,7 @@ public class ReportTableGridTest
         
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            categoryComboA, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), categoryComboA, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -642,7 +643,7 @@ public class ReportTableGridTest
         
         ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            categoryComboA, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), categoryComboA, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -685,7 +686,7 @@ public class ReportTableGridTest
         
         ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            categoryComboA, false, false, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), categoryComboA, false, false, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -729,7 +730,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Prescriptions", false,
             dataElements, indicators, dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
-            null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -767,7 +768,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             dataElements, indicators, dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -815,7 +816,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false, 
             dataElements, indicators, dataSets, periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -853,7 +854,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
-            null, true, true, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, true, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -874,7 +875,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Prescriptions", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(),
-            null, false, false, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
@@ -895,7 +896,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
         reportTable.setTopLimit( 2 );
         
         int id = reportTableService.saveReportTable( reportTable );
@@ -916,7 +917,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", false,
             new ArrayList<DataElement>(), indicators, new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
         reportTable.setSortOrder( ReportTable.DESC );
         
         int id = reportTableService.saveReportTable( reportTable );
@@ -941,7 +942,7 @@ public class ReportTableGridTest
     {
         ReportTable reportTable = new ReportTable( "Embezzlement", true, 
             dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, units, new ArrayList<OrganisationUnit>(), 
-            null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+            new ArrayList<OrganisationUnitGroup>(), null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
 
         int id = reportTableService.saveReportTable( reportTable );
 
