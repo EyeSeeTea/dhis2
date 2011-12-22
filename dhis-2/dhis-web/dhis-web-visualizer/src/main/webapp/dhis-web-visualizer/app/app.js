@@ -8,7 +8,7 @@ DV.conf = {
         ],
         jsonfy: function(r) {
             r = Ext.JSON.decode(r.responseText);
-            var obj = {system: {rootNode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}, isAdmin: r.isAdmin}};
+            var obj = {system: {rootNode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}, user: {id: r.user.id, isAdmin: r.user.isAdmin}}};
             for (var relative in r.p) {
                 obj.system.periods[relative] = [];
                 for (var i = 0; i < r.p[relative].length; i++) {
@@ -36,7 +36,7 @@ DV.conf = {
             favorite_addorupdate: 'addOrUpdateChart.action',
             favorite_addorupdatesystem: 'addOrUpdateSystemChart.action',            
             favorite_get: 'charts/',
-            favorite_getall: 'charts.json?paging=false&links=false',
+            favorite_getall: 'getAllCharts.action',
             favorite_delete: 'deleteCharts.action'
         },
         dimension: {
@@ -894,7 +894,7 @@ Ext.onReady( function() {
             fields: ['id', 'name', 'lastUpdated', 'userId'],
             proxy: {
                 type: 'ajax',
-                url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_getall,
+                url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_getall,
                 reader: {
                     type: 'json',
                     root: 'charts'
@@ -907,9 +907,19 @@ Ext.onReady( function() {
             },
             listeners: {
                 load: function(s) {
+                    s.filterBy(function(r) {
+                        if (r.data.userId == DV.init.system.user.id) {
+                            return true;
+                        }
+                        if (!r.data.userId && DV.init.system.user.isAdmin) {
+                            return true;
+                        }
+                        return false;
+                    });
+                        
                     s.sort(this.sorting.field, this.sorting.direction);
                     s.each(function(r) {
-                        r.data.lastUpdated = r.data.lastUpdated.substr(0,16).replace('T',' ');
+                        r.data.lastUpdated = r.data.lastUpdated.substr(0,16);
                         r.data.icon = '<img src="images/favorite.png" />';
                         r.commit();
                     });
@@ -2344,7 +2354,7 @@ Ext.onReady( function() {
                                                                         }
                                                                     ],
                                                                     setHeightInWindow: function(store) {
-                                                                        var h = (store.getTotalCount() * 23) + 30,
+                                                                        var h = (store.getCount() * 23) + 30,
                                                                             sh = DV.util.viewport.getSize().y * 0.8;
                                                                         this.setHeight(h > sh ? sh : h);
                                                                         this.doLayout();
@@ -2597,7 +2607,7 @@ Ext.onReady( function() {
                                                                     {
                                                                         xtype: 'checkbox',
                                                                         boxLabel: 'System',
-                                                                        disabled: !DV.init.system.isAdmin,
+                                                                        disabled: !DV.init.system.user.isAdmin,
                                                                         disabledCls: 'dv-invisible',
                                                                         listeners: {
                                                                             added: function() {
@@ -2718,7 +2728,7 @@ Ext.onReady( function() {
                                                     }
                                                 ],
                                                 setHeightInMenu: function(store) {
-                                                    var h = store.getTotalCount() * 26,
+                                                    var h = store.getCount() * 26,
                                                         sh = DV.util.viewport.getSize().y * 0.8;
                                                     this.setHeight(h > sh ? sh : h);
                                                     this.doLayout();
