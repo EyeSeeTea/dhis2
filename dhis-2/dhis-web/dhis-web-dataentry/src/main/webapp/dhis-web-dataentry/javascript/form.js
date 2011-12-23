@@ -495,6 +495,7 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 
         if ( periodId && periodId != -1 && dataEntryFormIsLoaded )
         {
+			disableFields( false );
             showLoader();
             loadDataValues();
         }
@@ -627,6 +628,26 @@ function loadDataValues()
     displayEntryFormCompleted();
 }
 
+function disableFields( disabled )
+{
+	if( disabled )
+	{
+		jQuery("#contentDiv :input").each(function()
+		{
+			jQuery(this).attr('disabled', 'disabled');
+			jQuery(this).css( 'background-color', COLOR_GREY );
+		});
+	}
+	else
+	{
+		jQuery("#contentDiv :input").each(function()
+		{
+			jQuery(this).removeAttr('disabled');
+			jQuery(this).css( 'background-color', COLOR_WHITE );
+		});
+	}
+}
+
 function insertDataValues()
 {
     var dataValueMap = [];
@@ -646,7 +667,7 @@ function insertDataValues()
     $( '[name="min"]' ).html( '' );
     $( '[name="max"]' ).html( '' );
 
-    $( '[name="entryfield"]' ).filter( ':disabled' ).css( 'background-color', COLOR_GREY );
+    //$( '[name="entryfield"]' ).filter( ':disabled' ).css( 'background-color', COLOR_GREY );
 
     $.ajax( {
     	url: 'getDataValues.action',
@@ -713,6 +734,14 @@ function insertDataValues()
 	                $( '#completedBy' ).html( json.storedBy );
 	                $( '#completedDate' ).html( json.date );
 	            }
+				if( getFieldValue('dataEntryFormCompleted') =='true'  )
+				{
+					disableFields ( true )
+				}
+				else
+				{
+					disableFields( false );
+				}
 	        }
 	        else
 	        {
@@ -858,9 +887,18 @@ function registerCompleteDataSet( json )
         {
             storageManager.clearCompleteDataSet( params );
             
-            if ( json.response == 'input' )
+            if( json.response == 'success' && getFieldValue('dataEntryFormCompleted') =='true' )
+			{
+				disableFields( true );
+			}
+			else if ( json.response == 'input' )
             {
-                validate();
+				if( getFieldValue('dataEntryFormCompleted') =='true' )
+				{
+					disableFields( true );
+				}
+				
+                validate( false );
             }
         }
     } );
@@ -882,10 +920,12 @@ function undoCompleteDataSet()
         	success: function()
 	        {
 	            storageManager.clearCompleteDataSet( params );
+				disableFields( false );
 	        },
 	        error: function()
 	        {
 	            storageManager.clearCompleteDataSet( params );
+				disableFields( false );
 	        }
         } );
     }

@@ -239,7 +239,6 @@ public class UpdateDataElementAction
         {
             description = null;
         }
-
         if ( formName != null && formName.trim().length() == 0 )
         {
             formName = null;
@@ -299,7 +298,7 @@ public class UpdateDataElementAction
                 dataElementService.updateDataElementGroup( newGroup );
             }
         }
-
+        
         if ( jsonAttributeValues != null )
         {
             AttributeUtils.updateAttributeValuesFromJson( dataElement.getAttributeValues(), jsonAttributeValues,
@@ -307,7 +306,7 @@ public class UpdateDataElementAction
         }
 
         dataElementService.updateDataElement( dataElement );
-
+        
         return SUCCESS;
     }
 }
