@@ -98,7 +98,7 @@ public class MappedRedirectStrategy
             url = request.getContextPath() + "/mobile/index.action";
         }
 
-        log.warn( "Redirecting to " + url );
+        log.debug( "Redirecting to " + url );
 
         super.sendRedirect( request, response, url );
     }
