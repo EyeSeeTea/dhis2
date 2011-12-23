@@ -27,6 +27,8 @@
 
 package org.hisp.dhis.security;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.mobile.device.Device;
 import org.springframework.mobile.device.DeviceResolver;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -43,6 +45,8 @@ import java.util.Map;
 public class MappedRedirectStrategy
     extends DefaultRedirectStrategy
 {
+    private static final Log log = LogFactory.getLog( MappedRedirectStrategy.class );
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -91,26 +95,11 @@ public class MappedRedirectStrategy
             //
             //  url = request.getHeader( "referer" ).replaceFirst( "/dhis-web-commons/security/login.action",
             //  "/mobile/index.action" );
-            url = getRootPath( request ) + "/mobile/index.action";
+            url = request.getContextPath() + "/mobile/index.action";
         }
+
+        log.warn( "Redirecting to " + url );
 
         super.sendRedirect( request, response, url );
-    }
-
-    public static String getRootPath( HttpServletRequest request )
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append( request.getScheme() );
-
-        builder.append( "://" ).append( request.getServerName() );
-
-        if ( request.getServerPort() != 80 && request.getServerPort() != 443 )
-        {
-            builder.append( ":" ).append( request.getServerPort() );
-        }
-
-        builder.append( request.getContextPath() );
-
-        return builder.toString();
     }
 }
