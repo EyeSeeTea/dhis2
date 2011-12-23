@@ -1,7 +1,7 @@
-package org.hisp.dhis.common.adapter;
+package org.hisp.dhis.visualizer.action;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2010, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,35 +27,50 @@ package org.hisp.dhis.common.adapter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import java.util.Collection;
 
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.dashboard.DashboardContent;
+import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.chart.ChartService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Jan Henrik Overland
  */
-public class DashboardContentXmlAdapter extends XmlAdapter<BaseIdentifiableObject, DashboardContent>
+public class GetAllChartsAction
+    implements Action
 {
-    //private BaseIdentifiableObjectXmlAdapter baseIdentifiableObjectXmlAdapter = new BaseIdentifiableObjectXmlAdapter();
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    @Override
-    public DashboardContent unmarshal( BaseIdentifiableObject identifiableObject ) throws Exception
+    private ChartService chartService;
+
+    public void setChartService( ChartService chartService )
     {
-        DashboardContent dashboardContent = new DashboardContent();
-
-/*
-        dashboardContent.setUid( identifiableObject.getUid() );
-        dashboardContent.setLastUpdated( identifiableObject.getLastUpdated() );
-        dashboardContent.setName( identifiableObject.getName() == null ? UUID.randomUUID().toString() : identifiableObject.getName() );
-*/
-
-        return dashboardContent;
+        this.chartService = chartService;
     }
 
-    @Override
-    public BaseIdentifiableObject marshal( DashboardContent dashboardContent ) throws Exception
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private Collection<Chart> object;
+
+    public Collection<Chart> getObject()
     {
-        return null; // baseIdentifiableObjectXmlAdapter.marshal( dashboardContent );
+        return object;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        object = chartService.getAllCharts();
+
+        return SUCCESS;
     }
 }
