@@ -457,6 +457,80 @@ public class ReportTableGridTest
         assertEquals( 27.0, grid.getRow( 1 ).get( 8 ) );
         assertEquals( 28.0, grid.getRow( 1 ).get( 9 ) );
     }
+
+    @Test
+    public void testGetDataElementOrgUnitReportTableA()
+    {
+        ReportTable reportTable = new ReportTable( "Prescriptions", false,
+            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, new ArrayList<OrganisationUnit>(), new ArrayList<OrganisationUnit>(),
+            groups, null, true, true, false, new RelativePeriods(), null, i18nFormat, "january_2000" );
+
+        reportTable.setParentOrganisationUnit( unitA );
+        
+        int id = reportTableService.saveReportTable( reportTable );
+
+        Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, date, 0 );
+
+        assertEquals( 21.0, grid.getRow( 0 ).get( 6 ) );
+        assertEquals( 23.0, grid.getRow( 0 ).get( 7 ) );
+        assertEquals( 25.0, grid.getRow( 0 ).get( 8 ) );
+        assertEquals( 27.0, grid.getRow( 0 ).get( 9 ) );
+        
+        assertEquals( 22.0, grid.getRow( 1 ).get( 6 ) );
+        assertEquals( 24.0, grid.getRow( 1 ).get( 7 ) );
+        assertEquals( 26.0, grid.getRow( 1 ).get( 8 ) );
+        assertEquals( 28.0, grid.getRow( 1 ).get( 9 ) );
+    }
+    
+    @Test
+    public void testGetDataElementOrgUnitReportTableB()
+    {
+        ReportTable reportTable = new ReportTable( "Embezzlement", false,
+            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, new ArrayList<OrganisationUnit>(), new ArrayList<OrganisationUnit>(), 
+            groups, null, false, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+
+        reportTable.setParentOrganisationUnit( unitA );
+        
+        int id = reportTableService.saveReportTable( reportTable );
+
+        Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, date, 0 );
+        
+        assertEquals( 21.0, grid.getRow( 0 ).get( 9 ) );
+        assertEquals( 22.0, grid.getRow( 0 ).get( 10 ) );
+        
+        assertEquals( 23.0, grid.getRow( 1 ).get( 9 ) );
+        assertEquals( 24.0, grid.getRow( 1 ).get( 10 ) );
+        
+        assertEquals( 25.0, grid.getRow( 2 ).get( 9 ) );
+        assertEquals( 26.0, grid.getRow( 2 ).get( 10 ) );
+        
+        assertEquals( 27.0, grid.getRow( 3 ).get( 9 ) );
+        assertEquals( 28.0, grid.getRow( 3 ).get( 10 ) );
+    }
+
+    @Test
+    public void testGetDataElementOrgUnitReportTableC()
+    {
+        ReportTable reportTable = new ReportTable( "Embezzlement", false, 
+            dataElements, new ArrayList<Indicator>(), new ArrayList<DataSet>(), periods, relativePeriods, new ArrayList<OrganisationUnit>(), new ArrayList<OrganisationUnit>(), 
+            groups, null, true, false, true, new RelativePeriods(), null, i18nFormat, "january_2000" );
+
+        reportTable.setParentOrganisationUnit( unitA );
+        
+        int id = reportTableService.saveReportTable( reportTable );
+
+        Grid grid = reportTableService.getReportTableGrid( id, i18nFormat, date, 0 );
+        
+        assertEquals( 21.0, grid.getRow( 0 ).get( 6 ) );
+        assertEquals( 22.0, grid.getRow( 0 ).get( 7 ) );
+        assertEquals( 25.0, grid.getRow( 0 ).get( 8 ) );
+        assertEquals( 26.0, grid.getRow( 0 ).get( 9 ) );
+        
+        assertEquals( 23.0, grid.getRow( 1 ).get( 6 ) );
+        assertEquals( 24.0, grid.getRow( 1 ).get( 7 ) );
+        assertEquals( 27.0, grid.getRow( 1 ).get( 8 ) );
+        assertEquals( 28.0, grid.getRow( 1 ).get( 9 ) );
+    }
     
     @Test
     public void testGetIndicatorReportTableA()
