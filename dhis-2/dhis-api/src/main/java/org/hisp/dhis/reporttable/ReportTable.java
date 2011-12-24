@@ -388,8 +388,8 @@ public class ReportTable extends BaseIdentifiableObject
         verify( nonEmptyLists( dataElements, indicators, dataSets ) > 0,
             "Must contain dataelements, indicators or datasets" );
         verify( nonEmptyLists( periods, relativePeriods ) > 0, "Must contain periods or relative periods" );
-        verify( nonEmptyLists( units, relativeUnits ) > 0,
-            "Must contain organisation units or relative organisation units" );
+        verify( nonEmptyLists( units, relativeUnits, organisationUnitGroups ) > 0,
+            "Must contain organisation units, relative organisation units or organisation unit groups" );
         verify( !(doTotal() && regression), "Cannot have regression columns with total columns" );
         verify( i18nFormat != null, "I18n format must be set" );
 
@@ -469,7 +469,10 @@ public class ReportTable extends BaseIdentifiableObject
 
             for ( NameableObject unit : allUnits )
             {
-                map.put( unit.getId(), ((OrganisationUnit) unit).getGroupNameInGroupSet( groupSet ) );
+                if ( unit instanceof OrganisationUnit )
+                {
+                    map.put( unit.getId(), ((OrganisationUnit) unit).getGroupNameInGroupSet( groupSet ) );
+                }
             }
 
             organisationUnitGroupMap.put( columnEncode( KEY_ORGUNIT_GROUPSET + groupSet.getName() ), map );

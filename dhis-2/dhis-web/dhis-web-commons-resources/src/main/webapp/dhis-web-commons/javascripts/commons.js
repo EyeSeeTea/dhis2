@@ -170,31 +170,28 @@ function trim( string )
  */
 function isChecked( checkboxId )
 {
-	return jQuery( "#" + checkboxId ).length && jQuery( "#" + checkboxId ).is( ":checked" );   
+	return jQuery( "#" + checkboxId ).length && jQuery( "#" + checkboxId ).is( ":checked" );
 }
 
 /**
- * Checks the checkbox with the given jQuery Selector String if the checkbox
- * exists.
+ * Toggles the checked property of checkbox elements.
  */
-function checkALL( jQuerySelectorString )
+function toggleChecked( checkBoxId )
 {
-    jQuery.each( jQuery( jQuerySelectorString ), function(i, item ){
-		item.checked = true;
-	});
+	var box = jQuery( "#" + checkBoxId );
+	
+	if ( box.length )
+	{
+		box.prop( "checked", !box.is( ":checked" ) );
+	}
 }
 
-function toggleChecked( checked, name )
-{
-	if( checked ) checkALL( "input[type=checkbox][name=" + name + "]" );
-	else unCheckALL( "input[type=checkbox][name=" + name + "]" );
-}
 /**
  * Checks the checkbox with the given identifier if the checkbox exists.
  */
 function check( checkBoxId )
 {
-    jQuery( "#" + checkBoxId ).attr("checked", true );
+    jQuery( "#" + checkBoxId ).prop( "checked", true );
 }
 
 /**
@@ -202,18 +199,7 @@ function check( checkBoxId )
  */
 function uncheck( checkBoxId )
 {
-    jQuery( "#" + checkBoxId ).attr("checked", false );
-}
-
-/**
- * unChecks the checkbox with the given jQuery Selector String if the checkbox
- * exists.
- */
-function unCheckALL( jQuerySelectorString )
-{
-    jQuery.each( jQuery( jQuerySelectorString ), function(i, item ){
-		item.checked = false;
-	});
+    jQuery( "#" + checkBoxId ).prop( "checked", false );
 }
 
 /**
@@ -940,7 +926,7 @@ function datePickerValid( id, today )
 }
 
 /**
- * Create jQuery datepicker for start date and end ate text with id * *
+ * Create jQuery datepicker for start date and end date text with id
  * 
  * @param startdate the id of input field which you want enter start date *
  * @param enddate the id of input field which you want enter end date *
@@ -978,6 +964,7 @@ function datePickerInRange ( startdate, enddate, setCurrentStartDate, setCurrent
 			dates.not(this).datepicker("option", option, date);
 		}
 	});
+
 	jQuery( "#" + startdate ).attr("disabled", true );
 	jQuery( "#" + enddate ).attr("disabled", true );
 
