@@ -1,3 +1,6 @@
+<script type="text/javascript">
+    var i18n_execute_tasks_confirmation = '$encoder.jsEscape( $i18n.getString( "execute_tasks_confirmation" ), "'" )';
+</script>
 
 <h3>$i18n.getString( "scheduling_management" )</h3>
 
@@ -27,6 +30,7 @@
 <tr>
 	<td>
 		<select id="orgUnitGroupSetAggLevel" name="orgUnitGroupSetAggLevel" class="scheduling" style="width:100%">
+		<option value="0"#if( $orgUnitGroupSetAggLevel && $orgUnitGroupSetAggLevel == 0 ) selected="selected"#end>[$i18n.getString( "no_aggregation" )]</option>
 		#foreach( $level in $levels )
 		<option value="$level.level"#if( $orgUnitGroupSetAggLevel && $orgUnitGroupSetAggLevel == $level.level ) selected="selected"#end>$encoder.htmlEncode( $level.name )</option>
 		#end
@@ -60,7 +64,7 @@
 		value="$i18n.getString( 'start' )"
 		#end
 		/>
-		<input type="button" style="width:140px" onclick="window.location.href='viewScheduledTasks.action?statusOnly=true'" value="$i18n.getString( 'refresh' )" />
+		<input type="button" style="width:140px" onclick="executeTasks()" value="$i18n.getString( 'execute_now' )" />
 	</td>
 </tr>
 </table>
