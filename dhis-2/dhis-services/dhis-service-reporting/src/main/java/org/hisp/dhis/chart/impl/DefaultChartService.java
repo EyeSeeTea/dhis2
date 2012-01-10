@@ -1,7 +1,7 @@
 package org.hisp.dhis.chart.impl;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -186,15 +186,15 @@ public class DefaultChartService
     public JFreeChart getJFreeChart( String uid, I18nFormat format )
     {
         Chart chart = getChart( uid );
-
-        return getJFreeChart( chart, format );
+        
+        return chart != null ? getJFreeChart( chart, format ) : null;
     }
 
     public JFreeChart getJFreeChart( int id, I18nFormat format )
     {
         Chart chart = getChart( id );
 
-        return getJFreeChart( chart, format );
+        return chart != null ? getJFreeChart( chart, format ) : null;
     }
 
     public JFreeChart getJFreeChart( Chart chart, I18nFormat format )

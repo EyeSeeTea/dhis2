@@ -82,5 +82,9 @@ public interface ProgramStageInstanceService
     public List<ProgramStageInstance> get( OrganisationUnit unit, Date after, Date before, Boolean completed );
 
     List<ProgramStageInstance> getProgramStageInstances( Patient patient, Boolean completed );
+    
+    List<ProgramStageInstance> getProgramStageInstances( ProgramInstance programInstance, Date executionDate, int min, int max );
+    
+    int countProgramStageInstances( ProgramInstance programInstance, Date executionDate);
 
 }

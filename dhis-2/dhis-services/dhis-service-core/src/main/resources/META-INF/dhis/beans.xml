@@ -2,8 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:aop="http://www.springframework.org/schema/aop" xmlns:sec="http://www.springframework.org/schema/security"
   xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
 http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
   <!-- Store definitions -->
@@ -215,6 +215,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="clazz" value="org.hisp.dhis.message.MessageConversation" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="jdbcTemplate" ref="jdbcTemplate" />
+    <property name="statementBuilder" ref="statementBuilder"/>
     <property name="cacheable" value="true" />
   </bean>
 
@@ -1238,6 +1239,10 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
   </bean>
 
+  <bean id="org.hisp.dhis.configuration.ConfigurationDeletionHandler" class="org.hisp.dhis.configuration.ConfigurationDeletionHandler">
+	<property name="jdbcTemplate" ref="jdbcTemplate" />
+  </bean>
+  
   <!-- DeletionManager -->
 
   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -1273,6 +1278,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
           <ref local="org.hisp.dhis.user.UserSettingDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementCategoryDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementGroupSetDeletionHandler" />
+          <ref local="org.hisp.dhis.configuration.ConfigurationDeletionHandler" />
         </list>
       </list>
     </property>
@@ -1308,6 +1314,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
         method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.user.UserService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.concept.ConceptService.delete*(..) )" method="intercept" />
+      <aop:before pointcut="execution( * org.hisp.dhis.user.UserGroupService.delete*(..) )" method="intercept" />
     </aop:aspect>
 
     <aop:aspect ref="statementInterceptor">

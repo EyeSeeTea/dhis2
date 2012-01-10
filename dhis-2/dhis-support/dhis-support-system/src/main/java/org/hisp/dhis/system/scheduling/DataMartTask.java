@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.scheduling;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,7 +127,7 @@ public class DataMartTask
         
         Set<String> periodTypes = (Set<String>) systemSettingManager.getSystemSetting( KEY_SCHEDULED_PERIOD_TYPES, DEFAULT_SCHEDULED_PERIOD_TYPES );
 
-        List<Period> periods = new RelativePeriods().getRelativePeriods( periodTypes ).getRelativePeriods();
+        List<Period> periods = new RelativePeriods().getRelativePeriods( periodTypes ).getRelativePeriods( 0 );
         
         final Date date = new Cal().now().subtract( Calendar.MONTH, 6 ).time();
         

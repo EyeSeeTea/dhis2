@@ -1,7 +1,7 @@
 package org.hisp.dhis.i18n;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,7 @@ public class DefaultI18nService
         }
 
         internationalise( object, localeManager.getCurrentLocale() );
-    }    
+    }
 
     public void localise( Object object, Locale locale )
     {
@@ -153,7 +153,7 @@ public class DefaultI18nService
     {
         internationaliseCollection( intObjects, localeManager.getCurrentLocale() );
     }
-    
+
     private void internationaliseCollection( Collection<?> intObjects, Locale locale )
     {
         if ( intObjects == null || intObjects.size() == 0 )
@@ -165,8 +165,7 @@ public class DefaultI18nService
 
         if ( i18nObject != null && locale != null )
         {
-            Collection<Translation> allTranslations = translationService.getTranslations( i18nObject.getClassName(),
-                locale );
+            Collection<Translation> allTranslations = translationService.getTranslations( i18nObject.getClassName(), locale );
 
             Collection<Translation> fallbackTranslations = null; // Not initialized unless needed
             Map<String, String> fallbackTranslationsMap = null; // Not initialized unless needed
@@ -230,6 +229,10 @@ public class DefaultI18nService
                 {
                     translations.put( property, value );
                 }
+                else
+                {
+                	translations.put( property, "" );
+                }
             }
 
             updateTranslation( className, id, locale, translations );
@@ -280,10 +283,10 @@ public class DefaultI18nService
             String key = translationEntry.getKey();
             String value = translationEntry.getValue();
 
+            Translation translation = translationService.getTranslation( className, id, locale, key );
+
             if ( value != null && !value.trim().isEmpty() )
             {
-                Translation translation = translationService.getTranslation( className, id, locale, key );
-
                 if ( translation != null )
                 {
                     translation.setValue( value );
@@ -294,6 +297,10 @@ public class DefaultI18nService
                     translation = new Translation( className, id, locale.toString(), key, value );
                     translationService.addTranslation( translation );
                 }
+            }
+            else if ( translation != null )
+            {
+                translationService.deleteTranslation( translation );
             }
         }
     }
@@ -426,10 +433,10 @@ public class DefaultI18nService
     // -------------------------------------------------------------------------
 
     /**
-     * Returns a map representing Translations for an object matching the given 
-     * id where the key is the translation property and the value is the translation 
-     * value.
-     *
+     * Returns a map representing Translations for an object matching the given
+     * id where the key is the translation property and the value is the
+     * translation value.
+     * 
      * @param translations Collection to search.
      * @param id the object id.
      * @return Map of property/value pairs.
@@ -450,9 +457,9 @@ public class DefaultI18nService
     }
 
     /**
-     * Returns a map for a collection of Translations where the key is the 
+     * Returns a map for a collection of Translations where the key is the
      * translation property and the value is the translation value.
-     *
+     * 
      * @param translations the Collection of translations.
      * @return Map containing translations.
      */
@@ -472,8 +479,9 @@ public class DefaultI18nService
     }
 
     /**
-     * Converts the property to a i18n keystring alternativeName produces alternative_name.
-     *
+     * Converts the property to a i18n keystring alternativeName produces
+     * alternative_name.
+     * 
      * @param propName string to parse.
      * @return the modified string.
      */
@@ -499,9 +507,9 @@ public class DefaultI18nService
     }
 
     /**
-     * Test if an object is not null and enabled for i18n. Returns the I18nObject
-     * if so. Returns null if not so.
-     *
+     * Test if an object is not null and enabled for i18n. Returns the
+     * I18nObject if so. Returns null if not so.
+     * 
      * @param object the object to test.
      * @return the I18nObject or null.
      */
@@ -519,5 +527,5 @@ public class DefaultI18nService
         }
 
         return null;
-    }	
+    }
 }

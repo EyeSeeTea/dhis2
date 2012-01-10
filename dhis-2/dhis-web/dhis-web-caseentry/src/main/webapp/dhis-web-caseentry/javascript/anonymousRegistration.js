@@ -8,6 +8,7 @@ function organisationUnitSelected( orgUnits )
 	
 	disable('createEventBtn');
 	disable('deleteCurrentEventBtn');
+	disable('showEventBtn');
 	
 	$.postJSON( 'loadAnonymousPrograms.action',{}
 		, function( json ) 
@@ -55,6 +56,8 @@ function loadEventForm()
 	var programId = getFieldValue('programId');
 	if( programId == '' )
 	{
+		disable('showEventBtn');
+		$('#executionDate').unbind('change');
 		return;
 	}
 	
@@ -66,8 +69,10 @@ function loadEventForm()
 		}, 
 		function( json ) 
 		{    
+			enable('showEventBtn');
 			setFieldValue( 'programStageId', json.programStages[0].id );
 			setFieldValue( 'selectedProgramId', programId );
+			$('#executionDate').bind('change');
 			
 			if( json.programStageInstances.length > 0 )
 			{
@@ -75,13 +80,10 @@ function loadEventForm()
 			}
 			else
 			{
-				
 				enable( 'executionDate' );
 				enable('createEventBtn');
 				disable('deleteCurrentEventBtn');
 				disable('completeBtn');
-				disable('validationBtn');
-				
 				hideById('loaderDiv');
 			}
 			
@@ -104,7 +106,6 @@ function loadEventRegistrationForm()
 				enable('createEventBtn');
 				disable('deleteCurrentEventBtn');
 				disable('completeBtn');
-				disable('validationBtn');
 				enable( 'executionDate' );
 				$('#executionDate').bind('change');
 			}
@@ -116,14 +117,12 @@ function loadEventRegistrationForm()
 					enable('createEventBtn');
 					enable('deleteCurrentEventBtn');
 					disable('completeBtn');
-					disable('validationBtn');
 				} 
 				else
 				{
 					disable('createEventBtn');
 					enable('deleteCurrentEventBtn');
 					enable('completeBtn');
-					enable('validationBtn');
 					enable( 'executionDate' );
 					jQuery('#executionDate').bind('change');
 				}
@@ -197,4 +196,29 @@ function deleteCurrentEvent()
 				}
 			});
 	}
+}
+
+isAjax = true;
+function showHistoryEvents()
+{
+	$('#executionDate').unbind('change');
+	contentDiv = 'dataEntryFormDiv';
+	$( '#dataEntryFormDiv' ).load( "getEventsByProgram.action", 
+		{ 
+			programInstanceId: jQuery('select[id=programId] option:selected').attr('programInstanceId'),
+			executionDate: getFieldValue('executionDate')
+		},function( )
+		{
+		});
+}
+
+
+function viewRecords( programStageInstanceId, div ) 
+{
+	$( '#' + div )
+		.load( 'viewAnonymousEvents.action?programStageInstanceId=' + programStageInstanceId ,{}
+		,function( )
+		{
+			$('#executionDate').unbind('change');
+		});
 }

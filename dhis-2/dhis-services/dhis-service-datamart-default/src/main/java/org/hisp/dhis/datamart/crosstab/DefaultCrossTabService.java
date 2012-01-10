@@ -1,7 +1,7 @@
 package org.hisp.dhis.datamart.crosstab;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -131,6 +131,8 @@ public class DefaultCrossTabService
         final BatchHandler<Object> batchHandler = batchHandlerFactory.createBatchHandler( GenericBatchHandler.class ).
             setTableName( CrossTabStore.CROSSTAB_TABLE_PREFIX + key ).init();
 
+        int rows = 0;
+        
         for ( final Integer periodId : periodIds )
         {
             for ( final Integer sourceId : organisationUnitIds )
@@ -177,6 +179,8 @@ public class DefaultCrossTabService
 
                 if ( hasValues )
                 {
+                    rows++;
+                    
                     batchHandler.addObject( valueList );
                 }
             }
@@ -185,6 +189,8 @@ public class DefaultCrossTabService
         batchHandler.flush();
         
         statementManager.destroy();
+        
+        log.info( "Crosstab table columns: " + ( operands.size() + 2 ) + ", rows: " + rows );
         
         return null;
     }

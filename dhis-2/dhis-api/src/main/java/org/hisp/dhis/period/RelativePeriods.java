@@ -1,7 +1,7 @@
 package org.hisp.dhis.period;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -302,6 +302,16 @@ public class RelativePeriods
         return getRelativePeriods( getDate( 1, new Date() ), null, false );
     }
 
+    /**
+     * Gets a list of Periods relative to current date.
+     * 
+     * @param months the number of months to subtract from the current date.
+     */
+    public List<Period> getRelativePeriods( int months )
+    {
+        return getRelativePeriods( getDate( months, new Date() ), null, false );
+    }
+    
     /**
      * Gets a list of Periods based on the given input and the state of this
      * RelativePeriods. The current date is set to todays date minus one month.

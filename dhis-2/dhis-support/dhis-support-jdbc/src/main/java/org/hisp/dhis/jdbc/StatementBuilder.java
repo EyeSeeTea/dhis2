@@ -1,7 +1,7 @@
 package org.hisp.dhis.jdbc;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -165,4 +165,6 @@ public interface StatementBuilder
     String queryRawDataElementsForOrgUnitBetweenPeriods( Integer orgUnitId, List<Integer> betweenPeriodIds);
 
     String getActivityPlan( int orgunitId, int min, int max );
+    
+    String limitRecord( int min, int max );
 }

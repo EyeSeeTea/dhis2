@@ -1,7 +1,7 @@
 package org.hisp.dhis.datamart.dataelement;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.system.util.SystemUtils;
 import org.springframework.scheduling.annotation.Async;
 
 /**
@@ -210,7 +211,7 @@ public class DefaultDataElementDataMart
                 }
             }
             
-            log.debug( "Exported data values for period: " + period );
+            log.debug( "Exported data values for period: " + period + ", " + SystemUtils.getMemoryString() );
         }
         
         batchHandler.flush();

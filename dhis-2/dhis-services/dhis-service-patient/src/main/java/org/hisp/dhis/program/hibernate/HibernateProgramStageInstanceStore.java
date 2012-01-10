@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -142,5 +143,21 @@ public class HibernateProgramStageInstanceStore
         String hql = "from ProgramStageInstance where programInstance.patient = :patient and completed = :completed";
 
         return getQuery( hql ).setEntity( "patient", patient ).setBoolean( "completed", completed ).list();
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public List<ProgramStageInstance> getProgramStageInstances( ProgramInstance programInstance, Date executionDate,
+        int min, int max )
+    {
+        return getCriteria( Restrictions.eq( "programInstance.id", programInstance.getId() ),
+            Restrictions.eq( "executionDate", executionDate ) ).setFirstResult( min ).setMaxResults( max ).list();
+    }
+
+    public int countProgramStageInstances( ProgramInstance programInstance, Date executionDate )
+    {
+        Number rs = (Number) getCriteria( Restrictions.eq( "programInstance.id", programInstance.getId() ),
+            Restrictions.eq( "executionDate", executionDate ) ).setProjection( Projections.rowCount() ).uniqueResult();
+
+        return rs != null ? rs.intValue() : 0;
     }
 }

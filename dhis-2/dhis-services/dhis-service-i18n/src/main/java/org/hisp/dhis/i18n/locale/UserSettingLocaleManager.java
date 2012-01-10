@@ -1,7 +1,7 @@
 package org.hisp.dhis.i18n.locale;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,8 @@ import org.hisp.dhis.user.UserSettingService;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: UserSettingLocaleManager.java 6335 2008-11-20 11:11:26Z larshelg $
+ * @version $Id: UserSettingLocaleManager.java 6335 2008-11-20 11:11:26Z
+ *          larshelg $
  */
 public class UserSettingLocaleManager
     implements LocaleManager

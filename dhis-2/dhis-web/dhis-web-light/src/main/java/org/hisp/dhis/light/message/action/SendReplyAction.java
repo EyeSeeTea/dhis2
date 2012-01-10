@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,51 +25,47 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.light.action.settings.action;
-
-import java.util.Locale;
-
-import org.hisp.dhis.i18n.locale.LocaleManager;
+package org.hisp.dhis.light.message.action;
 
 import com.opensymphony.xwork2.Action;
+import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.message.MessageConversation;
+import org.hisp.dhis.message.MessageService;
+import org.hisp.dhis.util.ContextUtils;
 
-public class SaveSettingsFormAction
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class SendReplyAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private LocaleManager localeManagerInterface;
+    private MessageService messageService;
 
-    public void setLocaleManagerInterface( LocaleManager localeManagerInterface )
+    public void setMessageService( MessageService messageService )
     {
-        this.localeManagerInterface = localeManagerInterface;
-    }
-
-    private LocaleManager localeManagerDB;
-
-    public void setLocaleManagerDB( LocaleManager localeManagerDB )
-    {
-        this.localeManagerDB = localeManagerDB;
+        this.messageService = messageService;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private String currentLocale;
+    private String conversationId;
 
-    public void setCurrentLocale( String locale )
+    public void setConversationId( String conversationId )
     {
-        this.currentLocale = locale;
+        this.conversationId = conversationId;
     }
 
-    private String currentLocaleDb;
+    private String text;
 
-    public void setCurrentLocaleDb( String currentLocaleDb )
+    public void setText( String text )
     {
-        this.currentLocaleDb = currentLocaleDb;
+        this.text = text;
     }
 
     // -------------------------------------------------------------------------
@@ -77,41 +73,15 @@ public class SaveSettingsFormAction
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
+    public String execute() throws Exception
     {
-        localeManagerInterface.setCurrentLocale( getRespectiveLocale( currentLocale ) );
+        String metaData = MessageService.META_USER_AGENT +
+            ServletActionContext.getRequest().getHeader( ContextUtils.HEADER_USER_AGENT );
 
-        localeManagerDB.setCurrentLocale( getRespectiveLocale( currentLocaleDb ) );
+        MessageConversation conversation = messageService.getMessageConversation( conversationId );
+
+        messageService.sendReply( conversation, text, metaData );
 
         return SUCCESS;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private Locale getRespectiveLocale( String locale )
-    {
-        String[] tokens = locale.split( "_" );
-        Locale newLocale = null;
-
-        switch ( tokens.length )
-        {
-        case 1:
-            newLocale = new Locale( tokens[0] );
-            break;
-
-        case 2:
-            newLocale = new Locale( tokens[0], tokens[1] );
-            break;
-
-        case 3:
-            newLocale = new Locale( tokens[0], tokens[1], tokens[2] );
-            break;
-
-        default:
-        }
-
-        return newLocale;
     }
 }

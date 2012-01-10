@@ -44,25 +44,20 @@ public class DataValueSet
    // ---------------------------------------------------------------------------
 
     public static final String ATTR_COMMENT = "comment";
-
     public static final String ATTR_DATASET = "dataSet";
-
     public static final String ATTR_IDSCHEME = "idScheme";
-
     public static final String ATTR_ORGUNIT = "orgUnit";
-
     public static final String ATTR_PERIOD = "period";
-
     public static final String ATTR_COMPLETE = "period";
 
     public static final String DATAVALUE = "dataValue";
 
-    public enum IdentificationStrategy { INTERNAL, UUID, CODE  };
+    public enum IdentificationStrategy { INTERNAL, UID, CODE  };
 
     /**
      *  A default strategy to use.
      */
-    public static final IdentificationStrategy DEFAULT_STRATEGY = IdentificationStrategy.UUID;
+    public static final IdentificationStrategy DEFAULT_STRATEGY = IdentificationStrategy.UID;
 
     @XmlAttribute( name = ATTR_DATASET )
     private String dataSetIdentifier;

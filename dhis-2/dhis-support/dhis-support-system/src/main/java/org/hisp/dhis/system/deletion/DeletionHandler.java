@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.deletion;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -82,6 +82,7 @@ import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserSetting;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationRule;
@@ -641,6 +642,15 @@ public abstract class DeletionHandler
     }
 
     public void deleteCaseAggregationCondition( CaseAggregationCondition caseAggregationCondition )
+    {
+    }
+
+    public String allowDeleteUserGroup ( UserGroup userGroup )
+    {
+        return null;
+    }
+
+    public void deleteUserGroup( UserGroup userGroup )
     {
     }
 }

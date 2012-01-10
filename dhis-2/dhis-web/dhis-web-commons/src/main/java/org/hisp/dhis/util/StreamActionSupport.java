@@ -1,7 +1,7 @@
 package org.hisp.dhis.util;
 
 /*
- * Copyright (c) 2004-2010, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@ public abstract class StreamActionSupport
         
         ContextUtils.configureResponse( response, contentType, disallowCache, filename, attachment );
         
-        log.info( "Content type: " + contentType + ", disallow cache: " + 
+        log.debug( "Content type: " + contentType + ", disallow cache: " + 
             disallowCache + ", filename: " + filename + ", attachment: " + attachment );
         
         try
