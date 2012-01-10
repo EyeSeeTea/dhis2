@@ -1022,10 +1022,10 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
 	},
     
     loadGeoJson: function() {
-        G.vars.mask.msg = G.i18n.loading_geojson;
+        G.vars.mask.msg = G.i18n.loading;
         G.vars.mask.show();
         G.vars.activeWidget = this;
-        this.updateValues = true;
+        this.updateValues = false;
         
         var url = G.conf.path_mapping + 'getGeoJsonWithValues.action?' + 
             'periodId=' + this.cmp.period.getValue() +
@@ -1040,7 +1040,8 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
             if (!this.layer.features.length) {
                 this.loadGeoJson();
             }
-            G.vars.mask.msg = G.i18n.aggregating_map_values;
+            
+            G.vars.mask.msg = G.i18n.loading;
             G.vars.mask.show();
             
             G.vars.lockPosition = lockPosition;
