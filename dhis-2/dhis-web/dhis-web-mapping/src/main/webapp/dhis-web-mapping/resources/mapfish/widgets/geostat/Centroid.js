@@ -1077,9 +1077,10 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
                             Ext.message.msg(false, G.i18n.current_selection_no_data);
                             G.vars.mask.hide();
                             return;
-                        }
+                        }                            
                         
                         for (var i = 0; i < this.layer.features.length; i++) {
+                            this.layer.features[i].attributes.value = 0;
                             for (var j = 0; j < mapvalues.length; j++) {
                                 if (this.layer.features[i].attributes.id == mapvalues[j].oi) {
                                     this.layer.features[i].attributes.value = parseFloat(mapvalues[j].v);

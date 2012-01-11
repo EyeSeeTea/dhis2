@@ -1710,6 +1710,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
                         }
                         
                         for (var i = 0; i < this.layer.features.length; i++) {
+                            this.layer.features[i].attributes.value = 0;
                             for (var j = 0; j < mapvalues.length; j++) {
                                 if (this.layer.features[i].attributes.id == mapvalues[j].oi) {
                                     this.layer.features[i].attributes.value = parseFloat(mapvalues[j].v);
