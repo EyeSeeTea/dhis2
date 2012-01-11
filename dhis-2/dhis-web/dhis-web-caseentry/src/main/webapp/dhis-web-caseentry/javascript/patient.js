@@ -479,6 +479,7 @@ function showProgramEnrollmentForm( patientId, programId )
 		setInnerHTML('dateOfIncidentDescription', '');
 		
 		hideById('programEnrollmentDiv');
+		hideEnrolmentField();
 		
 		return;
 	}
@@ -491,6 +492,7 @@ function showProgramEnrollmentForm( patientId, programId )
 		}, function()
 		{
 			showById('programEnrollmentDiv');
+			showEnrolmentField();
 			
 			var singleEvent = jQuery('#programId option:selected').attr('singleevent');
 			if(singleEvent=='true')
@@ -521,6 +523,7 @@ function validateProgramEnrollment()
 		url: 'validatePatientProgramEnrollment.action',
 		data: getParamsForDiv('programEnrollmentSelectDiv'),
 		success: function(json) {
+			hideById('message');
 			var type = json.response;
 			if ( type == 'success' )
 			{
@@ -528,11 +531,11 @@ function validateProgramEnrollment()
 			}
 			else if ( type == 'error' )
 			{
-				showErrorMessage( i18n_program_enrollment_failed + ':' + '\n' + message );
+				setMessage( i18n_program_enrollment_failed + ':' + '\n' + message );
 			}
 			else if ( type == 'input' )
 			{
-				showWarningMessage( json.message );
+				setMessage( json.message );
 			}
       }
     });
@@ -893,4 +896,18 @@ function showRepresentativeInfo( patientId)
 			width: 400,
 			height: 300
 		});
+}
+
+function hideEnrolmentField()
+{
+	hideById('enrollmentDateTR');
+	hideById('dateOfIncidentTR');
+	hideById('enrollBtn');
+}
+  
+function showEnrolmentField()
+{
+	showById('enrollmentDateTR');
+	showById('dateOfIncidentTR');
+	showById('enrollBtn');
 }
