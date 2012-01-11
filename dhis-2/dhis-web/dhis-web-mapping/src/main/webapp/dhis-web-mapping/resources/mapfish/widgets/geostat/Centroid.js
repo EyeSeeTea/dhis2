@@ -1035,9 +1035,9 @@ mapfish.widgets.geostat.Centroid = Ext.extend(Ext.Panel, {
         this.setUrl(url);
     },
 
-    classify: function(exception, lockPosition) {
+    classify: function(exception, lockPosition, loaded) {
         if (this.formValidation.validateForm.apply(this, [exception])) {
-            if (!this.layer.features.length) {
+            if (!this.layer.features.length && !loaded) {
                 this.loadGeoJson();
             }
             

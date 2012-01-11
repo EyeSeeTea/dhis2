@@ -101,7 +101,7 @@ mapfish.GeoStat = OpenLayers.Class({
         G.vars.activeWidget.featureStorage = this.layer.features.slice(0);
         this.requestSuccess(request);
         
-        G.vars.activeWidget.classify(false, false, true);
+        G.vars.activeWidget.classify(false, true, true);
     },
 
     onSuccess2: function(request) {
@@ -131,7 +131,7 @@ mapfish.GeoStat = OpenLayers.Class({
 		if (!G.vars.activeWidget.formValidation.validateForm.call(G.vars.activeWidget)) {
 			G.vars.mask.hide();
 		}
-		G.vars.activeWidget.classify();
+		G.vars.activeWidget.classify(false, false, true);
     },
 
     onFailure: function(request) {
