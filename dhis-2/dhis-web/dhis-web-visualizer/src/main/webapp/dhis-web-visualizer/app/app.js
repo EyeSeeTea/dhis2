@@ -2577,6 +2577,7 @@ Ext.onReady( function() {
                                                                                     DV.cmp.favorite.name = this;
                                                                                 },
                                                                                 change: function() {
+                                                                                    DV.cmp.favorite.system.check();
                                                                                     DV.cmp.favorite.save.xable();
                                                                                 }
                                                                             }
@@ -2588,6 +2589,13 @@ Ext.onReady( function() {
                                                                             fieldLabel: 'System',
                                                                             labelWidth: DV.conf.layout.form_label_width,
                                                                             disabled: !DV.init.system.user.isAdmin,
+                                                                            check: function() {
+                                                                                if (!DV.init.system.user.isAdmin) {
+                                                                                    if (DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue()) === -1) {
+                                                                                        this.setValue(false);
+                                                                                    }
+                                                                                }
+                                                                            },
                                                                             listeners: {
                                                                                 added: function() {
                                                                                     DV.cmp.favorite.system = this;
@@ -2876,7 +2884,9 @@ Ext.onReady( function() {
                                                                             DV.cmp.favorite.del.xable();
                                                                         },
                                                                         itemdblclick: function() {
-                                                                            DV.cmp.favorite.save.handler();
+                                                                            if (DV.cmp.favorite.save.xable()) {
+                                                                                DV.cmp.favorite.save.handler();
+                                                                            }
                                                                         }
                                                                     }
                                                                 }
@@ -2884,7 +2894,7 @@ Ext.onReady( function() {
                                                             bbar: [
                                                                 {
                                                                     xtype: 'label',
-                                                                    style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:50%',
+                                                                    style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:70%',
                                                                     listeners: {
                                                                         added: function() {
                                                                             DV.cmp.favorite.label = this;
@@ -2898,9 +2908,22 @@ Ext.onReady( function() {
                                                                     xable: function() {
                                                                         if (DV.state.isRendered) {
                                                                             if (DV.cmp.favorite.name.getValue()) {
-                                                                                this.enable();
-                                                                                DV.cmp.favorite.label.setText('');
-                                                                                return;
+                                                                                var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
+                                                                                if (index != -1) {
+                                                                                    if (DV.store.favorite.getAt(index).data.userId || DV.init.system.user.idAdmin) {
+                                                                                        this.enable();
+                                                                                        DV.cmp.favorite.label.setText('');
+                                                                                        return true;
+                                                                                    }
+                                                                                    else {
+                                                                                        DV.cmp.favorite.label.setText('* You are not allowed to overwrite a system favorite');
+                                                                                    }
+                                                                                }
+                                                                                else {
+                                                                                    this.enable();
+                                                                                    DV.cmp.favorite.label.setText('');
+                                                                                    return true;
+                                                                                }
                                                                             }
                                                                             else {
                                                                                 DV.cmp.favorite.label.setText('');
@@ -2915,10 +2938,11 @@ Ext.onReady( function() {
                                                                             }																				
                                                                         }
                                                                         this.disable();
+                                                                        return false;
                                                                     },
                                                                     handler: function() {
-                                                                        var value = DV.cmp.favorite.name.getValue();
-                                                                        if (DV.state.isRendered && value) {
+                                                                        if (this.xable()) {
+                                                                            var value = DV.cmp.favorite.name.getValue();
                                                                             if (DV.store.favorite.findExact('name', value) != -1) {
                                                                                 var item = value.length > 40 ? (value.substr(0,40) + '...') : value;
                                                                                 var w = Ext.create('Ext.window.Window', {
