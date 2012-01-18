@@ -323,7 +323,7 @@ Ext.onReady( function() {
                         a.push(r.data.id);
                     });
                     if (exception && !a.length) {
-                        alert('No indicators selected');
+                        alert(DV.i18n.no_indicators_selected);
                     }
                     return a;
                 }
@@ -2916,7 +2916,7 @@ Ext.onReady( function() {
                                                                                         return true;
                                                                                     }
                                                                                     else {
-                                                                                        DV.cmp.favorite.label.setText('* You are not allowed to overwrite a system favorite');
+                                                                                        DV.cmp.favorite.label.setText(DV.i18n.system_favorite_overwrite_not_allowed);
                                                                                     }
                                                                                 }
                                                                                 else {
@@ -2946,7 +2946,7 @@ Ext.onReady( function() {
                                                                             if (DV.store.favorite.findExact('name', value) != -1) {
                                                                                 var item = value.length > 40 ? (value.substr(0,40) + '...') : value;
                                                                                 var w = Ext.create('Ext.window.Window', {
-                                                                                    title: 'Save favorite',
+                                                                                    title: DV.i18n.save_favorite,
                                                                                     width: DV.conf.layout.window_confirm_width,
                                                                                     bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
                                                                                     modal: true,
@@ -3080,7 +3080,7 @@ Ext.onReady( function() {
                                 var svg = document.getElementsByTagName('svg');
                                 
                                 if (svg.length < 1) {
-                                    alert(DV.i18n.browser_download_alert);
+                                    alert(DV.i18n.alert_browser_download);
                                     return;
                                 }
                                 
