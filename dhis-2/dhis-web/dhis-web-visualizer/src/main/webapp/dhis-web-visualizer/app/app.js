@@ -2910,7 +2910,7 @@ Ext.onReady( function() {
                                                                             if (DV.cmp.favorite.name.getValue()) {
                                                                                 var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
                                                                                 if (index != -1) {
-                                                                                    if (DV.store.favorite.getAt(index).data.userId || DV.init.system.user.idAdmin) {
+                                                                                    if (DV.store.favorite.getAt(index).data.userId || DV.init.system.user.isAdmin) {
                                                                                         this.enable();
                                                                                         DV.cmp.favorite.label.setText('');
                                                                                         return true;
@@ -2952,7 +2952,7 @@ Ext.onReady( function() {
                                                                                     modal: true,
                                                                                     items: [
                                                                                         {
-                                                                                            html: DV.i18n.area_you_sure,
+                                                                                            html: DV.i18n.are_you_sure,
                                                                                             bodyStyle: 'border-style:none'
                                                                                         },
                                                                                         {
