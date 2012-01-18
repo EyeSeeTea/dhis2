@@ -30,8 +30,20 @@ package org.hisp.dhis.program;
 import static org.hisp.dhis.program.ProgramValidation.OBJECT_PROGRAM_STAGE_DATAELEMENT;
 import static org.hisp.dhis.program.ProgramValidation.SEPARATOR_ID;
 import static org.hisp.dhis.program.ProgramValidation.SEPARATOR_OBJECT;
+import static org.hisp.dhis.program.ProgramValidation.BEFORE_CURRENT_DATE;
+import static org.hisp.dhis.program.ProgramValidation.BEFORE_OR_EQUALS_TO_CURRENT_DATE;
+import static org.hisp.dhis.program.ProgramValidation.AFTER_CURRENT_DATE;
+import static org.hisp.dhis.program.ProgramValidation.AFTER_OR_EQUALS_TO_CURRENT_DATE;
+import static org.hisp.dhis.program.ProgramValidation.BEFORE_DUE_DATE;
+import static org.hisp.dhis.program.ProgramValidation.BEFORE_OR_EQUALS_TO_DUE_DATE;
+import static org.hisp.dhis.program.ProgramValidation.AFTER_DUE_DATE;
+import static org.hisp.dhis.program.ProgramValidation.AFTER_OR_EQUALS_TO_DUE_DATE;
+import static org.hisp.dhis.program.ProgramValidation.BEFORE_DUE_DATE_PLUS_OR_MINUS_MAX_DAYS;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +51,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
@@ -53,13 +66,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultProgramValidationService
     implements ProgramValidationService
 {
+    private final String regExp = "\\[" + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "([a-zA-Z0-9\\- ]+["
+        + SEPARATOR_ID + "[0-9]*]*)" + "\\]";
+
     private ProgramValidationStore validationStore;
 
     private ProgramStageService programStageService;
 
     private DataElementService dataElementService;
-
-    private ProgramStageInstanceService stageInstanceService;
 
     private PatientDataValueService valueService;
 
@@ -87,11 +101,6 @@ public class DefaultProgramValidationService
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
-    }
-
-    public void setStageInstanceService( ProgramStageInstanceService stageInstanceService )
-    {
-        this.stageInstanceService = stageInstanceService;
     }
 
     public void setValueService( PatientDataValueService valueService )
@@ -133,23 +142,27 @@ public class DefaultProgramValidationService
     }
 
     @Override
-    public boolean runValidation( ProgramValidation validation, ProgramInstance programInstance,
-        OrganisationUnit orgunit )
+    public boolean runValidation( ProgramValidation validation, ProgramStageInstance programStageInstance,
+        OrganisationUnit orgunit, I18nFormat format )
     {
-        // ---------------------------------------------------------------------
-        // parse left-expressions
-        // ---------------------------------------------------------------------
+        if ( !validation.getDateType() )
+        {
+            // ---------------------------------------------------------------------
+            // parse left-expressions
+            // ---------------------------------------------------------------------
 
-        boolean resultLeft = runExpression( validation.getLeftSide(), programInstance, orgunit );
+            boolean resultLeft = runExpression( validation.getLeftSide(), programStageInstance, orgunit );
 
-        // ---------------------------------------------------------------------
-        // parse right-expressions
-        // ---------------------------------------------------------------------
+            // ---------------------------------------------------------------------
+            // parse right-expressions
+            // ---------------------------------------------------------------------
 
-        boolean resultRight = runExpression( validation.getRightSide(), programInstance, orgunit );
+            boolean resultRight = runExpression( validation.getRightSide(), programStageInstance, orgunit );
 
-        return (resultLeft == resultRight);
+            return (resultLeft == resultRight);
+        }
 
+        return runDateExpression( validation, programStageInstance, orgunit, format );
     }
 
     public Collection<ProgramValidation> getProgramValidation( Program program )
@@ -157,11 +170,40 @@ public class DefaultProgramValidationService
         return validationStore.get( program );
     }
 
-    private boolean runExpression( String expression, ProgramInstance programInstance, OrganisationUnit orgunit )
+    public Collection<ProgramValidation> getProgramValidation( Program program, Boolean dateType )
     {
-        final String regExp = "\\[" + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "([a-zA-Z0-9\\- ]+["
-            + SEPARATOR_ID + "[0-9]*]*)" + "\\]";
+        return validationStore.get( program, dateType );
+    }
 
+    public Collection<ProgramValidation> getProgramValidation( ProgramStageDataElement psdataElement )
+    {
+        Collection<ProgramValidation> programValidation = validationStore.get( psdataElement.getProgramStage()
+            .getProgram() );
+
+        Collection<ProgramValidation> result = new HashSet<ProgramValidation>();
+
+        for ( ProgramValidation validation : programValidation )
+        {
+            Collection<DataElement> dataElements = getDataElementInExpression( validation );
+            Collection<ProgramStage> programStages = getProgramStageInExpression( validation );
+
+            if ( dataElements.contains( psdataElement.getDataElement() )
+                && programStages.contains( psdataElement.getProgramStage() ) )
+            {
+                result.add( validation );
+            }
+        }
+
+        return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private boolean runExpression( String expression, ProgramStageInstance programStageInstance,
+        OrganisationUnit orgunit )
+    {
         StringBuffer description = new StringBuffer();
 
         Pattern pattern = Pattern.compile( regExp );
@@ -171,26 +213,8 @@ public class DefaultProgramValidationService
         while ( matcher.find() )
         {
             String match = matcher.group();
-            match = match.replaceAll( "[\\[\\]]", "" );
 
-            String[] info = match.split( SEPARATOR_OBJECT );
-            String[] ids = info[1].split( SEPARATOR_ID );
-
-            int programStageId = Integer.parseInt( ids[0] );
-            ProgramStage programStage = programStageService.getProgramStage( programStageId );
-
-            int dataElementId = Integer.parseInt( ids[1] );
-            DataElement dataElement = dataElementService.getDataElement( dataElementId );
-
-            int optionComboId = Integer.parseInt( ids[2] );
-            DataElementCategoryOptionCombo optionCombo = categoryService
-                .getDataElementCategoryOptionCombo( optionComboId );
-
-            ProgramStageInstance stageInstance = stageInstanceService.getProgramStageInstance( programInstance,
-                programStage );
-
-            PatientDataValue dataValue = valueService.getPatientDataValue( stageInstance, dataElement, optionCombo,
-                orgunit );
+            PatientDataValue dataValue = getPatientDataValue( match, programStageInstance, orgunit );
 
             if ( dataValue == null )
             {
@@ -207,5 +231,187 @@ public class DefaultProgramValidationService
         parser.parseExpression( description.toString() );
 
         return (parser.getValue() == 1.0);
+    }
+
+    public boolean runDateExpression( ProgramValidation programValidation, ProgramStageInstance programStageInstance,
+        OrganisationUnit orgunit, I18nFormat format )
+    {
+        Pattern pattern = Pattern.compile( regExp );
+
+        Matcher matcher = pattern.matcher( programValidation.getLeftSide() );
+
+        if ( matcher.find() )
+        {
+            String match = matcher.group();
+
+            PatientDataValue dataValue = getPatientDataValue( match, programStageInstance, orgunit );
+
+            if ( dataValue == null )
+            {
+                return true;
+            }
+
+            String rightSide = programValidation.getRightSide();
+            Date dueDate = dataValue.getProgramStageInstance().getDueDate();
+            Date currentDate = dataValue.getTimestamp();
+            Date value = format.parseDate( dataValue.getValue() );
+
+            int index = rightSide.indexOf( 'D' );
+            if ( index < 0 )
+            {
+                int rightValidation = Integer.parseInt( rightSide );
+
+                switch ( rightValidation )
+                {
+                case BEFORE_CURRENT_DATE:
+                    return value.before( currentDate );
+                case BEFORE_OR_EQUALS_TO_CURRENT_DATE:
+                    return (value.before( currentDate ) || value.equals( currentDate ));
+                case AFTER_CURRENT_DATE:
+                    return value.after( currentDate );
+                case AFTER_OR_EQUALS_TO_CURRENT_DATE:
+                    return (value.after( currentDate ) || value.equals( currentDate ));
+                case BEFORE_DUE_DATE:
+                    return value.before( dueDate );
+                case BEFORE_OR_EQUALS_TO_DUE_DATE:
+                    return (value.before( dueDate ) || value.equals( dueDate ));
+                case AFTER_DUE_DATE:
+                    return value.after( dueDate );
+                case AFTER_OR_EQUALS_TO_DUE_DATE:
+                    return (value.after( dueDate ) || value.equals( dueDate ));
+                default:
+                    return true;
+                }
+            }
+            
+            int rightValidation = Integer.parseInt( rightSide.substring( 0, index ) );
+
+            int daysValue = Integer.parseInt( rightSide.substring( index + 1, rightSide.length() ) );
+
+            if ( rightValidation == BEFORE_DUE_DATE_PLUS_OR_MINUS_MAX_DAYS )
+            {
+                long maxDays = dueDate.getTime() / 86400000 + daysValue;
+                long minDays = dueDate.getTime() / 86400000 - daysValue;
+                long valueDays = value.getTime() / 86400000;
+                return (valueDays <= maxDays && valueDays >= minDays);
+            }
+        }
+        return true;
+    }
+
+    public Collection<ProgramValidation> getProgramValidation( ProgramStage programStage )
+    {
+        Collection<ProgramValidation> programValidation = getProgramValidation( programStage.getProgram() );
+
+        Iterator<ProgramValidation> iter = programValidation.iterator();
+
+        Pattern pattern = Pattern.compile( regExp );
+
+        while ( iter.hasNext() )
+        {
+            ProgramValidation validation = iter.next();
+
+            String expression = validation.getLeftSide() + " " + validation.getRightSide();
+            Matcher matcher = pattern.matcher( expression );
+
+            boolean flag = false;
+            while ( matcher.find() )
+            {
+                String match = matcher.group();
+                match = match.replaceAll( "[\\[\\]]", "" );
+
+                String[] info = match.split( SEPARATOR_OBJECT );
+                String[] ids = info[1].split( SEPARATOR_ID );
+
+                int programStageId = Integer.parseInt( ids[0] );
+
+                if ( programStageId == programStage.getId() )
+                {
+                    flag = true;
+                    break;
+                }
+            }
+
+            if ( !flag )
+            {
+                iter.remove();
+            }
+        }
+
+        return programValidation;
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private PatientDataValue getPatientDataValue( String match, ProgramStageInstance programStageInstance,
+        OrganisationUnit orgunit )
+    {
+        match = match.replaceAll( "[\\[\\]]", "" );
+
+        String[] info = match.split( SEPARATOR_OBJECT );
+        String[] ids = info[1].split( SEPARATOR_ID );
+
+        int dataElementId = Integer.parseInt( ids[1] );
+        DataElement dataElement = dataElementService.getDataElement( dataElementId );
+
+        int optionComboId = Integer.parseInt( ids[2] );
+        DataElementCategoryOptionCombo optionCombo = categoryService.getDataElementCategoryOptionCombo( optionComboId );
+
+        PatientDataValue dataValue = valueService.getPatientDataValue( programStageInstance, dataElement, optionCombo,
+            orgunit );
+
+        return dataValue;
+    }
+
+    private Collection<DataElement> getDataElementInExpression( ProgramValidation programValidation )
+    {
+        Collection<DataElement> dataElements = new HashSet<DataElement>();
+
+        Pattern pattern = Pattern.compile( regExp );
+        String expression = programValidation.getLeftSide() + " " + programValidation.getRightSide();
+        Matcher matcher = pattern.matcher( expression );
+
+        while ( matcher.find() )
+        {
+            String match = matcher.group();
+            match = match.replaceAll( "[\\[\\]]", "" );
+
+            String[] info = match.split( SEPARATOR_OBJECT );
+            String[] ids = info[1].split( SEPARATOR_ID );
+
+            int dataElementId = Integer.parseInt( ids[1] );
+            DataElement dataElement = dataElementService.getDataElement( dataElementId );
+
+            dataElements.add( dataElement );
+        }
+
+        return dataElements;
+    }
+
+    private Collection<ProgramStage> getProgramStageInExpression( ProgramValidation programValidation )
+    {
+        Collection<ProgramStage> programStages = new HashSet<ProgramStage>();
+
+        Pattern pattern = Pattern.compile( regExp );
+        String expression = programValidation.getLeftSide() + " " + programValidation.getRightSide();
+        Matcher matcher = pattern.matcher( expression );
+
+        while ( matcher.find() )
+        {
+            String match = matcher.group();
+            match = match.replaceAll( "[\\[\\]]", "" );
+
+            String[] info = match.split( SEPARATOR_OBJECT );
+            String[] ids = info[1].split( SEPARATOR_ID );
+
+            int programStageId = Integer.parseInt( ids[0] );
+            ProgramStage programStage = programStageService.getProgramStage( programStageId );
+
+            programStages.add( programStage );
+        }
+
+        return programStages;
     }
 }

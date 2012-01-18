@@ -29,13 +29,12 @@ package org.hisp.dhis.program;
 
 import java.io.Serializable;
 
-
 /**
  * @author Chau Thu Tran
  * @version $ ProgramValidation.java Apr 28, 2011 10:27:29 AM $
  */
 public class ProgramValidation
-implements Serializable
+    implements Serializable
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -47,6 +46,26 @@ implements Serializable
     public static final String SEPARATOR_OBJECT = ":";
 
     public static String OBJECT_PROGRAM_STAGE_DATAELEMENT = "DE";
+    
+
+    public static final int BEFORE_CURRENT_DATE = 1;
+
+    public static final int BEFORE_OR_EQUALS_TO_CURRENT_DATE = 2;
+
+    public static final int AFTER_CURRENT_DATE = 3;
+
+    public static final int AFTER_OR_EQUALS_TO_CURRENT_DATE = 4;
+    
+
+    public static final int BEFORE_DUE_DATE = -1;
+
+    public static final int BEFORE_OR_EQUALS_TO_DUE_DATE = -2;
+
+    public static final int AFTER_DUE_DATE = -3;
+
+    public static final int AFTER_OR_EQUALS_TO_DUE_DATE = -4;
+    
+    public static final int BEFORE_DUE_DATE_PLUS_OR_MINUS_MAX_DAYS = -5;
 
     // -------------------------------------------------------------------------
     // Fields
@@ -61,6 +80,8 @@ implements Serializable
     private String rightSide;
 
     private Program program;
+
+    private Boolean dateType;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -79,23 +100,27 @@ implements Serializable
         this.program = program;
     }
 
+    public ProgramValidation( String description, String leftSide, String rightSide, Program program, Boolean dateType )
+    {
+        this.description = description;
+        this.leftSide = leftSide;
+        this.rightSide = rightSide;
+        this.program = program;
+        this.dateType = dateType;
+    }
+
     // -------------------------------------------------------------------------
     // hashCode() and equals()
     // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
-    }
 
     @Override
     public int hashCode()
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ( ( leftSide == null ) ? 0 : leftSide.hashCode() );
-        result = prime * result + ( ( program == null ) ? 0 : program.hashCode() );
-        result = prime * result + ( ( rightSide == null)  ? 0 : rightSide.hashCode() );
+        result = prime * result + ((leftSide == null) ? 0 : leftSide.hashCode());
+        result = prime * result + ((program == null) ? 0 : program.hashCode());
+        result = prime * result + ((rightSide == null) ? 0 : rightSide.hashCode());
         return result;
     }
 
@@ -106,19 +131,19 @@ implements Serializable
         {
             return true;
         }
-        
+
         if ( obj == null )
         {
             return false;
         }
-        
+
         if ( getClass() != obj.getClass() )
         {
             return false;
         }
-        
+
         ProgramValidation other = (ProgramValidation) obj;
-        
+
         if ( leftSide == null )
         {
             if ( other.leftSide != null )
@@ -130,7 +155,7 @@ implements Serializable
         {
             return false;
         }
-        
+
         if ( program == null )
         {
             if ( other.program != null )
@@ -142,7 +167,7 @@ implements Serializable
         {
             return false;
         }
-        
+
         if ( rightSide == null )
         {
             if ( other.rightSide != null )
@@ -154,13 +179,18 @@ implements Serializable
         {
             return false;
         }
-        
+
         return true;
     }
 
     // -------------------------------------------------------------------------
     // Getters && Setters
     // -------------------------------------------------------------------------
+
+    public int getId()
+    {
+        return id;
+    }
 
     public void setId( int id )
     {
@@ -207,4 +237,13 @@ implements Serializable
         this.program = program;
     }
 
+    public Boolean getDateType()
+    {
+        return dateType;
+    }
+
+    public void setDateType( Boolean dateType )
+    {
+        this.dateType = dateType;
+    }
 }
