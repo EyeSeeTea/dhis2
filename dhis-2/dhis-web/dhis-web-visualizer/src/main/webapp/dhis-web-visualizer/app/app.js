@@ -1,4 +1,3 @@
-DV = {};
 DV.conf = {
     init: {
         data: [
