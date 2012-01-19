@@ -1362,6 +1362,7 @@ Ext.onReady( function() {
                     {
                         type: 'Numeric',
                         position: 'left',
+                        title: DV.state.rangeAxisLabel || false,
                         minimum: 0,
                         fields: DV.store.chart.left,
                         label: DV.util.chart.label.getNumericLabel(),
@@ -1372,6 +1373,7 @@ Ext.onReady( function() {
                     {
                         type: 'Category',
                         position: 'bottom',
+                        title: DV.state.domainAxisLabel || false,
                         fields: DV.store.chart.bottom,
                         label: DV.util.chart.label.getCategoryLabel()
                     }
@@ -1391,6 +1393,7 @@ Ext.onReady( function() {
                     {
                         type: 'Numeric',
                         position: 'left',
+                        title: DV.state.rangeAxisLabel || false,
                         minimum: 0,
                         fields: DV.store.chart.left,
                         label: DV.util.chart.label.getNumericLabel(),
@@ -1401,6 +1404,7 @@ Ext.onReady( function() {
                     {
                         type: 'Category',
                         position: 'bottom',
+                        title: DV.state.domainAxisLabel || false,
                         fields: DV.store.chart.bottom,
                         label: DV.util.chart.label.getCategoryLabel()
                     }
@@ -2321,7 +2325,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'checkbox',
                                                 cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:26px',
+                                                style: 'margin-right:25px',
                                                 boxLabel: DV.i18n.trend_line,
                                                 labelWidth: DV.conf.layout.form_label_width,
                                                 listeners: {
@@ -2333,7 +2337,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'checkbox',
                                                 cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:26px',
+                                                style: 'margin-right:24px',
                                                 boxLabel: DV.i18n.hide_subtitle,
                                                 labelWidth: DV.conf.layout.form_label_width,
                                                 listeners: {
@@ -2345,7 +2349,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'checkbox',
                                                 cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:26px',
+                                                style: 'margin-right:25px',
                                                 boxLabel: DV.i18n.hide_legend,
                                                 labelWidth: DV.conf.layout.form_label_width,
                                                 listeners: {
@@ -2525,23 +2529,6 @@ Ext.onReady( function() {
                             text: DV.i18n.update,
                             handler: function() {
                                 DV.exe.execute(true, DV.init.cmd);
-                            }
-                        },
-                        {
-                            xtype: 'button',
-							cls: 'dv-toolbar-btn-2',
-                            text: DV.i18n.data_table,
-                            handler: function() {
-                                var p = DV.cmp.region.east;
-                                if (p.collapsed && p.items.length) {
-                                    p.expand();
-                                    DV.cmp.toolbar.resizeeast.show();
-                                    DV.exe.datatable(true);
-                                }
-                                else {
-                                    p.collapse();
-                                    DV.cmp.toolbar.resizeeast.hide();
-                                }
                             }
                         },
                         {
@@ -3137,6 +3124,23 @@ Ext.onReady( function() {
                                             }
                                         ]                                            
                                     });
+                                }
+                            }
+                        },
+                        {
+                            xtype: 'button',
+							cls: 'dv-toolbar-btn-2',
+                            text: DV.i18n.data_table,
+                            handler: function() {
+                                var p = DV.cmp.region.east;
+                                if (p.collapsed && p.items.length) {
+                                    p.expand();
+                                    DV.cmp.toolbar.resizeeast.show();
+                                    DV.exe.datatable(true);
+                                }
+                                else {
+                                    p.collapse();
+                                    DV.cmp.toolbar.resizeeast.hide();
                                 }
                             }
                         },
