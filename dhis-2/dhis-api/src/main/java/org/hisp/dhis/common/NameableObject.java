@@ -27,11 +27,18 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public interface NameableObject extends IdentifiableObject
+public interface NameableObject 
+    extends IdentifiableObject
 {
-    public String getAlternativeName();
+    final String[] I18N_PROPERTIES = { "name", "shortName", "description" };
+            
+    String getAlternativeName();
 
-    public String getShortName();
+    String getShortName();
 
-    public String getDescription();
+    String getDescription();
+    
+    String getDisplayShortName();
+    
+    String getDisplayDescription();
 }
