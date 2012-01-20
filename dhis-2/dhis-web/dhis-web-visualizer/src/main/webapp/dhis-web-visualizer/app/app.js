@@ -810,7 +810,7 @@ Ext.onReady( function() {
         favorite: {
             validate: function(f) {
                 if (!f.organisationUnits || !f.organisationUnits.length) {
-                    alert('Favorite has no organisation units');
+                    alert(DV.i18n.favorite_no_orgunits);
                     return;
                 }                
             }
