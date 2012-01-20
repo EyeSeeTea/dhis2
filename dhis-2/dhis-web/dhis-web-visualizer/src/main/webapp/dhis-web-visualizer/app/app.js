@@ -1033,7 +1033,10 @@ Ext.onReady( function() {
             this.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
             this.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
             
-            this.isRendered = true;
+            if (!this.isRendered) {
+                DV.cmp.toolbar.datatable.enable();
+                this.isRendered = true;
+            }
             
             if (exe) {
                 DV.value.getValues(true);
@@ -2330,18 +2333,6 @@ Ext.onReady( function() {
                                                 xtype: 'checkbox',
                                                 cls: 'dv-checkbox-alt1',
                                                 style: 'margin-right:21px',
-                                                boxLabel: '<span style="color:#555">* ' + DV.i18n.trend_line + '</span>',
-                                                labelWidth: DV.conf.layout.form_label_width,
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.favorite.trendline = this;
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:21px',
                                                 boxLabel: DV.i18n.hide_subtitle,
                                                 labelWidth: DV.conf.layout.form_label_width,
                                                 listeners: {
@@ -2359,6 +2350,18 @@ Ext.onReady( function() {
                                                 listeners: {
                                                     added: function() {
                                                         DV.cmp.favorite.hidelegend = this;
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                xtype: 'checkbox',
+                                                cls: 'dv-checkbox-alt1',
+                                                style: 'margin-right:21px',
+                                                boxLabel: '<span style="color:#555">* ' + DV.i18n.trend_line + '</span>',
+                                                labelWidth: DV.conf.layout.form_label_width,
+                                                listeners: {
+                                                    added: function() {
+                                                        DV.cmp.favorite.trendline = this;
                                                     }
                                                 }
                                             },
@@ -3136,6 +3139,7 @@ Ext.onReady( function() {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
                             text: DV.i18n.data_table,
+                            disabled: true,
                             handler: function() {
                                 var p = DV.cmp.region.east;
                                 if (p.collapsed && p.items.length) {
@@ -3146,6 +3150,11 @@ Ext.onReady( function() {
                                 else {
                                     p.collapse();
                                     DV.cmp.toolbar.resizeeast.hide();
+                                }
+                            },
+                            listeners: {
+                                added: function() {
+                                    DV.cmp.toolbar.datatable = this;
                                 }
                             }
                         },
