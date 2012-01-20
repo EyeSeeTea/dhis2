@@ -991,6 +991,7 @@ Ext.onReady( function() {
         dataelementIds: [],
         relativePeriods: {},
         organisationunitIds: [],
+        hideSubtitle: false,
         hideLegend: false,
         domainAxisLabel: null,
         rangeAxisLabel: null,
@@ -1027,6 +1028,7 @@ Ext.onReady( function() {
             this.relativePeriods = DV.util.dimension.period.getRelativePeriodObject();
             this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
             
+            this.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
             this.hideLegend = DV.cmp.favorite.hidelegend.getValue();
             this.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
             this.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
@@ -1064,6 +1066,7 @@ Ext.onReady( function() {
                         }
                         var f = Ext.JSON.decode(r.responseText),
                             indiment = [];
+                            
                         f.type = f.type.toLowerCase();
                         f.series = f.series.toLowerCase();
                         f.category = f.category.toLowerCase();
@@ -1133,6 +1136,7 @@ Ext.onReady( function() {
                         this.filter.names = f.names[this.filter.dimension];
                         
                         DV.cmp.favorite.trendline.setValue(f.regression);
+                        this.hideSubtitle = f.hideSubtitle;
                         DV.cmp.favorite.hidesubtitle.setValue(f.hideSubtitle);
                         this.hideLegend = f.hideLegend;
                         DV.cmp.favorite.hidelegend.setValue(f.hideLegend);
@@ -1266,7 +1270,7 @@ Ext.onReady( function() {
                 animate: true,
                 store: DV.store.chart,
                 insetPadding: DV.conf.chart.style.inset,
-                items: DV.util.chart.getTitle(),
+                items: DV.state.hideSubtitle ? false : DV.util.chart.getTitle(),
                 legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(),
                 axes: [
                     {
@@ -1311,7 +1315,7 @@ Ext.onReady( function() {
                 animate: true,
                 store: DV.store.chart,
                 insetPadding: DV.conf.chart.style.inset,
-                items: DV.util.chart.getTitle(),
+                items: DV.state.hideSubtitle ? false : DV.util.chart.getTitle(),
                 legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(DV.store.chart.bottom.length),
                 axes: [
                     {
@@ -1356,7 +1360,7 @@ Ext.onReady( function() {
                 animate: true,
                 store: DV.store.chart,
                 insetPadding: DV.conf.chart.style.inset,
-                items: DV.util.chart.getTitle(),
+                items: DV.state.hideSubtitle ? false : DV.util.chart.getTitle(),
                 legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(),
                 axes: [
                     {
@@ -1387,7 +1391,7 @@ Ext.onReady( function() {
                 animate: true,
                 store: DV.store.chart,
                 insetPadding: DV.conf.chart.style.inset,
-                items: DV.util.chart.getTitle(),
+                items: DV.state.hideSubtitle ? false : DV.util.chart.getTitle(),
                 legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(),
                 axes: [
                     {
@@ -1427,7 +1431,7 @@ Ext.onReady( function() {
                 shadow: true,
                 store: DV.store.chart,
                 insetPadding: 60,
-                items: DV.util.chart.pie.getTitle(),
+                items: DV.state.hideSubtitle ? false : DV.util.chart.getTitle(),
                 legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(DV.state.category.names.length),
                 series: [{
                     type: 'pie',
@@ -2314,7 +2318,7 @@ Ext.onReady( function() {
                                 collapsible: true,
                                 items: [
                                     {
-                                        html: DV.i18n.png_only,
+                                        html: '* ' + DV.i18n.png_only,
                                         bodyStyle: 'border:0 none; color:#555; font-style:italic; padding-bottom:10px'
                                     },
                                     {
@@ -2325,8 +2329,8 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'checkbox',
                                                 cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:25px',
-                                                boxLabel: DV.i18n.trend_line,
+                                                style: 'margin-right:21px',
+                                                boxLabel: '<span style="color:#555">* ' + DV.i18n.trend_line + '</span>',
                                                 labelWidth: DV.conf.layout.form_label_width,
                                                 listeners: {
                                                     added: function() {
@@ -2337,7 +2341,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'checkbox',
                                                 cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:24px',
+                                                style: 'margin-right:21px',
                                                 boxLabel: DV.i18n.hide_subtitle,
                                                 labelWidth: DV.conf.layout.form_label_width,
                                                 listeners: {
@@ -2349,7 +2353,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'checkbox',
                                                 cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:25px',
+                                                style: 'margin-right:21px',
                                                 boxLabel: DV.i18n.hide_legend,
                                                 labelWidth: DV.conf.layout.form_label_width,
                                                 listeners: {
@@ -2361,7 +2365,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'checkbox',
                                                 cls: 'dv-checkbox-alt1',
-                                                boxLabel: DV.i18n.user_orgunit,
+                                                boxLabel: '<span style="color:#555">* ' + DV.i18n.user_orgunit + '</span>',
                                                 labelWidth: DV.conf.layout.form_label_width,
                                                 listeners: {
                                                     added: function() {
@@ -2421,7 +2425,8 @@ Ext.onReady( function() {
                                                 cls: 'dv-textfield-alt1',
                                                 style: 'margin-right:4px',
                                                 hideTrigger: true,
-                                                fieldLabel: DV.i18n.target_line_value,
+                                                fieldLabel: '* ' + DV.i18n.target_line_value,
+                                                labelStyle: 'color:#555',
                                                 labelAlign: 'top',
                                                 labelSeparator: '',
                                                 maxLength: 100,
@@ -2439,7 +2444,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'textfield',
                                                 cls: 'dv-textfield-alt1',
-                                                fieldLabel: DV.i18n.target_line_label,
+                                                fieldLabel: '* ' + DV.i18n.target_line_label,
                                                 labelAlign: 'top',
                                                 labelSeparator: '',
                                                 maxLength: 100,
