@@ -27,7 +27,6 @@ package org.hisp.dhis.i18n;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.i18n.locale.LocaleManager.DHIS_STANDARD_LOCALE;
 import static org.hisp.dhis.system.util.ReflectionUtils.getClassName;
 import static org.hisp.dhis.system.util.ReflectionUtils.getId;
 import static org.hisp.dhis.system.util.ReflectionUtils.getProperty;
@@ -106,10 +105,11 @@ public class DefaultI18nService
 
     private void internationaliseObject( Object object, Locale locale )
     {
-        if ( object == null || DHIS_STANDARD_LOCALE.equals( locale ) )
+        if ( locale == null || object == null )
         {
             return;
         }        
+        System.out.println( "Loc NO NULL ");
         
         List<String> properties = getObjectPropertyNames( object );
         
@@ -131,10 +131,11 @@ public class DefaultI18nService
 
     private void internationaliseCollection( Collection<?> objects, Locale locale )
     {
-        if ( objects == null || objects.size() == 0 || DHIS_STANDARD_LOCALE.equals( locale ) )
+        if ( locale == null || objects == null || objects.size() == 0 )
         {
             return;
-        }        
+        }
+        System.out.println( "Loc NO NULL ");
         
         Object peek = objects.iterator().next();
 
