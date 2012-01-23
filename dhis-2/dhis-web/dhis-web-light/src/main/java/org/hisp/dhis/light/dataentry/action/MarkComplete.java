@@ -25,30 +25,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.light.action;
+package org.hisp.dhis.light.dataentry.action;
 
 import com.opensymphony.xwork2.Action;
+import org.apache.commons.lang.Validate;
+import org.hisp.dhis.dataset.CompleteDataSetRegistration;
+import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.user.CurrentUserService;
 
-public class MenuAction
+import java.util.Date;
+
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class MarkComplete
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private MessageService messageService;
+    private CurrentUserService currentUserService;
 
-    public void setMessageService( MessageService messageService )
+    public void setCurrentUserService( CurrentUserService currentUserService )
     {
-        this.messageService = messageService;
+        this.currentUserService = currentUserService;
+    }
+
+    private CompleteDataSetRegistrationService registrationService;
+
+    public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
+    {
+        this.registrationService = registrationService;
     }
 
     private OrganisationUnitService organisationUnitService;
@@ -72,23 +86,9 @@ public class MenuAction
         this.periodService = periodService;
     }
 
-    private I18nFormat format;
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
-
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
-
-    private long unreadMessageConversationCount;
-
-    public long getUnreadMessageConversationCount()
-    {
-        return unreadMessageConversationCount;
-    }
 
     private Integer organisationUnitId;
 
@@ -97,11 +97,9 @@ public class MenuAction
         this.organisationUnitId = organisationUnitId;
     }
 
-    private OrganisationUnit organisationUnit;
-
-    public OrganisationUnit getOrganisationUnit()
+    public Integer getOrganisationUnitId()
     {
-        return organisationUnit;
+        return organisationUnitId;
     }
 
     private String periodId;
@@ -111,11 +109,9 @@ public class MenuAction
         this.periodId = periodId;
     }
 
-    private Period period;
-
-    public Period getPeriod()
+    public String getPeriodId()
     {
-        return period;
+        return periodId;
     }
 
     private Integer dataSetId;
@@ -125,23 +121,9 @@ public class MenuAction
         this.dataSetId = dataSetId;
     }
 
-    private DataSet dataSet;
-
-    public DataSet getDataSet()
+    public Integer getDataSetId()
     {
-        return dataSet;
-    }
-
-    private boolean complete;
-
-    public void setComplete( boolean complete )
-    {
-        this.complete = complete;
-    }
-
-    public boolean isComplete()
-    {
-        return complete;
+        return dataSetId;
     }
 
     // -------------------------------------------------------------------------
@@ -149,19 +131,32 @@ public class MenuAction
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
+    public String execute() throws Exception
     {
-        if ( complete )
+        Validate.notNull( organisationUnitId );
+        Validate.notNull( periodId );
+        Validate.notNull( dataSetId );
+
+        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+
+        Period period = periodService.getPeriodByExternalId( periodId );
+
+        DataSet dataSet = dataSetService.getDataSet( dataSetId );
+
+        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period,
+            organisationUnit );
+
+        if ( registration == null )
         {
-            organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+            registration = new CompleteDataSetRegistration();
+            registration.setDataSet( dataSet );
+            registration.setPeriod( period );
+            registration.setSource( organisationUnit );
+            registration.setDate( new Date() );
+            registration.setStoredBy( currentUserService.getCurrentUsername() );
 
-            period = periodService.getPeriodByExternalId( periodId );
-            period.setName( format.formatPeriod( period ) );
-
-            dataSet = dataSetService.getDataSet( dataSetId );
+            registrationService.saveCompleteDataSetRegistration( registration );
         }
-
-        unreadMessageConversationCount = messageService.getUnreadMessageConversationCount();
 
         return SUCCESS;
     }

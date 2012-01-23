@@ -290,6 +290,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 
   <bean id="org.hisp.dhis.datadictionary.DataDictionaryService" class="org.hisp.dhis.datadictionary.DefaultDataDictionaryService">
     <property name="dataDictionaryStore" ref="org.hisp.dhis.datadictionary.DataDictionaryStore" />
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
   <bean id="org.hisp.dhis.indicator.IndicatorService" class="org.hisp.dhis.indicator.DefaultIndicatorService">
@@ -342,7 +343,8 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />	
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementCategoryService" class="org.hisp.dhis.dataelement.DefaultDataElementCategoryService">
@@ -362,6 +364,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" class="org.hisp.dhis.organisationunit.DefaultOrganisationUnitGroupService">
     <property name="organisationUnitGroupStore" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupStore" />
     <property name="organisationUnitGroupSetStore" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupSetStore" />
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
   <bean id="org.hisp.dhis.dataanalysis.StdDevOutlierAnalysisService" class="org.hisp.dhis.dataanalysis.StdDevOutlierAnalysisService">
@@ -440,10 +443,6 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 
   <bean id="org.hisp.dhis.translation.TranslationService" class="org.hisp.dhis.translation.DefaultTranslationService">
     <property name="translationStore" ref="org.hisp.dhis.translation.TranslationStore" />
-  </bean>
-
-  <bean id="org.hisp.dhis.i18n.locale.LocaleManagerDb" class="org.hisp.dhis.i18n.locale.DatabaseLocaleManager">
-    <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
   </bean>
 
   <bean id="org.hisp.dhis.aggregation.AggregatedDataValueService" class="org.hisp.dhis.aggregation.DefaultAggregatedDataValueService">
@@ -540,19 +539,78 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     </property>
   </bean>
 
+  <bean id="org.hisp.dhis.options.StyleManager" class="org.hisp.dhis.options.style.DefaultStyleManager">
+    <property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
+	<property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
+    <property name="defaultStyle" value="light_blue" />
+    <property name="styles">
+      <map>
+        <entry>
+          <key>
+            <value>light_blue</value>
+          </key>
+          <value>light_blue/light_blue.css</value>
+        </entry>
+        <entry>
+          <key>
+            <value>blue</value>
+          </key>
+          <value>blue/blue.css</value>
+        </entry>
+        <entry>
+          <key>
+            <value>green</value>
+          </key>
+          <value>green/green.css</value>
+        </entry>
+        <entry>
+          <key>
+            <value>vietnam</value>
+          </key>
+          <value>vietnam/vietnam.css</value>
+        </entry>
+        <entry>
+          <key>
+            <value>india</value>
+          </key>
+          <value>india/india.css</value>
+        </entry>
+      </map>
+    </property>
+  </bean>
+  
   <bean id="org.hisp.dhis.common.IdentifiableObjectManager" class="org.hisp.dhis.common.DefaultIdentifiableObjectManager"/>  
 
+  <bean id="org.hisp.dhis.help.HelpManager" class="org.hisp.dhis.help.DefaultHelpManager" />
+  
   <!-- I18nService -->
 
   <bean id="org.hisp.dhis.i18n.I18nService" class="org.hisp.dhis.i18n.DefaultI18nService">
-    <property name="localeManager">
-      <ref bean="org.hisp.dhis.i18n.locale.LocaleManagerDb" />
-    </property>
-    <property name="translationService">
-      <ref bean="org.hisp.dhis.translation.TranslationService" />
-    </property>
+    <property name="translationService" ref="org.hisp.dhis.translation.TranslationService" />
+	<property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
+	<property name="locales">
+	<list>
+	  <value>af</value>
+	  <value>ar</value>
+	  <value>am</value>
+	  <value>de</value>
+	  <value>en</value>
+	  <value>es</value>
+	  <value>fr</value>
+	  <value>gu</value>
+	  <value>hi</value>
+	  <value>it</value>
+	  <value>ja</value>
+	  <value>nl</value>
+	  <value>no</value>
+	  <value>pt</value>
+	  <value>ru</value>
+	  <value>sw</value>
+	  <value>vi</value>
+	</list>
+	</property>
   </bean>
-
+  
   <!-- Startup routine definitions -->
 
   <bean id="org.hisp.dhis.startup.TableAlteror" class="org.hisp.dhis.startup.TableAlteror">

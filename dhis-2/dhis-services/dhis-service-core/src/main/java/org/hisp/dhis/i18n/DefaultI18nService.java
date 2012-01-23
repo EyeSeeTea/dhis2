@@ -27,14 +27,12 @@ package org.hisp.dhis.i18n;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.i18n.locale.LocaleManager.DHIS_STANDARD_LOCALE;
 import static org.hisp.dhis.system.util.ReflectionUtils.getClassName;
 import static org.hisp.dhis.system.util.ReflectionUtils.getId;
 import static org.hisp.dhis.system.util.ReflectionUtils.getProperty;
 import static org.hisp.dhis.system.util.ReflectionUtils.isCollection;
 import static org.hisp.dhis.system.util.ReflectionUtils.setProperty;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,9 +46,10 @@ import java.util.Map;
 
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
-import org.hisp.dhis.i18n.locale.LocaleManager;
+import org.hisp.dhis.system.util.LocaleUtils;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationService;
+import org.hisp.dhis.user.UserSettingService;
 
 /**
  * @author Oyvind Brucker
@@ -62,18 +61,45 @@ public class DefaultI18nService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private LocaleManager localeManager;
-
-    public void setLocaleManager( LocaleManager localeManager )
-    {
-        this.localeManager = localeManager;
-    }
-
     private TranslationService translationService;
 
     public void setTranslationService( TranslationService translationService )
     {
         this.translationService = translationService;
+    }
+
+    private UserSettingService userSettingService;
+
+    public void setUserSettingService( UserSettingService userSettingService )
+    {
+        this.userSettingService = userSettingService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Properties
+    // -------------------------------------------------------------------------
+
+    private List<Locale> locales = new ArrayList<Locale>();
+
+    public void setLocales( List<String> localeStrings )
+    {
+        for ( String string : localeStrings )
+        {
+            Locale locale = LocaleUtils.getLocale( string );
+            
+            if ( locale != null )
+            {
+                locales.add( locale );
+            }
+        }
+        
+        Collections.sort( locales, new Comparator<Locale>()
+            {
+                public int compare( Locale l1, Locale l2 )
+                {
+                    return l1.getDisplayName().compareTo( l2.getDisplayName() );
+                }
+            } );
     }
 
     // -------------------------------------------------------------------------
@@ -84,11 +110,11 @@ public class DefaultI18nService
     {
         if ( isCollection( object ) )
         {
-            internationaliseCollection( (Collection<?>) object, localeManager.getCurrentLocale() );
+            internationaliseCollection( (Collection<?>) object, getCurrentLocale() );
         }
         else
         {
-            internationaliseObject( object, localeManager.getCurrentLocale() );
+            internationaliseObject( object, getCurrentLocale() );
         }
     }
 
@@ -106,10 +132,10 @@ public class DefaultI18nService
 
     private void internationaliseObject( Object object, Locale locale )
     {
-        if ( object == null || DHIS_STANDARD_LOCALE.equals( locale ) )
+        if ( locale == null || object == null )
         {
             return;
-        }        
+        }
         
         List<String> properties = getObjectPropertyNames( object );
         
@@ -131,10 +157,10 @@ public class DefaultI18nService
 
     private void internationaliseCollection( Collection<?> objects, Locale locale )
     {
-        if ( objects == null || objects.size() == 0 || DHIS_STANDARD_LOCALE.equals( locale ) )
+        if ( locale == null || objects == null || objects.size() == 0 )
         {
             return;
-        }        
+        }
         
         Object peek = objects.iterator().next();
 
@@ -200,50 +226,62 @@ public class DefaultI18nService
 
     public void updateTranslation( String className, int id, Locale locale, Map<String, String> translations )
     {
-        for ( Map.Entry<String, String> translationEntry : translations.entrySet() )
+        if ( locale != null && className != null )
         {
-            String key = translationEntry.getKey();
-            String value = translationEntry.getValue();
-
-            Translation translation = translationService.getTranslation( className, id, locale, key );
-
-            if ( value != null && !value.trim().isEmpty() )
+            for ( Map.Entry<String, String> translationEntry : translations.entrySet() )
             {
-                if ( translation != null )
+                String key = translationEntry.getKey();
+                String value = translationEntry.getValue();
+    
+                Translation translation = translationService.getTranslation( className, id, locale, key );
+    
+                if ( value != null && !value.trim().isEmpty() )
                 {
-                    translation.setValue( value );
-                    translationService.updateTranslation( translation );
+                    if ( translation != null )
+                    {
+                        translation.setValue( value );
+                        translationService.updateTranslation( translation );
+                    }
+                    else
+                    {
+                        translation = new Translation( className, id, locale.toString(), key, value );
+                        translationService.addTranslation( translation );
+                    }
                 }
-                else
+                else if ( translation != null )
                 {
-                    translation = new Translation( className, id, locale.toString(), key, value );
-                    translationService.addTranslation( translation );
+                    translationService.deleteTranslation( translation );
                 }
-            }
-            else if ( translation != null )
-            {
-                translationService.deleteTranslation( translation );
             }
         }
     }
 
+    public Map<String, String> getTranslations( String className, int id )
+    {
+        return getTranslations( className, id, getCurrentLocale() );
+    }
+    
     public Map<String, String> getTranslations( String className, int id, Locale locale )
     {
-        return convertTranslations( translationService.getTranslations( className, id, locale ) );
+        if ( locale != null && className != null )
+        {
+            return convertTranslations( translationService.getTranslations( className, id, locale ) );
+        }
+        
+        return new HashMap<String, String>();
+    }
+
+    // -------------------------------------------------------------------------
+    // Locale
+    // -------------------------------------------------------------------------
+    
+    public Locale getCurrentLocale()
+    {
+        return (Locale) userSettingService.getUserSetting( UserSettingService.KEY_DB_LOCALE );
     }
     
     public List<Locale> getAvailableLocales()
-    {
-        List<Locale> locales = Arrays.asList( DateFormat.getAvailableLocales() );
-        
-        Collections.sort( locales, new Comparator<Locale>()
-            {
-                public int compare( Locale l1, Locale l2 )
-                {
-                    return l1.getDisplayName().compareTo( l2.getDisplayName() );
-                }
-            } );
-        
+    {        
         return locales;
     }
 

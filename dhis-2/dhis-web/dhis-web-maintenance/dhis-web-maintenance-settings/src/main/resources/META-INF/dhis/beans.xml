@@ -3,7 +3,7 @@
   xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
 
-	<!-- System settings -->
+  <!-- System settings -->
 
   <bean id="org.hisp.dhis.settings.action.system.GetGeneralSettingsAction" class="org.hisp.dhis.settings.action.system.GetGeneralSettingsAction"
     scope="prototype">
@@ -27,13 +27,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
     <property name="moduleManager" ref="org.hisp.dhis.webportal.module.ModuleManager" />
-    <property name="styleManager" ref="org.hisp.dhis.options.style.StyleManager" />
+    <property name="styleManager" ref="org.hisp.dhis.options.StyleManager" />
   </bean>
 
   <bean id="org.hisp.dhis.settings.action.system.SetAppearanceSettingsAction" class="org.hisp.dhis.settings.action.system.SetAppearanceSettingsAction"
     scope="prototype">
     <property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
-    <property name="styleManager" ref="org.hisp.dhis.options.style.StyleManager" />
+    <property name="styleManager" ref="org.hisp.dhis.options.StyleManager" />
   </bean>
 
   <bean id="org.hisp.dhis.settings.action.system.GetSMTPSettingsAction" class="org.hisp.dhis.settings.action.system.GetSMTPSettingsAction"
@@ -46,9 +46,7 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
   </bean>
 
-	<!-- User settings -->
-	
-	<!-- General settings -->
+  <!-- User settings -->
 	
   <bean id="org.hisp.dhis.settings.action.user.GetGeneralSettingsAction" class="org.hisp.dhis.settings.action.user.GetGeneralSettingsAction"
     scope="prototype">
@@ -58,37 +56,30 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="i18nService">
       <ref bean="org.hisp.dhis.i18n.I18nService" />
     </property>
-    <property name="localeManagerInterface">
+    <property name="localeManager">
       <ref bean="org.hisp.dhis.i18n.locale.LocaleManager" />
-    </property>
-    <property name="localeManagerDB">
-      <ref bean="org.hisp.dhis.i18n.locale.LocaleManagerDb" />
     </property>
     <property name="userSettingService">
       <ref bean="org.hisp.dhis.user.UserSettingService" />
     </property>
     <property name="styleManager">
-      <ref bean="org.hisp.dhis.options.style.StyleManager" />
+      <ref bean="org.hisp.dhis.options.StyleManager" />
     </property>
   </bean>
 
   <bean id="org.hisp.dhis.settings.action.user.SetGeneralSettingsAction" class="org.hisp.dhis.settings.action.user.SetGeneralSettingsAction"
     scope="prototype">
-    <property name="localeManagerInterface">
+    <property name="localeManager">
       <ref bean="org.hisp.dhis.i18n.locale.LocaleManager" />
-    </property>
-    <property name="localeManagerDB">
-      <ref bean="org.hisp.dhis.i18n.locale.LocaleManagerDb" />
     </property>
     <property name="userSettingService">
       <ref bean="org.hisp.dhis.user.UserSettingService" />
     </property>
     <property name="styleManager">
-      <ref bean="org.hisp.dhis.options.style.StyleManager" />
+      <ref bean="org.hisp.dhis.options.StyleManager" />
     </property>
   </bean>
   
-  <!-- Message settings -->
   <bean id="org.hisp.dhis.settings.action.user.GetMessageSettingsAction" class="org.hisp.dhis.settings.action.user.GetMessageSettingsAction"
     scope="prototype">
     <property name="userSettingService">

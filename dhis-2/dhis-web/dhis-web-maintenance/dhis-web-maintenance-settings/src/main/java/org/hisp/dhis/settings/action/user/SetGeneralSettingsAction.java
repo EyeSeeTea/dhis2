@@ -29,11 +29,13 @@ package org.hisp.dhis.settings.action.user;
 
 import static org.hisp.dhis.user.UserSettingService.AUTO_SAVE_DATA_ENTRY_FORM;
 import static org.hisp.dhis.user.UserSettingService.KEY_CHARTS_IN_DASHBOARD;
+import static org.hisp.dhis.user.UserSettingService.KEY_DB_LOCALE;
 
 import java.util.Locale;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.i18n.locale.LocaleManager;
-import org.hisp.dhis.options.style.StyleManager;
+import org.hisp.dhis.options.StyleManager;
 import org.hisp.dhis.user.UserSettingService;
 
 import com.opensymphony.xwork2.Action;
@@ -49,18 +51,11 @@ public class SetGeneralSettingsAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private LocaleManager localeManagerInterface;
+    private LocaleManager localeManager;
 
-    public void setLocaleManagerInterface( LocaleManager localeManagerInterface )
+    public void setLocaleManager( LocaleManager localeManager )
     {
-        this.localeManagerInterface = localeManagerInterface;
-    }
-
-    private LocaleManager localeManagerDB;
-
-    public void setLocaleManagerDB( LocaleManager localeManagerDB )
-    {
-        this.localeManagerDB = localeManagerDB;
+        this.localeManager = localeManager;
     }
 
     private StyleManager styleManager;
@@ -123,9 +118,9 @@ public class SetGeneralSettingsAction
     public String execute()
         throws Exception
     {
-        localeManagerInterface.setCurrentLocale( getRespectiveLocale( currentLocale ) );
+        localeManager.setCurrentLocale( getRespectiveLocale( currentLocale ) );
 
-        localeManagerDB.setCurrentLocale( getRespectiveLocale( currentLocaleDb ) );
+        userSettingService.saveUserSetting( KEY_DB_LOCALE, getRespectiveLocale( StringUtils.trimToNull( currentLocaleDb ) ) );
 
         styleManager.setUserStyle( currentStyle );
 
@@ -142,6 +137,11 @@ public class SetGeneralSettingsAction
 
     private Locale getRespectiveLocale( String locale )
     {
+        if ( locale == null )
+        {
+            return null;
+        }
+        
         String[] tokens = locale.split( "_" );
         Locale newLocale = null;
 
