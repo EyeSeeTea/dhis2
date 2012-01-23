@@ -259,7 +259,7 @@ public class AddOrUpdateChartAction
     {
         this.rangeAxisLabel = rangeAxisLabel;
     }
-    
+
     private Double targetLineValue;
 
     public void setTargetLineValue( Double targetLineValue )
@@ -386,6 +386,7 @@ public class AddOrUpdateChartAction
         
         if ( targetLineValue != null )
         {
+            chart.setTargetLine( true );
             chart.setTargetLineValue( targetLineValue );
         }
         
