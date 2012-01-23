@@ -47,12 +47,14 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * @author Dang Duy Hieu
  * @version $Id$
  */
+@Ignore
 public class DataSetLockServiceTest
     extends DhisSpringTest
 {
@@ -237,7 +239,6 @@ public class DataSetLockServiceTest
         assertEq( dataSetLockBA, dataSetB, periodA, lockSources );
         assertEquals( idBB, dataSetLockBB.getId() );
         assertEq( dataSetLockBB, dataSetB, periodB, lockSources );
-
     }
 
     @Test

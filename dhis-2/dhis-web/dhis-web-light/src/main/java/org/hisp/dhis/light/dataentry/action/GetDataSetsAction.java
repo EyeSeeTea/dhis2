@@ -31,6 +31,8 @@ import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang.Validate;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.light.utils.FormUtils;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,13 @@ public class GetDataSetsAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
 
     private FormUtils formUtils;
 
@@ -73,6 +82,20 @@ public class GetDataSetsAction
         return organisationUnitId;
     }
 
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
+
+    private Integer dataSetId;
+
+    public Integer getDataSetId()
+    {
+        return dataSetId;
+    }
+
     private List<DataSet> dataSets = new ArrayList<DataSet>();
 
     public List<DataSet> getDataSets()
@@ -90,6 +113,15 @@ public class GetDataSetsAction
         Validate.notNull( organisationUnitId );
 
         dataSets = formUtils.getDataSetsForCurrentUser( organisationUnitId );
+
+        organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+
+        if ( dataSets.size() == 1 )
+        {
+            dataSetId = dataSets.get( 0 ).getId();
+
+            return "selectPeriod";
+        }
 
         return SUCCESS;
     }
