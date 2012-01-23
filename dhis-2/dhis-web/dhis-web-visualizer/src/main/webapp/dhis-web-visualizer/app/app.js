@@ -811,8 +811,9 @@ Ext.onReady( function() {
             validate: function(f) {
                 if (!f.organisationUnits || !f.organisationUnits.length) {
                     alert(DV.i18n.favorite_no_orgunits);
-                    return;
-                }                
+                    return false;
+                }
+                return true;
             }
         }
     };
@@ -1081,7 +1082,7 @@ Ext.onReady( function() {
                         if (!DV.util.favorite.validate(f)) {
                             return;
                         }
-                            
+                        
                         f.type = f.type.toLowerCase();
                         f.series = f.series.toLowerCase();
                         f.category = f.category.toLowerCase();
