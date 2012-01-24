@@ -62,7 +62,7 @@
     <listener-class>org.hisp.dhis.system.startup.StartupListener</listener-class>
   </listener>
   
-  <!-- Processes application requests -->
+  <!-- Web API -->
   
   <servlet>
     <servlet-name>webapiServlet</servlet-name>
