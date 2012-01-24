@@ -9,11 +9,6 @@
     <param-value>classpath*:/META-INF/dhis/beans.xml</param-value>
   </context-param>
 
-  <context-param>
-    <param-name>automaticAccessType</param-name>
-    <param-value>ghostAdmin</param-value>
-  </context-param>
-
   <filter>
     <filter-name>RedirectFilter</filter-name>
     <filter-class>org.hisp.dhis.servlet.filter.HttpRedirectFilter</filter-class>
@@ -35,11 +30,6 @@
 
   <filter-mapping>
     <filter-name>OpenSessionInViewFilter</filter-name>
-    <url-pattern>*.action</url-pattern>
-  </filter-mapping>
-
-  <filter-mapping>
-    <filter-name>OpenSessionInViewFilter</filter-name>
     <url-pattern>/api/*</url-pattern>
   </filter-mapping>
 
@@ -51,7 +41,7 @@
     <listener-class>org.hisp.dhis.system.startup.StartupListener</listener-class>
   </listener>
 
-  <!-- Processes application requests -->
+  <!-- Web API -->
   
   <servlet>
     <servlet-name>webapiServlet</servlet-name>
@@ -71,4 +61,5 @@
     <servlet-name>webapiServlet</servlet-name>
     <url-pattern>/api/*</url-pattern>
   </servlet-mapping>
+  
 </web-app>
