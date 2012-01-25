@@ -953,9 +953,8 @@ Ext.onReady( function() {
             },
             listeners: {
                 load: function(s) {
-                    if (!s.isLoaded) {
-                        s.isLoaded = true;
-                    }                    
+					s.isLoaded = !s.isLoaded ? true : false;
+					
                     s.sortStore();
                     s.each(function(r) {
                         r.data.lastUpdated = r.data.lastUpdated.substr(0,16);
