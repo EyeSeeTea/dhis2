@@ -1,9 +1,9 @@
 DV.conf = {
     init: {
         data: [
-            {x: 'Category 1', 'Series 1': 41, 'Series 2': 69, 'Series 3': 63, 'Series 4': 51},
-            {x: 'Category 2', 'Series 1': 51, 'Series 2': 42, 'Series 3': 58, 'Series 4': 52},
-            {x: 'Category 3', 'Series 1': 44, 'Series 2': 71, 'Series 3': 62, 'Series 4': 54}
+            {'c_': 'Category 1', 'Series 1': 41, 'Series 2': 69, 'Series 3': 63, 'Series 4': 51},
+            {'c_': 'Category 2', 'Series 1': 51, 'Series 2': 42, 'Series 3': 58, 'Series 4': 52},
+            {'c_': 'Category 3', 'Series 1': 44, 'Series 2': 71, 'Series 3': 62, 'Series 4': 54}
         ],
         jsonfy: function(r) {
             r = Ext.JSON.decode(r.responseText);
@@ -61,7 +61,6 @@ DV.conf = {
             }
         },        
         chart: {
-            x: 'x',
             series: 'series',
             category: 'category',
             filter: 'filter',
@@ -73,6 +72,10 @@ DV.conf = {
             area: 'area',
             pie: 'pie'
         },
+        data: {
+			category: 'c_',
+			targetline: 't_'
+		},
         image: {
             png: 'png',
             pdf: 'pdf'
@@ -514,6 +517,23 @@ Ext.onReady( function() {
                     padding: 0
                 };
             },
+            getTargetLine: function() {
+				return {
+					type: 'line',
+					axis: 'left',
+					xField: DV.store.chart.bottom,
+					yField: DV.conf.finals.data.targetline,
+					style: {
+						opacity: 1,
+						'stroke-width': 2
+					},
+					markerConfig: {
+						type: 'circle',
+						radius: 0
+					},
+					title: DV.state.targetLineLabel || DV.i18n.target_line
+				};
+			},
             getGrid: function() {
                 return {
                     opacity: 1,
@@ -617,8 +637,8 @@ Ext.onReady( function() {
                         trackMouse: true,
                         height: 47,
                         renderer: function(item) {
-                            this.setWidth((item.data.x.length * 8) + 15);
-                            this.setTitle('<span class="dv-chart-tips">' + item.data.x + '<br/><b>' + item.data[DV.store.chart.left[0]] + '</b></span>');
+                            this.setWidth((item.data[DV.conf.finals.data.category].length * 8) + 15);
+                            this.setTitle('<span class="dv-chart-tips">' + item.data[DV.conf.finals.data.category] + '<br/><b>' + item.data[DV.store.chart.left[0]] + '</b></span>');
                         }
                     };
                 }
@@ -896,17 +916,18 @@ Ext.onReady( function() {
         defaultChartStore: function(exe) {
             var keys = [];
             Ext.Array.each(DV.chart.data, function(item) {
-                keys = Ext.Array.merge(keys, Ext.Object.getKeys(item));
+				keys = Ext.Array.merge(keys, Ext.Object.getKeys(item));
             });
             this.chart = Ext.create('Ext.data.Store', {
                 fields: keys,
                 data: DV.chart.data
             });
-            this.chart.bottom = [DV.conf.finals.chart.x];
-            this.chart.left = keys.slice(0);
+            this.chart.bottom = [DV.conf.finals.data.category];
+            this.chart.left = keys.slice(0);            
             for (var i = 0; i < this.chart.left.length; i++) {
-                if (this.chart.left[i] === DV.conf.finals.chart.x) {
+                if (this.chart.left[i] === DV.conf.finals.data.category || this.chart.left[i] === DV.conf.finals.data.targetline) {
                     this.chart.left.splice(i, 1);
+                    i = 0;
                 }
             }
             
@@ -918,13 +939,37 @@ Ext.onReady( function() {
             }
         },
         bar: function(exe) {
-            var properties = Ext.Object.getKeys(DV.chart.data[0]);
+            var keys = [];
+            Ext.Array.each(DV.chart.data, function(item) {
+				keys = Ext.Array.merge(keys, Ext.Object.getKeys(item));
+            });
             this.chart = Ext.create('Ext.data.Store', {
-                fields: properties,
+                fields: keys,
                 data: DV.chart.data
             });
-            this.chart.left = properties.slice(0, 1);
-            this.chart.bottom = properties.slice(1, properties.length);
+            this.chart.left = [DV.conf.finals.data.category];
+            this.chart.bottom = keys.slice(0);            
+            for (var i = 0; i < this.chart.bottom.length; i++) {
+                if (this.chart.bottom[i] === DV.conf.finals.data.category || this.chart.bottom[i] === DV.conf.finals.data.targetline) {
+                    this.chart.bottom.splice(i, 1);
+                    i = 0;
+                }
+            }			
+			
+            //var properties = Ext.Object.getKeys(DV.chart.data[0]);
+            //this.chart = Ext.create('Ext.data.Store', {
+                //fields: properties,
+                //data: DV.chart.data
+            //});
+            //this.chart.left = properties.slice(0, 1);
+            //this.chart.bottom = properties.slice(1, properties.length);     
+            //for (var i = 0; i < this.chart.bottom.length; i++) {
+                //if (this.chart.bottom[i] === DV.conf.finals.data.category || this.chart.bottom[i] === DV.conf.finals.data.targetline) {
+                    //this.chart.bottom.splice(i, 1);
+                    //i = 0;
+                //}
+            //}
+            
             
             if (exe) {
                 DV.chart.getChart(true);
@@ -988,6 +1033,8 @@ Ext.onReady( function() {
         hideLegend: false,
         domainAxisLabel: null,
         rangeAxisLabel: null,
+        targetLineValue: null,
+        targetLineLabel: null,
         isRendered: false,
         getState: function(exe) {
             this.resetState();
@@ -1025,6 +1072,8 @@ Ext.onReady( function() {
             this.hideLegend = DV.cmp.favorite.hidelegend.getValue();
             this.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
             this.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
+            this.targetLineValue = parseFloat(DV.cmp.favorite.targetlinevalue.getValue());
+            this.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
             
             if (!this.isRendered) {
                 DV.cmp.toolbar.datatable.enable();
@@ -1145,10 +1194,12 @@ Ext.onReady( function() {
                         DV.cmp.favorite.domainaxislabel.setValue(f.domainAxisLabel);
                         this.rangeAxisLabel = f.rangeAxisLabel;
                         DV.cmp.favorite.rangeaxislabel.setValue(f.rangeAxisLabel);
+                        this.targetLineValue = f.targetLineValue ? parseFloat(f.targetLineValue) : null;
                         DV.cmp.favorite.targetlinevalue.setValue(f.targetLineValue);
                         DV.cmp.favorite.targetlinelabel.xable();
+                        this.targetLineLabel = f.targetLineLabel ? f.targetLineLabel : null;
                         DV.cmp.favorite.targetlinelabel.setValue(f.targetLineLabel);
-                        
+                                    
                         if (!this.isRendered) {
                             DV.cmp.toolbar.datatable.enable();
                             this.isRendered = true;
@@ -1230,7 +1281,7 @@ Ext.onReady( function() {
             
             Ext.Array.each(DV.state.category.names, function(item) {
                 var obj = {};
-                obj[DV.conf.finals.chart.x] = item;
+                obj[DV.conf.finals.data.category] = item;
                 DV.chart.data.push(obj);
             });
             
@@ -1243,13 +1294,19 @@ Ext.onReady( function() {
             Ext.Array.each(DV.chart.data, function(item) {
                 for (var i = 0; i < DV.state.series.names.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
-                        if (DV.value.values[j][DV.state.category.dimension] === item[DV.conf.finals.chart.x] && DV.value.values[j][DV.state.series.dimension] === DV.state.series.names[i]) {
+                        if (DV.value.values[j][DV.state.category.dimension] === item[DV.conf.finals.data.category] && DV.value.values[j][DV.state.series.dimension] === DV.state.series.names[i]) {
                             item[DV.value.values[j][DV.state.series.dimension]] = DV.value.values[j].v;
                             break;
                         }
                     }
                 }
             });
+
+			if (DV.state.targetLineValue) {
+				Ext.Array.each(DV.chart.data, function(item) {
+					item[DV.conf.finals.data.targetline] = parseFloat(DV.state.targetLineValue);
+				});
+			}
             
             if (exe) {
                 DV.store.getChartStore(true);
@@ -1269,6 +1326,21 @@ Ext.onReady( function() {
             }
         },
         column: function(stacked) {
+			var series = [];
+			series.push({
+				type: 'column',
+				axis: 'left',
+				xField: DV.store.chart.bottom,
+				yField: DV.store.chart.left,
+				stacked: stacked,
+				style: {
+					opacity: 0.8
+				}
+			});
+			if (DV.state.targetLineValue) {
+				series.push(DV.util.chart.getTargetLine());
+			}
+			
             this.chart = Ext.create('Ext.chart.Chart', {
                 animate: true,
                 store: DV.store.chart,
@@ -1295,18 +1367,7 @@ Ext.onReady( function() {
                         label: DV.util.chart.label.getCategoryLabel()
                     }
                 ],
-                series: [
-                    {
-                        type: 'column',
-                        axis: 'left',
-                        xField: DV.store.chart.bottom,
-                        yField: DV.store.chart.left,
-                        stacked: stacked,
-                        style: {
-                            opacity: 0.8
-                        }
-                    }
-                ],
+                series: series,
                 theme: 'dv1'
             });
         },
@@ -1314,6 +1375,55 @@ Ext.onReady( function() {
             this.column(true);
         },
         bar: function(stacked) {
+			var series = [];
+			series.push(
+			//{
+				//type: 'line',
+				//axis: 'bottom',
+				//xField: DV.store.chart.left,
+				//yField: DV.store.chart.bottom,
+				//style: {
+					//opacity: 0.8,
+					//'stroke-width': 3
+				//},
+				//markerConfig: {
+					//type: 'circle',
+					//radius: 4
+				//}
+			//}
+			//);
+			
+			{
+				type: 'bar',
+				axis: 'bottom',
+				xField: DV.store.chart.left,
+				yField: DV.store.chart.bottom,
+				stacked: stacked,
+				style: {
+					opacity: 0.8
+				}
+			}
+			
+			);
+			
+			if (DV.state.targetLineValue) {
+				series.push({
+					type: 'line',
+					axis: 'left',
+					xField: DV.conf.finals.data.targetline,
+					yField: DV.store.chart.bottom,
+					style: {
+						opacity: 0.8,
+						'stroke-width': 3
+					},
+					markerConfig: {
+						type: 'circle',
+						radius: 0
+					},
+					title: DV.state.targetLineLabel || DV.i18n.target_line
+				});
+			}
+			
             this.chart = Ext.create('Ext.chart.Chart', {
                 animate: true,
                 store: DV.store.chart,
@@ -1340,18 +1450,7 @@ Ext.onReady( function() {
                         }
                     }
                 ],
-                series: [
-                    {
-                        type: 'bar',
-                        axis: 'bottom',
-                        xField: DV.store.chart.left,
-                        yField: DV.store.chart.bottom,
-                        stacked: stacked,
-                        style: {
-                            opacity: 0.8
-                        }
-                    }
-                ],
+                series: series,
                 theme: 'dv1'
             });
         },
@@ -1359,6 +1458,11 @@ Ext.onReady( function() {
             this.bar(true);
         },
         line: function() {
+			var series = DV.util.chart.line.getSeriesArray();
+			if (DV.state.targetLineValue) {
+				series.push(DV.util.chart.getTargetLine());
+			}
+			
             this.chart = Ext.create('Ext.chart.Chart', {
                 animate: true,
                 store: DV.store.chart,
@@ -1385,11 +1489,25 @@ Ext.onReady( function() {
                         label: DV.util.chart.label.getCategoryLabel()
                     }
                 ],
-                series: DV.util.chart.line.getSeriesArray(),
+                series: series,
                 theme: 'dv1'
             });
         },
         area: function() {
+			var series = [];
+			series.push({
+				type: 'area',
+				axis: 'left',
+				xField: DV.store.chart.bottom[0],
+				yField: DV.store.chart.left,
+				style: {
+					opacity: 0.65
+				}
+			});
+			if (DV.state.targetLineValue) {
+				series.push(DV.util.chart.getTargetLine());
+			}
+			
             this.chart = Ext.create('Ext.chart.Chart', {
                 animate: true,
                 store: DV.store.chart,
@@ -1416,15 +1534,7 @@ Ext.onReady( function() {
                         label: DV.util.chart.label.getCategoryLabel()
                     }
                 ],
-                series: [{
-                    type: 'area',
-                    axis: 'left',
-                    xField: DV.store.chart.bottom[0],
-                    yField: DV.store.chart.left,
-                    style: {
-                        opacity: 0.65
-                    }
-                }],
+                series: series,
                 theme: 'dv1'
             });
         },
