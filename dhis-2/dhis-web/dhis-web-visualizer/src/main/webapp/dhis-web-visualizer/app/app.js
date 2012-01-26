@@ -628,8 +628,8 @@ Ext.onReady( function() {
                         {
                             type: 'text',
                             text: DV.store.chart.range[0],
-                            font: 'bold 13px arial',
-                            fill: '#777',
+                            font: '13px arial',
+                            fill: '#444',
                             width: 300,
                             height: 20,
                             x: 28,
@@ -1497,7 +1497,7 @@ Ext.onReady( function() {
                 shadow: true,
                 store: DV.store.chart,
                 insetPadding: 60,
-                items: DV.state.hideSubtitle ? false : DV.util.chart.getTitle(),
+                items: DV.state.hideSubtitle ? false : DV.util.chart.pie.getTitle(),
                 legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(DV.state.category.names.length),
                 series: [{
                     type: 'pie',
