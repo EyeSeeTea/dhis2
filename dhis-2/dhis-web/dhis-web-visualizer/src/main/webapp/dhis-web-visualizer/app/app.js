@@ -1,9 +1,9 @@
 DV.conf = {
     init: {
         data: [
-            {'c_': 'Category 1', 'Series 1': 41, 'Series 2': 69, 'Series 3': 63, 'Series 4': 51},
-            {'c_': 'Category 2', 'Series 1': 51, 'Series 2': 42, 'Series 3': 58, 'Series 4': 52},
-            {'c_': 'Category 3', 'Series 1': 44, 'Series 2': 71, 'Series 3': 62, 'Series 4': 54}
+            {'domain_': 'Category 1', 'Series 1': 41, 'Series 2': 69, 'Series 3': 63, 'Series 4': 51},
+            {'domain_': 'Category 2', 'Series 1': 51, 'Series 2': 42, 'Series 3': 58, 'Series 4': 52},
+            {'domain_': 'Category 3', 'Series 1': 44, 'Series 2': 71, 'Series 3': 62, 'Series 4': 54}
         ],
         jsonfy: function(r) {
             r = Ext.JSON.decode(r.responseText);
@@ -73,8 +73,8 @@ DV.conf = {
             pie: 'pie'
         },
         data: {
-			category: 'c_',
-			targetline: 't_'
+			domain: 'domain_',
+			targetline: 'targetline_'
 		},
         image: {
             png: 'png',
@@ -502,7 +502,7 @@ Ext.onReady( function() {
         },
         chart: {
             getLegend: function(len) {
-                len = len ? len : DV.store.chart.left.length;
+                len = len ? len : DV.store.chart.range.length;
                 return {
                     position: len > 5 ? 'right' : 'top',
                     labelFont: '15px arial',
@@ -515,7 +515,7 @@ Ext.onReady( function() {
 				return {
 					type: 'line',
 					axis: 'left',
-					xField: DV.store.chart.bottom,
+					xField: DV.store.chart.domain,
 					yField: DV.conf.finals.data.targetline,
 					style: {
 						opacity: 1,
@@ -582,12 +582,12 @@ Ext.onReady( function() {
             line: {
                 getSeriesArray: function() {
                     var a = [];
-                    for (var i = 0; i < DV.store.chart.left.length; i++) {
+                    for (var i = 0; i < DV.store.chart.range.length; i++) {
                         a.push({
                             type: 'line',
                             axis: 'left',
-                            xField: DV.store.chart.bottom,
-                            yField: DV.store.chart.left[i],
+                            xField: DV.store.chart.domain,
+                            yField: DV.store.chart.range[i],
                             style: {
                                 opacity: 0.8,
                                 'stroke-width': 3
@@ -616,7 +616,7 @@ Ext.onReady( function() {
                         },
                         {
                             type: 'text',
-                            text: DV.store.chart.left[0],
+                            text: DV.store.chart.range[0],
                             font: 'bold 13px arial',
                             fill: '#777',
                             width: 300,
@@ -631,8 +631,8 @@ Ext.onReady( function() {
                         trackMouse: true,
                         height: 47,
                         renderer: function(item) {
-                            this.setWidth((item.data[DV.conf.finals.data.category].length * 8) + 15);
-                            this.setTitle('<span class="dv-chart-tips">' + item.data[DV.conf.finals.data.category] + '<br/><b>' + item.data[DV.store.chart.left[0]] + '</b></span>');
+                            this.setWidth((item.data[DV.conf.finals.data.domain].length * 8) + 15);
+                            this.setTitle('<span class="dv-chart-tips">' + item.data[DV.conf.finals.data.domain] + '<br/><b>' + item.data[DV.store.chart.range[0]] + '</b></span>');
                         }
                     };
                 }
@@ -913,16 +913,16 @@ Ext.onReady( function() {
                 fields: keys,
                 data: DV.chart.data
             });            
-            var category = [DV.conf.finals.data.category];
-            var series = keys.slice(0);
-            for (var i = 0; i < series.length; i++) {
-                if (series[i] === DV.conf.finals.data.category || series[i] === DV.conf.finals.data.targetline) {
-                    series.splice(i, 1);
+            var domain = [DV.conf.finals.data.domain];
+            var range = keys.slice(0);
+            for (var i = 0; i < range.length; i++) {
+                if (range[i] === DV.conf.finals.data.domain || range[i] === DV.conf.finals.data.targetline) {
+                    range.splice(i, 1);
                     i = 0;
                 }
             }
-            this.chart.bottom = DV.state.isBar() ? series : category;
-            this.chart.left = DV.state.isBar() ? category : series;
+            this.chart.domain = DV.state.isBar() ? range : domain;
+            this.chart.range = DV.state.isBar() ? domain : range;
             
             if (exe) {
                 DV.chart.getChart(true);
@@ -1237,7 +1237,7 @@ Ext.onReady( function() {
             
             Ext.Array.each(DV.state.category.names, function(item) {
                 var obj = {};
-                obj[DV.conf.finals.data.category] = item;
+                obj[DV.conf.finals.data.domain] = item;
                 DV.chart.data.push(obj);
             });
             
@@ -1250,7 +1250,7 @@ Ext.onReady( function() {
             Ext.Array.each(DV.chart.data, function(item) {
                 for (var i = 0; i < DV.state.series.names.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
-                        if (DV.value.values[j][DV.state.category.dimension] === item[DV.conf.finals.data.category] && DV.value.values[j][DV.state.series.dimension] === DV.state.series.names[i]) {
+                        if (DV.value.values[j][DV.state.category.dimension] === item[DV.conf.finals.data.domain] && DV.value.values[j][DV.state.series.dimension] === DV.state.series.names[i]) {
                             item[DV.value.values[j][DV.state.series.dimension]] = DV.value.values[j].v;
                             break;
                         }
@@ -1286,8 +1286,8 @@ Ext.onReady( function() {
 			series.push({
 				type: 'column',
 				axis: 'left',
-				xField: DV.store.chart.bottom,
-				yField: DV.store.chart.left,
+				xField: DV.store.chart.domain,
+				yField: DV.store.chart.range,
 				stacked: stacked,
 				style: {
 					opacity: 0.8
@@ -1309,7 +1309,7 @@ Ext.onReady( function() {
                         position: 'left',
                         title: DV.state.rangeAxisLabel || false,
                         minimum: 0,
-                        fields: DV.store.chart.left,
+                        fields: DV.store.chart.range,
                         label: DV.util.chart.label.getNumericLabel(),
                         grid: {
                             even: DV.util.chart.getGrid()
@@ -1319,7 +1319,7 @@ Ext.onReady( function() {
                         type: 'Category',
                         position: 'bottom',
                         title: DV.state.domainAxisLabel || false,
-                        fields: DV.store.chart.bottom,
+                        fields: DV.store.chart.domain,
                         label: DV.util.chart.label.getCategoryLabel()
                     }
                 ],
@@ -1336,8 +1336,8 @@ Ext.onReady( function() {
 			//{
 				//type: 'line',
 				//axis: 'bottom',
-				//xField: DV.store.chart.left,
-				//yField: DV.store.chart.bottom,
+				//xField: DV.store.chart.range,
+				//yField: DV.store.chart.domain,
 				//style: {
 					//opacity: 0.8,
 					//'stroke-width': 3
@@ -1352,8 +1352,8 @@ Ext.onReady( function() {
 			{
 				type: 'bar',
 				axis: 'bottom',
-				xField: DV.store.chart.left,
-				yField: DV.store.chart.bottom,
+				xField: DV.store.chart.range,
+				yField: DV.store.chart.domain,
 				stacked: stacked,
 				style: {
 					opacity: 0.8
@@ -1363,11 +1363,12 @@ Ext.onReady( function() {
 			);
 			
 			if (DV.state.targetLineValue) {
+alert(1);				
 				series.push({
 					type: 'line',
 					axis: 'left',
 					xField: DV.conf.finals.data.targetline,
-					yField: DV.store.chart.bottom,
+					yField: DV.store.chart.domain,
 					style: {
 						opacity: 0.8,
 						'stroke-width': 3
@@ -1385,13 +1386,13 @@ Ext.onReady( function() {
                 store: DV.store.chart,
                 insetPadding: DV.conf.chart.style.inset,
                 items: DV.state.hideSubtitle ? false : DV.util.chart.getTitle(),
-                legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(DV.store.chart.bottom.length),
+                legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(DV.store.chart.domain.length),
                 axes: [
                     {
                         type: 'Category',
                         position: 'left',
                         title: DV.state.domainAxisLabel || false,
-                        fields: DV.store.chart.left,
+                        fields: DV.store.chart.range,
                         label: DV.util.chart.bar.getCategoryLabel()
                     },
                     {
@@ -1399,7 +1400,7 @@ Ext.onReady( function() {
                         position: 'bottom',
                         title: DV.state.rangeAxisLabel || false,
                         minimum: 0,
-                        fields: DV.store.chart.bottom,
+                        fields: DV.store.chart.domain,
                         label: DV.util.chart.label.getNumericLabel(),
                         grid: {
                             even: DV.util.chart.getGrid()
@@ -1431,7 +1432,7 @@ Ext.onReady( function() {
                         position: 'left',
                         title: DV.state.rangeAxisLabel || false,
                         minimum: 0,
-                        fields: DV.store.chart.left,
+                        fields: DV.store.chart.range,
                         label: DV.util.chart.label.getNumericLabel(),
                         grid: {
                             even: DV.util.chart.getGrid()
@@ -1441,7 +1442,7 @@ Ext.onReady( function() {
                         type: 'Category',
                         position: 'bottom',
                         title: DV.state.domainAxisLabel || false,
-                        fields: DV.store.chart.bottom,
+                        fields: DV.store.chart.domain,
                         label: DV.util.chart.label.getCategoryLabel()
                     }
                 ],
@@ -1454,8 +1455,8 @@ Ext.onReady( function() {
 			series.push({
 				type: 'area',
 				axis: 'left',
-				xField: DV.store.chart.bottom[0],
-				yField: DV.store.chart.left,
+				xField: DV.store.chart.domain[0],
+				yField: DV.store.chart.range,
 				style: {
 					opacity: 0.65
 				}
@@ -1476,7 +1477,7 @@ Ext.onReady( function() {
                         position: 'left',
                         title: DV.state.rangeAxisLabel || false,
                         minimum: 0,
-                        fields: DV.store.chart.left,
+                        fields: DV.store.chart.range,
                         label: DV.util.chart.label.getNumericLabel(),
                         grid: {
                             even: DV.util.chart.getGrid()
@@ -1486,7 +1487,7 @@ Ext.onReady( function() {
                         type: 'Category',
                         position: 'bottom',
                         title: DV.state.domainAxisLabel || false,
-                        fields: DV.store.chart.bottom,
+                        fields: DV.store.chart.domain,
                         label: DV.util.chart.label.getCategoryLabel()
                     }
                 ],
@@ -1504,11 +1505,11 @@ Ext.onReady( function() {
                 legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(DV.state.category.names.length),
                 series: [{
                     type: 'pie',
-                    field: DV.store.chart.left[0],
+                    field: DV.store.chart.range[0],
                     showInLegend: true,
                     tips: DV.util.chart.pie.getTips(),
                     label: {
-                        field: DV.store.chart.bottom[0]
+                        field: DV.store.chart.domain[0]
                     },
                     highlight: {
                         segment: {
