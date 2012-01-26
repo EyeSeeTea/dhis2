@@ -129,12 +129,6 @@ Ext.onReady( function() {
     DV.init = DV.conf.init.jsonfy(r);    
     DV.init.initialize = function() {        
         DV.util.combobox.filter.category();
-        DV.store.column = DV.store.defaultChartStore;
-        DV.store.stackedcolumn = DV.store.defaultChartStore;
-        DV.store.stackedbar = DV.store.bar;
-        DV.store.line = DV.store.defaultChartStore;
-        DV.store.area = DV.store.defaultChartStore;
-        DV.store.pie = DV.store.defaultChartStore;
         DV.chart.data = DV.conf.init.data;
         
         DV.init.cmd = DV.util.getUrlParam('uid') || DV.conf.finals.cmd.init;
@@ -911,9 +905,6 @@ Ext.onReady( function() {
         },
         chart: null,
         getChartStore: function(exe) {
-            this[DV.state.type](exe);
-        },
-        defaultChartStore: function(exe) {
             var keys = [];
             Ext.Array.each(DV.chart.data, function(item) {
 				keys = Ext.Array.merge(keys, Ext.Object.getKeys(item));
@@ -921,61 +912,23 @@ Ext.onReady( function() {
             this.chart = Ext.create('Ext.data.Store', {
                 fields: keys,
                 data: DV.chart.data
-            });
-            this.chart.bottom = [DV.conf.finals.data.category];
-            this.chart.left = keys.slice(0);            
-            for (var i = 0; i < this.chart.left.length; i++) {
-                if (this.chart.left[i] === DV.conf.finals.data.category || this.chart.left[i] === DV.conf.finals.data.targetline) {
-                    this.chart.left.splice(i, 1);
+            });            
+            var category = [DV.conf.finals.data.category];
+            var series = keys.slice(0);
+            for (var i = 0; i < series.length; i++) {
+                if (series[i] === DV.conf.finals.data.category || series[i] === DV.conf.finals.data.targetline) {
+                    series.splice(i, 1);
                     i = 0;
                 }
             }
+            this.chart.bottom = DV.state.isBar() ? series : category;
+            this.chart.left = DV.state.isBar() ? category : series;
             
             if (exe) {
                 DV.chart.getChart(true);
             }
             else {
                 return this.chart;
-            }
-        },
-        bar: function(exe) {
-            var keys = [];
-            Ext.Array.each(DV.chart.data, function(item) {
-				keys = Ext.Array.merge(keys, Ext.Object.getKeys(item));
-            });
-            this.chart = Ext.create('Ext.data.Store', {
-                fields: keys,
-                data: DV.chart.data
-            });
-            this.chart.left = [DV.conf.finals.data.category];
-            this.chart.bottom = keys.slice(0);            
-            for (var i = 0; i < this.chart.bottom.length; i++) {
-                if (this.chart.bottom[i] === DV.conf.finals.data.category || this.chart.bottom[i] === DV.conf.finals.data.targetline) {
-                    this.chart.bottom.splice(i, 1);
-                    i = 0;
-                }
-            }			
-			
-            //var properties = Ext.Object.getKeys(DV.chart.data[0]);
-            //this.chart = Ext.create('Ext.data.Store', {
-                //fields: properties,
-                //data: DV.chart.data
-            //});
-            //this.chart.left = properties.slice(0, 1);
-            //this.chart.bottom = properties.slice(1, properties.length);     
-            //for (var i = 0; i < this.chart.bottom.length; i++) {
-                //if (this.chart.bottom[i] === DV.conf.finals.data.category || this.chart.bottom[i] === DV.conf.finals.data.targetline) {
-                    //this.chart.bottom.splice(i, 1);
-                    //i = 0;
-                //}
-            //}
-            
-            
-            if (exe) {
-                DV.chart.getChart(true);
-            }
-            else {
-                return DV.store.chart;
             }
         },
         favorite: Ext.create('Ext.data.Store', {
@@ -1097,6 +1050,9 @@ Ext.onReady( function() {
             obj = Ext.Object.merge(obj, this.relativePeriods);
             return obj;            
         },
+        isBar: function() {
+			return this.type === DV.conf.finals.chart.bar || this.type === DV.conf.finals.chart.stackedbar;
+		},
         setState: function(exe, uid) {
             if (uid) {
                 this.resetState();
