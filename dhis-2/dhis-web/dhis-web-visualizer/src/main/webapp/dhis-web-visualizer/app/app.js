@@ -90,7 +90,10 @@ DV.conf = {
         },
         theme: {
             dv1: ['#94ae0a', '#115fa6', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
-        }
+        },
+        axis: {
+			range: 1.1
+		}
     },
     layout: {
         west_width: 424,
@@ -551,9 +554,8 @@ Ext.onReady( function() {
 				title += ' (' + DV.state.targetLineValue + ')';
 				return {
 					type: 'line',
-					axis: DV.state.isBar() ? 'bottom' : 'left',
-					xField: DV.state.isBar() ? DV.conf.finals.data.targetline : DV.store.chart.domain,
-					yField: DV.state.isBar() ? DV.store.chart.domain : DV.conf.finals.data.targetline,
+					xField: DV.state.isBar() ? DV.conf.finals.data.targetline : DV.conf.finals.data.domain,
+					yField: DV.state.isBar() ? DV.conf.finals.data.domain : DV.conf.finals.data.targetline,
 					style: {
 						opacity: 1,
 						'stroke-width': 2
@@ -595,7 +597,7 @@ Ext.onReady( function() {
                         a.push({
                             type: 'line',
                             axis: 'left',
-                            xField: DV.store.chart.domain,
+                            xField: DV.conf.finals.data.domain,
                             yField: DV.store.chart.range[i],
                             style: {
                                 opacity: 0.8,
@@ -920,23 +922,19 @@ Ext.onReady( function() {
             });
             this.chart = Ext.create('Ext.data.Store', {
                 fields: keys,
-                data: DV.chart.data,
-				maximum: null
+                data: DV.chart.data
             });
             
-            var domain = [DV.conf.finals.data.domain];
-            var range = keys.slice(0);
-            for (var i = 0; i < range.length; i++) {
-                if (range[i] === DV.conf.finals.data.domain || range[i] === DV.conf.finals.data.targetline) {
-                    range.splice(i, 1);
+            this.chart.range = keys.slice(0);
+            for (var i = 0; i < this.chart.range.length; i++) {
+                if (this.chart.range[i] === DV.conf.finals.data.domain || this.chart.range[i] === DV.conf.finals.data.targetline) {
+                    this.chart.range.splice(i, 1);
                     i = 0;
                 }
             }
-            this.chart.domain = DV.state.isBar() ? range : domain;
-            this.chart.range = DV.state.isBar() ? domain : range;
                        
             if (DV.state.targetLineValue) {
-				this.chart.maximum = DV.util.store.getMaximum(this.chart, range);
+				this.chart.maximum = DV.util.store.getMaximum(this.chart, this.chart.range);
 			}
             
             if (exe) {
@@ -1300,8 +1298,7 @@ Ext.onReady( function() {
 			var series = [];
 			series.push({
 				type: 'column',
-				axis: 'left',
-				xField: DV.store.chart.domain,
+				xField: DV.conf.finals.data.domain,
 				yField: DV.store.chart.range,
 				stacked: stacked,
 				style: {
@@ -1325,14 +1322,14 @@ Ext.onReady( function() {
 				}
 			};
 			if (DV.state.targetLineValue && DV.state.targetLineValue > DV.store.chart.maximum) {
-				numeric.maximum = Math.round(DV.state.targetLineValue * 1.1);
+				numeric.maximum = Math.round(DV.state.targetLineValue * DV.conf.chart.axis.range);
 			}
 			axes.push(numeric);
 			axes.push({
 				type: 'Category',
 				position: 'bottom',
 				title: DV.state.domainAxisLabel || false,
-				fields: DV.store.chart.domain,
+				fields: DV.conf.finals.data.domain,
 				label: DV.util.chart.label.getCategoryLabel()
 			});
 			
@@ -1354,9 +1351,8 @@ Ext.onReady( function() {
 			var series = [];
 			series.push({
 				type: 'bar',
-				axis: 'bottom',
-				xField: DV.store.chart.range,
-				yField: DV.store.chart.domain,
+				xField: DV.conf.finals.data.domain,
+				yField: DV.store.chart.range,
 				stacked: stacked,
 				style: {
 					opacity: 0.8
@@ -1372,21 +1368,21 @@ Ext.onReady( function() {
 				position: 'bottom',
 				title: DV.state.rangeAxisLabel || false,
 				minimum: 0,
-				fields: DV.store.chart.domain,
+				fields: DV.store.chart.range,
 				label: DV.util.chart.label.getNumericLabel(),
 				grid: {
 					even: DV.util.chart.getGrid()
 				}
 			};
 			if (DV.state.targetLineValue && DV.state.targetLineValue > DV.store.chart.maximum) {
-				numeric.maximum = Math.round(DV.state.targetLineValue * 1.1);
+				numeric.maximum = Math.round(DV.state.targetLineValue * DV.conf.chart.axis.range);
 			}
 			axes.push(numeric);
 			axes.push({
 				type: 'Category',
 				position: 'left',
 				title: DV.state.domainAxisLabel || false,
-				fields: DV.store.chart.range,
+				fields: DV.conf.finals.data.domain,
 				label: DV.util.chart.bar.getCategoryLabel()
 			});
 			
@@ -1395,7 +1391,7 @@ Ext.onReady( function() {
                 store: DV.store.chart,
                 insetPadding: DV.conf.chart.style.inset,
                 items: DV.state.hideSubtitle ? false : DV.util.chart.getTitle(),
-                legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(DV.store.chart.domain.length),
+                legend: DV.state.hideLegend ? false : DV.util.chart.getLegend(),
                 axes: axes,
                 series: series,
                 theme: 'dv1'
@@ -1423,14 +1419,14 @@ Ext.onReady( function() {
 				}
 			};
 			if (DV.state.targetLineValue && DV.state.targetLineValue > DV.store.chart.maximum) {
-				numeric.maximum = Math.round(DV.state.targetLineValue * 1.1);
+				numeric.maximum = Math.round(DV.state.targetLineValue * DV.conf.chart.axis.range);
 			}
 			axes.push(numeric);
 			axes.push({
 				type: 'Category',
 				position: 'bottom',
 				title: DV.state.domainAxisLabel || false,
-				fields: DV.store.chart.domain,
+				fields: DV.conf.finals.data.domain,
 				label: DV.util.chart.label.getCategoryLabel()
 			});
 			
@@ -1450,7 +1446,7 @@ Ext.onReady( function() {
 			series.push({
 				type: 'area',
 				axis: 'left',
-				xField: DV.store.chart.domain[0],
+				xField: DV.conf.finals.data.domain,
 				yField: DV.store.chart.range,
 				style: {
 					opacity: 0.65
@@ -1473,14 +1469,14 @@ Ext.onReady( function() {
 				}
 			};
 			if (DV.state.targetLineValue && DV.state.targetLineValue > DV.store.chart.maximum) {
-				numeric.maximum = Math.round(DV.state.targetLineValue * 1.1);
+				numeric.maximum = Math.round(DV.state.targetLineValue * DV.conf.chart.axis.range);
 			}
 			axes.push(numeric);
 			axes.push({
 				type: 'Category',
 				position: 'bottom',
 				title: DV.state.domainAxisLabel || false,
-				fields: DV.store.chart.domain,
+				fields: DV.conf.finals.data.domain,
 				label: DV.util.chart.label.getCategoryLabel()
 			});
 			
@@ -1509,7 +1505,7 @@ Ext.onReady( function() {
                     showInLegend: true,
                     tips: DV.util.chart.pie.getTips(),
                     label: {
-                        field: DV.store.chart.domain[0]
+                        field: DV.conf.finals.data.domain
                     },
                     highlight: {
                         segment: {
