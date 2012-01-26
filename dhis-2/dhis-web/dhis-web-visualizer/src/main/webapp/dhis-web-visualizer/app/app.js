@@ -554,6 +554,7 @@ Ext.onReady( function() {
 				title += ' (' + DV.state.targetLineValue + ')';
 				return {
 					type: 'line',
+					axis: DV.state.isBar() ? 'bottom' : 'left',
 					xField: DV.state.isBar() ? DV.conf.finals.data.targetline : DV.conf.finals.data.domain,
 					yField: DV.state.isBar() ? DV.conf.finals.data.domain : DV.conf.finals.data.targetline,
 					style: {
@@ -1298,6 +1299,7 @@ Ext.onReady( function() {
 			var series = [];
 			series.push({
 				type: 'column',
+				axis: 'left',
 				xField: DV.conf.finals.data.domain,
 				yField: DV.store.chart.range,
 				stacked: stacked,
@@ -1305,7 +1307,7 @@ Ext.onReady( function() {
 					opacity: 0.8
 				}
 			});
-			if (DV.state.targetLineValue) {
+			if (DV.state.targetLineValue && !stacked) {
 				series.push(DV.util.chart.getTargetLineSeries());
 			}
 			
@@ -1351,6 +1353,7 @@ Ext.onReady( function() {
 			var series = [];
 			series.push({
 				type: 'bar',
+				axis: 'bottom',
 				xField: DV.conf.finals.data.domain,
 				yField: DV.store.chart.range,
 				stacked: stacked,
@@ -1358,7 +1361,7 @@ Ext.onReady( function() {
 					opacity: 0.8
 				}
 			});
-			if (DV.state.targetLineValue) {
+			if (DV.state.targetLineValue && !stacked) {
 				series.push(DV.util.chart.getTargetLineSeries());
 			}
 			
@@ -1452,9 +1455,6 @@ Ext.onReady( function() {
 					opacity: 0.65
 				}
 			});
-			if (DV.state.targetLineValue) {
-				series.push(DV.util.chart.getTargetLineSeries());
-			}
 			
 			var axes = [];
 			var numeric = {
@@ -2395,7 +2395,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'checkbox',
                                                 cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:21px',
+                                                style: 'margin-right:20px',
                                                 boxLabel: DV.i18n.hide_subtitle,
                                                 labelWidth: DV.conf.layout.form_label_width,
                                                 listeners: {
@@ -2407,7 +2407,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'checkbox',
                                                 cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:21px',
+                                                style: 'margin-right:20px',
                                                 boxLabel: DV.i18n.hide_legend,
                                                 labelWidth: DV.conf.layout.form_label_width,
                                                 listeners: {
@@ -2491,8 +2491,7 @@ Ext.onReady( function() {
                                                 cls: 'dv-textfield-alt1',
                                                 style: 'margin-right:4px',
                                                 hideTrigger: true,
-                                                fieldLabel: '* ' + DV.i18n.target_line_value,
-                                                labelStyle: 'color:#555',
+                                                fieldLabel: DV.i18n.target_line_value,
                                                 labelAlign: 'top',
                                                 labelSeparator: '',
                                                 maxLength: 100,
@@ -2510,7 +2509,7 @@ Ext.onReady( function() {
                                             {
                                                 xtype: 'textfield',
                                                 cls: 'dv-textfield-alt1',
-                                                fieldLabel: '* ' + DV.i18n.target_line_label,
+                                                fieldLabel: DV.i18n.target_line_label,
                                                 labelAlign: 'top',
                                                 labelSeparator: '',
                                                 maxLength: 100,
