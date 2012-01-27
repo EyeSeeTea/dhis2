@@ -74,7 +74,8 @@ DV.conf = {
         },
         data: {
 			domain: 'domain_',
-			targetline: 'targetline_'
+			targetline: 'targetline_',
+			trendline: 'trendline_'
 		},
         image: {
             png: 'png',
@@ -511,7 +512,7 @@ Ext.onReady( function() {
             }
         },
         chart: {
-			default: {				
+			default: {
 				getLegend: function(len) {
 					len = len ? len : DV.store.chart.range.length;
 					return {
@@ -609,6 +610,23 @@ Ext.onReady( function() {
 							},
 							title: title
 						};
+					},
+					getTrendLine: function() {
+						return {
+							type: 'line',
+							axis: 'left',
+							xField: DV.conf.finals.data.domain,
+							yField: DV.conf.finals.data.trendline,
+							style: {
+								opacity: 1,
+								'stroke-width': 2
+							},
+							markerConfig: {
+								type: 'circle',
+								radius: 0
+							},
+							title: DV.i18n.trend_line
+						};
 					}
 				}
 			},
@@ -638,6 +656,13 @@ Ext.onReady( function() {
 						var tl = DV.util.chart.default.series.getTargetLine();
 						tl.axis = 'bottom';
 						tl.xField = DV.conf.finals.data.targetline;
+						tl.yField = DV.conf.finals.data.domain;
+						return tl;
+					},
+					getTrendLine: function() {
+						var tl = DV.util.chart.default.series.getTrendLine();
+						tl.axis = 'bottom';
+						tl.xField = DV.conf.finals.data.trendline;
 						tl.yField = DV.conf.finals.data.domain;
 						return tl;
 					}
@@ -795,11 +820,15 @@ Ext.onReady( function() {
         value: {
             jsonfy: function(r) {
                 r = Ext.JSON.decode(r.responseText);
-                var values = [];
+                var obj = {
+					values: [],
+					trendline: []
+				};
                 for (var i = 0; i < r.length; i++) {
-                    values.push({v: r[i][0], d: r[i][1], p: r[i][2], o: r[i][3]});
+                    obj.values.push({v: r[i][0], d: r[i][1], p: r[i][2], o: r[i][3]});
                 }
-                return values;
+                obj.trendline = [40,80,60,30,50,60,90,70,50,20,40,60];
+                return obj;
             }
         },
         crud: {
@@ -1058,6 +1087,7 @@ Ext.onReady( function() {
         rangeAxisLabel: null,
         targetLineValue: null,
         targetLineLabel: null,
+        trendLine: null,
         isRendered: false,
         getState: function(exe) {
             this.resetState();
@@ -1097,6 +1127,7 @@ Ext.onReady( function() {
             this.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
             this.targetLineValue = parseFloat(DV.cmp.favorite.targetlinevalue.getValue());
             this.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
+            this.trendLine = DV.cmp.favorite.trendline.getValue();
             
             if (!this.isRendered) {
                 DV.cmp.toolbar.datatable.enable();
@@ -1120,9 +1151,6 @@ Ext.onReady( function() {
             obj = Ext.Object.merge(obj, this.relativePeriods);
             return obj;            
         },
-        isBar: function() {
-			return this.type === DV.conf.finals.chart.bar || this.type === DV.conf.finals.chart.stackedbar;
-		},
         setState: function(exe, uid) {
             if (uid) {
                 this.resetState();
@@ -1210,6 +1238,7 @@ Ext.onReady( function() {
                         this.category.names = f.names[this.category.dimension];
                         this.filter.names = f.names[this.filter.dimension];
                         
+                        this.trendLine = f.regression;
                         DV.cmp.favorite.trendline.setValue(f.regression);
                         this.hideSubtitle = f.hideSubtitle;
                         DV.cmp.favorite.hidesubtitle.setValue(f.hideSubtitle);
@@ -1274,7 +1303,9 @@ Ext.onReady( function() {
             Ext.Ajax.request({
                 url: baseurl,
                 success: function(r) {
-                    DV.value.values = DV.util.value.jsonfy(r);
+					var json = DV.util.value.jsonfy(r);
+                    DV.value.values = json.values;
+                    DV.value.trendLine.values = json.trendline;
                     if (!DV.value.values.length) {
                         DV.mask.hide();
                         alert(DV.i18n.no_data);
@@ -1297,7 +1328,10 @@ Ext.onReady( function() {
                     }
                 }
             });
-        }
+        },
+        trendLine: {
+			values: []
+		}
     };
     
     DV.chart = {
@@ -1333,6 +1367,14 @@ Ext.onReady( function() {
 					item[DV.conf.finals.data.targetline] = parseFloat(DV.state.targetLineValue);
 				});
 			}
+
+			if (DV.state.trendLine) {
+				alert(DV.chart.data.length == DV.value.trendLine.values.length);
+				var len = DV.chart.data.length;
+				for (var i = 0; i < len; i++) {
+					DV.chart.data[DV.conf.finals.data.trendline] = parseFloat(DV.value.trendLine.values[i]);
+				}
+			}
             
             if (exe) {
                 DV.store.getChartStore(true);
@@ -1365,6 +1407,9 @@ Ext.onReady( function() {
 			});
 			if (DV.state.targetLineValue && !stacked) {
 				series.push(DV.util.chart.default.series.getTargetLine());
+			}
+			if (DV.state.trendLine) {
+				series.push(DV.util.chart.default.series.getTrendLine());
 			}
 			
 			var axes = [];
