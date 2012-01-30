@@ -12,7 +12,7 @@ DV.conf = {
 				DV.state.category.dimension = DV.conf.finals.dimension.period.value;
 				DV.state.category.names = DV.conf.init.example.category;
 				DV.state.filter.names = DV.conf.init.example.filter;
-				DV.state.targetLineValue = 85;
+				DV.state.targetLineValue = 90;
 				DV.state.rangeAxisLabel = 'Range axis label';
 			},
 			setValues: function() {
@@ -611,14 +611,6 @@ Ext.onReady( function() {
 					}
 				},
 				axis: {
-					getGrid: function() {
-						return {
-							opacity: 1,
-							fill: '#f1f1f1',
-							stroke: '#aaa',
-							'stroke-width': 0.2
-						};
-					},
 					getNumeric: function(stacked) {
 						var axis = {
 							type: 'Numeric',
@@ -631,7 +623,12 @@ Ext.onReady( function() {
 							fields: stacked ? DV.state.series.names : DV.store.chart.range,
 							label: DV.util.chart.default.label.getNumeric(),
 							grid: {
-								even: DV.util.chart.default.axis.getGrid()
+								even: {
+									opacity: 1,
+									fill: '#f1f1f1',
+									stroke: '#aaa',
+									'stroke-width': 0.2
+								}
 							}
 						};
 						if (DV.init.cmd === DV.conf.finals.cmd.init) {
@@ -692,7 +689,7 @@ Ext.onReady( function() {
 								type: 'circle',
 								radius: 0
 							},
-							title: DV.i18n.trend_line
+							title: DV.i18n.trend_line + ' (' + DV.value.trendLine[0] + ' - ' + DV.value.trendLine[DV.value.trendLine.length - 1] + ')'
 						};
 					}
 				}
@@ -894,7 +891,7 @@ Ext.onReady( function() {
                 for (var i = 0; i < r.length; i++) {
                     obj.values.push({v: r[i][0], d: r[i][1], p: r[i][2], o: r[i][3]});
                 }
-                obj.trendline = [40,80,60,30,50,60,90,70,50,20,40,60];
+                obj.trendline = [40,45,50,55,60,65,70,75,80,85,90,95];
                 return obj;
             }
         },
