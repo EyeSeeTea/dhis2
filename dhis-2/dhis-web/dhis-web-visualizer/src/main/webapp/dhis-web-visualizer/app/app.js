@@ -1,47 +1,57 @@
 DV.conf = {
     init: {
 		example: {
-			series: ['Series 1', 'Series 2', 'Series 3'],
+			series: ['Series 1', 'Series 2', 'Series 3', 'Series 4'],
 			category: ['Category 1', 'Category 2', 'Category 3'],
+			values: [41, 54, 38, 42, 62, 37, 56, 45, 52, 58, 53, 47],
 			setState: function() {
 				DV.state.type = DV.conf.finals.chart.column;
 				DV.state.series.dimension = DV.conf.finals.dimension.data.value;
-				DV.state.series.names = DV.conf.init.example.series.names;
+				DV.state.series.names = DV.conf.init.example.series;
 				DV.state.category.dimension = DV.conf.finals.dimension.period.value;
-				DV.state.category.names = DV.conf.init.example.category.names;
-				DV.state.targetLineValue = 70;
-				DV.state.rangeAxisLabel = '%';
+				DV.state.category.names = DV.conf.init.example.category;
+				DV.state.targetLineValue = 95;
+				DV.state.rangeAxisLabel = 'Range axis label';
 			},
 			setValues: function() {
-				var obj1 = {}, obj2 = {}, obj3 = {}, obj4 = {}, obj5 = {}, obj6 = {}, obj7 = {}, obj8 = {}, obj9 = {};
+				var obj1 = {}, obj2 = {}, obj3 = {}, obj4 = {}, obj5 = {}, obj6 = {}, obj7 = {}, obj8 = {}, obj9 = {}, obj10 = {}, obj11 = {}, obj12 = {};
 				obj1[DV.state.series.dimension] = DV.conf.init.example.series[0];
 				obj1[DV.state.category.dimension] = DV.conf.init.example.category[0];
-				obj1.v = 41;
+				obj1.v = DV.conf.init.example.values[0];
 				obj2[DV.state.series.dimension] = DV.conf.init.example.series[1];
 				obj2[DV.state.category.dimension] = DV.conf.init.example.category[0];
-				obj2.v = 51;
+				obj2.v = DV.conf.init.example.values[1];
 				obj3[DV.state.series.dimension] = DV.conf.init.example.series[2];
 				obj3[DV.state.category.dimension] = DV.conf.init.example.category[0];
-				obj3.v = 44;
-				obj4[DV.state.series.dimension] = DV.conf.init.example.series[0];
-				obj4[DV.state.category.dimension] = DV.conf.init.example.category[1];
-				obj4.v = 69;
-				obj5[DV.state.series.dimension] = DV.conf.init.example.series[1];
+				obj3.v = DV.conf.init.example.values[2];
+				obj4[DV.state.series.dimension] = DV.conf.init.example.series[3];
+				obj4[DV.state.category.dimension] = DV.conf.init.example.category[0];
+				obj4.v = DV.conf.init.example.values[3];
+				obj5[DV.state.series.dimension] = DV.conf.init.example.series[0];
 				obj5[DV.state.category.dimension] = DV.conf.init.example.category[1];
-				obj5.v = 42;
-				obj6[DV.state.series.dimension] = DV.conf.init.example.series[2];
+				obj5.v = DV.conf.init.example.values[4];
+				obj6[DV.state.series.dimension] = DV.conf.init.example.series[1];
 				obj6[DV.state.category.dimension] = DV.conf.init.example.category[1];
-				obj6.v = 71;
-				obj7[DV.state.series.dimension] = DV.conf.init.example.series[0];
-				obj7[DV.state.category.dimension] = DV.conf.init.example.category[2];
-				obj7.v = 53;
-				obj8[DV.state.series.dimension] = DV.conf.init.example.series[1];
-				obj8[DV.state.category.dimension] = DV.conf.init.example.category[2];
-				obj8.v = 58;
-				obj9[DV.state.series.dimension] = DV.conf.init.example.series[2];
+				obj6.v = DV.conf.init.example.values[5];
+				obj7[DV.state.series.dimension] = DV.conf.init.example.series[2];
+				obj7[DV.state.category.dimension] = DV.conf.init.example.category[1];
+				obj7.v = DV.conf.init.example.values[6];
+				obj8[DV.state.series.dimension] = DV.conf.init.example.series[3];
+				obj8[DV.state.category.dimension] = DV.conf.init.example.category[1];
+				obj8.v = DV.conf.init.example.values[7];
+				obj9[DV.state.series.dimension] = DV.conf.init.example.series[0];
 				obj9[DV.state.category.dimension] = DV.conf.init.example.category[2];
-				obj9.v = 62;
-				DV.value.values = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9];
+				obj9.v = DV.conf.init.example.values[8];
+				obj10[DV.state.series.dimension] = DV.conf.init.example.series[1];
+				obj10[DV.state.category.dimension] = DV.conf.init.example.category[2];
+				obj10.v = DV.conf.init.example.values[9];
+				obj11[DV.state.series.dimension] = DV.conf.init.example.series[2];
+				obj11[DV.state.category.dimension] = DV.conf.init.example.category[2];
+				obj11.v = DV.conf.init.example.values[10];
+				obj12[DV.state.series.dimension] = DV.conf.init.example.series[3];
+				obj12[DV.state.category.dimension] = DV.conf.init.example.category[2];
+				obj12.v = DV.conf.init.example.values[11];
+				DV.value.values = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11, obj12];
 			}
 		},
 		ajax: {
@@ -517,7 +527,7 @@ Ext.onReady( function() {
                         a.push(DV.util.string.getEncodedString(r.data.text));
                     });
                     if (exception && !a.length) {
-                        alert( DV.i18n.no_orgunits_selected );
+                        alert(DV.i18n.no_orgunits_selected);
                     }
                     return a;
                 },
@@ -533,7 +543,7 @@ Ext.onReady( function() {
                         a.push(DV.util.string.getEncodedString(r.data.id));
                     });
                     if (exception && !a.length) {
-                        alert( DV.i18n.no_orgunits_selected );
+                        alert(DV.i18n.no_orgunits_selected);
                     }
                     return a;
                 }                    
@@ -1387,7 +1397,6 @@ Ext.onReady( function() {
         getData: function(exe) {
             this.data = [];
             
-            
             Ext.Array.each(DV.state.category.names, function(item) {
                 var obj = {};
                 obj[DV.conf.finals.data.domain] = item;
@@ -1413,13 +1422,13 @@ Ext.onReady( function() {
 
 			if (DV.state.targetLineValue) {
 				Ext.Array.each(DV.chart.data, function(item) {
-					item[DV.conf.finals.data.targetline] = parseFloat(DV.state.targetLineValue);
+					item[DV.conf.finals.data.targetline] = DV.state.targetLineValue;
 				});
 			}			
 
 			if (DV.state.trendLine) {
 				for (var i = 0; i < DV.chart.data.length; i++) {
-					DV.chart.data[i][DV.conf.finals.data.trendline] = parseFloat(DV.value.trendLine[i]);
+					DV.chart.data[i][DV.conf.finals.data.trendline] = DV.value.trendLine[i];
 				}
 			}
             
@@ -1502,6 +1511,9 @@ Ext.onReady( function() {
 			var series = DV.util.chart.line.series.getArray();
 			if (DV.state.targetLineValue) {
 				series.push(DV.util.chart.default.series.getTargetLine());
+			}
+			if (DV.state.trendLine) {
+				series.push(DV.util.chart.default.series.getTrendLine());
 			}
 			
 			var axes = [];
