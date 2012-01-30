@@ -701,7 +701,7 @@ Ext.onReady( function() {
 				label: {
 					getCategory: function() {
 						return {
-							font: '14px arial'
+							font: '14px ' + DV.conf.chart.style.font
 						};
 					}
 				},
@@ -765,7 +765,7 @@ Ext.onReady( function() {
                         {
                             type: 'text',
                             text: DV.state.filter.names[0],
-                            font: 'bold 15px arial',
+                            font: 'bold 15px ' + DV.conf.chart.style.font,
                             fill: '#222',
                             width: 300,
                             height: 20,
@@ -775,7 +775,7 @@ Ext.onReady( function() {
                         {
                             type: 'text',
                             text: DV.store.chart.range[0],
-                            font: '13px arial',
+                            font: '13px ' + DV.conf.chart.style.font,
                             fill: '#444',
                             width: 300,
                             height: 20,
