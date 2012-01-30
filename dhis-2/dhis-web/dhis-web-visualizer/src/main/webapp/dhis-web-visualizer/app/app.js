@@ -1,21 +1,62 @@
 DV.conf = {
     init: {
-        data: [
-            {'domain_': 'Category 1', 'Series 1': 41, 'Series 2': 69, 'Series 3': 63, 'Series 4': 51},
-            {'domain_': 'Category 2', 'Series 1': 51, 'Series 2': 42, 'Series 3': 58, 'Series 4': 52},
-            {'domain_': 'Category 3', 'Series 1': 44, 'Series 2': 71, 'Series 3': 62, 'Series 4': 54}
-        ],
-        jsonfy: function(r) {
-            r = Ext.JSON.decode(r.responseText);
-            var obj = {system: {rootNode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}, user: {id: r.user.id, isAdmin: r.user.isAdmin}}};
-            for (var relative in r.p) {
-                obj.system.periods[relative] = [];
-                for (var i = 0; i < r.p[relative].length; i++) {
-                    obj.system.periods[relative].push({id: r.p[relative][i][0], name: r.p[relative][i][1]});
-                }
-            }
-            return obj;
-        }
+		example: {
+			series: ['Series 1', 'Series 2', 'Series 3'],
+			category: ['Category 1', 'Category 2', 'Category 3'],
+			setState: function() {
+				DV.state.type = DV.conf.finals.chart.column;
+				DV.state.series.dimension = DV.conf.finals.dimension.data.value;
+				DV.state.series.names = DV.conf.init.example.series.names;
+				DV.state.category.dimension = DV.conf.finals.dimension.period.value;
+				DV.state.category.names = DV.conf.init.example.category.names;
+				DV.state.targetLineValue = 70;
+				DV.state.rangeAxisLabel = '%';
+			},
+			setValues: function() {
+				var obj1 = {}, obj2 = {}, obj3 = {}, obj4 = {}, obj5 = {}, obj6 = {}, obj7 = {}, obj8 = {}, obj9 = {};
+				obj1[DV.state.series.dimension] = DV.conf.init.example.series[0];
+				obj1[DV.state.category.dimension] = DV.conf.init.example.category[0];
+				obj1.v = 41;
+				obj2[DV.state.series.dimension] = DV.conf.init.example.series[1];
+				obj2[DV.state.category.dimension] = DV.conf.init.example.category[0];
+				obj2.v = 51;
+				obj3[DV.state.series.dimension] = DV.conf.init.example.series[2];
+				obj3[DV.state.category.dimension] = DV.conf.init.example.category[0];
+				obj3.v = 44;
+				obj4[DV.state.series.dimension] = DV.conf.init.example.series[0];
+				obj4[DV.state.category.dimension] = DV.conf.init.example.category[1];
+				obj4.v = 69;
+				obj5[DV.state.series.dimension] = DV.conf.init.example.series[1];
+				obj5[DV.state.category.dimension] = DV.conf.init.example.category[1];
+				obj5.v = 42;
+				obj6[DV.state.series.dimension] = DV.conf.init.example.series[2];
+				obj6[DV.state.category.dimension] = DV.conf.init.example.category[1];
+				obj6.v = 71;
+				obj7[DV.state.series.dimension] = DV.conf.init.example.series[0];
+				obj7[DV.state.category.dimension] = DV.conf.init.example.category[2];
+				obj7.v = 53;
+				obj8[DV.state.series.dimension] = DV.conf.init.example.series[1];
+				obj8[DV.state.category.dimension] = DV.conf.init.example.category[2];
+				obj8.v = 58;
+				obj9[DV.state.series.dimension] = DV.conf.init.example.series[2];
+				obj9[DV.state.category.dimension] = DV.conf.init.example.category[2];
+				obj9.v = 62;
+				DV.value.values = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9];
+			}
+		},
+		ajax: {
+			jsonfy: function(r) {
+				r = Ext.JSON.decode(r.responseText);
+				var obj = {system: {rootNode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}, user: {id: r.user.id, isAdmin: r.user.isAdmin}}};
+				for (var relative in r.p) {
+					obj.system.periods[relative] = [];
+					for (var i = 0; i < r.p[relative].length; i++) {
+						obj.system.periods[relative].push({id: r.p[relative][i][0], name: r.p[relative][i][1]});
+					}
+				}
+				return obj;
+			}
+		}
     },
     finals: {
         ajax: {
@@ -130,10 +171,13 @@ Ext.onReady( function() {
         url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.initialize,
         success: function(r) {
             
-    DV.init = DV.conf.init.jsonfy(r);    
-    DV.init.initialize = function() {        
+    DV.init = DV.conf.init.ajax.jsonfy(r);
+    
+    DV.init.initialize = function() {
         DV.util.combobox.filter.category();
-        DV.chart.data = DV.conf.init.data;
+        
+        DV.conf.init.example.setState();
+        DV.conf.init.example.setValues();
         
         DV.init.cmd = DV.util.getUrlParam('uid') || DV.conf.finals.cmd.init;
         DV.exe.execute(true, DV.init.cmd);
@@ -314,14 +358,7 @@ Ext.onReady( function() {
                     }
                 }
                 return false;
-            },
-            getMaximum: function(store, keys) {
-				var maximum = 0;
-				for (var i = 0; i < keys.length; i++) {
-					maximum = store.max(keys[i]) > maximum ? store.max(keys[i]) : maximum;
-				}
-				return maximum;
-			}				
+            }		
         },
         dimension: {
             indicator: {
@@ -572,13 +609,13 @@ Ext.onReady( function() {
 							'stroke-width': 0.2
 						};
 					},
-					getNumeric: function() {
+					getNumeric: function(stacked) {
 						return {
 							type: 'Numeric',
 							position: 'left',
 							title: DV.state.rangeAxisLabel || false,
 							minimum: 0,
-							fields: DV.store.chart.range,
+							fields: stacked ? DV.state.series.names : DV.store.chart.range,
 							label: DV.util.chart.default.label.getNumeric(),
 							grid: {
 								even: DV.util.chart.default.axis.getGrid()
@@ -689,7 +726,7 @@ Ext.onReady( function() {
 								type: 'line',
 								axis: 'left',
 								xField: DV.conf.finals.data.domain,
-								yField: DV.store.chart.range[i],
+								yField: DV.state.series.names[i],
 								style: {
 									opacity: 0.8,
 									'stroke-width': 3
@@ -865,7 +902,7 @@ Ext.onReady( function() {
                     
                     var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;                    
                     Ext.Ajax.request({
-                        url: DV.conf.finals.ajax.path_visualizer + url,
+                        url: DV.conf.finals.ajax.path_visexecualizer + url,
                         params: params,
                         success: function() {
                             DV.store.favorite.load({callback: function() {
@@ -992,6 +1029,31 @@ Ext.onReady( function() {
                 data: []
             })
         },
+        chart: null,
+        getChartStore: function(exe) {
+            var keys = [];
+            Ext.Array.each(DV.chart.data, function(item) {
+				keys = Ext.Array.merge(keys, Ext.Object.getKeys(item));
+            });
+            this.chart = Ext.create('Ext.data.Store', {
+                fields: keys,
+                data: DV.chart.data
+            });
+            
+            this.chart.range = keys.slice(0);
+            for (var i = 0; i < this.chart.range.length; i++) {
+                if (this.chart.range[i] === DV.conf.finals.data.domain) {
+                    this.chart.range.splice(i, 1);
+                }
+            }
+            
+            if (exe) {
+                DV.chart.getChart(true);
+            }
+            else {
+                return this.chart;
+            }
+        },
         datatable: null,
         getDataTableStore: function(exe) {
             this.datatable = Ext.create('Ext.data.Store', {
@@ -1011,36 +1073,6 @@ Ext.onReady( function() {
                 return this.datatable;
             }
             
-        },
-        chart: null,
-        getChartStore: function(exe) {
-            var keys = [];
-            Ext.Array.each(DV.chart.data, function(item) {
-				keys = Ext.Array.merge(keys, Ext.Object.getKeys(item));
-            });
-            this.chart = Ext.create('Ext.data.Store', {
-                fields: keys,
-                data: DV.chart.data
-            });
-            
-            this.chart.range = keys.slice(0);
-            for (var i = 0; i < this.chart.range.length; i++) {
-                if (this.chart.range[i] === DV.conf.finals.data.domain || this.chart.range[i] === DV.conf.finals.data.targetline) {
-                    this.chart.range.splice(i, 1);
-                    i = 0;
-                }
-            }
-                       
-            if (DV.state.targetLineValue) {
-				this.chart.maximum = DV.util.store.getMaximum(this.chart, this.chart.range);
-			}
-            
-            if (exe) {
-                DV.chart.getChart(true);
-            }
-            else {
-                return this.chart;
-            }
         },
         favorite: Ext.create('Ext.data.Store', {
             fields: ['id', 'name', 'lastUpdated', 'userId'],
@@ -1078,15 +1110,15 @@ Ext.onReady( function() {
     DV.state = {
         type: DV.conf.finals.chart.column,
         series: {
-            dimension: DV.conf.finals.dimension.data.value,
+            dimension: null,
             names: []
         },
         category: {
-            dimension: DV.conf.finals.dimension.period.value,
+            dimension: null,
             names: []
         },
         filter: {
-            dimension: DV.conf.finals.dimension.organisationunit.value,
+            dimension: null,
             names: []
         },
         indicatorIds: [],
@@ -1097,7 +1129,7 @@ Ext.onReady( function() {
         hideLegend: false,
         domainAxisLabel: null,
         rangeAxisLabel: null,
-        targetLineValue: null,
+        targetLineValue: 70,
         targetLineLabel: null,
         trendLine: null,
         isRendered: false,
@@ -1135,11 +1167,11 @@ Ext.onReady( function() {
             
             this.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
             this.hideLegend = DV.cmp.favorite.hidelegend.getValue();
+            this.trendLine = DV.cmp.favorite.trendline.getValue();
             this.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
             this.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
             this.targetLineValue = parseFloat(DV.cmp.favorite.targetlinevalue.getValue());
             this.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
-            this.trendLine = DV.cmp.favorite.trendline.getValue();
             
             if (!this.isRendered) {
                 DV.cmp.toolbar.datatable.enable();
@@ -1163,7 +1195,7 @@ Ext.onReady( function() {
             obj = Ext.Object.merge(obj, this.relativePeriods);
             return obj;            
         },
-        setState: function(exe, uid) {
+        setFavorite: function(exe, uid) {
             if (uid) {
                 this.resetState();
                 Ext.Ajax.request({
@@ -1291,7 +1323,13 @@ Ext.onReady( function() {
             this.dataelementIds = [];
             this.relativePeriods = {};
             this.organisationunitIds = [];
+			this.hideSubtitle = false,
             this.hideLegend = false;
+			this.trendLine = null;
+			this.domainAxisLabel = null;
+			this.rangeAxisLabel = null;
+			this.targetLineValue = null;
+			this.targetLineLabel = null;
         }
     };
     
@@ -1317,7 +1355,7 @@ Ext.onReady( function() {
                 success: function(r) {
 					var json = DV.util.value.jsonfy(r);
                     DV.value.values = json.values;
-                    DV.value.trendLine.values = json.trendline;
+                    DV.value.trendLine = json.trendline;
                     if (!DV.value.values.length) {
                         DV.mask.hide();
                         alert(DV.i18n.no_data);
@@ -1341,15 +1379,14 @@ Ext.onReady( function() {
                 }
             });
         },
-        trendLine: {
-			values: []
-		}
+        trendLine: []
     };
     
     DV.chart = {
         data: [],        
         getData: function(exe) {
             this.data = [];
+            
             
             Ext.Array.each(DV.state.category.names, function(item) {
                 var obj = {};
@@ -1378,13 +1415,11 @@ Ext.onReady( function() {
 				Ext.Array.each(DV.chart.data, function(item) {
 					item[DV.conf.finals.data.targetline] = parseFloat(DV.state.targetLineValue);
 				});
-			}
+			}			
 
 			if (DV.state.trendLine) {
-				alert(DV.chart.data.length == DV.value.trendLine.values.length);
-				var len = DV.chart.data.length;
-				for (var i = 0; i < len; i++) {
-					DV.chart.data[DV.conf.finals.data.trendline] = parseFloat(DV.value.trendLine.values[i]);
+				for (var i = 0; i < DV.chart.data.length; i++) {
+					DV.chart.data[i][DV.conf.finals.data.trendline] = parseFloat(DV.value.trendLine[i]);
 				}
 			}
             
@@ -1396,7 +1431,7 @@ Ext.onReady( function() {
             }
         },        
         chart: null,
-        getChart: function(exe) {
+        getChart: function(exe) {			
             this[DV.state.type]();
             if (exe) {
                 this.reload();
@@ -1411,7 +1446,7 @@ Ext.onReady( function() {
 				type: 'column',
 				axis: 'left',
 				xField: DV.conf.finals.data.domain,
-				yField: DV.store.chart.range,
+				yField: DV.state.series.names,
 				stacked: stacked,
 				style: {
 					opacity: 0.8
@@ -1420,15 +1455,12 @@ Ext.onReady( function() {
 			if (DV.state.targetLineValue && !stacked) {
 				series.push(DV.util.chart.default.series.getTargetLine());
 			}
-			if (DV.state.trendLine) {
+			if (DV.state.trendLine && !stacked) {
 				series.push(DV.util.chart.default.series.getTrendLine());
 			}
 			
 			var axes = [];
-			var numeric = DV.util.chart.default.axis.getNumeric();
-			if (DV.state.targetLineValue && DV.state.targetLineValue > DV.store.chart.maximum) {
-				numeric.maximum = Math.round(DV.state.targetLineValue * DV.conf.chart.axis.range);
-			}
+			var numeric = DV.util.chart.default.axis.getNumeric(stacked);
 			axes.push(numeric);
 			axes.push(DV.util.chart.default.axis.getCategory());
 			
@@ -1443,7 +1475,7 @@ Ext.onReady( function() {
 				type: 'bar',
 				axis: 'bottom',
 				xField: DV.conf.finals.data.domain,
-				yField: DV.store.chart.range,
+				yField: DV.state.series.names,
 				stacked: stacked,
 				style: {
 					opacity: 0.8
@@ -1452,12 +1484,12 @@ Ext.onReady( function() {
 			if (DV.state.targetLineValue && !stacked) {
 				series.push(DV.util.chart.bar.series.getTargetLine());
 			}
+			if (DV.state.trendLine && !stacked) {
+				series.push(DV.util.chart.default.series.getTrendLine());
+			}
 			
 			var axes = [];
-			var numeric = DV.util.chart.bar.axis.getNumeric();
-			if (DV.state.targetLineValue && DV.state.targetLineValue > DV.store.chart.maximum) {
-				numeric.maximum = Math.round(DV.state.targetLineValue * DV.conf.chart.axis.range);
-			}
+			var numeric = DV.util.chart.bar.axis.getNumeric(stacked);
 			axes.push(numeric);
 			axes.push(DV.util.chart.bar.axis.getCategory());
 			
@@ -1474,9 +1506,6 @@ Ext.onReady( function() {
 			
 			var axes = [];
 			var numeric = DV.util.chart.default.axis.getNumeric();
-			if (DV.state.targetLineValue && DV.state.targetLineValue > DV.store.chart.maximum) {
-				numeric.maximum = Math.round(DV.state.targetLineValue * DV.conf.chart.axis.range);
-			}
 			axes.push(numeric);
 			axes.push(DV.util.chart.default.axis.getCategory());
 			
@@ -1488,7 +1517,7 @@ Ext.onReady( function() {
 				type: 'area',
 				axis: 'left',
 				xField: DV.conf.finals.data.domain,
-				yField: DV.store.chart.range,
+				yField: DV.state.series.names,
 				style: {
 					opacity: 0.65
 				}
@@ -1496,9 +1525,6 @@ Ext.onReady( function() {
 			
 			var axes = [];
 			var numeric = DV.util.chart.default.axis.getNumeric();
-			if (DV.state.targetLineValue && DV.state.targetLineValue > DV.store.chart.maximum) {
-				numeric.maximum = Math.round(DV.state.targetLineValue * DV.conf.chart.axis.range);
-			}
 			axes.push(numeric);
 			axes.push(DV.util.chart.default.axis.getCategory());
 			
@@ -1514,7 +1540,7 @@ Ext.onReady( function() {
                 legend: DV.state.hideLegend ? false : DV.util.chart.default.getLegend(DV.state.category.names.length),
                 series: [{
                     type: 'pie',
-                    field: DV.store.chart.range[0],
+                    field: DV.state.series.names[0],
                     showInLegend: true,
                     tips: DV.util.chart.pie.series.getTips(),
                     label: {
@@ -1601,10 +1627,10 @@ Ext.onReady( function() {
         execute: function(exe, cmd) {
             if (cmd) {
                 if (cmd === DV.conf.finals.cmd.init) {
-                    DV.store.getChartStore(exe);
+                    DV.chart.getData(exe);
                 }
                 else {
-                    DV.state.setState(true, cmd);
+                    DV.state.setFavorite(true, cmd);
                 }
             }
             else {
