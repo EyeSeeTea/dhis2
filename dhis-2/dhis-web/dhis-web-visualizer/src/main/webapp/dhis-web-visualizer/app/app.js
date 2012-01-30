@@ -739,7 +739,7 @@ Ext.onReady( function() {
 				series: {
 					getArray: function() {
 						var a = [];
-						for (var i = 0; i < DV.store.chart.range.length; i++) {
+						for (var i = 0; i < DV.state.series.names.length; i++) {
 							a.push({
 								type: 'line',
 								axis: 'left',
@@ -774,7 +774,7 @@ Ext.onReady( function() {
                         },
                         {
                             type: 'text',
-                            text: DV.store.chart.range[0],
+                            text: DV.state.series.names[0],
                             font: '13px ' + DV.conf.chart.style.font,
                             fill: '#444',
                             width: 300,
@@ -791,7 +791,7 @@ Ext.onReady( function() {
 							height: 47,
 							renderer: function(item) {
 								this.setWidth((item.data[DV.conf.finals.data.domain].length * 8) + 15);
-								this.setTitle('<span class="dv-chart-tips">' + item.data[DV.conf.finals.data.domain] + '<br/><b>' + item.data[DV.store.chart.range[0]] + '</b></span>');
+								this.setTitle('<span class="dv-chart-tips">' + item.data[DV.conf.finals.data.domain] + '<br/><b>' + item.data[DV.state.series.names[0]] + '</b></span>');
 							}
 						};
 					}
