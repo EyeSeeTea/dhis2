@@ -140,14 +140,12 @@ DV.conf = {
     },
     chart: {
         style: {
-            inset: 30
+            inset: 30,
+            font: 'arial,sans-serif,ubuntu,consolas'
         },
         theme: {
             dv1: ['#94ae0a', '#115fa6', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
-        },
-        axis: {
-			range: 1.1
-		}
+        }
     },
     layout: {
         west_width: 424,
@@ -578,7 +576,7 @@ Ext.onReady( function() {
 					len = len ? len : DV.store.chart.range.length;
 					return {
 						position: len > 5 ? 'right' : 'top',
-						labelFont: '15px arial',
+						labelFont: '15px ' + DV.conf.chart.style.font,
 						boxStroke: '#ffffff',
 						boxStrokeWidth: 0,
 						padding: 0
@@ -588,7 +586,7 @@ Ext.onReady( function() {
 					return {
 						type: 'text',
 						text: DV.state.filter.names[0],
-						font: 'bold 15px arial',
+						font: 'bold 15px ' + DV.conf.chart.style.font,
 						fill: '#222',
 						width: 300,
 						height: 20,
@@ -599,7 +597,7 @@ Ext.onReady( function() {
 				label: {
 					getCategory: function() {
 						return {
-							font: '14px arial',
+							font: '14px ' + DV.conf.chart.style.font,
 							rotate: {
 								degrees: 330
 							}
@@ -607,7 +605,7 @@ Ext.onReady( function() {
 					},
 					getNumeric: function() {
 						return {
-							font: '13px arial',
+							font: '13px ' + DV.conf.chart.style.font,
 							renderer: Ext.util.Format.numberRenderer(DV.util.number.getChartAxisFormatRenderer())
 						};
 					}
@@ -626,6 +624,9 @@ Ext.onReady( function() {
 							type: 'Numeric',
 							position: 'left',
 							title: DV.state.rangeAxisLabel || false,
+							labelTitle: {
+								font: '17px ' + DV.conf.chart.style.font
+							},
 							minimum: 0,
 							fields: stacked ? DV.state.series.names : DV.store.chart.range,
 							label: DV.util.chart.default.label.getNumeric(),
