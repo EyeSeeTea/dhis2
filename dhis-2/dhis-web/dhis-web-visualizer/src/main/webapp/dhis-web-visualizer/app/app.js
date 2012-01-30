@@ -3,14 +3,16 @@ DV.conf = {
 		example: {
 			series: ['Series 1', 'Series 2', 'Series 3', 'Series 4'],
 			category: ['Category 1', 'Category 2', 'Category 3'],
-			values: [41, 54, 38, 42, 62, 37, 56, 45, 52, 58, 53, 47],
+			filter: [DV.i18n.example_chart],
+			values: [51, 64, 48, 52, 72, 47, 66, 55, 62, 68, 63, 57],
 			setState: function() {
 				DV.state.type = DV.conf.finals.chart.column;
 				DV.state.series.dimension = DV.conf.finals.dimension.data.value;
 				DV.state.series.names = DV.conf.init.example.series;
 				DV.state.category.dimension = DV.conf.finals.dimension.period.value;
 				DV.state.category.names = DV.conf.init.example.category;
-				DV.state.targetLineValue = 95;
+				DV.state.filter.names = DV.conf.init.example.filter;
+				DV.state.targetLineValue = 85;
 				DV.state.rangeAxisLabel = 'Range axis label';
 			},
 			setValues: function() {
@@ -585,7 +587,7 @@ Ext.onReady( function() {
 				getTitle: function() {
 					return {
 						type: 'text',
-						text: DV.init.cmd === DV.conf.finals.cmd.init ? DV.i18n.example_chart : DV.state.filter.names[0],
+						text: DV.state.filter.names[0],
 						font: 'bold 15px arial',
 						fill: '#222',
 						width: 300,
@@ -620,7 +622,7 @@ Ext.onReady( function() {
 						};
 					},
 					getNumeric: function(stacked) {
-						return {
+						var axis = {
 							type: 'Numeric',
 							position: 'left',
 							title: DV.state.rangeAxisLabel || false,
@@ -631,6 +633,11 @@ Ext.onReady( function() {
 								even: DV.util.chart.default.axis.getGrid()
 							}
 						};
+						if (DV.init.cmd === DV.conf.finals.cmd.init) {
+							axis.maximum = 100;
+							axis.majorTickSteps = 10;
+						}
+						return axis;
 					},
 					getCategory: function() {
 						return {
