@@ -513,6 +513,18 @@ Ext.onReady( function() {
         },
         chart: {
 			default: {
+				getChart: function(axes, series) {
+					return Ext.create('Ext.chart.Chart', {
+						animate: true,
+						store: DV.store.chart,
+						insetPadding: DV.conf.chart.style.inset,
+						items: DV.state.hideSubtitle ? false : DV.util.chart.default.getTitle(),
+						legend: DV.state.hideLegend ? false : DV.util.chart.default.getLegend(),
+						axes: axes,
+						series: series,
+						theme: 'dv1'
+					});
+				},
 				getLegend: function(len) {
 					len = len ? len : DV.store.chart.range.length;
 					return {
@@ -1420,16 +1432,7 @@ Ext.onReady( function() {
 			axes.push(numeric);
 			axes.push(DV.util.chart.default.axis.getCategory());
 			
-            this.chart = Ext.create('Ext.chart.Chart', {
-                animate: true,
-                store: DV.store.chart,
-                insetPadding: DV.conf.chart.style.inset,
-                items: DV.state.hideSubtitle ? false : DV.util.chart.default.getTitle(),
-                legend: DV.state.hideLegend ? false : DV.util.chart.default.getLegend(),
-                axes: axes,
-                series: series,
-                theme: 'dv1'
-            });
+			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         stackedcolumn: function() {
             this.column(true);
@@ -1458,16 +1461,7 @@ Ext.onReady( function() {
 			axes.push(numeric);
 			axes.push(DV.util.chart.bar.axis.getCategory());
 			
-            this.chart = Ext.create('Ext.chart.Chart', {
-                animate: true,
-                store: DV.store.chart,
-                insetPadding: DV.conf.chart.style.inset,
-                items: DV.state.hideSubtitle ? false : DV.util.chart.default.getTitle(),
-                legend: DV.state.hideLegend ? false : DV.util.chart.default.getLegend(),
-                axes: axes,
-                series: series,
-                theme: 'dv1'
-            });
+			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         stackedbar: function() {
             this.bar(true);
@@ -1486,16 +1480,7 @@ Ext.onReady( function() {
 			axes.push(numeric);
 			axes.push(DV.util.chart.default.axis.getCategory());
 			
-            this.chart = Ext.create('Ext.chart.Chart', {
-                animate: true,
-                store: DV.store.chart,
-                insetPadding: DV.conf.chart.style.inset,
-                items: DV.state.hideSubtitle ? false : DV.util.chart.default.getTitle(),
-                legend: DV.state.hideLegend ? false : DV.util.chart.default.getLegend(),
-                axes: axes,
-                series: series,
-                theme: 'dv1'
-            });
+			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         area: function() {
 			var series = [];
@@ -1517,16 +1502,7 @@ Ext.onReady( function() {
 			axes.push(numeric);
 			axes.push(DV.util.chart.default.axis.getCategory());
 			
-            this.chart = Ext.create('Ext.chart.Chart', {
-                animate: true,
-                store: DV.store.chart,
-                insetPadding: DV.conf.chart.style.inset,
-                items: DV.state.hideSubtitle ? false : DV.util.chart.default.getTitle(),
-                legend: DV.state.hideLegend ? false : DV.util.chart.default.getLegend(),
-                axes: axes,
-                series: series,
-                theme: 'dv1'
-            });
+			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         pie: function() {
             this.chart = Ext.create('Ext.chart.Chart', {
@@ -1903,7 +1879,7 @@ Ext.onReady( function() {
                                                 tbar: [
                                                     {
                                                         xtype: 'label',
-                                                        text: DV.i18n.available_indicators,
+                                                        text: DV.i18n.available,
                                                         cls: 'dv-toolbar-multiselect-left-label'
                                                     },
                                                     '->',
@@ -1968,7 +1944,7 @@ Ext.onReady( function() {
                                                     '->',
                                                     {
                                                         xtype: 'label',
-                                                        text: DV.i18n.selected_indicators,
+                                                        text: DV.i18n.selected,
                                                         cls: 'dv-toolbar-multiselect-right-label'
                                                     }
                                                 ],
@@ -2064,7 +2040,7 @@ Ext.onReady( function() {
                                                 tbar: [
                                                     {
                                                         xtype: 'label',
-                                                        text: DV.i18n.available_data_elements,
+                                                        text: DV.i18n.available,
                                                         cls: 'dv-toolbar-multiselect-left-label'
                                                     },
                                                     '->',
@@ -2129,7 +2105,7 @@ Ext.onReady( function() {
                                                     '->',
                                                     {
                                                         xtype: 'label',
-                                                        text: DV.i18n.selected_data_elements,
+                                                        text: DV.i18n.selected,
                                                         cls: 'dv-toolbar-multiselect-right-label'
                                                     }
                                                 ],
