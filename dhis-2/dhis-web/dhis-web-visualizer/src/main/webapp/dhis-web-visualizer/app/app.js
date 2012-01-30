@@ -1499,7 +1499,7 @@ Ext.onReady( function() {
 				series.push(DV.util.chart.bar.series.getTargetLine());
 			}
 			if (DV.state.trendLine && !stacked) {
-				series.push(DV.util.chart.default.series.getTrendLine());
+				series.push(DV.util.chart.bar.series.getTrendLine());
 			}
 			
 			var axes = [];
