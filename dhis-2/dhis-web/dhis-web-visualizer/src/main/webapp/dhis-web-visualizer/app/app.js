@@ -675,7 +675,7 @@ Ext.onReady( function() {
 							yField: DV.conf.finals.data.targetline,
 							style: {
 								opacity: 1,
-								'stroke-width': 2
+								lineWidth: 2
 							},
 							markerConfig: {
 								type: 'circle',
@@ -692,7 +692,7 @@ Ext.onReady( function() {
 							yField: DV.conf.finals.data.trendline,
 							style: {
 								opacity: 1,
-								'stroke-width': 2
+								lineWidth: 2
 							},
 							markerConfig: {
 								type: 'circle',
@@ -753,7 +753,7 @@ Ext.onReady( function() {
 								yField: DV.state.series.names[i],
 								style: {
 									opacity: 0.8,
-									'stroke-width': 3
+									lineWidth: 3
 								},
 								markerConfig: {
 									type: 'circle',
@@ -1472,7 +1472,8 @@ Ext.onReady( function() {
 				yField: DV.state.series.names,
 				stacked: stacked,
 				style: {
-					opacity: 0.8
+					opacity: 0.8,
+					stroke: '#333'
 				}
 			});
 			if (DV.state.targetLineValue && !stacked) {
@@ -1501,7 +1502,8 @@ Ext.onReady( function() {
 				yField: DV.state.series.names,
 				stacked: stacked,
 				style: {
-					opacity: 0.8
+					opacity: 0.8,
+					stroke: '#333'
 				}
 			});
 			if (DV.state.targetLineValue && !stacked) {
@@ -1545,7 +1547,8 @@ Ext.onReady( function() {
 				xField: DV.conf.finals.data.domain,
 				yField: DV.state.series.names,
 				style: {
-					opacity: 0.65
+					opacity: 0.65,
+					stroke: '#555'
 				}
 			});
 			
@@ -1578,7 +1581,8 @@ Ext.onReady( function() {
                         }
                     },
                     style: {
-                        opacity: 0.9
+                        opacity: 0.9,
+						stroke: '#555'
                     }
                 }],
                 theme: 'dv1'
