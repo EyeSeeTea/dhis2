@@ -17,6 +17,7 @@ function loadProgramStages()
 	var programId = jQuery('#dataRecordingSelectDiv [name=programId]').val();
 	if ( programId == 0 )
 	{
+		hideById('currentSelection');
 		return;
 	}
 	jQuery.postJSON( "loadProgramStages.action",
@@ -31,32 +32,13 @@ function loadProgramStages()
 				addOptionById( 'programStageId', json.programStages[i].id, json.programStages[i].name );
 			} 
 			
-			// show history / plan
-			setInnerHTML( 'currentSelection', '' ); 
-			var history = '<h4>' + i18n_program_stages_history_plan + '</h4>';
-			history += '<table class="history">';
-			history += '<tr>';
-            history += '<td class="bold row">' + i18n_program_stage + '</td>';
-            history += '<td class="bold row">' + i18n_scheduled_for + '</td>';
-            history += '</tr>';
-			for ( i in json.programStageInstances ) 
-			{
-				history += '<tr bgcolor=' + json.programStageInstances[i].colorMap + '>';
-                history += '<td>';
-                history += '<span>' + json.programStageInstances[i].name + '</span>';
-				history += '</td>';
-                history += '<td style="text-align:center">';
-                history += json.programStageInstances[i].infor;
-                history += '</td>';
-                history += '</tr>';
-			}
-			history += '</table>';
-			setInnerHTML( 'currentSelection', history );
-			
 			var singleEvent = jQuery('#dataRecordingSelectDiv [name=programId] option:selected').attr('singleevent');
+				
 			if(singleEvent=='true')
 			{
 				byId('programStageId').selectedIndex = 1;
+				jQuery('#programStageIdTR').attr('class','hidden');
+				jQuery('#dueDateTR').attr('class','hidden');
 				enable('completeBtn');
 				enable('validationBtn');
 				
@@ -64,9 +46,38 @@ function loadProgramStages()
 			}
 			else
 			{
+				
+				// show history / plan
+				setInnerHTML( 'currentSelection', '' ); 
+				var history = '<h4>' + i18n_program_stages_history_plan + '</h4>';
+				history += '<table class="history">';
+				history += '<tr>';
+				history += '<td class="bold row">' + i18n_program_stage + '</td>';
+				history += '<td class="bold row">' + i18n_scheduled_for + '</td>';
+				history += '</tr>';
+				for ( i in json.programStageInstances ) 
+				{
+					history += '<tr bgcolor=' + json.programStageInstances[i].colorMap + '>';
+					history += '<td>';
+					history += '<span>' + json.programStageInstances[i].name + '</span>';
+					history += '</td>';
+					history += '<td class="cent">';
+					history += json.programStageInstances[i].infor;
+					history += '</td>';
+					history += '</tr>';
+				}
+				history += '</table>';
+				setInnerHTML( 'currentSelection', history );
+				showById('currentSelection');
+				
 				disable('completeBtn');
 				disable('validationBtn');
+				
+				jQuery('#programStageIdTR').removeAttr('class');
+				jQuery('#dueDateTR').removeAttr('class');
+				
 			}
+			
 	});
 }
 
@@ -710,11 +721,11 @@ function doComplete()
 					});
 					jQuery("#dataEntryFormDiv").find(".ui-datepicker-trigger").each(function()
 					{
-						jQuery(this).attr('style', 'display:none');
+						jQuery(this).attr('class', 'hidden');
 					});
 					jQuery("#dataEntryFormDiv").find(".holder").each(function()
 					{
-						jQuery(this).attr('style', 'display:none');
+						jQuery(this).attr('class', 'visible');
 					});
 					
 					disable('validationBtn');
