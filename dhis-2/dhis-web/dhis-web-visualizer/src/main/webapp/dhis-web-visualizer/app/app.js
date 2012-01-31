@@ -623,11 +623,17 @@ Ext.onReady( function() {
 							fields: stacked ? DV.state.series.names : DV.store.chart.range,
 							label: DV.util.chart.default.label.getNumeric(),
 							grid: {
+								odd: {
+									opacity: 1,
+									fill: '#fefefe',
+									stroke: '#aaa',
+									'stroke-width': 0.1
+								},									
 								even: {
 									opacity: 1,
 									fill: '#f1f1f1',
 									stroke: '#aaa',
-									'stroke-width': 0.2
+									'stroke-width': 0.1
 								}
 							}
 						};
