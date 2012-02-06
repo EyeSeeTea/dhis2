@@ -62,7 +62,7 @@
       <tr>
         <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
         <td><input type="text" id="name" name="name" style="width:20em" value="$!encoder.htmlEncode( $dataSet.name )"></td>
-      </tr>      
+      </tr>
       <tr>
         <td><label>$i18n.getString( "short_name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
         <td><input type="text" id="shortName" name="shortName" style="width:20em" value="$!encoder.htmlEncode( $dataSet.shortName )"></td>
@@ -70,6 +70,10 @@
       <tr>
         <td><label>$i18n.getString( "code" )</label></td>
         <td><input type="text" id="code" name="code" style="width:20em" value="$!encoder.htmlEncode( $dataSet.code )"></td>
+      </tr>
+      <tr>
+        <td><label>$i18n.getString( "expiry_days" )</label></td>
+        <td><input type="text" id="expiryDays" name="expiryDays" style="width:20em" value="$!encoder.htmlEncode( $dataSet.expiryDays )"></td>
       </tr>
       <tr>
         <td><label>$i18n.getString( "frequency" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
@@ -113,7 +117,7 @@
         <td>
           <select id="dataElementsSelectedList" name="dataElementsSelectedList" multiple="multiple" style="height: 200px; width: 100%; margin-top: 45px;">
               #foreach ( $availableDataElement in $dataElements )
-                  <option value="$availableDataElement.id">$encoder.htmlEncode( $availableDataElement.name )</option>
+                  <option value="$availableDataElement.id">$encoder.htmlEncode( $availableDataElement.displayName )</option>
               #end   
           </select>
         </td>
@@ -149,7 +153,7 @@
         <td>
           <select id="indicatorsSelectedList" name="indicatorsSelectedList" multiple="multiple" style="height: 200px; width: 100%; margin-top: 45px;">
               #foreach ( $availableIndicator in $indicators )
-                  <option value="$availableIndicator.id">$encoder.htmlEncode( $availableIndicator.name )</option>
+                  <option value="$availableIndicator.id">$encoder.htmlEncode( $availableIndicator.displayName )</option>
               #end
           </select>
         </td>

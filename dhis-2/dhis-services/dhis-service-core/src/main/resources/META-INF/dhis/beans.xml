@@ -85,6 +85,12 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="cacheable" value="true" />
   </bean>
 
+  <bean id="org.hisp.dhis.dataset.LockExceptionStore" class="org.hisp.dhis.dataset.hibernate.HibernateLockExceptionStore">
+    <property name="clazz" value="org.hisp.dhis.dataset.LockException" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
   <bean id="org.hisp.dhis.dataset.CompleteDataSetRegistrationStore" class="org.hisp.dhis.dataset.hibernate.HibernateCompleteDataSetRegistrationStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
@@ -224,11 +230,6 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
-  <bean id="org.hisp.dhis.sequence.SequenceStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
-    <property name="sessionFactory" ref="sessionFactory" />
-    <property name="clazz" value="org.hisp.dhis.sequence.Sequence" />
-  </bean>
-
   <bean id="org.hisp.dhis.configuration.ConfigurationStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="clazz" value="org.hisp.dhis.configuration.Configuration" />
@@ -257,8 +258,14 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.options.SystemSettingStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
-    <property name="clazz" value="org.hisp.dhis.options.SystemSetting" />
+  <bean id="org.hisp.dhis.setting.SystemSettingStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
+    <property name="clazz" value="org.hisp.dhis.setting.SystemSetting" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+
+  <bean id="org.hisp.dhis.option.OptionSetStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
+    <property name="clazz" value="org.hisp.dhis.option.OptionSet" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
   </bean>
@@ -460,16 +467,12 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
   </bean>
 
   <bean id="emailMessageSender" class="org.hisp.dhis.message.EmailMessageSender">
-	<property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
+	<property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
 	<property name="userService" ref="org.hisp.dhis.user.UserService" />
   </bean>
 
   <bean id="org.hisp.dhis.concept.ConceptService" class="org.hisp.dhis.concept.DefaultConceptService">
     <property name="conceptStore" ref="org.hisp.dhis.concept.ConceptStore" />
-  </bean>
-
-  <bean id="org.hisp.dhis.sequence.SequenceGenerator" class="org.hisp.dhis.sequence.DefaultSequenceGenerator">
-    <property name="sequenceStore" ref="org.hisp.dhis.sequence.SequenceStore" />
   </bean>
 
   <bean id="org.hisp.dhis.configuration.ConfigurationService" class="org.hisp.dhis.configuration.DefaultConfigurationService">
@@ -488,9 +491,13 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="attributeStore" ref="org.hisp.dhis.attribute.AttributeStore" />
     <property name="attributeValueStore" ref="org.hisp.dhis.attribute.AttributeValueStore" />
   </bean>
+  
+  <bean id="org.hisp.dhis.option.OptionService" class="org.hisp.dhis.option.DefaultOptionService">
+	<property name="optionSetStore" ref="org.hisp.dhis.option.OptionSetStore"/>
+  </bean>
 
-  <bean id="org.hisp.dhis.options.SystemSettingManager" class="org.hisp.dhis.options.setting.DefaultSystemSettingManager">
-    <property name="systemSettingStore" ref="org.hisp.dhis.options.SystemSettingStore" />
+  <bean id="org.hisp.dhis.setting.SystemSettingManager" class="org.hisp.dhis.setting.DefaultSystemSettingManager">
+    <property name="systemSettingStore" ref="org.hisp.dhis.setting.SystemSettingStore" />
     <property name="flags">
       <list>
         <value>armenia</value>
@@ -539,8 +546,8 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     </property>
   </bean>
 
-  <bean id="org.hisp.dhis.options.StyleManager" class="org.hisp.dhis.options.style.DefaultStyleManager">
-    <property name="systemSettingManager" ref="org.hisp.dhis.options.SystemSettingManager" />
+  <bean id="org.hisp.dhis.setting.StyleManager" class="org.hisp.dhis.setting.DefaultStyleManager">
+    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
 	<property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
     <property name="defaultStyle" value="light_blue" />
     <property name="styles">

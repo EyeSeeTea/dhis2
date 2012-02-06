@@ -27,10 +27,6 @@ package org.hisp.dhis.importexport.dxf.converter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.apache.commons.lang.StringUtils.defaultIfEmpty;
-
-import javax.xml.namespace.QName;
-
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.amplecode.staxwax.reader.XMLReader;
@@ -121,6 +117,10 @@ import org.hisp.dhis.report.ReportService;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.validation.ValidationRuleService;
+
+import javax.xml.namespace.QName;
+
+import static org.apache.commons.lang.StringUtils.defaultIfEmpty;
 
 /**
  * DXFConverter class This does NOT implement XMLConverter, because we need to
@@ -332,6 +332,8 @@ public class DXFConverter
         {
             if ( reader.isStartElement( ConceptConverter.COLLECTION_NAME ) )
             {
+                log.debug( "Starting Concepts import" );
+
                 state.setMessage( "importing_concepts" );
 
                 BatchHandler<Concept> batchHandler = batchHandlerFactory.createBatchHandler( ConceptBatchHandler.class )
@@ -347,6 +349,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( ConstantConverter.COLLECTION_NAME ) )
             {
+                log.debug( "Starting Constants import" ) ;
+
                 state.setMessage( "importing_constants" );
 
                 BatchHandler<Constant> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -362,6 +366,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataElementCategoryOptionConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataElementCategoryOptions import ");
+
                 state.setMessage( "importing_data_element_category_options" );
 
                 BatchHandler<DataElementCategoryOption> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -378,6 +384,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataElementCategoryConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataElementCategories import");
+
                 state.setMessage( "importing_data_element_categories" );
 
                 BatchHandler<DataElementCategory> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -394,6 +402,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataElementCategoryComboConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataElementCategoryCombos import");
+
                 state.setMessage( "importing_data_element_category_combos" );
 
                 BatchHandler<DataElementCategoryCombo> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -410,6 +420,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataElementCategoryOptionComboConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataElementCategoryOptionCombos import");
+
                 state.setMessage( "importing_data_element_category_option_combos" );
 
                 XMLConverter converter = new DataElementCategoryOptionComboConverter( importObjectService,
@@ -422,6 +434,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( CategoryCategoryOptionAssociationConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting CategoryCategoryOption associations import");
+
                 state.setMessage( "importing_data_element_category_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -439,6 +453,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( CategoryComboCategoryAssociationConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting CategoryComboCategory associations import");
+
                 state.setMessage( "importing_data_element_category_combo_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -456,6 +472,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataElementConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataElements import");
+
                 state.setMessage( "importing_data_elements" );
 
                 BatchHandler<DataElement> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -473,6 +491,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataElementGroupConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataElementGroups import");
+
                 state.setMessage( "importing_data_element_groups" );
 
                 BatchHandler<DataElementGroup> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -489,6 +509,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataElementGroupMemberConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataElementGroup members import");
+
                 state.setMessage( "importing_data_element_group_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -506,6 +528,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataElementGroupSetConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataElementGroupSets import");
+
                 state.setMessage( "importing_data_element_group_sets" );
 
                 BatchHandler<DataElementGroupSet> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -522,6 +546,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataElementGroupSetMemberConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting Imported DataElementGroupSet members import");
+
                 state.setMessage( "importing_data_element_group_set_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -539,6 +565,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( IndicatorTypeConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting IndicatorTypes import");
+
                 state.setMessage( "importing_indicator_types" );
 
                 BatchHandler<IndicatorType> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -555,6 +583,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( IndicatorConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting Indicators import");
+
                 state.setMessage( "importing_indicators" );
 
                 BatchHandler<Indicator> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -573,6 +603,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( IndicatorGroupConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting IndicatorGroups import");
+
                 state.setMessage( "importing_indicator_groups" );
 
                 BatchHandler<IndicatorGroup> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -589,6 +621,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( IndicatorGroupMemberConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting IndicatorGroup members import");
+
                 state.setMessage( "importing_indicator_group_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -606,6 +640,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( IndicatorGroupSetConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting IndicatorGroupSets import");
+
                 state.setMessage( "importing_indicator_group_sets" );
 
                 BatchHandler<IndicatorGroupSet> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -622,6 +658,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( IndicatorGroupSetMemberConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting IndicatorGroupSet import");
+
                 state.setMessage( "importing_indicator_group_set_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -639,6 +677,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataDictionaryConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataDictionaries import");
+
                 state.setMessage( "importing_data_dictionaries" );
 
                 BatchHandler<DataDictionary> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -655,6 +695,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataDictionaryDataElementConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataDictionary DataElements import");
+
                 state.setMessage( "importing_data_dictionary_data_elements" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -672,6 +714,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataDictionaryIndicatorConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataDictionary Indicators import");
+
                 state.setMessage( "importing_data_dictionary_indicators" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -689,6 +733,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataSetConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataSets import");
+
                 state.setMessage( "importing_data_sets" );
 
                 BatchHandler<DataSet> batchHandler = batchHandlerFactory.createBatchHandler( DataSetBatchHandler.class )
@@ -705,6 +751,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataSetMemberConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataSet members import");
+
                 state.setMessage( "importing_data_set_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -722,6 +770,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( OrganisationUnitConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting OrganisationUnits import");
+
                 state.setMessage( "importing_organisation_units" );
 
                 BatchHandler<OrganisationUnit> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -738,6 +788,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( OrganisationUnitRelationshipConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting OrganisationUnit relationships import");
+
                 state.setMessage( "importing_organisation_unit_relationships" );
 
                 BatchHandler<OrganisationUnit> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -754,6 +806,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( OrganisationUnitGroupConverter.COLLECTION_NAME ) )
             {
+                log.info("Starting OrganisationUnitGroups import ");
+
                 state.setMessage( "importing_organisation_unit_groups" );
 
                 BatchHandler<OrganisationUnitGroup> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -770,6 +824,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( OrganisationUnitGroupMemberConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting OrganisationUnitGroup members import");
+
                 state.setMessage( "importing_organisation_unit_group_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -787,6 +843,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( GroupSetConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting OrganisationUnitGroupSets import");
+
                 state.setMessage( "importing_organisation_unit_group_sets" );
 
                 BatchHandler<OrganisationUnitGroupSet> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -803,6 +861,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( GroupSetMemberConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting OrganisationUnitGroupSet members import");
+
                 state.setMessage( "importing_organisation_unit_group_set_members" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -820,6 +880,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( OrganisationUnitLevelConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting OrganisationUnitLevels import");
+
                 state.setMessage( "importing_organisation_unit_levels" );
 
                 XMLConverter converter = new OrganisationUnitLevelConverter( organisationUnitService,
@@ -831,6 +893,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataSetSourceAssociationConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting DataSet Source associations import");
+
                 state.setMessage( "importing_data_set_source_associations" );
 
                 BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -848,6 +912,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( ValidationRuleConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting ValidationRules import");
+
                 state.setMessage( "importing_validation_rules" );
 
                 XMLConverter converter = new ValidationRuleConverter( importObjectService, validationRuleService,
@@ -860,6 +926,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( PeriodConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting Periods import");
+
                 state.setMessage( "importing_periods" );
 
                 BatchHandler<Period> batchHandler = batchHandlerFactory.createBatchHandler( PeriodBatchHandler.class )
@@ -876,6 +944,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( ReportConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting Reports import");
+
                 state.setMessage( "importing_reports" );
 
                 XMLConverter converter = new ReportConverter( reportService, importObjectService );
@@ -886,6 +956,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( ReportTableConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting ReportTables import");
+
                 state.setMessage( "importing_report_tables" );
 
                 BatchHandler<ReportTable> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -907,6 +979,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( ChartConverter.COLLECTION_NAME ) )
             {
+                log.debug("Starting Charts import");
+
                 state.setMessage( "importing_charts" );
 
                 XMLConverter converter = new ChartConverter( chartService, importObjectService, indicatorService,
@@ -920,6 +994,8 @@ public class DXFConverter
             else if ( reader.isStartElement( CompleteDataSetRegistrationConverter.COLLECTION_NAME )
                 && params.isDataValues() )
             {
+                log.debug("Starting CompleteDataSetRegistrations import");
+
                 state.setMessage( "importing_complete_data_set_registrations" );
 
                 BatchHandler<CompleteDataSetRegistration> batchHandler = batchHandlerFactory.createBatchHandler(
@@ -938,6 +1014,8 @@ public class DXFConverter
             }
             else if ( reader.isStartElement( DataValueConverter.COLLECTION_NAME ) && params.isDataValues() )
             {
+                log.debug("Starting DataValues import");
+
                 state.setMessage( "importing_data_values" );
 
                 BatchHandler<DataValue> batchHandler = batchHandlerFactory.createBatchHandler(
