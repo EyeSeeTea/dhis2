@@ -13,6 +13,7 @@ DV.conf = {
 				DV.state.category.names = DV.conf.init.example.category;
 				DV.state.filter.names = DV.conf.init.example.filter;
 				DV.state.targetLineValue = 80;
+				DV.state.targetLineLabel = 'Target line label';
 				DV.state.rangeAxisLabel = 'Range axis label';
 				DV.state.domainAxisLabel = 'Domain axis label';
 			},
