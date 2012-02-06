@@ -3294,6 +3294,38 @@ Ext.onReady( function() {
                                 }
                             }
                         },
+                        {
+                            xtype: 'button',
+							cls: 'dv-toolbar-btn-2',
+                            text: 'nissa',
+                            handler: function() {
+								var tp = DV.cmp.dimension.organisationunit.treepanel;
+								var i = 0;
+								var ids = [19,20,21];
+								var paths = ['/18/19','/18/20','/18/21'];
+								
+								var expand = function(path) {
+									i++;
+									tp.expandPath(path, 'id', callback());
+								};			
+								
+								var select = function() {
+DV.cmp.fieldset.organisationunit.expand();
+									tp.getSelectionModel().select(tp.getRootNode());
+								};									
+								
+								var callback = function() {
+									if (i == paths.length) {
+										select();
+									}
+									else {
+										expand(paths[i]);
+									}
+								}
+								
+								expand(paths[i]);				
+                            }
+                        },
                         '->',
                         {
                             xtype: 'button',
