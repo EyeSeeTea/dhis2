@@ -312,7 +312,8 @@ Ext.onReady( function() {
         'styleMap': new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
-                    {'fillOpacity': 1, 'strokeColor': '#fff', 'strokeWidth': 1, 'pointRadius': 5},
+                    //{'fillOpacity': 1, 'strokeColor': '#fff', 'strokeWidth': 1, 'pointRadius': 5},
+                    {'fillOpacity': 0, 'strokeColor': '#000', 'strokeWidth': 1, 'pointRadius': 5},
                     OpenLayers.Feature.Vector.style['default']
                 )
             ),
@@ -2325,7 +2326,7 @@ Ext.onReady( function() {
             ' ',
             {
                 xtype: 'button',
-                text: 'Close',
+                text: G.i18n.close,
                 iconCls: 'icon-cancel',
                 scope: point,
                 handler: function() {
@@ -2493,7 +2494,7 @@ Ext.onReady( function() {
             ' ',
             {
                 xtype: 'button',
-                text: 'Close',
+                text: G.i18n.close,
                 iconCls: 'icon-cancel',
                 scope: centroid,
                 handler: function() {
