@@ -312,8 +312,7 @@ Ext.onReady( function() {
         'styleMap': new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
-                    //{'fillOpacity': 1, 'strokeColor': '#fff', 'strokeWidth': 1, 'pointRadius': 5},
-                    {'fillOpacity': 0, 'strokeColor': '#000', 'strokeWidth': 1, 'pointRadius': 5},
+                    {'fillOpacity': 1, 'strokeColor': '#fff', 'strokeWidth': 1, 'pointRadius': 5},
                     OpenLayers.Feature.Vector.style['default']
                 )
             ),
