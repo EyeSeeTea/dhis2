@@ -3300,30 +3300,32 @@ Ext.onReady( function() {
                             text: 'nissa',
                             handler: function() {
 								var tp = DV.cmp.dimension.organisationunit.treepanel;
+								
+								
+//tp.getSelectionModel().select(tp.getRootNode());return;								
 								var i = 0;
 								var ids = [19,20,21];
 								var paths = ['/18/19','/18/20','/18/21'];
 								
-								var expand = function(path) {
+								function expand(path) {
 									i++;
 									tp.expandPath(path, 'id', callback());
 								};			
 								
-								var select = function() {
-DV.cmp.fieldset.organisationunit.expand();
-									tp.getSelectionModel().select(tp.getRootNode());
-								};									
-								
 								var callback = function() {
-									if (i == paths.length) {
+									if (i >= paths.length) {
 										select();
 									}
 									else {
 										expand(paths[i]);
 									}
-								}
+								};								
 								
-								expand(paths[i]);				
+								function select() {
+									tp.getSelectionModel().select(tp.getRootNode());
+								};									
+								
+								expand(paths[i]);
                             }
                         },
                         '->',
