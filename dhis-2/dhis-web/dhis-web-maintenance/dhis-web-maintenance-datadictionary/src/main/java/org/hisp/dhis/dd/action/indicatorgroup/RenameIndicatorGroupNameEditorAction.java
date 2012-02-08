@@ -1,3 +1,5 @@
+package org.hisp.dhis.dd.action.indicatorgroup;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -25,78 +27,66 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.dataadmin.action.option;
-
-import java.util.List;
-
-import org.hisp.dhis.option.OptionService;
-import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.indicator.IndicatorService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
- * 
- * @version $UpdateOptionSetAction.java Feb 3, 2012 9:28:11 PM$
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class UpdateOptionSetAction
+public class RenameIndicatorGroupNameEditorAction
     implements Action
 {
-    // -------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-    private OptionService optionService;
-
-    // -------------------------------------------------------------------------------------------------
+    @Autowired
+    private IndicatorService indicatorService;
+    
+    // -------------------------------------------------------------------------
     // Input
-    // -------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     private Integer id;
-    
-    private String name;
 
-    private List<String> options;
-
-    // -------------------------------------------------------------------------------------------------
-    // Setters
-    // -------------------------------------------------------------------------------------------------
-    
-    public void setOptionService( OptionService optionService )
-    {
-        this.optionService = optionService;
-    }
-    
     public void setId( Integer id )
     {
         this.id = id;
     }
+
+    private String name;
 
     public void setName( String name )
     {
         this.name = name;
     }
 
-    public void setOptions( List<String> options )
+    private IndicatorGroup indicatorGroup;
+
+    public IndicatorGroup getIndicatorGroup()
     {
-        this.options = options;
+        return indicatorGroup;
     }
 
-    // -------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Action implementation
-    // -------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
-    @Override
     public String execute()
-        throws Exception
     {
-        OptionSet optionSet = optionService.getOptionSet( id );
-        optionSet.setName( name );
-        optionSet.setOptions( options );
-        
-        optionService.updateOptionSet( optionSet );
-        
+        indicatorGroup = indicatorService.getIndicatorGroup( id );
+
+        if ( name != null && name.trim().length() > 0 )
+        {
+            indicatorGroup.setName( name );
+        }
+
+        indicatorService.updateIndicatorGroup( indicatorGroup );
+
         return SUCCESS;
     }
-
 }

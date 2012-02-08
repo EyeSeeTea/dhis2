@@ -305,6 +305,23 @@ Ext.onReady( function() {
     };
     
 	/* Thematic layers */
+	boundaryLayer = new OpenLayers.Layer.Vector(G.i18n.boundary_layer, {
+        strategies: [ new OpenLayers.Strategy.Refresh({force:true}) ],
+        'visibility': false,
+        'displayInLayerSwitcher': false,
+        'styleMap': new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style(
+                OpenLayers.Util.applyDefaults(
+                    {'fillOpacity': 0, 'strokeColor': '#000', 'strokeWidth': 1, 'pointRadius': 5},
+                    OpenLayers.Feature.Vector.style['default']
+                )
+            )
+        })
+    });
+    
+    boundaryLayer.layerType = G.conf.map_layer_type_thematic;
+    G.vars.map.addLayer(boundaryLayer);
+    
     polygonLayer = new OpenLayers.Layer.Vector(G.conf.thematic_layer_1, {
         strategies: [ new OpenLayers.Strategy.Refresh({force:true}) ],
         'visibility': false,
@@ -1983,6 +2000,11 @@ Ext.onReady( function() {
                 },
                 {
                     nodeType: 'gx_layer',
+                    layer: G.conf.boundary_layer,
+                    iconCls: 'treepanel-node-icon-boundary'
+                },
+                {
+                    nodeType: 'gx_layer',
                     layer: G.conf.thematic_layer_1,
                     iconCls: 'treepanel-node-icon-thematic1'
                 },
@@ -2165,6 +2187,95 @@ Ext.onReady( function() {
             }
         ]
 	});
+	
+    /* Section: widgets */
+    boundary = new mapfish.widgets.geostat.Boundary({
+        map: G.vars.map,
+        layer: boundaryLayer,
+        featureSelection: false,
+        defaults: {width: 130},
+        listeners: {
+            'expand': function() {
+                //G.vars.activePanel.setPolygon();
+            },
+            'afterrender': function() {
+                this.layer.widget = this;
+            }
+        }
+    });
+    
+    boundary.window = new Ext.Window({
+        title: '<span id="window-boundary-title">' + G.i18n.boundary_layer + '</span>',
+        layout: 'fit',
+        bodyStyle: 'padding:8px; background-color:#fff',
+        closeAction: 'hide',
+        width: 570,
+        collapsed: false,
+        isUpdate: false,
+        cmp: {},
+        items: boundary,
+        bbar: [
+            {
+                xtype: 'button',
+                text: G.i18n.resize,
+                iconCls: 'icon-resize',
+                scope: boundary,
+                handler: function() {
+                    if (this.window.collapsed) {
+                        this.window.setWidth(G.conf.window_editlayer_width);
+                        this.window.collapsed = false;
+                        this.window.syncSize();
+                    }
+                    else {
+                        this.window.setWidth(G.conf.window_editlayer_width_collapsed);
+                        this.window.collapsed = true;
+                    }
+                }
+            },
+            '->',
+            {
+                xtype: 'button',
+                text: G.i18n.update,
+                iconCls: 'icon-assign',
+                disabled: true,
+                scope: boundary,
+                handler: function() {
+                    var node = this.cmp.parent.selectedNode;
+                    this.organisationUnitSelection.setValues(node.attributes.id, node.attributes.text, node.attributes.level,
+                        this.cmp.level.getValue(), this.cmp.level.getRawValue());
+                    this.window.isUpdate = true;                    
+                    this.loadGeoJson();
+                },
+                listeners: {
+                    'render': {
+                        fn: function(b) {
+                            b.scope.window.cmp.apply = b;
+                        }
+                    }
+                }
+            },
+            ' ',
+            {
+                xtype: 'button',
+                text: G.i18n.close,
+                iconCls: 'icon-cancel',
+                scope: boundary,
+                handler: function() {
+                    this.window.hide();
+                }
+            }
+        ],
+        listeners: {
+            'show': {
+                scope: boundary,
+                fn: function() {
+                    this.cmp.parent.isLoaded = true;
+                    this.window.isShown = true;
+                }
+            }
+        }
+    });    
+    boundary.window.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
 	
     /* Section: widgets */
     choropleth = new mapfish.widgets.geostat.Choropleth({
@@ -2544,6 +2655,8 @@ Ext.onReady( function() {
             G.util.zoomToVisibleExtent();
         }
 	});
+	
+	var boundaryButton = new G.cls.vectorLayerButton('icon-boundary', G.i18n.boundary_layer, boundary);
     
     var choroplethButton = new G.cls.vectorLayerButton('icon-thematic1', G.i18n.thematic_layer + ' 1', choropleth);
     
@@ -2733,7 +2846,8 @@ Ext.onReady( function() {
 			'-',
 			' ',' ',' ',
 			layersLabel,
-			' ',' ', 
+			' ',' ',
+			boundaryButton,
             choroplethButton,
             pointButton,
             symbolButton,

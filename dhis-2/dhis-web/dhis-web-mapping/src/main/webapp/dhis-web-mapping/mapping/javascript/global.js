@@ -8,6 +8,7 @@ G.conf = {
     
 //  Layer names
 
+	boundary_layer: G.i18n.boundary_layer,
     thematic_layer_1: G.i18n.thematic_layer  + ' 1',
     thematic_layer_2: G.i18n.thematic_layer  + ' 2',
     symbol_layer: G.i18n.symbol_layer,
@@ -790,8 +791,8 @@ G.cls = {
         return new Ext.Button({
             iconCls: iconCls,
             tooltip: tooltip,
-            style: 'margin-top:1px',
             widget: widget,
+            style: 'margin-top:1px',
             enableItems: function(bool) {
                 var menuItems = [2,3,5,6,7,9];
                 for (var i = 0; i < menuItems.length; i++) {
