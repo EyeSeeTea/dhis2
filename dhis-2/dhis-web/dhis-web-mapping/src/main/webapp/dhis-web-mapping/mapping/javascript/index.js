@@ -1994,10 +1994,11 @@ Ext.onReady( function() {
                 {
                     nodeType: 'gx_baselayercontainer',
                     expanded: true,
-                    text: G.i18n.base_layers
+                    text: G.i18n.baselayers
                 },
                 {
-                    nodeType: 'gx_overlaylayercontainer'
+                    nodeType: 'gx_overlaylayercontainer',
+                    text: G.i18n.overlays_
                 },
                 {
                     nodeType: 'gx_layer',
@@ -2140,16 +2141,16 @@ Ext.onReady( function() {
             ]
         }),
         clickEventFn: function(node, e) {
-            if (node.attributes.text !== G.i18n.base_layers && node.attributes.text !== G.i18n.overlays ) {
+            if (node.attributes.text !== G.i18n.baselayers && node.attributes.text !== G.i18n.overlays_ ) {
                 node.select();
                 
-                if (node.parentNode.attributes.text === G.i18n.base_layers ) {
+                if (node.parentNode.attributes.text === G.i18n.baselayers ) {
                     var cmb = node.getOwnerTree().contextMenuBaselayer;
                     cmb.contextNode = node;
                     cmb.showAt(e.getXY());
                 }
                 
-                else if (node.parentNode.attributes.text === G.i18n.overlays ) {
+                else if (node.parentNode.attributes.text === G.i18n.overlays_ ) {
                     var cmo = node.layer.overlayType === 'wms' ?
                         node.getOwnerTree().contextMenuOverlayWMS : node.getOwnerTree().contextMenuOverlayFile;
                     cmo.contextNode = node;
