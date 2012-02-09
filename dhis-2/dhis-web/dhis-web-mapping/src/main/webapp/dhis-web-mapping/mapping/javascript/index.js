@@ -804,6 +804,7 @@ Ext.onReady( function() {
                     else {
                         var exportForm = document.getElementById('exportForm');
                         exportForm.action = '../exportImage.action';
+                        exportForm.method = 'post';
                         
                         document.getElementById('titleField').value = title;
                         document.getElementById('svgField').value = svg;
@@ -2209,29 +2210,12 @@ Ext.onReady( function() {
         layout: 'fit',
         bodyStyle: 'padding:8px; background-color:#fff',
         closeAction: 'hide',
-        width: 570,
+        width: 287,
         collapsed: false,
         isUpdate: false,
         cmp: {},
         items: boundary,
         bbar: [
-            {
-                xtype: 'button',
-                text: G.i18n.resize,
-                iconCls: 'icon-resize',
-                scope: boundary,
-                handler: function() {
-                    if (this.window.collapsed) {
-                        this.window.setWidth(G.conf.window_editlayer_width);
-                        this.window.collapsed = false;
-                        this.window.syncSize();
-                    }
-                    else {
-                        this.window.setWidth(G.conf.window_editlayer_width_collapsed);
-                        this.window.collapsed = true;
-                    }
-                }
-            },
             '->',
             {
                 xtype: 'button',
@@ -2948,13 +2932,14 @@ Ext.onReady( function() {
                 var svg = document.getElementsByTagName('svg');
                 
                 if (!Ext.isIE) {
-                    polygonLayer.svgId = svg[0].id;
-                    pointLayer.svgId = svg[1].id;
-                    symbolLayer.svgId = svg[2].id;
-                    centroidLayer.svgId = svg[3].id;
+					boundaryLayer.svgId = svg[0].id;
+                    polygonLayer.svgId = svg[1].id;
+                    pointLayer.svgId = svg[2].id;
+                    symbolLayer.svgId = svg[3].id;
+                    centroidLayer.svgId = svg[4].id;
                 }
                 
-                for (var i = 0, j = 3; i < G.vars.map.layers.length; i++) {
+                for (var i = 0, j = 4; i < G.vars.map.layers.length; i++) {
                     if (G.vars.map.layers[i].layerType == G.conf.map_layer_type_overlay) {
                         G.vars.map.layers[i].svgId = svg[j++].id;
                     }
@@ -3008,6 +2993,9 @@ Ext.onReady( function() {
                 
                 document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + G.i18n.no_feature_selected + '</div>';
                 
+				boundaryButton.menu.remove(boundaryButton.menu.items.items[5]);
+                boundaryButton.menu.remove(boundaryButton.menu.items.last());
+                boundaryButton.menu.remove(boundaryButton.menu.items.last());
                 symbolButton.menu.remove(symbolButton.menu.items.last());
                 symbolButton.menu.remove(symbolButton.menu.items.last());
                 centroidButton.menu.remove(centroidButton.menu.items.last());

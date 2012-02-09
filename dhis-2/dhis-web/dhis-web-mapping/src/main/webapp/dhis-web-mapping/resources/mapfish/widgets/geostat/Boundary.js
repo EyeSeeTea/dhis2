@@ -329,7 +329,6 @@ mapfish.widgets.geostat.Boundary = Ext.extend(Ext.Panel, {
 			{
 				xtype: 'panel',
 				width: 270,
-				bodyStyle: 'padding:0 0 0 8px;',
 				items: [
 					{ html: '<div class="window-info">' + G.i18n.organisation_unit_level + '</div>' },                            
 					{
@@ -348,7 +347,17 @@ mapfish.widgets.geostat.Boundary = Ext.extend(Ext.Panel, {
     },
     
     formValidation: {
-        validateForm: function() {            
+        validateForm: function() {
+            if (!this.cmp.parent.selectedNode || !this.cmp.level.getValue()) {
+                this.window.cmp.apply.disable();
+                return false;
+            }
+            
+            if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
+                this.window.cmp.apply.disable();
+                return false;
+            }
+            
             if (this.requireUpdate) {
                 if (this.window.isUpdate) {
                     this.window.cmp.apply.disable();
@@ -408,39 +417,25 @@ mapfish.widgets.geostat.Boundary = Ext.extend(Ext.Panel, {
             if (!this.layer.features.length && !loaded) {
                 this.loadGeoJson();
             }
-			
-			this.layer.renderer.clear();
-			this.layer.redraw();
-			this.layer.setVisibility(true);
-			
-			G.util.zoomToVisibleExtent();
+            
+            this.applyValues();			
         }
     },
     
-    applyValues: function() {
-        for (var i = 0; i < this.layer.features.length; i++) {
-            var f = this.layer.features[i];
+    applyValues: function() {            
+		for (var i = 0; i < this.layer.features.length; i++) {
+			var f = this.layer.features[i];
 			f.attributes.labelString = f.attributes.name;
 			f.attributes.fixedName = G.util.cutString(f.attributes.name, 30);
-        }
-        
-        this.button.menu.find('name','history')[0].addItem(this);
-        
-		var options = {
-            indicator: 'value',
-            method: this.cmp.method.getValue(),
-            numClasses: this.cmp.classes.getValue(),
-            colors: this.getColors(),
-            minSize: parseInt(this.cmp.radiusLow.getValue()),
-            maxSize: parseInt(this.cmp.radiusHigh.getValue())
-        };
-        
-        G.vars.activeWidget = this;
-        this.coreComp.applyClassification(options, this);
-        this.classificationApplied = true;
-        
-        G.vars.mask.hide();
-    },
+		}
+		
+		this.layer.renderer.clear();
+		this.layer.redraw();
+		this.layer.setVisibility(true);
+		
+		G.util.zoomToVisibleExtent();
+		G.vars.mask.hide();
+	},
     
     onRender: function(ct, position) {
         mapfish.widgets.geostat.Boundary.superclass.onRender.apply(this, arguments);
