@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.message.action;
+package org.hisp.dhis.dataadmin.action.lockexception;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,29 +27,26 @@ package org.hisp.dhis.dashboard.message.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.message.MessageConversation;
-import org.hisp.dhis.message.MessageService;
-import org.hisp.dhis.user.CurrentUserService;
-
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.UserCredentials;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ReadMessageAction
+public class GetDataSetsAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private MessageService messageService;
-
-    public void setMessageService( MessageService messageService )
-    {
-        this.messageService = messageService;
-    }
-    
     private CurrentUserService currentUserService;
 
     public void setCurrentUserService( CurrentUserService currentUserService )
@@ -57,43 +54,66 @@ public class ReadMessageAction
         this.currentUserService = currentUserService;
     }
 
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
+
     // -------------------------------------------------------------------------
-    // Input
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
-    
-    public void setId( Integer id )
+    private int id;
+
+    public void setId( int id )
     {
         this.id = id;
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
+    private List<DataSet> dataSets;
 
-    private MessageConversation conversation;
-
-    public MessageConversation getConversation()
+    public List<DataSet> getDataSets()
     {
-        return conversation;
+        return dataSets;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action Implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
-        throws Exception
+    public String execute() throws Exception
     {
-        conversation = messageService.getMessageConversation( id );
-                
-        if ( conversation.markRead( currentUserService.getCurrentUser() ) )
-        {        
-            messageService.updateMessageConversation( conversation );
-        }
-        
+        dataSets = getDataSetsForCurrentUser( id );
+
         return SUCCESS;
+    }
+
+    private List<DataSet> getDataSetsForCurrentUser( int id )
+    {
+        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( id );
+
+        if ( organisationUnit == null )
+        {
+            return new ArrayList<DataSet>();
+        }
+
+        List<DataSet> dataSets = new ArrayList<DataSet>();
+
+        if ( organisationUnit.getDataSets() != null )
+        {
+            dataSets.addAll( organisationUnit.getDataSets() );
+        }
+
+        UserCredentials userCredentials = currentUserService.getCurrentUser().getUserCredentials();
+
+        if ( !userCredentials.isSuper() )
+        {
+            dataSets.retainAll( userCredentials.getAllDataSets() );
+        }
+
+        return dataSets;
     }
 }

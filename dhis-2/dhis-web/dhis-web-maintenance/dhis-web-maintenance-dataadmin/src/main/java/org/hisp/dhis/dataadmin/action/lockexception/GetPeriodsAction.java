@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.message.action;
+package org.hisp.dhis.dataadmin.action.lockexception;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,73 +27,99 @@ package org.hisp.dhis.dashboard.message.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.message.MessageConversation;
-import org.hisp.dhis.message.MessageService;
-import org.hisp.dhis.user.CurrentUserService;
-
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataset.CompleteDataSetRegistration;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.period.CalendarPeriodType;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.system.filter.PastAndCurrentPeriodFilter;
+import org.hisp.dhis.system.util.FilterUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ReadMessageAction
+public class GetPeriodsAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private MessageService messageService;
+    private DataSetService dataSetService;
 
-    public void setMessageService( MessageService messageService )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.messageService = messageService;
+        this.dataSetService = dataSetService;
     }
-    
-    private CurrentUserService currentUserService;
 
-    public void setCurrentUserService( CurrentUserService currentUserService )
+    private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
     {
-        this.currentUserService = currentUserService;
+        this.format = format;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
-    
-    public void setId( Integer id )
+    private int id;
+
+    public void setId( int id )
     {
         this.id = id;
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
+    private List<Period> periods;
 
-    private MessageConversation conversation;
-
-    public MessageConversation getConversation()
+    public List<Period> getPeriods()
     {
-        return conversation;
+        return periods;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action Implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
-        throws Exception
+    public String execute() throws Exception
     {
-        conversation = messageService.getMessageConversation( id );
-                
-        if ( conversation.markRead( currentUserService.getCurrentUser() ) )
-        {        
-            messageService.updateMessageConversation( conversation );
+        periods = getPeriodsForDataSet( id );
+
+        for ( Period period : periods )
+        {
+            period.setName( format.formatPeriod( period ) );
         }
-        
+
         return SUCCESS;
+    }
+
+    private List<Period> getPeriodsForDataSet( int id )
+    {
+        DataSet dataSet = dataSetService.getDataSet( id );
+
+        if ( dataSet == null )
+        {
+            return new ArrayList<Period>();
+        }
+
+        CalendarPeriodType periodType = (CalendarPeriodType) dataSet.getPeriodType();
+        List<Period> periods = periodType.generateLast5Years( new Date() );
+        FilterUtils.filter( periods, new PastAndCurrentPeriodFilter() );
+        Collections.reverse( periods );
+
+        if ( periods.size() > 10 )
+        {
+            periods = periods.subList( 0, 10 );
+        }
+
+        return periods;
     }
 }

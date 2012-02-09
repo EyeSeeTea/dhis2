@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.message.action;
+package org.hisp.dhis.dataadmin.action.lockexception;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,73 +27,94 @@ package org.hisp.dhis.dashboard.message.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.message.MessageConversation;
-import org.hisp.dhis.message.MessageService;
-import org.hisp.dhis.user.CurrentUserService;
-
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dataset.LockException;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ReadMessageAction
+public class AddLockExceptionAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private MessageService messageService;
+    private DataSetService dataSetService;
 
-    public void setMessageService( MessageService messageService )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.messageService = messageService;
-    }
-    
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
+        this.dataSetService = dataSetService;
     }
 
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
+    private OrganisationUnitService organisationUnitService;
 
-    private Integer id;
-    
-    public void setId( Integer id )
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
-        this.id = id;
+        this.organisationUnitService = organisationUnitService;
+    }
+
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private MessageConversation conversation;
+    private int organisationUnitId;
 
-    public MessageConversation getConversation()
+    public void setOrganisationUnitId( int organisationUnitId )
     {
-        return conversation;
+        this.organisationUnitId = organisationUnitId;
+    }
+
+    private int dataSetId;
+
+    public void setDataSetId( int dataSetId )
+    {
+        this.dataSetId = dataSetId;
+    }
+
+    private String periodId;
+
+    public void setPeriodId( String periodId )
+    {
+        this.periodId = periodId;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action Implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
-        throws Exception
+    public String execute() throws Exception
     {
-        conversation = messageService.getMessageConversation( id );
-                
-        if ( conversation.markRead( currentUserService.getCurrentUser() ) )
-        {        
-            messageService.updateMessageConversation( conversation );
+        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+        DataSet dataSet = dataSetService.getDataSet( dataSetId );
+        Period period = periodService.getPeriodByExternalId( periodId );
+
+        if ( organisationUnit == null || dataSet == null || period == null )
+        {
+            return ERROR;
         }
-        
+
+        LockException lockException = new LockException();
+        lockException.setOrganisationUnit( organisationUnit );
+        lockException.setDataSet( dataSet );
+        lockException.setPeriod( period );
+
+        dataSetService.addLockException( lockException );
+
         return SUCCESS;
     }
 }

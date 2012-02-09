@@ -1,4 +1,4 @@
-package org.hisp.dhis.interceptor;
+package org.hisp.dhis.dataadmin.action.lockexception;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,52 +27,62 @@ package org.hisp.dhis.interceptor;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.hisp.dhis.system.database.DatabaseInfoProvider;
-import org.hisp.dhis.system.util.TextUtils;
-
-import com.opensymphony.xwork2.ActionInvocation;
-import com.opensymphony.xwork2.interceptor.Interceptor;
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dataset.LockException;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ContextInterceptor
-    implements Interceptor
+public class GetLockExceptionAction
+    implements Action
 {
-    private static final String KEY_IN_MEMORY_DATABASE = "inMemoryDatabase";
-    private static final String KEY_TEXT_UTILS = "dhisTextUtils";
-    
-    private DatabaseInfoProvider databaseInfoProvider;
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    public void setDatabaseInfoProvider( DatabaseInfoProvider databaseInfoProvider )
+    private DataSetService dataSetService;
+
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.databaseInfoProvider = databaseInfoProvider;
-    }
-    
-    @Override
-    public void destroy()
-    {
+        this.dataSetService = dataSetService;
     }
 
-    @Override
-    public void init()
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
     {
+        this.id = id;
     }
 
-    @Override
-    public String intercept( ActionInvocation invocation )
-        throws Exception
+    private LockException lockException;
+
+    public LockException getLockException()
     {
-        Map<String, Object> map = new HashMap<String, Object>();
-        
-        map.put( KEY_IN_MEMORY_DATABASE, databaseInfoProvider.isInMemory() );
-        map.put( KEY_TEXT_UTILS, TextUtils.INSTANCE );
-        
-        invocation.getStack().push( map );
-        
-        return invocation.invoke();
+        return lockException;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action Implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String execute() throws Exception
+    {
+        if ( id != null )
+        {
+            lockException = dataSetService.getLockException( id );
+
+            if ( lockException == null )
+            {
+                return INPUT;
+            }
+        }
+
+        return SUCCESS;
     }
 }

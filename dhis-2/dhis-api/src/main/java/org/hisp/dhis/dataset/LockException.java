@@ -48,6 +48,11 @@ public class LockException
 
     }
 
+    public String getName()
+    {
+        return dataSet.getName() + " - " + organisationUnit.getName() + " - " + period.getName();
+    }
+
     public int getId()
     {
         return id;

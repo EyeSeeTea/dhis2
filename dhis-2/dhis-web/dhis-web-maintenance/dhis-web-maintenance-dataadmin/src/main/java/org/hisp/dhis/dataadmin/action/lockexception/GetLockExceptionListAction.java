@@ -1,7 +1,5 @@
-package org.hisp.dhis.dashboard.message.action;
-
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,56 +25,61 @@ package org.hisp.dhis.dashboard.message.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.message.MessageConversation;
-import org.hisp.dhis.message.MessageService;
-import org.hisp.dhis.user.CurrentUserService;
+package org.hisp.dhis.dataadmin.action.lockexception;
 
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dataset.LockException;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.paging.ActionPagingSupport;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author Lars Helge Overland
+ * @author mortenoh
  */
-public class ReadMessageAction
-    implements Action
+public class GetLockExceptionListAction
+    extends ActionPagingSupport<LockException>
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private MessageService messageService;
+    private DataSetService dataSetService;
 
-    public void setMessageService( MessageService messageService )
+    public void setDataSetService( DataSetService dataSetService )
     {
-        this.messageService = messageService;
-    }
-    
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
+        this.dataSetService = dataSetService;
     }
 
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
+    private I18nFormat format;
 
-    private Integer id;
-    
-    public void setId( Integer id )
+    public void setFormat( I18nFormat format )
     {
-        this.id = id;
+        this.format = format;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private MessageConversation conversation;
+    private List<LockException> lockExceptions;
 
-    public MessageConversation getConversation()
+    public List<LockException> getLockExceptions()
     {
-        return conversation;
+        return lockExceptions;
+    }
+
+    private String key;
+
+    public String getKey()
+    {
+        return key;
+    }
+
+    public void setKey( String key )
+    {
+        this.key = key;
     }
 
     // -------------------------------------------------------------------------
@@ -85,15 +88,20 @@ public class ReadMessageAction
 
     @Override
     public String execute()
-        throws Exception
     {
-        conversation = messageService.getMessageConversation( id );
-                
-        if ( conversation.markRead( currentUserService.getCurrentUser() ) )
-        {        
-            messageService.updateMessageConversation( conversation );
+        lockExceptions = new ArrayList<LockException>( dataSetService.getAllLockExceptions() );
+
+        for ( LockException lockException : lockExceptions )
+        {
+            lockException.getPeriod().setName( format.formatPeriod( lockException.getPeriod() ) );
         }
-        
+
+        if ( usePaging )
+        {
+            paging = createPaging( dataSetService.getLockExceptionCount() );
+            lockExceptions = lockExceptions.subList( paging.getStartPos(), paging.getEndPos() );
+        }
+
         return SUCCESS;
     }
 }
