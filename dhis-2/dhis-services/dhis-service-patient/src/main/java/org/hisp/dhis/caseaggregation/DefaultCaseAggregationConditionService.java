@@ -763,7 +763,7 @@ public class DefaultCaseAggregationConditionService
         
         if( operator.equals( AGGRERATION_SUM ) )
         {
-            sql = "SELECT pi.programstageinstanceid ";
+            sql = "SELECT psi.programstageinstanceid ";
         }
         
         return sql + "FROM programstageinstance as psi "
@@ -879,10 +879,12 @@ public class DefaultCaseAggregationConditionService
         }
 
         return "SELECT distinct(p.patientid) FROM programinstance as pi "
+                   + "INNER JOIN programstageinstance psi "
+                   + "ON pi.programinstanceid = psi.programinstanceid "
                    + "INNER JOIN patient as p ON pi.patientid = p.patientid  " 
                    + "WHERE psi.programstageid=" + programStageId + " "
                    + "AND psi.executiondate >= '" + startDate
-                   + "' AND psi.executiondate <= '" + endDate + "' ";
+                   + "' AND psi.executiondate <= '" + endDate + "' AND p.organisationunitid = " + orgunitId + " ";
     }
     
     private String getSQL( String aggregateOperator, List<String> conditions, List<String> operators )
