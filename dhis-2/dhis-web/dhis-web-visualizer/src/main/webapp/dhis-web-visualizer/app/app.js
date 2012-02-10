@@ -926,7 +926,7 @@ Ext.onReady( function() {
                     if (isUpdate) {
                         params.uid = DV.store.favorite.getAt(DV.store.favorite.findExact('name', params.name)).data.id;
                     }
-                    
+					
                     var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;                    
                     Ext.Ajax.request({
                         url: DV.conf.finals.ajax.path_visualizer + url,
