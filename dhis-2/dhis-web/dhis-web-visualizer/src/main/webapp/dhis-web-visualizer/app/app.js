@@ -3294,40 +3294,6 @@ Ext.onReady( function() {
                                 }
                             }
                         },
-                        {
-                            xtype: 'button',
-							cls: 'dv-toolbar-btn-2',
-                            text: 'nissa',
-                            handler: function() {
-								var tp = DV.cmp.dimension.organisationunit.treepanel;
-								
-								
-//tp.getSelectionModel().select(tp.getRootNode());return;								
-								var i = 0;
-								var ids = [19,20,21];
-								var paths = ['/18/19','/18/20','/18/21'];
-								
-								function expand(path) {
-									i++;
-									tp.expandPath(path, 'id', callback());
-								};			
-								
-								var callback = function() {
-									if (i >= paths.length) {
-										select();
-									}
-									else {
-										expand(paths[i]);
-									}
-								};								
-								
-								function select() {
-									tp.getSelectionModel().select(tp.getRootNode());
-								};									
-								
-								expand(paths[i]);
-                            }
-                        },
                         '->',
                         {
                             xtype: 'button',
