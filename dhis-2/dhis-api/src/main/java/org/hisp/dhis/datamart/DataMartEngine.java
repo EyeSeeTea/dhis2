@@ -28,51 +28,45 @@ package org.hisp.dhis.datamart;
  */
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.hisp.dhis.period.RelativePeriods;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 
 /**
  * @author Lars Helge Overland
  */
-public interface DataMartService
+public interface DataMartEngine
 {
-    final String ID = DataMartService.class.getName();
+    final String ID = DataMartEngine.class.getName();
+    
+    final Set<OrganisationUnitGroup> DUMMY_ORG_UNIT_GROUPS = new HashSet<OrganisationUnitGroup>()
+    { {
+        add( null );
+    } };
 
     /**
-     * Exports to data mart for the given arguments.
+     * Exports aggregated values to the data mart tables.
      * 
      * @param dataElementIds the data element identifiers.
      * @param indicatorIds the indicator identifiers.
      * @param periodIds the period identifiers.
      * @param organisationUnitIds the organisation unit identifiers.
+     * @param processState the state object.
      */
     void export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
         Collection<Integer> periodIds, Collection<Integer> organisationUnitIds );
     
     /**
-     * Exports to data mart for the given arguments.
-     * 
-     * @param dataElementIds the data element identifiers.
-     * @param indicatorIds the indicator identifiers.
-     * @param periodIds the period identifiers.
-     * @param organisationUnitIds the organisation unit identifiers.
-     * @param relatives the RelativePeriods.
-     */
-    void export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
-        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, RelativePeriods relatives );
-
-    /**
-     * Exports to data mart for the given arguments.
+     * Exports aggregated values to the data mart tables.
      * 
      * @param dataElementIds the data element identifiers.
      * @param indicatorIds the indicator identifiers.
      * @param periodIds the period identifiers.
      * @param organisationUnitIds the organisation unit identifiers.
      * @param organisationUnitGroupIds the organisation unit group identifiers.
-     * @param relatives the RelativePeriods.
-     * @param completeExport indicates whether this is a complete export.
+     * @param processState the state object.
      */
     void export( Collection<Integer> dataElementIds, Collection<Integer> indicatorIds,
-        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, Collection<Integer> organisationUnitGroupIds,
-        RelativePeriods relatives, boolean completeExport );
+        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, Collection<Integer> organisationUnitGroupIds );
 }
