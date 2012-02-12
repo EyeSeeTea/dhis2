@@ -9,7 +9,7 @@ import javax.annotation.PostConstruct;
 public class InMemoryNotifier
     implements Notifier
 {
-    private int MAX_SIZE = 2000;
+    private int MAX_SIZE = 1000;
     
     private List<Notification> notifications;
     
@@ -43,24 +43,31 @@ public class InMemoryNotifier
     }
 
     @Override
-    public List<Notification> getNotifications()
+    public List<Notification> getNotifications( int max )
     {
-        return notifications;
+        max = max > notifications.size() ? notifications.size() : max;
+        
+        return notifications.subList( 0, max );
     }
 
     @Override
-    public List<Notification> getNotifications( NotificationCategory category )
+    public List<Notification> getNotifications( NotificationCategory category, int max )
     {
         List<Notification> list = new ArrayList<Notification>();
         
         for ( Notification notification : notifications )
         {
+            if ( list.size() == max )
+            {
+                break;
+            }
+            
             if ( category.equals( notification.getCategory() ) )
             {
                 list.add( notification );
             }
         }
         
-        return list;
+        return list.subList( 0, max );
     }
 }

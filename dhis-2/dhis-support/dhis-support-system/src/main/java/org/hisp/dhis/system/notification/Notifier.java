@@ -8,7 +8,7 @@ public interface Notifier
     
     void notify(  NotificationLevel level, NotificationCategory category, String message );
     
-    List<Notification> getNotifications();
+    List<Notification> getNotifications( int max );
     
-    List<Notification> getNotifications( NotificationCategory category );
+    List<Notification> getNotifications( NotificationCategory category, int max );
 }
