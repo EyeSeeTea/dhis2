@@ -230,7 +230,7 @@ public class DefaultDataMartEngine
         expressionService.filterInvalidIndicators( indicators );
 
         clock.logTime( "Filtered objects" );
-        notifier.notify( DATAMART, "Preparing indicator formulas" );
+        notifier.notify( DATAMART, "Loading indicator formulas" );
 
         // ---------------------------------------------------------------------
         // Explode indicator expressions
@@ -243,7 +243,7 @@ public class DefaultDataMartEngine
         }
 
         clock.logTime( "Exploded indicator expressions" );
-        notifier.notify( DATAMART, "Preparing data elements" );
+        notifier.notify( DATAMART, "Loading data elements" );
 
         // ---------------------------------------------------------------------
         // Get operands
@@ -257,7 +257,7 @@ public class DefaultDataMartEngine
         allOperands.addAll( indicatorOperands );
 
         clock.logTime( "Retrieved operands: " + allOperands.size() );
-        notifier.notify( DATAMART, "Preparing periods" );
+        notifier.notify( DATAMART, "Loading periods" );
 
         // ---------------------------------------------------------------------
         // Filter out future periods

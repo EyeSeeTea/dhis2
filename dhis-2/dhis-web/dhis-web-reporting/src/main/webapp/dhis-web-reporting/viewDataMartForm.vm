@@ -1,7 +1,7 @@
 
 <h3>$i18n.getString( "data_mart_management" )</h3>
 
-<div id="critiera" class="inputCriteria" style="width:400px;height:120px;">
+<div id="critiera" class="inputCriteria" style="width:380px;height:110px;">
 <table>
 <col width="120">
 <col width="240">
@@ -18,3 +18,6 @@
 	<td><input type="button" onclick="startExport()" value="$i18n.getString( 'start_export' )" style="width:120px"></td>
 </tr>
 </table>
+</div>
+
+<div id="notificationDiv"></div>

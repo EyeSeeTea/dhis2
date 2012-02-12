@@ -34,7 +34,7 @@ public class InMemoryNotifier
     {
         Notification notification = new Notification( level, category, new Date(), message );
         
-        notifications.add( notification );
+        notifications.add( 0, notification );
         
         if ( notifications.size() > MAX_SIZE )
         {
@@ -68,6 +68,6 @@ public class InMemoryNotifier
             }
         }
         
-        return list.subList( 0, max );
+        return list;
     }
 }
