@@ -61,7 +61,7 @@ DV.conf = {
 		ajax: {
 			jsonfy: function(r) {
 				r = Ext.JSON.decode(r.responseText);
-				var obj = {system: {rootNode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}, user: {id: r.user.id, isAdmin: r.user.isAdmin}}};
+				var obj = {system: {rootNode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}, user: {id: r.user.id, isAdmin: r.user.isAdmin, organisationUnit: {id: r.user.ou[0], name: r.user.ou[1]}}}};
 				for (var relative in r.p) {
 					obj.system.periods[relative] = [];
 					for (var i = 0; i < r.p[relative].length; i++) {
@@ -218,16 +218,16 @@ Ext.onReady( function() {
         getCmp: function(q) {
             return DV.viewport.query(q)[0];
         },
-        getUrlParam: function(strParam) {            
+        getUrlParam: function(s) {
             var output = '';
-            var strHref = window.location.href;
-            if (strHref.indexOf('?') > -1 ) {
-                var strQueryString = strHref.substr(strHref.indexOf('?'));
-                var aQueryString = strQueryString.split('&');
-                for (var iParam = 0; iParam < aQueryString.length; iParam++) {
-                    if (aQueryString[iParam].indexOf(strParam + '=') > -1) {
-                        var aParam = aQueryString[iParam].split('=');
-                        output = aParam[1];
+            var href = window.location.href;
+            if (href.indexOf('?') > -1 ) {
+                var query = href.substr(href.indexOf('?'));
+                var query = query.split('&');
+                for (var i = 0; i < query.length; i++) {
+                    if (query[i].indexOf(s + '=') > -1) {
+                        var a = query[i].split('=');
+                        output = a[1];
                         break;
                     }
                 }
