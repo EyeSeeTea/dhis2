@@ -41,7 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.completeness.DataSetCompletenessService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.datamart.DataMartService;
+import org.hisp.dhis.datamart.DataMartEngine;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.indicator.Indicator;
@@ -68,7 +68,7 @@ public class DataMartTask
 {
     private static final Log log = LogFactory.getLog( DataMartTask.class );
     
-    private DataMartService dataMartService;
+    private DataMartEngine dataMartEngine;
 
     private DataSetCompletenessService completenessService;
     
@@ -86,6 +86,17 @@ public class DataMartTask
     
     private SystemSettingManager systemSettingManager;
 
+    // -------------------------------------------------------------------------
+    // Params
+    // -------------------------------------------------------------------------
+
+    private List<Period> periods;
+    
+    public void setPeriods( List<Period> periods )
+    {
+        this.periods = periods;
+    }
+
     private boolean last6Months;
 
     public void setLast6Months( boolean last6Months )
@@ -100,16 +111,20 @@ public class DataMartTask
         this.from6To12Months = from6To12Months;
     }
 
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
     public DataMartTask()
     {
     }
     
-    public DataMartTask( DataMartService dataMartService, DataSetCompletenessService completenessService, 
+    public DataMartTask( DataMartEngine dataMartEngine, DataSetCompletenessService completenessService, 
         DataElementService dataElementService, IndicatorService indicatorService, PeriodService periodService,
         OrganisationUnitService organisationUnitService, OrganisationUnitGroupService organisationUnitGroupService,
         DataSetService dataSetService, SystemSettingManager systemSettingManager )
     {
-        this.dataMartService = dataMartService;
+        this.dataMartEngine = dataMartEngine;
         this.completenessService = completenessService;
         this.dataElementService = dataElementService;
         this.indicatorService = indicatorService;
@@ -119,7 +134,11 @@ public class DataMartTask
         this.dataSetService = dataSetService;
         this.systemSettingManager = systemSettingManager;
     }
-    
+
+    // -------------------------------------------------------------------------
+    // Runnable implementation
+    // -------------------------------------------------------------------------
+
     @Override  
     @SuppressWarnings("unchecked")  
     public void run()
@@ -138,27 +157,39 @@ public class DataMartTask
         
         Collection<Integer> periodIds = ConversionUtils.getIdentifiers( Period.class, periodService.reloadPeriods( periods ) );
         
-        dataMartService.export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, organisationUnitGroupIds, null, true );
+        dataMartEngine.export( dataElementIds, indicatorIds, periodIds, organisationUnitIds, organisationUnitGroupIds );
         completenessService.exportDataSetCompleteness( dataSetIds, periodIds, organisationUnitIds ); 
     }
 
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
     /**
-     * Generates periods based on parameters and period types argument.
+     * Generates periods based on parameters and period types argument. Returns
+     * the list of periods with class scope if it has been set and has one or
+     * more periods. Returns a list of relative periods based on the given set
+     * of period types otherwise.
      */
-    private List<Period> getPeriods( Set<String> periodTypes )
+    public List<Period> getPeriods( Set<String> periodTypes )
     {
-        List<Period> periods = new RelativePeriods().getRelativePeriods( periodTypes ).getRelativePeriods( 1 );
+        if ( periods != null && periods.size() > 0 )
+        {
+            return periods;
+        }
+        
+        List<Period> relativePeriods = new RelativePeriods().getRelativePeriods( periodTypes ).getRelativePeriods( 1 );
         
         if ( periodTypes.contains( YearlyPeriodType.NAME ) ) // Add last year
         {
-            periods.addAll( new RelativePeriods().setLastYear( true ).getRelativePeriods( 1 ) );
+            relativePeriods.addAll( new RelativePeriods().setLastYear( true ).getRelativePeriods( 1 ) );
         }
         
-        final Date date = new Cal().now().subtract( Calendar.MONTH, 6 ).time();
+        final Date date = new Cal().now().subtract( Calendar.MONTH, 7 ).time();
         
         if ( last6Months )
         {
-            FilterUtils.filter( periods, new Filter<Period>()
+            FilterUtils.filter( relativePeriods, new Filter<Period>()
             {
                 public boolean retain( Period period )
                 {
@@ -168,7 +199,7 @@ public class DataMartTask
         }
         else if ( from6To12Months )
         {
-            FilterUtils.filter( periods, new Filter<Period>()
+            FilterUtils.filter( relativePeriods, new Filter<Period>()
             {
                 public boolean retain( Period period )
                 {
@@ -177,6 +208,6 @@ public class DataMartTask
             } );
         }
         
-        return periods;
+        return relativePeriods;
     }
 }

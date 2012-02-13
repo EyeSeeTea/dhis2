@@ -156,8 +156,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		</property>
 		<property name="programStageDataElementService"
 			ref="org.hisp.dhis.program.ProgramStageDataElementService" />
-		<property name="categoryService"
-			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
 	</bean>
 	
 	<bean id="org.hisp.dhis.activityplan.ActivityPlanService"
@@ -181,7 +179,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
         <property name="patientService" ref="org.hisp.dhis.patient.PatientService" />     	
         <property name="dataValueService" ref="org.hisp.dhis.patientdatavalue.PatientDataValueService" />
         <property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />     	
-        <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
         <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
         <property name="patientAttributeService" ref="org.hisp.dhis.patient.PatientAttributeService" /> 
         <property name="programStageInstanceService" ref="org.hisp.dhis.program.ProgramStageInstanceService" />      	     	
@@ -233,8 +230,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 			ref="org.hisp.dhis.program.ProgramStageService" />
 		<property name="dataElementService"
 			ref="org.hisp.dhis.dataelement.DataElementService" />
-		<property name="categoryService"
-			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
 		<property name="valueService"
 			ref="org.hisp.dhis.patientdatavalue.PatientDataValueService" />
 	</bean>
@@ -409,6 +404,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 		<property name="runlevel" value="4" />
 		<property name="skipInTests" value="true" />
 		<property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
+		<property name="aggregationConditionService" ref="org.hisp.dhis.caseaggregation.CaseAggregationConditionService" />
+		<property name="programValidationService" ref="org.hisp.dhis.program.ProgramValidationService" />
 	</bean>
 	
 	<bean id="org.hisp.dhis.patient.startup.ProgramAttributePopulator" class="org.hisp.dhis.patient.startup.ProgramAttributePopulator">
