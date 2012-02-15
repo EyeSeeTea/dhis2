@@ -87,6 +87,7 @@ organisation_unit:'$encoder.jsEscape($i18n.getString( 'organisation_unit' ) , "'
 invalid_uid:'$encoder.jsEscape($i18n.getString( 'invalid_uid' ) , "'")',
 system_favorite_overwrite_not_allowed:'$encoder.jsEscape($i18n.getString( 'system_favorite_overwrite_not_allowed' ) , "'")',
 favorite_no_orgunits:'$encoder.jsEscape($i18n.getString( 'favorite_no_orgunits' ) , "'")',
-this_year:'$encoder.jsEscape($i18n.getString( 'this_year' ) , "'")'
+this_year:'$encoder.jsEscape($i18n.getString( 'this_year' ) , "'")',
+trend:'$encoder.jsEscape($i18n.getString( 'trend' ) , "'")'
 
 };

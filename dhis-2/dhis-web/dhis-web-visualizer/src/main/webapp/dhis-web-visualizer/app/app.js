@@ -688,22 +688,27 @@ Ext.onReady( function() {
 							title: title
 						};
 					},
-					getTrendLine: function() {
-						return {
-							type: 'line',
-							axis: 'left',
-							xField: DV.conf.finals.data.domain,
-							yField: DV.conf.finals.data.trendline,
-							style: {
-								opacity: 1,
-								lineWidth: 2
-							},
-							markerConfig: {
-								type: 'circle',
-								radius: 0
-							},
-							title: DV.i18n.trend_line + ' (' + DV.value.trendLine[0] + ' - ' + DV.value.trendLine[DV.value.trendLine.length - 1] + ')'
-						};
+					getTrendLineArray: function() {
+						var a = [];
+						for (var i = 0; i < DV.chart.trendLine.length; i++) {
+							a.push({
+								type: 'line',
+								axis: 'left',
+								xField: DV.conf.finals.data.domain,
+								yField: DV.chart.trendLine[i].key,
+								style: {
+									opacity: 0.8,
+									lineWidth: 3
+								},
+								markerConfig: {
+									type: 'circle',
+									radius: 4
+								},
+								tips: DV.util.chart.default.series.getTips(),
+								title: DV.chart.trendLine[i].name
+							});
+						}
+						return a;
 					}
 				}
 			},
@@ -1051,6 +1056,7 @@ Ext.onReady( function() {
         },
         chart: null,
         getChartStore: function(exe) {
+			console.log(DV.chart.data);
             var keys = [];
             Ext.Array.each(DV.chart.data, function(item) {
 				keys = Ext.Array.merge(keys, Ext.Object.getKeys(item));
@@ -1383,7 +1389,6 @@ Ext.onReady( function() {
                 success: function(r) {
 					var json = DV.util.value.jsonfy(r);
                     DV.value.values = json.values;
-                    DV.value.trendLine = json.trendline;
                     if (!DV.value.values.length) {
                         DV.mask.hide();
                         alert(DV.i18n.no_data);
@@ -1406,8 +1411,7 @@ Ext.onReady( function() {
                     }
                 }
             });
-        },
-        trendLine: []
+        }
     };
     
     DV.chart = {
@@ -1449,17 +1453,31 @@ Ext.onReady( function() {
                     }
                 }
             });
+			
+			if (DV.state.trendLine) {
+				this.trendLine = [];
+				for (var i = 0; i < DV.state.series.names.length; i++) {
+					var s = DV.state.series.names[i],
+						reg = new SimpleRegression();
+					for (var j = 0; j < DV.chart.data.length; j++) {
+						reg.addData(j, DV.chart.data[j][s]);
+					}
+					var key = DV.conf.finals.data.trendline + s;
+					for (var j = 0; j < DV.chart.data.length; j++) {
+						var n = reg.predict(j);
+						DV.chart.data[j][key] = parseFloat(reg.predict(j).toFixed(1));
+					}
+					this.trendLine.push({
+						key: key,
+						name: DV.i18n.trend + ' (' + s + ')'
+					});
+				}
+			}
 
 			if (DV.state.targetLineValue) {
 				Ext.Array.each(DV.chart.data, function(item) {
 					item[DV.conf.finals.data.targetline] = DV.state.targetLineValue;
 				});
-			}			
-
-			if (DV.state.trendLine) {
-				for (var i = 0; i < DV.chart.data.length; i++) {
-					DV.chart.data[i][DV.conf.finals.data.trendline] = DV.value.trendLine[i];
-				}
 			}
             
             if (exe) {
@@ -1468,9 +1486,9 @@ Ext.onReady( function() {
             else {
                 return this.data;
             }
-        },        
+        },
         chart: null,
-        getChart: function(exe) {			
+        getChart: function(exe) {
             this[DV.state.type]();
             if (exe) {
                 this.reload();
@@ -1493,11 +1511,14 @@ Ext.onReady( function() {
 				},
 				tips: DV.util.chart.default.series.getTips()
 			});
+			if (DV.state.trendLine && !stacked) {
+				var a = DV.util.chart.default.series.getTrendLineArray();
+				for (var i = 0; i < a.length; i++) {
+					series.push(a[i]);
+				}
+			}
 			if (DV.state.targetLineValue && !stacked) {
 				series.push(DV.util.chart.default.series.getTargetLine());
-			}
-			if (DV.state.trendLine && !stacked) {
-				series.push(DV.util.chart.default.series.getTrendLine());
 			}
 			
 			var axes = [];
@@ -1524,11 +1545,14 @@ Ext.onReady( function() {
 				},
 				tips: DV.util.chart.default.series.getTips()
 			});
+			if (DV.state.trendLine && !stacked) {
+				var a = DV.util.chart.default.series.getTrendLineArray();
+				for (var i = 0; i < a.length; i++) {
+					series.push(a[i]);
+				}
+			}
 			if (DV.state.targetLineValue && !stacked) {
 				series.push(DV.util.chart.bar.series.getTargetLine());
-			}
-			if (DV.state.trendLine && !stacked) {
-				series.push(DV.util.chart.bar.series.getTrendLine());
 			}
 			
 			var axes = [];
@@ -1547,7 +1571,10 @@ Ext.onReady( function() {
 				series.push(DV.util.chart.default.series.getTargetLine());
 			}
 			if (DV.state.trendLine) {
-				series.push(DV.util.chart.default.series.getTrendLine());
+				var a = DV.util.chart.default.series.getTrendLineArray();
+				for (var i = 0; i < a.length; i++) {
+					series.push(a[i]);
+				}
 			}
 			
 			var axes = [];

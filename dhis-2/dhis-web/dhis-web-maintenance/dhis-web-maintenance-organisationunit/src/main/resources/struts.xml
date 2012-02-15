@@ -24,7 +24,6 @@
         ../dhis-web-commons/ouwt/ouwt.js,
         javascript/organisationUnit.js
       </param>
-      <param name="stylesheets">../dhis-web-commons/paging/paging.css</param>
       <interceptor-ref name="organisationUnitTreeStack" />
     </action>
 
@@ -68,8 +67,7 @@
     </action>
 
     <action name="updateOrganisationUnit" class="org.hisp.dhis.oum.action.organisationunit.UpdateOrganisationUnitAction">
-      <result name="success" type="redirect">organisationUnit.action
-      </result>
+      <result name="success" type="redirect">organisationUnit.action?currentPage=${keyCurrentPage}</result>
       <param name="requiredAuthorities">F_ORGANISATIONUNIT_UPDATE</param>
     </action>
 
@@ -102,7 +100,6 @@
       <param name="page">/dhis-web-maintenance-organisationunit/organisationUnitGroup.vm</param>
       <param name="menu">/dhis-web-maintenance-organisationunit/menu.vm</param>
       <param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/organisationUnitGroup.js</param>
-      <param name="stylesheets">../dhis-web-commons/paging/paging.css</param>
     </action>
 
     <action name="getOrganisationUnitGroup" class="org.hisp.dhis.oum.action.organisationunitgroup.GetOrganisationUnitGroupAction">
@@ -139,8 +136,7 @@
     </action>
 
     <action name="updateOrganisationUnitGroup" class="org.hisp.dhis.oum.action.organisationunitgroup.UpdateOrganisationUnitGroupAction">
-      <result name="success" type="redirect">organisationUnitGroup.action
-      </result>
+      <result name="success" type="redirect">organisationUnitGroup.action?currentPage=${keyCurrentPage}</result>
       <param name="requiredAuthorities">F_ORGUNITGROUP_UPDATE</param>
     </action>
 
@@ -162,7 +158,6 @@
       <param name="page">/dhis-web-maintenance-organisationunit/organisationUnitGroupSet.vm</param>
       <param name="menu">/dhis-web-maintenance-organisationunit/menu.vm</param>
       <param name="javascripts">javascript/organisationUnitGroupSet.js</param>
-      <param name="stylesheets">../dhis-web-commons/paging/paging.css</param>
     </action>
 
     <action name="getOrganisationUnitGroupSet" class="org.hisp.dhis.oum.action.organisationunitgroupset.GetGroupSetAction">
@@ -214,8 +209,7 @@
     </action>
 
     <action name="updateOrganisationUnitGroupSet" class="org.hisp.dhis.oum.action.organisationunitgroupset.UpdateGroupSetAction">
-      <result name="success" type="redirect">organisationUnitGroupSet.action
-      </result>
+      <result name="success" type="redirect">organisationUnitGroupSet.action?currentPage=${keyCurrentPage}</result>
       <param name="requiredAuthorities">F_ORGUNITGROUPSET_UPDATE</param>
     </action>
 

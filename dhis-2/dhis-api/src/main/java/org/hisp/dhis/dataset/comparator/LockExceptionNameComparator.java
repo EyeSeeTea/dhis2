@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataset;
+package org.hisp.dhis.dataset.comparator;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,22 +27,19 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.GenericStore;
-import org.hisp.dhis.period.Period;
+import org.hisp.dhis.dataset.LockException;
 
-import java.util.Collection;
+import java.util.Comparator;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface LockExceptionStore
-    extends GenericStore<LockException>
+public class LockExceptionNameComparator
+    implements Comparator<LockException>
 {
-    String ID = LockExceptionStore.class.getName();
-
-    Collection<LockException> getBetween( int first, int max );
-
-    Collection<LockException> getCombinations();
-
-    void deleteCombination( DataSet dataSet, Period period );
+    @Override
+    public int compare( LockException e, LockException e1 )
+    {
+        return e.getName().compareTo( e1.getName() );
+    }
 }

@@ -143,3 +143,4 @@ function backBtnOnClick()
 	hideById('caseAggregationResult');
 	showById('caseAggregationForm');
 }
+
