@@ -1167,11 +1167,11 @@ Ext.onReady( function() {
             this.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
             this.hideLegend = DV.cmp.favorite.hidelegend.getValue();
             this.trendLine = DV.cmp.favorite.trendline.getValue();
+            this.userOrganisationUnit = DV.cmp.favorite.userorganisationunit.getValue();
             this.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
             this.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
             this.targetLineValue = parseFloat(DV.cmp.favorite.targetlinevalue.getValue());
             this.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
-            this.userOrganisationUnit = DV.cmp.favorite.userorganisationunit.getValue();
             
             this.series.dimension = DV.cmp.settings.series.getValue();
             this.series.names = DV.util.dimension[this.series.dimension].getNames(true);
@@ -1186,6 +1186,12 @@ Ext.onReady( function() {
 				this.resetState();
                 return;
             }
+            
+            if (this.type == DV.conf.finals.chart.line && this.category.names.length < 2) {
+				this.resetState();
+				alert(DV.i18n.line_chart + ': ' + DV.i18n.min_two_categories);
+				return;
+			}
             
             this.indicatorIds = DV.util.dimension.indicator.getIds();
             this.dataelementIds = DV.util.dimension.dataelement.getIds();
@@ -1205,18 +1211,19 @@ Ext.onReady( function() {
             this.getState();
             var obj = {};
             obj.type = this.type.toUpperCase();
-            obj.series = this.series.dimension.toUpperCase();
-            obj.category = this.category.dimension.toUpperCase();
-            obj.filter = this.filter.dimension.toUpperCase();
             
-			obj.trendLine = DV.cmp.favorite.trendline.getValue();
 			obj.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
 			obj.hideLegend = DV.cmp.favorite.hidelegend.getValue();
+			obj.trendLine = DV.cmp.favorite.trendline.getValue();
 			obj.userOrganisationUnit = DV.cmp.favorite.userorganisationunit.getValue();
 			obj.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
 			obj.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
 			obj.targetLineValue = DV.cmp.favorite.targetlinevalue.getValue();
 			obj.targetLineLabel = (obj.targetLineValue && !DV.cmp.favorite.targetlinelabel.isDisabled()) ? DV.cmp.favorite.targetlinelabel.getValue() : null;
+			
+            obj.series = this.series.dimension.toUpperCase();
+            obj.category = this.category.dimension.toUpperCase();
+            obj.filter = this.filter.dimension.toUpperCase();
 			
             obj.indicatorIds = this.indicatorIds;
             obj.dataElementIds = this.dataelementIds;
@@ -1374,27 +1381,6 @@ Ext.onReady( function() {
         getValues: function(exe) {
             DV.util.mask.setMask(DV.cmp.region.center, DV.i18n.loading);
             
-            
-            
-            
-            
-            
-            if (DV.state.userOrganisationUnit) {
-				DV.state[DV.state.series.dimension] = {};
-				DV.state[DV.state.series.dimension].dimension = DV.conf.finals.chart.series;
-				DV.state[DV.state.category.dimension] = {};
-				DV.state[DV.state.category.dimension].dimension = DV.conf.finals.chart.category;
-				DV.state[DV.state.filter.dimension] = {};
-				DV.state[DV.state.filter.dimension].dimension = DV.conf.finals.chart.filter;
-				
-				DV.state[DV.state[DV.conf.finals.dimension.organisationunit.value].dimension].names = [DV.init.system.user.organisationUnit.name];
-				DV.state.organisationUnitIds = [DV.init.system.user.organisationUnit.id];
-			}
-            
-            
-            
-            
-            
             var params = [];
             params = params.concat(DV.util.dimension[DV.state.series.dimension].getUrl());
             params = params.concat(DV.util.dimension[DV.state.category.dimension].getUrl());
@@ -1440,18 +1426,6 @@ Ext.onReady( function() {
         getData: function(exe) {
             this.data = [];
             
-            //if (DV.state.userOrganisationUnit) {
-				//DV.state[DV.state.series.dimension] = {};
-				//DV.state[DV.state.series.dimension].dimension = DV.conf.finals.chart.series;
-				//DV.state[DV.state.category.dimension] = {};
-				//DV.state[DV.state.category.dimension].dimension = DV.conf.finals.chart.category;
-				//DV.state[DV.state.filter.dimension] = {};
-				//DV.state[DV.state.filter.dimension].dimension = DV.conf.finals.chart.filter;
-				
-				//DV.state[DV.state[DV.conf.finals.dimension.organisationunit.value].dimension].names = [DV.init.system.user.organisationUnit.name];
-				//DV.state.organisationUnitIds = [DV.init.system.user.organisationUnit.id];
-			//}
-            
             Ext.Array.each(DV.state.category.names, function(item) {
                 var obj = {};
                 obj[DV.conf.finals.data.domain] = item;
@@ -1476,22 +1450,28 @@ Ext.onReady( function() {
             });
 			
 			if (DV.state.trendLine) {
-				this.trendLine = [];
-				for (var i = 0; i < DV.state.series.names.length; i++) {
-					var s = DV.state.series.names[i],
-						reg = new SimpleRegression();
-					for (var j = 0; j < DV.chart.data.length; j++) {
-						reg.addData(j, DV.chart.data[j][s]);
+				if (DV.state.category.names.length < 2) {
+					DV.state.trendLine = false;
+					alert(DV.i18n.trend_line + ': ' + DV.i18n.min_two_categories);
+				}
+				else {
+					this.trendLine = [];
+					for (var i = 0; i < DV.state.series.names.length; i++) {
+						var s = DV.state.series.names[i],
+							reg = new SimpleRegression();
+						for (var j = 0; j < DV.chart.data.length; j++) {
+							reg.addData(j, DV.chart.data[j][s]);
+						}
+						var key = DV.conf.finals.data.trendline + s;
+						for (var j = 0; j < DV.chart.data.length; j++) {
+							var n = reg.predict(j);
+							DV.chart.data[j][key] = parseFloat(reg.predict(j).toFixed(1));
+						}
+						this.trendLine.push({
+							key: key,
+							name: DV.i18n.trend + ' (' + s + ')'
+						});
 					}
-					var key = DV.conf.finals.data.trendline + s;
-					for (var j = 0; j < DV.chart.data.length; j++) {
-						var n = reg.predict(j);
-						DV.chart.data[j][key] = parseFloat(reg.predict(j).toFixed(1));
-					}
-					this.trendLine.push({
-						key: key,
-						name: DV.i18n.trend + ' (' + s + ')'
-					});
 				}
 			}
 
