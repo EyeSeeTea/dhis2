@@ -414,7 +414,7 @@ Ext.onReady( function() {
                     });
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
-                getNames: function(exception) {
+                getNames: function(exception, isFilter) {
                     var a = [];
                     DV.cmp.dimension.indicator.selected.store.each( function(r) {
                         a.push(DV.util.string.getEncodedString(r.data.s));
@@ -427,7 +427,7 @@ Ext.onReady( function() {
                     if (exception && !a.length) {
                         alert(DV.i18n.alert_no_indicators_selected);
                     }
-                    return a;
+                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 }                    
             },
             period: {
@@ -442,7 +442,7 @@ Ext.onReady( function() {
                     }
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
-                getNames: function(exception) {
+                getNames: function(exception, isFilter) {
                     var a = [],
                         cmp = DV.cmp.dimension.period;
                     Ext.Array.each(cmp, function(item) {
@@ -455,7 +455,7 @@ Ext.onReady( function() {
                     if (exception && !a.length) {
                         alert(DV.i18n.no_periods_selected);
                     }
-                    return a;
+                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
                 getNamesByRelativePeriodsObject: function(rp) {
                     var relatives = [],
@@ -518,7 +518,7 @@ Ext.onReady( function() {
 					});
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
-                getNames: function(exception) {
+                getNames: function(exception, isFilter) {
                     var a = [],
                         tp = DV.cmp.dimension.organisationunit.treepanel,
                         selection = tp.getSelectionModel().getSelection();
@@ -532,7 +532,7 @@ Ext.onReady( function() {
 					if (exception && !a.length) {
 						alert(DV.i18n.no_orgunits_selected);
 					}
-                    return a;
+                    return DV.state.userOrganisationUnit ? [DV.init.system.user.organisationUnit.name] : (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
                 getIds: function(exception) {
                     var a = [],
@@ -548,7 +548,7 @@ Ext.onReady( function() {
 					if (exception && !a.length) {
 						alert(DV.i18n.no_orgunits_selected);
 					}
-                    return a;
+                    return DV.state.userOrganisationUnit ? [DV.init.system.user.organisationUnit.id] : a;
                 }                    
             }
         },
@@ -1056,7 +1056,6 @@ Ext.onReady( function() {
         },
         chart: null,
         getChartStore: function(exe) {
-			console.log(DV.chart.data);
             var keys = [];
             Ext.Array.each(DV.chart.data, function(item) {
 				keys = Ext.Array.merge(keys, Ext.Object.getKeys(item));
@@ -1165,20 +1164,6 @@ Ext.onReady( function() {
             
             this.type = DV.util.button.type.getValue();
             
-            this.series.dimension = DV.cmp.settings.series.getValue();
-            this.series.names = DV.util.dimension[this.series.dimension].getNames(true);
-            
-            this.category.dimension = DV.cmp.settings.category.getValue();
-            this.category.names = DV.util.dimension[this.category.dimension].getNames(true);
-            
-            this.filter.dimension = DV.cmp.settings.filter.getValue();
-            this.filter.names = DV.util.dimension[this.filter.dimension].getNames(true).slice(0,1);
-            
-            if (!this.series.names.length || !this.category.names.length || !this.filter.names.length) {
-				this.resetState();
-                return;
-            }
-            
             this.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
             this.hideLegend = DV.cmp.favorite.hidelegend.getValue();
             this.trendLine = DV.cmp.favorite.trendline.getValue();
@@ -1187,6 +1172,20 @@ Ext.onReady( function() {
             this.targetLineValue = parseFloat(DV.cmp.favorite.targetlinevalue.getValue());
             this.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
             this.userOrganisationUnit = DV.cmp.favorite.userorganisationunit.getValue();
+            
+            this.series.dimension = DV.cmp.settings.series.getValue();
+            this.series.names = DV.util.dimension[this.series.dimension].getNames(true);
+            
+            this.category.dimension = DV.cmp.settings.category.getValue();
+            this.category.names = DV.util.dimension[this.category.dimension].getNames(true);
+            
+            this.filter.dimension = DV.cmp.settings.filter.getValue();
+            this.filter.names = DV.util.dimension[this.filter.dimension].getNames(true, true);
+            
+            if (!this.series.names.length || !this.category.names.length || !this.filter.names.length) {
+				this.resetState();
+                return;
+            }
             
             this.indicatorIds = DV.util.dimension.indicator.getIds();
             this.dataelementIds = DV.util.dimension.dataelement.getIds();
@@ -1262,6 +1261,25 @@ Ext.onReady( function() {
                         this.type = f.type;
                         DV.util.button.type.setValue(this.type);
                         
+                        this.trendLine = f.regression;
+                        DV.cmp.favorite.trendline.setValue(f.regression);
+                        this.hideSubtitle = f.hideSubtitle;
+                        DV.cmp.favorite.hidesubtitle.setValue(f.hideSubtitle);
+                        this.hideLegend = f.hideLegend;
+                        DV.cmp.favorite.hidelegend.setValue(f.hideLegend);
+                        DV.cmp.favorite.userorganisationunit.setValue(f.userOrganisationUnit);
+                        this.domainAxisLabel = f.domainAxisLabel;
+                        DV.cmp.favorite.domainaxislabel.setValue(f.domainAxisLabel);
+                        this.rangeAxisLabel = f.rangeAxisLabel;
+                        DV.cmp.favorite.rangeaxislabel.setValue(f.rangeAxisLabel);
+                        this.targetLineValue = f.targetLineValue ? parseFloat(f.targetLineValue) : null;
+                        DV.cmp.favorite.targetlinevalue.setValue(f.targetLineValue);
+                        DV.cmp.favorite.targetlinelabel.xable();
+                        this.targetLineLabel = f.targetLineLabel ? f.targetLineLabel : null;
+                        DV.cmp.favorite.targetlinelabel.setValue(f.targetLineLabel);
+                        this.userOrganisationUnit = f.userOrganisationUnit;
+                        DV.cmp.favorite.userorganisationunit.setValue(f.userOrganisationUnit);
+                        
                         this.series.dimension = f.series;
                         DV.cmp.settings.series.setValue(DV.conf.finals.dimension[this.series.dimension].value);
                         DV.util.combobox.filter.category();
@@ -1315,25 +1333,6 @@ Ext.onReady( function() {
                         this.series.names = f.names[this.series.dimension];
                         this.category.names = f.names[this.category.dimension];
                         this.filter.names = f.names[this.filter.dimension];
-                        
-                        this.trendLine = f.regression;
-                        DV.cmp.favorite.trendline.setValue(f.regression);
-                        this.hideSubtitle = f.hideSubtitle;
-                        DV.cmp.favorite.hidesubtitle.setValue(f.hideSubtitle);
-                        this.hideLegend = f.hideLegend;
-                        DV.cmp.favorite.hidelegend.setValue(f.hideLegend);
-                        DV.cmp.favorite.userorganisationunit.setValue(f.userOrganisationUnit);
-                        this.domainAxisLabel = f.domainAxisLabel;
-                        DV.cmp.favorite.domainaxislabel.setValue(f.domainAxisLabel);
-                        this.rangeAxisLabel = f.rangeAxisLabel;
-                        DV.cmp.favorite.rangeaxislabel.setValue(f.rangeAxisLabel);
-                        this.targetLineValue = f.targetLineValue ? parseFloat(f.targetLineValue) : null;
-                        DV.cmp.favorite.targetlinevalue.setValue(f.targetLineValue);
-                        DV.cmp.favorite.targetlinelabel.xable();
-                        this.targetLineLabel = f.targetLineLabel ? f.targetLineLabel : null;
-                        DV.cmp.favorite.targetlinelabel.setValue(f.targetLineLabel);
-                        this.userOrganisationUnit = f.userOrganisationUnit;
-                        DV.cmp.favorite.userorganisationunit.setValue(f.userOrganisationUnit);                        
                                     
                         if (!this.isRendered) {
                             DV.cmp.toolbar.datatable.enable();
@@ -1374,6 +1373,28 @@ Ext.onReady( function() {
         values: [],
         getValues: function(exe) {
             DV.util.mask.setMask(DV.cmp.region.center, DV.i18n.loading);
+            
+            
+            
+            
+            
+            
+            if (DV.state.userOrganisationUnit) {
+				DV.state[DV.state.series.dimension] = {};
+				DV.state[DV.state.series.dimension].dimension = DV.conf.finals.chart.series;
+				DV.state[DV.state.category.dimension] = {};
+				DV.state[DV.state.category.dimension].dimension = DV.conf.finals.chart.category;
+				DV.state[DV.state.filter.dimension] = {};
+				DV.state[DV.state.filter.dimension].dimension = DV.conf.finals.chart.filter;
+				
+				DV.state[DV.state[DV.conf.finals.dimension.organisationunit.value].dimension].names = [DV.init.system.user.organisationUnit.name];
+				DV.state.organisationUnitIds = [DV.init.system.user.organisationUnit.id];
+			}
+            
+            
+            
+            
+            
             var params = [];
             params = params.concat(DV.util.dimension[DV.state.series.dimension].getUrl());
             params = params.concat(DV.util.dimension[DV.state.category.dimension].getUrl());
@@ -1419,17 +1440,17 @@ Ext.onReady( function() {
         getData: function(exe) {
             this.data = [];
             
-            if (DV.state.userOrganisationUnit) {
-				DV.state[DV.state.series.dimension] = {};
-				DV.state[DV.state.series.dimension].dimension = DV.conf.finals.chart.series;
-				DV.state[DV.state.category.dimension] = {};
-				DV.state[DV.state.category.dimension].dimension = DV.conf.finals.chart.category;
-				DV.state[DV.state.filter.dimension] = {};
-				DV.state[DV.state.filter.dimension].dimension = DV.conf.finals.chart.filter;
+            //if (DV.state.userOrganisationUnit) {
+				//DV.state[DV.state.series.dimension] = {};
+				//DV.state[DV.state.series.dimension].dimension = DV.conf.finals.chart.series;
+				//DV.state[DV.state.category.dimension] = {};
+				//DV.state[DV.state.category.dimension].dimension = DV.conf.finals.chart.category;
+				//DV.state[DV.state.filter.dimension] = {};
+				//DV.state[DV.state.filter.dimension].dimension = DV.conf.finals.chart.filter;
 				
-				DV.state[DV.state[DV.conf.finals.dimension.organisationunit.value].dimension].names = [DV.init.system.user.organisationUnit.name];
-				DV.state.organisationUnitIds = [DV.init.system.user.organisationUnit.id];
-			}
+				//DV.state[DV.state[DV.conf.finals.dimension.organisationunit.value].dimension].names = [DV.init.system.user.organisationUnit.name];
+				//DV.state.organisationUnitIds = [DV.init.system.user.organisationUnit.id];
+			//}
             
             Ext.Array.each(DV.state.category.names, function(item) {
                 var obj = {};
