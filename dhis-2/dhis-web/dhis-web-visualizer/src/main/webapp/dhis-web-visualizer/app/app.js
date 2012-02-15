@@ -1191,6 +1191,11 @@ Ext.onReady( function() {
 				this.resetState();
 				alert(DV.i18n.line_chart + ': ' + DV.i18n.min_two_categories);
 				return;
+			}            
+            if (this.type == DV.conf.finals.chart.area && this.category.names.length < 2) {
+				this.resetState();
+				alert(DV.i18n.area_chart + ': ' + DV.i18n.min_two_categories);
+				return;
 			}
             
             this.indicatorIds = DV.util.dimension.indicator.getIds();
@@ -2412,7 +2417,7 @@ Ext.onReady( function() {
                                     {
                                         xtype: 'treepanel',
                                         cls: 'dv-tree',
-                                        height: 300,
+                                        height: 260,
                                         width: DV.conf.layout.west_fieldset_width - 22,
                                         autoScroll: true,
                                         multiSelect: true,
@@ -2494,177 +2499,167 @@ Ext.onReady( function() {
                                         }
                                     }
                                 }
-                            },
-                            {
-                                xtype: 'fieldset',
-                                cls: 'dv-fieldset',
-                                name: 'options',
-                                title: '<a href="javascript:DV.util.fieldset.toggleOptions();" class="dv-fieldset-title-link-alt1">' + DV.i18n.chart_options +'</a>',
-                                collapsed: true,
-                                collapsible: true,
-                                items: [
-                                    {
-                                        html: '* ' + DV.i18n.png_only,
-                                        bodyStyle: 'border:0 none; color:#555; font-style:italic; padding-bottom:10px'
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        layout: 'column',
-                                        bodyStyle: 'border-style:none; padding-bottom:10px',
-                                        items: [
-                                            {
-                                                xtype: 'checkbox',
-                                                cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:20px',
-                                                boxLabel: DV.i18n.hide_subtitle,
-                                                labelWidth: DV.conf.layout.form_label_width,
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.favorite.hidesubtitle = this;
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:20px',
-                                                boxLabel: DV.i18n.hide_legend,
-                                                labelWidth: DV.conf.layout.form_label_width,
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.favorite.hidelegend = this;
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                cls: 'dv-checkbox-alt1',
-                                                style: 'margin-right:21px',
-                                                boxLabel: '<span style="color:#555">* ' + DV.i18n.trend_line + '</span>',
-                                                labelWidth: DV.conf.layout.form_label_width,
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.favorite.trendline = this;
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                xtype: 'checkbox',
-                                                cls: 'dv-checkbox-alt1',
-                                                boxLabel: '<span style="color:#555">* ' + DV.i18n.user_orgunit + '</span>',
-                                                labelWidth: DV.conf.layout.form_label_width,
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.favorite.userorganisationunit = this;
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        layout: 'column',
-                                        bodyStyle: 'border:0 none; padding-bottom:8px',
-                                        items: [
-                                            {
-                                                xtype: 'textfield',
-                                                cls: 'dv-textfield-alt1',
-                                                style: 'margin-right:4px',
-                                                fieldLabel: DV.i18n.domain_axis_label,
-                                                labelAlign: 'top',
-                                                labelSeparator: '',
-                                                maxLength: 100,
-                                                enforceMaxLength: true,
-                                                labelWidth: DV.conf.layout.form_label_width,
-                                                width: 188,
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.favorite.domainaxislabel = this;
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                xtype: 'textfield',
-                                                cls: 'dv-textfield-alt1',
-                                                fieldLabel: DV.i18n.range_axis_label,
-                                                labelAlign: 'top',
-                                                labelSeparator: '',
-                                                maxLength: 100,
-                                                enforceMaxLength: true,
-                                                labelWidth: DV.conf.layout.form_label_width,
-                                                width: 187,
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.favorite.rangeaxislabel = this;
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        layout: 'column',
-                                        bodyStyle: 'border:0 none',
-                                        items: [
-                                            {
-                                                xtype: 'numberfield',
-                                                cls: 'dv-textfield-alt1',
-                                                style: 'margin-right:4px',
-                                                hideTrigger: true,
-                                                fieldLabel: DV.i18n.target_line_value,
-                                                labelAlign: 'top',
-                                                labelSeparator: '',
-                                                maxLength: 100,
-                                                enforceMaxLength: true,
-                                                width: 188,
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.favorite.targetlinevalue = this;
-                                                    },
-                                                    change: function() {
-                                                        DV.cmp.favorite.targetlinelabel.xable();
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                xtype: 'textfield',
-                                                cls: 'dv-textfield-alt1',
-                                                fieldLabel: DV.i18n.target_line_label,
-                                                labelAlign: 'top',
-                                                labelSeparator: '',
-                                                maxLength: 100,
-                                                enforceMaxLength: true,
-                                                width: 187,
-                                                disabled: true,
-                                                xable: function() {
-                                                    if (DV.cmp.favorite.targetlinevalue.getValue()) {
-                                                        this.enable();
-                                                    }
-                                                    else {
-                                                        this.disable();
-                                                    }
-                                                },
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.favorite.targetlinelabel = this;
-                                                    }
-                                                }
-                                            }
-                                        ]
-                                    }
-                                ],
-                                listeners: {
-                                    afterrender: function() {
-                                        DV.cmp.fieldset.options = this;
-                                    },
-                                    expand: function() {
-                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit]);
-                                    }
-                                }
                             }
                         ]
                     }
                 ],
+                bbar: {
+					xtype: 'toolbar',
+					id: 'chartoptions_tb',
+					items: [
+						{
+							xtype: 'panel',
+							bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+							items: [
+								{
+									xtype: 'panel',
+									layout: 'column',
+									bodyStyle: 'border-style:none; background-color:transparent; padding-bottom:15px',
+									items: [
+										{
+											xtype: 'checkbox',
+											cls: 'dv-checkbox-alt1',
+											style: 'margin-right:20px',
+											boxLabel: DV.i18n.hide_subtitle,
+											labelWidth: DV.conf.layout.form_label_width,
+											listeners: {
+												added: function() {
+													DV.cmp.favorite.hidesubtitle = this;
+												}
+											}
+										},
+										{
+											xtype: 'checkbox',
+											cls: 'dv-checkbox-alt1',
+											style: 'margin-right:20px',
+											boxLabel: DV.i18n.hide_legend,
+											labelWidth: DV.conf.layout.form_label_width,
+											listeners: {
+												added: function() {
+													DV.cmp.favorite.hidelegend = this;
+												}
+											}
+										},
+										{
+											xtype: 'checkbox',
+											cls: 'dv-checkbox-alt1',
+											style: 'margin-right:21px',
+											boxLabel: DV.i18n.trend_line,
+											labelWidth: DV.conf.layout.form_label_width,
+											listeners: {
+												added: function() {
+													DV.cmp.favorite.trendline = this;
+												}
+											}
+										},
+										{
+											xtype: 'checkbox',
+											cls: 'dv-checkbox-alt1',
+											boxLabel: DV.i18n.user_orgunit,
+											labelWidth: DV.conf.layout.form_label_width,
+											listeners: {
+												added: function() {
+													DV.cmp.favorite.userorganisationunit = this;
+												}
+											}
+										}
+									]
+								},
+								{
+									xtype: 'panel',
+									layout: 'column',
+									bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:8px',
+									items: [
+										{
+											xtype: 'textfield',
+											cls: 'dv-textfield-alt1',
+											style: 'margin-right:4px',
+											fieldLabel: DV.i18n.domain_axis_label,
+											labelAlign: 'top',
+											labelSeparator: '',
+											maxLength: 100,
+											enforceMaxLength: true,
+											labelWidth: DV.conf.layout.form_label_width,
+											width: 188,
+											listeners: {
+												added: function() {
+													DV.cmp.favorite.domainaxislabel = this;
+												}
+											}
+										},
+										{
+											xtype: 'textfield',
+											cls: 'dv-textfield-alt1',
+											fieldLabel: DV.i18n.range_axis_label,
+											labelAlign: 'top',
+											labelSeparator: '',
+											maxLength: 100,
+											enforceMaxLength: true,
+											labelWidth: DV.conf.layout.form_label_width,
+											width: 187,
+											listeners: {
+												added: function() {
+													DV.cmp.favorite.rangeaxislabel = this;
+												}
+											}
+										}
+									]
+								},
+								{
+									xtype: 'panel',
+									layout: 'column',
+									bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:5px',
+									items: [
+										{
+											xtype: 'numberfield',
+											cls: 'dv-textfield-alt1',
+											style: 'margin-right:4px',
+											hideTrigger: true,
+											fieldLabel: DV.i18n.target_line_value,
+											labelAlign: 'top',
+											labelSeparator: '',
+											maxLength: 100,
+											enforceMaxLength: true,
+											width: 188,
+											listeners: {
+												added: function() {
+													DV.cmp.favorite.targetlinevalue = this;
+												},
+												change: function() {
+													DV.cmp.favorite.targetlinelabel.xable();
+												}
+											}
+										},
+										{
+											xtype: 'textfield',
+											cls: 'dv-textfield-alt1',
+											fieldLabel: DV.i18n.target_line_label,
+											labelAlign: 'top',
+											labelSeparator: '',
+											maxLength: 100,
+											enforceMaxLength: true,
+											width: 187,
+											disabled: true,
+											xable: function() {
+												if (DV.cmp.favorite.targetlinevalue.getValue()) {
+													this.enable();
+												}
+												else {
+													this.disable();
+												}
+											},
+											listeners: {
+												added: function() {
+													DV.cmp.favorite.targetlinelabel = this;
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					]
+				},				
                 listeners: {
                     afterrender: function() {
                         DV.cmp.region.west = this;

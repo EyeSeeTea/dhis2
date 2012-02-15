@@ -6,7 +6,7 @@ stacked_column_chart: '$encoder.jsEscape($i18n.getString( 'stacked_column_chart'
 bar_chart:'$encoder.jsEscape($i18n.getString( 'bar_chart' ) , "'")',
 stacked_bar_chart: '$encoder.jsEscape($i18n.getString( 'stacked_bar_chart' ) , "'")',
 line_chart:'$encoder.jsEscape($i18n.getString( 'line_chart' ) , "'")',
-area_chart:'$encoder.jsEscape($i18n.getString( 'line_chart' ) , "'")',
+area_chart:'$encoder.jsEscape($i18n.getString( 'area_chart' ) , "'")',
 pie_chart:'$encoder.jsEscape($i18n.getString( 'pie_chart' ) , "'")',
 series: '$encoder.jsEscape($i18n.getString( 'series' ) , "'")' ,
 category:'$encoder.jsEscape($i18n.getString( 'category' ) , "'")',

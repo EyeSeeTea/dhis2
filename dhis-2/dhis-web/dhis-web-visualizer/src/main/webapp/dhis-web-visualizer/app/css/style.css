@@ -382,6 +382,13 @@ body {
     border-top: 1px dashed #ccc;
 }
 
+#chartoptions_tb {
+    padding: 5px 0 0 8px;
+    border-style: none;
+    border-right: 1px solid #ccc;
+    border-bottom: 2px solid #ccc;
+}
+
 /* Toolbar favorites */
 #favorite_t {
     border-bottom-width: 1px !important;
