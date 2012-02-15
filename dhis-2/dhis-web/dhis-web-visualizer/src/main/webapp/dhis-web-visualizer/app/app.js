@@ -980,7 +980,7 @@ Ext.onReady( function() {
             }
         },
         favorite: {
-            validate: function(f) {
+            validate: function(f) {				
                 if (!f.organisationUnits || !f.organisationUnits.length) {
                     alert(DV.i18n.favorite_no_orgunits);
                     return false;
@@ -1211,7 +1211,7 @@ Ext.onReady( function() {
 			obj.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
 			obj.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
 			obj.targetLineValue = DV.cmp.favorite.targetlinevalue.getValue();
-			obj.targetLineLabel = (params.targetLineValue && !DV.cmp.favorite.targetlinelabel.isDisabled()) ? DV.cmp.favorite.targetlinelabel.getValue() : null;
+			obj.targetLineLabel = (obj.targetLineValue && !DV.cmp.favorite.targetlinelabel.isDisabled()) ? DV.cmp.favorite.targetlinelabel.getValue() : null;
 			
             obj.indicatorIds = this.indicatorIds;
             obj.dataElementIds = this.dataelementIds;
@@ -1228,10 +1228,13 @@ Ext.onReady( function() {
                     scope: this,
                     success: function(r) {
                         if (!r.responseText) {
-                            DV.mask.hide();
+							if (DV.mask) {
+								DV.mask.hide();
+							}
                             alert(DV.i18n.invalid_uid);
                             return;
                         }
+						
                         var f = Ext.JSON.decode(r.responseText),
                             indiment = [];
                             
@@ -1365,10 +1368,7 @@ Ext.onReady( function() {
         values: [],
         getValues: function(exe) {
             DV.util.mask.setMask(DV.cmp.region.center, DV.i18n.loading);
-            var params = [],
-                i = DV.conf.finals.dimension.indicator.value,
-                d = DV.conf.finals.dimension.dataelement.value;
-                
+            var params = [];
             params = params.concat(DV.util.dimension[DV.state.series.dimension].getUrl());
             params = params.concat(DV.util.dimension[DV.state.category.dimension].getUrl());
             params = params.concat(DV.util.dimension[DV.state.filter.dimension].getUrl(true));
@@ -1390,7 +1390,7 @@ Ext.onReady( function() {
                         return;
                     }
                     
-                    var storage = Ext.Object.merge(DV.store[i].available.storage, DV.store[d].available.storage);
+                    var storage = Ext.Object.merge(DV.store[DV.conf.finals.dimension.indicator.value].available.storage, DV.store[DV.conf.finals.dimension.dataelement.value].available.storage);
                     Ext.Array.each(DV.value.values, function(item) {
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(storage[item.d].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.p));
@@ -1415,19 +1415,17 @@ Ext.onReady( function() {
         getData: function(exe) {
             this.data = [];
             
-            DV.state[DV.state.series.dimension] = {};
-            DV.state[DV.state.series.dimension].dimension = DV.conf.finals.chart.series;
-            DV.state[DV.state.category.dimension] = {};
-            DV.state[DV.state.category.dimension].dimension = DV.conf.finals.chart.category;
-            DV.state[DV.state.filter.dimension] = {};
-            DV.state[DV.state.filter.dimension].dimension = DV.conf.finals.chart.filter;
-            
             if (DV.state.userOrganisationUnit) {
-				DV.state[DV.conf.finals.dimension.organisationunit.value]
-            
-            alert(DV.state.organisationunit.dimension);
-            
-            //console.log(DV.state);return;
+				DV.state[DV.state.series.dimension] = {};
+				DV.state[DV.state.series.dimension].dimension = DV.conf.finals.chart.series;
+				DV.state[DV.state.category.dimension] = {};
+				DV.state[DV.state.category.dimension].dimension = DV.conf.finals.chart.category;
+				DV.state[DV.state.filter.dimension] = {};
+				DV.state[DV.state.filter.dimension].dimension = DV.conf.finals.chart.filter;
+				
+				DV.state[DV.state[DV.conf.finals.dimension.organisationunit.value].dimension].names = [DV.init.system.user.organisationUnit.name];
+				DV.state.organisationUnitIds = [DV.init.system.user.organisationUnit.id];
+			}
             
             Ext.Array.each(DV.state.category.names, function(item) {
                 var obj = {};
