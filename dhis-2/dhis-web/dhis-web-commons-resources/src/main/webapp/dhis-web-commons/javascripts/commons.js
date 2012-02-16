@@ -1258,6 +1258,11 @@ function showWarningMessage( message, time )
 	jQuery.growlUI( i18n_warning, message, 'warning', time ); 	
 }
 
+function showWaitMessage( message, time )
+{
+	jQuery.growlUI( i18n_waiting, message, 'waiting', time );
+}
+
 function markInvalid( elementId, message )
 {	
 	var element = jQuery("#" + elementId );
@@ -1514,12 +1519,35 @@ function roundTo( number, decimals )
 // Paging
 // -----------------------------------------------------------------------------
 
+
+isAjax = false;
 function pagingList( currentPage, pageSize )
 {
 	var baseLink = jQuery( "#baseLink" ).val();	
 	var url = baseLink + "currentPage=" + currentPage + "&pageSize=" + pageSize;
 	
-	window.location.href = url;
+	if ( isAjax == false )
+	{
+		window.location.href = url;
+	}
+	else
+	{
+		var index = url.indexOf( '?' );
+		var link = url.substring( 0, index );
+		var data = url.substring( index + 1 );
+		
+		jQuery.postUTF8( link , data, function(html)
+		{
+			if ( contentDiv == undefined )
+			{
+				setInnerHTML( 'contentDiv', html );
+			}
+			else
+			{
+				setInnerHTML( contentDiv, html );
+			}
+		} );
+	}
 }
 
 function changePageSize( event )

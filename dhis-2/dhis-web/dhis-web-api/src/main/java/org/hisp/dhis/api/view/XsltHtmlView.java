@@ -65,9 +65,10 @@ public class XsltHtmlView extends AbstractUrlBasedView
         if ( domainModel == null )
         {
             // TODO throw exception
+            return;
         }
 
-        Marshaller marshaller = Jaxb2Utils.createMarshaller( domainModel, request );
+        Marshaller marshaller = Jaxb2Utils.createMarshaller( domainModel );
 
         Source xmlSource = new JAXBSource( marshaller, domainModel );
 

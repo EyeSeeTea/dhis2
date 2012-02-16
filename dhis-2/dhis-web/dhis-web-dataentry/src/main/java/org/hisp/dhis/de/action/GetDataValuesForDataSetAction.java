@@ -30,8 +30,6 @@ package org.hisp.dhis.de.action;
 import java.util.Collection;
 import java.util.Date;
 
-import org.hisp.dhis.datalock.DataSetLock;
-import org.hisp.dhis.datalock.DataSetLockService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
@@ -63,7 +61,7 @@ public class GetDataValuesForDataSetAction
     {
         this.dataValueService = dataValueService;
     }
-    
+
     private MinMaxDataElementService minMaxDataElementService;
 
     public void setMinMaxDataElementService( MinMaxDataElementService minMaxDataElementService )
@@ -72,7 +70,7 @@ public class GetDataValuesForDataSetAction
     }
 
     private DataSetService dataSetService;
-    
+
     public void setDataSetService( DataSetService dataSetService )
     {
         this.dataSetService = dataSetService;
@@ -83,13 +81,6 @@ public class GetDataValuesForDataSetAction
     public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
     {
         this.registrationService = registrationService;
-    }
-
-    private DataSetLockService dataSetLockService;
-
-    public void setDataSetLockService( DataSetLockService dataSetLockService )
-    {
-        this.dataSetLockService = dataSetLockService;
     }
     
     private OrganisationUnitService organisationUnitService;
@@ -109,14 +100,14 @@ public class GetDataValuesForDataSetAction
     {
         this.periodId = periodId;
     }
-    
+
     private Integer dataSetId;
 
     public void setDataSetId( Integer dataSetId )
     {
         this.dataSetId = dataSetId;
     }
-    
+
     private Integer organisationUnitId;
 
     public void setOrganisationUnitId( Integer organisationUnitId )
@@ -134,7 +125,7 @@ public class GetDataValuesForDataSetAction
     {
         return dataValues;
     }
-    
+
     private Collection<MinMaxDataElement> minMaxDataElements;
 
     public Collection<MinMaxDataElement> getMinMaxDataElements()
@@ -155,9 +146,9 @@ public class GetDataValuesForDataSetAction
     {
         return complete;
     }
-    
+
     private Date date;
-    
+
     public Date getDate()
     {
         return date;
@@ -176,43 +167,29 @@ public class GetDataValuesForDataSetAction
 
     public String execute()
     {
-        Period period = PeriodType.createPeriodExternalId( periodId );
+        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
         DataSet dataSet = dataSetService.getDataSet( dataSetId );
-        OrganisationUnit unit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+        Period period = PeriodType.createPeriodExternalId( periodId );
 
         // ---------------------------------------------------------------------
         // Data values
         // ---------------------------------------------------------------------
 
-        dataValues = dataValueService.getDataValues( unit, period, dataSet.getDataElements() );
+        dataValues = dataValueService.getDataValues( organisationUnit, period, dataSet.getDataElements() );
 
         // ---------------------------------------------------------------------
         // Min-max data elements
         // ---------------------------------------------------------------------
 
-        minMaxDataElements = minMaxDataElementService.getMinMaxDataElements( unit, dataSet.getDataElements() );
-
-        // ---------------------------------------------------------------------
-        // Data locking info
-        // ---------------------------------------------------------------------
-
-        if ( dataSet != null && period != null )
-        {
-            DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
-
-            if ( dataSetLock != null && dataSetLock.getSources().contains( unit ) )
-            {
-                locked = true;
-            }
-        }
+        minMaxDataElements = minMaxDataElementService.getMinMaxDataElements( organisationUnit, dataSet.getDataElements() );
 
         // ---------------------------------------------------------------------
         // Data set completeness info
         // ---------------------------------------------------------------------
 
-        if ( dataSet != null && period != null && unit != null )
+        if ( dataSet != null && period != null && organisationUnit != null )
         {
-            CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period, unit );
+            CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit );
 
             if ( registration != null )
             {

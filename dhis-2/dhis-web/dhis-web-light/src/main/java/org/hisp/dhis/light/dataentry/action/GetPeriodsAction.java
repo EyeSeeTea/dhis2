@@ -28,8 +28,6 @@ package org.hisp.dhis.light.dataentry.action;
 
 import com.opensymphony.xwork2.Action;
 import org.apache.commons.lang.Validate;
-import org.hisp.dhis.datalock.DataSetLock;
-import org.hisp.dhis.datalock.DataSetLockService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
@@ -67,13 +65,6 @@ public class GetPeriodsAction
     public void setDataSetService( DataSetService dataSetService )
     {
         this.dataSetService = dataSetService;
-    }
-
-    private DataSetLockService dataSetLockService;
-
-    public void setDataSetLockService( DataSetLockService dataSetLockService )
-    {
-        this.dataSetLockService = dataSetLockService;
     }
 
     private CompleteDataSetRegistrationService registrationService;
@@ -229,25 +220,10 @@ public class GetPeriodsAction
     {
         for ( Period period : periods )
         {
-            boolean locked = dataSetLocked( organisationUnit, dataSet, period );
-
-            if ( locked )
+            if ( dataSetService.isLocked( organisationUnit, dataSet, period ) )
             {
                 lockedPeriods.add( period );
             }
         }
-    }
-
-    private boolean dataSetLocked( OrganisationUnit organisationUnit, DataSet dataSet, Period period )
-    {
-        // HACK workaround since get dataSetLock by unit/dataSet/period fails
-        DataSetLock dataSetLock = dataSetLockService.getDataSetLockByDataSetAndPeriod( dataSet, period );
-
-        if ( dataSetLock != null && dataSetLock.getSources().contains( organisationUnit ) )
-        {
-            return true;
-        }
-
-        return false;
     }
 }

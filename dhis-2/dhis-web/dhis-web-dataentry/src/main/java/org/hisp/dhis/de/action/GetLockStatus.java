@@ -1,5 +1,7 @@
+package org.hisp.dhis.de.action;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,26 +26,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.dataadmin.action.lock;
 
-import java.util.Collection;
-
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 
-import com.opensymphony.xwork2.Action;
-
 /**
- * @author Brajesh Murari
- * @version $Id$
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class GetPeriodTypesAction
+public class GetLockStatus
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+
+    private DataSetService dataSetService;
+
+    public void setDataSetService( DataSetService dataSetService )
+    {
+        this.dataSetService = dataSetService;
+    }
+
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
 
     private PeriodService periodService;
 
@@ -51,33 +66,56 @@ public class GetPeriodTypesAction
     {
         this.periodService = periodService;
     }
-    
-    private SelectionTreeManager selectionTreeManager;
 
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
-    {
-        this.selectionTreeManager = selectionTreeManager;
-    }
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private Collection<PeriodType> periodTypes;
+    private int dataSetId;
 
-    public Collection<PeriodType> getPeriodTypes()
+    public void setDataSetId( int dataSetId )
     {
-        return periodTypes;
+        this.dataSetId = dataSetId;
     }
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
+    private int organisationUnitId;
 
-    public String execute()
+    public void setOrganisationUnitId( int organisationUnitId )
     {
-        periodTypes = periodService.getAllPeriodTypes();
+        this.organisationUnitId = organisationUnitId;
+    }
 
-        selectionTreeManager.clearSelectedOrganisationUnits();
+    private String periodId;
+
+    public void setPeriodId( String periodId )
+    {
+        this.periodId = periodId;
+    }
+
+    private boolean locked;
+
+    public boolean isLocked()
+    {
+        return locked;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action Implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String execute() throws Exception
+    {
+        OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+        DataSet dataSet = dataSetService.getDataSet( dataSetId );
+        Period period = PeriodType.createPeriodExternalId( periodId );
+
+        if ( organisationUnit == null || dataSet == null || period == null )
+        {
+            return INPUT;
+        }
+
+        locked = dataSetService.isLocked( organisationUnit, dataSet, period );
 
         return SUCCESS;
     }

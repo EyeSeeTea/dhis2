@@ -509,6 +509,36 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 }
 
 // -----------------------------------------------------------------------------
+// Locking
+// -----------------------------------------------------------------------------
+function getLockStatus()
+{
+    var periodId = $( '#selectedPeriodId' ).val();
+    var dataSetId = $( '#selectedDataSetId' ).val();
+    var locked = false;
+
+    if(periodId == null || dataSetId == -1)
+    {
+        return false;
+    }
+
+    $.ajax({
+      url: 'getLockStatus.action',
+      async: false,
+      data: {
+          'organisationUnitId': currentOrganisationUnitId,
+          'dataSetId': dataSetId,
+          'periodId': periodId
+      },
+      success: function (data) {
+          locked = data.locked;
+      }
+    });
+
+    return locked;
+}
+
+// -----------------------------------------------------------------------------
 // Next/Previous Periods Selection
 // -----------------------------------------------------------------------------
 
@@ -742,6 +772,19 @@ function displayEntryFormCompleted()
     hideLoader();
 
     $( '#completenessDiv' ).css( 'display', 'block' );
+
+    if( getLockStatus() )
+    {
+        $("#contentDiv :input").attr("disabled", true);
+        $( '#currentDataElement' ).html( i18n_dataset_is_locked );
+    }
+    else
+    {
+        $("#contentDiv :input").removeAttr("disabled");
+        $( '#currentDataElement' ).html( i18n_no_dataelement_selected );
+    }
+
+    $("#contentDiv :input").css("backgroundColor", "white");
 }
 
 function valueFocus( e )

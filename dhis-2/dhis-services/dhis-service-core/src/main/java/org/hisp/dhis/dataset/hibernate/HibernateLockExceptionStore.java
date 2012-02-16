@@ -27,22 +27,26 @@ package org.hisp.dhis.dataset.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dataset.LockException;
 import org.hisp.dhis.dataset.LockExceptionStore;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.springframework.jdbc.core.RowCallbackHandler;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -73,6 +77,22 @@ public class HibernateLockExceptionStore
     // LockExceptionStore Implementation
     // -------------------------------------------------------------------------
 
+    @Override
+    public int save( LockException lockException )
+    {
+        lockException.setPeriod( periodService.reloadPeriod( lockException.getPeriod() ) );
+        
+        return super.save( lockException );
+    }
+    
+    @Override
+    public void update( LockException lockException )
+    {
+        lockException.setPeriod( periodService.reloadPeriod( lockException.getPeriod() ) );
+        
+        super.update( lockException );
+    }
+    
     @Override
     public Collection<LockException> getCombinations()
     {
@@ -113,12 +133,10 @@ public class HibernateLockExceptionStore
         query.setParameter( "period", period );
 
         query.executeUpdate();
-
-//        final String sql = "DELETE FROM LockException WHERE dataSetId=? AND periodId=?";
-//        jdbcTemplate.update( sql, new Object[]{dataSet.getId(), period.getId()} );
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<LockException> getBetween( int first, int max )
     {
         Criteria criteria = getCriteria();
@@ -126,5 +144,15 @@ public class HibernateLockExceptionStore
         criteria.setMaxResults( max );
 
         return criteria.list();
+    }
+    
+    public long getCount( DataElement dataElement, Period period, OrganisationUnit organisationUnit )
+    {
+        Criteria criteria = getCriteria( 
+            Restrictions.eq( "period", period ),
+            Restrictions.eq( "organisationUnit", organisationUnit ),
+            Restrictions.in( "dataSet", dataElement.getDataSets() ) );
+        
+        return (Long) criteria.setProjection( Projections.rowCount() ).uniqueResult();
     }
 }

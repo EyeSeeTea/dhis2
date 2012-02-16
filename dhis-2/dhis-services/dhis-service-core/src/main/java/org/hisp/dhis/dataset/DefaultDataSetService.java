@@ -40,6 +40,7 @@ import org.hisp.dhis.system.util.AuditLogUtil;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.user.CurrentUserService;
+import org.joda.time.DateTime;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -336,6 +337,10 @@ public class DefaultDataSetService
     {
         Validate.notNull( lockException );
 
+        DataSet dataSet = lockException.getDataSet();
+
+        dataSet.getLockExceptions().add( lockException );
+
         return lockExceptionStore.save( lockException );
     }
 
@@ -351,6 +356,10 @@ public class DefaultDataSetService
     public void deleteLockException( LockException lockException )
     {
         Validate.notNull( lockException );
+
+        DataSet dataSet = lockException.getDataSet();
+
+        dataSet.getLockExceptions().remove( lockException );
 
         lockExceptionStore.delete( lockException );
     }
@@ -389,5 +398,42 @@ public class DefaultDataSetService
     public void deleteLockExceptionCombination( DataSet dataSet, Period period )
     {
         lockExceptionStore.deleteCombination( dataSet, period );
+    }
+
+    @Override
+    public boolean isLocked( OrganisationUnit organisationUnit, DataSet dataSet, Period period )
+    {
+        // if we don't have any expiryDays, then just return false
+        if ( dataSet.getExpiryDays() == DataSet.NO_EXPIRY )
+        {
+            return false;
+        }
+
+        // using current time, see if we are over or under the current expiryDays limit
+        DateTime serverDate = new DateTime();
+        DateTime expiredDate = new DateTime( period.getEndDate() ).plusDays( dataSet.getExpiryDays() );
+
+        if ( serverDate.compareTo( expiredDate ) == -1 )
+        {
+            return false;
+        }
+
+        // if we are over the expiryDays limit, then check if there is an lockException for ou+ds+period combo
+        for ( LockException lockException : dataSet.getLockExceptions() )
+        {
+            if ( lockException.getOrganisationUnit().equals( organisationUnit ) &&
+                lockException.getDataSet().equals( dataSet ) && lockException.getPeriod().equals( period ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean isLocked( DataElement dataElement, Period period, OrganisationUnit organisationUnit )
+    {
+        return lockExceptionStore.getCount( dataElement, period, organisationUnit ) > 0l;
     }
 }
