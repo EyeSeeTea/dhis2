@@ -556,7 +556,6 @@ Ext.onReady( function() {
         chart: {
 			default: {
 				getChart: function(axes, series) {
-					DV.util.chart.default.series.setTheme();
 					return Ext.create('Ext.chart.Chart', {
 						animate: true,
 						store: DV.store.chart,
@@ -780,6 +779,21 @@ Ext.onReady( function() {
 							});
 						}
 						return a;
+					},
+					setTheme: function() {
+						var colors = DV.conf.chart.theme.dv1.slice(0, DV.state.series.names.length);
+						colors = colors.concat(colors);
+						if (DV.state.targetLineValue) {
+							colors.push('051a2e', '#051a2e');
+						}						
+						Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+							constructor: function(config) {
+								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+									seriesThemes: colors,
+									colors: colors
+								}, config));
+							}
+						});
 					}
 				}
             },
@@ -909,16 +923,12 @@ Ext.onReady( function() {
         },
         value: {
             jsonfy: function(r) {
-                r = Ext.JSON.decode(r.responseText);
-                var obj = {
-					values: [],
-					trendline: []
-				};
+                r = Ext.JSON.decode(r.responseText),
+                values = [];
                 for (var i = 0; i < r.length; i++) {
-                    obj.values.push({d: r[i][0], p: r[i][1], o: r[i][2], v: r[i][3]});
+                    values.push({d: r[i][0], p: r[i][1], o: r[i][2], v: r[i][3]});
                 }
-                obj.trendline = [40,45,50,55,60,65,70,75,80,85,90,95];
-                return obj;
+                return values;
             }
         },
         crud: {
@@ -1406,9 +1416,8 @@ Ext.onReady( function() {
             
             Ext.Ajax.request({
                 url: baseurl,
-                success: function(r) {
-					var json = DV.util.value.jsonfy(r);
-                    DV.value.values = json.values;
+                success: function(r) {                    
+                    DV.value.values = DV.util.value.jsonfy(r);
                     if (!DV.value.values.length) {
                         DV.mask.hide();
                         alert(DV.i18n.no_data);
@@ -1541,6 +1550,7 @@ Ext.onReady( function() {
 			axes.push(numeric);
 			axes.push(DV.util.chart.default.axis.getCategory());
 			
+			DV.util.chart.default.series.setTheme();
 			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         stackedcolumn: function() {
@@ -1548,6 +1558,12 @@ Ext.onReady( function() {
         },
         bar: function(stacked) {
 			var series = [];
+			if (DV.state.trendLine && !stacked) {
+				var a = DV.util.chart.default.series.getTrendLineArray();
+				for (var i = 0; i < a.length; i++) {
+					series.push(a[i]);
+				}
+			}
 			series.push({
 				type: 'bar',
 				axis: 'bottom',
@@ -1560,12 +1576,6 @@ Ext.onReady( function() {
 				},
 				tips: DV.util.chart.default.series.getTips()
 			});
-			if (DV.state.trendLine && !stacked) {
-				var a = DV.util.chart.default.series.getTrendLineArray();
-				for (var i = 0; i < a.length; i++) {
-					series.push(a[i]);
-				}
-			}
 			if (DV.state.targetLineValue && !stacked) {
 				series.push(DV.util.chart.bar.series.getTargetLine());
 			}
@@ -1575,21 +1585,23 @@ Ext.onReady( function() {
 			axes.push(numeric);
 			axes.push(DV.util.chart.bar.axis.getCategory());
 			
+			DV.util.chart.default.series.setTheme();			
 			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         stackedbar: function() {
             this.bar(true);
         },
         line: function() {
-			var series = DV.util.chart.line.series.getArray();
-			if (DV.state.targetLineValue) {
-				series.push(DV.util.chart.default.series.getTargetLine());
-			}
+			var series = [];
 			if (DV.state.trendLine) {
 				var a = DV.util.chart.default.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
 				}
+			}
+			series = series.concat(DV.util.chart.line.series.getArray());
+			if (DV.state.targetLineValue) {
+				series.push(DV.util.chart.default.series.getTargetLine());
 			}
 			
 			var axes = [];
@@ -1597,6 +1609,7 @@ Ext.onReady( function() {
 			axes.push(numeric);
 			axes.push(DV.util.chart.default.axis.getCategory());
 			
+			DV.util.chart.line.series.setTheme();
 			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         area: function() {
@@ -1617,6 +1630,7 @@ Ext.onReady( function() {
 			axes.push(numeric);
 			axes.push(DV.util.chart.default.axis.getCategory());
 			
+			DV.util.chart.line.series.setTheme();			
 			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         pie: function() {
