@@ -1505,37 +1505,41 @@ Ext.onReady( function() {
                     }
                 }
             });
-			
-			if (DV.state.trendLine) {
-				if (DV.state.category.names.length < 2) {
-					DV.state.trendLine = false;
-					alert(DV.i18n.trend_line + ': ' + DV.i18n.min_two_categories);
-				}
-				else {
-					this.trendLine = [];
-					for (var i = 0; i < DV.state.series.names.length; i++) {
-						var s = DV.state.series.names[i],
-							reg = new SimpleRegression();
-						for (var j = 0; j < DV.chart.data.length; j++) {
-							reg.addData(j, DV.chart.data[j][s]);
+            
+            if (DV.state.type === DV.conf.finals.chart.column || 
+				DV.state.type === DV.conf.finals.chart.bar ||
+				DV.state.type === DV.conf.finals.chart.line) {			
+				if (DV.state.trendLine) {
+					if (DV.state.category.names.length < 2) {
+						DV.state.trendLine = false;
+						alert(DV.i18n.trend_line + ': ' + DV.i18n.min_two_categories);
+					}
+					else {
+						this.trendLine = [];
+						for (var i = 0; i < DV.state.series.names.length; i++) {
+							var s = DV.state.series.names[i],
+								reg = new SimpleRegression();
+							for (var j = 0; j < DV.chart.data.length; j++) {
+								reg.addData(j, DV.chart.data[j][s]);
+							}
+							var key = DV.conf.finals.data.trendline + s;
+							for (var j = 0; j < DV.chart.data.length; j++) {
+								var n = reg.predict(j);
+								DV.chart.data[j][key] = parseFloat(reg.predict(j).toFixed(1));
+							}
+							this.trendLine.push({
+								key: key,
+								name: DV.i18n.trend + ' (' + s + ')'
+							});
 						}
-						var key = DV.conf.finals.data.trendline + s;
-						for (var j = 0; j < DV.chart.data.length; j++) {
-							var n = reg.predict(j);
-							DV.chart.data[j][key] = parseFloat(reg.predict(j).toFixed(1));
-						}
-						this.trendLine.push({
-							key: key,
-							name: DV.i18n.trend + ' (' + s + ')'
-						});
 					}
 				}
-			}
 
-			if (DV.state.targetLineValue) {
-				Ext.Array.each(DV.chart.data, function(item) {
-					item[DV.conf.finals.data.targetline] = DV.state.targetLineValue;
-				});
+				if (DV.state.targetLineValue) {
+					Ext.Array.each(DV.chart.data, function(item) {
+						item[DV.conf.finals.data.targetline] = DV.state.targetLineValue;
+					});
+				}
 			}
             
             if (exe) {
