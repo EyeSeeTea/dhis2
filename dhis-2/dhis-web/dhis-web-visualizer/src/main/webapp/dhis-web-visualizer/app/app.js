@@ -741,6 +741,16 @@ Ext.onReady( function() {
 					}
 				},
 				series: {
+					getTips: function() {
+						return {
+							trackMouse: true,
+							cls: 'dv-chart-tips',
+							renderer: function(si, item) {
+								console.log(item);
+								this.update('' + item.value[0]);
+							}
+						};
+					},
 					getTargetLine: function() {
 						var tl = DV.util.chart.default.series.getTargetLine();
 						tl.axis = 'bottom';
@@ -748,12 +758,27 @@ Ext.onReady( function() {
 						tl.yField = DV.conf.finals.data.domain;
 						return tl;
 					},
-					getTrendLine: function() {
-						var tl = DV.util.chart.default.series.getTrendLine();
-						tl.axis = 'bottom';
-						tl.xField = DV.conf.finals.data.trendline;
-						tl.yField = DV.conf.finals.data.domain;
-						return tl;
+					getTrendLineArray: function() {
+						var a = [];
+						for (var i = 0; i < DV.chart.trendLine.length; i++) {
+							a.push({
+								type: 'line',
+								axis: 'bottom',
+								xField: DV.chart.trendLine[i].key,
+								yField: DV.conf.finals.data.domain,
+								style: {
+									opacity: 0.8,
+									lineWidth: 3
+								},
+								markerConfig: {
+									type: 'circle',
+									radius: 4
+								},
+								tips: DV.util.chart.bar.series.getTips(),
+								title: DV.chart.trendLine[i].name
+							});
+						}
+						return a;
 					}
 				}
             },
@@ -1537,8 +1562,7 @@ Ext.onReady( function() {
 				style: {
 					opacity: 0.8,
 					stroke: '#333'
-				},
-				
+				},				
 				tips: DV.util.chart.default.series.getTips()
 			});
 			if (DV.state.targetLineValue && !stacked) {
@@ -1559,7 +1583,7 @@ Ext.onReady( function() {
         bar: function(stacked) {
 			var series = [];
 			if (DV.state.trendLine && !stacked) {
-				var a = DV.util.chart.default.series.getTrendLineArray();
+				var a = DV.util.chart.bar.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
 				}
