@@ -856,6 +856,17 @@ Ext.onReady( function() {
 								this.update(item.data[DV.conf.finals.data.domain] + '<br/><b>' + item.data[DV.state.series.names[0]] + '</b>');
 							}
 						};
+					},
+					setTheme: function() {
+						var colors = DV.conf.chart.theme.dv1.slice(0, DV.state.category.names.length);
+						Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+							constructor: function(config) {
+								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+									seriesThemes: colors,
+									colors: colors
+								}, config));
+							}
+						});
 					}
 				}
             }
@@ -1654,10 +1665,11 @@ Ext.onReady( function() {
 			axes.push(numeric);
 			axes.push(DV.util.chart.default.axis.getCategory());
 			
-			DV.util.chart.line.series.setTheme();			
+			DV.util.chart.line.series.setTheme();
 			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         pie: function() {
+			DV.util.chart.pie.series.setTheme();
             this.chart = Ext.create('Ext.chart.Chart', {
                 animate: true,
                 shadow: true,
