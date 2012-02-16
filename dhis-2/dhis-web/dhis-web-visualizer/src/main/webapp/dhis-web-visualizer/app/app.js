@@ -1914,7 +1914,7 @@ Ext.onReady( function() {
                     },
                     {
                         xtype: 'panel',
-                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:10px;',
+                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:10px 10px 0 10px;',
                         items: [
                             {
                                 xtype: 'fieldset',
@@ -2074,7 +2074,7 @@ Ext.onReady( function() {
                                         DV.cmp.fieldset.indicator = this;
                                     },
                                     expand: function() {
-                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit, DV.cmp.fieldset.options]);
+                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit]);
                                     }
                                 }
                             },
@@ -2235,7 +2235,7 @@ Ext.onReady( function() {
                                         DV.cmp.fieldset.dataelement = this;
                                     },
                                     expand: function() {
-                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit, DV.cmp.fieldset.options]);
+                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit]);
                                     }
                                 }
                             },
@@ -2402,7 +2402,7 @@ Ext.onReady( function() {
                                         DV.cmp.fieldset.period = this;
                                     },
                                     expand: function() {
-                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.organisationunit, DV.cmp.fieldset.options]);
+                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.organisationunit]);
                                     }
                                 }
                             },
@@ -2489,8 +2489,17 @@ Ext.onReady( function() {
                                     afterrender: function() {
                                         DV.cmp.fieldset.organisationunit = this;
                                     },
+                                    collapse: function(fs) {
+										if (DV.cmp.fieldset.organisationunit) {
+											DV.cmp.fieldset.organisationunit.setHeight(25);
+										}
+									},
                                     expand: function(fs) {
-                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period, DV.cmp.fieldset.options]);
+										var h = DV.cmp.region.west.getHeight() - 395;
+										DV.cmp.fieldset.organisationunit.setHeight(h);
+										DV.cmp.dimension.organisationunit.treepanel.setHeight(h - 30);
+
+                                        DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period]);
                                         var tp = DV.cmp.dimension.organisationunit.treepanel;
                                         if (!tp.isRendered) {
                                             tp.isRendered = true;
@@ -2501,165 +2510,172 @@ Ext.onReady( function() {
                                 }
                             }
                         ]
-                    }
-                ],
-                bbar: {
-					xtype: 'toolbar',
-					id: 'chartoptions_tb',
-					items: [
-						{
-							xtype: 'panel',
-							bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
-							items: [
-								{
-									xtype: 'panel',
-									layout: 'column',
-									bodyStyle: 'border-style:none; background-color:transparent; padding-bottom:15px',
-									items: [
-										{
-											xtype: 'checkbox',
-											cls: 'dv-checkbox-alt1',
-											style: 'margin-right:20px',
-											boxLabel: DV.i18n.hide_subtitle,
-											labelWidth: DV.conf.layout.form_label_width,
-											listeners: {
-												added: function() {
-													DV.cmp.favorite.hidesubtitle = this;
-												}
-											}
-										},
-										{
-											xtype: 'checkbox',
-											cls: 'dv-checkbox-alt1',
-											style: 'margin-right:20px',
-											boxLabel: DV.i18n.hide_legend,
-											labelWidth: DV.conf.layout.form_label_width,
-											listeners: {
-												added: function() {
-													DV.cmp.favorite.hidelegend = this;
-												}
-											}
-										},
-										{
-											xtype: 'checkbox',
-											cls: 'dv-checkbox-alt1',
-											style: 'margin-right:21px',
-											boxLabel: DV.i18n.trend_line,
-											labelWidth: DV.conf.layout.form_label_width,
-											listeners: {
-												added: function() {
-													DV.cmp.favorite.trendline = this;
-												}
-											}
-										},
-										{
-											xtype: 'checkbox',
-											cls: 'dv-checkbox-alt1',
-											boxLabel: DV.i18n.user_orgunit,
-											labelWidth: DV.conf.layout.form_label_width,
-											listeners: {
-												added: function() {
-													DV.cmp.favorite.userorganisationunit = this;
-												}
-											}
-										}
-									]
-								},
-								{
-									xtype: 'panel',
-									layout: 'column',
-									bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:8px',
-									items: [
-										{
-											xtype: 'textfield',
-											cls: 'dv-textfield-alt1',
-											style: 'margin-right:4px',
-											fieldLabel: DV.i18n.domain_axis_label,
-											labelAlign: 'top',
-											labelSeparator: '',
-											maxLength: 100,
-											enforceMaxLength: true,
-											labelWidth: DV.conf.layout.form_label_width,
-											width: 188,
-											listeners: {
-												added: function() {
-													DV.cmp.favorite.domainaxislabel = this;
-												}
-											}
-										},
-										{
-											xtype: 'textfield',
-											cls: 'dv-textfield-alt1',
-											fieldLabel: DV.i18n.range_axis_label,
-											labelAlign: 'top',
-											labelSeparator: '',
-											maxLength: 100,
-											enforceMaxLength: true,
-											labelWidth: DV.conf.layout.form_label_width,
-											width: 187,
-											listeners: {
-												added: function() {
-													DV.cmp.favorite.rangeaxislabel = this;
-												}
-											}
-										}
-									]
-								},
-								{
-									xtype: 'panel',
-									layout: 'column',
-									bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:5px',
-									items: [
-										{
-											xtype: 'numberfield',
-											cls: 'dv-textfield-alt1',
-											style: 'margin-right:4px',
-											hideTrigger: true,
-											fieldLabel: DV.i18n.target_line_value,
-											labelAlign: 'top',
-											labelSeparator: '',
-											maxLength: 100,
-											enforceMaxLength: true,
-											width: 188,
-											listeners: {
-												added: function() {
-													DV.cmp.favorite.targetlinevalue = this;
-												},
-												change: function() {
-													DV.cmp.favorite.targetlinelabel.xable();
-												}
-											}
-										},
-										{
-											xtype: 'textfield',
-											cls: 'dv-textfield-alt1',
-											fieldLabel: DV.i18n.target_line_label,
-											labelAlign: 'top',
-											labelSeparator: '',
-											maxLength: 100,
-											enforceMaxLength: true,
-											width: 187,
-											disabled: true,
-											xable: function() {
-												if (DV.cmp.favorite.targetlinevalue.getValue()) {
-													this.enable();
-												}
-												else {
-													this.disable();
+                    },
+					{
+						xtype: 'toolbar',
+						id: 'chartoptions_tb',
+						layout: 'fit',
+						items: [
+							{
+								xtype: 'panel',
+								bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+								items: [
+									{
+										bodyStyle: 'border-style:none; background-color:transparent; padding:0 0 10px 3px; font-size:11px; font-weight:bold',
+										html: 'Options'
+									},
+									{
+										xtype: 'panel',
+										layout: 'column',
+										bodyStyle: 'border-style:none; background-color:transparent; padding-bottom:15px',
+										items: [
+											{
+												xtype: 'checkbox',
+												cls: 'dv-checkbox-alt1',
+												style: 'margin-right:26px',
+												boxLabel: DV.i18n.hide_subtitle,
+												labelWidth: DV.conf.layout.form_label_width,
+												listeners: {
+													added: function() {
+														DV.cmp.favorite.hidesubtitle = this;
+													}
 												}
 											},
-											listeners: {
-												added: function() {
-													DV.cmp.favorite.targetlinelabel = this;
+											{
+												xtype: 'checkbox',
+												cls: 'dv-checkbox-alt1',
+												style: 'margin-right:25px',
+												boxLabel: DV.i18n.hide_legend,
+												labelWidth: DV.conf.layout.form_label_width,
+												listeners: {
+													added: function() {
+														DV.cmp.favorite.hidelegend = this;
+													}
+												}
+											},
+											{
+												xtype: 'checkbox',
+												cls: 'dv-checkbox-alt1',
+												style: 'margin-right:26px',
+												boxLabel: DV.i18n.trend_line,
+												labelWidth: DV.conf.layout.form_label_width,
+												listeners: {
+													added: function() {
+														DV.cmp.favorite.trendline = this;
+													}
+												}
+											},
+											{
+												xtype: 'checkbox',
+												cls: 'dv-checkbox-alt1',
+												boxLabel: DV.i18n.user_orgunit,
+												labelWidth: DV.conf.layout.form_label_width,
+												listeners: {
+													added: function() {
+														DV.cmp.favorite.userorganisationunit = this;
+													}
 												}
 											}
-										}
-									]
-								}
-							]
-						}
-					]
-				},				
+										]
+									},
+									{
+										xtype: 'panel',
+										layout: 'column',
+										bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:8px',
+										items: [
+											{
+												xtype: 'textfield',
+												cls: 'dv-textfield-alt1',
+												style: 'margin-right:4px',
+												fieldLabel: DV.i18n.domain_axis_label,
+												labelAlign: 'top',
+												labelSeparator: '',
+												maxLength: 100,
+												enforceMaxLength: true,
+												labelWidth: DV.conf.layout.form_label_width,
+												width: 199,
+												listeners: {
+													added: function() {
+														DV.cmp.favorite.domainaxislabel = this;
+													}
+												}
+											},
+											{
+												xtype: 'textfield',
+												cls: 'dv-textfield-alt1',
+												fieldLabel: DV.i18n.range_axis_label,
+												labelAlign: 'top',
+												labelSeparator: '',
+												maxLength: 100,
+												enforceMaxLength: true,
+												labelWidth: DV.conf.layout.form_label_width,
+												width: 199,
+												listeners: {
+													added: function() {
+														DV.cmp.favorite.rangeaxislabel = this;
+													}
+												}
+											}
+										]
+									},
+									{
+										xtype: 'panel',
+										layout: 'column',
+										bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:5px',
+										items: [
+											{
+												xtype: 'numberfield',
+												cls: 'dv-textfield-alt1',
+												style: 'margin-right:5px',
+												hideTrigger: true,
+												fieldLabel: DV.i18n.target_line_value,
+												labelAlign: 'top',
+												labelSeparator: '',
+												maxLength: 100,
+												enforceMaxLength: true,
+												width: 199,
+												spinUpEnabled: true,
+												spinDownEnabled: true,
+												listeners: {
+													added: function() {
+														DV.cmp.favorite.targetlinevalue = this;
+													},
+													change: function() {
+														DV.cmp.favorite.targetlinelabel.xable();
+													}
+												}
+											},
+											{
+												xtype: 'textfield',
+												cls: 'dv-textfield-alt1',
+												fieldLabel: DV.i18n.target_line_label,
+												labelAlign: 'top',
+												labelSeparator: '',
+												maxLength: 100,
+												enforceMaxLength: true,
+												width: 199,
+												disabled: true,
+												xable: function() {
+													if (DV.cmp.favorite.targetlinevalue.getValue()) {
+														this.enable();
+													}
+													else {
+														this.disable();
+													}
+												},
+												listeners: {
+													added: function() {
+														DV.cmp.favorite.targetlinelabel = this;
+													}
+												}
+											}
+										]
+									}
+								]
+							}
+						]
+					}
+				],				
                 listeners: {
                     afterrender: function() {
                         DV.cmp.region.west = this;
