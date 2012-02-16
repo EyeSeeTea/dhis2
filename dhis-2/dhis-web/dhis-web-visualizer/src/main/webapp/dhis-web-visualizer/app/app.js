@@ -147,7 +147,7 @@ DV.conf = {
             font: 'arial,sans-serif,ubuntu,consolas'
         },
         theme: {
-            dv1: ['#94ae0a', '#115fa6', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
+            dv1: ['#94ae0a', '#0c4375', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
         }
     },
     layout: {
@@ -170,15 +170,7 @@ Ext.require('Ext.ux.form.MultiSelect');
 Ext.onReady( function() {
     Ext.override(Ext.form.FieldSet,{setExpanded:function(a){var b=this,c=b.checkboxCmp,d=b.toggleCmp,e;a=!!a;if(c){c.setValue(a)}if(d){d.setType(a?"up":"down")}if(a){e="expand";b.removeCls(b.baseCls+"-collapsed")}else{e="collapse";b.addCls(b.baseCls+"-collapsed")}b.collapsed=!a;b.doComponentLayout();b.fireEvent(e,b);return b}});
     Ext.QuickTips.init();
-    document.body.oncontextmenu = function(){return false;};     
-    Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
-        constructor: function(config) {
-            Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
-                seriesThemes: DV.conf.chart.theme.dv1,
-                colors: DV.conf.chart.theme.dv1
-            }, config));
-        }
-    });
+    document.body.oncontextmenu = function(){return false;}; 
     
     Ext.Ajax.request({
         url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.initialize,
@@ -564,6 +556,7 @@ Ext.onReady( function() {
         chart: {
 			default: {
 				getChart: function(axes, series) {
+					DV.util.chart.default.series.setTheme();
 					return Ext.create('Ext.chart.Chart', {
 						animate: true,
 						store: DV.store.chart,
@@ -679,7 +672,8 @@ Ext.onReady( function() {
 							yField: DV.conf.finals.data.targetline,
 							style: {
 								opacity: 1,
-								lineWidth: 2
+								lineWidth: 3,
+								stroke: '#051a2e'
 							},
 							markerConfig: {
 								type: 'circle',
@@ -709,6 +703,20 @@ Ext.onReady( function() {
 							});
 						}
 						return a;
+					},
+					setTheme: function() {
+						var colors = DV.conf.chart.theme.dv1.slice(0, DV.state.series.names.length);						
+						if (DV.state.targetLineValue) {
+							colors.push('051a2e', '#051a2e');
+						}						
+						Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+							constructor: function(config) {
+								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+									seriesThemes: colors,
+									colors: colors
+								}, config));
+							}
+						});
 					}
 				}
 			},
@@ -1505,6 +1513,12 @@ Ext.onReady( function() {
         },
         column: function(stacked) {
 			var series = [];
+			if (DV.state.trendLine && !stacked) {
+				var a = DV.util.chart.default.series.getTrendLineArray();
+				for (var i = 0; i < a.length; i++) {
+					series.push(a[i]);
+				}
+			}
 			series.push({
 				type: 'column',
 				axis: 'left',
@@ -1515,14 +1529,9 @@ Ext.onReady( function() {
 					opacity: 0.8,
 					stroke: '#333'
 				},
+				
 				tips: DV.util.chart.default.series.getTips()
 			});
-			if (DV.state.trendLine && !stacked) {
-				var a = DV.util.chart.default.series.getTrendLineArray();
-				for (var i = 0; i < a.length; i++) {
-					series.push(a[i]);
-				}
-			}
 			if (DV.state.targetLineValue && !stacked) {
 				series.push(DV.util.chart.default.series.getTargetLine());
 			}
@@ -2522,7 +2531,7 @@ Ext.onReady( function() {
 								items: [
 									{
 										bodyStyle: 'border-style:none; background-color:transparent; padding:0 0 10px 3px; font-size:11px; font-weight:bold',
-										html: 'Options'
+										html: DV.i18n.chart_options
 									},
 									{
 										xtype: 'panel',
