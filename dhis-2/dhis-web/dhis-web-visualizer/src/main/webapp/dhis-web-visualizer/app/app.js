@@ -746,7 +746,6 @@ Ext.onReady( function() {
 							trackMouse: true,
 							cls: 'dv-chart-tips',
 							renderer: function(si, item) {
-								console.log(item);
 								this.update('' + item.value[0]);
 							}
 						};
