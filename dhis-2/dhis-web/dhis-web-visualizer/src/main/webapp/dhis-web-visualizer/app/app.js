@@ -662,7 +662,7 @@ Ext.onReady( function() {
 						};
 					},
 					getTargetLine: function() {
-						var title = DV.state.targetLineLabel || DV.i18n.target_line;
+						var title = DV.state.targetLineLabel || DV.i18n.target;
 						title += ' (' + DV.state.targetLineValue + ')';
 						return {
 							type: 'line',
@@ -2557,9 +2557,9 @@ Ext.onReady( function() {
 										}
 									},
                                     expand: function(fs) {
-										var h = DV.cmp.region.west.getHeight() - 395;
+										var h = DV.cmp.region.west.getHeight() - 405;
 										DV.cmp.fieldset.organisationunit.setHeight(h);
-										DV.cmp.dimension.organisationunit.treepanel.setHeight(h - 30);
+										DV.cmp.dimension.organisationunit.treepanel.setHeight(h - 40);
 
                                         DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period]);
                                         var tp = DV.cmp.dimension.organisationunit.treepanel;
@@ -3229,7 +3229,7 @@ Ext.onReady( function() {
                                                                                         {
                                                                                             text: DV.i18n.cancel,
                                                                                             handler: function() {
-                                                                                                DV.cmp.favorite.window.close();
+                                                                                                this.up('window').close();
                                                                                             }
                                                                                         },
                                                                                         '->',
