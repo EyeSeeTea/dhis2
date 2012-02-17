@@ -33,7 +33,6 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 
 /**
@@ -60,15 +59,8 @@ public class GetLockStatus
         this.organisationUnitService = organisationUnitService;
     }
 
-    private PeriodService periodService;
-
-    public void setPeriodService( PeriodService periodService )
-    {
-        this.periodService = periodService;
-    }
-
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Input
     // -------------------------------------------------------------------------
 
     private int dataSetId;
@@ -91,6 +83,10 @@ public class GetLockStatus
     {
         this.periodId = periodId;
     }
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
     private boolean locked;
 
@@ -115,7 +111,7 @@ public class GetLockStatus
             return INPUT;
         }
 
-        locked = dataSetService.isLocked( organisationUnit, dataSet, period );
+        locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
 
         return SUCCESS;
     }

@@ -34,7 +34,6 @@ import java.util.Collection;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
-import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataelement.DataElement;
@@ -96,7 +95,7 @@ public class HibernateLockExceptionStore
     @Override
     public Collection<LockException> getCombinations()
     {
-        final String sql = "SELECT DISTINCT datasetid, periodid FROM LockException";
+        final String sql = "select distinct datasetid, periodid from LockException";
 
         final Collection<LockException> lockExceptions = new ArrayList<LockException>();
 
@@ -125,10 +124,9 @@ public class HibernateLockExceptionStore
     @Override
     public void deleteCombination( DataSet dataSet, Period period )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        final String hql = "DELETE FROM LockException WHERE dataSet=:dataSet AND period=:period";
-        Query query = session.createQuery( hql );
+        final String hql = "delete from LockException where dataSet=:dataSet and period=:period";
+        
+        Query query = getQuery( hql );
         query.setParameter( "dataSet", dataSet );
         query.setParameter( "period", period );
 
@@ -149,9 +147,19 @@ public class HibernateLockExceptionStore
     public long getCount( DataElement dataElement, Period period, OrganisationUnit organisationUnit )
     {
         Criteria criteria = getCriteria( 
-            Restrictions.eq( "period", period ),
+            Restrictions.eq( "period", periodService.reloadPeriod( period ) ),
             Restrictions.eq( "organisationUnit", organisationUnit ),
             Restrictions.in( "dataSet", dataElement.getDataSets() ) );
+        
+        return (Long) criteria.setProjection( Projections.rowCount() ).uniqueResult();
+    }
+    
+    public long getCount( DataSet dataSet, Period period, OrganisationUnit organisationUnit )
+    {
+        Criteria criteria = getCriteria( 
+            Restrictions.eq( "period", periodService.reloadPeriod( period ) ),
+            Restrictions.eq( "organisationUnit", organisationUnit ),
+            Restrictions.eq( "dataSet", dataSet ) );
         
         return (Long) criteria.setProjection( Projections.rowCount() ).uniqueResult();
     }

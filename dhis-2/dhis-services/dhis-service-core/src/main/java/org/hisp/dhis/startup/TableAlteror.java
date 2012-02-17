@@ -100,6 +100,7 @@ public class TableAlteror
         executeSql( "DROP TABLE datasetlockedperiods" );
         executeSql( "DROP TABLE datasetlocksource" );
         executeSql( "DROP TABLE datasetlock" );
+        executeSql( "DROP TABLE datasetlockexceptions" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
         executeSql( "ALTER TABLE reporttable DROP column dimension_type" );
         executeSql( "ALTER TABLE reporttable DROP column dimensiontype" );
@@ -417,6 +418,8 @@ public class TableAlteror
         executeSql( "DROP TABLE reporttablegroup" );
         executeSql( "DROP TABLE chartgroupmembers" );
         executeSql( "DROP TABLE chartgroup" );
+        
+        executeSql( "ALTER TABLE patientdatavaluearchive DROP COLUMN categoryoptioncomboid" );
         
         log.info( "Tables updated" );
     }
