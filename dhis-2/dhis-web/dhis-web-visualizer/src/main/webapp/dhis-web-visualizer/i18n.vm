@@ -90,5 +90,7 @@ favorite_no_orgunits:'$encoder.jsEscape($i18n.getString( 'favorite_no_orgunits' 
 this_year:'$encoder.jsEscape($i18n.getString( 'this_year' ) , "'")',
 trend:'$encoder.jsEscape($i18n.getString( 'trend' ) , "'")',
 min_two_categories:'$encoder.jsEscape($i18n.getString( 'min_two_categories' ) , "'")',
-chart_options:'$encoder.jsEscape($i18n.getString( 'chart_options' ) , "'")'
+chart_options:'$encoder.jsEscape($i18n.getString( 'chart_options' ) , "'")',
+select_dimensions:'$encoder.jsEscape($i18n.getString( 'select_dimensions' ) , "'")'
+
 };

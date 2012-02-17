@@ -1227,12 +1227,17 @@ Ext.onReady( function() {
             this.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
             
             this.series.dimension = DV.cmp.settings.series.getValue();
-            this.series.names = DV.util.dimension[this.series.dimension].getNames(true);
-            
             this.category.dimension = DV.cmp.settings.category.getValue();
-            this.category.names = DV.util.dimension[this.category.dimension].getNames(true);
-            
             this.filter.dimension = DV.cmp.settings.filter.getValue();
+            
+            if (!this.series.dimension || !this.category.dimension || !this.filter.dimension) {
+				this.resetState();
+				alert(DV.i18n.select_dimensions);
+                return;
+            }
+            
+            this.series.names = DV.util.dimension[this.series.dimension].getNames(true);
+            this.category.names = DV.util.dimension[this.category.dimension].getNames(true);
             this.filter.names = DV.util.dimension[this.filter.dimension].getNames(true, true);
             
             if (!this.series.names.length || !this.category.names.length || !this.filter.names.length) {
