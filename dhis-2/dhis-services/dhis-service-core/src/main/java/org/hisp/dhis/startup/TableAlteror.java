@@ -391,6 +391,7 @@ public class TableAlteror
         executeSql( "update reporttable set last6bimonths = false where last6bimonths is null" );
         executeSql( "update reporttable set last4quarters = false where last4quarters is null" );
         executeSql( "update reporttable set last2sixmonths = false where last2sixmonths is null" );
+        executeSql( "update reporttable set cumulative = false where cumulative is null" );
 
         executeSql( "update chart set reportingmonth = false where reportingmonth is null" );
         executeSql( "update chart set reportingbimonth = false where reportingbimonth is null" );
@@ -420,6 +421,8 @@ public class TableAlteror
         executeSql( "DROP TABLE chartgroup" );
         
         executeSql( "ALTER TABLE patientdatavaluearchive DROP COLUMN categoryoptioncomboid" );
+        executeSql( "delete from usersetting where name='currentStyle' and value like '%blue/blue.css'" );
+        executeSql( "delete from systemsetting where name='currentStyle' and value like '%blue/blue.css'" );
         
         log.info( "Tables updated" );
     }
