@@ -1850,7 +1850,6 @@ Ext.onReady( function() {
     
     DV.exe = {
         execute: function(exe, cmd) {
-			DV.state.resetState();
 			DV.exe.warnings = [];
 			
             if (cmd) {
@@ -1858,10 +1857,12 @@ Ext.onReady( function() {
                     DV.chart.getData(exe);
                 }
                 else {
+					DV.state.resetState();
                     DV.state.setFavorite(true, cmd);
                 }
             }
             else {
+				DV.state.resetState();
                 DV.state.getState(exe);
             }
         },
@@ -3542,8 +3543,8 @@ Ext.onReady( function() {
 					items: [
 						{
 							xtype: 'panel',
+							cls: 'dv-statusbar',
 							height: 23,
-							bodyStyle: 'padding:5px 0 0 6px; border:0 none; background-color:transparent; color:#555; vertical-align:top; font-size:10px',
 							listeners: {
 								added: function() {
 									DV.cmp.statusbar.panel = this;

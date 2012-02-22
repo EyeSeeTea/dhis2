@@ -632,3 +632,13 @@ body {
 .dv-messagebox .x-toolbar-footer-docked-bottom {
 	display: none;
 }
+
+/* DV statusbar */
+.dv-statusbar .x-panel-body-default {
+	padding: 5px 0 0 6px;
+	border: 0 none;
+	background-color: transparent;
+	color: #222;
+	vertical-align: top;
+	font-size: 10px
+}
