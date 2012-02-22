@@ -150,6 +150,13 @@ DV.conf = {
             dv1: ['#94ae0a', '#0c4375', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
         }
     },
+    statusbar: {
+		icon: {
+			error: 'error.png',
+			warning: 'warning.png',
+			ok: 'ok.png'
+		}
+	},
     layout: {
         west_width: 424,
         west_fieldset_width: 402,
@@ -202,6 +209,7 @@ Ext.onReady( function() {
         toolbar: {
             menuitem: {}
         },
+        statusbar: {},
         favorite: {
             rename: {}
         }
@@ -2528,7 +2536,8 @@ Ext.onReady( function() {
                                                     v.menu.destroy();
                                                 }
                                                 v.menu = Ext.create('Ext.menu.Menu', {
-                                                    id: 'treepanel-contextmenu'
+                                                    id: 'treepanel-contextmenu',
+                                                    showSeparator: false
                                                 });
                                                 if (!r.data.leaf) {
                                                     v.menu.add({
@@ -2806,11 +2815,12 @@ Ext.onReady( function() {
                             listeners: {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
-                                        shadowOffset: 1,
+                                        margin: '2 0 0 0',
+                                        shadow: false,
                                         showSeparator: false,
                                         items: [
                                             {
-                                                text: 'Manage favorites',
+                                                text: DV.i18n.manage_favorites,
                                                 iconCls: 'dv-menu-item-edit',
                                                 handler: function() {
                                                     if (DV.cmp.favorite.window) {
@@ -3371,7 +3381,8 @@ Ext.onReady( function() {
                             listeners: {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
-                                        shadowOffset: 1,
+                                        margin: '2 0 0 0',
+                                        shadow: false,
                                         showSeparator: false,
                                         items: [
                                             {
@@ -3422,6 +3433,30 @@ Ext.onReady( function() {
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
+                            text: 'test',
+                            handler: function() {
+								DV.cmp.toolbar.bbar.setStatus(DV.conf.statusbar.icon.error, 'No data returned from server');
+                            }
+                        },
+                        {
+                            xtype: 'button',
+							cls: 'dv-toolbar-btn-2',
+                            text: 'test',
+                            handler: function() {
+								DV.cmp.toolbar.bbar.setStatus(DV.conf.statusbar.icon.warning, '5 filter units selected. Only the first one was used. ');
+                            }
+                        },
+                        {
+                            xtype: 'button',
+							cls: 'dv-toolbar-btn-2',
+                            text: 'test',
+                            handler: function() {
+								DV.cmp.toolbar.bbar.setStatus(DV.conf.statusbar.icon.ok, '');
+                            }
+                        },
+                        {
+                            xtype: 'button',
+							cls: 'dv-toolbar-btn-2',
                             text: 'Exit',
                             handler: function() {
                                 window.location.href = DV.conf.finals.ajax.path_portal + DV.conf.finals.ajax.redirect;
@@ -3447,6 +3482,30 @@ Ext.onReady( function() {
                     
                     ]
                 },
+                bbar: {
+					setStatus: function(icon, text) {
+						DV.cmp.statusbar.panel.update('<img src="images/' + icon + '" style="padding:0 5px 0 0"/>' + text);
+						//DV.cmp.statusbar.panel.setWidth(DV.
+					},
+					items: [
+						{
+							xtype: 'panel',
+							width: 500,
+							height: 23,
+							bodyStyle: 'padding:5px 0 0 6px; border:0 none; background-color:transparent; color:#555; vertical-align:top; font-size:10px',
+							listeners: {
+								added: function() {
+									DV.cmp.statusbar.panel = this;
+								}
+							}
+						}
+					],
+					listeners: {
+						added: function() {
+							DV.cmp.toolbar.bbar = this;
+						}
+					}
+				},					
                 listeners: {
                     added: function() {
                         DV.cmp.region.center = this;
