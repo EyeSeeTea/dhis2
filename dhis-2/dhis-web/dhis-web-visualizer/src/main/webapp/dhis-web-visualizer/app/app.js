@@ -499,7 +499,7 @@ Ext.onReady( function() {
                         }
                     });
                     if (exception && !a.length) {
-						DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_no_periods, DV.i18n.em_no_periods, true);
+						DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
                     }
                     return a;
                 },
@@ -512,7 +512,7 @@ Ext.onReady( function() {
                         valid = item.getValue() ? true : valid;
                     });
                     if (exception && !valid) {
-						DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_no_periods, DV.i18n.em_no_periods, true);
+						DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
                     }
                     return a;
                 }   
@@ -556,7 +556,7 @@ Ext.onReady( function() {
 						a.push(r.data.id);
 					});
 					if (exception && !a.length) {
-						DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits, true);
+						DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
 					}
                     return DV.state.userOrganisationUnit ? [DV.init.system.user.organisationUnit.id] : a;
                 }                    
@@ -1260,6 +1260,77 @@ Ext.onReady( function() {
         trendLine: null,
         userOrganisationUnit: false,
         isRendered: false,
+        validation: {
+			dimensions: function() {
+				if (!this.series.dimension || !this.category.dimension || !this.filter.dimension) {
+					DV.util.notification.error(DV.i18n.et_invalid_dimension_setup, DV.i18n.em_invalid_dimension_setup);
+					return false;
+				}
+				return true;
+			},
+			names: function() {            
+				if (!this.series.names.length) {
+					DV.util.notification.error(DV.i18n.et_no_indicators_dataelements, DV.i18n.em_no_indicators_dataelements);
+					return false;
+				}           
+				if (!this.category.names.length) {
+					DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
+					return false;
+				}           
+				if (!this.filter.names.length) {
+					DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
+					return false;
+				}
+				return true;
+			},
+			categories: function() {
+				if (this.category.names.length < 2 && (this.type === DV.conf.finals.chart.line || this.type === DV.conf.finals.chart.area)) {
+					DV.util.notification.error(DV.i18n.et_line_area_categories, DV.i18n.em_line_area_categories);
+					return false;
+				}
+				return true;
+			},
+			trendline: function() {            
+				if (this.trendLine) {
+					if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
+						DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_stacked);
+						this.trendLine = false;
+					}
+					else if (this.type === DV.conf.finals.chart.pie) {
+						DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_pie);
+						this.trendLine = false;
+					}
+					
+					if (this.category.names.length < 2) {
+						DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_categories);
+						this.trendLine = false;
+					}
+				}
+			},
+			targetline: function() {			
+				if (this.targetLineValue) {
+					if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
+						DV.exe.warnings.push(DV.i18n.wm_targetline_deactivated_stacked);
+						this.targetLineValue = null;
+					}
+					else if (this.type === DV.conf.finals.chart.pie) {
+						DV.exe.warnings.push(DV.i18n.wm_targetline_deactivated_pie);
+						this.targetLineValue = null;
+					}
+					
+					if (this.category.names.length < 2) {
+						DV.exe.warnings.push(DV.i18n.wm_targetline_deactivated_categories);
+						this.targetLineValue = null;
+					}
+				}
+			},
+			render: function() {
+				if (!this.isRendered) {
+					DV.cmp.toolbar.datatable.enable();
+					this.isRendered = true;
+				}
+			}
+		},
         getState: function(exe) {
             this.type = DV.util.button.type.getValue();
             
@@ -1276,24 +1347,19 @@ Ext.onReady( function() {
             this.category.dimension = DV.cmp.settings.category.getValue();
             this.filter.dimension = DV.cmp.settings.filter.getValue();
             
-            if (!this.series.dimension || !this.category.dimension || !this.filter.dimension) {
-				this.resetState();
-				DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_missing_dimensions, DV.i18n.em_missing_dimensions, true);
-                return;
-            }
+            if (!this.validation.dimensions.call(this)) {
+				return;
+			}
             
-            this.series.names = DV.util.dimension[this.series.dimension].getNames(true);
-            this.category.names = DV.util.dimension[this.category.dimension].getNames(true);
-            this.filter.names = DV.util.dimension[this.filter.dimension].getNames(true, true);
+            this.series.names = DV.util.dimension[this.series.dimension].getNames();
+            this.category.names = DV.util.dimension[this.category.dimension].getNames();
+            this.filter.names = DV.util.dimension[this.filter.dimension].getNames(false, true);
             
-            if (!this.series.names.length || !this.category.names.length || !this.filter.names.length) {
-				this.resetState();
-                return;
-            }
+            if (!this.validation.names.call(this)) {
+				return;
+			}
             
-            if (this.category.names.length < 2 && (this.type == DV.conf.finals.chart.line || this.type == DV.conf.finals.chart.area)) {
-				this.resetState();
-				DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_line_area_categories, DV.i18n.em_line_area_categories, true);
+            if (!this.validation.categories.call(this)) {
 				return;
 			}
             
@@ -1302,39 +1368,11 @@ Ext.onReady( function() {
             this.relativePeriods = DV.util.dimension.period.getRelativePeriodObject();
             this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
             
-            if (this.trendLine) {				
-				if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
-					DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_stacked);
-				}
-				else if (this.type === DV.conf.finals.chart.pie) {
-					DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_pie);
-				}
-				
-				if (this.category.names.length < 2) {
-					DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_categories);
-				}
-			}
-			
-			if (this.targetLineValue) {			
-				if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
-					DV.exe.warnings.push(DV.i18n.wm_targetline_deactivated_stacked);
-				}
-				else if (this.type === DV.conf.finals.chart.pie) {
-					DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_pie);
-				}
-				
-				if (this.category.names.length < 2) {
-					DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_categories);
-				}
-			}
-				
-				
-					
+            this.validation.trendline.call(this);
             
-            if (!this.isRendered) {
-                DV.cmp.toolbar.datatable.enable();
-                this.isRendered = true;
-            }
+            this.validation.targetline.call(this);
+            
+            this.validation.render.call(this);
             
             if (exe) {
                 DV.value.getValues(true);
@@ -1375,16 +1413,16 @@ Ext.onReady( function() {
 							if (DV.mask) {
 								DV.mask.hide();
 							}
-							DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_invalid_uid, DV.i18n.em_invalid_uid, true);
+							DV.util.notification.error(DV.i18n.et_invalid_uid, DV.i18n.em_invalid_uid);
                             return;
                         }
 						
                         var f = Ext.JSON.decode(r.responseText),
                             indiment = [];
                             
-                        if (!DV.util.favorite.validate(f)) {
-                            return;
-                        }
+			if (!DV.util.favorite.validate(f)) {
+				return;
+			}
                         
                         f.type = f.type.toLowerCase();
                         f.series = f.series.toLowerCase();
@@ -1398,36 +1436,57 @@ Ext.onReady( function() {
                         };
                         
                         this.type = f.type;
-                        DV.util.button.type.setValue(this.type);
-                        
-                        this.trendLine = f.regression;
-                        DV.cmp.favorite.trendline.setValue(f.regression);
+						
                         this.hideSubtitle = f.hideSubtitle;
-                        DV.cmp.favorite.hidesubtitle.setValue(f.hideSubtitle);
-                        this.hideLegend = f.hideLegend;
-                        DV.cmp.favorite.hidelegend.setValue(f.hideLegend);
-                        DV.cmp.favorite.userorganisationunit.setValue(f.userOrganisationUnit);
-                        this.domainAxisLabel = f.domainAxisLabel;
-                        DV.cmp.favorite.domainaxislabel.setValue(f.domainAxisLabel);
-                        this.rangeAxisLabel = f.rangeAxisLabel;
-                        DV.cmp.favorite.rangeaxislabel.setValue(f.rangeAxisLabel);
-                        this.targetLineValue = f.targetLineValue ? parseFloat(f.targetLineValue) : null;
-                        DV.cmp.favorite.targetlinevalue.setValue(f.targetLineValue);
-                        DV.cmp.favorite.targetlinelabel.xable();
-                        this.targetLineLabel = f.targetLineLabel ? f.targetLineLabel : null;
-                        DV.cmp.favorite.targetlinelabel.setValue(f.targetLineLabel);
+                        this.hideLegend = f.hideLegend;                        
+                        this.trendLine = f.regression;
                         this.userOrganisationUnit = f.userOrganisationUnit;
-                        DV.cmp.favorite.userorganisationunit.setValue(f.userOrganisationUnit);
+                        this.domainAxisLabel = f.domainAxisLabel;
+                        this.rangeAxisLabel = f.rangeAxisLabel;
+                        this.targetLineValue = f.targetLineValue ? parseFloat(f.targetLineValue) : null;
+                        this.targetLineLabel = f.targetLineLabel ? f.targetLineLabel : null;
                         
                         this.series.dimension = f.series;
-                        DV.cmp.settings.series.setValue(DV.conf.finals.dimension[this.series.dimension].value);
-                        DV.util.combobox.filter.category();
-                        
                         this.category.dimension = f.category;
-                        DV.cmp.settings.category.setValue(DV.conf.finals.dimension[this.category.dimension].value);
-                        DV.util.combobox.filter.filter();
-                        
                         this.filter.dimension = f.filter;
+                        
+                        if (!this.validation.dimensions.call(this)) {
+							return;
+						}
+                        
+                        this.series.names = f.names[this.series.dimension];
+                        this.category.names = f.names[this.category.dimension];
+                        this.filter.names = f.names[this.filter.dimension];
+                        
+						if (!this.validation.names.call(this)) {
+							return;
+						}
+						
+						if (!this.validation.categories.call(this)) {
+							return;
+						}
+						
+						this.validation.trendline.call(this);
+						
+						this.validation.targetline.call(this);
+						
+						this.validation.render.call(this);
+						
+						DV.util.button.type.setValue(this.type);
+						DV.cmp.favorite.hidesubtitle.setValue(this.hideSubtitle);
+						DV.cmp.favorite.hidelegend.setValue(this.hideLegend);
+						DV.cmp.favorite.trendline.setValue(this.trendLine);
+						DV.cmp.favorite.userorganisationunit.setValue(this.userOrganisationUnit);
+						DV.cmp.favorite.domainaxislabel.setValue(this.domainAxisLabel);
+						DV.cmp.favorite.rangeaxislabel.setValue(this.rangeAxisLabel);
+						DV.cmp.favorite.targetlinevalue.setValue(this.targetLineValue);
+						DV.cmp.favorite.targetlinelabel.xable();
+						DV.cmp.favorite.targetlinelabel.setValue(this.targetLineLabel);
+                        
+                        DV.cmp.settings.series.setValue(DV.conf.finals.dimension[this.series.dimension].value);
+                        DV.util.combobox.filter.category();                        
+                        DV.cmp.settings.category.setValue(DV.conf.finals.dimension[this.category.dimension].value);
+                        DV.util.combobox.filter.filter();                        
                         DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[this.filter.dimension].value);
                         
                         DV.store.indicator.selected.removeAll();                        
@@ -1468,10 +1527,6 @@ Ext.onReady( function() {
                             f.names.organisationunit.push(DV.util.string.getEncodedString(f.organisationUnits[i].name));
                             DV.cmp.dimension.organisationunit.treepanel.storage[f.organisationUnits[i].internalId] = DV.util.string.getEncodedString(f.organisationUnits[i].name);
                         }
-                        
-                        this.series.names = f.names[this.series.dimension];
-                        this.category.names = f.names[this.category.dimension];
-                        this.filter.names = f.names[this.filter.dimension];
                                     
                         if (!this.isRendered) {
                             DV.cmp.toolbar.datatable.enable();
@@ -1529,7 +1584,7 @@ Ext.onReady( function() {
                     DV.value.values = DV.util.value.jsonfy(r);
                     if (!DV.value.values.length) {
                         DV.mask.hide();
-                        DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.error_title_no_data, DV.i18n.error_text_no_data, true);
+                        DV.util.notification.error(DV.i18n.error_title_no_data, DV.i18n.error_text_no_data);
                         return;
                     }
                     
@@ -1580,40 +1635,30 @@ Ext.onReady( function() {
                 }
             });
             
-            if (DV.state.type === DV.conf.finals.chart.column || 
-				DV.state.type === DV.conf.finals.chart.bar ||
-				DV.state.type === DV.conf.finals.chart.line) {
-				if (DV.state.trendLine) {
-					if (DV.state.category.names.length < 2) {
-						DV.state.trendLine = false;
-                        DV.util.notification.alert(DV.conf.statusbar.icon.warning, null, DV.i18n.wm_trendline_categories, false);
+			if (DV.state.trendLine) {
+				this.trendLine = [];
+				for (var i = 0; i < DV.state.series.names.length; i++) {
+					var s = DV.state.series.names[i],
+						reg = new SimpleRegression();
+					for (var j = 0; j < DV.chart.data.length; j++) {
+						reg.addData(j, DV.chart.data[j][s]);
 					}
-					else {
-						this.trendLine = [];
-						for (var i = 0; i < DV.state.series.names.length; i++) {
-							var s = DV.state.series.names[i],
-								reg = new SimpleRegression();
-							for (var j = 0; j < DV.chart.data.length; j++) {
-								reg.addData(j, DV.chart.data[j][s]);
-							}
-							var key = DV.conf.finals.data.trendline + s;
-							for (var j = 0; j < DV.chart.data.length; j++) {
-								var n = reg.predict(j);
-								DV.chart.data[j][key] = parseFloat(reg.predict(j).toFixed(1));
-							}
-							this.trendLine.push({
-								key: key,
-								name: DV.i18n.trend + ' (' + s + ')'
-							});
-						}
+					var key = DV.conf.finals.data.trendline + s;
+					for (var j = 0; j < DV.chart.data.length; j++) {
+						var n = reg.predict(j);
+						DV.chart.data[j][key] = parseFloat(reg.predict(j).toFixed(1));
 					}
-				}
-
-				if (DV.state.targetLineValue) {
-					Ext.Array.each(DV.chart.data, function(item) {
-						item[DV.conf.finals.data.targetline] = DV.state.targetLineValue;
+					this.trendLine.push({
+						key: key,
+						name: DV.i18n.trend + ' (' + s + ')'
 					});
 				}
+			}
+
+			if (DV.state.targetLineValue) {
+				Ext.Array.each(DV.chart.data, function(item) {
+					item[DV.conf.finals.data.targetline] = DV.state.targetLineValue;
+				});
 			}
             
             if (exe) {
@@ -1635,7 +1680,7 @@ Ext.onReady( function() {
         },
         column: function(stacked) {
 			var series = [];
-			if (DV.state.trendLine && !stacked) {
+			if (DV.state.trendLine) {
 				var a = DV.util.chart.default.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
@@ -1653,7 +1698,7 @@ Ext.onReady( function() {
 				},				
 				tips: DV.util.chart.default.series.getTips()
 			});
-			if (DV.state.targetLineValue && !stacked) {
+			if (DV.state.targetLineValue) {
 				series.push(DV.util.chart.default.series.getTargetLine());
 			}
 			
@@ -1670,7 +1715,7 @@ Ext.onReady( function() {
         },
         bar: function(stacked) {
 			var series = [];
-			if (DV.state.trendLine && !stacked) {
+			if (DV.state.trendLine) {
 				var a = DV.util.chart.bar.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
@@ -1688,7 +1733,7 @@ Ext.onReady( function() {
 				},
 				tips: DV.util.chart.default.series.getTips()
 			});
-			if (DV.state.targetLineValue && !stacked) {
+			if (DV.state.targetLineValue) {
 				series.push(DV.util.chart.bar.series.getTargetLine());
 			}
 			
@@ -3441,7 +3486,7 @@ Ext.onReady( function() {
                                 var svg = document.getElementsByTagName('svg');
                                 
                                 if (svg.length < 1) {
-									DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_svg_browser, DV.i18n.em_svg_browser, true);
+									DV.util.notification.error(DV.i18n.et_svg_browser, DV.i18n.em_svg_browser);
                                     return;
                                 }
                                 

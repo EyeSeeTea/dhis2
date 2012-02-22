@@ -624,7 +624,7 @@ body {
 /* DV messagebox alert */
 .dv-messagebox .x-window-body-default {
 	background-color: #fff;
-	padding: 8px 8px 12px;
+	padding: 15px;
 	color: #333;
 	font-size: 11px;
 }
