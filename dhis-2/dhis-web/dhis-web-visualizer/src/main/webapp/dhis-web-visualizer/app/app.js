@@ -594,13 +594,18 @@ Ext.onReady( function() {
 			}				
 		},
         mask: {
-            setMask: function(cmp, str) {
+            showMask: function(cmp, str) {
                 if (DV.mask) {
-                    DV.mask.hide();
+                    DV.mask.destroy();
                 }
                 DV.mask = new Ext.LoadMask(cmp, {msg: str});
                 DV.mask.show();
-            }
+            },
+            hideMask: function() {
+				if (DV.mask) {
+					DV.mask.hide();
+				}
+			}
         },
         chart: {
 			default: {
@@ -1018,7 +1023,7 @@ Ext.onReady( function() {
         crud: {
             favorite: {
                 create: function(fn, isUpdate) {
-                    DV.util.mask.setMask(DV.cmp.favorite.window, DV.i18n.saving + '...');
+                    DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.saving + '...');
                     
                     var params = DV.state.getParams();
                     params.name = DV.cmp.favorite.name.getValue();
@@ -1033,7 +1038,7 @@ Ext.onReady( function() {
                         params: params,
                         success: function() {
                             DV.store.favorite.load({callback: function() {
-                                DV.mask.hide();
+                                DV.util.mask.hideMask();
                                 if (fn) {
                                     fn();
                                 }
@@ -1048,7 +1053,7 @@ Ext.onReady( function() {
                     if (DV.store.favorite.findExact('name', name) != -1) {
                         return;
                     }
-                    DV.util.mask.setMask(DV.cmp.favorite.window, DV.i18n.renaming + '...');
+                    DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.renaming + '...');
                     var r = DV.cmp.favorite.grid.getSelectionModel().getSelection()[0];
                     var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;
                     Ext.Ajax.request({
@@ -1057,7 +1062,7 @@ Ext.onReady( function() {
                         success: function() {
                             DV.store.favorite.load({callback: function() {
                                 DV.cmp.favorite.rename.window.close();
-                                DV.mask.hide();
+                                DV.util.mask.hideMask();
                                 DV.cmp.favorite.grid.getSelectionModel().select(DV.store.favorite.getAt(DV.store.favorite.findExact('name', name)));
                                 DV.cmp.favorite.name.setValue(name);
                             }});
@@ -1065,7 +1070,7 @@ Ext.onReady( function() {
                     });
                 },
                 del: function(fn) {
-                    DV.util.mask.setMask(DV.cmp.favorite.window, DV.i18n.deleting + '...');
+                    DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.deleting + '...');
                     var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_delete,
                         selection = DV.cmp.favorite.grid.getSelectionModel().getSelection();
                     Ext.Array.each(selection, function(item) {
@@ -1075,7 +1080,7 @@ Ext.onReady( function() {
                         url: baseurl,
                         success: function() {
                             DV.store.favorite.load({callback: function() {
-                                DV.mask.hide();
+                                DV.util.mask.hideMask();
                                 if (fn) {
                                     fn();
                                 }
@@ -1083,15 +1088,6 @@ Ext.onReady( function() {
                         }
                     }); 
                 }
-            }
-        },
-        favorite: {
-            validate: function(f) {				
-                if (!f.organisationUnits || !f.organisationUnits.length) {
-                    alert(DV.i18n.favorite_no_orgunits);
-                    return false;
-                }
-                return true;
             }
         }
     };
@@ -1329,6 +1325,21 @@ Ext.onReady( function() {
 					DV.cmp.toolbar.datatable.enable();
 					this.isRendered = true;
 				}
+			},
+			response: function(r) {
+				if (!r.responseText) {
+					DV.util.mask.hideMask();
+					DV.util.notification.error(DV.i18n.et_invalid_uid, DV.i18n.em_invalid_uid);
+					return false;
+				}
+				return true;
+			},
+			favorite: function(f) {				
+				if (!f.organisationUnits || !f.organisationUnits.length) {
+					alert(DV.i18n.favorite_no_orgunits);
+					return false;
+				}
+				return true;
 			}
 		},
         getState: function(exe) {
@@ -1409,26 +1420,24 @@ Ext.onReady( function() {
                     url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + uid + '.json?links=false',
                     scope: this,
                     success: function(r) {
-                        if (!r.responseText) {
-							if (DV.mask) {
-								DV.mask.hide();
-							}
-							DV.util.notification.error(DV.i18n.et_invalid_uid, DV.i18n.em_invalid_uid);
-                            return;
-                        }
+						if (!this.validation.response.call(this, r)) {
+							return;
+						}
 						
                         var f = Ext.JSON.decode(r.responseText),
-                            indiment = [];
+							indiment = [],
+							irec = [],
+							drec = [];
                             
-			if (!DV.util.favorite.validate(f)) {
-				return;
-			}
+						if (!this.validation.favorite(f)) {
+							return;
+						}
                         
                         f.type = f.type.toLowerCase();
                         f.series = f.series.toLowerCase();
                         f.category = f.category.toLowerCase();
-                        f.filter = f.filter.toLowerCase();
-                        
+                        f.filter = f.filter.toLowerCase();        
+                                        
                         f.names = {
                             data: [],
                             period: [],
@@ -1453,14 +1462,6 @@ Ext.onReady( function() {
                         if (!this.validation.dimensions.call(this)) {
 							return;
 						}
-                        
-                        this.series.names = f.names[this.series.dimension];
-                        this.category.names = f.names[this.category.dimension];
-                        this.filter.names = f.names[this.filter.dimension];
-                        
-						if (!this.validation.names.call(this)) {
-							return;
-						}
 						
 						if (!this.validation.categories.call(this)) {
 							return;
@@ -1470,56 +1471,25 @@ Ext.onReady( function() {
 						
 						this.validation.targetline.call(this);
 						
-						this.validation.render.call(this);
-						
-						DV.util.button.type.setValue(this.type);
-						DV.cmp.favorite.hidesubtitle.setValue(this.hideSubtitle);
-						DV.cmp.favorite.hidelegend.setValue(this.hideLegend);
-						DV.cmp.favorite.trendline.setValue(this.trendLine);
-						DV.cmp.favorite.userorganisationunit.setValue(this.userOrganisationUnit);
-						DV.cmp.favorite.domainaxislabel.setValue(this.domainAxisLabel);
-						DV.cmp.favorite.rangeaxislabel.setValue(this.rangeAxisLabel);
-						DV.cmp.favorite.targetlinevalue.setValue(this.targetLineValue);
-						DV.cmp.favorite.targetlinelabel.xable();
-						DV.cmp.favorite.targetlinelabel.setValue(this.targetLineLabel);
-                        
-                        DV.cmp.settings.series.setValue(DV.conf.finals.dimension[this.series.dimension].value);
-                        DV.util.combobox.filter.category();                        
-                        DV.cmp.settings.category.setValue(DV.conf.finals.dimension[this.category.dimension].value);
-                        DV.util.combobox.filter.filter();                        
-                        DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[this.filter.dimension].value);
-                        
-                        DV.store.indicator.selected.removeAll();                        
-                        DV.store.dataelement.selected.removeAll();                        
-                        
                         if (f.indicators) {
-                            var records = [];
                             for (var i = 0; i < f.indicators.length; i++) {
                                 indiment.push(f.indicators[i]);
                                 this.indicatorIds.push(f.indicators[i].internalId);
-                                records.push({id: f.indicators[i].internalId, s: DV.util.string.getEncodedString(f.indicators[i].shortName), name: DV.util.string.getEncodedString(f.indicators[i].shortName), parent: null});
+                                irec.push({id: f.indicators[i].internalId, s: DV.util.string.getEncodedString(f.indicators[i].shortName), name: DV.util.string.getEncodedString(f.indicators[i].shortName), parent: null});
                             }
-                            DV.store.indicator.selected.add(records);
-                            DV.util.store.addToStorage(DV.store.indicator.available, records);
-                            DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
-                        }
+                        }                        
                         if (f.dataElements) {
-                            var records = [];
                             for (var i = 0; i < f.dataElements.length; i++) {
                                 indiment.push(f.dataElements[i]);
                                 this.dataelementIds.push(f.dataElements[i].internalId);
-                                records.push({id: f.dataElements[i].internalId, s: DV.util.string.getEncodedString(f.dataElements[i].shortName), name: DV.util.string.getEncodedString(f.dataElements[i].shortName), parent: null});
+                                drec.push({id: f.dataElements[i].internalId, s: DV.util.string.getEncodedString(f.dataElements[i].shortName), name: DV.util.string.getEncodedString(f.dataElements[i].shortName), parent: null});
                             }
-                            DV.store.dataelement.selected.add(records);
-                            DV.util.store.addToStorage(DV.store.dataelement.available, records);
-                            DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
                         }
                         for (var i = 0; i < indiment.length; i++) {
                             f.names.data.push(DV.util.string.getEncodedString(indiment[i].shortName));
                         }
                         
                         this.relativePeriods = f.relativePeriods;
-                        DV.util.checkbox.setRelativePeriods(this.relativePeriods);
                         f.names.period = DV.util.dimension.period.getNamesByRelativePeriodsObject(this.relativePeriods);
                         
                         for (var i = 0; i < f.organisationUnits.length; i++) {
@@ -1527,11 +1497,18 @@ Ext.onReady( function() {
                             f.names.organisationunit.push(DV.util.string.getEncodedString(f.organisationUnits[i].name));
                             DV.cmp.dimension.organisationunit.treepanel.storage[f.organisationUnits[i].internalId] = DV.util.string.getEncodedString(f.organisationUnits[i].name);
                         }
-                                    
-                        if (!this.isRendered) {
-                            DV.cmp.toolbar.datatable.enable();
-                            this.isRendered = true;
-                        }
+                        
+                        this.series.names = f.names[this.series.dimension];
+                        this.category.names = f.names[this.category.dimension];
+                        this.filter.names = f.names[this.filter.dimension];
+                        
+						if (!this.validation.names.call(this)) {
+							return;
+						}
+						
+						this.validation.render.call(this);
+						
+						this.setUI(f, irec, drec);
                         
                         if (exe) {
                             DV.value.getValues(true);
@@ -1540,6 +1517,41 @@ Ext.onReady( function() {
                 });
             }
         },
+        setUI: function(f, irec, drec) {
+			DV.util.button.type.setValue(this.type);
+			
+			DV.cmp.favorite.hidesubtitle.setValue(this.hideSubtitle);
+			DV.cmp.favorite.hidelegend.setValue(this.hideLegend);
+			DV.cmp.favorite.trendline.setValue(this.trendLine);
+			DV.cmp.favorite.userorganisationunit.setValue(this.userOrganisationUnit);
+			DV.cmp.favorite.domainaxislabel.setValue(this.domainAxisLabel);
+			DV.cmp.favorite.rangeaxislabel.setValue(this.rangeAxisLabel);
+			DV.cmp.favorite.targetlinevalue.setValue(this.targetLineValue);
+			DV.cmp.favorite.targetlinelabel.xable();
+			DV.cmp.favorite.targetlinelabel.setValue(this.targetLineLabel);
+
+			DV.cmp.settings.series.setValue(DV.conf.finals.dimension[this.series.dimension].value);
+			DV.util.combobox.filter.category();                        
+			DV.cmp.settings.category.setValue(DV.conf.finals.dimension[this.category.dimension].value);
+			DV.util.combobox.filter.filter();                        
+			DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[this.filter.dimension].value);
+									
+			DV.store.indicator.selected.removeAll();
+			if (f.indicators) {
+				DV.store.indicator.selected.add(irec);
+				DV.util.store.addToStorage(DV.store.indicator.available, irec);
+				DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+			}
+									
+			DV.store.dataelement.selected.removeAll();
+			if (f.dataElements) {
+				DV.store.dataelement.selected.add(drec);
+				DV.util.store.addToStorage(DV.store.dataelement.available, drec);
+				DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
+			}
+
+			DV.util.checkbox.setRelativePeriods(this.relativePeriods);
+		},						
         resetState: function() {
             this.type = DV.conf.finals.chart.column;
             this.series.dimension = null;
@@ -1555,18 +1567,18 @@ Ext.onReady( function() {
 			this.hideSubtitle = false,
             this.hideLegend = false;
 			this.trendLine = null;
+			this.userOrganisationUnit = false;
 			this.domainAxisLabel = null;
 			this.rangeAxisLabel = null;
 			this.targetLineValue = null;
 			this.targetLineLabel = null;
-			this.userOrganisationUnit = false;
         }
     };
     
     DV.value = {
         values: [],
         getValues: function(exe) {
-            DV.util.mask.setMask(DV.cmp.region.center, DV.i18n.loading);
+            DV.util.mask.showMask(DV.cmp.region.center, DV.i18n.loading);
             
             var params = [];
             params = params.concat(DV.util.dimension[DV.state.series.dimension].getUrl());
@@ -1582,8 +1594,9 @@ Ext.onReady( function() {
                 url: baseurl,
                 success: function(r) {                    
                     DV.value.values = DV.util.value.jsonfy(r);
+                    
                     if (!DV.value.values.length) {
-                        DV.mask.hide();
+						DV.util.mask.hideMask();
                         DV.util.notification.error(DV.i18n.error_title_no_data, DV.i18n.error_text_no_data);
                         return;
                     }
@@ -1825,7 +1838,7 @@ Ext.onReady( function() {
             DV.cmp.region.center.add(this.chart);
             
             if (DV.init.cmd !== DV.conf.finals.cmd.init) {
-                DV.mask.hide();
+                DV.util.mask.hideMask();
                 DV.store.getDataTableStore(true);
             }
             else {
