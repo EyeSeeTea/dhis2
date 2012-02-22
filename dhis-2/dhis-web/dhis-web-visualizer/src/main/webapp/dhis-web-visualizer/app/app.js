@@ -760,7 +760,7 @@ Ext.onReady( function() {
 					setTheme: function() {
 						var colors = DV.conf.chart.theme.dv1.slice(0, DV.state.series.names.length);						
 						if (DV.state.targetLineValue) {
-							colors.push('051a2e', '#051a2e');
+							colors.push('#051a2e', '#051a2e');
 						}						
 						Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
 							constructor: function(config) {
