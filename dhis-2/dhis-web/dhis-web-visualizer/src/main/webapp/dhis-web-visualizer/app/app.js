@@ -138,6 +138,7 @@ DV.conf = {
             pdf: 'pdf'
         },
         cmd: {
+			chartid: 'id',
             init: 'init'
         }
     },
@@ -152,7 +153,7 @@ DV.conf = {
     },
     statusbar: {
 		icon: {
-			error: 'error.png',
+			error: 'error_s.png',
 			warning: 'warning.png',
 			ok: 'ok.png'
 		}
@@ -191,7 +192,7 @@ Ext.onReady( function() {
         DV.conf.init.example.setState();
         DV.conf.init.example.setValues();
         
-        DV.init.cmd = DV.util.getUrlParam('uid') || DV.conf.finals.cmd.init;
+        DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.chartid) || DV.conf.finals.cmd.init;
         DV.exe.execute(true, DV.init.cmd);
     };
     
@@ -425,9 +426,12 @@ Ext.onReady( function() {
                         });
                     }
                     if (exception && !a.length) {
-                        alert(DV.i18n.alert_no_indicators_selected);
+						DV.util.notification.error(DV.i18n.et_no_indicators_dataelements, DV.i18n.em_no_indicators_dataelements);
                     }
-                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+                    if (isFilter && a.length > 1) {
+						DV.exe.warnings.push(DV.i18n.wm_first_filter_unit);
+					}
+					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 }                    
             },
             period: {
@@ -453,8 +457,11 @@ Ext.onReady( function() {
                         }
                     });
                     if (exception && !a.length) {
-                        alert(DV.i18n.no_periods_selected);
+						DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
                     }
+                    if (isFilter && a.length > 1) {
+						DV.exe.warnings.push(DV.i18n.wm_first_filter_unit);
+					}
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
                 getNamesByRelativePeriodsObject: function(rp) {
@@ -492,7 +499,7 @@ Ext.onReady( function() {
                         }
                     });
                     if (exception && !a.length) {
-                        alert(DV.i18n.no_periods_selected);
+						DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_no_periods, DV.i18n.em_no_periods, true);
                     }
                     return a;
                 },
@@ -505,7 +512,7 @@ Ext.onReady( function() {
                         valid = item.getValue() ? true : valid;
                     });
                     if (exception && !valid) {
-                        alert(DV.i18n.no_periods_selected);
+						DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_no_periods, DV.i18n.em_no_periods, true);
                     }
                     return a;
                 }   
@@ -530,7 +537,10 @@ Ext.onReady( function() {
 						a.push(DV.util.string.getEncodedString(r.data.text));
 					});
 					if (exception && !a.length) {
-						alert(DV.i18n.no_orgunits_selected);
+						DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
+					}
+                    if (isFilter && a.length > 1 && !DV.state.userOrganisationUnit) {
+						DV.exe.warnings.push(DV.i18n.wm_first_filter_unit);
 					}
                     return DV.state.userOrganisationUnit ? [DV.init.system.user.organisationUnit.name] : (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
@@ -546,12 +556,43 @@ Ext.onReady( function() {
 						a.push(r.data.id);
 					});
 					if (exception && !a.length) {
-						alert(DV.i18n.no_orgunits_selected);
+						DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits, true);
 					}
                     return DV.state.userOrganisationUnit ? [DV.init.system.user.organisationUnit.id] : a;
                 }                    
             }
         },
+        notification: {
+			error: function(title, text) {
+				title = title || '';
+				text = text || '';
+				Ext.create('Ext.window.Window', {
+					title: title,
+					cls: 'dv-messagebox',
+					iconCls: 'dv-window-title-messagebox',
+					modal: true,
+					width: 300,
+					items: [
+						{
+							xtype: 'label',
+							width: 40,
+							text: text
+						}
+					]
+				}).show();
+				DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
+				DV.cmp.statusbar.panel.update('<img src="images/' + DV.conf.statusbar.icon.error + '" style="padding:0 5px 0 0"/>' + text);
+			},
+			warning: function(text) {
+				text = text || '';
+				DV.cmp.statusbar.panel.update('<img src="images/' + DV.conf.statusbar.icon.warning + '" style="padding:0 5px 0 0"/>' + text);
+				DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
+			},
+			ok: function() {
+				DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
+				DV.cmp.statusbar.panel.update('<img src="images/' + DV.conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>&nbsp;&nbsp;');
+			}				
+		},
         mask: {
             setMask: function(cmp, str) {
                 if (DV.mask) {
@@ -1005,7 +1046,6 @@ Ext.onReady( function() {
                 },
                 updateName: function(name) {
                     if (DV.store.favorite.findExact('name', name) != -1) {
-                        alert(DV.i18n.name_already_in_use);
                         return;
                     }
                     DV.util.mask.setMask(DV.cmp.favorite.window, DV.i18n.renaming + '...');
@@ -1221,8 +1261,6 @@ Ext.onReady( function() {
         userOrganisationUnit: false,
         isRendered: false,
         getState: function(exe) {
-            this.resetState();
-            
             this.type = DV.util.button.type.getValue();
             
             this.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
@@ -1240,7 +1278,7 @@ Ext.onReady( function() {
             
             if (!this.series.dimension || !this.category.dimension || !this.filter.dimension) {
 				this.resetState();
-				alert(DV.i18n.select_dimensions);
+				DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_missing_dimensions, DV.i18n.em_missing_dimensions, true);
                 return;
             }
             
@@ -1253,14 +1291,9 @@ Ext.onReady( function() {
                 return;
             }
             
-            if (this.type == DV.conf.finals.chart.line && this.category.names.length < 2) {
+            if (this.category.names.length < 2 && (this.type == DV.conf.finals.chart.line || this.type == DV.conf.finals.chart.area)) {
 				this.resetState();
-				alert(DV.i18n.line_chart + ': ' + DV.i18n.min_two_categories);
-				return;
-			}            
-            if (this.type == DV.conf.finals.chart.area && this.category.names.length < 2) {
-				this.resetState();
-				alert(DV.i18n.area_chart + ': ' + DV.i18n.min_two_categories);
+				DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_line_area_categories, DV.i18n.em_line_area_categories, true);
 				return;
 			}
             
@@ -1268,6 +1301,35 @@ Ext.onReady( function() {
             this.dataelementIds = DV.util.dimension.dataelement.getIds();
             this.relativePeriods = DV.util.dimension.period.getRelativePeriodObject();
             this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
+            
+            if (this.trendLine) {				
+				if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
+					DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_stacked);
+				}
+				else if (this.type === DV.conf.finals.chart.pie) {
+					DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_pie);
+				}
+				
+				if (this.category.names.length < 2) {
+					DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_categories);
+				}
+			}
+			
+			if (this.targetLineValue) {			
+				if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
+					DV.exe.warnings.push(DV.i18n.wm_targetline_deactivated_stacked);
+				}
+				else if (this.type === DV.conf.finals.chart.pie) {
+					DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_pie);
+				}
+				
+				if (this.category.names.length < 2) {
+					DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_categories);
+				}
+			}
+				
+				
+					
             
             if (!this.isRendered) {
                 DV.cmp.toolbar.datatable.enable();
@@ -1305,7 +1367,6 @@ Ext.onReady( function() {
         },
         setFavorite: function(exe, uid) {
             if (uid) {
-                this.resetState();
                 Ext.Ajax.request({
                     url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + uid + '.json?links=false',
                     scope: this,
@@ -1314,7 +1375,7 @@ Ext.onReady( function() {
 							if (DV.mask) {
 								DV.mask.hide();
 							}
-                            alert(DV.i18n.invalid_uid);
+							DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_invalid_uid, DV.i18n.em_invalid_uid, true);
                             return;
                         }
 						
@@ -1425,7 +1486,7 @@ Ext.onReady( function() {
             }
         },
         resetState: function() {
-            this.type = null;
+            this.type = DV.conf.finals.chart.column;
             this.series.dimension = null;
             this.series.names = [];
             this.category.dimension = null;
@@ -1468,7 +1529,7 @@ Ext.onReady( function() {
                     DV.value.values = DV.util.value.jsonfy(r);
                     if (!DV.value.values.length) {
                         DV.mask.hide();
-                        alert(DV.i18n.no_data);
+                        DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.error_title_no_data, DV.i18n.error_text_no_data, true);
                         return;
                     }
                     
@@ -1521,11 +1582,11 @@ Ext.onReady( function() {
             
             if (DV.state.type === DV.conf.finals.chart.column || 
 				DV.state.type === DV.conf.finals.chart.bar ||
-				DV.state.type === DV.conf.finals.chart.line) {			
+				DV.state.type === DV.conf.finals.chart.line) {
 				if (DV.state.trendLine) {
 					if (DV.state.category.names.length < 2) {
 						DV.state.trendLine = false;
-						alert(DV.i18n.trend_line + ': ' + DV.i18n.min_two_categories);
+                        DV.util.notification.alert(DV.conf.statusbar.icon.warning, null, DV.i18n.wm_trendline_categories, false);
 					}
 					else {
 						this.trendLine = [];
@@ -1724,6 +1785,7 @@ Ext.onReady( function() {
             }
             else {
                 DV.init.cmd = false;
+				DV.util.notification.ok();
             }
         }
     };
@@ -1776,11 +1838,21 @@ Ext.onReady( function() {
             DV.cmp.region.east.removeAll(true);
             DV.cmp.region.east.add(this.datatable);
             DV.init.cmd = false;
+            
+            if (DV.exe.warnings.length) {
+				DV.util.notification.warning(DV.exe.getWarningsText());
+			}
+			else {
+				DV.util.notification.ok();
+			}
         }            
     };
     
     DV.exe = {
         execute: function(exe, cmd) {
+			DV.state.resetState();
+			DV.exe.warnings = [];
+			
             if (cmd) {
                 if (cmd === DV.conf.finals.cmd.init) {
                     DV.chart.getData(exe);
@@ -1795,7 +1867,15 @@ Ext.onReady( function() {
         },
         datatable: function(exe) {
             DV.store.getDataTableStore(exe);
-        }
+        },
+        warnings: [],
+        getWarningsText: function() {
+			var t = '';
+			for (var i = 0; i < this.warnings.length; i++) {
+				t += this.warnings[i] + ' ';
+			}
+			return t;
+		}				
     };
         
     DV.viewport = Ext.create('Ext.container.Viewport', {
@@ -3360,7 +3440,7 @@ Ext.onReady( function() {
                                 var svg = document.getElementsByTagName('svg');
                                 
                                 if (svg.length < 1) {
-                                    alert(DV.i18n.alert_browser_download);
+									DV.util.notification.alert(DV.conf.statusbar.icon.error, DV.i18n.et_svg_browser, DV.i18n.em_svg_browser, true);
                                     return;
                                 }
                                 
@@ -3433,30 +3513,6 @@ Ext.onReady( function() {
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
-                            text: 'test',
-                            handler: function() {
-								DV.cmp.toolbar.bbar.setStatus(DV.conf.statusbar.icon.error, 'No data returned from server');
-                            }
-                        },
-                        {
-                            xtype: 'button',
-							cls: 'dv-toolbar-btn-2',
-                            text: 'test',
-                            handler: function() {
-								DV.cmp.toolbar.bbar.setStatus(DV.conf.statusbar.icon.warning, '5 filter units selected. Only the first one was used. ');
-                            }
-                        },
-                        {
-                            xtype: 'button',
-							cls: 'dv-toolbar-btn-2',
-                            text: 'test',
-                            handler: function() {
-								DV.cmp.toolbar.bbar.setStatus(DV.conf.statusbar.icon.ok, '');
-                            }
-                        },
-                        {
-                            xtype: 'button',
-							cls: 'dv-toolbar-btn-2',
                             text: 'Exit',
                             handler: function() {
                                 window.location.href = DV.conf.finals.ajax.path_portal + DV.conf.finals.ajax.redirect;
@@ -3483,14 +3539,9 @@ Ext.onReady( function() {
                     ]
                 },
                 bbar: {
-					setStatus: function(icon, text) {
-						DV.cmp.statusbar.panel.update('<img src="images/' + icon + '" style="padding:0 5px 0 0"/>' + text);
-						//DV.cmp.statusbar.panel.setWidth(DV.
-					},
 					items: [
 						{
 							xtype: 'panel',
-							width: 500,
 							height: 23,
 							bodyStyle: 'padding:5px 0 0 6px; border:0 none; background-color:transparent; color:#555; vertical-align:top; font-size:10px',
 							listeners: {
