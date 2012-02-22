@@ -1256,103 +1256,10 @@ Ext.onReady( function() {
         trendLine: null,
         userOrganisationUnit: false,
         isRendered: false,
-        validation: {
-			dimensions: function() {
-				if (!this.series.dimension || !this.category.dimension || !this.filter.dimension) {
-					DV.util.notification.error(DV.i18n.et_invalid_dimension_setup, DV.i18n.em_invalid_dimension_setup);
-					return false;
-				}
-				return true;
-			},
-			names: function() {            
-				if (!this.series.names.length) {
-					DV.util.notification.error(DV.i18n.et_no_indicators_dataelements, DV.i18n.em_no_indicators_dataelements);
-					return false;
-				}           
-				if (!this.category.names.length) {
-					DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
-					return false;
-				}           
-				if (!this.filter.names.length) {
-					DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
-					return false;
-				}
-				return true;
-			},
-			categories: function() {
-				if (this.category.names.length < 2 && (this.type === DV.conf.finals.chart.line || this.type === DV.conf.finals.chart.area)) {
-					DV.util.notification.error(DV.i18n.et_line_area_categories, DV.i18n.em_line_area_categories);
-					return false;
-				}
-				return true;
-			},
-			trendline: function() {            
-				if (this.trendLine) {
-					if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
-						DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_stacked);
-						this.trendLine = false;
-					}
-					else if (this.type === DV.conf.finals.chart.pie) {
-						DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_pie);
-						this.trendLine = false;
-					}
-					
-					if (this.category.names.length < 2) {
-						DV.exe.warnings.push(DV.i18n.wm_trendline_deactivated_categories);
-						this.trendLine = false;
-					}
-				}
-			},
-			targetline: function() {			
-				if (this.targetLineValue) {
-					if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
-						DV.exe.warnings.push(DV.i18n.wm_targetline_deactivated_stacked);
-						this.targetLineValue = null;
-					}
-					else if (this.type === DV.conf.finals.chart.pie) {
-						DV.exe.warnings.push(DV.i18n.wm_targetline_deactivated_pie);
-						this.targetLineValue = null;
-					}
-					
-					if (this.category.names.length < 2) {
-						DV.exe.warnings.push(DV.i18n.wm_targetline_deactivated_categories);
-						this.targetLineValue = null;
-					}
-				}
-			},
-			render: function() {
-				if (!this.isRendered) {
-					DV.cmp.toolbar.datatable.enable();
-					this.isRendered = true;
-				}
-			},
-			response: function(r) {
-				if (!r.responseText) {
-					DV.util.mask.hideMask();
-					DV.util.notification.error(DV.i18n.et_invalid_uid, DV.i18n.em_invalid_uid);
-					return false;
-				}
-				return true;
-			},
-			favorite: function(f) {				
-				if (!f.organisationUnits || !f.organisationUnits.length) {
-					alert(DV.i18n.favorite_no_orgunits);
-					return false;
-				}
-				return true;
-			}
-		},
         getState: function(exe) {
             this.type = DV.util.button.type.getValue();
             
-            this.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
-            this.hideLegend = DV.cmp.favorite.hidelegend.getValue();
-            this.trendLine = DV.cmp.favorite.trendline.getValue();
-            this.userOrganisationUnit = DV.cmp.favorite.userorganisationunit.getValue();
-            this.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
-            this.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
-            this.targetLineValue = parseFloat(DV.cmp.favorite.targetlinevalue.getValue());
-            this.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
+            this.getOptions();
             
             this.series.dimension = DV.cmp.settings.series.getValue();
             this.category.dimension = DV.cmp.settings.category.getValue();
@@ -1389,8 +1296,18 @@ Ext.onReady( function() {
                 DV.value.getValues(true);
             }
         },
+        getOptions: function() {            
+            this.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
+            this.hideLegend = DV.cmp.favorite.hidelegend.getValue();
+            this.trendLine = DV.cmp.favorite.trendline.getValue();
+            this.userOrganisationUnit = DV.cmp.favorite.userorganisationunit.getValue();
+            this.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
+            this.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
+            this.targetLineValue = parseFloat(DV.cmp.favorite.targetlinevalue.getValue());
+            this.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
+		},
         getParams: function() {
-            this.getState();
+            //this.getState();
             var obj = {};
             obj.type = this.type.toUpperCase();
             
@@ -1427,7 +1344,7 @@ Ext.onReady( function() {
                         var f = Ext.JSON.decode(r.responseText),
 							indiment = [],
 							irec = [],
-							drec = [];
+							drec = [];	
                             
 						if (!this.validation.favorite(f)) {
 							return;
@@ -1518,23 +1435,23 @@ Ext.onReady( function() {
             }
         },
         setUI: function(f, irec, drec) {
-			DV.util.button.type.setValue(this.type);
+			DV.util.button.type.setValue(f.type);
 			
-			DV.cmp.favorite.hidesubtitle.setValue(this.hideSubtitle);
-			DV.cmp.favorite.hidelegend.setValue(this.hideLegend);
-			DV.cmp.favorite.trendline.setValue(this.trendLine);
-			DV.cmp.favorite.userorganisationunit.setValue(this.userOrganisationUnit);
-			DV.cmp.favorite.domainaxislabel.setValue(this.domainAxisLabel);
-			DV.cmp.favorite.rangeaxislabel.setValue(this.rangeAxisLabel);
-			DV.cmp.favorite.targetlinevalue.setValue(this.targetLineValue);
+			DV.cmp.favorite.hidesubtitle.setValue(f.hideSubtitle);
+			DV.cmp.favorite.hidelegend.setValue(f.hideLegend);
+			DV.cmp.favorite.trendline.setValue(f.regression);
+			DV.cmp.favorite.userorganisationunit.setValue(f.userOrganisationUnit);
+			DV.cmp.favorite.domainaxislabel.setValue(f.domainAxisLabel);
+			DV.cmp.favorite.rangeaxislabel.setValue(f.rangeAxisLabel);
+			DV.cmp.favorite.targetlinevalue.setValue(f.targetLineValue);
 			DV.cmp.favorite.targetlinelabel.xable();
-			DV.cmp.favorite.targetlinelabel.setValue(this.targetLineLabel);
+			DV.cmp.favorite.targetlinelabel.setValue(f.targetLineLabel);
 
-			DV.cmp.settings.series.setValue(DV.conf.finals.dimension[this.series.dimension].value);
+			DV.cmp.settings.series.setValue(DV.conf.finals.dimension[f.series].value);
 			DV.util.combobox.filter.category();                        
-			DV.cmp.settings.category.setValue(DV.conf.finals.dimension[this.category.dimension].value);
+			DV.cmp.settings.category.setValue(DV.conf.finals.dimension[f.category].value);
 			DV.util.combobox.filter.filter();                        
-			DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[this.filter.dimension].value);
+			DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[f.filter].value);
 									
 			DV.store.indicator.selected.removeAll();
 			if (f.indicators) {
@@ -1550,7 +1467,7 @@ Ext.onReady( function() {
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
 			}
 
-			DV.util.checkbox.setRelativePeriods(this.relativePeriods);
+			DV.util.checkbox.setRelativePeriods(f.relativePeriods);
 		},						
         resetState: function() {
             this.type = DV.conf.finals.chart.column;
@@ -1572,7 +1489,115 @@ Ext.onReady( function() {
 			this.rangeAxisLabel = null;
 			this.targetLineValue = null;
 			this.targetLineLabel = null;
-        }
+        },
+        validation: {
+			dimensions: function() {
+				if (!this.series.dimension || !this.category.dimension || !this.filter.dimension) {
+					DV.util.notification.error(DV.i18n.et_invalid_dimension_setup, DV.i18n.em_invalid_dimension_setup);
+					return false;
+				}
+				return true;
+			},
+			names: function() {            
+				if (!this.series.names.length) {
+					DV.util.notification.error(DV.i18n.et_no_indicators_dataelements, DV.i18n.em_no_indicators_dataelements);
+					return false;
+				}           
+				if (!this.category.names.length) {
+					DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
+					return false;
+				}           
+				if (!this.filter.names.length) {
+					DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
+					return false;
+				}
+				return true;
+			},
+			categories: function() {
+				if (this.category.names.length < 2 && (this.type === DV.conf.finals.chart.line || this.type === DV.conf.finals.chart.area)) {
+					DV.util.notification.error(DV.i18n.et_line_area_categories, DV.i18n.em_line_area_categories);
+					return false;
+				}
+				return true;
+			},
+			trendline: function() {
+				if (this.trendLine) {
+					var reasons = [];
+					if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
+						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
+						this.trendLine = false;
+					}
+					else if (this.type === DV.conf.finals.chart.pie) {
+						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
+						this.trendLine = false;
+					}
+					
+					if (this.category.names.length < 2) {
+						reasons.push(DV.i18n.wm_required_categories);
+						this.trendLine = false;
+					}
+					
+					if (reasons.length) {
+						var text = DV.i18n.wm_trendline_deactivated + ' (';
+						for (var i = 0; i < reasons.length; i++) {
+							text += i > 0 ? ' + ' : '';
+							text += reasons[i];
+						}
+						text += ').';
+						DV.exe.warnings.push(text);
+					}
+				}
+			},
+			targetline: function() {			
+				if (this.targetLineValue) {
+					var reasons = [];
+					if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
+						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
+						this.targetLineValue = null;
+					}
+					else if (this.type === DV.conf.finals.chart.pie) {
+						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
+						this.targetLineValue = null;
+					}
+					
+					if (this.category.names.length < 2) {
+						reasons.push(DV.i18n.wm_required_categories);
+						this.targetLineValue = null;
+					}
+					
+					if (reasons.length) {
+						var text = DV.i18n.wm_targetline_deactivated + ' (';
+						for (var i = 0; i < reasons.length; i++) {
+							text += i > 0 ? ' + ' : '';
+							text += reasons[i];
+						}
+						text += ').';
+						DV.exe.warnings.push(text);
+					}
+				}
+			},
+			render: function() {
+				if (!this.isRendered) {
+					DV.cmp.toolbar.datatable.enable();
+					this.isRendered = true;
+				}
+			},
+			response: function(r) {
+				if (!r.responseText) {
+					DV.util.mask.hideMask();
+					DV.util.notification.error(DV.i18n.et_invalid_uid, DV.i18n.em_invalid_uid);
+					return false;
+				}
+				return true;
+			},
+			favorite: function(f) {				
+				if (!f.organisationUnits || !f.organisationUnits.length) {
+					alert(DV.i18n.favorite_no_orgunits);
+					return false;
+				}
+				return true;
+			}
+		}
     };
     
     DV.value = {
@@ -1597,7 +1622,7 @@ Ext.onReady( function() {
                     
                     if (!DV.value.values.length) {
 						DV.util.mask.hideMask();
-                        DV.util.notification.error(DV.i18n.error_title_no_data, DV.i18n.error_text_no_data);
+                        DV.util.notification.error(DV.i18n.et_no_data, DV.i18n.em_no_data);
                         return;
                     }
                     
@@ -1834,16 +1859,15 @@ Ext.onReady( function() {
             });
         },
         reload: function() {
+			DV.state.getOptions();
             DV.cmp.region.center.removeAll(true);
-            DV.cmp.region.center.add(this.chart);
+            DV.cmp.region.center.add(this.chart);            
             
-            if (DV.init.cmd !== DV.conf.finals.cmd.init) {
-                DV.util.mask.hideMask();
-                DV.store.getDataTableStore(true);
+            if (DV.init.cmd === DV.conf.finals.cmd.init) {
+				DV.exe.finalize();
             }
             else {
-                DV.init.cmd = false;
-				DV.util.notification.ok();
+                DV.store.getDataTableStore(true);
             }
         }
     };
@@ -1895,21 +1919,14 @@ Ext.onReady( function() {
         reload: function() {
             DV.cmp.region.east.removeAll(true);
             DV.cmp.region.east.add(this.datatable);
-            DV.init.cmd = false;
             
-            if (DV.exe.warnings.length) {
-				DV.util.notification.warning(DV.exe.getWarningsText());
-			}
-			else {
-				DV.util.notification.ok();
-			}
+            DV.exe.finalize();
         }            
     };
     
     DV.exe = {
         execute: function(exe, cmd) {
-			DV.exe.warnings = [];
-			
+			DV.exe.warnings = [];			
             if (cmd) {
                 if (cmd === DV.conf.finals.cmd.init) {
                     DV.chart.getData(exe);
@@ -1924,11 +1941,19 @@ Ext.onReady( function() {
                 DV.state.getState(exe);
             }
         },
-        datatable: function(exe) {
-            DV.store.getDataTableStore(exe);
+        finalize: function() {
+			DV.init.cmd = false;
+			DV.util.mask.hideMask();
+            
+            if (DV.exe.warnings.length) {
+				DV.util.notification.warning(DV.exe.getWarnings());
+			}
+			else {
+				DV.util.notification.ok();
+			}
         },
         warnings: [],
-        getWarningsText: function() {
+        getWarnings: function() {
 			var t = '';
 			for (var i = 0; i < this.warnings.length; i++) {
 				t += this.warnings[i] + ' ';
