@@ -3635,12 +3635,7 @@ Ext.onReady( function() {
 								}
 							}
 						}
-					],
-					listeners: {
-						added: function() {
-							DV.cmp.toolbar.bbar = this;
-						}
-					}
+					]
 				},					
                 listeners: {
                     added: function() {
