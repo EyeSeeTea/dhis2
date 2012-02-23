@@ -1309,7 +1309,6 @@ Ext.onReady( function() {
             this.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
 		},
         getParams: function() {
-            //this.getState();
             var obj = {};
             obj.type = this.type.toUpperCase();
             
