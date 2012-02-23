@@ -32,7 +32,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-validationrule/addValidationRuleForm.vm</param>
       <param name="menu">/dhis-web-validationrule/menu.vm</param>
-      <param name="javascripts">javascript/general.js,javascript/validationForm.js,javascript/expression.js,
+      <param name="javascripts">javascript/general.js,javascript/expression.js,
         javascript/addValidationRuleForm.js</param>
       <param name="requiredAuthorities">F_VALIDATIONRULE_ADD</param>
     </action>
@@ -62,7 +62,7 @@
     <action name="showUpdateValidationRuleForm" class="org.hisp.dhis.validationrule.action.ShowUpdateValidationRuleFormAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-validationrule/updateValidationRuleForm.vm</param>
-      <param name="javascripts">javascript/general.js,javascript/validationForm.js,javascript/expression.js,
+      <param name="javascripts">javascript/general.js,javascript/expression.js,
         javascript/updateValidationRuleForm.js</param>
       <param name="requiredAuthorities">F_VALIDATIONRULE_UPDATE</param>
     </action>
@@ -138,9 +138,8 @@
     </action>
 
     <action name="validateRunValidation" class="org.hisp.dhis.validationrule.action.ValidateRunValidationAction">
-      <result name="success" type="velocity-xml">/dhis-web-validationrule/responseSuccess.vm</result>
-      <result name="error" type="velocity-xml">/dhis-web-validationrule/responseError.vm</result>
-      <result name="input" type="velocity-xml">/dhis-web-validationrule/responseInput.vm</result>
+      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      <result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
     </action>
 
     <action name="runValidationAction" class="org.hisp.dhis.validationrule.action.RunValidationAction">
@@ -185,18 +184,17 @@
     </action>
 
     <action name="editDataValue" class="org.hisp.dhis.validationrule.action.dataanalysis.EditDataValueAction">
-      <result name="success" type="velocity">responseStatus.vm</result>
-      <result name="error" type="velocity">responseStatus.vm</result>
+      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      <param name="requiredAuthorities">F_DATAVALUE_ADD,F_DATAVALUE_UPDATE,F_DATAVALUE_DELETE</param>
     </action>
 
     <action name="markForFollowup" class="org.hisp.dhis.validationrule.action.dataanalysis.MarkForFollowupAction">
-      <result name="success" type="velocity-xml">/dhis-web-validationrule/responseSuccess.vm</result>
+      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
     </action>
 
     <action name="validateRunAnalysis" class="org.hisp.dhis.validationrule.action.dataanalysis.ValidationRunAnalysisAction">
-      <result name="success" type="velocity-xml">/dhis-web-validationrule/responseSuccess.vm</result>
-      <result name="error" type="velocity-xml">/dhis-web-validationrule/responseError.vm</result>
-      <result name="input" type="velocity-xml">/dhis-web-validationrule/responseInput.vm</result>
+      <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      <result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm</result>
     </action>
     
 	<!-- PDF -->
