@@ -242,12 +242,39 @@ function getSuggestedValues( sourceId, targetId )
 	for( var i=0; i< arrValues.length; i++ )
 	{
 		var option = document.createElement("option");
-		option.value = "'" + arrValues[i] + "'";
-		option.text = arrValues[i];
-		option.title = arrValues[i];
+		var value = jQuery.trim( arrValues[i] );
+		option.value = "'" + value + "'";
+		option.text = value;
+		option.title = value;
 
 		suggestedValueSelector.add(option, null); 
 	}
 }
 
+function insertSingleValue( elementId )
+{
+	var element = byId( elementId );
+	insertTextCommon('aggregationCondition', "=" + element.options[element.selectedIndex].value );
+	getConditionDescription();
+}
+
+function insertMultiValues( elementId )
+{
+	var list = jQuery('select[id=' + elementId + '] option:selected')
+	if( list.length > 1 )
+	{
+		var selectedValues = "";
+		list.each(function(){
+			selectedValues += jQuery(this).val() + ", ";
+		});
+		selectedValues = " IN @ " + selectedValues.substring( 0, selectedValues.length - 2) + " #";
+		
+		insertTextCommon('aggregationCondition', selectedValues );
+		getConditionDescription();
+	}
+	else
+	{
+		insertSingleValue( elementId );
+	}
+}
 
