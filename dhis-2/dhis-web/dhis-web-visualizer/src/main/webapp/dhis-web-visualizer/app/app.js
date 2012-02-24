@@ -97,7 +97,10 @@ DV.conf = {
         dimension: {
             data: {
                 value: 'data',
-                rawvalue: DV.i18n.data
+                rawvalue: DV.i18n.data,
+                warning: {
+					filter: DV.i18n.wm_multiple_filter_ind_de
+				}
             },
             indicator: {
                 value: 'indicator',
@@ -109,11 +112,17 @@ DV.conf = {
             },
             period: {
                 value: 'period',
-                rawvalue: DV.i18n.period
+                rawvalue: DV.i18n.period,
+                warning: {
+					filter: DV.i18n.wm_multiple_filter_period
+				}
             },
             organisationunit: {
                 value: 'organisationunit',
-                rawvalue: DV.i18n.organisation_unit
+                rawvalue: DV.i18n.organisation_unit,
+                warning: {
+					filter: DV.i18n.wm_multiple_filter_orgunit
+				}
             }
         },        
         chart: {
@@ -428,7 +437,7 @@ Ext.onReady( function() {
                     if (exception && !a.length) {
 						DV.util.notification.error(DV.i18n.et_no_indicators_dataelements, DV.i18n.em_no_indicators_dataelements);
                     }
-                    if (isFilter && a.length > 1) {
+                    if (exception && isFilter && a.length > 1) {
 						DV.exe.warnings.push(DV.i18n.wm_first_filter_unit);
 					}
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
@@ -459,7 +468,7 @@ Ext.onReady( function() {
                     if (exception && !a.length) {
 						DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
                     }
-                    if (isFilter && a.length > 1) {
+                    if (exception && isFilter && a.length > 1) {
 						DV.exe.warnings.push(DV.i18n.wm_first_filter_unit);
 					}
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
@@ -539,7 +548,7 @@ Ext.onReady( function() {
 					if (exception && !a.length) {
 						DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
 					}
-                    if (isFilter && a.length > 1 && !DV.state.userOrganisationUnit) {
+                    if (exception && isFilter && a.length > 1 && !DV.state.userOrganisationUnit) {
 						DV.exe.warnings.push(DV.i18n.wm_first_filter_unit);
 					}
                     return DV.state.userOrganisationUnit ? [DV.init.system.user.organisationUnit.name] : (isFilter && a.length > 1) ? a.slice(0,1) : a;
@@ -1273,15 +1282,13 @@ Ext.onReady( function() {
             
             this.series.names = DV.util.dimension[this.series.dimension].getNames();
             this.category.names = DV.util.dimension[this.category.dimension].getNames();
-            this.filter.names = DV.util.dimension[this.filter.dimension].getNames(false, true);
-            
+            this.filter.names = DV.util.dimension[this.filter.dimension].getNames();
+
             if (!this.validation.names.call(this)) {
 				return;
 			}
-            
-            if (!this.validation.categories.call(this)) {
-				return;
-			}
+			
+            this.validation.filter.call(this);
             
             this.indicatorIds = DV.util.dimension.indicator.getIds();
             this.dataelementIds = DV.util.dimension.dataelement.getIds();
@@ -1423,6 +1430,8 @@ Ext.onReady( function() {
 						if (!this.validation.names.call(this)) {
 							return;
 						}
+			
+						this.validation.filter.call(this);
 						
 						this.validation.render.call(this);
 						
@@ -1513,6 +1522,12 @@ Ext.onReady( function() {
 					return false;
 				}
 				return true;
+			},
+			filter: function() {
+				if (this.filter.names.length > 1) {
+					this.filter.names = this.filter.names.slice(0,1);
+					DV.exe.warnings.push(DV.conf.finals.dimension[this.filter.dimension].warning.filter + ', ' + DV.i18n.wm_first_filter_used);
+				}
 			},
 			categories: function() {
 				if (this.category.names.length < 2 && (this.type === DV.conf.finals.chart.line || this.type === DV.conf.finals.chart.area)) {
