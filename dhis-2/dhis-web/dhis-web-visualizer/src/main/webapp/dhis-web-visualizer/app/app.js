@@ -148,8 +148,9 @@ DV.conf = {
             pdf: 'pdf'
         },
         cmd: {
-			chartid: 'id',
-            init: 'init'
+            init: 'init_',
+            datatable: 'datatable_',
+			urlparam: 'id'
         }
     },
     chart: {
@@ -202,7 +203,7 @@ Ext.onReady( function() {
         DV.conf.init.example.setState();
         DV.conf.init.example.setValues();
         
-        DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.chartid) || DV.conf.finals.cmd.init;
+        DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
         DV.exe.execute(true, DV.init.cmd);
     };
     
@@ -595,8 +596,8 @@ Ext.onReady( function() {
 			},
 			warning: function(text) {
 				text = text || '';
-				DV.cmp.statusbar.panel.update('<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.warning + '" style="padding:0 5px 0 0"/>' + text);
 				DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
+				DV.cmp.statusbar.panel.update('<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.warning + '" style="padding:0 5px 0 0"/>' + text);
 			},
 			ok: function() {
 				DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
@@ -1527,7 +1528,7 @@ Ext.onReady( function() {
 			filter: function() {
 				if (this.filter.names.length > 1) {
 					this.filter.names = this.filter.names.slice(0,1);
-					DV.exe.warnings.push(DV.conf.finals.dimension[this.filter.dimension].warning.filter + ', ' + DV.i18n.wm_first_filter_used);
+					DV.exe.warnings.push(DV.conf.finals.dimension[this.filter.dimension].warning.filter + '. ' + DV.i18n.wm_first_filter_used);
 				}
 			},
 			categories: function() {
@@ -1948,6 +1949,9 @@ Ext.onReady( function() {
                 if (cmd === DV.conf.finals.cmd.init) {
                     DV.chart.getData(exe);
                 }
+                else if (cmd === DV.conf.finals.cmd.datatable) {
+					DV.store.getDataTableStore(exe);
+				}					
                 else {
 					DV.state.resetState();
                     DV.state.setFavorite(true, cmd);
@@ -3600,7 +3604,7 @@ Ext.onReady( function() {
                                 if (p.collapsed && p.items.length) {
                                     p.expand();
                                     DV.cmp.toolbar.resizeeast.show();
-                                    DV.exe.datatable(true);
+                                    DV.exe.execute(true, DV.conf.finals.cmd.datatable);
                                 }
                                 else {
                                     p.collapse();
@@ -3659,7 +3663,12 @@ Ext.onReady( function() {
                 listeners: {
                     added: function() {
                         DV.cmp.region.center = this;
-                    }
+                    },
+                    resize: function() {
+						if (DV.state.isRendered && DV.cmp.statusbar.panel) {
+							DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
+						}
+					}
                 }
             },
             {
