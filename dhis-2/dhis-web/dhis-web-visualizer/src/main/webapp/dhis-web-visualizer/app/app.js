@@ -1528,7 +1528,7 @@ Ext.onReady( function() {
 			filter: function() {
 				if (this.filter.names.length > 1) {
 					this.filter.names = this.filter.names.slice(0,1);
-					DV.exe.warnings.push(DV.conf.finals.dimension[this.filter.dimension].warning.filter + '. ' + DV.i18n.wm_first_filter_used);
+					DV.exe.warnings.push(DV.conf.finals.dimension[this.filter.dimension].warning.filter + ' ' + DV.i18n.wm_first_filter_used);
 				}
 			},
 			categories: function() {
@@ -1880,11 +1880,9 @@ Ext.onReady( function() {
 			DV.state.getOptions();
             DV.cmp.region.center.removeAll(true);
             DV.cmp.region.center.add(this.chart);            
+            DV.exe.finalize();
             
-            if (DV.init.cmd === DV.conf.finals.cmd.init) {
-				DV.exe.finalize();
-            }
-            else {
+            if (DV.init.cmd !== DV.conf.finals.cmd.init) {
                 DV.store.getDataTableStore(true);
             }
         }
@@ -1937,8 +1935,6 @@ Ext.onReady( function() {
         reload: function() {
             DV.cmp.region.east.removeAll(true);
             DV.cmp.region.east.add(this.datatable);
-            
-            DV.exe.finalize();
         }            
     };
     
