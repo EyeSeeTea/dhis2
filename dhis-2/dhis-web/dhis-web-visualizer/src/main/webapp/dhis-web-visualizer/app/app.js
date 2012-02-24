@@ -79,6 +79,7 @@ DV.conf = {
             path_commons: '../../dhis-web-commons-ajax-json/',
             path_api: '../../api/',
             path_portal: '../../dhis-web-portal/',
+            path_images: 'images/',
             initialize: 'initialize.action',
             redirect: 'redirect.action',
             data_get: 'getAggregatedValues.action',
@@ -590,16 +591,16 @@ Ext.onReady( function() {
 					]
 				}).show();
 				DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
-				DV.cmp.statusbar.panel.update('<img src="images/' + DV.conf.statusbar.icon.error + '" style="padding:0 5px 0 0"/>' + text);
+				DV.cmp.statusbar.panel.update('<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.error + '" style="padding:0 5px 0 0"/>' + text);
 			},
 			warning: function(text) {
 				text = text || '';
-				DV.cmp.statusbar.panel.update('<img src="images/' + DV.conf.statusbar.icon.warning + '" style="padding:0 5px 0 0"/>' + text);
+				DV.cmp.statusbar.panel.update('<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.warning + '" style="padding:0 5px 0 0"/>' + text);
 				DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
 			},
 			ok: function() {
 				DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
-				DV.cmp.statusbar.panel.update('<img src="images/' + DV.conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>&nbsp;&nbsp;');
+				DV.cmp.statusbar.panel.update('<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.ok + '" style="padding:0 5px 0 0"/>&nbsp;&nbsp;');
 			}				
 		},
         mask: {
@@ -1232,7 +1233,7 @@ Ext.onReady( function() {
                     s.sortStore();
                     s.each(function(r) {
                         r.data.lastUpdated = r.data.lastUpdated.substr(0,16);
-                        r.data.icon = '<img src="images/favorite.png" />';
+                        r.data.icon = '<img src="' + DV.conf.finals.ajax.path_images + 'favorite.png" />';
                         r.commit();
                     });
                 }
@@ -1972,6 +1973,9 @@ Ext.onReady( function() {
         getWarnings: function() {
 			var t = '';
 			for (var i = 0; i < this.warnings.length; i++) {
+				if (i > 0) {
+					t += '<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.warning + '" style="padding:0 5px 0 8px" />';
+				}
 				t += this.warnings[i] + ' ';
 			}
 			return t;
@@ -3643,7 +3647,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'panel',
 							cls: 'dv-statusbar',
-							height: 23,
+							height: 24,
 							listeners: {
 								added: function() {
 									DV.cmp.statusbar.panel = this;
