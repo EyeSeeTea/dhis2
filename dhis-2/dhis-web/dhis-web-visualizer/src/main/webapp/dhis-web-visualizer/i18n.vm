@@ -90,6 +90,8 @@ favorite_no_orgunits:'$encoder.jsEscape($i18n.getString( 'favorite_no_orgunits' 
 this_year:'$encoder.jsEscape($i18n.getString( 'this_year' ) , "'")',
 trend:'$encoder.jsEscape($i18n.getString( 'trend' ) , "'")',
 chart_options:'$encoder.jsEscape($i18n.getString( 'chart_options' ) , "'")',
+dataset:'$encoder.jsEscape($i18n.getString( 'dataset' ) , "'")',
+datasets:'$encoder.jsEscape($i18n.getString( 'datasets' ) , "'")',
 et_no_data:'$encoder.jsEscape($i18n.getString( 'et_no_data' ) , "'")',
 em_no_data:'$encoder.jsEscape($i18n.getString( 'em_no_data' ) , "'")',
 et_invalid_dimension_setup:'$encoder.jsEscape($i18n.getString( 'et_invalid_dimension_setup' ) , "'")',

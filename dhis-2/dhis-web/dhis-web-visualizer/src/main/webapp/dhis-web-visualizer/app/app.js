@@ -99,27 +99,33 @@ DV.conf = {
         dimension: {
             data: {
                 value: 'data',
+                rawvalue: DV.i18n.data,
                 warning: {
 					filter: DV.i18n.wm_multiple_filter_ind_de
 				}
             },
             indicator: {
-                value: 'indicator'
+                value: 'indicator',
+                rawvalue: DV.i18n.indicator
             },
             dataelement: {
-                value: 'dataelement'
+                value: 'dataelement',
+                rawvalue: DV.i18n.dataelement
             },
             dataset: {
-				value: 'dataset'
+				value: 'dataset',
+                rawvalue: DV.i18n.dataset
 			},
             period: {
                 value: 'period',
+                rawvalue: DV.i18n.period,
                 warning: {
 					filter: DV.i18n.wm_multiple_filter_period
 				}
             },
             organisationunit: {
                 value: 'organisationunit',
+                rawvalue: DV.i18n.organisation_unit,
                 warning: {
 					filter: DV.i18n.wm_multiple_filter_orgunit
 				}
@@ -170,6 +176,7 @@ DV.conf = {
     layout: {
         west_width: 424,
         west_fieldset_width: 402,
+        west_fill_height: 440,
         center_tbar_height: 31,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
@@ -1180,6 +1187,7 @@ Ext.onReady( function() {
                     }
                 },
                 storage: {},
+                isLoaded: false,
                 listeners: {
                     load: function(s) {
                         DV.util.store.addToStorage(s);
@@ -2639,6 +2647,9 @@ Ext.onReady( function() {
                                         DV.cmp.fieldset.dataset = this;
                                     },
                                     expand: function() {
+										if (!DV.store.dataset.available.isLoaded) {
+											DV.store.dataset.available.load();
+										}
                                         DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit]);
                                     }
                                 }
@@ -2900,7 +2911,7 @@ Ext.onReady( function() {
 										}
 									},
                                     expand: function(fs) {
-										var h = DV.cmp.region.west.getHeight() - 405;
+										var h = DV.cmp.region.west.getHeight() - DV.conf.layout.west_fill_height;
 										DV.cmp.fieldset.organisationunit.setHeight(h);
 										DV.cmp.dimension.organisationunit.treepanel.setHeight(h - 40);
 
