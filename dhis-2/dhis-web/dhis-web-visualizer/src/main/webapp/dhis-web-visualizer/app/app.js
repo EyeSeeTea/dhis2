@@ -1375,7 +1375,11 @@ Ext.onReady( function() {
             if (!this.validation.names.call(this)) {
 				return;
 			}
-			
+						
+			if (!this.validation.categories.call(this)) {
+				return;
+			}
+
             this.validation.filter.call(this);
             
             this.indicatorIds = DV.util.dimension.indicator.getIds();
@@ -1479,10 +1483,6 @@ Ext.onReady( function() {
 							return;
 						}
 						
-						if (!this.validation.categories.call(this)) {
-							return;
-						}
-						
 						this.validation.trendline.call(this);
 						
 						this.validation.targetline.call(this);
@@ -1526,6 +1526,10 @@ Ext.onReady( function() {
                         this.filter.names = f.names[this.filter.dimension];
                         
 						if (!this.validation.names.call(this)) {
+							return;
+						}
+						
+						if (!this.validation.categories.call(this)) {
 							return;
 						}
 			
