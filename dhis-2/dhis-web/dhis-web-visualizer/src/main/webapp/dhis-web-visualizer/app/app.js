@@ -159,7 +159,7 @@ DV.conf = {
     },
     chart: {
         style: {
-            inset: 30,
+            inset: 27,
             font: 'arial,sans-serif,ubuntu,consolas'
         },
         theme: {
@@ -3110,7 +3110,7 @@ Ext.onReady( function() {
                 id: 'center',
                 region: 'center',
                 layout: 'fit',
-                bodyStyle: 'padding:10px',
+                bodyStyle: 'padding-top:5px',
                 tbar: {
                     xtype: 'toolbar',
                     cls: 'dv-toolbar',
