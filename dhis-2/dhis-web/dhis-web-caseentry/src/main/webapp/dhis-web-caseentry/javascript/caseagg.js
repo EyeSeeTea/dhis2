@@ -103,12 +103,13 @@ function validationCaseAggregationCompleted( message )
     }
 }
 
-function viewResultDetails( orgunitId, periodId, aggregationConditionId ) 
+function viewResultDetails( orgunitId, periodTypeName, startDate, aggregationConditionId ) 
 {
 	$('#contentDetails' ).val('');
 	var url = 'caseAggregationResultDetails.action?';
 		url+= 'orgunitId=' + orgunitId;
-		url+= '&periodId=' + periodId;
+		url+= '&periodTypeName=' + periodTypeName;
+		url+= '&startDate=' + startDate;
 		url+= '&aggregationConditionId=' + aggregationConditionId;
 		
 	$('#contentDetails' ).load(url).dialog({
@@ -147,4 +148,51 @@ function backBtnOnClick()
 function toggleResult( id )
 {
 	$( "#" + id + "-div" ).slideToggle( "fast" );
+}
+
+function saveAggregateDataValues( isSaveAll )
+{
+	lockScreen();
+	
+	var params = ""
+	if( isSaveAll )
+	{
+		jQuery("input[name=aggregateValues]").each(function( ){
+				params += "aggregateValues=" + $(this).val() + "&";
+			}); 
+	}
+	else
+	{
+		jQuery("input[name=aggregateValues]:checked").each(function( ){
+				params += "aggregateValues=" + $(this).val() + "&";
+			}); 
+	}
+	
+	$.ajax({
+		   type: "POST",
+		   url: "saveAggregateDataValue.action",
+		   data: params,
+		   dataType: "json",
+		   success: function(json){
+				if( isSaveAll )
+				{
+					jQuery("input[name=aggregateValues]").each(function( ){
+							$(this).replaceWith('<span>' + i18n_saved + '<span>' );
+						}); 
+				}
+				else
+				{
+					jQuery("input[name=aggregateValues]:checked").each(function( ){
+							$(this).replaceWith('<span>' + i18n_saved + '<span>' );
+						}); 
+				}
+				unLockScreen();
+				showSuccessMessage( i18n_save_success );
+		   }
+		});
+}
+
+function toogleAllCheckBoxes( tableDiv, checked )
+{
+	jQuery("#" + tableDiv + " input[name=aggregateValues]").attr( 'checked', checked );
 }

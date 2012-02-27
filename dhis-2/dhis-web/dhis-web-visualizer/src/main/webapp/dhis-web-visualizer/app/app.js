@@ -159,7 +159,7 @@ DV.conf = {
     },
     chart: {
         style: {
-            inset: 27,
+            inset: 30,
             font: 'arial,sans-serif,ubuntu,consolas'
         },
         theme: {
@@ -411,19 +411,26 @@ Ext.onReady( function() {
             },
             dataelement: {
                 getIds: function(exception) {
-                    if (DV.cmp.dimension.dataelement.selected.store) {
-                        var a = [];
-                        DV.cmp.dimension.dataelement.selected.store.each( function(r) {
-                            a.push(r.data.id);
-                        });
-                        if (exception && !a.length) {
-                            alert(DV.i18n.no_data_elements_selected);
-                        }
-                        return a;
-                    }
-                    else {
-                        alert(DV.i18n.data_element_store_does_not_exist);
-                    }
+					var a = [];
+					DV.cmp.dimension.dataelement.selected.store.each( function(r) {
+						a.push(r.data.id);
+					});
+					if (exception && !a.length) {
+						alert(DV.i18n.no_data_elements_selected);
+					}
+					return a;
+                }
+            },
+            dataset: {
+                getIds: function(exception) {
+					var a = [];
+					DV.cmp.dimension.dataset.selected.store.each( function(r) {
+						a.push(r.data.id);
+					});
+					if (exception && !a.length) {
+						alert(DV.i18n.no_datasets_selected);
+					}
+					return a;
                 }
             },
             data: {
@@ -434,6 +441,9 @@ Ext.onReady( function() {
                     });
                     Ext.Array.each(DV.state.dataelementIds, function(r) {
                         a.push('dataElementIds=' + r);
+                    });
+                    Ext.Array.each(DV.state.datasetIds, function(r) {
+                        a.push('dataSetIds=' + r);
                     });
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
@@ -447,14 +457,19 @@ Ext.onReady( function() {
                             a.push(DV.util.string.getEncodedString(r.data.s));
                         });
                     }
+                    if (DV.cmp.dimension.dataset.selected.store) {
+                        DV.cmp.dimension.dataset.selected.store.each( function(r) {
+                            a.push(DV.util.string.getEncodedString(r.data.s));
+                        });
+                    }
                     if (exception && !a.length) {
-						DV.util.notification.error(DV.i18n.et_no_indicators_dataelements, DV.i18n.em_no_indicators_dataelements);
+						DV.util.notification.error(DV.i18n.et_no_indicators_dataelements_datasets, DV.i18n.em_no_indicators_dataelements_datasets);
                     }
                     if (exception && isFilter && a.length > 1) {
 						DV.exe.warnings.push(DV.i18n.wm_first_filter_unit);
 					}
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
-                }                    
+                }
             },
             period: {
                 getUrl: function(isFilter) {
@@ -1294,6 +1309,7 @@ Ext.onReady( function() {
         },
         indicatorIds: [],
         dataelementIds: [],
+        datasetIds: [],
         relativePeriods: {},
         organisationunitIds: [],
         hideSubtitle: false,
@@ -1330,6 +1346,7 @@ Ext.onReady( function() {
             
             this.indicatorIds = DV.util.dimension.indicator.getIds();
             this.dataelementIds = DV.util.dimension.dataelement.getIds();
+            this.datasetIds = DV.util.dimension.dataset.getIds();
             this.relativePeriods = DV.util.dimension.period.getRelativePeriodObject();
             this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
             
@@ -1372,6 +1389,7 @@ Ext.onReady( function() {
 			
             obj.indicatorIds = this.indicatorIds;
             obj.dataElementIds = this.dataelementIds;
+            obj.dataSetIds = this.datasetIds;
             obj = Ext.Object.merge(obj, this.relativePeriods);
             obj.organisationUnitIds = this.organisationunitIds;
             
@@ -1390,7 +1408,8 @@ Ext.onReady( function() {
                         var f = Ext.JSON.decode(r.responseText),
 							indiment = [],
 							irec = [],
-							drec = [];	
+							derec = [],
+							dsrec = [];
                             
 						if (!this.validation.favorite(f)) {
 							return;
@@ -1445,7 +1464,14 @@ Ext.onReady( function() {
                             for (var i = 0; i < f.dataElements.length; i++) {
                                 indiment.push(f.dataElements[i]);
                                 this.dataelementIds.push(f.dataElements[i].internalId);
-                                drec.push({id: f.dataElements[i].internalId, s: DV.util.string.getEncodedString(f.dataElements[i].shortName), name: DV.util.string.getEncodedString(f.dataElements[i].shortName), parent: null});
+                                derec.push({id: f.dataElements[i].internalId, s: DV.util.string.getEncodedString(f.dataElements[i].shortName), name: DV.util.string.getEncodedString(f.dataElements[i].shortName), parent: null});
+                            }
+                        }             
+                        if (f.dataSets) {
+                            for (var i = 0; i < f.dataSets.length; i++) {
+                                indiment.push(f.dataSets[i]);
+                                this.datasetIds.push(f.dataSets[i].internalId);
+                                dsrec.push({id: f.dataSets[i].internalId, s: DV.util.string.getEncodedString(f.dataSets[i].shortName), name: DV.util.string.getEncodedString(f.dataSets[i].shortName), parent: null});
                             }
                         }
                         for (var i = 0; i < indiment.length; i++) {
@@ -1473,7 +1499,7 @@ Ext.onReady( function() {
 						
 						this.validation.render.call(this);
 						
-						this.setUI(f, irec, drec);
+						this.setUI(f, irec, derec, dsrec);
                         
                         if (exe) {
                             DV.value.getValues(true);
@@ -1482,7 +1508,7 @@ Ext.onReady( function() {
                 });
             }
         },
-        setUI: function(f, irec, drec) {
+        setUI: function(f, irec, derec, dsrec) {
 			DV.util.button.type.setValue(f.type);
 			
 			DV.cmp.favorite.hidesubtitle.setValue(f.hideSubtitle);
@@ -1510,9 +1536,16 @@ Ext.onReady( function() {
 									
 			DV.store.dataelement.selected.removeAll();
 			if (f.dataElements) {
-				DV.store.dataelement.selected.add(drec);
-				DV.util.store.addToStorage(DV.store.dataelement.available, drec);
+				DV.store.dataelement.selected.add(derec);
+				DV.util.store.addToStorage(DV.store.dataelement.available, derec);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
+			}
+									
+			DV.store.dataset.selected.removeAll();
+			if (f.dataSets) {
+				DV.store.dataset.selected.add(dsrec);
+				DV.util.store.addToStorage(DV.store.dataset.available, dsrec);
+				DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
 			}
 
 			DV.util.checkbox.setRelativePeriods(f.relativePeriods);
@@ -1680,7 +1713,11 @@ Ext.onReady( function() {
                         return;
                     }
                     
-                    var storage = Ext.Object.merge(DV.store[DV.conf.finals.dimension.indicator.value].available.storage, DV.store[DV.conf.finals.dimension.dataelement.value].available.storage);
+                    var storage = Ext.Object.merge(
+						DV.store[DV.conf.finals.dimension.indicator.value].available.storage,
+						DV.store[DV.conf.finals.dimension.dataelement.value].available.storage,
+						DV.store[DV.conf.finals.dimension.dataset.value].available.storage
+					);
                     Ext.Array.each(DV.value.values, function(item) {
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(storage[item.d].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.p));
@@ -2538,7 +2575,7 @@ Ext.onReady( function() {
                                 xtype: 'fieldset',
                                 cls: 'dv-fieldset',
                                 name: DV.conf.finals.dimension.dataset.value,
-                                title: '<a href="javascript:DV.util.fieldset.toggleDataSet();" class="dv-fieldset-title-link">' + DV.i18n.datasets + '</a>',
+                                title: '<a href="javascript:DV.util.fieldset.toggleDataSet();" class="dv-fieldset-title-link">' + DV.i18n.reporting_rates + '</a>',
                                 collapsed: true,
                                 collapsible: true,
                                 items: [

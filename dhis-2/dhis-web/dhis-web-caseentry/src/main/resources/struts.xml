@@ -109,13 +109,7 @@
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
 
-		<!-- save data-value -->
-
-		<action name="saveDateValue"
-			class="org.hisp.dhis.caseentry.action.caseentry.SaveDateValueAction">
-			<result name="success" type="velocity-xml">status.vm</result>
-			<param name="onExceptionReturn">plainTextError</param>
-		</action>
+		<!-- save providing-facility -->
 
 		<action name="saveProvidingFacility"
 			class="org.hisp.dhis.caseentry.action.caseentry.SaveProvidingFacilityAction">
@@ -286,6 +280,12 @@
 			<param name="page">/dhis-web-caseentry/caseAggregationResult.vm</param>
 			<param name="menu">/dhis-web-caseentry/caseAggregationMenu.vm</param>
 			<param name="javascripts">javascript/caseagg.js</param>
+		</action>
+		
+		<action name="saveAggregateDataValue"
+			class="org.hisp.dhis.caseentry.action.caseaggregation.SaveAggregateDataValueAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 		</action>
 
 		<action name="caseAggregationResultDetails"
