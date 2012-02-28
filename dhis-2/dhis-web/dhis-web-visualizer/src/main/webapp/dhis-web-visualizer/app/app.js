@@ -185,10 +185,10 @@ DV.conf = {
         window_favorite_ypos: 100,
         window_confirm_width: 250,
         grid_favorite_width: 420,
-        treepanel_minheight: 188,
+        treepanel_minheight: 135,
         treepanel_maxheight: 400,
         treepanel_fill_default: 310,
-        multiselect_minheight: 153,
+        multiselect_minheight: 100,
         multiselect_maxheight: 250,
         multiselect_fill_default: 345,
         multiselect_fill_reportingrates: 315
@@ -907,11 +907,18 @@ Ext.onReady( function() {
 						};
 					},
 					getTargetLine: function() {
-						var tl = DV.util.chart.default.series.getTargetLine();
-						tl.axis = 'bottom';
-						tl.xField = DV.conf.finals.data.targetline;
-						tl.yField = DV.conf.finals.data.domain;
-						return tl;
+						var line = DV.util.chart.default.series.getTargetLine();
+						line.axis = 'bottom';
+						line.xField = DV.conf.finals.data.targetline;
+						line.yField = DV.conf.finals.data.domain;
+						return line;
+					},
+					getBaseLine: function() {
+						var line = DV.util.chart.default.series.getBaseLine();
+						line.axis = 'bottom';
+						line.xField = DV.conf.finals.data.baseline;
+						line.yField = DV.conf.finals.data.domain;
+						return line;
 					},
 					getTrendLineArray: function() {
 						var a = [];
@@ -1270,6 +1277,7 @@ Ext.onReady( function() {
                 isLoaded: false,
                 listeners: {
                     load: function(s) {
+						this.isLoaded = true;
                         DV.util.store.addToStorage(s);
                         DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
                     }
@@ -1423,6 +1431,8 @@ Ext.onReady( function() {
             
             this.validation.targetline.call(this);
             
+            this.validation.baseline.call(this);
+            
             this.validation.render.call(this);
             
             if (exe) {
@@ -1524,6 +1534,8 @@ Ext.onReady( function() {
 						
 						this.validation.targetline.call(this);
 						
+						this.validation.baseline.call(this);
+						
                         if (f.indicators) {
                             for (var i = 0; i < f.indicators.length; i++) {
                                 indiment.push(f.indicators[i]);
@@ -1595,6 +1607,9 @@ Ext.onReady( function() {
 			DV.cmp.favorite.targetlinevalue.setValue(f.targetLineValue);
 			DV.cmp.favorite.targetlinelabel.xable();
 			DV.cmp.favorite.targetlinelabel.setValue(f.targetLineLabel);
+			DV.cmp.favorite.baselinevalue.setValue(f.baseLineValue);
+			DV.cmp.favorite.baselinelabel.xable();
+			DV.cmp.favorite.baselinelabel.setValue(f.baseLineLabel);
 
 			DV.cmp.settings.series.setValue(DV.conf.finals.dimension[f.series].value);
 			DV.util.combobox.filter.category();                        
@@ -1729,6 +1744,34 @@ Ext.onReady( function() {
 					
 					if (reasons.length) {
 						var text = DV.i18n.wm_targetline_deactivated + ' (';
+						for (var i = 0; i < reasons.length; i++) {
+							text += i > 0 ? ' + ' : '';
+							text += reasons[i];
+						}
+						text += ').';
+						DV.exe.warnings.push(text);
+					}
+				}
+			},
+			baseline: function() {			
+				if (this.baseLineValue) {
+					var reasons = [];
+					if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
+						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
+						this.baseLineValue = null;
+					}
+					else if (this.type === DV.conf.finals.chart.pie) {
+						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
+						this.baseLineValue = null;
+					}
+					
+					if (this.category.names.length < 2) {
+						reasons.push(DV.i18n.wm_required_categories);
+						this.baseLineValue = null;
+					}
+					
+					if (reasons.length) {
+						var text = DV.i18n.wm_baseline_deactivated + ' (';
 						for (var i = 0; i < reasons.length; i++) {
 							text += i > 0 ? ' + ' : '';
 							text += reasons[i];
@@ -1949,6 +1992,9 @@ Ext.onReady( function() {
 			if (DV.state.targetLineValue) {
 				series.push(DV.util.chart.bar.series.getTargetLine());
 			}
+			if (DV.state.baseLineValue) {
+				series.push(DV.util.chart.bar.series.getBaseLine());
+			}
 			
 			var axes = [];
 			var numeric = DV.util.chart.bar.axis.getNumeric(stacked);
@@ -1972,6 +2018,9 @@ Ext.onReady( function() {
 			series = series.concat(DV.util.chart.line.series.getArray());
 			if (DV.state.targetLineValue) {
 				series.push(DV.util.chart.default.series.getTargetLine());
+			}
+			if (DV.state.baseLineValue) {
+				series.push(DV.util.chart.default.series.getBaseLine());
 			}
 			
 			var axes = [];
