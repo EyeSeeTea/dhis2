@@ -2730,6 +2730,7 @@ Ext.onReady( function() {
                             {
                                 xtype: 'fieldset',
                                 cls: 'dv-fieldset',
+                                style: 'padding-bottom:7px',
                                 name: DV.conf.finals.dimension.period.value,
                                 title: '<a href="javascript:DV.util.fieldset.togglePeriod();" class="dv-fieldset-title-link">' + DV.i18n.periods +'</a>',
                                 collapsed: true,
