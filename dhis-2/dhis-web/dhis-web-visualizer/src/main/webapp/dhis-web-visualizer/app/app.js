@@ -602,9 +602,15 @@ Ext.onReady( function() {
 						a.push('organisationUnitIds=' + item);
 					});
 					if (DV.state.groupsetId) {
+						a = a.slice(0,1);
+						a.push('organisationUnitGroupSetId=' + DV.state.groupsetId);
+						
+					
+                    var output = (isFilter && a.length > 1) ? a.slice(0,1) : a;
+					if (DV.state.groupsetId) {
 						a.push('organisationUnitGroupSetId=' + DV.state.groupsetId);
 					}
-                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+					return a;
                 },
                 getNames: function(exception, isFilter) {
                     var a = [],
@@ -1402,7 +1408,7 @@ Ext.onReady( function() {
         hideLegend: false,
         domainAxisLabel: null,
         rangeAxisLabel: null,
-        targetLineValue: 70,
+        targetLineValue: null,
         targetLineLabel: null,
         trendLine: null,
         userOrganisationUnit: false,
