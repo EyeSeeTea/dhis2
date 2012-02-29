@@ -156,6 +156,7 @@ DV.conf = {
         },
         cmd: {
             init: 'init_',
+            none: 'none_',
 			urlparam: 'id'
         }
     },
@@ -600,6 +601,9 @@ Ext.onReady( function() {
 					Ext.Array.each(DV.state.organisationunitIds, function(item) {
 						a.push('organisationUnitIds=' + item);
 					});
+					if (DV.state.groupsetId) {
+						a.push('organisationUnitGroupSetId=' + DV.state.groupsetId);
+					}
                     return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
                 getNames: function(exception, isFilter) {
@@ -1392,6 +1396,7 @@ Ext.onReady( function() {
         dataelementIds: [],
         datasetIds: [],
         relativePeriods: {},
+        groupsetId: null,
         organisationunitIds: [],
         hideSubtitle: false,
         hideLegend: false,
@@ -1433,6 +1438,7 @@ Ext.onReady( function() {
             this.dataelementIds = DV.util.dimension.dataelement.getIds();
             this.datasetIds = DV.util.dimension.dataset.getIds();
             this.relativePeriods = DV.util.dimension.period.getRelativePeriodObject();
+            this.groupsetId = DV.cmp.fieldset.organisationunit.groupsets.getStateValue();
             this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
             
             this.validation.trendline.call(this);
@@ -1482,6 +1488,7 @@ Ext.onReady( function() {
             obj.dataElementIds = this.dataelementIds;
             obj.dataSetIds = this.datasetIds;
             obj = Ext.Object.merge(obj, this.relativePeriods);
+            obj.groupsetId = this.groupsetId;
             obj.organisationUnitIds = this.organisationunitIds;
             
             return obj;            
@@ -1659,6 +1666,7 @@ Ext.onReady( function() {
             this.indicatorIds = [];
             this.dataelementIds = [];
             this.relativePeriods = {};
+            this.groupsetId = null;
             this.organisationunitIds = [];
 			this.hideSubtitle = false,
             this.hideLegend = false;
@@ -1827,8 +1835,6 @@ Ext.onReady( function() {
             Ext.Array.each(params, function(item) {
                 baseurl = Ext.String.urlAppend(baseurl, item);
             });
-            
-            baseurl += '&organisationUnitGroupSetId=1';
             
             Ext.Ajax.request({
                 url: baseurl,
@@ -3015,7 +3021,10 @@ Ext.onReady( function() {
                                         labelStyle: 'padding-left:7px;',
 										editable: false,
 										queryMode: 'remote',
-										value: 0,
+										value: DV.i18n.none,
+										getStateValue: function() {
+											return !this.getValue() || this.getValue() === DV.i18n.none || this.getValue() === DV.conf.finals.cmd.none ? null : this.getValue();
+										},
 										store: Ext.create('Ext.data.Store', {
 											fields: ['id', 'name', 'index'],
 											proxy: {
@@ -3026,13 +3035,18 @@ Ext.onReady( function() {
 													root: 'organisationUnitGroupSets'
 												}
 											},
-                                            listeners: {
-                                                load: function(s) {
-                                                    s.add({id: 0, name: DV.i18n.none, index: -1});
-                                                    s.sort('index', 'ASC');
-                                                }
-                                            }
-										})
+											listeners: {
+												load: function() {
+													this.add({id: DV.conf.finals.cmd.none, name: DV.i18n.none, index: -1});
+													this.sort('index', 'ASC');
+												}
+											}
+										}),
+										listeners: {
+											added: function() {
+												this.up('fieldset').groupsets = this;
+											}
+										}
 									},
                                     {
                                         xtype: 'treepanel',
