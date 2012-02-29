@@ -35,7 +35,6 @@ import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class AggregatedIndicatorValueRowMapper
     implements RowMapper<AggregatedIndicatorValue>, org.springframework.jdbc.core.RowMapper<AggregatedIndicatorValue>

@@ -89,6 +89,7 @@ DV.conf = {
             dataelementgroup_get: 'getDataElementGroupsMinified.action',
             dataelement_get: 'getDataElementsMinified.action',
             dataset_get: 'getDataSetsMinified.action',
+            organisationunitgroupset_get: 'getOrganisationUnitGroupSets.action',
             organisationunitchildren_get: 'getOrganisationUnitChildren.action',
             favorite_addorupdate: 'addOrUpdateChart.action',
             favorite_addorupdatesystem: 'addOrUpdateSystemChart.action',            
@@ -1827,6 +1828,8 @@ Ext.onReady( function() {
                 baseurl = Ext.String.urlAppend(baseurl, item);
             });
             
+            baseurl += '&organisationUnitGroupSetId=1';
+            
             Ext.Ajax.request({
                 url: baseurl,
                 success: function(r) {
@@ -2560,7 +2563,7 @@ Ext.onReady( function() {
                                         width: DV.conf.layout.west_fieldset_width - 22,
                                         valueField: 'id',
                                         displayField: 'name',
-                                        fieldLabel: 'Select group',
+                                        fieldLabel: DV.i18n.select_group,
                                         labelStyle: 'padding-left:7px;',
                                         labelWidth: 90,
                                         editable: false,
@@ -3000,6 +3003,37 @@ Ext.onReady( function() {
                                 collapsed: true,
                                 collapsible: true,
                                 items: [
+									{
+										xtype: 'combobox',
+										cls: 'dv-combo',
+										style: 'margin-bottom:8px',
+										width: DV.conf.layout.west_fieldset_width - 22,
+										valueField: 'id',
+										displayField: 'name',
+										fieldLabel: DV.i18n.group_sets,
+										labelWidth: 85,
+                                        labelStyle: 'padding-left:7px;',
+										editable: false,
+										queryMode: 'remote',
+										value: 0,
+										store: Ext.create('Ext.data.Store', {
+											fields: ['id', 'name', 'index'],
+											proxy: {
+												type: 'ajax',
+												url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.organisationunitgroupset_get,
+												reader: {
+													type: 'json',
+													root: 'organisationUnitGroupSets'
+												}
+											},
+                                            listeners: {
+                                                load: function(s) {
+                                                    s.add({id: 0, name: DV.i18n.none, index: -1});
+                                                    s.sort('index', 'ASC');
+                                                }
+                                            }
+										})
+									},
                                     {
                                         xtype: 'treepanel',
                                         cls: 'dv-tree',
@@ -3083,7 +3117,7 @@ Ext.onReady( function() {
                                     expand: function(fs) {
 										var h = DV.util.treepanel.getHeight();
 										DV.cmp.dimension.organisationunit.treepanel.setHeight(h);
-										fs.setHeight(h + 30);
+										fs.setHeight(h + 60);
 
                                         DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.dataset, DV.cmp.fieldset.period]);
                                         var tp = DV.cmp.dimension.organisationunit.treepanel;
