@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.objectmapper;
+package org.hisp.dhis.mobile.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,39 +27,16 @@ package org.hisp.dhis.system.objectmapper;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.amplecode.quick.mapper.RowMapper;
-import org.hisp.dhis.aggregation.AggregatedDataValue;
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author
  */
-public class AggregatedDataValueRowMapper
-    implements RowMapper<AggregatedDataValue>, org.springframework.jdbc.core.RowMapper<AggregatedDataValue>
+public class NoAction
+    implements Action
 {
-    @Override
-    public AggregatedDataValue mapRow( ResultSet resultSet )
-        throws SQLException
+    public String execute()
     {
-        final AggregatedDataValue value = new AggregatedDataValue();
-        
-        value.setDataElementId( resultSet.getInt( "dataelementid" ) );
-        value.setCategoryOptionComboId( resultSet.getInt( "categoryoptioncomboid" ) );
-        value.setPeriodId( resultSet.getInt( "periodid" ) );
-        value.setOrganisationUnitId( resultSet.getInt( "organisationunitid" ) );
-        value.setPeriodTypeId( resultSet.getInt( "periodtypeid" ) );
-        value.setLevel( resultSet.getInt( "level" ) );
-        value.setValue( resultSet.getDouble( "value" ) );
-        
-        return value;
-    }
-
-    @Override
-    public AggregatedDataValue mapRow( ResultSet resultSet, int rowNum )
-        throws SQLException
-    {
-        return mapRow( resultSet );
+        return SUCCESS;
     }
 }
