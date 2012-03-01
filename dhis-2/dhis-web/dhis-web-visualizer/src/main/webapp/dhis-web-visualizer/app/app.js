@@ -601,12 +601,9 @@ Ext.onReady( function() {
 					Ext.Array.each(DV.state.organisationunitIds, function(item) {
 						a.push('organisationUnitIds=' + item);
 					});
-					if (DV.state.groupsetId) {
+					if ((isFilter || DV.state.groupsetId) && a.length > 1) {
 						a = a.slice(0,1);
-						a.push('organisationUnitGroupSetId=' + DV.state.groupsetId);
-						
-					
-                    var output = (isFilter && a.length > 1) ? a.slice(0,1) : a;
+					}
 					if (DV.state.groupsetId) {
 						a.push('organisationUnitGroupSetId=' + DV.state.groupsetId);
 					}
@@ -646,7 +643,11 @@ Ext.onReady( function() {
 						DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
 					}
                     return DV.state.userOrganisationUnit ? [DV.init.system.user.organisationUnit.id] : a;
-                }                    
+                },
+                getGroupSetId: function() {
+					var value = DV.cmp.fieldset.organisationunit.groupsets.getValue();
+					return !value || value === DV.i18n.none || value === DV.conf.finals.cmd.none ? null : value;
+				}
             }
         },
         notification: {
@@ -1444,7 +1445,7 @@ Ext.onReady( function() {
             this.dataelementIds = DV.util.dimension.dataelement.getIds();
             this.datasetIds = DV.util.dimension.dataset.getIds();
             this.relativePeriods = DV.util.dimension.period.getRelativePeriodObject();
-            this.groupsetId = DV.cmp.fieldset.organisationunit.groupsets.getStateValue();
+            this.groupsetId = DV.util.dimension.organisationunit.getGroupSetId();
             this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
             
             this.validation.trendline.call(this);
@@ -3028,9 +3029,6 @@ Ext.onReady( function() {
 										editable: false,
 										queryMode: 'remote',
 										value: DV.i18n.none,
-										getStateValue: function() {
-											return !this.getValue() || this.getValue() === DV.i18n.none || this.getValue() === DV.conf.finals.cmd.none ? null : this.getValue();
-										},
 										store: Ext.create('Ext.data.Store', {
 											fields: ['id', 'name', 'index'],
 											proxy: {
