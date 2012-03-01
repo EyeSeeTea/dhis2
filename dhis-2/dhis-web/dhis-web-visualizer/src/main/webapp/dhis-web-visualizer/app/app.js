@@ -644,16 +644,16 @@ Ext.onReady( function() {
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
                 getUrl: function(isFilter) {
-					var obj = DV.chart.instance.organisationunit.objects,
+					var ou = DV.chart.instance.organisationunit,
 						a = [];
-                    for (var i = 0; i < obj.length; i++) {
-						a.push('organisationUnitIds=' + obj[i].id);
+                    for (var i = 0; i < ou.objects.length; i++) {
+						a.push('organisationUnitIds=' + ou.objects[i].id);
 					}
-					if ((isFilter || DV.chart.instance.organisationunit.groupsetId) && a.length > 1) {
+					if ((isFilter || ou.groupsetId) && a.length > 1) {
 						a = a.slice(0,1);
 					}
-					if (DV.chart.instance.organisationunit.groupsetId) {
-						a.push('organisationUnitGroupSetId=' + DV.chart.instance.organisationunit.groupsetId);
+					if (ou.groupsetId) {
+						a.push('organisationUnitGroupSetId=' + ou.groupsetId);
 					}
 					return a;
                 },
