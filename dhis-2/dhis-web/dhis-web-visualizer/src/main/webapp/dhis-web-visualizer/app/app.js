@@ -1524,20 +1524,13 @@ Ext.onReady( function() {
 				return;
 			}
             
-            this.indicatorIds = DV.util.dimension.indicator.getIds();
-            this.dataelementIds = DV.util.dimension.dataelement.getIds();
-            this.datasetIds = DV.util.dimension.dataset.getIds();
-            this.relativePeriods = DV.util.dimension.period.getRelativePeriodObject();
-            this.groupsetId = DV.util.dimension.organisationunit.getGroupSetId();
-            this.organisationunitIds = DV.util.dimension.organisationunit.getIds();
+            this.validation.trendline();
             
-            this.validation.trendline.call(this);
+            this.validation.targetline();
             
-            this.validation.targetline.call(this);
+            this.validation.baseline();
             
-            this.validation.baseline.call(this);
-            
-            this.validation.render.call(this);
+            this.validation.render();
             
             if (exe) {
                 DV.value.getValues(true);
@@ -1663,20 +1656,21 @@ Ext.onReady( function() {
 				return true;
 			},
 			trendline: function() {
-				if (this.trendLine) {
+				var c = DV.chart.instance;
+				if (c.trendLine) {
 					var reasons = [];
-					if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
+					if (c.type === DV.conf.finals.chart.stackedcolumn || c.type === DV.conf.finals.chart.stackedbar || c.type === DV.conf.finals.chart.area) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
-						this.trendLine = false;
+						c.trendLine = false;
 					}
-					else if (this.type === DV.conf.finals.chart.pie) {
+					else if (c.type === DV.conf.finals.chart.pie) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
-						this.trendLine = false;
+						c.trendLine = false;
 					}
 					
-					if (this.category.names.length < 2) {
+					if (c[c.category].names.length < 2) {
 						reasons.push(DV.i18n.wm_required_categories);
-						this.trendLine = false;
+						c.trendLine = false;
 					}
 					
 					if (reasons.length) {
@@ -1690,21 +1684,22 @@ Ext.onReady( function() {
 					}
 				}
 			},
-			targetline: function() {			
-				if (this.targetLineValue) {
+			targetline: function() {	
+				var c = DV.chart.instance;
+				if (c.targetLineValue) {
 					var reasons = [];
-					if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
+					if (c.type === DV.conf.finals.chart.stackedcolumn || c.type === DV.conf.finals.chart.stackedbar || c.type === DV.conf.finals.chart.area) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
-						this.targetLineValue = null;
+						c.targetLineValue = null;
 					}
-					else if (this.type === DV.conf.finals.chart.pie) {
+					else if (c.type === DV.conf.finals.chart.pie) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
-						this.targetLineValue = null;
+						c.targetLineValue = null;
 					}
 					
-					if (this.category.names.length < 2) {
+					if (c[c.category].names.length < 2) {
 						reasons.push(DV.i18n.wm_required_categories);
-						this.targetLineValue = null;
+						c.targetLineValue = null;
 					}
 					
 					if (reasons.length) {
@@ -1718,21 +1713,22 @@ Ext.onReady( function() {
 					}
 				}
 			},
-			baseline: function() {			
-				if (this.baseLineValue) {
+			baseline: function() {		
+				var c = DV.chart.instance;	
+				if (c.baseLineValue) {
 					var reasons = [];
-					if (this.type === DV.conf.finals.chart.stackedcolumn || this.type === DV.conf.finals.chart.stackedbar || this.type === DV.conf.finals.chart.area) {
+					if (c.type === DV.conf.finals.chart.stackedcolumn || c.type === DV.conf.finals.chart.stackedbar || c.type === DV.conf.finals.chart.area) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
-						this.baseLineValue = null;
+						c.baseLineValue = null;
 					}
-					else if (this.type === DV.conf.finals.chart.pie) {
+					else if (c.type === DV.conf.finals.chart.pie) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
-						this.baseLineValue = null;
+						c.baseLineValue = null;
 					}
 					
-					if (this.category.names.length < 2) {
+					if (c[c.category].names.length < 2) {
 						reasons.push(DV.i18n.wm_required_categories);
-						this.baseLineValue = null;
+						c.baseLineValue = null;
 					}
 					
 					if (reasons.length) {
@@ -1747,9 +1743,9 @@ Ext.onReady( function() {
 				}
 			},
 			render: function() {
-				if (!this.isRendered) {
+				if (!c.isRendered) {
 					DV.cmp.toolbar.datatable.enable();
-					this.isRendered = true;
+					c.isRendered = true;
 				}
 			},
 			response: function(r) {
