@@ -166,17 +166,17 @@ public class GetAggregatedValuesAction
                 return SUCCESS;
             }
             
-            Collection<Integer> groupSetIds = ConversionUtils.getIdentifiers( OrganisationUnitGroup.class, groupSet.getOrganisationUnitGroups() );
+            Collection<Integer> groupIds = ConversionUtils.getIdentifiers( OrganisationUnitGroup.class, groupSet.getOrganisationUnitGroups() );
             
             if ( indicatorIds != null )
             {
                 indicatorValues = aggregatedOrgUnitDataValueService.getAggregatedIndicatorValues( indicatorIds, 
-                    periodIds, organisationUnitId, groupSetIds );
+                    periodIds, organisationUnitId, groupIds );
             }
             
             if ( dataElementIds != null )
             {
-                dataElementValues = aggregatedOrgUnitDataValueService.getAggregatedDataValueTotals( dataElementIds, periodIds, organisationUnitId, groupSetIds );                
+                dataElementValues = aggregatedOrgUnitDataValueService.getAggregatedDataValueTotals( dataElementIds, periodIds, organisationUnitId, groupIds );                
             }
             
             if ( dataSetIds != null )
