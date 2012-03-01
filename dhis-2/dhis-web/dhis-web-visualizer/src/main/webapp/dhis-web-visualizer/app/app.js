@@ -623,12 +623,22 @@ Ext.onReady( function() {
 					return a;
                 },
                 getNames: function(exception, isFilter) {
-					var obj = DV.chart.instance.organisationunit.objects,
+					var ou = DV.chart.instance.organisationunit,
 						a = [];
-                    for (var i = 0; i < obj.length; i++) {
-						a.push(obj[i].name);
+                    for (var i = 0; i < ou.objects.length; i++) {
+						a.push(ou.objects[i].name);
 					}
-                    if (exception && isFilter && a.length > 1) {
+					if (ou.groupsetId) {
+						a = [];
+						var groups = DV.init.system.groupSets[ou.groupsetId];
+						for (var i = 0; i < groups.length; i++) {
+							a.push(groups[i].name);
+						}
+						if (exception && isFilter && a.length > 1) {
+							DV.exe.warnings.push(DV.i18n.wm_multiple_filter_groups + ' ' + DV.i18n.wm_first_filter_unit);
+						}
+					}
+					else if (exception && isFilter && a.length > 1) {
 						DV.exe.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_unit);
 					}
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
@@ -1440,6 +1450,7 @@ Ext.onReady( function() {
 						for (var i = 0; i < f.organisationUnits.length; i++) {
 							c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: f.organisationUnits[i].shortName});
 						}
+						c.organisationunit.groupsetId = f.organisationUnitGroupSetId;
 						
                         c.hideSubtitle = f.hideSubtitle;
                         c.hideLegend = f.hideLegend;
@@ -1508,32 +1519,10 @@ Ext.onReady( function() {
 			c.dataset.ids = DV.util.dimension.dataset.getIds();
 			c.period.ids = DV.util.dimension.period.getIds();
 			c.filter.ids = DV.util.dimension.filter.getIds();
-			
-console.log(DV.chart.instance);return;
-			
-			
-				
-			
-            
-            if (exe) {
-                this.validatevalue.getValues(true);
-            }
-			
-			
-            
-            this.series.names = DV.util.dimension[this.series.dimension].getNames();
-            this.category.names = DV.util.dimension[this.category.dimension].getNames();
-            this.filter.names = DV.util.dimension[this.filter.dimension].getNames();
-
-            if (!this.validation.names.call(this)) {
-				return;
-			}
 						
-			if (!this.validation.categories.call(this)) {
+			if (!this.validation.categories()) {
 				return;
 			}
-
-            this.validation.filter.call(this);
             
             this.indicatorIds = DV.util.dimension.indicator.getIds();
             this.dataelementIds = DV.util.dimension.dataelement.getIds();
@@ -1649,7 +1638,8 @@ console.log(DV.chart.instance);return;
 				}
 				return true;
 			},
-			objects: function() {            
+			objects: function() {       
+				var c = DV.chart.instance;     
 				if (!c.data.objects.length) {
 					DV.util.notification.error(DV.i18n.et_no_indicators_dataelements_datasets, DV.i18n.em_no_indicators_dataelements_datasets);
 					return false;
@@ -1661,40 +1651,12 @@ console.log(DV.chart.instance);return;
 				if (!c.organisationunit.objects.length) {
 					DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
 					return false;
-				}  
-				if (!c.period.objects.length) {
-					DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
-					return false;
-				}  
-				if (!c.organisationunit.objects.length) {
-					DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
-					return false;
 				}
 				return true;
 			},
-			//names: function() {            
-				//if (!this.series.names.length) {
-					//DV.util.notification.error(DV.i18n.et_no_indicators_dataelements_datasets, DV.i18n.em_no_indicators_dataelements_datasets);
-					//return false;
-				//}           
-				//if (!this.category.names.length) {
-					//DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
-					//return false;
-				//}           
-				//if (!this.filter.names.length) {
-					//DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
-					//return false;
-				//}
-				//return true;
-			//},
-			filter: function() {
-				if (this.filter.names.length > 1) {
-					this.filter.names = this.filter.names.slice(0,1);
-					DV.exe.warnings.push(DV.conf.finals.dimension[this.filter.dimension].warning.filter + ' ' + DV.i18n.wm_first_filter_used);
-				}
-			},
 			categories: function() {
-				if (this.category.names.length < 2 && (this.type === DV.conf.finals.chart.line || this.type === DV.conf.finals.chart.area)) {
+				var c = DV.chart.instance;
+				if (c[c.category].names.length < 2 && (c.type === DV.conf.finals.chart.line || c.type === DV.conf.finals.chart.area)) {
 					DV.util.notification.error(DV.i18n.et_line_area_categories, DV.i18n.em_line_area_categories);
 					return false;
 				}
