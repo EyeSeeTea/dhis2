@@ -6,56 +6,58 @@ DV.conf = {
 			filter: [DV.i18n.example_chart],
 			values: [84, 77, 87, 82, 91, 69, 82, 78, 83, 76, 73, 85],
 			setState: function() {
-				DV.state.type = DV.conf.finals.chart.column;
-				DV.state.series.dimension = DV.conf.finals.dimension.data.value;
-				DV.state.series.names = DV.conf.init.example.series;
-				DV.state.category.dimension = DV.conf.finals.dimension.period.value;
-				DV.state.category.names = DV.conf.init.example.category;
-				DV.state.filter.dimension = DV.conf.finals.dimension.organisationunit.value;
-				DV.state.filter.names = DV.conf.init.example.filter;
-				DV.state.targetLineValue = 80;
-				DV.state.targetLineLabel = 'Target label';
-				DV.state.rangeAxisLabel = 'Range axis label';
-				DV.state.domainAxisLabel = 'Domain axis label';
+				var c = DV.chart.instance;
+				c.type = DV.conf.finals.chart.column;
+				c.series = DV.conf.finals.dimension.data.value;
+				c.category = DV.conf.finals.dimension.period.value;
+				c.filter = DV.conf.finals.dimension.organisationunit.value;				
+				c.series.names = this.series;
+				c.category.names = this.category;
+				c.filter.names = this.filter;
+				c.targetLineValue = 80;
+				c.targetLineLabel = 'Target label';
+				c.rangeAxisLabel = 'Range axis label';
+				c.domainAxisLabel = 'Domain axis label';
 			},
 			setValues: function() {
+				var c = DV.chart.instance;
 				var obj1 = {}, obj2 = {}, obj3 = {}, obj4 = {}, obj5 = {}, obj6 = {}, obj7 = {}, obj8 = {}, obj9 = {}, obj10 = {}, obj11 = {}, obj12 = {};
-				obj1[DV.state.series.dimension] = DV.conf.init.example.series[0];
-				obj1[DV.state.category.dimension] = DV.conf.init.example.category[0];
-				obj1.v = DV.conf.init.example.values[0];
-				obj2[DV.state.series.dimension] = DV.conf.init.example.series[1];
-				obj2[DV.state.category.dimension] = DV.conf.init.example.category[0];
-				obj2.v = DV.conf.init.example.values[1];
-				obj3[DV.state.series.dimension] = DV.conf.init.example.series[2];
-				obj3[DV.state.category.dimension] = DV.conf.init.example.category[0];
-				obj3.v = DV.conf.init.example.values[2];
-				obj4[DV.state.series.dimension] = DV.conf.init.example.series[3];
-				obj4[DV.state.category.dimension] = DV.conf.init.example.category[0];
-				obj4.v = DV.conf.init.example.values[3];
-				obj5[DV.state.series.dimension] = DV.conf.init.example.series[0];
-				obj5[DV.state.category.dimension] = DV.conf.init.example.category[1];
-				obj5.v = DV.conf.init.example.values[4];
-				obj6[DV.state.series.dimension] = DV.conf.init.example.series[1];
-				obj6[DV.state.category.dimension] = DV.conf.init.example.category[1];
-				obj6.v = DV.conf.init.example.values[5];
-				obj7[DV.state.series.dimension] = DV.conf.init.example.series[2];
-				obj7[DV.state.category.dimension] = DV.conf.init.example.category[1];
-				obj7.v = DV.conf.init.example.values[6];
-				obj8[DV.state.series.dimension] = DV.conf.init.example.series[3];
-				obj8[DV.state.category.dimension] = DV.conf.init.example.category[1];
-				obj8.v = DV.conf.init.example.values[7];
-				obj9[DV.state.series.dimension] = DV.conf.init.example.series[0];
-				obj9[DV.state.category.dimension] = DV.conf.init.example.category[2];
-				obj9.v = DV.conf.init.example.values[8];
-				obj10[DV.state.series.dimension] = DV.conf.init.example.series[1];
-				obj10[DV.state.category.dimension] = DV.conf.init.example.category[2];
-				obj10.v = DV.conf.init.example.values[9];
-				obj11[DV.state.series.dimension] = DV.conf.init.example.series[2];
-				obj11[DV.state.category.dimension] = DV.conf.init.example.category[2];
-				obj11.v = DV.conf.init.example.values[10];
-				obj12[DV.state.series.dimension] = DV.conf.init.example.series[3];
-				obj12[DV.state.category.dimension] = DV.conf.init.example.category[2];
-				obj12.v = DV.conf.init.example.values[11];
+				obj1[c.series] = this.series[0];
+				obj1[c.category] = this.category[0];
+				obj1.value = this.values[0];
+				obj2[c.series] = this.series[1];
+				obj2[c.category] = this.category[0];
+				obj2.value = this.values[1];
+				obj3[c.series] = this.series[2];
+				obj3[c.category] = this.category[0];
+				obj3.value = this.values[2];
+				obj4[c.series] = this.series[3];
+				obj4[c.category] = this.category[0];
+				obj4.value = this.values[3];
+				obj5[c.series] = this.series[0];
+				obj5[c.category] = this.category[1];
+				obj5.value = this.values[4];
+				obj6[c.series] = this.series[1];
+				obj6[c.category] = this.category[1];
+				obj6.value = this.values[5];
+				obj7[c.series] = this.series[2];
+				obj7[c.category] = this.category[1];
+				obj7.value = this.values[6];
+				obj8[c.series] = this.series[3];
+				obj8[c.category] = this.category[1];
+				obj8.value = this.values[7];
+				obj9[c.series] = this.series[0];
+				obj9[c.category] = this.category[2];
+				obj9.value = this.values[8];
+				obj10[c.series] = this.series[1];
+				obj10[c.category] = this.category[2];
+				obj10.value = this.values[9];
+				obj11[c.series] = this.series[2];
+				obj11[c.category] = this.category[2];
+				obj11.value = this.values[10];
+				obj12[c.series] = this.series[3];
+				obj12[c.category] = this.category[2];
+				obj12.value = this.values[11];
 				DV.value.values = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11, obj12];
 			}
 		},
@@ -216,11 +218,7 @@ Ext.onReady( function() {
         DV.util.combobox.filter.category();
         DV.util.fieldset.toggleIndicator();
         
-        //DV.conf.init.example.setState();
-        //DV.conf.init.example.setValues();
-        
-        DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
-        //DV.exe.execute(true, DV.init.cmd);
+        DV.exe.execute(DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init);
     };
     
     DV.cmp = {
@@ -444,9 +442,6 @@ Ext.onReady( function() {
                     DV.cmp.dimension.indicator.selected.store.each( function(r) {
                         a.push({id: r.data.id, name: DV.util.string.getEncodedString(r.data.name)});
                     });
-                    if (exception && !a.length) {
-                        alert(DV.i18n.no_indicators_selected);
-                    }
                     return a;
                 },
                 getIds: function() {
@@ -464,9 +459,6 @@ Ext.onReady( function() {
 					DV.cmp.dimension.dataelement.selected.store.each( function(r) {
 						a.push({id: r.data.id, name: DV.util.string.getEncodedString(r.data.name)});
 					});
-					if (exception && !a.length) {
-						alert(DV.i18n.no_data_elements_selected);
-					}
 					return a;
                 },
                 getIds: function() {
@@ -484,9 +476,6 @@ Ext.onReady( function() {
 					DV.cmp.dimension.dataset.selected.store.each( function(r) {
 						a.push({id: r.data.id, name: DV.util.string.getEncodedString(r.data.name)});
 					});
-					if (exception && !a.length) {
-						alert(DV.i18n.no_datasets_selected);
-					}
 					return a;
                 },
                 getIds: function() {
@@ -619,7 +608,6 @@ Ext.onReady( function() {
 					Ext.Array.each(selection, function(r) {
 						a.push({id: r.data.id, name: DV.util.string.getEncodedString(r.data.text)});
 					});
-                    DV.state.organisationunits.objects = a;
 					return a;
                 },
                 getNames: function(exception, isFilter) {
@@ -1163,9 +1151,9 @@ Ext.onReady( function() {
                     values.push({
 						value: r[i][0],
 						type: t === 'in' ? DV.conf.finals.dimension.indicator.value : t === 'de' ? DV.conf.finals.dimension.dataelement.value : t === 'ds' ? DV.conf.finals.dimension.dataset.value : t,
-						data: r[i][2],
-						period: r[i][3],
-						organisationunit: r[i][4]
+						dataId: r[i][2],
+						periodId: r[i][3],
+						organisationunitId: r[i][4]
 					});
                 }
                 return values;
@@ -1447,6 +1435,7 @@ Ext.onReady( function() {
 							}
 						}						
 						c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(f.relativePeriods);
+						c.period.rp = f.relativePeriods;
 						for (var i = 0; i < f.organisationUnits.length; i++) {
 							c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: f.organisationUnits[i].shortName});
 						}
@@ -1484,19 +1473,22 @@ Ext.onReady( function() {
                         
 				if (exe) {
 					this.expandChart(exe);
-				}				
+				}
 			}
 		},
 		expandChart: function(exe, id) {
+			var c = DV.chart.instance;
+			DV.chart.warnings = [];
+			
 			if (!this.validation.dimensions()) {
 				return;
 			}
 			
 			c.data = {};
 			c.data.objects = [];
-			c.data.objects.concat(c.indicator.objects);
-			c.data.objects.concat(c.dataelement.objects);
-			c.data.objects.concat(c.dataset.objects);
+			c.data.objects = c.data.objects.concat(c.indicator.objects);
+			c.data.objects = c.data.objects.concat(c.dataelement.objects);
+			c.data.objects = c.data.objects.concat(c.dataset.objects);
 			
 			if (!this.validation.objects()) {
 				return;
@@ -1518,7 +1510,7 @@ Ext.onReady( function() {
 			c.dataelement.ids = DV.util.dimension.dataelement.getIds();
 			c.dataset.ids = DV.util.dimension.dataset.getIds();
 			c.period.ids = DV.util.dimension.period.getIds();
-			c.filter.ids = DV.util.dimension.filter.getIds();
+			c.organisationunit.ids = DV.util.dimension.organisationunit.getIds();
 						
 			if (!this.validation.categories()) {
 				return;
@@ -1605,27 +1597,27 @@ Ext.onReady( function() {
 			DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[c.filter].value);
 									
 			DV.store.indicator.selected.removeAll();
-			if (f.indicators) {
-				DV.store.indicator.selected.add(irec);
-				DV.util.store.addToStorage(DV.store.indicator.available, irec);
+			if (c.indicators.objects) {
+				DV.store.indicator.selected.add(c.indicators.objects);
+				DV.util.store.addToStorage(DV.store.indicator.available, c.indicators.objects);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
 			}
 									
 			DV.store.dataelement.selected.removeAll();
-			if (f.dataElements) {
-				DV.store.dataelement.selected.add(derec);
-				DV.util.store.addToStorage(DV.store.dataelement.available, derec);
+			if (c.dataElements.objects) {
+				DV.store.dataelement.selected.add(c.dataElements.objects);
+				DV.util.store.addToStorage(DV.store.dataelement.available, c.dataElements.objects);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
 			}
 									
 			DV.store.dataset.selected.removeAll();
-			if (f.dataSets) {
-				DV.store.dataset.selected.add(dsrec);
-				DV.util.store.addToStorage(DV.store.dataset.available, dsrec);
+			if (c.dataSets.objects) {
+				DV.store.dataset.selected.add(c.dataSets.objects);
+				DV.util.store.addToStorage(DV.store.dataset.available, c.dataSets.objects);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
 			}
-
-			DV.util.checkbox.setRelativePeriods(f.relativePeriods);
+			
+			DV.util.checkbox.setRelativePeriods(c.period.rp);
 		},
         validation: {
 			dimensions: function() {
@@ -1636,16 +1628,16 @@ Ext.onReady( function() {
 				}
 				return true;
 			},
-			objects: function() {       
-				var c = DV.chart.instance;     
+			objects: function() {
+				var c = DV.chart.instance;
 				if (!c.data.objects.length) {
 					DV.util.notification.error(DV.i18n.et_no_indicators_dataelements_datasets, DV.i18n.em_no_indicators_dataelements_datasets);
 					return false;
-				}           
+				}
 				if (!c.period.objects.length) {
 					DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
 					return false;
-				}           
+				}
 				if (!c.organisationunit.objects.length) {
 					DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
 					return false;
@@ -1718,8 +1710,8 @@ Ext.onReady( function() {
 					}
 				}
 			},
-			baseline: function() {		
-				var c = DV.chart.instance;	
+			baseline: function() {
+				var c = DV.chart.instance;
 				if (c.baseLineValue) {
 					var reasons = [];
 					if (c.type === DV.conf.finals.chart.stackedcolumn || c.type === DV.conf.finals.chart.stackedbar || c.type === DV.conf.finals.chart.area) {
@@ -1748,6 +1740,7 @@ Ext.onReady( function() {
 				}
 			},
 			render: function() {
+				var c = DV.chart.instance;
 				if (!c.isRendered) {
 					DV.cmp.toolbar.datatable.enable();
 					c.isRendered = true;
@@ -1776,10 +1769,11 @@ Ext.onReady( function() {
         getValues: function(exe) {
             DV.util.mask.showMask(DV.cmp.region.center, DV.i18n.loading);
             
-            var params = [];
-            params = params.concat(DV.util.dimension[DV.state.series.dimension].getUrl());
-            params = params.concat(DV.util.dimension[DV.state.category.dimension].getUrl());
-            params = params.concat(DV.util.dimension[DV.state.filter.dimension].getUrl(true));
+            var params = [],
+				c = DV.chart.instance;
+            params = params.concat(c.data.url);
+            params = params.concat(c.period.url);
+            params = params.concat(c.organisationunit.url);
             
             var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.data_get;
             Ext.Array.each(params, function(item) {
@@ -1798,10 +1792,10 @@ Ext.onReady( function() {
                     }
 					
                     Ext.Array.each(DV.value.values, function(item) {
-                        item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(DV.store[item.type].available.storage[item.data].name);
-                        item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.period));
-                        item[DV.conf.finals.dimension.organisationunit.value] = DV.util.string.getEncodedString(DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunit));
-                        item.v = parseFloat(item.value);
+                        item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(DV.store[item.type].available.storage[item.dataId].name);
+                        item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.periodId));
+                        item[DV.conf.finals.dimension.organisationunit.value] = DV.util.string.getEncodedString(DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitId));
+                        item.value = parseFloat(item.value);
                     });
                     
                     if (exe) {
@@ -1863,35 +1857,38 @@ Ext.onReady( function() {
 		},
         data: [],
         getData: function(exe) {
+			var c = this.instance;
+			var series = this.instance[this.instance.series];
+			var category = this.instance[this.instance.category];
             this.data = [];
             
-            Ext.Array.each(DV.state.category.names, function(item) {
+            Ext.Array.each(category.names, function(item) {
                 var obj = {};
                 obj[DV.conf.finals.data.domain] = item;
                 DV.chart.data.push(obj);
             });
             
             Ext.Array.each(DV.chart.data, function(item) {
-                for (var i = 0; i < DV.state.series.names.length; i++) {
-                    item[DV.state.series.names[i]] = 0;
+                for (var i = 0; i < series.names.length; i++) {
+                    item[series.names[i]] = 0;
                 }
             });
 
             Ext.Array.each(DV.chart.data, function(item) {
-                for (var i = 0; i < DV.state.series.names.length; i++) {
+                for (var i = 0; i < series.names.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
-                        if (DV.value.values[j][DV.state.category.dimension] === item[DV.conf.finals.data.domain] && DV.value.values[j][DV.state.series.dimension] === DV.state.series.names[i]) {
-                            item[DV.value.values[j][DV.state.series.dimension]] = DV.value.values[j].v;
+                        if (DV.value.values[j][category.dimension] === item[DV.conf.finals.data.domain] && DV.value.values[j][series.dimension] === series.names[i]) {
+                            item[DV.value.values[j][series.dimension]] = DV.value.values[j].value;
                             break;
                         }
                     }
                 }
             });
             
-			if (DV.state.trendLine) {
+			if (c.trendLine) {
 				this.trendLine = [];
-				for (var i = 0; i < DV.state.series.names.length; i++) {
-					var s = DV.state.series.names[i],
+				for (var i = 0; i < series.names.length; i++) {
+					var s = series.names[i],
 						reg = new SimpleRegression();
 					for (var j = 0; j < DV.chart.data.length; j++) {
 						reg.addData(j, DV.chart.data[j][s]);
@@ -1908,15 +1905,15 @@ Ext.onReady( function() {
 				}
 			}
 
-			if (DV.state.targetLineValue) {
+			if (c.targetLineValue) {
 				Ext.Array.each(DV.chart.data, function(item) {
-					item[DV.conf.finals.data.targetline] = DV.state.targetLineValue;
+					item[DV.conf.finals.data.targetline] = c.targetLineValue;
 				});
 			}
 
-			if (DV.state.baseLineValue) {
+			if (c.baseLineValue) {
 				Ext.Array.each(DV.chart.data, function(item) {
-					item[DV.conf.finals.data.baseline] = DV.state.baseLineValue;
+					item[DV.conf.finals.data.baseline] = c.baseLineValue;
 				});
 			}
             
@@ -1938,8 +1935,9 @@ Ext.onReady( function() {
             }
         },
         column: function(stacked) {
-			var series = [];
-			if (DV.state.trendLine) {
+			var c = this.instance,
+				series = [];
+			if (c.trendLine) {
 				var a = DV.util.chart.default.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
@@ -1949,7 +1947,7 @@ Ext.onReady( function() {
 				type: 'column',
 				axis: 'left',
 				xField: DV.conf.finals.data.domain,
-				yField: DV.state.series.names,
+				yField: c[c.series].names,
 				stacked: stacked,
 				style: {
 					opacity: 0.8,
@@ -1957,10 +1955,10 @@ Ext.onReady( function() {
 				},				
 				tips: DV.util.chart.default.series.getTips()
 			});
-			if (DV.state.targetLineValue) {
+			if (c.targetLineValue) {
 				series.push(DV.util.chart.default.series.getTargetLine());
 			}
-			if (DV.state.baseLineValue) {
+			if (c.baseLineValue) {
 				series.push(DV.util.chart.default.series.getBaseLine());
 			}
 			
@@ -1976,8 +1974,9 @@ Ext.onReady( function() {
             this.column(true);
         },
         bar: function(stacked) {
-			var series = [];
-			if (DV.state.trendLine) {
+			var c = this.instance,
+				series = [];
+			if (c.trendLine) {
 				var a = DV.util.chart.bar.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
@@ -1987,7 +1986,7 @@ Ext.onReady( function() {
 				type: 'bar',
 				axis: 'bottom',
 				xField: DV.conf.finals.data.domain,
-				yField: DV.state.series.names,
+				yField: c[c.series].names,
 				stacked: stacked,
 				style: {
 					opacity: 0.8,
@@ -1995,10 +1994,10 @@ Ext.onReady( function() {
 				},
 				tips: DV.util.chart.default.series.getTips()
 			});
-			if (DV.state.targetLineValue) {
+			if (c.targetLineValue) {
 				series.push(DV.util.chart.bar.series.getTargetLine());
 			}
-			if (DV.state.baseLineValue) {
+			if (c.baseLineValue) {
 				series.push(DV.util.chart.bar.series.getBaseLine());
 			}
 			
@@ -2014,18 +2013,19 @@ Ext.onReady( function() {
             this.bar(true);
         },
         line: function() {
-			var series = [];
-			if (DV.state.trendLine) {
+			var c = this.instance,
+				series = [];
+			if (c.trendLine) {
 				var a = DV.util.chart.default.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
 				}
 			}
 			series = series.concat(DV.util.chart.line.series.getArray());
-			if (DV.state.targetLineValue) {
+			if (c.targetLineValue) {
 				series.push(DV.util.chart.default.series.getTargetLine());
 			}
-			if (DV.state.baseLineValue) {
+			if (c.baseLineValue) {
 				series.push(DV.util.chart.default.series.getBaseLine());
 			}
 			
@@ -2038,12 +2038,13 @@ Ext.onReady( function() {
 			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         area: function() {
-			var series = [];
+			var c = this.instance,
+				series = [];
 			series.push({
 				type: 'area',
 				axis: 'left',
 				xField: DV.conf.finals.data.domain,
-				yField: DV.state.series.names,
+				yField: c[c.series].names,
 				style: {
 					opacity: 0.65,
 					stroke: '#555'
@@ -2059,17 +2060,18 @@ Ext.onReady( function() {
 			this.chart = DV.util.chart.default.getChart(axes, series);
         },
         pie: function() {
+			var c = this.instance;
 			DV.util.chart.pie.series.setTheme();
             this.chart = Ext.create('Ext.chart.Chart', {
                 animate: true,
                 shadow: true,
                 store: DV.store.chart,
                 insetPadding: 60,
-                items: DV.state.hideSubtitle ? false : DV.util.chart.pie.getTitle(),
-                legend: DV.state.hideLegend ? false : DV.util.chart.default.getLegend(DV.state.category.names.length),
+                items: c.hideSubtitle ? false : DV.util.chart.pie.getTitle(),
+                legend: c.hideLegend ? false : DV.util.chart.default.getLegend(c[c.category].names.length),
                 series: [{
                     type: 'pie',
-                    field: DV.state.series.names[0],
+                    field: c[c.series].names[0],
                     showInLegend: true,
                     label: {
                         field: DV.conf.finals.data.domain
@@ -2089,14 +2091,24 @@ Ext.onReady( function() {
             });
         },
         reload: function() {
-			DV.state.getOptions();
+			//DV.state.getOptions(); // ??
             DV.cmp.region.center.removeAll(true);
-            DV.cmp.region.center.add(this.chart);            
-            DV.exe.finalize(); // flytt til dv.chart
+            DV.cmp.region.center.add(this.chart);
+            
+			DV.util.mask.hideMask();
+            
+            if (DV.exe.warnings.length) {
+				DV.util.notification.warning(DV.exe.getWarnings());
+			}
+			else {
+				DV.util.notification.ok();
+			}
             
             if (DV.init.cmd !== DV.conf.finals.cmd.init) {
                 DV.store.getDataTableStore(true);
             }
+            
+            DV.init.cmd = false;
         }
     };
     
@@ -2151,36 +2163,30 @@ Ext.onReady( function() {
     };
     
     DV.exe = {
-        execute: function(exe, cmd) {
-			DV.exe.warnings = [];			
-            if (cmd) {
-                if (cmd === DV.conf.finals.cmd.init) {
-                    DV.chart.getData(exe);
-                }
-                else if (cmd === DV.conf.finals.cmd.datatable) {
-					DV.store.getDataTableStore(exe);
-				}					
-                else {
-					DV.state.resetState();
-                    DV.state.setFavorite(true, cmd);
-                }
-            }
-            else {
-				DV.state.resetState();
-                DV.state.getState(exe);
-            }
-        },
-        finalize: function() {
-			DV.init.cmd = false;
-			DV.util.mask.hideMask();
-            
-            if (DV.exe.warnings.length) {
-				DV.util.notification.warning(DV.exe.getWarnings());
+		execute: function(cmd) {
+			if (cmd) {
+				if (cmd === DV.conf.finals.cmd.init) {
+					this.init();
+				}
+				else {
+					this.favorite(cmd);
+				}
 			}
 			else {
-				DV.util.notification.ok();
+				this.update();
 			}
-        },
+		},
+		init: function() {
+			DV.conf.init.example.setState();
+			DV.conf.init.example.setValues();
+			DV.chart.getData(true);
+		},			
+		update: function() {
+			DV.chart.setChart(true);
+		},
+		favorite: function(id) {
+			DV.chart.setChart(true, id);
+		},
         warnings: [],
         getWarnings: function() {
 			var t = '';
