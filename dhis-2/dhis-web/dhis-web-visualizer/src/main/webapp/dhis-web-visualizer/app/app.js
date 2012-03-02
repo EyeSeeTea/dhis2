@@ -6,57 +6,55 @@ DV.conf = {
 			filter: [DV.i18n.example_chart],
 			values: [84, 77, 87, 82, 91, 69, 82, 78, 83, 76, 73, 85],
 			setState: function() {
-				var c = DV.chart.instance;
-				c.type = DV.conf.finals.chart.column;
-				c.series = DV.conf.finals.dimension.data.value;
-				c.category = DV.conf.finals.dimension.period.value;
-				c.filter = DV.conf.finals.dimension.organisationunit.value;				
-				c.series.names = this.series;
-				c.category.names = this.category;
-				c.filter.names = this.filter;
-				c.targetLineValue = 80;
-				c.targetLineLabel = 'Target label';
-				c.rangeAxisLabel = 'Range axis label';
-				c.domainAxisLabel = 'Domain axis label';
+				DV.c.type = DV.conf.finals.chart.column;
+				DV.c.series = DV.conf.finals.dimension.data.value;
+				DV.c.category = DV.conf.finals.dimension.period.value;
+				DV.c.filter = DV.conf.finals.dimension.organisationunit.value;				
+				DV.c.data = {names: this.series};
+				DV.c.period = {names: this.category};
+				DV.c.organisationunit = {names: this.filter};
+				DV.c.targetLineValue = 80;
+				DV.c.targetLineLabel = 'Target label';
+				DV.c.rangeAxisLabel = 'Range axis label';
+				DV.c.domainAxisLabel = 'Domain axis label';
 			},
 			setValues: function() {
-				var c = DV.chart.instance;
 				var obj1 = {}, obj2 = {}, obj3 = {}, obj4 = {}, obj5 = {}, obj6 = {}, obj7 = {}, obj8 = {}, obj9 = {}, obj10 = {}, obj11 = {}, obj12 = {};
-				obj1[c.series] = this.series[0];
-				obj1[c.category] = this.category[0];
+				obj1[DV.c.series] = this.series[0];
+				obj1[DV.c.category] = this.category[0];
 				obj1.value = this.values[0];
-				obj2[c.series] = this.series[1];
-				obj2[c.category] = this.category[0];
+				obj2[DV.c.series] = this.series[1];
+				obj2[DV.c.category] = this.category[0];
 				obj2.value = this.values[1];
-				obj3[c.series] = this.series[2];
-				obj3[c.category] = this.category[0];
+				obj3[DV.c.series] = this.series[2];
+				obj3[DV.c.category] = this.category[0];
 				obj3.value = this.values[2];
-				obj4[c.series] = this.series[3];
-				obj4[c.category] = this.category[0];
+				obj4[DV.c.series] = this.series[3];
+				obj4[DV.c.category] = this.category[0];
 				obj4.value = this.values[3];
-				obj5[c.series] = this.series[0];
-				obj5[c.category] = this.category[1];
+				obj5[DV.c.series] = this.series[0];
+				obj5[DV.c.category] = this.category[1];
 				obj5.value = this.values[4];
-				obj6[c.series] = this.series[1];
-				obj6[c.category] = this.category[1];
+				obj6[DV.c.series] = this.series[1];
+				obj6[DV.c.category] = this.category[1];
 				obj6.value = this.values[5];
-				obj7[c.series] = this.series[2];
-				obj7[c.category] = this.category[1];
+				obj7[DV.c.series] = this.series[2];
+				obj7[DV.c.category] = this.category[1];
 				obj7.value = this.values[6];
-				obj8[c.series] = this.series[3];
-				obj8[c.category] = this.category[1];
+				obj8[DV.c.series] = this.series[3];
+				obj8[DV.c.category] = this.category[1];
 				obj8.value = this.values[7];
-				obj9[c.series] = this.series[0];
-				obj9[c.category] = this.category[2];
+				obj9[DV.c.series] = this.series[0];
+				obj9[DV.c.category] = this.category[2];
 				obj9.value = this.values[8];
-				obj10[c.series] = this.series[1];
-				obj10[c.category] = this.category[2];
+				obj10[DV.c.series] = this.series[1];
+				obj10[DV.c.category] = this.category[2];
 				obj10.value = this.values[9];
-				obj11[c.series] = this.series[2];
-				obj11[c.category] = this.category[2];
+				obj11[DV.c.series] = this.series[2];
+				obj11[DV.c.category] = this.category[2];
 				obj11.value = this.values[10];
-				obj12[c.series] = this.series[3];
-				obj12[c.category] = this.category[2];
+				obj12[DV.c.series] = this.series[3];
+				obj12[DV.c.category] = this.category[2];
 				obj12.value = this.values[11];
 				DV.value.values = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11, obj12];
 			}
@@ -215,10 +213,12 @@ Ext.onReady( function() {
     DV.init = DV.conf.init.ajax.jsonfy(r);
     
     DV.init.initialize = function() {
+		DV.c = DV.chart.chart;
         DV.util.combobox.filter.category();
         DV.util.fieldset.toggleIndicator();
         
-        DV.exe.execute(DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init);
+        DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
+        DV.exe.execute(DV.init.cmd);
     };
     
     DV.cmp = {
@@ -495,7 +495,7 @@ Ext.onReady( function() {
 						a.push(obj[i].name);
 					}
                     if (exception && isFilter && a.length > 1) {
-						DV.exe.warnings.push(DV.i18n.wm_multiple_filter_ind_de_ds + ' ' + DV.i18n.wm_first_filter_unit);
+						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_ind_de_ds + ' ' + DV.i18n.wm_first_filter_unit);
 					}
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
@@ -552,7 +552,7 @@ Ext.onReady( function() {
 						a.push(obj[i].name);
 					}
                     if (exception && isFilter && a.length > 1) {
-						DV.exe.warnings.push(DV.i18n.wm_multiple_filter_period + ' ' + DV.i18n.wm_first_filter_unit);
+						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_period + ' ' + DV.i18n.wm_first_filter_unit);
 					}
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
@@ -623,11 +623,11 @@ Ext.onReady( function() {
 							a.push(groups[i].name);
 						}
 						if (exception && isFilter && a.length > 1) {
-							DV.exe.warnings.push(DV.i18n.wm_multiple_filter_groups + ' ' + DV.i18n.wm_first_filter_unit);
+							DV.chart.warnings.push(DV.i18n.wm_multiple_filter_groups + ' ' + DV.i18n.wm_first_filter_unit);
 						}
 					}
 					else if (exception && isFilter && a.length > 1) {
-						DV.exe.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_unit);
+						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_unit);
 					}
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
@@ -711,8 +711,8 @@ Ext.onReady( function() {
 						animate: true,
 						store: DV.store.chart,
 						insetPadding: DV.conf.chart.style.inset,
-						items: DV.state.hideSubtitle ? false : DV.util.chart.default.getTitle(),
-						legend: DV.state.hideLegend ? false : DV.util.chart.default.getLegend(),
+						items: DV.c.hideSubtitle ? false : DV.util.chart.default.getTitle(),
+						legend: DV.c.hideLegend ? false : DV.util.chart.default.getLegend(),
 						axes: axes,
 						series: series,
 						theme: 'dv1'
@@ -731,7 +731,7 @@ Ext.onReady( function() {
 				getTitle: function() {
 					return {
 						type: 'text',
-						text: DV.state.filter.names[0],
+						text: DV.c.filter.names[0],
 						font: 'bold 15px ' + DV.conf.chart.style.font,
 						fill: '#222',
 						width: 300,
@@ -761,12 +761,12 @@ Ext.onReady( function() {
 						var axis = {
 							type: 'Numeric',
 							position: 'left',
-							title: DV.state.rangeAxisLabel || false,
+							title: DV.c.rangeAxisLabel || false,
 							labelTitle: {
 								font: '17px ' + DV.conf.chart.style.font
 							},
 							minimum: 0,
-							fields: stacked ? DV.state.series.names : DV.store.chart.range,
+							fields: stacked ? DV.c.series.names : DV.store.chart.range,
 							label: DV.util.chart.default.label.getNumeric(),
 							grid: {
 								odd: {
@@ -793,7 +793,7 @@ Ext.onReady( function() {
 						return {
 							type: 'Category',
 							position: 'bottom',
-							title: DV.state.domainAxisLabel || false,
+							title: DV.c.domainAxisLabel || false,
 							labelTitle: {
 								font: '17px ' + DV.conf.chart.style.font
 							},
@@ -813,8 +813,8 @@ Ext.onReady( function() {
 						};
 					},
 					getTargetLine: function() {
-						var title = DV.state.targetLineLabel || DV.i18n.target;
-						title += ' (' + DV.state.targetLineValue + ')';
+						var title = DV.c.targetLineLabel || DV.i18n.target;
+						title += ' (' + DV.c.targetLineValue + ')';
 						return {
 							type: 'line',
 							axis: 'left',
@@ -833,8 +833,8 @@ Ext.onReady( function() {
 						};
 					},
 					getBaseLine: function() {
-						var title = DV.state.baseLineLabel || DV.i18n.base;
-						title += ' (' + DV.state.baseLineValue + ')';
+						var title = DV.c.baseLineLabel || DV.i18n.base;
+						title += ' (' + DV.c.baseLineValue + ')';
 						return {
 							type: 'line',
 							axis: 'left',
@@ -875,14 +875,14 @@ Ext.onReady( function() {
 						return a;
 					},
 					setTheme: function() {
-						var colors = DV.conf.chart.theme.dv1.slice(0, DV.state.series.names.length);						
-						if (DV.state.targetLineValue || DV.state.baseLineValue) {
+						var colors = DV.conf.chart.theme.dv1.slice(0, DV.c.series.names.length);						
+						if (DV.c.targetLineValue || DV.c.baseLineValue) {
 							colors.push('#051a2e');
 						}					
-						if (DV.state.targetLineValue) {
+						if (DV.c.targetLineValue) {
 							colors.push('#051a2e');
 						}					
-						if (DV.state.baseLineValue) {
+						if (DV.c.baseLineValue) {
 							colors.push('#051a2e');
 						}
 						Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
@@ -969,12 +969,12 @@ Ext.onReady( function() {
 				series: {
 					getArray: function() {
 						var a = [];
-						for (var i = 0; i < DV.state.series.names.length; i++) {
+						for (var i = 0; i < DV.c.series.names.length; i++) {
 							a.push({
 								type: 'line',
 								axis: 'left',
 								xField: DV.conf.finals.data.domain,
-								yField: DV.state.series.names[i],
+								yField: DV.c.series.names[i],
 								style: {
 									opacity: 0.8,
 									lineWidth: 3
@@ -989,11 +989,11 @@ Ext.onReady( function() {
 						return a;
 					},
 					setTheme: function() {
-						var colors = DV.conf.chart.theme.dv1.slice(0, DV.state.series.names.length);
-						if (DV.state.trendLine) {
+						var colors = DV.conf.chart.theme.dv1.slice(0, DV.c.series.names.length);
+						if (DV.c.trendLine) {
 							colors = colors.concat(colors);
 						}
-						if (DV.state.targetLineValue) {
+						if (DV.c.targetLineValue) {
 							colors.push('#051a2e');
 						}						
 						Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
@@ -1012,7 +1012,7 @@ Ext.onReady( function() {
                     return [
                         {
                             type: 'text',
-                            text: DV.state.filter.names[0],
+                            text: DV.c.filter.names[0],
                             font: 'bold 15px ' + DV.conf.chart.style.font,
                             fill: '#222',
                             width: 300,
@@ -1022,7 +1022,7 @@ Ext.onReady( function() {
                         },
                         {
                             type: 'text',
-                            text: DV.state.series.names[0],
+                            text: DV.c.series.names[0],
                             font: '13px ' + DV.conf.chart.style.font,
                             fill: '#444',
                             width: 300,
@@ -1038,12 +1038,12 @@ Ext.onReady( function() {
 							trackMouse: true,
 							cls: 'dv-chart-tips-pie',
 							renderer: function(item) {
-								this.update(item.data[DV.conf.finals.data.domain] + '<br/><b>' + item.data[DV.state.series.names[0]] + '</b>');
+								this.update(item.data[DV.conf.finals.data.domain] + '<br/><b>' + item.data[DV.c.series.names[0]] + '</b>');
 							}
 						};
 					},
 					setTheme: function() {
-						var colors = DV.conf.chart.theme.dv1.slice(0, DV.state.category.names.length);
+						var colors = DV.conf.chart.theme.dv1.slice(0, DV.c.category.names.length);
 						Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
 							constructor: function(config) {
 								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
@@ -1162,9 +1162,10 @@ Ext.onReady( function() {
         crud: {
             favorite: {
                 create: function(fn, isUpdate) {
+					var c = DV.chart.instance;
                     DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.saving + '...');
                     
-                    var params = DV.state.getParams();
+                    var params = c.getParams();
                     params.name = DV.cmp.favorite.name.getValue();
                     
                     if (isUpdate) {
@@ -1397,7 +1398,6 @@ Ext.onReady( function() {
     DV.state = {
         setChart: function(exe, id) {
 			DV.chart.reset();
-			var c = DV.chart.instance;
 			
 			if (id) {
                 Ext.Ajax.request({
@@ -1414,43 +1414,43 @@ Ext.onReady( function() {
 							return;
 						}
                         
-                        c.type = f.type.toLowerCase();
-                        c.series = f.series.toLowerCase();
-                        c.category = f.category.toLowerCase();
-                        c.filter = f.filter.toLowerCase();
+                        DV.c.type = f.type.toLowerCase();
+                        DV.c.dimension.series = f.series.toLowerCase();
+                        DV.c.dimension.category = f.category.toLowerCase();
+                        DV.c.dimension.filter = f.filter.toLowerCase();
                         
                         if (f.indicators) {
 							for (var i = 0; i < f.indicators.length; i++) {
-								c.indicator.objects.push({id: f.indicators[i].internalId, name: f.indicators[i].shortName});
+								DV.c.indicator.objects.push({id: f.indicators[i].internalId, name: f.indicators[i].shortName});
 							}
 						}
 						if (f.dataElements) {
 							for (var i = 0; i < f.dataElements.length; i++) {
-								c.dataelement.objects.push({id: f.dataElements[i].internalId, name: f.dataElements[i].shortName});
+								DV.c.dataelement.objects.push({id: f.dataElements[i].internalId, name: f.dataElements[i].shortName});
 							}
 						}
 						if (f.dataSets) {
 							for (var i = 0; i < f.dataSets.length; i++) {
-								c.dataset.objects.push({id: f.dataSets[i].internalId, name: f.dataSets[i].shortName});
+								DV.c.dataset.objects.push({id: f.dataSets[i].internalId, name: f.dataSets[i].shortName});
 							}
 						}						
-						c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(f.relativePeriods);
-						c.period.rp = f.relativePeriods;
+						DV.c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(f.relativePeriods);
+						DV.c.period.rp = f.relativePeriods;
 						for (var i = 0; i < f.organisationUnits.length; i++) {
-							c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: f.organisationUnits[i].shortName});
+							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: f.organisationUnits[i].shortName});
 						}
-						c.organisationunit.groupsetId = f.organisationUnitGroupSetId;
+						DV.c.organisationunit.groupsetId = f.organisationUnitGroupSetId;
 						
-                        c.hideSubtitle = f.hideSubtitle;
-                        c.hideLegend = f.hideLegend;
-                        c.trendLine = f.regression;
-                        c.userOrganisationUnit = f.userOrganisationUnit;
-                        c.domainAxisLabel = f.domainAxisLabel;
-                        c.rangeAxisLabel = f.rangeAxisLabel;
-                        c.targetLineValue = f.targetLineValue ? parseFloat(f.targetLineValue) : null;
-                        c.targetLineLabel = f.targetLineLabel ? f.targetLineLabel : null;
-                        c.baseLineValue = f.baseLineValue ? parseFloat(f.baseLineValue) : null;
-                        c.baseLineLabel = f.baseLineLabel ? f.baseLineLabel : null;
+                        DV.c.hideSubtitle = f.hideSubtitle;
+                        DV.c.hideLegend = f.hideLegend;
+                        DV.c.trendLine = f.regression;
+                        DV.c.userOrganisationUnit = f.userOrganisationUnit;
+                        DV.c.domainAxisLabel = f.domainAxisLabel;
+                        DV.c.rangeAxisLabel = f.rangeAxisLabel;
+                        DV.c.targetLineValue = f.targetLineValue ? parseFloat(f.targetLineValue) : null;
+                        DV.c.targetLineLabel = f.targetLineLabel ? f.targetLineLabel : null;
+                        DV.c.baseLineValue = f.baseLineValue ? parseFloat(f.baseLineValue) : null;
+                        DV.c.baseLineLabel = f.baseLineLabel ? f.baseLineLabel : null;
                         
                         if (exe) {
 							this.expandChart(exe, id);
@@ -1459,16 +1459,16 @@ Ext.onReady( function() {
 				});
 			}
 			else {
-				c.type = DV.util.button.type.getValue();
-				c.series = DV.cmp.settings.series.getValue();
-				c.category = DV.cmp.settings.category.getValue();
-				c.filter = DV.cmp.settings.filter.getValue();
-				c.indicator.objects = DV.util.dimension.indicator.getObjects();
-				c.dataelement.objects = DV.util.dimension.dataelement.getObjects();
-				c.dataset.objects = DV.util.dimension.dataset.getObjects();
-				c.period.objects = DV.util.dimension.period.getObjects();
-				c.organisationunit.objects = DV.util.dimension.organisationunit.getObjects();
-				c.organisationunit.groupsetId = DV.util.dimension.organisationunit.getGroupSetId();
+				DV.c.type = DV.util.button.type.getValue();
+				DV.c.dimension.series = DV.cmp.settings.series.getValue();
+				DV.c.dimension.category = DV.cmp.settings.category.getValue();
+				DV.c.dimension.filter = DV.cmp.settings.filter.getValue();
+				DV.c.indicator.objects = DV.util.dimension.indicator.getObjects();
+				DV.c.dataelement.objects = DV.util.dimension.dataelement.getObjects();
+				DV.c.dataset.objects = DV.util.dimension.dataset.getObjects();
+				DV.c.period.objects = DV.util.dimension.period.getObjects();
+				DV.c.organisationunit.objects = DV.util.dimension.organisationunit.getObjects();
+				DV.c.organisationunit.groupsetId = DV.util.dimension.organisationunit.getGroupSetId();
 				this.getOptions();
                         
 				if (exe) {
@@ -1477,40 +1477,43 @@ Ext.onReady( function() {
 			}
 		},
 		expandChart: function(exe, id) {
-			var c = DV.chart.instance;
 			DV.chart.warnings = [];
 			
 			if (!this.validation.dimensions()) {
 				return;
 			}
 			
-			c.data = {};
-			c.data.objects = [];
-			c.data.objects = c.data.objects.concat(c.indicator.objects);
-			c.data.objects = c.data.objects.concat(c.dataelement.objects);
-			c.data.objects = c.data.objects.concat(c.dataset.objects);
+			DV.c.data = {};
+			DV.c.data.objects = [];
+			DV.c.data.objects = DV.c.data.objects.concat(DV.c.indicator.objects);
+			DV.c.data.objects = DV.c.data.objects.concat(DV.c.dataelement.objects);
+			DV.c.data.objects = DV.c.data.objects.concat(DV.c.dataset.objects);
 			
 			if (!this.validation.objects()) {
 				return;
 			}
 			
-			c[c.series].dimension = DV.conf.finals.chart.series;
-			c[c.category].dimension = DV.conf.finals.chart.category;
-			c[c.filter].dimension = DV.conf.finals.chart.filter;
+			DV.c.series = DV.c[DV.c.dimension.series];
+			DV.c.category = DV.c[DV.c.dimension.category];
+			DV.c.filter = DV.c[DV.c.dimension.filter];
 			
-			c[c.series].names = DV.util.dimension[c.series].getNames(true);
-			c[c.category].names = DV.util.dimension[c.category].getNames(true);
-			c[c.filter].names = DV.util.dimension[c.filter].getNames(true, true);
+			DV.c.series.dimension = DV.conf.finals.chart.series;
+			DV.c.category.dimension = DV.conf.finals.chart.category;
+			DV.c.filter.dimension = DV.conf.finals.chart.filter;
 			
-			c[c.series].url = DV.util.dimension[c.series].getUrl();
-			c[c.category].url = DV.util.dimension[c.category].getUrl();
-			c[c.filter].url = DV.util.dimension[c.filter].getUrl(true);
+			DV.c.series.names = DV.util.dimension[DV.c.dimension.series].getNames(true);
+			DV.c.category.names = DV.util.dimension[DV.c.dimension.category].getNames(true);
+			DV.c.filter.names = DV.util.dimension[DV.c.dimension.filter].getNames(true, true);
 			
-			c.indicator.ids = DV.util.dimension.indicator.getIds();
-			c.dataelement.ids = DV.util.dimension.dataelement.getIds();
-			c.dataset.ids = DV.util.dimension.dataset.getIds();
-			c.period.ids = DV.util.dimension.period.getIds();
-			c.organisationunit.ids = DV.util.dimension.organisationunit.getIds();
+			DV.c.series.url = DV.util.dimension[c.dimension.series].getUrl();
+			DV.c.category.url = DV.util.dimension[c.dimension.category].getUrl();
+			DV.c.filter.url = DV.util.dimension[c.dimension.filter].getUrl(true);
+			
+			DV.c.indicator.ids = DV.util.dimension.indicator.getIds();
+			DV.c.dataelement.ids = DV.util.dimension.dataelement.getIds();
+			DV.c.dataset.ids = DV.util.dimension.dataset.getIds();
+			DV.c.period.ids = DV.util.dimension.period.getIds();
+			DV.c.organisationunit.ids = DV.util.dimension.organisationunit.getIds();
 						
 			if (!this.validation.categories()) {
 				return;
@@ -1533,17 +1536,16 @@ Ext.onReady( function() {
             }
         },
         getOptions: function() {
-			var c = DV.chart.instance;
-            c.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
-            c.hideLegend = DV.cmp.favorite.hidelegend.getValue();
-            c.trendLine = DV.cmp.favorite.trendline.getValue();
-            c.userOrganisationUnit = DV.cmp.favorite.userorganisationunit.getValue();
-            c.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
-            c.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
-            c.targetLineValue = parseFloat(DV.cmp.favorite.targetlinevalue.getValue());
-            c.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
-            c.baseLineValue = parseFloat(DV.cmp.favorite.baselinevalue.getValue());
-            c.baseLineLabel = DV.cmp.favorite.baselinelabel.getValue();
+            DV.c.hideSubtitle = DV.cmp.favorite.hidesubtitle.getValue();
+            DV.c.hideLegend = DV.cmp.favorite.hidelegend.getValue();
+            DV.c.trendLine = DV.cmp.favorite.trendline.getValue();
+            DV.c.userOrganisationUnit = DV.cmp.favorite.userorganisationunit.getValue();
+            DV.c.domainAxisLabel = DV.cmp.favorite.domainaxislabel.getValue();
+            DV.c.rangeAxisLabel = DV.cmp.favorite.rangeaxislabel.getValue();
+            DV.c.targetLineValue = parseFloat(DV.cmp.favorite.targetlinevalue.getValue());
+            DV.c.targetLineLabel = DV.cmp.favorite.targetlinelabel.getValue();
+            DV.c.baseLineValue = parseFloat(DV.cmp.favorite.baselinevalue.getValue());
+            DV.c.baseLineLabel = DV.cmp.favorite.baselinelabel.getValue();
 		},
         getParams: function() {
             var obj = {};
@@ -1573,40 +1575,39 @@ Ext.onReady( function() {
             
             return obj;            
         },
-        setUI: function(f, irec, derec, dsrec) {
-			var c = DV.chart.instance;
+        setUI: function() {
 			DV.util.button.type.setValue(c.type);
 			
-			DV.cmp.favorite.hidesubtitle.setValue(c.hideSubtitle);
-			DV.cmp.favorite.hidelegend.setValue(c.hideLegend);
-			DV.cmp.favorite.trendline.setValue(c.regression);
-			DV.cmp.favorite.userorganisationunit.setValue(c.userOrganisationUnit);
-			DV.cmp.favorite.domainaxislabel.setValue(c.domainAxisLabel);
-			DV.cmp.favorite.rangeaxislabel.setValue(c.rangeAxisLabel);
-			DV.cmp.favorite.targetlinevalue.setValue(c.targetLineValue);
+			DV.cmp.favorite.hidesubtitle.setValue(DV.c.hideSubtitle);
+			DV.cmp.favorite.hidelegend.setValue(DV.c.hideLegend);
+			DV.cmp.favorite.trendline.setValue(DV.c.regression);
+			DV.cmp.favorite.userorganisationunit.setValue(DV.c.userOrganisationUnit);
+			DV.cmp.favorite.domainaxislabel.setValue(DV.c.domainAxisLabel);
+			DV.cmp.favorite.rangeaxislabel.setValue(DV.c.rangeAxisLabel);
+			DV.cmp.favorite.targetlinevalue.setValue(DV.c.targetLineValue);
 			DV.cmp.favorite.targetlinelabel.xable();
-			DV.cmp.favorite.targetlinelabel.setValue(cf.targetLineLabel);
-			DV.cmp.favorite.baselinevalue.setValue(c.baseLineValue);
+			DV.cmp.favorite.targetlinelabel.setValue(DV..targetLineLabel);
+			DV.cmp.favorite.baselinevalue.setValue(DV.c.baseLineValue);
 			DV.cmp.favorite.baselinelabel.xable();
-			DV.cmp.favorite.baselinelabel.setValue(c.baseLineLabel);
+			DV.cmp.favorite.baselinelabel.setValue(DV.c.baseLineLabel);
 
-			DV.cmp.settings.series.setValue(DV.conf.finals.dimension[c.series].value);
+			DV.cmp.settings.series.setValue(DV.conf.finals.dimension[DV.c.dimension.series].value);
 			DV.util.combobox.filter.category();                        
-			DV.cmp.settings.category.setValue(DV.conf.finals.dimension[c.category].value);
+			DV.cmp.settings.category.setValue(DV.conf.finals.dimension[DV.c.dimension.category].value);
 			DV.util.combobox.filter.filter();                        
-			DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[c.filter].value);
+			DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[DV.c.dimension.filter].value);
 									
 			DV.store.indicator.selected.removeAll();
-			if (c.indicators.objects) {
-				DV.store.indicator.selected.add(c.indicators.objects);
-				DV.util.store.addToStorage(DV.store.indicator.available, c.indicators.objects);
+			if (DV.c.indicator.objects) {
+				DV.store.indicator.selected.add(DV.c.indicator.objects);
+				DV.util.store.addToStorage(DV.store.indicator.available, DV.c.indicator.objects);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
 			}
 									
 			DV.store.dataelement.selected.removeAll();
-			if (c.dataElements.objects) {
-				DV.store.dataelement.selected.add(c.dataElements.objects);
-				DV.util.store.addToStorage(DV.store.dataelement.available, c.dataElements.objects);
+			if (DV.c.dataElement.objects) {
+				DV.store.dataelement.selected.add(DV.c.dataElement.objects);
+				DV.util.store.addToStorage(DV.store.dataelement.available, DV.c.dataElement.objects);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
 			}
 									
@@ -1621,53 +1622,49 @@ Ext.onReady( function() {
 		},
         validation: {
 			dimensions: function() {
-				var c = DV.chart.instance;
-				if (!c.series || !c.category || !c.filter) {
+				if (!DV.c.dimension.series || !DV.c.dimension.category || !DV.c.dimension.filter) {
 					DV.util.notification.error(DV.i18n.et_invalid_dimension_setup, DV.i18n.em_invalid_dimension_setup);
 					return false;
 				}
 				return true;
 			},
 			objects: function() {
-				var c = DV.chart.instance;
-				if (!c.data.objects.length) {
+				if (!DV.c.data.objects.length) {
 					DV.util.notification.error(DV.i18n.et_no_indicators_dataelements_datasets, DV.i18n.em_no_indicators_dataelements_datasets);
 					return false;
 				}
-				if (!c.period.objects.length) {
+				if (!DV.c.period.objects.length) {
 					DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
 					return false;
 				}
-				if (!c.organisationunit.objects.length) {
+				if (!DV.c.organisationunit.objects.length) {
 					DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
 					return false;
 				}
 				return true;
 			},
 			categories: function() {
-				var c = DV.chart.instance;
-				if (c[c.category].names.length < 2 && (c.type === DV.conf.finals.chart.line || c.type === DV.conf.finals.chart.area)) {
+				if (DV.c.category.names.length < 2 && (DV.c.type === DV.conf.finals.chart.line || DV.c.type === DV.conf.finals.chart.area)) {
 					DV.util.notification.error(DV.i18n.et_line_area_categories, DV.i18n.em_line_area_categories);
 					return false;
 				}
 				return true;
 			},
 			trendline: function() {
-				var c = DV.chart.instance;
-				if (c.trendLine) {
+				if (DV.c.trendLine) {
 					var reasons = [];
-					if (c.type === DV.conf.finals.chart.stackedcolumn || c.type === DV.conf.finals.chart.stackedbar || c.type === DV.conf.finals.chart.area) {
+					if (DV.c.type === DV.conf.finals.chart.stackedcolumn || DV.c.type === DV.conf.finals.chart.stackedbar || DV.c.type === DV.conf.finals.chart.area) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
-						c.trendLine = false;
+						DV.c.trendLine = false;
 					}
-					else if (c.type === DV.conf.finals.chart.pie) {
+					else if (DV.c.type === DV.conf.finals.chart.pie) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
-						c.trendLine = false;
+						DV.c.trendLine = false;
 					}
 					
-					if (c[c.category].names.length < 2) {
+					if (DV.c.category.names.length < 2) {
 						reasons.push(DV.i18n.wm_required_categories);
-						c.trendLine = false;
+						DV.c.trendLine = false;
 					}
 					
 					if (reasons.length) {
@@ -1677,26 +1674,25 @@ Ext.onReady( function() {
 							text += reasons[i];
 						}
 						text += ').';
-						DV.exe.warnings.push(text);
+						DV.chart.warnings.push(text);
 					}
 				}
 			},
-			targetline: function() {	
-				var c = DV.chart.instance;
-				if (c.targetLineValue) {
+			targetline: function() {
+				if (DV.c.targetLineValue) {
 					var reasons = [];
-					if (c.type === DV.conf.finals.chart.stackedcolumn || c.type === DV.conf.finals.chart.stackedbar || c.type === DV.conf.finals.chart.area) {
+					if (DV.c.type === DV.conf.finals.chart.stackedcolumn || DV.c.type === DV.conf.finals.chart.stackedbar || DV.c.type === DV.conf.finals.chart.area) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
-						c.targetLineValue = null;
+						DV.c.targetLineValue = null;
 					}
-					else if (c.type === DV.conf.finals.chart.pie) {
+					else if (DV.c.type === DV.conf.finals.chart.pie) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
-						c.targetLineValue = null;
+						DV.c.targetLineValue = null;
 					}
 					
-					if (c[c.category].names.length < 2) {
+					if (DV.c.category.names.length < 2) {
 						reasons.push(DV.i18n.wm_required_categories);
-						c.targetLineValue = null;
+						DV.c.targetLineValue = null;
 					}
 					
 					if (reasons.length) {
@@ -1706,26 +1702,25 @@ Ext.onReady( function() {
 							text += reasons[i];
 						}
 						text += ').';
-						DV.exe.warnings.push(text);
+						DV.chart.warnings.push(text);
 					}
 				}
 			},
 			baseline: function() {
-				var c = DV.chart.instance;
-				if (c.baseLineValue) {
+				if (DV.c.baseLineValue) {
 					var reasons = [];
-					if (c.type === DV.conf.finals.chart.stackedcolumn || c.type === DV.conf.finals.chart.stackedbar || c.type === DV.conf.finals.chart.area) {
+					if (DV.c.type === DV.conf.finals.chart.stackedcolumn || DV.c.type === DV.conf.finals.chart.stackedbar || DV.c.type === DV.conf.finals.chart.area) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
-						c.baseLineValue = null;
+						DV.c.baseLineValue = null;
 					}
 					else if (c.type === DV.conf.finals.chart.pie) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
 						c.baseLineValue = null;
 					}
 					
-					if (c[c.category].names.length < 2) {
+					if (DV.c.category.names.length < 2) {
 						reasons.push(DV.i18n.wm_required_categories);
-						c.baseLineValue = null;
+						DV.c.baseLineValue = null;
 					}
 					
 					if (reasons.length) {
@@ -1735,15 +1730,14 @@ Ext.onReady( function() {
 							text += reasons[i];
 						}
 						text += ').';
-						DV.exe.warnings.push(text);
+						DV.chart.warnings.push(text);
 					}
 				}
 			},
 			render: function() {
-				var c = DV.chart.instance;
-				if (!c.isRendered) {
+				if (!DV.c.isRendered) {
 					DV.cmp.toolbar.datatable.enable();
-					c.isRendered = true;
+					DV.c.isRendered = true;
 				}
 			},
 			response: function(r) {
@@ -1769,11 +1763,10 @@ Ext.onReady( function() {
         getValues: function(exe) {
             DV.util.mask.showMask(DV.cmp.region.center, DV.i18n.loading);
             
-            var params = [],
-				c = DV.chart.instance;
-            params = params.concat(c.data.url);
-            params = params.concat(c.period.url);
-            params = params.concat(c.organisationunit.url);
+            var params = [];
+            params = params.concat(DV.c.data.url);
+            params = params.concat(DV.c.period.url);
+            params = params.concat(DV.c.organisationunit.url);
             
             var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.data_get;
             Ext.Array.each(params, function(item) {
@@ -1810,16 +1803,14 @@ Ext.onReady( function() {
     };
     
     DV.chart = {
-		instance: {
+		chart: {
 			type: DV.conf.finals.chart.column,
-			series: null,
-			category: null,
-			filter: null,
+			dimension: {},
 			indicator: {},
-			dataelement: {},
-			dataset: {},
+			dataElement: {},
+			dataSet: {},
 			period: {},
-			organisationunit: {},
+			organisationUnit: {},
 			hideSubtitle: false,
 			hideLegend: false,
 			trendLine: false,
@@ -1833,16 +1824,17 @@ Ext.onReady( function() {
 			isRendered: false
 		},
 		reset: function() {
-			this.instance = {
+			this.chart = {
 				type: DV.conf.finals.chart.column,
+				dimension: {},
 				series: null,
 				category: null,
 				filter: null,
 				indicator: {},
-				dataelement: {},
-				dataset: {},
+				dataElement: {},
+				dataSet: {},
 				period: {},
-				organisationunit: {},
+				organisationUnit: {},
 				hideSubtitle: false,
 				hideLegend: false,
 				trendLine: false,
@@ -1857,38 +1849,35 @@ Ext.onReady( function() {
 		},
         data: [],
         getData: function(exe) {
-			var c = this.instance;
-			var series = this.instance[this.instance.series];
-			var category = this.instance[this.instance.category];
             this.data = [];
             
-            Ext.Array.each(category.names, function(item) {
+            Ext.Array.each(DV.c.category.names, function(item) {
                 var obj = {};
                 obj[DV.conf.finals.data.domain] = item;
                 DV.chart.data.push(obj);
             });
             
             Ext.Array.each(DV.chart.data, function(item) {
-                for (var i = 0; i < series.names.length; i++) {
-                    item[series.names[i]] = 0;
+                for (var i = 0; i < DV.c.series.names.length; i++) {
+                    item[DV.c.series.names[i]] = 0;
                 }
             });
 
             Ext.Array.each(DV.chart.data, function(item) {
-                for (var i = 0; i < series.names.length; i++) {
+                for (var i = 0; i < DV.c.series.names.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
-                        if (DV.value.values[j][category.dimension] === item[DV.conf.finals.data.domain] && DV.value.values[j][series.dimension] === series.names[i]) {
-                            item[DV.value.values[j][series.dimension]] = DV.value.values[j].value;
+                        if (DV.value.values[j][DV.c.category.dimension] === item[DV.conf.finals.data.domain] && DV.value.values[j][DV.c.series.dimension] === DV.c.series.names[i]) {
+                            item[DV.value.values[j][DV.c.series.dimension]] = DV.value.values[j].value;
                             break;
                         }
                     }
                 }
             });
             
-			if (c.trendLine) {
-				this.trendLine = [];
-				for (var i = 0; i < series.names.length; i++) {
-					var s = series.names[i],
+			if (DV.c.trendLine) {
+				DV.c.trendLine = [];
+				for (var i = 0; i < DV.c.series.names.length; i++) {
+					var s = DV.c.series.names[i],
 						reg = new SimpleRegression();
 					for (var j = 0; j < DV.chart.data.length; j++) {
 						reg.addData(j, DV.chart.data[j][s]);
@@ -1898,22 +1887,22 @@ Ext.onReady( function() {
 						var n = reg.predict(j);
 						DV.chart.data[j][key] = parseFloat(reg.predict(j).toFixed(1));
 					}
-					this.trendLine.push({
+					DV.c.trendLine.push({
 						key: key,
 						name: DV.i18n.trend + ' (' + s + ')'
 					});
 				}
 			}
 
-			if (c.targetLineValue) {
+			if (DV.c.targetLineValue) {
 				Ext.Array.each(DV.chart.data, function(item) {
-					item[DV.conf.finals.data.targetline] = c.targetLineValue;
+					item[DV.conf.finals.data.targetline] = DV.c.targetLineValue;
 				});
 			}
 
-			if (c.baseLineValue) {
+			if (DV.c.baseLineValue) {
 				Ext.Array.each(DV.chart.data, function(item) {
-					item[DV.conf.finals.data.baseline] = c.baseLineValue;
+					item[DV.conf.finals.data.baseline] = DV.c.baseLineValue;
 				});
 			}
             
@@ -1926,7 +1915,7 @@ Ext.onReady( function() {
         },
         chart: null,
         getChart: function(exe) {
-            this[DV.state.type]();
+            this[DV.c.type]();
             if (exe) {
                 this.reload();
             }
@@ -1935,9 +1924,8 @@ Ext.onReady( function() {
             }
         },
         column: function(stacked) {
-			var c = this.instance,
-				series = [];
-			if (c.trendLine) {
+			var series = [];
+			if (DV.c.trendLine) {
 				var a = DV.util.chart.default.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
@@ -1947,7 +1935,7 @@ Ext.onReady( function() {
 				type: 'column',
 				axis: 'left',
 				xField: DV.conf.finals.data.domain,
-				yField: c[c.series].names,
+				yField: DV.c.series.names,
 				stacked: stacked,
 				style: {
 					opacity: 0.8,
@@ -1955,10 +1943,10 @@ Ext.onReady( function() {
 				},				
 				tips: DV.util.chart.default.series.getTips()
 			});
-			if (c.targetLineValue) {
+			if (DV.c.targetLineValue) {
 				series.push(DV.util.chart.default.series.getTargetLine());
 			}
-			if (c.baseLineValue) {
+			if (DV.c.baseLineValue) {
 				series.push(DV.util.chart.default.series.getBaseLine());
 			}
 			
@@ -2090,6 +2078,17 @@ Ext.onReady( function() {
                 theme: 'dv1'
             });
         },
+        warnings: [],
+        getWarnings: function() {
+			var t = '';
+			for (var i = 0; i < this.warnings.length; i++) {
+				if (i > 0) {
+					t += '<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.warning + '" style="padding:0 5px 0 8px" />';
+				}
+				t += this.warnings[i] + ' ';
+			}
+			return t;
+		},
         reload: function() {
 			//DV.state.getOptions(); // ??
             DV.cmp.region.center.removeAll(true);
@@ -2097,8 +2096,8 @@ Ext.onReady( function() {
             
 			DV.util.mask.hideMask();
             
-            if (DV.exe.warnings.length) {
-				DV.util.notification.warning(DV.exe.getWarnings());
+            if (DV.chart.warnings.length) {
+				DV.util.notification.warning(this.getWarnings());
 			}
 			else {
 				DV.util.notification.ok();
@@ -2186,18 +2185,7 @@ Ext.onReady( function() {
 		},
 		favorite: function(id) {
 			DV.chart.setChart(true, id);
-		},
-        warnings: [],
-        getWarnings: function() {
-			var t = '';
-			for (var i = 0; i < this.warnings.length; i++) {
-				if (i > 0) {
-					t += '<img src="' + DV.conf.finals.ajax.path_images + DV.conf.statusbar.icon.warning + '" style="padding:0 5px 0 8px" />';
-				}
-				t += this.warnings[i] + ' ';
-			}
-			return t;
-		}				
+		}
     };
         
     DV.viewport = Ext.create('Ext.container.Viewport', {
@@ -3800,7 +3788,7 @@ Ext.onReady( function() {
                                                                     text: DV.i18n.save,
                                                                     disabled: true,
                                                                     xable: function() {
-                                                                        if (DV.state.isRendered) {
+                                                                        if (DV.chart.instance.isRendered) {
                                                                             if (DV.cmp.favorite.name.getValue()) {
                                                                                 var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
                                                                                 if (index != -1) {
