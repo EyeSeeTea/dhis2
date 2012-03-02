@@ -287,7 +287,7 @@ Ext.onReady( function() {
                 if (selected.length) {
                     var array = [];
                     Ext.Array.each(selected, function(item) {
-                        array.push({id: item, s: a.store.getAt(a.store.findExact('id', item)).data.s});
+                        array.push({id: item, name: a.store.getAt(a.store.findExact('id', item)).data.name});
                     });
                     s.store.add(array);
                 }
@@ -296,7 +296,7 @@ Ext.onReady( function() {
             selectAll: function(a, s) {
                 var array = [];
                 a.store.each( function(r) {
-                    array.push({id: r.data.id, s: r.data.s});
+                    array.push({id: r.data.id, name: r.data.name});
                 });
                 s.store.add(array);
                 this.filterAvailable(a, s);
@@ -324,7 +324,7 @@ Ext.onReady( function() {
                     });
                     return filter;
                 });
-                a.store.sort('s', 'ASC');
+                a.store.sort('name', 'ASC');
             },
             setHeight: function(ms, fill) {
 				var h1 = DV.cmp.region.west.getHeight();
@@ -406,13 +406,13 @@ Ext.onReady( function() {
             addToStorage: function(s, records) {
                 s.each( function(r) {
                     if (!s.storage[r.data.id]) {
-                        s.storage[r.data.id] = {id: r.data.id, s: r.data.s, name: r.data.s, parent: s.parent};
+                        s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
                     }
                 });
                 if (records) {
                     Ext.Array.each(records, function(r) {
                         if (!s.storage[r.data.id]) {
-                            s.storage[r.data.id] = {id: r.data.id, s: r.data.s, name: r.data.s, parent: s.parent};
+                            s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
                         }
                     });
                 }                        
@@ -426,7 +426,7 @@ Ext.onReady( function() {
                     }
                 }
                 s.add(items);
-                s.sort('s', 'ASC');
+                s.sort('name', 'ASC');
             },
             containsParent: function(s) {
                 for (var obj in s.storage) {
@@ -442,7 +442,7 @@ Ext.onReady( function() {
                 getObjects: function() {
                     var a = [];
                     DV.cmp.dimension.indicator.selected.store.each( function(r) {
-                        a.push({id: r.data.id, name: DV.util.string.getEncodedString(r.data.s)});
+                        a.push({id: r.data.id, name: DV.util.string.getEncodedString(r.data.name)});
                     });
                     if (exception && !a.length) {
                         alert(DV.i18n.no_indicators_selected);
@@ -462,7 +462,7 @@ Ext.onReady( function() {
                 getObjects: function() {
 					var a = [];
 					DV.cmp.dimension.dataelement.selected.store.each( function(r) {
-						a.push({id: r.data.id, name: DV.util.string.getEncodedString(r.data.s)});
+						a.push({id: r.data.id, name: DV.util.string.getEncodedString(r.data.name)});
 					});
 					if (exception && !a.length) {
 						alert(DV.i18n.no_data_elements_selected);
@@ -482,7 +482,7 @@ Ext.onReady( function() {
                 getObjects: function() {
 					var a = [];
 					DV.cmp.dimension.dataset.selected.store.each( function(r) {
-						a.push({id: r.data.id, name: DV.util.string.getEncodedString(r.data.s)});
+						a.push({id: r.data.id, name: DV.util.string.getEncodedString(r.data.name)});
 					});
 					if (exception && !a.length) {
 						alert(DV.i18n.no_datasets_selected);
@@ -1256,7 +1256,7 @@ Ext.onReady( function() {
         },
         indicator: {
             available: Ext.create('Ext.data.Store', {
-                fields: ['id', 's'],
+                fields: ['id', 'name'],
                 proxy: {
                     type: 'ajax',
                     url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.indicator_get,
@@ -1274,13 +1274,13 @@ Ext.onReady( function() {
                 }
             }),
             selected: Ext.create('Ext.data.Store', {
-                fields: ['id', 's'],
+                fields: ['id', 'name'],
                 data: []
             })
         },
         dataelement: {
             available: Ext.create('Ext.data.Store', {
-                fields: ['id', 's'],
+                fields: ['id', 'name'],
                 proxy: {
                     type: 'ajax',
                     url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.dataelement_get,
@@ -1298,13 +1298,13 @@ Ext.onReady( function() {
                 }
             }),
             selected: Ext.create('Ext.data.Store', {
-                fields: ['id', 's'],
+                fields: ['id', 'name'],
                 data: []
             })
         },
         dataset: {
             available: Ext.create('Ext.data.Store', {
-                fields: ['id', 's'],
+                fields: ['id', 'name'],
                 proxy: {
                     type: 'ajax',
                     url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.dataset_get,
@@ -1324,7 +1324,7 @@ Ext.onReady( function() {
                 }
             }),
             selected: Ext.create('Ext.data.Store', {
-                fields: ['id', 's'],
+                fields: ['id', 'name'],
                 data: []
             })
         },
@@ -1464,12 +1464,12 @@ Ext.onReady( function() {
                         c.baseLineLabel = f.baseLineLabel ? f.baseLineLabel : null;
                         
                         if (exe) {
-							this.expandChart();
+							this.expandChart(exe, id);
 						}
 					}
 				});
 			}
-			else {				
+			else {
 				c.type = DV.util.button.type.getValue();
 				c.series = DV.cmp.settings.series.getValue();
 				c.category = DV.cmp.settings.category.getValue();
@@ -1483,11 +1483,11 @@ Ext.onReady( function() {
 				this.getOptions();
                         
 				if (exe) {
-					this.expandChart();
+					this.expandChart(exe);
 				}				
 			}
 		},
-		expandChart: function(exe) {
+		expandChart: function(exe, id) {
 			if (!this.validation.dimensions()) {
 				return;
 			}
@@ -1531,6 +1531,10 @@ Ext.onReady( function() {
             this.validation.baseline();
             
             this.validation.render();
+            
+            if (id) {
+				this.setUI();
+			}
             
             if (exe) {
                 DV.value.getValues(true);
@@ -1578,26 +1582,27 @@ Ext.onReady( function() {
             return obj;            
         },
         setUI: function(f, irec, derec, dsrec) {
-			DV.util.button.type.setValue(f.type);
+			var c = DV.chart.instance;
+			DV.util.button.type.setValue(c.type);
 			
-			DV.cmp.favorite.hidesubtitle.setValue(f.hideSubtitle);
-			DV.cmp.favorite.hidelegend.setValue(f.hideLegend);
-			DV.cmp.favorite.trendline.setValue(f.regression);
-			DV.cmp.favorite.userorganisationunit.setValue(f.userOrganisationUnit);
-			DV.cmp.favorite.domainaxislabel.setValue(f.domainAxisLabel);
-			DV.cmp.favorite.rangeaxislabel.setValue(f.rangeAxisLabel);
-			DV.cmp.favorite.targetlinevalue.setValue(f.targetLineValue);
+			DV.cmp.favorite.hidesubtitle.setValue(c.hideSubtitle);
+			DV.cmp.favorite.hidelegend.setValue(c.hideLegend);
+			DV.cmp.favorite.trendline.setValue(c.regression);
+			DV.cmp.favorite.userorganisationunit.setValue(c.userOrganisationUnit);
+			DV.cmp.favorite.domainaxislabel.setValue(c.domainAxisLabel);
+			DV.cmp.favorite.rangeaxislabel.setValue(c.rangeAxisLabel);
+			DV.cmp.favorite.targetlinevalue.setValue(c.targetLineValue);
 			DV.cmp.favorite.targetlinelabel.xable();
-			DV.cmp.favorite.targetlinelabel.setValue(f.targetLineLabel);
-			DV.cmp.favorite.baselinevalue.setValue(f.baseLineValue);
+			DV.cmp.favorite.targetlinelabel.setValue(cf.targetLineLabel);
+			DV.cmp.favorite.baselinevalue.setValue(c.baseLineValue);
 			DV.cmp.favorite.baselinelabel.xable();
-			DV.cmp.favorite.baselinelabel.setValue(f.baseLineLabel);
+			DV.cmp.favorite.baselinelabel.setValue(c.baseLineLabel);
 
-			DV.cmp.settings.series.setValue(DV.conf.finals.dimension[f.series].value);
+			DV.cmp.settings.series.setValue(DV.conf.finals.dimension[c.series].value);
 			DV.util.combobox.filter.category();                        
-			DV.cmp.settings.category.setValue(DV.conf.finals.dimension[f.category].value);
+			DV.cmp.settings.category.setValue(DV.conf.finals.dimension[c.category].value);
 			DV.util.combobox.filter.filter();                        
-			DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[f.filter].value);
+			DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[c.filter].value);
 									
 			DV.store.indicator.selected.removeAll();
 			if (f.indicators) {
@@ -2445,8 +2450,8 @@ Ext.onReady( function() {
                                                 name: 'availableIndicators',
                                                 cls: 'dv-toolbar-multiselect-left',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
-                                                displayField: 's',
                                                 valueField: 'id',
+                                                displayField: 'name',
                                                 queryMode: 'remote',
                                                 store: DV.store.indicator.available,
                                                 tbar: [
@@ -2490,7 +2495,7 @@ Ext.onReady( function() {
                                                 name: 'selectedIndicators',
                                                 cls: 'dv-toolbar-multiselect-right',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
-                                                displayField: 's',
+                                                displayField: 'name',
                                                 valueField: 'id',
                                                 ddReorder: true,
                                                 queryMode: 'local',
@@ -2605,7 +2610,7 @@ Ext.onReady( function() {
                                                 name: 'availableDataElements',
                                                 cls: 'dv-toolbar-multiselect-left',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
-                                                displayField: 's',
+                                                displayField: 'name',
                                                 valueField: 'id',
                                                 queryMode: 'remote',
                                                 store: DV.store.dataelement.available,
@@ -2650,7 +2655,7 @@ Ext.onReady( function() {
                                                 name: 'selectedDataElements',
                                                 cls: 'dv-toolbar-multiselect-right',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
-                                                displayField: 's',
+                                                displayField: 'name',
                                                 valueField: 'id',
                                                 ddReorder: true,
                                                 queryMode: 'remote',
@@ -2721,7 +2726,7 @@ Ext.onReady( function() {
                                                 name: 'availableDataSets',
                                                 cls: 'dv-toolbar-multiselect-left',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
-                                                displayField: 's',
+                                                displayField: 'name',
                                                 valueField: 'id',
                                                 queryMode: 'remote',
                                                 store: DV.store.dataset.available,
@@ -2766,7 +2771,7 @@ Ext.onReady( function() {
                                                 name: 'selectedDataSets',
                                                 cls: 'dv-toolbar-multiselect-right',
                                                 width: (DV.conf.layout.west_fieldset_width - 22) / 2,
-                                                displayField: 's',
+                                                displayField: 'name',
                                                 valueField: 'id',
                                                 ddReorder: true,
                                                 queryMode: 'remote',
@@ -4039,6 +4044,14 @@ Ext.onReady( function() {
                             text: 'Exit',
                             handler: function() {
                                 window.location.href = DV.conf.finals.ajax.path_portal + DV.conf.finals.ajax.redirect;
+                            }
+                        },
+                        {
+                            xtype: 'button',
+							cls: 'dv-toolbar-btn-2',
+                            text: 'eee',
+                            handler: function() {
+                                console.log(DV.store.indicator.available.storage);
                             }
                         },
                         {
