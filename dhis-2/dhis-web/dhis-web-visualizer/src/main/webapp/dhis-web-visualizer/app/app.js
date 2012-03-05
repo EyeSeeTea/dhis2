@@ -854,12 +854,12 @@ Ext.onReady( function() {
 					},
 					getTrendLineArray: function() {
 						var a = [];
-						for (var i = 0; i < DV.chart.trendLine.length; i++) {
+						for (var i = 0; i < DV.chart.trendline.length; i++) {
 							a.push({
 								type: 'line',
 								axis: 'left',
 								xField: DV.conf.finals.data.domain,
-								yField: DV.chart.trendLine[i].key,
+								yField: DV.chart.trendline[i].key,
 								style: {
 									opacity: 0.8,
 									lineWidth: 3
@@ -869,7 +869,7 @@ Ext.onReady( function() {
 									radius: 4
 								},
 								tips: DV.util.chart.def.series.getTips(),
-								title: DV.chart.trendLine[i].name
+								title: DV.chart.trendline[i].name
 							});
 						}
 						return a;
@@ -943,11 +943,11 @@ Ext.onReady( function() {
 					},
 					getTrendLineArray: function() {
 						var a = [];
-						for (var i = 0; i < DV.chart.trendLine.length; i++) {
+						for (var i = 0; i < DV.chart.trendline.length; i++) {
 							a.push({
 								type: 'line',
 								axis: 'bottom',
-								xField: DV.chart.trendLine[i].key,
+								xField: DV.chart.trendline[i].key,
 								yField: DV.conf.finals.data.domain,
 								style: {
 									opacity: 0.8,
@@ -958,7 +958,7 @@ Ext.onReady( function() {
 									radius: 4
 								},
 								tips: DV.util.chart.bar.series.getTips(),
-								title: DV.chart.trendLine[i].name
+								title: DV.chart.trendline[i].name
 							});
 						}
 						return a;
@@ -990,7 +990,7 @@ Ext.onReady( function() {
 					},
 					setTheme: function() {
 						var colors = DV.conf.chart.theme.dv1.slice(0, DV.c.series.names.length);
-						if (DV.c.trendLine) {
+						if (DV.c.trendline) {
 							colors = colors.concat(colors);
 						}
 						if (DV.c.targetlinevalue) {
@@ -1401,7 +1401,7 @@ Ext.onReady( function() {
 			
 			if (id) {
                 Ext.Ajax.request({
-                    url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + uid + '.json?links=false',
+                    url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + id + '.json?links=false',
                     scope: this,
                     success: function(r) {
 						if (!this.validation.response(r)) {
@@ -1749,6 +1749,14 @@ Ext.onReady( function() {
 					return false;
 				}
 				return true;
+			},
+			value: function() {
+				if (!DV.value.values.length) {
+					DV.util.mask.hideMask();
+					DV.util.notification.error(DV.i18n.et_no_data, DV.i18n.em_no_data);
+					return false;
+				}
+				return true;
 			}
 		}
     };
@@ -1918,7 +1926,7 @@ Ext.onReady( function() {
         },
         column: function(stacked) {
 			var series = [];
-			if (DV.c.trendLine) {
+			if (DV.c.trendline) {
 				var a = DV.util.chart.def.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
@@ -1955,9 +1963,8 @@ Ext.onReady( function() {
             this.column(true);
         },
         bar: function(stacked) {
-			var c = this.instance,
-				series = [];
-			if (c.trendLine) {
+			var series = [];
+			if (DV.c.trendline) {
 				var a = DV.util.chart.bar.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
@@ -1967,7 +1974,7 @@ Ext.onReady( function() {
 				type: 'bar',
 				axis: 'bottom',
 				xField: DV.conf.finals.data.domain,
-				yField: c[c.series].names,
+				yField: DV.c.series.names,
 				stacked: stacked,
 				style: {
 					opacity: 0.8,
@@ -1975,10 +1982,10 @@ Ext.onReady( function() {
 				},
 				tips: DV.util.chart.def.series.getTips()
 			});
-			if (c.targetlinevalue) {
+			if (DV.c.targetlinevalue) {
 				series.push(DV.util.chart.bar.series.getTargetLine());
 			}
-			if (c.baselinevalue) {
+			if (DV.c.baselinevalue) {
 				series.push(DV.util.chart.bar.series.getBaseLine());
 			}
 			
@@ -1994,19 +2001,18 @@ Ext.onReady( function() {
             this.bar(true);
         },
         line: function() {
-			var c = this.instance,
-				series = [];
-			if (c.trendLine) {
+			var series = [];
+			if (DV.c.trendline) {
 				var a = DV.util.chart.def.series.getTrendLineArray();
 				for (var i = 0; i < a.length; i++) {
 					series.push(a[i]);
 				}
 			}
 			series = series.concat(DV.util.chart.line.series.getArray());
-			if (c.targetlinevalue) {
+			if (DV.c.targetlinevalue) {
 				series.push(DV.util.chart.def.series.getTargetLine());
 			}
-			if (c.baselinevalue) {
+			if (DV.c.baselinevalue) {
 				series.push(DV.util.chart.def.series.getBaseLine());
 			}
 			
@@ -2019,13 +2025,12 @@ Ext.onReady( function() {
 			this.chart = DV.util.chart.def.getChart(axes, series);
         },
         area: function() {
-			var c = this.instance,
-				series = [];
+			var series = [];
 			series.push({
 				type: 'area',
 				axis: 'left',
 				xField: DV.conf.finals.data.domain,
-				yField: c[c.series].names,
+				yField: DV.c.series.names,
 				style: {
 					opacity: 0.65,
 					stroke: '#555'
@@ -2041,18 +2046,17 @@ Ext.onReady( function() {
 			this.chart = DV.util.chart.def.getChart(axes, series);
         },
         pie: function() {
-			var c = this.instance;
 			DV.util.chart.pie.series.setTheme();
             this.chart = Ext.create('Ext.chart.Chart', {
                 animate: true,
                 shadow: true,
                 store: DV.store.chart,
                 insetPadding: 60,
-                items: c.hideSubtitle ? false : DV.util.chart.pie.getTitle(),
-                legend: c.hideLegend ? false : DV.util.chart.def.getLegend(c[c.category].names.length),
+                items: DV.c.hideSubtitle ? false : DV.util.chart.pie.getTitle(),
+                legend: DV.c.hideLegend ? false : DV.util.chart.def.getLegend(DV.c.category.names.length),
                 series: [{
                     type: 'pie',
-                    field: c[c.series].names[0],
+                    field: DV.c.series.names[0],
                     showInLegend: true,
                     label: {
                         field: DV.conf.finals.data.domain
@@ -2174,10 +2178,10 @@ Ext.onReady( function() {
 			DV.chart.getData(true);
 		},			
 		update: function() {
-			DV.chart.setChart(true);
+			DV.state.setChart(true);
 		},
 		favorite: function(id) {
-			DV.chart.setChart(true, id);
+			DV.state.setChart(true, id);
 		}
     };
         
@@ -3400,7 +3404,7 @@ Ext.onReady( function() {
 							cls: 'dv-toolbar-btn-1',
                             text: DV.i18n.update,
                             handler: function() {
-                                DV.exe.execute(true, DV.init.cmd);
+                                DV.exe.execute();
                             }
                         },
                         {
@@ -3926,7 +3930,7 @@ Ext.onReady( function() {
                                                     itemclick: function(g, r) {
                                                         g.getSelectionModel().select([], false);
                                                         this.up('menu').hide();
-                                                        DV.exe.execute(true, r.data.id);
+                                                        DV.exe.execute(r.data.id);
                                                     }
                                                 }
                                             }
