@@ -495,7 +495,7 @@ Ext.onReady( function() {
 						a.push(obj[i].name);
 					}
                     if (exception && isFilter && a.length > 1) {
-						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_ind_de_ds + ' ' + DV.i18n.wm_first_filter_unit);
+						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_ind_de_ds + ' ' + DV.i18n.wm_first_filter_used);
 					}
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
@@ -552,7 +552,7 @@ Ext.onReady( function() {
 						a.push(obj[i].name);
 					}
                     if (exception && isFilter && a.length > 1) {
-						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_period + ' ' + DV.i18n.wm_first_filter_unit);
+						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_period + ' ' + DV.i18n.wm_first_filter_used);
 					}
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
@@ -630,7 +630,7 @@ Ext.onReady( function() {
 						}
 					}
 					if (exception && isFilter && a.length > 1) {
-						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_unit);
+						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_used);
 					}
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
@@ -3967,7 +3967,7 @@ Ext.onReady( function() {
                                     return;
                                 }
                                 
-                                document.getElementById('titleField').value = DV.state.filter.names[0] || 'Example chart';
+                                document.getElementById('titleField').value = DV.c.filter.names[0] || 'Example chart';
                                 document.getElementById('svgField').value = svg[0].parentNode.innerHTML;
                                 document.getElementById('typeField').value = type;
                                 
@@ -4079,7 +4079,7 @@ Ext.onReady( function() {
                         DV.cmp.region.center = this;
                     },
                     resize: function() {
-						if (DV.state.isRendered && DV.cmp.statusbar.panel) {
+						if (DV.chart.chart.isrendered && DV.cmp.statusbar.panel) {
 							DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
 						}
 					}
