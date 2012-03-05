@@ -1346,10 +1346,9 @@ Ext.onReady( function() {
         getDataTableStore: function(exe) {
             this.datatable = Ext.create('Ext.data.Store', {
                 fields: [
-                    DV.conf.finals.dimension.data.value,
-                    DV.conf.finals.dimension.period.value,
-                    DV.conf.finals.dimension.organisationunit.value,
-                    'v'
+					DV.c.dimension.series,
+					DV.c.dimension.category,
+                    'value'
                 ],
                 data: DV.value.values
             });
@@ -2117,27 +2116,21 @@ Ext.onReady( function() {
                 cls: 'dv-datatable',
                 columns: [
                     {
-                        text: DV.conf.finals.dimension.data.rawvalue,
-                        dataIndex: DV.conf.finals.dimension.data.value,
+                        text: DV.conf.finals.dimension[DV.c.dimension.series].rawvalue,
+                        dataIndex: DV.conf.finals.dimension[DV.c.dimension.series].value,
                         width: 150,
                         height: DV.conf.layout.east_gridcolumn_height
                     },
                     {
-                        text: DV.conf.finals.dimension.period.rawvalue,
-                        dataIndex: DV.conf.finals.dimension.period.value,
-                        width: 100,
+                        text: DV.conf.finals.dimension[DV.c.dimension.category].rawvalue,
+                        dataIndex: DV.conf.finals.dimension[DV.c.dimension.category].value,
+                        width: 150,
                         height: DV.conf.layout.east_gridcolumn_height,
                         sortable: false
                     },
                     {
-                        text: DV.conf.finals.dimension.organisationunit.rawvalue,
-                        dataIndex: DV.conf.finals.dimension.organisationunit.value,
-                        width: 150,
-                        height: DV.conf.layout.east_gridcolumn_height
-                    },
-                    {
                         text: DV.i18n.value,
-                        dataIndex: 'v',
+                        dataIndex: 'value',
                         width: 80,
                         height: DV.conf.layout.east_gridcolumn_height
                     }
@@ -2182,6 +2175,9 @@ Ext.onReady( function() {
 		},
 		favorite: function(id) {
 			DV.state.setChart(true, id);
+		},
+		datatable: function() {
+			DV.store.getDataTableStore(true);
 		}
     };
         
@@ -4015,7 +4011,7 @@ Ext.onReady( function() {
                                 if (p.collapsed && p.items.length) {
                                     p.expand();
                                     DV.cmp.toolbar.resizeeast.show();
-                                    DV.exe.execute(true, DV.conf.finals.cmd.datatable);
+                                    DV.exe.datatable();
                                 }
                                 else {
                                     p.collapse();
@@ -4095,7 +4091,7 @@ Ext.onReady( function() {
                 collapsible: true,
                 collapsed: true,
                 collapseMode: 'mini',
-                width: 498,
+                width: 398,
                 listeners: {
                     afterrender: function() {
                         DV.cmp.region.east = this;
