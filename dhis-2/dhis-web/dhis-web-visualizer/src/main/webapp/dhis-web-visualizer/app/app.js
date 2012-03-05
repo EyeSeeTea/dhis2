@@ -7,12 +7,12 @@ DV.conf = {
 			values: [84, 77, 87, 82, 91, 69, 82, 78, 83, 76, 73, 85],
 			setState: function() {
 				DV.c.type = DV.conf.finals.chart.column;
-				DV.c.series = DV.conf.finals.dimension.data.value;
-				DV.c.category = DV.conf.finals.dimension.period.value;
-				DV.c.filter = DV.conf.finals.dimension.organisationunit.value;				
-				DV.c.data = {names: this.series};
-				DV.c.period = {names: this.category};
-				DV.c.organisationunit = {names: this.filter};
+				DV.c.dimension.series = DV.conf.finals.dimension.data.value;
+				DV.c.dimension.category = DV.conf.finals.dimension.period.value;
+				DV.c.dimension.filter = DV.conf.finals.dimension.organisationunit.value;
+				DV.c.series = DV.c.data = {names: this.series};
+				DV.c.category = DV.c.period = {names: this.category};
+				DV.c.filter = DV.c.organisationunit = {names: this.filter};
 				DV.c.targetlinevalue = 80;
 				DV.c.targetlinelabel = 'Target label';
 				DV.c.rangeaxislabel = 'Range axis label';
@@ -20,41 +20,42 @@ DV.conf = {
 			},
 			setValues: function() {
 				var obj1 = {}, obj2 = {}, obj3 = {}, obj4 = {}, obj5 = {}, obj6 = {}, obj7 = {}, obj8 = {}, obj9 = {}, obj10 = {}, obj11 = {}, obj12 = {};
-				obj1[DV.c.series] = this.series[0];
-				obj1[DV.c.category] = this.category[0];
+				var s = DV.c.dimension.series, c = DV.c.dimension.category;
+				obj1[s] = this.series[0];
+				obj1[c] = this.category[0];
 				obj1.value = this.values[0];
-				obj2[DV.c.series] = this.series[1];
-				obj2[DV.c.category] = this.category[0];
+				obj2[s] = this.series[1];
+				obj2[c] = this.category[0];
 				obj2.value = this.values[1];
-				obj3[DV.c.series] = this.series[2];
-				obj3[DV.c.category] = this.category[0];
+				obj3[s] = this.series[2];
+				obj3[c] = this.category[0];
 				obj3.value = this.values[2];
-				obj4[DV.c.series] = this.series[3];
-				obj4[DV.c.category] = this.category[0];
+				obj4[s] = this.series[3];
+				obj4[c] = this.category[0];
 				obj4.value = this.values[3];
-				obj5[DV.c.series] = this.series[0];
-				obj5[DV.c.category] = this.category[1];
+				obj5[s] = this.series[0];
+				obj5[c] = this.category[1];
 				obj5.value = this.values[4];
-				obj6[DV.c.series] = this.series[1];
-				obj6[DV.c.category] = this.category[1];
+				obj6[s] = this.series[1];
+				obj6[c] = this.category[1];
 				obj6.value = this.values[5];
-				obj7[DV.c.series] = this.series[2];
-				obj7[DV.c.category] = this.category[1];
+				obj7[s] = this.series[2];
+				obj7[c] = this.category[1];
 				obj7.value = this.values[6];
-				obj8[DV.c.series] = this.series[3];
-				obj8[DV.c.category] = this.category[1];
+				obj8[s] = this.series[3];
+				obj8[c] = this.category[1];
 				obj8.value = this.values[7];
-				obj9[DV.c.series] = this.series[0];
-				obj9[DV.c.category] = this.category[2];
+				obj9[s] = this.series[0];
+				obj9[c] = this.category[2];
 				obj9.value = this.values[8];
-				obj10[DV.c.series] = this.series[1];
-				obj10[DV.c.category] = this.category[2];
+				obj10[s] = this.series[1];
+				obj10[c] = this.category[2];
 				obj10.value = this.values[9];
-				obj11[DV.c.series] = this.series[2];
-				obj11[DV.c.category] = this.category[2];
+				obj11[s] = this.series[2];
+				obj11[c] = this.category[2];
 				obj11.value = this.values[10];
-				obj12[DV.c.series] = this.series[3];
-				obj12[DV.c.category] = this.category[2];
+				obj12[s] = this.series[3];
+				obj12[c] = this.category[2];
 				obj12.value = this.values[11];
 				DV.value.values = [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8, obj9, obj10, obj11, obj12];
 			}
@@ -833,7 +834,7 @@ Ext.onReady( function() {
 					},
 					getBaseLine: function() {
 						var title = DV.c.baseLineLabel || DV.i18n.base;
-						title += ' (' + DV.c.baseLineValue + ')';
+						title += ' (' + DV.c.baselinevalue + ')';
 						return {
 							type: 'line',
 							axis: 'left',
@@ -874,14 +875,14 @@ Ext.onReady( function() {
 						return a;
 					},
 					setTheme: function() {
-						var colors = DV.conf.chart.theme.dv1.slice(0, DV.c.series.names.length);						
-						if (DV.c.targetlinevalue || DV.c.baseLineValue) {
+						var colors = DV.conf.chart.theme.dv1.slice(0, DV.c.series.names.length);
+						if (DV.c.targetlinevalue || DV.c.baselinevalue) {
 							colors.push('#051a2e');
 						}					
 						if (DV.c.targetlinevalue) {
 							colors.push('#051a2e');
 						}					
-						if (DV.c.baseLineValue) {
+						if (DV.c.baselinevalue) {
 							colors.push('#051a2e');
 						}
 						Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
@@ -1150,9 +1151,9 @@ Ext.onReady( function() {
                     values.push({
 						value: r[i][0],
 						type: t === 'in' ? DV.conf.finals.dimension.indicator.value : t === 'de' ? DV.conf.finals.dimension.dataelement.value : t === 'ds' ? DV.conf.finals.dimension.dataset.value : t,
-						dataId: r[i][2],
-						periodId: r[i][3],
-						organisationunitId: r[i][4]
+						dataid: r[i][2],
+						periodid: r[i][3],
+						organisationunitid: r[i][4]
 					});
                 }
                 return values;
@@ -1504,9 +1505,9 @@ Ext.onReady( function() {
 			DV.c.category.names = DV.util.dimension[DV.c.dimension.category].getNames(true);
 			DV.c.filter.names = DV.util.dimension[DV.c.dimension.filter].getNames(true, true);
 			
-			DV.c.series.url = DV.util.dimension[c.dimension.series].getUrl();
-			DV.c.category.url = DV.util.dimension[c.dimension.category].getUrl();
-			DV.c.filter.url = DV.util.dimension[c.dimension.filter].getUrl(true);
+			DV.c.series.url = DV.util.dimension[DV.c.dimension.series].getUrl();
+			DV.c.category.url = DV.util.dimension[DV.c.dimension.category].getUrl();
+			DV.c.filter.url = DV.util.dimension[DV.c.dimension.filter].getUrl(true);
 			
 			DV.c.indicator.ids = DV.util.dimension.indicator.getIds();
 			DV.c.dataelement.ids = DV.util.dimension.dataelement.getIds();
@@ -1581,7 +1582,7 @@ Ext.onReady( function() {
 			DV.cmp.favorite.targetlinevalue.setValue(DV.c.targetlinevalue);
 			DV.cmp.favorite.targetlinelabel.xable();
 			DV.cmp.favorite.targetlinelabel.setValue(DV.c.targetlinelabel);
-			DV.cmp.favorite.baselinevalue.setValue(DV.c.baseLineValue);
+			DV.cmp.favorite.baselinevalue.setValue(DV.c.baselinevalue);
 			DV.cmp.favorite.baselinelabel.xable();
 			DV.cmp.favorite.baselinelabel.setValue(DV.c.baseLineLabel);
 
@@ -1777,9 +1778,9 @@ Ext.onReady( function() {
 					}
 					
                     Ext.Array.each(DV.value.values, function(item) {
-                        item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(DV.store[item.type].available.storage[item.dataId].name);
-                        item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.periodId));
-                        item[DV.conf.finals.dimension.organisationunit.value] = DV.util.string.getEncodedString(DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitId));
+                        item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(DV.store[item.type].available.storage[item.dataid].name);
+                        item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.periodid));
+                        item[DV.conf.finals.dimension.organisationunit.value] = DV.util.string.getEncodedString(DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitid));
                         item.value = parseFloat(item.value);
                     });
                     
@@ -1841,7 +1842,7 @@ Ext.onReady( function() {
 		},
         data: [],
         getData: function(exe) {
-            this.data = [];
+            this.data = [];            
             
             Ext.Array.each(DV.c.category.names, function(item) {
                 var obj = {};
@@ -1858,16 +1859,16 @@ Ext.onReady( function() {
             Ext.Array.each(DV.chart.data, function(item) {
                 for (var i = 0; i < DV.c.series.names.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
-                        if (DV.value.values[j][DV.c.category.dimension] === item[DV.conf.finals.data.domain] && DV.value.values[j][DV.c.series.dimension] === DV.c.series.names[i]) {
-                            item[DV.value.values[j][DV.c.series.dimension]] = DV.value.values[j].value;
+                        if (DV.value.values[j][DV.c.dimension.category] === item[DV.conf.finals.data.domain] && DV.value.values[j][DV.c.dimension.series] === DV.c.series.names[i]) {
+							item[DV.c.series.names[i]] = DV.value.values[j].value;
                             break;
                         }
                     }
                 }
             });
             
-			if (DV.c.trendLine) {
-				DV.c.trendLine = [];
+			if (DV.c.trendline) {
+				DV.chart.trendline = [];
 				for (var i = 0; i < DV.c.series.names.length; i++) {
 					var s = DV.c.series.names[i],
 						reg = new SimpleRegression();
@@ -1879,7 +1880,7 @@ Ext.onReady( function() {
 						var n = reg.predict(j);
 						DV.chart.data[j][key] = parseFloat(reg.predict(j).toFixed(1));
 					}
-					DV.c.trendLine.push({
+					DV.chart.trendline.push({
 						key: key,
 						name: DV.i18n.trend + ' (' + s + ')'
 					});
@@ -1892,9 +1893,9 @@ Ext.onReady( function() {
 				});
 			}
 
-			if (DV.c.baseLineValue) {
+			if (DV.c.baselinevalue) {
 				Ext.Array.each(DV.chart.data, function(item) {
-					item[DV.conf.finals.data.baseline] = DV.c.baseLineValue;
+					item[DV.conf.finals.data.baseline] = DV.c.baselinevalue;
 				});
 			}
             
@@ -1938,7 +1939,7 @@ Ext.onReady( function() {
 			if (DV.c.targetlinevalue) {
 				series.push(DV.util.chart.def.series.getTargetLine());
 			}
-			if (DV.c.baseLineValue) {
+			if (DV.c.baselinevalue) {
 				series.push(DV.util.chart.def.series.getBaseLine());
 			}
 			
@@ -1977,7 +1978,7 @@ Ext.onReady( function() {
 			if (c.targetlinevalue) {
 				series.push(DV.util.chart.bar.series.getTargetLine());
 			}
-			if (c.baseLineValue) {
+			if (c.baselinevalue) {
 				series.push(DV.util.chart.bar.series.getBaseLine());
 			}
 			
@@ -2005,7 +2006,7 @@ Ext.onReady( function() {
 			if (c.targetlinevalue) {
 				series.push(DV.util.chart.def.series.getTargetLine());
 			}
-			if (c.baseLineValue) {
+			if (c.baselinevalue) {
 				series.push(DV.util.chart.def.series.getBaseLine());
 			}
 			
