@@ -63,7 +63,7 @@ DV.conf = {
 		ajax: {
 			jsonfy: function(r) {
 				r = Ext.JSON.decode(r.responseText);
-				var obj = {system: {rootNode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}, user: {id: r.user.id, isAdmin: r.user.isAdmin, organisationUnit: {id: r.user.ou[0], name: r.user.ou[1]}}}};
+				var obj = {system: {rootnode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}, user: {id: r.user.id, isadmin: r.user.isAdmin, organisationunit: {id: r.user.ou[0], name: r.user.ou[1]}}}};
 				for (var relative in r.p) {
 					obj.system.periods[relative] = [];
 					for (var i = 0; i < r.p[relative].length; i++) {
@@ -613,20 +613,23 @@ Ext.onReady( function() {
                 getNames: function(exception, isFilter) {
 					var ou = DV.c.organisationunit,
 						a = [];
-                    for (var i = 0; i < ou.objects.length; i++) {
-						a.push(ou.objects[i].name);
-					}
-					if (ou.groupsetId) {
-						a = [];
-						var groups = DV.init.system.groupSets[ou.groupsetId];
+					if (ou.groupsetid) {
+						var groups = DV.init.system.groupsets[ou.groupsetid];
 						for (var i = 0; i < groups.length; i++) {
 							a.push(groups[i].name);
 						}
-						if (exception && isFilter && a.length > 1) {
-							DV.chart.warnings.push(DV.i18n.wm_multiple_filter_groups + ' ' + DV.i18n.wm_first_filter_unit);
+					}
+					else {
+						if (DV.c.userorganisationunit) {
+							a.push(DV.init.system.user.organisationunit.name);
+						}
+						else {
+							for (var i = 0; i < ou.objects.length; i++) {
+								a.push(ou.objects[i].name);
+							}
 						}
 					}
-					else if (exception && isFilter && a.length > 1) {
+					if (exception && isFilter && a.length > 1) {
 						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_unit);
 					}
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
@@ -634,14 +637,19 @@ Ext.onReady( function() {
                 getUrl: function(isFilter) {
 					var ou = DV.c.organisationunit,
 						a = [];
-                    for (var i = 0; i < ou.objects.length; i++) {
-						a.push('organisationUnitIds=' + ou.objects[i].id);
+					if (DV.c.userorganisationunit) {
+						a.push('organisationUnitIds=' + DV.init.system.user.organisationunit.id);
 					}
-					if ((isFilter || ou.groupsetId) && a.length > 1) {
-						a = a.slice(0,1);
+					else {
+						for (var i = 0; i < ou.objects.length; i++) {
+							a.push('organisationUnitIds=' + ou.objects[i].id);
+						}
+						if ((isFilter || ou.groupsetid) && a.length > 1) {
+							a = a.slice(0,1);
+						}
 					}
-					if (ou.groupsetId) {
-						a.push('organisationUnitGroupSetId=' + ou.groupsetId);
+					if (ou.groupsetid) {
+						a.push('organisationUnitGroupSetId=' + ou.groupsetid);
 					}
 					return a;
                 },
@@ -3059,8 +3067,8 @@ Ext.onReady( function() {
                                                 url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunitchildren_get
                                             },
                                             root: {
-                                                id: DV.init.system.rootNode.id,
-                                                text: DV.init.system.rootNode.name,
+                                                id: DV.init.system.rootnode.id,
+                                                text: DV.init.system.rootnode.name,
                                                 expanded: false
                                             }
                                         }),
@@ -4031,14 +4039,6 @@ Ext.onReady( function() {
                             text: 'Exit',
                             handler: function() {
                                 window.location.href = DV.conf.finals.ajax.path_portal + DV.conf.finals.ajax.redirect;
-                            }
-                        },
-                        {
-                            xtype: 'button',
-							cls: 'dv-toolbar-btn-2',
-                            text: 'eee',
-                            handler: function() {
-                                console.log(DV.store.indicator.available.storage);
                             }
                         },
                         {
