@@ -711,8 +711,8 @@ Ext.onReady( function() {
 						animate: true,
 						store: DV.store.chart,
 						insetPadding: DV.conf.chart.style.inset,
-						items: DV.c.hideSubtitle ? false : DV.util.chart.def.getTitle(),
-						legend: DV.c.hideLegend ? false : DV.util.chart.def.getLegend(),
+						items: DV.c.hidesubtitle ? false : DV.util.chart.def.getTitle(),
+						legend: DV.c.hidelegend ? false : DV.util.chart.def.getLegend(),
 						axes: axes,
 						series: series,
 						theme: 'dv1'
@@ -833,7 +833,7 @@ Ext.onReady( function() {
 						};
 					},
 					getBaseLine: function() {
-						var title = DV.c.baseLineLabel || DV.i18n.base;
+						var title = DV.c.baselinelabel || DV.i18n.base;
 						title += ' (' + DV.c.baselinevalue + ')';
 						return {
 							type: 'line',
@@ -1572,10 +1572,10 @@ Ext.onReady( function() {
         },
         setUI: function() {
 			DV.util.button.type.setValue(DV.c.type);			
-			DV.cmp.favorite.hidesubtitle.setValue(DV.c.hideSubtitle);
-			DV.cmp.favorite.hidelegend.setValue(DV.c.hideLegend);
-			DV.cmp.favorite.trendline.setValue(DV.c.regression);
-			DV.cmp.favorite.userorganisationunit.setValue(DV.c.userOrganisationUnit);
+			DV.cmp.favorite.hidesubtitle.setValue(DV.c.hidesubtitle);
+			DV.cmp.favorite.hidelegend.setValue(DV.c.hidelegend);
+			DV.cmp.favorite.trendline.setValue(DV.c.trendline);
+			DV.cmp.favorite.userorganisationunit.setValue(DV.c.userorganisationunit);
 			DV.cmp.favorite.domainaxislabel.setValue(DV.c.domainaxislabel);
 			DV.cmp.favorite.rangeaxislabel.setValue(DV.c.rangeaxislabel);
 			DV.cmp.favorite.targetlinevalue.setValue(DV.c.targetlinevalue);
@@ -1583,7 +1583,7 @@ Ext.onReady( function() {
 			DV.cmp.favorite.targetlinelabel.setValue(DV.c.targetlinelabel);
 			DV.cmp.favorite.baselinevalue.setValue(DV.c.baselinevalue);
 			DV.cmp.favorite.baselinelabel.xable();
-			DV.cmp.favorite.baselinelabel.setValue(DV.c.baseLineLabel);
+			DV.cmp.favorite.baselinelabel.setValue(DV.c.baselinelabel);
 
 			DV.cmp.settings.series.setValue(DV.conf.finals.dimension[DV.c.dimension.series].value);
 			DV.util.combobox.filter.category();                        
@@ -1707,9 +1707,9 @@ Ext.onReady( function() {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
 						DV.c.baselinevalue = null;
 					}
-					else if (c.type === DV.conf.finals.chart.pie) {
+					else if (DV.c.type === DV.conf.finals.chart.pie) {
 						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
-						c.baselinevalue = null;
+						DV.c.baselinevalue = null;
 					}
 					
 					if (DV.c.category.names.length < 2) {
@@ -2051,8 +2051,8 @@ Ext.onReady( function() {
                 shadow: true,
                 store: DV.store.chart,
                 insetPadding: 60,
-                items: DV.c.hideSubtitle ? false : DV.util.chart.pie.getTitle(),
-                legend: DV.c.hideLegend ? false : DV.util.chart.def.getLegend(DV.c.category.names.length),
+                items: DV.c.hidesubtitle ? false : DV.util.chart.pie.getTitle(),
+                legend: DV.c.hidelegend ? false : DV.util.chart.def.getLegend(DV.c.category.names.length),
                 series: [{
                     type: 'pie',
                     field: DV.c.series.names[0],
