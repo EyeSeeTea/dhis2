@@ -33,8 +33,8 @@ import java.util.List;
 
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
@@ -92,11 +92,11 @@ public class InitializeAction
         return rootNode;
     }
     
-    private Collection<OrganisationUnitGroup> organisationUnitGroups;
+    private Collection<OrganisationUnitGroupSet> organisationUnitGroupSets;
     
-    public Collection<OrganisationUnitGroup> getOrganisationUnitGroups()
+    public Collection<OrganisationUnitGroupSet> getOrganisationUnitGroupSets()
     {
-        return organisationUnitGroups;
+        return organisationUnitGroupSets;
     }
 
     private List<Period> lastMonth;
@@ -174,7 +174,7 @@ public class InitializeAction
 
         rootNode = rootUnits.size() > 0 ? rootUnits.iterator().next() : new OrganisationUnit();
         
-        organisationUnitGroups = organisationUnitGroupService.getAllOrganisationUnitGroups();
+        organisationUnitGroupSets = organisationUnitGroupService.getAllOrganisationUnitGroupSets();
         
         RelativePeriods rp = new RelativePeriods();
         
