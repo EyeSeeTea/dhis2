@@ -63,7 +63,7 @@ DV.conf = {
 		ajax: {
 			jsonfy: function(r) {
 				r = Ext.JSON.decode(r.responseText);
-				var obj = {system: {rootnode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}, user: {id: r.user.id, isadmin: r.user.isAdmin, organisationunit: {id: r.user.ou[0], name: r.user.ou[1]}}}};
+				var obj = {system: {rootnode: {id: r.rn[0], name: r.rn[1], level: 1}, periods: {}, user: {id: r.user.id, isadmin: r.user.isAdmin, organisationunit: {id: r.user.ou[0], name: r.user.ou[1]}},organisationunitgroupsets:r.ougs}};
 				for (var relative in r.p) {
 					obj.system.periods[relative] = [];
 					for (var i = 0; i < r.p[relative].length; i++) {
@@ -614,7 +614,7 @@ Ext.onReady( function() {
 					var ou = DV.c.organisationunit,
 						a = [];
 					if (ou.groupsetid) {
-						var groups = DV.init.system.groupsets[ou.groupsetid];
+						var groups = DV.init.system.organisationunitgroupsets[ou.groupsetid];
 						for (var i = 0; i < groups.length; i++) {
 							a.push(groups[i].name);
 						}
