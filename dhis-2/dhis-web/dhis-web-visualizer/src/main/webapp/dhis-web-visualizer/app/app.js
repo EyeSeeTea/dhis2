@@ -1415,7 +1415,6 @@ Ext.onReady( function() {
 						}
 						
 						var f = Ext.JSON.decode(r.responseText);
-//console.log(f);return;						
                             
 						if (!this.validation.favorite(f)) {
 							return;
@@ -1446,9 +1445,7 @@ Ext.onReady( function() {
 							for (var i = 0; i < f.dataSets.length; i++) {
 								DV.c.dataset.objects.push({id: f.dataSets[i].internalId, name: DV.util.string.getEncodedString(f.dataSets[i].shortName)});
 							}
-						}
-//console.log(f);return;						
-						//DV.c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(f.relativePeriods);
+						}						
 						DV.c.period.rp = f.relativePeriods;
 						for (var i = 0; i < f.organisationUnits.length; i++) {
 							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: DV.util.string.getEncodedString(f.organisationUnits[i].shortName)});
@@ -1465,7 +1462,6 @@ Ext.onReady( function() {
                         DV.c.targetlinelabel = f.targetLineLabel ? f.targetLineLabel : null;
                         DV.c.baselinevalue = f.baseLineValue ? parseFloat(f.baseLineValue) : null;
                         DV.c.baselinelabel = f.baseLineLabel ? f.baseLineLabel : null;
-//console.log(DV.c);return;                        
                         
                         if (exe) {
 							this.expandChart(exe, id);
@@ -1482,7 +1478,6 @@ Ext.onReady( function() {
 				DV.c.dataelement.objects = DV.util.dimension.dataelement.getObjects();
 				DV.c.dataset.objects = DV.util.dimension.dataset.getObjects();
 				DV.c.period.rp = DV.util.dimension.period.getRelativePeriodObject();
-				//DV.c.period.objects = DV.util.dimension.period.getObjects();
 				DV.c.organisationunit.objects = DV.util.dimension.organisationunit.getObjects();
 				DV.c.organisationunit.groupsetid = DV.util.dimension.organisationunit.getGroupSetId();
 				this.setOptions();
