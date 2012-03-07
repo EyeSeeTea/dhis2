@@ -167,7 +167,7 @@ DV.conf = {
             font: 'arial,sans-serif,ubuntu,consolas'
         },
         theme: {
-            dv1: ['#94ae0a', '#0c4375', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
+            dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
         }
     },
     statusbar: {
@@ -831,7 +831,7 @@ Ext.onReady( function() {
 							style: {
 								opacity: 1,
 								lineWidth: 3,
-								stroke: '#051a2e'
+								stroke: '#041423'
 							},
 							markerConfig: {
 								type: 'circle',
@@ -851,7 +851,7 @@ Ext.onReady( function() {
 							style: {
 								opacity: 1,
 								lineWidth: 3,
-								stroke: '#051a2e'
+								stroke: '#041423'
 							},
 							markerConfig: {
 								type: 'circle',
