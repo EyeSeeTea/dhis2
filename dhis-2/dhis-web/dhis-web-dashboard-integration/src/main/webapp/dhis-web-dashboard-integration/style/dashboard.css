@@ -30,6 +30,11 @@
   position:absolute;
 }
 
+.linkArea div
+{
+  position:absolute;
+}
+
 .chartArea
 {
   border:1px solid #d0d0d0;
@@ -53,6 +58,7 @@
 .labelText
 {
   color:#808080;
+  padding:3px;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -93,18 +99,18 @@
   padding-bottom:15px;
 }
 
-a
+.page a
 {
   text-decoration:none;
   color:#3567cd;
 }
 
-a:hover
+.page a:hover
 {
   text-decoration:underline;
 }
 
-a:visited
+.page a:visited
 {
   color:#3567cd;
 }

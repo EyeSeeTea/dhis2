@@ -2112,7 +2112,6 @@ Ext.onReady( function() {
 			return t;
 		},
         reload: function() {
-			//DV.state.setOptions(); // ??
             DV.cmp.region.center.removeAll(true);
             DV.cmp.region.center.add(this.chart);
             
@@ -3708,7 +3707,7 @@ Ext.onReady( function() {
                                                                                 }
                                                                             },
                                                                             {
-                                                                                text: DV.i18n.delete,
+                                                                                text: DV.i18n.delete_object,
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 disabled: true,
                                                                                 xable: function() {
@@ -3751,7 +3750,7 @@ Ext.onReady( function() {
                                                                                                 },
                                                                                                 '->',
                                                                                                 {
-                                                                                                    text: DV.i18n.delete,
+                                                                                                    text: DV.i18n.delete_object,
                                                                                                     handler: function() {
                                                                                                         this.up('window').close();
                                                                                                         DV.util.crud.favorite.del(function() {

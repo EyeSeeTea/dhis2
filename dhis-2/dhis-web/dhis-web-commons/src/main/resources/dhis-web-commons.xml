@@ -39,6 +39,7 @@
       <interceptor name="systemSettingInterceptor" class="org.hisp.dhis.interceptor.SystemSettingInterceptor" />
       <interceptor name="userSettingInterceptor" class="org.hisp.dhis.interceptor.UserSettingInterceptor" />
       <interceptor name="contextInterceptor" class="org.hisp.dhis.interceptor.ContextInterceptor" />
+	  <interceptor name="cacheInterceptor" class="org.hisp.dhis.interceptor.CacheInterceptor" />
 
       <interceptor name="portalParamsInterceptor" class="org.hisp.dhis.webportal.interceptor.XWorkPortalParamsInterceptor" />
       <interceptor name="portalModuleInterceptor" class="org.hisp.dhis.webportal.interceptor.XWorkPortalModuleInterceptor" />
@@ -81,6 +82,12 @@
         <interceptor-ref name="organisationUnitTreeInterceptor" />
         <interceptor-ref name="commonInterceptors" />
       </interceptor-stack>
+	  
+      <interceptor-stack name="cacheStack">
+        <interceptor-ref name="cacheInterceptor" />
+        <interceptor-ref name="commonInterceptors" />
+      </interceptor-stack>
+	  
     </interceptors>
 
     <default-interceptor-ref name="exceptionStack" />
@@ -98,6 +105,7 @@
   </package>
 
   <!-- Security -->
+  
   <package name="dhis-web-commons-security" extends="dhis-web-commons" namespace="/dhis-web-commons/security">
 
     <action name="login" class="org.hisp.dhis.security.action.LoginAction">
@@ -109,6 +117,7 @@
   </package>
 
   <!-- Organisation Unit Selection Tree -->
+  
   <package name="dhis-web-commons-oust" extends="dhis-web-commons" namespace="/dhis-web-commons/oust">
 
     <action name="expandSubtree" class="org.hisp.dhis.oust.action.ExpandSubtreeAction">
@@ -150,9 +159,6 @@
       <result name="success" type="velocity-xml">
         /dhis-web-commons/ouwt/responseSuccess.vm
       </result>
-      <result name="error" type="velocity-xml">
-        /dhis-web-commons/ouwt/responseError.vm
-      </result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
@@ -193,9 +199,6 @@
     <action name="clearselected" class="org.hisp.dhis.ouwt.action.ClearSelectedOrganisationUnitsAction">
       <result name="success" type="velocity-xml">
         /dhis-web-commons/ouwt/responseSuccess.vm
-      </result>
-      <result name="error" type="velocity-xml">
-        /dhis-web-commons/ouwt/responseError.vm
       </result>
       <param name="onExceptionReturn">plainTextError</param>
     </action>
@@ -300,13 +303,13 @@
     </action>
 
     <action name="i18nJavaScript" class="org.hisp.dhis.commons.action.NoAction">
-      <result name="success" type="velocity-javascript">/dhis-web-commons/i18n/i18n.vm
-      </result>
+      <result name="success" type="velocity-javascript">/dhis-web-commons/i18n/i18n.vm</result>
+	  <interceptor-ref name="cacheStack"/>
     </action>
 
     <action name="messagesJavaScript" class="org.hisp.dhis.commons.action.NoAction">
-      <result name="success" type="velocity-javascript">/dhis-web-commons/i18n/messages.vm
-      </result>
+      <result name="success" type="velocity-javascript">/dhis-web-commons/i18n/messages.vm</result>
+	  <interceptor-ref name="cacheStack"/>
     </action>
 
   </package>
@@ -844,6 +847,12 @@
       <result name="input" type="velocity-xml">
         /dhis-web-commons/useraccount/updateUserInput.vm
       </result>
+    </action>
+
+    <action name="modules" class="org.hisp.dhis.commons.action.NoAction">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-commons/about/modules.vm</param>
+      <param name="menu">/dhis-web-commons/about/menu.vm</param>
     </action>
 
   </package>

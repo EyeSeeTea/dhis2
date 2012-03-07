@@ -88,13 +88,6 @@ public class SaveValueAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private boolean providedByAnotherFacility;
-
-    public void setProvidedByAnotherFacility( boolean providedByAnotherFacility )
-    {
-        this.providedByAnotherFacility = providedByAnotherFacility;
-    }
-
     private String value;
 
     public void setValue( String value )
@@ -121,18 +114,6 @@ public class SaveValueAction
         return statusCode;
     }
 
-    private int optionComboId;
-
-    public int getOptionComboId()
-    {
-        return optionComboId;
-    }
-
-    public void setOptionComboId( int optionComboId )
-    {
-        this.optionComboId = optionComboId;
-    }
-
     // -------------------------------------------------------------------------
     // Implementation Action
     // -------------------------------------------------------------------------
@@ -140,14 +121,12 @@ public class SaveValueAction
     public String execute()
         throws Exception
     {
-        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
-
         ProgramStageInstance programStageInstance = selectedStateManager.getSelectedProgramStageInstance();
 
         DataElement dataElement = dataElementService.getDataElement( dataElementId );
 
         PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue( programStageInstance,
-            dataElement, organisationUnit );
+            dataElement );
 
         if ( value != null && value.trim().length() == 0 )
         {
@@ -164,12 +143,11 @@ public class SaveValueAction
             programStageInstanceService.updateProgramStageInstance( programStageInstance );
         }
 
-        if ( patientDataValue == null  && value != null )
+        if ( patientDataValue == null && value != null )
         {
             LOG.debug( "Adding PatientDataValue, value added" );
 
-            patientDataValue = new PatientDataValue( programStageInstance, dataElement, organisationUnit, new Date(),
-                value, providedByAnotherFacility );
+            patientDataValue = new PatientDataValue( programStageInstance, dataElement, new Date(), value );
 
             patientDataValueService.savePatientDataValue( patientDataValue );
         }
@@ -178,11 +156,12 @@ public class SaveValueAction
             LOG.debug( "Updating PatientDataValue, value added/changed" );
 
             patientDataValue.setValue( value );
-            patientDataValue.setProvidedByAnotherFacility( providedByAnotherFacility );
             patientDataValue.setTimestamp( new Date() );
 
             patientDataValueService.updatePatientDataValue( patientDataValue );
         }
+
+        statusCode = 0;
 
         return SUCCESS;
     }

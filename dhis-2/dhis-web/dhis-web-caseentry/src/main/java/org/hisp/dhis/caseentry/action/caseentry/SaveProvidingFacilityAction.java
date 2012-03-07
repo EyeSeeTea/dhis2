@@ -36,6 +36,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
 import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -46,8 +47,6 @@ import com.opensymphony.xwork2.Action;
 public class SaveProvidingFacilityAction
     implements Action
 {
-    private static final Log LOG = LogFactory.getLog( SaveProvidingFacilityAction.class );
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -59,18 +58,11 @@ public class SaveProvidingFacilityAction
         this.selectedStateManager = selectedStateManager;
     }
 
-    private DataElementService dataElementService;
+    private ProgramStageInstanceService programStageInstanceService;
 
-    public void setDataElementService( DataElementService dataElementService )
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
-        this.dataElementService = dataElementService;
-    }
-
-    private PatientDataValueService patientDataValueService;
-
-    public void setPatientDataValueService( PatientDataValueService patientDataValueService )
-    {
-        this.patientDataValueService = patientDataValueService;
+        this.programStageInstanceService = programStageInstanceService;
     }
 
     // -------------------------------------------------------------------------
@@ -82,18 +74,6 @@ public class SaveProvidingFacilityAction
     public void setProvidedByAnotherFacility( boolean providedByAnotherFacility )
     {
         this.providedByAnotherFacility = providedByAnotherFacility;
-    }
-
-    private int dataElementId;
-
-    public void setDataElementId( int dataElementId )
-    {
-        this.dataElementId = dataElementId;
-    }
-
-    public int getDataElementId()
-    {
-        return dataElementId;
     }
 
     private int statusCode;
@@ -110,23 +90,22 @@ public class SaveProvidingFacilityAction
     public String execute()
         throws Exception
     {
-        OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
-
         ProgramStageInstance programStageInstance = selectedStateManager.getSelectedProgramStageInstance();
 
-        DataElement dataElement = dataElementService.getDataElement( dataElementId );
-
-        PatientDataValue patientDataValue = patientDataValueService.getPatientDataValue( programStageInstance,
-            dataElement, organisationUnit );
-
-        if ( patientDataValue != null )
+        if ( programStageInstance != null )
         {
-            LOG.debug( "Updating PatientDataValue, value added/changed" );
+            if ( programStageInstance.getOrganisationUnit() == null )
+            {
+                OrganisationUnit organisationUnit = selectedStateManager.getSelectedOrganisationUnit();
+                programStageInstance.setOrganisationUnit( organisationUnit );
+            }
+            
+            programStageInstance.setProvidedByAnotherFacility( providedByAnotherFacility );
 
-            patientDataValue.setProvidedByAnotherFacility( providedByAnotherFacility );
-
-            patientDataValueService.updatePatientDataValue( patientDataValue );
+            programStageInstanceService.updateProgramStageInstance( programStageInstance );
         }
+
+        statusCode = 0;
 
         return SUCCESS;
     }

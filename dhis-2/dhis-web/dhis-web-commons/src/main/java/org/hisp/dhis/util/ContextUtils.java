@@ -125,15 +125,20 @@ public class ContextUtils
 
         if ( disallowCache )
         {
-            response.addHeader( "Cache-Control", "no-cache" );
-            response.addHeader( "Expires", DateUtils.getExpiredHttpDateString() );
+            // -----------------------------------------------------------------
+            // Cache set to expire after 1 second as IE 8 will not save cached
+            // responses to disk over SSL, was "no-cache".
+            // -----------------------------------------------------------------
+
+            response.setHeader( "Cache-Control", "max-age=1" );
+            response.setHeader( "Expires", DateUtils.getExpiredHttpDateString() );
         }
 
         if ( filename != null )
         {
             String type = attachment ? "attachment" : "inline";
 
-            response.addHeader( "Content-Disposition", type + "; filename=\"" + filename + "\"" );
+            response.setHeader( "Content-Disposition", type + "; filename=\"" + filename + "\"" );
         }
     }
 

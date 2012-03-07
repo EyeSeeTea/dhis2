@@ -40,10 +40,15 @@ function SelectionTreeSelection()
 	{
 		return selectedOrganisationUnit;
 	};
+	
+	this.isSelected = function()
+	{
+		return selectedOrganisationUnit && selectedOrganisationUnit.length > 0;
+	}
 
     this.select = function( unitId )
     {
-        if ( onSelectFunction )
+       if ( onSelectFunction )
         {
             onSelectFunction();
         }
@@ -88,11 +93,6 @@ function SelectionTreeSelection()
 
     function responseReceived( json )
     {
-        if ( !listenerFunction )
-        {
-            return;
-        }       
-
 		selectedOrganisationUnit = new Array();
 
 		var unitIds = new Array();
@@ -104,7 +104,11 @@ function SelectionTreeSelection()
         }
 
         jQuery("body").trigger("oust.selected", selectedOrganisationUnit);
-        listenerFunction( unitIds );
+        
+        if ( listenerFunction )
+        {
+        	listenerFunction( unitIds );
+        }
     }
 
     function getTagId( unitId )
@@ -122,13 +126,8 @@ function SelectionTree()
     this.clearSelectedOrganisationUnits = function()
     {
     	$.ajax({ 
-    		"url" : selectionTreePath + "clearSelectedOrganisationUnits.action",
-    		async : false,
-			dataType :"xml",
-    		"success" : function( data )
-    	   	{
-    			clearSelectedOrgUnitsCompleted( data );
-    	   	} 
+    		url: selectionTreePath + "clearSelectedOrganisationUnits.action",
+			async: false
     	});
     };
 
@@ -360,17 +359,4 @@ function SelectionTree()
     {
         treeTag.style.backgroundImage = 'none';
     }
-		
-	function clearSelectedOrgUnitsCompleted( xmlObject )
-	{
-		if ( xmlObject != null )
-		{
-			var type = xmlObject.documentElement.attributes.getNamedItem("type").nodeValue;
-			
-			if ( type == 'error' )
-			{
-				alert( xmlObject.documentElement.childNodes[0].nodeValue );
-			}
-		}		
-	}
 }
