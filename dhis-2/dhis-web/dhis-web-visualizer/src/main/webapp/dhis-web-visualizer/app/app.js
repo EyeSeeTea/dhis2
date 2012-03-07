@@ -1415,6 +1415,7 @@ Ext.onReady( function() {
 						}
 						
 						var f = Ext.JSON.decode(r.responseText);
+//console.log(f);return;						
                             
 						if (!this.validation.favorite(f)) {
 							return;
@@ -1433,24 +1434,24 @@ Ext.onReady( function() {
                         
                         if (f.indicators) {
 							for (var i = 0; i < f.indicators.length; i++) {
-								DV.c.indicator.objects.push({id: f.indicators[i].internalId, name: f.indicators[i].shortName});
+								DV.c.indicator.objects.push({id: f.indicators[i].internalId, name: DV.util.string.getEncodedString(f.indicators[i].shortName)});
 							}
 						}
 						if (f.dataElements) {
 							for (var i = 0; i < f.dataElements.length; i++) {
-								DV.c.dataelement.objects.push({id: f.dataElements[i].internalId, name: f.dataElements[i].shortName});
+								DV.c.dataelement.objects.push({id: f.dataElements[i].internalId, name: DV.util.string.getEncodedString(f.dataElements[i].shortName)});
 							}
 						}
 						if (f.dataSets) {
 							for (var i = 0; i < f.dataSets.length; i++) {
-								DV.c.dataset.objects.push({id: f.dataSets[i].internalId, name: f.dataSets[i].shortName});
+								DV.c.dataset.objects.push({id: f.dataSets[i].internalId, name: DV.util.string.getEncodedString(f.dataSets[i].shortName)});
 							}
 						}
 //console.log(f);return;						
 						//DV.c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(f.relativePeriods);
 						DV.c.period.rp = f.relativePeriods;
 						for (var i = 0; i < f.organisationUnits.length; i++) {
-							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: f.organisationUnits[i].shortName});
+							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: DV.util.string.getEncodedString(f.organisationUnits[i].shortName)});
 						}
 						DV.c.organisationunit.groupsetid = f.organisationUnitGroupSetId;
 						
@@ -1815,8 +1816,6 @@ Ext.onReady( function() {
 					}
 					
                     Ext.Array.each(DV.value.values, function(item) {
-console.log(item);
-console.log(DV.store[item.type].available);						
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(DV.store[item.type].available.storage[item.dataid].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.periodid));
                         item[DV.conf.finals.dimension.organisationunit.value] = DV.util.string.getEncodedString(DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitid));
