@@ -1169,21 +1169,20 @@ Ext.onReady( function() {
         },
         crud: {
             favorite: {
-                create: function(fn, isUpdate) {
-					var c = DV.c;
+                create: function(fn, isupdate) {
                     DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.saving + '...');
                     
-                    var params = c.getParams();
-                    params.name = DV.cmp.favorite.name.getValue();
+                    var p = DV.state.getParams();
+                    p.name = DV.cmp.favorite.name.getValue();
                     
-                    if (isUpdate) {
-                        params.uid = DV.store.favorite.getAt(DV.store.favorite.findExact('name', params.name)).data.id;
+                    if (isupdate) {
+                        p.uid = DV.store.favorite.getAt(DV.store.favorite.findExact('name', p.name)).data.id;
                     }
 					
                     var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;                    
                     Ext.Ajax.request({
                         url: DV.conf.finals.ajax.path_visualizer + url,
-                        params: params,
+                        params: p,
                         success: function() {
                             DV.store.favorite.load({callback: function() {
                                 DV.util.mask.hideMask();
@@ -1426,6 +1425,12 @@ Ext.onReady( function() {
                         DV.c.dimension.category = f.category.toLowerCase();
                         DV.c.dimension.filter = f.filter.toLowerCase();
                         
+                        DV.c.indicator.objects = [];
+                        DV.c.dataelement.objects = [];
+                        DV.c.dataset.objects = [];
+                        DV.c.period.objects = [];
+                        DV.c.organisationunit.objects = [];
+                        
                         if (f.indicators) {
 							for (var i = 0; i < f.indicators.length; i++) {
 								DV.c.indicator.objects.push({id: f.indicators[i].internalId, name: f.indicators[i].shortName});
@@ -1440,8 +1445,9 @@ Ext.onReady( function() {
 							for (var i = 0; i < f.dataSets.length; i++) {
 								DV.c.dataset.objects.push({id: f.dataSets[i].internalId, name: f.dataSets[i].shortName});
 							}
-						}						
-						DV.c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(f.relativePeriods);
+						}
+//console.log(f);return;						
+						//DV.c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(f.relativePeriods);
 						DV.c.period.rp = f.relativePeriods;
 						for (var i = 0; i < f.organisationUnits.length; i++) {
 							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: f.organisationUnits[i].shortName});
@@ -1458,6 +1464,7 @@ Ext.onReady( function() {
                         DV.c.targetlinelabel = f.targetLineLabel ? f.targetLineLabel : null;
                         DV.c.baselinevalue = f.baseLineValue ? parseFloat(f.baseLineValue) : null;
                         DV.c.baselinelabel = f.baseLineLabel ? f.baseLineLabel : null;
+//console.log(DV.c);return;                        
                         
                         if (exe) {
 							this.expandChart(exe, id);
@@ -1473,10 +1480,11 @@ Ext.onReady( function() {
 				DV.c.indicator.objects = DV.util.dimension.indicator.getObjects();
 				DV.c.dataelement.objects = DV.util.dimension.dataelement.getObjects();
 				DV.c.dataset.objects = DV.util.dimension.dataset.getObjects();
-				DV.c.period.objects = DV.util.dimension.period.getObjects();
+				DV.c.period.rp = DV.util.dimension.period.getRelativePeriodObject();
+				//DV.c.period.objects = DV.util.dimension.period.getObjects();
 				DV.c.organisationunit.objects = DV.util.dimension.organisationunit.getObjects();
 				DV.c.organisationunit.groupsetid = DV.util.dimension.organisationunit.getGroupSetId();
-				this.getOptions();
+				this.setOptions();
                         
 				if (exe) {
 					this.expandChart(exe);
@@ -1495,6 +1503,8 @@ Ext.onReady( function() {
 			DV.c.data.objects = DV.c.data.objects.concat(DV.c.indicator.objects);
 			DV.c.data.objects = DV.c.data.objects.concat(DV.c.dataelement.objects);
 			DV.c.data.objects = DV.c.data.objects.concat(DV.c.dataset.objects);
+			
+			DV.c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(DV.c.period.rp);
 			
 			if (!this.validation.objects()) {
 				return;
@@ -1542,7 +1552,7 @@ Ext.onReady( function() {
                 DV.value.getValues(true);
             }
         },
-        getOptions: function() {
+        setOptions: function() {
             DV.c.hidesubtitle = DV.cmp.favorite.hidesubtitle.getValue();
             DV.c.hidelegend = DV.cmp.favorite.hidelegend.getValue();
             DV.c.trendline = DV.cmp.favorite.trendline.getValue();
@@ -1559,21 +1569,33 @@ Ext.onReady( function() {
             p.type = DV.c.type.toUpperCase();
             p.series = DV.c.dimension.series.toUpperCase();
             p.category = DV.c.dimension.category.toUpperCase();
-            p.filter = DV.c.dimension.filter.toUpperCase();            
+            p.filter = DV.c.dimension.filter.toUpperCase();
 			p.hideSubtitle = DV.c.hidesubtitle;
 			p.hideLegend = DV.c.hidelegend;
 			p.trendLine = DV.c.trendline;
 			p.userOrganisationUnit = DV.c.userorganisationunit;
-			p.domainAxisLabel = DV.c.domainaxislabel;
-			p.rangeAxisLabel = DV.c.rangeaxislabel;
-			p.targetLineValue = DV.c.targetlinevalue;
-			p.targetLineLabel = DV.c.targetlinelabel;
-			p.baseLineValue = DV.c.baselinevalue;
-			p.baseLineLabel = DV.c.baselinelabel;			
+			if (DV.c.domainaxislabel) {
+				p.domainAxisLabel = DV.c.domainaxislabel;
+			}
+			if (DV.c.rangeaxislabel) {
+				p.rangeAxisLabel = DV.c.rangeaxislabel;
+			}
+			if (DV.c.targetlinevalue) {
+				p.targetLineValue = DV.c.targetlinevalue;
+			}
+			if (DV.c.targetlinelabel) {
+				p.targetLineLabel = DV.c.targetlinelabel;
+			}
+			if (DV.c.baselinevalue) {
+				p.baseLineValue = DV.c.baselinevalue;
+			}
+			if (DV.c.baselinelabel) {
+				p.baseLineLabel = DV.c.baselinelabel;
+			}
             p.indicatorIds = DV.c.indicator.ids;
             p.dataElementIds = DV.c.dataelement.ids;
             p.dataSetIds = DV.c.dataset.ids;
-            p = Ext.Object.merge(obj, DV.c.period.rp);
+            p = Ext.Object.merge(p, DV.c.period.rp);
             p.organisationUnitIds = DV.c.organisationunit.ids;
             p.organisationUnitGroupSetId = DV.c.organisationunit.groupsetid;            
             return p;
@@ -1614,13 +1636,13 @@ Ext.onReady( function() {
 			}
 									
 			DV.store.dataset.selected.removeAll();
-			if (c.datasets.objects) {
-				DV.store.dataset.selected.add(c.datasets.objects);
-				DV.util.store.addToStorage(DV.store.dataset.available, c.datasets.objects);
+			if (DV.c.dataset.objects) {
+				DV.store.dataset.selected.add(DV.c.dataset.objects);
+				DV.util.store.addToStorage(DV.store.dataset.available, DV.c.dataset.objects);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
 			}
 			
-			DV.util.checkbox.setRelativePeriods(c.period.rp);
+			DV.util.checkbox.setRelativePeriods(DV.c.period.rp);
 		},
         validation: {
 			dimensions: function() {
@@ -1793,6 +1815,8 @@ Ext.onReady( function() {
 					}
 					
                     Ext.Array.each(DV.value.values, function(item) {
+console.log(item);
+console.log(DV.store[item.type].available);						
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(DV.store[item.type].available.storage[item.dataid].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.periodid));
                         item[DV.conf.finals.dimension.organisationunit.value] = DV.util.string.getEncodedString(DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitid));
@@ -2094,7 +2118,7 @@ Ext.onReady( function() {
 			return t;
 		},
         reload: function() {
-			//DV.state.getOptions(); // ??
+			//DV.state.setOptions(); // ??
             DV.cmp.region.center.removeAll(true);
             DV.cmp.region.center.add(this.chart);
             
@@ -3041,10 +3065,10 @@ Ext.onReady( function() {
                                         width: DV.conf.layout.west_fieldset_width - 22,
                                         autoScroll: true,
                                         multiSelect: true,
-                                        isRendered: false,
+                                        isrendered: false,
                                         storage: {},
                                         selectRoot: function() {
-                                            if (this.isRendered) {
+                                            if (this.isrendered) {
                                                 if (!this.getSelectionModel().getSelection().length) {
                                                     this.getSelectionModel().select(this.getRootNode());
                                                 }
@@ -3122,8 +3146,8 @@ Ext.onReady( function() {
 
                                         DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.dataset, DV.cmp.fieldset.period]);
                                         var tp = DV.cmp.dimension.organisationunit.treepanel;
-                                        if (!tp.isRendered) {
-                                            tp.isRendered = true;
+                                        if (!tp.isrendered) {
+                                            tp.isrendered = true;
                                             tp.getRootNode().expand();
                                             tp.selectRoot();
                                         }
@@ -3789,7 +3813,7 @@ Ext.onReady( function() {
                                                                     text: DV.i18n.save,
                                                                     disabled: true,
                                                                     xable: function() {
-                                                                        if (DV.c.isRendered) {
+                                                                        if (DV.c.isrendered) {
                                                                             if (DV.cmp.favorite.name.getValue()) {
                                                                                 var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
                                                                                 if (index != -1) {
