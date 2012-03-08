@@ -131,7 +131,10 @@ DV.conf = {
                 warning: {
 					filter: DV.i18n.wm_multiple_filter_orgunit
 				}
-            }
+            },
+            organisationunitgroup: {
+				value: 'organisationunitgroup'
+			}
         },        
         chart: {
             series: 'series',
@@ -404,13 +407,13 @@ Ext.onReady( function() {
             addToStorage: function(s, records) {
                 s.each( function(r) {
                     if (!s.storage[r.data.id]) {
-                        s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
+                        s.storage[r.data.id] = {id: r.data.id, name: DV.util.string.getEncodedString(r.data.name), parent: s.parent};
                     }
                 });
                 if (records) {
                     Ext.Array.each(records, function(r) {
                         if (!s.storage[r.data.id]) {
-                            s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
+                            s.storage[r.data.id] = {id: r.data.id, name: DV.util.string.getEncodedString(r.data.name), parent: s.parent};
                         }
                     });
                 }                        
@@ -664,6 +667,17 @@ Ext.onReady( function() {
                 getGroupSetId: function() {
 					var value = DV.cmp.fieldset.organisationunit.groupsets.getValue();
 					return !value || value === DV.i18n.none || value === DV.conf.finals.cmd.none ? null : value;
+				},
+				getGroupNameByGroupId: function(id) {
+					var gs = DV.init.system.organisationunitgroupsets;
+					for (var k in gs) {
+						for (var i = 0; i < gs[k].length; i++) {
+							if (gs[k][i].id == id) {
+								return gs[k][i].name;
+							}
+						}
+					}
+					return null;
 				}
             }
         },
@@ -1144,6 +1158,11 @@ Ext.onReady( function() {
                 return this.allValuesAreIntegers(DV.value.values) ? '0' : '0.0';
             }
         },
+        variable: {
+			hasValue: function(str) {
+				return (str & str !== 0 && str !== '0' && str !== '');
+			}
+		},
        /*FIXME:This is probably not going to work as intended with UNICODE?*/
         string: {
             getEncodedString: function(text) {
@@ -1158,10 +1177,13 @@ Ext.onReady( function() {
 					var t = r[i][1];
                     values.push({
 						value: r[i][0],
-						type: t === 'in' ? DV.conf.finals.dimension.indicator.value : t === 'de' ? DV.conf.finals.dimension.dataelement.value : t === 'ds' ? DV.conf.finals.dimension.dataset.value : t,
+						type: r[i][1] === 'in' ? DV.conf.finals.dimension.indicator.value :
+							  r[i][1] === 'de' ? DV.conf.finals.dimension.dataelement.value :
+							  r[i][1] === 'ds' ? DV.conf.finals.dimension.dataset.value : t,
 						dataid: r[i][2],
 						periodid: r[i][3],
-						organisationunitid: r[i][4]
+						organisationunitid: r[i][4],
+						organisationunitgroupid: r[i][5]
 					});
                 }
                 return values;
@@ -1815,7 +1837,9 @@ Ext.onReady( function() {
                     Ext.Array.each(DV.value.values, function(item) {
                         item[DV.conf.finals.dimension.data.value] = DV.util.string.getEncodedString(DV.store[item.type].available.storage[item.dataid].name);
                         item[DV.conf.finals.dimension.period.value] = DV.util.string.getEncodedString(DV.util.dimension.period.getNameById(item.periodid));
-                        item[DV.conf.finals.dimension.organisationunit.value] = DV.util.string.getEncodedString(DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitid));
+                        item[DV.conf.finals.dimension.organisationunit.value] = DV.util.variable.hasValue(item.organisationunitgroupid) ?
+							DV.util.dimension.organisationunit.getGroupNameByGroupId(item.organisationunitgroupid) : DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitid);
+                        item[DV.conf.finals.dimension.organisationunitgroup.value] = DV.util.variable.hasValue(item.organisationunitgroupid) ? DV.util.dimension.organisationunit.getGroupNameByGroupId(item.organisationunitgroupid) : null;
                         item.value = parseFloat(item.value);
                     });
                     
@@ -1877,7 +1901,7 @@ Ext.onReady( function() {
 		},
         data: [],
         getData: function(exe) {
-            this.data = [];            
+            this.data = [];
             
             Ext.Array.each(DV.c.category.names, function(item) {
                 var obj = {};
