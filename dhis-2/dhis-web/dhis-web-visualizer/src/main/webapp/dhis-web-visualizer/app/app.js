@@ -1160,7 +1160,7 @@ Ext.onReady( function() {
         },
         variable: {
 			hasValue: function(str) {
-				return (str & str !== 0 && str !== '0' && str !== '');
+				return (str !== 0 && str !== '0' && str !== '');
 			}
 		},
        /*FIXME:This is probably not going to work as intended with UNICODE?*/
