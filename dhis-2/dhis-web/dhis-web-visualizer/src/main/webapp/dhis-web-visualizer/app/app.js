@@ -1865,7 +1865,7 @@ Ext.onReady( function() {
             Ext.Ajax.request({
                 url: baseurl,
                 success: function(r) {
-                    DV.value.values = DV.util.value.jsonfy(r);
+                    DV.value.values = DV.util.value.jsonfy(r);                    
                     
                     if (!DV.state.validation.value()) {
 						return;

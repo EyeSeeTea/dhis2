@@ -1,3 +1,5 @@
+package org.hisp.dhis.mobile.action;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -25,107 +27,98 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.patient;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-import java.util.List;
-
-import org.hisp.dhis.common.Grid;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.program.ProgramInstanceService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.sms.MessageSender;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
- * 
- * @version $GetPatientHistoryAction.java Mar 7, 2012 3:11:32 PM$
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class GetPatientHistoryAction
+public class ProcessingSendSMSAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Implementation Action
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientService patientService;
+    @Autowired
+    private SelectionTreeManager selectionTreeManager;
 
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
+    @Autowired
+    private UserService userService;
 
-    private ProgramInstanceService programInstanceService;
+    @Autowired
+    private CurrentUserService currentUserService;
 
-    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
-    {
-        this.programInstanceService = programInstanceService;
-    }
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-
-    private I18nFormat format;
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
+    @Autowired
+    private MessageSender messageSender;
 
     // -------------------------------------------------------------------------
-    // Getters && Setters
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer patientId;
+    private String gatewayId;
 
-    public void setPatientId( Integer patientId )
+    public void setGatewayId( String gatewayId )
     {
-        this.patientId = patientId;
+        this.gatewayId = gatewayId;
     }
 
-    private String type;
+    private String smsSubject;
 
-    public void setType( String type )
+    public void setSmsSubject( String smsSubject )
     {
-        this.type = type;
+        this.smsSubject = smsSubject;
     }
 
-    private List<Grid> grids;
+    private String smsMessage;
 
-    public List<Grid> getGrids()
+    public void setSmsMessage( String smsMessage )
     {
-        return grids;
+        this.smsMessage = smsMessage;
     }
 
-    private Patient patient;
+    private Set<String> recipients = new HashSet<String>();
 
-    public Patient getPatient()
+    public void setRecipients( Set<String> recipients )
     {
-        return patient;
+        this.recipients = recipients;
     }
 
     // -------------------------------------------------------------------------
-    // Implementation Action
+    // Action Implementation
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
-        patient = patientService.getPatient( patientId );
-
-        grids = programInstanceService.getProgramInstanceReport( patient, i18n, format );
-
-        if ( type == null )
+        if ( smsMessage != null && !smsMessage.isEmpty() )
         {
-            return SUCCESS;
+            if ( recipients != null && !recipients.isEmpty() )
+            {
+                messageSender.sendMessage( smsSubject, smsMessage, currentUserService.getCurrentUser(), true,
+                    recipients, gatewayId );
+            }
+
+            Collection<OrganisationUnit> units = selectionTreeManager.getSelectedOrganisationUnits();
+
+            if ( units != null && !units.isEmpty() )
+            {
+                messageSender.sendMessage( smsSubject, smsMessage, currentUserService.getCurrentUser(), false,
+                    new HashSet<User>( userService.getUsersByOrganisationUnits( units ) ), gatewayId );
+            }
         }
 
-        return type;
+        return SUCCESS;
     }
 }

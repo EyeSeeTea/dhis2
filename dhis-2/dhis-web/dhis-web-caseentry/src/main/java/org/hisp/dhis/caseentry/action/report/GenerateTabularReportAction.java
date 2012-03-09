@@ -28,7 +28,6 @@
 package org.hisp.dhis.caseentry.action.report;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,8 +45,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
@@ -203,7 +200,7 @@ public class GenerateTabularReportAction
 
         Set<Integer> orgunitIds = new HashSet<Integer>();
 
-        if ( facilityLB.equals( "random" ) )
+        if ( facilityLB.equals( "selected" ) )
         {
             orgunitIds.add( selectedOrgunit.getId() );
         }
@@ -215,7 +212,7 @@ public class GenerateTabularReportAction
 
             orgunitIds.addAll( childOrgUnitIdentifiers );
 
-            if ( facilityLB.equals( "immChildren" ) )
+            if ( facilityLB.equals( "childrenOnly" ) )
             {
                 orgunitIds.remove( selectedOrgunit.getId() );
             }

@@ -33,36 +33,50 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
-public class ShowMobileConfigurationFormAction implements Action {
+/**
+ * @author 
+ * @version $Id$
+ */
 
-	// -------------------------------------------------------------------------
-	// Dependencies
-	// -------------------------------------------------------------------------
+public class ShowMobileConfigurationFormAction
+    implements Action
+{
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-	@Autowired
-        private SmsConfigurationManager smsConfigurationManager;
+    @Autowired
+    private SmsConfigurationManager smsConfigurationManager;
 
-	// -------------------------------------------------------------------------
-	// Output
-	// -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
 
-	private SmsConfiguration smsConfig;
+    private SmsConfiguration smsConfig;
 
-	@Override
-	public String execute() throws Exception {
-	    smsConfig = smsConfigurationManager.getSmsConfiguration();
-		return SUCCESS;
-	}
+    public SmsConfiguration getSmsConfig()
+    {
+        return smsConfig;
+    }
 
-	public boolean getSmsServiceStatus() {
-		return this.smsConfig != null && this.smsConfig.isEnabled();
-	}
+    public void setSmsConfig( SmsConfiguration smsConfig )
+    {
+        this.smsConfig = smsConfig;
+    }
 
-	public SmsConfiguration getSmsConfig() {
-		return smsConfig;
-	}
+    public boolean getSmsServiceStatus()
+    {
+        return this.smsConfig != null && this.smsConfig.isEnabled();
+    }
 
-	public void setSmsConfig(SmsConfiguration smsConfig) {
-		this.smsConfig = smsConfig;
-	}
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        smsConfig = smsConfigurationManager.getSmsConfiguration();
+        return SUCCESS;
+    }
 }
