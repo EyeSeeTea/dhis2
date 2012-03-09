@@ -1332,10 +1332,10 @@ Ext.onReady( function() {
                     }
                 },
                 storage: {},
-                isLoaded: false,
+                isloaded: false,
                 listeners: {
                     load: function(s) {
-						this.isLoaded = true;
+						this.isloaded = true;
                         DV.util.store.addToStorage(s);
                         DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
                     }
@@ -1400,7 +1400,7 @@ Ext.onReady( function() {
                     root: 'charts'
                 }
             },
-            isLoaded: false,
+            isloaded: false,
             sorting: {
                 field: 'name',
                 direction: 'ASC'
@@ -1410,7 +1410,7 @@ Ext.onReady( function() {
             },
             listeners: {
                 load: function(s) {
-					s.isLoaded = !s.isLoaded ? true : false;
+					s.isloaded = !s.isloaded ? true : false;
 					
                     s.sortStore();
                     s.each(function(r) {
@@ -1420,12 +1420,32 @@ Ext.onReady( function() {
                     });
                 }
             }
-        })            
+        }),
+        groupset: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'index'],
+			proxy: {
+				type: 'ajax',
+				url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.organisationunitgroupset_get,
+				reader: {
+					type: 'json',
+					root: 'organisationUnitGroupSets'
+				}
+			},
+			isloaded: false,
+			listeners: {
+				load: function() {
+					this.isloaded = true;
+					this.add({id: DV.conf.finals.cmd.none, name: DV.i18n.none, index: -1});
+					this.sort('index', 'ASC');
+				}
+			}
+		})
     };
     
     DV.state = {
         setChart: function(exe, id) {
 			DV.chart.reset();
+//alert(DV.chart.organisationunit.groupsetid);			
 			
 			if (id) {
                 Ext.Ajax.request({
@@ -1437,7 +1457,7 @@ Ext.onReady( function() {
 						}
 						
 						var f = Ext.JSON.decode(r.responseText);
-                            
+						
 						if (!this.validation.favorite(f)) {
 							return;
 						}
@@ -1472,7 +1492,9 @@ Ext.onReady( function() {
 						for (var i = 0; i < f.organisationUnits.length; i++) {
 							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: DV.util.string.getEncodedString(f.organisationUnits[i].shortName)});
 						}
-						DV.c.organisationunit.groupsetid = f.organisationUnitGroupSetId;
+						if (f.organisationUnitGroupSet) {
+							DV.c.organisationunit.groupsetid = f.organisationUnitGroupSet.internalId;
+						}
 						
                         DV.c.hidesubtitle = f.hideSubtitle;
                         DV.c.hidelegend = f.hideLegend;
@@ -1615,7 +1637,9 @@ Ext.onReady( function() {
             p.dataSetIds = DV.c.dataset.ids;
             p = Ext.Object.merge(p, DV.c.period.rp);
             p.organisationUnitIds = DV.c.organisationunit.ids;
-            p.organisationUnitGroupSetId = DV.c.organisationunit.groupsetid;            
+            if (DV.c.organisationunit.groupsetid) {
+				p.organisationUnitGroupSetId = DV.c.organisationunit.groupsetid;
+			}
             return p;
         },
         setUI: function() {
@@ -1663,6 +1687,23 @@ Ext.onReady( function() {
 			DV.util.checkbox.setRelativePeriods(DV.c.period.rp);
 			
 			DV.cmp.dimension.organisationunit.treepanel.addToStorage(DV.c.organisationunit.objects);
+			
+alert(DV.c.organisationunit.groupsetid);
+			if (DV.c.organisationunit.groupsetid) {
+				if (DV.store.groupset.isloaded) {
+					DV.cmp.fieldset.organisationunit.groupsets.setValue(DV.c.organisationunit.groupsetid);
+				}
+				else {
+					DV.store.groupset.load({
+						callback: function() {
+							DV.cmp.fieldset.organisationunit.groupsets.setValue(DV.c.organisationunit.groupsetid);
+						}
+					});
+				}
+			}
+			else {
+				DV.cmp.fieldset.organisationunit.groupsets.setValue(DV.store.isloaded ? DV.conf.finals.cmd.none : DV.i18n.none);
+			}
 		},
         validation: {
 			dimensions: function() {
@@ -1876,28 +1917,26 @@ Ext.onReady( function() {
 			isrendered: false
 		},
 		reset: function() {
-			this.chart = {
-				type: DV.conf.finals.chart.column,
-				dimension: {},
-				series: null,
-				category: null,
-				filter: null,
-				indicator: {},
-				dataelement: {},
-				dataset: {},
-				period: {},
-				organisationunit: {},
-				hidesubtitle: false,
-				hidelegend: false,
-				trendline: false,
-				userorganisationunit: false,
-				domainaxislabel: null,
-				rangeaxislabel: null,
-				targetlinevalue: null,
-				targetlinelabel: null,
-				baselinevalue: null,
-				baselinelabel: null
-			};
+			this.chart.type = DV.conf.finals.chart.column;
+			this.chart.dimension = {};
+			this.chart.series = null;
+			this.chart.category = null;
+			this.chart.filter = null;
+			this.chart.indicator = {};
+			this.chart.dataelement = {};
+			this.chart.dataset = {};
+			this.chart.period = {};
+			this.chart.organisationunit = {};
+			this.chart.hidesubtitle = false;
+			this.chart.hidelegend = false;
+			this.chart.trendline = false;
+			this.chart.userorganisationunit = false;
+			this.chart.domainaxislabel = null;
+			this.chart.rangeaxislabel = null;
+			this.chart.targetlinevalue = null;
+			this.chart.targetlinelabel = null;
+			this.chart.baselinevalue = null;
+			this.chart.baselinelabel = null;
 		},
         data: [],
         getData: function(exe) {
@@ -2858,7 +2897,7 @@ Ext.onReady( function() {
                                         DV.cmp.fieldset.dataset = this;
                                     },
                                     expand: function() {
-										if (!DV.store.dataset.available.isLoaded) {
+										if (!DV.store.dataset.available.isloaded) {
 											DV.store.dataset.available.load();
 										}
                                         DV.util.fieldset.collapseFieldsets([DV.cmp.fieldset.indicator, DV.cmp.fieldset.dataelement, DV.cmp.fieldset.period, DV.cmp.fieldset.organisationunit]);
@@ -3055,23 +3094,7 @@ Ext.onReady( function() {
 										editable: false,
 										queryMode: 'remote',
 										value: DV.i18n.none,
-										store: Ext.create('Ext.data.Store', {
-											fields: ['id', 'name', 'index'],
-											proxy: {
-												type: 'ajax',
-												url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.organisationunitgroupset_get,
-												reader: {
-													type: 'json',
-													root: 'organisationUnitGroupSets'
-												}
-											},
-											listeners: {
-												load: function() {
-													this.add({id: DV.conf.finals.cmd.none, name: DV.i18n.none, index: -1});
-													this.sort('index', 'ASC');
-												}
-											}
-										}),
+										store: DV.store.groupset,
 										listeners: {
 											added: function() {
 												this.up('fieldset').groupsets = this;
@@ -3989,7 +4012,7 @@ Ext.onReady( function() {
                                         ],
                                         listeners: {
                                             show: function() {
-                                                if (!DV.store.favorite.isLoaded) {
+                                                if (!DV.store.favorite.isloaded) {
                                                     DV.store.favorite.load({scope: this, callback: function() {
                                                         this.down('grid').setHeightInMenu(DV.store.favorite);
                                                     }});
