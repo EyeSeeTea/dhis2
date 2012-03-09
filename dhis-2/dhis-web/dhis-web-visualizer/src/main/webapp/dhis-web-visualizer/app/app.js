@@ -1445,8 +1445,7 @@ Ext.onReady( function() {
     DV.state = {
         setChart: function(exe, id) {
 			DV.chart.reset();
-//alert(DV.chart.organisationunit.groupsetid);			
-			
+						
 			if (id) {
                 Ext.Ajax.request({
                     url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + id + '.json?links=false',
@@ -1492,9 +1491,7 @@ Ext.onReady( function() {
 						for (var i = 0; i < f.organisationUnits.length; i++) {
 							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: DV.util.string.getEncodedString(f.organisationUnits[i].shortName)});
 						}
-						if (f.organisationUnitGroupSet) {
-							DV.c.organisationunit.groupsetid = f.organisationUnitGroupSet.internalId;
-						}
+						DV.c.organisationunit.groupsetid = f.organisationUnitGroupSet ? f.organisationUnitGroupSet.internalId : null;
 						
                         DV.c.hidesubtitle = f.hideSubtitle;
                         DV.c.hidelegend = f.hideLegend;
@@ -1688,7 +1685,6 @@ Ext.onReady( function() {
 			
 			DV.cmp.dimension.organisationunit.treepanel.addToStorage(DV.c.organisationunit.objects);
 			
-alert(DV.c.organisationunit.groupsetid);
 			if (DV.c.organisationunit.groupsetid) {
 				if (DV.store.groupset.isloaded) {
 					DV.cmp.fieldset.organisationunit.groupsets.setValue(DV.c.organisationunit.groupsetid);
