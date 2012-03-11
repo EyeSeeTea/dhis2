@@ -41,7 +41,7 @@ public class JacksonUtils
         objectMapper.setSerializationInclusion( JsonInclude.Include.NON_NULL );
         objectMapper.configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true );
         objectMapper.configure( SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, true );
-        objectMapper.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, true );
+        objectMapper.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, false );
 
         JsonFactory factory = objectMapper.getJsonFactory();
         factory.enable( JsonGenerator.Feature.QUOTE_FIELD_NAMES );
@@ -91,14 +91,14 @@ public class JacksonUtils
         jsonMapper.setSerializationInclusion( JsonInclude.Include.NON_NULL );
         jsonMapper.configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true );
         jsonMapper.configure( SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, true );
-        jsonMapper.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, true );
+        jsonMapper.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, false );
 
         jsonMapper.getJsonFactory().enable( JsonGenerator.Feature.QUOTE_FIELD_NAMES );
 
         xmlMapper.configure( ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true );
         xmlMapper.configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true );
         xmlMapper.configure( SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, true );
-        xmlMapper.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, true );
+        xmlMapper.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, false );
     }
 
     //---------------------------------------------------------------------------------------------------

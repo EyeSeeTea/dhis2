@@ -88,6 +88,7 @@ public class ExtendedMappingJacksonView extends MappingJacksonJsonView
             value = new JSONPObject( callback, value );
         }
 
-        JacksonUtils.writeObject( value, response.getOutputStream() );
+        // JacksonUtils.writeObject( value, response.getOutputStream() );
+        JacksonUtils.toJson( response.getOutputStream(), value );
     }
 }

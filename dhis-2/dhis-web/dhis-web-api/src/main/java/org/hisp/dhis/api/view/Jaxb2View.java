@@ -61,10 +61,10 @@ public class Jaxb2View extends AbstractView
             // TODO throw exception
         }
 
-        OutputStream outputStream = response.getOutputStream();
-        
-        Marshaller marshaller = Jaxb2Utils.createMarshaller( domainModel );
+        JacksonUtils.toXml( response.getOutputStream(), domainModel );
 
-        marshaller.marshal( domainModel, outputStream );
+/*        OutputStream outputStream = response.getOutputStream();
+        Marshaller marshaller = Jaxb2Utils.createMarshaller( domainModel );
+        marshaller.marshal( domainModel, outputStream ); */
     }
 }
