@@ -27,8 +27,12 @@ package org.hisp.dhis.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
@@ -36,6 +40,7 @@ import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.adapter.DataSetXmlAdapter;
 import org.hisp.dhis.common.adapter.IndicatorGroupXmlAdapter;
 import org.hisp.dhis.common.adapter.IndicatorTypeXmlAdapter;
+import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.dataset.DataSet;
 
 import javax.xml.bind.annotation.*;
@@ -46,8 +51,7 @@ import java.util.Set;
 /**
  * @author Lars Helge Overland
  */
-@XmlRootElement( name = "indicator", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "indicator", namespace = Dxf2Namespace.NAMESPACE )
 public class Indicator extends BaseNameableObject
 {
     /**
@@ -159,8 +163,8 @@ public class Indicator extends BaseNameableObject
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isAnnualized()
     {
         return annualized;
@@ -171,10 +175,9 @@ public class Indicator extends BaseNameableObject
         this.annualized = annualized;
     }
 
-    @XmlElement
-    @XmlJavaTypeAdapter( IndicatorTypeXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
     public IndicatorType getIndicatorType()
     {
         return indicatorType;
@@ -185,8 +188,8 @@ public class Indicator extends BaseNameableObject
         this.indicatorType = indicatorType;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getNumerator()
     {
         return numerator;
@@ -197,8 +200,8 @@ public class Indicator extends BaseNameableObject
         this.numerator = numerator;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getNumeratorDescription()
     {
         return numeratorDescription;
@@ -209,7 +212,6 @@ public class Indicator extends BaseNameableObject
         this.numeratorDescription = numeratorDescription;
     }
 
-    @XmlElement
     @JsonProperty
     public String getExplodedNumerator()
     {
@@ -221,8 +223,8 @@ public class Indicator extends BaseNameableObject
         this.explodedNumerator = explodedNumerator;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getDenominator()
     {
         return denominator;
@@ -233,8 +235,8 @@ public class Indicator extends BaseNameableObject
         this.denominator = denominator;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getDenominatorDescription()
     {
         return denominatorDescription;
@@ -245,8 +247,8 @@ public class Indicator extends BaseNameableObject
         this.denominatorDescription = denominatorDescription;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getExplodedDenominator()
     {
         return explodedDenominator;
@@ -257,8 +259,8 @@ public class Indicator extends BaseNameableObject
         this.explodedDenominator = explodedDenominator;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -269,8 +271,8 @@ public class Indicator extends BaseNameableObject
         this.sortOrder = sortOrder;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getUrl()
     {
         return url;
@@ -281,11 +283,11 @@ public class Indicator extends BaseNameableObject
         this.url = url;
     }
 
-    @XmlElementWrapper( name = "indicatorGroups" )
-    @XmlJavaTypeAdapter( IndicatorGroupXmlAdapter.class )
-    @XmlElement( name = "indicatorGroup" )
     @JsonProperty( value = "indicatorGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "indicatorGroups" )
+    @JacksonXmlProperty( localName = "indicatorGroup" )
     public Set<IndicatorGroup> getGroups()
     {
         return groups;
@@ -296,10 +298,10 @@ public class Indicator extends BaseNameableObject
         this.groups = groups;
     }
 
-    @XmlElementWrapper( name = "dataSets" )
-    @XmlJavaTypeAdapter( DataSetXmlAdapter.class )
-    @XmlElement( name = "dataSet" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "dataSets" )
+    @JacksonXmlProperty( localName = "dataSet" )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -310,9 +312,10 @@ public class Indicator extends BaseNameableObject
         this.dataSets = dataSets;
     }
 
-    @XmlElementWrapper( name = "attributes" )
-    @XmlElement( name = "attribute" )
     @JsonProperty( value = "attributes" )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "attributes" )
+    @JacksonXmlProperty( localName = "attribute" )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

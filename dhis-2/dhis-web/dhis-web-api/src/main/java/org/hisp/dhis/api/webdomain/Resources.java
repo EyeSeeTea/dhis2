@@ -27,28 +27,16 @@ package org.hisp.dhis.api.webdomain;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.attribute.Attributes;
 import org.hisp.dhis.chart.Charts;
 import org.hisp.dhis.common.BaseCollection;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.constant.Constants;
-import org.hisp.dhis.dataelement.DataElementCategories;
-import org.hisp.dhis.dataelement.DataElementCategoryCombos;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombos;
-import org.hisp.dhis.dataelement.DataElementCategoryOptions;
-import org.hisp.dhis.dataelement.DataElementGroupSets;
-import org.hisp.dhis.dataelement.DataElementGroups;
-import org.hisp.dhis.dataelement.DataElements;
+import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSets;
 import org.hisp.dhis.document.Documents;
 import org.hisp.dhis.indicator.IndicatorGroupSets;
@@ -70,15 +58,19 @@ import org.hisp.dhis.validation.ValidationRules;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * At some point this class will be extended to show all available options
  * for a current user for this resource. For now it is only used for index page.
  *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@XmlRootElement( name = "resources", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
-public class Resources extends BaseCollection
+@JacksonXmlRootElement( localName = "dxf2", namespace = Dxf2Namespace.NAMESPACE )
+public class Resources
+    extends BaseCollection
 {
     private List<Resource> resources = new ArrayList<Resource>();
 
@@ -87,8 +79,9 @@ public class Resources extends BaseCollection
         generateResources();
     }
 
-    @XmlElement( name = "resource" )
-    @JsonProperty( value = "resources" )
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "resources" )
+    @JacksonXmlProperty( localName = "resource" )
     public List<Resource> getResources()
     {
         return resources;

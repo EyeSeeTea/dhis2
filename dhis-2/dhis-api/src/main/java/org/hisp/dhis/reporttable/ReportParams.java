@@ -27,25 +27,21 @@ package org.hisp.dhis.reporttable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.Dxf2Namespace;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
  * The ReportParams object represents report parameters for a ReportTable. Report
  * parameters are meant to make ReportTables more generic, as it can avoid having
  * dynamic, selectable parameters rather than static.
- * 
+ *
  * @author Lars Helge Overland
  * @version $Id$
  */
-@XmlRootElement( name = "reportParams", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "dataElement", namespace = Dxf2Namespace.NAMESPACE )
 public class ReportParams
     implements Serializable
 {
@@ -57,11 +53,11 @@ public class ReportParams
     private Boolean paramReportingMonth;
 
     private Boolean paramLeafParentOrganisationUnit;
-    
+
     private Boolean paramGrandParentOrganisationUnit;
-    
+
     private Boolean paramParentOrganisationUnit;
-    
+
     private Boolean paramOrganisationUnit;
 
     // -------------------------------------------------------------------------
@@ -71,9 +67,9 @@ public class ReportParams
     public ReportParams()
     {
     }
-    
+
     public ReportParams( boolean paramReportingMonth, boolean paramLeafParentOrganisationUnit,
-        boolean paramGrandParentOrganisationUnit, boolean paramParentOrganisationUnit, boolean paramOrganisationUnit )
+                         boolean paramGrandParentOrganisationUnit, boolean paramParentOrganisationUnit, boolean paramOrganisationUnit )
     {
         this.paramReportingMonth = paramReportingMonth;
         this.paramLeafParentOrganisationUnit = paramLeafParentOrganisationUnit;
@@ -90,27 +86,27 @@ public class ReportParams
     {
         return paramReportingMonth != null && paramReportingMonth;
     }
-    
+
     public boolean isParamLeafParentOrganisationUnit()
     {
         return paramLeafParentOrganisationUnit != null && paramLeafParentOrganisationUnit;
     }
-    
+
     public boolean isParamGrandParentOrganisationUnit()
     {
         return paramGrandParentOrganisationUnit != null && paramGrandParentOrganisationUnit;
     }
-    
+
     public boolean isParamParentOrganisationUnit()
     {
         return paramParentOrganisationUnit != null && paramParentOrganisationUnit;
     }
-    
+
     public boolean isParamOrganisationUnit()
     {
         return paramOrganisationUnit != null && paramOrganisationUnit;
     }
-    
+
     public boolean isSet()
     {
         return isParamReportingMonth() || isOrganisationUnitSet();
@@ -118,15 +114,14 @@ public class ReportParams
 
     public boolean isOrganisationUnitSet()
     {
-        return isParamLeafParentOrganisationUnit() || isParamGrandParentOrganisationUnit() || 
+        return isParamLeafParentOrganisationUnit() || isParamGrandParentOrganisationUnit() ||
             isParamParentOrganisationUnit() || isParamOrganisationUnit();
     }
-    
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @XmlElement
     @JsonProperty
     public Boolean getParamReportingMonth()
     {
@@ -138,7 +133,6 @@ public class ReportParams
         this.paramReportingMonth = paramReportingMonth;
     }
 
-    @XmlElement
     @JsonProperty
     public Boolean getParamLeafParentOrganisationUnit()
     {
@@ -150,7 +144,6 @@ public class ReportParams
         this.paramLeafParentOrganisationUnit = paramLeafParentOrganisationUnit;
     }
 
-    @XmlElement
     @JsonProperty
     public Boolean getParamGrandParentOrganisationUnit()
     {
@@ -162,7 +155,6 @@ public class ReportParams
         this.paramGrandParentOrganisationUnit = paramGrandParentOrganisationUnit;
     }
 
-    @XmlElement
     @JsonProperty
     public Boolean getParamParentOrganisationUnit()
     {
@@ -174,7 +166,6 @@ public class ReportParams
         this.paramParentOrganisationUnit = paramParentOrganisationUnit;
     }
 
-    @XmlElement
     @JsonProperty
     public Boolean getParamOrganisationUnit()
     {
@@ -184,5 +175,5 @@ public class ReportParams
     public void setParamOrganisationUnit( Boolean paramOrganisationUnit )
     {
         this.paramOrganisationUnit = paramOrganisationUnit;
-    }    
+    }
 }

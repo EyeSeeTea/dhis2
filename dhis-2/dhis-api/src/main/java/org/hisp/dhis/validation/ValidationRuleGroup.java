@@ -27,11 +27,16 @@ package org.hisp.dhis.validation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.adapter.ValidationRuleXmlAdapter;
+import org.hisp.dhis.common.view.DetailedView;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -41,8 +46,7 @@ import java.util.Set;
 /**
  * @author Lars Helge Overland
  */
-@XmlRootElement( name = "validationRuleGroup", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "validationRuleGroup", namespace = Dxf2Namespace.NAMESPACE )
 public class ValidationRuleGroup
     extends BaseIdentifiableObject
 {
@@ -109,8 +113,8 @@ public class ValidationRuleGroup
     // Getters and setters
     // -------------------------------------------------------------------------     
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getDescription()
     {
         return description;
@@ -121,11 +125,11 @@ public class ValidationRuleGroup
         this.description = description;
     }
 
-    @XmlElementWrapper( name = "validationRules" )
-    @XmlElement( name = "validationRule" )
-    @XmlJavaTypeAdapter( ValidationRuleXmlAdapter.class )
     @JsonProperty( value = "validationRules" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "validationRules" )
+    @JacksonXmlProperty( localName = "validationRule" )
     public Set<ValidationRule> getMembers()
     {
         return members;

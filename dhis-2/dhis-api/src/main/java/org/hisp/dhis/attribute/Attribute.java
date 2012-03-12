@@ -27,23 +27,22 @@
 
 package org.hisp.dhis.attribute;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.view.DetailedView;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * @author mortenoh
  */
-@XmlRootElement( name = "attributeType", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
-public class Attribute extends BaseIdentifiableObject
+@JacksonXmlRootElement( localName = "attributeType", namespace = Dxf2Namespace.NAMESPACE )
+public class Attribute
+    extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -77,8 +76,8 @@ public class Attribute extends BaseIdentifiableObject
         this.valueType = valueType;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getValueType()
     {
         return valueType;
@@ -89,8 +88,8 @@ public class Attribute extends BaseIdentifiableObject
         this.valueType = valueType;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isMandatory()
     {
         return mandatory;
@@ -101,8 +100,8 @@ public class Attribute extends BaseIdentifiableObject
         this.mandatory = mandatory;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isDataElementAttribute()
     {
         return dataElementAttribute;
@@ -113,8 +112,8 @@ public class Attribute extends BaseIdentifiableObject
         this.dataElementAttribute = dataElementAttribute;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isIndicatorAttribute()
     {
         return indicatorAttribute;
@@ -125,8 +124,8 @@ public class Attribute extends BaseIdentifiableObject
         this.indicatorAttribute = indicatorAttribute;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isOrganisationUnitAttribute()
     {
         return organisationUnitAttribute;
@@ -137,8 +136,8 @@ public class Attribute extends BaseIdentifiableObject
         this.organisationUnitAttribute = organisationUnitAttribute;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isUserAttribute()
     {
         return userAttribute;
@@ -160,8 +159,8 @@ public class Attribute extends BaseIdentifiableObject
         this.attributeValues = attributeValues;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public Integer getSortOrder()
     {
         return sortOrder;

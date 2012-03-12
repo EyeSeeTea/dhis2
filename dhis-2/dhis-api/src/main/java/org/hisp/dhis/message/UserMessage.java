@@ -27,25 +27,21 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.UserXmlAdapter;
+import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.user.User;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.UUID;
 
 /**
  * @author Lars Helge Overland
  */
-@XmlRootElement( name = "userMessage", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "userMessage", namespace = Dxf2Namespace.NAMESPACE )
 public class UserMessage
 {
     private int id;
@@ -55,7 +51,7 @@ public class UserMessage
     private User user;
 
     private boolean read;
-    
+
     private boolean followUp;
 
     public UserMessage()
@@ -87,8 +83,8 @@ public class UserMessage
         this.id = id;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getKey()
     {
         return key;
@@ -99,10 +95,9 @@ public class UserMessage
         this.key = key;
     }
 
-    @XmlElement
-    @XmlJavaTypeAdapter( UserXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
     public User getUser()
     {
         return user;
@@ -113,8 +108,8 @@ public class UserMessage
         this.user = user;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isRead()
     {
         return read;
@@ -125,8 +120,8 @@ public class UserMessage
         this.read = read;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isFollowUp()
     {
         return followUp;

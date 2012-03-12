@@ -27,24 +27,20 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.adapter.DataElementXmlAdapter;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import org.apache.commons.lang.StringEscapeUtils;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.CategoryOptionComboXmlAdapter;
-import org.hisp.dhis.common.adapter.DataElementXmlAdapter;
 
 /**
  * This object can act both as a hydrated persisted object and as a wrapper
@@ -52,8 +48,7 @@ import org.hisp.dhis.common.adapter.DataElementXmlAdapter;
  *
  * @author Abyot Asalefew
  */
-@XmlRootElement( name = "dataElementOperand", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "dataElementOperand", namespace = Dxf2Namespace.NAMESPACE )
 public class DataElementOperand
     implements Serializable, Comparable<DataElementOperand>
 {
@@ -346,8 +341,6 @@ public class DataElementOperand
         this.id = id;
     }
 
-    @XmlElement
-    @XmlJavaTypeAdapter( DataElementXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public DataElement getDataElement()
@@ -360,8 +353,6 @@ public class DataElementOperand
         this.dataElement = dataElement;
     }
 
-    @XmlElement
-    @XmlJavaTypeAdapter( CategoryOptionComboXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     public DataElementCategoryOptionCombo getCategoryOptionCombo()

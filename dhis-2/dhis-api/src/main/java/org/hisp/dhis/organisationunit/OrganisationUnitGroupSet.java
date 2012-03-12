@@ -42,19 +42,23 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.adapter.OrganisationUnitGroupXmlAdapter;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.common.view.DetailedView;
 
 /**
  * @author Kristian Nordal
  */
-@XmlRootElement( name = "organisationUnitGroupSet", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "organisationUnitGroupSet", namespace = Dxf2Namespace.NAMESPACE )
 public class OrganisationUnitGroupSet extends BaseIdentifiableObject
 {
     /**
@@ -196,8 +200,8 @@ public class OrganisationUnitGroupSet extends BaseIdentifiableObject
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getDescription()
     {
         return description;
@@ -208,8 +212,8 @@ public class OrganisationUnitGroupSet extends BaseIdentifiableObject
         this.description = description;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isCompulsory()
     {
         return compulsory;
@@ -220,11 +224,11 @@ public class OrganisationUnitGroupSet extends BaseIdentifiableObject
         this.compulsory = compulsory;
     }
 
-    @XmlElementWrapper( name = "organisationUnitGroups" )
-    @XmlElement( name = "organisationUnitGroup" )
-    @XmlJavaTypeAdapter( OrganisationUnitGroupXmlAdapter.class )
     @JsonProperty( value = "organisationUnitGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "organisationUnitGroups" )
+    @JacksonXmlProperty( localName = "organisationUnitGroup" )
     public Set<OrganisationUnitGroup> getOrganisationUnitGroups()
     {
         return organisationUnitGroups;

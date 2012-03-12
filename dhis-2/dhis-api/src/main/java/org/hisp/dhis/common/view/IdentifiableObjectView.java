@@ -1,5 +1,7 @@
+package org.hisp.dhis.common.view;
+
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,37 +27,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.chart;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.BaseCollection;
-import org.hisp.dhis.common.Dxf2Namespace;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "dxf2", namespace = Dxf2Namespace.NAMESPACE )
-public class Charts
-    extends BaseCollection
+public class IdentifiableObjectView
 {
-    private List<Chart> charts = new ArrayList<Chart>();
-
-    @JsonProperty
-    @JacksonXmlElementWrapper( localName = "charts" )
-    @JacksonXmlProperty( localName = "chart" )
-    public List<Chart> getCharts()
-    {
-        return charts;
-    }
-
-    public void setCharts( List<Chart> charts )
-    {
-        this.charts = charts;
-    }
 }

@@ -1147,9 +1147,9 @@ public class WebLinkPopulator
             port = request.getServerPort();
         }
 
-        if ( request.getServerPort() != 80 && request.getServerPort() != 443 )
+        if ( port != 80 && port != 443 )
         {
-            builder.append( ":" ).append( request.getServerPort() );
+            builder.append( ":" ).append( port );
         }
 
         builder.append( request.getContextPath() );

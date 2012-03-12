@@ -27,49 +27,37 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.adapter.DataSetXmlAdapter;
-import org.hisp.dhis.common.adapter.OrganisationUnitGroupXmlAdapter;
-import org.hisp.dhis.common.adapter.OrganisationUnitXmlAdapter;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.user.User;
 
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * @author Kristian Nordal
  */
-@XmlRootElement( name = "organisationUnit", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
-public class OrganisationUnit extends BaseNameableObject
+@JacksonXmlRootElement( localName = "organisationUnit", namespace = Dxf2Namespace.NAMESPACE )
+public class OrganisationUnit
+    extends BaseNameableObject
 {
     private static final long serialVersionUID = 1228298379303894619L;
-    
+
     public static final String FEATURETYPE_NONE = "None";
     public static final String FEATURETYPE_MULTIPOLYGON = "MultiPolygon";
     public static final String FEATURETYPE_POLYGON = "Polygon";
@@ -77,7 +65,7 @@ public class OrganisationUnit extends BaseNameableObject
     public static final String RESULTTYPE_SYMBOL = "Symbol";
 
     private static final List<String> FEATURETYPES = Arrays.asList( FEATURETYPE_NONE, FEATURETYPE_MULTIPOLYGON, FEATURETYPE_POLYGON, FEATURETYPE_POINT );
-    
+
     private static final Comparator<IdentifiableObject> COMPARATOR = new IdentifiableObjectNameComparator();
 
     private static final Pattern JSON_COORDINATE_PATTERN = Pattern.compile( "(\\[{3}.*?\\]{3})" );
@@ -283,7 +271,7 @@ public class OrganisationUnit extends BaseNameableObject
     {
         return coordinates != null && coordinates.trim().length() > 0;
     }
-    
+
     public boolean hasFeatureType()
     {
         return featureType != null && FEATURETYPES.contains( featureType );
@@ -546,10 +534,9 @@ public class OrganisationUnit extends BaseNameableObject
         this.children = children;
     }
 
-    @XmlElement
-    @XmlJavaTypeAdapter( OrganisationUnitXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
     public OrganisationUnit getParent()
     {
         return parent;
@@ -570,8 +557,8 @@ public class OrganisationUnit extends BaseNameableObject
         // throw new UnsupportedOperationException( "Cannot set alternativeName on OrganisationUnit: " + alternativeName );
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public Date getOpeningDate()
     {
         return openingDate;
@@ -582,8 +569,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.openingDate = openingDate;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public Date getClosedDate()
     {
         return closedDate;
@@ -594,8 +581,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.closedDate = closedDate;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isActive()
     {
         return active;
@@ -606,8 +593,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.active = active;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getComment()
     {
         return comment;
@@ -618,8 +605,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.comment = comment;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getGeoCode()
     {
         return geoCode;
@@ -630,8 +617,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.geoCode = geoCode;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getFeatureType()
     {
         return featureType;
@@ -642,8 +629,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.featureType = featureType;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getCoordinates()
     {
         return coordinates;
@@ -654,8 +641,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.coordinates = coordinates;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getUrl()
     {
         return url;
@@ -666,11 +653,11 @@ public class OrganisationUnit extends BaseNameableObject
         this.url = url;
     }
 
-    @XmlElementWrapper( name = "organisationUnitGroups" )
-    @XmlElement( name = "organisationUnitGroup" )
-    @XmlJavaTypeAdapter( OrganisationUnitGroupXmlAdapter.class )
     @JsonProperty( value = "organisationUnitGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "organisationUnitGroups" )
+    @JacksonXmlProperty( localName = "organisationUnitGroup" )
     public Set<OrganisationUnitGroup> getGroups()
     {
         return groups;
@@ -681,11 +668,11 @@ public class OrganisationUnit extends BaseNameableObject
         this.groups = groups;
     }
 
-    @XmlElementWrapper( name = "dataSets" )
-    @XmlElement( name = "dataSet" )
-    @XmlJavaTypeAdapter( DataSetXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "dataSets" )
+    @JacksonXmlProperty( localName = "dataSet" )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -707,8 +694,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.users = users;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getContactPerson()
     {
         return contactPerson;
@@ -719,8 +706,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.contactPerson = contactPerson;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getAddress()
     {
         return address;
@@ -731,8 +718,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.address = address;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getEmail()
     {
         return email;
@@ -743,8 +730,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.email = email;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getPhoneNumber()
     {
         return phoneNumber;
@@ -755,8 +742,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.phoneNumber = phoneNumber;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isHasPatients()
     {
         return hasPatients;
@@ -767,8 +754,8 @@ public class OrganisationUnit extends BaseNameableObject
         this.hasPatients = hasPatients;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getType()
     {
         return type;
@@ -779,9 +766,10 @@ public class OrganisationUnit extends BaseNameableObject
         this.type = type;
     }
 
-    @XmlElementWrapper( name = "attributes" )
-    @XmlElement( name = "attribute" )
     @JsonProperty( value = "attributes" )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "attributes" )
+    @JacksonXmlProperty( localName = "attribute" )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

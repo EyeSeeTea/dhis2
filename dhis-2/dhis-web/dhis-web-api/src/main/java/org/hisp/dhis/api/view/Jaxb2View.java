@@ -27,19 +27,18 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.OutputStream;
-import java.util.Map;
+import org.hisp.dhis.common.view.IdentifiableObjectView;
+import org.springframework.web.servlet.view.AbstractView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.Marshaller;
-
-import org.springframework.web.servlet.view.AbstractView;
+import java.util.Map;
 
 /**
  * @author mortenoh
  */
-public class Jaxb2View extends AbstractView
+public class Jaxb2View
+    extends AbstractView
 {
     public static final String DEFAULT_CONTENT_TYPE = "application/xml";
 
@@ -61,7 +60,7 @@ public class Jaxb2View extends AbstractView
             // TODO throw exception
         }
 
-        JacksonUtils.toXml( response.getOutputStream(), domainModel );
+        JacksonUtils.toXmlWithView( response.getOutputStream(), domainModel, IdentifiableObjectView.class );
 
 /*        OutputStream outputStream = response.getOutputStream();
         Marshaller marshaller = Jaxb2Utils.createMarshaller( domainModel );

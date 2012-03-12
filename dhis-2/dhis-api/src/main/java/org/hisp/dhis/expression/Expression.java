@@ -27,17 +27,18 @@ package org.hisp.dhis.expression;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.CategoryOptionComboXmlAdapter;
-import org.hisp.dhis.common.adapter.DataElementXmlAdapter;
+import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -58,8 +59,7 @@ import java.util.Set;
  * @author Margrethe Store
  * @version $Id: Expression.java 5011 2008-04-24 20:41:28Z larshelg $
  */
-@XmlRootElement( name = "expression", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "expression", namespace = Dxf2Namespace.NAMESPACE )
 public class Expression
     implements Serializable
 {
@@ -205,8 +205,8 @@ public class Expression
         this.id = id;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getExpression()
     {
         return expression;
@@ -217,11 +217,11 @@ public class Expression
         this.expression = expression;
     }
 
-    @XmlElementWrapper( name = "dataElements" )
-    @XmlElement( name = "dataElement" )
-    @XmlJavaTypeAdapter( DataElementXmlAdapter.class )
     @JsonProperty( value = "dataElements" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "dataElements" )
+    @JacksonXmlProperty( localName = "dataElement" )
     public Set<DataElement> getDataElementsInExpression()
     {
         return dataElementsInExpression;
@@ -232,11 +232,11 @@ public class Expression
         this.dataElementsInExpression = dataElementsInExpression;
     }
 
-    @XmlElementWrapper( name = "categoryOptionCombos" )
-    @XmlElement( name = "categoryOptionCombo" )
-    @XmlJavaTypeAdapter( CategoryOptionComboXmlAdapter.class )
     @JsonProperty( value = "categoryOptionCombos" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "categoryOptionCombos" )
+    @JacksonXmlProperty( localName = "categoryOptionCombo" )
     public Set<DataElementCategoryOptionCombo> getOptionCombosInExpression()
     {
         return optionCombosInExpression;
@@ -247,8 +247,8 @@ public class Expression
         this.optionCombosInExpression = optionCombosInExpression;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getDescription()
     {
         return description;

@@ -1,3 +1,5 @@
+package org.hisp.dhis.option;
+
 /*
  * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
@@ -25,8 +27,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.chart;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
@@ -41,21 +41,21 @@ import java.util.List;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @JacksonXmlRootElement( localName = "dxf2", namespace = Dxf2Namespace.NAMESPACE )
-public class Charts
+public class OptionSets
     extends BaseCollection
 {
-    private List<Chart> charts = new ArrayList<Chart>();
+    private List<OptionSet> optionSets = new ArrayList<OptionSet>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "charts" )
-    @JacksonXmlProperty( localName = "chart" )
-    public List<Chart> getCharts()
+    @JacksonXmlElementWrapper( localName = "optionSets" )
+    @JacksonXmlProperty( localName = "optionSet" )
+    public List<OptionSet> getOptionSets()
     {
-        return charts;
+        return optionSets;
     }
 
-    public void setCharts( List<Chart> charts )
+    public void setOptionSets( List<OptionSet> optionSets )
     {
-        this.charts = charts;
+        this.optionSets = optionSets;
     }
 }

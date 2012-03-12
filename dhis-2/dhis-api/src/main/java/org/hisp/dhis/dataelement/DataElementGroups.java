@@ -27,8 +27,10 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.*;
 import org.hisp.dhis.common.adapter.DataElementGroupXmlAdapter;
 
@@ -43,16 +45,14 @@ import java.util.List;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@XmlRootElement( name = "dataElementGroups", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "dxf2", namespace = Dxf2Namespace.NAMESPACE )
 public class DataElementGroups extends BaseCollection
 {
     private List<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>();
 
-    @XmlElement( name = "dataElementGroup" )
-    @XmlJavaTypeAdapter( DataElementGroupXmlAdapter.class )
-    @JsonProperty( value = "dataElementGroups" )
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "dataElementGroups" )
+    @JacksonXmlProperty( localName = "dataElementGroup" )
     public List<DataElementGroup> getDataElementGroups()
     {
         return dataElementGroups;

@@ -27,23 +27,27 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import javax.xml.bind.annotation.XmlAttribute;
-
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.IdentifiableObjectView;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class BaseLinkableObject implements LinkableObject
+public class BaseLinkableObject
+    implements LinkableObject
 {
     /**
-     * As part of the marshalling process, this field can be set to indicate a link to this
+     * As part of the serializing process, this field can be set to indicate a link to this
      * identifiable object (will be used on the web layer for navigating the REST API)
      */
     private transient String link;
 
-    @XmlAttribute
     @JsonProperty
+    @JsonView( {IdentifiableObjectView.class, DetailedView.class} )
+    @JacksonXmlProperty( isAttribute = true )
     public String getLink()
     {
         return link;

@@ -27,27 +27,16 @@ package org.hisp.dhis.chart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.NameableObject;
-import org.hisp.dhis.common.adapter.DataElementXmlAdapter;
-import org.hisp.dhis.common.adapter.DataSetXmlAdapter;
-import org.hisp.dhis.common.adapter.IndicatorXmlAdapter;
-import org.hisp.dhis.common.adapter.OrganisationUnitXmlAdapter;
+import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -58,11 +47,14 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.user.User;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author Lars Helge Overland
  */
-@XmlRootElement( name = "chart", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "chart", namespace = Dxf2Namespace.NAMESPACE )
 public class Chart
     extends BaseIdentifiableObject
 {
@@ -128,9 +120,9 @@ public class Chart
     private RelativePeriods relatives;
 
     private boolean userOrganisationUnit;
-    
+
     private User user;
-    
+
     private OrganisationUnitGroupSet organisationUnitGroupSet;
 
     // -------------------------------------------------------------------------
@@ -164,16 +156,16 @@ public class Chart
     {
         return dimensionToList( series );
     }
-    
+
     public List<NameableObject> category()
     {
         return dimensionToList( category );
     }
-    
+
     public NameableObject filter()
     {
         List<NameableObject> list = dimensionToList( filter );
-        
+
         return list != null && !list.isEmpty() ? list.iterator().next() : null;
     }
 
@@ -183,10 +175,10 @@ public class Chart
         {
             return format.formatPeriod( getRelativePeriods().get( 0 ) );
         }
-        
+
         return filter().getName();
     }
-    
+
     public List<OrganisationUnit> getAllOrganisationUnits()
     {
         if ( organisationUnit != null )
@@ -198,11 +190,11 @@ public class Chart
             return organisationUnits;
         }
     }
-    
+
     private List<NameableObject> dimensionToList( String dimension )
     {
         List<NameableObject> list = new ArrayList<NameableObject>();
-        
+
         if ( DIMENSION_DATA.equals( dimension ) )
         {
             list.addAll( dataElements );
@@ -211,17 +203,17 @@ public class Chart
         else if ( DIMENSION_PERIOD.equals( dimension ) )
         {
             namePeriods( getRelativePeriods(), format );
-            
+
             list.addAll( relativePeriods );
         }
         else if ( DIMENSION_ORGANISATIONUNIT.equals( dimension ) )
         {
             list.addAll( getAllOrganisationUnits() );
         }
-        
+
         return list;
     }
-    
+
     private void namePeriods( List<Period> periods, I18nFormat format )
     {
         for ( Period period : periods )
@@ -230,7 +222,7 @@ public class Chart
             period.setShortName( format.formatPeriod( period ) );
         }
     }
-    
+
     // -------------------------------------------------------------------------
     // hashCode, equals, toString
     // -------------------------------------------------------------------------
@@ -276,10 +268,10 @@ public class Chart
 
     /**
      * Sets all dimensions for this chart.
-     * 
-     * @param series the series dimension.
+     *
+     * @param series   the series dimension.
      * @param category the category dimension.
-     * @param filter the filter dimension.
+     * @param filter   the filter dimension.
      */
     public void setDimensions( String series, String category, String filter )
     {
@@ -287,17 +279,17 @@ public class Chart
         this.category = category;
         this.filter = filter;
     }
-    
+
     public boolean hasIndicators()
     {
         return indicators != null && indicators.size() > 0;
     }
-    
+
     public boolean hasDataElements()
     {
         return dataElements != null && dataElements.size() > 0;
     }
-    
+
     public boolean isType( String type )
     {
         return this.type != null && this.type.equals( type );
@@ -327,8 +319,8 @@ public class Chart
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getDomainAxisLabel()
     {
         return domainAxisLabel;
@@ -339,8 +331,8 @@ public class Chart
         this.domainAxisLabel = domainAxisLabel;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getRangeAxisLabel()
     {
         return rangeAxisLabel;
@@ -351,8 +343,8 @@ public class Chart
         this.rangeAxisLabel = rangeAxisLabel;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getType()
     {
         return type;
@@ -363,8 +355,8 @@ public class Chart
         this.type = type;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getSeries()
     {
         return series;
@@ -375,8 +367,8 @@ public class Chart
         this.series = series;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getCategory()
     {
         return category;
@@ -387,8 +379,8 @@ public class Chart
         this.category = category;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getFilter()
     {
         return filter;
@@ -399,8 +391,8 @@ public class Chart
         this.filter = filter;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isHideLegend()
     {
         return hideLegend;
@@ -411,8 +403,8 @@ public class Chart
         this.hideLegend = hideLegend;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isRegression()
     {
         return regression;
@@ -423,8 +415,8 @@ public class Chart
         this.regression = regression;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public Double getTargetLineValue()
     {
         return targetLineValue;
@@ -435,8 +427,8 @@ public class Chart
         this.targetLineValue = targetLineValue;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getTargetLineLabel()
     {
         return targetLineLabel;
@@ -447,8 +439,8 @@ public class Chart
         this.targetLineLabel = targetLineLabel;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public Double getBaseLineValue()
     {
         return baseLineValue;
@@ -459,8 +451,8 @@ public class Chart
         this.baseLineValue = baseLineValue;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getBaseLineLabel()
     {
         return baseLineLabel;
@@ -471,8 +463,8 @@ public class Chart
         this.baseLineLabel = baseLineLabel;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isHideSubtitle()
     {
         return hideSubtitle;
@@ -483,11 +475,11 @@ public class Chart
         this.hideSubtitle = hideSubtitle;
     }
 
-    @XmlElementWrapper( name = "indicators" )
-    @XmlElement( name = "indicator" )
-    @XmlJavaTypeAdapter( IndicatorXmlAdapter.class )
     @JsonProperty
-    @JsonSerialize( contentAs = BaseNameableObject.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "indicators" )
+    @JacksonXmlProperty( localName = "indicator" )
     public List<Indicator> getIndicators()
     {
         return indicators;
@@ -498,11 +490,11 @@ public class Chart
         this.indicators = indicators;
     }
 
-    @XmlElementWrapper( name = "dataElements" )
-    @XmlElement( name = "dataElement" )
-    @XmlJavaTypeAdapter( DataElementXmlAdapter.class )
     @JsonProperty
-    @JsonSerialize( contentAs = BaseNameableObject.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "dataElements" )
+    @JacksonXmlProperty( localName = "dataElement" )
     public List<DataElement> getDataElements()
     {
         return dataElements;
@@ -513,11 +505,11 @@ public class Chart
         this.dataElements = dataElements;
     }
 
-    @XmlElementWrapper( name = "dataSets" )
-    @XmlElement( name = "dataSet" )
-    @XmlJavaTypeAdapter( DataSetXmlAdapter.class )
     @JsonProperty
-    @JsonSerialize( contentAs = BaseNameableObject.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "dataSets" )
+    @JacksonXmlProperty( localName = "dataSet" )
     public List<DataSet> getDataSets()
     {
         return dataSets;
@@ -528,11 +520,11 @@ public class Chart
         this.dataSets = dataSets;
     }
 
-    @XmlElementWrapper( name = "organisationUnits" )
-    @XmlElement( name = "organisationUnit" )
-    @XmlJavaTypeAdapter( OrganisationUnitXmlAdapter.class )
     @JsonProperty
-    @JsonSerialize( contentAs = BaseNameableObject.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "organisationUnits" )
+    @JacksonXmlProperty( localName = "organisationUnit" )
     public List<OrganisationUnit> getOrganisationUnits()
     {
         return organisationUnits;
@@ -553,8 +545,8 @@ public class Chart
         this.format = format;
     }
 
-    @XmlElement( name = "relativePeriods" )
     @JsonProperty( value = "relativePeriods" )
+    @JsonView( {DetailedView.class} )
     public RelativePeriods getRelatives()
     {
         return relatives;
@@ -565,8 +557,8 @@ public class Chart
         this.relatives = relatives;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isUserOrganisationUnit()
     {
         return userOrganisationUnit;
@@ -597,8 +589,8 @@ public class Chart
         this.organisationUnit = organisationUnit;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public User getUser()
     {
         return user;
@@ -609,8 +601,8 @@ public class Chart
         this.user = user;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public OrganisationUnitGroupSet getOrganisationUnitGroupSet()
     {
         return organisationUnitGroupSet;
@@ -620,6 +612,4 @@ public class Chart
     {
         this.organisationUnitGroupSet = organisationUnitGroupSet;
     }
-    
-    
 }

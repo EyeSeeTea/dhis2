@@ -28,6 +28,7 @@ package org.hisp.dhis.api.view;
  */
 
 import org.codehaus.jackson.map.util.JSONPObject;
+import org.hisp.dhis.common.view.IdentifiableObjectView;
 import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +38,8 @@ import java.util.Map;
 /**
  * @author mortenoh
  */
-public class ExtendedMappingJacksonView extends MappingJacksonJsonView
+public class ExtendedMappingJacksonView
+    extends MappingJacksonJsonView
 {
     private boolean withPadding = false;
 
@@ -89,6 +91,6 @@ public class ExtendedMappingJacksonView extends MappingJacksonJsonView
         }
 
         // JacksonUtils.writeObject( value, response.getOutputStream() );
-        JacksonUtils.toJson( response.getOutputStream(), value );
+        JacksonUtils.toJsonWithView( response.getOutputStream(), value, IdentifiableObjectView.class );
     }
 }

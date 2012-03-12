@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
@@ -89,16 +90,27 @@ public class JacksonUtils
     static
     {
         jsonMapper.setSerializationInclusion( JsonInclude.Include.NON_NULL );
-        jsonMapper.configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true );
-        jsonMapper.configure( SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, true );
+        jsonMapper.configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false );
+        jsonMapper.configure( SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false );
         jsonMapper.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, false );
+        jsonMapper.disable( MapperFeature.AUTO_DETECT_FIELDS );
+        jsonMapper.disable( MapperFeature.AUTO_DETECT_CREATORS );
+        jsonMapper.disable( MapperFeature.AUTO_DETECT_GETTERS );
+        jsonMapper.disable( MapperFeature.AUTO_DETECT_SETTERS );
+        jsonMapper.disable( MapperFeature.AUTO_DETECT_IS_GETTERS );
 
         jsonMapper.getJsonFactory().enable( JsonGenerator.Feature.QUOTE_FIELD_NAMES );
 
+        xmlMapper.setSerializationInclusion( JsonInclude.Include.NON_NULL );
         xmlMapper.configure( ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true );
-        xmlMapper.configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true );
-        xmlMapper.configure( SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, true );
+        xmlMapper.configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false );
+        xmlMapper.configure( SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false );
         xmlMapper.configure( SerializationFeature.FAIL_ON_EMPTY_BEANS, false );
+        xmlMapper.disable( MapperFeature.AUTO_DETECT_FIELDS );
+        xmlMapper.disable( MapperFeature.AUTO_DETECT_CREATORS );
+        xmlMapper.disable( MapperFeature.AUTO_DETECT_GETTERS );
+        xmlMapper.disable( MapperFeature.AUTO_DETECT_SETTERS );
+        xmlMapper.disable( MapperFeature.AUTO_DETECT_IS_GETTERS );
     }
 
     //---------------------------------------------------------------------------------------------------

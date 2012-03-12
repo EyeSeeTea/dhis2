@@ -27,9 +27,12 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.view.DetailedView;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -39,8 +42,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 /**
  * @author Lars Helge Overland
  */
-@XmlRootElement( name = "organisationUnitLevel", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "organisationUnitLevel", namespace = Dxf2Namespace.NAMESPACE )
 public class OrganisationUnitLevel extends BaseIdentifiableObject
 {
     /**
@@ -114,8 +116,8 @@ public class OrganisationUnitLevel extends BaseIdentifiableObject
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public int getLevel()
     {
         return level;

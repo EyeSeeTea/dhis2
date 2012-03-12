@@ -27,23 +27,23 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.CategoryComboXmlAdapter;
-import org.hisp.dhis.common.adapter.DataElementGroupXmlAdapter;
-import org.hisp.dhis.common.adapter.DataSetXmlAdapter;
+import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
 
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -67,9 +67,9 @@ import static org.hisp.dhis.dataset.DataSet.NO_EXPIRY;
  * @author Kristian Nordal
  * @version $Id: DataElement.java 5540 2008-08-19 10:47:07Z larshelg $
  */
-@XmlRootElement( name = "dataElement", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
-public class DataElement extends BaseNameableObject
+@JacksonXmlRootElement( localName = "dataElement", namespace = Dxf2Namespace.NAMESPACE )
+public class DataElement
+    extends BaseNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -173,7 +173,7 @@ public class DataElement extends BaseNameableObject
      * Set of the dynamic attributes values that belong to this data element.
      */
     private Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
-    
+
     /**
      * The option set for this data element.
      */
@@ -364,7 +364,7 @@ public class DataElement extends BaseNameableObject
     {
         return formName != null && !formName.isEmpty() ? formName : getDisplayName();
     }
-    
+
     /**
      * Returns the minimum number of expiry days from the data sets of this data
      * element.
@@ -372,7 +372,7 @@ public class DataElement extends BaseNameableObject
     public int getExpiryDays()
     {
         int expiryDays = Integer.MAX_VALUE;
-        
+
         for ( DataSet dataSet : dataSets )
         {
             if ( dataSet.getExpiryDays() != NO_EXPIRY && dataSet.getExpiryDays() < expiryDays )
@@ -380,7 +380,7 @@ public class DataElement extends BaseNameableObject
                 expiryDays = dataSet.getExpiryDays();
             }
         }
-        
+
         return expiryDays == Integer.MAX_VALUE ? NO_EXPIRY : expiryDays;
     }
 
@@ -401,8 +401,8 @@ public class DataElement extends BaseNameableObject
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getFormName()
     {
         return formName;
@@ -413,8 +413,8 @@ public class DataElement extends BaseNameableObject
         this.formName = formName;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isActive()
     {
         return active;
@@ -425,8 +425,8 @@ public class DataElement extends BaseNameableObject
         this.active = active;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getDomainType()
     {
         return domainType;
@@ -437,8 +437,8 @@ public class DataElement extends BaseNameableObject
         this.domainType = domainType;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getType()
     {
         return type;
@@ -449,8 +449,8 @@ public class DataElement extends BaseNameableObject
         this.type = type;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getAggregationOperator()
     {
         return aggregationOperator;
@@ -461,10 +461,9 @@ public class DataElement extends BaseNameableObject
         this.aggregationOperator = aggregationOperator;
     }
 
-    @XmlElement
-    @XmlJavaTypeAdapter( CategoryComboXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
@@ -475,8 +474,8 @@ public class DataElement extends BaseNameableObject
         this.categoryCombo = categoryCombo;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -487,8 +486,8 @@ public class DataElement extends BaseNameableObject
         this.sortOrder = sortOrder;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getUrl()
     {
         return url;
@@ -499,11 +498,11 @@ public class DataElement extends BaseNameableObject
         this.url = url;
     }
 
-    @XmlElementWrapper( name = "dataElementGroups" )
-    @XmlElement( name = "dataElementGroup" )
-    @XmlJavaTypeAdapter( DataElementGroupXmlAdapter.class )
     @JsonProperty( value = "dataElementGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "dataElementGroups" )
+    @JacksonXmlProperty( localName = "dataElementGroup" )
     public Set<DataElementGroup> getGroups()
     {
         return groups;
@@ -514,11 +513,11 @@ public class DataElement extends BaseNameableObject
         this.groups = groups;
     }
 
-    @XmlElementWrapper( name = "dataSets" )
-    @XmlElement( name = "dataSet" )
-    @XmlJavaTypeAdapter( DataSetXmlAdapter.class )
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "dataSets" )
+    @JacksonXmlProperty( localName = "dataSet" )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -529,8 +528,8 @@ public class DataElement extends BaseNameableObject
         this.dataSets = dataSets;
     }
 
-    @XmlElementWrapper( name = "aggregationLevels" )
-    @XmlElement( name = "aggregationLevel" )
+    @JsonProperty
+    @JsonView( {DetailedView.class} )
     public List<Integer> getAggregationLevels()
     {
         return aggregationLevels;
@@ -541,8 +540,8 @@ public class DataElement extends BaseNameableObject
         this.aggregationLevels = aggregationLevels;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public boolean isZeroIsSignificant()
     {
         return zeroIsSignificant;
@@ -553,8 +552,8 @@ public class DataElement extends BaseNameableObject
         this.zeroIsSignificant = zeroIsSignificant;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class} )
     public String getNumberType()
     {
         return numberType;
@@ -565,9 +564,10 @@ public class DataElement extends BaseNameableObject
         this.numberType = numberType;
     }
 
-    @XmlElementWrapper( name = "attributes" )
-    @XmlElement( name = "attribute" )
     @JsonProperty( value = "attributes" )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "attributes" )
+    @JacksonXmlProperty( localName = "attribute" )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;
@@ -578,6 +578,9 @@ public class DataElement extends BaseNameableObject
         this.attributeValues = attributeValues;
     }
 
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
     public OptionSet getOptionSet()
     {
         return optionSet;
