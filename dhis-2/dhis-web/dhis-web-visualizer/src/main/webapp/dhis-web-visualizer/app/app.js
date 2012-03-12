@@ -183,7 +183,7 @@ DV.conf = {
     layout: {
         west_width: 424,
         west_fieldset_width: 402,
-        west_width_subtractor: 30,
+        west_width_subtractor: 20,
         west_fill_height: 440,
         center_tbar_height: 31,
         east_tbar_height: 31,
@@ -2468,7 +2468,7 @@ Ext.onReady( function() {
 								activeOnTop: true,
 								cls: 'dv-accordion',
 								bodyStyle: 'border:0 none',
-								height: 420,
+								height: 410,
 								items: [
 									{
 										title: DV.i18n.indicators,
