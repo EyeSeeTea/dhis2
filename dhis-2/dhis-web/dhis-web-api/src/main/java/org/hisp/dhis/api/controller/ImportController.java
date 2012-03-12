@@ -28,7 +28,6 @@ package org.hisp.dhis.api.controller;
  */
 
 import org.hisp.dhis.api.view.JacksonUtils;
-import org.hisp.dhis.api.view.Jaxb2Utils;
 import org.hisp.dhis.api.webdomain.DXF2;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -55,7 +54,8 @@ public class ImportController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
     public void importXml( HttpServletResponse response, HttpServletRequest request ) throws JAXBException, IOException
     {
-        DXF2 dxf2 = Jaxb2Utils.unmarshal( DXF2.class, request.getInputStream() );
+        DXF2 dxf2 = JacksonUtils.fromXml( request.getInputStream(), DXF2.class );
+
         print( dxf2 );
     }
 
@@ -63,7 +63,8 @@ public class ImportController
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
     public void importJson( HttpServletResponse response, HttpServletRequest request ) throws IOException
     {
-        DXF2 dxf2 = JacksonUtils.readValueAs( DXF2.class, request.getInputStream() );
+        DXF2 dxf2 = JacksonUtils.fromJson( request.getInputStream(), DXF2.class );
+
         print( dxf2 );
     }
 
@@ -76,7 +77,8 @@ public class ImportController
 
         System.err.println( "(xml) Reading from file : " + entry.getName() );
 
-        DXF2 dxf2 = Jaxb2Utils.unmarshal( DXF2.class, zip );
+        DXF2 dxf2 = JacksonUtils.fromXml( zip, DXF2.class );
+
         print( dxf2 );
     }
 
@@ -88,7 +90,7 @@ public class ImportController
         ZipEntry entry = zip.getNextEntry();
 
         System.err.println( "(json) Reading from file : " + entry.getName() );
-        DXF2 dxf2 = JacksonUtils.readValueAs( DXF2.class, zip );
+        DXF2 dxf2 = JacksonUtils.fromJson( zip, DXF2.class );
 
         print( dxf2 );
     }

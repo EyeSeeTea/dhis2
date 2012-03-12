@@ -29,8 +29,8 @@ package org.hisp.dhis.api.controller;
 
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.view.JacksonUtils;
-import org.hisp.dhis.api.view.Jaxb2Utils;
 import org.hisp.dhis.api.webdomain.DXF2;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -109,7 +109,7 @@ public class ExportController
         ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
         zip.putNextEntry( new ZipEntry( "export.xml" ) );
 
-        Jaxb2Utils.marshal( dxf2, zip );
+        JacksonUtils.toXmlWithView( zip, dxf2, ExportView.class );
 
         zip.closeEntry();
         zip.close();
@@ -128,7 +128,7 @@ public class ExportController
         ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
         zip.putNextEntry( new ZipEntry( "export.json" ) );
 
-        JacksonUtils.writeObject( dxf2, zip );
+        JacksonUtils.toJsonWithView( zip, dxf2, ExportView.class );
 
         zip.closeEntry();
         zip.close();
