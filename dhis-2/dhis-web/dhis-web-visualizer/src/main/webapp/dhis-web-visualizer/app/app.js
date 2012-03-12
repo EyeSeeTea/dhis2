@@ -183,7 +183,7 @@ DV.conf = {
     layout: {
         west_width: 424,
         west_fieldset_width: 402,
-        west_width_subtractor: 16,
+        west_width_subtractor: 30,
         west_fill_height: 440,
         center_tbar_height: 31,
         east_tbar_height: 31,
@@ -2616,7 +2616,15 @@ Ext.onReady( function() {
 													}
 												]
 											}
-										]
+										],
+										listeners: {
+											afterrender: function() {
+												DV.cmp.dimension.indicator.panel = this;
+											},
+											expand: function() {
+												DV.util.multiselect.setHeight([DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected], DV.conf.layout.multiselect_fill_default);
+											}
+										}
 									},
 									{
 										title: DV.i18n.data_elements,
@@ -2767,7 +2775,7 @@ Ext.onReady( function() {
 										]
 									},
 									{
-										title: DV.i18n.datasets,
+										title: DV.i18n.reporting_rates,
 										hideCollapseTool: true,
 										style: 'margin-top:2px',
 										items: [
@@ -3138,10 +3146,6 @@ Ext.onReady( function() {
 												bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
 												items: [
 													{
-														bodyStyle: 'border-style:none; background-color:transparent; padding:0 0 10px 3px; font-size:11px; font-weight:bold',
-														html: DV.i18n.chart_options
-													},
-													{
 														xtype: 'panel',
 														layout: 'column',
 														bodyStyle: 'border-style:none; background-color:transparent; padding-bottom:15px',
@@ -3210,7 +3214,7 @@ Ext.onReady( function() {
 																maxLength: 100,
 																enforceMaxLength: true,
 																labelWidth: DV.conf.layout.form_label_width,
-																width: 199,
+																width: 187,
 																listeners: {
 																	added: function() {
 																		DV.cmp.favorite.domainaxislabel = this;
@@ -3226,7 +3230,7 @@ Ext.onReady( function() {
 																maxLength: 100,
 																enforceMaxLength: true,
 																labelWidth: DV.conf.layout.form_label_width,
-																width: 199,
+																width: 187,
 																listeners: {
 																	added: function() {
 																		DV.cmp.favorite.rangeaxislabel = this;
@@ -3250,7 +3254,7 @@ Ext.onReady( function() {
 																labelSeparator: '',
 																maxLength: 100,
 																enforceMaxLength: true,
-																width: 199,
+																width: 187,
 																spinUpEnabled: true,
 																spinDownEnabled: true,
 																listeners: {
@@ -3270,7 +3274,7 @@ Ext.onReady( function() {
 																labelSeparator: '',
 																maxLength: 100,
 																enforceMaxLength: true,
-																width: 199,
+																width: 187,
 																disabled: true,
 																xable: function() {
 																	if (DV.cmp.favorite.targetlinevalue.getValue()) {
@@ -3303,7 +3307,7 @@ Ext.onReady( function() {
 																labelSeparator: '',
 																maxLength: 100,
 																enforceMaxLength: true,
-																width: 199,
+																width: 187,
 																spinUpEnabled: true,
 																spinDownEnabled: true,
 																listeners: {
@@ -3323,7 +3327,7 @@ Ext.onReady( function() {
 																labelSeparator: '',
 																maxLength: 100,
 																enforceMaxLength: true,
-																width: 199,
+																width: 187,
 																disabled: true,
 																xable: function() {
 																	if (DV.cmp.favorite.baselinevalue.getValue()) {
