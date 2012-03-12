@@ -442,8 +442,8 @@ body {
     border-color: transparent;
 }
 .dv-toolbar-multiselect-left .x-boundlist-selected {
-    background-color: #d3d3d3;
-    border-color: #d3d3d3;
+    background-color: #e5e5e5;
+    border-color: #e5e5e5;
 }
 
 .dv-toolbar-multiselect-right .x-boundlist-item-over {
@@ -451,8 +451,8 @@ body {
     border-color: transparent;
 }
 .dv-toolbar-multiselect-right .x-boundlist-selected {
-    background-color: #d3d3d3;
-    border-color: #d3d3d3;
+    background-color: #e5e5e5;
+    border-color: #e5e5e5;
 }
 
 /* Menu */
@@ -535,7 +535,7 @@ body {
 .dv-label-period-heading {
     font-size: 11px;
     font-weight: bold;
-    color: #666;
+    color: #444;
     line-height: 20px;
 }
 
@@ -642,4 +642,44 @@ body {
 	vertical-align: top;
 	font-size: 10px;
 	line-height: 14px;
+}
+
+/* DV accordion */
+.dv-accordion .x-accordion-hd {
+	border-color: #e5e5e5 !important;
+	background: #e5e5e5 !important;
+	padding: 5px 5px 5px 8px;
+	cursor: pointer;
+    -moz-border-radius: 1px 1px 1px 1px;
+    -webkit-border-radius: 1px 1px 1px 1px;
+    -o-border-radius: 1px 1px 1px 1px;
+    -ms-border-radius: 1px 1px 1px 1px;
+    -khtml-border-radius: 1px 1px 1px 1px;
+    border-radius: 1px 1px 1px 1px;
+}
+
+.dv-accordion .dv-accordion-options .x-accordion-hd {
+	border-color: #cacaca !important;
+	background: #cacaca !important;
+	padding: 5px 5px 5px 8px;
+	cursor: pointer;
+}
+
+.dv-accordion .dv-accordion-options .x-accordion-hd .x-panel-header-text {
+	color: #222;
+}
+
+.dv-accordion .x-accordion-hd .x-panel-header-text {
+	font-weight: bold;
+}
+
+.dv-accordion .x-accordion-body {
+	padding: 8px;
+}
+
+.dv-accordion .x-accordion-hd-sibling-expanded {
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	-o-box-shadow: none;
+	box-shadow: none;
 }
