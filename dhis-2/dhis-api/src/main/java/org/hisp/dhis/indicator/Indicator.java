@@ -37,14 +37,9 @@ import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.DataSetXmlAdapter;
-import org.hisp.dhis.common.adapter.IndicatorGroupXmlAdapter;
-import org.hisp.dhis.common.adapter.IndicatorTypeXmlAdapter;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.dataset.DataSet;
 
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,7 +47,8 @@ import java.util.Set;
  * @author Lars Helge Overland
  */
 @JacksonXmlRootElement( localName = "indicator", namespace = Dxf2Namespace.NAMESPACE )
-public class Indicator extends BaseNameableObject
+public class Indicator
+    extends BaseNameableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

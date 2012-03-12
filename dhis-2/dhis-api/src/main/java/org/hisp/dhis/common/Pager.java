@@ -27,7 +27,8 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>

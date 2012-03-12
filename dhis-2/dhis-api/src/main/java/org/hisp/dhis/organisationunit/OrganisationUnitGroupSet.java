@@ -27,21 +27,6 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -51,15 +36,17 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.adapter.OrganisationUnitGroupXmlAdapter;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.common.view.DetailedView;
+
+import java.util.*;
 
 /**
  * @author Kristian Nordal
  */
 @JacksonXmlRootElement( localName = "organisationUnitGroupSet", namespace = Dxf2Namespace.NAMESPACE )
-public class OrganisationUnitGroupSet extends BaseIdentifiableObject
+public class OrganisationUnitGroupSet
+    extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

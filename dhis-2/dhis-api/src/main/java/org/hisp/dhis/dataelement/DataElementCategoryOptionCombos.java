@@ -47,8 +47,8 @@ public class DataElementCategoryOptionCombos
     private List<DataElementCategoryOptionCombo> categoryOptionCombos = new ArrayList<DataElementCategoryOptionCombo>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "dataElements" )
-    @JacksonXmlProperty( localName = "dataElement" )
+    @JacksonXmlElementWrapper( localName = "categoryOptionCombos" )
+    @JacksonXmlProperty( localName = "categoryOptionCombo" )
     public List<DataElementCategoryOptionCombo> getCategoryOptionCombos()
     {
         return categoryOptionCombos;

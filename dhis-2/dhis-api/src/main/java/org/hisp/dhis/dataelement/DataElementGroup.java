@@ -35,12 +35,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.DataElementGroupSetXmlAdapter;
-import org.hisp.dhis.common.adapter.DataElementXmlAdapter;
 import org.hisp.dhis.common.view.DetailedView;
 
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,7 +45,8 @@ import java.util.Set;
  * @version $Id: DataElementGroup.java 5540 2008-08-19 10:47:07Z larshelg $
  */
 @JacksonXmlRootElement( localName = "dataElementGroup", namespace = Dxf2Namespace.NAMESPACE )
-public class DataElementGroup extends BaseIdentifiableObject
+public class DataElementGroup
+    extends BaseIdentifiableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

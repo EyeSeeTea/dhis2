@@ -35,11 +35,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.ValidationRuleXmlAdapter;
 import org.hisp.dhis.common.view.DetailedView;
 
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.HashSet;
 import java.util.Set;
 

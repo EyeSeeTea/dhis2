@@ -33,12 +33,8 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.ReportTableXmlAdapter;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.reporttable.ReportTable;
-
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * @author Lars Helge Overland

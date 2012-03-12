@@ -167,6 +167,7 @@ public class DashboardContent
 
     @JsonProperty( value = "internalId" )
     @JsonView( {IdentifiableObjectView.class} )
+    @JacksonXmlProperty( isAttribute = true )
     public int getId()
     {
         return id;

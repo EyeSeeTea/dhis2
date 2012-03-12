@@ -36,10 +36,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.CategoryOptionComboXmlAdapter;
 import org.hisp.dhis.common.view.DetailedView;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.*;
 
 /**
@@ -230,7 +228,6 @@ public class DataElementCategoryCombo
         this.categories = categories;
     }
 
-    @XmlJavaTypeAdapter( CategoryOptionComboXmlAdapter.class )
     @JsonProperty( value = "categoryOptionCombo" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JacksonXmlElementWrapper( localName = "optionCombos" )
