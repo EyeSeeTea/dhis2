@@ -27,6 +27,7 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.IdentifiableObjectView;
 import org.springframework.web.servlet.view.AbstractView;
 
@@ -61,9 +62,5 @@ public class Jaxb2View
         }
 
         JacksonUtils.toXmlWithView( response.getOutputStream(), domainModel, IdentifiableObjectView.class );
-
-/*        OutputStream outputStream = response.getOutputStream();
-        Marshaller marshaller = Jaxb2Utils.createMarshaller( domainModel );
-        marshaller.marshal( domainModel, outputStream ); */
     }
 }

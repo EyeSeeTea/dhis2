@@ -90,7 +90,6 @@ public class ExtendedMappingJacksonView
             value = new JSONPObject( callback, value );
         }
 
-        // JacksonUtils.writeObject( value, response.getOutputStream() );
         JacksonUtils.toJsonWithView( response.getOutputStream(), value, IdentifiableObjectView.class );
     }
 }

@@ -30,7 +30,7 @@ package org.hisp.dhis.api.controller;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.view.JacksonUtils;
 import org.hisp.dhis.api.webdomain.DXF2;
-import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.IdentifiableObjectView;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -109,10 +109,7 @@ public class ExportController
         ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
         zip.putNextEntry( new ZipEntry( "export.xml" ) );
 
-        JacksonUtils.toXmlWithView( zip, dxf2, ExportView.class );
-
-        zip.closeEntry();
-        zip.close();
+        JacksonUtils.toXmlWithView( zip, dxf2, IdentifiableObjectView.class );
     }
 
     @RequestMapping( value = ExportController.RESOURCE_PATH + ".zip", method = RequestMethod.GET, headers = {"Accept=application/json"} )
@@ -128,10 +125,7 @@ public class ExportController
         ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
         zip.putNextEntry( new ZipEntry( "export.json" ) );
 
-        JacksonUtils.toJsonWithView( zip, dxf2, ExportView.class );
-
-        zip.closeEntry();
-        zip.close();
+        JacksonUtils.toJsonWithView( zip, dxf2, IdentifiableObjectView.class );
     }
 
     //-------------------------------------------------------------------------------------------------------
