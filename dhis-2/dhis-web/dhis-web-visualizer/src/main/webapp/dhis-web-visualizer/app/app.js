@@ -183,7 +183,7 @@ DV.conf = {
     layout: {
         west_width: 424,
         west_fieldset_width: 402,
-        west_width_subtractor: 20,
+        west_width_subtractor: 22,
         west_fill_height: 440,
         center_tbar_height: 31,
         east_tbar_height: 31,
@@ -2468,7 +2468,7 @@ Ext.onReady( function() {
 								activeOnTop: true,
 								cls: 'dv-accordion',
 								bodyStyle: 'border:0 none',
-								height: 410,
+								height: 415,
 								items: [
 									{
 										title: DV.i18n.indicators,
@@ -2629,7 +2629,7 @@ Ext.onReady( function() {
 									{
 										title: DV.i18n.data_elements,
 										hideCollapseTool: true,
-										style: 'margin-top:2px',
+										style: 'margin-top:3px',
 										items: [
 											{
 												xtype: 'combobox',
@@ -2777,7 +2777,7 @@ Ext.onReady( function() {
 									{
 										title: DV.i18n.reporting_rates,
 										hideCollapseTool: true,
-										style: 'margin-top:2px',
+										style: 'margin-top:3px',
 										items: [
 											{
 												xtype: 'panel',
@@ -2881,7 +2881,7 @@ Ext.onReady( function() {
 									{
 										title: DV.i18n.periods,
 										hideCollapseTool: true,
-										style: 'margin-top:2px',
+										style: 'margin-top:3px',
 										items: [
 											{
 												xtype: 'panel',
@@ -3036,7 +3036,7 @@ Ext.onReady( function() {
 									{
 										title: DV.i18n.organisation_units,
 										hideCollapseTool: true,
-										style: 'margin-top:2px',
+										style: 'margin-top:3px',
 										items: [
 											{
 												xtype: 'combobox',
@@ -3139,7 +3139,7 @@ Ext.onReady( function() {
 										title: DV.i18n.chart_options,
 										hideCollapseTool: true,
 										cls: 'dv-accordion-options',
-										style: 'margin-top:2px',
+										style: 'margin-top:3px',
 										items: [
 											{
 												xtype: 'panel',
