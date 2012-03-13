@@ -1,7 +1,7 @@
-package org.hisp.dhis.sms;
+package org.hisp.dhis.importexport.dxf2.service;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2005, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,7 +11,7 @@ package org.hisp.dhis.sms;
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
+ * * Neither the name of the <ORGANIZATION> nor the names of its contributors may
  *   be used to endorse or promote products derived from this software without
  *   specific prior written permission.
  *
@@ -27,12 +27,11 @@ package org.hisp.dhis.sms;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.sms.config.SmsConfiguration;
+import org.amplecode.staxwax.reader.XMLReader;
+import org.hisp.dhis.common.ProcessState;
+import org.hisp.dhis.importexport.ImportParams;
 
-public interface SmsConfigurationManager
+public interface DataValueImportService
 {
-    SmsConfiguration getSmsConfiguration();
-
-    void updateSmsConfiguration( SmsConfiguration config );
-
+    void read( XMLReader reader, ImportParams params, ProcessState state );
 }
