@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.view;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,8 +27,7 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.IdentifiableObjectView;
+
 import org.springframework.web.servlet.view.AbstractView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,31 +35,32 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class Jaxb2View
+public class JacksonXmlView
     extends AbstractView
 {
-    public static final String DEFAULT_CONTENT_TYPE = "application/xml";
+    private static String CONTENT_TYPE_APPLICATION_XML = "application/xml";
 
-    public Jaxb2View()
+    public JacksonXmlView()
     {
-        setContentType( DEFAULT_CONTENT_TYPE );
+        setContentType( CONTENT_TYPE_APPLICATION_XML );
     }
 
     @Override
     protected void renderMergedOutputModel( Map<String, Object> model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
+        Object object = model.get( "model" );
+        Class<?> viewClass = JacksonUtils.getViewClass( model.get( "view" ) );
         response.setContentType( getContentType() );
-        model = ViewUtils.filterModel( model );
 
-        Object domainModel = model.get( "model" );
-
-        if ( domainModel == null )
+        if ( viewClass != null )
         {
-            // TODO throw exception
+            JacksonUtils.toXmlWithView( response.getOutputStream(), object, viewClass );
         }
-
-        JacksonUtils.toXmlWithView( response.getOutputStream(), domainModel, IdentifiableObjectView.class );
+        else
+        {
+            JacksonUtils.toXml( response.getOutputStream(), object );
+        }
     }
 }

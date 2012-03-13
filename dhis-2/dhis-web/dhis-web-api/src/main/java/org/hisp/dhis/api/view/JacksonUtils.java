@@ -7,10 +7,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.common.view.IdentifiableObjectView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -20,6 +25,8 @@ public class JacksonUtils
     private static ObjectMapper jsonMapper = new ObjectMapper();
 
     private static XmlMapper xmlMapper = new XmlMapper();
+
+    private static Map<String, Class<?>> viewClasses = new HashMap<String, Class<?>>();
 
     static
     {
@@ -45,6 +52,17 @@ public class JacksonUtils
         xmlMapper.disable( MapperFeature.AUTO_DETECT_GETTERS );
         xmlMapper.disable( MapperFeature.AUTO_DETECT_SETTERS );
         xmlMapper.disable( MapperFeature.AUTO_DETECT_IS_GETTERS );
+
+        // register view classes
+        viewClasses.put( "default", IdentifiableObjectView.class );
+        viewClasses.put( "basic", IdentifiableObjectView.class );
+        viewClasses.put( "export", ExportView.class );
+        viewClasses.put( "detailed", DetailedView.class );
+    }
+
+    public static Class<?> getViewClass( Object viewName )
+    {
+        return viewClasses.get( viewName );
     }
 
     //---------------------------------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.view;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,38 +27,46 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 import org.codehaus.jackson.map.util.JSONPObject;
-import org.hisp.dhis.common.view.IdentifiableObjectView;
-import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
+import org.springframework.web.servlet.view.AbstractView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ExtendedMappingJacksonView
-    extends MappingJacksonJsonView
+public class JacksonJsonView
+    extends AbstractView
 {
+    private static String CONTENT_TYPE_APPLICATION_JSON = "application/json";
+
+    private static String CONTENT_TYPE_APPLICATION_JAVASCRIPT = "application/javascript";
+
     private boolean withPadding = false;
 
     private String callbackParameter = "callback";
 
     private String paddingFunction = "callback";
 
-    public ExtendedMappingJacksonView()
+    public JacksonJsonView()
     {
-
+        setContentType( CONTENT_TYPE_APPLICATION_JSON );
     }
 
-    public ExtendedMappingJacksonView( boolean withPadding )
+    public JacksonJsonView( boolean withPadding )
     {
         this.withPadding = withPadding;
 
-        if ( withPadding )
+        if ( !withPadding )
         {
-            setContentType( "application/javascript" );
+            setContentType( CONTENT_TYPE_APPLICATION_JSON );
+        }
+        else
+        {
+            setContentType( CONTENT_TYPE_APPLICATION_JAVASCRIPT );
         }
     }
 
@@ -75,8 +83,9 @@ public class ExtendedMappingJacksonView
     @Override
     protected void renderMergedOutputModel( Map<String, Object> model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        model = ViewUtils.filterModel( model );
-        Object value = model.get( "model" );
+        Object object = model.get( "model" );
+        Class<?> viewClass = JacksonUtils.getViewClass( model.get( "view" ) );
+        response.setContentType( getContentType() );
 
         if ( withPadding )
         {
@@ -87,9 +96,16 @@ public class ExtendedMappingJacksonView
                 callback = paddingFunction;
             }
 
-            value = new JSONPObject( callback, value );
+            object = new JSONPObject( callback, object );
         }
 
-        JacksonUtils.toJsonWithView( response.getOutputStream(), value, IdentifiableObjectView.class );
+        if ( viewClass != null )
+        {
+            JacksonUtils.toJsonWithView( response.getOutputStream(), object, viewClass );
+        }
+        else
+        {
+            JacksonUtils.toJson( response.getOutputStream(), object );
+        }
     }
 }
