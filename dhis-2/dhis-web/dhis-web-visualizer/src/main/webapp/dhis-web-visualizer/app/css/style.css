@@ -230,7 +230,7 @@ body {
 /* Boundlist (multiselect, comboboxlist etc) */
 .x-boundlist-item {
     color: #333;
-    padding: 2px 2px 2px 4px;
+    padding: 2px 2px 3px 4px;
     font-size: 10px;
     border: 1px solid transparent;
 }

@@ -183,7 +183,7 @@ DV.conf = {
     layout: {
         west_width: 424,
         west_fieldset_width: 402,
-        west_width_subtractor: 22,
+        west_width_subtractor: 18,
         west_fill_height: 440,
         center_tbar_height: 31,
         east_tbar_height: 31,
@@ -219,7 +219,9 @@ Ext.onReady( function() {
     DV.init.initialize = function() {
 		DV.c = DV.chart.chart;
         DV.util.combobox.filter.category();
-        DV.util.fieldset.toggleIndicator();
+        
+        //DV.cmp.dimension.indicator.panel.expand();
+        //DV.util.fieldset.toggleIndicator();
         
         DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
         DV.exe.execute(DV.init.cmd);
@@ -229,12 +231,13 @@ Ext.onReady( function() {
         region: {},
         charttype: [],
         settings: {},
-        fieldset: {},
         dimension: {
             indicator: {},
             dataelement: {},
             dataset: {},
-            period: [],
+            period: {
+				checkbox: []
+			},
             organisationunit: {}
         },
         options: {},
@@ -2618,11 +2621,12 @@ Ext.onReady( function() {
 											}
 										],
 										listeners: {
-											afterrender: function() {
+											added: function() {
 												DV.cmp.dimension.indicator.panel = this;
 											},
 											expand: function() {
-												DV.util.multiselect.setHeight([DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected], DV.conf.layout.multiselect_fill_default);
+												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 117);
+												//DV.util.multiselect.setHeight([DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected], DV.conf.layout.multiselect_fill_default);
 											}
 										}
 									},
@@ -2771,7 +2775,12 @@ Ext.onReady( function() {
 													}
 												]
 											}
-										]
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.dimension.dataelement.panel = this;
+											}
+										}
 									},
 									{
 										title: '<div style="height:17px">' + DV.i18n.reporting_rates + '</div>',
@@ -2874,7 +2883,12 @@ Ext.onReady( function() {
 													}
 												]
 											}
-										]
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.dimension.dataset.panel = this;
+											}
+										}
 									},
 									{
 										title: '<div style="height:17px">' + DV.i18n.periods + '</div>',
@@ -2894,7 +2908,7 @@ Ext.onReady( function() {
 															listeners: {
 																added: function(chb) {
 																	if (chb.xtype === 'checkbox') {
-																		DV.cmp.dimension.period.push(chb);
+																		DV.cmp.dimension.period.checkbox.push(chb);
 																	}
 																}
 															}
@@ -2927,7 +2941,7 @@ Ext.onReady( function() {
 															listeners: {
 																added: function(chb) {
 																	if (chb.xtype === 'checkbox') {
-																		DV.cmp.dimension.period.push(chb);
+																		DV.cmp.dimension.period.checkbox.push(chb);
 																	}
 																}
 															}
@@ -2959,7 +2973,7 @@ Ext.onReady( function() {
 															listeners: {
 																added: function(chb) {
 																	if (chb.xtype === 'checkbox') {
-																		DV.cmp.dimension.period.push(chb);
+																		DV.cmp.dimension.period.checkbox.push(chb);
 																	}
 																}
 															}
@@ -2998,7 +3012,7 @@ Ext.onReady( function() {
 															listeners: {
 																added: function(chb) {
 																	if (chb.xtype === 'checkbox') {
-																		DV.cmp.dimension.period.push(chb);
+																		DV.cmp.dimension.period.checkbox.push(chb);
 																	}
 																}
 															}
@@ -3028,7 +3042,12 @@ Ext.onReady( function() {
 													}
 												]
 											}
-										]
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.dimension.period.panel = this;
+											}
+										}
 									},
 									{
 										title: '<div style="height:17px">' + DV.i18n.organisation_units + '</div>',
@@ -3050,7 +3069,7 @@ Ext.onReady( function() {
 												store: DV.store.groupset,
 												listeners: {
 													added: function() {
-														//this.up('fieldset').groupsets = this;
+														this.up('panel').groupsets = this;
 													}
 												}
 											},
@@ -3129,7 +3148,12 @@ Ext.onReady( function() {
 													}
 												}
 											}
-										]
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.dimension.organisationunit.panel = this;
+											}
+										}
 									},
 									{
 										title: '<div style="height:17px">' + DV.i18n.chart_options + '</div>',
@@ -3349,7 +3373,12 @@ Ext.onReady( function() {
 											}
 										]
 									}
-								]
+								],
+								listeners: {
+									added: function() {
+										DV.cmp.dimension.panel = this;
+									}
+								}
 							}
 						]
 					}
@@ -3583,7 +3612,7 @@ Ext.onReady( function() {
 					//}
 				],
                 listeners: {
-                    afterrender: function() {
+                    added: function() {
                         DV.cmp.region.west = this;
                     },
                     collapse: function() {                    
