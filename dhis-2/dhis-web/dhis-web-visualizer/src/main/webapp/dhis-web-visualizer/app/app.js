@@ -2629,7 +2629,7 @@ Ext.onReady( function() {
 									{
 										title: DV.i18n.data_elements,
 										hideCollapseTool: true,
-										style: 'margin-top:3px',
+										style: 'margin-top:0px',
 										items: [
 											{
 												xtype: 'combobox',
@@ -2777,7 +2777,7 @@ Ext.onReady( function() {
 									{
 										title: DV.i18n.reporting_rates,
 										hideCollapseTool: true,
-										style: 'margin-top:3px',
+										style: 'margin-top:0px',
 										items: [
 											{
 												xtype: 'panel',
@@ -2881,7 +2881,7 @@ Ext.onReady( function() {
 									{
 										title: DV.i18n.periods,
 										hideCollapseTool: true,
-										style: 'margin-top:3px',
+										style: 'margin-top:0px',
 										items: [
 											{
 												xtype: 'panel',
@@ -3036,7 +3036,7 @@ Ext.onReady( function() {
 									{
 										title: DV.i18n.organisation_units,
 										hideCollapseTool: true,
-										style: 'margin-top:3px',
+										style: 'margin-top:0px',
 										items: [
 											{
 												xtype: 'combobox',
@@ -3139,7 +3139,7 @@ Ext.onReady( function() {
 										title: DV.i18n.chart_options,
 										hideCollapseTool: true,
 										cls: 'dv-accordion-options',
-										style: 'margin-top:3px',
+										style: 'margin-top:0px',
 										items: [
 											{
 												xtype: 'panel',

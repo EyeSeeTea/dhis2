@@ -646,7 +646,7 @@ body {
 
 /* DV accordion */
 .dv-accordion .x-accordion-hd, .dv-accordion .dv-accordion-options .x-accordion-hd {
-	padding: 3px 5px 4px 8px;
+	padding: 4px 5px 4px 8px;
 	cursor: pointer;
     -o-border-top-left-radius: 1px;
 	-icab-border-top-left-radius: 1px;
@@ -662,15 +662,15 @@ body {
 	border-top-right-radius: 1px;
 }
 .dv-accordion .x-accordion-hd {
-	border-color: #e0e0da !important;
-	background: #e0e0da !important;
+	border-color: #eaeaea !important;
+	background: #eaeaea !important;
 }
 .dv-accordion .dv-accordion-options .x-accordion-hd {
-	border-color: #c4c4be !important;
-	background: #c4c4be !important;
+	border-color: #d5d5d5 !important;
+	background: #d5d5d5 !important;
 }
 .dv-accordion .collapsed .x-accordion-hd {
-	padding-bottom: 6px;
+	padding-bottom: 5px;
 }
 
 .dv-accordion .x-accordion-item, .dv-accordion-options .x-accordion-item {
@@ -688,11 +688,11 @@ body {
 	border-top-right-radius: 2px;
 }
 .dv-accordion .x-accordion-item {
-	border: 2px solid #e0e0da;
+	border: 1px solid #d0d0d0;
 	border-bottom: 0 none;
 }
 .dv-accordion .dv-accordion-options {
-	border: 2px solid #c4c4be;
+	border: 1px solid #c5c5c5;
 }
 
 .dv-accordion .x-accordion-hd .x-panel-header-text {
@@ -700,11 +700,12 @@ body {
 	cursor: pointer;
 }
 .dv-accordion .dv-accordion-options .x-accordion-hd .x-panel-header-text {
-	color: #222;
+	color: #000;
 }
 
 .dv-accordion .x-accordion-body {
 	padding: 8px 8px 2px 8px;
+	border-top: 1px solid #d0d0d0 !important;
 }
 
 .dv-accordion .x-accordion-hd-sibling-expanded {
