@@ -645,8 +645,8 @@ body {
 }
 
 /* DV accordion */
-.dv-accordion .x-accordion-hd, .dv-accordion .dv-accordion-options .x-accordion-hd {
-	padding: 4px 5px 4px 8px;
+.dv-accordion .x-accordion-item .x-accordion-hd, .dv-accordion .dv-accordion-options .x-accordion-hd { /* accordion title bar, shared */
+	padding: 5px 5px 3px 8px;
 	cursor: pointer;
     -o-border-top-left-radius: 1px;
 	-icab-border-top-left-radius: 1px;
@@ -661,19 +661,33 @@ body {
 	-webkit-border-top-right-radius: 1px;
 	border-top-right-radius: 1px;
 }
-.dv-accordion .x-accordion-hd {
+.dv-accordion .x-accordion-item .x-accordion-hd { /* accordion title dock, default */
 	border-color: #eaeaea !important;
-	background: #eaeaea !important;
+    background-image: none;
+    background-color: #eaeaea;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #eaeaea), color-stop(100%, #ededed)) !important;
+    background-image: -webkit-linear-gradient(top, #eaeaea, #ededed) !important;
+    background-image: -moz-linear-gradient(top, #eaeaea, #ededed) !important;
+    background-image: -o-linear-gradient(top, #eaeaea, #ededed) !important;
+    background-image: -ms-linear-gradient(top, #eaeaea, #ededed) !important;
+    background-image: linear-gradient(top, #eaeaea, #ededed) !important;
 }
-.dv-accordion .dv-accordion-options .x-accordion-hd {
+.dv-accordion .dv-accordion-options .x-accordion-hd { /* accordion title dock, options */
 	border-color: #d5d5d5 !important;
-	background: #d5d5d5 !important;
+    background-image: none;
+    background-color: #d5d5d5;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #d5d5d5), color-stop(100%, #d8d8d8)) !important;
+    background-image: -webkit-linear-gradient(top, #d5d5d5, #d8d8d8) !important;
+    background-image: -moz-linear-gradient(top, #d5d5d5, #d8d8d8) !important;
+    background-image: -o-linear-gradient(top, #d5d5d5, #d8d8d8) !important;
+    background-image: -ms-linear-gradient(top, #d5d5d5, #d8d8d8) !important;
+    background-image: linear-gradient(top, #d5d5d5, #d8d8d8) !important;
 }
-.dv-accordion .collapsed .x-accordion-hd {
-	padding-bottom: 5px;
+.dv-accordion .collapsed .x-accordion-hd { /* accordion title dock, default, collapsed */
+	padding-bottom: 4px !important;
 }
 
-.dv-accordion .x-accordion-item, .dv-accordion-options .x-accordion-item {
+.dv-accordion .x-accordion-item, .dv-accordion-options .x-accordion-item { /* accordion title dock outer, shared */
     -o-border-top-left-radius: 2px;
 	-icab-border-top-left-radius: 2px;
 	-khtml-border-top-left-radius: 2px;
@@ -687,23 +701,20 @@ body {
 	-webkit-border-top-right-radius: 2px;
 	border-top-right-radius: 2px;
 }
-.dv-accordion .x-accordion-item {
+.dv-accordion .x-accordion-item { /* accordion title dock outer, default */
 	border: 1px solid #d0d0d0;
 	border-bottom: 0 none;
 }
-.dv-accordion .dv-accordion-options {
+.dv-accordion .dv-accordion-options { /* accordion title dock outer, options */
 	border: 1px solid #c5c5c5;
 }
 
-.dv-accordion .x-accordion-hd .x-panel-header-text {
+.dv-accordion .x-accordion-hd .x-panel-header-text { /* accordion title dock text, shared */
 	font-weight: bold;
 	cursor: pointer;
 }
-.dv-accordion .dv-accordion-options .x-accordion-hd .x-panel-header-text {
-	color: #000;
-}
 
-.dv-accordion .x-accordion-body {
+.dv-accordion .x-accordion-body { /* accordion item body */
 	padding: 8px 8px 2px 8px;
 	border-top: 1px solid #d0d0d0 !important;
 }
@@ -718,3 +729,4 @@ body {
 .dv-accordion .dv-toolbar-multiselect-left, .dv-accordion .dv-toolbar-multiselect-right {
 	margin-bottom: 0;
 }
+

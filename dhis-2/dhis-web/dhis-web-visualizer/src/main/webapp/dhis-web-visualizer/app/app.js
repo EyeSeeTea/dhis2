@@ -2468,10 +2468,10 @@ Ext.onReady( function() {
 								activeOnTop: true,
 								cls: 'dv-accordion',
 								bodyStyle: 'border:0 none',
-								height: 415,
+								height: 430,
 								items: [
 									{
-										title: DV.i18n.indicators,
+										title: '<div style="height:17px">' + DV.i18n.indicators + '</div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -2627,9 +2627,8 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: DV.i18n.data_elements,
+										title: '<div style="height:17px">' + DV.i18n.data_elements + '</div>',
 										hideCollapseTool: true,
-										style: 'margin-top:0px',
 										items: [
 											{
 												xtype: 'combobox',
@@ -2775,9 +2774,8 @@ Ext.onReady( function() {
 										]
 									},
 									{
-										title: DV.i18n.reporting_rates,
+										title: '<div style="height:17px">' + DV.i18n.reporting_rates + '</div>',
 										hideCollapseTool: true,
-										style: 'margin-top:0px',
 										items: [
 											{
 												xtype: 'panel',
@@ -2879,9 +2877,8 @@ Ext.onReady( function() {
 										]
 									},
 									{
-										title: DV.i18n.periods,
+										title: '<div style="height:17px">' + DV.i18n.periods + '</div>',
 										hideCollapseTool: true,
-										style: 'margin-top:0px',
 										items: [
 											{
 												xtype: 'panel',
@@ -3034,9 +3031,8 @@ Ext.onReady( function() {
 										]
 									},
 									{
-										title: DV.i18n.organisation_units,
+										title: '<div style="height:17px">' + DV.i18n.organisation_units + '</div>',
 										hideCollapseTool: true,
-										style: 'margin-top:0px',
 										items: [
 											{
 												xtype: 'combobox',
@@ -3136,10 +3132,9 @@ Ext.onReady( function() {
 										]
 									},
 									{
-										title: DV.i18n.chart_options,
+										title: '<div style="height:17px">' + DV.i18n.chart_options + '</div>',
 										hideCollapseTool: true,
 										cls: 'dv-accordion-options',
-										style: 'margin-top:0px',
 										items: [
 											{
 												xtype: 'panel',
