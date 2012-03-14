@@ -6,6 +6,7 @@ DV.conf = {
 			filter: [DV.i18n.example_chart],
 			values: [84, 77, 87, 82, 91, 69, 82, 78, 83, 76, 73, 85],
 			setState: function() {
+console.log(DV);return;				
 				DV.c.type = DV.conf.finals.chart.column;
 				DV.c.dimension.series = DV.conf.finals.dimension.data.value;
 				DV.c.dimension.category = DV.conf.finals.dimension.period.value;
@@ -184,11 +185,17 @@ DV.conf = {
         west_width: 424,
         west_fieldset_width: 402,
         west_width_subtractor: 18,
-        west_fill_accordion_panel: 117,
+        west_fill: 117,
         west_fill_accordion_indicator: 77,
         west_fill_accordion_dataelement: 77,
         west_fill_accordion_dataset: 45,
         west_fill_accordion_organisationunit: 75,
+        west_maxheight_accordion_indicator: 450,
+        west_maxheight_accordion_dataelement: 450,
+        west_maxheight_accordion_dataset: 450,
+        west_maxheight_accordion_period: 340,
+        west_maxheight_accordion_organisationunit: 700,
+        west_maxheight_accordion_options: 367,
         center_tbar_height: 31,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
@@ -654,7 +661,13 @@ Ext.onReady( function() {
 					}
 					return null;
 				}
-            }
+            },
+            panel: {
+				setHeight: function(mx) {
+					var h = DV.cmp.region.west.getHeight() - DV.conf.layout.west_fill;
+					DV.cmp.dimension.panel.setHeight(h > mx ? mx : h);
+				}
+			}
         },
         notification: {
 			error: function(title, text) {
@@ -2598,7 +2611,7 @@ Ext.onReady( function() {
 												DV.cmp.dimension.indicator.panel = this;
 											},
 											expand: function() {
-												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 117);
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_indicator);
 												DV.util.multiselect.setHeight(
 													[DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected],
 													DV.cmp.dimension.indicator.panel,
@@ -2758,7 +2771,7 @@ Ext.onReady( function() {
 												DV.cmp.dimension.dataelement.panel = this;
 											},
 											expand: function() {
-												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 117);
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_dataelement);
 												DV.util.multiselect.setHeight(
 													[DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected],
 													DV.cmp.dimension.dataelement.panel,
@@ -2874,7 +2887,7 @@ Ext.onReady( function() {
 												DV.cmp.dimension.dataset.panel = this;
 											},
 											expand: function() {
-												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 117);
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_dataset);
 												DV.util.multiselect.setHeight(
 													[DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected],
 													DV.cmp.dimension.dataset.panel,
@@ -3041,7 +3054,7 @@ Ext.onReady( function() {
 												DV.cmp.dimension.period.panel = this;
 											},
 											expand: function() {
-												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 281);
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_period);
 											}
 										}
 									},
@@ -3150,7 +3163,7 @@ Ext.onReady( function() {
 												DV.cmp.dimension.organisationunit.panel = this;
 											},
 											expand: function() {
-												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 117);
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_organisationunit);
 												DV.cmp.dimension.organisationunit.treepanel.setHeight(DV.cmp.dimension.organisationunit.panel.getHeight() - DV.conf.layout.west_fill_accordion_organisationunit);
 											}
 										}
@@ -3364,14 +3377,17 @@ Ext.onReady( function() {
 															}
 														]
 													}
-												],
-												listeners: {
-													added: function() {
-														DV.cmp.options.panel = this;
-													}
-												}
+												]
 											}
-										]
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.options.panel = this;
+											},
+											expand: function() {
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_options);
+											}
+										}
 									}
 								],
 								listeners: {
@@ -3381,235 +3397,7 @@ Ext.onReady( function() {
 								}
 							}
 						]
-					}
-                        
-                    
-                    
-                    
-                    
-                    
-					//{
-						//xtype: 'toolbar',
-						//id: 'chartoptions_tb',
-						//layout: 'fit',
-						//items: [
-							//{
-								//xtype: 'panel',
-								//bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
-								//items: [
-									//{
-										//bodyStyle: 'border-style:none; background-color:transparent; padding:0 0 10px 3px; font-size:11px; font-weight:bold',
-										//html: DV.i18n.chart_options
-									//},
-									//{
-										//xtype: 'panel',
-										//layout: 'column',
-										//bodyStyle: 'border-style:none; background-color:transparent; padding-bottom:15px',
-										//items: [
-											//{
-												//xtype: 'checkbox',
-												//cls: 'dv-checkbox-alt1',
-												//style: 'margin-right:26px',
-												//boxLabel: DV.i18n.hide_subtitle,
-												//labelWidth: DV.conf.layout.form_label_width,
-												//listeners: {
-													//added: function() {
-														//DV.cmp.favorite.hidesubtitle = this;
-													//}
-												//}
-											//},
-											//{
-												//xtype: 'checkbox',
-												//cls: 'dv-checkbox-alt1',
-												//style: 'margin-right:25px',
-												//boxLabel: DV.i18n.hide_legend,
-												//labelWidth: DV.conf.layout.form_label_width,
-												//listeners: {
-													//added: function() {
-														//DV.cmp.favorite.hidelegend = this;
-													//}
-												//}
-											//},
-											//{
-												//xtype: 'checkbox',
-												//cls: 'dv-checkbox-alt1',
-												//style: 'margin-right:26px',
-												//boxLabel: DV.i18n.trend_line,
-												//labelWidth: DV.conf.layout.form_label_width,
-												//listeners: {
-													//added: function() {
-														//DV.cmp.favorite.trendline = this;
-													//}
-												//}
-											//},
-											//{
-												//xtype: 'checkbox',
-												//cls: 'dv-checkbox-alt1',
-												//boxLabel: DV.i18n.user_orgunit,
-												//labelWidth: DV.conf.layout.form_label_width,
-												//listeners: {
-													//added: function() {
-														//DV.cmp.favorite.userorganisationunit = this;
-													//}
-												//}
-											//}
-										//]
-									//},
-									//{
-										//xtype: 'panel',
-										//layout: 'column',
-										//bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:8px',
-										//items: [
-											//{
-												//xtype: 'textfield',
-												//cls: 'dv-textfield-alt1',
-												//style: 'margin-right:4px',
-												//fieldLabel: DV.i18n.domain_axis_label,
-												//labelAlign: 'top',
-												//labelSeparator: '',
-												//maxLength: 100,
-												//enforceMaxLength: true,
-												//labelWidth: DV.conf.layout.form_label_width,
-												//width: 199,
-												//listeners: {
-													//added: function() {
-														//DV.cmp.favorite.domainaxislabel = this;
-													//}
-												//}
-											//},
-											//{
-												//xtype: 'textfield',
-												//cls: 'dv-textfield-alt1',
-												//fieldLabel: DV.i18n.range_axis_label,
-												//labelAlign: 'top',
-												//labelSeparator: '',
-												//maxLength: 100,
-												//enforceMaxLength: true,
-												//labelWidth: DV.conf.layout.form_label_width,
-												//width: 199,
-												//listeners: {
-													//added: function() {
-														//DV.cmp.favorite.rangeaxislabel = this;
-													//}
-												//}
-											//}
-										//]
-									//},
-									//{
-										//xtype: 'panel',
-										//layout: 'column',
-										//bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:8px',
-										//items: [
-											//{
-												//xtype: 'numberfield',
-												//cls: 'dv-textfield-alt1',
-												//style: 'margin-right:5px',
-												//hideTrigger: true,
-												//fieldLabel: DV.i18n.target_line_value,
-												//labelAlign: 'top',
-												//labelSeparator: '',
-												//maxLength: 100,
-												//enforceMaxLength: true,
-												//width: 199,
-												//spinUpEnabled: true,
-												//spinDownEnabled: true,
-												//listeners: {
-													//added: function() {
-														//DV.cmp.favorite.targetlinevalue = this;
-													//},
-													//change: function() {
-														//DV.cmp.favorite.targetlinelabel.xable();
-													//}
-												//}
-											//},
-											//{
-												//xtype: 'textfield',
-												//cls: 'dv-textfield-alt1',
-												//fieldLabel: DV.i18n.target_line_label,
-												//labelAlign: 'top',
-												//labelSeparator: '',
-												//maxLength: 100,
-												//enforceMaxLength: true,
-												//width: 199,
-												//disabled: true,
-												//xable: function() {
-													//if (DV.cmp.favorite.targetlinevalue.getValue()) {
-														//this.enable();
-													//}
-													//else {
-														//this.disable();
-													//}
-												//},
-												//listeners: {
-													//added: function() {
-														//DV.cmp.favorite.targetlinelabel = this;
-													//}
-												//}
-											//}
-										//]
-									//},
-									//{
-										//xtype: 'panel',
-										//layout: 'column',
-										//bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:5px',
-										//items: [
-											//{
-												//xtype: 'numberfield',
-												//cls: 'dv-textfield-alt1',
-												//style: 'margin-right:5px',
-												//hideTrigger: true,
-												//fieldLabel: DV.i18n.base_line_value,
-												//labelAlign: 'top',
-												//labelSeparator: '',
-												//maxLength: 100,
-												//enforceMaxLength: true,
-												//width: 199,
-												//spinUpEnabled: true,
-												//spinDownEnabled: true,
-												//listeners: {
-													//added: function() {
-														//DV.cmp.favorite.baselinevalue = this;
-													//},
-													//change: function() {
-														//DV.cmp.favorite.baselinelabel.xable();
-													//}
-												//}
-											//},
-											//{
-												//xtype: 'textfield',
-												//cls: 'dv-textfield-alt1',
-												//fieldLabel: DV.i18n.base_line_label,
-												//labelAlign: 'top',
-												//labelSeparator: '',
-												//maxLength: 100,
-												//enforceMaxLength: true,
-												//width: 199,
-												//disabled: true,
-												//xable: function() {
-													//if (DV.cmp.favorite.baselinevalue.getValue()) {
-														//this.enable();
-													//}
-													//else {
-														//this.disable();
-													//}
-												//},
-												//listeners: {
-													//added: function() {
-														//DV.cmp.favorite.baselinelabel = this;
-													//}
-												//}
-											//}
-										//]
-									//}
-								//],
-								//listeners: {
-									//added: function() {
-										//DV.cmp.options.panel = this;
-									//}
-								//}
-							//}
-						//]
-					//}
+					}					
 				],
                 listeners: {
                     added: function() {
@@ -4335,7 +4123,7 @@ Ext.onReady( function() {
                         DV.cmp.region.center = this;
                     },
                     resize: function() {
-						if (DV.chart.chart.isrendered && DV.cmp.statusbar.panel) {
+						if (DV.cmp.statusbar.panel) {
 							DV.cmp.statusbar.panel.setWidth(DV.cmp.region.center.getWidth());
 						}
 					}
