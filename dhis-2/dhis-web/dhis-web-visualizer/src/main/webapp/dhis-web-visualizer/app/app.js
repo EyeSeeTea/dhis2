@@ -562,7 +562,7 @@ Ext.onReady( function() {
                 },
                 getRelativePeriodObject: function(exception) {
                     var a = {},
-                        cmp = DV.cmp.dimension.period,
+                        cmp = DV.cmp.dimension.period.checkbox,
                         valid = false;
                     Ext.Array.each(cmp, function(item) {
                         a[item.paramName] = item.getValue();
@@ -640,7 +640,7 @@ Ext.onReady( function() {
 					return a;
 				},
                 getGroupSetId: function() {
-					var value = DV.cmp.fieldset.organisationunit.groupsets.getValue();
+					var value = DV.cmp.dimension.organisationunit.panel.groupsets.getValue();
 					return !value || value === DV.i18n.none || value === DV.conf.finals.cmd.none ? null : value;
 				},
 				getGroupNameByGroupId: function(id) {
@@ -1662,18 +1662,18 @@ Ext.onReady( function() {
 			
 			if (DV.c.organisationunit.groupsetid) {
 				if (DV.store.groupset.isloaded) {
-					DV.cmp.fieldset.organisationunit.groupsets.setValue(DV.c.organisationunit.groupsetid);
+					DV.cmp.dimension.organisationunit.panel.groupsets.setValue(DV.c.organisationunit.groupsetid);
 				}
 				else {
 					DV.store.groupset.load({
 						callback: function() {
-							DV.cmp.fieldset.organisationunit.groupsets.setValue(DV.c.organisationunit.groupsetid);
+							DV.cmp.dimension.organisationunit.panel.groupsets.setValue(DV.c.organisationunit.groupsetid);
 						}
 					});
 				}
 			}
 			else {
-				DV.cmp.fieldset.organisationunit.groupsets.setValue(DV.store.isloaded ? DV.conf.finals.cmd.none : DV.i18n.none);
+				DV.cmp.dimension.organisationunit.panel.groupsets.setValue(DV.store.isloaded ? DV.conf.finals.cmd.none : DV.i18n.none);
 			}
 		},
         validation: {
