@@ -224,8 +224,7 @@ Ext.onReady( function() {
 		DV.c = DV.chart.chart;
         DV.util.combobox.filter.category();
         
-        DV.cmp.dimension.indicator.panel.collapse();
-        DV.cmp.dimension.indicator.panel.expand();
+        DV.cmp.dimension.indicator.panel.fireEvent('expand');
         
         DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
         DV.exe.execute(DV.init.cmd);
