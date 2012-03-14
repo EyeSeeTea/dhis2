@@ -1,40 +1,38 @@
 
 //------------------------------------------------------------------------------
-// Get Aggregated Dataelements
+// Get dataelements by dataset
 //------------------------------------------------------------------------------
 
-function getAggDataElements( )
+function getDataElementsByDataset()
 {
-	var dataElementGroup = document.getElementById( 'dataElementGroup' );
-	var dataElementGroupId = dataElementGroup.options[ dataElementGroup.selectedIndex ].value;
-	if( dataElementGroupId == "" ){
+	var dataSets = document.getElementById( 'dataSets' );
+	var dataSetId = dataSets.options[ dataSets.selectedIndex ].value;
+	if( dataSetId == "" ){
 		clearList( byId('aggregationDataElementId'));
 		return;
 	}
 
-	$.post( 'getAggDataElements.action', { dataElementGroupId:dataElementGroupId }, getAggDataElementsCompleted );
-}
+	jQuery.getJSON( 'getDataElementsByDataset.action', 
+		{ 
+			id:dataSetId 
+		}, function( json )
+        {
+			var de = document.getElementById( 'aggregationDataElementId' );
+			clearList( de );
+		  
+			for ( i in json.dataElements ) 
+			{ 
+				var id = json.dataElements[i].id;
+				var name = json.dataElements[i].name;
 
-function getAggDataElementsCompleted( dataelementElement )
-{
-	var de = document.getElementById( 'aggregationDataElementId' );
-  
-	clearList( de );
-  
-	var dataElementList = $(dataelementElement).find( 'dataelement' );
-  
-	$( dataElementList ).each( function( i, item )
-	{
-        var id = $(item).find("id").text();
-        var name = $(item).find("name").text();
-
-        var option = document.createElement("option");
-        option.value = id;
-        option.text = name;
-        option.title = name;
-        
-        de.add(option, null);  			
-	} );
+				var option = document.createElement("option");
+				option.value = id;
+				option.text = name;
+				option.title = name;
+				
+				de.add(option, null);  			
+			}
+		});
 }
 
 //------------------------------------------------------------------------------
@@ -52,7 +50,7 @@ function getProgramStages()
 		return;  
 	}
 
-	$.post( 'getProgramStages.action', { programId:programId }, getProgramStagesCompleted );
+	$.getJSON( 'getProgramStages.action', { programId:programId }, getProgramStagesCompleted );
 }
 
 function getProgramStagesCompleted( programstageElement )
@@ -91,7 +89,7 @@ function getProgramStagesForFormula()
 		return;  
 	}
 
-	$.post( 'getProgramStages.action', { programId:programId }, getProgramStagesFomulaCompleted );
+	$.getJSON( 'getProgramStages.action', { programId:programId }, getProgramStagesFomulaCompleted );
 }
 
 function getProgramStagesFomulaCompleted( programstageElement )
@@ -129,7 +127,7 @@ function getPrgramStageDataElements()
 	var programStage = document.getElementById( 'programStage' );
 	var psId = programStage.options[ programStage.selectedIndex ].value;
 	
-	$.post( 'getPSDataElements.action', { psId:psId }, getPrgramStageDataElementsCompleted );
+	$.getJSON( 'getPSDataElements.action', { psId:psId }, getPrgramStageDataElementsCompleted );
 }
 
 function getPrgramStageDataElementsCompleted( dataelementElement )
@@ -178,7 +176,7 @@ function removeCaseAggregation( caseAggregationId, caseAggregationName )
 
 function showCaseAggregationDetails( caseAggregationId )
 {
-    jQuery.post( 'getCaseAggregation.action', { id:caseAggregationId }, function ( json )
+    jQuery.getJSON( 'getCaseAggregation.action', { id:caseAggregationId }, function ( json )
 	{
 		setInnerHTML( 'descriptionField', json.caseAggregation.description );	
 		setInnerHTML( 'operatorField', json.caseAggregation.operator );
@@ -196,7 +194,7 @@ function showCaseAggregationDetails( caseAggregationId )
 
 function getConditionDescription()
 {
-	$.post( 'getCaseAggregationDescription.action', 
+	$.postUTF8( 'getCaseAggregationDescription.action', 
 		{ 
 			condition:getFieldValue('aggregationCondition') 
 		},function (data)
@@ -211,7 +209,7 @@ function getConditionDescription()
 
 function testCaseAggregationCondition()
 {
-	$.postJSON( 'testCaseAggregationCondition.action', 
+	$.postUTF8( 'testCaseAggregationCondition.action', 
 		{ 
 			condition:getFieldValue('aggregationCondition') 
 		},function (json)

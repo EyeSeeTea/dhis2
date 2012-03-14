@@ -29,8 +29,8 @@ package org.hisp.dhis.dbms;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.orm.hibernate3.SessionFactoryUtils;
-import org.springframework.orm.hibernate3.SessionHolder;
+import org.springframework.orm.hibernate4.SessionFactoryUtils;
+import org.springframework.orm.hibernate4.SessionHolder;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -41,7 +41,7 @@ public class DbmsUtils
 {
     public static void bindSessionToThread( SessionFactory sessionFactory )
     {
-        Session session = SessionFactoryUtils.getSession( sessionFactory, true );
+        Session session = SessionFactoryUtils.openSession( sessionFactory );
         
         TransactionSynchronizationManager.bindResource( sessionFactory, new SessionHolder( session ) );        
     }

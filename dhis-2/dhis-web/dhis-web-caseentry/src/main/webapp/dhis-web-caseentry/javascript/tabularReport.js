@@ -69,7 +69,7 @@ function loadDataElements()
 				{
 					for ( i in json.dataElements ) 
 					{ 
-						$('#availableDataElementIds').append('<option value=' + json.dataElements[i].id + '>' + json.dataElements[i].name + '</option>');
+						$('#availableDataElementIds').append('<option value=' + json.dataElements[i].id + ' >' + json.dataElements[i].name + '</option>');
 					}
 				} );
 		}
@@ -161,6 +161,25 @@ function autocompletedField( idField )
 		});
 }
 
+function validateTabularReport()
+{
+	$.post( 'validateTabularReport.action',
+		{
+			facilityLB: getFieldValue('facilityLB')
+		}
+		, function( json ) 
+		{
+			if( json.response == 'success' )
+			{
+				loadGeneratedReport();
+			}
+			else
+			{
+				setMessage( json.message );
+			}
+		} );
+}
+
 function loadGeneratedReport()
 {
 	hideCriteria();
@@ -237,9 +256,11 @@ function exportTabularReport( type )
 	}
 }
 
-function onchangeOrderBy( element )
+function onchangeOrderBy( elementId )
 {
 	searchTabularReport();
+	
+	var element = jQuery( "#" + elementId );
 	var isAcs = jQuery( element ).attr( 'orderBy' );
 	if( isAcs == 'true')
 	{
@@ -258,8 +279,7 @@ function getParams()
 	hideMessage();
 	
 	var searchingValues = "";
-	var listSeachingValues = jQuery("#gridTable input");
-	var regExp = new RegExp([]); 
+	var listSeachingValues = jQuery("#gridTable input[type=text]");
 	
 	listSeachingValues.each( function( i, item ){
 		if( item.value != '' )
@@ -327,4 +347,12 @@ function getFormula( value )
 		}
 	}
 	return value;
+}
+
+function clearFilter()
+{
+	var listSeachingValues = jQuery("#gridTable input[type=text]");
+	listSeachingValues.each( function( i, item ){
+		item.value = '';
+	});	
 }
