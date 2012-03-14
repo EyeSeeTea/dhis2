@@ -729,3 +729,10 @@ body {
 	margin-bottom: 0;
 }
 
+.dv-accordion .dv-combo .x-form-text, .dv-accordion .dv-combo .x-form-trigger { /* accordion combo box */
+	height: 24px;
+	padding-top: 2px;
+}
+.dv-accordion .dv-combo .x-form-item-label {
+	padding: 4px 0 0;
+}

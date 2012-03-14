@@ -184,7 +184,11 @@ DV.conf = {
         west_width: 424,
         west_fieldset_width: 402,
         west_width_subtractor: 18,
-        west_fill_height: 440,
+        west_fill_accordion_panel: 117,
+        west_fill_accordion_indicator: 77,
+        west_fill_accordion_dataelement: 77,
+        west_fill_accordion_dataset: 100,
+        west_fill_accordion_organisationunit: 77,
         center_tbar_height: 31,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
@@ -220,8 +224,8 @@ Ext.onReady( function() {
 		DV.c = DV.chart.chart;
         DV.util.combobox.filter.category();
         
-        //DV.cmp.dimension.indicator.panel.expand();
-        //DV.util.fieldset.toggleIndicator();
+        DV.cmp.dimension.indicator.panel.collapse();
+        DV.cmp.dimension.indicator.panel.expand();
         
         DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
         DV.exe.execute(DV.init.cmd);
@@ -331,14 +335,9 @@ Ext.onReady( function() {
                 });
                 a.store.sort('name', 'ASC');
             },
-            setHeight: function(ms, fill) {
-				var h1 = DV.cmp.region.west.getHeight();
-				var h2 = DV.cmp.options.panel.getHeight();
-				var h = h1 - h2 - fill;
-				var mx = DV.conf.layout.multiselect_maxheight;
-				var mn = DV.conf.layout.multiselect_minheight;
+            setHeight: function(ms, panel, fill) {
 				for (var i = 0; i < ms.length; i++) {
-					ms[i].setHeight(h > mx ? mx : h < mn ? mn : h);
+					ms[i].setHeight(panel.getHeight() - fill);
 				}
 			}
         },
@@ -2476,6 +2475,7 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + DV.i18n.indicators + '</div>',
 										hideCollapseTool: true,
+										layout: 'anchor',
 										items: [
 											{
 												xtype: 'combobox',
@@ -2626,7 +2626,11 @@ Ext.onReady( function() {
 											},
 											expand: function() {
 												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 117);
-												//DV.util.multiselect.setHeight([DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected], DV.conf.layout.multiselect_fill_default);
+												DV.util.multiselect.setHeight(
+													[DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected],
+													DV.cmp.dimension.indicator.panel,
+													DV.conf.layout.west_fill_accordion_indicator
+												);
 											}
 										}
 									},
@@ -2779,6 +2783,14 @@ Ext.onReady( function() {
 										listeners: {
 											added: function() {
 												DV.cmp.dimension.dataelement.panel = this;
+											},
+											expand: function() {
+												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 117);
+												DV.util.multiselect.setHeight(
+													[DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected],
+													DV.cmp.dimension.dataelement.panel,
+													DV.conf.layout.west_fill_accordion_dataelement
+												);
 											}
 										}
 									},
@@ -2887,6 +2899,14 @@ Ext.onReady( function() {
 										listeners: {
 											added: function() {
 												DV.cmp.dimension.dataset.panel = this;
+											},
+											expand: function() {
+												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 117);
+												DV.util.multiselect.setHeight(
+													[DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected],
+													DV.cmp.dimension.dataset.panel,
+													DV.conf.layout.west_fill_accordion_dataset
+												);
 											}
 										}
 									},
