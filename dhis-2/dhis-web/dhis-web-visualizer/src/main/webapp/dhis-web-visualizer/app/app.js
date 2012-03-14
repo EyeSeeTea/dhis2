@@ -3183,7 +3183,7 @@ Ext.onReady( function() {
 															{
 																xtype: 'checkbox',
 																cls: 'dv-checkbox-alt1',
-																style: 'margin-right:26px',
+																style: 'margin-right:22px',
 																boxLabel: DV.i18n.hide_subtitle,
 																labelWidth: DV.conf.layout.form_label_width,
 																listeners: {
@@ -3195,7 +3195,7 @@ Ext.onReady( function() {
 															{
 																xtype: 'checkbox',
 																cls: 'dv-checkbox-alt1',
-																style: 'margin-right:25px',
+																style: 'margin-right:22px',
 																boxLabel: DV.i18n.hide_legend,
 																labelWidth: DV.conf.layout.form_label_width,
 																listeners: {
@@ -3207,7 +3207,7 @@ Ext.onReady( function() {
 															{
 																xtype: 'checkbox',
 																cls: 'dv-checkbox-alt1',
-																style: 'margin-right:26px',
+																style: 'margin-right:22px',
 																boxLabel: DV.i18n.trend_line,
 																labelWidth: DV.conf.layout.form_label_width,
 																listeners: {
@@ -3237,7 +3237,7 @@ Ext.onReady( function() {
 															{
 																xtype: 'textfield',
 																cls: 'dv-textfield-alt1',
-																style: 'margin-right:4px',
+																style: 'margin-right:6px',
 																fieldLabel: DV.i18n.domain_axis_label,
 																labelAlign: 'top',
 																labelSeparator: '',
@@ -3277,7 +3277,7 @@ Ext.onReady( function() {
 															{
 																xtype: 'numberfield',
 																cls: 'dv-textfield-alt1',
-																style: 'margin-right:5px',
+																style: 'margin-right:6px',
 																hideTrigger: true,
 																fieldLabel: DV.i18n.target_line_value,
 																labelAlign: 'top',
@@ -3330,7 +3330,7 @@ Ext.onReady( function() {
 															{
 																xtype: 'numberfield',
 																cls: 'dv-textfield-alt1',
-																style: 'margin-right:5px',
+																style: 'margin-right:6px',
 																hideTrigger: true,
 																fieldLabel: DV.i18n.base_line_value,
 																labelAlign: 'top',
