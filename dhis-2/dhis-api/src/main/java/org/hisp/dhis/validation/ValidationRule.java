@@ -182,6 +182,7 @@ public class ValidationRule
         this.type = type;
     }
 
+    // TODO fix serialization of this..
     @JsonProperty
     @JsonView( {DetailedView.class} )
     public Expression getLeftSide()
@@ -194,6 +195,7 @@ public class ValidationRule
         this.leftSide = leftSide;
     }
 
+    // TODO fix serialization of this..
     @JsonProperty
     @JsonView( {DetailedView.class} )
     public Expression getRightSide()

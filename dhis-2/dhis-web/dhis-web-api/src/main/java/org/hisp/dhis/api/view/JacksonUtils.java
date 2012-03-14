@@ -62,6 +62,11 @@ public class JacksonUtils
 
     public static Class<?> getViewClass( Object viewName )
     {
+        if ( viewName == null || !(viewName instanceof String && ((String) viewName).length() != 0) )
+        {
+            return viewClasses.get( "default" );
+        }
+
         return viewClasses.get( viewName );
     }
 

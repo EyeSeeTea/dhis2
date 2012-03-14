@@ -28,6 +28,7 @@ package org.hisp.dhis.api.view;
  */
 
 
+import org.hisp.dhis.common.view.IdentifiableObjectView;
 import org.springframework.web.servlet.view.AbstractView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +54,7 @@ public class JacksonXmlView
         Object object = model.get( "model" );
         Class<?> viewClass = JacksonUtils.getViewClass( model.get( "view" ) );
         response.setContentType( getContentType() );
+        response.setStatus( HttpServletResponse.SC_OK );
 
         if ( viewClass != null )
         {

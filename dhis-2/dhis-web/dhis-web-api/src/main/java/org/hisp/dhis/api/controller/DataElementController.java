@@ -100,7 +100,6 @@ public class DataElementController
         }
 
         model.addAttribute( "model", dataElements );
-        model.addAttribute( "view", "detailed" );
 
         return "dataElements";
     }
@@ -117,6 +116,7 @@ public class DataElementController
         }
 
         model.addAttribute( "model", dataElement );
+        model.addAttribute( "view", "detailed" );
 
         return "dataElement";
     }
