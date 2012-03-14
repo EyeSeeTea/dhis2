@@ -2,10 +2,10 @@ body {
     font: normal 10px arial,sans-serif,ubuntu,consolas;
 }
 
-.x-body, .x-btn-default-toolbar-small .x-btn-inner, .x-form-item {
+.x-body, .x-btn-default-toolbar-small .x-btn-inner, .x-form-item, .x-panel-header-text-default {
 	font-family: arial,sans-serif,ubuntu,consolas;
 }
-
+	
 .x-panel-body {
     font-size: 11px;
 }
@@ -664,24 +664,23 @@ body {
 }
 .dv-accordion .x-accordion-item .x-accordion-hd { /* accordion title dock, default */
     background-image: none;
-    background-color: green;
-    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dadada), color-stop(100%, #e5e5e5)) !important;
-    background-image: -webkit-linear-gradient(top, #dadada, #e5e5e5) !important;
-    background-image: -moz-linear-gradient(top, #dadada, #e5e5e5) !important;
-    background-image: -o-linear-gradient(top, #dadada, #e5e5e5) !important;
-    background-image: -ms-linear-gradient(top, #dadada, #e5e5e5) !important;
-    background-image: linear-gradient(top, #dadada, #e5e5e5) !important;
+    background-color: #e0e0e0;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dcdcdc), color-stop(100%, #e5e5e5)) !important;
+    background-image: -webkit-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
+    background-image: -moz-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
+    background-image: -o-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
+    background-image: -ms-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
+    background-image: linear-gradient(top, #dcdcdc, #e5e5e5) !important;
 }
 .dv-accordion .dv-accordion-options .x-accordion-hd { /* accordion title dock, options */
-	border-color: #d3d3d3 !important;
     background-image: none;
-    background-color: #d3d3d3;
-    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #d3d3d3), color-stop(100%, #d6d6d6)) !important;
-    background-image: -webkit-linear-gradient(top, #d3d3d3, #d6d6d6) !important;
-    background-image: -moz-linear-gradient(top, #d3d3d3, #d6d6d6) !important;
-    background-image: -o-linear-gradient(top, #d3d3d3, #d6d6d6) !important;
-    background-image: -ms-linear-gradient(top, #d3d3d3, #d6d6d6) !important;
-    background-image: linear-gradient(top, #d3d3d3, #d6d6d6) !important;
+    background-color: #d0d0d0;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #cccccc), color-stop(100%, #d3d3d3)) !important;
+    background-image: -webkit-linear-gradient(top, #cccccc, #d3d3d3) !important;
+    background-image: -moz-linear-gradient(top, #cccccc, #d3d3d3) !important;
+    background-image: -o-linear-gradient(top, #cccccc, #d3d3d3) !important;
+    background-image: -ms-linear-gradient(top, #cccccc, #d3d3d3) !important;
+    background-image: linear-gradient(top, #cccccc, #d3d3d3) !important;
 }
 .dv-accordion .collapsed .x-accordion-hd { /* accordion title dock, default, collapsed */
 	padding-bottom: 5px !important;
@@ -706,7 +705,7 @@ body {
 	border-bottom: 0 none;
 }
 .dv-accordion .dv-accordion-options { /* accordion title dock outer, options */
-	border: 1px solid #c5c5c5;
+	border: 1px solid #c0c0c0;
 }
 
 .dv-accordion .x-accordion-hd .x-panel-header-text { /* accordion title dock text, shared */
