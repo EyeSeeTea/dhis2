@@ -6,7 +6,6 @@ DV.conf = {
 			filter: [DV.i18n.example_chart],
 			values: [84, 77, 87, 82, 91, 69, 82, 78, 83, 76, 73, 85],
 			setState: function() {
-console.log(DV);return;				
 				DV.c.type = DV.conf.finals.chart.column;
 				DV.c.dimension.series = DV.conf.finals.dimension.data.value;
 				DV.c.dimension.category = DV.conf.finals.dimension.period.value;
@@ -228,7 +227,7 @@ Ext.onReady( function() {
             
     DV.init = DV.conf.init.ajax.jsonfy(r);    
     DV.init.initialize = function() {
-		DV.c = DV.chart.chart;
+		DV.c = DV.chart.model;
         DV.util.combobox.filter.category();
         
         DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
@@ -1880,7 +1879,7 @@ Ext.onReady( function() {
     };
     
     DV.chart = {
-		chart: {
+		model: {
 			type: DV.conf.finals.chart.column,
 			dimension: {},
 			indicator: {},
@@ -1901,31 +1900,30 @@ Ext.onReady( function() {
 			isrendered: false
 		},
 		reset: function() {
-			this.chart.type = DV.conf.finals.chart.column;
-			this.chart.dimension = {};
-			this.chart.series = null;
-			this.chart.category = null;
-			this.chart.filter = null;
-			this.chart.indicator = {};
-			this.chart.dataelement = {};
-			this.chart.dataset = {};
-			this.chart.period = {};
-			this.chart.organisationunit = {};
-			this.chart.hidesubtitle = false;
-			this.chart.hidelegend = false;
-			this.chart.trendline = false;
-			this.chart.userorganisationunit = false;
-			this.chart.domainaxislabel = null;
-			this.chart.rangeaxislabel = null;
-			this.chart.targetlinevalue = null;
-			this.chart.targetlinelabel = null;
-			this.chart.baselinevalue = null;
-			this.chart.baselinelabel = null;
+			this.model.type = DV.conf.finals.chart.column;
+			this.model.dimension = {};
+			this.model.series = null;
+			this.model.category = null;
+			this.model.filter = null;
+			this.model.indicator = {};
+			this.model.dataelement = {};
+			this.model.dataset = {};
+			this.model.period = {};
+			this.model.organisationunit = {};
+			this.model.hidesubtitle = false;
+			this.model.hidelegend = false;
+			this.model.trendline = false;
+			this.model.userorganisationunit = false;
+			this.model.domainaxislabel = null;
+			this.model.rangeaxislabel = null;
+			this.model.targetlinevalue = null;
+			this.model.targetlinelabel = null;
+			this.model.baselinevalue = null;
+			this.model.baselinelabel = null;
 		},
         data: [],
         getData: function(exe) {
             this.data = [];
-            
             Ext.Array.each(DV.c.category.names, function(item) {
                 var obj = {};
                 obj[DV.conf.finals.data.domain] = item;
@@ -1990,7 +1988,7 @@ Ext.onReady( function() {
         },
         chart: null,
         getChart: function(exe) {
-            this[DV.c.type]();
+            this[this.model.type]();
             if (exe) {
                 this.reload();
             }
