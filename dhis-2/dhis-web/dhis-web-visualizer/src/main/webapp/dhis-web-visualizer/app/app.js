@@ -3183,7 +3183,7 @@ Ext.onReady( function() {
 															{
 																xtype: 'checkbox',
 																cls: 'dv-checkbox-alt1',
-																style: 'margin-right:22px',
+																style: 'margin-right:23px',
 																boxLabel: DV.i18n.hide_subtitle,
 																labelWidth: DV.conf.layout.form_label_width,
 																listeners: {
@@ -3195,7 +3195,7 @@ Ext.onReady( function() {
 															{
 																xtype: 'checkbox',
 																cls: 'dv-checkbox-alt1',
-																style: 'margin-right:22px',
+																style: 'margin-right:23px',
 																boxLabel: DV.i18n.hide_legend,
 																labelWidth: DV.conf.layout.form_label_width,
 																listeners: {
@@ -3207,7 +3207,7 @@ Ext.onReady( function() {
 															{
 																xtype: 'checkbox',
 																cls: 'dv-checkbox-alt1',
-																style: 'margin-right:22px',
+																style: 'margin-right:23px',
 																boxLabel: DV.i18n.trend_line,
 																labelWidth: DV.conf.layout.form_label_width,
 																listeners: {
