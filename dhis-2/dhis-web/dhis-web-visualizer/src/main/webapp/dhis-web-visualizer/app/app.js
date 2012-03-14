@@ -187,8 +187,8 @@ DV.conf = {
         west_fill_accordion_panel: 117,
         west_fill_accordion_indicator: 77,
         west_fill_accordion_dataelement: 77,
-        west_fill_accordion_dataset: 100,
-        west_fill_accordion_organisationunit: 77,
+        west_fill_accordion_dataset: 45,
+        west_fill_accordion_organisationunit: 75,
         center_tbar_height: 31,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
@@ -223,8 +223,6 @@ Ext.onReady( function() {
     DV.init.initialize = function() {
 		DV.c = DV.chart.chart;
         DV.util.combobox.filter.category();
-        
-        DV.cmp.dimension.indicator.panel.fireEvent('expand');
         
         DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
         DV.exe.execute(DV.init.cmd);
@@ -287,7 +285,16 @@ Ext.onReady( function() {
             },
             getPageCenterY: function(cmp) {
                 return ((screen.height/2)-((cmp.height/2)-100));
-            }
+            },
+            resizeDimensions: function() {
+				var a = [DV.cmp.dimension.indicator.panel, DV.cmp.dimension.dataelement.panel, DV.cmp.dimension.dataset.panel,
+						DV.cmp.dimension.period.panel, DV.cmp.dimension.organisationunit.panel, DV.cmp.options.panel];
+				for (var i = 0; i < a.length; i++) {
+					if (!a[i].collapsed) {
+						a[i].fireEvent('expand');
+					}
+				}
+			}
         },
         multiselect: {
             select: function(a, s) {
@@ -337,40 +344,6 @@ Ext.onReady( function() {
             setHeight: function(ms, panel, fill) {
 				for (var i = 0; i < ms.length; i++) {
 					ms[i].setHeight(panel.getHeight() - fill);
-				}
-			}
-        },
-        fieldset: {
-            toggleIndicator: function() {
-                DV.cmp.fieldset.indicator.toggle();
-            },
-            toggleDataElement: function() {
-                DV.cmp.fieldset.dataelement.toggle();
-            },
-            toggleDataSet: function() {
-                DV.cmp.fieldset.dataset.toggle();
-            },
-            togglePeriod: function() {
-                DV.cmp.fieldset.period.toggle();
-            },
-            toggleOrganisationUnit: function() {
-                DV.cmp.fieldset.organisationunit.toggle();
-            },
-            toggleOptions: function() {
-                DV.cmp.fieldset.options.toggle();
-            },
-            collapseFieldsets: function(fieldsets) {
-                for (var i = 0; i < fieldsets.length; i++) {
-                    fieldsets[i].collapse();
-                }
-            },
-            reloadExpanded: function() {
-				var fs = DV.cmp.fieldset;
-				for (var f in fs) {
-					if (!fs[f].collapsed) {
-						fs[f].collapse();
-						fs[f].expand();
-					}
 				}
 			}
         },
@@ -2272,6 +2245,7 @@ Ext.onReady( function() {
     DV.viewport = Ext.create('Ext.container.Viewport', {
         layout: 'border',
         renderTo: Ext.getBody(),
+        isrendered: false,
         items: [
             {
                 region: 'west',
@@ -3065,6 +3039,9 @@ Ext.onReady( function() {
 										listeners: {
 											added: function() {
 												DV.cmp.dimension.period.panel = this;
+											},
+											expand: function() {
+												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 281);
 											}
 										}
 									},
@@ -3171,6 +3148,10 @@ Ext.onReady( function() {
 										listeners: {
 											added: function() {
 												DV.cmp.dimension.organisationunit.panel = this;
+											},
+											expand: function() {
+												DV.cmp.dimension.panel.setHeight(DV.cmp.region.west.getHeight() - 117);
+												DV.cmp.dimension.organisationunit.treepanel.setHeight(DV.cmp.dimension.organisationunit.panel.getHeight() - DV.conf.layout.west_fill_accordion_organisationunit);
 											}
 										}
 									},
@@ -4375,12 +4356,13 @@ Ext.onReady( function() {
             }
         ],
         listeners: {
-            afterrender: function() {
-                DV.init.initialize();
+            afterrender: function(vp) {
+                DV.init.initialize(vp);
             },
             resize: function(vp) {
                 DV.cmp.region.west.setWidth(DV.conf.layout.west_width);
-                DV.util.fieldset.reloadExpanded();
+                
+				DV.util.viewport.resizeDimensions();
                 
                 if (DV.datatable.datatable) {
                     DV.datatable.datatable.setHeight(DV.util.viewport.getSize().y - DV.conf.layout.east_tbar_height);
