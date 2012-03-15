@@ -79,9 +79,19 @@ public class JacksonUtils
         jsonMapper.writeValue( output, value );
     }
 
+    public static String toJsonAsString( Object value ) throws IOException
+    {
+        return jsonMapper.writeValueAsString( value );
+    }
+
     public static void toJsonWithView( OutputStream output, Object value, Class<?> viewClass ) throws IOException
     {
         jsonMapper.writerWithView( viewClass ).writeValue( output, value );
+    }
+
+    public static String toJsonWithViewAsString( Object value, Class<?> viewClass ) throws IOException
+    {
+        return jsonMapper.writerWithView( viewClass ).writeValueAsString( value );
     }
 
     public static <T> T fromJson( InputStream input, Class<?> clazz ) throws IOException
@@ -98,9 +108,19 @@ public class JacksonUtils
         xmlMapper.writeValue( output, value );
     }
 
+    public static String toXmlAsString( Object value ) throws IOException
+    {
+        return xmlMapper.writeValueAsString( value );
+    }
+
     public static void toXmlWithView( OutputStream output, Object value, Class<?> viewClass ) throws IOException
     {
         xmlMapper.writerWithView( viewClass ).writeValue( output, value );
+    }
+
+    public static String toXmlWithViewAsString( Object value, Class<?> viewClass ) throws IOException
+    {
+        return xmlMapper.writerWithView( viewClass ).writeValueAsString( value );
     }
 
     public static <T> T fromXml( InputStream input, Class<?> clazz ) throws IOException

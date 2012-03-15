@@ -27,19 +27,18 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@XmlRootElement( name = "collection", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
-public class BaseCollection implements LinkableObject
+@JacksonXmlRootElement( localName = "collection", namespace = Dxf2Namespace.NAMESPACE )
+public class BaseCollection
+    implements LinkableObject
 {
     private Pager pager;
 
@@ -47,7 +46,6 @@ public class BaseCollection implements LinkableObject
 
     public BaseCollection()
     {
-        // TODO this will be made more dynamic for 2.7
         linkableObject = new BaseLinkableObject();
     }
 
@@ -66,6 +64,7 @@ public class BaseCollection implements LinkableObject
         this.pager = pager;
     }
 
+    @JsonProperty
     public LinkableObject getLinkableObject()
     {
         return linkableObject;
@@ -80,8 +79,8 @@ public class BaseCollection implements LinkableObject
     // Serializable fields
     //-------------------------------------------------------------------------------------
 
-    @XmlAttribute
     @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
     public String getLink()
     {
         if ( linkableObject == null )
@@ -110,7 +109,8 @@ public class BaseCollection implements LinkableObject
      *
      * @return Current page
      */
-    @XmlAttribute
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
     public Integer getPage()
     {
         if ( pager == null )
@@ -126,7 +126,8 @@ public class BaseCollection implements LinkableObject
      *
      * @return number of items in collection
      */
-    @XmlAttribute
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
     public Integer getTotal()
     {
         if ( pager == null )
@@ -142,7 +143,8 @@ public class BaseCollection implements LinkableObject
      *
      * @return items per page
      */
-    @XmlAttribute
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
     public Integer getPageSize()
     {
         if ( pager == null )
@@ -169,7 +171,8 @@ public class BaseCollection implements LinkableObject
         return pager.getPageCount();
     }
 
-    @XmlAttribute
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
     public String getNextPage()
     {
         if ( pager == null )
@@ -180,7 +183,8 @@ public class BaseCollection implements LinkableObject
         return pager.getNextPage();
     }
 
-    @XmlAttribute
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
     public String getPrevPage()
     {
         if ( pager == null )

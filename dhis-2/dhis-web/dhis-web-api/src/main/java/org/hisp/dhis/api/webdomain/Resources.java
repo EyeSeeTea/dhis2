@@ -59,7 +59,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -80,8 +79,7 @@ public class Resources
     }
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "resources" )
-    @JacksonXmlProperty( localName = "resource" )
+    @JacksonXmlProperty( localName = "resource", namespace = Dxf2Namespace.NAMESPACE )
     public List<Resource> getResources()
     {
         return resources;
@@ -98,17 +96,14 @@ public class Resources
 
     private void generateResources()
     {
-        RequestMethod[] defaultRequestMethods = new RequestMethod[]{
-            RequestMethod.GET /* , RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE */
-        };
+        List<String> requestMethods = new ArrayList<String>();
+        requestMethods.add( RequestMethod.GET.toString() );
 
-        MediaType[] defaultMediaTypes = new MediaType[]{
-            MediaType.TEXT_HTML, MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON,
-            new MediaType( "application", "javascript" ) /* , new MediaType( "application", "pdf" ) */
-        };
-
-        List<RequestMethod> requestMethods = Arrays.asList( defaultRequestMethods );
-        List<MediaType> mediaTypes = Arrays.asList( defaultMediaTypes );
+        List<String> mediaTypes = new ArrayList<String>();
+        mediaTypes.add( MediaType.TEXT_HTML.toString() );
+        mediaTypes.add( MediaType.APPLICATION_JSON.toString() );
+        mediaTypes.add( MediaType.APPLICATION_XML.toString() );
+        mediaTypes.add( new MediaType( "application", "javascript" ).toString() );
 
         resources.add( new Resource( "AttributeTypes", Attributes.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "Categories", DataElementCategories.class, requestMethods, mediaTypes ) );
