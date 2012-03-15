@@ -2460,6 +2460,11 @@ Ext.onReady( function() {
 										title: '<div style="height:17px">' + DV.i18n.indicators + '</div>',
 										hideCollapseTool: true,
 										layout: 'anchor',
+										tools: [{
+											xtype: 'label',
+											text: 'Series',
+											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold'
+										}],
 										items: [
 											{
 												xtype: 'combobox',
@@ -2621,6 +2626,11 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + DV.i18n.data_elements + '</div>',
 										hideCollapseTool: true,
+										tools: [{
+											xtype: 'label',
+											text: 'Series',
+											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold'
+										}],
 										items: [
 											{
 												xtype: 'combobox',
@@ -2781,6 +2791,11 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + DV.i18n.reporting_rates + '</div>',
 										hideCollapseTool: true,
+										tools: [{
+											xtype: 'label',
+											text: 'Series',
+											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold'
+										}],
 										items: [
 											{
 												xtype: 'panel',
@@ -2897,6 +2912,11 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + DV.i18n.periods + '</div>',
 										hideCollapseTool: true,
+										tools: [{
+											xtype: 'label',
+											text: 'Category',
+											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold'
+										}],
 										items: [
 											{
 												xtype: 'panel',
@@ -3059,6 +3079,11 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + DV.i18n.organisation_units + '</div>',
 										hideCollapseTool: true,
+										tools: [{
+											xtype: 'label',
+											text: 'Filter',
+											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold'
+										}],
 										items: [
 											{
 												xtype: 'combobox',
