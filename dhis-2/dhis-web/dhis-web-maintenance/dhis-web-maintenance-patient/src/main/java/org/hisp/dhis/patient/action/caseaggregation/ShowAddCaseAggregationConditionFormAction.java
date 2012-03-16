@@ -33,8 +33,6 @@ import java.util.List;
 
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.patient.PatientAttribute;
@@ -69,7 +67,9 @@ public class ShowAddCaseAggregationConditionFormAction
     // -------------------------------------------------------------------------
     
     private Integer id;
-	
+
+    private Integer dataSetId;
+
     private List<PatientAttribute> patientAttributes;
 
     private List<DataSet> dataSets;
@@ -100,6 +100,16 @@ public class ShowAddCaseAggregationConditionFormAction
     public void setId( Integer id )
     {
         this.id = id;
+    }
+
+    public void setDataSetId( Integer dataSetId )
+    {
+        this.dataSetId = dataSetId;
+    }
+    
+    public Integer getDataSetId()
+    {
+        return dataSetId;
     }
 
     public List<Program> getPrograms()
