@@ -47,8 +47,8 @@ public class Charts
     private List<Chart> charts = new ArrayList<Chart>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "charts" )
-    @JacksonXmlProperty( localName = "chart" )
+    @JacksonXmlElementWrapper( localName = "charts", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "chart", namespace = Dxf2Namespace.NAMESPACE )
     public List<Chart> getCharts()
     {
         return charts;

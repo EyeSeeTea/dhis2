@@ -47,8 +47,8 @@ public class DataElementGroups
     private List<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "dataElementGroups" )
-    @JacksonXmlProperty( localName = "dataElementGroup" )
+    @JacksonXmlElementWrapper( localName = "dataElementGroups", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "dataElementGroup", namespace = Dxf2Namespace.NAMESPACE )
     public List<DataElementGroup> getDataElementGroups()
     {
         return dataElementGroups;

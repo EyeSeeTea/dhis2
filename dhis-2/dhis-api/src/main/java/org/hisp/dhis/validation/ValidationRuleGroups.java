@@ -47,8 +47,8 @@ public class ValidationRuleGroups
     private List<ValidationRuleGroup> validationRuleGroups = new ArrayList<ValidationRuleGroup>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "validationRuleGroups" )
-    @JacksonXmlProperty( localName = "validationRuleGroup" )
+    @JacksonXmlElementWrapper( localName = "validationRuleGroups", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "validationRuleGroup", namespace = Dxf2Namespace.NAMESPACE )
     public List<ValidationRuleGroup> getValidationRuleGroups()
     {
         return validationRuleGroups;

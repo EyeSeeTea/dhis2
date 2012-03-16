@@ -47,8 +47,8 @@ public class DataElementCategories
     private List<DataElementCategory> categories = new ArrayList<DataElementCategory>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "categories" )
-    @JacksonXmlProperty( localName = "category" )
+    @JacksonXmlElementWrapper( localName = "categories", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "category", namespace = Dxf2Namespace.NAMESPACE )
     public List<DataElementCategory> getCategories()
     {
         return categories;

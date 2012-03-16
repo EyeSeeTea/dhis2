@@ -47,8 +47,8 @@ public class MessageConversations
     private List<MessageConversation> messageConversations = new ArrayList<MessageConversation>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "messageConversations" )
-    @JacksonXmlProperty( localName = "messageConversation" )
+    @JacksonXmlElementWrapper( localName = "messageConversations", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "messageConversation", namespace = Dxf2Namespace.NAMESPACE )
     public List<MessageConversation> getMessageConversations()
     {
         return messageConversations;

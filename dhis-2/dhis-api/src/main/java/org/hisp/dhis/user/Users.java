@@ -47,8 +47,8 @@ public class Users
     private List<User> users = new ArrayList<User>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "users" )
-    @JacksonXmlProperty( localName = "user" )
+    @JacksonXmlElementWrapper( localName = "users", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "user", namespace = Dxf2Namespace.NAMESPACE )
     public List<User> getUsers()
     {
         return users;

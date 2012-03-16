@@ -44,8 +44,8 @@ public class Reports
     private List<Report> reports = new ArrayList<Report>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "reports" )
-    @JacksonXmlProperty( localName = "report" )
+    @JacksonXmlElementWrapper( localName = "reports", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "report", namespace = Dxf2Namespace.NAMESPACE )
     public List<Report> getReports()
     {
         return reports;

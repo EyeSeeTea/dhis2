@@ -47,8 +47,8 @@ public class ReportTables
     private List<ReportTable> reportTables = new ArrayList<ReportTable>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "reportTables" )
-    @JacksonXmlProperty( localName = "reportTable" )
+    @JacksonXmlElementWrapper( localName = "reportTables", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "reportTable", namespace = Dxf2Namespace.NAMESPACE )
     public List<ReportTable> getReportTables()
     {
         return reportTables;

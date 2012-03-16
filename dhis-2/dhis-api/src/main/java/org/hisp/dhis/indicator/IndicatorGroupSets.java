@@ -47,8 +47,8 @@ public class IndicatorGroupSets
     private List<IndicatorGroupSet> indicatorGroupSets = new ArrayList<IndicatorGroupSet>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "indicatorGroupSets" )
-    @JacksonXmlProperty( localName = "indicatorGroupSet" )
+    @JacksonXmlElementWrapper( localName = "indicatorGroupSets", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "indicatorGroupSet", namespace = Dxf2Namespace.NAMESPACE )
     public List<IndicatorGroupSet> getIndicatorGroupSets()
     {
         return indicatorGroupSets;

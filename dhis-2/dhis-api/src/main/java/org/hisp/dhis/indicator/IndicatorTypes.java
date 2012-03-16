@@ -47,8 +47,8 @@ public class IndicatorTypes
     private List<IndicatorType> indicatorTypes = new ArrayList<IndicatorType>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "indicatorTypes" )
-    @JacksonXmlProperty( localName = "indicatorType" )
+    @JacksonXmlElementWrapper( localName = "indicatorTypes", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "indicatorType", namespace = Dxf2Namespace.NAMESPACE )
     public List<IndicatorType> getIndicatorTypes()
     {
         return indicatorTypes;

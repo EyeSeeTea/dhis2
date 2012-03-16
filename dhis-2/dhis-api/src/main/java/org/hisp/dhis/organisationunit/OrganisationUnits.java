@@ -47,8 +47,8 @@ public class OrganisationUnits
     private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "organisationUnits" )
-    @JacksonXmlProperty( localName = "organisationUnit" )
+    @JacksonXmlElementWrapper( localName = "organisationUnits", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "organisationUnit", namespace = Dxf2Namespace.NAMESPACE )
     public List<OrganisationUnit> getOrganisationUnits()
     {
         return organisationUnits;

@@ -109,6 +109,7 @@ public class AttributeTypeController
         }
 
         model.addAttribute( "model", attribute );
+        model.addAttribute( "view", "detailed" );
 
         return "attributeType";
     }

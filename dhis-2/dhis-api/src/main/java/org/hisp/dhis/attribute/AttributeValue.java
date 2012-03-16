@@ -29,6 +29,7 @@ package org.hisp.dhis.attribute;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.Dxf2Namespace;
 
@@ -74,6 +75,7 @@ public class AttributeValue
     }
 
     @JsonProperty( value = "id" )
+    @JacksonXmlProperty( isAttribute = true )
     public String getAttributeTypeRef()
     {
         return attribute.getUid();
@@ -85,6 +87,7 @@ public class AttributeValue
     }
 
     @JsonProperty( value = "name" )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public String getAttributeName()
     {
         return attribute.getName();
@@ -106,6 +109,7 @@ public class AttributeValue
     }
 
     @JsonProperty
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public String getValue()
     {
         return value;

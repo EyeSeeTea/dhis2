@@ -48,8 +48,8 @@ public class Constants
     private List<Constant> constants = new ArrayList<Constant>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "constants" )
-    @JacksonXmlProperty( localName = "constant" )
+    @JacksonXmlElementWrapper( localName = "constants", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "constant", namespace = Dxf2Namespace.NAMESPACE )
     public List<Constant> getConstants()
     {
         return constants;

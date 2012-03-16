@@ -29,10 +29,13 @@ package org.hisp.dhis.common;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+@JacksonXmlRootElement( localName = "pager", namespace = Dxf2Namespace.NAMESPACE )
 public class Pager
 {
     public static final int DEFAULT_PAGE_SIZE = 50;

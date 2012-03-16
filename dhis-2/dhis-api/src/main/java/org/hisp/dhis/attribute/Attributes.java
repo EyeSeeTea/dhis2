@@ -47,8 +47,8 @@ public class Attributes
     private List<Attribute> attributes = new ArrayList<Attribute>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "attributes" )
-    @JacksonXmlProperty( localName = "attribute" )
+    @JacksonXmlElementWrapper( localName = "attributeTypes", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "attributeType", namespace = Dxf2Namespace.NAMESPACE )
     public List<Attribute> getAttributes()
     {
         return attributes;

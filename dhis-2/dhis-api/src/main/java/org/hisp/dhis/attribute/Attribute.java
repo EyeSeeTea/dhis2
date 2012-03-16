@@ -1,3 +1,5 @@
+package org.hisp.dhis.attribute;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -25,10 +27,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.attribute;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
@@ -51,8 +52,6 @@ public class Attribute
 
     private String valueType;
 
-    private boolean mandatory;
-
     private boolean dataElementAttribute;
 
     private boolean indicatorAttribute;
@@ -60,6 +59,8 @@ public class Attribute
     private boolean organisationUnitAttribute;
 
     private boolean userAttribute;
+
+    private boolean mandatory;
 
     private Integer sortOrder;
 
@@ -90,6 +91,7 @@ public class Attribute
 
     @JsonProperty
     @JsonView( {DetailedView.class} )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public boolean isMandatory()
     {
         return mandatory;

@@ -41,7 +41,6 @@ import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
-import javax.xml.bind.annotation.XmlElement;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;

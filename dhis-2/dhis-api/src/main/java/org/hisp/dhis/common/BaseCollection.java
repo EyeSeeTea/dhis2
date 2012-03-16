@@ -29,14 +29,10 @@ package org.hisp.dhis.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
-import javax.xml.bind.annotation.XmlAttribute;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "collection", namespace = Dxf2Namespace.NAMESPACE )
 public class BaseCollection
     implements LinkableObject
 {
@@ -64,7 +60,6 @@ public class BaseCollection
         this.pager = pager;
     }
 
-    @JsonProperty
     public LinkableObject getLinkableObject()
     {
         return linkableObject;
@@ -109,8 +104,6 @@ public class BaseCollection
      *
      * @return Current page
      */
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
     public Integer getPage()
     {
         if ( pager == null )
@@ -126,8 +119,6 @@ public class BaseCollection
      *
      * @return number of items in collection
      */
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
     public Integer getTotal()
     {
         if ( pager == null )
@@ -143,8 +134,6 @@ public class BaseCollection
      *
      * @return items per page
      */
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
     public Integer getPageSize()
     {
         if ( pager == null )
@@ -160,7 +149,6 @@ public class BaseCollection
      *
      * @return total page count
      */
-    @XmlAttribute
     public Integer getPageCount()
     {
         if ( pager == null )
@@ -171,8 +159,6 @@ public class BaseCollection
         return pager.getPageCount();
     }
 
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
     public String getNextPage()
     {
         if ( pager == null )
@@ -183,8 +169,6 @@ public class BaseCollection
         return pager.getNextPage();
     }
 
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
     public String getPrevPage()
     {
         if ( pager == null )

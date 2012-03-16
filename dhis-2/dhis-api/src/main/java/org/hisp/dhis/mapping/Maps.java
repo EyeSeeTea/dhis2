@@ -44,8 +44,8 @@ public class Maps
     private List<MapView> maps = new ArrayList<MapView>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "maps" )
-    @JacksonXmlProperty( localName = "map" )
+    @JacksonXmlElementWrapper( localName = "maps", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "map", namespace = Dxf2Namespace.NAMESPACE )
     public List<MapView> getMaps()
     {
         return maps;

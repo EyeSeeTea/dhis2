@@ -28,16 +28,11 @@ package org.hisp.dhis.common;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.IdentifiableObjectView;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "linkableObject", namespace = Dxf2Namespace.NAMESPACE )
 public class BaseLinkableObject
     implements LinkableObject
 {
@@ -48,8 +43,7 @@ public class BaseLinkableObject
     private transient String link;
 
     @JsonProperty
-    @JsonView( {IdentifiableObjectView.class, DetailedView.class} )
-    @JacksonXmlProperty( isAttribute = true, namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( isAttribute = true )
     public String getLink()
     {
         return link;

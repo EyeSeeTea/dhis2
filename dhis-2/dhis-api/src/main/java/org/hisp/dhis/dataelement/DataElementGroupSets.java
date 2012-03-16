@@ -50,8 +50,8 @@ public class DataElementGroupSets
     private List<DataElementGroupSet> dataElementGroupSets = new ArrayList<DataElementGroupSet>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "dataElementGroupSets" )
-    @JacksonXmlProperty( localName = "dataElementGroupSet" )
+    @JacksonXmlElementWrapper( localName = "dataElementGroupSets", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "dataElementGroupSet", namespace = Dxf2Namespace.NAMESPACE )
     public List<DataElementGroupSet> getDataElementGroupSets()
     {
         return dataElementGroupSets;

@@ -47,8 +47,8 @@ public class SqlViews
     private List<SqlView> sqlViews = new ArrayList<SqlView>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "sqlViews" )
-    @JacksonXmlProperty( localName = "sqlView" )
+    @JacksonXmlElementWrapper( localName = "sqlViews", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "sqlView", namespace = Dxf2Namespace.NAMESPACE )
     public List<SqlView> getSqlViews()
     {
         return sqlViews;

@@ -230,8 +230,9 @@ public class DataElementCategoryCombo
 
     @JsonProperty( value = "categoryOptionCombo" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JacksonXmlElementWrapper( localName = "optionCombos" )
-    @JacksonXmlProperty( localName = "optionCombo" )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "categoryOptionCombos" )
+    @JacksonXmlProperty( localName = "categoryOptionCombo" )
     public Set<DataElementCategoryOptionCombo> getOptionCombos()
     {
         return optionCombos;

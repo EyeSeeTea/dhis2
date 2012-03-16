@@ -47,8 +47,8 @@ public class UserGroups
     private List<UserGroup> userGroups = new ArrayList<UserGroup>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "userGroups" )
-    @JacksonXmlProperty( localName = "userGroup" )
+    @JacksonXmlElementWrapper( localName = "userGroups", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "userGroup", namespace = Dxf2Namespace.NAMESPACE )
     public List<UserGroup> getUserGroups()
     {
         return userGroups;

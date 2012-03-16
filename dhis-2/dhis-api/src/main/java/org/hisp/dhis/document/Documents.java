@@ -47,8 +47,8 @@ public class Documents
     private List<Document> documents = new ArrayList<Document>();
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "documents" )
-    @JacksonXmlProperty( localName = "document" )
+    @JacksonXmlElementWrapper( localName = "documents", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "document", namespace = Dxf2Namespace.NAMESPACE )
     public List<Document> getDocuments()
     {
         return documents;
