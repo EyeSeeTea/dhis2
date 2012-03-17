@@ -27,20 +27,17 @@ package org.hisp.dhis.completeness.jdbc;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 
 import org.amplecode.quick.StatementManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.completeness.DataSetCompletenessStore;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.system.util.TextUtils;
 
 /**
@@ -62,6 +59,13 @@ public class JDBCDataSetCompletenessStore
     {
         this.statementManager = statementManager;
     }
+    
+    private StatementBuilder statementBuilder;
+
+    public void setStatementBuilder( StatementBuilder statementBuilder )
+    {
+        this.statementBuilder = statementBuilder;
+    }
 
     // -------------------------------------------------------------------------
     // DataSetCompletenessStore
@@ -80,15 +84,15 @@ public class JDBCDataSetCompletenessStore
         
         final String sql =
             "SELECT COUNT(*) " +
-            "FROM completedatasetregistration " +
-            "WHERE datasetid = " + dataSet.getId() + " " +
-            "AND periodid IN ( " + getCommaDelimitedString( periods ) + " ) " +
-            "AND sourceid IN ( " + getCommaDelimitedString( relevantSources ) + " )";
+            "FROM completedatasetregistration cr " +
+            "WHERE cr.datasetid = " + dataSet.getId() + " " +
+            "AND cr.periodid IN ( " + getCommaDelimitedString( periods ) + " ) " +
+            "AND cr.sourceid IN ( " + getCommaDelimitedString( relevantSources ) + " )";
         
         return statementManager.getHolder().queryForInteger( sql );
     }
 
-    public Integer getCompleteDataSetRegistrations( DataSet dataSet, Collection<Integer> periods, Collection<Integer> relevantSources, Date deadline )
+    public Integer getCompleteDataSetRegistrations( DataSet dataSet, Collection<Integer> periods, Collection<Integer> relevantSources, int completenessOffset )
     {
         if ( relevantSources == null || relevantSources.size() == 0 )
         {
@@ -97,11 +101,12 @@ public class JDBCDataSetCompletenessStore
         
         final String sql =
             "SELECT COUNT(*) " +
-            "FROM completedatasetregistration " +
-            "WHERE datasetid = " + dataSet.getId() + " " +
-            "AND periodid IN ( " + getCommaDelimitedString( periods ) + " ) " +
-            "AND sourceid IN ( " + getCommaDelimitedString( relevantSources ) + " ) " +
-            "AND date <= '" + getMediumDateString( deadline ) + "'";
+            "FROM completedatasetregistration cr " +
+            "JOIN period pe ON (cr.periodid = pe.periodid) " +
+            "WHERE cr.datasetid = " + dataSet.getId() + " " +
+            "AND cr.periodid IN ( " + getCommaDelimitedString( periods ) + " ) " +
+            "AND cr.sourceid IN ( " + getCommaDelimitedString( relevantSources ) + " ) " +
+            "AND cr.date <= " + statementBuilder.getAddDate( "pe.enddate", completenessOffset );
         
         return statementManager.getHolder().queryForInteger( sql );
     }
@@ -112,13 +117,14 @@ public class JDBCDataSetCompletenessStore
 
     public Integer getCompulsoryDataElementRegistrations( DataSet dataSet, Collection<Integer> children, Collection<Integer> periods )
     {
-        return getCompulsoryDataElementRegistrations( dataSet, children, periods, null );
+        return getCompulsoryDataElementRegistrations( dataSet, children, periods, -1 );
     }
     
-    public Integer getCompulsoryDataElementRegistrations( DataSet dataSet, Collection<Integer> children, Collection<Integer> periods, Date deadline )
+    public Integer getCompulsoryDataElementRegistrations( DataSet dataSet, Collection<Integer> children, Collection<Integer> periods, int completenessOffset )
     {           
         final int compulsoryElements = dataSet.getCompulsoryDataElementOperands().size();
-        final String deadlineCriteria = deadline != null ? "AND lastupdated < '" + DateUtils.getMediumDateString( deadline ) + "' " : "";
+        
+        final String deadlineCriteria = completenessOffset >= 0 ? "AND lastupdated <= " + statementBuilder.getAddDate( "pe.enddate", completenessOffset ) : "";
         
         final String sql = 
             "SELECT COUNT(completed) FROM ( " +
@@ -128,7 +134,9 @@ public class JDBCDataSetCompletenessStore
                 "ON dv.dataelementid=deo.dataelementid AND dv.categoryoptioncomboid=deo.categoryoptioncomboid " +
                 "JOIN datasetoperands dso " +
                 "ON deo.dataelementoperandid=dso.dataelementoperandid " +
-                "WHERE periodid IN ( " + getCommaDelimitedString( periods ) + " ) " + deadlineCriteria +
+                "JOIN period pe " +
+                "ON dv.periodid=pe.periodid " +
+                "WHERE dv.periodid IN ( " + getCommaDelimitedString( periods ) + " ) " + deadlineCriteria +
                 "AND sourceid IN ( " + getCommaDelimitedString( children ) + " ) " +
                 "AND datasetid = " + dataSet.getId() + " GROUP BY sourceid) AS completed " +
             "WHERE completed.sources = " + compulsoryElements;
@@ -140,16 +148,15 @@ public class JDBCDataSetCompletenessStore
     // Based on number of data values
     // -------------------------------------------------------------------------
 
-    public Integer getNumberOfValues( DataSet dataSet, Collection<Integer> children, Collection<Integer> periods, Date deadline )
+    public Integer getNumberOfValues( DataSet dataSet, Collection<Integer> children, Collection<Integer> periods )
     {
         final String childrenIds = TextUtils.getCommaDelimitedString( children );
-        final String deadlineCriteria = deadline != null ? "AND lastupdated < '" + DateUtils.getMediumDateString( deadline ) + "' " : "";
         
         final String sql =
             "SELECT count(*) FROM datavalue dv " +
             "JOIN datasetmembers dsm ON dv.dataelementid=dsm.dataelementid " +
             "JOIN dataset ds ON dsm.datasetid=ds.datasetid " +
-            "WHERE ds.datasetid = " + dataSet.getId() + " " + deadlineCriteria +
+            "WHERE ds.datasetid = " + dataSet.getId() + " " +
             "AND periodid IN ( " + getCommaDelimitedString( periods ) + " ) " +
             "AND sourceid IN (" + childrenIds + ")";
 

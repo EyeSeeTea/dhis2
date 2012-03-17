@@ -28,10 +28,10 @@ package org.hisp.dhis.completeness.impl;
  */
 
 import java.util.Collection;
-import java.util.Date;
 
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.period.Period;
 
 /**
  * @author Lars Helge Overland
@@ -43,22 +43,22 @@ public class RatioDataSetCompletenessService
     @Override
     public int getRegistrations( DataSet dataSet, Collection<Integer> relevantSources, Collection<Integer> periods )
     {
-        return completenessStore.getNumberOfValues( dataSet, relevantSources, periods, null );
+        return completenessStore.getNumberOfValues( dataSet, relevantSources, periods );
     }
 
     @Override
-    public int getRegistrationsOnTime( DataSet dataSet, Collection<Integer> relevantSources, Collection<Integer> periods, Date deadline )
+    public int getRegistrationsOnTime( DataSet dataSet, Collection<Integer> relevantSources, Collection<Integer> periods, int completenessOffset )
     {
-        return completenessStore.getNumberOfValues( dataSet, relevantSources, periods, null );
+        return completenessStore.getNumberOfValues( dataSet, relevantSources, periods );
     }
 
     @Override
-    public int getSources( DataSet dataSet, Collection<Integer> relevantSources, Collection<Integer> periods )
+    public int getSources( DataSet dataSet, Collection<Integer> relevantSources, Period period )
     {
         Collection<DataElementOperand> operands = dataElementService.getAllGeneratedOperands( dataSet.getDataElements() );
         
         // Number of operands in data set times number of organisation units times number of periods
         
-        return operands != null && relevantSources != null ? ( operands.size() * relevantSources.size() * periods.size() ) : 0; 
+        return operands != null && relevantSources != null ? ( operands.size() * relevantSources.size() * period.getPeriodSpan( dataSet.getPeriodType() ) ) : 0; 
     }
 }
