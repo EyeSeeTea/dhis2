@@ -665,6 +665,11 @@ Ext.onReady( function() {
 				setHeight: function(mx) {
 					var h = DV.cmp.region.west.getHeight() - DV.conf.layout.west_fill;
 					DV.cmp.dimension.panel.setHeight(h > mx ? mx : h);
+				},
+				setDimensionLabels: function() {
+					alert(DV.cmp.settings.series.getValue());
+					alert(DV.cmp.settings.series.getRawValue());
+					//DV.cmp.settings.series
 				}
 			}
         },
@@ -2366,11 +2371,12 @@ Ext.onReady( function() {
                                         store: DV.store.dimension(),
                                         value: DV.conf.finals.dimension.data.value,
                                         listeners: {
-                                            afterrender: function() {
+                                            added: function() {
                                                 DV.cmp.settings.series = this;
                                             },
                                             select: function() {
                                                 DV.util.combobox.filter.category();
+                                                DV.util.dimension.panel.setDimensionLabels();
                                             }
                                         }
                                     }
@@ -2463,7 +2469,12 @@ Ext.onReady( function() {
 										tools: [{
 											xtype: 'label',
 											text: 'Series',
-											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold'
+											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold',
+											listeners: {
+												added: function() {
+													DV.cmp.dimension.indicator.label = this;
+												}
+											}
 										}],
 										items: [
 											{
@@ -2629,7 +2640,12 @@ Ext.onReady( function() {
 										tools: [{
 											xtype: 'label',
 											text: 'Series',
-											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold'
+											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold',
+											listeners: {
+												added: function() {
+													DV.cmp.dimension.dataelement.label = this;
+												}
+											}
 										}],
 										items: [
 											{
@@ -2794,7 +2810,12 @@ Ext.onReady( function() {
 										tools: [{
 											xtype: 'label',
 											text: 'Series',
-											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold'
+											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold',
+											listeners: {
+												added: function() {
+													DV.cmp.dimension.dataset.label = this;
+												}
+											}
 										}],
 										items: [
 											{
@@ -2915,7 +2936,12 @@ Ext.onReady( function() {
 										tools: [{
 											xtype: 'label',
 											text: 'Category',
-											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold'
+											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold',
+											listeners: {
+												added: function() {
+													DV.cmp.dimension.period.label = this;
+												}
+											}
 										}],
 										items: [
 											{
@@ -3082,7 +3108,12 @@ Ext.onReady( function() {
 										tools: [{
 											xtype: 'label',
 											text: 'Filter',
-											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold'
+											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold',
+											listeners: {
+												added: function() {
+													DV.cmp.dimension.organisationunit.label = this;
+												}
+											}
 										}],
 										items: [
 											{
