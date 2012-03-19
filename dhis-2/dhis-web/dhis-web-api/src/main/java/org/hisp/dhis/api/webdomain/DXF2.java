@@ -31,16 +31,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
+import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.report.Report;
+import org.hisp.dhis.reporttable.ReportTable;
+import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 
@@ -55,9 +61,13 @@ public class DXF2
 {
     private List<DataElement> dataElements = new ArrayList<DataElement>();
 
+    private List<OptionSet> optionSets = new ArrayList<OptionSet>();
+
     private List<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>();
 
     private List<DataElementGroupSet> dataElementGroupSets = new ArrayList<DataElementGroupSet>();
+
+    private List<Concept> concepts = new ArrayList<Concept>();
 
     private List<DataElementCategory> categories = new ArrayList<DataElementCategory>();
 
@@ -87,6 +97,14 @@ public class DXF2
 
     private List<ValidationRuleGroup> validationRuleGroups = new ArrayList<ValidationRuleGroup>();
 
+    private List<SqlView> sqlViews = new ArrayList<SqlView>();
+
+    private List<Chart> charts = new ArrayList<Chart>();
+
+    private List<Report> reports = new ArrayList<Report>();
+
+    private List<ReportTable> reportTables = new ArrayList<ReportTable>();
+
     @JsonProperty
     @JacksonXmlElementWrapper( localName = "dataElements" )
     @JacksonXmlProperty( localName = "dataElement" )
@@ -98,6 +116,19 @@ public class DXF2
     public void setDataElements( List<DataElement> dataElements )
     {
         this.dataElements = dataElements;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "optionSets" )
+    @JacksonXmlProperty( localName = "optionSet" )
+    public List<OptionSet> getOptionSets()
+    {
+        return optionSets;
+    }
+
+    public void setOptionSets( List<OptionSet> optionSets )
+    {
+        this.optionSets = optionSets;
     }
 
     @JsonProperty
@@ -124,6 +155,19 @@ public class DXF2
     public void setDataElementGroupSets( List<DataElementGroupSet> dataElementGroupSets )
     {
         this.dataElementGroupSets = dataElementGroupSets;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "concepts" )
+    @JacksonXmlProperty( localName = "concept" )
+    public List<Concept> getConcepts()
+    {
+        return concepts;
+    }
+
+    public void setConcepts( List<Concept> concepts )
+    {
+        this.concepts = concepts;
     }
 
     @JsonProperty
@@ -306,5 +350,57 @@ public class DXF2
     public void setValidationRuleGroups( List<ValidationRuleGroup> validationRuleGroups )
     {
         this.validationRuleGroups = validationRuleGroups;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "sqlViews" )
+    @JacksonXmlProperty( localName = "sqlView" )
+    public List<SqlView> getSqlViews()
+    {
+        return sqlViews;
+    }
+
+    public void setSqlViews( List<SqlView> sqlViews )
+    {
+        this.sqlViews = sqlViews;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "charts" )
+    @JacksonXmlProperty( localName = "chart" )
+    public List<Chart> getCharts()
+    {
+        return charts;
+    }
+
+    public void setCharts( List<Chart> charts )
+    {
+        this.charts = charts;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "reports" )
+    @JacksonXmlProperty( localName = "report" )
+    public List<Report> getReports()
+    {
+        return reports;
+    }
+
+    public void setReports( List<Report> reports )
+    {
+        this.reports = reports;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "reportTables" )
+    @JacksonXmlProperty( localName = "reportTable" )
+    public List<ReportTable> getReportTables()
+    {
+        return reportTables;
+    }
+
+    public void setReportTables( List<ReportTable> reportTables )
+    {
+        this.reportTables = reportTables;
     }
 }

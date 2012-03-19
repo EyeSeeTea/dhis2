@@ -36,6 +36,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -146,7 +147,7 @@ public class IndicatorGroup
 
     @JsonProperty( value = "indicators" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "indicators" )
     @JacksonXmlProperty( localName = "indicator" )
     public Set<Indicator> getMembers()
@@ -161,7 +162,7 @@ public class IndicatorGroup
 
     @JsonProperty( value = "indicatorGroupSet" )
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "indicatorGroupSets" )
     @JacksonXmlProperty( localName = "indicatorGroupSet" )
     public IndicatorGroupSet getGroupSet()

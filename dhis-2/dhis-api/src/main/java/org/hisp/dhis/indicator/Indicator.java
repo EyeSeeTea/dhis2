@@ -38,6 +38,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataset.DataSet;
 
 import java.util.HashSet;
@@ -160,7 +161,7 @@ public class Indicator
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public boolean isAnnualized()
     {
         return annualized;
@@ -173,7 +174,7 @@ public class Indicator
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public IndicatorType getIndicatorType()
     {
         return indicatorType;
@@ -185,7 +186,7 @@ public class Indicator
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public String getNumerator()
     {
         return numerator;
@@ -197,7 +198,7 @@ public class Indicator
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public String getNumeratorDescription()
     {
         return numeratorDescription;
@@ -209,6 +210,7 @@ public class Indicator
     }
 
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
     public String getExplodedNumerator()
     {
         return explodedNumerator;
@@ -220,7 +222,7 @@ public class Indicator
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public String getDenominator()
     {
         return denominator;
@@ -232,7 +234,7 @@ public class Indicator
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public String getDenominatorDescription()
     {
         return denominatorDescription;
@@ -244,7 +246,7 @@ public class Indicator
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public String getExplodedDenominator()
     {
         return explodedDenominator;
@@ -256,7 +258,7 @@ public class Indicator
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -268,7 +270,7 @@ public class Indicator
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public String getUrl()
     {
         return url;

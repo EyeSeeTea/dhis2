@@ -37,6 +37,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -290,7 +291,7 @@ public class Chart
     {
         return dataElements != null && dataElements.size() > 0;
     }
-    
+
     public boolean hasDataSets()
     {
         return dataSets != null && dataSets.size() > 0;
@@ -326,7 +327,8 @@ public class Chart
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getDomainAxisLabel()
     {
         return domainAxisLabel;
@@ -338,7 +340,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getRangeAxisLabel()
     {
         return rangeAxisLabel;
@@ -350,7 +353,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getType()
     {
         return type;
@@ -362,7 +366,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getSeries()
     {
         return series;
@@ -374,7 +379,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getCategory()
     {
         return category;
@@ -386,7 +392,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getFilter()
     {
         return filter;
@@ -398,7 +405,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isHideLegend()
     {
         return hideLegend;
@@ -410,7 +418,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isRegression()
     {
         return regression;
@@ -422,7 +431,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Double getTargetLineValue()
     {
         return targetLineValue;
@@ -434,7 +444,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getTargetLineLabel()
     {
         return targetLineLabel;
@@ -446,7 +457,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Double getBaseLineValue()
     {
         return baseLineValue;
@@ -458,7 +470,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getBaseLineLabel()
     {
         return baseLineLabel;
@@ -470,7 +483,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isHideSubtitle()
     {
         return hideSubtitle;
@@ -483,7 +497,7 @@ public class Chart
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "indicators" )
     @JacksonXmlProperty( localName = "indicator" )
     public List<Indicator> getIndicators()
@@ -498,7 +512,7 @@ public class Chart
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "dataElements" )
     @JacksonXmlProperty( localName = "dataElement" )
     public List<DataElement> getDataElements()
@@ -513,7 +527,7 @@ public class Chart
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "dataSets" )
     @JacksonXmlProperty( localName = "dataSet" )
     public List<DataSet> getDataSets()
@@ -528,7 +542,7 @@ public class Chart
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "organisationUnits" )
     @JacksonXmlProperty( localName = "organisationUnit" )
     public List<OrganisationUnit> getOrganisationUnits()
@@ -541,18 +555,9 @@ public class Chart
         this.organisationUnits = organisationUnits;
     }
 
-    public I18nFormat getFormat()
-    {
-        return format;
-    }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
-
     @JsonProperty( value = "relativePeriods" )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public RelativePeriods getRelatives()
     {
         return relatives;
@@ -564,7 +569,8 @@ public class Chart
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isUserOrganisationUnit()
     {
         return userOrganisationUnit;
@@ -573,6 +579,47 @@ public class Chart
     public void setUserOrganisationUnit( boolean userOrganisationUnit )
     {
         this.userOrganisationUnit = userOrganisationUnit;
+    }
+
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
+    public User getUser()
+    {
+        return user;
+    }
+
+    public void setUser( User user )
+    {
+        this.user = user;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
+    public OrganisationUnitGroupSet getOrganisationUnitGroupSet()
+    {
+        return organisationUnitGroupSet;
+    }
+
+    public void setOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet )
+    {
+        this.organisationUnitGroupSet = organisationUnitGroupSet;
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters and setters for transient fields
+    // -------------------------------------------------------------------------
+
+    public I18nFormat getFormat()
+    {
+        return format;
+    }
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
     }
 
     public List<Period> getRelativePeriods()
@@ -593,29 +640,5 @@ public class Chart
     public void setOrganisationUnit( OrganisationUnit organisationUnit )
     {
         this.organisationUnit = organisationUnit;
-    }
-
-    @JsonProperty
-    @JsonView( {DetailedView.class} )
-    public User getUser()
-    {
-        return user;
-    }
-
-    public void setUser( User user )
-    {
-        this.user = user;
-    }
-
-    @JsonProperty
-    @JsonView( {DetailedView.class} )
-    public OrganisationUnitGroupSet getOrganisationUnitGroupSet()
-    {
-        return organisationUnitGroupSet;
-    }
-
-    public void setOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet )
-    {
-        this.organisationUnitGroupSet = organisationUnitGroupSet;
     }
 }

@@ -41,6 +41,7 @@ import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.user.User;
@@ -536,7 +537,8 @@ public class OrganisationUnit
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public OrganisationUnit getParent()
     {
         return parent;
@@ -558,7 +560,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Date getOpeningDate()
     {
         return openingDate;
@@ -570,7 +573,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Date getClosedDate()
     {
         return closedDate;
@@ -582,7 +586,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isActive()
     {
         return active;
@@ -594,7 +599,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getComment()
     {
         return comment;
@@ -606,7 +612,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getGeoCode()
     {
         return geoCode;
@@ -618,7 +625,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getFeatureType()
     {
         return featureType;
@@ -630,7 +638,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getCoordinates()
     {
         return coordinates;
@@ -642,7 +651,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getUrl()
     {
         return url;
@@ -695,7 +705,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getContactPerson()
     {
         return contactPerson;
@@ -707,7 +718,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getAddress()
     {
         return address;
@@ -719,7 +731,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getEmail()
     {
         return email;
@@ -731,7 +744,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getPhoneNumber()
     {
         return phoneNumber;
@@ -743,7 +757,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isHasPatients()
     {
         return hasPatients;
@@ -755,7 +770,8 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getType()
     {
         return type;

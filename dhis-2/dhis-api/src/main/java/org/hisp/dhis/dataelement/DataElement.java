@@ -39,6 +39,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.period.PeriodType;
@@ -402,8 +403,8 @@ public class DataElement
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getFormName()
     {
         return formName;
@@ -415,8 +416,8 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isActive()
     {
         return active;
@@ -428,7 +429,7 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public String getDomainType()
     {
@@ -441,8 +442,8 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getType()
     {
         return type;
@@ -454,8 +455,8 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getAggregationOperator()
     {
         return aggregationOperator;
@@ -480,8 +481,8 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -493,8 +494,8 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getUrl()
     {
         return url;
@@ -508,8 +509,8 @@ public class DataElement
     @JsonProperty( value = "dataElementGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( {DetailedView.class} )
-    @JacksonXmlElementWrapper( localName = "dataElementGroups", namespace = Dxf2Namespace.NAMESPACE )
-    @JacksonXmlProperty( localName = "dataElementGroup", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlElementWrapper( localName = "dataElementGroups" )
+    @JacksonXmlProperty( localName = "dataElementGroup" )
     public Set<DataElementGroup> getGroups()
     {
         return groups;
@@ -523,8 +524,8 @@ public class DataElement
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( {DetailedView.class} )
-    @JacksonXmlElementWrapper( localName = "dataSets", namespace = Dxf2Namespace.NAMESPACE )
-    @JacksonXmlProperty( localName = "dataSet", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlElementWrapper( localName = "dataSets" )
+    @JacksonXmlProperty( localName = "dataSet" )
     public Set<DataSet> getDataSets()
     {
         return dataSets;
@@ -536,8 +537,8 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public List<Integer> getAggregationLevels()
     {
         return aggregationLevels;
@@ -549,8 +550,8 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isZeroIsSignificant()
     {
         return zeroIsSignificant;
@@ -562,8 +563,8 @@ public class DataElement
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getNumberType()
     {
         return numberType;
@@ -590,8 +591,8 @@ public class DataElement
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public OptionSet getOptionSet()
     {
         return optionSet;

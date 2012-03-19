@@ -30,7 +30,11 @@ package org.hisp.dhis.api.controller;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.view.JacksonUtils;
 import org.hisp.dhis.api.webdomain.DXF2;
-import org.hisp.dhis.common.view.IdentifiableObjectView;
+import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.chart.ChartService;
+import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.concept.Concept;
+import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -38,7 +42,15 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.option.OptionService;
+import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.*;
+import org.hisp.dhis.report.Report;
+import org.hisp.dhis.report.ReportService;
+import org.hisp.dhis.reporttable.ReportTable;
+import org.hisp.dhis.reporttable.ReportTableService;
+import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.sqlview.SqlViewService;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.hisp.dhis.validation.ValidationRuleService;
@@ -68,6 +80,12 @@ public class ExportController
     private DataElementService dataElementService;
 
     @Autowired
+    private OptionService optionService;
+
+    @Autowired
+    private ConceptService conceptService;
+
+    @Autowired
     private DataElementCategoryService dataElementCategoryService;
 
     @Autowired
@@ -85,6 +103,18 @@ public class ExportController
     @Autowired
     private ValidationRuleService validationRuleService;
 
+    @Autowired
+    private SqlViewService sqlViewService;
+
+    @Autowired
+    private ChartService chartService;
+
+    @Autowired
+    private ReportService reportService;
+
+    @Autowired
+    private ReportTableService reportTableService;
+
     @RequestMapping( value = ExportController.RESOURCE_PATH, method = RequestMethod.GET )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public String export( Model model )
@@ -92,6 +122,7 @@ public class ExportController
         DXF2 dxf2 = getExportObject();
 
         model.addAttribute( "model", dxf2 );
+        model.addAttribute( "view", "export" );
 
         return "export";
     }
@@ -109,7 +140,7 @@ public class ExportController
         ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
         zip.putNextEntry( new ZipEntry( "export.xml" ) );
 
-        JacksonUtils.toXmlWithView( zip, dxf2, IdentifiableObjectView.class );
+        JacksonUtils.toXmlWithView( zip, dxf2, ExportView.class );
     }
 
     @RequestMapping( value = ExportController.RESOURCE_PATH + ".zip", method = RequestMethod.GET, headers = {"Accept=application/json"} )
@@ -125,7 +156,7 @@ public class ExportController
         ZipOutputStream zip = new ZipOutputStream( response.getOutputStream() );
         zip.putNextEntry( new ZipEntry( "export.json" ) );
 
-        JacksonUtils.toJsonWithView( zip, dxf2, IdentifiableObjectView.class );
+        JacksonUtils.toJsonWithView( zip, dxf2, ExportView.class );
     }
 
     //-------------------------------------------------------------------------------------------------------
@@ -137,11 +168,15 @@ public class ExportController
         DXF2 dxf2 = new DXF2();
 
         dxf2.setDataElements( new ArrayList<DataElement>( dataElementService.getAllDataElements() ) );
+        dxf2.setOptionSets( new ArrayList<OptionSet>( optionService.getAllOptionSets() ) );
         dxf2.setDataElementGroups( new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() ) );
         dxf2.setDataElementGroupSets( new ArrayList<DataElementGroupSet>( dataElementService.getAllDataElementGroupSets() ) );
+
+        dxf2.setConcepts( new ArrayList<Concept>( conceptService.getAllConcepts() ) );
         dxf2.setCategories( new ArrayList<DataElementCategory>( dataElementCategoryService.getAllDataElementCategories() ) );
-        dxf2.setCategoryCombos( new ArrayList<DataElementCategoryCombo>( dataElementCategoryService.getAllDataElementCategoryCombos() ) );
         dxf2.setCategoryOptions( new ArrayList<DataElementCategoryOption>( dataElementCategoryService.getAllDataElementCategoryOptions() ) );
+
+        dxf2.setCategoryCombos( new ArrayList<DataElementCategoryCombo>( dataElementCategoryService.getAllDataElementCategoryCombos() ) );
         dxf2.setCategoryOptionCombos( new ArrayList<DataElementCategoryOptionCombo>( dataElementCategoryService.getAllDataElementCategoryOptionCombos() ) );
 
         dxf2.setIndicators( new ArrayList<Indicator>( indicatorService.getAllIndicators() ) );
@@ -157,6 +192,12 @@ public class ExportController
 
         dxf2.setValidationRules( new ArrayList<ValidationRule>( validationRuleService.getAllValidationRules() ) );
         dxf2.setValidationRuleGroups( new ArrayList<ValidationRuleGroup>( validationRuleService.getAllValidationRuleGroups() ) );
+
+        dxf2.setSqlViews( new ArrayList<SqlView>( sqlViewService.getAllSqlViews() ) );
+
+        dxf2.setReportTables( new ArrayList<ReportTable>( reportTableService.getAllReportTables() ) );
+        dxf2.setReports( new ArrayList<Report>( reportService.getAllReports() ) );
+        dxf2.setCharts( new ArrayList<Chart>( chartService.getAllCharts() ) );
 
         return dxf2;
     }

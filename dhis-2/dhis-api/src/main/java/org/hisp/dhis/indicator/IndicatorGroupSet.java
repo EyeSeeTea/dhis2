@@ -37,6 +37,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -192,7 +193,7 @@ public class IndicatorGroupSet
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public String getDescription()
     {
         return description;
@@ -204,7 +205,7 @@ public class IndicatorGroupSet
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public Boolean isCompulsory()
     {
         if ( compulsory == null )
@@ -222,7 +223,7 @@ public class IndicatorGroupSet
 
     @JsonProperty( value = "indicatorGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "indicatorGroups" )
     @JacksonXmlProperty( localName = "indicatorGroup" )
     public List<IndicatorGroup> getMembers()

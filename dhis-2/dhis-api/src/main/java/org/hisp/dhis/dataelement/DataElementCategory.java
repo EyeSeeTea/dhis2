@@ -36,6 +36,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.concept.Concept;
 
 import java.util.ArrayList;
@@ -152,7 +153,7 @@ public class DataElementCategory
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "categoryOptions" )
     @JacksonXmlProperty( localName = "categoryOption" )
     public List<DataElementCategoryOption> getCategoryOptions()
@@ -165,6 +166,10 @@ public class DataElementCategory
         this.categoryOptions = categoryOptions;
     }
 
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Concept getConcept()
     {
         return concept;

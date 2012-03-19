@@ -27,6 +27,7 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -38,6 +39,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 
 import java.util.*;
 
@@ -270,6 +272,7 @@ public class DataElementCategoryOptionCombo
     }
 
     @Override
+    @JsonIgnore
     public String getShortName()
     {
         return getName();
@@ -282,6 +285,7 @@ public class DataElementCategoryOptionCombo
     }
 
     @Override
+    @JsonIgnore
     public String getAlternativeName()
     {
         return getName();
@@ -296,7 +300,8 @@ public class DataElementCategoryOptionCombo
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
@@ -309,7 +314,7 @@ public class DataElementCategoryOptionCombo
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "categoryOptions" )
     @JacksonXmlProperty( localName = "categoryOption" )
     public List<DataElementCategoryOption> getCategoryOptions()

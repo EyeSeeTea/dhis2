@@ -37,6 +37,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
@@ -327,7 +328,7 @@ public class DataSet
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "dataElements" )
     @JacksonXmlProperty( localName = "dataElement" )
     public Set<DataElement> getDataElements()
@@ -342,7 +343,7 @@ public class DataSet
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "indicators" )
     @JacksonXmlProperty( localName = "indicator" )
     public Set<Indicator> getIndicators()
@@ -356,7 +357,7 @@ public class DataSet
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public Set<DataElementOperand> getCompulsoryDataElementOperands()
     {
         return compulsoryDataElementOperands;
@@ -369,7 +370,7 @@ public class DataSet
 
     @JsonProperty( value = "organisationUnits" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "organisationUnits" )
     @JacksonXmlProperty( localName = "organisationUnit" )
     public Set<OrganisationUnit> getSources()
@@ -383,7 +384,7 @@ public class DataSet
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -395,7 +396,7 @@ public class DataSet
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "sections" )
     @JacksonXmlProperty( localName = "section" )
     public Set<Section> getSections()
@@ -409,7 +410,7 @@ public class DataSet
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public boolean isMobile()
     {
         return mobile;
@@ -421,7 +422,7 @@ public class DataSet
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public Integer getVersion()
     {
         return version;
@@ -433,7 +434,7 @@ public class DataSet
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public int getExpiryDays()
     {
         return expiryDays;

@@ -28,8 +28,12 @@ package org.hisp.dhis.reporttable;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 
 import java.io.Serializable;
 
@@ -41,7 +45,7 @@ import java.io.Serializable;
  * @author Lars Helge Overland
  * @version $Id$
  */
-@JacksonXmlRootElement( localName = "dataElement", namespace = Dxf2Namespace.NAMESPACE )
+@JacksonXmlRootElement( localName = "reportParams", namespace = Dxf2Namespace.NAMESPACE )
 public class ReportParams
     implements Serializable
 {
@@ -123,6 +127,8 @@ public class ReportParams
     // -------------------------------------------------------------------------
 
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Boolean getParamReportingMonth()
     {
         return paramReportingMonth;
@@ -134,6 +140,8 @@ public class ReportParams
     }
 
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Boolean getParamLeafParentOrganisationUnit()
     {
         return paramLeafParentOrganisationUnit;
@@ -145,6 +153,8 @@ public class ReportParams
     }
 
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Boolean getParamGrandParentOrganisationUnit()
     {
         return paramGrandParentOrganisationUnit;
@@ -156,6 +166,8 @@ public class ReportParams
     }
 
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Boolean getParamParentOrganisationUnit()
     {
         return paramParentOrganisationUnit;
@@ -167,6 +179,8 @@ public class ReportParams
     }
 
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Boolean getParamOrganisationUnit()
     {
         return paramOrganisationUnit;

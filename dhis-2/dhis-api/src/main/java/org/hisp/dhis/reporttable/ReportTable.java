@@ -39,6 +39,7 @@ import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
@@ -854,7 +855,8 @@ public class ReportTable
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isRegression()
     {
         return regression;
@@ -866,7 +868,8 @@ public class ReportTable
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isCumulative()
     {
         return cumulative;
@@ -879,7 +882,7 @@ public class ReportTable
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "dataElements" )
     @JacksonXmlProperty( localName = "dataElement" )
     public List<DataElement> getDataElements()
@@ -894,7 +897,7 @@ public class ReportTable
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "indicators" )
     @JacksonXmlProperty( localName = "indicator" )
     public List<Indicator> getIndicators()
@@ -907,6 +910,11 @@ public class ReportTable
         this.indicators = indicators;
     }
 
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "periods" )
+    @JacksonXmlProperty( localName = "period" )
     public List<Period> getPeriods()
     {
         return periods;
@@ -919,7 +927,7 @@ public class ReportTable
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "dataSets" )
     @JacksonXmlProperty( localName = "dataSet" )
     public List<DataSet> getDataSets()
@@ -934,7 +942,7 @@ public class ReportTable
 
     @JsonProperty( value = "organisationUnits" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "organisationUnits" )
     @JacksonXmlProperty( localName = "organisationUnit" )
     public List<OrganisationUnit> getUnits()
@@ -949,7 +957,9 @@ public class ReportTable
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "organisationUnitGroups" )
+    @JacksonXmlProperty( localName = "organisationUnitGroup" )
     public List<OrganisationUnitGroup> getOrganisationUnitGroups()
     {
         return organisationUnitGroups;
@@ -962,7 +972,8 @@ public class ReportTable
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public DataElementCategoryCombo getCategoryCombo()
     {
         return categoryCombo;
@@ -974,7 +985,8 @@ public class ReportTable
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isDoIndicators()
     {
         return doIndicators;
@@ -986,7 +998,8 @@ public class ReportTable
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isDoPeriods()
     {
         return doPeriods;
@@ -998,7 +1011,8 @@ public class ReportTable
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isDoUnits()
     {
         return doUnits;
@@ -1010,7 +1024,8 @@ public class ReportTable
     }
 
     @JsonProperty( value = "relativePeriods" )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public RelativePeriods getRelatives()
     {
         return relatives;
@@ -1022,7 +1037,8 @@ public class ReportTable
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public ReportParams getReportParams()
     {
         return reportParams;
@@ -1034,7 +1050,8 @@ public class ReportTable
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -1046,7 +1063,8 @@ public class ReportTable
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getTopLimit()
     {
         return topLimit;

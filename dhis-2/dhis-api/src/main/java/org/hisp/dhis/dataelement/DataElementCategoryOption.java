@@ -27,6 +27,7 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -128,6 +129,7 @@ public class DataElementCategoryOption
     // -------------------------------------------------------------------------
 
     @Override
+    @JsonIgnore
     public String getShortName()
     {
         return name;
@@ -146,7 +148,6 @@ public class DataElementCategoryOption
         this.category = category;
     }
 
-    // TODO Serialize this when bobs concept stuff is in place
     public Concept getConcept()
     {
         return concept;

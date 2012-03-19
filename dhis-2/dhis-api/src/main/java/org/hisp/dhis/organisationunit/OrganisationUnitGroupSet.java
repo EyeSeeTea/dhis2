@@ -38,6 +38,7 @@ import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 
 import java.util.*;
 
@@ -188,7 +189,7 @@ public class OrganisationUnitGroupSet
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public String getDescription()
     {
         return description;
@@ -200,7 +201,7 @@ public class OrganisationUnitGroupSet
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     public boolean isCompulsory()
     {
         return compulsory;
@@ -213,7 +214,7 @@ public class OrganisationUnitGroupSet
 
     @JsonProperty( value = "organisationUnitGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "organisationUnitGroups" )
     @JacksonXmlProperty( localName = "organisationUnitGroup" )
     public Set<OrganisationUnitGroup> getOrganisationUnitGroups()
