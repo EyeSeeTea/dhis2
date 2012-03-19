@@ -27,6 +27,7 @@ package org.hisp.dhis.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -39,6 +40,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 import java.util.Collection;
@@ -257,7 +259,8 @@ public class User
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getFirstName()
     {
         return firstName;
@@ -269,7 +272,8 @@ public class User
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getSurname()
     {
         return surname;
@@ -281,7 +285,8 @@ public class User
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getEmail()
     {
         return email;
@@ -293,7 +298,8 @@ public class User
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getPhoneNumber()
     {
         return phoneNumber;
@@ -304,6 +310,9 @@ public class User
         this.phoneNumber = phoneNumber;
     }
 
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public UserCredentials getUserCredentials()
     {
         return userCredentials;
@@ -316,7 +325,7 @@ public class User
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "organisationUnits" )
     @JacksonXmlProperty( localName = "organisationUnit" )
     public Collection<OrganisationUnit> getOrganisationUnits()

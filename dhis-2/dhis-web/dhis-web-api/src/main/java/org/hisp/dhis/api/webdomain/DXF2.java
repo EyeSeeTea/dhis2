@@ -34,8 +34,10 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.concept.Concept;
+import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.document.Document;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
@@ -47,6 +49,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 
@@ -59,6 +63,10 @@ import java.util.List;
 @JacksonXmlRootElement( localName = "dxf2", namespace = Dxf2Namespace.NAMESPACE )
 public class DXF2
 {
+    private List<User> users = new ArrayList<User>();
+
+    private List<UserGroup> userGroups = new ArrayList<UserGroup>();
+
     private List<DataElement> dataElements = new ArrayList<DataElement>();
 
     private List<OptionSet> optionSets = new ArrayList<OptionSet>();
@@ -104,6 +112,40 @@ public class DXF2
     private List<Report> reports = new ArrayList<Report>();
 
     private List<ReportTable> reportTables = new ArrayList<ReportTable>();
+
+    private List<Document> documents = new ArrayList<Document>();
+
+    private List<Constant> constants = new ArrayList<Constant>();
+
+    public DXF2()
+    {
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "users" )
+    @JacksonXmlProperty( localName = "user" )
+    public List<User> getUsers()
+    {
+        return users;
+    }
+
+    public void setUsers( List<User> users )
+    {
+        this.users = users;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "userGroups" )
+    @JacksonXmlProperty( localName = "userGroup" )
+    public List<UserGroup> getUserGroups()
+    {
+        return userGroups;
+    }
+
+    public void setUserGroups( List<UserGroup> userGroups )
+    {
+        this.userGroups = userGroups;
+    }
 
     @JsonProperty
     @JacksonXmlElementWrapper( localName = "dataElements" )
@@ -402,5 +444,31 @@ public class DXF2
     public void setReportTables( List<ReportTable> reportTables )
     {
         this.reportTables = reportTables;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "documents" )
+    @JacksonXmlProperty( localName = "document" )
+    public List<Document> getDocuments()
+    {
+        return documents;
+    }
+
+    public void setDocuments( List<Document> documents )
+    {
+        this.documents = documents;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "constants" )
+    @JacksonXmlProperty( localName = "constant" )
+    public List<Constant> getConstants()
+    {
+        return constants;
+    }
+
+    public void setConstants( List<Constant> constants )
+    {
+        this.constants = constants;
     }
 }

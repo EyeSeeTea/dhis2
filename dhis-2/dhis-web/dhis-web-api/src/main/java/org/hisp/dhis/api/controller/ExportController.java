@@ -35,9 +35,12 @@ import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.concept.ConceptService;
+import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.document.DocumentService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
@@ -51,6 +54,10 @@ import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewService;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupService;
+import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.hisp.dhis.validation.ValidationRuleService;
@@ -75,6 +82,12 @@ import java.util.zip.ZipOutputStream;
 public class ExportController
 {
     public static final String RESOURCE_PATH = "/export";
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserGroupService userGroupService;
 
     @Autowired
     private DataElementService dataElementService;
@@ -114,6 +127,12 @@ public class ExportController
 
     @Autowired
     private ReportTableService reportTableService;
+
+    @Autowired
+    private DocumentService documentService;
+
+    @Autowired
+    private ConstantService constantService;
 
     @RequestMapping( value = ExportController.RESOURCE_PATH, method = RequestMethod.GET )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
@@ -167,6 +186,13 @@ public class ExportController
     {
         DXF2 dxf2 = new DXF2();
 
+        dxf2.setUsers( new ArrayList<User>( userService.getAllUsers() ) );
+        dxf2.setUserGroups( new ArrayList<UserGroup>( userGroupService.getAllUserGroups() ) );
+
+/*
+        dxf2.setConstants( new ArrayList<Constant>( constantService.getAllConstants() ) );
+        dxf2.setConcepts( new ArrayList<Concept>( conceptService.getAllConcepts() ) );
+
         dxf2.setDataElements( new ArrayList<DataElement>( dataElementService.getAllDataElements() ) );
         dxf2.setOptionSets( new ArrayList<OptionSet>( optionService.getAllOptionSets() ) );
         dxf2.setDataElementGroups( new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() ) );
@@ -198,6 +224,7 @@ public class ExportController
         dxf2.setReportTables( new ArrayList<ReportTable>( reportTableService.getAllReportTables() ) );
         dxf2.setReports( new ArrayList<Report>( reportService.getAllReports() ) );
         dxf2.setCharts( new ArrayList<Chart>( chartService.getAllCharts() ) );
+*/
 
         return dxf2;
     }

@@ -36,6 +36,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -108,9 +109,9 @@ public class UserGroup
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @JsonProperty
+    @JsonProperty( value = "users" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "users" )
     @JacksonXmlProperty( localName = "user" )
     public Set<User> getMembers()
