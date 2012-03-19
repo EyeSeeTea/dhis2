@@ -2,8 +2,12 @@ package org.hisp.dhis.document;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -32,14 +36,8 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.view.DetailedView;
-
-import javax.xml.bind.annotation.*;
-
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 @JacksonXmlRootElement( localName = "document", namespace = Dxf2Namespace.NAMESPACE )
 public class Document
@@ -93,7 +91,8 @@ public class Document
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getUrl()
     {
         return url;
@@ -105,7 +104,8 @@ public class Document
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isExternal()
     {
         return external;
@@ -117,7 +117,8 @@ public class Document
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getContentType()
     {
         return contentType;

@@ -42,6 +42,7 @@ import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.document.Document;
 import org.hisp.dhis.document.DocumentService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
@@ -288,6 +289,7 @@ public class MetaDataController
 
         dxf2.setSqlViews( new ArrayList<SqlView>( sqlViewService.getAllSqlViews() ) );
 
+        dxf2.setDocuments( new ArrayList<Document>( documentService.getAllDocuments() ) );
         dxf2.setReportTables( new ArrayList<ReportTable>( reportTableService.getAllReportTables() ) );
         dxf2.setReports( new ArrayList<Report>( reportService.getAllReports() ) );
         dxf2.setCharts( new ArrayList<Chart>( chartService.getAllCharts() ) );
@@ -307,6 +309,7 @@ public class MetaDataController
         System.err.println( "UserGroups: " + dxf2.getUserGroups().size() );
         System.err.println( "UserAuthorityGroups: " + dxf2.getUserAuthorityGroups().size() );
 
+        System.err.println( "Documents: " + dxf2.getDocuments().size() );
         System.err.println( "Reports: " + dxf2.getReports().size() );
         System.err.println( "ReportTables: " + dxf2.getReportTables().size() );
         System.err.println( "Charts: " + dxf2.getCharts().size() );
