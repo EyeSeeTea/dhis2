@@ -30,33 +30,29 @@ package org.hisp.dhis.api.controller;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.view.JacksonUtils;
 import org.hisp.dhis.api.webdomain.DXF2;
-import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.concept.ConceptService;
-import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
-import org.hisp.dhis.dataelement.*;
-import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.document.DocumentService;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.mapping.MapLegend;
+import org.hisp.dhis.mapping.MapLegendSet;
+import org.hisp.dhis.mapping.MapView;
+import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.message.MessageConversation;
+import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.option.OptionService;
-import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.organisationunit.*;
-import org.hisp.dhis.report.Report;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.report.ReportService;
-import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
-import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewService;
-import org.hisp.dhis.user.*;
-import org.hisp.dhis.validation.ValidationRule;
-import org.hisp.dhis.validation.ValidationRuleGroup;
+import org.hisp.dhis.user.UserGroupService;
+import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.validation.ValidationRuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -85,6 +81,9 @@ public class ExportController
 
     @Autowired
     private UserGroupService userGroupService;
+
+    @Autowired
+    private MessageService messageService;
 
     @Autowired
     private DataElementService dataElementService;
@@ -130,6 +129,9 @@ public class ExportController
 
     @Autowired
     private ConstantService constantService;
+
+    @Autowired
+    private MappingService mappingService;
 
     @RequestMapping( value = ExportController.RESOURCE_PATH, method = RequestMethod.GET )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
@@ -183,11 +185,11 @@ public class ExportController
     {
         DXF2 dxf2 = new DXF2();
 
+/*
         dxf2.setUsers( new ArrayList<User>( userService.getAllUsers() ) );
         dxf2.setUserAuthorityGroups( new ArrayList<UserAuthorityGroup>( userService.getAllUserAuthorityGroups() ) );
         dxf2.setUserGroups( new ArrayList<UserGroup>( userGroupService.getAllUserGroups() ) );
 
-/*
         dxf2.setConstants( new ArrayList<Constant>( constantService.getAllConstants() ) );
         dxf2.setConcepts( new ArrayList<Concept>( conceptService.getAllConcepts() ) );
 
@@ -223,6 +225,10 @@ public class ExportController
         dxf2.setReports( new ArrayList<Report>( reportService.getAllReports() ) );
         dxf2.setCharts( new ArrayList<Chart>( chartService.getAllCharts() ) );
 */
+
+        dxf2.setMaps( new ArrayList<MapView>( mappingService.getAllMapViews() ) );
+        dxf2.setMapLegends( new ArrayList<MapLegend>( mappingService.getAllMapLegends() ) );
+        dxf2.setMapLegendSets( new ArrayList<MapLegendSet>( mappingService.getAllMapLegendSets() ) );
 
         return dxf2;
     }

@@ -56,6 +56,7 @@ public class HibernateMappingStore
     public int addMapLegend( MapLegend legend )
     {
         Session session = sessionFactory.getCurrentSession();
+        legend.setAutoFields();
 
         return (Integer) session.save( legend );
     }
@@ -63,6 +64,7 @@ public class HibernateMappingStore
     public void updateMapLegend( MapLegend legend )
     {
         Session session = sessionFactory.getCurrentSession();
+        legend.setAutoFields();
 
         session.update( legend );
     }
@@ -109,6 +111,7 @@ public class HibernateMappingStore
     public int addMapLegendSet( MapLegendSet legendSet )
     {
         Session session = sessionFactory.getCurrentSession();
+        legendSet.setAutoFields();
 
         return (Integer) session.save( legendSet );
     }
@@ -116,6 +119,7 @@ public class HibernateMappingStore
     public void updateMapLegendSet( MapLegendSet legendSet )
     {
         Session session = sessionFactory.getCurrentSession();
+        legendSet.setAutoFields();
 
         session.update( legendSet );
     }

@@ -36,6 +36,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.user.User;
 
 import java.util.*;
@@ -47,6 +48,10 @@ import java.util.*;
 public class MessageConversation
     extends BaseIdentifiableObject
 {
+    //-------------------------------------------------------------------------------------------------------
+    // Persistent fields
+    //-------------------------------------------------------------------------------------------------------
+
     private String subject;
 
     private Set<UserMessage> userMessages = new HashSet<UserMessage>();
@@ -56,6 +61,10 @@ public class MessageConversation
     private User lastSender;
 
     private Date lastMessage;
+
+    //-------------------------------------------------------------------------------------------------------
+    // Transient fields
+    //-------------------------------------------------------------------------------------------------------
 
     private transient boolean read;
 
@@ -76,10 +85,43 @@ public class MessageConversation
         this.lastMessage = new Date();
     }
 
+    //-------------------------------------------------------------------------------------------------------
+    // Logic
+    //-------------------------------------------------------------------------------------------------------
+
     @Override
-    public String getName()
+    public int hashCode()
     {
-        return subject;
+        return uid.hashCode();
+    }
+
+    @Override
+    public boolean equals( Object object )
+    {
+        if ( this == object )
+        {
+            return true;
+        }
+
+        if ( object == null )
+        {
+            return false;
+        }
+
+        if ( getClass() != object.getClass() )
+        {
+            return false;
+        }
+
+        final MessageConversation other = (MessageConversation) object;
+
+        return uid.equals( other.uid );
+    }
+
+    @Override
+    public String toString()
+    {
+        return "[" + subject + "]";
     }
 
     public void addUserMessage( UserMessage userMessage )
@@ -191,8 +233,19 @@ public class MessageConversation
         return users;
     }
 
+    //-------------------------------------------------------------------------------------------------------
+    // Persistent fields
+    //-------------------------------------------------------------------------------------------------------
+
+    @Override
+    public String getName()
+    {
+        return subject;
+    }
+
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getSubject()
     {
         return subject;
@@ -203,6 +256,10 @@ public class MessageConversation
         this.subject = subject;
     }
 
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "userMessages" )
+    @JacksonXmlProperty( localName = "userMessage" )
     public Set<UserMessage> getUserMessages()
     {
         return userMessages;
@@ -214,7 +271,8 @@ public class MessageConversation
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "messages" )
     @JacksonXmlProperty( localName = "message" )
     public List<Message> getMessages()
@@ -229,7 +287,8 @@ public class MessageConversation
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public User getLastSender()
     {
         return lastSender;
@@ -241,7 +300,8 @@ public class MessageConversation
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Date getLastMessage()
     {
         return lastMessage;
@@ -251,6 +311,10 @@ public class MessageConversation
     {
         this.lastMessage = lastMessage;
     }
+
+    //-------------------------------------------------------------------------------------------------------
+    // Transient fields
+    //-------------------------------------------------------------------------------------------------------
 
     @JsonProperty
     @JsonView( {DetailedView.class} )
@@ -299,40 +363,5 @@ public class MessageConversation
     public void setLastSenderFirstname( String lastSenderFirstname )
     {
         this.lastSenderFirstname = lastSenderFirstname;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return uid.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        final MessageConversation other = (MessageConversation) object;
-
-        return uid.equals( other.uid );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[" + subject + "]";
     }
 }

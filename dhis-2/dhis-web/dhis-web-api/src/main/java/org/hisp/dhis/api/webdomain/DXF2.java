@@ -41,6 +41,10 @@ import org.hisp.dhis.document.Document;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
+import org.hisp.dhis.mapping.MapLegend;
+import org.hisp.dhis.mapping.MapLegendSet;
+import org.hisp.dhis.mapping.MapView;
+import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -69,6 +73,8 @@ public class DXF2
     private List<UserAuthorityGroup> userAuthorityGroups = new ArrayList<UserAuthorityGroup>();
 
     private List<UserGroup> userGroups = new ArrayList<UserGroup>();
+
+    private List<MessageConversation> messageConversations = new ArrayList<MessageConversation>();
 
     private List<DataElement> dataElements = new ArrayList<DataElement>();
 
@@ -120,6 +126,12 @@ public class DXF2
 
     private List<Constant> constants = new ArrayList<Constant>();
 
+    private List<MapView> maps = new ArrayList<MapView>();
+
+    private List<MapLegend> mapLegends = new ArrayList<MapLegend>();
+
+    private List<MapLegendSet> mapLegendSets = new ArrayList<MapLegendSet>();
+
     public DXF2()
     {
     }
@@ -161,6 +173,19 @@ public class DXF2
     public void setUserGroups( List<UserGroup> userGroups )
     {
         this.userGroups = userGroups;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "messageConversations" )
+    @JacksonXmlProperty( localName = "messageConversation" )
+    public List<MessageConversation> getMessageConversations()
+    {
+        return messageConversations;
+    }
+
+    public void setMessageConversations( List<MessageConversation> messageConversations )
+    {
+        this.messageConversations = messageConversations;
     }
 
     @JsonProperty
@@ -486,5 +511,44 @@ public class DXF2
     public void setConstants( List<Constant> constants )
     {
         this.constants = constants;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "maps" )
+    @JacksonXmlProperty( localName = "map" )
+    public List<MapView> getMaps()
+    {
+        return maps;
+    }
+
+    public void setMaps( List<MapView> maps )
+    {
+        this.maps = maps;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "mapLegends" )
+    @JacksonXmlProperty( localName = "mapLegend" )
+    public List<MapLegend> getMapLegends()
+    {
+        return mapLegends;
+    }
+
+    public void setMapLegends( List<MapLegend> mapLegends )
+    {
+        this.mapLegends = mapLegends;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "mapLegendSets" )
+    @JacksonXmlProperty( localName = "mapLegendSet" )
+    public List<MapLegendSet> getMapLegendSets()
+    {
+        return mapLegendSets;
+    }
+
+    public void setMapLegendSets( List<MapLegendSet> mapLegendSets )
+    {
+        this.mapLegendSets = mapLegendSets;
     }
 }

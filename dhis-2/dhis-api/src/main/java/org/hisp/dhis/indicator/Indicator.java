@@ -296,6 +296,7 @@ public class Indicator
         this.groups = groups;
     }
 
+    @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( {DetailedView.class} )
     @JacksonXmlElementWrapper( localName = "dataSets" )

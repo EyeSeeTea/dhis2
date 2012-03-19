@@ -30,11 +30,13 @@ package org.hisp.dhis.message;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.user.User;
 
 import java.util.Date;
@@ -83,7 +85,8 @@ public class Message
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getText()
     {
         return text;
@@ -95,7 +98,8 @@ public class Message
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getMetaData()
     {
         return metaData;
@@ -108,7 +112,8 @@ public class Message
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public User getSender()
     {
         return sender;

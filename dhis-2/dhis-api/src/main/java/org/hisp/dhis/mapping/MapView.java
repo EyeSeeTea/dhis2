@@ -30,10 +30,12 @@ package org.hisp.dhis.mapping;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.indicator.Indicator;
@@ -46,7 +48,6 @@ import org.hisp.dhis.user.User;
 
 /**
  * @author Jan Henrik Overland
- * @version $Id$
  */
 @JacksonXmlRootElement( localName = "map", namespace = Dxf2Namespace.NAMESPACE )
 public class MapView
@@ -190,7 +191,9 @@ public class MapView
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public User getUser()
     {
         return user;
@@ -202,7 +205,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getMapValueType()
     {
         return mapValueType;
@@ -215,7 +219,8 @@ public class MapView
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public IndicatorGroup getIndicatorGroup()
     {
         return indicatorGroup;
@@ -228,7 +233,8 @@ public class MapView
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Indicator getIndicator()
     {
         return indicator;
@@ -241,7 +247,8 @@ public class MapView
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public DataElementGroup getDataElementGroup()
     {
         return dataElementGroup;
@@ -254,7 +261,8 @@ public class MapView
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public DataElement getDataElement()
     {
         return dataElement;
@@ -266,7 +274,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getMapDateType()
     {
         return mapDateType;
@@ -289,7 +298,8 @@ public class MapView
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Period getPeriod()
     {
         return period;
@@ -302,7 +312,8 @@ public class MapView
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public OrganisationUnit getParentOrganisationUnit()
     {
         return parentOrganisationUnit;
@@ -315,7 +326,8 @@ public class MapView
 
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public OrganisationUnitLevel getOrganisationUnitLevel()
     {
         return organisationUnitLevel;
@@ -327,7 +339,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getMapLegendType()
     {
         return mapLegendType;
@@ -339,7 +352,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getMethod()
     {
         return method;
@@ -351,7 +365,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getClasses()
     {
         return classes;
@@ -363,7 +378,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getBounds()
     {
         return bounds;
@@ -375,7 +391,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getColorLow()
     {
         return colorLow;
@@ -387,7 +404,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getColorHigh()
     {
         return colorHigh;
@@ -399,7 +417,9 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public MapLegendSet getMapLegendSet()
     {
         return mapLegendSet;
@@ -411,7 +431,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getRadiusLow()
     {
         return radiusLow;
@@ -423,7 +444,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getRadiusHigh()
     {
         return radiusHigh;
@@ -435,7 +457,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getLongitude()
     {
         return longitude;
@@ -447,7 +470,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getLatitude()
     {
         return latitude;
@@ -459,7 +483,8 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getZoom()
     {
         return zoom;
