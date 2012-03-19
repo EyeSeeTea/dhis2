@@ -631,6 +631,12 @@ public class DefaultMappingService
         return mappingStore.getMapLayer( id );
     }
 
+    @Override
+    public MapLayer getMapLayer( String uid )
+    {
+        return mappingStore.getMapLayer( uid );
+    }
+
     public MapLayer getMapLayerByName( String name )
     {
         return mappingStore.getMapLayerByName( name );

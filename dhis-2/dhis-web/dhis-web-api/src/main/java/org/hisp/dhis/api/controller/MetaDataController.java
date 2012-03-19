@@ -30,6 +30,8 @@ package org.hisp.dhis.api.controller;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.view.JacksonUtils;
 import org.hisp.dhis.api.webdomain.DXF2;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.view.ExportView;
@@ -45,10 +47,7 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.mapping.MapLegend;
-import org.hisp.dhis.mapping.MapLegendSet;
-import org.hisp.dhis.mapping.MapView;
-import org.hisp.dhis.mapping.MappingService;
+import org.hisp.dhis.mapping.*;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.option.OptionSet;
@@ -87,6 +86,9 @@ import java.util.zip.ZipOutputStream;
 public class MetaDataController
 {
     public static final String RESOURCE_PATH = "/metaData";
+
+    @Autowired
+    private AttributeService attributeService;
 
     @Autowired
     private UserService userService;
@@ -251,6 +253,8 @@ public class MetaDataController
     {
         DXF2 dxf2 = new DXF2();
 
+        dxf2.setAttributeTypes( new ArrayList<Attribute>( attributeService.getAllAttributes() ) );
+
         dxf2.setUsers( new ArrayList<User>( userService.getAllUsers() ) );
         dxf2.setUserAuthorityGroups( new ArrayList<UserAuthorityGroup>( userService.getAllUserAuthorityGroups() ) );
         dxf2.setUserGroups( new ArrayList<UserGroup>( userGroupService.getAllUserGroups() ) );
@@ -292,6 +296,8 @@ public class MetaDataController
         dxf2.setMapLegends( new ArrayList<MapLegend>( mappingService.getAllMapLegends() ) );
         dxf2.setMapLegendSets( new ArrayList<MapLegendSet>( mappingService.getAllMapLegendSets() ) );
 
+        dxf2.setMapLayers( new ArrayList<MapLayer>( mappingService.getAllMapLayers() ) );
+
         return dxf2;
     }
 
@@ -308,6 +314,7 @@ public class MetaDataController
         System.err.println( "Maps: " + dxf2.getMaps().size() );
         System.err.println( "MapLegends: " + dxf2.getMapLegends().size() );
         System.err.println( "MapLegendSets: " + dxf2.getMapLegendSets().size() );
+        System.err.println( "MapLayers: " + dxf2.getMapLayers().size() );
 
         System.err.println( "Constans: " + dxf2.getConstants().size() );
         System.err.println( "Concepts: " + dxf2.getConcepts().size() );

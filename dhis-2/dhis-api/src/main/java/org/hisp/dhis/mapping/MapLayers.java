@@ -1,5 +1,7 @@
+package org.hisp.dhis.mapping;
+
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,84 +27,32 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.attribute;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.BaseCollection;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.ExportView;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * @author mortenoh
- */
-@JacksonXmlRootElement( localName = "attribute", namespace = Dxf2Namespace.NAMESPACE )
-public class AttributeValue
-    implements Serializable
+@JacksonXmlRootElement( localName = "dxf2", namespace = Dxf2Namespace.NAMESPACE )
+public class MapLayers
+    extends BaseCollection
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = -6625127769248931066L;
-
-    private int id;
-
-    private Attribute attribute;
-
-    private String value;
-
-    public AttributeValue()
-    {
-
-    }
-
-    public AttributeValue( String value )
-    {
-        this.value = value;
-    }
-
-    @JsonIgnore
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
+    private List<MapLayer> mapLayers = new ArrayList<MapLayer>();
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty
-    public Attribute getAttribute()
+    @JacksonXmlElementWrapper( localName = "mapLayers", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "mapLayer", namespace = Dxf2Namespace.NAMESPACE )
+    public List<MapLayer> getMapLayers()
     {
-        return attribute;
+        return mapLayers;
     }
 
-    public void setAttribute( Attribute attribute )
+    public void setMapLayers( List<MapLayer> mapLayers )
     {
-        this.attribute = attribute;
-    }
-
-    @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty
-    public String getValue()
-    {
-        return value;
-    }
-
-    public void setValue( String value )
-    {
-        this.value = value;
+        this.mapLayers = mapLayers;
     }
 }

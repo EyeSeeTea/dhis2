@@ -293,6 +293,18 @@ public class HibernateMappingStore
         return (MapLayer) session.get( MapLayer.class, id );
     }
 
+    @Override
+    public MapLayer getMapLayer( String uid )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( MapLayer.class );
+
+        criteria.add( Restrictions.eq( "uid", uid ) );
+
+        return (MapLayer) criteria.uniqueResult();
+    }
+
     public MapLayer getMapLayerByName( String name )
     {
         Session session = sessionFactory.getCurrentSession();

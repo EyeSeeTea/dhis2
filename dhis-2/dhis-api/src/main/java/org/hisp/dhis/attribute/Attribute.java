@@ -34,6 +34,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -78,7 +79,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public String getValueType()
     {
         return valueType;
@@ -90,8 +92,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isMandatory()
     {
         return mandatory;
@@ -103,7 +105,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isDataElementAttribute()
     {
         return dataElementAttribute;
@@ -115,7 +118,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isIndicatorAttribute()
     {
         return indicatorAttribute;
@@ -127,7 +131,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isOrganisationUnitAttribute()
     {
         return organisationUnitAttribute;
@@ -139,7 +144,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isUserAttribute()
     {
         return userAttribute;
@@ -150,7 +156,6 @@ public class Attribute
         this.userAttribute = userAttribute;
     }
 
-    // TODO expose attribute values? probably not..
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;
@@ -162,7 +167,8 @@ public class Attribute
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getSortOrder()
     {
         return sortOrder;

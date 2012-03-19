@@ -43,6 +43,7 @@ import org.hisp.dhis.indicator.IndicatorGroupSets;
 import org.hisp.dhis.indicator.IndicatorGroups;
 import org.hisp.dhis.indicator.IndicatorTypes;
 import org.hisp.dhis.indicator.Indicators;
+import org.hisp.dhis.mapping.MapLayers;
 import org.hisp.dhis.mapping.MapLegendSets;
 import org.hisp.dhis.mapping.MapLegends;
 import org.hisp.dhis.mapping.Maps;
@@ -128,6 +129,7 @@ public class Resources
         resources.add( new Resource( "Maps", Maps.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "MapLegends", MapLegends.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "MapLegendSets", MapLegendSets.class, requestMethods, mediaTypes ) );
+        resources.add( new Resource( "MapLayers", MapLayers.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "MessageConversations", MessageConversations.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "OrganisationUnits", OrganisationUnits.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "OrganisationUnitGroups", OrganisationUnitGroups.class, requestMethods, mediaTypes ) );

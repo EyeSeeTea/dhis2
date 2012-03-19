@@ -66,7 +66,6 @@ import static org.hisp.dhis.dataset.DataSet.NO_EXPIRY;
  * DimensionOption in the static DataElement dimension.
  *
  * @author Kristian Nordal
- * @version $Id: DataElement.java 5540 2008-08-19 10:47:07Z larshelg $
  */
 @JacksonXmlRootElement( localName = "dataElement", namespace = Dxf2Namespace.NAMESPACE )
 public class DataElement
@@ -576,7 +575,7 @@ public class DataElement
     }
 
     @JsonProperty( value = "attributes" )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "attributes" )
     @JacksonXmlProperty( localName = "attribute" )
     public Set<AttributeValue> getAttributeValues()

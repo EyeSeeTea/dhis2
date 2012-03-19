@@ -31,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.concept.Concept;
@@ -41,6 +42,7 @@ import org.hisp.dhis.document.Document;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
+import org.hisp.dhis.mapping.MapLayer;
 import org.hisp.dhis.mapping.MapLegend;
 import org.hisp.dhis.mapping.MapLegendSet;
 import org.hisp.dhis.mapping.MapView;
@@ -68,6 +70,8 @@ import java.util.List;
 @JacksonXmlRootElement( localName = "dxf2", namespace = Dxf2Namespace.NAMESPACE )
 public class DXF2
 {
+    private List<Attribute> attributeTypes = new ArrayList<Attribute>();
+
     private List<User> users = new ArrayList<User>();
 
     private List<UserAuthorityGroup> userAuthorityGroups = new ArrayList<UserAuthorityGroup>();
@@ -132,8 +136,23 @@ public class DXF2
 
     private List<MapLegendSet> mapLegendSets = new ArrayList<MapLegendSet>();
 
+    private List<MapLayer> mapLayers = new ArrayList<MapLayer>();
+
     public DXF2()
     {
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "attributeTypes" )
+    @JacksonXmlProperty( localName = "attributeType" )
+    public List<Attribute> getAttributeTypes()
+    {
+        return attributeTypes;
+    }
+
+    public void setAttributeTypes( List<Attribute> attributeTypes )
+    {
+        this.attributeTypes = attributeTypes;
     }
 
     @JsonProperty
@@ -550,5 +569,18 @@ public class DXF2
     public void setMapLegendSets( List<MapLegendSet> mapLegendSets )
     {
         this.mapLegendSets = mapLegendSets;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "mapLayers" )
+    @JacksonXmlProperty( localName = "mapLayer" )
+    public List<MapLayer> getMapLayers()
+    {
+        return mapLayers;
+    }
+
+    public void setMapLayers( List<MapLayer> mapLayers )
+    {
+        this.mapLayers = mapLayers;
     }
 }

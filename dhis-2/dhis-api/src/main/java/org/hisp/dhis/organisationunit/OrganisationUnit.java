@@ -783,7 +783,7 @@ public class OrganisationUnit
     }
 
     @JsonProperty( value = "attributes" )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "attributes" )
     @JacksonXmlProperty( localName = "attribute" )
     public Set<AttributeValue> getAttributeValues()

@@ -109,6 +109,8 @@ public interface MappingStore
 
     MapLayer getMapLayer( int id );
 
+    MapLayer getMapLayer( String uid );
+
     MapLayer getMapLayerByName( String name );
 
     Collection<MapLayer> getMapLayersByType( String type );
