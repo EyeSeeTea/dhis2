@@ -27,26 +27,23 @@ package org.hisp.dhis.mapping.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.mapping.MapLayer;
-import org.hisp.dhis.mapping.MapLegend;
-import org.hisp.dhis.mapping.MapLegendSet;
-import org.hisp.dhis.mapping.MapView;
-import org.hisp.dhis.mapping.MappingStore;
+import org.hisp.dhis.mapping.*;
 import org.hisp.dhis.user.User;
+
+import java.util.Collection;
 
 /**
  * @author Jan Henrik Overland
  * @version $Id$
  */
 public class HibernateMappingStore
-    extends HibernateIdentifiableObjectStore<MapView> implements MappingStore
+    extends HibernateIdentifiableObjectStore<MapView>
+    implements MappingStore
 {
 
     // -------------------------------------------------------------------------
@@ -81,6 +78,18 @@ public class HibernateMappingStore
         Session session = sessionFactory.getCurrentSession();
 
         return (MapLegend) session.get( MapLegend.class, id );
+    }
+
+    @Override
+    public MapLegend getMapLegend( String uid )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( MapLegend.class );
+
+        criteria.add( Restrictions.eq( "uid", uid ) );
+
+        return (MapLegend) criteria.uniqueResult();
     }
 
     public MapLegend getMapLegendByName( String name )
@@ -138,6 +147,18 @@ public class HibernateMappingStore
         return (MapLegendSet) session.get( MapLegendSet.class, id );
     }
 
+    @Override
+    public MapLegendSet getMapLegendSet( String uid )
+    {
+        Session session = sessionFactory.getCurrentSession();
+
+        Criteria criteria = session.createCriteria( MapLegendSet.class );
+
+        criteria.add( Restrictions.eq( "uid", uid ) );
+
+        return (MapLegendSet) criteria.uniqueResult();
+    }
+
     public MapLegendSet getMapLegendSetByName( String name )
     {
         Session session = sessionFactory.getCurrentSession();
@@ -148,7 +169,7 @@ public class HibernateMappingStore
 
         return (MapLegendSet) criteria.uniqueResult();
     }
-    
+
     @SuppressWarnings( "unchecked" )
     public Collection<MapLegendSet> getMapLegendSetsByType( String type )
     {
@@ -218,9 +239,9 @@ public class HibernateMappingStore
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( MapView.class );
-        
+
         Criterion nullUser = Restrictions.isNull( "user" );
-        
+
         criteria.add( user != null ? Restrictions.or( Restrictions.eq( "user", user ), nullUser ) : nullUser );
 
         return criteria.list();
@@ -234,7 +255,7 @@ public class HibernateMappingStore
         Criteria criteria = session.createCriteria( MapView.class );
 
         criteria.add( Restrictions.eq( "featureType", featureType ) );
-        
+
         criteria.add( Restrictions.or( Restrictions.eq( "user", user ), Restrictions.isNull( "user" ) ) );
 
         return criteria.list();
@@ -282,7 +303,7 @@ public class HibernateMappingStore
 
         return (MapLayer) criteria.uniqueResult();
     }
-    
+
     @SuppressWarnings( "unchecked" )
     public Collection<MapLayer> getMapLayersByType( String type )
     {

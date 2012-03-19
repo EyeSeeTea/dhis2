@@ -56,8 +56,8 @@ public class JacksonUtils
         // register view classes
         viewClasses.put( "default", IdentifiableObjectView.class );
         viewClasses.put( "basic", IdentifiableObjectView.class );
-        viewClasses.put( "export", ExportView.class );
         viewClasses.put( "detailed", DetailedView.class );
+        viewClasses.put( "export", ExportView.class );
     }
 
     public static Class<?> getViewClass( Object viewName )
