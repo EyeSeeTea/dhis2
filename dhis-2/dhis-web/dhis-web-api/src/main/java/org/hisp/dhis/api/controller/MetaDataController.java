@@ -338,6 +338,7 @@ public class MetaDataController
         System.err.println( "Indicators:" + dxf2.getIndicators().size() );
         System.err.println( "IndicatorGroups:" + dxf2.getIndicatorGroups().size() );
         System.err.println( "IndicatorGroupSets:" + dxf2.getIndicatorGroupSets().size() );
+        System.err.println( "IndicatorTypes:" + dxf2.getIndicatorTypes().size() );
 
         System.err.println( "OrganisationUnits: " + dxf2.getOrganisationUnits().size() );
         System.err.println( "OrganisationUnitGroups: " + dxf2.getOrganisationUnitGroups().size() );
