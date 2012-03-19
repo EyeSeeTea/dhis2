@@ -297,7 +297,6 @@ public class MetaDataController
         dxf2.setMaps( new ArrayList<MapView>( mappingService.getAllMapViews() ) );
         dxf2.setMapLegends( new ArrayList<MapLegend>( mappingService.getAllMapLegends() ) );
         dxf2.setMapLegendSets( new ArrayList<MapLegendSet>( mappingService.getAllMapLegendSets() ) );
-
         dxf2.setMapLayers( new ArrayList<MapLayer>( mappingService.getAllMapLayers() ) );
 
         return dxf2;
@@ -305,6 +304,8 @@ public class MetaDataController
 
     private void print( DXF2 dxf2 )
     {
+        System.err.println( "AttributeTypes: " + dxf2.getAttributeTypes().size() );
+
         System.err.println( "Users: " + dxf2.getUsers().size() );
         System.err.println( "UserGroups: " + dxf2.getUserGroups().size() );
         System.err.println( "UserAuthorityGroups: " + dxf2.getUserAuthorityGroups().size() );
@@ -343,6 +344,7 @@ public class MetaDataController
         System.err.println( "OrganisationUnits: " + dxf2.getOrganisationUnits().size() );
         System.err.println( "OrganisationUnitGroups: " + dxf2.getOrganisationUnitGroups().size() );
         System.err.println( "OrganisationUnitGroupSets: " + dxf2.getOrganisationUnitGroupSets().size() );
+        System.err.println( "OrganisationUnitLevels: " + dxf2.getOrganisationUnitLevels().size() );
 
         System.err.println( "ValidationRules: " + dxf2.getValidationRules().size() );
         System.err.println( "ValidationRuleGroups: " + dxf2.getValidationRuleGroups().size() );
