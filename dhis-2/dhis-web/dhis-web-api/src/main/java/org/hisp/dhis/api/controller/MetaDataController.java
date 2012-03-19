@@ -320,7 +320,7 @@ public class MetaDataController
         System.err.println( "MapLegendSets: " + dxf2.getMapLegendSets().size() );
         System.err.println( "MapLayers: " + dxf2.getMapLayers().size() );
 
-        System.err.println( "Constans: " + dxf2.getConstants().size() );
+        System.err.println( "Constants: " + dxf2.getConstants().size() );
         System.err.println( "Concepts: " + dxf2.getConcepts().size() );
 
         System.err.println( "SqlViews: " + dxf2.getSqlViews().size() );
