@@ -49,7 +49,6 @@ import java.util.Set;
 
 /**
  * @author Nguyen Hong Duc
- * @version $Id: User.java 5554 2008-08-20 09:18:38Z abyot $
  */
 @JacksonXmlRootElement( localName = "user", namespace = Dxf2Namespace.NAMESPACE )
 public class User

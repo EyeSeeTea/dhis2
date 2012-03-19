@@ -44,20 +44,16 @@ import java.util.Set;
 
 /**
  * @author Nguyen Hong Duc
- * @version $Id: UserAuthorityGroup.java 5701 2008-09-14 20:34:46Z larshelg $
  */
 @JacksonXmlRootElement( localName = "userAuthorityGroup", namespace = Dxf2Namespace.NAMESPACE )
 public class UserAuthorityGroup
+    extends BaseIdentifiableObject
 {
     public static final String AUTHORITY_ALL = "ALL";
-
-    private int id;
 
     /**
      * Required and unique.
      */
-    private String name;
-
     private String description;
 
     private Set<String> authorities = new HashSet<String>();
@@ -102,29 +98,6 @@ public class UserAuthorityGroup
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
-    }
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty
-    public String getName()
-    {
-        return name;
-    }
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
 
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )

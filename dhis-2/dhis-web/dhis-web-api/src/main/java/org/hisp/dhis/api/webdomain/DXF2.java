@@ -50,6 +50,7 @@ import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
@@ -64,6 +65,8 @@ import java.util.List;
 public class DXF2
 {
     private List<User> users = new ArrayList<User>();
+
+    private List<UserAuthorityGroup> userAuthorityGroups = new ArrayList<UserAuthorityGroup>();
 
     private List<UserGroup> userGroups = new ArrayList<UserGroup>();
 
@@ -132,6 +135,19 @@ public class DXF2
     public void setUsers( List<User> users )
     {
         this.users = users;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "userAuthorityGroups" )
+    @JacksonXmlProperty( localName = "userAuthorityGroup" )
+    public List<UserAuthorityGroup> getUserAuthorityGroups()
+    {
+        return userAuthorityGroups;
+    }
+
+    public void setUserAuthorityGroups( List<UserAuthorityGroup> userAuthorityGroups )
+    {
+        this.userAuthorityGroups = userAuthorityGroups;
     }
 
     @JsonProperty

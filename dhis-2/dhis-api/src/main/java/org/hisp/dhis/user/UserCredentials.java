@@ -29,9 +29,11 @@ package org.hisp.dhis.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -45,7 +47,6 @@ import java.util.Set;
 
 /**
  * @author Nguyen Hong Duc
- * @version $Id: UserCredentials.java 2869 2007-02-20 14:26:09Z andegje $
  */
 @JacksonXmlRootElement( localName = "userCredentials", namespace = Dxf2Namespace.NAMESPACE )
 public class UserCredentials
@@ -266,6 +267,7 @@ public class UserCredentials
     }
 
     @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "userAuthorityGroups" )
     @JacksonXmlProperty( localName = "userAuthorityGroup" )
