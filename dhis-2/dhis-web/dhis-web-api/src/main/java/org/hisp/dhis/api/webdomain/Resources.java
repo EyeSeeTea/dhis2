@@ -117,6 +117,7 @@ public class Resources
         resources.add( new Resource( "DataElementGroups", DataElementGroups.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "DataElementGroupSets", DataElementGroupSets.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "DataSets", DataSets.class, requestMethods, mediaTypes ) );
+        resources.add( new Resource( "DataValueSets", DataValueSets.class, requestMethods, mediaTypes.subList( 0, 0 ) ) );
         resources.add( new Resource( "Documents", Documents.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "Indicators", Indicators.class, requestMethods, mediaTypes ) );
         resources.add( new Resource( "IndicatorGroups", IndicatorGroups.class, requestMethods, mediaTypes ) );
