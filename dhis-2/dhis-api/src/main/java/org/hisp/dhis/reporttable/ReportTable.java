@@ -27,6 +27,7 @@ package org.hisp.dhis.reporttable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -1079,31 +1080,37 @@ public class ReportTable
     // Get- and set-methods for transient properties
     // -------------------------------------------------------------------------
 
+    @JsonIgnore
     public List<Period> getRelativePeriods()
     {
         return relativePeriods;
     }
 
+    @JsonIgnore
     public void setRelativePeriods( List<Period> relativePeriods )
     {
         this.relativePeriods = relativePeriods;
     }
 
+    @JsonIgnore
     public List<Period> getAllPeriods()
     {
         return allPeriods;
     }
 
+    @JsonIgnore
     public List<OrganisationUnit> getRelativeUnits()
     {
         return relativeUnits;
     }
 
+    @JsonIgnore
     public void setRelativeUnits( List<OrganisationUnit> relativeUnits )
     {
         this.relativeUnits = relativeUnits;
     }
 
+    @JsonIgnore
     public List<NameableObject> getAllUnits()
     {
         return allUnits;
@@ -1119,56 +1126,67 @@ public class ReportTable
         i18nFormat = format;
     }
 
+    @JsonIgnore
     public String getReportingPeriodName()
     {
         return reportingPeriodName;
     }
 
+    @JsonIgnore
     public void setReportingPeriodName( String reportingPeriodName )
     {
         this.reportingPeriodName = reportingPeriodName;
     }
 
+    @JsonIgnore
     public List<List<NameableObject>> getColumns()
     {
         return columns;
     }
 
+    @JsonIgnore
     public List<List<NameableObject>> getRows()
     {
         return rows;
     }
 
+    @JsonIgnore
     public List<String> getIndexColumns()
     {
         return indexColumns;
     }
 
+    @JsonIgnore
     public List<String> getIndexNameColumns()
     {
         return indexNameColumns;
     }
 
+    @JsonIgnore
     public List<String> getIndexCodeColumns()
     {
         return indexCodeColumns;
     }
 
+    @JsonIgnore
     public OrganisationUnit getParentOrganisationUnit()
     {
         return parentOrganisationUnit;
     }
 
+    @JsonIgnore
     public void setParentOrganisationUnit( OrganisationUnit parentOrganisationUnit )
     {
         this.parentOrganisationUnit = parentOrganisationUnit;
     }
 
+    @JsonIgnore
     public List<DataElementCategoryOptionCombo> getCategoryOptionCombos()
     {
         return categoryOptionCombos;
     }
 
+    @JsonIgnore
     public void setCategoryOptionCombos( List<DataElementCategoryOptionCombo> categoryOptionCombos )
     {
         this.categoryOptionCombos = categoryOptionCombos;

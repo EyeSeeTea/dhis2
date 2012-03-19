@@ -27,6 +27,7 @@ package org.hisp.dhis.chart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -622,21 +623,25 @@ public class Chart
         this.format = format;
     }
 
+    @JsonIgnore
     public List<Period> getRelativePeriods()
     {
         return relativePeriods;
     }
 
+    @JsonIgnore
     public void setRelativePeriods( List<Period> relativePeriods )
     {
         this.relativePeriods = relativePeriods;
     }
 
+    @JsonIgnore
     public OrganisationUnit getOrganisationUnit()
     {
         return organisationUnit;
     }
 
+    @JsonIgnore
     public void setOrganisationUnit( OrganisationUnit organisationUnit )
     {
         this.organisationUnit = organisationUnit;
