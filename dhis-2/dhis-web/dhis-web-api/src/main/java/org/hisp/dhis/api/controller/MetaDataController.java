@@ -43,7 +43,6 @@ import org.hisp.dhis.mapping.MapLegend;
 import org.hisp.dhis.mapping.MapLegendSet;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.mapping.MappingService;
-import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -61,20 +60,23 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-public class ExportController
+public class MetaDataController
 {
-    public static final String RESOURCE_PATH = "/export";
+    public static final String RESOURCE_PATH = "/metaData";
 
     @Autowired
     private UserService userService;
@@ -133,7 +135,11 @@ public class ExportController
     @Autowired
     private MappingService mappingService;
 
-    @RequestMapping( value = ExportController.RESOURCE_PATH, method = RequestMethod.GET )
+    //-------------------------------------------------------------------------------------------------------
+    // Export
+    //-------------------------------------------------------------------------------------------------------
+
+    @RequestMapping( value = MetaDataController.RESOURCE_PATH, method = RequestMethod.GET )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public String export( Model model )
     {
@@ -145,7 +151,7 @@ public class ExportController
         return "export";
     }
 
-    @RequestMapping( value = ExportController.RESOURCE_PATH + ".zip", method = RequestMethod.GET, headers = {"Accept=application/xml, text/*"} )
+    @RequestMapping( value = MetaDataController.RESOURCE_PATH + ".zip", method = RequestMethod.GET, headers = {"Accept=application/xml, text/*"} )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedXML( HttpServletResponse response ) throws IOException, JAXBException
     {
@@ -161,7 +167,7 @@ public class ExportController
         JacksonUtils.toXmlWithView( zip, dxf2, ExportView.class );
     }
 
-    @RequestMapping( value = ExportController.RESOURCE_PATH + ".zip", method = RequestMethod.GET, headers = {"Accept=application/json"} )
+    @RequestMapping( value = MetaDataController.RESOURCE_PATH + ".zip", method = RequestMethod.GET, headers = {"Accept=application/json"} )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_EXPORT')" )
     public void exportZippedJSON( HttpServletResponse response ) throws IOException, JAXBException
     {
@@ -176,6 +182,56 @@ public class ExportController
 
         JacksonUtils.toJsonWithView( zip, dxf2, ExportView.class );
     }
+
+    //-------------------------------------------------------------------------------------------------------
+    // Import
+    //-------------------------------------------------------------------------------------------------------
+
+    @RequestMapping( value = MetaDataController.RESOURCE_PATH, method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/*"} )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void importXml( HttpServletResponse response, HttpServletRequest request ) throws JAXBException, IOException
+    {
+        DXF2 dxf2 = JacksonUtils.fromXml( request.getInputStream(), DXF2.class );
+
+        print( dxf2 );
+    }
+
+    @RequestMapping( value = MetaDataController.RESOURCE_PATH, method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void importJson( HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        DXF2 dxf2 = JacksonUtils.fromJson( request.getInputStream(), DXF2.class );
+
+        print( dxf2 );
+    }
+
+    @RequestMapping( value = MetaDataController.RESOURCE_PATH + ".zip", method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void importZippedXml( HttpServletResponse response, HttpServletRequest request ) throws JAXBException, IOException
+    {
+        ZipInputStream zip = new ZipInputStream( new BufferedInputStream( request.getInputStream() ) );
+        ZipEntry entry = zip.getNextEntry();
+
+        System.err.println( "(xml) Reading from file : " + entry.getName() );
+
+        DXF2 dxf2 = JacksonUtils.fromXml( zip, DXF2.class );
+
+        print( dxf2 );
+    }
+
+    @RequestMapping( value = MetaDataController.RESOURCE_PATH + ".zip", method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void importZippedJson( HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        ZipInputStream zip = new ZipInputStream( request.getInputStream() );
+        ZipEntry entry = zip.getNextEntry();
+
+        System.err.println( "(json) Reading from file : " + entry.getName() );
+        DXF2 dxf2 = JacksonUtils.fromJson( zip, DXF2.class );
+
+        print( dxf2 );
+    }
+
 
     //-------------------------------------------------------------------------------------------------------
     // Helpers
@@ -198,10 +254,8 @@ public class ExportController
         dxf2.setDataElementGroups( new ArrayList<DataElementGroup>( dataElementService.getAllDataElementGroups() ) );
         dxf2.setDataElementGroupSets( new ArrayList<DataElementGroupSet>( dataElementService.getAllDataElementGroupSets() ) );
 
-        dxf2.setConcepts( new ArrayList<Concept>( conceptService.getAllConcepts() ) );
         dxf2.setCategories( new ArrayList<DataElementCategory>( dataElementCategoryService.getAllDataElementCategories() ) );
         dxf2.setCategoryOptions( new ArrayList<DataElementCategoryOption>( dataElementCategoryService.getAllDataElementCategoryOptions() ) );
-
         dxf2.setCategoryCombos( new ArrayList<DataElementCategoryCombo>( dataElementCategoryService.getAllDataElementCategoryCombos() ) );
         dxf2.setCategoryOptionCombos( new ArrayList<DataElementCategoryOptionCombo>( dataElementCategoryService.getAllDataElementCategoryOptionCombos() ) );
 
@@ -231,5 +285,48 @@ public class ExportController
         dxf2.setMapLegendSets( new ArrayList<MapLegendSet>( mappingService.getAllMapLegendSets() ) );
 
         return dxf2;
+    }
+
+    private void print( DXF2 dxf2 )
+    {
+        System.err.println( "Users: " + dxf2.getUsers().size() );
+        System.err.println( "UserGroups: " + dxf2.getUserGroups().size() );
+        System.err.println( "UserAuthorityGroups: " + dxf2.getUserAuthorityGroups().size() );
+
+        System.err.println( "Reports: " + dxf2.getReports().size() );
+        System.err.println( "ReportTables: " + dxf2.getReportTables().size() );
+        System.err.println( "Charts: " + dxf2.getCharts().size() );
+
+        System.err.println( "Maps: " + dxf2.getMaps().size() );
+        System.err.println( "MapLegends: " + dxf2.getMapLegends().size() );
+        System.err.println( "MapLegendSets: " + dxf2.getMapLegendSets().size() );
+
+        System.err.println( "Constans: " + dxf2.getConstants().size() );
+        System.err.println( "Concepts: " + dxf2.getConcepts().size() );
+
+        System.err.println( "SqlViews: " + dxf2.getSqlViews().size() );
+
+        System.err.println( "DataElements: " + dxf2.getDataElements().size() );
+        System.err.println( "OptionSets: " + dxf2.getOptionSets().size() );
+        System.err.println( "DataElementGroups: " + dxf2.getDataElementGroups().size() );
+        System.err.println( "DataElementGroupSets: " + dxf2.getDataElementGroupSets().size() );
+
+        System.err.println( "Categories: " + dxf2.getCategories().size() );
+        System.err.println( "CategoryOptions: " + dxf2.getCategoryOptions().size() );
+        System.err.println( "CategoryCombos: " + dxf2.getCategoryCombos().size() );
+        System.err.println( "CategoryOptionCombos: " + dxf2.getCategoryOptionCombos().size() );
+
+        System.err.println( "DataSets: " + dxf2.getDataSets().size() );
+
+        System.err.println( "Indicators:" + dxf2.getIndicators().size() );
+        System.err.println( "IndicatorGroups:" + dxf2.getIndicatorGroups().size() );
+        System.err.println( "IndicatorGroupSets:" + dxf2.getIndicatorGroupSets().size() );
+
+        System.err.println( "OrganisationUnits: " + dxf2.getOrganisationUnits().size() );
+        System.err.println( "OrganisationUnitGroups: " + dxf2.getOrganisationUnitGroups().size() );
+        System.err.println( "OrganisationUnitGroupSets: " + dxf2.getOrganisationUnitGroupSets().size() );
+
+        System.err.println( "ValidationRules: " + dxf2.getValidationRules().size() );
+        System.err.println( "ValidationRuleGroups: " + dxf2.getValidationRuleGroups().size() );
     }
 }
