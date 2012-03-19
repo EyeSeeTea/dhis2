@@ -42,6 +42,7 @@ import org.hisp.dhis.document.Document;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
+import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.mapping.MapLayer;
 import org.hisp.dhis.mapping.MapLegend;
 import org.hisp.dhis.mapping.MapLegendSet;
@@ -103,6 +104,8 @@ public class DXF2
     private List<IndicatorGroup> indicatorGroups = new ArrayList<IndicatorGroup>();
 
     private List<IndicatorGroupSet> indicatorGroupSets = new ArrayList<IndicatorGroupSet>();
+
+    private List<IndicatorType> indicatorTypes = new ArrayList<IndicatorType>();
 
     private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
 
@@ -361,6 +364,19 @@ public class DXF2
     public void setIndicatorGroupSets( List<IndicatorGroupSet> indicatorGroupSets )
     {
         this.indicatorGroupSets = indicatorGroupSets;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "indicatorTypes" )
+    @JacksonXmlProperty( localName = "indicatorType" )
+    public List<IndicatorType> getIndicatorTypes()
+    {
+        return indicatorTypes;
+    }
+
+    public void setIndicatorTypes( List<IndicatorType> indicatorTypes )
+    {
+        this.indicatorTypes = indicatorTypes;
     }
 
     @JsonProperty
