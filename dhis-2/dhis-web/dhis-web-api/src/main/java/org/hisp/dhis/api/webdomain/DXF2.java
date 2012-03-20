@@ -36,6 +36,7 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.document.Document;
@@ -140,6 +141,8 @@ public class DXF2
     private List<MapLegendSet> mapLegendSets = new ArrayList<MapLegendSet>();
 
     private List<MapLayer> mapLayers = new ArrayList<MapLayer>();
+
+    private List<DataDictionary> dataDictionaries = new ArrayList<DataDictionary>();
 
     public DXF2()
     {
@@ -598,5 +601,18 @@ public class DXF2
     public void setMapLayers( List<MapLayer> mapLayers )
     {
         this.mapLayers = mapLayers;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "dataDictionaries" )
+    @JacksonXmlProperty( localName = "dataDictionary" )
+    public List<DataDictionary> getDataDictionaries()
+    {
+        return dataDictionaries;
+    }
+
+    public void setDataDictionaries( List<DataDictionary> dataDictionaries )
+    {
+        this.dataDictionaries = dataDictionaries;
     }
 }

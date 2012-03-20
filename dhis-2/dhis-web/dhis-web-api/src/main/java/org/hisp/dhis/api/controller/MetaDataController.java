@@ -39,6 +39,8 @@ import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
+import org.hisp.dhis.datadictionary.DataDictionary;
+import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -144,6 +146,9 @@ public class MetaDataController
 
     @Autowired
     private MappingService mappingService;
+
+    @Autowired
+    private DataDictionaryService dataDictionaryService;
 
     //-------------------------------------------------------------------------------------------------------
     // Export
@@ -251,6 +256,8 @@ public class MetaDataController
     {
         DXF2 dxf2 = new DXF2();
 
+        dxf2.setDataDictionaries( new ArrayList<DataDictionary>( dataDictionaryService.getAllDataDictionaries() ) );
+/*
         dxf2.setAttributeTypes( new ArrayList<Attribute>( attributeService.getAllAttributes() ) );
 
         dxf2.setUsers( new ArrayList<User>( userService.getAllUsers() ) );
@@ -296,6 +303,7 @@ public class MetaDataController
         dxf2.setMapLegends( new ArrayList<MapLegend>( mappingService.getAllMapLegends() ) );
         dxf2.setMapLegendSets( new ArrayList<MapLegendSet>( mappingService.getAllMapLegendSets() ) );
         dxf2.setMapLayers( new ArrayList<MapLayer>( mappingService.getAllMapLayers() ) );
+*/
 
         return dxf2;
     }
@@ -347,5 +355,7 @@ public class MetaDataController
 
         System.err.println( "ValidationRules: " + dxf2.getValidationRules().size() );
         System.err.println( "ValidationRuleGroups: " + dxf2.getValidationRuleGroups().size() );
+
+        System.err.println( "DataDictionaries: " + dxf2.getDataDictionaries().size() );
     }
 }

@@ -32,6 +32,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
@@ -171,7 +172,7 @@ public class Section
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "dataElements" )
     @JacksonXmlProperty( localName = "dataElement" )
     public List<DataElement> getDataElements()
@@ -190,7 +191,8 @@ public class Section
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public int getSortOrder()
     {
         return sortOrder;
@@ -202,7 +204,7 @@ public class Section
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class} )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "greyedFields" )
     @JacksonXmlProperty( localName = "greyedField" )
     public Set<DataElementOperand> getGreyedFields()

@@ -385,6 +385,7 @@ public class DataSet
 
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -411,6 +412,7 @@ public class DataSet
 
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isMobile()
     {
         return mobile;
@@ -423,6 +425,7 @@ public class DataSet
 
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getVersion()
     {
         return version;
@@ -435,6 +438,7 @@ public class DataSet
 
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public int getExpiryDays()
     {
         return expiryDays;
