@@ -256,8 +256,6 @@ public class MetaDataController
     {
         DXF2 dxf2 = new DXF2();
 
-        dxf2.setDataDictionaries( new ArrayList<DataDictionary>( dataDictionaryService.getAllDataDictionaries() ) );
-/*
         dxf2.setAttributeTypes( new ArrayList<Attribute>( attributeService.getAllAttributes() ) );
 
         dxf2.setUsers( new ArrayList<User>( userService.getAllUsers() ) );
@@ -303,7 +301,8 @@ public class MetaDataController
         dxf2.setMapLegends( new ArrayList<MapLegend>( mappingService.getAllMapLegends() ) );
         dxf2.setMapLegendSets( new ArrayList<MapLegendSet>( mappingService.getAllMapLegendSets() ) );
         dxf2.setMapLayers( new ArrayList<MapLayer>( mappingService.getAllMapLayers() ) );
-*/
+
+        dxf2.setDataDictionaries( new ArrayList<DataDictionary>( dataDictionaryService.getAllDataDictionaries() ) );
 
         return dxf2;
     }
