@@ -2465,17 +2465,6 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + DV.i18n.indicators + '</div>',
 										hideCollapseTool: true,
-										layout: 'anchor',
-										tools: [{
-											xtype: 'label',
-											text: 'Series',
-											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold',
-											listeners: {
-												added: function() {
-													DV.cmp.dimension.indicator.label = this;
-												}
-											}
-										}],
 										items: [
 											{
 												xtype: 'combobox',
@@ -2637,16 +2626,6 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + DV.i18n.data_elements + '</div>',
 										hideCollapseTool: true,
-										tools: [{
-											xtype: 'label',
-											text: 'Series',
-											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold',
-											listeners: {
-												added: function() {
-													DV.cmp.dimension.dataelement.label = this;
-												}
-											}
-										}],
 										items: [
 											{
 												xtype: 'combobox',
@@ -2807,16 +2786,6 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + DV.i18n.reporting_rates + '</div>',
 										hideCollapseTool: true,
-										tools: [{
-											xtype: 'label',
-											text: 'Series',
-											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold',
-											listeners: {
-												added: function() {
-													DV.cmp.dimension.dataset.label = this;
-												}
-											}
-										}],
 										items: [
 											{
 												xtype: 'panel',
@@ -2927,22 +2896,16 @@ Ext.onReady( function() {
 													DV.cmp.dimension.dataset.panel,
 													DV.conf.layout.west_fill_accordion_dataset
 												);
+												
+												if (!DV.store.dataset.available.isloaded) {
+													DV.store.dataset.available.load();
+												}
 											}
 										}
 									},
 									{
 										title: '<div style="height:17px">' + DV.i18n.periods + '</div>',
 										hideCollapseTool: true,
-										tools: [{
-											xtype: 'label',
-											text: 'Category',
-											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold',
-											listeners: {
-												added: function() {
-													DV.cmp.dimension.period.label = this;
-												}
-											}
-										}],
 										items: [
 											{
 												xtype: 'panel',
@@ -3105,16 +3068,6 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + DV.i18n.organisation_units + '</div>',
 										hideCollapseTool: true,
-										tools: [{
-											xtype: 'label',
-											text: 'Filter',
-											style: 'font-size:10px; color:#777; padding-right:5px; height: 17px; font-weight:bold',
-											listeners: {
-												added: function() {
-													DV.cmp.dimension.organisationunit.label = this;
-												}
-											}
-										}],
 										items: [
 											{
 												xtype: 'combobox',

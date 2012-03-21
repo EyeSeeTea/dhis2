@@ -28,7 +28,6 @@ package org.hisp.dhis.completeness.impl;
  */
 
 import java.util.Collection;
-import java.util.Date;
 
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
@@ -41,20 +40,25 @@ import org.hisp.dhis.period.Period;
 public class RatioDataSetCompletenessService
     extends AbstractDataSetCompletenessService
 {
-    public int getRegistrations( DataSet dataSet, Collection<Integer> relevantSources, Period period )
+    @Override
+    public int getRegistrations( DataSet dataSet, Collection<Integer> relevantSources, Collection<Integer> periods )
     {
-        return completenessStore.getNumberOfValues( dataSet, relevantSources, period, null );
+        return completenessStore.getNumberOfValues( dataSet, relevantSources, periods );
     }
 
-    public int getRegistrationsOnTime( DataSet dataSet, Collection<Integer> relevantSources, Period period, Date deadline )
+    @Override
+    public int getRegistrationsOnTime( DataSet dataSet, Collection<Integer> relevantSources, Collection<Integer> periods, int completenessOffset )
     {
-        return completenessStore.getNumberOfValues( dataSet, relevantSources, period, null );
+        return completenessStore.getNumberOfValues( dataSet, relevantSources, periods );
     }
-    
-    public int getSources( DataSet dataSet, Collection<Integer> relevantSources )
+
+    @Override
+    public int getSources( DataSet dataSet, Collection<Integer> relevantSources, Period period )
     {
         Collection<DataElementOperand> operands = dataElementService.getAllGeneratedOperands( dataSet.getDataElements() );
         
-        return operands != null && relevantSources != null ? operands.size() * relevantSources.size() : 0; // Number of operands in data set times number of organisation units
+        // Number of operands in data set times number of organisation units times number of periods
+        
+        return operands != null && relevantSources != null ? ( operands.size() * relevantSources.size() * period.getPeriodSpan( dataSet.getPeriodType() ) ) : 0; 
     }
 }

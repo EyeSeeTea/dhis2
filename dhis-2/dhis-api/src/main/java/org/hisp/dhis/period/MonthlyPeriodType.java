@@ -57,11 +57,12 @@ public class MonthlyPeriodType
      */
     public static final String NAME = "Monthly";
 
-    public static final int FREQUENCY_ORDER = 31;
+    public static final int FREQUENCY_ORDER = 30;
 
     // -------------------------------------------------------------------------
     // PeriodType functionality
     // -------------------------------------------------------------------------
+    
     @Override
     public String getName()
     {

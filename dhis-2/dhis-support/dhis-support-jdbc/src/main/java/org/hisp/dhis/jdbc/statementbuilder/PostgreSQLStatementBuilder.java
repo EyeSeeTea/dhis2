@@ -70,7 +70,7 @@ public class PostgreSQLStatementBuilder
 
     public String getDropDatasetForeignKeyForDataEntryFormTable()
     {
-        return  "ALTER TABLE dataentryform DROP CONSTRAINT fk_dataentryform_datasetid;" ;
+        return "ALTER TABLE dataentryform DROP CONSTRAINT fk_dataentryform_datasetid;" ;
     }
 
     @Override
@@ -103,7 +103,6 @@ public class PostgreSQLStatementBuilder
             + "SELECT * FROM datavalue AS d2 " + "WHERE d2.dataelementid=" + destDataElementId + " "
             + "AND d2.categoryoptioncomboid=" + destCategoryOptionComboId + " " + "AND d1.periodid=d2.periodid "
             + "AND d1.sourceid=d2.sourceid );";
-
     }
 
     @Override
@@ -246,8 +245,7 @@ public class PostgreSQLStatementBuilder
         return "DELETE FROM patientdatavalue AS d " +
                 "USING patientdatavaluearchive AS a " +
                 "WHERE d.programstageinstanceid=a.programstageinstanceid " +
-                "AND d.dataelementid=a.dataelementid " +
-                "AND d.organisationunitid=a.organisationunitid; ";
+                "AND d.dataelementid=a.dataelementid; ";
     }
     
     public String deleteArchivedOverlappingPatientData()
@@ -255,8 +253,7 @@ public class PostgreSQLStatementBuilder
         return "DELETE FROM patientdatavaluearchive AS a " +
                 "USING patientdatavalue AS d " +
                 "WHERE d.programstageinstanceid=a.programstageinstanceid " +
-                "AND d.dataelementid=a.dataelementid " +
-                "AND d.organisationunitid=a.organisationunitid ";
+                "AND d.dataelementid=a.dataelementid ";
     }
     
     public String deleteOldestOverlappingPatientDataValue()
@@ -265,7 +262,6 @@ public class PostgreSQLStatementBuilder
                 "USING patientdatavaluearchive AS a " +
                 "WHERE d.programstageinstanceid=a.programstageinstanceid " +
                 "AND d.dataelementid=a.dataelementid " +
-                "AND d.organisationunitid=a.organisationunitid " +
                 "AND d.timestamp<a.timestamp;";
     }
     
@@ -275,7 +271,6 @@ public class PostgreSQLStatementBuilder
                 "USING patientdatavaluearchive AS a " +
                 "WHERE d.programstageinstanceid=a.programstageinstanceid " +
                 "AND d.dataelementid=a.dataelementid " +
-                "AND d.organisationunitid=a.organisationunitid " +
                 "AND a.timestamp<=d.timestamp;";
     }
     
@@ -368,5 +363,10 @@ public class PostgreSQLStatementBuilder
     public String limitRecord( int min, int max )
     {
         return " LIMIT " + max + " OFFSET " + min;
+    }
+    
+    public String getAddDate( String dateField, int days )
+    {
+        return "(" + dateField + "+" + days + ")";
     }
 }
