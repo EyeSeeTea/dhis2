@@ -1452,7 +1452,7 @@ Ext.onReady( function() {
 						if (!this.validation.favorite(f)) {
 							return;
 						}
-                        
+						
                         DV.c.type = f.type.toLowerCase();
                         DV.c.dimension.series = f.series.toLowerCase();
                         DV.c.dimension.category = f.category.toLowerCase();
@@ -1466,22 +1466,23 @@ Ext.onReady( function() {
                         
                         if (f.indicators) {
 							for (var i = 0; i < f.indicators.length; i++) {
-								DV.c.indicator.objects.push({id: f.indicators[i].internalId, name: DV.util.string.getEncodedString(f.indicators[i].shortName)});
+								DV.c.indicator.objects.push({id: f.indicators[i].internalId, name: DV.util.string.getEncodedString(f.indicators[i].name)});
 							}
 						}
+						
 						if (f.dataElements) {
 							for (var i = 0; i < f.dataElements.length; i++) {
-								DV.c.dataelement.objects.push({id: f.dataElements[i].internalId, name: DV.util.string.getEncodedString(f.dataElements[i].shortName)});
+								DV.c.dataelement.objects.push({id: f.dataElements[i].internalId, name: DV.util.string.getEncodedString(f.dataElements[i].name)});
 							}
 						}
 						if (f.dataSets) {
 							for (var i = 0; i < f.dataSets.length; i++) {
-								DV.c.dataset.objects.push({id: f.dataSets[i].internalId, name: DV.util.string.getEncodedString(f.dataSets[i].shortName)});
+								DV.c.dataset.objects.push({id: f.dataSets[i].internalId, name: DV.util.string.getEncodedString(f.dataSets[i].name)});
 							}
 						}						
 						DV.c.period.rp = f.relativePeriods;
 						for (var i = 0; i < f.organisationUnits.length; i++) {
-							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: DV.util.string.getEncodedString(f.organisationUnits[i].shortName)});
+							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: DV.util.string.getEncodedString(f.organisationUnits[i].name)});
 						}
 						DV.c.organisationunit.groupsetid = f.organisationUnitGroupSet ? f.organisationUnitGroupSet.internalId : null;
 						
