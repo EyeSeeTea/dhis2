@@ -53,7 +53,6 @@ import org.hisp.dhis.period.DailyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.CurrentUserService;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.annotation.Transactional;
 
 public class DefaultDataValueSetService
@@ -120,7 +119,6 @@ public class DefaultDataValueSetService
      * of add/update in data value store
      * <li>completed semantics: can't uncomplete but can complete and
      * "recomplete"
-     * <li>what is 'comment' good for really?
      *
      * @param dataValueSet
      * @throws IllegalArgumentException if there are any inconsistencies
@@ -134,7 +132,7 @@ public class DefaultDataValueSetService
         
         if ( idStrategy != DataValueSet.DEFAULT_STRATEGY )
         {
-            throw new IllegalArgumentException( "Only UID id strategy supported currently." );
+            throw new IllegalArgumentException( "Only UID id strategy supported currently" );
         }
 
         DataSet dataSet = getDataSet( dataValueSet );
@@ -143,8 +141,8 @@ public class DefaultDataValueSetService
 
         if ( !dataSet.getSources().contains( unit ) )
         {
-            throw new IllegalArgumentException( "Org unit with UID " + unit.getUid()
-                + " does not report data set with UID " + dataSet.getUid() );
+            throw new IllegalArgumentException( "Organisation unit with ID " + unit.getUid()
+                + " does not report data set with ID " + dataSet.getUid() );
         }
 
         Period period = getPeriod( dataValueSet.getPeriodIsoDate(), dataSet.getPeriodType() );
@@ -162,7 +160,7 @@ public class DefaultDataValueSetService
     private void log( DataValueSet dataValueSet, OrganisationUnit unit, DataSet dataSet )
     {
         String message = "Saved data value set for " + dataSet.getName() + ", " + unit.getName() + ", "
-            + dataValueSet.getPeriodIsoDate() + " - Data values received: ";
+            + dataValueSet.getPeriodIsoDate() + " - data values received: ";
 
         for ( org.hisp.dhis.importexport.dxf2.model.DataValue value : dataValueSet.getDataValues() )
         {
@@ -177,19 +175,21 @@ public class DefaultDataValueSetService
         DataSet dataSet = null;
 
         String uid = dataValueSet.getDataSetIdentifier();
+        
         if ( uid != null )
         {
             dataSet = dataSetService.getDataSet( uid );
 
             if ( dataSet == null )
             {
-                throw new IllegalArgumentException( "Data set with UID " + uid + " does not exist" );
+                throw new IllegalArgumentException( "Data set with ID " + uid + " does not exist" );
             }
         }
         else
         {
             dataSet = resolveDataSet( dataValueSet );
         }
+        
         return dataSet;
     }
 
@@ -197,11 +197,10 @@ public class DefaultDataValueSetService
     {
         if ( dataValueSet.getDataValues() == null )
         {
-            throw new IllegalArgumentException(
-                "Data value set doesn't specify data set and does not contain data values." );
+            throw new IllegalArgumentException( "Data value set does not specify a data set and does not contain data values" );
         }
 
-        Set<DataSet> potential = null;
+        Set<DataSet> potentialDataSets = new HashSet<DataSet>();
 
         for ( org.hisp.dhis.importexport.dxf2.model.DataValue value : dataValueSet.getDataValues() )
         {
@@ -210,7 +209,7 @@ public class DefaultDataValueSetService
 
             if ( dataSets == null || dataSets.isEmpty() )
             {
-                throw new IllegalArgumentException( "Data element '" + dataElement.getUid() + "' isn't in a data set." );
+                throw new IllegalArgumentException( "Data element " + dataElement.getUid() + " is not in a data set" );
             }
             else if ( dataSets.size() == 1 )
             {
@@ -218,35 +217,19 @@ public class DefaultDataValueSetService
             }
             else
             {
-                if ( potential == null )
-                {
-                    potential = new HashSet<DataSet>( dataSets );
-                }
-                else
-                {
-                    for ( DataSet set : dataSets )
-                    {
-                        if ( !potential.contains( set ) )
-                        {
-                            potential.remove( set );
-                        }
-                    }
-                    if ( potential.size() == 1 )
-                    {
-                        return potential.iterator().next();
-                    }
-                }
+                potentialDataSets.addAll( dataSets );
             }
         }
 
-        // TODO: Check if potential data sets are compatible
-
         String message = "Ambiguous which of these data set the data values belong to: ";
-        for ( DataSet p : potential )
+        
+        for ( DataSet ds : potentialDataSets )
         {
-            message += p.getUid() + ", ";
+            message += ds.getUid() + ", ";
         }
+        
         message.substring( 0, message.length() - 2 );
+        
         throw new IllegalArgumentException( message );
     }
 
@@ -257,7 +240,7 @@ public class DefaultDataValueSetService
 
         if ( !dataSet.getDataElements().contains( dataElement ) )
         {
-            throw new IllegalArgumentException( "Data element '" + dataElement.getUid() + "' isn't in data set "
+            throw new IllegalArgumentException( "Data element " + dataElement.getUid() + " is not in data set "
                 + dataSet.getUid() );
         }
 
@@ -266,8 +249,6 @@ public class DefaultDataValueSetService
         DataValue dv = dataValueService.getDataValue( unit, dataElement, period, combo );
 
         String value = dxfValue.getValue();
-
-        // dataElement.isValidValue(value);
 
         String storedBy = currentUserService.getCurrentUsername();
 
@@ -289,12 +270,12 @@ public class DefaultDataValueSetService
     {
         CompleteDataSetRegistration alreadyComplete = registrationService.getCompleteDataSetRegistration( dataSet,
             period, unit );
+        
         String completeDateString = dataValueSet.getCompleteDate();
 
         if ( alreadyComplete != null && completeDateString == null )
         {
-            throw new IllegalArgumentException(
-                "DataValueSet is complete, include a new complete date if you want to recomplete" );
+            throw new IllegalArgumentException( "Data value set is complete, include a new complete date if you want to recomplete" );
         }
 
         if ( alreadyComplete != null )
@@ -308,6 +289,7 @@ public class DefaultDataValueSetService
         {
             complete = getComplete( dataSet, unit, period, completeDateString, complete );
         }
+        
         if ( complete != null )
         {
             registrationService.saveCompleteDataSetRegistration( complete );
@@ -318,6 +300,7 @@ public class DefaultDataValueSetService
         String completeDateString, CompleteDataSetRegistration complete )
     {
         SimpleDateFormat format = new SimpleDateFormat( DailyPeriodType.ISO_FORMAT );
+        
         try
         {
             Date completeDate = format.parse( completeDateString );
@@ -328,6 +311,7 @@ public class DefaultDataValueSetService
         {
             throw new IllegalArgumentException( "Complete date not in valid format: " + DailyPeriodType.ISO_FORMAT );
         }
+        
         return complete;
     }
 
@@ -341,9 +325,10 @@ public class DefaultDataValueSetService
         }
         catch ( Exception e )
         {
-            throw new IllegalArgumentException( "Period " + periodIsoDate + " is not valid period of type "
+            throw new IllegalArgumentException( "Period " + periodIsoDate + " is not a valid period of type "
                 + periodType.getName() );
         }
+        
         return period;
     }
 
@@ -353,8 +338,9 @@ public class DefaultDataValueSetService
 
         if ( unit == null )
         {
-            throw new IllegalArgumentException( "Org unit with UID " + uid + " does not exist" );
+            throw new IllegalArgumentException( "Org unit with ID " + uid + " does not exist" );
         }
+        
         return unit;
     }
 
@@ -364,7 +350,7 @@ public class DefaultDataValueSetService
 
         if ( dataElement == null )
         {
-            throw new IllegalArgumentException( "Data element with UID " + uid + " does not exist" );
+            throw new IllegalArgumentException( "Data element with ID " + uid + " does not exist" );
         }
 
         return dataElement;
@@ -385,14 +371,14 @@ public class DefaultDataValueSetService
 
         if ( combo == null )
         {
-            throw new IllegalArgumentException( "DataElementCategoryOptionCombo with UID '" + uid
-                + "' does not exist" );
+            throw new IllegalArgumentException( "Data element category option combo with ID " + uid
+                + " does not exist" );
         }
 
         if ( !dataElement.getCategoryCombo().getOptionCombos().contains( combo ) )
         {
-            throw new IllegalArgumentException( "DataElementCategoryOptionCombo with UID '" + combo.getUid()
-                + "' isn't in DataElement '" + dataElement.getUid() + "'" );
+            throw new IllegalArgumentException( "Data element category option combo with ID " + combo.getUid()
+                + " is not in data element " + dataElement.getUid() );
         }
         return combo;
     }
@@ -417,19 +403,16 @@ public class DefaultDataValueSetService
         this.dataElementService = dataElementService;
     }
 
-    @Required
     public void setDataValueService( DataValueService dataValueService )
     {
         this.dataValueService = dataValueService;
     }
 
-    @Required
     public void setRegistrationService( CompleteDataSetRegistrationService registrationService )
     {
         this.registrationService = registrationService;
     }
 
-    @Required
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;

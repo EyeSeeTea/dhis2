@@ -27,14 +27,20 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.common.adapter.DataElementXmlAdapter;
-import org.hisp.dhis.common.adapter.IndicatorXmlAdapter;
-import org.hisp.dhis.common.adapter.OrganisationUnitXmlAdapter;
+import org.hisp.dhis.common.adapter.JacksonPeriodTypeDeserializer;
+import org.hisp.dhis.common.adapter.JacksonPeriodTypeSerializer;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
@@ -42,8 +48,6 @@ import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
 
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,8 +57,7 @@ import java.util.Set;
  *
  * @author Kristian Nordal
  */
-@XmlRootElement( name = "dataSet", namespace = Dxf2Namespace.NAMESPACE )
-@XmlAccessorType( value = XmlAccessType.NONE )
+@JacksonXmlRootElement( localName = "dataSet", namespace = Dxf2Namespace.NAMESPACE )
 public class DataSet
     extends BaseNameableObject
 {
@@ -62,8 +65,8 @@ public class DataSet
     public static final String TYPE_SECTION = "section";
     public static final String TYPE_CUSTOM = "custom";
 
-    public static final int NO_EXPIRY = 0; 
-    
+    public static final int NO_EXPIRY = 0;
+
     /**
      * Determines if a de-serialized file is compatible with this class.
      */
@@ -306,6 +309,11 @@ public class DataSet
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @JsonProperty
+    @JsonSerialize( using = JacksonPeriodTypeSerializer.class )
+    @JsonDeserialize( using = JacksonPeriodTypeDeserializer.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public PeriodType getPeriodType()
     {
         return periodType;
@@ -316,6 +324,9 @@ public class DataSet
         this.periodType = periodType;
     }
 
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public DataEntryForm getDataEntryForm()
     {
         return dataEntryForm;
@@ -326,11 +337,11 @@ public class DataSet
         this.dataEntryForm = dataEntryForm;
     }
 
-    @XmlElementWrapper( name = "dataElements" )
-    @XmlElement( name = "dataElement" )
-    @XmlJavaTypeAdapter( DataElementXmlAdapter.class )
-    @JsonProperty( value = "dataElements" )
+    @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "dataElements" )
+    @JacksonXmlProperty( localName = "dataElement" )
     public Set<DataElement> getDataElements()
     {
         return dataElements;
@@ -341,11 +352,11 @@ public class DataSet
         this.dataElements = dataElements;
     }
 
-    @XmlElementWrapper( name = "indicators" )
-    @XmlElement( name = "indicator" )
-    @XmlJavaTypeAdapter( IndicatorXmlAdapter.class )
-    @JsonProperty( value = "indicators" )
+    @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "indicators" )
+    @JacksonXmlProperty( localName = "indicator" )
     public Set<Indicator> getIndicators()
     {
         return indicators;
@@ -356,8 +367,8 @@ public class DataSet
         this.indicators = indicators;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
     public Set<DataElementOperand> getCompulsoryDataElementOperands()
     {
         return compulsoryDataElementOperands;
@@ -368,11 +379,11 @@ public class DataSet
         this.compulsoryDataElementOperands = compulsoryDataElementOperands;
     }
 
-    @XmlElementWrapper( name = "organisationUnits" )
-    @XmlElement( name = "organisationUnit" )
-    @XmlJavaTypeAdapter( OrganisationUnitXmlAdapter.class )
     @JsonProperty( value = "organisationUnits" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "organisationUnits" )
+    @JacksonXmlProperty( localName = "organisationUnit" )
     public Set<OrganisationUnit> getSources()
     {
         return sources;
@@ -383,8 +394,9 @@ public class DataSet
         this.sources = sources;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -395,9 +407,10 @@ public class DataSet
         this.sortOrder = sortOrder;
     }
 
-    @XmlElementWrapper( name = "sections" )
-    @XmlElement( name = "section" )
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "sections" )
+    @JacksonXmlProperty( localName = "section" )
     public Set<Section> getSections()
     {
         return sections;
@@ -408,8 +421,9 @@ public class DataSet
         this.sections = sections;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public boolean isMobile()
     {
         return mobile;
@@ -420,8 +434,9 @@ public class DataSet
         this.mobile = mobile;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public Integer getVersion()
     {
         return version;
@@ -432,8 +447,9 @@ public class DataSet
         this.version = version;
     }
 
-    @XmlElement
     @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty
     public int getExpiryDays()
     {
         return expiryDays;

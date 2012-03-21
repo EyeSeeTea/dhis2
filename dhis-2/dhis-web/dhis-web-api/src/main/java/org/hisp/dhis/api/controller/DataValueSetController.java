@@ -36,9 +36,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Controller
 @RequestMapping( value = DataValueSetController.RESOURCE_PATH )
@@ -54,7 +58,10 @@ public class DataValueSetController
     @RequestMapping( method = RequestMethod.GET )
     public String getDataValueSet( Model model ) throws Exception
     {
-        model.addAttribute( "model", new DataValueSets() );
+        DataValueSets dataValueSets = new DataValueSets();
+        dataValueSets.getDataValueSets().add( new DataValueSet() );
+
+        model.addAttribute( "model", dataValueSets );
 
         return "dataValueSets";
     }
@@ -67,5 +74,12 @@ public class DataValueSetController
 
         log.debug( "Saved data value set for data set: " + dataValueSet.getDataSetIdentifier() +
             ", org unit: " + dataValueSet.getOrganisationUnitIdentifier() + ", period: " + dataValueSet.getPeriodIsoDate() );
+    }
+
+    @ExceptionHandler( IllegalArgumentException.class )
+    public void handleException( HttpServletResponse response, IllegalArgumentException ex )
+        throws IOException
+    {
+        response.sendError( HttpServletResponse.SC_CONFLICT, ex.getMessage() );
     }
 }

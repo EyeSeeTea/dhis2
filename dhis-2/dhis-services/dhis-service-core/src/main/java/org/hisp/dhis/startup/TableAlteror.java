@@ -90,8 +90,10 @@ public class TableAlteror
         executeSql( "DROP TABLE dataelement_dataelementgroupsetmembers" );
         executeSql( "DROP TABLE dashboardcontent_olapurls" );
         executeSql( "DROP TABLE olapurl" );
+        executeSql( "DROP TABLE target" );
         executeSql( "DROP TABLE calculateddataelement" );
         executeSql( "DROP TABLE systemsequence" );
+        executeSql( "DROP TABLE reporttablecolumn" );
         executeSql( "DROP TABLE datamartexport" );
         executeSql( "DROP TABLE datamartexportdataelements" );
         executeSql( "DROP TABLE datamartexportindicators" );

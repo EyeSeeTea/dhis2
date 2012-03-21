@@ -7,8 +7,11 @@ function getDataElementsByDataset()
 {
 	var dataSets = document.getElementById( 'dataSets' );
 	var dataSetId = dataSets.options[ dataSets.selectedIndex ].value;
+	clearList( byId('aggregationDataElementId'));
+	
 	if( dataSetId == "" ){
-		clearList( byId('aggregationDataElementId'));
+		disable( 'dataElementsButton' );
+		setFieldValue( 'aggregationDataElementInput','');
 		return;
 	}
 
@@ -17,7 +20,7 @@ function getDataElementsByDataset()
 			id:dataSetId 
 		}, function( json )
         {
-			var de = document.getElementById( 'aggregationDataElementId' );
+			var de = byId( 'aggregationDataElementId' );
 			clearList( de );
 		  
 			for ( i in json.dataElements ) 
@@ -32,6 +35,94 @@ function getDataElementsByDataset()
 				
 				de.add(option, null);  			
 			}
+			
+			autoCompletedField( '' );
+		});
+}
+
+function autoCompletedField( id )
+{
+	var select = jQuery( "#aggregationDataElementId" );
+	$( "#dataElementsButton" ).unbind('click');
+	enable( 'dataElementsButton' );
+	hideById( id );
+	var selected = select.children( ":selected" );
+	var value = selected.val() ? selected.text() : "";
+	
+	var input = jQuery( "#aggregationDataElementInput" )
+		.insertAfter( select )
+		.val( value )
+		.autocomplete({
+			delay: 0,
+			minLength: 0,
+			source: function( request, response ) {
+				var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+				response( select.children( "option" ).map(function() {
+					var text = $( this ).text();
+					if ( this.value && ( !request.term || matcher.test(text) ) )
+						return {
+							label: text,
+							value: text,
+							option: this
+						};
+				}) );
+			},
+			select: function( event, ui ) {
+				ui.item.option.selected = true;
+			},
+			change: function( event, ui ) {
+				if ( !ui.item ) {
+					var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( $(this).val() ) + "$", "i" ),
+						valid = false;
+					select.children( "option" ).each(function() {
+						if ( $( this ).text().match( matcher ) ) {
+							this.selected = valid = true;
+							return false;
+						}
+					});
+					if ( !valid ) {
+						// remove invalid value, as it didn't match anything
+						$( this ).val( "" );
+						select.val( "" );
+						input.data( "autocomplete" ).term = "";
+						return false;
+					}
+				}
+			}
+		})
+		.addClass( "ui-widget ui-widget-content ui-corner-left" );
+
+	input.data( "autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li></li>" )
+			.data( "item.autocomplete", item )
+			.append( "<a>" + item.label + "</a>" )
+			.appendTo( ul );
+	};
+
+	showById('dataElementsButton');
+	var button = $( "#dataElementsButton" )
+		.attr( "title", i18n_show_all_items )
+		.button({
+			icons: {
+				primary: "ui-icon-triangle-1-s"
+			},
+			text: false
+		})
+		.removeClass( "ui-corner-all" )
+		.addClass( "ui-corner-right ui-button-icon" )
+		.click(function() {
+			// close if already visible
+			if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
+				input.autocomplete( "close" );
+				return;
+			}
+
+			// work around a bug (likely same cause as #5265)
+			$( this ).blur();
+
+			// pass empty string as value to search for, displaying all results
+			input.autocomplete( "search", "" );
+			input.focus();
 		});
 }
 
@@ -89,7 +180,7 @@ function getProgramStagesForFormula()
 		return;  
 	}
 
-	$.getJSON( 'getProgramStages.action', { programId:programId }, getProgramStagesFomulaCompleted );
+	$.get( 'getProgramStages.action', { programId:programId }, getProgramStagesFomulaCompleted, 'xml' );
 }
 
 function getProgramStagesFomulaCompleted( programstageElement )
@@ -286,4 +377,9 @@ function getCaseAggConditionByDataset()
 		{
 			setInnerHTML('list', html );
 		} );
+}
+
+function showAddCaseAggregationForm()
+{
+	window.location.href='showAddCaseAggregationForm.action?dataSetId=' + getFieldValue( 'dataSetId' );
 }
