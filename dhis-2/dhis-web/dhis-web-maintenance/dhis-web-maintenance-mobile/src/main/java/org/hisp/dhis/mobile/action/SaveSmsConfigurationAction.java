@@ -28,7 +28,6 @@ package org.hisp.dhis.mobile.action;
  */
 
 import org.hisp.dhis.sms.SmsConfigurationManager;
-import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
 import org.hisp.dhis.sms.config.SmsConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -39,7 +38,7 @@ import com.opensymphony.xwork2.Action;
  * @version $Id$
  */
 
-public class UpdateClickatellGateWayConfigAction
+public class SaveSmsConfigurationAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -50,42 +49,21 @@ public class UpdateClickatellGateWayConfigAction
     private SmsConfigurationManager smsConfigurationManager;
 
     // -------------------------------------------------------------------------
-    // Input
+    // Output
     // -------------------------------------------------------------------------
 
-    private String name;
+    private Integer pollingInterval;
 
-    public void setName( String name )
+    public void setPollingInterval( Integer pollingInterval )
     {
-        this.name = name;
+        this.pollingInterval = pollingInterval;
     }
 
-    private String password;
+    private String serverPhoneNumber;
 
-    public void setPassword( String password )
+    public void setServerPhoneNumber( String longNumber )
     {
-        this.password = password;
-    }
-
-    private String username;
-
-    public void setUsername( String username )
-    {
-        this.username = username;
-    }
-
-    private String apiId;
-
-    public void setApiId( String apiId )
-    {
-        this.apiId = apiId;
-    }
-
-    private String gatewayType;
-
-    public void setGatewayType( String gatewayType )
-    {
-        this.gatewayType = gatewayType;
+        this.serverPhoneNumber = longNumber;
     }
 
     // -------------------------------------------------------------------------
@@ -95,43 +73,17 @@ public class UpdateClickatellGateWayConfigAction
     public String execute()
         throws Exception
     {
-        if ( gatewayType != null && gatewayType.equals( "clickatell" ) )
+        SmsConfiguration smsConfig = smsConfigurationManager.getSmsConfiguration();
+
+        if ( smsConfig == null )
         {
-            SmsConfiguration config = smsConfigurationManager.getSmsConfiguration();
-
-            if ( config != null )
-            {
-                ClickatellGatewayConfig gatewayConfig = (ClickatellGatewayConfig) smsConfigurationManager
-                    .checkInstanceOfGateway( ClickatellGatewayConfig.class );
-
-                int index = -1;
-
-                if ( gatewayConfig == null )
-                {
-                    gatewayConfig = new ClickatellGatewayConfig();
-                }
-                else
-                {
-                    index = config.getGateways().indexOf( gatewayConfig );
-                }
-
-                gatewayConfig.setName( name );
-                gatewayConfig.setPassword( password );
-                gatewayConfig.setUsername( username );
-                gatewayConfig.setApiId( apiId );
-
-                if ( index >= 0 )
-                {
-                    config.getGateways().set( index, gatewayConfig );
-                }
-                else
-                {
-                    config.getGateways().add( gatewayConfig );
-                }
-
-                smsConfigurationManager.updateSmsConfiguration( config );
-            }
+            smsConfig = new SmsConfiguration( true );
         }
+
+        smsConfig.setPollingInterval( pollingInterval );
+        smsConfig.setLongNumber( serverPhoneNumber );
+
+        smsConfigurationManager.updateSmsConfiguration( smsConfig );
 
         return SUCCESS;
     }

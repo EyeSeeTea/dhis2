@@ -27,13 +27,9 @@ package org.hisp.dhis.mobile.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 
 import org.hisp.dhis.sms.SmsConfigurationManager;
-import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
-import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
-import org.hisp.dhis.sms.config.ModemGatewayConfig;
 import org.hisp.dhis.sms.config.SmsConfiguration;
 import org.hisp.dhis.sms.config.SmsGatewayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +41,7 @@ import com.opensymphony.xwork2.Action;
  * @version $Id$
  */
 
-public class ShowUpdateGateWayConfigFormAction
+public class RemoveGatewayConfigAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -56,14 +52,14 @@ public class ShowUpdateGateWayConfigFormAction
     private SmsConfigurationManager smsConfigurationManager;
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input
     // -------------------------------------------------------------------------
 
-    private Map<Integer, SmsGatewayConfig> gatewayConfigMap = new HashMap<Integer, SmsGatewayConfig>();
+    private Integer id;
 
-    public Map<Integer, SmsGatewayConfig> getGatewayConfigMap()
+    public void setId( Integer id )
     {
-        return gatewayConfigMap;
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
@@ -75,26 +71,17 @@ public class ShowUpdateGateWayConfigFormAction
     {
         SmsConfiguration smsConfig = smsConfigurationManager.getSmsConfiguration();
 
-        if ( smsConfig != null )
+        Iterator<SmsGatewayConfig> it = smsConfig.getGateways().iterator();
+        
+        while( it.hasNext() )
         {
-            for ( SmsGatewayConfig gw : smsConfig.getGateways() )
+            if ( smsConfig.getGateways().indexOf( it.next() ) == id )
             {
-                if ( gw instanceof BulkSmsGatewayConfig )
-                {
-                    gatewayConfigMap.put( 0, gw );
-                }
-                else if ( gw instanceof ClickatellGatewayConfig )
-                {
-                    gatewayConfigMap.put( 1, gw );
-                }
-                else if ( gw instanceof ModemGatewayConfig )
-                {
-                    gatewayConfigMap.put( 2, gw );
-                }
-                else
-                {
-                    gatewayConfigMap.put( 3, gw );
-                }
+                it.remove();
+                
+                smsConfigurationManager.updateSmsConfiguration( smsConfig );
+                
+                break;
             }
         }
 

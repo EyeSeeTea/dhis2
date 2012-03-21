@@ -27,18 +27,25 @@ package org.hisp.dhis.mobile.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.hisp.dhis.sms.SmsConfigurationManager;
+import org.hisp.dhis.sms.config.BulkSmsGatewayConfig;
+import org.hisp.dhis.sms.config.ClickatellGatewayConfig;
+import org.hisp.dhis.sms.config.ModemGatewayConfig;
 import org.hisp.dhis.sms.config.SmsConfiguration;
+import org.hisp.dhis.sms.config.SmsGatewayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author 
+ * @author Dang Duy Hieu
  * @version $Id$
  */
 
-public class GetMobileConfigurationAction
+public class GetSmsConfigurationAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -51,6 +58,20 @@ public class GetMobileConfigurationAction
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
+
+    private Map<Integer, SmsGatewayConfig> gatewayConfigMap1 = new HashMap<Integer, SmsGatewayConfig>();
+
+    public Map<Integer, SmsGatewayConfig> getGatewayConfigMap1()
+    {
+        return gatewayConfigMap1;
+    }
+
+    private Map<Integer, Integer> gatewayConfigMap2 = new HashMap<Integer, Integer>();
+
+    public Map<Integer, Integer> getGatewayConfigMap2()
+    {
+        return gatewayConfigMap2;
+    }
 
     private SmsConfiguration smsConfig;
 
@@ -72,6 +93,35 @@ public class GetMobileConfigurationAction
         throws Exception
     {
         smsConfig = smsConfigurationManager.getSmsConfiguration();
+
+        if ( smsConfig != null )
+        {
+            int index = 0;
+
+            for ( SmsGatewayConfig gw : smsConfig.getGateways() )
+            {
+                index = smsConfig.getGateways().indexOf( gw );
+
+                gatewayConfigMap1.put( index, gw );
+
+                if ( gw instanceof BulkSmsGatewayConfig )
+                {
+                    gatewayConfigMap2.put( 0, index );
+                }
+                else if ( gw instanceof ClickatellGatewayConfig )
+                {
+                    gatewayConfigMap2.put( 1, index );
+                }
+                else if ( gw instanceof ModemGatewayConfig )
+                {
+                    gatewayConfigMap2.put( 2, index );
+                }
+                else
+                {
+                    gatewayConfigMap2.put( 3, index );
+                }
+            }
+        }
 
         return SUCCESS;
     }
