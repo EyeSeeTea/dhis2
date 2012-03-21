@@ -667,8 +667,8 @@ Ext.onReady( function() {
 					DV.cmp.dimension.panel.setHeight(h > mx ? mx : h);
 				},
 				setDimensionLabels: function() {
-					alert(DV.cmp.settings.series.getValue());
-					alert(DV.cmp.settings.series.getRawValue());
+					//alert(DV.cmp.settings.series.getValue());
+					//alert(DV.cmp.settings.series.getRawValue());
 					//DV.cmp.settings.series
 				}
 			}
@@ -3522,9 +3522,9 @@ Ext.onReady( function() {
                                                                             style: 'padding-bottom:2px',
                                                                             fieldLabel: DV.i18n.system,
                                                                             labelWidth: DV.conf.layout.form_label_width,
-                                                                            disabled: !DV.init.system.user.isAdmin,
+                                                                            disabled: !DV.init.system.user.isadmin,
                                                                             check: function() {
-                                                                                if (!DV.init.system.user.isAdmin) {
+                                                                                if (!DV.init.system.user.isadmin) {
                                                                                     if (DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue()) === -1) {
                                                                                         this.setValue(false);
                                                                                     }
@@ -3844,7 +3844,7 @@ Ext.onReady( function() {
                                                                             if (DV.cmp.favorite.name.getValue()) {
                                                                                 var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
                                                                                 if (index != -1) {
-                                                                                    if (DV.store.favorite.getAt(index).data.userId || DV.init.system.user.isAdmin) {
+                                                                                    if (DV.store.favorite.getAt(index).data.userId || DV.init.system.user.isadmin) {
                                                                                         this.enable();
                                                                                         DV.cmp.favorite.label.setText('');
                                                                                         return true;
