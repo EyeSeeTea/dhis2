@@ -27,8 +27,8 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 import org.codehaus.jackson.map.util.JSONPObject;
+import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.springframework.web.servlet.view.AbstractView;
 
 import javax.servlet.http.HttpServletRequest;

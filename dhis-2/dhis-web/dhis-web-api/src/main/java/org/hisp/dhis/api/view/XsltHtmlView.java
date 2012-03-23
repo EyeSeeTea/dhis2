@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.view;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,7 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.springframework.util.Assert;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
