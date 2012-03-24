@@ -31,9 +31,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.sms.MessageSender;
+import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
@@ -63,6 +65,9 @@ public class ProcessingSendSMSAction
 
     @Autowired
     private MessageSender messageSender;
+    
+    @Autowired
+    private OutboundSmsTransportService smsLibService;
 
     // -------------------------------------------------------------------------
     // Input & Output
@@ -96,18 +101,50 @@ public class ProcessingSendSMSAction
         this.recipients = recipients;
     }
 
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private I18n i18n;
+
+    // -------------------------------------------------------------------------
+    // I18n
+    // -------------------------------------------------------------------------
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+
     // -------------------------------------------------------------------------
     // Action Implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
+        if ( gatewayId == null || gatewayId.isEmpty() )
+        {
+            message = i18n.getString( "please_select_a_gateway_type_to_send_sms" );
+
+            return ERROR;
+        }
+
         if ( smsMessage != null && !smsMessage.isEmpty() )
         {
             if ( recipients != null && !recipients.isEmpty() )
             {
                 messageSender.sendMessage( smsSubject, smsMessage, currentUserService.getCurrentUser(), true,
                     recipients, gatewayId );
+
+                message = smsLibService.getMessageStatus();
+                
+                if ( message != null && !message.equals( "success" ) )
+                {
+                    return ERROR;
+                }
             }
 
             Collection<OrganisationUnit> units = selectionTreeManager.getSelectedOrganisationUnits();
@@ -116,6 +153,13 @@ public class ProcessingSendSMSAction
             {
                 messageSender.sendMessage( smsSubject, smsMessage, currentUserService.getCurrentUser(), false,
                     new HashSet<User>( userService.getUsersByOrganisationUnits( units ) ), gatewayId );
+   
+                message = smsLibService.getMessageStatus();
+                
+                if ( message != null && !message.equals( "success" ) )
+                {
+                    return ERROR;
+                }
             }
         }
 
