@@ -1,5 +1,3 @@
-package org.hisp.dhis.mobile.action;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,96 +25,79 @@ package org.hisp.dhis.mobile.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.sms.SmsConfigurationManager;
-import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
-import org.springframework.beans.factory.annotation.Autowired;
+package org.hisp.dhis.dataelement;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.attribute.LocalAttributeValueService;
+import org.hisp.dhis.system.util.AttributeUtils;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Dang Duy Hieu
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version $LoadAttributeValuesByAttributeAction.java Mar 24, 2012 9:10:52 AM$
  */
-
-public class ReloadStartStopServiceAction
+public class LoadAttributeValuesByAttributeAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private SmsConfigurationManager smsConfigurationManager;
+    private LocalAttributeValueService localAttributeValueService;
 
-    @Autowired
-    private OutboundSmsTransportService smsLibService;
+    private AttributeService attributeService;
 
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    private String actionType;
+    private Integer attributeId;
 
-    public void setActionType( String actionType )
+    private Collection<String> values;
+
+    public Collection<String> getValues()
     {
-        this.actionType = actionType;
+        return values;
     }
 
-    private String message;
-
-    public String getMessage()
+    public void setLocalAttributeValueService( LocalAttributeValueService localAttributeValueService )
     {
-        return message;
+        this.localAttributeValueService = localAttributeValueService;
     }
 
-    // -------------------------------------------------------------------------
-    // I18n
-    // -------------------------------------------------------------------------
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
+    public void setAttributeService( AttributeService attributeService )
     {
-        this.i18n = i18n;
+        this.attributeService = attributeService;
+    }
+
+    public void setAttributeId( Integer attributeId )
+    {
+        this.attributeId = attributeId;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
-        if ( smsConfigurationManager.getSmsConfiguration() == null )
-        {
-            message = i18n.getString( "smsconfiguration_not_available" );
+        Attribute attribute = attributeService.getAttribute( attributeId );
+        Set<AttributeValue> attributeValues = new HashSet<AttributeValue>( localAttributeValueService
+            .getAttributeValuesByAttribute( attribute ) );
 
-            return INPUT;
-        }
-
-        if ( actionType != null && actionType.equals( "start" ) )
-        {
-            smsLibService.startService();
-        }
-        else if ( actionType.equals( "stop" ) )
-        {
-            smsLibService.stopService();
-        }
-        else
-        {
-            smsLibService.reloadConfig();
-        }
-
-        message = smsLibService.getMessageStatus();
-        
-        if ( message != null && !message.equals( "success" ) )
-        {
-            message = i18n.getString( message );
-
-            return INPUT;
-        }
+        values = AttributeUtils.getAttributeValueMap( attributeValues ).values();
 
         return SUCCESS;
     }
+
 }

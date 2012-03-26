@@ -1,5 +1,6 @@
 Ext.onReady( function() {
     Ext.BLANK_IMAGE_URL = '../resources/ext-ux/theme/gray-extend/gray-extend/s.gif';
+    Ext.Ajax.method = 'GET';
 	Ext.layout.FormLayout.prototype.trackLabels = true;
     Ext.QuickTips.init();
 	document.body.oncontextmenu = function(){return false;};
@@ -11,11 +12,11 @@ Ext.onReady( function() {
     });
     
     G.vars.mask = new Ext.LoadMask(Ext.getBody(),{msg:G.i18n.loading,msgCls:'x-mask-loading2'});
-    G.vars.parameter = G.util.getUrlParam('view') ? {id: G.util.getUrlParam('view')} : {id: null};
-	
+    G.vars.parameter = G.util.getUrlParam('id') ? {id: G.util.getUrlParam('id')} : {id: null};
+    G.vars.parameter.base = G.util.getUrlParam('base') ? G.util.getUrlParam('base') : 'none';
+    
     Ext.Ajax.request({
         url: G.conf.path_mapping + 'initialize' + G.conf.type,
-        method: 'GET',
         params: {id: G.vars.parameter.id || null},
         success: function(r) {
             var init = Ext.util.JSON.decode(r.responseText);
@@ -416,7 +417,7 @@ Ext.onReady( function() {
         G.vars.map.addLayer(ghyb);
     }
 	
-    var osm = new OpenLayers.Layer.OSM.Osmarender("OpenStreetMap");
+    var osm = new OpenLayers.Layer.OSM("OpenStreetMap");
     osm.layerType = G.conf.map_layer_type_baselayer;
     G.vars.map.addLayer(osm);
     
@@ -1538,7 +1539,6 @@ Ext.onReady( function() {
 	function setHelpText(topic, tab) {
 		Ext.Ajax.request({
 			url: '../../dhis-web-commons-about/getHelpContent.action',
-			method: 'POST',
 			params: {id: topic},
 			success: function(r) {
 				tab.body.update('<div id="help">' + r.responseText + '</div>');
@@ -1724,6 +1724,7 @@ Ext.onReady( function() {
                     
                     Ext.Ajax.request({
                         url: G.conf.path_mapping + 'addOrUpdateMapLayer' + G.conf.type,
+                        method: 'POST',
                         params: params,
                         success: function(r) {
                             Ext.message.msg(true, 'WMS ' + G.i18n.overlay + ' <span class="x-msg-hl">' + bln + '</span> ' + G.i18n.registered);
@@ -2927,7 +2928,16 @@ Ext.onReady( function() {
                 G.util.setOpacityByLayerType(G.conf.map_layer_type_thematic, G.conf.defaultLayerOpacity);
                 symbolLayer.setOpacity(1);
                 centroidLayer.setOpacity(1);
-                G.vars.map.getLayersByName('Google Streets')[0].setVisibility(false);
+                
+				if (G.vars.parameter.base === 'googlestreets') {
+					G.vars.map.getLayersByName('Google Streets')[0].setVisibility(true);
+				}
+				else if (G.vars.parameter.base === 'googlehybrid') {
+					G.vars.map.getLayersByName('Google Hybrid')[0].setVisibility(true);
+				}
+				else {
+					G.vars.map.getLayersByName('Google Streets')[0].setVisibility(false);
+				}
                 
                 var svg = document.getElementsByTagName('svg');
                 
@@ -3007,7 +3017,7 @@ Ext.onReady( function() {
                 helpWindow.setPagePosition(c+((e-c)/2)-(helpWindow.width/2), Ext.getCmp('east').y + 100);
                 
                 if (G.vars.parameter.id) {
-                    G.util.mapView.mapView.call(choropleth, G.vars.parameter.id);
+                    G.util.mapView.launch.call(choropleth, G.vars.parameter.mapView);
                     G.vars.parameter.id = null;
                 }
             }
