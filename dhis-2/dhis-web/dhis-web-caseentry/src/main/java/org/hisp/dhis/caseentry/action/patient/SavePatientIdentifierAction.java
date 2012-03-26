@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,12 +24,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.caseentry.action.patient;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+package org.hisp.dhis.caseentry.action.patient;
 
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientIdentifier;
@@ -37,19 +33,15 @@ import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramInstanceService;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStageInstance;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version $SavePatientIdentifierAction.java Mar 26, 2012 11:50:50 AM$
  */
-public class ProgramEnrollmentAction
+public class SavePatientIdentifierAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -57,10 +49,6 @@ public class ProgramEnrollmentAction
     // -------------------------------------------------------------------------
 
     private PatientService patientService;
-
-    private ProgramService programService;
-
-    private ProgramInstanceService programInstanceService;
 
     private PatientIdentifierTypeService identifierTypeService;
 
@@ -72,32 +60,19 @@ public class ProgramEnrollmentAction
 
     private Integer patientId;
 
-    private Integer programId;
+    private Integer identifierTypeId;
 
-    private Map<Integer, String> identiferMap;
+    private String value;
 
-    private Patient patient;
-
-    private Program program;
-
-    private ProgramInstance programInstance;
-
-    private Collection<ProgramStageInstance> programStageInstances = new ArrayList<ProgramStageInstance>();
-
-    private Collection<PatientIdentifierType> identifierTypes;
-
+    private Integer statusCode;
+    
     // -------------------------------------------------------------------------
-    // Getters/Setters
+    // Input/Output
     // -------------------------------------------------------------------------
 
     public void setPatientService( PatientService patientService )
     {
         this.patientService = patientService;
-    }
-
-    public Map<Integer, String> getIdentiferMap()
-    {
-        return identiferMap;
     }
 
     public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
@@ -110,91 +85,58 @@ public class ProgramEnrollmentAction
         this.identifierTypeService = identifierTypeService;
     }
 
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
-    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
-    {
-        this.programInstanceService = programInstanceService;
-    }
-
-    public Collection<PatientIdentifierType> getIdentifierTypes()
-    {
-        return identifierTypes;
-    }
-
     public void setPatientId( Integer patientId )
     {
         this.patientId = patientId;
     }
 
-    public ProgramInstance getProgramInstance()
+    public Integer getStatusCode()
     {
-        return programInstance;
+        return statusCode;
     }
 
-    public Patient getPatient()
+    public void setIdentifierTypeId( Integer identifierTypeId )
     {
-        return patient;
+        this.identifierTypeId = identifierTypeId;
     }
 
-    public Program getProgram()
+    public void setValue( String value )
     {
-        return program;
-    }
-
-    public void setProgramId( Integer programId )
-    {
-        this.programId = programId;
-    }
-
-    public Collection<ProgramStageInstance> getProgramStageInstances()
-    {
-        return programStageInstances;
+        this.value = value;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
-        patient = patientService.getPatient( patientId );
+        Patient patient = patientService.getPatient( patientId );
+        PatientIdentifierType identifierType = identifierTypeService.getPatientIdentifierType( identifierTypeId );
 
-        program = programService.getProgram( programId );
+        PatientIdentifier patientIdentifier = patientIdentifierService.getPatientIdentifier( identifierType, patient );
 
-        // ---------------------------------------------------------------------
-        // Load active ProgramInstance, completed = false
-        // ---------------------------------------------------------------------
-
-        Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( patient, program,
-            false );
-
-        if ( programInstances.iterator().hasNext() )
+        if ( patientIdentifier == null )
         {
-            programInstance = programInstances.iterator().next();
-
-            programStageInstances = programInstance.getProgramStageInstances();
-
-            // ---------------------------------------------------------------------
-            // Load identifier types of the selected program
-            // ---------------------------------------------------------------------
-
-            identifierTypes = identifierTypeService.getPatientIdentifierTypes( program );
-            identiferMap = new HashMap<Integer, String>();
-
-            Collection<PatientIdentifier> patientIdentifiers = patientIdentifierService.getPatientIdentifiers(
-                identifierTypes, patient );
-
-            for ( PatientIdentifier identifier : patientIdentifiers )
-            {
-                identiferMap.put( identifier.getIdentifierType().getId(), identifier.getIdentifier() );
-            }
+            patientIdentifier = new PatientIdentifier();
+            patientIdentifier.setIdentifierType( identifierType );
+            patientIdentifier.setPatient( patient );
+            patientIdentifier.setIdentifier( value.trim() );
         }
+        else
+        {
+            patientIdentifier.setIdentifier( value.trim() );
+        }
+        
+        patient.getIdentifiers().add( patientIdentifier );
 
+        patientService.updatePatient( patient );
+
+        statusCode = 0;
+        
         return SUCCESS;
     }
+
 }

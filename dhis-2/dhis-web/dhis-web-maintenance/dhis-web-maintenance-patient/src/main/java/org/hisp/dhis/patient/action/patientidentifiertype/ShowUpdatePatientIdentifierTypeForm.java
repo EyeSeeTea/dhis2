@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,75 +24,76 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.caseentry.action.patient;
 
-import java.util.ArrayList;
+package org.hisp.dhis.patient.action.patientidentifiertype;
+
 import java.util.Collection;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.patient.PatientIdentifierType;
+import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Chau Thu Tran
+ *
+ * @version $ShowUpdatePatientIdentifierTypeForm.java Mar 26, 2012 07:25:51 AM$
  */
-public class ProgramEnrollmentSelectAction
-    implements Action
+public class ShowUpdatePatientIdentifierTypeForm
+implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private PatientService patientService;
-
-    public void setPatientService( PatientService patientService )
-    {
-        this.patientService = patientService;
-    }
+    private PatientIdentifierTypeService patientIdentifierTypeService;
 
     private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
     private Integer id;
 
+    private PatientIdentifierType patientIdentifierType;
+    
+    private Collection<Program> programs;
+
+    // -------------------------------------------------------------------------
+    // Getters && Setters
+    // -------------------------------------------------------------------------
+
+    public PatientIdentifierType getPatientIdentifierType()
+    {
+        return patientIdentifierType;
+    }
+
+    public Collection<Program> getPrograms()
+    {
+        return programs;
+    }
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+
+    public Integer getId()
+    {
+        return id;
+    }
+
     public void setId( Integer id )
     {
         this.id = id;
     }
 
-    private Patient patient;
-
-    public Patient getPatient()
+    public void setPatientIdentifierTypeService( PatientIdentifierTypeService patientIdentifierTypeService )
     {
-        return patient;
-    }
-
-    private Collection<Program> programs = new ArrayList<Program>();
-
-    public Collection<Program> getPrograms()
-    {
-        return programs;
+        this.patientIdentifierTypeService = patientIdentifierTypeService;
     }
 
     // -------------------------------------------------------------------------
@@ -102,20 +103,11 @@ public class ProgramEnrollmentSelectAction
     public String execute()
         throws Exception
     {
-        patient = patientService.getPatient( id );
+        patientIdentifierType = patientIdentifierTypeService.getPatientIdentifierType( id );
 
-        OrganisationUnit selectedOrgunit = selectionManager.getSelectedOrganisationUnit();
-
-        // Get none single-event programs
-        programs = programService.getPrograms( false );
-
-        // Check the selected orgunit has any single-event program or not
-        Collection<Program> programsbyOrgunit = programService.getPrograms( selectedOrgunit );
-
-        Collection<Program> singleEventPrograms = programService.getPrograms( true, false );
-
-        singleEventPrograms.retainAll( programsbyOrgunit );
-
+        programs = programService.getAllPrograms();
+        
         return SUCCESS;
     }
 }
+

@@ -2935,6 +2935,9 @@ Ext.onReady( function() {
 				else if (G.vars.parameter.base === 'googlehybrid') {
 					G.vars.map.getLayersByName('Google Hybrid')[0].setVisibility(true);
 				}
+				else if (G.vars.parameter.base === 'osm') {
+					G.vars.map.getLayersByName('OpenStreetMap')[0].setVisibility(true);
+				}
 				else {
 					G.vars.map.getLayersByName('Google Streets')[0].setVisibility(false);
 				}
