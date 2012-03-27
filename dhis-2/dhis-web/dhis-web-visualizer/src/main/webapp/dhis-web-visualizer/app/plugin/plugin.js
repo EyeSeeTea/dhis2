@@ -278,8 +278,7 @@ Ext.onReady( function() {
             }
         },
         value: {
-            jsonfy: function(r) {
-                r = Ext.JSON.decode(r.responseText);
+            jsonfy: function(r) {                
                 var object = {
                     values: [],
                     periods: r.p
