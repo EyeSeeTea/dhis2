@@ -25,56 +25,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patientattribute;
+package org.hisp.dhis.patient;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.common.GenericNameableObjectStore;
+import org.hisp.dhis.program.Program;
 
 /**
  * @author Chau Thu Tran
- *
- * @version GetPatientAttributesWithoutGroupAction.java Sep 27, 2010 4:55:01 PM
+ * 
+ * @version $PatientAttributeGroupStore.java Mar 26, 2012 1:43:53 PM$
  */
-public class GetPatientAttributesWithoutGroupAction 
-    implements Action
-{   
-    // -------------------------------------------------------------------------
-    // Dependency
-    // -------------------------------------------------------------------------
+public interface PatientAttributeGroupStore
+    extends GenericNameableObjectStore<PatientAttributeGroup>
+{
+    Collection<PatientAttributeGroup> get( Program program );
 
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private Collection<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
-
-    public Collection<PatientAttribute> getPatientAttributes()
-    {
-        return patientAttributes;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        patientAttributes = patientAttributeService.getPatientAttributesWithoutGroup();
-
-        return SUCCESS;
-    }
-
+    Collection<PatientAttributeGroup> getWithoutProgram();
 }

@@ -28,7 +28,7 @@ package org.hisp.dhis.patient;
 
 import java.util.Collection;
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.program.Program;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -43,10 +43,9 @@ public class DefaultPatientAttributeGroupService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericIdentifiableObjectStore<PatientAttributeGroup> patientAttributeGroupStore;
+    private PatientAttributeGroupStore patientAttributeGroupStore;
 
-    public void setPatientAttributeGroupStore(
-        GenericIdentifiableObjectStore<PatientAttributeGroup> patientAttributeGroupStore )
+    public void setPatientAttributeGroupStore( PatientAttributeGroupStore patientAttributeGroupStore )
     {
         this.patientAttributeGroupStore = patientAttributeGroupStore;
     }
@@ -83,5 +82,17 @@ public class DefaultPatientAttributeGroupService
     public Collection<PatientAttributeGroup> getAllPatientAttributeGroups()
     {
         return patientAttributeGroupStore.getAll();
+    }
+
+    @Override
+    public Collection<PatientAttributeGroup> getPatientAttributeGroups( Program program )
+    {
+        return patientAttributeGroupStore.get( program );
+    }
+
+    @Override
+    public Collection<PatientAttributeGroup> getPatientAttributeGroupsWithoutProgram()
+    {
+        return patientAttributeGroupStore.getWithoutProgram();
     }
 }
