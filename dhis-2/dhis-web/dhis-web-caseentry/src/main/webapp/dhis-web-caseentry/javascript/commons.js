@@ -1,25 +1,14 @@
 
-function dobTypeOnChange( container ){
+function verifiedOnchange( container ){
 
-	var type = jQuery('#' + container + ' [id=dobType]').val();
-	
-	if(type == 'V' || type == 'D'){
-		jQuery('#' + container + ' [id=age]').rules("remove","required");
-		jQuery('#' + container + ' [id=birthDate]').rules("add",{required:true});
-		
-		showById(container + ' [id=birthdaySpan]');
-		hideById(container + ' [id=ageSpan]');
-	}else if(type == 'A'){
-		jQuery('#' + container + ' [id=birthDate]').rules("remove","required");
-		jQuery('#' + container + ' [id=age]').rules("add",{required:true});
-		
-		hideById(container + ' [id=birthdaySpan]');
-		showById(container + ' [id=ageSpan]');
-	}else {
-		hideById(container + ' [id=birthdaySpan]');
-		hideById(container + ' [id=ageSpan]');
-		jQuery('#' + container + ' [id=age]').rules("remove","required");
-		jQuery('#' + container + ' [id=birthDate]').rules("remove","required");
+	var checked = byId( 'verified' ).checked;
+	if( checked )
+	{
+		disable( 'age' );
+	}
+	else
+	{
+		enable( 'age' );
 	}
 }
 
@@ -50,6 +39,93 @@ function getPatientsByName( divname )
 	{
 		alert( i18n_no_patients_found );
 	}
+}
+
+// -----------------------------------------------------------------------------
+// Advanced search
+// -----------------------------------------------------------------------------
+
+function addAttributeOption()
+{
+	var rowId = 'advSearchBox' + jQuery('#advancedSearchTB select[name=searchingAttributeId]').length + 1;
+	var contend  = '<td>' + getInnerHTML('searchingAttributeIdTD') + '</td>';
+		contend += '<td>' + searchTextBox ;
+		contend += '<input type="button" value="-" onclick="removeAttributeOption(' + "'" + rowId + "'" + ');"></td>';
+		contend = '<tr id="' + rowId + '">' + contend + '</tr>';
+
+	jQuery('#advancedSearchTB > tbody:last').append( contend );
+}	
+
+function removeAttributeOption( rowId )
+{
+	jQuery( '#' + rowId ).remove();
+}		
+
+//------------------------------------------------------------------------------
+// Search patients by selected attribute
+//------------------------------------------------------------------------------
+
+function searchingAttributeOnChange( this_ )
+{	
+	var container = jQuery(this_).parent().parent().attr('id');
+	var attributeId = jQuery('#' + container+ ' [id=searchingAttributeId]').val(); 
+	var element = jQuery('#' + container+ ' [id=searchText]');
+	var valueType = jQuery('#' + container+ ' [id=searchingAttributeId] option:selected').attr('valueType');
+	
+	if( attributeId == '0' )
+	{
+		element.replaceWith( programComboBox );
+	}
+	else if ( valueType=='YES/NO' )
+	{
+		element.replaceWith( trueFalseBox );
+	}
+	else
+	{
+		element.replaceWith( searchTextBox );
+	}
+}
+//-----------------------------------------------------------------------------
+// Search Patient
+//-----------------------------------------------------------------------------
+
+function searchPatientsOnKeyUp( event )
+{
+	var key = getKeyCode( event );
+	
+	if ( key==13 )// Enter
+	{
+		searchPatients();
+	}
+}
+
+function getKeyCode(e)
+{
+	 if (window.event)
+		return window.event.keyCode;
+	 return (e)? e.which : null;
+}
+
+function searchAdvancedPatients()
+{
+	hideById( 'listPatientDiv' );
+	var searchTextFields = jQuery('[name=searchText]');
+	var flag = true;
+	jQuery( searchTextFields ).each( function( i, item )
+    {
+		if( jQuery( item ).val() == '' )
+		{
+			showWarningMessage( i18n_specify_search_criteria );
+			flag = false;
+		}
+	});
+	
+	if(!flag) return;
+	
+	contentDiv = 'listPatientDiv';
+	jQuery( "#loaderDiv" ).show();
+	searchPatient();
+	
 }
 
 // ----------------------------------------------------------------------------

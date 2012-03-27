@@ -28,18 +28,8 @@
 			</td>
 		</tr>
 	</table>
-	
-	<hr/>
-	<!-- TAB Header -->
-	<div id="tabs">
-		<ul>
-			<li><a href="#tab-1">$i18n.getString("enroll_to_program")</a></li>
-			<li><a href="#tab-2">$i18n.getString("name_based_data_entry")</a></li>
-		</ul>
-		
-		<!-- Enroll program TAB -->
-		<div id="tab-1">
-			<form id='programEnrollmentSelectDiv' name='programEnrollmentSelectDiv' method='POST'>
+<hr/>
+	<form id='programEnrollmentSelectDiv' name='programEnrollmentSelectDiv' method='POST'>
 			<input type="hidden" id="patientId" name="patientId" value="$patient.id">    
 
 			<table>    
@@ -49,7 +39,7 @@
 						<select id="programId" name="programId" onchange="showProgramEnrollmentForm('$patient.id', this.value);" >
 							<option value="0">[$i18n.getString( "select" )]</option>
 							#foreach( $program in $programs )
-								<option value="$program.id" singleevent='$program.singleEvent'>$encoder.htmlEncode( $program.name )</option>
+								<option value="$program.id" singleevent='$program.singleEvent' hideDateOfIncident='$program.hideDateOfIncident'>$encoder.htmlEncode( $program.name )</option>
 							#end
 						</select>
 					</td>
@@ -60,10 +50,12 @@
 					<td class='text-column'><label for="enrollmentDate"><span id='enrollmentDateDescription'></span><em title="$i18n.getString( "required" )" class="required"> * </em></label></td>
                     <td colspan='2' class='input-column'><input type="text" id="enrollmentDate" name="enrollmentDate" disabled="disabled" class="{validate:{required:true}}"></td>
 				</tr>
-				<tr id='dateOfIncidentTR' class='hidden'>
+				
+				<tr id='dateOfIncidentTR' style='display:none'>
 					<td class='text-column'><label for="dateOfIncident"><span id='dateOfIncidentDescription'></span><em title="$i18n.getString( "required" )" class="required"> * </em></label></td>
 					<td colspan='2' class='input-column'><input type="text" id="dateOfIncident" name="dateOfIncident" disabled="disabled" class="{validate:{required:true}}"></td>
 				</tr>
+			
 				<tr>
 					<td></td>
 					<td></td>   
@@ -80,17 +72,10 @@
                 	<td colspan='3'><span id='message'></span></td>
                 </tr>
 			</table>
+			</form>
 			
 			<div id='programEnrollmentDiv' class='hidden'></div>
-			</form>
-		</div>
-
-		<!-- register-event TAB -->
-		<div id="tab-2">
-			<div id='dataRecordingSelectDiv' class='hidden'></div>
-			<div id='dataEntryFormDiv' class='hidden'></div>
-
-		</div>
+	
 </div>
 
 <script>
@@ -104,16 +89,7 @@
 			
 			datePickerInRange( 'dateOfIncident' , 'enrollmentDate' );
 		}); 
-	
-	jQuery("#tabs").tabs();
+		
 	datePickerValid( 'enrollmentDate' );
 	datePickerValid( 'dateOfIncident' );
-	
-	$( "#tabs" ).tabs( "option", "selected", 0 );
-	$('#tabs').bind('tabsselect', function(event, ui) {
-		if( ui.index == 1 )
-		{
-			showSelectedDataRecoding( getFieldValue('patientId') );
-		}
-	});
 </script>

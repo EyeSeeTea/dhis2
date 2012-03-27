@@ -25,56 +25,41 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patientattribute;
+package org.hisp.dhis.patient.hibernate;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
-
-import com.opensymphony.xwork2.Action;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.patient.PatientAttributeGroup;
+import org.hisp.dhis.patient.PatientAttributeGroupStore;
+import org.hisp.dhis.program.Program;
 
 /**
  * @author Chau Thu Tran
- *
- * @version GetPatientAttributesWithoutGroupAction.java Sep 27, 2010 4:55:01 PM
+ * 
+ * @version $HibernatePatientAttributeGroupStore.java Mar 26, 2012 1:45:26 PM$
  */
-public class GetPatientAttributesWithoutGroupAction 
-    implements Action
-{   
-    // -------------------------------------------------------------------------
-    // Dependency
-    // -------------------------------------------------------------------------
+public class HibernatePatientAttributeGroupStore
+    extends HibernateGenericStore<PatientAttributeGroup>
+    implements PatientAttributeGroupStore
+{
 
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    @SuppressWarnings( "unchecked" )
+    @Override
+    public Collection<PatientAttributeGroup> get( Program program )
     {
-        this.patientAttributeService = patientAttributeService;
+        return getCriteria().setResultTransformer( Criteria.DISTINCT_ROOT_ENTITY ).createAlias( "attributes",
+            "attribute" ).add( Restrictions.eq( "attribute.program", program ) ).list();
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private Collection<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
-
-    public Collection<PatientAttribute> getPatientAttributes()
+    @SuppressWarnings( "unchecked" )
+    @Override
+    public Collection<PatientAttributeGroup> getWithoutProgram()
     {
-        return patientAttributes;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        patientAttributes = patientAttributeService.getPatientAttributesWithoutGroup();
-
-        return SUCCESS;
+        return getCriteria().setResultTransformer( Criteria.DISTINCT_ROOT_ENTITY ).createAlias( "attributes",
+            "attribute" ).add( Restrictions.isNull( "attribute.program" ) ).list();
     }
 
 }

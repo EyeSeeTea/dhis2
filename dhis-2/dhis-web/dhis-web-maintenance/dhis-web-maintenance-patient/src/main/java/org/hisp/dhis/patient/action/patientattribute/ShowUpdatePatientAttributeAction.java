@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,22 +27,23 @@
 
 package org.hisp.dhis.patient.action.patientattribute;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- *
- * @version GetPatientAttributesWithoutGroupAction.java Sep 27, 2010 4:55:01 PM
+ * 
+ * @version $ShowUpdatePatientAttributeAction.java Mar 26, 2012 1:58:26 PM$
  */
-public class GetPatientAttributesWithoutGroupAction 
+public class ShowUpdatePatientAttributeAction
     implements Action
-{   
+{
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
@@ -54,15 +55,36 @@ public class GetPatientAttributesWithoutGroupAction
         this.patientAttributeService = patientAttributeService;
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
+    private ProgramService programService;
 
-    private Collection<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
-
-    public Collection<PatientAttribute> getPatientAttributes()
+    public void setProgramService( ProgramService programService )
     {
-        return patientAttributes;
+        this.programService = programService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
+
+    private int id;
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    private PatientAttribute patientAttribute;
+
+    public PatientAttribute getPatientAttribute()
+    {
+        return patientAttribute;
+    }
+
+    private Collection<Program> programs;
+
+    public Collection<Program> getPrograms()
+    {
+        return programs;
     }
 
     // -------------------------------------------------------------------------
@@ -72,9 +94,10 @@ public class GetPatientAttributesWithoutGroupAction
     public String execute()
         throws Exception
     {
-        patientAttributes = patientAttributeService.getPatientAttributesWithoutGroup();
-
+        patientAttribute = patientAttributeService.getPatientAttribute( id );
+        
+        programs = programService.getAllPrograms();
+        
         return SUCCESS;
     }
-
 }

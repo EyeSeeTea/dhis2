@@ -1,3 +1,9 @@
+var COLOR_GREEN = '#b9ffb9';
+var COLOR_YELLOW = '#fffe8c';
+var COLOR_WHITE = '#ffffff';
+var COLOR_ORANGE = '#ff6600';
+var COLOR_RED = '#ff8a8a';
+var COLOR_GREY = '#cccccc';
 
 function organisationUnitSelected( orgUnits )
 {	
@@ -10,7 +16,8 @@ function organisationUnitSelected( orgUnits )
 	hideById('enrollmentDiv');
 	hideById('listRelationshipDiv');
 	hideById('addRelationshipDiv');
-			
+	hideById('migrationPatientDiv');
+	
 	$.getJSON( 'organisationUnitHasPatients.action', {orgunitId:orgUnits[0]}
 		, function( json ) 
 		{
@@ -34,31 +41,6 @@ function organisationUnitSelected( orgUnits )
 
 selection.setListenerFunction( organisationUnitSelected );
 
-//------------------------------------------------------------------------------
-// Search patients by selected attribute
-//------------------------------------------------------------------------------
-
-function searchingAttributeOnChange( this_ )
-{	
-	var container = jQuery(this_).parent().parent().attr('id');
-	var attributeId = jQuery('#' + container+ ' [id=searchingAttributeId]').val(); 
-	var element = jQuery('#' + container+ ' [id=searchText]');
-	var valueType = jQuery('#' + container+ ' [id=searchingAttributeId] option:selected').attr('valueType');
-	
-	if( attributeId == '0' )
-	{
-		element.replaceWith( programComboBox );
-	}
-	else if ( valueType=='YES/NO' )
-	{
-		element.replaceWith( trueFalseBox );
-	}
-	else
-	{
-		element.replaceWith( searchTextBox );
-	}
-}
-
 // -----------------------------------------------------------------------------
 // Remove patient
 // -----------------------------------------------------------------------------
@@ -66,58 +48,6 @@ function searchingAttributeOnChange( this_ )
 function removePatient( patientId, fullName )
 {
 	removeItem( patientId, fullName, i18n_confirm_delete, 'removePatient.action' );
-}
-
-//-----------------------------------------------------------------------------
-// Search Patient
-//-----------------------------------------------------------------------------
-
-function searchPatientsOnKeyUp( event )
-{
-	var key = getKeyCode( event );
-	
-	if ( key==13 )// Enter
-	{
-		searchPatients();
-	}
-}
-
-function getKeyCode(e)
-{
-	 if (window.event)
-		return window.event.keyCode;
-	 return (e)? e.which : null;
-}
-
-function searchPatients()
-{
-	hideById( 'listPatientDiv' );
-	var searchTextFields = jQuery('[name=searchText]');
-	var flag = true;
-	jQuery( searchTextFields ).each( function( i, item )
-    {
-		if( jQuery( item ).val() == '' )
-		{
-			showWarningMessage( i18n_specify_search_criteria );
-			flag = false;
-		}
-	});
-	
-	if(!flag) return;
-	
-	contentDiv = 'listPatientDiv';
-	jQuery( "#loaderDiv" ).show();
-	$.ajax({
-		url: 'searchRegistrationPatient.action',
-		type:"POST",
-		data: getParamsForDiv('searchPatientDiv'),
-		success: function( html ){
-				statusSearching = 1;
-				setInnerHTML( 'listPatientDiv', html );
-				showById('listPatientDiv');
-				jQuery( "#loaderDiv" ).hide();
-			}
-		});
 }
 
 function sortPatients()
@@ -385,10 +315,10 @@ function toggleUnderAge(this_)
 function showAddPatientForm()
 {
 	hideById('listPatientDiv');
-	
 	hideById('selectDiv');
 	hideById('searchPatientDiv');
-				
+	hideById('migrationPatientDiv');
+	
 	jQuery('#loaderDiv').show();
 	jQuery('#editPatientDiv').load('showAddPatientForm.action'
 		, function()
@@ -422,9 +352,9 @@ function showUpdatePatientForm( patientId )
 {
 	hideById('listPatientDiv');
 	setInnerHTML('editPatientDiv', '');
-	
 	hideById('selectDiv');
 	hideById('searchPatientDiv');
+	hideById('migrationPatientDiv');
 				
 	jQuery('#loaderDiv').show();
 	jQuery('#editPatientDiv').load('showUpdatePatientForm.action',
@@ -460,9 +390,9 @@ function showProgramEnrollmentSelectForm( patientId )
 {
 	hideById('listPatientDiv');
 	hideById('editPatientDiv');
-	
 	hideById('selectDiv');
 	hideById('searchPatientDiv');
+	hideById('migrationPatientDiv');
 				
 	jQuery('#loaderDiv').show();
 	jQuery('#enrollmentDiv').load('showProgramEnrollmentForm.action',
@@ -471,6 +401,7 @@ function showProgramEnrollmentSelectForm( patientId )
 		}, function()
 		{
 			showById('enrollmentDiv');
+			
 			jQuery('#loaderDiv').hide();
 		});
 }
@@ -522,6 +453,17 @@ function showProgramEnrollmentForm( patientId, programId )
 				enable('dateOfIncident');
 				showById('enrollmentDateTD');
 				showById('dateOfIncidentTD');
+			}
+			
+			var hideDateOfIncident = jQuery('#programEnrollmentSelectDiv [name=programId] option:selected').attr('hidedateofincident');
+				
+			if( hideDateOfIncident=='true')
+			{
+				hideById( 'dateOfIncidentTR');
+			}
+			else
+			{
+				showById( 'dateOfIncidentTR');
 			}
 			
 			jQuery('#loaderDiv').hide();
@@ -577,9 +519,9 @@ function showUnenrollmentSelectForm( patientId )
 {
 	hideById('listPatientDiv');
 	hideById('editPatientDiv');
-	
 	hideById('selectDiv');
 	hideById('searchPatientDiv');
+	hideById('migrationPatientDiv');
 				
 	jQuery('#loaderDiv').show();
 	jQuery('#enrollmentDiv').load('showProgramUnEnrollmentForm.action',
@@ -712,6 +654,7 @@ function onClickBackBtn()
 	hideById('enrollmentDiv');
 	hideById('listRelationshipDiv');
 	hideById('addRelationshipDiv');
+	hideById('migrationPatientDiv');
 }
 
 function loadPatientList()
@@ -722,6 +665,7 @@ function loadPatientList()
 	hideById('addRelationshipDiv');
 	hideById('dataRecordingSelectDiv');
 	hideById('dataEntryFormDiv');
+	hideById('migrationPatientDiv');
 	
 	showById('selectDiv');
 	showById('searchPatientDiv');
@@ -744,6 +688,7 @@ function loadAllPatients()
 {
 	hideById('listPatientDiv');
 	hideById('editPatientDiv');
+	hideById('migrationPatientDiv');
 	
 	jQuery('#loaderDiv').show();
 	contentDiv = 'listPatientDiv';
@@ -765,9 +710,6 @@ function loadAllPatients()
 
 function DateDueSaver( programStageInstanceId_, dueDate_, resultColor_ )
 {
-	var SUCCESS = '#ccffcc';
-	var ERROR = '#ccccff';
-	
 	var programStageInstanceId = programStageInstanceId_;	
 	var dueDate = dueDate_;
 	var resultColor = resultColor_;	
@@ -800,14 +742,14 @@ function DateDueSaver( programStageInstanceId_, dueDate_, resultColor_ )
 		}
 		else
 		{
-			markValue( ERROR );
+			markValue( COLOR_GREY );
 			window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
 		}
 	}
 
 	function handleHttpError( errorCode )
 	{
-		markValue( ERROR );
+		markValue( COLOR_GREY );
 		window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
 	}   
 
@@ -850,26 +792,6 @@ function addEventForPatientForm( divname )
 	});
 }
 
-// -----------------------------------------------------------------------------
-// Advanced search
-// -----------------------------------------------------------------------------
-
-function addAttributeOption()
-{
-	var rowId = 'advSearchBox' + jQuery('#advancedSearchTB select[name=searchingAttributeId]').length + 1;
-	var contend  = '<td>' + getInnerHTML('searchingAttributeIdTD') + '</td>';
-		contend += '<td>' + searchTextBox ;
-		contend += '<input type="button" value="-" onclick="removeAttributeOption(' + "'" + rowId + "'" + ');"></td>';
-		contend = '<tr id="' + rowId + '">' + contend + '</tr>';
-
-	jQuery('#advancedSearchTB > tbody:last').append( contend );
-}	
-
-function removeAttributeOption( rowId )
-{
-	jQuery( '#' + rowId ).remove();
-}		
-
 function showRepresentativeInfo( patientId)
 {
 	jQuery('#representativeInfo' ).dialog({
@@ -897,29 +819,54 @@ function showEnrolmentField()
 	showById('enrollBtn');
 }
 
-function toogleDiv( div )
+function savePatientIdentifier( identifierTypeId, field )
 {
-	jQuery( "#" + div ).slideToggle( "fast" );
+	field.blur();
+	field.style.backgroundColor = COLOR_WHITE;
+	if( validateValue( "iden" + identifierTypeId ) )
+	{
+		var patientId = getFieldValue("patientId");
+		field.style.backgroundColor = COLOR_YELLOW;
+		
+		var valueSaver = new PatientIdentifierSaver( patientId, identifierTypeId, field.value, COLOR_GREEN );
+		valueSaver.save();
+	}
+	else
+	{
+		field.style.backgroundColor = COLOR_ORANGE;
+	}
+}
+
+function savePatientAttrValue( patientAttributeId, field )
+{
+	field.blur();
+	field.style.backgroundColor = COLOR_WHITE;
+	if( validateValue( "attr" + patientAttributeId ) )
+	{
+		var patientId = getFieldValue("patientId");
+		field.style.backgroundColor = COLOR_YELLOW;
+		
+		var valueSaver = new PatientAttributeValueSaver( patientId, patientAttributeId, field.value, COLOR_GREEN );
+		valueSaver.save();
+	}
+	else
+	{
+		field.style.backgroundColor = COLOR_ORANGE;
+	}
 }
 
 //--------------------------------------------------------------------------------------------
-// Show search-form
+// For saving patient-identifier and patient-attribute-value
 //--------------------------------------------------------------------------------------------
 
-function savePatientIdentifier( identifierTypeId, field )
+function validateValue( spanErrorId )
 {
-	var patientId = getFieldValue("patientId");
-	field.style.backgroundColor = '#ffffcc';
-	
-	var valueSaver = new PatientIdentifierSaver( patientId, identifierTypeId, field.value, '#ccffcc' );
-    valueSaver.save();
+	var classes = jQuery( 'span[for=' + spanErrorId + ']' ).attr('class');
+	return ( classes == "error") ? false : true;
 }
 
 function PatientIdentifierSaver( patientId_, identifierTypeId_, value_, resultColor_  )
 {
-    var SUCCESS = '#ccffcc';
-    var ERROR = '#ccccff';
-	
     var patientId = patientId_;
 	var identifierTypeId = identifierTypeId_;
 	var value = value_;
@@ -957,7 +904,7 @@ function PatientIdentifierSaver( patientId_, identifierTypeId_, value_, resultCo
         {
             if(value!="")
             {
-                markValue( ERROR );
+                markValue( COLOR_GREY );
                 window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
             }
             else
@@ -969,7 +916,7 @@ function PatientIdentifierSaver( patientId_, identifierTypeId_, value_, resultCo
  
     function handleHttpError( errorCode )
     {
-        markValue( ERROR );
+        markValue( COLOR_GREY );
         window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
     }
  
@@ -979,4 +926,160 @@ function PatientIdentifierSaver( patientId_, identifierTypeId_, value_, resultCo
         var element = byId( 'iden' + identifierTypeId );
         element.style.backgroundColor = color;
     }
+}
+	
+function PatientAttributeValueSaver( patientId_, attributeId_, value_, resultColor_  )
+{
+    var patientId = patientId_;
+	var attributeId = attributeId_;
+	var value = value_;
+    var resultColor = resultColor_;
+	
+    this.save = function()
+    {
+		var params  = 'patientId=' + patientId;
+			params += '&attributeId=' + attributeId;
+			params += '&value=' + value;
+		
+		$.ajax({
+			   url: "savePatientAttribueValue.action",
+			   data: params,
+			   type: "POST",
+			   dataType: "xml",
+			   success: function(result){
+					handleResponse (result);
+			   },
+			   error: function(request,status,errorThrown) {
+					handleHttpError (request);
+			   }
+			});
+    };
+ 
+    function handleResponse( rootElement )
+    {
+        var codeElement = rootElement.getElementsByTagName( 'code' )[0];
+        var code = parseInt( codeElement.firstChild.nodeValue );
+        if ( code == 0 )
+        {
+            markValue( resultColor );
+        }
+        else
+        {
+            if(value!="")
+            {
+                markValue( COLOR_GREY );
+                window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
+            }
+            else
+            {
+                markValue( resultColor );
+            }
+        }
+    }
+ 
+    function handleHttpError( errorCode )
+    {
+        markValue( COLOR_GREY );
+        window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
+    }
+ 
+    function markValue( color )
+    {
+		var programStageId = getFieldValue('programStageId');
+        var element = byId( 'attr' + attributeId );
+        element.style.backgroundColor = color;
+    }
+}
+
+//--------------------------------------------------------------------------------------------
+// Show selected data-recording
+//--------------------------------------------------------------------------------------------
+
+function showSelectedDataRecoding( patientId )
+{
+	showLoader();
+	hideById('searchPatientDiv');
+	hideById('dataEntryFormDiv');
+	hideById('migrationPatientDiv');
+	jQuery('#dataRecordingSelectDiv').load( 'selectDataRecording.action', 
+		{
+			patientId: patientId
+		},
+		function()
+		{
+			jQuery('#dataRecordingSelectDiv [id=patientInfoDiv]').hide();
+			jQuery('#dataRecordingSelectDiv [id=backBtnFromEntry]').hide();
+			showById('dataRecordingSelectDiv');
+			
+			//var programId = jQuery('#programEnrollmentSelectDiv [id=programId] option:selected').val();
+			//var programName = jQuery('#programEnrollmentSelectDiv [id=programId] option:selected').text();
+			//$('#dataRecordingSelectDiv [id=programId]').find('option').remove().end().append('<option value="' + programId + '">' + programName + '</option>').val('whatever');
+
+			loadProgramStages();
+			hideLoader();
+			hideById('contentDiv');
+		});
+}
+
+function searchPatient()
+{
+	$.ajax({
+		url: 'searchRegistrationPatient.action',
+		type:"POST",
+		data: getParamsForDiv('searchPatientDiv'),
+		success: function( html ){
+				statusSearching = 1;
+				setInnerHTML( 'listPatientDiv', html );
+				showById('listPatientDiv');
+				jQuery( "#loaderDiv" ).hide();
+			}
+		});
+}
+
+//--------------------------------------------------------------------------------------------
+// Migration patient
+//--------------------------------------------------------------------------------------------
+
+function getPatientLocation( patientId )
+{
+	hideById('listPatientDiv');
+	hideById('selectDiv');
+	hideById('searchPatientDiv');
+				
+	jQuery('#loaderDiv').show();
+	
+	jQuery('#migrationPatientDiv').load("getPatientLocation.action", 
+		{
+			patientId: patientId
+		}
+		, function(){
+			showById( 'migrationPatientDiv' );
+			jQuery( "#loaderDiv" ).hide();
+		});
+}
+
+function verifyOrgunitRegistration( patientId )
+{
+	$.getJSON( 'verifyOrgunitRegistration.action', {}
+		, function( json ) 
+		{
+			var type = json.response;
+			if( type == 'success' )
+			{
+				registerPatientLocation( patientId );
+			}
+			else if( type == 'input' )
+			{
+				showWarningMessage( i18n_can_not_register_patient_for_orgunit);
+			}
+		} );
+}
+
+function registerPatientLocation( patientId )
+{
+	$.getJSON( 'registerPatientLocation.action',{ patientId:patientId }
+		, function( json ) 
+		{
+			showSuccessMessage( i18n_save_success );
+		} );
 }

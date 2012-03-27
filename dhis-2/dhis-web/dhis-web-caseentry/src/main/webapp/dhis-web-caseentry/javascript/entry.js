@@ -637,7 +637,15 @@ function doComplete()
 					var irregular = jQuery('#entryFormContainer [name=irregular]').val();
 					if( irregular == 'true')
 					{
-						enable('newEncounterBtn');
+						jQuery('#createNewEncounterDiv').dialog({
+								title: i18n_create_new_encounter,
+								maximize: true, 
+								closable: true,
+								modal:false,
+								overlay:{background:'#000000', opacity:0.1},
+								width: 300,
+								height: 100
+							}).show('fast');
 					}
 					
 					var selectedProgram = jQuery('#dataRecordingSelectForm [name=programId] option:selected');
@@ -733,13 +741,19 @@ function runValidation()
 // Register Irregular-encounter
 //------------------------------------------------------
 
-function registerIrregularEncounter()
+function registerIrregularEncounter( dueDate )
 {
-	jQuery.postJSON( "registerIrregularEncounter.action",{}, 
+	jQuery.postJSON( "registerIrregularEncounter.action",{ dueDate: dueDate }, 
 		function( json ) 
 		{   
 			loadDataEntry();
+			jQuery('#createNewEncounterDiv').dialog('close');
 		});
+}
+
+function closeDueDateDiv()
+{
+	jQuery('#createNewEncounterDiv').dialog('close');
 }
 
 function autocompletedField( idField )
@@ -806,27 +820,5 @@ function autocompletedField( idField )
 			// pass empty string as value to search for, displaying all results
 			input.autocomplete( "search", "" );
 			input.focus();
-		});
-}
-
-
-//--------------------------------------------------------------------------------------------
-// Show selected data-recording
-//--------------------------------------------------------------------------------------------
-
-function showSelectedDataRecoding( patientId )
-{
-	showLoader();
-	hideById('searchPatientDiv');
-	hideById('dataEntryFormDiv');
-	jQuery('#dataRecordingSelectDiv').load( 'selectDataRecording.action', 
-		{
-			patientId: patientId
-		},
-		function()
-		{
-			showById('dataRecordingSelectDiv');
-			hideLoader();
-			hideById('contentDiv');
 		});
 }

@@ -123,3 +123,39 @@ function searchValidationCompleted( messageElement )
         showWarningMessage( message );
     }
 }
+
+//--------------------------------------------------------------------------------------------
+// Show selected data-recording
+//--------------------------------------------------------------------------------------------
+
+function showSelectedDataRecoding( patientId )
+{
+	showLoader();
+	hideById('searchPatientDiv');
+	hideById('dataEntryFormDiv');
+	jQuery('#dataRecordingSelectDiv').load( 'selectDataRecording.action', 
+		{
+			patientId: patientId
+		},
+		function()
+		{
+			showById('dataRecordingSelectDiv');
+			hideLoader();
+			hideById('contentDiv');
+		});
+}
+
+function searchPatient()
+{
+	$.ajax({
+		url: 'searchPatient.action',
+		type:"POST",
+		data: getParamsForDiv('searchPatientDiv'),
+		success: function( html ){
+				statusSearching = 1;
+				setInnerHTML( 'contentDiv', html );
+				showById('contentDiv');
+				jQuery( "#loaderDiv" ).hide();
+			}
+		});
+}

@@ -25,44 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patientattribute;
+package org.hisp.dhis.caseentry.action.patient;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- *
- * @version GetPatientAttributesWithoutGroupAction.java Sep 27, 2010 4:55:01 PM
+ * 
+ * @version $VerifyOrgunitRegistrationAction.java Mar 27, 2012 04:58:27 PM$
  */
-public class GetPatientAttributesWithoutGroupAction 
+public class VerifyOrgunitRegistrationAction
     implements Action
-{   
+{
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientAttributeService patientAttributeService;
+    private SelectionTreeManager selectionTreeManager;
 
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
-        this.patientAttributeService = patientAttributeService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private Collection<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
-
-    public Collection<PatientAttribute> getPatientAttributes()
-    {
-        return patientAttributes;
+        this.selectionTreeManager = selectionTreeManager;
     }
 
     // -------------------------------------------------------------------------
@@ -72,9 +58,13 @@ public class GetPatientAttributesWithoutGroupAction
     public String execute()
         throws Exception
     {
-        patientAttributes = patientAttributeService.getPatientAttributesWithoutGroup();
+        OrganisationUnit orgunit = selectionTreeManager.getReloadedSelectedOrganisationUnit();
+
+        if ( orgunit == null || !orgunit.isHasPatients() )
+        {
+            return INPUT;
+        }
 
         return SUCCESS;
     }
-
 }

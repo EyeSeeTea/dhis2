@@ -25,44 +25,50 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patientattribute;
+package org.hisp.dhis.caseentry.action.patient;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- *
- * @version GetPatientAttributesWithoutGroupAction.java Sep 27, 2010 4:55:01 PM
+ * 
+ * @version $RegisterPatientLocationAction.java Mar 27, 2012 04:52:51 PM$
  */
-public class GetPatientAttributesWithoutGroupAction 
+public class RegisterPatientLocationAction
     implements Action
-{   
+{
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
+    
+    private SelectionTreeManager selectionTreeManager;
 
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
-        this.patientAttributeService = patientAttributeService;
+        this.selectionTreeManager = selectionTreeManager;
+    }
+
+    private PatientService patientService;
+
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Action implementation
     // -------------------------------------------------------------------------
 
-    private Collection<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
+    private Integer patientId;
 
-    public Collection<PatientAttribute> getPatientAttributes()
+    public void setPatientId( Integer patientId )
     {
-        return patientAttributes;
+        this.patientId = patientId;
     }
 
     // -------------------------------------------------------------------------
@@ -72,7 +78,13 @@ public class GetPatientAttributesWithoutGroupAction
     public String execute()
         throws Exception
     {
-        patientAttributes = patientAttributeService.getPatientAttributesWithoutGroup();
+        OrganisationUnit orgunit = selectionTreeManager.getReloadedSelectedOrganisationUnit();
+
+        Patient patient = patientService.getPatient( patientId );
+
+        patient.setOrganisationUnit( orgunit );
+        
+        patientService.savePatient( patient );
 
         return SUCCESS;
     }
