@@ -6,40 +6,36 @@
   
   <xsl:template match="d:organisationUnit">
     <div class="organisationUnit">
-      <h2> <xsl:value-of select="@name" /> </h2>
+      <h2> <xsl:value-of select="@d:name" /> </h2>
 
       <table>
         <tr>
           <td>ID</td>
-          <td> <xsl:value-of select="@id" /> </td>
+          <td> <xsl:value-of select="@d:id" /> </td>
         </tr>
         <tr>
           <td>Last Updated</td>
-          <td> <xsl:value-of select="@lastUpdated" /> </td>
+          <td> <xsl:value-of select="@d:lastUpdated" /> </td>
         </tr>
         <tr>
           <td>Code</td>
-          <td> <xsl:value-of select="@code" /> </td>
+          <td> <xsl:value-of select="@d:code" /> </td>
         </tr>
         <tr>
           <td>Short Name</td>
           <td> <xsl:value-of select="d:shortName" /> </td>
         </tr>
         <tr>
+          <td>Period Type</td>
+          <td> <xsl:value-of select="d:periodType" /> </td>
+        </tr>
+        <tr>
           <td>Opening Date</td>
           <td> <xsl:value-of select="d:openingDate" /> </td>
         </tr>
         <tr>
-          <td>Level</td>
-          <td> <xsl:value-of select="d:level" /> </td>
-        </tr>
-        <tr>
           <td>Active</td>
           <td> <xsl:value-of select="d:active" /> </td>
-        </tr>
-        <tr>
-          <td>Current Parent</td>
-          <td> <xsl:value-of select="d:currentParent" /> </td>
         </tr>
         <tr>
           <td>Has Patients</td>
@@ -61,7 +57,7 @@
       </table>
     </xsl:if>
   </xsl:template>
-  
+
   <xsl:template match="d:parent" mode="short">
     <h3>Parent OrganisationUnit</h3>
     <table>

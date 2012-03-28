@@ -27,12 +27,6 @@ package org.hisp.dhis.api.controller.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.InputStream;
-import java.util.ArrayList;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.hisp.dhis.api.utils.IdentifiableObjectParams;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
 import org.hisp.dhis.user.User;
@@ -48,6 +42,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -66,6 +65,7 @@ public class UserController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET )
+    @PreAuthorize( "hasRole('ALL')" )
     public String getUsers( IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
         Users users = new Users();
@@ -83,6 +83,7 @@ public class UserController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
+    @PreAuthorize( "hasRole('ALL')" )
     public String getUser( @PathVariable( "uid" ) String uid, IdentifiableObjectParams params, Model model, HttpServletRequest request )
     {
         User user = userService.getUser( uid );
@@ -104,7 +105,7 @@ public class UserController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/xml, text/xml"} )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_ADD')" )
+    @PreAuthorize( "hasRole('ALL')" )
     @ResponseStatus( value = HttpStatus.CREATED )
     public void postUserXML( HttpServletResponse response, InputStream input ) throws Exception
     {
@@ -112,7 +113,7 @@ public class UserController
     }
 
     @RequestMapping( method = RequestMethod.POST, headers = {"Content-Type=application/json"} )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_ADD')" )
+    @PreAuthorize( "hasRole('ALL')" )
     @ResponseStatus( value = HttpStatus.CREATED )
     public void postUserJSON( HttpServletResponse response, InputStream input ) throws Exception
     {
@@ -124,7 +125,7 @@ public class UserController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/xml, text/xml"} )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_UPDATE')" )
+    @PreAuthorize( "hasRole('ALL')" )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void putUserXML( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
     {
@@ -132,7 +133,7 @@ public class UserController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = {"Content-Type=application/json"} )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_UPDATE')" )
+    @PreAuthorize( "hasRole('ALL')" )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void putUserJSON( @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
     {
@@ -144,7 +145,7 @@ public class UserController
     //-------------------------------------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_DELETE')" )
+    @PreAuthorize( "hasRole('ALL')" )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void deleteUser( @PathVariable( "uid" ) String uid ) throws Exception
     {

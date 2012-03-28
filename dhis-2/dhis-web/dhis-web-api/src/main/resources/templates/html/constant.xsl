@@ -4,8 +4,8 @@
                 xmlns:d="http://dhis2.org/schema/dxf/2.0"
     >
 
-  <xsl:template match="d:organisationUnitGroup">
-    <div class="organisationUnitGroup">
+  <xsl:template match="d:constant">
+    <div class="constant">
       <h2> <xsl:value-of select="@d:name" /> </h2>
 
       <table>
@@ -21,19 +21,13 @@
           <td>Code</td>
           <td> <xsl:value-of select="@d:code" /> </td>
         </tr>
+        <tr>
+          <td>Value</td>
+          <td> <xsl:value-of select="d:value" /> </td>
+        </tr>
       </table>
 
-      <xsl:apply-templates select="d:organisationUnits" mode="short"/>
     </div>
   </xsl:template>
 
-  <xsl:template match="d:organisationUnitGroups" mode="short">
-    <xsl:if test="count(child::*) > 0">
-      <h3>OrganisationUnit Groups</h3>
-      <table class="organisationUnitGroups">
-        <xsl:apply-templates select="child::*" mode="row"/>
-      </table>
-    </xsl:if>
-  </xsl:template>
-  
 </xsl:stylesheet>

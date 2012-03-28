@@ -6,12 +6,12 @@
 
   <xsl:template match="d:chart">
     <div class="chart">
-      <h2> <xsl:value-of select="@name"/> </h2>
+      <h2> <xsl:value-of select="@d:name"/> </h2>
 	  
 	  <table>
 		<tr>
 			<td>Resource Data</td>
-			<td><a href="{@link}/data">png</a></td>
+			<td><a href="{@d:link}/data">png</a></td>
 		</tr>
 		<tr>
 			<td>width</td>
@@ -54,26 +54,34 @@
 		</tr>
 	  </table><br/>
 	  
-      <a href="{@link}/data"><img src="{@link}/data" style="border-style:solid; border-width: 1px; padding: 5px;" /></a>
+      <a href="{@d:link}/data"><img src="{@d:link}/data" style="border-style:solid; border-width: 1px; padding: 5px;" /></a>
 
       <h3>Details</h3>
 
       <table>
         <tr>
           <td>ID</td>
-          <td> <xsl:value-of select="@id"/> </td>
+          <td> <xsl:value-of select="@d:id"/> </td>
         </tr>
         <tr>
           <td>Last Updated</td>
-          <td> <xsl:value-of select="@lastUpdated"/> </td>
+          <td> <xsl:value-of select="@d:lastUpdated"/> </td>
         </tr>
         <tr>
           <td>Code</td>
-          <td> <xsl:value-of select="@code" /> </td>
+          <td> <xsl:value-of select="@d:code" /> </td>
         </tr>
         <tr>
-          <td>Dimension</td>
-          <td> <xsl:value-of select="d:dimension"/> </td>
+          <td>Series</td>
+          <td> <xsl:value-of select="d:series"/> </td>
+        </tr>
+        <tr>
+          <td>Category</td>
+          <td> <xsl:value-of select="d:category"/> </td>
+        </tr>
+        <tr>
+          <td>Filter</td>
+          <td> <xsl:value-of select="d:filter"/> </td>
         </tr>
         <tr>
           <td>Hide legend</td>
@@ -84,20 +92,8 @@
           <td> <xsl:value-of select="d:hideSubtitle"/> </td>
         </tr>
         <tr>
-          <td>Horizontal Pilot  Orientation</td>
-          <td> <xsl:value-of select="d:horizontalPlotOrientation"/> </td>
-        </tr>
-        <tr>
           <td>Regression</td>
           <td> <xsl:value-of select="d:regression"/> </td>
-        </tr>
-        <tr>
-          <td>Size</td>
-          <td> <xsl:value-of select="d:size"/> </td>
-        </tr>
-        <tr>
-          <td>Target line</td>
-          <td> <xsl:value-of select="d:targetLine"/> </td>
         </tr>
         <tr>
           <td>Target line label</td>
@@ -111,13 +107,10 @@
           <td>User organisation unit</td>
           <td> <xsl:value-of select="d:userOrganisationUnit"/> </td>
         </tr>
-        <tr>
-          <td>Vertical labels</td>
-          <td> <xsl:value-of select="d:verticalLabels"/> </td>
-        </tr>
       </table>
 
       <xsl:apply-templates select="d:organisationUnits|d:dataElements|d:indicators" mode="short"/>
+      <xsl:apply-templates select="d:relativePeriods" />
 
     </div>
   </xsl:template>

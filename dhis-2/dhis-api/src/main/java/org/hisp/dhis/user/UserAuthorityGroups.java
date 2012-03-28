@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.user;
 
 /*
  * Copyright (c) 2004-2011, University of Oslo
@@ -28,31 +28,34 @@ package org.hisp.dhis.common;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.BaseCollection;
+import org.hisp.dhis.common.Dxf2Namespace;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "linkableObject", namespace = Dxf2Namespace.NAMESPACE )
-public class BaseLinkableObject
-    implements LinkableObject
+@JacksonXmlRootElement( localName = "dxf2", namespace = Dxf2Namespace.NAMESPACE )
+public class UserAuthorityGroups
+    extends BaseCollection
 {
-    /**
-     * As part of the serializing process, this field can be set to indicate a link to this
-     * identifiable object (will be used on the web layer for navigating the REST API)
-     */
-    private transient String link;
+    private List<UserAuthorityGroup> userAuthorityGroups = new ArrayList<UserAuthorityGroup>();
 
     @JsonProperty
-    @JacksonXmlProperty( isAttribute = true, namespace = Dxf2Namespace.NAMESPACE )
-    public String getLink()
+    @JacksonXmlElementWrapper( localName = "userAuthorityGroups", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "userAuthorityGroup", namespace = Dxf2Namespace.NAMESPACE )
+    public List<UserAuthorityGroup> getUserAuthorityGroups()
     {
-        return link;
+        return userAuthorityGroups;
     }
 
-    public void setLink( String link )
+    public void setUserAuthorityGroups( List<UserAuthorityGroup> userAuthorityGroups )
     {
-        this.link = link;
+        this.userAuthorityGroups = userAuthorityGroups;
     }
 }
