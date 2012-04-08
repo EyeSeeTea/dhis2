@@ -178,4 +178,13 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     <property name="configurationManager" ref="org.hisp.dhis.importexport.IbatisConfigurationManager" />
   </bean>
 
+  <bean id="org.hisp.dhis.importexport.action.integration.DisplayRoutesAction" class="org.hisp.dhis.importexport.action.integration.DisplayRoutesAction" 
+    scope="prototype">
+    <property name="builtinCamelContext" ref="camel-builtin"/>    
+  </bean>
+
+  <bean id="org.hisp.dhis.importexport.action.integration.AddRouteAction" class="org.hisp.dhis.importexport.action.integration.AddRouteAction" 
+    scope="prototype">
+    <property name="builtinCamelContext" ref="camel-builtin"/>    
+  </bean>
 </beans>
