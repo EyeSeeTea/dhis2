@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd"
+       xmlns:d="http://dhis2.org/schema/dxf/2.0"
+  >
+
+  <camel:camelContext id="camel-builtin">
+    <camel:packageScan>
+      <camel:package>org.hisp.dhis.integration.routes</camel:package>
+      <camel:excludes>**.*Excluded*</camel:excludes>
+      <camel:includes>**.*</camel:includes>
+    </camel:packageScan>
+
+    <camel:route id="test">
+      <camel:description>A test Route</camel:description>
+      <camel:from uri="file://inputDir"/>
+      <camel:to uri="log:org.hisp.dhis.camel?level=INFO&amp;showBody=true"/>
+      <camel:to uri="xslt:transform/cross2dxf2.xsl"/>
+      <camel:to uri="file://outputDir"/>
+    </camel:route>
+    
+    <route id="ou-in" xmlns="http://camel.apache.org/schema/spring">
+      
+      <description>Updates orgunits from other dhis2 instance</description>
+      
+      <!-- every now and again ... -->
+      <from uri="quartz://halfminute?trigger.repeatInterval=30000&amp;trigger.repeatCount=10"/>
+      <!-- consume metadata from dhis web api -->
+      <to
+        uri="http://localhost/trunk/api/metaData.xml?httpClient.authenticationPreemptive=true&amp;authMethod=Basic&amp;authUsername=camel&amp;authPassword=Cam3llaa"/>
+      <to uri="log:org.hisp.dhis.camel?level=INFO"/>
+      
+      <!-- split out the orgunits into separate messages -->
+      <split>
+        <xpath xmlns:d="http://dhis2.org/schema/dxf/2.0">/d:dxf2/d:organisationUnits/d:organisationUnit</xpath>
+        <!--       <tokenize token="wstxns1:organisationUnit" inheritNamespaceTagName="dxf2" xml="true"/> -->
+        <convertBodyTo type="java.io.InputStream"/>
+        <to uri="direct:dxf2_in" />
+      </split>
+    </route>
+    
+
+<!--    <camel:route>
+      <camel:from uri="file://dataInputDir"/>
+      <camel:convertBodyTo type="java.io.InputStream"/>
+      <camel:to uri="class:org.hisp.dhis.dxf2.utils.DataValueSetMapper"/>
+      <camel:inOut uri="bean:org.hisp.dhis.dxf2.datavalueset.DataValueSetService?method=saveDataValueSet(${body})"/>
+      <camel:to uri="class:org.hisp.dhis.dxf2.utils.JacksonUtils?method=toXmlAsString"/>
+      <camel:to uri="xslt:xsl/importsummary.xsl"/>
+      <camel:to uri="smtp://localhost?to=bobj@localhost&amp;subject='result of data import'"/>
+    </camel:route>
+-->    
+  </camel:camelContext>
+
+</beans>

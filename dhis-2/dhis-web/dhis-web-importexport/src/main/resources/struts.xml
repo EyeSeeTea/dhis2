@@ -222,6 +222,22 @@
       <result name="success" type="velocity-xml">/dhis-web-importexport/responseSuccess.vm</result>
       <result name="input" type="velocity-xml">/dhis-web-importexport/responseInput.vm</result>
     </action>
+
+    <action name="displayRoutes" class="org.hisp.dhis.importexport.action.integration.DisplayRoutesAction">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-importexport/displayRoutes.vm</param>
+      <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
+      <param name="javascripts" />
+    </action>
+
+    <action name="addRoute" class="org.hisp.dhis.importexport.action.integration.AddRouteAction">
+      <result name="success" type="velocity">/main.vm</result>
+      <param name="page">/dhis-web-importexport/addRoute.vm</param>
+      <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
+      <interceptor-ref name="fileUploadStack" />
+      <param name="javascripts" />
+    </action>
+
   </package>
 
 </struts>
