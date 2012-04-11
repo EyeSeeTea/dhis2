@@ -34,6 +34,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.reporttable.ReportTable;
@@ -166,5 +167,20 @@ public class Report
     public void setUsingOrgUnitGroupSets( Boolean usingOrgUnitGroupSets )
     {
         this.usingOrgUnitGroupSets = usingOrgUnitGroupSets;
+    }
+
+    @Override
+    public void mergeWith( IdentifiableObject other )
+    {
+        super.mergeWith( other );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            Report report = (Report) other;
+
+            designContent = report.getDesignContent() == null ? designContent : report.getDesignContent();
+            reportTable = report.getReportTable() == null ? reportTable : report.getReportTable();
+            usingOrgUnitGroupSets = report.isUsingOrganisationUnitGroupSets();
+        }
     }
 }

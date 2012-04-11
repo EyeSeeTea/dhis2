@@ -36,6 +36,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -645,5 +646,39 @@ public class Chart
     public void setOrganisationUnit( OrganisationUnit organisationUnit )
     {
         this.organisationUnit = organisationUnit;
+    }
+
+    @Override
+    public void mergeWith( IdentifiableObject other )
+    {
+        super.mergeWith( other );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            Chart chart = (Chart) other;
+
+            domainAxisLabel = chart.getDomainAxisLabel() == null ? domainAxisLabel : chart.getDomainAxisLabel();
+            rangeAxisLabel = chart.getRangeAxisLabel() == null ? rangeAxisLabel : chart.getRangeAxisLabel();
+            type = chart.getType() == null ? type : chart.getType();
+            series = chart.getSeries() == null ? series : chart.getSeries();
+            category = chart.getCategory() == null ? category : chart.getCategory();
+            filter = chart.getFilter() == null ? filter : chart.getFilter();
+            hideLegend = chart.isHideLegend();
+            regression = chart.isRegression();
+            hideSubtitle = chart.isHideSubtitle();
+            targetLineValue = chart.getTargetLineValue() == null ? targetLineValue : chart.getTargetLineValue();
+            targetLineLabel = chart.getTargetLineLabel() == null ? targetLineLabel : chart.getTargetLineLabel();
+            baseLineValue = chart.getBaseLineValue() == null ? baseLineValue : chart.getBaseLineValue();
+            baseLineLabel = chart.getBaseLineLabel() == null ? baseLineLabel : chart.getBaseLineLabel();
+            relatives = chart.getRelatives() == null ? relatives : chart.getRelatives();
+            userOrganisationUnit = chart.isUserOrganisationUnit();
+            user = chart.getUser() == null ? user : chart.getUser();
+            organisationUnitGroupSet = chart.getOrganisationUnitGroupSet() == null ? organisationUnitGroupSet : chart.getOrganisationUnitGroupSet();
+
+            indicators.addAll( chart.getIndicators() );
+            dataElements.addAll( chart.getDataElements() );
+            dataSets.addAll( chart.getDataSets() );
+            organisationUnits.addAll( chart.getOrganisationUnits() );
+        }
     }
 }

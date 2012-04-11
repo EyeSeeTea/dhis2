@@ -79,8 +79,11 @@ public class LoadDataElementsAction
     public String execute()
         throws Exception
     {
-        psDataElements = programStageService.getProgramStage( programStageId ).getProgramStageDataElements();
-
+        if ( programStageId != null )
+        {
+            psDataElements = programStageService.getProgramStage( programStageId ).getProgramStageDataElements();
+        }
+        
         return SUCCESS;
     }
 }
