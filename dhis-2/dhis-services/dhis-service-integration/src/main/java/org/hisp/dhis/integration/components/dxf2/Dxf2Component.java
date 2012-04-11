@@ -44,7 +44,6 @@ import org.apache.camel.impl.DefaultComponent;
  */
 public class Dxf2Component extends DefaultComponent
 {
-
     public static final String DATA = "data";
 
     public static final String METADATA = "metadata";
@@ -52,15 +51,14 @@ public class Dxf2Component extends DefaultComponent
     @Override
     protected Endpoint createEndpoint( String uri, String remaining, Map<String, Object> parameters ) throws Exception
     {
-        System.out.println( "URI: " + uri + ", remaining: " + remaining );
-        System.out.println( parameters );
         
         if ( !remaining.equals( DATA ) && !remaining.equals( METADATA ) ) 
         {
             throw new UnsupportedOperationException( "Invalid dxf2 uri part " + remaining);
         }
         
-        Endpoint endpoint = remaining.equals( DATA ) ? new Dxf2DataEndpoint( uri, this ) : new Dxf2MetaDataEndpoint( uri, this );
+        Endpoint endpoint = remaining.equals( DATA ) ? 
+            new Dxf2DataEndpoint( uri, this ) : new Dxf2MetaDataEndpoint( uri, this );
   
         setProperties( endpoint, parameters );
         return endpoint;
