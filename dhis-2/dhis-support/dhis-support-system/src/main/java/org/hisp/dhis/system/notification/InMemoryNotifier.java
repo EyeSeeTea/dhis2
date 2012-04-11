@@ -36,12 +36,17 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * @author Lars Helge Overland
  */
 public class InMemoryNotifier
     implements Notifier
 {
+    private static final Log log = LogFactory.getLog( InMemoryNotifier.class );
+    
     private int MAX_SIZE = 1000;
     
     private List<Notification> notifications;
@@ -76,6 +81,8 @@ public class InMemoryNotifier
         {
             notifications.remove( MAX_SIZE );
         }
+        
+        log.info( notification );
         
         return this;
     }
