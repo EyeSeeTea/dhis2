@@ -27,6 +27,10 @@ package org.hisp.dhis.dxf2.datavalueset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+
 import java.util.Collection;
 
 import org.hisp.dhis.DhisTest;
@@ -49,8 +53,6 @@ import org.hisp.dhis.period.PeriodService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-
-import static junit.framework.Assert.*;
 
 public class DataValueSetServiceTest
     extends DhisTest
@@ -119,6 +121,7 @@ public class DataValueSetServiceTest
         ImportSummary summary = dataValueSetService.saveDataValueSet( new ClassPathResource( "dataValueSetA.xml" ).getInputStream() );
         
         assertNotNull( summary );
+        assertEquals( 1, summary.getCounts().size() );
         
         Collection<DataValue> dataValues = dataValueService.getAllDataValues();
         
