@@ -30,17 +30,23 @@ package org.hisp.dhis.visualizer.action;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.aggregation.AggregatedDataValue;
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
 import org.hisp.dhis.aggregation.AggregatedOrgUnitDataValueService;
+import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.completeness.DataSetCompletenessResult;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.system.util.ConversionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
+
+import static org.hisp.dhis.api.utils.ContextUtils.CONTENT_TYPE_JSON;
 
 /**
  * @author Jan Henrik Overland
@@ -58,20 +64,24 @@ public class GetAggregatedValuesAction
     {
         this.aggregatedDataValueService = aggregatedDataValueService;
     }
-    
+
     private AggregatedOrgUnitDataValueService aggregatedOrgUnitDataValueService;
 
-    public void setAggregatedOrgUnitDataValueService( AggregatedOrgUnitDataValueService aggregatedOrgUnitDataValueService )
+    public void setAggregatedOrgUnitDataValueService(
+        AggregatedOrgUnitDataValueService aggregatedOrgUnitDataValueService )
     {
         this.aggregatedOrgUnitDataValueService = aggregatedOrgUnitDataValueService;
     }
-    
+
     private OrganisationUnitGroupService organisationUnitGroupService;
 
     public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
     {
         this.organisationUnitGroupService = organisationUnitGroupService;
     }
+
+    @Autowired
+    private ContextUtils contextUtils;
 
     // -------------------------------------------------------------------------
     // Input
@@ -83,14 +93,14 @@ public class GetAggregatedValuesAction
     {
         this.indicatorIds = indicatorIds;
     }
-    
+
     private Collection<Integer> dataElementIds;
 
     public void setDataElementIds( Collection<Integer> dataElementIds )
     {
         this.dataElementIds = dataElementIds;
     }
-    
+
     private Collection<Integer> dataSetIds;
 
     public void setDataSetIds( Collection<Integer> dataSetIds )
@@ -111,7 +121,7 @@ public class GetAggregatedValuesAction
     {
         this.organisationUnitIds = organisationUnitIds;
     }
-    
+
     private Integer organisationUnitGroupSetId;
 
     public void setOrganisationUnitGroupSetId( Integer organisationUnitGroupSetId )
@@ -124,14 +134,14 @@ public class GetAggregatedValuesAction
     // -------------------------------------------------------------------------
 
     private Collection<AggregatedIndicatorValue> indicatorValues = new HashSet<AggregatedIndicatorValue>();
-    
+
     public Collection<AggregatedIndicatorValue> getIndicatorValues()
     {
         return indicatorValues;
     }
 
     private Collection<AggregatedDataValue> dataElementValues = new HashSet<AggregatedDataValue>();
-    
+
     public Collection<AggregatedDataValue> getDataElementValues()
     {
         return dataElementValues;
@@ -155,29 +165,34 @@ public class GetAggregatedValuesAction
         // Org unit group set data
         // ---------------------------------------------------------------------
 
-        if ( organisationUnitGroupSetId != null && periodIds != null && organisationUnitIds != null && organisationUnitIds.size() > 0 )
+        if ( organisationUnitGroupSetId != null && periodIds != null && organisationUnitIds != null
+            && organisationUnitIds.size() > 0 )
         {
             Integer organisationUnitId = organisationUnitIds.iterator().next();
-            
-            OrganisationUnitGroupSet groupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( organisationUnitGroupSetId );
-            
+
+            OrganisationUnitGroupSet groupSet = organisationUnitGroupService
+                .getOrganisationUnitGroupSet( organisationUnitGroupSetId );
+
             if ( organisationUnitId == null || groupSet == null )
             {
                 return SUCCESS;
             }
-            
-            Collection<Integer> groupIds = ConversionUtils.getIdentifiers( OrganisationUnitGroup.class, groupSet.getOrganisationUnitGroups() );
-            
+
+            Collection<Integer> groupIds = ConversionUtils.getIdentifiers( OrganisationUnitGroup.class,
+                groupSet.getOrganisationUnitGroups() );
+
             if ( indicatorIds != null )
             {
-                indicatorValues = aggregatedOrgUnitDataValueService.getAggregatedIndicatorValues( indicatorIds, periodIds, organisationUnitId, groupIds );
+                indicatorValues = aggregatedOrgUnitDataValueService.getAggregatedIndicatorValues( indicatorIds,
+                    periodIds, organisationUnitId, groupIds );
             }
-            
+
             if ( dataElementIds != null )
             {
-                dataElementValues = aggregatedOrgUnitDataValueService.getAggregatedDataValueTotals( dataElementIds, periodIds, organisationUnitId, groupIds );                
+                dataElementValues = aggregatedOrgUnitDataValueService.getAggregatedDataValueTotals( dataElementIds,
+                    periodIds, organisationUnitId, groupIds );
             }
-            
+
             if ( dataSetIds != null )
             {
                 // FIXME will be implemented soon
@@ -192,19 +207,25 @@ public class GetAggregatedValuesAction
         {
             if ( indicatorIds != null )
             {
-                indicatorValues = aggregatedDataValueService.getAggregatedIndicatorValues( indicatorIds, periodIds, organisationUnitIds );
+                indicatorValues = aggregatedDataValueService.getAggregatedIndicatorValues( indicatorIds, periodIds,
+                    organisationUnitIds );
             }
-            
+
             if ( dataElementIds != null )
             {
-                dataElementValues = aggregatedDataValueService.getAggregatedDataValueTotals( dataElementIds, periodIds, organisationUnitIds );                
+                dataElementValues = aggregatedDataValueService.getAggregatedDataValueTotals( dataElementIds, periodIds,
+                    organisationUnitIds );
             }
-            
+
             if ( dataSetIds != null )
             {
-                dataSetValues = aggregatedDataValueService.getAggregatedDataSetCompleteness( dataSetIds, periodIds, organisationUnitIds );
+                dataSetValues = aggregatedDataValueService.getAggregatedDataSetCompleteness( dataSetIds, periodIds,
+                    organisationUnitIds );
             }
         }
+
+        contextUtils.configureResponse( ServletActionContext.getResponse(), CONTENT_TYPE_JSON,
+            CacheStrategy.RESPECT_SYSTEM_SETTING, null, false );
 
         return SUCCESS;
     }

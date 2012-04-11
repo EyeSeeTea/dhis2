@@ -98,6 +98,14 @@ public class BaseIdentifiableObject
         this.name = name;
     }
 
+    public BaseIdentifiableObject(IdentifiableObject identifiableObject)
+    {
+        this.id = identifiableObject.getId();
+        this.uid = identifiableObject.getUid();
+        this.name = identifiableObject.getName();
+        this.lastUpdated = identifiableObject.getLastUpdated();
+    }
+
     // -------------------------------------------------------------------------
     // Comparable implementation
     // -------------------------------------------------------------------------
@@ -113,8 +121,8 @@ public class BaseIdentifiableObject
     // -------------------------------------------------------------------------
 
     @JsonProperty( value = "internalId" )
-    @JsonView( {DetailedView.class, IdentifiableObjectView.class, ExportView.class} )
-    @JacksonXmlProperty( isAttribute = true, namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( { DetailedView.class, IdentifiableObjectView.class, ExportView.class } )
+    @JacksonXmlProperty( isAttribute = true )
     public int getId()
     {
         return id;
@@ -126,7 +134,7 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty( value = "id" )
-    @JacksonXmlProperty( isAttribute = true, namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( isAttribute = true )
     public String getUid()
     {
         return uid;
@@ -138,21 +146,21 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class, IdentifiableObjectView.class, ExportView.class} )
-    @JacksonXmlProperty( isAttribute = true, namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( { DetailedView.class, IdentifiableObjectView.class, ExportView.class } )
+    @JacksonXmlProperty( isAttribute = true )
     public String getCode()
     {
         return code;
     }
 
     public void setCode( String code )
-    {
+    {  
         this.code = code;
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class, IdentifiableObjectView.class, ExportView.class} )
-    @JacksonXmlProperty( isAttribute = true, namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( { DetailedView.class, IdentifiableObjectView.class, ExportView.class } )
+    @JacksonXmlProperty( isAttribute = true )
     public String getName()
     {
         return name;
@@ -164,8 +172,8 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class, IdentifiableObjectView.class, ExportView.class} )
-    @JacksonXmlProperty( isAttribute = true, namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView( { DetailedView.class, IdentifiableObjectView.class, ExportView.class } )
+    @JacksonXmlProperty( isAttribute = true )
     public Date getLastUpdated()
     {
         return lastUpdated;
@@ -205,13 +213,14 @@ public class BaseIdentifiableObject
 
     /**
      * Get a map of uids to internal identifiers
-     *
+     * 
      * @param objects the IdentifiableObjects to put in the map
      * @return the map
      */
     public static Map<String, Integer> getUIDMap( Collection<? extends BaseIdentifiableObject> objects )
     {
         Map<String, Integer> map = new HashMap<String, Integer>();
+
         for ( IdentifiableObject object : objects )
         {
             String uid = object.getUid();
@@ -225,14 +234,14 @@ public class BaseIdentifiableObject
 
     /**
      * Get a map of codes to internal identifiers
-     *
+     * 
      * @param objects the NameableObjects to put in the map
      * @return the map
      */
-    public static Map<String, Integer> getCodeMap( Collection<? extends BaseNameableObject> objects )
+    public static Map<String, Integer> getCodeMap( Collection<? extends BaseIdentifiableObject> objects )
     {
         Map<String, Integer> map = new HashMap<String, Integer>();
-        for ( NameableObject object : objects )
+        for ( BaseIdentifiableObject object : objects )
         {
             String code = object.getCode();
             int internalId = object.getId();
@@ -240,5 +249,47 @@ public class BaseIdentifiableObject
             map.put( code, internalId );
         }
         return map;
+    }
+
+    /**
+     * Get a map of names to internal identifiers
+     * 
+     * @param objects the NameableObjects to put in the map
+     * @return the map
+     */
+    public static Map<String, Integer> getNameMap( Collection<? extends BaseIdentifiableObject> objects )
+    {
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        for ( BaseIdentifiableObject object : objects )
+        {
+            String name = object.getName();
+            int internalId = object.getId();
+
+            map.put( name, internalId );
+        }
+        return map;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "IdentifiableObject{" +
+            "id=" + id +
+            ", uid='" + uid + '\'' +
+            ", code='" + code + '\'' +
+            ", name='" + name + '\'' +
+            ", lastUpdated=" + lastUpdated +
+            ", displayName='" + displayName + '\'' +
+            '}';
+    }
+
+    @Override
+    public void mergeWith( IdentifiableObject other )
+    {
+        this.id = other.getId() == 0 ? this.id : other.getId();
+        this.uid = other.getUid() == null ? this.uid : other.getUid();
+        this.name = other.getName() == null ? this.name : other.getName();
+        this.code = other.getCode() == null ? this.code : other.getCode();
+        this.lastUpdated = other.getLastUpdated() == null ? this.lastUpdated : other.getLastUpdated();
     }
 }

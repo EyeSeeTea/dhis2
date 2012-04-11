@@ -241,7 +241,7 @@
     <!-- DataSets -->
     
     <tr>
-        <th>$i18n.getString( "available_dataset_completeness_percentages" )</th>
+        <th>$i18n.getString( "available_reporting_rates" )</th>
     </tr>
     <tr>
         <td>
@@ -261,7 +261,7 @@
         </td>
     </tr>
     <tr>
-        <th>$i18n.getString( "selected_dataset_completeness_percentages" )</th>
+        <th>$i18n.getString( "selected_reporting_rates" )</th>
     </tr>
     <tr>
         <td>
@@ -330,64 +330,11 @@
 
 <span><a href="javascript:toggleFixedOrganisationUnits()">$i18n.getString( "toggle_fixed_organisation_units" )</a>&nbsp;</span>
 
-<div id="fixedOrganisationUnits" style="display:none">
+<div id="fixedOrganisationUnits" style="display:none; margin-top:2px; margin-bottom:15px;">
 
-<table>
-	
-	<!-- OrganisationUnits -->
-	
-	<tr>
-		<th>$i18n.getString( "available_organisationunits" )</th>
-	</tr>
-	<tr>
-		<td>
-			<select id="organisationUnitLevel" name="organisationUnitLevel" style="min-width:640px" onchange="getOrganisationUnits()">
-				<option value="$ALL">[ $i18n.getString( "select_organisationunit_level_all" ) ]</option>
-				#foreach ( $level in $levels )
-					#if( $velocityCount == 1)
-					<option value="$level.level" selected="selected">$encoder.htmlEncode( $level.name )</option>
-					#else
-					<option value="$level.level">$encoder.htmlEncode( $level.name )</option>
-					#end
-				#end
-			</select>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<select multiple size="6" id="availableOrganisationUnits" name="availableOrganisationUnits" style="min-width:640px" ondblclick="moveSelectedById( 'availableOrganisationUnits', 'selectedOrganisationUnits' )">
-				#foreach ( $unit in $organisationUnits )
-					<option value="$unit.id">$encoder.htmlEncode( $unit.name )</option>
-				#end
-			</select>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<input type="button" value="$i18n.getString( 'add_selected' )" title="$i18n.getString( 'add_selected' )" style="width:120px" onclick="moveSelectedById( 'availableOrganisationUnits', 'selectedOrganisationUnits' )"><input 
-				type="button" value="$i18n.getString( 'add_all' )" title="$i18n.getString( 'add_all' )" style="width:120px" onclick="moveAllById( 'availableOrganisationUnits', 'selectedOrganisationUnits' )"><input 
-                type="button" value="$i18n.getString( 'add_children' )" title="$i18n.getString( 'add_children' )" style="width:120px" onclick="getOrganisationUnitChildren()"><input 
-				type="button" value="$i18n.getString( 'remove_selected' )" title="$i18n.getString( 'remove_selected' )" style="width:120px" onclick="moveSelectedById( 'selectedOrganisationUnits', 'availableOrganisationUnits' )"><input 
-				type="button" value="$i18n.getString( 'remove_all' )" title="$i18n.getString( 'remove_all' )" style="width:120px" onclick="moveAllById( 'selectedOrganisationUnits', 'availableOrganisationUnits' )">
-		</td>
-	</tr>
-	<tr>
-		<th>$i18n.getString( "selected_organisationunits" )</th>
-	</tr>
-	<tr>
-		<td>
-			<select multiple size="6" id="selectedOrganisationUnits" name="selectedOrganisationUnits" style="min-width:640px" ondblclick="moveSelectedById( 'selectedOrganisationUnits', 'availableOrganisationUnits' )">				
-				#foreach ( $unit in $selectedOrganisationUnits )
-					<option value="$unit.id">$encoder.htmlEncode( $unit.name )</option>
-				#end
-			</select>
-		</td>
-	</tr>
-	<tr>
-		<td style="height:15px"></td>
-	</tr>
-	
-</table>
+	<!-- Organisation Units -->
+
+#organisationUnitSelectionTree( false true false )
 
 </div>
 
@@ -465,7 +412,9 @@
 		    <label for="reportingBimonth">$i18n.getString( "reporting_bimonth" )</label>
 			<input type="checkbox" id="reportingBimonth" name="reportingBimonth" value="true"#if( $reportTable.relatives.isReportingBimonth() ) checked#end>&nbsp;
 		    <label for="reportingQuarter">$i18n.getString( "reporting_quarter" )</label>
-			<input type="checkbox" id="reportingQuarter" name="reportingQuarter" value="true"#if( $reportTable.relatives.isReportingQuarter() ) checked#end><br><br>
+			<input type="checkbox" id="reportingQuarter" name="reportingQuarter" value="true"#if( $reportTable.relatives.isReportingQuarter() ) checked#end>&nbsp;
+		    <label for="lastSixMonth">$i18n.getString( "reporting_sixmonth" )</label>
+			<input type="checkbox" id="lastSixMonth" name="lastSixMonth" value="true"#if( $reportTable.relatives.isLastSixMonth() ) checked#end><br><br>
 		
 			<label for="monthsThisYear">$i18n.getString( "months_this_year" )</label>
 			<input type="checkbox" id="monthsThisYear" name="monthsThisYear" value="true""#if( $reportTable.relatives.isMonthsThisYear() ) checked#end>&nbsp;
@@ -482,11 +431,13 @@
 			<input type="checkbox" id="lastYear" name="lastYear" value="true"#if( $reportTable.relatives.isLastYear() ) checked#end><br><br>
 				
 			<label for="last5years">$i18n.getString( "last_5_years" )</label>
-			<input type="checkbox" id="last5years" name="last5years" value="true"#if( $reportTable.relatives.isLast5Years() ) checked#end>&nbsp;
+			<input type="checkbox" id="last5Years" name="last5Years" value="true"#if( $reportTable.relatives.isLast5Years() ) checked#end>&nbsp;
 			<label for="last12Months">$i18n.getString( "last_12_months" )</label>
 			<input type="checkbox" id="last12Months" name="last12Months" value="true"#if( $reportTable.relatives.isLast12Months() ) checked#end>&nbsp;
 			<label for="last4Quarters">$i18n.getString( "last_4_quarters" )</label>
-			<input type="checkbox" id="last4Quarters" name="last4Quarters" value="true"#if( $reportTable.relatives.isLast4Quarters() ) checked#end>
+			<input type="checkbox" id="last4Quarters" name="last4Quarters" value="true"#if( $reportTable.relatives.isLast4Quarters() ) checked#end>&nbsp;
+			<label for="last2SixMonths">$i18n.getString( "last_2_sixmonths" )</label>
+			<input type="checkbox" id="last2SixMonths" name="last2SixMonths" value="true"#if( $reportTable.relatives.isLast2SixMonths() ) checked#end>
         </td>
     </tr>
     <tr>
@@ -504,7 +455,7 @@
     </tr>
     <tr>
     	<td>
-    		<label for="paramReportingMonth">$i18n.getString( "reporting_month" )</label>
+    		<label for="paramReportingMonth">$i18n.getString( "reporting_period" )</label>
     	    <input type="checkbox" id="paramReportingMonth" name="paramReportingMonth" value="true"#if( $reportTable.reportParams.isParamReportingMonth() ) checked#end>&nbsp;
     	    <label for="paramLeafParentOrganisationUnit">$i18n.getString( "leaf_parent_organisation_unit" )</label>
             <input type="checkbox" id="paramLeafParentOrganisationUnit" name="paramLeafParentOrganisationUnit" value="true"#if( $reportTable.reportParams.isParamLeafParentOrganisationUnit() ) checked#end>&nbsp;

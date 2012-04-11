@@ -44,7 +44,7 @@ import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.RelativePeriods;
@@ -100,13 +100,6 @@ public class SaveTableAction
         this.periodService = periodService;
     }
     
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-    
     private OrganisationUnitGroupService organisationUnitGroupService;
     
     public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
@@ -121,6 +114,13 @@ public class SaveTableAction
         this.dataSetService = dataSetService;
     }
 
+    private SelectionTreeManager selectionTreeManager;
+
+    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
+    {
+        this.selectionTreeManager = selectionTreeManager;
+    }
+    
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -222,13 +222,6 @@ public class SaveTableAction
     {
         this.selectedPeriods = selectedPeriods;
     }
-
-    private List<String> selectedOrganisationUnits = new ArrayList<String>();
-
-    public void setSelectedOrganisationUnits( List<String> selectedOrganisationUnits )
-    {
-        this.selectedOrganisationUnits = selectedOrganisationUnits;
-    }
     
     private List<String> selectedOrganisationUnitGroups = new ArrayList<String>();
 
@@ -327,6 +320,13 @@ public class SaveTableAction
     {
         this.last4Quarters = last4Quarters;
     }
+    
+    private boolean last2SixMonths;
+
+    public void setLast2SixMonths( boolean last2SixMonths )
+    {
+        this.last2SixMonths = last2SixMonths;
+    }
 
     private boolean paramReportingMonth;
 
@@ -389,7 +389,7 @@ public class SaveTableAction
         List<DataElement> dataElements = new ArrayList<DataElement>();        
         List<Indicator> indicators = new ArrayList<Indicator>();
         List<DataSet> dataSets = new ArrayList<DataSet>();
-        List<OrganisationUnit> units = new ArrayList<OrganisationUnit>();
+        List<OrganisationUnit> units = new ArrayList<OrganisationUnit>( selectionTreeManager.getReloadedSelectedOrganisationUnits() );
         List<OrganisationUnitGroup> organisationUnitGroups = new ArrayList<OrganisationUnitGroup>(); 
 
         for ( Integer id : getIntegerCollection( selectedDataElements ) )
@@ -406,12 +406,7 @@ public class SaveTableAction
         {
             dataSets.add( dataSetService.getDataSet( id ) );
         }
-        
-        for ( Integer id : getIntegerCollection( selectedOrganisationUnits ) )
-        {
-            units.add( organisationUnitService.getOrganisationUnit( id ) );
-        }
-        
+                
         for ( Integer id : getIntegerCollection( selectedOrganisationUnitGroups ) )
         {
             organisationUnitGroups.add( organisationUnitGroupService.getOrganisationUnitGroup( id ) );
@@ -422,7 +417,7 @@ public class SaveTableAction
         RelativePeriods relatives = new RelativePeriods( reportingMonth, reportingBimonth, reportingQuarter, lastSixMonth,
             monthsThisYear, quartersThisYear, thisYear, 
             monthsLastYear, quartersLastYear, lastYear, 
-            last5years, last12Months, false, last4Quarters, false );
+            last5years, last12Months, false, last4Quarters, last2SixMonths );
         
         ReportParams reportParams = new ReportParams();
         

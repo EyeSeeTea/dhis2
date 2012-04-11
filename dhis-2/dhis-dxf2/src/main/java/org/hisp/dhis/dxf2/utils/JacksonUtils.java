@@ -92,9 +92,9 @@ public class JacksonUtils
         return viewClasses.get( viewName );
     }
 
-    //---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // Global pre-configured instances of ObjectMapper and XmlMapper
-    //---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     public static ObjectMapper getJsonMapper()
     {
@@ -106,9 +106,9 @@ public class JacksonUtils
         return xmlMapper;
     }
 
-    //---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // JSON
-    //---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     public static void toJson( OutputStream output, Object value ) throws IOException
     {
@@ -130,14 +130,15 @@ public class JacksonUtils
         return jsonMapper.writerWithView( viewClass ).writeValueAsString( value );
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T fromJson( InputStream input, Class<?> clazz ) throws IOException
     {
         return (T) jsonMapper.readValue( input, clazz );
     }
 
-    //---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // XML
-    //---------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     public static void toXml( OutputStream output, Object value ) throws IOException
     {
@@ -159,6 +160,7 @@ public class JacksonUtils
         return xmlMapper.writerWithView( viewClass ).writeValueAsString( value );
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T fromXml( InputStream input, Class<?> clazz ) throws IOException
     {
         return (T) xmlMapper.readValue( input, clazz );

@@ -32,7 +32,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.Dxf2Namespace;
-import org.hisp.dhis.importexport.dxf2.model.DataValueSet;
+import org.hisp.dhis.dxf2.datavalueset.DataValueSet;
 
 import java.util.ArrayList;
 import java.util.List;

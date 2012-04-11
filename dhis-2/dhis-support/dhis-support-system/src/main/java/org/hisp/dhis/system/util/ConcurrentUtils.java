@@ -28,6 +28,7 @@ package org.hisp.dhis.system.util;
  */
 
 import java.util.Collection;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
@@ -48,9 +49,13 @@ public class ConcurrentUtils
             {
                 future.get();
             }
-            catch ( Exception ex )
+            catch ( ExecutionException ex )
             {
-                throw new RuntimeException( ex );
+                throw new RuntimeException( "Exception during execution", ex );
+            }
+            catch ( InterruptedException ex )
+            {
+                throw new RuntimeException( "Thread interrupted", ex );
             }
         }
     }

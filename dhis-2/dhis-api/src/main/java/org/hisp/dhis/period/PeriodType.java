@@ -238,7 +238,7 @@ public abstract class PeriodType
 
     /**
      * Parses a date from a String on the format YYYY-MM-DD.
-     *
+     * 
      * @param dateString the String to parse.
      * @return a Date based on the given String.
      */
@@ -249,7 +249,8 @@ public abstract class PeriodType
             final SimpleDateFormat format = new SimpleDateFormat();
             format.applyPattern( "yyyy-MM-dd" );
             return dateString != null ? format.parse( dateString ) : null;
-        } catch ( ParseException ex )
+        }
+        catch ( ParseException ex )
         {
             throw new RuntimeException( "Failed to parse medium date", ex );
         }
@@ -291,6 +292,32 @@ public abstract class PeriodType
             return new SixMonthlyPeriodType();
         }
 
+        return null;
+    }
+    
+    /**
+     * Returns a period type based on the given date string in ISO format. Returns
+     * null if the date string cannot be parsed to a date.
+     * 
+     * @param isoPeriod the date string in ISO format.
+     * @return a period.
+     */
+    public static Period getPeriodFromIsoString( String isoPeriod )
+    {
+        if ( isoPeriod != null )
+        {
+            PeriodType periodType = getPeriodTypeFromIsoString( isoPeriod );
+            
+            try
+            {
+                return periodType != null ? periodType.createPeriod( isoPeriod ) : null;
+            }
+            catch ( Exception ex )
+            {
+                // Do nothing and return null
+            }
+        }
+        
         return null;
     }
 

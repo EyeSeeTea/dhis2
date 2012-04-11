@@ -27,20 +27,31 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
+
+import java.util.Collection;
+import java.util.Map;
+
 /**
  * @author Lars Helge Overland
  */
 public interface IdentifiableObjectManager
 {
     void save( IdentifiableObject object );
-    
+
     void update( IdentifiableObject object );
+
+    <T extends IdentifiableObject> void get( Class<T> clazz, String uid );
     
-    void get( Class<IdentifiableObject> clazz, String uid );
-    
+    <T extends IdentifiableObject> Collection<T> getAll( Class<T> clazz );
+
     void delete( IdentifiableObject object );
-    
+
+    <T extends IdentifiableObject> Map<String, T> getIdMap( Class<T> clazz, IdentifiableProperty property );
+
+    <T extends IdentifiableObject> T getObject( Class<T> clazz, IdentifiableProperty property, String id );
+
     IdentifiableObject getObject( String uid, String simpleClassName );
-    
+
     IdentifiableObject getObject( int id, String simpleClassName );
 }

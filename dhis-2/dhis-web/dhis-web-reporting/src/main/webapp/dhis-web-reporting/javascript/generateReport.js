@@ -45,7 +45,7 @@ function viewReport( type )
 
 function getUrlParams()
 {
-    var url = "id=" + $( "#id" ).val() + "&mode=" + $( "#mode" ).val();
+    var url = "id=" + $( "#id" ).val();
 
     if ( $( "#reportingPeriod" ).length )
     {
@@ -54,7 +54,7 @@ function getUrlParams()
 
     if ( selectionTreeSelection.isSelected() )
     {
-        url += "&organisationUnitId=" + selectedOrganisationUnit[0];
+        url += "&organisationUnitId=" + selectionTreeSelection.getSelected()[0];
     }
 
     return url;
