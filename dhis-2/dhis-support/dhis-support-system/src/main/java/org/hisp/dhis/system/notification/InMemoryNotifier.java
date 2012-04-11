@@ -144,7 +144,7 @@ public class InMemoryNotifier
             
             while ( iter.hasNext() )
             {
-                if ( category.equals( iter.next() ) )
+                if ( category.equals( iter.next().getCategory() ) )
                 {
                     iter.remove();
                 }

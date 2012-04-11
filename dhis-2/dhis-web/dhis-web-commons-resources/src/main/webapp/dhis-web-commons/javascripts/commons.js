@@ -1615,7 +1615,7 @@ function pingNotifications( category, tableId )
 			}		
 			
 			html += '<tr><td>' + notification.time + '</td><td>' + notification.message + ' &nbsp;';
-			html += notification.completed == true ?  completedHtml : loaderHtml;
+			html += notification.completed == "true" ?  completedHtml : loaderHtml;
 			html += '</td></tr>';
 		} );
 		

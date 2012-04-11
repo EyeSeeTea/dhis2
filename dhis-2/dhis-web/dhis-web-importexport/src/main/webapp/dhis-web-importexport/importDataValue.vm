@@ -27,7 +27,7 @@
 </tr>
 <tr>
 	<td></td>
-	<td><input type="submit" value="$i18n.getString( 'import' )" style="width:120px"/></td>
+	<td><input type="button" value="$i18n.getString( 'import' )" style="width:120px" onclick="importDataValue()"/></td>
 </tr>
 </table>
 </form>
@@ -36,7 +36,7 @@
 #if( $running )
 
 <div>
-<table id="notificationTable" class="notificationTable" style="display:none">
+<table id="notificationTable" class="notificationTable">
 <col width="120">
 <col width="380">
 </table>
@@ -44,6 +44,7 @@
 
 <script type="text/javascript">
 $( document ).ready( function() {
+	$( "#notificationTable" ).empty();
 	pingNotificationsTimeout();
 } );
 </script>
