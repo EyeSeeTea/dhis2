@@ -43,4 +43,9 @@ public interface Notifier
     List<Notification> getNotifications( NotificationCategory category, String lastUid );
     
     Notifier clear( NotificationCategory category );
+    
+    Notifier addTaskSummary( NotificationCategory category, Object taskSummary );
+    
+    Object getTaskSummary( NotificationCategory category );
+    
 }
