@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.datavalueset;
+package org.hisp.dhis.importexport.action;
 
 /*
  * Copyright (c) 2011, University of Oslo
@@ -27,18 +27,59 @@ package org.hisp.dhis.dxf2.datavalueset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.system.notification.Notifier;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public interface DataValueSetService
+import com.opensymphony.xwork2.Action;
+
+/**
+ * @author Lars Helge Overland
+ */
+public class GetImportSummaryAction
+    implements Action
 {
-    void writeDataValueSet( String dataSet, String period, String orgUnit, OutputStream out );
+    @Autowired
+    private Notifier notifier;
     
-    ImportSummary saveDataValueSet( InputStream in );
+    @Autowired
+    private CurrentUserService currentUserService;
+
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
     
-    ImportSummary saveDataValueSet( InputStream in, ImportOptions importOptions, TaskId taskId );
+    private TaskCategory category;
+    
+    public void setCategory( TaskCategory category )
+    {
+        this.category = category;
+    }
+
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+    
+    private ImportSummary summary;
+    
+    public ImportSummary getSummary()
+    {
+        return summary;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+    
+    public String execute()
+    {
+        TaskId taskId = new TaskId( category, currentUserService.getCurrentUser() );        
+        
+        summary = (ImportSummary) notifier.getTaskSummary( taskId, category );
+        
+        return SUCCESS;
+    }
 }

@@ -38,27 +38,22 @@ import java.util.List;
 @JacksonXmlRootElement( localName = "importSummary" )
 public class ImportSummary
 {
-    private List<ImportCount> counts = new ArrayList<ImportCount>();
+    private ImportCount dataValueCount;
 
     private List<ImportConflict> conflicts = new ArrayList<ImportConflict>();
 
     private String dataSetComplete;
 
-    public void increaseImportCount( Class<?> clazz )
-    {
-    }
-
     @JsonProperty
-    @JacksonXmlElementWrapper
     @JacksonXmlProperty
-    public List<ImportCount> getCounts()
+    public ImportCount getDataValueCount()
     {
-        return counts;
+        return dataValueCount;
     }
 
-    public void setCounts( List<ImportCount> counts )
+    public void setDataValueCount( ImportCount dataValueCount )
     {
-        this.counts = counts;
+        this.dataValueCount = dataValueCount;
     }
 
     @JsonProperty
@@ -84,15 +79,5 @@ public class ImportSummary
     public void setDataSetComplete( String dataSetComplete )
     {
         this.dataSetComplete = dataSetComplete;
-    }
-
-    @Override
-    public String toString()
-    {
-        return "ImportSummary{" +
-            "counts=" + counts +
-            ", noneExistingIdentifiers=" + conflicts +
-            ", dataSetComplete='" + dataSetComplete + '\'' +
-            '}';
     }
 }

@@ -29,7 +29,6 @@ package org.hisp.dhis.dxf2.metadata.importers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.indicator.Indicator;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +37,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class IndicatorImporter
-    extends AbstractIdentifiableObjectImporter<Indicator>
+    extends AbstractImporter<Indicator>
 {
     private static final Log log = LogFactory.getLog( IndicatorImporter.class );
 

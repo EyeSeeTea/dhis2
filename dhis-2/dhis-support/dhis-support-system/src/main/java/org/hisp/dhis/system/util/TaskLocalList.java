@@ -1,7 +1,7 @@
-package org.hisp.dhis.dxf2.metadata;
+package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2012, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,63 +27,40 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.scheduling.TaskId;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public class IdScheme
+public class TaskLocalList<T>
 {
-    public static final String UID_SCHEME = "uid";
-    public static final String CODE_SCHEME = "code";
-    public static final String NAME_SCHEME = "name";
-
-    private String scheme;
-
-    private boolean uidScheme;
-
-    private boolean codeScheme;
-
-    private boolean nameScheme;
-
-    public static IdScheme getDefaultIdScheme()
+    private Map<TaskId, List<T>> internalMap;
+    
+    public TaskLocalList()
     {
-        return new IdScheme( IdScheme.UID_SCHEME );
+        this.internalMap = new HashMap<TaskId, List<T>>();
     }
-
-    public IdScheme( String scheme )
+    
+    public List<T> get( TaskId id )
     {
-        setScheme( scheme );
-    }
-
-    public String getScheme()
-    {
-        return scheme;
-    }
-
-    public void setScheme( String scheme )
-    {
-        this.scheme = scheme;
-
-        if ( scheme != null )
+        List<T> list = internalMap.get( id );
+        
+        if ( list == null )
         {
-            uidScheme = scheme.equals( IdScheme.UID_SCHEME );
-            nameScheme = scheme.equals( IdScheme.NAME_SCHEME );
-            codeScheme = scheme.equals( IdScheme.CODE_SCHEME );
+            list = new ArrayList<T>();
+            internalMap.put( id, list );
         }
+        
+        return list;
     }
-
-    public boolean isUidScheme()
+    
+    public boolean clear( TaskId id )
     {
-        return uidScheme;
-    }
-
-    public boolean isNameScheme()
-    {
-        return nameScheme;
-    }
-
-    public boolean isCodeScheme()
-    {
-        return codeScheme;
+        return internalMap.remove( id ) != null;
     }
 }

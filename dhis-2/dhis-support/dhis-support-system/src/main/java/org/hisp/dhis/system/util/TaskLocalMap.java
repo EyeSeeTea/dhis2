@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.notification;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,11 +27,38 @@ package org.hisp.dhis.system.notification;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hisp.dhis.scheduling.TaskId;
+
 /**
  * @author Lars Helge Overland
  */
-public enum NotificationCategory
+public class TaskLocalMap<T, V>
 {
-    DATAMART,
-    IMPORT
+    private Map<TaskId, Map<T, V>> internalMap;
+    
+    public TaskLocalMap()
+    {
+        this.internalMap = new HashMap<TaskId, Map<T, V>>();
+    }
+
+    public Map<T, V> get( TaskId id )
+    {
+        Map<T, V> map = internalMap.get( id );
+        
+        if ( map == null )
+        {
+            map = new HashMap<T, V>();
+            internalMap.put( id, map );
+        }
+        
+        return map;
+    }
+
+    public boolean clear( TaskId id )
+    {
+        return internalMap.remove( id ) != null;
+    }
 }

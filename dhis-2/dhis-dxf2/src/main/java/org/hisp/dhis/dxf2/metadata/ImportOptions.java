@@ -27,36 +27,58 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class ImportOptions
 {
+    private IdentifiableProperty dataElementIdScheme;
+    
+    private IdentifiableProperty orgUnitIdScheme;
+    
     private boolean dryRun = false;
-
-    private IdScheme idScheme = IdScheme.getDefaultIdScheme();
 
     private ImportStrategy importStrategy;
 
-    private static ImportOptions defaultImportOptions = new ImportOptions( IdScheme.getDefaultIdScheme(),
-        ImportStrategy.getDefaultImportStrategy() );
+    private static ImportOptions DEFAULT_OPTIONS = new ImportOptions( IdentifiableProperty.UID, IdentifiableProperty.UID, false, ImportStrategy.NEW_AND_UPDATES );
 
     public static ImportOptions getDefaultImportOptions()
     {
-        return defaultImportOptions;
+        return DEFAULT_OPTIONS;
     }
 
     public ImportOptions()
     {
-        this.idScheme = IdScheme.getDefaultIdScheme();
-        this.importStrategy = ImportStrategy.getDefaultImportStrategy();
+    }
+    
+    public ImportOptions( ImportStrategy importStrategy )
+    {
+        this.importStrategy = importStrategy;
     }
 
-    public ImportOptions( IdScheme idScheme, ImportStrategy importStrategy )
+    public ImportOptions( IdentifiableProperty dataElementIdScheme, IdentifiableProperty orgUnitIdScheme, boolean dryRun, ImportStrategy importStrategy )
     {
-        this.idScheme = idScheme;
+        this.dataElementIdScheme = dataElementIdScheme;
+        this.orgUnitIdScheme = orgUnitIdScheme;
+        this.dryRun = dryRun;
         this.importStrategy = importStrategy;
+    }
+
+    //--------------------------------------------------------------------------
+    // Get methods
+    //--------------------------------------------------------------------------
+
+    public IdentifiableProperty getDataElementIdScheme()
+    {
+        return dataElementIdScheme != null ? dataElementIdScheme : IdentifiableProperty.UID;
+    }
+
+    public IdentifiableProperty getOrgUnitIdScheme()
+    {
+        return orgUnitIdScheme != null ? orgUnitIdScheme : IdentifiableProperty.UID;
     }
 
     public boolean isDryRun()
@@ -64,28 +86,39 @@ public class ImportOptions
         return dryRun;
     }
 
-    public void setDryRun( boolean dryRun )
-    {
-        this.dryRun = dryRun;
-    }
-
-    public IdScheme getIdScheme()
-    {
-        return idScheme;
-    }
-
-    public void setIdScheme( IdScheme idScheme )
-    {
-        this.idScheme = idScheme;
-    }
-
     public ImportStrategy getImportStrategy()
     {
-        return importStrategy;
+        return importStrategy != null ? importStrategy : ImportStrategy.NEW_AND_UPDATES;
     }
 
-    public void setImportStrategy( ImportStrategy importStrategy )
+    //--------------------------------------------------------------------------
+    // Set methods
+    //--------------------------------------------------------------------------
+
+    public void setDataElementIdScheme( String scheme )
     {
-        this.importStrategy = importStrategy;
+        this.dataElementIdScheme = scheme != null ? IdentifiableProperty.valueOf( scheme.toUpperCase() ) : null;
+    }
+
+    public void setOrgUnitIdScheme( String scheme )
+    {
+        this.orgUnitIdScheme = scheme != null ? IdentifiableProperty.valueOf( scheme.toUpperCase() ) : null;
+    }
+
+    public void setDryRun( Boolean dryRun )
+    {
+        this.dryRun = dryRun != null ? dryRun : false;
+    }
+
+    public void setImportStrategy( String strategy )
+    {
+        this.importStrategy = strategy != null ? ImportStrategy.valueOf( strategy.toUpperCase() ) : null;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "[data element id scheme: " + dataElementIdScheme + ", org unit id scheme: " + 
+            orgUnitIdScheme + ", dry run: " + dryRun + ", strategy: " + importStrategy + "]";
     }
 }

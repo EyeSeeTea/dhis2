@@ -1,7 +1,7 @@
-package org.hisp.dhis.dxf2.metadata;
+package org.hisp.dhis.scheduling;
 
 /*
- * Copyright (c) 2012, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,62 +27,64 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.user.User;
+
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public class ImportStrategy
+public class TaskId
 {
-    public static final String NEW_AND_UPDATES_STRATEGY = "newAndUpdates";
-    public static final String UPDATES_STRATEGY = "updates";
-    public static final String NEW_STRATEGY = "new";
-
-    private String strategy;
-
-    private boolean newAndUpdatesStrategy;
-
-    private boolean updatesStrategy;
-
-    private boolean newStrategy;
-
-    public static ImportStrategy getDefaultImportStrategy()
+    private static final String SEPARATOR = "-";
+    
+    private String id;
+    
+    public TaskId( String id )
     {
-        return new ImportStrategy( ImportStrategy.NEW_AND_UPDATES_STRATEGY );
+        this.id = id;
+    }
+    
+    public TaskId( TaskCategory category, User user )
+    {
+        this.id = category.toString() + SEPARATOR + user.getUserCredentials().getUsername();
+    }
+    
+    public String getId()
+    {
+        return id;
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        return id.hashCode();
     }
 
-    public ImportStrategy( String strategy )
+    @Override
+    public boolean equals( Object obj )
     {
-        setStrategy( strategy );
-    }
-
-    public String getStrategy()
-    {
-        return strategy;
-    }
-
-    public void setStrategy( String strategy )
-    {
-        this.strategy = strategy;
-
-        if ( strategy != null )
+        if ( this == obj )
         {
-            newAndUpdatesStrategy = strategy.equals( ImportStrategy.NEW_AND_UPDATES_STRATEGY );
-            updatesStrategy = strategy.equals( ImportStrategy.UPDATES_STRATEGY );
-            newStrategy = strategy.equals( ImportStrategy.NEW_STRATEGY );
+            return true;
         }
+        
+        if ( obj == null )
+        {
+            return false;
+        }
+        
+        if ( getClass() != obj.getClass() )
+        {
+            return false;
+        }
+        
+        TaskId other = (TaskId) obj;
+        
+        return id.equals( other.id );
     }
 
-    public boolean isNewAndUpdatesStrategy()
+    @Override
+    public String toString()
     {
-        return newAndUpdatesStrategy;
-    }
-
-    public boolean isUpdatesStrategy()
-    {
-        return updatesStrategy;
-    }
-
-    public boolean isNewStrategy()
-    {
-        return newStrategy;
+        return "[" + id + "]";
     }
 }

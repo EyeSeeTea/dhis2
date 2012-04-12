@@ -34,83 +34,58 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement( localName = "count" )
 public class ImportCount
 {
-    private String object;
+    private int imported;
 
-    private int imports;
+    private int updated;
 
-    private int updates;
+    private int ignored;
 
-    private int ignores;
-
-    public ImportCount( String object )
+    public ImportCount( int imported, int updated, int ignored )
     {
-        this.object = object;
-    }
-
-    public ImportCount( String object, int imports, int updates, int ignores )
-    {
-        this.object = object;
-        this.imports = imports;
-        this.updates = updates;
-        this.ignores = ignores;
+        this.imported = imported;
+        this.updated = updated;
+        this.ignored = ignored;
     }
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
-    public String getObject()
+    public int getImported()
     {
-        return object;
+        return imported;
     }
 
-    public void setObject( String object )
+    public void setImported( int imported )
     {
-        this.object = object;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( isAttribute = true )
-    public int getImports()
-    {
-        return imports;
-    }
-
-    public void setImports( int imports )
-    {
-        this.imports = imports;
+        this.imported = imported;
     }
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
-    public int getUpdates()
+    public int getUpdated()
     {
-        return updates;
+        return updated;
     }
 
-    public void setUpdates( int updates )
+    public void setUpdated( int updated )
     {
-        this.updates = updates;
+        this.updated = updated;
     }
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
-    public int getIgnores()
+    public int getIgnored()
     {
-        return ignores;
+        return ignored;
     }
 
-    public void setIgnores( int ignores )
+    public void setIgnored( int ignored )
     {
-        this.ignores = ignores;
+        this.ignored = ignored;
     }
 
     @Override
     public String toString()
     {
-        return "ImportCount{" +
-            "object='" + object + '\'' +
-            ", imports=" + imports +
-            ", updates=" + updates +
-            ", ignores=" + ignores +
-            '}';
+        return "[imports=" + imported + ", updates=" + updated + ", ignores=" + ignored + "]";
     }
 }

@@ -1,7 +1,7 @@
-package org.hisp.dhis.commons.action;
+package org.hisp.dhis.system.notification;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,76 +27,64 @@ package org.hisp.dhis.commons.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+
 import java.util.List;
 
+import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.Notification;
 import org.hisp.dhis.system.notification.Notifier;
-import org.hisp.dhis.user.CurrentUserService;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
  */
-public class GetNotificationsAction
-    implements Action
-{    
+public class NotifierTest
+    extends DhisSpringTest
+{
     @Autowired
     private Notifier notifier;
 
-    @Autowired
-    private CurrentUserService currentUserService;
+    private TaskId id1 = new TaskId( "DATAVALUE_IMPORT-admin" );
+    private TaskId id2 = new TaskId( "DATAMART-admin" );
+    private TaskId id3 = new TaskId( "METADATA_IMPORT-admin" );
     
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-    
-    private String category;
-
-    public void setCategory( String category )
+    @Test
+    public void testNotifiy()
     {
-        this.category = category;
-    }
-
-    private String lastUid;
-    
-    public void setLastUid( String lastUid )
-    {
-        this.lastUid = lastUid;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-    
-    private List<Notification> notifications = new ArrayList<Notification>();
-    
-    public List<Notification> getNotifications()
-    {
-        return notifications;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-    
-    @Override
-    public String execute()
-        throws Exception
-    {
-        if ( category != null )
-        {
-            TaskCategory taskCategory = TaskCategory.valueOf( category.toUpperCase() );
-
-            TaskId taskId = new TaskId( taskCategory, currentUserService.getCurrentUser() );
-            
-            notifications = notifier.getNotifications( taskId, taskCategory, lastUid );
-        }
+        notifier.notify( id1, TaskCategory.DATAVALUE_IMPORT, "Import started" );
+        notifier.notify( id1, TaskCategory.DATAVALUE_IMPORT, "Import working" );
+        notifier.notify( id1, TaskCategory.DATAVALUE_IMPORT, "Import done" );
+        notifier.notify( id2, TaskCategory.DATAMART, "Process started" );
+        notifier.notify( id2, TaskCategory.DATAMART, "Process done" );
         
-        return SUCCESS;
+        List<Notification> notifications = notifier.getNotifications( id1, TaskCategory.DATAVALUE_IMPORT, null );
+        
+        assertNotNull( notifications );
+        assertEquals( 3, notifications.size() );
+        
+        notifications = notifier.getNotifications( id2, TaskCategory.DATAMART, null );
+        
+        assertNotNull( notifications );
+        assertEquals( 2, notifications.size() );
+
+        notifications = notifier.getNotifications( id3, TaskCategory.METADATA_IMPORT, null );
+        
+        assertNotNull( notifications );
+        assertEquals( 0, notifications.size() );
+    }
+    
+    @Test
+    public void testTaskSummary()
+    {
+        notifier.addTaskSummary( id1, TaskCategory.DATAVALUE_IMPORT, new Object() );
+        
+        assertNotNull( notifier.getTaskSummary( id1, TaskCategory.DATAVALUE_IMPORT ) );
+        assertNull( notifier.getTaskSummary( id1, TaskCategory.DATAMART ) );
     }
 }

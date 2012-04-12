@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.datavalueset;
+package org.hisp.dhis.importexport.action.util;
 
 /*
  * Copyright (c) 2011, University of Oslo
@@ -28,17 +28,37 @@ package org.hisp.dhis.dxf2.datavalueset;
  */
 
 import java.io.InputStream;
-import java.io.OutputStream;
 
-import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
+import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.scheduling.TaskId;
 
-public interface DataValueSetService
-{
-    void writeDataValueSet( String dataSet, String period, String orgUnit, OutputStream out );
+/**
+ * @author Lars Helge Overland
+ */
+public class ImportDataValueTask
+    implements Runnable
+{    
+    private DataValueSetService dataValueSetService;
+    private InputStream in;
+    private boolean dryRun;
+    private ImportStrategy strategy;
+    private TaskId taskId;
     
-    ImportSummary saveDataValueSet( InputStream in );
+    public ImportDataValueTask( DataValueSetService dataValueSetService, InputStream in, boolean dryRun, ImportStrategy strategy, TaskId taskId )
+    {
+        this.dataValueSetService = dataValueSetService;
+        this.in = in;
+        this.dryRun = dryRun;
+        this.strategy = strategy;
+        this.taskId = taskId;
+    }
     
-    ImportSummary saveDataValueSet( InputStream in, ImportOptions importOptions, TaskId taskId );
+    @Override
+    public void run()
+    {
+        dataValueSetService.saveDataValueSet( in, new ImportOptions( IdentifiableProperty.UID, IdentifiableProperty.UID, dryRun, strategy ), taskId );
+    }
 }

@@ -1,7 +1,7 @@
-package org.hisp.dhis.reporting.datamart.action;
+package org.hisp.dhis.importexport.action.datavalue;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,109 +27,74 @@ package org.hisp.dhis.reporting.datamart.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
-import org.hisp.dhis.period.CalendarPeriodType;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
+import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.importexport.action.util.ImportDataValueTask;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
-import org.hisp.dhis.system.scheduling.DataMartTask;
 import org.hisp.dhis.system.scheduling.Scheduler;
-import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
  */
-public class StartExportAction
+public class ImportDataValueAction
     implements Action
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    @Autowired
+    private DataValueSetService dataValueSetService;
 
+    @Autowired
     private CurrentUserService currentUserService;
     
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
+    @Autowired
     private Scheduler scheduler;
-    
-    public void setScheduler( Scheduler scheduler )
-    {
-        this.scheduler = scheduler;
-    }
 
-    private DataMartTask dataMartTask;
-
-    public void setDataMartTask( DataMartTask dataMartTask )
-    {
-        this.dataMartTask = dataMartTask;
-    }
-    
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
-
-    private Set<String> periodType = new HashSet<String>();
     
-    public void setPeriodType( Set<String> periodType )
+    private File upload;
+
+    public void setUpload( File upload )
     {
-        this.periodType = periodType;
+        this.upload = upload;
     }
 
-    private String startDate;
-    
-    public void setStartDate( String startDate )
+    private boolean dryRun;
+
+    public void setDryRun( boolean dryRun )
     {
-        this.startDate = startDate;
+        this.dryRun = dryRun;
     }
 
-    private String endDate;
+    private ImportStrategy strategy;
 
-    public void setEndDate( String endDate )
+    public void setStrategy( String stgy )
     {
-        this.endDate = endDate;
+        this.strategy = ImportStrategy.valueOf( stgy );
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
-    @Override
+    
     public String execute()
         throws Exception
     {
-        Date start = DateUtils.getMediumDate( startDate );
-        Date end = DateUtils.getMediumDate( endDate );
+        final TaskId taskId = new TaskId( TaskCategory.DATAVALUE_IMPORT, currentUserService.getCurrentUser() );
         
-        List<Period> periods = new ArrayList<Period>();
-        
-        for ( String type : periodType )
-        {
-            CalendarPeriodType periodType = (CalendarPeriodType) PeriodType.getPeriodTypeByName( type );
-            
-            periods.addAll( periodType.generatePeriods( start, end ) );
-        }
+        final InputStream in = new BufferedInputStream( new FileInputStream( upload ) ); 
 
-        TaskId taskId = new TaskId( TaskCategory.DATAMART, currentUserService.getCurrentUser() );
-        
-        if ( periods.size() > 0 )
-        {
-            dataMartTask.setPeriods( periods );
-            dataMartTask.setTaskId( taskId );
-        
-            scheduler.executeTask( dataMartTask );
-        }
+        scheduler.executeTask( new ImportDataValueTask( dataValueSetService, in, dryRun, strategy, taskId ) );
         
         return SUCCESS;
     }

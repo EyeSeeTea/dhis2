@@ -34,20 +34,32 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.scheduling.TaskCategory;
+import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.system.util.TaskLocalList;
+import org.hisp.dhis.system.util.TaskLocalMap;
+
 /**
  * @author Lars Helge Overland
  */
 public class InMemoryNotifier
     implements Notifier
 {
-    private int MAX_SIZE = 1000;
+    private static final Log log = LogFactory.getLog( InMemoryNotifier.class );
     
-    private List<Notification> notifications;
+    private int MAX_SIZE = 500;
+    
+    private TaskLocalList<Notification> notifications;
+    
+    private TaskLocalMap<TaskCategory, Object> taskSummaries;
     
     @PostConstruct
     public void init()
     {
-        notifications = new ArrayList<Notification>();
+        notifications = new TaskLocalList<Notification>();
+        taskSummaries = new TaskLocalMap<TaskCategory, Object>();
     }
 
     // -------------------------------------------------------------------------
@@ -55,58 +67,36 @@ public class InMemoryNotifier
     // -------------------------------------------------------------------------
 
     @Override
-    public Notifier notify( NotificationCategory category, String message )
+    public Notifier notify( TaskId id, TaskCategory category, String message )
     {
-        return notify( NotificationLevel.INFO, category, message, false );
+        return notify( id, category, NotificationLevel.INFO, message, false );
     }
     
     @Override
-    public Notifier notify( NotificationLevel level, NotificationCategory category, String message, boolean completed )
+    public Notifier notify( TaskId id, TaskCategory category, NotificationLevel level, String message, boolean completed )
     {
         Notification notification = new Notification( level, category, new Date(), message, completed );
         
-        notifications.add( 0, notification );
+        notifications.get( id ).add( 0, notification );
         
-        if ( notifications.size() > MAX_SIZE )
+        if ( notifications.get( id ).size() > MAX_SIZE )
         {
-            notifications.remove( MAX_SIZE );
+            notifications.get( id ).remove( MAX_SIZE );
         }
+
+        log.info( notification );
         
         return this;
     }
 
     @Override
-    public List<Notification> getNotifications( NotificationCategory category, int max )
+    public List<Notification> getNotifications( TaskId id, TaskCategory category, String lastUid )
     {
         List<Notification> list = new ArrayList<Notification>();
         
         if ( category != null )
         {
-            for ( Notification notification : notifications )
-            {
-                if ( list.size() == max )
-                {
-                    break;
-                }
-                
-                if ( category.equals( notification.getCategory() ) )
-                {
-                    list.add( notification );
-                }
-            }
-        }
-        
-        return list;
-    }
-
-    @Override
-    public List<Notification> getNotifications( NotificationCategory category, String lastUid )
-    {
-        List<Notification> list = new ArrayList<Notification>();
-        
-        if ( category != null )
-        {
-            for ( Notification notification : notifications )
+            for ( Notification notification : notifications.get( id ) )
             {
                 if ( lastUid != null && lastUid.equals( notification.getUid() ) )
                 {
@@ -124,21 +114,36 @@ public class InMemoryNotifier
     }
     
     @Override
-    public Notifier clear( NotificationCategory category )
+    public Notifier clear( TaskId id, TaskCategory category )
     {
         if ( category != null )
         {
-            Iterator<Notification> iter = notifications.iterator();
+            Iterator<Notification> iter = notifications.get( id ).iterator();
             
             while ( iter.hasNext() )
             {
-                if ( category.equals( iter.next() ) )
+                if ( category.equals( iter.next().getCategory() ) )
                 {
                     iter.remove();
                 }
             }
         }
         
+        taskSummaries.get( id ).remove( category );
+        
         return this;
+    }
+
+    @Override
+    public Notifier addTaskSummary( TaskId id, TaskCategory category, Object taskSummary )
+    {
+        taskSummaries.get( id ).put( category, taskSummary );
+        return this;
+    }
+
+    @Override
+    public Object getTaskSummary( TaskId id, TaskCategory category )
+    {
+        return taskSummaries.get( id ).get( category );
     }
 }
