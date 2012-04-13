@@ -42,7 +42,11 @@ public interface IdentifiableObjectManager
 
     void update( IdentifiableObject object );
 
-    <T extends IdentifiableObject> void get( Class<T> clazz, String uid );
+    <T extends IdentifiableObject> T get( Class<T> clazz, String uid );
+
+    <T extends IdentifiableObject> T getByCode( Class<T> clazz, String code );
+
+    <T extends IdentifiableObject> T getByName( Class<T> clazz, String name );
 
     <T extends IdentifiableObject> Collection<T> getAll( Class<T> clazz );
 

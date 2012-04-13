@@ -1,7 +1,5 @@
-package org.hisp.dhis.dataset;
-
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,63 +25,47 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+package org.hisp.dhis.light.beneficiaryenrollment.action;
 
-public interface SectionService
+import org.hisp.dhis.user.CurrentUserService;
+
+import com.opensymphony.xwork2.Action;
+
+public class GetBeneficiarySearchingFormAction
+    implements Action
 {
-    String ID = SectionService.class.getName();
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
     
-    /**
-     * Adds a Section.
-     * 
-     * @param section the Section to add.
-     * @return the generated identifier.
-     */
-    int addSection( Section section );
+    private String message;
 
-    /**
-     * Updates a Section.
-     * 
-     * @param section the Section to update.
-     */
-    void updateSection( Section section );
+    public String getMessage()
+    {
+        return message;
+    }
 
-    /**
-     * Deletes a Section.
-     * 
-     * @param section the Section to delete.
-     */
-    void deleteSection( Section section );
-   
-    /**
-     * Retrieves the Section with the given identifier.
-     * 
-     * @param id the identifier of the Section to retrieve.
-     * @return the Section.
-     */
-    Section getSection( int id );
+    public void setMessage( String message )
+    {
+        this.message = message;
+    }
 
-    /**
-     * Retrieves the Section with the given identifier (uid).
-     *
-     * @param uid the identifier of the Section to retrieve.
-     * @return the Section.
-     */
-    Section getSection( String uid );
+    @Override
+    public String execute()
+        throws Exception
+    {
+        return SUCCESS;
+    }
 
-    /**
-     * Retrieves the Section with the given name.
-     * 
-     * @param name the name of the Section to retrieve.
-     * @return the Section.
-     */
-    Section getSectionByName( String name, Integer dataSetId );
-    
-    /**
-     * Retrieves all Sections.
-     * 
-     * @return a Collection of Sections.
-     */
-    Collection<Section> getAllSections();  
-    
 }

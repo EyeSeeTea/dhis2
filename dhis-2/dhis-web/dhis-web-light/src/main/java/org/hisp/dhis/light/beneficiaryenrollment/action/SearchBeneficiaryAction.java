@@ -1,7 +1,5 @@
-package org.hisp.dhis.api.mobile.model;
-
 /*
- * Copyright (c) 2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,49 +25,69 @@ package org.hisp.dhis.api.mobile.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.DataOutputStream;
-import java.io.IOException;
+package org.hisp.dhis.light.beneficiaryenrollment.action;
+
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
 
-public class Section
-    extends Model
+import com.opensymphony.xwork2.Action;
+
+public class SearchBeneficiaryAction
+    implements Action
 {
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    private List<DataElement> dataElements;
+    private PatientService patientService;
 
-    @XmlElement( name = "dataElement" )
-    public List<DataElement> getDataElements()
+    public PatientService getPatientService()
     {
-        return dataElements;
+        return patientService;
     }
 
-    public void setDataElements( List<DataElement> des )
+    public void setPatientService( PatientService patientService )
     {
-        this.dataElements = des;
+        this.patientService = patientService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private String keyword;
+
+    public String getKeyword()
+    {
+        return keyword;
+    }
+
+    public void setKeyword( String keyword )
+    {
+        this.keyword = keyword;
+    }
+
+    public List<Patient> patientList;
+
+    public List<Patient> getPatientList()
+    {
+        return patientList;
+    }
+
+    public void setPatientList( List<Patient> patientList )
+    {
+        this.patientList = patientList;
     }
 
     @Override
-    public void serialize( DataOutputStream dout )
-        throws IOException
+    public String execute()
+        throws Exception
     {
-        dout.writeInt( this.getId() );
-        dout.writeUTF( getName() );
-
-        if ( dataElements == null )
-        {
-            dout.writeInt( 0 );
-        }
-        else
-        {
-            dout.writeInt( dataElements.size() );
-            for ( int i = 0; i < dataElements.size(); i++ )
-            {
-                DataElement de = (DataElement) dataElements.get( i );
-                de.serialize( dout );
-            }
-        }
+        patientList = new ArrayList<Patient>( patientService.getPatientsByNames( keyword ) );
+        return SUCCESS;
     }
 
 }

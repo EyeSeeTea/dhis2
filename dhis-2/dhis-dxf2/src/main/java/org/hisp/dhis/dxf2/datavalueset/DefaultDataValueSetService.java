@@ -30,10 +30,10 @@ package org.hisp.dhis.dxf2.datavalueset;
 import static org.hisp.dhis.importexport.ImportStrategy.NEW;
 import static org.hisp.dhis.importexport.ImportStrategy.NEW_AND_UPDATES;
 import static org.hisp.dhis.importexport.ImportStrategy.UPDATES;
-import static org.hisp.dhis.system.util.ConversionUtils.wrap;
-import static org.hisp.dhis.system.util.DateUtils.getDefaultDate;
 import static org.hisp.dhis.scheduling.TaskCategory.DATAVALUE_IMPORT;
 import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
+import static org.hisp.dhis.system.util.ConversionUtils.wrap;
+import static org.hisp.dhis.system.util.DateUtils.getDefaultDate;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -150,6 +150,11 @@ public class DefaultDataValueSetService
     public ImportSummary saveDataValueSet( InputStream in )
     {
         return saveDataValueSet( in, ImportOptions.getDefaultImportOptions(), null );
+    }
+
+    public ImportSummary saveDataValueSet( InputStream in, ImportOptions importOptions )
+    {
+        return saveDataValueSet( in, importOptions, null );
     }
     
     public ImportSummary saveDataValueSet( InputStream in, ImportOptions importOptions, TaskId id )

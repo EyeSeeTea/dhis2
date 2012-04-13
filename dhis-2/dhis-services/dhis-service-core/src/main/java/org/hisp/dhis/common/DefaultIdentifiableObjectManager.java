@@ -75,17 +75,50 @@ public class DefaultIdentifiableObjectManager
 
     public void save( IdentifiableObject object )
     {
-        objectStoreMap.get( object.getClass() ).save( object );
+        if ( objectStoreMap.get( object.getClass() ) != null )
+        {
+            objectStoreMap.get( object.getClass() ).save( object );
+        }
     }
 
     public void update( IdentifiableObject object )
     {
-        objectStoreMap.get( object.getClass() ).update( object );
+        if ( objectStoreMap.get( object.getClass() ) != null )
+        {
+            objectStoreMap.get( object.getClass() ).update( object );
+        }
     }
 
-    public <T extends IdentifiableObject> void get( Class<T> clazz, String uid )
+    public <T extends IdentifiableObject> T get( Class<T> clazz, String uid )
     {
-        objectStoreMap.get( clazz ).getByUid( uid );
+        if ( objectStoreMap.get( clazz ) != null )
+        {
+            return (T) objectStoreMap.get( clazz ).getByUid( uid );
+        }
+
+        return null;
+    }
+
+    @Override
+    public <T extends IdentifiableObject> T getByCode( Class<T> clazz, String code )
+    {
+        if ( objectStoreMap.get( clazz ) != null )
+        {
+            return (T) objectStoreMap.get( clazz ).getByCode( code );
+        }
+
+        return null;
+    }
+
+    @Override
+    public <T extends IdentifiableObject> T getByName( Class<T> clazz, String name )
+    {
+        if ( objectStoreMap.get( clazz ) != null )
+        {
+            return (T) objectStoreMap.get( clazz ).getByName( name );
+        }
+
+        return null;
     }
 
     @SuppressWarnings( "unchecked" )

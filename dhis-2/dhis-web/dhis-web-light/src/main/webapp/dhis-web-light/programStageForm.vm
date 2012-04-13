@@ -32,7 +32,9 @@
 					#set( $categoryOptionCombo = $dataElement.getCategoryOptionCombos().getModels().get( 0 ) )
 					#set( $key = "DE${dataElement.id}OC${categoryOptionCombo.id}" )
 
-					<label>$encoder.htmlEncode( $dataElementName ) #if( $categoryOptionCombo.name!="(default)")$encoder.htmlEncode( $categoryOptionCombo.name )#end</label>
+					<label>$encoder.htmlEncode( $dataElementName ) #if( $categoryOptionCombo.name!="(default)")$encoder.htmlEncode( $categoryOptionCombo.name )#end 
+					#if($dataElement.type=="date") [yyyy-MM-dd] #end
+					</label>
 					
 					#if( $typeViolations.get( $key ) )
                 		#set( $typeViolation = $typeViolations.get( $key ) )
@@ -103,7 +105,7 @@
 <div id="footer">
 <h2>$i18n.getString( "navigate_to" )</h2>
 <ul>
-	<li> <a href="activity.action?orgUnitId=$organisationUnit.id&beneficiaryId=$beneficiaryId&programStageId=$programStageId"> activity details </a> </li>
+	<li> <a href="selectActivity.action?organisationUnitId=$orgUnitId&beneficiaryId=$beneficiaryId&current=$current"> $i18n.getString("activity_list") </a> </li>
 	<li><a href="index.action">$i18n.getString("home")</a></li>
 </ul>
 </div>

@@ -1,7 +1,5 @@
-package org.hisp.dhis.api.mobile.model;
-
 /*
- * Copyright (c) 2010, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,50 +25,55 @@ package org.hisp.dhis.api.mobile.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+package org.hisp.dhis.light.beneficiaryenrollment.action;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 
-public class ProgramStage
-    extends Model
+import com.opensymphony.xwork2.Action;
+
+public class GetBeneficiaryEnrollmentOrganisationUnitAction
+    implements Action
 {
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    private List<DataElement> dataElements;
+    private CurrentUserService currentUserService;
 
-    public List<DataElement> getDataElements()
+    public void setCurrentUserService( CurrentUserService currentUserService )
     {
-        return dataElements;
+        this.currentUserService = currentUserService;
     }
 
-    public void setDataElements( List<DataElement> dataElements )
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
+
+    public List<OrganisationUnit> getOrganisationUnits()
     {
-        this.dataElements = dataElements;
+        return organisationUnits;
     }
 
     @Override
-    public void serialize( DataOutputStream dout )
-        throws IOException
+    public String execute()
+        throws Exception
     {
-        // FIXME: Children should serialize themselves
-        dout.writeInt( this.getId() );
-        dout.writeUTF( this.getName() );
+        User user = currentUserService.getCurrentUser();
 
-        dout.writeInt( dataElements.size() );
-
-        for ( int i = 0; i < dataElements.size(); i++ )
+        if ( user != null )
         {
-            DataElement de = (DataElement) dataElements.get( i );
-            de.serialize( dout );
-
+            organisationUnits = new ArrayList<OrganisationUnit>( user.getOrganisationUnits() );
+            Collections.sort( organisationUnits, IdentifiableObjectNameComparator.INSTANCE );
         }
-    }
 
-    @Override
-    public void deSerialize( DataInputStream dataInputStream )
-        throws IOException
-    {
-        // FIXME: Get implementation from client
+        return SUCCESS;
     }
-
 }

@@ -27,38 +27,30 @@ package org.hisp.dhis.dxf2.metadata.importers;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.CodeGenerator;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.common.*;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportCount;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.Importer;
 import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.lang.reflect.Field;
+import java.util.*;
+
 /**
- * Abstract importer that can handle IdentifiableObject and NameableObject.
+ * Importer that can handle IdentifiableObject and NameableObject.
  *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public abstract class AbstractImporter<T extends BaseIdentifiableObject>
+public class DefaultImporter<T extends BaseIdentifiableObject>
     implements Importer<T>
 {
-    private static final Log log = LogFactory.getLog( AbstractImporter.class );
+    private static final Log log = LogFactory.getLog( DefaultImporter.class );
 
     //-------------------------------------------------------------------------------------------------------
     // Dependencies
@@ -66,6 +58,20 @@ public abstract class AbstractImporter<T extends BaseIdentifiableObject>
 
     @Autowired
     protected IdentifiableObjectManager manager;
+
+    //-------------------------------------------------------------------------------------------------------
+    // Constructor
+    //-------------------------------------------------------------------------------------------------------
+
+    public DefaultImporter( Class<T> importerClass )
+    {
+        this.importerClass = importerClass;
+        this.nameable = NameableObject.class.isAssignableFrom( importerClass );
+    }
+
+    private final Class<T> importerClass;
+
+    private final boolean nameable;
 
     //-------------------------------------------------------------------------------------------------------
     // Current import counts
@@ -114,9 +120,9 @@ public abstract class AbstractImporter<T extends BaseIdentifiableObject>
 
         log.info( "Trying to save new object with UID: " + object.getUid() );
 
-        findAndUpdateCollections( object );
-        //manager.save( object );
-        //updateIdMaps( object );
+        findAndUpdateReferences( object );
+        manager.save( object );
+        updateIdMaps( object );
 
         log.info( "Save successful." );
 
@@ -138,47 +144,16 @@ public abstract class AbstractImporter<T extends BaseIdentifiableObject>
             return null;
         }
 
-        log.info( "Trying to update object with UID: " + oldObject.getUid() );
+        log.info( "Starting update of object " + getDisplayName( oldObject ) + " (" + oldObject.getClass().getSimpleName() + ")" );
 
-        findAndUpdateCollections( object );
-        // oldObject.mergeWith( object );
-        // manager.update( oldObject );
+        findAndUpdateReferences( object );
+        oldObject.mergeWith( object );
+        manager.update( oldObject );
 
         log.info( "Update successful." );
 
         return null;
     }
-
-    private void findAndUpdateCollections( T object )
-    {
-        Field[] fields = object.getClass().getDeclaredFields();
-
-        for ( Field field : fields )
-        {
-            if ( ReflectionUtils.isType( field, IdentifiableObject.class ) )
-            {
-                IdentifiableObject identifiableObject = ReflectionUtils.invokeGetterMethod( field.getName(), object );
-                log.info( identifiableObject );
-            }
-            else
-            {
-                boolean b = ReflectionUtils.isCollection( field.getName(), object, IdentifiableObject.class );
-
-                if ( b )
-                {
-                    Collection<IdentifiableObject> identifiableObjects = ReflectionUtils.invokeGetterMethod( field.getName(), object );
-                    log.info( identifiableObjects );
-                }
-            }
-        }
-    }
-
-    /**
-     * Current object name, used to fill name part of a ImportConflict
-     *
-     * @return Name of object
-     */
-    protected abstract String getObjectName();
 
     //-------------------------------------------------------------------------------------------------------
     // Importer<T> Implementation
@@ -194,7 +169,7 @@ public abstract class AbstractImporter<T extends BaseIdentifiableObject>
             return conflicts;
         }
 
-        reset( objects.get( 0 ) );
+        reset();
 
         for ( T object : objects )
         {
@@ -212,38 +187,122 @@ public abstract class AbstractImporter<T extends BaseIdentifiableObject>
     @Override
     public ImportConflict importObject( T object, ImportOptions options )
     {
-        if ( object != null )
-        {
-            reset( object );
-        }
+        reset();
 
         return importObjectLocal( object, options );
     }
 
     @Override
     public ImportCount getCurrentImportCount()
-    {        
+    {
         return new ImportCount( imported, updated, ignored );
     }
 
+    @Override
+    public boolean canHandle( Class<?> clazz )
+    {
+        return importerClass.equals( clazz );
+    }
+
     //-------------------------------------------------------------------------------------------------------
-    // Internal methods
+    // Protected methods
     //-------------------------------------------------------------------------------------------------------
 
-    private void reset( T type )
+    protected void updateIdMaps( T object )
+    {
+        if ( object.getUid() != null )
+        {
+            uidMap.put( object.getUid(), object );
+        }
+
+        if ( object.getCode() != null )
+        {
+            codeMap.put( object.getCode(), object );
+        }
+
+        if ( object.getName() != null )
+        {
+            nameMap.put( object.getName(), object );
+        }
+
+        if ( nameable )
+        {
+            NameableObject nameableObject = (NameableObject) object;
+
+            if ( nameableObject.getShortName() != null )
+            {
+                shortNameMap.put( nameableObject.getShortName(), object );
+            }
+
+            if ( nameableObject.getAlternativeName() != null )
+            {
+                alternativeNameMap.put( nameableObject.getAlternativeName(), object );
+            }
+        }
+    }
+
+    protected void prepareIdentifiableObject( BaseIdentifiableObject object )
+    {
+        if ( object.getUid() == null && object.getLastUpdated() == null )
+        {
+            object.setAutoFields();
+        }
+        else if ( object.getUid() == null )
+        {
+            object.setUid( CodeGenerator.generateCode() );
+        }
+    }
+
+    /**
+     * @param object Object to get display name for
+     * @return A usable display name
+     */
+    protected String getDisplayName( IdentifiableObject object )
+    {
+        if ( object.getUid() != null )
+        {
+            return object.getUid();
+        }
+        else if ( object.getCode() != null )
+        {
+            return object.getCode();
+        }
+        else if ( object.getName() != null )
+        {
+            return object.getName();
+        }
+
+        return object.getClass().getName();
+    }
+
+    /**
+     * Current object name, used to fill name part of a ImportConflict
+     *
+     * @return Name of object
+     */
+    protected String getClassName()
+    {
+        return importerClass.getSimpleName();
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+    // Helpers
+    //-------------------------------------------------------------------------------------------------------
+
+    private void reset()
     {
         imported = 0;
         updated = 0;
         ignored = 0;
 
-        uidMap = manager.getIdMap( (Class<T>) type.getClass(), IdentifiableObject.IdentifiableProperty.UID );
-        codeMap = manager.getIdMap( (Class<T>) type.getClass(), IdentifiableObject.IdentifiableProperty.CODE );
-        nameMap = manager.getIdMap( (Class<T>) type.getClass(), IdentifiableObject.IdentifiableProperty.NAME );
+        uidMap = manager.getIdMap( importerClass, IdentifiableObject.IdentifiableProperty.UID );
+        codeMap = manager.getIdMap( importerClass, IdentifiableObject.IdentifiableProperty.CODE );
+        nameMap = manager.getIdMap( importerClass, IdentifiableObject.IdentifiableProperty.NAME );
 
-        if ( NameableObject.class.isInstance( type ) )
+        if ( nameable )
         {
-            shortNameMap = (Map<String, T>) manager.getIdMap( (Class<? extends NameableObject>) type.getClass(), NameableObject.NameableProperty.SHORT_NAME );
-            alternativeNameMap = (Map<String, T>) manager.getIdMap( (Class<? extends NameableObject>) type.getClass(), NameableObject.NameableProperty.ALTERNATIVE_NAME );
+            shortNameMap = (Map<String, T>) manager.getIdMap( (Class<? extends NameableObject>) importerClass, NameableObject.NameableProperty.SHORT_NAME );
+            alternativeNameMap = (Map<String, T>) manager.getIdMap( (Class<? extends NameableObject>) importerClass, NameableObject.NameableProperty.ALTERNATIVE_NAME );
         }
     }
 
@@ -331,7 +390,7 @@ public abstract class AbstractImporter<T extends BaseIdentifiableObject>
         T shortNameObject = null;
         T alternativeNameObject = null;
 
-        if ( NameableObject.class.isInstance( object ) )
+        if ( nameable )
         {
             NameableObject nameableObject = (NameableObject) object;
 
@@ -374,7 +433,7 @@ public abstract class AbstractImporter<T extends BaseIdentifiableObject>
         T shortNameObject = null;
         T alternativeNameObject = null;
 
-        if ( NameableObject.class.isInstance( object ) )
+        if ( nameable )
         {
             NameableObject nameableObject = (NameableObject) object;
 
@@ -432,7 +491,7 @@ public abstract class AbstractImporter<T extends BaseIdentifiableObject>
         T shortNameObject = null;
         T alternativeNameObject = null;
 
-        if ( NameableObject.class.isInstance( object ) )
+        if ( nameable )
         {
             NameableObject nameableObject = (NameableObject) object;
 
@@ -488,7 +547,7 @@ public abstract class AbstractImporter<T extends BaseIdentifiableObject>
             return matchedObject;
         }
 
-        if ( NameableObject.class.isInstance( object ) )
+        if ( nameable )
         {
             NameableObject nameableObject = (NameableObject) object;
 
@@ -510,61 +569,93 @@ public abstract class AbstractImporter<T extends BaseIdentifiableObject>
         return matchedObject;
     }
 
-    //-------------------------------------------------------------------------------------------------------
-    // Protected methods
-    //-------------------------------------------------------------------------------------------------------
-
-    protected void updateIdMaps( T object )
+    private IdentifiableObject findObjectByReference( IdentifiableObject identifiableObject )
     {
-        if ( object.getUid() != null )
+        IdentifiableObject match = null;
+
+        if ( identifiableObject.getUid() != null )
         {
-            uidMap.put( object.getUid(), object );
+            match = manager.get( identifiableObject.getClass(), identifiableObject.getUid() );
+        }
+        else if ( identifiableObject.getCode() != null )
+        {
+            match = manager.getByCode( identifiableObject.getClass(), identifiableObject.getCode() );
+        }
+        else if ( identifiableObject.getName() != null )
+        {
+            match = manager.getByName( identifiableObject.getClass(), identifiableObject.getName() );
         }
 
-        if ( object.getCode() != null )
-        {
-            codeMap.put( object.getCode(), object );
-        }
-
-        if ( object.getName() != null )
-        {
-            nameMap.put( object.getName(), object );
-        }
-
-        if ( NameableObject.class.isInstance( object ) )
-        {
-            NameableObject nameableObject = (NameableObject) object;
-
-            if ( nameableObject.getShortName() != null )
-            {
-                shortNameMap.put( nameableObject.getShortName(), object );
-            }
-
-            if ( nameableObject.getAlternativeName() != null )
-            {
-                alternativeNameMap.put( nameableObject.getAlternativeName(), object );
-            }
-        }
+        return match;
     }
 
-    protected void prepareIdentifiableObject( BaseIdentifiableObject object )
+    private void findAndUpdateReferences( T object )
     {
-        if ( object.getUid() == null && object.getLastUpdated() == null )
-        {
-            object.setAutoFields();
-        }
-        else if ( object.getUid() == null )
-        {
-            object.setUid( CodeGenerator.generateCode() );
-        }
-    }
+        Field[] fields = object.getClass().getDeclaredFields();
 
-    /**
-     * @param object Object to get display name for
-     * @return A usable display name
-     */
-    protected String getDisplayName( IdentifiableObject object )
-    {
-        return object.getClass().getName();
+        log.info( "-> Finding and updating references." );
+
+        for ( Field field : fields )
+        {
+            if ( ReflectionUtils.isType( field, IdentifiableObject.class ) )
+            {
+                IdentifiableObject identifiableObject = ReflectionUtils.invokeGetterMethod( field.getName(), object );
+
+                if ( identifiableObject != null )
+                {
+                    if ( Period.class.isAssignableFrom( identifiableObject.getClass() ) )
+                    {
+                        // FIXME
+                        log.info( "Skipping Period.class" );
+                    }
+                    else
+                    {
+                        IdentifiableObject ref = findObjectByReference( identifiableObject );
+
+                        if ( ref != null )
+                        {
+                            ReflectionUtils.invokeSetterMethod( field.getName(), object, ref );
+                        }
+                        else
+                        {
+                            log.info( "--> Ignored reference " + getDisplayName( identifiableObject ) + "." );
+                        }
+                    }
+                }
+            }
+            else
+            {
+                boolean b = ReflectionUtils.isCollection( field.getName(), object, IdentifiableObject.class );
+
+                if ( b )
+                {
+                    Collection<IdentifiableObject> identifiableObjects = ReflectionUtils.invokeGetterMethod( field.getName(), object );
+
+                    if ( identifiableObjects != null && !identifiableObjects.isEmpty() )
+                    {
+                        for ( IdentifiableObject identifiableObject : identifiableObjects )
+                        {
+                            if ( Period.class.isAssignableFrom( identifiableObject.getClass() ) )
+                            {
+                                // FIXME
+                                log.info( "Skipping Period.class" );
+                                continue;
+                            }
+
+                            IdentifiableObject ref = findObjectByReference( identifiableObject );
+
+                            if ( ref != null )
+                            {
+                                ReflectionUtils.invokeSetterMethod( field.getName(), object, ref );
+                            }
+                            else
+                            {
+                                log.info( "--> Ignored reference " + getDisplayName( identifiableObject ) + "." );
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
