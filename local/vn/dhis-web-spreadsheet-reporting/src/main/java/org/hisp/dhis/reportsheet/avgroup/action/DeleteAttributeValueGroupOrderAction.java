@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.action.exp;
+package org.hisp.dhis.reportsheet.avgroup.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,79 +27,39 @@ package org.hisp.dhis.importexport.action.exp;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrderService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id: GetOptionsAction.java 2869 2007-02-20 14:26:09Z andegje $
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class GetExportOptionsAction
+public class DeleteAttributeValueGroupOrderAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private DataSetService dataSetService;
+    private AttributeValueGroupOrderService attributeValueGroupOrderService;
 
-    public void setDataSetService( DataSetService dataSetService )
+    public void setAttributeValueGroupOrderService( AttributeValueGroupOrderService attributeValueGroupOrderService )
     {
-        this.dataSetService = dataSetService;
-    }
-    
-    private SelectionTreeManager selectionTreeManager;
-
-    public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
-    {
-        this.selectionTreeManager = selectionTreeManager;
-    }
-    
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
+        this.attributeValueGroupOrderService = attributeValueGroupOrderService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private String exportFormat;
+    private Integer id;
 
-    public String getExportFormat()
+    public void setId( Integer id )
     {
-        return exportFormat;
+        this.id = id;
     }
 
-    public void setExportFormat( String format )
-    {
-        this.exportFormat = format;
-    }    
-    
-    private List<DataSet> dataSets;
-
-    public List<DataSet> getDataSets()
-    {
-        return dataSets;
-    }
-    
-    private List<OrganisationUnitLevel> levels;
-
-    public List<OrganisationUnitLevel> getLevels()
-    {
-        return levels;
-    }
-    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -107,11 +67,7 @@ public class GetExportOptionsAction
     public String execute()
         throws Exception
     {
-        selectionTreeManager.clearSelectedOrganisationUnits();
-        
-        dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
-        
-        levels = new ArrayList<OrganisationUnitLevel>( organisationUnitService.getOrganisationUnitLevels() );
+        attributeValueGroupOrderService.deleteAttributeValueGroupOrder( id );
 
         return SUCCESS;
     }

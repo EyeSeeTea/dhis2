@@ -30,26 +30,25 @@ package org.hisp.dhis.dxf2.datavalueset;
 import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
-import static org.hisp.dhis.system.util.TextUtils.ifNotNull;
 
 import java.io.OutputStream;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 
 import org.amplecode.staxwax.factory.XMLFactory;
-import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dxf2.datavalue.DataValue;
-import org.hisp.dhis.dxf2.datavalue.StreamingDataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.util.TextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 public class SpringDataValueSetStore
     implements DataValueSetStore
@@ -61,22 +60,34 @@ public class SpringDataValueSetStore
     // DataValueSetStore implementation
     //--------------------------------------------------------------------------
 
-    public void writeDataValueSet( DataSet dataSet, Date completeDate, OrganisationUnit orgUnit, Period period, 
+    public void writeDataValueSetXml( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit, 
         Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream out )
     {
-        XMLWriter writer = XMLFactory.getXMLWriter( out );
+        DataValueSet dataValueSet = new StreamingDataValueSet( XMLFactory.getXMLWriter( out ) );
         
+        writeDataValueSet( dataSet, completeDate, period, orgUnit, dataElements, periods, orgUnits, dataValueSet );        
+    }
+    
+    public void writeDataValueSetCsv( Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, Writer writer )
+    {
+        DataValueSet dataValueSet = new StreamingCsvDataValueSet( new CSVWriter( writer ) );
+        
+        writeDataValueSet( null, null, null, null, dataElements, periods, orgUnits, dataValueSet );
+    }
+    
+    private void writeDataValueSet( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit, 
+        Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, DataValueSet dataValueSet )
+    {        
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( getDataValueSql( dataElements, periods, orgUnits ) );
 
-        DataValueSet dataValueSet = new StreamingDataValueSet( writer );
-        dataValueSet.setDataSet( ifNotNull( dataSet, dataSet.getUid() ) );
+        dataValueSet.setDataSet( dataSet != null ? dataSet.getUid() : null );
         dataValueSet.setCompleteDate( getMediumDateString( completeDate ) );
-        dataValueSet.setPeriod( ifNotNull( period, period.getIsoDate() ) );
-        dataValueSet.setOrgUnit( ifNotNull( orgUnit, orgUnit.getUid() ) );
+        dataValueSet.setPeriod( period != null ? period.getIsoDate() : null );
+        dataValueSet.setOrgUnit( orgUnit != null ? orgUnit.getUid() : null );
         
         while ( rowSet.next() )
         {
-            DataValue dataValue = new StreamingDataValue( writer );
+            DataValue dataValue = dataValueSet.getDataValueInstance();
             
             String periodType = rowSet.getString( "name" );
             Date startDate = rowSet.getDate( "startdate" );
@@ -90,13 +101,11 @@ public class SpringDataValueSetStore
             dataValue.setStoredBy( rowSet.getString( "storedby" ) );
             dataValue.setTimestamp( getMediumDateString( rowSet.getDate( "lastupdated" ) ) );
             dataValue.setComment( rowSet.getString( "comment" ) );
-            dataValue.setFollowup( TextUtils.valueOf( "followup" ) );
-            
-            writer.closeElement();
+            dataValue.setFollowup( rowSet.getBoolean( "followup" ) );            
+            dataValue.close();
         }
         
-        writer.closeElement();
-        writer.closeDocument();
+        dataValueSet.close();
     }
     
     private String getDataValueSql( Collection<DataElement> dataElements, Collection<Period> periods, Collection<OrganisationUnit> orgUnits )

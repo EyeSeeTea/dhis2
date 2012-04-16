@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.action.exp;
+package org.hisp.dhis.reportsheet.avgroup.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,56 +27,69 @@ package org.hisp.dhis.importexport.action.exp;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.util.InternalProcessUtil.*;
-
-import org.amplecode.cave.process.ProcessCoordinator;
-import org.amplecode.cave.process.ProcessExecutor;
-import org.amplecode.cave.process.state.MessageState;
-import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrder;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrderService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class GetExportStatusAction
+public class GetAttributeValueGroupOrderAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private ProcessCoordinator processCoordinator;
+    private AttributeValueGroupOrderService attributeValueGroupOrderService;
 
-    public void setProcessCoordinator( ProcessCoordinator processCoordinator )
+    public void setAttributeValueGroupOrderService( AttributeValueGroupOrderService attributeValueGroupOrderService )
     {
-        this.processCoordinator = processCoordinator;
-    }
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
+        this.attributeValueGroupOrderService = attributeValueGroupOrderService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------------------------------------
-    
-    private String statusMessage = new String();
 
-    public String getStatusMessage()
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        return statusMessage;
+        this.id = id;
     }
-    
-    private boolean finished = false;
 
-    public boolean getFinished()
+    private Integer reportId;
+
+    public Integer getReportId()
     {
-        return finished;
+        return reportId;
+    }
+
+    public void setReportId( Integer reportId )
+    {
+        this.reportId = reportId;
+    }
+
+    private String clazzName;
+
+    public void setClazzName( String clazzName )
+    {
+        this.clazzName = clazzName;
+    }
+
+    public String getClazzName()
+    {
+        return clazzName;
+    }
+
+    private AttributeValueGroupOrder attributeValueGroupOrder;
+
+    public AttributeValueGroupOrder getAttributeValueGroupOrder()
+    {
+        return attributeValueGroupOrder;
     }
 
     // -------------------------------------------------------------------------
@@ -84,29 +97,11 @@ public class GetExportStatusAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        if ( processIsRunning( PROCESS_KEY_EXPORT ) )
-        {
-            String id = getCurrentRunningProcess( PROCESS_KEY_EXPORT );
+        attributeValueGroupOrder = attributeValueGroupOrderService.getAttributeValueGroupOrder( id );
 
-            ProcessExecutor executor = processCoordinator.getProcess( id );
-            
-            if ( executor != null && executor.getProcess() != null && executor.getState() != null )
-            {
-                MessageState state = (MessageState) executor.getState();
-                
-                statusMessage = i18n.getString( state.getMessage() );
-                
-                finished = state.isEnded();
-            }            
-        }
-        else
-        {
-            statusMessage = i18n.getString( "no_process_running" );
-            
-            finished = false;
-        }
-        
         return SUCCESS;
-    }        
+    }
+
 }

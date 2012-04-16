@@ -33,7 +33,7 @@ import java.util.List;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
-import org.hisp.dhis.reportsheet.ExportReportOganiztionGroupListing;
+import org.hisp.dhis.reportsheet.ExportReportOrganizationGroupListing;
 import org.hisp.dhis.reportsheet.ExportReportService;
 
 import com.opensymphony.xwork2.Action;
@@ -73,13 +73,13 @@ public class OpenUpdateOrgUnitGroupAction
 
     private List<OrganisationUnitGroup> selectedOrganisationUnitGroups;
 
-    private ExportReportOganiztionGroupListing exportReportOrgUnitGroupListing;
+    private ExportReportOrganizationGroupListing exportReportOrgUnitGroupListing;
 
     // -------------------------------------------------------------------------
     // Getter & Setter
     // -------------------------------------------------------------------------
 
-    public ExportReportOganiztionGroupListing getExportReportOrgUnitGroupListing()
+    public ExportReportOrganizationGroupListing getExportReportOrgUnitGroupListing()
     {
         return exportReportOrgUnitGroupListing;
     }
@@ -106,7 +106,7 @@ public class OpenUpdateOrgUnitGroupAction
     public String execute()
         throws Exception
     {
-        exportReportOrgUnitGroupListing = (ExportReportOganiztionGroupListing) exportReportService.getExportReport( id );
+        exportReportOrgUnitGroupListing = (ExportReportOrganizationGroupListing) exportReportService.getExportReport( id );
 
         availableOrganisationUnitGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService
             .getAllOrganisationUnitGroups() );

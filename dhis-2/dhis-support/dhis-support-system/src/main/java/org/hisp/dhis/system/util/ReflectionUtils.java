@@ -27,6 +27,9 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.lang.Validate;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.*;
@@ -37,11 +40,11 @@ import java.util.Collection;
  */
 public class ReflectionUtils
 {
-
+    private static final Log log = LogFactory.getLog( ReflectionUtils.class );
 
     /**
-     * Invokes method getId() for this object and returns the return value. An int
-     * return type is expected. If the operation fails -1 is returned.
+     * Invokes method getId() for this object and returns the return value. An
+     * int return type is expected. If the operation fails -1 is returned.
      *
      * @param object object to call getId() on.
      * @return The identifier.
@@ -82,8 +85,8 @@ public class ReflectionUtils
     }
 
     /**
-     * Sets a property for the supplied object. Throws an UnsupportedOperationException
-     * if the operation fails.
+     * Sets a property for the supplied object. Throws an
+     * UnsupportedOperationException if the operation fails.
      *
      * @param object Object to modify
      * @param name   Name of property to set
@@ -112,8 +115,8 @@ public class ReflectionUtils
     }
 
     /**
-     * Sets a property for the supplied object. Throws an UnsupportedOperationException
-     * if the operation fails.
+     * Sets a property for the supplied object. Throws an
+     * UnsupportedOperationException if the operation fails.
      *
      * @param object     Object to modify
      * @param namePrefix prefix of the property name to set
@@ -194,31 +197,54 @@ public class ReflectionUtils
         return false;
     }
 
-    public static Method findGetterMethod( String fieldName, Object object )
+    public static Method findGetterMethod( String fieldName, Object object, Class<?>... classes )
     {
         try
         {
-            return object.getClass().getMethod( "get" + StringUtils.capitalize( fieldName ) );
+            return object.getClass().getMethod( "get" + StringUtils.capitalize( fieldName ), classes );
         } catch ( NoSuchMethodException e )
         {
+            log.info( "Getter method was not found for fieldName: " + fieldName );
             return null;
         }
     }
 
-    public static Method findSetterMethod( String fieldName, Object object )
+    public static Method findSetterMethod( String fieldName, Object object, Class<?>... classes )
     {
+        Method method = null;
+
         try
         {
-            return object.getClass().getMethod( "set" + StringUtils.capitalize( fieldName ) );
+            method = object.getClass().getMethod( "set" + StringUtils.capitalize( fieldName ), classes );
         } catch ( NoSuchMethodException e )
         {
-            return null;
         }
+
+        // if parameter classes was not given, we will retry using the type of the field
+        if ( method == null && classes.length == 0 )
+        {
+            try
+            {
+                Field field = object.getClass().getDeclaredField( fieldName );
+                method = findSetterMethod( fieldName, object, field.getType() );
+            } catch ( NoSuchFieldException e )
+            {
+            }
+        }
+
+        if ( method == null )
+        {
+            log.info( "Setter method was not found for fieldName: " + fieldName );
+        }
+
+        return method;
     }
 
+    @SuppressWarnings( "unchecked" )
     public static <T> T invokeGetterMethod( String fieldName, Object object )
     {
         Method method = findGetterMethod( fieldName, object );
+        log.info( method );
 
         if ( method == null )
         {
@@ -230,16 +256,20 @@ public class ReflectionUtils
             return (T) method.invoke( object );
         } catch ( InvocationTargetException e )
         {
+            log.info( "InvocationTargetException for fieldName: " + fieldName );
             return null;
         } catch ( IllegalAccessException e )
         {
+            log.info( "IllegalAccessException for fieldName: " + fieldName );
             return null;
         }
     }
 
+    @SuppressWarnings( "unchecked" )
     public static <T> T invokeSetterMethod( String fieldName, Object object, Object... objects )
     {
         Method method = findSetterMethod( fieldName, object );
+        log.info( method );
 
         if ( method == null )
         {
@@ -251,9 +281,11 @@ public class ReflectionUtils
             return (T) method.invoke( object, objects );
         } catch ( InvocationTargetException e )
         {
+            log.info( "InvocationTargetException for fieldName: " + fieldName );
             return null;
         } catch ( IllegalAccessException e )
         {
+            log.info( "IllegalAccessException for fieldName: " + fieldName );
             return null;
         }
     }

@@ -31,7 +31,7 @@ import java.util.List;
 
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
-import org.hisp.dhis.reportsheet.ExportReportOganiztionGroupListing;
+import org.hisp.dhis.reportsheet.ExportReportOrganizationGroupListing;
 import org.hisp.dhis.reportsheet.ExportReportService;
 
 import com.opensymphony.xwork2.Action;
@@ -86,7 +86,7 @@ public class UpdateOrgUnitGroupAction
     public String execute()
         throws Exception
     {
-        ExportReportOganiztionGroupListing exportReport = (ExportReportOganiztionGroupListing) exportReportService
+        ExportReportOrganizationGroupListing exportReport = (ExportReportOrganizationGroupListing) exportReportService
             .getExportReport( id );
 
         List<OrganisationUnitGroup> organisationUnitGroups = new ArrayList<OrganisationUnitGroup>();

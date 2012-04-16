@@ -47,6 +47,17 @@ public class NoAction
         this.running = running;
     }
     
+    private String importFormat;
+    
+    public String getImportFormat()
+    {
+        return importFormat;
+    }
+    public void setImportFormat( String importFormat )
+    {
+        this.importFormat = importFormat;
+    }
+    
     public String execute()
     {
         return SUCCESS;

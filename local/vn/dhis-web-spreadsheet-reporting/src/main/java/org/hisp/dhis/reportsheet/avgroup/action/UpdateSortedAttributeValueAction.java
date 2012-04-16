@@ -1,3 +1,5 @@
+package org.hisp.dhis.reportsheet.avgroup.action;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -25,110 +27,101 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.report;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
-import org.hisp.dhis.patient.PatientIdentifierType;
-import org.hisp.dhis.patient.PatientIdentifierTypeService;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrder;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrderService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
- * 
- * @version $GetTabularParamsAction.java Apr 3, 2012 8:42:24 AM$
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class GetTabularParamsAction
+public class UpdateSortedAttributeValueAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private PatientIdentifierTypeService identifierTypeService;
+    private AttributeValueGroupOrderService attributeValueGroupOrderService;
 
-    private PatientAttributeService attributeService;
+    public void setAttributeValueGroupOrderService( AttributeValueGroupOrderService attributeValueGroupOrderService )
+    {
+        this.attributeValueGroupOrderService = attributeValueGroupOrderService;
+    }
 
-    private ProgramService programService;
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer programId;
+    private Integer id;
 
-    private Collection<PatientIdentifierType> identifierTypes = new HashSet<PatientIdentifierType>();
+    private Integer reportId;
 
-    private Collection<PatientAttribute> attributes = new HashSet<PatientAttribute>();
+    private List<String> attributeValues = new ArrayList<String>();
 
-    private Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+    public String message;
+
+    public I18n i18n;
 
     // -------------------------------------------------------------------------
-    // Getter && Setters
+    // Getter & Setter
     // -------------------------------------------------------------------------
 
-    public Collection<PatientIdentifierType> getIdentifierTypes()
+    public String getMessage()
     {
-        return identifierTypes;
+        return message;
     }
 
-    public Collection<PatientAttribute> getAttributes()
+    public void setReportId( Integer reportId )
     {
-        return attributes;
+        this.reportId = reportId;
     }
 
-    public void setIdentifierTypeService( PatientIdentifierTypeService identifierTypeService )
+    public Integer getReportId()
     {
-        this.identifierTypeService = identifierTypeService;
+        return reportId;
     }
 
-    public void setAttributeService( PatientAttributeService attributeService )
+    public void setId( Integer id )
     {
-        this.attributeService = attributeService;
+        this.id = id;
     }
 
-    public void setProgramService( ProgramService programService )
+    public Integer getId()
     {
-        this.programService = programService;
+        return id;
     }
 
-    public void setProgramId( Integer programId )
+    public void setAttributeValues( List<String> attributeValues )
     {
-        this.programId = programId;
-    }
-
-    public Set<ProgramStage> getProgramStages()
-    {
-        return programStages;
+        this.attributeValues = attributeValues;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    @Override
     public String execute()
         throws Exception
     {
-        Program program = programService.getProgram( programId );
+        AttributeValueGroupOrder attributeValueGroupOrder = attributeValueGroupOrderService.getAttributeValueGroupOrder( id );
 
-        programStages = program.getProgramStages();
+        attributeValueGroupOrder.setAttributeValues( attributeValues );
 
-        identifierTypes = identifierTypeService.getPatientIdentifierTypesWithoutProgram();
-        identifierTypes.addAll( identifierTypeService.getPatientIdentifierTypes( program ) );
+        message = i18n.getString( "update_sort_attributevalue_success" );
 
-        attributes = attributeService.getPatientAttributes( null, null );
-        attributes.addAll( attributeService.getPatientAttributes( program ) );
+        attributeValueGroupOrderService.updateAttributeValueGroupOrder( attributeValueGroupOrder );
 
         return SUCCESS;
     }
-
 }
