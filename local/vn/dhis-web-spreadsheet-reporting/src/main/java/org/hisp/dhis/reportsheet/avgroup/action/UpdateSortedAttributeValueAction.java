@@ -1,5 +1,7 @@
+package org.hisp.dhis.reportsheet.avgroup.action;
+
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,42 +26,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportsheet.orgunitgrouplisting.action;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.reportsheet.ExportReportService;
-import org.hisp.dhis.reportsheet.ExportReportOrganizationGroupListing;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrder;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrderService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class ListOrgUnitGroupAtLevelAction
+public class UpdateSortedAttributeValueAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ExportReportService exportReportService;
+    private AttributeValueGroupOrderService attributeValueGroupOrderService;
 
-    public void setExportReportService( ExportReportService exportReportService )
+    public void setAttributeValueGroupOrderService( AttributeValueGroupOrderService attributeValueGroupOrderService )
     {
-        this.exportReportService = exportReportService;
+        this.attributeValueGroupOrderService = attributeValueGroupOrderService;
     }
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    public void setI18n( I18n i18n )
     {
-        this.organisationUnitService = organisationUnitService;
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -68,37 +65,46 @@ public class ListOrgUnitGroupAtLevelAction
 
     private Integer id;
 
+    private Integer reportId;
+
+    private List<String> attributeValues = new ArrayList<String>();
+
+    public String message;
+
+    public I18n i18n;
+
+    // -------------------------------------------------------------------------
+    // Getter & Setter
+    // -------------------------------------------------------------------------
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    public void setReportId( Integer reportId )
+    {
+        this.reportId = reportId;
+    }
+
+    public Integer getReportId()
+    {
+        return reportId;
+    }
+
     public void setId( Integer id )
     {
         this.id = id;
     }
 
-    private Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitGroupAtLevel;
-
-    public Map<OrganisationUnitGroup, OrganisationUnitLevel> getOrganisationUnitGroupAtLevel()
+    public Integer getId()
     {
-        return organisationUnitGroupAtLevel;
+        return id;
     }
 
-    private List<OrganisationUnitGroup> availableOrganisationUnitGroups;
-
-    public List<OrganisationUnitGroup> getAvailableOrganisationUnitGroups()
+    public void setAttributeValues( List<String> attributeValues )
     {
-        return availableOrganisationUnitGroups;
-    }
-
-    private List<OrganisationUnitLevel> organisationUnitLevel;
-
-    public List<OrganisationUnitLevel> getOrganisationUnitLevel()
-    {
-        return organisationUnitLevel;
-    }
-
-    private ExportReportOrganizationGroupListing exportReport;
-
-    public ExportReportOrganizationGroupListing getExportReport()
-    {
-        return exportReport;
+        this.attributeValues = attributeValues;
     }
 
     // -------------------------------------------------------------------------
@@ -108,15 +114,14 @@ public class ListOrgUnitGroupAtLevelAction
     public String execute()
         throws Exception
     {
-        organisationUnitLevel = organisationUnitService.getOrganisationUnitLevels();
+        AttributeValueGroupOrder attributeValueGroupOrder = attributeValueGroupOrderService.getAttributeValueGroupOrder( id );
 
-        exportReport = (ExportReportOrganizationGroupListing) exportReportService.getExportReport( id );
+        attributeValueGroupOrder.setAttributeValues( attributeValues );
 
-        availableOrganisationUnitGroups = exportReport.getOrganisationUnitGroups();
-        
-        organisationUnitGroupAtLevel = exportReport.getOrganisationUnitLevels();
+        message = i18n.getString( "update_sort_attributevalue_success" );
+
+        attributeValueGroupOrderService.updateAttributeValueGroupOrder( attributeValueGroupOrder );
 
         return SUCCESS;
     }
-
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,99 +24,76 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportsheet.orgunitgrouplisting.action;
 
-import java.util.List;
-import java.util.Map;
+package org.hisp.dhis.reportsheet.avgroup.action;
 
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.reportsheet.ExportReportService;
-import org.hisp.dhis.reportsheet.ExportReportOrganizationGroupListing;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.LocalAttributeValueService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class ListOrgUnitGroupAtLevelAction
+public class GetAttributeValuesByAttributeAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private ExportReportService exportReportService;
+    private AttributeService attributeService;
 
-    public void setExportReportService( ExportReportService exportReportService )
+    public void setAttributeService( AttributeService attributeService )
     {
-        this.exportReportService = exportReportService;
+        this.attributeService = attributeService;
     }
 
-    private OrganisationUnitService organisationUnitService;
+    private LocalAttributeValueService localAttributeValueService;
 
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    public void setLocalAttributeValueService( LocalAttributeValueService localAttributeValueService )
     {
-        this.organisationUnitService = organisationUnitService;
+        this.localAttributeValueService = localAttributeValueService;
     }
 
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer attributeId;
 
-    public void setId( Integer id )
+    public void setAttributeId( Integer attributeId )
     {
-        this.id = id;
+        this.attributeId = attributeId;
     }
 
-    private Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitGroupAtLevel;
+    private Collection<String> values = new ArrayList<String>();
 
-    public Map<OrganisationUnitGroup, OrganisationUnitLevel> getOrganisationUnitGroupAtLevel()
+    public Collection<String> getValues()
     {
-        return organisationUnitGroupAtLevel;
-    }
-
-    private List<OrganisationUnitGroup> availableOrganisationUnitGroups;
-
-    public List<OrganisationUnitGroup> getAvailableOrganisationUnitGroups()
-    {
-        return availableOrganisationUnitGroups;
-    }
-
-    private List<OrganisationUnitLevel> organisationUnitLevel;
-
-    public List<OrganisationUnitLevel> getOrganisationUnitLevel()
-    {
-        return organisationUnitLevel;
-    }
-
-    private ExportReportOrganizationGroupListing exportReport;
-
-    public ExportReportOrganizationGroupListing getExportReport()
-    {
-        return exportReport;
+        return values;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
-        organisationUnitLevel = organisationUnitService.getOrganisationUnitLevels();
+        Attribute attribute = attributeService.getAttribute( attributeId );
 
-        exportReport = (ExportReportOrganizationGroupListing) exportReportService.getExportReport( id );
-
-        availableOrganisationUnitGroups = exportReport.getOrganisationUnitGroups();
-        
-        organisationUnitGroupAtLevel = exportReport.getOrganisationUnitLevels();
+        if ( attribute != null )
+        {
+            values = localAttributeValueService.getDistinctValuesByAttribute( attribute );
+        }
 
         return SUCCESS;
     }
-
 }

@@ -30,19 +30,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class ExportReportCategory
+public class ExportReportAttribute
     extends ExportReport
 {
-    private List<DataElementGroupOrder> dataElementOrders;
+    private List<AttributeValueGroupOrder> attributeValueOrders;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public ExportReportCategory()
+    public ExportReportAttribute()
     {
         super();
     }
@@ -51,32 +51,32 @@ public class ExportReportCategory
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public List<DataElementGroupOrder> getDataElementOrders()
+    public List<AttributeValueGroupOrder> getAttributeValueOrders()
     {
-        return dataElementOrders;
+        return attributeValueOrders;
     }
 
-    public void setDataElementOrders( List<DataElementGroupOrder> dataElementOrders )
+    public void setAttributeValueOrders( List<AttributeValueGroupOrder> attributeValueOrders )
     {
-        this.dataElementOrders = dataElementOrders;
+        this.attributeValueOrders = attributeValueOrders;
     }
 
     @Override
     public String getReportType()
     {
-        return ExportReport.TYPE.CATEGORY;
+        return ExportReport.TYPE.ATTRIBUTE;
     }
 
     @Override
     public boolean isAttribute()
     {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isCategory()
     {
-        return true;
+        return false;
     }
 
     @Override
@@ -104,7 +104,6 @@ public class ExportReportCategory
         types.add( ExportItem.TYPE.DATAELEMENT );
         types.add( ExportItem.TYPE.DATAELEMENT_CODE );
         types.add( ExportItem.TYPE.DATAELEMENT_NAME );
-        types.add( ExportItem.TYPE.FORMULA_EXCEL);
         types.add( ExportItem.TYPE.SERIAL );
 
         return types;

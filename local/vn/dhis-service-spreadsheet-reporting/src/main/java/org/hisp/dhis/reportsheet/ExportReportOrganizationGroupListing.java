@@ -28,21 +28,28 @@ package org.hisp.dhis.reportsheet;
  */
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 
 /**
- * @author Tran Thanh Tri
+ * @author Chau Thu Tran
  * @version $Id$
  */
-public class ExportReportCategory
+
+public class ExportReportOrganizationGroupListing
     extends ExportReport
 {
-    private List<DataElementGroupOrder> dataElementOrders;
+    private List<OrganisationUnitGroup> organisationUnitGroups;
+
+    private Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitLevels;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public ExportReportCategory()
+    public ExportReportOrganizationGroupListing()
     {
         super();
     }
@@ -51,20 +58,30 @@ public class ExportReportCategory
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public List<DataElementGroupOrder> getDataElementOrders()
+    public List<OrganisationUnitGroup> getOrganisationUnitGroups()
     {
-        return dataElementOrders;
+        return organisationUnitGroups;
     }
 
-    public void setDataElementOrders( List<DataElementGroupOrder> dataElementOrders )
+    public Map<OrganisationUnitGroup, OrganisationUnitLevel> getOrganisationUnitLevels()
     {
-        this.dataElementOrders = dataElementOrders;
+        return organisationUnitLevels;
+    }
+
+    public void setOrganisationUnitLevels( Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitLevels )
+    {
+        this.organisationUnitLevels = organisationUnitLevels;
+    }
+
+    public void setOrganisationUnitGroups( List<OrganisationUnitGroup> organisationUnitGroups )
+    {
+        this.organisationUnitGroups = organisationUnitGroups;
     }
 
     @Override
     public String getReportType()
     {
-        return ExportReport.TYPE.CATEGORY;
+        return ExportReport.TYPE.ORGANIZATION_GROUP_LISTING;
     }
 
     @Override
@@ -76,7 +93,7 @@ public class ExportReportCategory
     @Override
     public boolean isCategory()
     {
-        return true;
+        return false;
     }
 
     @Override
@@ -88,7 +105,7 @@ public class ExportReportCategory
     @Override
     public boolean isOrgUnitGroupListing()
     {
-        return false;
+        return true;
     }
 
     @Override
@@ -102,9 +119,9 @@ public class ExportReportCategory
     {
         List<String> types = new ArrayList<String>();
         types.add( ExportItem.TYPE.DATAELEMENT );
-        types.add( ExportItem.TYPE.DATAELEMENT_CODE );
-        types.add( ExportItem.TYPE.DATAELEMENT_NAME );
-        types.add( ExportItem.TYPE.FORMULA_EXCEL);
+        types.add( ExportItem.TYPE.ORGANISATION );
+        types.add( ExportItem.TYPE.INDICATOR );
+        types.add( ExportItem.TYPE.FORMULA_EXCEL );
         types.add( ExportItem.TYPE.SERIAL );
 
         return types;

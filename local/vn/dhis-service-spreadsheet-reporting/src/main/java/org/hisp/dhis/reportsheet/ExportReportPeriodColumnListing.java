@@ -78,6 +78,12 @@ public class ExportReportPeriodColumnListing
     }
 
     @Override
+    public boolean isAttribute()
+    {
+        return false;
+    }
+
+    @Override
     public boolean isCategory()
     {
         return false;

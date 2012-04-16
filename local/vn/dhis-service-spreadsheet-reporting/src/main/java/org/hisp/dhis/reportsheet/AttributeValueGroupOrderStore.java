@@ -1,3 +1,5 @@
+package org.hisp.dhis.reportsheet;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -25,21 +27,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.attribute;
-
-import java.util.Collection;
-
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.attribute.AttributeValue;
-
 /**
- * @author Chau Thu Tran
- *
- * @version $LocalAttributeValueService.java Mar 24, 2012 8:30:12 AM$
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public interface LocalAttributeValueService
+public interface AttributeValueGroupOrderStore
 {
-    Collection<AttributeValue> getAttributeValuesByAttribute( Attribute attribute );
-    
-    Collection<String> getDistinctValuesByAttribute( Attribute attribute );
+    String ID = AttributeValueGroupOrderStore.class.getName();
+
+    // -------------------------------------------------------------------------
+    // Attribute Value Group Order
+    // -------------------------------------------------------------------------
+
+    public AttributeValueGroupOrder getAttributeValueGroupOrder( Integer id );
+
+    public AttributeValueGroupOrder getAttributeValueGroupOrder( String name, String clazzName, Integer reportId );
+
+    public void updateAttributeValueGroupOrder( AttributeValueGroupOrder attributeValueGroupOrder );
+
+    public void deleteAttributeValueGroupOrder( Integer id );
+
 }

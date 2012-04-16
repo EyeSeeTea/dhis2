@@ -1,7 +1,7 @@
 package org.hisp.dhis.reportsheet;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,87 +26,107 @@ package org.hisp.dhis.reportsheet;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import java.util.ArrayList;
+
 import java.util.List;
 
+import org.hisp.dhis.attribute.Attribute;
+
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class ExportReportCategory
-    extends ExportReport
+public class AttributeValueGroupOrder
 {
-    private List<DataElementGroupOrder> dataElementOrders;
+    private int id;
+
+    private String name;
+
+    private Attribute attribute;
+
+    private List<String> attributeValues;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public ExportReportCategory()
+    public AttributeValueGroupOrder()
     {
-        super();
+    }
+
+    public AttributeValueGroupOrder( String name )
+    {
+        this.name = name;
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public List<DataElementGroupOrder> getDataElementOrders()
+    public int getId()
     {
-        return dataElementOrders;
+        return id;
     }
 
-    public void setDataElementOrders( List<DataElementGroupOrder> dataElementOrders )
+    public void setId( int id )
     {
-        this.dataElementOrders = dataElementOrders;
+        this.id = id;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    public Attribute getAttribute()
+    {
+        return attribute;
+    }
+
+    public void setAttribute( Attribute attribute )
+    {
+        this.attribute = attribute;
+    }
+
+    public List<String> getAttributeValues()
+    {
+        return attributeValues;
+    }
+
+    public void setAttributeValues( List<String> attributeValues )
+    {
+        this.attributeValues = attributeValues;
+    }
+
+    // -------------------------------------------------------------------------
+    // hashCode and equals
+    // -------------------------------------------------------------------------
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + id;
+        return result;
     }
 
     @Override
-    public String getReportType()
+    public boolean equals( Object obj )
     {
-        return ExportReport.TYPE.CATEGORY;
-    }
-
-    @Override
-    public boolean isAttribute()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isCategory()
-    {
+        if ( this == obj )
+            return true;
+        if ( obj == null )
+            return false;
+        if ( getClass() != obj.getClass() )
+            return false;
+        AttributeValueGroupOrder other = (AttributeValueGroupOrder) obj;
+        if ( id != other.id )
+            return false;
         return true;
-    }
-
-    @Override
-    public boolean isNormal()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isOrgUnitGroupListing()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isPeriodColumnListing()
-    {
-        return false;
-    }
-
-    @Override
-    public List<String> getItemTypes()
-    {
-        List<String> types = new ArrayList<String>();
-        types.add( ExportItem.TYPE.DATAELEMENT );
-        types.add( ExportItem.TYPE.DATAELEMENT_CODE );
-        types.add( ExportItem.TYPE.DATAELEMENT_NAME );
-        types.add( ExportItem.TYPE.FORMULA_EXCEL);
-        types.add( ExportItem.TYPE.SERIAL );
-
-        return types;
     }
 }

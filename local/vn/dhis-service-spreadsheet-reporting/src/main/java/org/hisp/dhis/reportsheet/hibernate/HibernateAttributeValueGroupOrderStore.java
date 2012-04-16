@@ -1,7 +1,7 @@
-package org.hisp.dhis.reportsheet.exportreport.action;
+package org.hisp.dhis.reportsheet.hibernate;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,92 +27,76 @@ package org.hisp.dhis.reportsheet.exportreport.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.reportsheet.ExportReportService;
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrder;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrderStore;
 import org.hisp.dhis.reportsheet.ExportReport;
-import org.hisp.dhis.reportsheet.action.ActionSupport;
-import org.hisp.dhis.reportsheet.state.SelectionManager;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Tran Thanh Tri
  * @author Dang Duy Hieu
  * @version $Id$
  */
-public class GetExportReportAction
-    extends ActionSupport
+
+@Transactional
+public class HibernateAttributeValueGroupOrderStore
+    implements AttributeValueGroupOrderStore
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ExportReportService exportReportService;
+    private SessionFactory sessionFactory;
 
-    public void setExportReportService( ExportReportService exportReportService )
+    public void setSessionFactory( SessionFactory sessionFactory )
     {
-        this.exportReportService = exportReportService;
-    }
-
-    private SelectionManager selectionManager;
-
-    public void setSelectionManager( SelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
+        this.sessionFactory = sessionFactory;
     }
 
     // -------------------------------------------------------------------------
-    // Input & Output
+    // Data Element Group Order
     // -------------------------------------------------------------------------
 
-    private Integer id;
-
-    private ExportReport report;
-
-    // -------------------------------------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------------------------------------
-
-    public void setId( Integer id )
+    public AttributeValueGroupOrder getAttributeValueGroupOrder( Integer id )
     {
-        this.id = id;
+        Session session = sessionFactory.getCurrentSession();
+        return (AttributeValueGroupOrder) session.get( AttributeValueGroupOrder.class, id );
     }
 
-    public Integer getId()
+    public AttributeValueGroupOrder getAttributeValueGroupOrder( String name, String clazzName, Integer reportId )
     {
-        return id;
-    }
+        Session session = sessionFactory.getCurrentSession();
 
-    public ExportReport getReport()
-    {
-        return report;
-    }
+        String sql = "SELECT * FROM reportexcel_attributevaluegrouporders WHERE lower(name) = :name";
 
-    public void setReport( ExportReport report )
-    {
-        this.report = report;
-    }
-
-    public String getClazzSimpleName()
-    {
-        return ExportReport.class.getSimpleName();
-    }
-
-    // -------------------------------------------------------------------------
-    // Execute method
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        if ( id == null )
+        if ( clazzName.equals( ExportReport.class.getSimpleName() ) )
         {
-            return ERROR;
+            sql += " AND reportexcelid = :reportId";
         }
         else
         {
-            selectionManager.setSelectedReportId( id );
-
-            report = exportReportService.getExportReport( id );
+            sql += " AND excelitemgroupid = :reportId";
         }
 
-        return SUCCESS;
+        SQLQuery query = session.createSQLQuery( sql );
+
+        query.addEntity( AttributeValueGroupOrder.class );
+        query.setString( "name", name.toLowerCase() ).setInteger( "reportId", reportId );
+
+        return (AttributeValueGroupOrder) query.uniqueResult();
+    }
+
+    public void updateAttributeValueGroupOrder( AttributeValueGroupOrder attributeValueGroupOrder )
+    {
+        Session session = sessionFactory.getCurrentSession();
+        session.update( attributeValueGroupOrder );
+    }
+
+    public void deleteAttributeValueGroupOrder( Integer id )
+    {
+        Session session = sessionFactory.getCurrentSession();
+        session.delete( this.getAttributeValueGroupOrder( id ) );
     }
 }

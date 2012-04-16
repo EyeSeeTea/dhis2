@@ -1,3 +1,5 @@
+package org.hisp.dhis.reportsheet.avgroup.action;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -25,21 +27,48 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.attribute;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrderService;
 
-import java.util.Collection;
-
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.attribute.AttributeValue;
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
- *
- * @version $LocalAttributeValueService.java Mar 24, 2012 8:30:12 AM$
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public interface LocalAttributeValueService
+public class DeleteAttributeValueGroupOrderAction
+    implements Action
 {
-    Collection<AttributeValue> getAttributeValuesByAttribute( Attribute attribute );
-    
-    Collection<String> getDistinctValuesByAttribute( Attribute attribute );
+    // -------------------------------------------------------------------------
+    // Dependency
+    // -------------------------------------------------------------------------
+
+    private AttributeValueGroupOrderService attributeValueGroupOrderService;
+
+    public void setAttributeValueGroupOrderService( AttributeValueGroupOrderService attributeValueGroupOrderService )
+    {
+        this.attributeValueGroupOrderService = attributeValueGroupOrderService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        attributeValueGroupOrderService.deleteAttributeValueGroupOrder( id );
+
+        return SUCCESS;
+    }
 }

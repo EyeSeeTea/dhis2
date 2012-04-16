@@ -1,5 +1,7 @@
+package org.hisp.dhis.reportsheet.avgroup.action;
+
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,42 +26,28 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.reportsheet.orgunitgrouplisting.action;
 
-import java.util.List;
-import java.util.Map;
-
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.reportsheet.ExportReportService;
-import org.hisp.dhis.reportsheet.ExportReportOrganizationGroupListing;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrder;
+import org.hisp.dhis.reportsheet.AttributeValueGroupOrderService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class ListOrgUnitGroupAtLevelAction
+public class GetAttributeValueGroupOrderAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private ExportReportService exportReportService;
+    private AttributeValueGroupOrderService attributeValueGroupOrderService;
 
-    public void setExportReportService( ExportReportService exportReportService )
+    public void setAttributeValueGroupOrderService( AttributeValueGroupOrderService attributeValueGroupOrderService )
     {
-        this.exportReportService = exportReportService;
-    }
-
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
+        this.attributeValueGroupOrderService = attributeValueGroupOrderService;
     }
 
     // -------------------------------------------------------------------------
@@ -73,32 +61,35 @@ public class ListOrgUnitGroupAtLevelAction
         this.id = id;
     }
 
-    private Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitGroupAtLevel;
+    private Integer reportId;
 
-    public Map<OrganisationUnitGroup, OrganisationUnitLevel> getOrganisationUnitGroupAtLevel()
+    public Integer getReportId()
     {
-        return organisationUnitGroupAtLevel;
+        return reportId;
     }
 
-    private List<OrganisationUnitGroup> availableOrganisationUnitGroups;
-
-    public List<OrganisationUnitGroup> getAvailableOrganisationUnitGroups()
+    public void setReportId( Integer reportId )
     {
-        return availableOrganisationUnitGroups;
+        this.reportId = reportId;
     }
 
-    private List<OrganisationUnitLevel> organisationUnitLevel;
+    private String clazzName;
 
-    public List<OrganisationUnitLevel> getOrganisationUnitLevel()
+    public void setClazzName( String clazzName )
     {
-        return organisationUnitLevel;
+        this.clazzName = clazzName;
     }
 
-    private ExportReportOrganizationGroupListing exportReport;
-
-    public ExportReportOrganizationGroupListing getExportReport()
+    public String getClazzName()
     {
-        return exportReport;
+        return clazzName;
+    }
+
+    private AttributeValueGroupOrder attributeValueGroupOrder;
+
+    public AttributeValueGroupOrder getAttributeValueGroupOrder()
+    {
+        return attributeValueGroupOrder;
     }
 
     // -------------------------------------------------------------------------
@@ -108,13 +99,7 @@ public class ListOrgUnitGroupAtLevelAction
     public String execute()
         throws Exception
     {
-        organisationUnitLevel = organisationUnitService.getOrganisationUnitLevels();
-
-        exportReport = (ExportReportOrganizationGroupListing) exportReportService.getExportReport( id );
-
-        availableOrganisationUnitGroups = exportReport.getOrganisationUnitGroups();
-        
-        organisationUnitGroupAtLevel = exportReport.getOrganisationUnitLevels();
+        attributeValueGroupOrder = attributeValueGroupOrderService.getAttributeValueGroupOrder( id );
 
         return SUCCESS;
     }
