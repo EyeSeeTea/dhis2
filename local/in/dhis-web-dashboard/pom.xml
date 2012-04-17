@@ -93,12 +93,12 @@
 			<artifactId>dhis-in-service-dataentrystatus</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.hisp.dhis</groupId>
             <artifactId>dhis-in-service-coldchain</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+		-->
 
 		<!-- Other -->
 		<!--	     
