@@ -1496,7 +1496,6 @@ Ext.onReady( function() {
 			DV.chart.reset();
 			
 			if (id) {
-				alert(id);
                 Ext.Ajax.request({
                     url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + id + '.json?links=false',
                     scope: this,
@@ -1549,6 +1548,7 @@ Ext.onReady( function() {
                         DV.c.trendline = f.regression;
                         DV.c.userorganisationunit = f.userOrganisationUnit;
                         DV.c.userorganisationunitchildren = f.userOrganisationUnitChildren;
+                        DV.c.showdata = f.showData;
                         DV.c.domainaxislabel = f.domainAxisLabel;
                         DV.c.rangeaxislabel = f.rangeAxisLabel;
                         DV.c.targetlinevalue = f.targetLineValue ? parseFloat(f.targetLineValue) : null;
@@ -1647,6 +1647,7 @@ Ext.onReady( function() {
             DV.c.trendline = DV.cmp.favorite.trendline.getValue();
             DV.c.userorganisationunit = DV.cmp.favorite.userorganisationunit.getValue();
             DV.c.userorganisationunitchildren = DV.cmp.favorite.userorganisationunitchildren.getValue();
+            DV.c.showdata = DV.cmp.favorite.showdata.getValue();
             DV.c.domainaxislabel = DV.cmp.favorite.domainaxislabel.getValue();
             DV.c.rangeaxislabel = DV.cmp.favorite.rangeaxislabel.getValue();
             DV.c.targetlinevalue = parseFloat(DV.cmp.favorite.targetlinevalue.getValue());
@@ -1665,6 +1666,7 @@ Ext.onReady( function() {
 			p.trendLine = DV.c.trendline;
 			p.userOrganisationUnit = DV.c.userorganisationunit;
 			p.userOrganisationUnitChildren = DV.c.userorganisationunitchildren;
+			p.showData = DV.c.showdata;
 			if (DV.c.domainaxislabel) {
 				p.domainAxisLabel = DV.c.domainaxislabel;
 			}
@@ -1700,6 +1702,7 @@ Ext.onReady( function() {
 			DV.cmp.favorite.trendline.setValue(DV.c.trendline);
 			DV.cmp.favorite.userorganisationunit.setValue(DV.c.userorganisationunit);
 			DV.cmp.favorite.userorganisationunitchildren.setValue(DV.c.userorganisationunitchildren);
+			DV.cmp.favorite.showdata.setValue(DV.c.showdata);
 			DV.cmp.favorite.domainaxislabel.setValue(DV.c.domainaxislabel);
 			DV.cmp.favorite.rangeaxislabel.setValue(DV.c.rangeaxislabel);
 			DV.cmp.favorite.targetlinevalue.setValue(DV.c.targetlinevalue);
@@ -1961,6 +1964,7 @@ Ext.onReady( function() {
 			trendline: false,
 			userorganisationunit: false,
 			userorganisationunitchildren: false,
+			showdata: false,
 			domainaxislabel: null,
 			rangeaxislabel: null,
 			targetlinevalue: null,
@@ -1984,7 +1988,8 @@ Ext.onReady( function() {
 			this.model.hidelegend = false;
 			this.model.trendline = false;
 			this.model.userorganisationunit = false;
-			this.model.userorganisationunitchildren = false;			
+			this.model.userorganisationunitchildren = false;
+			this.model.showdata = false;
 			this.model.domainaxislabel = null;
 			this.model.rangeaxislabel = null;
 			this.model.targetlinevalue = null;
@@ -2087,7 +2092,7 @@ Ext.onReady( function() {
 				},
 				tips: DV.util.chart.def.series.getTips()
 			};
-			if (DV.c.showData) {
+			if (DV.c.showdata) {
 				main.label = {display: 'outside', field: DV.c.series.names};
 			}
 			series.push(main);
@@ -2129,7 +2134,7 @@ Ext.onReady( function() {
 				},
 				tips: DV.util.chart.def.series.getTips()
 			};
-			if (DV.c.showData) {
+			if (DV.c.showdata) {
 				main.label = {display: 'outside', field: DV.c.series.names};
 			}
 			series.push(main);
@@ -3265,6 +3270,17 @@ Ext.onReady( function() {
 														items: [
 															{
 																xtype: 'checkbox',
+																width: 126,
+																boxLabel: DV.i18n.show_data,
+																labelWidth: DV.conf.layout.form_label_width,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.showdata = this;
+																	}
+																}
+															},
+															{
+																xtype: 'checkbox',
 																width: 124,
 																boxLabel: DV.i18n.hide_subtitle,
 																labelWidth: DV.conf.layout.form_label_width,
@@ -3276,23 +3292,12 @@ Ext.onReady( function() {
 															},
 															{
 																xtype: 'checkbox',
-																width: 130,
+																width: 128,
 																boxLabel: DV.i18n.user_orgunit,
 																labelWidth: DV.conf.layout.form_label_width,
 																listeners: {
 																	added: function() {
 																		DV.cmp.favorite.userorganisationunit = this;
-																	}
-																}
-															},
-															{
-																xtype: 'checkbox',
-																width: 124,
-																boxLabel: DV.i18n.trend_line,
-																labelWidth: DV.conf.layout.form_label_width,
-																listeners: {
-																	added: function() {
-																		DV.cmp.favorite.trendline = this;
 																	}
 																}
 															}
@@ -3303,6 +3308,17 @@ Ext.onReady( function() {
 														layout: 'column',
 														bodyStyle: 'border-style:none; background-color:transparent; padding-bottom:15px',
 														items: [
+															{
+																xtype: 'checkbox',
+																width: 126,
+																boxLabel: DV.i18n.trend_line,
+																labelWidth: DV.conf.layout.form_label_width,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.trendline = this;
+																	}
+																}
+															},
 															{
 																xtype: 'checkbox',
 																width: 124,
@@ -3316,7 +3332,7 @@ Ext.onReady( function() {
 															},
 															{
 																xtype: 'checkbox',
-																width: 130,
+																width: 128,
 																boxLabel: DV.i18n.user_orgunit_children,
 																labelWidth: DV.conf.layout.form_label_width,
 																listeners: {
