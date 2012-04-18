@@ -1018,9 +1018,9 @@ Ext.onReady( function() {
             line: {
 				series: {
 					getArray: function() {
-						var a = [];
+						var series = [];
 						for (var i = 0; i < DV.c.series.names.length; i++) {
-							a.push({
+							var main = {
 								type: 'line',
 								axis: 'left',
 								xField: DV.conf.finals.data.domain,
@@ -1034,9 +1034,10 @@ Ext.onReady( function() {
 									radius: 4
 								},
 								tips: DV.util.chart.def.series.getTips()
-							});
+							};
+							series.push(main);
 						}
-						return a;
+						return series;
 					},
 					setTheme: function() {
 						var colors = DV.conf.chart.theme.dv1.slice(0, DV.c.series.names.length);
@@ -1493,8 +1494,9 @@ Ext.onReady( function() {
     DV.state = {
         setChart: function(exe, id) {
 			DV.chart.reset();
-						
+			
 			if (id) {
+				alert(id);
                 Ext.Ajax.request({
                     url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + id + '.json?links=false',
                     scope: this,
@@ -2073,7 +2075,7 @@ Ext.onReady( function() {
 					series.push(a[i]);
 				}
 			}
-			series.push({
+			var main = {
 				type: 'column',
 				axis: 'left',
 				xField: DV.conf.finals.data.domain,
@@ -2082,9 +2084,13 @@ Ext.onReady( function() {
 				style: {
 					opacity: 0.8,
 					stroke: '#333'
-				},				
+				},
 				tips: DV.util.chart.def.series.getTips()
-			});
+			};
+			if (DV.c.showData) {
+				main.label = {display: 'outside', field: DV.c.series.names};
+			}
+			series.push(main);
 			if (DV.c.targetlinevalue) {
 				series.push(DV.util.chart.def.series.getTargetLine());
 			}
@@ -2111,7 +2117,7 @@ Ext.onReady( function() {
 					series.push(a[i]);
 				}
 			}
-			series.push({
+			var main = {
 				type: 'bar',
 				axis: 'bottom',
 				xField: DV.conf.finals.data.domain,
@@ -2122,7 +2128,11 @@ Ext.onReady( function() {
 					stroke: '#333'
 				},
 				tips: DV.util.chart.def.series.getTips()
-			});
+			};
+			if (DV.c.showData) {
+				main.label = {display: 'outside', field: DV.c.series.names};
+			}
+			series.push(main);
 			if (DV.c.targetlinevalue) {
 				series.push(DV.util.chart.bar.series.getTargetLine());
 			}
