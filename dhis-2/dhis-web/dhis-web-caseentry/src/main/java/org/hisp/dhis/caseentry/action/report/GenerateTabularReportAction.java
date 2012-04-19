@@ -62,6 +62,8 @@ import org.hisp.dhis.program.ProgramStageService;
 public class GenerateTabularReportAction
     extends ActionPagingSupport<ProgramStageInstance>
 {
+    private String PREFIX_META_DATA = "meta";
+
     private String PREFIX_IDENTIFIER_TYPE = "iden";
 
     private String PREFIX_PATIENT_ATTRIBUTE = "attr";
@@ -161,7 +163,7 @@ public class GenerateTabularReportAction
     {
         this.searchingValues = searchingValues;
     }
-    
+
     private boolean orderByOrgunitAsc;
 
     public void setOrderByOrgunitAsc( boolean orderByOrgunitAsc )
@@ -253,6 +255,13 @@ public class GenerateTabularReportAction
         return valueTypes;
     }
 
+    private List<String> fixedAttributes = new ArrayList<String>();
+
+    public void setFixedAttributes( List<String> fixedAttributes )
+    {
+        this.fixedAttributes = fixedAttributes;
+    }
+
     private Map<Integer, List<String>> mapSuggestedValues = new HashMap<Integer, List<String>>();
 
     public Map<Integer, List<String>> getMapSuggestedValues()
@@ -267,7 +276,7 @@ public class GenerateTabularReportAction
     private Map<Integer, String> searchingDEKeys = new HashMap<Integer, String>();
 
     private List<Boolean> hiddenCols = new ArrayList<Boolean>();
-    
+
     // -------------------------------------------------------------------------
     // Implementation Action
     // -------------------------------------------------------------------------
@@ -330,24 +339,24 @@ public class GenerateTabularReportAction
 
             this.paging = createPaging( totalRecords );
 
-            grid = programStageInstanceService.getTabularReport( programStage, hiddenCols, identifierTypes, patientAttributes,
-                dataElements, searchingIdenKeys, searchingAttrKeys, searchingDEKeys, orgunitIds, level, startValue,
-                endValue, orderByOrgunitAsc, orderByExecutionDateByAsc, paging.getStartPos(), paging.getPageSize(),
-                format, i18n );
+            grid = programStageInstanceService.getTabularReport( programStage, hiddenCols, identifierTypes,
+                fixedAttributes, patientAttributes, dataElements, searchingIdenKeys, searchingAttrKeys,
+                searchingDEKeys, orgunitIds, level, startValue, endValue, orderByOrgunitAsc, orderByExecutionDateByAsc,
+                paging.getStartPos(), paging.getPageSize(), format, i18n );
 
             return SUCCESS;
         }
 
-        grid = programStageInstanceService.getTabularReport( programStage, hiddenCols, identifierTypes, patientAttributes,
-            dataElements, searchingIdenKeys, searchingAttrKeys, searchingDEKeys, orgunitIds, level, startValue,
-            endValue, orderByOrgunitAsc, orderByExecutionDateByAsc, format, i18n );
+        grid = programStageInstanceService.getTabularReport( programStage, hiddenCols, identifierTypes,
+            fixedAttributes, patientAttributes, dataElements, searchingIdenKeys, searchingAttrKeys, searchingDEKeys,
+            orgunitIds, level, startValue, endValue, orderByOrgunitAsc, orderByExecutionDateByAsc, format, i18n );
 
         return type;
     }
 
-    // ---------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Supportive methods
-    // ---------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     public int getNumberOfPages( int totalRecord )
     {
@@ -367,7 +376,11 @@ public class GenerateTabularReportAction
             String objectType = infor[0];
             int objectId = Integer.parseInt( infor[1] );
 
-            if ( objectType.equals( PREFIX_IDENTIFIER_TYPE ) )
+            if ( objectType.equals( PREFIX_META_DATA ) )
+            {
+                hiddenCols.add( Boolean.parseBoolean( infor[2] ) );
+            }
+            else if ( objectType.equals( PREFIX_IDENTIFIER_TYPE ) )
             {
                 PatientIdentifierType identifierType = identifierTypeService.getPatientIdentifierType( objectId );
                 identifierTypes.add( identifierType );
@@ -386,12 +399,13 @@ public class GenerateTabularReportAction
                 {
                     values.add( "" );
                 }
+                index++;
             }
             else if ( objectType.equals( PREFIX_PATIENT_ATTRIBUTE ) )
             {
                 PatientAttribute attribute = patientAttributeService.getPatientAttribute( objectId );
                 patientAttributes.add( attribute );
-                
+
                 // Get value-type && suggested-values
                 valueTypes.add( attribute.getValueType() );
                 mapSuggestedValues.put( index, getSuggestedAttrValues( attribute ) );
@@ -407,12 +421,13 @@ public class GenerateTabularReportAction
                 {
                     values.add( "" );
                 }
+                index++;
             }
             else if ( objectType.equals( PREFIX_DATA_ELEMENT ) )
             {
                 DataElement dataElement = dataElementService.getDataElement( objectId );
                 dataElements.add( dataElement );
-                
+
                 // Get value-type && suggested-values
                 String valueType = (dataElement.getOptionSet() != null) ? VALUE_TYPE_OPTION_SET : dataElement.getType();
                 valueTypes.add( valueType );
@@ -428,9 +443,9 @@ public class GenerateTabularReportAction
                 {
                     values.add( "" );
                 }
+                index++;
             }
 
-            index++;
         }
     }
 

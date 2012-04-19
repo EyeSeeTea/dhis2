@@ -136,7 +136,10 @@ Ext.onReady( function() {
 			patientAttribute: {},
 			programStage: {},
 			dataelement: {},
-			organisationunit: {}
+			organisationunit: {},
+			fixedAttributes:{
+				checkbox: []
+			}
         },
         options: {},
         toolbar: {
@@ -507,6 +510,8 @@ Ext.onReady( function() {
 			this.datatable = Ext.create('Ext.data.Store', {
 				fields: TR.value.fields,
 				data: TR.value.values,
+				remoteSort:true,
+				autoLoad: false,
 				proxy: {
 					type: 'memory',
 					reader: {
@@ -522,6 +527,8 @@ Ext.onReady( function() {
     TR.state = {
         currentPage: 1,
 		total: 1,
+		orderByOrgunitAsc: true,
+		orderByExecutionDateByAsc: true,
 		generateReport: function( type ) {
 			// Validation
 			if( !this.validation.objects() )
@@ -550,6 +557,7 @@ Ext.onReady( function() {
 						TR.state.total = json.total;
 						TR.value.valueTypes = json.valueTypes;
 						TR.value.fields = json.fields;
+						TR.value.columns = json.columns;
 						TR.value.values = json.items;
 						
 						if ( json.items.length > 1 )
@@ -575,12 +583,23 @@ Ext.onReady( function() {
             p.endDate = TR.cmp.settings.endDate.rawValue;
 			p.facilityLB = TR.cmp.settings.facilityLB.getValue();
 			p.level = TR.cmp.settings.level.getValue();
+			// organisation unit
 			p.orgunitId = TR.cmp.params.organisationunit.treepanel.getSelectionModel().getSelection()[0].data.id
-			p.orderByOrgunitAsc = 'true';
-			p.orderByExecutionDateByAsc= 'true';
+			p.orderByOrgunitAsc = this.orderByOrgunitAsc;
+			p.orderByExecutionDateByAsc= this.orderByExecutionDateByAsc;
+			
 			p.programStageId = TR.cmp.params.programStage.getValue();
 			p.currentPage = this.currentPage;
 			
+			// Get fixed attributes
+			p.fixedAttributes = [];
+			var fixedAttributes = TR.cmp.params.fixedAttributes.checkbox;
+			Ext.Array.each(fixedAttributes, function(item) {
+				if( item.value )
+					p.fixedAttributes.push( item.paramName );
+			});
+			
+			// Get searching values
 			p.searchingValues = [];
 			if( TR.store.datatable && TR.store.datatable.data.length)
 			{
@@ -631,6 +650,13 @@ Ext.onReady( function() {
 			p += "&orderByExecutionDateByAsc=" +'true';
 			p += "&programStageId=" + TR.cmp.params.programStage.getValue();
 			p += "&type=" + type;
+			
+			// Get fixed attributes
+			var fixedAttributes = TR.cmp.params.fixedAttributes.checkbox;
+			Ext.Array.each(fixedAttributes, function(item) {
+				if( item.value )
+					p+="&fixedAttributes=" + item.paramName;
+			});
 			
 			if( TR.store.datatable && TR.store.datatable.data.length)
 			{
@@ -725,6 +751,7 @@ Ext.onReady( function() {
     
     TR.value = {
 		valueTypes: [],
+		columns: [],
 		fields: [],
 		values: []
     };
@@ -735,7 +762,7 @@ Ext.onReady( function() {
 			// column
 			var cols = [];
 			cols[0] = {
-				header: '#', 
+				header: TR.i18n.no, 
 				dataIndex: 'id',
 				width: 50,
 				height: TR.conf.layout.east_gridcolumn_height,
@@ -744,26 +771,39 @@ Ext.onReady( function() {
 				groupable: true
 			}
 			
-			cols[1] = {
-				header: TR.i18n.report_unit, 
-				dataIndex: 'col1',
-				height: TR.conf.layout.east_gridcolumn_height,
-				sortable: false,
-				draggable: false,
-				groupable: true
-			};
-			
-			cols[2] = { 
+			cols[1] = { 
 				header: TR.i18n.report_date, 
-				dataIndex: 'col2',
-				width: 150,
-				height: TR.conf.layout.east_gridcolumn_height,
-				sortable: false,
+				dataIndex: 'col' + index,
+				name:"reportdate_1" + "_",
+				sortable: true,
 				draggable: false,
-				groupable: true
+				groupable: true,
+				sortAscText: TR.i18n.asc,
+				sortDescText: TR.i18n.desc
 			};
 			
-			var index = 3;
+			var paramsLen = TR.cmp.params.identifierType.selected.store.data.length
+						+ TR.cmp.params.patientAttribute.selected.store.data.length
+						+ TR.cmp.params.dataelement.selected.store.data.length;
+			
+			var metaDatatColsLen = TR.value.columns.length - paramsLen ;
+			var index = 2;
+			
+			for( index=2; index < metaDatatColsLen; index++ )
+			{
+				cols[index] = {
+					header: TR.value.columns[index], 
+					dataIndex: 'col' + index,
+					height: TR.conf.layout.east_gridcolumn_height,
+					name:"meta_" + index + "_",
+					sortable: false,
+					draggable: false,
+					groupable: true,
+					sortAscText: TR.i18n.asc,
+					sortDescText: TR.i18n.desc
+				}
+			}
+			
 			TR.cmp.params.identifierType.selected.store.each( function(r) {
 				var dataIndex = "col" + index;
 				cols[index] = { 
@@ -796,6 +836,7 @@ Ext.onReady( function() {
 					sortable: false,
 					draggable: false,
 					groupable: true,
+					emptyText: TR.i18n.et_no_data,
 					editor: {
 							xtype: TR.value.valueTypes[index].valueType,
 							queryMode: 'local',
@@ -841,36 +882,20 @@ Ext.onReady( function() {
 				index++;
 			});
 			
-			cols1 = [
-				{
-					text: TR.i18n.commons,
-					colspan: 3, 
-					align: 'center'
-				},
-				{ 
-					text: TR.i18n.identifiers,
-					colspan: TR.cmp.params.identifierType.selected.length, 
-					align: 'center'
-				},
-				{
-					text: TR.i18n.attributes,
-					colspan: TR.cmp.params.patientAttribute.selected.length, 
-					align: 'center'
-				},
-				{
-					text: TR.i18n.data_elements,
-					colspan: TR.cmp.params.dataelement.selected.length, 
-					align: 'center'
-				}
-			];
-			
-			var group = new Ext.ux.grid.ColumnHeaderGroup({rows: [cols1, cols]});
-			
 			// grid
 			this.datatable = Ext.create('Ext.grid.Panel', {
                 height: TR.util.viewport.getSize().y - 68,
 				columns: cols,
 				scroll: 'both',
+				viewConfig: {
+					getRowClass: function(record, rowIndex, rp, ds){ 
+						if(rowIndex == 0){
+							return 'blue-row';
+						} else {
+						   return '';
+						}
+					}
+				},
 				bbar: [
 					{
 						xtype: 'button',
@@ -977,8 +1002,6 @@ Ext.onReady( function() {
 							}
 						}
 					})
-					
-					,group
 				],
 				store: TR.store.datatable
 				,listeners: {
@@ -987,9 +1010,24 @@ Ext.onReady( function() {
 						{
 							grid.getView().focusRow(this.rowIndex);
 						}
+					},
+					sortchange: function( ct, column, direction, eOpts )
+					{
+						var sortedStatus = (direction == "DESC") ? false: true;
+						if( column.name.match("^org")=='org' && TR.state.orderByOrgunitAsc != sortedStatus )
+						{
+							TR.state.orderByOrgunitAsc = sortedStatus;
+							TR.exe.execute();
+						}
+						else if ( TR.state.orderByExecutionDateByAsc != sortedStatus )
+						{
+							TR.state.orderByExecutionDateByAsc = (direction == "DESC") ? false: true;
+							TR.exe.execute();
+						}
 					}
 				},
-				sortAscText: TR.i18n.asc
+				sortAscText: TR.i18n.asc,
+				sortDescText: TR.i18n.desc
 			});
 			
 			if (Ext.grid.RowEditor) {
@@ -1048,7 +1086,7 @@ Ext.onReady( function() {
 			Ext.getCmp('currentPage').setValue( currentPage );	
 			TR.datatable.setPagingToolbarStatus();
 		},
-		reload: function() {
+		reset: function() {
 			TR.store.datatable.loadData([],false);
 			this.execute();
 		},
@@ -1422,6 +1460,115 @@ Ext.onReady( function() {
 										title: '<div style="height:17px">' + TR.i18n.attributes + '</div>',
 										hideCollapseTool: true,
 										items: [
+											{
+														xtype: 'label',
+														text: TR.i18n.fixed_attributes
+											},
+											{
+												xtype: 'panel',
+												layout: 'column',
+												bodyStyle: 'border-style:none; padding:10px 10px;',
+												items: [
+													{
+														xtype: 'panel',
+														layout: 'anchor',
+														bodyStyle: 'border-style:none; ',
+														defaults: {
+															labelSeparator: '',
+															listeners: {
+																added: function(chb) {
+																	if (chb.xtype === 'checkbox') {
+																		TR.cmp.params.fixedAttributes.checkbox.push(chb);
+																	}
+																}
+															}
+														},
+														items: [
+															{
+																xtype: 'checkbox',
+																paramName: 'fullName',
+																boxLabel: TR.i18n.full_name
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'gender',
+																boxLabel: TR.i18n.gender
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'birthDate',
+																boxLabel: TR.i18n.date_of_birth
+															}
+														]
+													},
+													{
+														xtype: 'panel',
+														layout: 'anchor',
+														bodyStyle: 'border-style:none; padding:0 0 0 32px',
+														defaults: {
+															labelSeparator: '',
+															listeners: {
+																added: function(chb) {
+																	if (chb.xtype === 'checkbox') {
+																		TR.cmp.params.fixedAttributes.checkbox.push(chb);
+																	}
+																}
+															}
+														},
+														items: [
+															{
+																xtype: 'checkbox',
+																paramName: 'bloodGroup',
+																boxLabel: TR.i18n.blood_group
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'phoneNumber',
+																boxLabel: TR.i18n.phone_number
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'deathdate',
+																boxLabel: TR.i18n.death_date
+															}
+														]
+													},
+													
+													{
+														xtype: 'panel',
+														layout: 'anchor',
+														bodyStyle: 'border-style:none; padding:0 0 0 32px',
+														defaults: {
+															labelSeparator: '',
+															listeners: {
+																added: function(chb) {
+																	if (chb.xtype === 'checkbox') {
+																		TR.cmp.params.fixedAttributes.checkbox.push(chb);
+																	}
+																}
+															}
+														},
+														items: [
+															{
+																xtype: 'checkbox',
+																paramName: 'registrationDate',
+																boxLabel: TR.i18n.registration_date
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'dobType',
+																boxLabel: TR.i18n.dob_type
+															}
+														]
+													}
+													
+												]
+											},
+											
+											{
+												xtype: 'label',
+												text: TR.i18n.dynamic_attributes
+											},
 											{
 												xtype: 'panel',
 												layout: 'column',
@@ -1809,11 +1956,11 @@ Ext.onReady( function() {
 						{
 							xtype: 'button',
 							cls: 'tr-toolbar-btn-1',
-							text: TR.i18n.reload,
+							text: TR.i18n.reset,
 							width: 50,
 							listeners: {
 								click: function() {
-									TR.exe.reload();
+									TR.exe.reset();
 								}
 							}
 						},

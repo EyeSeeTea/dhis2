@@ -27,10 +27,14 @@ package org.hisp.dhis.importexport.action.datavalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.DateUtils.getMediumDate;
 import static org.hisp.dhis.system.util.CodecUtils.filenameEncode;
-import static org.hisp.dhis.util.ContextUtils.*;
+import static org.hisp.dhis.system.util.DateUtils.getMediumDate;
+import static org.hisp.dhis.util.ContextUtils.CONTENT_TYPE_CSV;
+import static org.hisp.dhis.util.ContextUtils.CONTENT_TYPE_XML;
+import static org.hisp.dhis.util.ContextUtils.getZipOut;
 
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -55,6 +59,8 @@ public class ExportDataValueAction
 {
     private final static String FILE_PREFIX = "Export";
     private final static String FILE_SEPARATOR = "_";
+    private final static String EXTENSION_XML_ZIP = ".xml.zip";
+    private final static String EXTENSION_CSV_ZIP = ".csv.zip";
     private final static String EXTENSION_XML = ".xml";
     private final static String EXTENSION_CSV = ".csv";
     private final static String FORMAT_CSV = "csv";
@@ -123,15 +129,17 @@ public class ExportDataValueAction
         
         if ( FORMAT_CSV.equals( exportFormat ) )
         {
-            ContextUtils.configureResponse( response, CONTENT_TYPE_CSV, true, getFileName( EXTENSION_CSV ), true );
+            ContextUtils.configureResponse( response, CONTENT_TYPE_CSV, true, getFileName( EXTENSION_CSV_ZIP ), true );
             
-            dataValueSetService.writeDataValueSetCsv( selectedDataSets,getMediumDate( startDate ), getMediumDate( endDate ), orgUnits, response.getWriter() );
+            Writer writer = new OutputStreamWriter( getZipOut( response, getFileName( EXTENSION_CSV ) ) );
+            
+            dataValueSetService.writeDataValueSetCsv( selectedDataSets, getMediumDate( startDate ), getMediumDate( endDate ), orgUnits, writer );
         }
         else
         {
-            ContextUtils.configureResponse( response, CONTENT_TYPE_XML, true, getFileName( EXTENSION_XML ), true );
+            ContextUtils.configureResponse( response, CONTENT_TYPE_XML, true, getFileName( EXTENSION_XML_ZIP ), true );
             
-            dataValueSetService.writeDataValueSet( selectedDataSets, getMediumDate( startDate ), getMediumDate( endDate ), orgUnits, response.getOutputStream() );
+            dataValueSetService.writeDataValueSet( selectedDataSets, getMediumDate( startDate ), getMediumDate( endDate ), orgUnits, getZipOut( response, getFileName( EXTENSION_XML ) ) );
         }
                 
         return SUCCESS;

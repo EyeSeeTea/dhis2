@@ -286,7 +286,7 @@ public class AddOrUpdateChartAction
     {
         this.userOrganisationUnitChildren = userOrganisationUnitChildren;
     }
-    
+
     private Boolean showData;
 
     public void setShowData( Boolean showData )
@@ -475,7 +475,7 @@ public class AddOrUpdateChartAction
         {
             chart.setUserOrganisationUnitChildren( userOrganisationUnitChildren );
         }
-        
+
         if ( showData != null )
         {
             chart.setShowData( showData );
