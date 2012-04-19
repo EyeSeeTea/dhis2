@@ -111,7 +111,7 @@ TR.conf = {
 Ext.Loader.setConfig({enabled: true});
 Ext.Loader.setPath('Ext.ux', TR.conf.finals.ajax.path_lib + 'ext-ux');
 Ext.require('Ext.ux.form.MultiSelect');
-//Ext.require('Ext.ux.grid.ColumnHeaderGroup');
+Ext.require('Ext.ux.grid.ColumnHeaderGroup');
 
 Ext.onReady( function() {
     Ext.override(Ext.form.FieldSet,{setExpanded:function(a){var b=this,c=b.checkboxCmp,d=b.toggleCmp,e;a=!!a;if(c){c.setValue(a)}if(d){d.setType(a?"up":"down")}if(a){e="expand";b.removeCls(b.baseCls+"-collapsed")}else{e="collapse";b.addCls(b.baseCls+"-collapsed")}b.collapsed=!a;b.doComponentLayout();b.fireEvent(e,b);return b}});
@@ -1933,7 +1933,6 @@ Ext.onReady( function() {
 												id: 'facilityLBCombobox',
 												fieldLabel: TR.i18n.use_data_from_level,
 												labelWidth: 135,
-												labelSeparator: '',
 												emptyText: TR.i18n.please_select,
 												queryMode: 'local',
 												editable: false,
@@ -1957,7 +1956,6 @@ Ext.onReady( function() {
 												id:'levelCombobox',
 												fieldLabel: TR.i18n.show_hierachy_from_level,
 												labelWidth: 135,
-												labelSeparator: '',
 												name: TR.conf.finals.programs,
 												emptyText: TR.i18n.please_select,
 												queryMode: 'local',
@@ -2046,7 +2044,7 @@ Ext.onReady( function() {
                         },
 						{
 							xtype: 'button',
-							cls: 'tr-toolbar-btn-1',
+							cls: 'tr-toolbar-btn-2',
 							text: TR.i18n.reset,
 							width: 50,
 							listeners: {
@@ -2057,7 +2055,7 @@ Ext.onReady( function() {
 						},
 						{
                             xtype: 'button',
-                            text: TR.i18n.download,
+                            text: TR.i18n.download + '..',
                             execute: function(type) {
 								TR.exe.execute( type );
                             },
