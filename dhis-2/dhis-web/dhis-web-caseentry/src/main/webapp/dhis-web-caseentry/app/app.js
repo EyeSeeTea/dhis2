@@ -111,7 +111,7 @@ TR.conf = {
 Ext.Loader.setConfig({enabled: true});
 Ext.Loader.setPath('Ext.ux', TR.conf.finals.ajax.path_lib + 'ext-ux');
 Ext.require('Ext.ux.form.MultiSelect');
-Ext.require('Ext.ux.grid.ColumnHeaderGroup');
+//Ext.require('Ext.ux.grid.ColumnHeaderGroup');
 
 Ext.onReady( function() {
     Ext.override(Ext.form.FieldSet,{setExpanded:function(a){var b=this,c=b.checkboxCmp,d=b.toggleCmp,e;a=!!a;if(c){c.setValue(a)}if(d){d.setType(a?"up":"down")}if(a){e="expand";b.removeCls(b.baseCls+"-collapsed")}else{e="collapse";b.addCls(b.baseCls+"-collapsed")}b.collapsed=!a;b.doComponentLayout();b.fireEvent(e,b);return b}});
@@ -1213,28 +1213,24 @@ Ext.onReady( function() {
 					items: [
 						{
 							xtype: 'panel',
-							bodyStyle: 'border-style:none; background-color:transparent; padding:0 6px',
+							bodyStyle: 'border-style:none; background-color:transparent; padding:4px 0 0 8px',
                             items: [
                             {
 								xtype: 'label',
 								text: TR.i18n.programs,
-								style: 'font-size:11px; font-weight:bold; padding:0 3px'
+								style: 'font-size:11px; font-weight:bold; padding:0 0 0 3px'
 							},
 							{ bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
 							{
 								xtype: 'combobox',
 								cls: 'tr-combo',
-								id:'programCombobox',
-								fieldLabel: TR.i18n.program,
-								labelStyle: 'padding-left:7px;font-weight:bold;',
-								labelWidth: TR.conf.layout.form_label_width,
 								name: TR.init.system.programs,
 								emptyText: TR.i18n.please_select,
 								queryMode: 'local',
 								editable: false,
 								valueField: 'id',
 								displayField: 'name',
-								width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor,
+								width: TR.conf.layout.west_fieldset_width,
 								store: TR.store.program.available,
 								listeners: {
 									added: function() {
@@ -1277,22 +1273,20 @@ Ext.onReady( function() {
 							},
 							{
 								xtype: 'panel',
-								bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+								bodyStyle: 'border-style:none; background-color:transparent; padding:3px 0 0 0',
                                 layout: 'column',
 								items: [
-									{ bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
                                     {
 										xtype: 'datefield',
 										cls: 'tr-textfield-alt1',
-										id:'startDate',
+										id: 'startDate',
 										fieldLabel: TR.i18n.start_date,
-										labelStyle: 'padding-left:7px;font-weight:bold;',
-										labelWidth: TR.conf.layout.form_label_width,
+										labelStyle: 'padding-left:3px; font-weight:bold',
 										labelAlign: 'top',
 										labelSeparator: '',
 										editable: false,
-										style: 'margin-right:6px',
-										width: ( TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor)/2 - 8,
+										style: 'margin-right:8px',
+										width: TR.conf.layout.west_fieldset_width / 2 - 4,
 										format: TR.i18n.format_date,
 										value: new Date(),
 										listeners: {
@@ -1304,15 +1298,14 @@ Ext.onReady( function() {
 									{
 										xtype: 'datefield',
 										cls: 'tr-textfield-alt1',
-										style: 'margin-left:6px',
-										id:'endDate',
+										id: 'endDate',
 										fieldLabel: TR.i18n.end_date,
-										labelStyle: 'padding-left:7px;font-weight:bold;',
+										labelStyle: 'padding-left:3px; font-weight:bold',
 										labelWidth: TR.conf.layout.form_label_width,
 										labelAlign: 'top',
 										labelSeparator: '',
 										editable: false,
-										width: ( TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor)/2 - 8,
+										width: TR.conf.layout.west_fieldset_width / 2 - 4,
 										format: TR.i18n.format_date,
 										value: new Date(),
 										listeners: {
@@ -1546,7 +1539,7 @@ Ext.onReady( function() {
 													TR.cmp.params.identifierType.panel
 												);
 												
-												var programId = Ext.getCmp('programCombobox').getValue();													
+												var programId = TR.cmp.settings.program.getValue();													
 												if ( programId!=null && !TR.store.identifierType.available.isloaded ) {
 													TR.store.identifierType.available.load({params: {programId: programId}});
 												}
@@ -1776,7 +1769,7 @@ Ext.onReady( function() {
 													TR.cmp.params.patientAttribute.panel
 												);
 												
-												var programId = Ext.getCmp('programCombobox').getValue();													
+												var programId = TR.cmp.settings.program.getValue();													
 												if ( programId!=null && !TR.store.patientAttribute.available.isloaded ) {
 													TR.store.patientAttribute.available.load({params: {programId: programId}});
 												}
@@ -2163,4 +2156,4 @@ Ext.onReady( function() {
     });
     
     }});
-}); 
+});
