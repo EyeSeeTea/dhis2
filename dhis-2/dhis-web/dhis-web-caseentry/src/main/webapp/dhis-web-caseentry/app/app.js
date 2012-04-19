@@ -100,7 +100,7 @@ TR.conf = {
         west_fieldset_width: 402,
         west_width_subtractor: 18,
         west_fill: 117,
-        west_fill_accordion_organisationunit: 75,
+        west_fill_accordion_organisationunit: 50,
         west_maxheight_accordion_organisationunit: 225,
         center_tbar_height: 31,
         east_gridcolumn_height: 30,
@@ -240,7 +240,7 @@ Ext.onReady( function() {
             },
             setHeight: function(ms, panel, fill) {
 				for (var i = 0; i < ms.length; i++) {
-					ms[i].setHeight(panel.getHeight() - fill);
+					ms[i].setHeight(panel.getHeight() - 45);
 				}
 			}
         },
@@ -1343,7 +1343,7 @@ Ext.onReady( function() {
 												xtype: 'treepanel',
 												cls: 'tr-tree',
 												width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor,
-												height: TR.conf.layout.west_maxheight_accordion_organisationunit,
+												height: 273,
 												autoScroll: true,
 												multiSelect: false,
 												isrendered: false,
@@ -1540,7 +1540,7 @@ Ext.onReady( function() {
 												);
 												
 												var programId = TR.cmp.settings.program.getValue();													
-												if ( programId!=null && !TR.store.identifierType.available.isloaded ) {
+												if (programId != null && !TR.store.identifierType.available.isloaded) {
 													TR.store.identifierType.available.load({params: {programId: programId}});
 												}
 											}
@@ -1553,18 +1553,19 @@ Ext.onReady( function() {
 										hideCollapseTool: true,
 										items: [
 											{
-														xtype: 'label',
-														text: TR.i18n.fixed_attributes
+												xtype: 'label',
+												text: TR.i18n.fixed_attributes,
+												style: 'font-size:11px; font-weight:bold; color:#444; padding:0 0 0 3px'
 											},
 											{
 												xtype: 'panel',
 												layout: 'column',
-												bodyStyle: 'border-style:none; padding:10px 10px;',
+												bodyStyle: 'border-style:none; padding:5px 0 10px 8px;',
 												items: [
 													{
 														xtype: 'panel',
 														layout: 'anchor',
-														bodyStyle: 'border-style:none; ',
+														bodyStyle: 'border-style:none; padding:0 0 0 5px',
 														defaults: {
 															labelSeparator: '',
 															listeners: {
@@ -1655,21 +1656,22 @@ Ext.onReady( function() {
 													}
 													
 												]
-											},
-											
+											},											
 											{
 												xtype: 'label',
-												text: TR.i18n.dynamic_attributes
+												text: TR.i18n.dynamic_attributes,
+												style: 'font-size:11px; font-weight:bold; color:#444; padding:0 0 0 3px'
 											},
 											{
 												xtype: 'panel',
 												layout: 'column',
-												bodyStyle: 'border-style:none',
+												bodyStyle: 'border-style:none; padding:5px 0 0 0',
 												items: [
 													Ext.create('Ext.ux.form.MultiSelect', {
 														name: 'availablePatientAttributes',
 														cls: 'tr-toolbar-multiselect-left',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														height: 159,
 														displayField: 'name',
 														valueField: 'id',
 														queryMode: 'local',
@@ -1715,6 +1717,7 @@ Ext.onReady( function() {
 														name: 'selectedPatientAttribute',
 														cls: 'tr-toolbar-multiselect-right',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														height: 159,
 														displayField: 'name',
 														valueField: 'id',
 														ddReorder: true,
@@ -1764,11 +1767,6 @@ Ext.onReady( function() {
 												TR.cmp.params.patientAttribute.panel = this;
 											},
 											expand: function() {
-												TR.util.multiselect.setHeight(
-													[TR.cmp.params.patientAttribute.available, TR.cmp.params.patientAttribute.selected],
-													TR.cmp.params.patientAttribute.panel
-												);
-												
 												var programId = TR.cmp.settings.program.getValue();													
 												if ( programId!=null && !TR.store.patientAttribute.available.isloaded ) {
 													TR.store.patientAttribute.available.load({params: {programId: programId}});
@@ -1825,6 +1823,7 @@ Ext.onReady( function() {
 														name: 'availableDataelementAttributes',
 														cls: 'tr-toolbar-multiselect-left',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														height: 241,
 														displayField: 'name',
 														valueField: 'id',
 														queryMode: 'remote',
@@ -1870,6 +1869,7 @@ Ext.onReady( function() {
 														name: 'selectedDataelementAttribute',
 														cls: 'tr-toolbar-multiselect-right',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														height: 241,
 														displayField: 'name',
 														valueField: 'id',
 														ddReorder: true,
@@ -1917,12 +1917,6 @@ Ext.onReady( function() {
 										listeners: {
 											added: function() {
 												TR.cmp.params.dataelement.panel = this;
-											},
-											expand: function() {
-												TR.util.multiselect.setHeight(
-													[TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected],
-													TR.cmp.params.dataelement.panel
-												);
 											}
 										}
 									},
@@ -1931,18 +1925,21 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + TR.i18n.options + '</div>',
 										hideCollapseTool: true,
+										cls: 'tr-accordion-options',
 										items: [
 											{
 												xtype: 'combobox',
 												cls: 'tr-combo',
-												id:'facilityLBCombobox',
+												id: 'facilityLBCombobox',
 												fieldLabel: TR.i18n.use_data_from_level,
+												labelWidth: 135,
+												labelSeparator: '',
 												emptyText: TR.i18n.please_select,
 												queryMode: 'local',
 												editable: false,
 												valueField: 'value',
 												displayField: 'name',
-												width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor - 20,
+												width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor,
 												store:  new Ext.data.ArrayStore({
 													fields: ['value', 'name'],
 													data: [['all', TR.i18n.all], ['childrenOnly', TR.i18n.children_only], ['selected', TR.i18n.selected]],
@@ -1959,13 +1956,15 @@ Ext.onReady( function() {
 												cls: 'tr-combo',
 												id:'levelCombobox',
 												fieldLabel: TR.i18n.show_hierachy_from_level,
+												labelWidth: 135,
+												labelSeparator: '',
 												name: TR.conf.finals.programs,
 												emptyText: TR.i18n.please_select,
 												queryMode: 'local',
 												editable: false,
 												valueField: 'value',
 												displayField: 'name',
-												width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor - 20,
+												width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor,
 												store: Ext.create('Ext.data.Store', {
 													fields: ['value', 'name'],
 													data: TR.init.system.level,
