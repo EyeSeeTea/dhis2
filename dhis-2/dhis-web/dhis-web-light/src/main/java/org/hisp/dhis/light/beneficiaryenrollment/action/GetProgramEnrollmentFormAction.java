@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,83 +25,94 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.report;
+package org.hisp.dhis.light.beneficiaryenrollment.action;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.hisp.dhis.patient.PatientAttributeGroup;
-import org.hisp.dhis.patient.PatientAttributeGroupService;
-import org.hisp.dhis.patient.comparator.PatientAttributeGroupSortOrderComparator;
+import org.hisp.dhis.patient.Patient;
+import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
 
-/**
- * @author Chau Thu Tran
- * 
- * @version $LoadAttributeGroupsAction.java Apr 3, 2012 8:42:24 AM$
- */
-public class LoadAttributeGroupsAction
+public class GetProgramEnrollmentFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
+    private PatientService patientService;
+
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
+    }
+
     private ProgramService programService;
-
-    private PatientAttributeGroupService attributeGroupService;
-
-    // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
-
-    private Integer programId;
-
-    private List<PatientAttributeGroup> attributeGroups = new ArrayList<PatientAttributeGroup>();
-
-    // -------------------------------------------------------------------------
-    // Getter && Setters
-    // -------------------------------------------------------------------------
-
-    public Collection<PatientAttributeGroup> getAttributeGroups()
-    {
-        return attributeGroups;
-    }
-
-    public void setAttributeGroupService( PatientAttributeGroupService attributeGroupService )
-    {
-        this.attributeGroupService = attributeGroupService;
-    }
 
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
     }
 
-    public void setProgramId( Integer programId )
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private String programId;
+
+    public String getProgramId()
+    {
+        return programId;
+    }
+
+    public void setProgramId( String programId )
     {
         this.programId = programId;
     }
+    
+    private String beneficiaryId;
+    
+    public String getBeneficiaryId()
+    {
+        return beneficiaryId;
+    }
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
+    public void setBeneficiaryId( String beneficiaryId )
+    {
+        this.beneficiaryId = beneficiaryId;
+    }
+
+    private Patient patient;
+
+    public Patient getPatient()
+    {
+        return patient;
+    }
+
+    public void setPatient( Patient patient )
+    {
+        this.patient = patient;
+    }
+
+    public Program getProgram()
+    {
+        return program;
+    }
+
+    public void setProgram( Program program )
+    {
+        this.program = program;
+    }
+
+    private Program program;
 
     @Override
     public String execute()
         throws Exception
     {
-        Program program = programService.getProgram( programId );
-
-        attributeGroups = new ArrayList<PatientAttributeGroup>( attributeGroupService
-            .getPatientAttributeGroups( program ) );
-        Collections.sort( attributeGroups, new PatientAttributeGroupSortOrderComparator() );
-
+        patient = patientService.getPatient( Integer.parseInt( beneficiaryId ) );
+        program = programService.getProgram( Integer.parseInt( programId ) );
         return SUCCESS;
     }
 

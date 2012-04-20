@@ -7,7 +7,7 @@ TR.conf = {
 				for (var program in r.programs) {
 					obj.system.program = [];
 					for (var i = 0; i < r.programs.length; i++) {
-						obj.system.program.push({id: r.programs[i].id, name: r.programs[i].name});
+						obj.system.program.push({id: r.programs[i].id, name: r.programs[i].name, anonymous: r.programs[i].anonymous });
 					}
 				}
 				
@@ -111,7 +111,6 @@ TR.conf = {
 Ext.Loader.setConfig({enabled: true});
 Ext.Loader.setPath('Ext.ux', TR.conf.finals.ajax.path_lib + 'ext-ux');
 Ext.require('Ext.ux.form.MultiSelect');
-Ext.require('Ext.ux.grid.ColumnHeaderGroup');
 
 Ext.onReady( function() {
     Ext.override(Ext.form.FieldSet,{setExpanded:function(a){var b=this,c=b.checkboxCmp,d=b.toggleCmp,e;a=!!a;if(c){c.setValue(a)}if(d){d.setType(a?"up":"down")}if(a){e="expand";b.removeCls(b.baseCls+"-collapsed")}else{e="collapse";b.addCls(b.baseCls+"-collapsed")}b.collapsed=!a;b.doComponentLayout();b.fireEvent(e,b);return b}});
@@ -149,9 +148,6 @@ Ext.onReady( function() {
     };
     
     TR.util = {
-        getCmp: function(q) {
-            return TR.viewport.query(q)[0];
-        },
         getUrlParam: function(s) {
             var output = '';
             var href = window.location.href;
@@ -331,81 +327,61 @@ Ext.onReady( function() {
             }
         },
         getValueFormula: function( value )
+		{
+			if( value.indexOf('"') != value.lastIndexOf('"') )
 			{
-				if( value.indexOf('"') != value.lastIndexOf('"') )
+				value = value.replace(/"/g,"'");
+			}
+			// if key is [xyz] && [=xyz]
+			if( value.indexOf("'")==-1 ){
+				var flag = value.match(/[>|>=|<|<=|=|!=]+[ ]*/);
+			
+				if( flag == null )
 				{
-					value = value.replace(/"/g,"'");
+					value = "='"+ value + "'";
 				}
-				// if key is [xyz] && [=xyz]
-				if( value.indexOf("'")==-1 ){
-					var flag = value.match(/[>|>=|<|<=|=|!=]+[ ]*/);
-				
-					if( flag == null )
-					{
-						value = "='"+ value + "'";
-					}
-					else
-					{
-						value = value.replace( flag, flag + "'");
-						value +=  "'";
-					}
-				}
-				// if key is ['xyz'] && [='xyz']
-				// if( value.indexOf("'") != value.lastIndexOf("'") )
 				else
 				{
-					var flag = value.match(/[>|>=|<|<=|=|!=]+[ ]*/);
-				
-					if( flag == null )
-					{
-						value = "="+ value;
-					}
+					value = value.replace( flag, flag + "'");
+					value +=  "'";
 				}
-				
-				return value;
 			}
+			// if key is ['xyz'] && [='xyz']
+			// if( value.indexOf("'") != value.lastIndexOf("'") )
+			else
+			{
+				var flag = value.match(/[>|>=|<|<=|=|!=]+[ ]*/);
+			
+				if( flag == null )
+				{
+					value = "="+ value;
+				}
+			}
+			
+			return value;
+		},
+		setEnabledFixedAttr: function()
+		{
+			var fixedAttributes = TR.cmp.params.fixedAttributes.checkbox;
+			Ext.Array.each(fixedAttributes, function(item) {
+				item.enable();
+			});
+		},
+		setDisabledFixedAttr: function()
+		{
+			var fixedAttributes = TR.cmp.params.fixedAttributes.checkbox;
+			Ext.Array.each(fixedAttributes, function(item) {
+				item.setValue(false);
+				item.disable();
+			});
+		}
 	};
     
     TR.store = {
-        params: function() {
-            return Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                data: [
-                    {id: TR.conf.finals.params.data.value, name: TR.conf.finals.params.data.rawvalue},
-					{id: TR.conf.finals.params.program.value, name: TR.conf.finals.params.program.rawvalue},
-					{id: TR.conf.finals.params.organisationunit.value, name: TR.conf.finals.params.organisationunit.rawvalue},
-					{id: TR.conf.finals.params.identifierType.value, name: TR.conf.finals.params.identifierType.rawvalue},
-					{id: TR.conf.finals.params.patientAttribute.value, name: TR.conf.finals.params.patientAttribute.rawvalue},
-					{id: TR.conf.finals.params.programStage.value, name: TR.conf.finals.params.programStage.rawvalue},
-					{id: TR.conf.finals.params.dataelement.value, name: TR.conf.finals.params.dataelement.rawvalue}
-                ]
-            });
-        },
-        program: {
-            available: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                proxy: {
-                    type: 'ajax',
-                    url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.programs_get,
-					reader: {
-                        type: 'json',
-                        root: 'programs'
-                    }
-                },
-				data:TR.init.system.program,
-                storage: {},
-                listeners: {
-                    load: function(s) {
-                       s.add({id: 0, name: TR.i18n.please_select, index: -1});
-					   s.sort('index', 'ASC');
-                    }
-                }
+        program: Ext.create('Ext.data.Store', {
+                fields: ['id', 'name', 'anonymous'],
+				data:TR.init.system.program
             }),
-            selected: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                data: []
-            })
-        },
 		identifierType: {
             available: Ext.create('Ext.data.Store', {
                 fields: ['id', 'name'],
@@ -558,6 +534,7 @@ Ext.onReady( function() {
 						TR.state.total = json.total;
 						TR.value.valueTypes = json.valueTypes;
 						TR.value.fields = json.fields;
+						TR.value.hidden= json.hidden;
 						TR.value.columns = json.columns;
 						TR.value.values = json.items;
 						
@@ -566,6 +543,9 @@ Ext.onReady( function() {
 							TR.store.getDataTableStore();
 							TR.datatable.getDataTable();
 							TR.datatable.setPagingToolbarStatus();
+							
+							Ext.getCmp('btnReset').enable();
+							
 							TR.util.mask.hideMask();
 						}
 						else
@@ -607,12 +587,21 @@ Ext.onReady( function() {
 				var cols = [];
 				var grid = TR.datatable.datatable;
 				var i = 0;
-				for( var index=1; index<grid.columns.length; index++)
+				for( var index=0; index<grid.columns.length; index++)
 				{
-					var subCols = grid.columns[index].items;
+					var col = grid.columns[index];
+					if( col.name )
+					{
+						cols[i] = col;
+						i++;
+					}
+					var hidden = col.hidden;
+					var subCols = col.items;
 					for( var subIndex=0; subIndex<subCols.length; subIndex++)
 					{
-						cols[i] = subCols.getAt(subIndex);
+						var subCol = subCols.getAt(subIndex);
+						subCol.hidden = hidden ? hidden : subCol.hidden;
+						cols[i] = subCol;
 						i++;
 					}
 				}
@@ -777,6 +766,7 @@ Ext.onReady( function() {
 		valueTypes: [],
 		columns: [],
 		fields: [],
+		hidden: [],
 		values: []
     };
       
@@ -784,24 +774,15 @@ Ext.onReady( function() {
         datatable: null,
 		getDataTable: function() {
 			
+			var index = 1;
+			
 			var paramsLen = TR.cmp.params.identifierType.selected.store.data.length
 						+ TR.cmp.params.patientAttribute.selected.store.data.length
 						+ TR.cmp.params.dataelement.selected.store.data.length;
-			
 			var metaDatatColsLen = TR.value.columns.length - paramsLen ;
-			var index = 2;
 			
 			var dgCols = [];
-			dgCols[0] = { 
-				header: TR.i18n.report_date, 
-				dataIndex: 'col' + index,
-				sortable: true,
-				draggable: false,
-				sortAscText: TR.i18n.asc,
-				sortDescText: TR.i18n.desc
-			};
-			
-			var i = 1;
+			var i = 0;
 			for( index=2; index < metaDatatColsLen; index++ )
 			{
 				dgCols[i] = {
@@ -811,6 +792,7 @@ Ext.onReady( function() {
 					name:"meta_" + index + "_",
 					sortable: false,
 					draggable: false,
+					hidden: eval(TR.value.hidden[index]),
 					sortAscText: TR.i18n.asc,
 					sortDescText: TR.i18n.desc
 				}
@@ -827,16 +809,9 @@ Ext.onReady( function() {
 					width: 150,
 					height: TR.conf.layout.east_gridcolumn_height,
 					name: "iden_"+ r.data.id + "_",
+					hidden: eval(TR.value.hidden[index]),
 					sortable: false,
 					draggable: true,
-					renderer: function (val) {
-						if (val > 0) {
-							return '<span style="color:black;">' + val + '</span>';
-						} else if (val < 0) {
-							return '<span style="color:red;">' + val + '</span>';
-						}
-						return val;
-					},
 					editor: {
 						xtype: 'textfield',
 						allowBlank: true
@@ -856,18 +831,11 @@ Ext.onReady( function() {
 					width: 150,
 					height: TR.conf.layout.east_gridcolumn_height,
 					name: "attr_"+ r.data.id + "_",
+					hidden: eval(TR.value.hidden[index]),
 					flex:1,
 					sortable: false,
 					draggable: true,
 					emptyText: TR.i18n.et_no_data,
-					renderer: function (val) {
-						if (val > 0) {
-							return '<span style="color:black;">' + val + '</span>';
-						} else if (val < 0) {
-							return '<span style="color:red;">' + val + '</span>';
-						}
-						return val;
-					},
 					editor: {
 							xtype: TR.value.valueTypes[index].valueType,
 							queryMode: 'local',
@@ -895,18 +863,10 @@ Ext.onReady( function() {
 					width: 150,
 					height: TR.conf.layout.east_gridcolumn_height,
 					name: "de_"+ r.data.id + "_",
+					hidden: eval(TR.value.hidden[index]),
 					flex:1,
 					sortable: false,
 					draggable: true,
-					dragGroup: "dataElementGroup",
-					renderer: function (val) {
-						if (val > 0) {
-							return '<span style="color:black;">' + val + '</span>';
-						} else if (val < 0) {
-							return '<span style="color:red;">' + val + '</span>';
-						}
-						return val;
-					},
 					editor: {
 						xtype: TR.value.valueTypes[index].valueType,
 							queryMode: 'local',
@@ -935,14 +895,25 @@ Ext.onReady( function() {
 				height: TR.conf.layout.east_gridcolumn_height,
 				sortable: false,
 				draggable: false,
+				hideable: false,
 				menuDisabled: true
-			}
-			
-			index = 1;
+			};
+			cols[1] = {
+				header: TR.value.columns[1], 
+				dataIndex: 'col1',
+				height: TR.conf.layout.east_gridcolumn_height,
+				name:"meta_1_",
+				sortable: false,
+				draggable: false,
+				hideable: false
+			};
+				
+			index = 2;
 			if( dgCols.length > 0 )
 			{
 				cols[index]={
 					text: TR.i18n.demographics,
+					isGroupHeader: true,
 					columns: dgCols,
 					menuDisabled: true
 				}
@@ -953,6 +924,7 @@ Ext.onReady( function() {
 			{
 				cols[index]={
 					text: TR.i18n.identifiers,
+					isGroupHeader: true,
 					columns: idenCols,
 					menuDisabled: true
 				}
@@ -963,6 +935,7 @@ Ext.onReady( function() {
 			{
 				cols[index]={
 					text: TR.i18n.attributes,
+					isGroupHeader: true,
 					columns: attrCols,
 					menuDisabled: true
 				}
@@ -972,6 +945,7 @@ Ext.onReady( function() {
 			// Data element group header
 			cols[index]={
 				text: TR.i18n.data_elements,
+				isGroupHeader: true,
 				columns: deCols,
 				menuDisabled: true
 			}
@@ -1108,20 +1082,6 @@ Ext.onReady( function() {
 						{
 							grid.getView().focusRow(this.rowIndex);
 						}
-					},
-					sortchange: function( ct, column, direction, eOpts )
-					{
-						var sortedStatus = (direction == "DESC") ? false: true;
-						if( column.name.match("^org")=='org' && TR.state.orderByOrgunitAsc != sortedStatus )
-						{
-							TR.state.orderByOrgunitAsc = sortedStatus;
-							TR.exe.execute();
-						}
-						else if ( TR.state.orderByExecutionDateByAsc != sortedStatus )
-						{
-							TR.state.orderByExecutionDateByAsc = (direction == "DESC") ? false: true;
-							TR.exe.execute();
-						}
 					}
 				},
 				sortAscText: TR.i18n.asc,
@@ -1231,36 +1191,51 @@ Ext.onReady( function() {
 								valueField: 'id',
 								displayField: 'name',
 								width: TR.conf.layout.west_fieldset_width,
-								store: TR.store.program.available,
+								store: TR.store.program,
 								listeners: {
 									added: function() {
 										TR.cmp.settings.program = this;
 									},
 									select: function(cb) {
-										// IDENTIFIER TYPE
-										var storeIdentifierType = TR.store.identifierType.available;
-										TR.store.identifierType.selected.loadData([],false);
-										storeIdentifierType.parent = cb.getValue();
-										
-										if (TR.util.store.containsParent(storeIdentifierType)) {
-											TR.util.store.loadFromStorage(storeIdentifierType);
-											TR.util.multiselect.filterAvailable(TR.cmp.params.identifierType.available, TR.cmp.params.identifierType.selected);
+										var anonymous = cb.displayTplData[0].anonymous;
+										if( anonymous=='false' )
+										{
+											// IDENTIFIER TYPE
+											var storeIdentifierType = TR.store.identifierType.available;
+											TR.store.identifierType.selected.loadData([],false);
+											storeIdentifierType.parent = cb.getValue();
+											
+											if (TR.util.store.containsParent(storeIdentifierType)) {
+												TR.util.store.loadFromStorage(storeIdentifierType);
+												TR.util.multiselect.filterAvailable(TR.cmp.params.identifierType.available, TR.cmp.params.identifierType.selected);
+											}
+											else {
+												storeIdentifierType.load({params: {programId: cb.getValue()}});
+											}
+											
+											// PATIENT ATTRIBUTE
+											var storePatientAttribute = TR.store.patientAttribute.available;
+											storePatientAttribute.parent = cb.getValue();
+											TR.store.patientAttribute.selected.loadData([],false);
+											
+											if (TR.util.store.containsParent(storePatientAttribute)) {
+												TR.util.store.loadFromStorage(storePatientAttribute);
+												TR.util.multiselect.filterAvailable(TR.cmp.params.patientAttribute.available, TR.cmp.params.patientAttribute.selected);
+											}
+											else {
+												storePatientAttribute.load({params: {programId: cb.getValue()}});
+											}
+											TR.util.setEnabledFixedAttr();
 										}
-										else {
-											storeIdentifierType.load({params: {programId: cb.getValue()}});
-										}
-										
-										// PATIENT ATTRIBUTE
-										var storePatientAttribute = TR.store.patientAttribute.available;
-										storePatientAttribute.parent = cb.getValue();
-										TR.store.patientAttribute.selected.loadData([],false);
-										
-										if (TR.util.store.containsParent(storePatientAttribute)) {
-											TR.util.store.loadFromStorage(storePatientAttribute);
-											TR.util.multiselect.filterAvailable(TR.cmp.params.patientAttribute.available, TR.cmp.params.patientAttribute.selected);
-										}
-										else {
-											storePatientAttribute.load({params: {programId: cb.getValue()}});
+										else
+										{
+											TR.util.setDisabledFixedAttr();
+											
+											TR.store.identifierType.available.loadData([],false);
+											TR.store.identifierType.selected.loadData([],false);
+											
+											TR.store.patientAttribute.available.loadData([],false);
+											TR.store.patientAttribute.selected.loadData([],false);
 										}
 										
 										// PROGRAM-STAGE										
@@ -1316,7 +1291,6 @@ Ext.onReady( function() {
 									}
 								]
 							}
-							
 							
 							]
 						}]
@@ -2046,7 +2020,9 @@ Ext.onReady( function() {
 							xtype: 'button',
 							cls: 'tr-toolbar-btn-2',
 							text: TR.i18n.reset,
+							id:'btnReset',
 							width: 50,
+							disabled: true,
 							listeners: {
 								click: function() {
 									TR.exe.reset();
