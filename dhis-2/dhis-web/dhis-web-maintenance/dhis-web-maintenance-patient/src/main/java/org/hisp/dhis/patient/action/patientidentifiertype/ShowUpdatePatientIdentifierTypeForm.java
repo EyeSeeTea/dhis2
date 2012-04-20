@@ -38,11 +38,11 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- *
+ * 
  * @version $ShowUpdatePatientIdentifierTypeForm.java Mar 26, 2012 07:25:51 AM$
  */
 public class ShowUpdatePatientIdentifierTypeForm
-implements Action
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
@@ -51,7 +51,7 @@ implements Action
     private PatientIdentifierTypeService patientIdentifierTypeService;
 
     private ProgramService programService;
-    
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -59,7 +59,7 @@ implements Action
     private Integer id;
 
     private PatientIdentifierType patientIdentifierType;
-    
+
     private Collection<Program> programs;
 
     // -------------------------------------------------------------------------
@@ -106,8 +106,9 @@ implements Action
         patientIdentifierType = patientIdentifierTypeService.getPatientIdentifierType( id );
 
         programs = programService.getAllPrograms();
-        
+
+        programs.removeAll( programService.getPrograms( true, true ) );
+
         return SUCCESS;
     }
 }
-

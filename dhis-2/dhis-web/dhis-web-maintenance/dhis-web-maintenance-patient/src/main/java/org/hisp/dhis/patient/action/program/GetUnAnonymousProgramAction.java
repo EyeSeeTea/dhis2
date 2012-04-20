@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,12 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.patientattribute;
+package org.hisp.dhis.patient.action.program;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 
@@ -39,21 +38,15 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Chau Thu Tran
  * 
- * @version $ShowUpdatePatientAttributeAction.java Mar 26, 2012 1:58:26 PM$
+ * @version $GetUnAnonymousProgramAction.java Apr 20, 2012 12:29:59 PM$
  */
-public class ShowUpdatePatientAttributeAction
+public class GetUnAnonymousProgramAction
+
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
-
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
-    }
 
     private ProgramService programService;
 
@@ -66,25 +59,16 @@ public class ShowUpdatePatientAttributeAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private int id;
-
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
-    private PatientAttribute patientAttribute;
-
-    public PatientAttribute getPatientAttribute()
-    {
-        return patientAttribute;
-    }
-
-    private Collection<Program> programs;
+    private Collection<Program> programs = new ArrayList<Program>();
 
     public Collection<Program> getPrograms()
     {
         return programs;
+    }
+
+    public void setPrograms( Collection<Program> programs )
+    {
+        this.programs = programs;
     }
 
     // -------------------------------------------------------------------------
@@ -94,10 +78,8 @@ public class ShowUpdatePatientAttributeAction
     public String execute()
         throws Exception
     {
-        patientAttribute = patientAttributeService.getPatientAttribute( id );
-        
         programs = programService.getAllPrograms();
-        
+
         programs.removeAll( programService.getPrograms( true, true ) );
         
         return SUCCESS;
