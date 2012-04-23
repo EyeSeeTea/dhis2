@@ -41,6 +41,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitComparator;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -66,6 +68,9 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     @Autowired
     private PeriodService periodService;
+
+    @Autowired
+    private PeriodStore periodStore;
 
     //-------------------------------------------------------------------------------------------------------
     // Constructor
@@ -106,6 +111,8 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     protected Map<String, T> shortNameMap;
 
+    private Map<String, PeriodType> periodTypeMap = new HashMap<String, PeriodType>();
+
     //-------------------------------------------------------------------------------------------------------
     // Generic implementations of newObject and updatedObject
     //-------------------------------------------------------------------------------------------------------
@@ -138,6 +145,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         updateIdentifiableObjectCollections( object, identifiableObjectCollections );
 
+        updatePeriodTypes( object );
         manager.update( object );
         updateIdMaps( object );
 
@@ -168,6 +176,8 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         updateIdentifiableObjectCollections( object, scanIdentifiableObjectCollections( object ) );
 
         oldObject.mergeWith( object );
+        updatePeriodTypes( oldObject );
+
         manager.update( oldObject );
 
         log.info( "Update successful." );
@@ -175,11 +185,28 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         return null;
     }
 
+    // FIXME to static ATM, should be refactor out.. "type handler", not idObject
+    private void updatePeriodTypes( T object )
+    {
+        for ( Field field : object.getClass().getDeclaredFields() )
+        {
+            if ( PeriodType.class.isAssignableFrom( field.getType() ) )
+            {
+                PeriodType periodType = ReflectionUtils.invokeGetterMethod( field.getName(), object );
+
+                periodType = periodTypeMap.get( periodType.getName() );
+
+                ReflectionUtils.invokeSetterMethod( field.getName(), object, periodType );
+            }
+        }
+    }
+
     //-------------------------------------------------------------------------------------------------------
     // Importer<T> Implementation
     //-------------------------------------------------------------------------------------------------------
 
     @Override
+    @SuppressWarnings( "unchecked" )
     public List<ImportConflict> importObjects( List<T> objects, ImportOptions options )
     {
         List<ImportConflict> conflicts = new ArrayList<ImportConflict>();
@@ -188,6 +215,8 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         {
             return conflicts;
         }
+
+        populatePeriodTypeMap();
 
         reset();
 
@@ -214,6 +243,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     @Override
     public ImportConflict importObject( T object, ImportOptions options )
     {
+        populatePeriodTypeMap();
         reset();
 
         return importObjectLocal( object, options );
@@ -234,6 +264,14 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     //-------------------------------------------------------------------------------------------------------
     // Protected methods
     //-------------------------------------------------------------------------------------------------------
+
+    protected void populatePeriodTypeMap()
+    {
+        for ( PeriodType periodType : periodStore.getAllPeriodTypes() )
+        {
+            periodTypeMap.put( periodType.getName(), periodType );
+        }
+    }
 
     protected void updateIdMaps( T object )
     {
@@ -285,20 +323,11 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         return object.getClass().getName();
     }
 
-    /**
-     * Current object name, used to fill name part of a ImportConflict
-     *
-     * @return Name of object
-     */
-    protected String getClassName()
-    {
-        return importerClass.getSimpleName();
-    }
-
     //-------------------------------------------------------------------------------------------------------
     // Helpers
     //-------------------------------------------------------------------------------------------------------
 
+    @SuppressWarnings( "unchecked" )
     private void reset()
     {
         imported = 0;
@@ -407,29 +436,29 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         if ( ImportStrategy.NEW.equals( options.getImportStrategy() ) )
         {
-            conflict = validateForNewStrategy( object, options );
+            conflict = validateForNewStrategy( object );
         }
         else if ( ImportStrategy.UPDATES.equals( options.getImportStrategy() ) )
         {
-            conflict = validateForUpdatesStrategy( object, options );
+            conflict = validateForUpdatesStrategy( object );
         }
         else if ( ImportStrategy.NEW_AND_UPDATES.equals( options.getImportStrategy() ) )
         {
             // if we have a match on at least one of the objects, then assume update
             if ( uidObject != null || codeObject != null || nameObject != null || shortNameObject != null )
             {
-                conflict = validateForUpdatesStrategy( object, options );
+                conflict = validateForUpdatesStrategy( object );
             }
             else
             {
-                conflict = validateForNewStrategy( object, options );
+                conflict = validateForNewStrategy( object );
             }
         }
 
         return conflict;
     }
 
-    private ImportConflict validateForUpdatesStrategy( T object, ImportOptions options )
+    private ImportConflict validateForUpdatesStrategy( T object )
     {
         T uidObject = uidMap.get( object.getUid() );
         T codeObject = codeMap.get( object.getCode() );
@@ -470,17 +499,17 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         if ( nonNullObjects.isEmpty() )
         {
-            conflict = reportLookupConflict( object, options );
+            conflict = reportLookupConflict( object );
         }
         else if ( nonNullObjects.size() > 1 )
         {
-            conflict = reportMoreThanOneConflict( object, options );
+            conflict = reportMoreThanOneConflict( object );
         }
 
         return conflict;
     }
 
-    private ImportConflict validateForNewStrategy( T object, ImportOptions options )
+    private ImportConflict validateForNewStrategy( T object )
     {
         T uidObject = uidMap.get( object.getUid() );
         T codeObject = codeMap.get( object.getCode() );
@@ -499,23 +528,23 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         if ( uidObject != null || codeObject != null || nameObject != null || shortNameObject != null )
         {
-            conflict = reportConflict( object, options );
+            conflict = reportConflict( object );
         }
 
         return conflict;
     }
 
-    private ImportConflict reportLookupConflict( IdentifiableObject object, ImportOptions options )
+    private ImportConflict reportLookupConflict( IdentifiableObject object )
     {
         return new ImportConflict( getDisplayName( object ), "Object does not exist." );
     }
 
-    private ImportConflict reportMoreThanOneConflict( IdentifiableObject object, ImportOptions options )
+    private ImportConflict reportMoreThanOneConflict( IdentifiableObject object )
     {
         return new ImportConflict( getDisplayName( object ), "More than one object matches identifiers." );
     }
 
-    private ImportConflict reportConflict( IdentifiableObject object, ImportOptions options )
+    private ImportConflict reportConflict( IdentifiableObject object )
     {
         return new ImportConflict( getDisplayName( object ), "Object already exists." );
     }
@@ -654,7 +683,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         for ( Field field : identifiableObjectCollections.keySet() )
         {
             Collection<? extends IdentifiableObject> identifiableObjects = identifiableObjectCollections.get( field );
-            Collection<IdentifiableObject> objects = null;
+            Collection<IdentifiableObject> objects;
 
             if ( List.class.isAssignableFrom( field.getType() ) )
             {
@@ -667,6 +696,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             else
             {
                 log.warn( "Unknown Collection type!" );
+                continue;
             }
 
             for ( IdentifiableObject idObject : identifiableObjects )

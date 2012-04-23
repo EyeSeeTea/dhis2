@@ -103,6 +103,7 @@ public class TableAlteror
         executeSql( "DROP TABLE datasetlocksource" );
         executeSql( "DROP TABLE datasetlock" );
         executeSql( "DROP TABLE datasetlockexceptions" );
+        executeSql( "DROP TABLE indicator_indicatorgroupsetmembers" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
         executeSql( "ALTER TABLE reporttable DROP column dimension_type" );
         executeSql( "ALTER TABLE reporttable DROP column dimensiontype" );
@@ -421,6 +422,9 @@ public class TableAlteror
         executeSql( "update chart set last6bimonths = false where last6bimonths is null" );
         executeSql( "update chart set last4quarters = false where last4quarters is null" );
         executeSql( "update chart set last2sixmonths = false where last2sixmonths is null" );
+        executeSql( "update chart set showdata = false where showdata is null" );
+        executeSql( "update chart set userorganisationunitchildren = false where userorganisationunitchildren is null" );
+        executeSql( "update chart set userorganisationunit = false where userorganisationunit is null" );
 
         // report, reporttable, chart groups
         

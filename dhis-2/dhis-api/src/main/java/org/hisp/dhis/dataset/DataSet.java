@@ -373,9 +373,11 @@ public class DataSet
         this.periodType = periodType;
     }
 
-    @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    //@JsonProperty
+    //@JsonView( {DetailedView.class, ExportView.class} )
+    //@JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    // Leaving dataEntryForm out for the moment since we are using IDs there and not UIDs.
+    // At some point it should also be upgraded to idObject (to make it work a bit better with the importer).
     public DataEntryForm getDataEntryForm()
     {
         return dataEntryForm;
@@ -517,11 +519,11 @@ public class DataSet
         {
             DataSet dataSet = (DataSet) other;
 
-            periodType = periodType != null ? periodType : dataSet.getPeriodType();
-            sortOrder = sortOrder != null ? sortOrder : dataSet.getSortOrder();
+            periodType = dataSet.getPeriodType() == null ? periodType : dataSet.getPeriodType();
+            sortOrder = dataSet.getSortOrder() == null ? sortOrder : dataSet.getSortOrder();
             mobile = dataSet.isMobile();
-            dataEntryForm = dataEntryForm != null ? dataEntryForm : dataSet.getDataEntryForm();
-            version = version != null ? version : dataSet.getVersion();
+            dataEntryForm = dataSet.getDataEntryForm() == null ? dataEntryForm : dataSet.getDataEntryForm();
+            version = dataSet.getVersion() == null ? version : dataSet.getVersion();
             expiryDays = dataSet.getExpiryDays();
 
             removeAllDataElements();
