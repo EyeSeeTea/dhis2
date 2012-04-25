@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.filter;
+package org.hisp.dhis.organisationunit;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,25 +27,44 @@ package org.hisp.dhis.system.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.system.util.Filter;
-import org.hisp.dhis.system.util.ValidationUtils;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+
+import java.util.Collection;
 
 /**
- * @author Jan Henrik Overland
+ * Defines methods for persisting OrganisationUnitLevels.
+ *
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class OrganisationUnitWithValidPointCoordinateFilter
-    implements Filter<OrganisationUnit>
+public interface OrganisationUnitLevelStore
+    extends GenericIdentifiableObjectStore<OrganisationUnitLevel>
 {
-    @Override
-    public boolean retain( OrganisationUnit object )
-    {
-        if ( object != null && object.hasCoordinates() )
-        {
-            return object.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) ?
-                ValidationUtils.coordinateIsValid( object.getCoordinates() ) : true;
-        }
-        
-        return false;
-    }
+    String ID = OrganisationUnitLevelStore.class.getName();
+
+    /**
+     * Deletes all OrganisationUnitLevels.
+     */
+    void deleteAll();
+
+    /**
+     * Gets all OrganisationUnitLevels.
+     *
+     * @return a Collection of all OrganisationUnitLevels.
+     */
+    Collection<OrganisationUnitLevel> getOrganisationUnitLevels();
+
+    /**
+     * Gets the OrganisationUnitLevel at the given level.
+     *
+     * @param level the level.
+     * @return the OrganisationUnitLevel at the given level.
+     */
+    OrganisationUnitLevel getByLevel( int level );
+
+    /**
+     * Gets the maximum level from the hierarchy.
+     *
+     * @return the maximum number of level.
+     */
+    int getMaxLevels();
 }

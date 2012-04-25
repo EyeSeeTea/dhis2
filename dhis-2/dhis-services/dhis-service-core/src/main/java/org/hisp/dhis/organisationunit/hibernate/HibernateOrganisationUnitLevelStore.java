@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataset.action;
+package org.hisp.dhis.organisationunit.hibernate;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,56 +27,46 @@ package org.hisp.dhis.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevelStore;
 
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
-
-import com.opensymphony.xwork2.Action;
+import java.util.Collection;
 
 /**
- * @author Kristian
- * @version $Id: DataElementListAction.java 6256 2008-11-10 17:10:30Z larshelg $
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class DataElementListAction
-    implements Action
+public class HibernateOrganisationUnitLevelStore
+    extends HibernateIdentifiableObjectStore<OrganisationUnitLevel>
+    implements OrganisationUnitLevelStore
 {
-    private List<DataElement> dataElements;
-
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
+    public void deleteAll()
     {
-        this.dataElementService = dataElementService;
+        String hql = "delete from OrganisationUnitLevel";
+
+        sessionFactory.getCurrentSession().createQuery( hql ).executeUpdate();
     }
 
-    // -------------------------------------------------------------------------
-    // Getters & Setters
-    // -------------------------------------------------------------------------
-
-    public List<DataElement> getDataElements()
+    @SuppressWarnings( "unchecked" )
+    public Collection<OrganisationUnitLevel> getOrganisationUnitLevels()
     {
-        return dataElements;
+        return sessionFactory.getCurrentSession().createCriteria( OrganisationUnitLevel.class ).list();
     }
 
-    // -------------------------------------------------------------------------
-    // Execute
-    // -------------------------------------------------------------------------
-    
-    public String execute()
-        throws Exception
+    public OrganisationUnitLevel getByLevel( int level )
     {
-        dataElements = new ArrayList<DataElement>( dataElementService.getAllActiveDataElements() );
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria( OrganisationUnitLevel.class );
 
-        Collections.sort( dataElements, new IdentifiableObjectNameComparator() );
+        return (OrganisationUnitLevel) criteria.add( Restrictions.eq( "level", level ) ).uniqueResult();
+    }
 
-        return SUCCESS;
+    @Override
+    public int getMaxLevels()
+    {
+        final String sql = "SELECT MAX(level) FROM orgunitlevel";
+
+        return jdbcTemplate.queryForInt( sql );
     }
 }

@@ -29,19 +29,22 @@ package org.hisp.dhis.dxf2.metadata.importers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.*;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportCount;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.Importer;
+import org.hisp.dhis.dxf2.metadata.ObjectBridge;
 import org.hisp.dhis.dxf2.utils.OrganisationUnitUtils;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitComparator;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
-import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,13 +67,10 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     //-------------------------------------------------------------------------------------------------------
 
     @Autowired
-    protected IdentifiableObjectManager manager;
-
-    @Autowired
     private PeriodService periodService;
 
     @Autowired
-    private PeriodStore periodStore;
+    private ObjectBridge objectBridge;
 
     //-------------------------------------------------------------------------------------------------------
     // Constructor
@@ -79,39 +79,19 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     public DefaultIdentifiableObjectImporter( Class<T> importerClass )
     {
         this.importerClass = importerClass;
-        this.nameable = NameableObject.class.isAssignableFrom( importerClass );
     }
 
     private final Class<T> importerClass;
-
-    private final boolean nameable;
 
     //-------------------------------------------------------------------------------------------------------
     // Current import counts
     //-------------------------------------------------------------------------------------------------------
 
-    protected int imported;
+    protected int totalImported;
 
-    protected int updated;
+    protected int totalUpdated;
 
-    protected int ignored;
-
-    //-------------------------------------------------------------------------------------------------------
-    // Mappings from identifier (uid, name, code) to a db object.
-    //
-    // WARNING: These maps might be out-of-date, depending on if new inserts has been made after the were
-    //          fetched.
-    //-------------------------------------------------------------------------------------------------------
-
-    protected Map<String, T> uidMap;
-
-    protected Map<String, T> codeMap;
-
-    protected Map<String, T> nameMap;
-
-    protected Map<String, T> shortNameMap;
-
-    private Map<String, PeriodType> periodTypeMap = new HashMap<String, PeriodType>();
+    protected int totalIgnored;
 
     //-------------------------------------------------------------------------------------------------------
     // Generic implementations of newObject and updatedObject
@@ -120,39 +100,36 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     /**
      * Called every time a new object is to be imported.
      *
-     * @param object  Object to import
-     * @param options Current import options
+     * @param object Object to import
      * @return An ImportConflict instance if there was a conflict, otherwise null
      */
-    protected ImportConflict newObject( T object, ImportOptions options )
+    protected List<ImportConflict> newObject( T object )
     {
-        if ( options.isDryRun() )
-        {
-            return null;
-        }
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
 
         // make sure that the internalId is 0, so that the system will generate a ID
         object.setId( 0 );
-        object.setUid( CodeGenerator.generateCode() );
 
-        log.info( "Trying to save new object => " + getDisplayName( object ) );
+        // FIXME add uidValidator.. part of bean validation impl?
+        // object.setUid( CodeGenerator.generateCode() );
 
-        Map<Field, Set<? extends IdentifiableObject>> identifiableObjectCollections = scanIdentifiableObjectCollections( object );
+        log.debug( "Trying to save new object => " + getDisplayName( object ) );
 
-        updateIdentifiableObjects( object, scanIdentifiableObjects( object ) );
+        Map<Field, Set<? extends IdentifiableObject>> identifiableObjectCollections =
+            scanIdentifiableObjectCollections( object );
 
-        manager.save( object );
+        importConflicts.addAll( updateIdentifiableObjects( object, scanIdentifiableObjects( object ) ) );
 
-        updateIdentifiableObjectCollections( object, identifiableObjectCollections );
+        objectBridge.saveObject( object );
+
+        importConflicts.addAll( updateIdentifiableObjectCollections( object, identifiableObjectCollections ) );
 
         updatePeriodTypes( object );
-        manager.update( object );
-        updateIdMaps( object );
+        objectBridge.updateObject( object );
 
-        log.info( "Save successful." );
-        log.info( object );
+        log.debug( "Save successful." );
 
-        return null;
+        return importConflicts;
     }
 
     /**
@@ -160,29 +137,26 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
      *
      * @param object    Object to import
      * @param oldObject The current version of the object
-     * @param options   Current import options
      * @return An ImportConflict instance if there was a conflict, otherwise null
      */
-    protected ImportConflict updatedObject( T object, T oldObject, ImportOptions options )
+    protected List<ImportConflict> updatedObject( T object, T oldObject )
     {
-        if ( options.isDryRun() )
-        {
-            return null;
-        }
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
 
-        log.info( "Starting update of object " + getDisplayName( oldObject ) + " (" + oldObject.getClass().getSimpleName() + ")" );
+        log.debug( "Starting update of object " + getDisplayName( oldObject ) + " (" + oldObject.getClass()
+            .getSimpleName() + ")" );
 
-        updateIdentifiableObjects( object, scanIdentifiableObjects( object ) );
-        updateIdentifiableObjectCollections( object, scanIdentifiableObjectCollections( object ) );
+        importConflicts.addAll( updateIdentifiableObjects( object, scanIdentifiableObjects( object ) ) );
+        importConflicts.addAll( updateIdentifiableObjectCollections( object, scanIdentifiableObjectCollections( object ) ) );
 
         oldObject.mergeWith( object );
         updatePeriodTypes( oldObject );
 
-        manager.update( oldObject );
+        objectBridge.updateObject( oldObject );
 
-        log.info( "Update successful." );
+        log.debug( "Update successful." );
 
-        return null;
+        return importConflicts;
     }
 
     // FIXME to static ATM, should be refactor out.. "type handler", not idObject
@@ -193,9 +167,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             if ( PeriodType.class.isAssignableFrom( field.getType() ) )
             {
                 PeriodType periodType = ReflectionUtils.invokeGetterMethod( field.getName(), object );
-
-                periodType = periodTypeMap.get( periodType.getName() );
-
+                periodType = objectBridge.getObject( periodType );
                 ReflectionUtils.invokeSetterMethod( field.getName(), object, periodType );
             }
         }
@@ -209,16 +181,14 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     @SuppressWarnings( "unchecked" )
     public List<ImportConflict> importObjects( List<T> objects, ImportOptions options )
     {
-        List<ImportConflict> conflicts = new ArrayList<ImportConflict>();
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
 
         if ( objects.isEmpty() )
         {
-            return conflicts;
+            return importConflicts;
         }
 
-        populatePeriodTypeMap();
-
-        reset();
+        init( options );
 
         // FIXME a bit too static.. implement "pre handler" for types?
         if ( OrganisationUnit.class.isAssignableFrom( objects.get( 0 ).getClass() ) )
@@ -229,22 +199,21 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         for ( T object : objects )
         {
-            ImportConflict importConflict = importObjectLocal( object, options );
+            List<ImportConflict> conflicts = importObjectLocal( object, options );
 
-            if ( importConflict != null )
+            if ( !conflicts.isEmpty() )
             {
-                conflicts.add( importConflict );
+                importConflicts.addAll( conflicts );
             }
         }
 
-        return conflicts;
+        return importConflicts;
     }
 
     @Override
-    public ImportConflict importObject( T object, ImportOptions options )
+    public List<ImportConflict> importObject( T object, ImportOptions options )
     {
-        populatePeriodTypeMap();
-        reset();
+        init( options );
 
         return importObjectLocal( object, options );
     }
@@ -252,7 +221,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     @Override
     public ImportCount getCurrentImportCount()
     {
-        return new ImportCount( imported, updated, ignored );
+        return new ImportCount( totalImported, totalUpdated, totalIgnored );
     }
 
     @Override
@@ -265,57 +234,25 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     // Protected methods
     //-------------------------------------------------------------------------------------------------------
 
-    protected void populatePeriodTypeMap()
-    {
-        for ( PeriodType periodType : periodStore.getAllPeriodTypes() )
-        {
-            periodTypeMap.put( periodType.getName(), periodType );
-        }
-    }
-
-    protected void updateIdMaps( T object )
-    {
-        if ( object.getUid() != null )
-        {
-            uidMap.put( object.getUid(), object );
-        }
-
-        if ( object.getCode() != null )
-        {
-            codeMap.put( object.getCode(), object );
-        }
-
-        if ( object.getName() != null )
-        {
-            nameMap.put( object.getName(), object );
-        }
-
-        if ( nameable )
-        {
-            NameableObject nameableObject = (NameableObject) object;
-
-            if ( nameableObject.getShortName() != null )
-            {
-                shortNameMap.put( nameableObject.getShortName(), object );
-            }
-        }
-    }
-
     /**
      * @param object Object to get display name for
      * @return A usable display name
      */
     protected String getDisplayName( IdentifiableObject object )
     {
-        if ( object.getName() != null )
+        if ( object == null )
+        {
+            return "[ object is null ]";
+        }
+        else if ( object.getName() != null && object.getName().length() > 0 )
         {
             return object.getName();
         }
-        else if ( object.getUid() != null )
+        else if ( object.getUid() != null && object.getName().length() > 0 )
         {
             return object.getUid();
         }
-        else if ( object.getCode() != null )
+        else if ( object.getCode() != null && object.getName().length() > 0 )
         {
             return object.getCode();
         }
@@ -327,112 +264,109 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     // Helpers
     //-------------------------------------------------------------------------------------------------------
 
-    @SuppressWarnings( "unchecked" )
-    private void reset()
+    private void init( ImportOptions options )
     {
-        imported = 0;
-        updated = 0;
-        ignored = 0;
+        totalImported = 0;
+        totalUpdated = 0;
+        totalIgnored = 0;
 
-        uidMap = manager.getIdMap( importerClass, IdentifiableObject.IdentifiableProperty.UID );
-        codeMap = manager.getIdMap( importerClass, IdentifiableObject.IdentifiableProperty.CODE );
-        nameMap = manager.getIdMap( importerClass, IdentifiableObject.IdentifiableProperty.NAME );
-
-        if ( nameable )
+        if ( options.isDryRun() )
         {
-            shortNameMap = (Map<String, T>) manager.getIdMap( (Class<? extends NameableObject>) importerClass, NameableObject.NameableProperty.SHORT_NAME );
+            // disable writing on the persistence layer
+            objectBridge.setWriteEnabled( false );
         }
     }
 
-    private ImportConflict importObjectLocal( T object, ImportOptions options )
+    private List<ImportConflict> importObjectLocal( T object, ImportOptions options )
     {
-        ImportConflict conflict = validateIdentifiableObject( object, options );
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
+        ImportConflict importConflict = validateIdentifiableObject( object, options );
 
-        if ( conflict == null )
+        if ( importConflict == null )
         {
-            conflict = startImport( object, options );
+            importConflicts.addAll( startImport( object, options ) );
+        }
+        else
+        {
+            importConflicts.add( importConflict );
         }
 
-        if ( conflict != null )
+        if ( importConflicts.isEmpty() )
         {
-            ignored++;
+            totalIgnored++;
         }
 
-        return conflict;
+        return importConflicts;
     }
 
-    private ImportConflict startImport( T object, ImportOptions options )
+    private List<ImportConflict> startImport( T object, ImportOptions options )
     {
-        T oldObject = getObject( object );
-        ImportConflict conflict;
+        T oldObject = objectBridge.getObject( object );
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
 
         if ( ImportStrategy.NEW.equals( options.getImportStrategy() ) )
         {
-            conflict = newObject( object, options );
+            importConflicts.addAll( newObject( object ) );
 
-            if ( conflict != null )
+            if ( importConflicts.isEmpty() )
             {
-                return conflict;
+                totalImported++;
             }
-
-            imported++;
         }
         else if ( ImportStrategy.UPDATES.equals( options.getImportStrategy() ) )
         {
-            conflict = updatedObject( object, oldObject, options );
+            importConflicts.addAll( updatedObject( object, oldObject ) );
 
-            if ( conflict != null )
+            if ( importConflicts.isEmpty() )
             {
-                return conflict;
+                totalUpdated++;
             }
-
-            updated++;
         }
         else if ( ImportStrategy.NEW_AND_UPDATES.equals( options.getImportStrategy() ) )
         {
             if ( oldObject != null )
             {
-                conflict = updatedObject( object, oldObject, options );
+                importConflicts.addAll( updatedObject( object, oldObject ) );
 
-                if ( conflict != null )
+                if ( importConflicts.isEmpty() )
                 {
-                    return conflict;
+                    totalUpdated++;
                 }
-
-                updated++;
             }
             else
             {
-                conflict = newObject( object, options );
+                importConflicts.addAll( newObject( object ) );
 
-                if ( conflict != null )
+                if ( importConflicts.isEmpty() )
                 {
-                    return conflict;
+                    totalImported++;
                 }
-
-                imported++;
             }
         }
 
-        return null;
+        return importConflicts;
     }
 
     private ImportConflict validateIdentifiableObject( T object, ImportOptions options )
     {
-        T uidObject = uidMap.get( object.getUid() );
-        T codeObject = codeMap.get( object.getCode() );
-        T nameObject = nameMap.get( object.getName() );
+        ImportConflict conflict = null;
 
-        T shortNameObject = null;
+        // FIXME add bean validation for this
+        if ( object.getName() == null || object.getName().length() == 0 )
+        {
+            return new ImportConflict( getDisplayName( object ), "Empty name for object " + object );
+        }
 
-        if ( nameable )
+        if ( NameableObject.class.isInstance( object ) )
         {
             NameableObject nameableObject = (NameableObject) object;
 
-            shortNameObject = shortNameMap.get( nameableObject.getShortName() );
+            if ( nameableObject.getShortName() == null || nameableObject.getShortName().length() == 0 )
+            {
+                return new ImportConflict( getDisplayName( object ), "Empty shortName for object " + object );
+            }
         }
-
-        ImportConflict conflict = null;
+        // end
 
         if ( ImportStrategy.NEW.equals( options.getImportStrategy() ) )
         {
@@ -445,7 +379,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         else if ( ImportStrategy.NEW_AND_UPDATES.equals( options.getImportStrategy() ) )
         {
             // if we have a match on at least one of the objects, then assume update
-            if ( uidObject != null || codeObject != null || nameObject != null || shortNameObject != null )
+            if ( objectBridge.getObjects( object ).size() > 0 )
             {
                 conflict = validateForUpdatesStrategy( object );
             }
@@ -460,48 +394,14 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     private ImportConflict validateForUpdatesStrategy( T object )
     {
-        T uidObject = uidMap.get( object.getUid() );
-        T codeObject = codeMap.get( object.getCode() );
-        T nameObject = nameMap.get( object.getName() );
-
-        T shortNameObject = null;
-
-        if ( nameable )
-        {
-            NameableObject nameableObject = (NameableObject) object;
-
-            shortNameObject = shortNameMap.get( nameableObject.getShortName() );
-        }
-
         ImportConflict conflict = null;
+        Collection<T> objects = objectBridge.getObjects( object );
 
-        Set<T> nonNullObjects = new HashSet<T>();
-
-        if ( uidObject != null )
-        {
-            nonNullObjects.add( uidObject );
-        }
-
-        if ( codeObject != null )
-        {
-            nonNullObjects.add( codeObject );
-        }
-
-        if ( nameObject != null )
-        {
-            nonNullObjects.add( nameObject );
-        }
-
-        if ( shortNameObject != null )
-        {
-            nonNullObjects.add( shortNameObject );
-        }
-
-        if ( nonNullObjects.isEmpty() )
+        if ( objects.isEmpty() )
         {
             conflict = reportLookupConflict( object );
         }
-        else if ( nonNullObjects.size() > 1 )
+        else if ( objects.size() > 1 )
         {
             conflict = reportMoreThanOneConflict( object );
         }
@@ -511,22 +411,10 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     private ImportConflict validateForNewStrategy( T object )
     {
-        T uidObject = uidMap.get( object.getUid() );
-        T codeObject = codeMap.get( object.getCode() );
-        T nameObject = nameMap.get( object.getName() );
-
-        T shortNameObject = null;
-
-        if ( nameable )
-        {
-            NameableObject nameableObject = (NameableObject) object;
-
-            shortNameObject = shortNameMap.get( nameableObject.getShortName() );
-        }
-
         ImportConflict conflict = null;
+        Collection<T> objects = objectBridge.getObjects( object );
 
-        if ( uidObject != null || codeObject != null || nameObject != null || shortNameObject != null )
+        if ( objects.size() > 0 )
         {
             conflict = reportConflict( object );
         }
@@ -549,45 +437,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         return new ImportConflict( getDisplayName( object ), "Object already exists." );
     }
 
-    private T getObject( T object )
-    {
-        T matchedObject = uidMap.get( object.getUid() );
-
-        if ( matchedObject != null )
-        {
-            return matchedObject;
-        }
-
-        matchedObject = codeMap.get( object.getCode() );
-
-        if ( matchedObject != null )
-        {
-            return matchedObject;
-        }
-
-        matchedObject = nameMap.get( object.getName() );
-
-        if ( matchedObject != null )
-        {
-            return matchedObject;
-        }
-
-        if ( nameable )
-        {
-            NameableObject nameableObject = (NameableObject) object;
-
-            matchedObject = shortNameMap.get( nameableObject.getShortName() );
-
-            if ( matchedObject != null )
-            {
-                return matchedObject;
-            }
-        }
-
-        return matchedObject;
-    }
-
-    // FIXME slow! some kind of global idMap is needed here, that will also update itself from several importers
     private IdentifiableObject findObjectByReference( IdentifiableObject identifiableObject )
     {
         IdentifiableObject match = null;
@@ -596,22 +445,10 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         if ( Period.class.isAssignableFrom( identifiableObject.getClass() ) )
         {
             Period period = (Period) identifiableObject;
-            match = periodService.reloadPeriod( period );
-        }
-        else if ( identifiableObject.getUid() != null )
-        {
-            match = manager.get( identifiableObject.getClass(), identifiableObject.getUid() );
-        }
-        else if ( identifiableObject.getCode() != null )
-        {
-            match = manager.getByCode( identifiableObject.getClass(), identifiableObject.getCode() );
-        }
-        else if ( identifiableObject.getName() != null )
-        {
-            match = manager.getByName( identifiableObject.getClass(), identifiableObject.getName() );
+            return periodService.reloadPeriod( period );
         }
 
-        return match;
+        return objectBridge.getObject( identifiableObject );
     }
 
     private Map<Field, IdentifiableObject> scanIdentifiableObjects( IdentifiableObject identifiableObject )
@@ -635,11 +472,15 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         return identifiableObjects;
     }
 
-    private void updateIdentifiableObjects( IdentifiableObject identifiableObject, Map<Field, IdentifiableObject> identifiableObjects )
+    private List<ImportConflict> updateIdentifiableObjects( IdentifiableObject identifiableObject, Map<Field,
+        IdentifiableObject> identifiableObjects )
     {
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
+
         for ( Field field : identifiableObjects.keySet() )
         {
-            IdentifiableObject ref = findObjectByReference( identifiableObjects.get( field ) );
+            IdentifiableObject idObject = identifiableObjects.get( field );
+            IdentifiableObject ref = findObjectByReference( idObject );
 
             if ( ref != null )
             {
@@ -647,23 +488,37 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             }
             else
             {
-                log.info( "--> Ignored reference " + getDisplayName( identifiableObject ) + "." );
+                // FIXME special case, possible forward reference.. so just skip it..
+                if ( !OrganisationUnitGroupSet.class.isInstance( idObject ) )
+                {
+                    log.warn( "Ignored reference " + idObject + " on object " + identifiableObject + "." );
+
+                    ImportConflict importConflict = new ImportConflict( getDisplayName( identifiableObject ),
+                        "Unknown reference to " + idObject + " on field " + field.getName() + ", reference has been discarded." );
+
+                    importConflicts.add( importConflict );
+                }
             }
         }
+
+        return importConflicts;
     }
 
-    private Map<Field, Set<? extends IdentifiableObject>> scanIdentifiableObjectCollections( IdentifiableObject identifiableObject )
+    private Map<Field, Set<? extends IdentifiableObject>> scanIdentifiableObjectCollections( IdentifiableObject
+        identifiableObject )
     {
         Map<Field, Set<? extends IdentifiableObject>> collected = new HashMap<Field, Set<? extends IdentifiableObject>>();
         Field[] fields = identifiableObject.getClass().getDeclaredFields();
 
         for ( Field field : fields )
         {
-            boolean b = ReflectionUtils.isCollection( field.getName(), identifiableObject, IdentifiableObject.class, Scanned.class );
+            boolean b = ReflectionUtils.isCollection( field.getName(), identifiableObject, IdentifiableObject.class,
+                Scanned.class );
 
             if ( b )
             {
-                Collection<IdentifiableObject> objects = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
+                Collection<IdentifiableObject> objects = ReflectionUtils.invokeGetterMethod( field.getName(),
+                    identifiableObject );
 
                 if ( objects != null && !objects.isEmpty() )
                 {
@@ -677,9 +532,11 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         return collected;
     }
 
-    private void updateIdentifiableObjectCollections( IdentifiableObject identifiableObject,
-                                                      Map<Field, Set<? extends IdentifiableObject>> identifiableObjectCollections )
+    private List<ImportConflict> updateIdentifiableObjectCollections( IdentifiableObject identifiableObject,
+        Map<Field, Set<? extends IdentifiableObject>> identifiableObjectCollections )
     {
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
+
         for ( Field field : identifiableObjectCollections.keySet() )
         {
             Collection<? extends IdentifiableObject> identifiableObjects = identifiableObjectCollections.get( field );
@@ -695,7 +552,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             }
             else
             {
-                log.warn( "Unknown Collection type!" );
+                log.warn( "Unknown Collection type." );
                 continue;
             }
 
@@ -709,11 +566,18 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 }
                 else
                 {
-                    log.info( "--> Ignored reference " + getDisplayName( identifiableObject ) + "." );
+                    log.warn( "Ignored reference " + idObject + " on object " + identifiableObject + "." );
+
+                    ImportConflict importConflict = new ImportConflict( getDisplayName( identifiableObject ),
+                        "Unknown reference to " + idObject + " on field " + field.getName() + ", reference has been discarded." );
+
+                    importConflicts.add( importConflict );
                 }
             }
 
             ReflectionUtils.invokeSetterMethod( field.getName(), identifiableObject, objects );
         }
+
+        return importConflicts;
     }
 }

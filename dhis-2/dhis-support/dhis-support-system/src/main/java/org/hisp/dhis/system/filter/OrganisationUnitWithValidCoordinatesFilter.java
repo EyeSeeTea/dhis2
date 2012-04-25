@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataset.action;
+package org.hisp.dhis.system.filter;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,55 +27,19 @@ package org.hisp.dhis.dataset.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.system.util.Filter;
+import org.hisp.dhis.system.util.ValidationUtils;
 
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorService;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.*;
 
-import com.opensymphony.xwork2.Action;
-
-/**
- * @author mortenoh
- */
-public class IndicatorGroupListAction
-    implements Action
+public class OrganisationUnitWithValidCoordinatesFilter
+    implements Filter<OrganisationUnit>
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private IndicatorService indicatorService;
-
-    public void setIndicatorService( IndicatorService indicatorService )
+    @Override
+    public boolean retain( OrganisationUnit object )
     {
-        this.indicatorService = indicatorService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
-
-    private List<IndicatorGroup> indicatorGroups;
-
-    public List<IndicatorGroup> getIndicatorGroups()
-    {
-        return indicatorGroups;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action
-    // -------------------------------------------------------------------------
-
-    public String execute()
-        throws Exception
-    {
-        indicatorGroups = new ArrayList<IndicatorGroup>( indicatorService.getAllIndicatorGroups() );
-
-        Collections.sort( indicatorGroups, IdentifiableObjectNameComparator.INSTANCE );
-
-        return SUCCESS;
+        return object != null && object.getFeatureType() != null && object.hasCoordinates() &&
+            ( object.getFeatureType().equals( FEATURETYPE_POINT ) ? ValidationUtils.coordinateIsValid( object.getCoordinates() ) : true );
     }
 }

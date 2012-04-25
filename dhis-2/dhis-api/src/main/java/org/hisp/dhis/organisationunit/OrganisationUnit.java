@@ -40,7 +40,6 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -94,15 +93,6 @@ public class OrganisationUnit
 
     private String url;
 
-    @Scanned
-    private Set<OrganisationUnitGroup> groups = new HashSet<OrganisationUnitGroup>();
-
-    @Scanned
-    private Set<DataSet> dataSets = new HashSet<DataSet>();
-
-    @Scanned
-    private Set<User> users = new HashSet<User>();
-
     private String contactPerson;
 
     private String address;
@@ -112,6 +102,12 @@ public class OrganisationUnit
     private String phoneNumber;
 
     private boolean hasPatients;
+
+    private Set<OrganisationUnitGroup> groups = new HashSet<OrganisationUnitGroup>();
+
+    private Set<DataSet> dataSets = new HashSet<DataSet>();
+
+    private Set<User> users = new HashSet<User>();
 
     /**
      * Set of the dynamic attributes values that belong to this
@@ -695,51 +691,6 @@ public class OrganisationUnit
         this.url = url;
     }
 
-    @JsonProperty( value = "organisationUnitGroups" )
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlElementWrapper( localName = "organisationUnitGroups", namespace = Dxf2Namespace.NAMESPACE )
-    @JacksonXmlProperty( localName = "organisationUnitGroup", namespace = Dxf2Namespace.NAMESPACE )
-    public Set<OrganisationUnitGroup> getGroups()
-    {
-        return groups;
-    }
-
-    public void setGroups( Set<OrganisationUnitGroup> groups )
-    {
-        this.groups = groups;
-    }
-
-    @JsonProperty
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlElementWrapper( localName = "dataSets", namespace = Dxf2Namespace.NAMESPACE )
-    @JacksonXmlProperty( localName = "dataSet", namespace = Dxf2Namespace.NAMESPACE )
-    public Set<DataSet> getDataSets()
-    {
-        return dataSets;
-    }
-
-    public void setDataSets( Set<DataSet> dataSets )
-    {
-        this.dataSets = dataSets;
-    }
-
-    @JsonProperty
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class} )
-    @JacksonXmlElementWrapper( localName = "users", namespace = Dxf2Namespace.NAMESPACE )
-    @JacksonXmlProperty( localName = "user", namespace = Dxf2Namespace.NAMESPACE )
-    public Set<User> getUsers()
-    {
-        return users;
-    }
-
-    public void setUsers( Set<User> users )
-    {
-        this.users = users;
-    }
-
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
@@ -816,6 +767,51 @@ public class OrganisationUnit
     public void setType( String type )
     {
         this.type = type;
+    }
+
+    @JsonProperty( value = "organisationUnitGroups" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "organisationUnitGroups", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "organisationUnitGroup", namespace = Dxf2Namespace.NAMESPACE )
+    public Set<OrganisationUnitGroup> getGroups()
+    {
+        return groups;
+    }
+
+    public void setGroups( Set<OrganisationUnitGroup> groups )
+    {
+        this.groups = groups;
+    }
+
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "dataSets", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "dataSet", namespace = Dxf2Namespace.NAMESPACE )
+    public Set<DataSet> getDataSets()
+    {
+        return dataSets;
+    }
+
+    public void setDataSets( Set<DataSet> dataSets )
+    {
+        this.dataSets = dataSets;
+    }
+
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "users", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "user", namespace = Dxf2Namespace.NAMESPACE )
+    public Set<User> getUsers()
+    {
+        return users;
+    }
+
+    public void setUsers( Set<User> users )
+    {
+        this.users = users;
     }
 
     @JsonProperty( value = "attributes" )
