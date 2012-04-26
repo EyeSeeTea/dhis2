@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.statistics;
+package org.hisp.dhis.reportsheet.cogroup.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,82 +27,45 @@ package org.hisp.dhis.dataadmin.action.statistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.hisp.dhis.chart.ChartService;
-import org.hisp.dhis.common.Objects;
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.statistics.StatisticsProvider;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryLabelPositions;
-import org.jfree.chart.plot.PlotOrientation;
+import org.hisp.dhis.reportsheet.CategoryOptionGroupOrderService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class GetStatisticsChartAction
+public class DeleteCategoryOptionGroupOrderAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-    
-    private StatisticsProvider statisticsProvider;
-
-    public void setStatisticsProvider( StatisticsProvider statisticsProvider )
-    {
-        this.statisticsProvider = statisticsProvider;
-    }
-    
-    private ChartService chartService;
-
-    public void setChartService( ChartService chartService )
-    {
-        this.chartService = chartService;
-    }
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-    
-    // -------------------------------------------------------------------------
-    // Output
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private JFreeChart chart;
+    @Autowired
+    private CategoryOptionGroupOrderService categoryOptionGroupOrderService;
 
-    public JFreeChart getChart()
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        return chart;
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
-    // Action implemenation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        Map<Objects, Integer> counts = statisticsProvider.getObjectCounts();
-        
-        Map<String, Double> categoryValues = new HashMap<String, Double>();
-        
-        categoryValues.put( i18n.getString( "data_elements" ), Double.valueOf( counts.get( Objects.DATAELEMENT ) ) );
-        categoryValues.put( i18n.getString( "indicators" ), Double.valueOf( counts.get( Objects.INDICATOR ) ) );
-        categoryValues.put( i18n.getString( "data_sets" ), Double.valueOf( counts.get( Objects.DATASET ) ) );
-        categoryValues.put( i18n.getString( "organisation_units" ), Double.valueOf( counts.get( Objects.SOURCE ) ) );
-        categoryValues.put( i18n.getString( "periods" ), Double.valueOf( counts.get( Objects.PERIOD ) ) );
-        
-        chart = chartService.getJFreeChart( i18n.getString( "number_of_objects" ), 
-            PlotOrientation.HORIZONTAL, CategoryLabelPositions.STANDARD, categoryValues );
-        
+        categoryOptionGroupOrderService.deleteCategoryOptionGroupOrder( id );
+
         return SUCCESS;
     }
 }
-

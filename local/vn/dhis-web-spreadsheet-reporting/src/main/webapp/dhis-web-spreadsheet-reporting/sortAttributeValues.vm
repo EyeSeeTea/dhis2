@@ -13,7 +13,7 @@
 		<td>
 			<select multiple size="30" id="availableList" name="availableList" style="min-width:300px;" ondblclick="moveSelectedById( 'availableList', 'selectedList' );">
 				#foreach( $attributeValue in $!attributeValueGroupOrder.attributeValues )
-    				<option value="$!attributeValue">$!attributeValue</option>
+    				<option value="$!attributeValue">$!encoder.htmlEncode( $!attributeValue )</option>
     			#end
 			</select>
 		</td>
