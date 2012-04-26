@@ -951,6 +951,29 @@ Ext.onReady( function() {
 				menuDisabled: true
 			}
 			
+			var rowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
+				clicksToEdit: 1,
+				editStyle: 'row',
+				autoScroll: true,
+				errorSummary: false,
+				listeners: {
+					beforeedit: function( editor, e) 
+					{
+						if( editor.rowIdx > 0 )
+						{
+							return false;
+						}
+					},
+					edit: function( editor, e ){
+						TR.exe.execute();
+					},
+					canceledit: function( grid, eOpts ){
+						var grid = TR.datatable.datatable;
+						grid.getView().getNode(0).classList.add('hidden');
+					}
+				}
+			});
+	
 			// grid
 			this.datatable = Ext.create('Ext.grid.Panel', {
                 height: TR.util.viewport.getSize().y - 60,
@@ -961,12 +984,66 @@ Ext.onReady( function() {
 				viewConfig: {
 					getRowClass: function(record, rowIndex, rp, ds){ 
 						if(rowIndex == 0){
-							return 'filter-row';
+							return 'filter-row hidden';
 						} else {
 						   return '';
 						}
 					}
 				},
+				tbar: [
+					{
+						xtype: 'button',
+						text: TR.i18n.filter,
+						handler: function() {
+							var grid = TR.datatable.datatable;
+							var hidden = grid.getView().getNode(0).classList.contains('hidden');
+							if( hidden )
+							{
+								grid.getView().getNode(0).classList.remove('hidden');
+								var record = grid.getView().getRecord( grid.getView().getNode(0) );
+								grid.getView().getSelectionModel().select(record, false, false);
+								rowEditing.startEdit(0, 0);
+							}
+							else {
+								TR.exe.execute();
+							}
+						}
+					},
+					{
+						xtype: 'button',
+						text: TR.i18n.clear_filter,
+						handler: function() {
+							var cols = [];
+							var grid = TR.datatable.datatable;
+							var i = 0;
+							for( var index=0; index<grid.columns.length; index++)
+							{
+								var col = grid.columns[index];
+								
+								cols[i] = col;
+								i++;
+								
+								var subCols = col.items;
+								for( var subIndex=0; subIndex<subCols.length; subIndex++)
+								{
+									cols[i] = subCols.getAt(subIndex);
+									i++;
+								}
+							}
+							
+							var editor = grid.getStore().getAt(0);
+							var colLen = cols.length;
+							for( var i=1; i<colLen; i++ )
+							{
+								var col = cols[i];
+								var dataIndex = col.dataIndex;
+								TR.store.datatable.first().data[dataIndex] = "";
+							}
+							
+							TR.exe.execute();
+						}
+					}
+				],
 				bbar: [
 					{
 						xtype: 'button',
@@ -1053,66 +1130,10 @@ Ext.onReady( function() {
 						}
 					}
 				], 
-				plugins: [
-					  Ext.create('Ext.grid.plugin.RowEditing', {
-						clicksToEdit: 1,
-						editStyle: 'row',
-						clicksToMoveEditor: 1,
-						autoScroll: true,
-						errorSummary: false,
-						listeners: {
-							beforeedit: function( editor, e) 
-							{
-								if( editor.rowIdx > 0 )
-								{
-									return false;
-								}
-							},
-							edit: function( editor, e ){
-								TR.exe.execute();
-							}
-
-						}
-					})
-				],
+				plugins: [rowEditing],
 				store: TR.store.datatable
-				,listeners: {
-					cellclick: function ( o, idx, colIdx, e ) {
-						if ( e.index == 0 && colIdx == 1 )
-						{
-							var cols = [];
-							var grid = TR.datatable.datatable;
-							var i = 0;
-							for( var index=0; index<grid.columns.length; index++)
-							{
-								var col = grid.columns[index];
-								
-								cols[i] = col;
-								i++;
-								
-								var subCols = col.items;
-								for( var subIndex=0; subIndex<subCols.length; subIndex++)
-								{
-									cols[i] = subCols.getAt(subIndex);
-									i++;
-								}
-							}
-							
-							var editor = grid.getStore().getAt(0);
-							var colLen = cols.length;
-							for( var i=1; i<colLen; i++ )
-							{
-								var col = cols[i];
-								var dataIndex = col.dataIndex;
-								TR.store.datatable.first().data[dataIndex] = "";
-							}
-							
-							TR.exe.execute();
-						}
-					}
-				}
 			});
-			
+										
 			if (Ext.grid.RowEditor) {
 				Ext.apply(Ext.grid.RowEditor.prototype, {
 					saveBtnText : TR.i18n.filter,
@@ -2022,7 +2043,7 @@ Ext.onReady( function() {
                             name: 'resizewest',
 							cls: 'tr-toolbar-btn-2',
                             text: '<<<',
-                            tooltip: TR.i18n.show_hide_settings_panel,
+                            tooltip: TR.i18n.show_hide_settings,
                             handler: function() {
                                 var p = TR.cmp.region.west;
                                 if (p.collapsed) {
