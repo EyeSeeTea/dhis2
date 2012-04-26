@@ -1,7 +1,7 @@
 package org.hisp.dhis.reportsheet;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,28 +28,21 @@ package org.hisp.dhis.reportsheet;
  */
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 
 /**
- * @author Chau Thu Tran
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-
-public class ExportReportOrganizationGroupListing
+public class ExportReportVerticalCategory
     extends ExportReport
-{
-    private List<OrganisationUnitGroup> organisationUnitGroups;
-
-    private Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitLevels;
+{    
+    private List<CategoryOptionGroupOrder> categoryOptionGroupOrders;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public ExportReportOrganizationGroupListing()
+    public ExportReportVerticalCategory()
     {
         super();
     }
@@ -58,30 +51,20 @@ public class ExportReportOrganizationGroupListing
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public List<OrganisationUnitGroup> getOrganisationUnitGroups()
+    public List<CategoryOptionGroupOrder> getCategoryOptionGroupOrders()
     {
-        return organisationUnitGroups;
+        return categoryOptionGroupOrders;
     }
 
-    public Map<OrganisationUnitGroup, OrganisationUnitLevel> getOrganisationUnitLevels()
+    public void setCategoryOptionGroupOrders( List<CategoryOptionGroupOrder> categoryOptionGroupOrders )
     {
-        return organisationUnitLevels;
-    }
-
-    public void setOrganisationUnitLevels( Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitLevels )
-    {
-        this.organisationUnitLevels = organisationUnitLevels;
-    }
-
-    public void setOrganisationUnitGroups( List<OrganisationUnitGroup> organisationUnitGroups )
-    {
-        this.organisationUnitGroups = organisationUnitGroups;
+        this.categoryOptionGroupOrders = categoryOptionGroupOrders;
     }
 
     @Override
     public String getReportType()
     {
-        return ExportReport.TYPE.ORGANIZATION_GROUP_LISTING;
+        return ExportReport.TYPE.CATEGORY_VERTICAL;
     }
 
     @Override
@@ -89,8 +72,8 @@ public class ExportReportOrganizationGroupListing
     {
         List<String> types = new ArrayList<String>();
         types.add( ExportItem.TYPE.DATAELEMENT );
-        types.add( ExportItem.TYPE.ORGANISATION );
-        types.add( ExportItem.TYPE.INDICATOR );
+        types.add( ExportItem.TYPE.DATAELEMENT_CODE );
+        types.add( ExportItem.TYPE.DATAELEMENT_NAME );
         types.add( ExportItem.TYPE.FORMULA_EXCEL );
         types.add( ExportItem.TYPE.SERIAL );
 

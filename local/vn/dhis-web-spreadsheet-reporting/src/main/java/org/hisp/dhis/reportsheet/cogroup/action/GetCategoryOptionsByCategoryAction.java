@@ -1,7 +1,5 @@
-package org.hisp.dhis.reportsheet;
-
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,74 +24,66 @@ package org.hisp.dhis.reportsheet;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+package org.hisp.dhis.reportsheet.cogroup.action;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Chau Thu Tran
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-
-public class ExportReportOrganizationGroupListing
-    extends ExportReport
+public class GetCategoryOptionsByCategoryAction
+    implements Action
 {
-    private List<OrganisationUnitGroup> organisationUnitGroups;
-
-    private Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitLevels;
-
     // -------------------------------------------------------------------------
-    // Constructors
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    public ExportReportOrganizationGroupListing()
+    @Autowired
+    private DataElementCategoryService categoryService;
+
+    // -------------------------------------------------------------------------
+    // Input && Output
+    // -------------------------------------------------------------------------
+
+    private Integer categoryId;
+
+    public void setAttributeId( Integer categoryId )
     {
-        super();
+        this.categoryId = categoryId;
+    }
+
+    private Collection<DataElementCategoryOption> categoryOptions = new ArrayList<DataElementCategoryOption>();
+
+    public Collection<DataElementCategoryOption> getCategoryOptions()
+    {
+        return categoryOptions;
     }
 
     // -------------------------------------------------------------------------
-    // Getters and setters
+    // Action implementation
     // -------------------------------------------------------------------------
-
-    public List<OrganisationUnitGroup> getOrganisationUnitGroups()
-    {
-        return organisationUnitGroups;
-    }
-
-    public Map<OrganisationUnitGroup, OrganisationUnitLevel> getOrganisationUnitLevels()
-    {
-        return organisationUnitLevels;
-    }
-
-    public void setOrganisationUnitLevels( Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitLevels )
-    {
-        this.organisationUnitLevels = organisationUnitLevels;
-    }
-
-    public void setOrganisationUnitGroups( List<OrganisationUnitGroup> organisationUnitGroups )
-    {
-        this.organisationUnitGroups = organisationUnitGroups;
-    }
 
     @Override
-    public String getReportType()
+    public String execute()
+        throws Exception
     {
-        return ExportReport.TYPE.ORGANIZATION_GROUP_LISTING;
-    }
+        DataElementCategory category = categoryService.getDataElementCategory( categoryId );
 
-    @Override
-    public List<String> getItemTypes()
-    {
-        List<String> types = new ArrayList<String>();
-        types.add( ExportItem.TYPE.DATAELEMENT );
-        types.add( ExportItem.TYPE.ORGANISATION );
-        types.add( ExportItem.TYPE.INDICATOR );
-        types.add( ExportItem.TYPE.FORMULA_EXCEL );
-        types.add( ExportItem.TYPE.SERIAL );
+        if ( category != null )
+        {
+            categoryOptions = category.getCategoryOptions();
+        }
 
-        return types;
+        return SUCCESS;
     }
 }

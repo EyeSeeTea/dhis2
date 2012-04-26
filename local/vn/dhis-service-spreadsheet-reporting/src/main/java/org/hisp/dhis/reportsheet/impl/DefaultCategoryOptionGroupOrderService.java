@@ -1,7 +1,7 @@
-package org.hisp.dhis.reportsheet;
+package org.hisp.dhis.reportsheet.impl;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,74 +26,52 @@ package org.hisp.dhis.reportsheet;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.reportsheet.CategoryOptionGroupOrder;
+import org.hisp.dhis.reportsheet.CategoryOptionGroupOrderService;
+import org.hisp.dhis.reportsheet.CategoryOptionGroupOrderStore;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Chau Thu Tran
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-
-public class ExportReportOrganizationGroupListing
-    extends ExportReport
+@Transactional
+public class DefaultCategoryOptionGroupOrderService
+    implements CategoryOptionGroupOrderService
 {
-    private List<OrganisationUnitGroup> organisationUnitGroups;
-
-    private Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitLevels;
-
     // -------------------------------------------------------------------------
-    // Constructors
+    // Dependency
     // -------------------------------------------------------------------------
 
-    public ExportReportOrganizationGroupListing()
+    private CategoryOptionGroupOrderStore categoryOptionGroupOrderStore;
+
+    public void setCategoryOptionGroupOrderStore( CategoryOptionGroupOrderStore categoryOptionGroupOrderStore )
     {
-        super();
+        this.categoryOptionGroupOrderStore = categoryOptionGroupOrderStore;
     }
 
     // -------------------------------------------------------------------------
-    // Getters and setters
+    // Data Element Group Order
     // -------------------------------------------------------------------------
 
-    public List<OrganisationUnitGroup> getOrganisationUnitGroups()
+    public CategoryOptionGroupOrder getCategoryOptionGroupOrder( Integer id )
     {
-        return organisationUnitGroups;
+        return categoryOptionGroupOrderStore.getCategoryOptionGroupOrder( id );
     }
 
-    public Map<OrganisationUnitGroup, OrganisationUnitLevel> getOrganisationUnitLevels()
+    public void updateCategoryOptionGroupOrder( CategoryOptionGroupOrder categoryOptionGroupOrder )
     {
-        return organisationUnitLevels;
+        categoryOptionGroupOrderStore.updateCategoryOptionGroupOrder( categoryOptionGroupOrder );
     }
 
-    public void setOrganisationUnitLevels( Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitLevels )
+    public void deleteCategoryOptionGroupOrder( Integer id )
     {
-        this.organisationUnitLevels = organisationUnitLevels;
+        categoryOptionGroupOrderStore.deleteCategoryOptionGroupOrder( id );
     }
 
-    public void setOrganisationUnitGroups( List<OrganisationUnitGroup> organisationUnitGroups )
+    public CategoryOptionGroupOrder getCategoryOptionGroupOrder( String name, String clazzName, Integer reportId )
     {
-        this.organisationUnitGroups = organisationUnitGroups;
-    }
-
-    @Override
-    public String getReportType()
-    {
-        return ExportReport.TYPE.ORGANIZATION_GROUP_LISTING;
-    }
-
-    @Override
-    public List<String> getItemTypes()
-    {
-        List<String> types = new ArrayList<String>();
-        types.add( ExportItem.TYPE.DATAELEMENT );
-        types.add( ExportItem.TYPE.ORGANISATION );
-        types.add( ExportItem.TYPE.INDICATOR );
-        types.add( ExportItem.TYPE.FORMULA_EXCEL );
-        types.add( ExportItem.TYPE.SERIAL );
-
-        return types;
+        return categoryOptionGroupOrderStore.getCategoryOptionGroupOrder( name, clazzName, reportId );
     }
 }

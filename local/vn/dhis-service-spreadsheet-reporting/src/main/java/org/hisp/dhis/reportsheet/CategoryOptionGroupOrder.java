@@ -1,7 +1,7 @@
 package org.hisp.dhis.reportsheet;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,74 +26,95 @@ package org.hisp.dhis.reportsheet;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import java.util.List;
+
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 
 /**
- * @author Chau Thu Tran
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-
-public class ExportReportOrganizationGroupListing
-    extends ExportReport
+public class CategoryOptionGroupOrder
 {
-    private List<OrganisationUnitGroup> organisationUnitGroups;
+    private int id;
 
-    private Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitLevels;
+    private String name;
+
+    private List<DataElementCategoryOption> categoryOptions;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public ExportReportOrganizationGroupListing()
+    public CategoryOptionGroupOrder()
     {
-        super();
+    }
+
+    public CategoryOptionGroupOrder( String name )
+    {
+        this.name = name;
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public List<OrganisationUnitGroup> getOrganisationUnitGroups()
+    public int getId()
     {
-        return organisationUnitGroups;
+        return id;
     }
 
-    public Map<OrganisationUnitGroup, OrganisationUnitLevel> getOrganisationUnitLevels()
+    public void setId( int id )
     {
-        return organisationUnitLevels;
+        this.id = id;
     }
 
-    public void setOrganisationUnitLevels( Map<OrganisationUnitGroup, OrganisationUnitLevel> organisationUnitLevels )
+    public String getName()
     {
-        this.organisationUnitLevels = organisationUnitLevels;
+        return name;
     }
 
-    public void setOrganisationUnitGroups( List<OrganisationUnitGroup> organisationUnitGroups )
+    public void setName( String name )
     {
-        this.organisationUnitGroups = organisationUnitGroups;
+        this.name = name;
+    }
+
+    public List<DataElementCategoryOption> getCategoryOptions()
+    {
+        return categoryOptions;
+    }
+
+    public void setCategoryOptions( List<DataElementCategoryOption> categoryOptions )
+    {
+        this.categoryOptions = categoryOptions;
+    }
+
+    // -------------------------------------------------------------------------
+    // hashCode and equals
+    // -------------------------------------------------------------------------
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + id;
+        return result;
     }
 
     @Override
-    public String getReportType()
+    public boolean equals( Object obj )
     {
-        return ExportReport.TYPE.ORGANIZATION_GROUP_LISTING;
-    }
-
-    @Override
-    public List<String> getItemTypes()
-    {
-        List<String> types = new ArrayList<String>();
-        types.add( ExportItem.TYPE.DATAELEMENT );
-        types.add( ExportItem.TYPE.ORGANISATION );
-        types.add( ExportItem.TYPE.INDICATOR );
-        types.add( ExportItem.TYPE.FORMULA_EXCEL );
-        types.add( ExportItem.TYPE.SERIAL );
-
-        return types;
+        if ( this == obj )
+            return true;
+        if ( obj == null )
+            return false;
+        if ( getClass() != obj.getClass() )
+            return false;
+        CategoryOptionGroupOrder other = (CategoryOptionGroupOrder) obj;
+        if ( id != other.id )
+            return false;
+        return true;
     }
 }
