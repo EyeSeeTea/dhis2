@@ -31,8 +31,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.cache.HibernateCacheManager;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
-import org.hisp.dhis.dxf2.importsummary.ImportCount;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,6 +65,9 @@ public class DefaultImportService
     @Autowired
     private HibernateCacheManager cacheManager;
 
+    @Autowired
+    private CurrentUserService currentUserService;
+
     //-------------------------------------------------------------------------------------------------------
     // ImportService Implementation
     //-------------------------------------------------------------------------------------------------------
@@ -82,7 +85,8 @@ public class DefaultImportService
         objectBridge.init();
 
         Date startDate = new Date();
-        log.info( "Started import at " + startDate );
+
+        log.info( "User " + currentUserService.getCurrentUsername() + " started import at " + startDate );
 
         doImport( metaData.getOrganisationUnits(), importOptions, importSummary );
         doImport( metaData.getOrganisationUnitLevels(), importOptions, importSummary );
@@ -155,10 +159,9 @@ public class DefaultImportService
         return null;
     }
 
-    @SuppressWarnings( "unchecked" )
     private <T> Importer<T> findImporterClass( Class<?> clazz )
     {
-        for ( Importer i : importerClasses )
+        for ( Importer<T> i : importerClasses )
         {
             if ( i.canHandle( clazz ) )
             {
@@ -178,7 +181,6 @@ public class DefaultImportService
             if ( importer != null )
             {
                 List<ImportConflict> importConflicts = importer.importObjects( objects, importOptions );
-                ImportCount count = importer.getCurrentImportCount();
 
                 importSummary.getConflicts().addAll( importConflicts );
                 // importSummary.getCounts().add( count ); //FIXME

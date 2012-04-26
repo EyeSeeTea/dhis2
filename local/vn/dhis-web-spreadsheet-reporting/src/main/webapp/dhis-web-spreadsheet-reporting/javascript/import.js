@@ -38,10 +38,10 @@ function importData()
 // -----------------------------------------------------------------------------
 
 function getPreviewImportData()
-{	
+{
 	lockScreen();
 	isImport = true;
-	jQuery.postJSON( "previewDataFlow.action", { importReportId: byId( "importReportId" ).value }, previewExportReportReceived );
+	jQuery.post( "previewDataFlow.action", { importReportId: byId( "importReportId" ).value }, previewExportReportReceived, 'xml' );
 }
 
 isToggled = true;
@@ -54,7 +54,7 @@ function selectAllData( _this )
 		
 		for ( var i = 0 ; i < importlist.length ; i ++ )
 		{
-			importlist[i].className = 'ui-widget-content ui-selected';
+			importlist[i].className = 'ui-preview-table ui-preview-selected';
 			
 			idTemp = jQuery(importlist[i]).attr( 'id' ) + "_" + jQuery(importlist[i]).html();
 			
@@ -73,7 +73,7 @@ function selectAllData( _this )
 		
 		for ( var i = 0 ; i < importlist.length ; i ++ )
 		{
-			importlist[i].className = 'ui-widget-content ui-unselected';
+			importlist[i].className = 'ui-preview-table ui-preview-unselected';
 		}
 		
 		importItemIds.length = 0;
@@ -89,25 +89,28 @@ function selectAllData( _this )
 function getPeriodsByImportReport( importReportId ) {
 	
 	var url = 'getPeriodsByImportReport.action';
+	var periodList = jQuery( '#period' );
+	periodList.empty();
 	
-	jQuery.postJSON( url, { 'importReportId' : importReportId }, responseListPeriodReceived );
+	jQuery.postJSON( url, { 'importReportId' : importReportId }, function ( json ) {
+		for ( var i = 0 ; i < json.periods.length ; i ++ ) {
+			periodList.append( '<option value="' + i + '">' + json.periods[i].name + '</option>' );
+		}
+	} );
 }
 
-function validateUploadExcelImportByJSON(){
+function validateUploadExcelImportByJSON() {
 
 	jQuery( "#upload" ).upload( 'validateUploadExcelImport.action',
 		{ 'draft': true },
 		function ( data )
 		{
-			if ( data.response == 'error' )
-			{              
+			if ( data.response == 'error' )	{              
 				setMessage( data.message );
-			}
-			else
-			{
+			} else {
 				uploadExcelImport();
 			}
-		}, 'json'
+		}
 	);
 }
 
@@ -120,12 +123,9 @@ function validateUploadExcelImportByXML(){
 			data = data.getElementsByTagName('message')[0];
 			var type = data.getAttribute("type");
 			
-			if ( type == 'error' )
-			{              
+			if ( type == 'error' ) {              
 				setMessage( data.firstChild.nodeValue );
-			}
-			else
-			{
+			} else {
 				uploadExcelImport();
 			}
 		}, 'xml'

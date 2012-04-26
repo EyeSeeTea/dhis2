@@ -27,33 +27,28 @@ package org.hisp.dhis.system.grid;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.MathUtils.getRounded;
-
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
-
 import org.apache.commons.math.stat.regression.SimpleRegression;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
+import org.hisp.dhis.common.adapter.JacksonRowDataSerializer;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.system.util.MathUtils;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.*;
+
+import static org.hisp.dhis.system.util.MathUtils.getRounded;
 
 /**
  * @author Lars Helge Overland
@@ -122,6 +117,7 @@ public class ListGrid
 
     @JsonProperty
     @JsonView( {DetailedView.class} )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public String getTitle()
     {
         return title;
@@ -136,6 +132,7 @@ public class ListGrid
 
     @JsonProperty
     @JsonView( {DetailedView.class} )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public String getSubtitle()
     {
         return subtitle;
@@ -150,6 +147,7 @@ public class ListGrid
 
     @JsonProperty
     @JsonView( {DetailedView.class} )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public String getTable()
     {
         return table;
@@ -173,8 +171,8 @@ public class ListGrid
 
     @JsonProperty
     @JsonView( {DetailedView.class} )
-    @JacksonXmlElementWrapper( localName = "headers" )
-    @JacksonXmlProperty( localName = "header" )
+    @JacksonXmlElementWrapper( localName = "headers", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "header", namespace = Dxf2Namespace.NAMESPACE )
     public List<GridHeader> getHeaders()
     {
         return headers;
@@ -197,6 +195,7 @@ public class ListGrid
 
     @JsonProperty
     @JsonView( {DetailedView.class} )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public int getHeight()
     {
         return (grid != null && grid.size() > 0) ? grid.size() : 0;
@@ -204,6 +203,7 @@ public class ListGrid
 
     @JsonProperty
     @JsonView( {DetailedView.class} )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public int getWidth()
     {
         verifyGridState();
@@ -240,7 +240,10 @@ public class ListGrid
     }
 
     @JsonProperty
+    @JsonSerialize( using = JacksonRowDataSerializer.class )
     @JsonView( {DetailedView.class} )
+    @JacksonXmlElementWrapper( localName = "rows", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "row", namespace = Dxf2Namespace.NAMESPACE )
     public List<List<Object>> getRows()
     {
         return grid;
@@ -399,7 +402,9 @@ public class ListGrid
 
         for ( Object value : column )
         {
-            if ( !MathUtils.isEqual( Double.parseDouble( String.valueOf( value ) ), 0d ) ) // 0 omitted from regression
+            // 0 omitted from regression
+            
+            if ( !MathUtils.isEqual( Double.parseDouble( String.valueOf( value ) ), 0d ) ) 
             {
                 regression.addData( index++, Double.parseDouble( String.valueOf( value ) ) );
             }
@@ -411,7 +416,9 @@ public class ListGrid
         {
             final double predicted = regression.predict( i );
 
-            if ( !Double.isNaN( predicted ) ) // Enough values must exist for regression
+            // Enough values must exist for regression
+            
+            if ( !Double.isNaN( predicted ) ) 
             {
                 regressionColumn.add( getRounded( predicted, 1 ) );
             }
@@ -517,7 +524,7 @@ public class ListGrid
             {
                 addHeader( new GridHeader( rsmd.getColumnLabel( i ), false, false ) );
             }
-        }
+        } 
         catch ( SQLException ex )
         {
             throw new RuntimeException( ex );
@@ -533,19 +540,19 @@ public class ListGrid
             while ( rs.next() )
             {
                 addRow();
-                
+
                 for ( int i = 1; i <= columnNo; i++ )
                 {
                     addValue( rs.getObject( i ) );
                 }
             }
-        }
+        } 
         catch ( SQLException ex )
         {
             throw new RuntimeException( ex );
         }
     }
-    
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
