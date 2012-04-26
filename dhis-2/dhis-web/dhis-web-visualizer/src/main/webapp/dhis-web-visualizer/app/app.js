@@ -1269,9 +1269,10 @@ Ext.onReady( function() {
                     if (DV.store.favorite.findExact('name', name) != -1) {
                         return;
                     }
-                    DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.renaming + '...');
+                    //DV.util.mask.showMask(DV.cmp.favorite.window, DV.i18n.renaming + '...');
                     var r = DV.cmp.favorite.grid.getSelectionModel().getSelection()[0];
                     var url = DV.cmp.favorite.system.getValue() ? DV.conf.finals.ajax.favorite_addorupdatesystem : DV.conf.finals.ajax.favorite_addorupdate;
+console.log(url);                    
                     Ext.Ajax.request({
                         url: DV.conf.finals.ajax.path_visualizer + url,
                         method: 'POST',
@@ -1279,7 +1280,7 @@ Ext.onReady( function() {
                         success: function() {
                             DV.store.favorite.load({callback: function() {
                                 DV.cmp.favorite.rename.window.close();
-                                DV.util.mask.hideMask();
+                                //DV.util.mask.hideMask();
                                 DV.cmp.favorite.grid.getSelectionModel().select(DV.store.favorite.getAt(DV.store.favorite.findExact('name', name)));
                                 DV.cmp.favorite.name.setValue(name);
                             }});
