@@ -29,14 +29,14 @@ package org.hisp.dhis.completeness.engine;
 
 import static org.hisp.dhis.setting.SystemSettingManager.DEFAULT_COMPLETENESS_OFFSET;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_COMPLETENESS_OFFSET;
+import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
+import static org.hisp.dhis.scheduling.TaskCategory.DATAMART;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Future;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.completeness.DataSetCompletenessEngine;
 import org.hisp.dhis.completeness.DataSetCompletenessService;
 import org.hisp.dhis.completeness.DataSetCompletenessStore;
@@ -47,9 +47,14 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.RelativePeriods;
+import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.filter.DataSetWithOrganisationUnitsFilter;
+import org.hisp.dhis.system.notification.Notifier;
+import org.hisp.dhis.system.util.Clock;
 import org.hisp.dhis.system.util.ConcurrentUtils;
 import org.hisp.dhis.system.util.ConversionUtils;
+import org.hisp.dhis.system.util.FilterUtils;
 import org.hisp.dhis.system.util.PaginatedList;
 import org.hisp.dhis.system.util.SystemUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,8 +65,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultDataSetCompletenessEngine
     implements DataSetCompletenessEngine
 {
-    private static final Log log = LogFactory.getLog( DefaultDataSetCompletenessEngine.class );
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -108,41 +111,50 @@ public class DefaultDataSetCompletenessEngine
         this.systemSettingManager = systemSettingManager;
     }
 
+    private Notifier notifier;
+
+    public void setNotifier( Notifier notifier )
+    {
+        this.notifier = notifier;
+    }
+
     // -------------------------------------------------------------------------
     // DataSetCompletenessEngine implementation
     // -------------------------------------------------------------------------
 
     @Transactional
     public void exportDataSetCompleteness( Collection<Integer> dataSetIds, RelativePeriods relatives,
-        Collection<Integer> organisationUnitIds )
+        Collection<Integer> organisationUnitIds, TaskId id )
     {
         if ( relatives != null )
         {
             Collection<Integer> periodIds = ConversionUtils.getIdentifiers( Period.class,
                 periodService.reloadPeriods( relatives.getRelativePeriods() ) );
 
-            exportDataSetCompleteness( dataSetIds, periodIds, organisationUnitIds );
+            exportDataSetCompleteness( dataSetIds, periodIds, organisationUnitIds, id );
         }
     }
 
     @Transactional
     public void exportDataSetCompleteness( Collection<Integer> dataSetIds, Collection<Integer> periodIds,
-        Collection<Integer> organisationUnitIds )
+        Collection<Integer> organisationUnitIds, TaskId id )
     {
         final int cpuCores = SystemUtils.getCpuCores();
         
-        log.info( "Data completeness export process started" );
+        Clock clock = new Clock().startClock().logTime( "Data completeness export process started, number of CPU cores: " + cpuCores + ", " + SystemUtils.getMemoryString() );
+        notifier.notify( id, DATAMART, "Completeness export process started" );
 
         completenessStore.dropIndex();
 
-        log.info( "Dropped potential index" );
+        clock.logTime( "Dropped potential index" );
 
         int days = (Integer) systemSettingManager.getSystemSetting( KEY_COMPLETENESS_OFFSET,
             DEFAULT_COMPLETENESS_OFFSET );
 
         completenessStore.deleteDataSetCompleteness( dataSetIds, periodIds, organisationUnitIds );
 
-        log.info( "Deleted existing completeness data" );
+        clock.logTime( "Deleted existing completeness data" );
+        notifier.notify( id, DATAMART, "Exporting completeness for data sets" );
 
         Collection<Period> periods = periodService.getPeriods( periodIds );
         Collection<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnits( organisationUnitIds );
@@ -150,6 +162,8 @@ public class DefaultDataSetCompletenessEngine
 
         dataSets = completenessStore.getDataSetsWithRegistrations( dataSets );
 
+        FilterUtils.filter( dataSets, new DataSetWithOrganisationUnitsFilter() );
+        
         List<List<OrganisationUnit>> organisationUnitPages = new PaginatedList<OrganisationUnit>( organisationUnits ).setNumberOfPages( cpuCores ).getPages();
         
         List<Future<?>> futures = new ArrayList<Future<?>>();
@@ -163,8 +177,9 @@ public class DefaultDataSetCompletenessEngine
         
         completenessStore.createIndex();
 
-        log.info( "Created index" );
+        clock.logTime( "Created index" );
 
-        log.info( "Completeness export process done" );
+        clock.logTime( "Completeness export process completed" );
+        notifier.notify( id, DATAMART, INFO, "Completeness process completed", true );
     }
 }

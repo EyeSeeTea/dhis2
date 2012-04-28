@@ -1206,7 +1206,7 @@ Ext.onReady( function() {
             }
         },
         variable: {
-			isEmpty: function(str) {
+			isNotEmpty: function(str) {
 				return (str !== 0 && str !== '0' && str !== '');
 			}
 		},
@@ -1231,7 +1231,7 @@ Ext.onReady( function() {
 						periodid: r[i][3],
 						organisationunitid: r[i][4]
 					};
-					if (DV.util.variable.isEmpty(r[i][5])) {
+					if (DV.util.variable.isNotEmpty(r[i][5])) {
 						v.organisationunitgroupid = r[i][5];
 					}
 					values.push(v);					

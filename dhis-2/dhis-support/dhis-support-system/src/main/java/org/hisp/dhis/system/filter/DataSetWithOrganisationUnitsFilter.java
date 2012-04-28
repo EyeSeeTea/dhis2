@@ -1,4 +1,4 @@
-package org.hisp.dhis.completeness;
+package org.hisp.dhis.system.filter;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,21 +27,18 @@ package org.hisp.dhis.completeness;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
-import org.hisp.dhis.period.RelativePeriods;
-import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.system.util.Filter;
 
 /**
  * @author Lars Helge Overland
  */
-public interface DataSetCompletenessEngine
+public class DataSetWithOrganisationUnitsFilter
+    implements Filter<DataSet>
 {
-    final String ID = DataSetCompletenessEngine.class.getName();
-    
-    void exportDataSetCompleteness( Collection<Integer> dataSetIds, RelativePeriods relatives,
-        Collection<Integer> organisationUnitIds, TaskId id );
-    
-    void exportDataSetCompleteness( Collection<Integer> dataSetIds, Collection<Integer> periodIds,
-        Collection<Integer> organisationUnitIds, TaskId id );
+    @Override
+    public boolean retain( DataSet dataSet )
+    {
+        return dataSet != null && dataSet.getSources() != null && dataSet.getSources().size() > 0;
+    }
 }
