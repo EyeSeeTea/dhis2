@@ -2027,9 +2027,6 @@ Ext.onReady( function() {
                 }
             });
 
-console.log(DV.value.values);
-console.log(DV.c.series.names);
-
             Ext.Array.each(DV.chart.data, function(item) {
                 for (var i = 0; i < DV.c.series.names.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
@@ -2041,8 +2038,6 @@ console.log(DV.c.series.names);
                 }
             });
             
-            
-console.log(DV.chart.data);
 			if (DV.c.trendline) {
 				DV.chart.trendline = [];
 				for (var i = 0; i < DV.c.series.names.length; i++) {
