@@ -766,8 +766,7 @@ Ext.onReady( function() {
 						legend: DV.c.hidelegend ? false : DV.util.chart.def.getLegend(),
 						axes: axes,
 						series: series,
-						theme: 'dv1',
-				label: ['nissa1', 'nissa2']
+						theme: 'dv1'
 					});
 				},
 				getLegend: function(len) {
