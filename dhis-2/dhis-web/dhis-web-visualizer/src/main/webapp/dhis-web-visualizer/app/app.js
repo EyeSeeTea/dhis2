@@ -766,7 +766,8 @@ Ext.onReady( function() {
 						legend: DV.c.hidelegend ? false : DV.util.chart.def.getLegend(),
 						axes: axes,
 						series: series,
-						theme: 'dv1'
+						theme: 'dv1',
+				label: ['nissa1', 'nissa2']
 					});
 				},
 				getLegend: function(len) {
@@ -1936,7 +1937,6 @@ Ext.onReady( function() {
                 disableCaching: false,
                 success: function(r) {
                     DV.value.values = DV.util.value.jsonfy(r);
-                    
                     if (!DV.state.validation.value()) {
 						return;
 					}
@@ -1947,9 +1947,8 @@ Ext.onReady( function() {
                         item[DV.conf.finals.dimension.organisationunit.value] = DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitid);
                         
                         if (item.organisationunitgroupid) {
-							var groupname = DV.util.dimension.organisationunit.getGroupNameByGroupId(item.organisationunitgroupid);
-							item[DV.conf.finals.dimension.organisationunit.value] = groupname;
-							item[DV.conf.finals.dimension.organisationunitgroup.value] = groupname;
+							item[DV.conf.finals.dimension.organisationunit.value] = DV.util.dimension.organisationunit.getGroupNameByGroupId(item.organisationunitgroupid);
+							item.organisationunitid = organisationunitgroupid;
 						}
 						
                         item.value = parseFloat(item.value);
@@ -2028,6 +2027,9 @@ Ext.onReady( function() {
                 }
             });
 
+console.log(DV.value.values);
+console.log(DV.c.series.names);
+
             Ext.Array.each(DV.chart.data, function(item) {
                 for (var i = 0; i < DV.c.series.names.length; i++) {
                     for (var j = 0; j < DV.value.values.length; j++) {
@@ -2039,6 +2041,8 @@ Ext.onReady( function() {
                 }
             });
             
+            
+console.log(DV.chart.data);
 			if (DV.c.trendline) {
 				DV.chart.trendline = [];
 				for (var i = 0; i < DV.c.series.names.length; i++) {
