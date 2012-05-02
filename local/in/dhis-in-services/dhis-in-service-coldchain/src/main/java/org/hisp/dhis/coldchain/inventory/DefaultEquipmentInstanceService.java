@@ -35,22 +35,26 @@ public class DefaultEquipmentInstanceService implements EquipmentInstanceService
     @Override
     public int addEquipmentInstance( EquipmentInstance equipmentInstance )
     {
-        return equipmentInstanceStore.addEquipmentInstance( equipmentInstance );
+        //return equipmentInstanceStore.addEquipmentInstance( equipmentInstance );
+        return equipmentInstanceStore.save( equipmentInstance );
     }
     @Override
     public void deleteEquipmentInstance( EquipmentInstance equipmentInstance )
     {
-        equipmentInstanceStore.deleteEquipmentInstance( equipmentInstance );
+        //equipmentInstanceStore.deleteEquipmentInstance( equipmentInstance );
+        equipmentInstanceStore.delete( equipmentInstance );
     }
     @Override
     public Collection<EquipmentInstance> getAllEquipmentInstance()
     {
-        return equipmentInstanceStore.getAllEquipmentInstance();
+        //return equipmentInstanceStore.getAllEquipmentInstance();
+        return equipmentInstanceStore.getAll();
     }
     @Override
     public void updateEquipmentInstance( EquipmentInstance equipmentInstance )
     {
-        equipmentInstanceStore.updateEquipmentInstance( equipmentInstance );
+        //equipmentInstanceStore.updateEquipmentInstance( equipmentInstance );
+        equipmentInstanceStore.update( equipmentInstance );
     }
     
     public int createEquipment( EquipmentInstance equipmentInstance, List<EquipmentDetails> equipmentDetails )
@@ -65,6 +69,10 @@ public class DefaultEquipmentInstanceService implements EquipmentInstanceService
         return equipmentInstanceId;
     }
 
+    public EquipmentInstance getEquipmentInstance( int id )
+    {
+        return equipmentInstanceStore.get( id );
+    }
     
     public Collection<EquipmentInstance> getEquipmentInstances( OrganisationUnit orgUnit )
     {
@@ -87,4 +95,13 @@ public class DefaultEquipmentInstanceService implements EquipmentInstanceService
         return equipmentInstanceStore.getCountEquipmentInstance( orgUnit, inventoryType );
     }
 
+    public int getCountEquipmentInstance( OrganisationUnit orgUnit, InventoryType inventoryType, InventoryTypeAttribute inventoryTypeAttribute, String searchText )
+    {
+        return equipmentInstanceStore.getCountEquipmentInstance(  orgUnit,  inventoryType, inventoryTypeAttribute ,  searchText );
+    }
+
+    public Collection<EquipmentInstance> getEquipmentInstances( OrganisationUnit orgUnit, InventoryType inventoryType, InventoryTypeAttribute inventoryTypeAttribute, String searchText, int min, int max )
+    {
+        return equipmentInstanceStore.getEquipmentInstances( orgUnit, inventoryType, inventoryTypeAttribute, searchText, min, max );
+    }
 }

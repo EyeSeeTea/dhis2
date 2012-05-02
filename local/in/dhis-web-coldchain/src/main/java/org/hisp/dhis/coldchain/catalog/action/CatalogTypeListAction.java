@@ -1,15 +1,16 @@
 package org.hisp.dhis.coldchain.catalog.action;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hisp.dhis.coldchain.catalog.CatalogType;
 import org.hisp.dhis.coldchain.catalog.CatalogTypeService;
-import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.coldchain.catalog.comparator.CatalogTypeComparator;
 import org.hisp.dhis.paging.ActionPagingSupport;
 
 public class CatalogTypeListAction
-extends ActionPagingSupport<DataSet>
+extends ActionPagingSupport<CatalogType>
 {
     
 
@@ -62,7 +63,7 @@ extends ActionPagingSupport<DataSet>
         
         
         catalogTypes = new ArrayList<CatalogType>( catalogTypeService.getAllCatalogTypes());
-        
+        Collections.sort( catalogTypes, new CatalogTypeComparator() );
         /*
         if ( isNotBlank( key ) ) // Filter on key only if set
         {
