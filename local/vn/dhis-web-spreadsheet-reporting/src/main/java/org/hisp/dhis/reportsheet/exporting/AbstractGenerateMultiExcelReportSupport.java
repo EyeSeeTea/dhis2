@@ -1,7 +1,7 @@
-package org.hisp.dhis.reportsheet.exporting.action;
+package org.hisp.dhis.reportsheet.exporting;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,20 +26,24 @@ package org.hisp.dhis.reportsheet.exporting.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+import java.util.ArrayList;
+import java.util.List;
 
-import org.hisp.dhis.reportsheet.ExportReportService;
+import org.hisp.dhis.dataelement.LocalDataElementService;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.reportsheet.ExportReport;
-import org.hisp.dhis.reportsheet.state.SelectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Tran Thanh Tri
  * @author Dang Duy Hieu
  * @version $Id$
  */
-public class GenerateExcelReportFlowAction
+public abstract class AbstractGenerateMultiExcelReportSupport
+    extends GenerateExcelReportGeneric
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -47,44 +51,52 @@ public class GenerateExcelReportFlowAction
     // -------------------------------------------------------------------------
 
     @Autowired
-    private ExportReportService exportReportService;
+    protected LocalDataElementService localDataElementService;
 
     @Autowired
-    private SelectionManager selectionManager;
-
-    // -------------------------------------------------------------------------
-    // Input && Output
-    // -------------------------------------------------------------------------
-
-    private Integer organisationGroupId;
-
-    public void setOrganisationGroupId( Integer organisationGroupId )
-    {
-        this.organisationGroupId = organisationGroupId;
-    }
-
-    public Integer getOrganisationGroupId()
-    {
-        return organisationGroupId;
-    }
+    protected OrganisationUnitService organisationUnitService;
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
-        Integer reportId = selectionManager.getSelectedReportId();
-        
-        if ( reportId == null )
-        {
-            return "MULTI";
-        }
-        
-        ExportReport exportReport = exportReportService.getExportReport( reportId );
+        statementManager.initialise();
 
-        return exportReport.getReportType();
+        Period period = PeriodType.createPeriodExternalId( selectionManager.getSelectedPeriodIndex() );
+
+        this.installPeriod( period );
+
+        List<ExportReport> reports = new ArrayList<ExportReport>();
+
+        for ( String id : selectionManager.getListObject() )
+        {
+            reports.add( exportReportService.getExportReport( Integer.parseInt( id ) ) );
+        }
+
+        executeGenerateOutputFile( reports, period );
+
+        this.complete();
+
+        statementManager.destroy();
+
+        return SUCCESS;
     }
 
+    // -------------------------------------------------------------------------
+    // Overriding abstract method(s)
+    // -------------------------------------------------------------------------
+
+    /**
+     * The process method which must be implemented by subclasses.
+     * 
+     * @param period
+     * @param reports
+     * @param organisationUnit
+     */
+    protected abstract void executeGenerateOutputFile( List<ExportReport> reports, Period period )
+        throws Exception;
 }
