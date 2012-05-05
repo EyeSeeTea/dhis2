@@ -92,12 +92,7 @@ public class LoadAttributeValuesByAttributeAction
         throws Exception
     {
         Attribute attribute = attributeService.getAttribute( attributeId );
-        Set<AttributeValue> attributeValues = new HashSet<AttributeValue>( localAttributeValueService
-            .getAttributeValuesByAttribute( attribute ) );
-
-        values = AttributeUtils.getAttributeValueMap( attributeValues ).values();
-
+        values = localAttributeValueService.getDistinctValuesByAttribute( attribute );
         return SUCCESS;
     }
-
 }

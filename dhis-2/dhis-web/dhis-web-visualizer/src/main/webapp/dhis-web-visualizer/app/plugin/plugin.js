@@ -54,9 +54,10 @@ Ext.onReady( function() {
         DHIS.store.pie = DHIS.store.defaultChartStore;
         
         DHIS.getChart = DHIS.exe.addToQueue;
+        DHIS.destroyChart = DHIS.exe.destroy;
     };
     
-    DHIS.projects = [];
+    DHIS.projects = {};
     
     DHIS.util = {
         dimension: {
@@ -414,7 +415,8 @@ Ext.onReady( function() {
                     }
                 });
             }
-        }
+        },
+        storage: {}
     };
     
     DHIS.value = {
@@ -503,7 +505,7 @@ Ext.onReady( function() {
             this[project.state.type](project);
             DHIS.exe.execute();
         },
-        column: function(project, isStacked) {
+        column: function(project, isStacked) {			
             project.chart = Ext.create('Ext.chart.Chart', {
 				renderTo: project.state.conf.el,
                 width: project.state.conf.width || this.el.getWidth(),
@@ -545,7 +547,7 @@ Ext.onReady( function() {
                 ]
             });
             
-            DHIS.projects.push(project);
+            DHIS.projects[project.state.conf.el] = project;
         },
         stackedcolumn: function(project) {
             this.column(project, true);
@@ -707,7 +709,7 @@ Ext.onReady( function() {
         allow: true,
         queue: [],
         addToQueue: function(conf) {
-            DHIS.exe.queue.push(conf);            
+            DHIS.exe.queue.push(conf);
             if (DHIS.exe.allow) {
                 DHIS.exe.allow = false;
                 DHIS.exe.execute();
@@ -716,6 +718,7 @@ Ext.onReady( function() {
         execute: function() {
             if (this.queue.length) {
                 var conf = this.queue.shift();
+                this.destroy(conf.el);
                 if (conf.uid) {
                     DHIS.state.setState(conf);
                 }
@@ -723,6 +726,14 @@ Ext.onReady( function() {
                     DHIS.state.getState(conf);
                 }
             }
+            else {
+				DHIS.exe.allow = true;
+			}
+		},
+		destroy: function(el) {
+			if (DHIS.projects[el]) {
+				DHIS.projects[el].chart.destroy();
+			}
 		}
     };
     

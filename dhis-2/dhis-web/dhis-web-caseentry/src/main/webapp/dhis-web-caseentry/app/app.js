@@ -202,11 +202,16 @@ Ext.onReady( function() {
                 this.filterAvailable(a, s);
             },
             selectAll: function(a, s) {
-                var array = [];
-                a.store.each( function(r) {
-                    array.push({id: r.data.id, name: r.data.name});
-                });
-                s.store.add(array);
+				var array = [];
+				var elements = a.boundList.all.elements;
+				for( var i=0; i< elements.length; i++ )
+				{
+					if( elements[i].style.display != 'none' )
+					{
+						array.push({id: a.store.getAt(i).data.id, name: a.store.getAt(i).data.name});
+					}
+				}
+				s.store.add(array);
                 this.filterAvailable(a, s);
             },            
             unselect: function(a, s) {
@@ -219,11 +224,21 @@ Ext.onReady( function() {
                 }
             },
             unselectAll: function(a, s) {
-                s.store.removeAll();
-                a.store.clearFilter();
+                var elements = s.boundList.all.elements;
+				var index = 0;
+				var arr = [];
+				Ext.Array.each(s.store.data.items, function(item) {
+					if( elements[index].style.display != 'none' )
+					{
+					  arr.push( item.data.id );
+					}
+					index++;
+				}); 
+				s.setValue(arr);
+				this.unselect(a,s);
             },
             filterAvailable: function(a, s) {
-                a.store.filterBy( function(r) {
+				a.store.filterBy( function(r) {
                     var filter = true;
                     s.store.each( function(r2) {
                         if (r.data.id === r2.data.id) {
@@ -233,6 +248,21 @@ Ext.onReady( function() {
                     return filter;
                 });
                 a.store.sort('name', 'ASC');
+            },
+			filterSelector: function(selectors, queryString) {
+                var elements = selectors.boundList.all.elements;
+
+				for( var i=0; i< elements.length; i++ )
+				{
+					if( elements[i].innerHTML.toLowerCase().indexOf( queryString ) != -1 )
+					{
+						elements[i].style.display = 'block';
+					}
+					else
+					{
+						elements[i].style.display = 'none';
+					}
+				}
             },
             setHeight: function(ms, panel, fill) {
 				for (var i = 0; i < ms.length; i++) {
@@ -1714,18 +1744,13 @@ Ext.onReady( function() {
 												layout: 'column',
 												bodyStyle: 'border-style:none',
 												items: [
-													Ext.create('Ext.ux.form.MultiSelect', {
-														name: 'availableDataelementAttributes',
-														cls: 'tr-toolbar-multiselect-left',
+													{
+														xtype: 'toolbar',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
-														height: 241,
-														displayField: 'name',
-														valueField: 'id',
-														queryMode: 'remote',
-														store: TR.store.dataelement.available,
-														tbar: [
+														cls: 'tr-toolbar-multiselect-left',
+														items: [
 															{
-																xtype: 'label',
+																xtype: 'label',	
 																text: TR.i18n.available,
 																cls: 'tr-toolbar-multiselect-left-label'
 															},
@@ -1736,6 +1761,7 @@ Ext.onReady( function() {
 																width: 22,
 																handler: function() {
 																	TR.util.multiselect.select(TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected);
+																	TR.util.multiselect.filterSelector( TR.cmp.params.dataelement.available, Ext.getCmp('deFilterAvailable').getValue());
 																}
 															},
 															{
@@ -1744,33 +1770,17 @@ Ext.onReady( function() {
 																width: 22,
 																handler: function() {
 																	TR.util.multiselect.selectAll(TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected);
+																		TR.util.multiselect.filterSelector( TR.cmp.params.dataelement.available, Ext.getCmp('deFilterAvailable').getValue());
 																}
 															},
-															' '
-														],
-														listeners: {
-															added: function() {
-																TR.cmp.params.dataelement.available = this;
-															},                                                                
-															afterrender: function() {
-																this.boundList.on('itemdblclick', function() {
-																	TR.util.multiselect.select(this, TR.cmp.params.dataelement.selected);
-																}, this);
-															}
-														}
-													}),                                            
+															''
+														]
+													},
 													{
-														xtype: 'multiselect',
-														name: 'selectedDataelementAttribute',
-														cls: 'tr-toolbar-multiselect-right',
+														xtype: 'toolbar',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
-														height: 241,
-														displayField: 'name',
-														valueField: 'id',
-														ddReorder: true,
-														queryMode: 'remote',
-														store: TR.store.dataelement.selected,
-														tbar: [
+														cls: 'tr-toolbar-multiselect-left',
+														items: [
 															' ',
 															{
 																xtype: 'button',
@@ -1778,6 +1788,7 @@ Ext.onReady( function() {
 																width: 22,
 																handler: function() {
 																	TR.util.multiselect.unselectAll(TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected);
+																	TR.util.multiselect.filterSelector( TR.cmp.params.dataelement.selected, Ext.getCmp('deFilterSelected').getValue());
 																}
 															},
 															{
@@ -1786,6 +1797,7 @@ Ext.onReady( function() {
 																width: 22,
 																handler: function() {
 																	TR.util.multiselect.unselect(TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected);
+																	TR.util.multiselect.filterSelector( TR.cmp.params.dataelement.selected, Ext.getCmp('deFilterSelected').getValue());
 																}
 															},
 															'->',
@@ -1793,6 +1805,72 @@ Ext.onReady( function() {
 																xtype: 'label',
 																text: TR.i18n.selected,
 																cls: 'tr-toolbar-multiselect-right-label'
+															}
+														]
+													},	
+													{
+														xtype: 'multiselect',
+														name: 'availableDataelements',
+														cls: 'tr-toolbar-multiselect-left',
+														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														height: 215,
+														displayField: 'name',
+														valueField: 'id',
+														queryMode: 'remote',
+														store: TR.store.dataelement.available,
+														tbar: [
+															{
+																xtype: 'textfield',
+																emptyText: TR.i18n.filter,
+																id: 'deFilterAvailable',
+																width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 - 4,
+																listeners: {			
+																	specialkey: function( textfield, e, eOpts ){
+																		if ( e.keyCode == e.ENTER )
+																		{
+																			TR.util.multiselect.filterSelector( TR.cmp.params.dataelement.available, textfield.rawValue.toLowerCase());	
+																		}
+																	}
+																}
+															}
+														],
+														listeners: {
+															added: function() {
+																TR.cmp.params.dataelement.available = this;
+															},                                                                
+															afterrender: function() {
+																this.boundList.on('itemdblclick', function() {
+																	TR.util.multiselect.select(this, TR.cmp.params.dataelement.selected);
+																	TR.util.multiselect.filterSelector( TR.cmp.params.dataelement.available, Ext.getCmp('deFilterAvailable').getValue());
+																}, this);
+															}
+														}
+													},											
+													{
+														xtype: 'multiselect',
+														name: 'selectedDataelements',
+														cls: 'tr-toolbar-multiselect-right',
+														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														height: 215,
+														displayField: 'name',
+														valueField: 'id',
+														ddReorder: true,
+														queryMode: 'remote',
+														store: TR.store.dataelement.selected,
+														tbar: [
+															{
+																xtype: 'textfield',
+																emptyText: TR.i18n.filter,
+																id: 'deFilterSelected',
+																width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2 - 4,
+																listeners: {			
+																	specialkey: function( textfield, e, eOpts ){
+																		if ( e.keyCode == e.ENTER )
+																		{
+																			TR.util.multiselect.filterSelector( TR.cmp.params.dataelement.selected, textfield.rawValue.toLowerCase());	
+																		}
+																	}
+																}
 															}
 														],
 														listeners: {
@@ -1802,6 +1880,7 @@ Ext.onReady( function() {
 															afterrender: function() {
 																this.boundList.on('itemdblclick', function() {
 																	TR.util.multiselect.unselect(TR.cmp.params.dataelement.available, this);
+																	TR.util.multiselect.filterSelector( TR.cmp.params.dataelement.available, Ext.getCmp('deFilterAvailable').getValue());
 																}, this);
 															}
 														}

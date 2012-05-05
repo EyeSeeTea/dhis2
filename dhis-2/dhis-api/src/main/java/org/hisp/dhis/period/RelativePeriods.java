@@ -250,6 +250,9 @@ public class RelativePeriods
         this.last6BiMonths = false;
         this.last4Quarters = false;
         this.last2SixMonths = false;
+        this.thisFinancialYear = false;
+        this.lastFinancialYear = false;
+        this.last5FinancialYears = false;
 
         return this;
     }
@@ -261,24 +264,29 @@ public class RelativePeriods
      */
     public PeriodType getPeriodType()
     {
-        if ( isReportingMonth() )
+        if ( isReportingMonth() || isLast12Months() )
         {
             return PeriodType.getPeriodTypeByName( MonthlyPeriodType.NAME );
         }
 
-        if ( isReportingBimonth() )
+        if ( isReportingBimonth() || isLast6BiMonths() )
         {
             return PeriodType.getPeriodTypeByName( BiMonthlyPeriodType.NAME );
         }
 
-        if ( isReportingQuarter() )
+        if ( isReportingQuarter() || isLast4Quarters() )
         {
             return PeriodType.getPeriodTypeByName( QuarterlyPeriodType.NAME );
         }
 
-        if ( isLastSixMonth() )
+        if ( isLastSixMonth() || isLast2SixMonths() )
         {
             return PeriodType.getPeriodTypeByName( SixMonthlyPeriodType.NAME );
+        }
+        
+        if ( isThisFinancialYear() || isLastFinancialYear() || isLast5FinancialYears() )
+        {
+            return PeriodType.getPeriodTypeByName( FinancialJulyPeriodType.NAME );
         }
 
         return PeriodType.getPeriodTypeByName( YearlyPeriodType.NAME );
@@ -316,16 +324,6 @@ public class RelativePeriods
     public List<Period> getRelativePeriods()
     {
         return getRelativePeriods( getDate( 1, new Date() ), null, false );
-    }
-
-    /**
-     * Gets a list of Periods relative to current date.
-     *
-     * @param months the number of months to subtract from the current date.
-     */
-    public List<Period> getRelativePeriods( int months )
-    {
-        return getRelativePeriods( getDate( months, new Date() ), null, false );
     }
 
     /**
@@ -526,15 +524,9 @@ public class RelativePeriods
      * @param date   the date representing now, ignored if null.
      * @return a date.
      */
-    public Date getDate( int months, Date date )
+    private Date getDate( int months, Date date )
     {
-        Calendar cal = PeriodType.createCalendarInstance();
-
-        if ( date != null ) // For testing purposes
-        {
-            cal.setTime( date );
-        }
-
+        Calendar cal = PeriodType.createCalendarInstance( date );
         cal.add( Calendar.MONTH, (months * -1) );
 
         return cal.getTime();
@@ -773,9 +765,10 @@ public class RelativePeriods
         return thisFinancialYear;
     }
 
-    public void setThisFinancialYear( boolean thisFinancialYear )
+    public RelativePeriods setThisFinancialYear( boolean thisFinancialYear )
     {
         this.thisFinancialYear = thisFinancialYear;
+        return this;
     }
 
     @JsonProperty
@@ -785,9 +778,10 @@ public class RelativePeriods
         return lastFinancialYear;
     }
 
-    public void setLastFinancialYear( boolean lastFinancialYear )
+    public RelativePeriods setLastFinancialYear( boolean lastFinancialYear )
     {
         this.lastFinancialYear = lastFinancialYear;
+        return this;
     }
 
     @JsonProperty
@@ -797,9 +791,10 @@ public class RelativePeriods
         return last5FinancialYears;
     }
 
-    public void setLast5FinancialYears( boolean last5FinancialYears )
+    public RelativePeriods setLast5FinancialYears( boolean last5FinancialYears )
     {
         this.last5FinancialYears = last5FinancialYears;
+        return this;
     }
 
     // -------------------------------------------------------------------------
@@ -828,6 +823,9 @@ public class RelativePeriods
         result = prime * result + (last6BiMonths ? 1 : 0);
         result = prime * result + (last4Quarters ? 1 : 0);
         result = prime * result + (last2SixMonths ? 1 : 0);
+        result = prime * result + (thisFinancialYear ? 1 : 0);
+        result = prime * result + (lastFinancialYear ? 1 : 0);
+        result = prime * result + (last5FinancialYears ? 1 : 0);
 
         return result;
     }
@@ -923,6 +921,21 @@ public class RelativePeriods
         }
 
         if ( !last2SixMonths == other.last2SixMonths )
+        {
+            return false;
+        }
+
+        if ( !thisFinancialYear == other.thisFinancialYear )
+        {
+            return false;
+        }
+
+        if ( !lastFinancialYear == other.lastFinancialYear )
+        {
+            return false;
+        }
+
+        if ( !last5FinancialYears == other.last5FinancialYears )
         {
             return false;
         }

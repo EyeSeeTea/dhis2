@@ -1,3 +1,39 @@
+// ----------------------------------------------------------------
+// organization Unit Selected
+// ----------------------------------------------------------------
+function organisationUnitSelected( orgUnits )
+{   
+	document.getElementById('selectedOrgunitID').value = orgUnits;
+    
+	showById('selectDiv');
+    disable('listAllEquipmentBtn');
+    
+    hideById('searchEquipmentDiv');
+    hideById('listEquipmentDiv');
+    hideById('editEquipmentDiv');
+	hideById('resultSearchDiv');
+    
+	   $.getJSON( 'getOrganisationUnit.action', {orgunitId:orgUnits[0]}
+        , function( json ) 
+        {
+            var type = json.response;
+            setFieldValue('selectedOrgunitText', json.message );
+                
+            if( type == 'success' )
+            {
+            	//showById('searchEquipmentDiv');
+				enable('listAllEquipmentBtn');
+                setInnerHTML('warnmessage','');
+                setFieldValue('selectedOrgunitText', json.message );
+            }
+            else if( type == 'input' )
+            {
+                setInnerHTML('warnmessage', i18n_can_not_register_patient_for_orgunit);
+                disable('listPatientBtn');
+            }
+        } );
+}
+selection.setListenerFunction( organisationUnitSelected );
 
 // ----------------------------------------------------------------
 // On InventoryType Change - Loading InventoryTypeAttributes
@@ -62,7 +98,8 @@ function loadAllEquipments()
 	
 	if( inventoryTypeId == 0 )
 	{	
-		alert("Plese select Inventorytype");
+		//alert("Plese select Inventorytype");
+		showWarningMessage( i18n_select_inventorytype );
 		return;
 	}
 	
@@ -102,7 +139,8 @@ function loadEquipmentsByFilter( )
 	
 	if( inventoryTypeId == 0 )
 	{	
-		alert("Plese select Inventorytype");
+		//alert("Plese select Inventorytype");
+		showWarningMessage( i18n_select_inventorytype );
 		return;
 	}
 	
@@ -139,8 +177,8 @@ function showEquipmentStatusHistoryForm( equipmentInstanceId )
 {
 	//hideById('listEquipmentDiv');
 	hideById('editEquipmentStatusDiv');
-	hideById('selectDiv');
-	hideById('searchEquipmentDiv');
+	//hideById('selectDiv');
+	//hideById('searchEquipmentDiv');
 	
 	setInnerHTML('editEquipmentDiv', '');
 	
@@ -148,7 +186,7 @@ function showEquipmentStatusHistoryForm( equipmentInstanceId )
 	
 	jQuery('#equipmentStatusHistoryDiv').dialog('destroy').remove();
 	jQuery('<div id="equipmentStatusHistoryDiv">' ).load( 'showEquipmentStatusHistoryForm.action?equipmentInstanceId='+equipmentInstanceId ).dialog({
-		title: 'i18n_equipment_status_history',
+		title: i18n_equipment_status_history,
 		maximize: true, 
 		closable: true,
 		modal:true,
@@ -211,7 +249,8 @@ function showAddEquipmentForm()
 	var inventoryTypeId = inventoryType.options[ inventoryType.selectedIndex ].value;
 	if( inventoryTypeId == 0 )
 	{	
-		alert("Plese select inventorytype");
+		//alert("Plese select inventorytype");
+		showWarningMessage( i18n_select_inventorytype );
 		return;
 	}
 
@@ -285,6 +324,16 @@ function updateEquipment()
       }
      });
 }
+
+//-----------------------------------------------------------------------------
+//Remove equipment
+//-----------------------------------------------------------------------------
+
+function removeEquipment( equipmentId, name )
+{
+	removeItem( equipmentId, name, i18n_confirm_delete, 'removeEquipmentInstance.action' );
+}
+
 //----------------------------------------------------------------
 //Get Params form Div
 //----------------------------------------------------------------
@@ -314,8 +363,31 @@ function getParamsForDiv( equipmentDiv )
 			
 		});
 	
-	alert( params );
+	//alert( params );
 	
 	return params;
 }
 
+//----------------------------------------------------------------
+//Show EquipmentInstance Details
+//----------------------------------------------------------------
+function showEquipmentDetails( equipmentInstanceId )
+{
+	hideById('editEquipmentStatusDiv');
+	//hideById('selectDiv');
+	//hideById('searchEquipmentDiv');
+	
+	setInnerHTML('editEquipmentDiv', '');
+	
+	jQuery('#equipmentStatusHistoryDiv').dialog('destroy').remove();
+	jQuery('<div id="equipmentStatusHistoryDiv">' ).load( 'showEquipmentInstanceDetails.action?equipmentInstanceId='+equipmentInstanceId ).dialog({
+		title: i18n_equipment_details,
+		maximize: true, 
+		closable: true,
+		modal:true,
+		overlay:{background:'#000000', opacity:0.1},
+		width: 500,
+		height: 450
+	});
+	
+}

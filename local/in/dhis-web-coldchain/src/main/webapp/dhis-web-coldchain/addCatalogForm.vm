@@ -6,15 +6,15 @@
 <form id="catalogForm" name="catalogForm" action="addCatalog.action" method="post" >
 
 <table>
-	<tr>
+	<!--<tr>
 		<td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-		<td><input type="text" id="name" name="name" class="{validate:{required:true, unicodechars:true, rangelength:[4,160]}}"/></td>
+		<td><input type="text" id="name" name="name" class="{validate:{required:true, rangelength:[4,160]}}"/></td>
 	</tr>	
 	
 	<tr>
 		<td><label>$i18n.getString( "description" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-		<td><input type="text" id="description" name="description" class="{validate:{required:true,unicodechars:true, minlength:4}}"/></td>
-	</tr>
+		<td><input type="text" id="description" name="description" class="{validate:{required:true, minlength:4}}"/></td>
+	</tr>-->
 	<tr>
 		
 		<td><label>$i18n.getString( "catalogType" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>

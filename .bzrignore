@@ -18,3 +18,4 @@ nbactions.xml
 *.ipr
 *.ids
 *.iws
+overlays/

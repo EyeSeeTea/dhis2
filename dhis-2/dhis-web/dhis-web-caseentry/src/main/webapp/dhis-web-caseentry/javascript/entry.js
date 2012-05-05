@@ -5,6 +5,7 @@
 
 function loadProgramStages()
 {
+	jQuery('#createNewEncounterDiv').dialog('close');
 	hideById('dataEntryFormDiv');
 	clearListById('programStageId');
 	setFieldValue('executionDate','');
@@ -149,7 +150,7 @@ function loadDataEntry()
 }
 
 //------------------------------------------------------------------------------
-//Save value
+// Save value
 //------------------------------------------------------------------------------
 
 function saveVal( dataElementId )
@@ -160,13 +161,18 @@ function saveVal( dataElementId )
 	var field = byId( fieldId ); 
 	var fieldValue = jQuery.trim( field.value );
 
-	var data = jQuery( "#" + fieldId ).metadata({
-        type:'attr',
-        name:'data'
-    });
-	
-	var dataElementName = data.deName; 
-    var type = data.deType;
+	var arrData = jQuery( "#" + fieldId ).attr('data').replace('{','').replace('}','').replace(/'/g,"").split(',');
+	var data = new Array();
+	for( var i in arrData )
+	{	
+		var values = arrData[i].split(':');
+		var key = jQuery.trim( values[0] );
+		var value = jQuery.trim( values[1] )
+		data[key] = value;
+	}
+ 
+	var dataElementName = data['deName']; 
+    var type = data['deType'];
  
 	field.style.backgroundColor = '#ffffcc';
     
@@ -637,7 +643,7 @@ function doComplete()
 					disable('completeBtn');
 					disable('executionDate');
 					var irregular = jQuery('#entryFormContainer [name=irregular]').val();
-					if( irregular == 'true')
+					if( irregular == 'true' )
 					{
 						jQuery('#createNewEncounterDiv').dialog({
 								title: i18n_create_new_encounter,
@@ -651,7 +657,7 @@ function doComplete()
 					}
 					
 					var selectedProgram = jQuery('#dataRecordingSelectForm [name=programId] option:selected');
-					if( selectedProgram.attr('singleevent')=='true' )
+					if( selectedProgram.attr('singleevent')=='true' && irregular == 'false' )
 					{
 						selectedProgram.remove();
 					}
@@ -748,14 +754,9 @@ function registerIrregularEncounter( dueDate )
 	jQuery.postJSON( "registerIrregularEncounter.action",{ dueDate: dueDate }, 
 		function( json ) 
 		{   
-			loadDataEntry();
 			jQuery('#createNewEncounterDiv').dialog('close');
+			loadDataEntry();
 		});
-}
-
-function closeDueDateDiv()
-{
-	jQuery('#createNewEncounterDiv').dialog('close');
 }
 
 function autocompletedField( idField )

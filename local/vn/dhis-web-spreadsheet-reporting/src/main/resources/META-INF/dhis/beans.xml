@@ -300,6 +300,21 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		id="org.hisp.dhis.reportsheet.cogroup.action.GetCategoryOptionsByCategoryAction"
 		class="org.hisp.dhis.reportsheet.cogroup.action.GetCategoryOptionsByCategoryAction"
 		scope="prototype" />
+	
+	<bean
+		id="org.hisp.dhis.reportsheet.cogroup.action.OpenCategoryOptionAssociationsAction"
+		class="org.hisp.dhis.reportsheet.cogroup.action.OpenCategoryOptionAssociationsAction"
+		scope="prototype" />
+	
+	<bean
+		id="org.hisp.dhis.reportsheet.cogroup.action.ShowDefineCategoryOptionAssociationsAction"
+		class="org.hisp.dhis.reportsheet.cogroup.action.ShowDefineCategoryOptionAssociationsAction"
+		scope="prototype" />
+	
+	<bean
+		id="org.hisp.dhis.reportsheet.cogroup.action.UpdateCategoryOptionAssociationsAction"
+		class="org.hisp.dhis.reportsheet.cogroup.action.UpdateCategoryOptionAssociationsAction"
+		scope="prototype" />
 
 	<!-- REPORT EXCEL ATTRIBUTE BEAN -->
 
@@ -576,6 +591,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	<bean
 		id="org.hisp.dhis.reportsheet.exporting.action.GenerateReportPeriodColumnListingAction"
 		class="org.hisp.dhis.reportsheet.exporting.action.GenerateReportPeriodColumnListingAction"
+		scope="prototype" />
+
+	<bean
+		id="org.hisp.dhis.reportsheet.exporting.action.GenerateMultiReportAction"
+		class="org.hisp.dhis.reportsheet.exporting.action.GenerateMultiReportAction"
 		scope="prototype" />
 
 	<!-- DATA ENTRY STATUS BEAN -->
