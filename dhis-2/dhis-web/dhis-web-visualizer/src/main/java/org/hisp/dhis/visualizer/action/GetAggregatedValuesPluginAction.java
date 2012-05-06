@@ -235,7 +235,14 @@ public class GetAggregatedValuesPluginAction
     {
         return dataNames;
     }
+    
+    private Collection<String> organisationUnitNames = new ArrayList<String>();
 
+    public Collection<String> getOrganisationUnitNames()
+    {
+        return organisationUnitNames;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -272,6 +279,11 @@ public class GetAggregatedValuesPluginAction
 
             Set<OrganisationUnit> organisationUnits = organisationUnitService
                 .getOrganisationUnitsByUid( organisationUnitIds );
+            
+            for ( String id : organisationUnitIds )
+            {
+                organisationUnitNames.add( organisationUnitService.getOrganisationUnit( id ).getName() );
+            }
 
             if ( indicatorIds != null )
             {
