@@ -30,6 +30,7 @@ package org.hisp.dhis.visualizer.action;
 import static org.hisp.dhis.api.utils.ContextUtils.CONTENT_TYPE_JSON;
 import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -227,6 +228,13 @@ public class GetAggregatedValuesPluginAction
     {
         return periods;
     }
+    
+    private Collection<String> dataNames = new ArrayList<String>();
+
+    public Collection<String> getDataNames()
+    {
+        return dataNames;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -280,6 +288,11 @@ public class GetAggregatedValuesPluginAction
                     value.setOrganisationUnitName( organisationUnitService.getOrganisationUnit(
                         value.getOrganisationUnitId() ).getName() );
                 }
+                
+                for ( String id : indicatorIds )
+                {
+                    dataNames.add( indicatorService.getIndicator( id ).getDisplayShortName() );
+                }
             }
 
             if ( dataElementIds != null )
@@ -296,6 +309,11 @@ public class GetAggregatedValuesPluginAction
                     value.setPeriodName( format.formatPeriod( periodService.getPeriod( value.getPeriodId() ) ) );
                     value.setOrganisationUnitName( organisationUnitService.getOrganisationUnit(
                         value.getOrganisationUnitId() ).getName() );
+                }
+                
+                for ( String id : dataElementIds )
+                {
+                    dataNames.add( dataElementService.getDataElement( id ).getDisplayShortName() );
                 }
             }
         }
