@@ -11,7 +11,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.aggregation.AggregatedDataValue;
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
 import org.hisp.dhis.aggregation.AggregatedIndicatorValue;
@@ -20,7 +19,6 @@ import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.api.webdomain.ChartPluginValue;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.indicator.Indicator;
@@ -83,12 +81,12 @@ public class ChartPluginController
         
         chartValue.setP( periodIds );
 
-        Set<OrganisationUnit> organisationUnits = organisationUnitService
+        List<OrganisationUnit> organisationUnits = organisationUnitService
             .getOrganisationUnitsByUid( organisationUnitIds );
 
         if ( indicatorIds != null )
         {
-            Set<Indicator> indicators = indicatorService.getIndicatorsByUid( indicatorIds );
+            List<Indicator> indicators = indicatorService.getIndicatorsByUid( indicatorIds );
 
             Collection<AggregatedIndicatorValue> indicatorValues = aggregatedDataValueService.getAggregatedIndicatorValues(
                 getIdentifiers( Indicator.class, indicators ), periodIds,
@@ -109,7 +107,7 @@ public class ChartPluginController
 
         if ( dataElementIds != null )
         {
-            Set<DataElement> dataElements = dataElementService.getDataElementsByUid( dataElementIds );
+            List<DataElement> dataElements = dataElementService.getDataElementsByUid( dataElementIds );
             
             Collection<AggregatedDataValue> dataValues = aggregatedDataValueService.getAggregatedDataValueTotals( 
                 getIdentifiers( DataElement.class, dataElements ), periodIds,

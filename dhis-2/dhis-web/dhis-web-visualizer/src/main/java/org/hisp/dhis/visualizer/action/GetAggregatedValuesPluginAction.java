@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.aggregation.AggregatedDataValue;
@@ -277,7 +276,7 @@ public class GetAggregatedValuesPluginAction
 
             Collection<Integer> periodIds = getIdentifiers( Period.class, periods );
 
-            Set<OrganisationUnit> organisationUnits = organisationUnitService
+            List<OrganisationUnit> organisationUnits = organisationUnitService
                 .getOrganisationUnitsByUid( organisationUnitIds );
             
             for ( String id : organisationUnitIds )
@@ -287,7 +286,7 @@ public class GetAggregatedValuesPluginAction
 
             if ( indicatorIds != null )
             {
-                Set<Indicator> indicators = indicatorService.getIndicatorsByUid( indicatorIds );
+                List<Indicator> indicators = indicatorService.getIndicatorsByUid( indicatorIds );
 
                 indicatorValues = aggregatedDataValueService.getAggregatedIndicatorValues(
                     getIdentifiers( Indicator.class, indicators ), periodIds,
@@ -309,7 +308,7 @@ public class GetAggregatedValuesPluginAction
 
             if ( dataElementIds != null )
             {
-                Set<DataElement> dataElements = dataElementService.getDataElementsByUid( dataElementIds );
+                List<DataElement> dataElements = dataElementService.getDataElementsByUid( dataElementIds );
                 
                 dataValues = aggregatedDataValueService.getAggregatedDataValueTotals( getIdentifiers( DataElement.class, dataElements ), periodIds,
                     getIdentifiers( OrganisationUnit.class, organisationUnits ) );
