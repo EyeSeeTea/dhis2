@@ -2378,7 +2378,7 @@ Ext.onReady( function() {
                         style: 'padding-top:1px; border-style:none',
                         defaults: {
                             height: 40,
-                            width: 40,
+                            style: 'padding: 2px 3px',
                             toggleGroup: 'chartsettings',
                             handler: DV.util.button.type.toggleHandler,
                             listeners: {
@@ -2394,7 +2394,7 @@ Ext.onReady( function() {
                                 xtype: 'label',
                                 text: DV.i18n.chart_type,
                                 style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 10px',
-								width: 75
+								width: 73
                             },
                             {
 								xtype: 'button',
@@ -2437,7 +2437,8 @@ Ext.onReady( function() {
 								xtype: 'button',
                                 icon: 'images/pie.png',
                                 name: DV.conf.finals.chart.pie,
-                                tooltip: DV.i18n.pie_chart
+                                tooltip: DV.i18n.pie_chart,
+                                style: 'padding: 2px 4px 2px 2px'
                             }
                         ]
                     },
@@ -2448,7 +2449,8 @@ Ext.onReady( function() {
                         items: [
                             {
                                 xtype: 'panel',
-                                bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+                                bodyStyle: 'border-style:none; background-color:transparent; margin:0 2px',
+                                width: (DV.conf.layout.west_fieldset_width / 3),
                                 items: [
                                     {
                                         xtype: 'label',
@@ -2481,7 +2483,8 @@ Ext.onReady( function() {
                             },                            
                             {
                                 xtype: 'panel',
-                                bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+                                bodyStyle: 'border-style:none; background-color:transparent; margin:0 2px',
+                                width: (DV.conf.layout.west_fieldset_width / 3),
                                 items: [
                                     {
                                         xtype: 'label',
@@ -2515,7 +2518,8 @@ Ext.onReady( function() {
                             },                            
                             {
                                 xtype: 'panel',
-                                bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+                                bodyStyle: 'border-style:none; background-color:transparent; margin:0 2px',
+                                width: (DV.conf.layout.west_fieldset_width / 3),
                                 items: [
                                     {
                                         xtype: 'label',
