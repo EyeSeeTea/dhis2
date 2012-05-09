@@ -41,6 +41,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -218,10 +219,12 @@ public class DefaultDataValueSetService
         IdentifiableProperty orgUnitIdScheme = dataValueSet.getOrgUnitIdScheme() != null ? IdentifiableProperty.valueOf( dataValueSet.getOrgUnitIdScheme().toUpperCase() ) : importOptions.getOrgUnitIdScheme();
         boolean dryRun = dataValueSet.getDryRun() != null ? dataValueSet.getDryRun() : importOptions.isDryRun();
         ImportStrategy strategy = dataValueSet.getStrategy() != null ? ImportStrategy.valueOf( dataValueSet.getStrategy() ) : importOptions.getImportStrategy();
+        boolean skipExistingCheck = importOptions.isSkipExistingCheck();
         
         Map<String, DataElement> dataElementMap = identifiableObjectManager.getIdMap( DataElement.class, dataElementIdScheme );
         Map<String, OrganisationUnit> orgUnitMap = identifiableObjectManager.getIdMap( OrganisationUnit.class, orgUnitIdScheme );
         Map<String, DataElementCategoryOptionCombo> categoryOptionComboMap = identifiableObjectManager.getIdMap( DataElementCategoryOptionCombo.class, IdentifiableProperty.UID );
+        Map<String, Period> periodMap = new HashMap<String, Period>();
         
         DataSet dataSet = dataValueSet.getDataSet() != null ? identifiableObjectManager.getObject( DataSet.class, IdentifiableProperty.UID, dataValueSet.getDataSet() ) : null;
         Date completeDate = getDefaultDate( dataValueSet.getCompleteDate() );
@@ -284,14 +287,24 @@ public class DefaultDataValueSetService
             {
                 categoryOptionCombo = fallbackCategoryOptionCombo;
             }
-            
+                        
             if ( dataValue.getValue() == null && dataValue.getComment() == null )
             {
                 continue;
             }
             
+            if ( periodMap.containsKey( dataValue.getPeriod() ) )
+            {
+                period = periodMap.get( dataValue.getPeriod() );
+            }
+            else
+            {
+                period = periodService.reloadPeriod( period );
+                periodMap.put( dataValue.getPeriod(), period );
+            }
+            
             internalValue.setDataElement( dataElement );
-            internalValue.setPeriod( periodService.reloadPeriod( period ) );
+            internalValue.setPeriod( period );
             internalValue.setSource( orgUnit );
             internalValue.setOptionCombo( categoryOptionCombo );
             internalValue.setValue( dataValue.getValue() );
@@ -300,7 +313,7 @@ public class DefaultDataValueSetService
             internalValue.setComment( dataValue.getComment() );
             internalValue.setFollowup( dataValue.getFollowup() );
             
-            if ( batchHandler.objectExists( internalValue ) )
+            if ( !skipExistingCheck && batchHandler.objectExists( internalValue ) )
             {
                 if ( NEW_AND_UPDATES.equals( strategy ) || UPDATES.equals( strategy ) )
                 {

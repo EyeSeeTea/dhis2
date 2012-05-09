@@ -27,19 +27,15 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorGroup;
+import org.hisp.dhis.indicator.IndicatorGroupSet;
+import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
@@ -49,6 +45,8 @@ import org.hisp.dhis.period.PeriodType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -101,6 +99,11 @@ public class DefaultObjectBridge
         registeredTypes.add( OrganisationUnit.class );
         registeredTypes.add( OrganisationUnitGroup.class );
         registeredTypes.add( OrganisationUnitGroupSet.class );
+
+        registeredTypes.add( Indicator.class );
+        registeredTypes.add( IndicatorType.class );
+        registeredTypes.add( IndicatorGroup.class );
+        registeredTypes.add( IndicatorGroupSet.class );
     }
 
     @Override
@@ -231,7 +234,7 @@ public class DefaultObjectBridge
     @Transactional( readOnly = false )
     public void saveObject( Object object )
     {
-        if ( IdentifiableObject.class.isInstance( object ) )
+        if ( _typeSupported( object.getClass() ) && IdentifiableObject.class.isInstance( object ) )
         {
             if ( writeEnabled )
             {
@@ -248,7 +251,7 @@ public class DefaultObjectBridge
     @Transactional( readOnly = false )
     public void updateObject( Object object )
     {
-        if ( IdentifiableObject.class.isInstance( object ) )
+        if ( _typeSupported( object.getClass() ) && IdentifiableObject.class.isInstance( object ) )
         {
             if ( writeEnabled )
             {
@@ -503,5 +506,18 @@ public class DefaultObjectBridge
         }
 
         return null;
+    }
+
+    private boolean _typeSupported( Class<?> clazz )
+    {
+        for ( Class c : registeredTypes )
+        {
+            if ( c.isAssignableFrom( clazz ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

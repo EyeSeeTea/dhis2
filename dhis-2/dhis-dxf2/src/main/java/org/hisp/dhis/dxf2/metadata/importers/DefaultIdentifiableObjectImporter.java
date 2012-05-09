@@ -29,6 +29,7 @@ package org.hisp.dhis.dxf2.metadata.importers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
@@ -269,12 +270,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         totalImported = 0;
         totalUpdated = 0;
         totalIgnored = 0;
-
-        if ( options.isDryRun() )
-        {
-            // disable writing on the persistence layer
-            objectBridge.setWriteEnabled( false );
-        }
     }
 
     private List<ImportConflict> importObjectLocal( T object, ImportOptions options )
