@@ -3815,7 +3815,9 @@ Ext.onReady( function() {
                                                                                         bbar: [
 																							{
 																								xtype: 'label',
-																								style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:50%',
+																								style: 'padding-left:2px; font-size:10px; color:#666; width:50%',
+																								width: 120,
+																								height: 13,
 																								listeners: {
 																									added: function() {
 																										DV.cmp.favorite.rename.label = this;
