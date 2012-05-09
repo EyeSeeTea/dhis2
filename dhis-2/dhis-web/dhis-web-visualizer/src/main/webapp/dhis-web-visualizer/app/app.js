@@ -4183,7 +4183,6 @@ Ext.onReady( function() {
                                             {
                                                 text: DV.i18n.image_png,
                                                 iconCls: 'dv-menu-item-png',
-                                                minWidth: 105,
                                                 handler: function() {
                                                     b.execute(DV.conf.finals.image.png);
                                                 }
@@ -4191,7 +4190,6 @@ Ext.onReady( function() {
                                             {
                                                 text: 'PDF',
                                                 iconCls: 'dv-menu-item-pdf',
-                                                minWidth: 105,
                                                 handler: function() {
                                                     b.execute(DV.conf.finals.image.pdf);
                                                 }
