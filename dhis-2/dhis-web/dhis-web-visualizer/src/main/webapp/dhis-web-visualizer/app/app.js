@@ -246,7 +246,6 @@ Ext.Loader.setPath('Ext.ux', DV.conf.finals.ajax.path_lib + 'ext-ux');
 Ext.require('Ext.ux.form.MultiSelect');
 
 Ext.onReady( function() {
-    Ext.override(Ext.form.FieldSet,{setExpanded:function(a){var b=this,c=b.checkboxCmp,d=b.toggleCmp,e;a=!!a;if(c){c.setValue(a)}if(d){d.setType(a?"up":"down")}if(a){e="expand";b.removeCls(b.baseCls+"-collapsed")}else{e="collapse";b.addCls(b.baseCls+"-collapsed")}b.collapsed=!a;b.doComponentLayout();b.fireEvent(e,b);return b}});
     Ext.QuickTips.init();
     document.body.oncontextmenu = function(){return false;}; 
     
@@ -3963,7 +3962,9 @@ Ext.onReady( function() {
                                                             bbar: [
                                                                 {
                                                                     xtype: 'label',
-                                                                    style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:70%',
+                                                                    style: 'padding-left:2px; font-size:10px; color:#666; width:70%',
+                                                                    width: 200,
+                                                                    height: 13,
                                                                     listeners: {
                                                                         added: function() {
                                                                             DV.cmp.favorite.label = this;

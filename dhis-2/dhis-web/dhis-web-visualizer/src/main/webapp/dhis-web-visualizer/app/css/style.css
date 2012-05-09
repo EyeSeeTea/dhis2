@@ -368,7 +368,7 @@ body {
 
 /* Grid row/cell text position */
 .x-grid-cell-inner {
-    line-height: 15px;
+    padding-top: 4px;
     font-size: 10px;
     cursor: pointer;
     cursor: hand;
