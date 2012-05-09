@@ -523,7 +523,7 @@ Ext.onReady( function() {
             this[project.state.type](project);
             DHIS.exe.execute();
         },
-        column: function(project, isStacked) {			
+        column: function(project, isStacked) {
             project.chart = Ext.create('Ext.chart.Chart', {
 				renderTo: project.state.conf.el,
                 width: project.state.conf.width || this.el.getWidth(),
