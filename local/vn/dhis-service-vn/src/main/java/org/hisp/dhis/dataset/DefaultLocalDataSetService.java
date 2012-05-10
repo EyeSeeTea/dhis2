@@ -25,56 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.attribute;
+package org.hisp.dhis.dataset;
 
 import java.util.Collection;
 
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.attribute.AttributeValue;
-import org.hisp.dhis.dataset.DataSet;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version $DefaultLocalAttributeValueService.java Mar 24, 2012 8:30:05 AM$
+ * @version $DefaultLocalDataSetService.java May 10, 2012 8:00:11 AM$
  */
-@Transactional
-public class DefaultLocalAttributeValueService
-    implements LocalAttributeValueService
+public class DefaultLocalDataSetService
+    implements LocalDataSetService
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private LocalAttributeValueStore localAttributeValueStore;
+    private LocalDataSetStore localDataSetStore;
 
-    public void setLocalAttributeValueStore( LocalAttributeValueStore localAttributeValueStore )
+    public void setLocalDataSetStore( LocalDataSetStore localDataSetStore )
     {
-        this.localAttributeValueStore = localAttributeValueStore;
+        this.localDataSetStore = localDataSetStore;
     }
 
     // -------------------------------------------------------------------------
     // Implementation methods
     // -------------------------------------------------------------------------
 
-    public Collection<AttributeValue> getAttributeValuesByAttribute( Attribute attribute )
+    @Override
+    public Collection<DataSet> getDataSetsByDescription( String description )
     {
-        return localAttributeValueStore.getByAttribute( attribute );
-    }
-
-    public Collection<String> getDistinctValuesByAttribute( Attribute attribute )
-    {
-        return localAttributeValueStore.getDistinctValuesByAttribute( attribute );
+       return localDataSetStore.getByDescription( description );
     }
     
-    public boolean hasAttributesByDataSet( DataSet dataSet )
+    public DataElementCategoryOptionCombo getDepartmentByDataSet( DataSet dataSet )
     {
-        return localAttributeValueStore.hasAttributesByDataSet( dataSet );  
-    }
-    
-    public Collection<String> getValuesByDataSet( DataSet dataSet )
-    {
-        return localAttributeValueStore.getByDataSet( dataSet );
+        return localDataSetStore.getDepartmentByDataSet( dataSet );
     }
 }
