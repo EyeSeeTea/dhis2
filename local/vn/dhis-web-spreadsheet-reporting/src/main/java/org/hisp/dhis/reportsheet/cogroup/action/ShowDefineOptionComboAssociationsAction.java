@@ -27,8 +27,15 @@ package org.hisp.dhis.reportsheet.cogroup.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.reportsheet.CategoryOptionGroupOrder;
-import org.hisp.dhis.reportsheet.CategoryOptionGroupOrderService;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.reportsheet.OptionComboAssociation;
+import org.hisp.dhis.reportsheet.OptionComboAssociationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -38,7 +45,7 @@ import com.opensymphony.xwork2.Action;
  * @version $Id$
  */
 
-public class OpenCategoryOptionAssociationsAction
+public class ShowDefineOptionComboAssociationsAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -46,40 +53,23 @@ public class OpenCategoryOptionAssociationsAction
     // -------------------------------------------------------------------------
 
     @Autowired
-    private CategoryOptionGroupOrderService groupOrderService;
+    private DataElementCategoryService categoryService;
+
+    @Autowired
+    private OptionComboAssociationService associationService;
+
+    @Autowired
+    private SelectionTreeManager selectionTreeManager;
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer optionComboId;
 
-    private Integer reportId;
-
-    private CategoryOptionGroupOrder group;
-
-    // -------------------------------------------------------------------------
-    // Getter & Setter
-    // -------------------------------------------------------------------------
-
-    public void setId( Integer id )
+    public void setOptionComboId( Integer optionComboId )
     {
-        this.id = id;
-    }
-
-    public void setReportId( Integer reportId )
-    {
-        this.reportId = reportId;
-    }
-
-    public Integer getReportId()
-    {
-        return reportId;
-    }
-
-    public CategoryOptionGroupOrder getGroup()
-    {
-        return group;
+        this.optionComboId = optionComboId;
     }
 
     // -------------------------------------------------------------------------
@@ -89,8 +79,21 @@ public class OpenCategoryOptionAssociationsAction
     public String execute()
         throws Exception
     {
-        group = groupOrderService.getCategoryOptionGroupOrder( id );
+        DataElementCategoryOptionCombo optionCombo = categoryService.getDataElementCategoryOptionCombo( optionComboId );
+
+        Set<OrganisationUnit> sources = new HashSet<OrganisationUnit>();
+
+        if ( optionCombo != null )
+        {
+            for ( OptionComboAssociation association : associationService.getOptionComboAssociations( optionCombo ) )
+            {
+                sources.add( association.getSource() );
+            }
+        }
+
+        selectionTreeManager.setSelectedOrganisationUnits( sources );
 
         return SUCCESS;
     }
+
 }
