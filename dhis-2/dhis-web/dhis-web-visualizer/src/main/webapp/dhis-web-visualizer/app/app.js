@@ -246,6 +246,7 @@ Ext.Loader.setPath('Ext.ux', DV.conf.finals.ajax.path_lib + 'ext-ux');
 Ext.require('Ext.ux.form.MultiSelect');
 
 Ext.onReady( function() {
+    Ext.override(Ext.form.FieldSet,{setExpanded:function(a){var b=this,c=b.checkboxCmp,d=b.toggleCmp,e;a=!!a;if(c){c.setValue(a)}if(d){d.setType(a?"up":"down")}if(a){e="expand";b.removeCls(b.baseCls+"-collapsed")}else{e="collapse";b.addCls(b.baseCls+"-collapsed")}b.collapsed=!a;b.doComponentLayout();b.fireEvent(e,b);return b}});
     Ext.QuickTips.init();
     document.body.oncontextmenu = function(){return false;}; 
     
@@ -1423,6 +1424,7 @@ Ext.onReady( function() {
                     this.chart.range.splice(i, 1);
                 }
             }
+            
             if (exe) {
                 DV.chart.getChart(true);
             }
@@ -2267,7 +2269,7 @@ Ext.onReady( function() {
             DV.cmp.region.center.add(this.chart);
             
 			DV.util.mask.hideMask();
-			
+            
             if (DV.chart.warnings.length) {
 				DV.util.notification.warning(this.getWarnings());
 			}
@@ -2368,7 +2370,6 @@ Ext.onReady( function() {
                 preventHeader: true,
                 collapsible: true,
                 collapseMode: 'mini',
-                width: 424,
                 items: [
                     {
                         xtype: 'toolbar',
@@ -2376,7 +2377,6 @@ Ext.onReady( function() {
                         style: 'padding-top:1px; border-style:none',
                         defaults: {
                             height: 40,
-                            style: 'padding: 2px 3px',
                             toggleGroup: 'chartsettings',
                             handler: DV.util.button.type.toggleHandler,
                             listeners: {
@@ -2391,52 +2391,57 @@ Ext.onReady( function() {
                             {
                                 xtype: 'label',
                                 text: DV.i18n.chart_type,
-                                style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 10px',
-								width: 73
+                                style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 10px'
                             },
                             {
 								xtype: 'button',
                                 icon: 'images/column.png',
                                 name: DV.conf.finals.chart.column,
                                 tooltip: DV.i18n.column_chart,
+								width: 40,
                                 pressed: true
                             },
                             {
 								xtype: 'button',
                                 icon: 'images/column-stacked.png',
                                 name: DV.conf.finals.chart.stackedcolumn,
-                                tooltip: DV.i18n.stacked_column_chart
+                                tooltip: DV.i18n.stacked_column_chart,
+								width: 40
                             },
                             {
 								xtype: 'button',
                                 icon: 'images/bar.png',
                                 name: DV.conf.finals.chart.bar,
                                 tooltip: DV.i18n.bar_chart,
+								width: 40
                             },
                             {
 								xtype: 'button',
                                 icon: 'images/bar-stacked.png',
                                 name: DV.conf.finals.chart.stackedbar,
-                                tooltip: DV.i18n.stacked_bar_chart
+                                tooltip: DV.i18n.stacked_bar_chart,
+								width: 40
                             },
                             {
 								xtype: 'button',
                                 icon: 'images/line.png',
                                 name: DV.conf.finals.chart.line,
-                                tooltip: DV.i18n.line_chart
+                                tooltip: DV.i18n.line_chart,
+								width: 40
                             },
                             {
 								xtype: 'button',
                                 icon: 'images/area.png',
                                 name: DV.conf.finals.chart.area,
-                                tooltip: DV.i18n.area_chart
+                                tooltip: DV.i18n.area_chart,
+								width: 40
                             },
                             {
 								xtype: 'button',
                                 icon: 'images/pie.png',
                                 name: DV.conf.finals.chart.pie,
                                 tooltip: DV.i18n.pie_chart,
-                                style: 'padding: 2px 4px 2px 2px'
+								width: 40
                             }
                         ]
                     },
@@ -2447,8 +2452,7 @@ Ext.onReady( function() {
                         items: [
                             {
                                 xtype: 'panel',
-                                bodyStyle: 'border-style:none; background-color:transparent; margin:0 2px',
-                                width: (DV.conf.layout.west_fieldset_width / 3),
+                                bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
                                 items: [
                                     {
                                         xtype: 'label',
@@ -2481,8 +2485,7 @@ Ext.onReady( function() {
                             },                            
                             {
                                 xtype: 'panel',
-                                bodyStyle: 'border-style:none; background-color:transparent; margin:0 2px',
-                                width: (DV.conf.layout.west_fieldset_width / 3),
+                                bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
                                 items: [
                                     {
                                         xtype: 'label',
@@ -2516,8 +2519,7 @@ Ext.onReady( function() {
                             },                            
                             {
                                 xtype: 'panel',
-                                bodyStyle: 'border-style:none; background-color:transparent; margin:0 2px',
-                                width: (DV.conf.layout.west_fieldset_width / 3),
+                                bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
                                 items: [
                                     {
                                         xtype: 'label',
@@ -3774,7 +3776,7 @@ Ext.onReady( function() {
                                                                             },
                                                                             '->',
                                                                             {
-                                                                                text: DV.i18n.rename + '..',
+                                                                                text: DV.i18n.rename,
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 disabled: true,
                                                                                 xable: function() {
@@ -3814,9 +3816,7 @@ Ext.onReady( function() {
                                                                                         bbar: [
 																							{
 																								xtype: 'label',
-																								style: 'padding-left:2px; font-size:10px; color:#666; width:50%',
-																								width: 120,
-																								height: 13,
+																								style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:50%',
 																								listeners: {
 																									added: function() {
 																										DV.cmp.favorite.rename.label = this;
@@ -3963,9 +3963,7 @@ Ext.onReady( function() {
                                                             bbar: [
                                                                 {
                                                                     xtype: 'label',
-                                                                    style: 'padding-left:2px; font-size:10px; color:#666; width:70%',
-                                                                    width: 200,
-                                                                    height: 13,
+                                                                    style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:70%',
                                                                     listeners: {
                                                                         added: function() {
                                                                             DV.cmp.favorite.label = this;
@@ -4182,6 +4180,7 @@ Ext.onReady( function() {
                                             {
                                                 text: DV.i18n.image_png,
                                                 iconCls: 'dv-menu-item-png',
+                                                minWidth: 105,
                                                 handler: function() {
                                                     b.execute(DV.conf.finals.image.png);
                                                 }
@@ -4189,6 +4188,7 @@ Ext.onReady( function() {
                                             {
                                                 text: 'PDF',
                                                 iconCls: 'dv-menu-item-pdf',
+                                                minWidth: 105,
                                                 handler: function() {
                                                     b.execute(DV.conf.finals.image.pdf);
                                                 }
