@@ -1423,7 +1423,6 @@ Ext.onReady( function() {
                     this.chart.range.splice(i, 1);
                 }
             }
-            
             if (exe) {
                 DV.chart.getChart(true);
             }
@@ -2268,7 +2267,7 @@ Ext.onReady( function() {
             DV.cmp.region.center.add(this.chart);
             
 			DV.util.mask.hideMask();
-            
+			
             if (DV.chart.warnings.length) {
 				DV.util.notification.warning(this.getWarnings());
 			}
@@ -3775,7 +3774,7 @@ Ext.onReady( function() {
                                                                             },
                                                                             '->',
                                                                             {
-                                                                                text: DV.i18n.rename,
+                                                                                text: DV.i18n.rename + '..',
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 disabled: true,
                                                                                 xable: function() {
