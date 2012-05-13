@@ -389,6 +389,7 @@ Ext.onReady( function() {
                 el: '',
                 legendPosition: false,
                 orgUnitIsParent: false,
+                skipAnimation: false,
                 url: ''
             };
             
@@ -416,6 +417,7 @@ Ext.onReady( function() {
             if (conf.uid) {
                 Ext.data.JsonP.request({
                     url: conf.url + DHIS.conf.finals.ajax.favorite_get + conf.uid + '.jsonp',
+                    disableCaching: false,
                     scope: this,
                     success: function(r) {
                         if (!r) {
@@ -539,7 +541,7 @@ Ext.onReady( function() {
 				renderTo: project.state.conf.el,
                 width: project.state.conf.width || this.el.getWidth(),
                 height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
+                animate: !project.state.conf.skipAnimation,
                 store: project.store,
                 items: DHIS.util.chart.getTitle(),
                 legend: DHIS.util.chart.getLegend(project.store.left.length),
@@ -587,7 +589,7 @@ Ext.onReady( function() {
 				renderTo: project.state.conf.el,
                 width: project.state.conf.width || this.el.getWidth(),
                 height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
+                animate: !project.state.conf.skipAnimation,
                 store: project.store,
                 items: DHIS.util.chart.getTitle(),
                 legend: DHIS.util.chart.getLegend(project.store.bottom.length),
@@ -635,7 +637,7 @@ Ext.onReady( function() {
 				renderTo: project.state.conf.el,
                 width: project.state.conf.width || this.el.getWidth(),
                 height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
+                animate: !project.state.conf.skipAnimation,
                 store: project.store,
                 items: DHIS.util.chart.getTitle(),
                 legend: DHIS.util.chart.getLegend(project.store.left.length),
@@ -667,7 +669,7 @@ Ext.onReady( function() {
 				renderTo: project.state.conf.el,
                 width: project.state.conf.width || this.el.getWidth(),
                 height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
+                animate: !project.state.conf.skipAnimation,
                 store: project.store,
                 items: DHIS.util.chart.getTitle(),
                 legend: DHIS.util.chart.getLegend(project.store.left.length),
@@ -708,7 +710,7 @@ Ext.onReady( function() {
 				renderTo: project.state.conf.el,
                 width: project.state.conf.width || this.el.getWidth(),
                 height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
+                animate: !project.state.conf.skipAnimation,
                 shadow: true,
                 store: project.store,
                 insetPadding: 60,
