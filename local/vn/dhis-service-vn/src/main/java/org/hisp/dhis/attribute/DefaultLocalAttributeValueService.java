@@ -31,6 +31,7 @@ import java.util.Collection;
 
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.dataset.DataSet;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -65,5 +66,15 @@ public class DefaultLocalAttributeValueService
     public Collection<String> getDistinctValuesByAttribute( Attribute attribute )
     {
         return localAttributeValueStore.getDistinctValuesByAttribute( attribute );
+    }
+    
+    public boolean hasAttributesByDataSet( DataSet dataSet )
+    {
+        return localAttributeValueStore.hasAttributesByDataSet( dataSet );  
+    }
+    
+    public Collection<String> getValuesByDataSet( DataSet dataSet )
+    {
+        return localAttributeValueStore.getByDataSet( dataSet );
     }
 }

@@ -25,87 +25,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patientreport;
+package org.hisp.dhis.dataset;
 
-import org.hisp.dhis.patient.PatientIdentifierType;
+import java.util.Collection;
+
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version $PatientIdentifierTypeAssociation.java May 7, 2012 1:47:17 PM$
+ * @version $DefaultLocalDataSetService.java May 10, 2012 8:00:11 AM$
  */
-public class PatientIdentifierTypeAssociation
+public class DefaultLocalDataSetService
+    implements LocalDataSetService
 {
-    private Integer id;
-
-    private PatientTabularReport patientTabularReport;
-
-    private PatientIdentifierType patientIdentifierType;
-
-    private String key;
-
-    private boolean hidden;
-
     // -------------------------------------------------------------------------
-    // Constructor
+    // Dependency
     // -------------------------------------------------------------------------
 
-    public PatientIdentifierTypeAssociation()
+    private LocalDataSetStore localDataSetStore;
+
+    public void setLocalDataSetStore( LocalDataSetStore localDataSetStore )
     {
+        this.localDataSetStore = localDataSetStore;
     }
 
     // -------------------------------------------------------------------------
-    // Getters && Setters
+    // Implementation methods
     // -------------------------------------------------------------------------
 
-    public Integer getId()
+    @Override
+    public Collection<DataSet> getDataSetsByDescription( String description )
     {
-        return id;
+       return localDataSetStore.getByDescription( description );
     }
-
-    public void setId( Integer id )
+    
+    public DataElementCategoryOptionCombo getDepartmentByDataSet( DataSet dataSet )
     {
-        this.id = id;
+        return localDataSetStore.getDepartmentByDataSet( dataSet );
     }
-
-    public PatientTabularReport getPatientTabularReport()
-    {
-        return patientTabularReport;
-    }
-
-    public void setPatientTabularReport( PatientTabularReport patientTabularReport )
-    {
-        this.patientTabularReport = patientTabularReport;
-    }
-
-    public PatientIdentifierType getPatientIdentifierType()
-    {
-        return patientIdentifierType;
-    }
-
-    public void setPatientIdentifierType( PatientIdentifierType patientIdentifierType )
-    {
-        this.patientIdentifierType = patientIdentifierType;
-    }
-
-    public String getKey()
-    {
-        return key;
-    }
-
-    public void setKey( String key )
-    {
-        this.key = key;
-    }
-
-    public boolean isHidden()
-    {
-        return hidden;
-    }
-
-    public void setHidden( boolean hidden )
-    {
-        this.hidden = hidden;
-    }
-
 }

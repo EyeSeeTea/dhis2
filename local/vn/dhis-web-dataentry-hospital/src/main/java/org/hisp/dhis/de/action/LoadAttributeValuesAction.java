@@ -25,87 +25,72 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patientreport;
+package org.hisp.dhis.de.action;
 
-import org.hisp.dhis.dataelement.DataElement;
+import java.util.Collection;
+
+import org.hisp.dhis.attribute.LocalAttributeValueService;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version $PatientDataElementAssociation.java May 7, 2012 1:47:16 PM$
+ * @version $LoadAttributeValuesByAttributeAction.java Mar 24, 2012 9:10:52 AM$
  */
-public class PatientDataElementAssociation
+public class LoadAttributeValuesAction
+    implements Action
 {
-    private Integer id;
-
-    private PatientTabularReport patientTabularReport;
-
-    private DataElement dataElement;
-
-    private String key;
-
-    private boolean hidden;
-
     // -------------------------------------------------------------------------
-    // Constructor
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    public PatientDataElementAssociation()
+    private LocalAttributeValueService localAttributeValueService;
+
+    private DataSetService dataSetService;
+
+    // -------------------------------------------------------------------------
+    // Input && Output
+    // -------------------------------------------------------------------------
+
+    private Integer dataSetId;
+
+    private Collection<String> values;
+
+    public Collection<String> getValues()
     {
+        return values;
+    }
+
+    public void setDataSetService( DataSetService dataSetService )
+    {
+        this.dataSetService = dataSetService;
+    }
+
+    public void setLocalAttributeValueService( LocalAttributeValueService localAttributeValueService )
+    {
+        this.localAttributeValueService = localAttributeValueService;
+    }
+
+    public void setDataSetId( Integer dataSetId )
+    {
+        this.dataSetId = dataSetId;
     }
 
     // -------------------------------------------------------------------------
-    // Getters && Setters
+    // Action implementation
     // -------------------------------------------------------------------------
 
-    public Integer getId()
+    @Override
+    public String execute()
+        throws Exception
     {
-        return id;
+        DataSet dataset = dataSetService.getDataSet( dataSetId );
+        
+        values = localAttributeValueService.getValuesByDataSet( dataset );
+            
+        return SUCCESS;
     }
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    public PatientTabularReport getPatientTabularReport()
-    {
-        return patientTabularReport;
-    }
-
-    public void setPatientTabularReport( PatientTabularReport patientTabularReport )
-    {
-        this.patientTabularReport = patientTabularReport;
-    }
-
-    public DataElement getDataElement()
-    {
-        return dataElement;
-    }
-
-    public void setDataElement( DataElement dataElement )
-    {
-        this.dataElement = dataElement;
-    }
-
-    public String getKey()
-    {
-        return key;
-    }
-
-    public void setKey( String key )
-    {
-        this.key = key;
-    }
-
-    public boolean isHidden()
-    {
-        return hidden;
-    }
-
-    public void setHidden( boolean hidden )
-    {
-        this.hidden = hidden;
-    }
-
 }

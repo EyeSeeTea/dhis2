@@ -31,6 +31,7 @@ import static org.hisp.dhis.api.utils.ContextUtils.CONTENT_TYPE_JSON;
 import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 import static org.hisp.dhis.system.util.DateUtils.setNames;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -92,6 +93,7 @@ public class ChartPluginController
     public String getChartValues( @RequestParam(required=false) Set<String> indicatorIds,
                                 @RequestParam(required=false) Set<String> dataElementIds,
                                 @RequestParam Set<String> organisationUnitIds,
+                                @RequestParam(required=false) boolean orgUnitIsParent, 
                                 RelativePeriods relativePeriods,
                                 Model model, 
                                 HttpServletResponse response )
@@ -100,25 +102,67 @@ public class ChartPluginController
         ChartPluginValue chartValue = new ChartPluginValue();
         
         I18nFormat format = i18nManager.getI18nFormat();
-                
+
+        // ---------------------------------------------------------------------
+        // Periods
+        // ---------------------------------------------------------------------
+
         List<Period> periods = periodService.reloadPeriods( setNames( relativePeriods.getRelativePeriods(), format ) );
 
+        if ( periods.isEmpty() )
+        {
+            ContextUtils.conflictResponse( response, "No valid periods specified" );
+            return null;
+        }
+        
         for ( Period period : periods )
         {
             chartValue.getPeriods().add( period.getName() );
         }
-        
+
+        // ---------------------------------------------------------------------
+        // Organisation units
+        // ---------------------------------------------------------------------
+
         List<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsByUid( organisationUnitIds );
+        
+        if ( organisationUnits.isEmpty() )
+        {
+            ContextUtils.conflictResponse( response, "No valid organisation units specified" );
+            return null;
+        }
+        
+        if ( orgUnitIsParent )
+        {
+            List<OrganisationUnit> childOrganisationUnits = new ArrayList<OrganisationUnit>();
+            
+            for ( OrganisationUnit unit : organisationUnits )
+            {
+                childOrganisationUnits.addAll( unit.getChildren() );
+            }
+            
+            organisationUnits = childOrganisationUnits;
+        }
         
         for ( OrganisationUnit unit : organisationUnits )
         {
             chartValue.getOrgUnits().add( unit.getName() );
         }
-        
+
+        // ---------------------------------------------------------------------
+        // Indicators
+        // ---------------------------------------------------------------------
+
         if ( indicatorIds != null )
         {
             List<Indicator> indicators = indicatorService.getIndicatorsByUid( indicatorIds );
 
+            if ( indicators.isEmpty() )
+            {
+                ContextUtils.conflictResponse( response, "No valid indicators specified" );
+                return null;
+            }
+            
             for ( Indicator indicator : indicators )
             {
                 chartValue.getData().add( indicator.getDisplayShortName() );
@@ -142,9 +186,19 @@ public class ChartPluginController
             }
         }
 
+        // ---------------------------------------------------------------------
+        // Data elements
+        // ---------------------------------------------------------------------
+
         if ( dataElementIds != null )
         {
             List<DataElement> dataElements = dataElementService.getDataElementsByUid( dataElementIds );
+
+            if ( dataElements.isEmpty() )
+            {
+                ContextUtils.conflictResponse( response, "No valid data elements specified" );
+                return null;
+            }
             
             for ( DataElement element : dataElements )
             {
