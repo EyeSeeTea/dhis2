@@ -32,6 +32,7 @@
 				filter: 'period',
 				organisationunits: ['ImspTQPwCqd'],
 				orgUnitIsParent: true,
+				showData: true,
 				el: 'chart2',
 				url: url
 			});
@@ -52,10 +53,12 @@
 	series              string          'data'              (Optional) Series: 'data', 'period' or 'organisationunit'
 	category            string          'period'            (Optional) Category: 'indicator', 'dataelement', 'period' or 'organisationunit'
 	filter              string          'organisationunit'  (Optional) Filter: 'indicator', 'dataelement', 'period' or 'organisationunit'
+	orgUnitIsParent		boolean			false				(Optional) If true, the children of the provided orgunit are displayed
+	showData			boolean			false				(Optional) If true, the exact data will be displayed on the chart
+	legendPosition      string          'top'               (Optional) Positions: 'top', 'right', 'bottom' or 'left'
 	el                  string                              (Required) The element id to render the chart.
 	width               integer         <el width>          (Optional) Chart width. Default is the element width.
 	height              integer         <el height>         (Optional) Chart height. Default is the element height.
-	legendPosition      string          'top'               (Optional) Positions: 'top', 'right', 'bottom' or 'left'
 	url                 string                              (Required) The base url of the DHIS instance.
 	-->
 </head>

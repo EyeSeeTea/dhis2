@@ -1509,8 +1509,8 @@ Ext.onReady( function() {
 		})
     };
     
-    DV.state = {};
-    DV.state.setChart = function(exe, id) {
+    DV.state = {
+		setChart: function(exe, id) {
 			DV.chart.reset();
 			
 			if (id) {
@@ -1597,69 +1597,69 @@ Ext.onReady( function() {
 					this.extendChart(exe);
 				}
 			}
-		};
-		//extendChart: function(exe, id) {
-			//DV.chart.warnings = [];
+		},
+		extendChart: function(exe, id) {
+			DV.chart.warnings = [];
 			
-			//if (!this.validation.dimensions()) {
-				//return;
-			//}
+			if (!this.validation.dimensions()) {
+				return;
+			}
 			
-			//DV.c.data = {};
-			//DV.c.data.objects = [];
-			//DV.c.data.objects = DV.c.data.objects.concat(DV.c.indicator.objects);
-			//DV.c.data.objects = DV.c.data.objects.concat(DV.c.dataelement.objects);
-			//DV.c.data.objects = DV.c.data.objects.concat(DV.c.dataset.objects);
+			DV.c.data = {};
+			DV.c.data.objects = [];
+			DV.c.data.objects = DV.c.data.objects.concat(DV.c.indicator.objects);
+			DV.c.data.objects = DV.c.data.objects.concat(DV.c.dataelement.objects);
+			DV.c.data.objects = DV.c.data.objects.concat(DV.c.dataset.objects);
 			
-			//DV.c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(DV.c.period.rp);
+			DV.c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(DV.c.period.rp);
 			
-			//if (!this.validation.objects()) {
-				//return;
-			//}
+			if (!this.validation.objects()) {
+				return;
+			}
 			
-			//DV.c.series = DV.c[DV.c.dimension.series];
-			//DV.c.category = DV.c[DV.c.dimension.category];
-			//DV.c.filter = DV.c[DV.c.dimension.filter];
+			DV.c.series = DV.c[DV.c.dimension.series];
+			DV.c.category = DV.c[DV.c.dimension.category];
+			DV.c.filter = DV.c[DV.c.dimension.filter];
 			
-			//DV.c.series.dimension = DV.conf.finals.chart.series;
-			//DV.c.category.dimension = DV.conf.finals.chart.category;
-			//DV.c.filter.dimension = DV.conf.finals.chart.filter;
+			DV.c.series.dimension = DV.conf.finals.chart.series;
+			DV.c.category.dimension = DV.conf.finals.chart.category;
+			DV.c.filter.dimension = DV.conf.finals.chart.filter;
 			
-			//DV.c.series.names = DV.util.dimension[DV.c.dimension.series].getNames(true);
-			//DV.c.category.names = DV.util.dimension[DV.c.dimension.category].getNames(true);
-			//DV.c.filter.names = DV.util.dimension[DV.c.dimension.filter].getNames(true, true);
+			DV.c.series.names = DV.util.dimension[DV.c.dimension.series].getNames(true);
+			DV.c.category.names = DV.util.dimension[DV.c.dimension.category].getNames(true);
+			DV.c.filter.names = DV.util.dimension[DV.c.dimension.filter].getNames(true, true);
 			
-			//DV.c.series.url = DV.util.dimension[DV.c.dimension.series].getUrl();
-			//DV.c.category.url = DV.util.dimension[DV.c.dimension.category].getUrl();
-			//DV.c.filter.url = DV.util.dimension[DV.c.dimension.filter].getUrl(true);
+			DV.c.series.url = DV.util.dimension[DV.c.dimension.series].getUrl();
+			DV.c.category.url = DV.util.dimension[DV.c.dimension.category].getUrl();
+			DV.c.filter.url = DV.util.dimension[DV.c.dimension.filter].getUrl(true);
 			
-			//DV.c.indicator.ids = DV.util.dimension.indicator.getIds();
-			//DV.c.dataelement.ids = DV.util.dimension.dataelement.getIds();
-			//DV.c.dataset.ids = DV.util.dimension.dataset.getIds();
-			//DV.c.period.ids = DV.util.dimension.period.getIds();
-			//DV.c.organisationunit.ids = DV.util.dimension.organisationunit.getIds();
+			DV.c.indicator.ids = DV.util.dimension.indicator.getIds();
+			DV.c.dataelement.ids = DV.util.dimension.dataelement.getIds();
+			DV.c.dataset.ids = DV.util.dimension.dataset.getIds();
+			DV.c.period.ids = DV.util.dimension.period.getIds();
+			DV.c.organisationunit.ids = DV.util.dimension.organisationunit.getIds();
 						
-			//if (!this.validation.categories()) {
-				//return;
-			//}
+			if (!this.validation.categories()) {
+				return;
+			}
             
-            //this.validation.trendline();
+            this.validation.trendline();
             
-            //this.validation.targetline();
+            this.validation.targetline();
             
-            //this.validation.baseline();
+            this.validation.baseline();
             
-            //this.validation.render();
+            this.validation.render();
             
-            //if (id) {
-				//this.setUI();
-			//}
+            if (id) {
+				this.setUI();
+			}
             
-            //if (exe) {
-                //DV.value.getValues(true);
-            //}
-        //},
-        DV.state.setOptions = function() {
+            if (exe) {
+                DV.value.getValues(true);
+            }
+        },
+        setOptions: function() {
             DV.c.hidesubtitle = DV.cmp.favorite.hidesubtitle.getValue();
             DV.c.hidelegend = DV.cmp.favorite.hidelegend.getValue();
             DV.c.trendline = DV.cmp.favorite.trendline.getValue();
@@ -1672,8 +1672,8 @@ Ext.onReady( function() {
             DV.c.targetlinelabel = DV.cmp.favorite.targetlinelabel.getValue();
             DV.c.baselinevalue = parseFloat(DV.cmp.favorite.baselinevalue.getValue());
             DV.c.baselinelabel = DV.cmp.favorite.baselinelabel.getValue();
-		};
-        DV.state.getParams = function() {
+		},
+		getParams: function() {
             var p = {};
             p.type = DV.c.type.toUpperCase();
             p.series = DV.c.dimension.series.toUpperCase();
@@ -1712,8 +1712,8 @@ Ext.onReady( function() {
 				p.organisationUnitGroupSetId = DV.c.organisationunit.groupsetid;
 			}
             return p;
-        };
-        DV.state.setUI = function() {
+        },
+        setUI: function() {
 			DV.util.button.type.setValue(DV.c.type);			
 			DV.cmp.favorite.hidesubtitle.setValue(DV.c.hidesubtitle);
 			DV.cmp.favorite.hidelegend.setValue(DV.c.hidelegend);
@@ -1776,9 +1776,8 @@ Ext.onReady( function() {
 			else {
 				DV.cmp.dimension.organisationunit.panel.groupsets.setValue(DV.store.isloaded ? DV.conf.finals.cmd.none : DV.i18n.none);
 			}
-		};
-		
-		DV.state.validation = {
+		},
+		validation: {
 			dimensions: function() {
 				if (!DV.c.dimension.series || !DV.c.dimension.category || !DV.c.dimension.filter) {
 					DV.util.notification.error(DV.i18n.et_invalid_dimension_setup, DV.i18n.em_invalid_dimension_setup);
@@ -1921,7 +1920,8 @@ Ext.onReady( function() {
 				}
 				return true;
 			}
-		};
+		}
+	};
     
     DV.value = {
         values: [],
