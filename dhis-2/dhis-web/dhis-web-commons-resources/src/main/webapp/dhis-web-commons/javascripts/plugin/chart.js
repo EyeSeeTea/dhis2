@@ -191,6 +191,21 @@ Ext.onReady( function() {
         },
         chart: {
 			def: {
+				getChart: function(project, axes, series, elWidth, elHeight) {
+					return Ext.create('Ext.chart.Chart', {
+						renderTo: project.state.conf.el,
+						animate: true,
+						store: project.store,
+						insetPadding: DHIS.conf.chart.style.inset,						
+						items: project.state.conf.hideSubtitle ? false : DHIS.util.chart.def.getTitle(project),
+						legend: project.state.conf.hideLegend ? false : DHIS.util.chart.def.getLegend(project.store.range.length),
+						width: project.state.conf.width || elWidth,
+						height: project.state.conf.height || elHeight,
+						axes: axes,
+						series: series,
+						theme: project.state.conf.el
+					});
+				},
 				getLegend: function(len) {
 					len = len ? len : 1;
 					return {
@@ -201,10 +216,10 @@ Ext.onReady( function() {
 						padding: 0
 					};
 				},
-				getTitle: function() {
+				getTitle: function(project) {
 					return {
 						type: 'text',
-						text: DHIS.state.state.filter.names[0],
+						text: project.state.filter.names[0],
 						font: 'bold 13px ' + DHIS.conf.chart.style.font,
 						fill: '#222',
 						width: 300,
@@ -229,7 +244,7 @@ Ext.onReady( function() {
 					DHIS.mask.show();
 				},
 				label: {
-					getCategoryLabel: function() {
+					getCategory: function() {
 						return {
 							font: '11px ' + DHIS.conf.chart.style.font,
 							rotate: {
@@ -237,10 +252,51 @@ Ext.onReady( function() {
 							}
 						};
 					},
-					getNumericLabel: function(values) {
+					getNumeric: function(values) {
 						return {
 							font: '11px ' + DHIS.conf.chart.style.font,
 							renderer: Ext.util.Format.numberRenderer(DHIS.util.number.getChartAxisFormatRenderer(values))
+						};
+					}
+				},
+				axis: {
+					getNumeric: function(project, isStacked) {
+						return {
+							type: 'Numeric',
+							position: 'left',
+							title: project.state.conf.rangeAxisLabel || false,
+							labelTitle: {
+								font: '17px ' + DHIS.conf.chart.style.font
+							},
+							minimum: 0,
+							fields: isStacked ? project.state.series.names : project.store.range,
+							label: DHIS.util.chart.def.label.getNumeric(project.values),
+							grid: {
+								odd: {
+									opacity: 1,
+									fill: '#fefefe',
+									stroke: '#aaa',
+									'stroke-width': 0.1
+								},									
+								even: {
+									opacity: 1,
+									fill: '#f1f1f1',
+									stroke: '#aaa',
+									'stroke-width': 0.1
+								}
+							}
+						};
+					},
+					getCategory: function(project) {
+						return {
+							type: 'Category',
+							position: 'bottom',
+							title: project.state.conf.domainAxisLabel || false,
+							labelTitle: {
+								font: '17px ' + DHIS.conf.chart.style.font
+							},
+							fields: DHIS.conf.finals.data.domain,
+							label: DHIS.util.chart.def.label.getCategory()
 						};
 					}
 				},
@@ -281,7 +337,7 @@ Ext.onReady( function() {
 							type: 'line',
 							axis: 'left',
 							xField: DHIS.conf.finals.data.domain,
-							yField: DHIS.conf.finals.data.targetline,
+							yField: DHIS.conf.finals.data.baseline,
 							style: {
 								opacity: 1,
 								lineWidth: 3,
@@ -339,11 +395,24 @@ Ext.onReady( function() {
 				}
 			},
             bar: {
-                getCategoryLabel: function() {
-                    return {
-                        font: '11px arial'
-                    };
-                }
+				label: {
+					getCategory: function() {
+						return {
+							font: '11px arial'
+						};
+					}
+				},
+                series: {
+					getTips: function() {
+						return {
+							trackMouse: true,
+							cls: 'dv-chart-tips',
+							renderer: function(si, item) {
+								this.update('' + item.value[0]);
+							}
+						};
+					}
+				}
             },
             line: {
                 getSeriesArray: function(project) {
@@ -406,25 +475,27 @@ Ext.onReady( function() {
                         }
                     ];                        
                 },
-                getTips: function(left) {
-                    return {
-                        trackMouse: true,
-						style: 'border-width:2px; background-color:#eee',
-                        renderer: function(item) {
-							this.update('<span style="font-size:14px">' + item.data[DHIS.conf.finals.data.domain] + '<br/><b>' + item.data[left] + '</b></span>');
-                        }
-                    };
-				},
-				setTheme: function(project) {
-					var colors = DV.conf.chart.theme.dv1.slice(0, project.state.category.names.length);
-					Ext.chart.theme[project.state.conf.el] = Ext.extend(Ext.chart.theme.Base, {
-						constructor: function(config) {
-							Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
-								seriesThemes: colors,
-								colors: colors
-							}, config));
-						}
-					});
+                series: {
+					getTips: function(project) {
+						return {
+							trackMouse: true,
+							cls: 'dv-chart-tips-pie',
+							renderer: function(item) {
+								this.update(item.data[DHIS.conf.finals.data.domain] + '<br/><b>' + item.data[project.state.series.names[0]] + '</b>');
+							}
+						};
+					},
+					setTheme: function(project) {
+						var colors = DV.conf.chart.theme.dv1.slice(0, project.state.category.names.length);
+						Ext.chart.theme[project.state.conf.el] = Ext.extend(Ext.chart.theme.Base, {
+							constructor: function(config) {
+								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+									seriesThemes: colors,
+									colors: colors
+								}, config));
+							}
+						});
+					}
 				}
             }
         },
@@ -550,10 +621,12 @@ Ext.onReady( function() {
                 orgUnitIsParent: false,
                 showData: false,
                 trendLine: false,
+                hideLegend: false,
+                hideSubtitle: false,
                 targetLineValue: null,
                 targetLineLabel: null,
                 baseLineValue: null,
-                baseLineLabel: null,
+                baseLineLabel: null,                
                 url: ''
             };
             
@@ -571,7 +644,6 @@ Ext.onReady( function() {
             project.state.series.dimension = project.state.conf.series;
             project.state.category.dimension = project.state.conf.category;
             project.state.filter.dimension = project.state.conf.filter;
-            project.state.orgUnitIsParent = project.state.conf.orgUnitIsParent;
             
             DHIS.state.state = project.state;
             
@@ -709,17 +781,17 @@ Ext.onReady( function() {
 				}
 			}
 
-			//if (DV.c.targetlinevalue) {
-				//Ext.Array.each(DV.chart.data, function(item) {
-					//item[DV.conf.finals.data.targetline] = DV.c.targetlinevalue;
-				//});
-			//}
+			if (project.state.conf.targetLineValue) {
+				Ext.Array.each(project.data, function(item) {
+					item[DHIS.conf.finals.data.targetline] = project.state.conf.targetLineValue;
+				});
+			}
 
-			//if (DV.c.baselinevalue) {
-				//Ext.Array.each(DV.chart.data, function(item) {
-					//item[DV.conf.finals.data.baseline] = DV.c.baselinevalue;
-				//});
-			//}
+			if (project.state.conf.baseLineValue) {
+				Ext.Array.each(project.data, function(item) {
+					item[DHIS.conf.finals.data.baseline] = project.state.conf.baseLineValue;
+				});
+			}
                 
 			DHIS.store.getChartStore(project);
         },
@@ -753,44 +825,21 @@ Ext.onReady( function() {
 				main.label = {display: 'outside', field: project.state.series.names};
 			}
 			series.push(main);
-			//if (project.state.conf.targetLineValue) {
-				//series.push(DV.util.chart.def.series.getTargetLine());
-			//}
-			//if (project.state.conf.baseLineValue) {
-				//series.push(DV.util.chart.def.series.getBaseLine());
-			//}
-			DHIS.util.chart.def.series.setTheme(project);
+			if (project.state.conf.targetLineValue) {
+				series.push(DHIS.util.chart.def.series.getTargetLine(project));
+			}
+			if (project.state.conf.baseLineValue) {
+				series.push(DHIS.util.chart.def.series.getBaseLine(project));
+			}
 			
-            project.chart = Ext.create('Ext.chart.Chart', {
-				renderTo: project.state.conf.el,
-                width: project.state.conf.width || this.el.getWidth(),
-                height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
-                store: project.store,
-                items: DHIS.util.chart.def.getTitle(),
-                legend: DHIS.util.chart.def.getLegend(project.store.range.length),
-                axes: [
-                    {
-                        type: 'Numeric',
-                        position: 'left',
-                        minimum: 0,
-                        fields: project.store.range,
-                        label: DHIS.util.chart.def.label.getNumericLabel(project.values),
-                        grid: {
-                            even: DHIS.util.chart.def.getGrid()
-                        }
-                    },
-                    {
-                        type: 'Category',
-                        position: 'bottom',
-                        fields: DHIS.conf.finals.data.domain,
-                        label: DHIS.util.chart.def.label.getCategoryLabel()
-                    }
-                ],
-                series: series,
-                theme: project.state.conf.el
-            });
-            
+			var axes = [];
+			var numeric = DHIS.util.chart.def.axis.getNumeric(project, isStacked);
+			axes.push(numeric);
+			axes.push(DHIS.util.chart.def.axis.getCategory(project));
+			
+			DHIS.util.chart.def.series.setTheme(project);
+			project.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
+			
             DHIS.projects[project.state.conf.el] = project;
         },
         stackedcolumn: function(project) {
@@ -810,14 +859,14 @@ Ext.onReady( function() {
                         type: 'Category',
                         position: 'left',
                         fields: project.store.left,
-                        label: DHIS.util.chart.bar.getCategoryLabel()
+                        label: DHIS.util.chart.bar.label.getCategory()
                     },
                     {
                         type: 'Numeric',
                         position: 'bottom',
                         minimum: 0,
                         fields: project.store.bottom,
-                        label: DHIS.util.chart.def.label.getNumericLabel(project.values),
+                        label: DHIS.util.chart.def.label.getNumeric(project.values),
                         grid: {
                             even: DHIS.util.chart.def.getGrid()
                         }
@@ -859,7 +908,7 @@ Ext.onReady( function() {
                         position: 'left',
                         minimum: 0,
                         fields: project.store.left,
-                        label: DHIS.util.chart.def.label.getNumericLabel(project.values),
+                        label: DHIS.util.chart.def.label.getNumeric(project.values),
                         grid: {
                             even: DHIS.util.chart.def.getGrid()
                         }
@@ -868,7 +917,7 @@ Ext.onReady( function() {
                         type: 'Category',
                         position: 'bottom',
                         fields: project.store.bottom,
-                        label: DHIS.util.chart.def.label.getCategoryLabel()
+                        label: DHIS.util.chart.def.label.getCategory()
                     }
                 ],
                 series: DHIS.util.chart.line.getSeriesArray(project)
@@ -891,7 +940,7 @@ Ext.onReady( function() {
                         position: 'left',
                         minimum: 0,
                         fields: project.store.left,
-                        label: DHIS.util.chart.def.label.getNumericLabel(project.values),
+                        label: DHIS.util.chart.def.label.getNumeric(project.values),
                         grid: {
                             even: DHIS.util.chart.def.getGrid()
                         }
@@ -900,7 +949,7 @@ Ext.onReady( function() {
                         type: 'Category',
                         position: 'bottom',
                         fields: project.store.bottom,
-                        label: DHIS.util.chart.def.label.getCategoryLabel()
+                        label: DHIS.util.chart.def.label.getCategory()
                     }
                 ],
                 series: [{
@@ -944,7 +993,7 @@ Ext.onReady( function() {
                         opacity: 0.9,
 						stroke: '#555'
                     },
-                    tips: DHIS.util.chart.pie.getTips(project.store.left[0])
+                    tips: DHIS.util.chart.pie.series.getTips(project)
                 }]
             });
             
