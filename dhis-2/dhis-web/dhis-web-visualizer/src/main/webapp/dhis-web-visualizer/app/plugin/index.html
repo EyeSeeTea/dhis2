@@ -25,7 +25,7 @@
 			});*/
 			
 			DHIS.getChart({
-				type: 'line',
+				type: 'stackedbar',
 				indicators: ['Uvn6LCg7dVU', 'OdiHJayrsKo'],
 				periods: 'last4Quarters',
 				category: 'period',
@@ -33,11 +33,13 @@
 				organisationunits: ['ImspTQPwCqd'],
 				orgUnitIsParent: false,
 				showData: false,
-				trendLine: true,
+				trendLine: false,
 				hideLegend: false,
 				hideSubtitle: false,
 				targetLineValue: null,
+				targetLineLabel: null,				
 				baseLineValue: null,
+				baseLineLabel: null,	
 				el: 'chart2',
 				url: url
 			});

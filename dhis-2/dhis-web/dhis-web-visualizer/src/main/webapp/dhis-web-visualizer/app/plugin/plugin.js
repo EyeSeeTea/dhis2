@@ -975,43 +975,25 @@ Ext.onReady( function() {
             DHIS.projects[project.state.conf.el] = project;
         },
         area: function(project) {
-            project.chart = Ext.create('Ext.chart.Chart', {
-				renderTo: project.state.conf.el,
-                width: project.state.conf.width || this.el.getWidth(),
-                height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
-                store: project.store,
-                items: DHIS.util.chart.def.getTitle(),
-                legend: DHIS.util.chart.def.getLegend(project.store.left.length),
-                axes: [
-                    {
-                        type: 'Numeric',
-                        position: 'left',
-                        minimum: 0,
-                        fields: project.store.left,
-                        label: DHIS.util.chart.def.label.getNumeric(project.values),
-                        grid: {
-                            even: DHIS.util.chart.def.getGrid()
-                        }
-                    },
-                    {
-                        type: 'Category',
-                        position: 'bottom',
-                        fields: project.store.bottom,
-                        label: DHIS.util.chart.def.label.getCategory()
-                    }
-                ],
-                series: [{
-                    type: 'area',
-                    axis: 'left',
-                    xField: project.store.bottom[0],
-                    yField: project.store.left,
-					style: {
-						opacity: 0.65,
-						stroke: '#555'
-					}
-                }]
-            });
+			var series = [];
+			series.push({
+				type: 'area',
+				axis: 'left',
+				xField: DHIS.conf.finals.data.domain,
+				yField: project.state.series.names,
+				style: {
+					opacity: 0.65,
+					stroke: '#555'
+				}
+			});
+			
+			var axes = [];
+			var numeric = DHIS.util.chart.def.axis.getNumeric(project);
+			axes.push(numeric);
+			axes.push(DHIS.util.chart.def.axis.getCategory(project));
+			
+			DHIS.util.chart.line.series.setTheme(project);
+			this.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
             
             DHIS.projects[project.state.conf.el] = project;
         },
