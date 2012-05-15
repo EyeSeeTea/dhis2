@@ -1051,7 +1051,10 @@ Ext.onReady( function() {
 						}
 						if (DV.c.targetlinevalue) {
 							colors.push('#051a2e');
-						}						
+						}
+						if (DV.c.baselinevalue) {
+							colors.push('#051a2e');
+						}
 						Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
 							constructor: function(config) {
 								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({

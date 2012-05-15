@@ -464,40 +464,49 @@ Ext.onReady( function() {
 				}
             },
             line: {
-                getSeriesArray: function(project) {
-                    var a = [];
-                    for (var i = 0; i < project.state.series.names.length; i++) {
-                        a.push({
-                            type: 'line',
-                            axis: 'left',
-                            xField: DHIS.conf.finals.data.domain,
-                            yField: project.state.series.names[i],
-							style: {
-								opacity: 0.8,
-								lineWidth: 3
-							},
-							tips: DHIS.util.chart.def.series.getTips()
-                        });
-                    }
-                    return a;
-                },
-				setTheme: function(project) {
-					var colors = DV.conf.chart.theme.dv1.slice(0, project.state.series.names.length);
-					if (project.state.conf.trendLine) {
-						colors = colors.concat(colors);
-					}
-					if (project.state.conf.targetLineValue) {
-						colors.push('#051a2e');
-					}						
-					Ext.chart.theme[project.state.conf.el] = Ext.extend(Ext.chart.theme.Base, {
-						constructor: function(config) {
-							Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
-								seriesThemes: colors,
-								colors: colors
-							}, config));
+				series: {
+					getArray: function(project) {
+						var a = [];
+						for (var i = 0; i < project.state.series.names.length; i++) {
+							a.push({
+								type: 'line',
+								axis: 'left',
+								xField: DHIS.conf.finals.data.domain,
+								yField: project.state.series.names[i],
+								style: {
+									opacity: 0.8,
+									lineWidth: 3
+								},
+								markerConfig: {
+									type: 'circle',
+									radius: 4
+								},
+								tips: DHIS.util.chart.def.series.getTips()
+							});
 						}
-					});
-				}
+						return a;
+					},
+					setTheme: function(project) {
+						var colors = DHIS.conf.chart.theme.dv1.slice(0, project.state.series.names.length);
+						if (project.state.conf.trendLine) {
+							colors = colors.concat(colors);
+						}
+						if (project.state.conf.targetLineValue) {
+							colors.push('#051a2e');
+						}
+						if (project.state.conf.baseLineValue) {
+							colors.push('#051a2e');
+						}
+						Ext.chart.theme[project.state.conf.el] = Ext.extend(Ext.chart.theme.Base, {
+							constructor: function(config) {
+								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+									seriesThemes: colors,
+									colors: colors
+								}, config));
+							}
+						});
+					}
+                }
             },
             pie: {
                 getTitle: function(title, subtitle) {
@@ -939,34 +948,29 @@ Ext.onReady( function() {
             this.bar(project, true);
         },
         line: function(project) {
-            project.chart = Ext.create('Ext.chart.Chart', {
-				renderTo: project.state.conf.el,
-                width: project.state.conf.width || this.el.getWidth(),
-                height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
-                store: project.store,
-                items: DHIS.util.chart.def.getTitle(),
-                legend: DHIS.util.chart.def.getLegend(project.store.left.length),
-                axes: [
-                    {
-                        type: 'Numeric',
-                        position: 'left',
-                        minimum: 0,
-                        fields: project.store.left,
-                        label: DHIS.util.chart.def.label.getNumeric(project.values),
-                        grid: {
-                            even: DHIS.util.chart.def.getGrid()
-                        }
-                    },
-                    {
-                        type: 'Category',
-                        position: 'bottom',
-                        fields: project.store.bottom,
-                        label: DHIS.util.chart.def.label.getCategory()
-                    }
-                ],
-                series: DHIS.util.chart.line.getSeriesArray(project)
-            });
+			var series = [];
+			if (project.state.conf.trendLine) {
+				var a = DHIS.util.chart.def.series.getTrendLineArray(project);
+				for (var i = 0; i < a.length; i++) {
+					series.push(a[i]);
+				}
+			}	
+			series = series.concat(DHIS.util.chart.line.series.getArray(project));
+			
+			if (project.state.conf.targetLineValue) {
+				series.push(DHIS.util.chart.def.series.getTargetLine(project));
+			}
+			if (project.state.conf.baseLineValue) {
+				series.push(DHIS.util.chart.def.series.getBaseLine(project));
+			}
+			
+			var axes = [];
+			var numeric = DHIS.util.chart.def.axis.getNumeric(project);
+			axes.push(numeric);
+			axes.push(DHIS.util.chart.def.axis.getCategory(project));
+			
+			DHIS.util.chart.line.series.setTheme(project);
+			this.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
             
             DHIS.projects[project.state.conf.el] = project;
         },
