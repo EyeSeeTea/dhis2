@@ -196,9 +196,9 @@ Ext.onReady( function() {
 						renderTo: project.state.conf.el,
 						animate: true,
 						store: project.store,
-						insetPadding: DHIS.conf.chart.style.inset,
-						items: DHIS.util.chart.def.getTitle(project),
-						legend: DHIS.util.chart.def.getLegend(project.store.range.length),
+						insetPadding: DHIS.conf.chart.style.inset,						
+						items: project.state.conf.hideSubtitle ? false : DHIS.util.chart.def.getTitle(project),
+						legend: project.state.conf.hideLegend ? false : DHIS.util.chart.def.getLegend(project.store.range.length),
 						width: project.state.conf.width || elWidth,
 						height: project.state.conf.height || elHeight,
 						axes: axes,
@@ -644,7 +644,6 @@ Ext.onReady( function() {
             project.state.series.dimension = project.state.conf.series;
             project.state.category.dimension = project.state.conf.category;
             project.state.filter.dimension = project.state.conf.filter;
-            project.state.orgUnitIsParent = project.state.conf.orgUnitIsParent;
             
             DHIS.state.state = project.state;
             
