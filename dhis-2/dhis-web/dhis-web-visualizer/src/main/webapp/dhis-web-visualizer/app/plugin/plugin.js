@@ -248,9 +248,9 @@ Ext.onReady( function() {
 					getTips: function() {
 						return {
 							trackMouse: true,
-							style: 'border-width:2px; background-color:#eee',
+							cls: 'dv-chart-tips',
 							renderer: function(r, item) {
-								this.update('<span style="font-size:21px">' + '' + item.value[1] + '</span>');
+								this.update('' + item.value[1]);
 							}
 						};
 					},
