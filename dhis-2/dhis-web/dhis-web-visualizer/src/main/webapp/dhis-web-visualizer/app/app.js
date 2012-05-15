@@ -1199,7 +1199,7 @@ Ext.onReady( function() {
             },
             allValuesAreIntegers: function(values) {
                 for (var i = 0; i < values.length; i++) {
-                    if (!this.isInteger(values[i].v)) {
+                    if (!this.isInteger(values[i].value)) {
                         return false;
                     }
                 }
