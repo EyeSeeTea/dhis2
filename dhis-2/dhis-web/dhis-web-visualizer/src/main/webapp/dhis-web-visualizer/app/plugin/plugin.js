@@ -398,8 +398,21 @@ Ext.onReady( function() {
 				label: {
 					getCategory: function() {
 						return {
-							font: '11px arial'
+							font: '11px ' + DHIS.conf.chart.style.font
 						};
+					}
+				},
+				axis: {
+					getNumeric: function(project) {
+						var num = DHIS.util.chart.def.axis.getNumeric(project);
+						num.position = 'bottom';
+						return num;
+					},
+					getCategory: function(project) {
+						var cat = DHIS.util.chart.def.axis.getCategory(project);
+						cat.position = 'left';
+						cat.label = DHIS.util.chart.bar.label.getCategory();
+						return cat;
 					}
 				},
                 series: {
@@ -411,6 +424,42 @@ Ext.onReady( function() {
 								this.update('' + item.value[0]);
 							}
 						};
+					},
+					getTargetLine: function(project) {
+						var line = DHIS.util.chart.def.series.getTargetLine(project);
+						line.axis = 'bottom';
+						line.xField = DHIS.conf.finals.data.targetline;
+						line.yField = DHIS.conf.finals.data.domain;
+						return line;
+					},
+					getBaseLine: function(project) {
+						var line = DHIS.util.chart.def.series.getBaseLine(project);
+						line.axis = 'bottom';
+						line.xField = DHIS.conf.finals.data.baseline;
+						line.yField = DHIS.conf.finals.data.domain;
+						return line;
+					},
+					getTrendLineArray: function(project) {
+						var a = [];
+						for (var i = 0; i < project.trendline.length; i++) {
+							a.push({
+								type: 'line',
+								axis: 'bottom',
+								xField: project.trendline[i].key,
+								yField: DHIS.conf.finals.data.domain,
+								style: {
+									opacity: 0.8,
+									lineWidth: 3
+								},
+								markerConfig: {
+									type: 'circle',
+									radius: 4
+								},
+								tips: DHIS.util.chart.bar.series.getTips(),
+								title: project.trendline[i].name
+							});
+						}
+						return a;
 					}
 				}
             },
@@ -846,48 +895,44 @@ Ext.onReady( function() {
             this.column(project, true);
         },
         bar: function(project, isStacked) {
-            project.chart = Ext.create('Ext.chart.Chart', {
-				renderTo: project.state.conf.el,
-                width: project.state.conf.width || this.el.getWidth(),
-                height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
-                store: project.store,
-                items: DHIS.util.chart.def.getTitle(),
-                legend: DHIS.util.chart.def.getLegend(project.store.bottom.length),
-                axes: [
-                    {
-                        type: 'Category',
-                        position: 'left',
-                        fields: project.store.left,
-                        label: DHIS.util.chart.bar.label.getCategory()
-                    },
-                    {
-                        type: 'Numeric',
-                        position: 'bottom',
-                        minimum: 0,
-                        fields: project.store.bottom,
-                        label: DHIS.util.chart.def.label.getNumeric(project.values),
-                        grid: {
-                            even: DHIS.util.chart.def.getGrid()
-                        }
-                    }
-                ],
-                series: [
-                    {
-                        type: 'bar',
-                        axis: 'bottom',
-                        xField: project.store.left,
-                        yField: project.store.bottom,
-                        stacked: isStacked,
-						style: {
-							opacity: 0.8,
-							stroke: '#333'
-						},
-						tips: DHIS.util.chart.def.series.getTips()
-                    }
-                ]
-            });
-            
+			var series = [];
+			if (project.state.conf.trendLine) {
+				var a = DHIS.util.chart.bar.series.getTrendLineArray(project);
+				for (var i = 0; i < a.length; i++) {
+					series.push(a[i]);
+				}
+			}
+			var main = {
+				type: 'bar',
+				axis: 'bottom',
+				xField: DHIS.conf.finals.data.domain,
+				yField: project.state.series.names,
+				stacked: isStacked,
+				style: {
+					opacity: 0.8,
+					stroke: '#333'
+				},
+				tips: DHIS.util.chart.def.series.getTips()
+			};
+			if (project.state.conf.showData) {
+				main.label = {display: 'outside', field: project.state.series.names};
+			}
+			series.push(main);
+			if (project.state.conf.targetLineValue) {
+				series.push(DHIS.util.chart.bar.series.getTargetLine(project));
+			}
+			if (project.state.conf.baseLineValue) {
+				series.push(DHIS.util.chart.bar.series.getBaseLine(project));
+			}
+			
+			var axes = [];
+			var numeric = DHIS.util.chart.bar.axis.getNumeric(project, isStacked);
+			axes.push(numeric);
+			axes.push(DHIS.util.chart.bar.axis.getCategory(project));
+			
+			DHIS.util.chart.def.series.setTheme(project);
+			project.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
+			
             DHIS.projects[project.state.conf.el] = project;
         },
         stackedbar: function(project) {
