@@ -83,13 +83,13 @@ Ext.onReady( function() {
     
     DHIS.chart.plugin = {
 		SimpleRegression: function SimpleRegression() {
-			var sumX = 0; // Sum of x values
-			var sumY = 0; // Sum of y values
-			var sumXX = 0; // Total variation in x
-			var sumXY = 0; // Sum of products
-			var n = 0; // Number of observations
-			var xbar = 0; // Mean of accumulated x values, used in updating formulas
-			var ybar = 0; // Mean of accumulated y values, used in updating formulas
+			var sumX = 0;
+			var sumY = 0;
+			var sumXX = 0;
+			var sumXY = 0;
+			var n = 0;
+			var xbar = 0;
+			var ybar = 0;
 			
 			this.addData = function(x, y) {
 				if ( n == 0 ) {
@@ -1098,7 +1098,7 @@ DHIS.table.finals = {
 	}
 };
 
-DHIS.table.tables = []; // element id -> grid panel
+DHIS.table.tables = []; /* element id -> grid panel */
 
 DHIS.table.utils = {
     appendUrlIfTrue: function(url, param, expression) {
@@ -1179,7 +1179,7 @@ DHIS.table.grid = {
 DHIS.table.plain = {
 	getMarkup: function(data) {
 		var html = '<table><tr>';
-		var classMap = []; // Col index -> class markup
+		var classMap = []; /* Col index -> class markup */
 		
 		Ext.Array.each(data.headers, function(header, index) {
 			var clazz = !header.meta ? ' class=\"val\"' : '';	
