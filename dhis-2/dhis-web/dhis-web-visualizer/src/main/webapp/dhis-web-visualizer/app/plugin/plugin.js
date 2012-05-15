@@ -281,7 +281,7 @@ Ext.onReady( function() {
 							type: 'line',
 							axis: 'left',
 							xField: DHIS.conf.finals.data.domain,
-							yField: DHIS.conf.finals.data.targetline,
+							yField: DHIS.conf.finals.data.baseline,
 							style: {
 								opacity: 1,
 								lineWidth: 3,
@@ -339,11 +339,24 @@ Ext.onReady( function() {
 				}
 			},
             bar: {
-                getCategoryLabel: function() {
-                    return {
-                        font: '11px arial'
-                    };
-                }
+				label: {
+					getCategory: function() {
+						return {
+							font: '11px arial'
+						};
+					}
+				},
+                series: {
+					getTips: function() {
+						return {
+							trackMouse: true,
+							cls: 'dv-chart-tips',
+							renderer: function(si, item) {
+								this.update('' + item.value[0]);
+							}
+						};
+					}
+				}
             },
             line: {
                 getSeriesArray: function(project) {
@@ -406,25 +419,27 @@ Ext.onReady( function() {
                         }
                     ];                        
                 },
-                getTips: function(left) {
-                    return {
-                        trackMouse: true,
-						style: 'border-width:2px; background-color:#eee',
-                        renderer: function(item) {
-							this.update('<span style="font-size:14px">' + item.data[DHIS.conf.finals.data.domain] + '<br/><b>' + item.data[left] + '</b></span>');
-                        }
-                    };
-				},
-				setTheme: function(project) {
-					var colors = DV.conf.chart.theme.dv1.slice(0, project.state.category.names.length);
-					Ext.chart.theme[project.state.conf.el] = Ext.extend(Ext.chart.theme.Base, {
-						constructor: function(config) {
-							Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
-								seriesThemes: colors,
-								colors: colors
-							}, config));
-						}
-					});
+                series: {
+					getTips: function(project) {
+						return {
+							trackMouse: true,
+							cls: 'dv-chart-tips-pie',
+							renderer: function(item) {
+								this.update(item.data[DHIS.conf.finals.data.domain] + '<br/><b>' + item.data[project.state.series.names[0]] + '</b>');
+							}
+						};
+					},
+					setTheme: function(project) {
+						var colors = DV.conf.chart.theme.dv1.slice(0, project.state.category.names.length);
+						Ext.chart.theme[project.state.conf.el] = Ext.extend(Ext.chart.theme.Base, {
+							constructor: function(config) {
+								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+									seriesThemes: colors,
+									colors: colors
+								}, config));
+							}
+						});
+					}
 				}
             }
         },
@@ -709,17 +724,17 @@ Ext.onReady( function() {
 				}
 			}
 
-			//if (DV.c.targetlinevalue) {
-				//Ext.Array.each(DV.chart.data, function(item) {
-					//item[DV.conf.finals.data.targetline] = DV.c.targetlinevalue;
-				//});
-			//}
+			if (project.state.conf.targetLineValue) {
+				Ext.Array.each(project.data, function(item) {
+					item[DHIS.conf.finals.data.targetline] = project.state.conf.targetLineValue;
+				});
+			}
 
-			//if (DV.c.baselinevalue) {
-				//Ext.Array.each(DV.chart.data, function(item) {
-					//item[DV.conf.finals.data.baseline] = DV.c.baselinevalue;
-				//});
-			//}
+			if (project.state.conf.baseLineValue) {
+				Ext.Array.each(project.data, function(item) {
+					item[DHIS.conf.finals.data.baseline] = project.state.conf.baseLineValue;
+				});
+			}
                 
 			DHIS.store.getChartStore(project);
         },
@@ -753,12 +768,12 @@ Ext.onReady( function() {
 				main.label = {display: 'outside', field: project.state.series.names};
 			}
 			series.push(main);
-			//if (project.state.conf.targetLineValue) {
-				//series.push(DV.util.chart.def.series.getTargetLine());
-			//}
-			//if (project.state.conf.baseLineValue) {
-				//series.push(DV.util.chart.def.series.getBaseLine());
-			//}
+			if (project.state.conf.targetLineValue) {
+				series.push(DHIS.util.chart.def.series.getTargetLine(project));
+			}
+			if (project.state.conf.baseLineValue) {
+				series.push(DHIS.util.chart.def.series.getBaseLine(project));
+			}
 			DHIS.util.chart.def.series.setTheme(project);
 			
             project.chart = Ext.create('Ext.chart.Chart', {
@@ -810,7 +825,7 @@ Ext.onReady( function() {
                         type: 'Category',
                         position: 'left',
                         fields: project.store.left,
-                        label: DHIS.util.chart.bar.getCategoryLabel()
+                        label: DHIS.util.chart.bar.label.getCategory()
                     },
                     {
                         type: 'Numeric',
@@ -944,7 +959,7 @@ Ext.onReady( function() {
                         opacity: 0.9,
 						stroke: '#555'
                     },
-                    tips: DHIS.util.chart.pie.getTips(project.store.left[0])
+                    tips: DHIS.util.chart.pie.series.getTips(project)
                 }]
             });
             
