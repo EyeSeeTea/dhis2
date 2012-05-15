@@ -1,11 +1,11 @@
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="../../../dhis-web-commons/javascripts/plugin/css/chart.css" />
+    <link rel="stylesheet" type="text/css" href="plugin.css" />
     <script type="text/javascript" src="../../../dhis-web-commons/javascripts/ext/ext-all.js"></script>
-    <script type="text/javascript" src="chart.js"></script>
+    <script type="text/javascript" src="plugin.js"></script>
     
     <style>
-		body {margin: 0 0 0 60px;}
+		body {margin: 0 0 0 60px; font-family: sans-serif}
 		
 		h1 {font-size: 20px; margin: 20px 0;}
 		
@@ -17,22 +17,21 @@
 	<script>
 		Ext.onReady( function() {
 			var url = '../../../'; // http://apps.dhis2.org/dev/
-		
+		/*
 			DHIS.getChart({
 				uid: 'EbRN2VIbPdV',
 				el: 'chart1',
 				url: url
-			});
+			});*/
 			
 			DHIS.getChart({
-				type: 'stackedcolumn',
 				indicators: ['Uvn6LCg7dVU', 'OdiHJayrsKo'],
-				periods: 'thisYear',
-				category: 'organisationunit',
-				filter: 'period',
+				periods: 'last4Quarters',
+				category: 'period',
+				filter: 'organisationunit',
 				organisationunits: ['ImspTQPwCqd'],
-				orgUnitIsParent: true,
-				showData: true,
+				orgUnitIsParent: false,
+				trendLine: true,
 				el: 'chart2',
 				url: url
 			});
@@ -64,9 +63,6 @@
 </head>
 
 <body>
-	<h1>My chart 1</h1>
-	<div id="chart1"></div>
-    
     <h1>My chart 2</h1>
 	<div id="chart2"></div>
 </body>
