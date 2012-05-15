@@ -398,8 +398,21 @@ Ext.onReady( function() {
 				label: {
 					getCategory: function() {
 						return {
-							font: '11px arial'
+							font: '11px ' + DHIS.conf.chart.style.font
 						};
+					}
+				},
+				axis: {
+					getNumeric: function(project) {
+						var num = DHIS.util.chart.def.axis.getNumeric(project);
+						num.position = 'bottom';
+						return num;
+					},
+					getCategory: function(project) {
+						var cat = DHIS.util.chart.def.axis.getCategory(project);
+						cat.position = 'left';
+						cat.label = DHIS.util.chart.bar.label.getCategory();
+						return cat;
 					}
 				},
                 series: {
@@ -411,44 +424,89 @@ Ext.onReady( function() {
 								this.update('' + item.value[0]);
 							}
 						};
+					},
+					getTargetLine: function(project) {
+						var line = DHIS.util.chart.def.series.getTargetLine(project);
+						line.axis = 'bottom';
+						line.xField = DHIS.conf.finals.data.targetline;
+						line.yField = DHIS.conf.finals.data.domain;
+						return line;
+					},
+					getBaseLine: function(project) {
+						var line = DHIS.util.chart.def.series.getBaseLine(project);
+						line.axis = 'bottom';
+						line.xField = DHIS.conf.finals.data.baseline;
+						line.yField = DHIS.conf.finals.data.domain;
+						return line;
+					},
+					getTrendLineArray: function(project) {
+						var a = [];
+						for (var i = 0; i < project.trendline.length; i++) {
+							a.push({
+								type: 'line',
+								axis: 'bottom',
+								xField: project.trendline[i].key,
+								yField: DHIS.conf.finals.data.domain,
+								style: {
+									opacity: 0.8,
+									lineWidth: 3
+								},
+								markerConfig: {
+									type: 'circle',
+									radius: 4
+								},
+								tips: DHIS.util.chart.bar.series.getTips(),
+								title: project.trendline[i].name
+							});
+						}
+						return a;
 					}
 				}
             },
             line: {
-                getSeriesArray: function(project) {
-                    var a = [];
-                    for (var i = 0; i < project.state.series.names.length; i++) {
-                        a.push({
-                            type: 'line',
-                            axis: 'left',
-                            xField: DHIS.conf.finals.data.domain,
-                            yField: project.state.series.names[i],
-							style: {
-								opacity: 0.8,
-								lineWidth: 3
-							},
-							tips: DHIS.util.chart.def.series.getTips()
-                        });
-                    }
-                    return a;
-                },
-				setTheme: function(project) {
-					var colors = DV.conf.chart.theme.dv1.slice(0, project.state.series.names.length);
-					if (project.state.conf.trendLine) {
-						colors = colors.concat(colors);
-					}
-					if (project.state.conf.targetLineValue) {
-						colors.push('#051a2e');
-					}						
-					Ext.chart.theme[project.state.conf.el] = Ext.extend(Ext.chart.theme.Base, {
-						constructor: function(config) {
-							Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
-								seriesThemes: colors,
-								colors: colors
-							}, config));
+				series: {
+					getArray: function(project) {
+						var a = [];
+						for (var i = 0; i < project.state.series.names.length; i++) {
+							a.push({
+								type: 'line',
+								axis: 'left',
+								xField: DHIS.conf.finals.data.domain,
+								yField: project.state.series.names[i],
+								style: {
+									opacity: 0.8,
+									lineWidth: 3
+								},
+								markerConfig: {
+									type: 'circle',
+									radius: 4
+								},
+								tips: DHIS.util.chart.def.series.getTips()
+							});
 						}
-					});
-				}
+						return a;
+					},
+					setTheme: function(project) {
+						var colors = DHIS.conf.chart.theme.dv1.slice(0, project.state.series.names.length);
+						if (project.state.conf.trendLine) {
+							colors = colors.concat(colors);
+						}
+						if (project.state.conf.targetLineValue) {
+							colors.push('#051a2e');
+						}
+						if (project.state.conf.baseLineValue) {
+							colors.push('#051a2e');
+						}
+						Ext.chart.theme[project.state.conf.el] = Ext.extend(Ext.chart.theme.Base, {
+							constructor: function(config) {
+								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+									seriesThemes: colors,
+									colors: colors
+								}, config));
+							}
+						});
+					}
+                }
             },
             pie: {
                 getTitle: function(title, subtitle) {
@@ -486,7 +544,7 @@ Ext.onReady( function() {
 						};
 					},
 					setTheme: function(project) {
-						var colors = DV.conf.chart.theme.dv1.slice(0, project.state.category.names.length);
+						var colors = DHIS.conf.chart.theme.dv1.slice(0, project.state.category.names.length);
 						Ext.chart.theme[project.state.conf.el] = Ext.extend(Ext.chart.theme.Base, {
 							constructor: function(config) {
 								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
@@ -846,127 +904,101 @@ Ext.onReady( function() {
             this.column(project, true);
         },
         bar: function(project, isStacked) {
-            project.chart = Ext.create('Ext.chart.Chart', {
-				renderTo: project.state.conf.el,
-                width: project.state.conf.width || this.el.getWidth(),
-                height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
-                store: project.store,
-                items: DHIS.util.chart.def.getTitle(),
-                legend: DHIS.util.chart.def.getLegend(project.store.bottom.length),
-                axes: [
-                    {
-                        type: 'Category',
-                        position: 'left',
-                        fields: project.store.left,
-                        label: DHIS.util.chart.bar.label.getCategory()
-                    },
-                    {
-                        type: 'Numeric',
-                        position: 'bottom',
-                        minimum: 0,
-                        fields: project.store.bottom,
-                        label: DHIS.util.chart.def.label.getNumeric(project.values),
-                        grid: {
-                            even: DHIS.util.chart.def.getGrid()
-                        }
-                    }
-                ],
-                series: [
-                    {
-                        type: 'bar',
-                        axis: 'bottom',
-                        xField: project.store.left,
-                        yField: project.store.bottom,
-                        stacked: isStacked,
-						style: {
-							opacity: 0.8,
-							stroke: '#333'
-						},
-						tips: DHIS.util.chart.def.series.getTips()
-                    }
-                ]
-            });
-            
+			var series = [];
+			if (project.state.conf.trendLine) {
+				var a = DHIS.util.chart.bar.series.getTrendLineArray(project);
+				for (var i = 0; i < a.length; i++) {
+					series.push(a[i]);
+				}
+			}
+			var main = {
+				type: 'bar',
+				axis: 'bottom',
+				xField: DHIS.conf.finals.data.domain,
+				yField: project.state.series.names,
+				stacked: isStacked,
+				style: {
+					opacity: 0.8,
+					stroke: '#333'
+				},
+				tips: DHIS.util.chart.def.series.getTips()
+			};
+			if (project.state.conf.showData) {
+				main.label = {display: 'outside', field: project.state.series.names};
+			}
+			series.push(main);
+			if (project.state.conf.targetLineValue) {
+				series.push(DHIS.util.chart.bar.series.getTargetLine(project));
+			}
+			if (project.state.conf.baseLineValue) {
+				series.push(DHIS.util.chart.bar.series.getBaseLine(project));
+			}
+			
+			var axes = [];
+			var numeric = DHIS.util.chart.bar.axis.getNumeric(project, isStacked);
+			axes.push(numeric);
+			axes.push(DHIS.util.chart.bar.axis.getCategory(project));
+			
+			DHIS.util.chart.def.series.setTheme(project);
+			project.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
+			
             DHIS.projects[project.state.conf.el] = project;
         },
         stackedbar: function(project) {
             this.bar(project, true);
         },
         line: function(project) {
-            project.chart = Ext.create('Ext.chart.Chart', {
-				renderTo: project.state.conf.el,
-                width: project.state.conf.width || this.el.getWidth(),
-                height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
-                store: project.store,
-                items: DHIS.util.chart.def.getTitle(),
-                legend: DHIS.util.chart.def.getLegend(project.store.left.length),
-                axes: [
-                    {
-                        type: 'Numeric',
-                        position: 'left',
-                        minimum: 0,
-                        fields: project.store.left,
-                        label: DHIS.util.chart.def.label.getNumeric(project.values),
-                        grid: {
-                            even: DHIS.util.chart.def.getGrid()
-                        }
-                    },
-                    {
-                        type: 'Category',
-                        position: 'bottom',
-                        fields: project.store.bottom,
-                        label: DHIS.util.chart.def.label.getCategory()
-                    }
-                ],
-                series: DHIS.util.chart.line.getSeriesArray(project)
-            });
+			var series = [];
+			if (project.state.conf.trendLine) {
+				var a = DHIS.util.chart.def.series.getTrendLineArray(project);
+				for (var i = 0; i < a.length; i++) {
+					series.push(a[i]);
+				}
+			}	
+			series = series.concat(DHIS.util.chart.line.series.getArray(project));
+			
+			if (project.state.conf.targetLineValue) {
+				series.push(DHIS.util.chart.def.series.getTargetLine(project));
+			}
+			if (project.state.conf.baseLineValue) {
+				series.push(DHIS.util.chart.def.series.getBaseLine(project));
+			}
+			
+			var axes = [];
+			var numeric = DHIS.util.chart.def.axis.getNumeric(project);
+			axes.push(numeric);
+			axes.push(DHIS.util.chart.def.axis.getCategory(project));
+			
+			DHIS.util.chart.line.series.setTheme(project);
+			project.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
             
             DHIS.projects[project.state.conf.el] = project;
         },
         area: function(project) {
-            project.chart = Ext.create('Ext.chart.Chart', {
-				renderTo: project.state.conf.el,
-                width: project.state.conf.width || this.el.getWidth(),
-                height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
-                store: project.store,
-                items: DHIS.util.chart.def.getTitle(),
-                legend: DHIS.util.chart.def.getLegend(project.store.left.length),
-                axes: [
-                    {
-                        type: 'Numeric',
-                        position: 'left',
-                        minimum: 0,
-                        fields: project.store.left,
-                        label: DHIS.util.chart.def.label.getNumeric(project.values),
-                        grid: {
-                            even: DHIS.util.chart.def.getGrid()
-                        }
-                    },
-                    {
-                        type: 'Category',
-                        position: 'bottom',
-                        fields: project.store.bottom,
-                        label: DHIS.util.chart.def.label.getCategory()
-                    }
-                ],
-                series: [{
-                    type: 'area',
-                    axis: 'left',
-                    xField: project.store.bottom[0],
-                    yField: project.store.left,
-					style: {
-						opacity: 0.65,
-						stroke: '#555'
-					}
-                }]
-            });
+			var series = [];
+			series.push({
+				type: 'area',
+				axis: 'left',
+				xField: DHIS.conf.finals.data.domain,
+				yField: project.state.series.names,
+				style: {
+					opacity: 0.65,
+					stroke: '#555'
+				}
+			});
+			
+			var axes = [];
+			var numeric = DHIS.util.chart.def.axis.getNumeric(project);
+			axes.push(numeric);
+			axes.push(DHIS.util.chart.def.axis.getCategory(project));
+			
+			DHIS.util.chart.line.series.setTheme(project);
+			project.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
             
             DHIS.projects[project.state.conf.el] = project;
         },
         pie: function(project) {
+			DHIS.util.chart.pie.series.setTheme(project);
             project.chart = Ext.create('Ext.chart.Chart', {
 				renderTo: project.state.conf.el,
                 width: project.state.conf.width || this.el.getWidth(),
@@ -975,14 +1007,14 @@ Ext.onReady( function() {
                 shadow: true,
                 store: project.store,
                 insetPadding: 60,
-                items: DHIS.util.chart.pie.getTitle(project.state.filter.names[0], project.store.left[0]),
-                legend: DHIS.util.chart.def.getLegend(project.state.category.names.length),
+                items: project.state.conf.hideSubtitle ? false : DHIS.util.chart.pie.getTitle(project.state.filter.names[0], project.store.range[0]),
+                legend: project.state.conf.hideLegend ? false : DHIS.util.chart.def.getLegend(project.state.category.names.length),
                 series: [{
                     type: 'pie',
-                    field: project.store.left[0],
+                    field: project.state.series.names[0],
                     showInLegend: true,
                     label: {
-                        field: project.store.bottom[0]
+                        field: DHIS.conf.finals.data.domain
                     },
                     highlight: {
                         segment: {
@@ -994,7 +1026,8 @@ Ext.onReady( function() {
 						stroke: '#555'
                     },
                     tips: DHIS.util.chart.pie.series.getTips(project)
-                }]
+                }],
+                theme: project.state.conf.el
             });
             
             DHIS.projects[project.state.conf.el] = project;
