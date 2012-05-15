@@ -44,9 +44,17 @@ import org.hisp.dhis.api.utils.IdentifiableObjectParams;
 import org.hisp.dhis.api.utils.WebLinkPopulator;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.i18n.I18nManager;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Cal;
+import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.reporttable.ReportTables;
@@ -80,6 +88,15 @@ public class ReportTableController
     @Autowired
     private OrganisationUnitService organisationUnitService;
 
+    @Autowired
+    private IndicatorService indicatorService;
+    
+    @Autowired
+    private DataElementService dataElementService;
+    
+    @Autowired
+    private DataSetService dataSetService;
+    
     @Autowired
     private I18nManager i18nManager;
 
@@ -140,6 +157,67 @@ public class ReportTableController
         return "reportTable";
     }
 
+    @RequestMapping( value = "/data", method = RequestMethod.GET )
+    public String getReportTableDynamicData( @RequestParam(required=false, value="in") List<String> indicators,
+                                             @RequestParam(required=false, value="de") List<String> dataElements,
+                                             @RequestParam(required=false, value="ds") List<String> dataSets,
+                                             @RequestParam(value="ou") List<String> orgUnits,
+                                             @RequestParam(required=false, value="crosstab") List<String> crossTab,
+                                             @RequestParam(required=false) boolean orgUnitIsParent,
+                                             @RequestParam(required=false) boolean minimal,
+                                             RelativePeriods relatives,
+                                             Model model, 
+                                             HttpServletResponse response ) throws Exception
+    {
+        List<Indicator> indicators_ = indicatorService.getIndicatorsByUid( indicators );
+        List<DataElement> dataElements_ = dataElementService.getDataElementsByUid( dataElements );
+        List<DataSet> dataSets_ = dataSetService.getDataSetsByUid( dataSets );
+        List<OrganisationUnit> organisationUnits = organisationUnitService.getOrganisationUnitsByUid( orgUnits );
+        
+        if ( indicators_.isEmpty() && dataElements_.isEmpty() && dataSets_.isEmpty() )
+        {
+            ContextUtils.conflictResponse( response, "No valid indicators, data elements or data sets specified" );
+            return null;
+        }
+        
+        if ( orgUnitIsParent )
+        {
+            List<OrganisationUnit> childUnits = new ArrayList<OrganisationUnit>();
+            
+            for ( OrganisationUnit unit : organisationUnits )
+            {
+                childUnits.addAll( unit.getChildren() );
+            }
+            
+            organisationUnits = childUnits;
+        }
+        
+        if ( organisationUnits.isEmpty() )
+        {
+            ContextUtils.conflictResponse( response, "No valid organisation units specified" );
+            return null;
+        }
+        
+        ReportTable table = new ReportTable();
+        
+        table.setIndicators( indicators_ );
+        table.setDataElements( dataElements_ );
+        table.setUnits( organisationUnits );
+        
+        table.setDoIndicators( crossTab != null && crossTab.contains( "data" ) );
+        table.setDoPeriods( crossTab != null && crossTab.contains( "periods" ) );
+        table.setDoUnits( crossTab != null && crossTab.contains( "orgunits" ) );
+        
+        table.setRelatives( relatives );
+        
+        Grid grid = reportTableService.getReportTableGrid( table, i18nManager.getI18nFormat(), new Date(), null, minimal );
+
+        model.addAttribute( "model", grid );
+        model.addAttribute( "view", "detailed" );
+        
+        return "reportTableData";
+    }
+        
     @RequestMapping( value = "/{uid}/data", method = RequestMethod.GET )
     public String getReportTableData( @PathVariable( "uid" ) String uid, Model model,
                                       @RequestParam( value = "ou", required = false ) String organisationUnitUid,

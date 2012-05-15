@@ -9,25 +9,62 @@
       <h2> <xsl:value-of select="@name" /> </h2>
 	  
 	  <table>
-		<tr>
-			<td>Resource Data</td>
-			<td><a href="{@link}/data.html">html</a></td>
-			<td><a href="{@link}/data.xml">xml</a></td>
-			<td><a href="{@link}/data.json">json</a></td>
-			<td><a href="{@link}/data.pdf">pdf</a></td>
-			<td><a href="{@link}/data.xls">xls</a></td>
-			<td><a href="{@link}/data.csv">csv</a></td>
-		</tr>
-		<tr>
-			<td>ou</td>
-			<td colspan="4">organisation unit uid (opt)</td>
-		</tr>
-		<tr>
-			<td>pe</td>
-			<td colspan="4">period yyyy-MM-dd (opt)</td>
-		</tr>
+      <tr>
+        <td>Resource Data</td>
+        <td><a href="{@link}/data.html">html</a></td>
+        <td><a href="{@link}/data.xml">xml</a></td>
+        <td><a href="{@link}/data.json">json</a></td>
+        <td><a href="{@link}/data.pdf">pdf</a></td>
+        <td><a href="{@link}/data.xls">xls</a></td>
+        <td><a href="{@link}/data.csv">csv</a></td>
+      </tr>
+
+      <tr>
+        <td>ou</td>
+        <td colspan="4">organisation unit uid (opt)</td>
+      </tr>
+
+      <tr>
+        <td>pe</td>
+        <td colspan="4">period yyyy-MM-dd (opt)</td>
+      </tr>
 	  </table><br/>
-	  	  
+
+	  <table>
+      <tr>
+        <td>Dynamic Data</td>
+        <td><a href="data.json">json</a></td>
+      </tr>
+      <tr>
+        <td>in</td>
+        <td>indicator uids</td>
+      </tr>
+      <tr>
+        <td>de</td>
+        <td>data element uids</td>
+      </tr>
+      <tr>
+        <td>ds</td>
+        <td>data set uids</td>
+      </tr>
+      <tr>
+        <td>ou</td>
+        <td>org unit uids</td>
+      </tr>
+      <tr>
+        <td>crosstab</td>
+        <td>crosstab dimensions</td>
+      </tr>
+      <tr>
+        <td>orgUnitIsParent</td>
+        <td>org unit is parent</td>
+      </tr>
+      <tr>
+        <td>[relative periods]</td>
+        <td>[boolean values]</td>
+      </tr>
+      </table><br/>
+	  
       <table>
         <tr>
           <td>ID</td>
@@ -63,7 +100,7 @@
         </tr>
       </table>
 
-      <xsl:apply-templates select="d:reportParams|d:indicators|d:dataElements|d:dataSets|d:categoryOptionCombos|d:organisationUnits" mode="short"/>
+      <xsl:apply-templates select="d:reportParams|d:indicators|d:dataElements|d:dataSets|d:categoryOptionCombos|d:organisationUnits" mode="short" />
     </div>
   </xsl:template>
 

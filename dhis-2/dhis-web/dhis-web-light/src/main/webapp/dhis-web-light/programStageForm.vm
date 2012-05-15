@@ -13,6 +13,7 @@
 
 <form action="saveProgramStageForm.action" method="POST">
 
+<input type="hidden" value=$programInstanceId name="programInstanceId"/>
 <input type="hidden" value=$programStageInstanceId name="programStageInstanceId"/>
 <input type="hidden" value=$programStageId name="programStageId"/>
 <input type="hidden" value=$orgUnitId name="orgUnitId"/>
@@ -105,7 +106,7 @@
 <div id="footer">
 <h2>$i18n.getString( "navigate_to" )</h2>
 <ul>
-	<li> <a href="selectActivity.action?organisationUnitId=$orgUnitId&beneficiaryId=$beneficiaryId&current=$current"> $i18n.getString("activity_list") </a> </li>
+	<li><a href="trackingMenu.action"> $i18n.getString("tracking_menu")</a></li>
 	<li><a href="index.action">$i18n.getString("home")</a></li>
 </ul>
 </div>

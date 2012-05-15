@@ -27,7 +27,10 @@
 
 package org.hisp.dhis.light.namebaseddataentry.action;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.hisp.dhis.api.mobile.model.Activity;
 import org.hisp.dhis.api.mobile.model.ActivityPlan;
 import org.hisp.dhis.api.mobile.model.DataElement;
@@ -36,12 +39,16 @@ import org.hisp.dhis.api.mobile.model.ProgramStage;
 import org.hisp.dhis.light.utils.NamebasedUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.patientdatavalue.PatientDataValue;
+import org.hisp.dhis.patientdatavalue.PatientDataValueService;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 
 import com.opensymphony.xwork2.Action;
 
 public class GetProgramStageFormAction
     implements Action
 {
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -65,18 +72,55 @@ public class GetProgramStageFormAction
         return util;
     }
 
+    private ProgramStageInstanceService programStageInstanceService;
+
+    public ProgramStageInstanceService getProgramStageInstanceService()
+    {
+        return programStageInstanceService;
+    }
+
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
+    {
+        this.programStageInstanceService = programStageInstanceService;
+    }
+    
+    private PatientDataValueService patientDataValueService;
+    
+    public PatientDataValueService getPatientDataValueService()
+    {
+        return patientDataValueService;
+    }
+
+    public void setPatientDataValueService( PatientDataValueService patientDataValueService )
+    {
+        this.patientDataValueService = patientDataValueService;
+    }
+    
+
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private String programStageInstanceId;
+    private int programInstanceId;
 
-    public String getProgramStageInstanceId()
+    public int getProgramInstanceId()
+    {
+        return programInstanceId;
+    }
+
+    public void setProgramInstanceId( int programInstanceId )
+    {
+        this.programInstanceId = programInstanceId;
+    }
+    
+    private int programStageInstanceId;
+    
+    public int getProgramStageInstanceId()
     {
         return programStageInstanceId;
     }
 
-    public void setProgramStageInstanceId( String programStageInstanceId )
+    public void setProgramStageInstanceId( int programStageInstanceId )
     {
         this.programStageInstanceId = programStageInstanceId;
     }
@@ -99,8 +143,7 @@ public class GetProgramStageFormAction
     {
         return this.organisationUnit;
     }
-    
-    
+
     public void setOrganisationUnit( OrganisationUnit organisationUnit )
     {
         this.organisationUnit = organisationUnit;
@@ -176,9 +219,16 @@ public class GetProgramStageFormAction
     {
         return this.program;
     }
-    
+
     private boolean current;
     
+    private Map<String, String> prevDataValues = new HashMap<String, String>();
+
+    public Map<String, String> getPrevDataValues()
+    {
+        return prevDataValues;
+    }
+
     // -------------------------------------------------------------------------
     // Action Implementation
     // -------------------------------------------------------------------------
@@ -197,12 +247,17 @@ public class GetProgramStageFormAction
     public String execute()
         throws Exception
     {
-        organisationUnit = organisationUnitService.getOrganisationUnit( Integer.parseInt( orgUnitId ) );
-
+        // organisationUnit = organisationUnitService.getOrganisationUnit(
+        // Integer.parseInt( orgUnitId ) );
+        prevDataValues.clear();
         programStage = util.getProgramStage( Integer.parseInt( programId ), Integer.parseInt( programStageId ) );
-
         dataElements = programStage.getDataElements();
-
+        Collection<PatientDataValue> patientDataValues =  patientDataValueService.getPatientDataValues( programStageInstanceService.getProgramStageInstance( programStageInstanceId ) );
+        for (PatientDataValue patientDataValue : patientDataValues) {
+            prevDataValues.put( "DE" + patientDataValue.getDataElement().getId() + "OC" + 4, patientDataValue.getValue() );
+        }
+        
         return SUCCESS;
+
     }
 }

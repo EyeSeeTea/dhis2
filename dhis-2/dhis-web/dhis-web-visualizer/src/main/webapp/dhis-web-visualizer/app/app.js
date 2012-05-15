@@ -3009,6 +3009,7 @@ Ext.onReady( function() {
 									{
 										title: '<div style="height:17px">' + DV.i18n.periods + '</div>',
 										hideCollapseTool: true,
+										autoScroll: true,
 										items: [
 											{
 												xtype: 'panel',

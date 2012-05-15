@@ -3,88 +3,85 @@ package org.hisp.dhis.coldchain.inventory.hibernate;
 import java.util.Collection;
 
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.coldchain.inventory.EquipmentDetails;
-import org.hisp.dhis.coldchain.inventory.EquipmentDetailsStore;
+import org.hisp.dhis.coldchain.inventory.Equipment;
 import org.hisp.dhis.coldchain.inventory.EquipmentInstance;
-import org.hisp.dhis.coldchain.inventory.InventoryType;
+import org.hisp.dhis.coldchain.inventory.EquipmentStore;
 import org.hisp.dhis.coldchain.inventory.InventoryTypeAttribute;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 
-public class HibernateEquipmentDetailsStore implements EquipmentDetailsStore
+public class HibernateEquipmentStore implements EquipmentStore
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
+    
     private SessionFactory sessionFactory;
 
     public void setSessionFactory( SessionFactory sessionFactory )
     {
         this.sessionFactory = sessionFactory;
     }
-
+    
     // -------------------------------------------------------------------------
     // EquipmentDetails
     // -------------------------------------------------------------------------
-
+    
     @Override
-    public void addEquipmentDetails( EquipmentDetails equipmentDetails )
+    public void addEquipment( Equipment equipment )
     {
         Session session = sessionFactory.getCurrentSession();
 
-        session.save( equipmentDetails );
+        session.save( equipment );
     }
 
     @Override
-    public void deleteEquipmentDetails( EquipmentDetails equipmentDetails )
+    public void deleteEquipment( Equipment equipment )
     {
         Session session = sessionFactory.getCurrentSession();
 
-        session.delete( equipmentDetails );
+        session.delete( equipment );
     }
 
     @Override
-    public Collection<EquipmentDetails> getAllEquipmentDetails()
+    public Collection<Equipment> getAllEquipments()
     {
         Session session = sessionFactory.getCurrentSession();
 
-        return session.createCriteria( EquipmentDetails.class ).list();
+        return session.createCriteria( Equipment.class ).list();
     }
 
     @Override
-    public void updateEquipmentDetails( EquipmentDetails equipmentDetails )
+    public void updateEquipment( Equipment equipment )
     {
         Session session = sessionFactory.getCurrentSession();
 
-        session.update( equipmentDetails );
+        session.update( equipment );
     }
     
-    public Collection<EquipmentDetails> getEquipmentDetails( EquipmentInstance equipmentInstance )
+    
+    public Collection<Equipment> getEquipments( EquipmentInstance equipmentInstance )
     {
         Session session = sessionFactory.getCurrentSession();
         
-        Criteria criteria = session.createCriteria( EquipmentDetails.class );
+        Criteria criteria = session.createCriteria( Equipment.class );
         
         criteria.add( Restrictions.eq( "equipmentInstance", equipmentInstance ) );
         
         return criteria.list();
     }
 
-    public EquipmentDetails getEquipmentDetails( EquipmentInstance equipmentInstance, InventoryTypeAttribute inventoryTypeAttribute )
+    public Equipment getEquipment( EquipmentInstance equipmentInstance, InventoryTypeAttribute inventoryTypeAttribute )
     {
         Session session = sessionFactory.getCurrentSession();
         
-        Criteria criteria = session.createCriteria( EquipmentDetails.class );
+        Criteria criteria = session.createCriteria( Equipment.class );
         
         criteria.add( Restrictions.eq( "equipmentInstance", equipmentInstance ) );
         criteria.add( Restrictions.eq( "inventoryTypeAttribute", inventoryTypeAttribute ) );
         
-        return (EquipmentDetails) criteria.uniqueResult();
+        return (Equipment) criteria.uniqueResult();
     }
-
     
 }
