@@ -544,7 +544,7 @@ Ext.onReady( function() {
 						};
 					},
 					setTheme: function(project) {
-						var colors = DV.conf.chart.theme.dv1.slice(0, project.state.category.names.length);
+						var colors = DHIS.conf.chart.theme.dv1.slice(0, project.state.category.names.length);
 						Ext.chart.theme[project.state.conf.el] = Ext.extend(Ext.chart.theme.Base, {
 							constructor: function(config) {
 								Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
@@ -970,7 +970,7 @@ Ext.onReady( function() {
 			axes.push(DHIS.util.chart.def.axis.getCategory(project));
 			
 			DHIS.util.chart.line.series.setTheme(project);
-			this.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
+			project.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
             
             DHIS.projects[project.state.conf.el] = project;
         },
@@ -993,11 +993,12 @@ Ext.onReady( function() {
 			axes.push(DHIS.util.chart.def.axis.getCategory(project));
 			
 			DHIS.util.chart.line.series.setTheme(project);
-			this.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
+			project.chart = DHIS.util.chart.def.getChart(project, axes, series, this.el.getWidth(), this.el.getHeight());
             
             DHIS.projects[project.state.conf.el] = project;
         },
         pie: function(project) {
+			DHIS.util.chart.pie.series.setTheme(project);
             project.chart = Ext.create('Ext.chart.Chart', {
 				renderTo: project.state.conf.el,
                 width: project.state.conf.width || this.el.getWidth(),
@@ -1006,14 +1007,14 @@ Ext.onReady( function() {
                 shadow: true,
                 store: project.store,
                 insetPadding: 60,
-                items: DHIS.util.chart.pie.getTitle(project.state.filter.names[0], project.store.left[0]),
-                legend: DHIS.util.chart.def.getLegend(project.state.category.names.length),
+                items: project.state.conf.hideSubtitle ? false : DHIS.util.chart.pie.getTitle(project.state.filter.names[0], project.store.range[0]),
+                legend: project.state.conf.hideLegend ? false : DHIS.util.chart.def.getLegend(project.state.category.names.length),
                 series: [{
                     type: 'pie',
-                    field: project.store.left[0],
+                    field: project.state.series.names[0],
                     showInLegend: true,
                     label: {
-                        field: project.store.bottom[0]
+                        field: DHIS.conf.finals.data.domain
                     },
                     highlight: {
                         segment: {
@@ -1025,7 +1026,8 @@ Ext.onReady( function() {
 						stroke: '#555'
                     },
                     tips: DHIS.util.chart.pie.series.getTips(project)
-                }]
+                }],
+                theme: project.state.conf.el
             });
             
             DHIS.projects[project.state.conf.el] = project;
