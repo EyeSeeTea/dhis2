@@ -17,28 +17,28 @@
 	<script>
 		Ext.onReady( function() {
 			var url = '../../../'; // http://apps.dhis2.org/dev/
-		/*
+		
 			DHIS.getChart({
 				uid: 'EbRN2VIbPdV',
 				el: 'chart1',
 				url: url
-			});*/
+			});
 			
 			DHIS.getChart({
-				type: 'pie',
+				type: 'stackedcolumn',
 				indicators: ['Uvn6LCg7dVU'],
-				periods: 'last4Quarters',
+				periods: 'last12Months',
 				category: 'period',
 				filter: 'organisationunit',
 				organisationunits: ['ImspTQPwCqd'],
 				orgUnitIsParent: false,
-				showData: false,
-				trendLine: false,
+				showData: true,
+				trendLine: true,
 				hideLegend: false,
 				hideSubtitle: false,
-				targetLineValue: null,
+				targetLineValue: 80,
 				targetLineLabel: null,				
-				baseLineValue: null,
+				baseLineValue: 20,
 				baseLineLabel: null,	
 				el: 'chart2',
 				url: url
@@ -57,12 +57,19 @@
 	dataelements        [integer]                           (Required*) Data element uids. Required if no indicators are provided.
 	periods             [string]        'last12Months'      (Optional) Relative period names.
 	organisationunits   [integer]                           (Required) Organisation unit uids.
-	series              string          'data'              (Optional) Series: 'data', 'period' or 'organisationunit'
-	category            string          'period'            (Optional) Category: 'indicator', 'dataelement', 'period' or 'organisationunit'
-	filter              string          'organisationunit'  (Optional) Filter: 'indicator', 'dataelement', 'period' or 'organisationunit'
-	orgUnitIsParent		boolean			false				(Optional) If true, the children of the provided orgunit are displayed
-	showData			boolean			false				(Optional) If true, the exact data will be displayed on the chart
-	legendPosition      string          'top'               (Optional) Positions: 'top', 'right', 'bottom' or 'left'
+	series              string          'data'              (Optional) Series: 'data', 'period' or 'organisationunit'.
+	category            string          'period'            (Optional) Category: 'indicator', 'dataelement', 'period' or 'organisationunit'.
+	filter              string          'organisationunit'  (Optional) Filter: 'indicator', 'dataelement', 'period' or 'organisationunit'.
+	orgUnitIsParent		boolean			false				(Optional) If true, the children of the provided orgunit are displayed.
+	showData			boolean			false				(Optional) If true, the exact data are displayed on the chart.
+	trendLine			boolean			false				(Optional) If true, trend line(s) are added.
+	hideLegend			boolean			false				(Optional) If true, the legend is not visible.
+	hideSubtitle		boolean			false				(Optional) If true, the subtitle is not visible.
+	targetLineValue		integer								(Optional) The value of the target line.
+	targetLineLabel		string								(Optional) The legend name of the target line. Requires targetLineValue, otherwise ignored.
+	baseLineValue		integer								(Optional) The value of the base line.
+	baseLineLabel		string								(Optional) The legend name of the base line. Requires baseLineValue, otherwise ignored.
+	legendPosition      string          'top'               (Optional) Positions: 'top', 'right', 'bottom' or 'left'.
 	el                  string                              (Required) The element id to render the chart.
 	width               integer         <el width>          (Optional) Chart width. Default is the element width.
 	height              integer         <el height>         (Optional) Chart height. Default is the element height.
@@ -71,6 +78,9 @@
 </head>
 
 <body>
+    <h1>My chart 1</h1>
+	<div id="chart1"></div>
+	
     <h1>My chart 2</h1>
 	<div id="chart2"></div>
 </body>
