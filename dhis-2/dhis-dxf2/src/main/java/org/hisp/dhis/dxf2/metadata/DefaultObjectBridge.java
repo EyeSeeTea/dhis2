@@ -39,6 +39,7 @@ import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
@@ -58,9 +59,6 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserAuthorityGroup;
-import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,6 +151,7 @@ public class DefaultObjectBridge
         registeredTypes.add( ValidationRuleGroup.class );
 
         registeredTypes.add( DataSet.class );
+        registeredTypes.add( Section.class );
 
         registeredTypes.add( MapView.class );
         registeredTypes.add( MapLayer.class );

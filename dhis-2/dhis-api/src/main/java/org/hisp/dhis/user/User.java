@@ -94,16 +94,6 @@ public class User
     // -------------------------------------------------------------------------
 
     @Override
-    public String toString()
-    {
-        return "[" + surname + " " + firstName + "]";
-    }
-
-    // -------------------------------------------------------------------------
-    // Logic
-    // -------------------------------------------------------------------------
-
-    @Override
     public int hashCode()
     {
         final int prime = 31;
@@ -117,6 +107,10 @@ public class User
 
         return result;
     }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
 
     // TODO fix, users might very well have the same name, should use credentials
 
@@ -382,11 +376,7 @@ public class User
             attributeValues.addAll( user.getAttributeValues() );
 
             removeAllOrganisationUnits();
-
-            for ( OrganisationUnit organisationUnit : user.getOrganisationUnits() )
-            {
-                addOrganisationUnit( organisationUnit );
-            }
+            organisationUnits.addAll( user.getOrganisationUnits() );
         }
     }
 }

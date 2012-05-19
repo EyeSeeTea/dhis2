@@ -200,7 +200,7 @@ Ext.onReady( function() {
 				getChart: function(project, axes, series, elWidth, elHeight) {
 					return Ext.create('Ext.chart.Chart', {
 						renderTo: project.state.conf.el,
-						animate: true,
+						animate: !project.state.conf.skipAnimation,
 						store: project.store,
 						insetPadding: DHIS.chart.conf.chart.style.inset,						
 						items: project.state.conf.hideSubtitle ? false : DHIS.chart.util.chart.def.getTitle(project),
@@ -683,14 +683,17 @@ Ext.onReady( function() {
                 el: '',
                 legendPosition: false,
                 orgUnitIsParent: false,
+                skipAnimation: false,
                 showData: false,
                 trendLine: false,
                 hideLegend: false,
                 hideSubtitle: false,
+                userOrganisationUnit: false,
+                userOrganisationUnitChildren: false,
                 targetLineValue: null,
                 targetLineLabel: null,
                 baseLineValue: null,
-                baseLineLabel: null,                
+                baseLineLabel: null,
                 url: ''
             };
             
@@ -730,6 +733,16 @@ Ext.onReady( function() {
                         conf.series = r.series.toLowerCase();
                         conf.category = r.category.toLowerCase();
                         conf.filter = r.filter.toLowerCase();
+                        conf.showData = r.showData || false,
+						conf.trendLine = r.regression || false,
+						conf.hideLegend = r.hideLegend || false,
+						conf.hideSubtitle = r.hideSubtitle || false,
+						conf.userOrganisationUnit = r.userOrganisationUnit || false,
+						conf.userOrganisationUnitChildren = r.userOrganisationUnitChildren || false,
+						conf.targetLineValue = r.targetLineValue || null,
+						conf.targetLineLabel = r.targetLineLabel || null,
+						conf.baseLineValue = r.baseLineValue || null,
+						conf.baseLineLabel = r.baseLineLabel || null,
                         conf.legendPosition = conf.legendPosition || false;
                         
                         if (r.indicators) {
@@ -754,11 +767,18 @@ Ext.onReady( function() {
             params = params.concat(DHIS.chart.util.dimension[project.state.filter.dimension].getUrl(true));
                         
             var baseUrl = DHIS.chart.util.string.extendUrl(project.state.conf.url) + DHIS.chart.conf.finals.ajax.data_get;
-            baseUrl = DHIS.chart.util.string.appendUrlIfTrue(baseUrl, DHIS.chart.conf.finals.chart.orgUnitIsParent, project.state.orgUnitIsParent);
+            baseUrl = DHIS.chart.util.string.appendUrlIfTrue(baseUrl, DHIS.chart.conf.finals.chart.orgUnitIsParent, project.state.conf.orgUnitIsParent);
             
             Ext.Array.each(params, function(item) {
                 baseUrl = Ext.String.urlAppend(baseUrl, item);
             });
+            
+            if (project.state.conf.userOrganisationUnit) {
+				baseUrl = Ext.String.urlAppend(baseUrl, 'userOrganisationUnit=true');
+			}
+			if (project.state.conf.userOrganisationUnitChildren) {
+				baseUrl = Ext.String.urlAppend(baseUrl, 'userOrganisationUnitChildren=true');
+			}
             
             Ext.data.JsonP.request({
                 url: baseUrl,
@@ -1009,7 +1029,7 @@ Ext.onReady( function() {
 				renderTo: project.state.conf.el,
                 width: project.state.conf.width || this.el.getWidth(),
                 height: project.state.conf.height || this.el.getHeight(),
-                animate: true,
+                animate: !project.state.conf.skipAnimation,
                 shadow: true,
                 store: project.store,
                 insetPadding: 60,
@@ -1078,7 +1098,8 @@ Ext.onReady( function() {
 /* TABLE */
 
 DHIS.table.finals = {
-	dataGet: 'api/reportTables/data.jsonp?minimal=true',
+	tableDataGet: 'api/reportTables/data.jsonp?minimal=true',
+	dynamicDataGet: 'api/reportTables/data',
 	data: 'data',
 	periods: 'periods',
 	orgunits: 'orgunits',
@@ -1092,7 +1113,9 @@ DHIS.table.finals = {
 		orgunits: [],
 		crosstab: ['data'],
 		orgUnitIsParent: false,
+		hiddenCols: [],
 		useExtGrid: false,
+		format: 'html',
 		el: '',
 		url: ''
 	}
@@ -1112,10 +1135,8 @@ DHIS.table.utils = {
     		DHIS.table.tables[el].destroy();
     	}
     },
-    getDataUrl: function(conf) {
-		var url = conf.url + DHIS.table.finals.dataGet;
-		
-		Ext.Array.each(conf.indicators, function(item) {
+    getDataQuery: function(conf,url) {    	
+    	Ext.Array.each(conf.indicators, function(item) {
 			url = Ext.String.urlAppend(url, 'in=' + item);
 		});
 		Ext.Array.each(conf.dataelements, function(item) {
@@ -1134,7 +1155,16 @@ DHIS.table.utils = {
 			url = Ext.String.urlAppend(url, 'crosstab=' + item);
 		});
 		url = DHIS.table.utils.appendUrlIfTrue(url, DHIS.table.finals.orgUnitIsParent, conf.orgUnitIsParent);
+		
 		return url;
+    },
+    getTableDataUrl: function(conf) {
+		var url = conf.url + DHIS.table.finals.tableDataGet;
+		return this.getDataQuery(conf, url);
+	},
+	getDynamicDataUrl: function(conf) {
+		var url = conf.url + DHIS.table.finals.dynamicDataGet + '.' + conf.format;
+		return this.getDataQuery(conf, url);
 	}
 };
 
@@ -1146,10 +1176,12 @@ DHIS.table.grid = {
 		});
 		return headers;
 	},
-	getColumnArray: function(data) {
+	getColumnArray: function(conf,data) {
 		var columns = [];
 		Ext.Array.each(data.headers, function(header, index) {
-			columns.push({text: header.name, dataIndex: header.name});
+			if (!Ext.Array.contains(conf.hiddenCols, index) && !Ext.Array.contains(conf.hiddenCols, header)) {
+				columns.push({text: header.name, dataIndex: header.name});
+			}
 		});
 		return columns;
 	},
@@ -1163,12 +1195,12 @@ DHIS.table.grid = {
 	render: function(conf) {
 		DHIS.table.utils.destroy(conf.el);
 		Ext.data.JsonP.request({
-			url: DHIS.table.utils.getDataUrl(conf),
+			url: DHIS.table.utils.getTableDataUrl(conf),
 			disableCaching: false,
 			success: function(data) {
 				DHIS.table.tables[conf.el] = Ext.create('Ext.grid.Panel', {
 					store: DHIS.table.grid.getStore(data),
-					columns: DHIS.table.grid.getColumnArray(data),
+					columns: DHIS.table.grid.getColumnArray(conf,data),
 					renderTo: conf.el
 				});
 			}
@@ -1203,7 +1235,7 @@ DHIS.table.plain = {
 	},	
 	render: function(conf) {
 		Ext.data.JsonP.request({
-			url: DHIS.table.utils.getDataUrl(conf),
+			url: DHIS.table.utils.getTableDataUrl(conf),
 			disableCaching: false,
 			success: function(data) {
 				var html = DHIS.table.plain.getMarkup(data);
@@ -1216,13 +1248,18 @@ DHIS.table.plain = {
 DHIS.table.impl = {
 	render: function(conf) {
 		conf = Ext.applyIf(conf, DHIS.table.finals.defaultConf);
-		if ( conf.useExtGrid ) {
+		if (conf.useExtGrid) {
 			DHIS.table.grid.render(conf);
 		}
 		else {
 			DHIS.table.plain.render(conf);
 		}
+	},
+	getUrl: function(conf) {
+		conf = Ext.applyIf(conf, DHIS.table.finals.defaultConf);
+		return DHIS.table.utils.getDynamicDataUrl(conf);
 	}
 }
 
 DHIS.getTable = DHIS.table.impl.render;
+DHIS.getUrl = DHIS.table.impl.getUrl;
