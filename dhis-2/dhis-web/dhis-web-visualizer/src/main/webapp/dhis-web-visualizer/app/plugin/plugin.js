@@ -65,7 +65,7 @@ DHIS.chart.conf = {
     }
 };
 
-Ext.onReady( function() {
+//Ext.onReady( function() {
 	
     DHIS.chart.initialize = function() {
         DHIS.chart.store.column = DHIS.chart.store.defaultChartStore;
@@ -1073,7 +1073,7 @@ Ext.onReady( function() {
     };
     
     DHIS.chart.initialize();
-});
+//});
 
 /* TABLE */
 
