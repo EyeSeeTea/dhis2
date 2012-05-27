@@ -1,7 +1,7 @@
-package org.hisp.dhis.api.view;
+package org.hisp.dhis.api.controller;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,42 +27,52 @@ package org.hisp.dhis.api.view;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-import org.hisp.dhis.dxf2.utils.JacksonUtils;
-import org.springframework.web.servlet.view.AbstractView;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.LinkableObject;
+import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.dxf2.metadata.MetaData;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class JacksonXmlView
-    extends AbstractView
+public class WebMetaData
+    extends MetaData
 {
-    private static String CONTENT_TYPE_APPLICATION_XML = "application/xml";
+    private Pager pager;
 
-    public JacksonXmlView()
+    private LinkableObject linkableObject;
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    public Pager getPager()
     {
-        setContentType( CONTENT_TYPE_APPLICATION_XML );
+        return pager;
     }
 
-    @Override
-    protected void renderMergedOutputModel( Map<String, Object> model, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    public void setPager( Pager pager )
     {
-        Object object = model.get( "model" );
-        Class<?> viewClass = JacksonUtils.getViewClass( model.get( "viewClass" ) );
-        response.setContentType( getContentType() );
-        response.setStatus( HttpServletResponse.SC_OK );
+        this.pager = pager;
+    }
 
-        if ( viewClass != null )
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true, namespace = Dxf2Namespace.NAMESPACE )
+    public String getLink()
+    {
+        if ( linkableObject == null )
         {
-            JacksonUtils.toXmlWithView( response.getOutputStream(), object, viewClass );
+            return null;
         }
-        else
+
+        return linkableObject.getLink();
+    }
+
+    public void setLink( String link )
+    {
+        if ( linkableObject != null )
         {
-            JacksonUtils.toXml( response.getOutputStream(), object );
+            linkableObject.setLink( link );
         }
     }
 }
