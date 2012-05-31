@@ -29,10 +29,12 @@ package org.hisp.dhis.light.namebaseddataentry.action;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
+
 import com.opensymphony.xwork2.Action;
 
 public class GetPatientProgramListAction
@@ -70,14 +72,14 @@ public class GetPatientProgramListAction
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private int patientId;
+    private Integer patientId;
 
-    public int getPatientId()
+    public Integer getPatientId()
     {
         return patientId;
     }
 
-    public void setPatientId( int patientId )
+    public void setPatientId( Integer patientId )
     {
         this.patientId = patientId;
     }
@@ -95,7 +97,7 @@ public class GetPatientProgramListAction
     }
 
     private Patient patient;
-    
+
     public Patient getPatient()
     {
         return patient;
@@ -114,12 +116,12 @@ public class GetPatientProgramListAction
         patient = patientService.getPatient( patientId );
         for ( ProgramInstance programInstance : programInstanceService.getProgramInstances( patient ) )
         {
-            if (!programInstance.getProgram().getAnonymous() && !programInstance.getProgram().getSingleEvent()) {
-            programInstances.add( programInstance );
+            if ( !programInstance.getProgram().isSingleEvent() )
+            {
+                programInstances.add( programInstance );
             }
         }
-
+        
         return SUCCESS;
     }
-
 }

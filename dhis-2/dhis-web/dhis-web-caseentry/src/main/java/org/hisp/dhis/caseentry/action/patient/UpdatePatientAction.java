@@ -99,9 +99,7 @@ public class UpdatePatientAction
     private Boolean verified;
 
     private String gender;
-
-    private String bloodGroup;
-
+    
     private String phoneNumber;
 
     private boolean underAge;
@@ -110,6 +108,8 @@ public class UpdatePatientAction
 
     private Integer relationshipTypeId;
 
+    private Character dobType;
+    
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -165,7 +165,6 @@ public class UpdatePatientAction
 
         patient.setGender( gender );
         patient.setIsDead( isDead );
-        patient.setBloodGroup( bloodGroup );
         patient.setPhoneNumber( phoneNumber );
 
         if ( deathDate != null )
@@ -176,13 +175,6 @@ public class UpdatePatientAction
 
         patient.setUnderAge( underAge );
         patient.setOrganisationUnit( organisationUnit );
-
-        Character dobType = (verified) ? 'V' : 'D';
-
-        if ( !verified && age != null )
-        {
-            dobType = 'A';
-        }
 
         if ( dobType == Patient.DOB_TYPE_VERIFIED || dobType == Patient.DOB_TYPE_DECLARED )
         {
@@ -237,7 +229,7 @@ public class UpdatePatientAction
                 else if ( identifier != null )
                 {
                     patient.getIdentifiers().remove( identifier );
-                    patientIdentifierService.deletePatientIdentifier( identifier );
+//                    patientIdentifierService.deletePatientIdentifier( identifier );
                 }
             }
         }
@@ -339,6 +331,11 @@ public class UpdatePatientAction
         this.patientIdentifierTypeService = patientIdentifierTypeService;
     }
 
+    public void setDobType( Character dobType )
+    {
+        this.dobType = dobType;
+    }
+
     public void setFormat( I18nFormat format )
     {
         this.format = format;
@@ -398,12 +395,7 @@ public class UpdatePatientAction
     {
         this.gender = gender;
     }
-
-    public void setBloodGroup( String bloodGroup )
-    {
-        this.bloodGroup = bloodGroup;
-    }
-
+    
     public void setPhoneNumber( String phoneNumber )
     {
         this.phoneNumber = phoneNumber;

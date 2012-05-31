@@ -78,11 +78,29 @@ public class TableAlteror
         executeSql( "ALTER TABLE patientdatavalue DROP COLUMN categoryoptioncomboid" );
         executeSql( "ALTER TABLE patientdatavaluearchive DROP COLUMN providedbyanotherfacility" );
         executeSql( "ALTER TABLE patientdatavaluearchive DROP COLUMN organisationunitid" );
-        executeSql( "ALTER TABLE patientdatavaluearchive DROP COLUMN storedby" );  
-        executeSql( "DROP TABLE patientchart" ); 
-        
-        executeSql( "UPDATE program set hideDateOfIncident=false WHERE hideDateOfIncident is null" );
+        executeSql( "ALTER TABLE patientdatavaluearchive DROP COLUMN storedby" );
+        executeSql( "DROP TABLE patientchart" );
 
+        executeSql( "ALTER TABLE program DROP COLUMN hidedateofincident" );
+
+        executeSql( "UPDATE program SET type=2 where singleevent=true" );
+        executeSql( "UPDATE program SET type=3 where anonymous=true" );
+        executeSql( "ALTER TABLE program DROP COLUMN singleevent" );
+        executeSql( "ALTER TABLE program DROP COLUMN anonymous" );
+        executeSql( "UPDATE program SET type=1 where type is null" );
+        
+        executeSql( "UPDATE programstage set irregular=false where irregular is null" );
+
+        executeSql( "DROP TABLE programattributevalue" );
+        executeSql( "DROP TABLE programinstance_attributes" );
+        executeSql( "DROP TABLE programattributeoption" );
+        executeSql( "DROP TABLE programattribute" );
+
+        executeSql( "ALTER TABLE patientattribute DROP COLUMN noChars" );
+        executeSql( "ALTER TABLE programstageinstance ALTER executiondate TYPE date" );
+        
+        executeSql( "ALTER TABLE patientidentifier ALTER COLUMN patientid DROP NOT NULL" );
+        executeSql( "ALTER TABLE patient DROP COLUMN bloodgroup" );
     }
 
     // -------------------------------------------------------------------------
@@ -99,7 +117,7 @@ public class TableAlteror
 
             ResultSet resultSet = statement
                 .executeQuery( "SELECT distinct programstageinstanceid, organisationunitid, providedByAnotherFacility FROM patientdatavalue" );
-            
+
             while ( resultSet.next() )
             {
                 executeSql( "UPDATE programstageinstance SET organisationunitid=" + resultSet.getInt( 2 )

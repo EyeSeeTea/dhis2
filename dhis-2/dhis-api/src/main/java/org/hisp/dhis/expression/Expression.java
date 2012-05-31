@@ -35,12 +35,14 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -93,12 +95,14 @@ public class Expression
     /**
      * A reference to the DataElements in the Expression.
      */
-    private Set<DataElement> dataElementsInExpression;
+    @Scanned
+    private Set<DataElement> dataElementsInExpression = new HashSet<DataElement>();
 
     /**
      * A reference to the optionCombos in the Expression.
      */
-    private Set<DataElementCategoryOptionCombo> optionCombosInExpression;
+    @Scanned
+    private Set<DataElementCategoryOptionCombo> optionCombosInExpression = new HashSet<DataElementCategoryOptionCombo>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -119,7 +123,7 @@ public class Expression
      * @param dataElementsInExpression A reference to the DataElements in the Expression.
      */
     public Expression( String expression, String description, Set<DataElement> dataElementsInExpression,
-                       Set<DataElementCategoryOptionCombo> optionCombosInExpression )
+        Set<DataElementCategoryOptionCombo> optionCombosInExpression )
     {
         this.expression = expression;
         this.description = description;
@@ -207,7 +211,7 @@ public class Expression
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty
     public String getExpression()
     {
@@ -221,7 +225,7 @@ public class Expression
 
     @JsonProperty( value = "dataElements" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class, ExportView.class} )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "dataElements" )
     @JacksonXmlProperty( localName = "dataElement" )
     public Set<DataElement> getDataElementsInExpression()
@@ -236,7 +240,7 @@ public class Expression
 
     @JsonProperty( value = "categoryOptionCombos" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( {DetailedView.class, ExportView.class} )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "categoryOptionCombos" )
     @JacksonXmlProperty( localName = "categoryOptionCombo" )
     public Set<DataElementCategoryOptionCombo> getOptionCombosInExpression()
@@ -250,7 +254,7 @@ public class Expression
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty
     public String getDescription()
     {

@@ -21,20 +21,19 @@
 			</tr>  
 
 			<tr>
-				<td><label>$i18n.getString( "min_days_from_start" )</label></td>
+				<td><label>$i18n.getString( "scheduled_days_from_start" )</label></td>
 				<td><input type="text" id="minDaysFromStart" name="minDaysFromStart" value="$programStage.minDaysFromStart" class="{validate:{number:true,min:0}}"/></td>
 			</tr> 
 
 			<tr>
-				<td><label>$i18n.getString( "program" )</label></td>
-				<td><input type="text" id="program" name="program" maxlength="30" value="$encoder.htmlEncode( $programStage.program.name )" disabled="disabled"/></td>
-			</tr>     
-			
-			<tr>
-				<td><label>$i18n.getString( "irregular_encounter" )</label></td>
-				<td><input type="checkbox" id="irregular" name="irregular" value='true' #if( $programStage.irregular=='true' ) checked #end/></td>
+				<td><label>$i18n.getString( "repeatable" )</label></td>
+				<td><input type="checkbox" id="irregular" name="irregular" value='true' #if( $programStage.irregular=='true' ) checked #end onchange='repeatableOnChange();' /></td>
 			</tr>	
 		  
+			<tr>
+				<td><label>$i18n.getString( "standard_interval_days" )</label></td>
+				<td><input type="text" id="standardInterval" name="standardInterval" value='$!programStage.standardInterval' class="{validate:{required:true,number:true}}" #if( $programStage.irregular=='false' ) disabled #end /></td>
+			</tr>
 			<tr><td>&nbsp;</td></tr>       
 		  
 		</tbody>
@@ -46,7 +45,7 @@
 				<th>$i18n.getString( "available_data_elements" )</th>
 				<th></th>
 				<th>$i18n.getString( "selected_data_elements" )
-					<select id="selectedDataElementsValidator" name='selectedDataElementsValidator' multiple="multiple" class="{validate:{required:true}} hidden" > </select>
+					<select id="selectedDataElementsValidator" name='selectedDataElementsValidator' multiple="multiple" class="hidden" > </select>
 					<select id="compulsories" name='compulsories' multiple="multiple" class="hidden"></select>
 				</th>
 			</tr>

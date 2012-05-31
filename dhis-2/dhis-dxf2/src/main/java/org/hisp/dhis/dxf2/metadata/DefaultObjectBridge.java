@@ -27,51 +27,26 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.NameableObject;
-import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.constant.Constant;
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.dataelement.*;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.Section;
-import org.hisp.dhis.document.Document;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.indicator.IndicatorGroupSet;
-import org.hisp.dhis.indicator.IndicatorType;
-import org.hisp.dhis.mapping.MapLayer;
-import org.hisp.dhis.mapping.MapLegend;
-import org.hisp.dhis.mapping.MapLegendSet;
-import org.hisp.dhis.mapping.MapView;
-import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.period.PeriodStore;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.report.Report;
-import org.hisp.dhis.reporttable.ReportTable;
-import org.hisp.dhis.sqlview.SqlView;
-import org.hisp.dhis.validation.ValidationRule;
-import org.hisp.dhis.validation.ValidationRuleGroup;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Component
-@Transactional( readOnly = true )
 public class DefaultObjectBridge
     implements ObjectBridge
 {
@@ -114,49 +89,11 @@ public class DefaultObjectBridge
     static
     {
         registeredTypes.add( PeriodType.class );
-        registeredTypes.add( Document.class );
-        registeredTypes.add( Constant.class );
-        registeredTypes.add( Attribute.class );
-        registeredTypes.add( Concept.class );
-        registeredTypes.add( SqlView.class );
-        registeredTypes.add( Chart.class );
-        registeredTypes.add( Report.class );
-        registeredTypes.add( ReportTable.class );
-        registeredTypes.add( DataDictionary.class );
 
-        // registeredTypes.add( User.class );
-        // registeredTypes.add( UserGroup.class );
-        // registeredTypes.add( UserAuthorityGroup.class );
-
-        registeredTypes.add( OrganisationUnitLevel.class );
-        registeredTypes.add( OrganisationUnit.class );
-        registeredTypes.add( OrganisationUnitGroup.class );
-        registeredTypes.add( OrganisationUnitGroupSet.class );
-
-        registeredTypes.add( Indicator.class );
-        registeredTypes.add( IndicatorType.class );
-        registeredTypes.add( IndicatorGroup.class );
-        registeredTypes.add( IndicatorGroupSet.class );
-
-        registeredTypes.add( DataElement.class );
-        registeredTypes.add( OptionSet.class );
-        registeredTypes.add( DataElementGroup.class );
-        registeredTypes.add( DataElementGroupSet.class );
-        registeredTypes.add( DataElementCategory.class );
-        registeredTypes.add( DataElementCategoryOption.class );
-        registeredTypes.add( DataElementCategoryCombo.class );
-        registeredTypes.add( DataElementCategoryOptionCombo.class );
-
-        registeredTypes.add( ValidationRule.class );
-        registeredTypes.add( ValidationRuleGroup.class );
-
-        registeredTypes.add( DataSet.class );
-        registeredTypes.add( Section.class );
-
-        registeredTypes.add( MapView.class );
-        registeredTypes.add( MapLayer.class );
-        registeredTypes.add( MapLegend.class );
-        registeredTypes.add( MapLegendSet.class );
+        for ( Class<?> clazz : ExchangeClasses.getImportClasses() )
+        {
+            registeredTypes.add( clazz );
+        }
     }
 
     @Override
@@ -188,13 +125,13 @@ public class DefaultObjectBridge
     public void destroy()
     {
         masterMap = null;
-
         uidMap = null;
         codeMap = null;
         nameMap = null;
         shortNameMap = null;
-
         periodTypeMap = null;
+
+        writeEnabled = true;
     }
 
     //-------------------------------------------------------------------------------------------------------
@@ -284,7 +221,6 @@ public class DefaultObjectBridge
     //-------------------------------------------------------------------------------------------------------
 
     @Override
-    @Transactional( readOnly = false )
     public void saveObject( Object object )
     {
         if ( _typeSupported( object.getClass() ) && IdentifiableObject.class.isInstance( object ) )
@@ -301,7 +237,6 @@ public class DefaultObjectBridge
     }
 
     @Override
-    @Transactional( readOnly = false )
     public void updateObject( Object object )
     {
         if ( _typeSupported( object.getClass() ) && IdentifiableObject.class.isInstance( object ) )
@@ -563,7 +498,7 @@ public class DefaultObjectBridge
 
     private boolean _typeSupported( Class<?> clazz )
     {
-        for ( Class c : registeredTypes )
+        for ( Class<?> c : registeredTypes )
         {
             if ( c.isAssignableFrom( clazz ) )
             {

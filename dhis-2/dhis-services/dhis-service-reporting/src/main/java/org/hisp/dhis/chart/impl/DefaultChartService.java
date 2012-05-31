@@ -43,6 +43,7 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -114,10 +115,10 @@ public class DefaultChartService
 
     private static final String TREND_PREFIX = "Trend - ";
 
-    private static final Color[] colors = {Color.decode( "#d54a4a" ), Color.decode( "#2e4e83" ),
-        Color.decode( "#75e077" ), Color.decode( "#e3e274" ), Color.decode( "#e58c6d" ), Color.decode( "#df6ff3" ),
-        Color.decode( "#88878e" ), Color.decode( "#6ff3e8" ), Color.decode( "#6fc3f3" ), Color.decode( "#aaf36f" ),
-        Color.decode( "#9d6ff3" ), Color.decode( "#474747" )};
+    private static final Color[] colors = {Color.decode( "#9ebe3b" ), Color.decode( "#3b6286" ),
+        Color.decode( "#b7404c" ), Color.decode( "#ff9f3a" ), Color.decode( "#968f8f" ), Color.decode( "#b7409f" ),
+        Color.decode( "#ffda64" ), Color.decode( "#4fbdae" ), Color.decode( "#b78040" ), Color.decode( "#676767" ),
+        Color.decode( "#6a33cf" ), Color.decode( "#4a7833" )};
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -173,13 +174,6 @@ public class DefaultChartService
     // Logic
     // -------------------------------------------------------------------------
 
-    public JFreeChart getJFreeChart( String uid, I18nFormat format )
-    {
-        Chart chart = getChart( uid );
-        
-        return chart != null ? getJFreeChart( chart, format ) : null;
-    }
-
     public JFreeChart getJFreeChart( int id, I18nFormat format )
     {
         Chart chart = getChart( id );
@@ -189,10 +183,15 @@ public class DefaultChartService
 
     public JFreeChart getJFreeChart( Chart chart, I18nFormat format )
     {
+        return getJFreeChart( chart, null, format );
+    }
+    
+    public JFreeChart getJFreeChart( Chart chart, Date date, I18nFormat format )
+    {
         if ( chart.getRelatives() != null )
         {
-            chart.setRelativePeriods( periodService.reloadPeriods( chart.getRelatives().getRelativePeriods( format,
-                true ) ) );
+            chart.setRelativePeriods( periodService.reloadPeriods( chart.getRelatives().getRelativePeriods( 
+                date, format, true ) ) );
         }
 
         User user = currentUserService.getCurrentUser();
@@ -492,18 +491,29 @@ public class DefaultChartService
         if ( chart.isType( TYPE_LINE ) || chart.isType( TYPE_AREA ) )
         {
             plot = new CategoryPlot( dataSets[0], new CategoryAxis(), new NumberAxis(), lineRenderer );
+            plot.setOrientation( PlotOrientation.VERTICAL );
         }
-        else if ( chart.isType( TYPE_BAR ) || chart.isType( TYPE_COLUMN ) )
+        else if ( chart.isType( TYPE_COLUMN ) )
         {
             plot = new CategoryPlot( dataSets[0], new CategoryAxis(), new NumberAxis(), barRenderer );
+            plot.setOrientation( PlotOrientation.VERTICAL );
+        }
+        else if ( chart.isType( TYPE_BAR ) )
+        {
+            plot = new CategoryPlot( dataSets[0], new CategoryAxis(), new NumberAxis(), barRenderer );
+            plot.setOrientation( PlotOrientation.HORIZONTAL );
         }
         else if ( chart.isType( TYPE_PIE ) )
         {
             return getMultiplePieChart( chart, dataSets );
         }
-        else if ( chart.isType( TYPE_STACKED_BAR ) || chart.isType( TYPE_STACKED_COLUMN ) )
+        else if ( chart.isType( TYPE_STACKED_COLUMN ) )
         {
-            return getStackedBarChart( chart, dataSets[0] );
+            return getStackedBarChart( chart, dataSets[0], false );
+        }
+        else if ( chart.isType( TYPE_STACKED_BAR ) )
+        {
+            return getStackedBarChart( chart, dataSets[0], true );
         }
 
         if ( chart.isRegression() )
@@ -529,23 +539,18 @@ public class DefaultChartService
             jFreeChart.addSubtitle( getSubTitle( chart ) );
         }
 
-        // ---------------------------------------------------------------------
-        // Plot orientation
-        // ---------------------------------------------------------------------
-
-        plot.setOrientation( PlotOrientation.VERTICAL );
         plot.setDatasetRenderingOrder( DatasetRenderingOrder.FORWARD );
 
         // ---------------------------------------------------------------------
         // Category label positions
         // ---------------------------------------------------------------------
 
-        CategoryAxis xAxis = plot.getDomainAxis();
-        xAxis.setCategoryLabelPositions( CategoryLabelPositions.UP_45 );
-        xAxis.setLabel( chart.getDomainAxisLabel() );
+        CategoryAxis domainAxis = plot.getDomainAxis();
+        domainAxis.setCategoryLabelPositions( CategoryLabelPositions.UP_45 );
+        domainAxis.setLabel( chart.getDomainAxisLabel() );
 
-        ValueAxis yAxis = plot.getRangeAxis();
-        yAxis.setLabel( chart.getRangeAxisLabel() );
+        ValueAxis rangeAxis = plot.getRangeAxis();
+        rangeAxis.setLabel( chart.getRangeAxisLabel() );
 
         // ---------------------------------------------------------------------
         // Color & antialias
@@ -557,7 +562,7 @@ public class DefaultChartService
         return jFreeChart;
     }
     
-    private JFreeChart getStackedBarChart( Chart chart, CategoryDataset dataSet )
+    private JFreeChart getStackedBarChart( Chart chart, CategoryDataset dataSet, boolean horizontal )
     {
         JFreeChart stackedBarChart = null;
 
@@ -575,6 +580,7 @@ public class DefaultChartService
         CategoryPlot plot = (CategoryPlot) stackedBarChart.getPlot();
         plot.setBackgroundPaint( Color.WHITE );
         plot.setOutlinePaint( Color.WHITE );
+        plot.setOrientation( horizontal ? PlotOrientation.HORIZONTAL : PlotOrientation.VERTICAL );
 
         CategoryAxis xAxis = plot.getDomainAxis();
         xAxis.setCategoryLabelPositions( CategoryLabelPositions.UP_45 );

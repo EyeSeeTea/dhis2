@@ -57,7 +57,7 @@
 
 .labelText
 {
-  color:#808080;
+  color:#888;
   padding:3px;
 }
 
@@ -99,6 +99,16 @@
   padding-bottom:15px;
 }
 
+.replyArea
+{
+  width:495px;
+  height:80px;
+  border: 1px solid #ccc;
+  resize: none;
+  overflow: auto;
+  padding: 4px 0px 0px 6px;
+}
+
 .page a
 {
   text-decoration:none;
@@ -119,3 +129,80 @@ div#selectionTree
 {
   height:200px;
 }
+
+.grey
+{
+  color: #555;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Interpretation                                                             */
+/*----------------------------------------------------------------------------*/
+
+#interpretationFeed
+{
+  width: 550px;
+  border-top: 1px solid #ccc;
+}
+
+#shareLink
+{
+  color: #777;
+  font-size: 11pt;
+  margin-bottom: 9px;
+}
+
+.interpretation
+{
+  width: 550px;
+  border-bottom: 1px solid #ccc;
+  padding: 22px 10px 16px 10px;
+}
+
+.interpretationName
+{
+  margin-bottom: 7px;
+}
+
+.interpretationText
+{
+  margin-bottom: 18px;
+}
+
+.interpretationChart
+{
+  margin-bottom: 12px;
+}
+
+.interpretationCommentArea
+{
+  margin-top: 10px;
+  padding: 18px 20px 14px 20px;
+  background-color: #f2f3f4;
+  border: 1px solid #d5d5d5;
+  border-radius: 3px;
+}
+
+.commentArea
+{
+  height: 18px;
+  width: 370px;
+  border: 1px solid #ccc;
+  resize: none;
+  overflow: auto;
+  padding: 4px 0px 0px 6px;
+}
+
+.commentButton
+{
+  width: 120px;
+  height: 24px;
+  margin: 1px 0 0 5px;
+  float: right;
+}
+
+.pointer
+{
+  cursor:pointer;
+}
+

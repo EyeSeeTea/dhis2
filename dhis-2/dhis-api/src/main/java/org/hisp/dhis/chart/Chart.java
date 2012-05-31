@@ -203,6 +203,12 @@ public class Chart
             return organisationUnits;
         }
     }
+    
+    public OrganisationUnit getFirstOrganisationUnit()
+    {
+        List<OrganisationUnit> units = getAllOrganisationUnits();
+        return units != null && !units.isEmpty() ? units.iterator().next() : null;
+    }
 
     private List<NameableObject> dimensionToList( String dimension )
     {
@@ -222,7 +228,14 @@ public class Chart
         }
         else if ( DIMENSION_ORGANISATIONUNIT.equals( dimension ) )
         {
-            list.addAll( getAllOrganisationUnits() );
+            if ( isOrganisationUnitGroupBased() )
+            {
+                list.addAll( organisationUnitGroupSet.getOrganisationUnitGroups() );
+            }
+            else
+            {
+                list.addAll( getAllOrganisationUnits() );
+            }
         }
 
         return list;
@@ -237,10 +250,15 @@ public class Chart
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Logic
-    // -------------------------------------------------------------------------
-
+    /**
+     * Indicates whether this report table is based on organisation unit groups
+     * or the organisation unit hierarchy.
+     */
+    public boolean isOrganisationUnitGroupBased()
+    {
+        return organisationUnitGroupSet != null && organisationUnitGroupSet.getOrganisationUnitGroups() != null;
+    }
+    
     public void removeAllOrganisationUnits()
     {
         organisationUnits.clear();

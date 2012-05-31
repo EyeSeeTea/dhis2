@@ -1,5 +1,4 @@
 <div id='selectDiv'>
-	
 	<h3>$i18n.getString( "patient_management" ) #openHelp( "patient" )</h3>
 	
 	<input type="hidden" id="isShowPatientList" name="isShowPatientList" />
@@ -7,14 +6,15 @@
 		<tr>
 			<td><label>$i18n.getString( "registering_unit" )</label></td>
 			<td style="padding-right:5px"><input type="text" id='selectedOrgunitText' readonly style="min-width:16em"></td>
-			<td style="padding-right:5px"><input type="button" id='listPatientBtn' value="$i18n.getString( 'list_all_patients' )" onclick='loadAllPatients();'></td>
-			<td><span id='warnmessage' style='color:red'></span></td>
+			<td style="padding-right:5px">
+				<input type="button" id='listPatientBtn' value="$i18n.getString( 'list_all_patients' )" onclick='loadAllPatients();'>
+			</td>
+			<td><input type="button" value='$i18n.getString( "add_new" )' onclick="showAddPatientForm();"></td>
 		</tr>
 	</table>
-
 </div>
 
-<div id='searchPatientDiv' style='display:none'>
+<div id='searchPatientDiv'>
 	<table id='advancedSearchTB'>	
 		<tbody>
 			<tr id='advSearchBox0'>	       
@@ -23,6 +23,9 @@
 					<option value="">$i18n.getString( "search_by_name_identifier" )</option>
 					<option value="0">$i18n.getString( "search_by_program" )</option>
 					<option value="-1">$i18n.getString( "date_of_birth" )</option>
+					<option value="-2">$i18n.getString( "gender" )</option>
+					<!-- option value="-3">$i18n.getString( "age" )</option -->
+					<option value="-4">$i18n.getString( "phone_number" )</option>
 					#foreach( $attribute in $patientAttributes )
 						<option value="$attribute.id" valueType='$attribute.valueType'>$encoder.htmlEncode( $attribute.name )</option>
 					#end
@@ -34,11 +37,15 @@
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				</td>	
 				<td></td>
-				<td><input type="button" value='+' onclick='addAttributeOption();'>
+				<td><input type="button" value='+' onclick='addAttributeOption();'> </td>
+				<td>
+					$i18n.getString('search_by_selected_unit')
+					<input type='checkbox' id='searchBySelectedOrgunit' name='searchBySelectedOrgunit' value='true' />
+				</td>
+				<td>
 					<input type="button" value='$i18n.getString( "search" )' onclick='searchAdvancedPatients();'>
 				</td>
 				<td>&nbsp;</td>
-				<td><input type="button" value='$i18n.getString( "add_new" )' onclick="showAddPatientForm();"></td>
 			</tr>
 		</tbody>
 	</table>
@@ -56,7 +63,6 @@
 
 <script>
 	var i18n_none = '$encoder.jsEscape( $i18n.getString( "none" ) , "'")';
-	var i18n_can_not_register_patient_for_orgunit = '$encoder.jsEscape( $i18n.getString( "can_not_register_patient_for_orgunit" ), "'")';	
 	var i18n_please_select_village = '[' + '$encoder.jsEscape( $i18n.getString( "please_select_village" ), "'")' + ']';
 	var i18n_specify_search_criteria = '$encoder.jsEscape( $i18n.getString( "specify_search_criteria" ) , "'")';
 	var i18n_select_program = '[' + '$encoder.jsEscape( $i18n.getString( "select_program" ), "'")' + ']';
@@ -86,7 +92,6 @@
 	var i18n_patient_date_of_birth = '$encoder.jsEscape( $i18n.getString( "date_of_birth" ) , "'")';
 	var i18n_patient_dob_type = '$encoder.jsEscape( $i18n.getString( "dob_type" ), "'")';
 	var i18n_patient_age = '$encoder.jsEscape( $i18n.getString( "age" ) , "'")';
-	var i18n_patient_blood_group = '$encoder.jsEscape( $i18n.getString( "blood_group" ) , "'")';
 	var i18n_patient_phone_number = '$encoder.jsEscape( $i18n.getString( "phone_number" ) , "'")';
 	var i18n_edit_this_patient = '$encoder.jsEscape( $i18n.getString( "edit_this_patient" ) , "'")';
 	var i18n_no_duplicate_found = '$encoder.jsEscape( $i18n.getString( "no_duplicate_found" ) , "'")';
@@ -142,7 +147,12 @@
 		trueFalseBox += '<option value="true">' + i18n_yes + '</option>';
 		trueFalseBox += '<option value="false">' + i18n_no + '</option>';
 		trueFalseBox += '</select>';
-	
+		
+	var genderSelector = '<select id="searchText" name="searchText" style="width:20.2em" >';
+		genderSelector += '<option value="M">$i18n.getString( "male" )</option>';
+		genderSelector += '<option value="F">$i18n.getString( "female" )</option>';
+		genderSelector += '</select>';
+		
 	var programComboBox = '<select id="searchText" name="searchText" style="width:20.2em" >';
 	#foreach ( $program in $programs ) 
 		programComboBox += '<option value="$program.id">$program.name</option>';
@@ -155,13 +165,10 @@
 	
 	#if( $status == 1 )
 		setFieldValue('selectedOrgunitText', i18n_please_select_village );
-		setInnerHTML('warnmessage', '' );
 	#elseif( $status == 2 )
 		setFieldValue('selectedOrgunitText', '$organisationUnit.name' );
-		setInnerHTML('warnmessage', i18n_can_not_register_patient_for_orgunit);
 	#else
 		setFieldValue('selectedOrgunitText', '$organisationUnit.name' );
-		setInnerHTML('warnmessage', '' );
 		showById('searchPatientDiv');
 	#end
 	

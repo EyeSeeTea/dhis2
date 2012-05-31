@@ -5,31 +5,30 @@ import com.opensymphony.xwork2.Action;
 public class ShowActivityTypeAction
     implements Action
 {
-
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private String orgUnitId;
+    private Integer orgUnitId;
 
-    public void setOrgUnitId( String orgUnitId )
+    public void setOrgUnitId( Integer orgUnitId )
     {
         this.orgUnitId = orgUnitId;
     }
 
-    public String getOrgUnitId( String orgUnitId )
+    public Integer getOrgUnitId( Integer orgUnitId )
     {
         return this.orgUnitId;
     }
     
-    private String organisationUnitId;
+    private Integer organisationUnitId;
 
-    public String getOrganisationUnitId()
+    public Integer getOrganisationUnitId()
     {
         return organisationUnitId;
     }
 
-    public void setOrganisationUnitId( String organisationUnitId )
+    public void setOrganisationUnitId( Integer organisationUnitId )
     {
         this.organisationUnitId = organisationUnitId;
     }
@@ -38,8 +37,8 @@ public class ShowActivityTypeAction
     public String execute()
         throws Exception
     {
-         this.organisationUnitId = orgUnitId;
+        this.organisationUnitId = orgUnitId;
+        
         return SUCCESS;
     }
-
 }

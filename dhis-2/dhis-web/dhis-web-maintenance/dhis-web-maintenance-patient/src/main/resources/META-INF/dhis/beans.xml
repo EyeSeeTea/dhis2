@@ -158,28 +158,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 			ref="org.hisp.dhis.program.ProgramService" />
 	</bean>
 	
-	<!-- Organisation Registration -->
-
-	<bean
-		id="org.hisp.dhis.patient.action.orgunitregistration.GetPatientOrgnunitRegistrationAction"
-		class="org.hisp.dhis.patient.action.orgunitregistration.GetPatientOrgnunitRegistrationAction"
-		scope="prototype">
-		<property name="selectionTreeManager"
-			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.patient.action.orgunitregistration.DefinePatientOrgnunitRegistrationAction"
-		class="org.hisp.dhis.patient.action.orgunitregistration.DefinePatientOrgnunitRegistrationAction"
-		scope="prototype">
-		<property name="selectionTreeManager"
-			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-	</bean>
-
 	<!-- Program -->
 
 	<bean id="org.hisp.dhis.patient.action.program.AddProgramAction"
@@ -231,66 +209,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.patient.action.program.ValidateProgramAction"
 		scope="prototype">
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
-	</bean>
-
-	<!-- Program Attribute -->
-
-	<bean
-		id="org.hisp.dhis.patient.action.program.GetProgramAttributeListAction"
-		class="org.hisp.dhis.patient.action.program.GetProgramAttributeListAction"
-		scope="prototype">
-		<property name="programAttributeService"
-			ref="org.hisp.dhis.program.ProgramAttributeService" />
-	</bean>
-
-	<bean id="org.hisp.dhis.patient.action.program.GetProgramAttributeAction"
-		class="org.hisp.dhis.patient.action.program.GetProgramAttributeAction"
-		scope="prototype">
-		<property name="programAttributeService"
-			ref="org.hisp.dhis.program.ProgramAttributeService" />
-	</bean>
-
-	<bean id="org.hisp.dhis.patient.action.program.AddProgramAttributeAction"
-		class="org.hisp.dhis.patient.action.program.AddProgramAttributeAction"
-		scope="prototype">
-		<property name="programAttributeService"
-			ref="org.hisp.dhis.program.ProgramAttributeService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.patient.action.program.UpdateProgramAttributeAction"
-		class="org.hisp.dhis.patient.action.program.UpdateProgramAttributeAction"
-		scope="prototype">
-		<property name="programAttributeService"
-			ref="org.hisp.dhis.program.ProgramAttributeService" />
-		<property name="programAttributeOptionService"
-			ref="org.hisp.dhis.program.ProgramAttributeOptionService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.patient.action.program.RemoveProgramAttributeAction"
-		class="org.hisp.dhis.patient.action.program.RemoveProgramAttributeAction"
-		scope="prototype">
-		<property name="programAttributeService"
-			ref="org.hisp.dhis.program.ProgramAttributeService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.patient.action.program.ValidateProgramAttributeAction"
-		class="org.hisp.dhis.patient.action.program.ValidateProgramAttributeAction"
-		scope="prototype">
-		<property name="programAttributeService"
-			ref="org.hisp.dhis.program.ProgramAttributeService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.patient.action.program.RemoveProgramAttributeOptionAction"
-		class="org.hisp.dhis.patient.action.program.RemoveProgramAttributeOptionAction"
-		scope="prototype">
-		<property name="programAttributeOptionService"
-			ref="org.hisp.dhis.program.ProgramAttributeOptionService" />
-		<property name="programAttributeValueService"
-			ref="org.hisp.dhis.programattributevalue.ProgramAttributeValueService" />
 	</bean>
 
 	<!-- Program_OrganisationUnit Association -->

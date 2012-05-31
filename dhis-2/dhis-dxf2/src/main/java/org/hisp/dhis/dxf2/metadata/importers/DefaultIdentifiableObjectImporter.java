@@ -37,17 +37,20 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.annotation.Scanned;
+import org.hisp.dhis.dataelement.DataElementOperand;
+import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportCount;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.Importer;
 import org.hisp.dhis.dxf2.metadata.ObjectBridge;
-import org.hisp.dhis.dxf2.utils.OrganisationUnitUtils;
+import org.hisp.dhis.dxf2.metadata.handlers.FieldHandler;
+import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandler;
+import org.hisp.dhis.expression.Expression;
+import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.comparator.OrganisationUnitComparator;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodStore;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,16 +73,28 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     //-------------------------------------------------------------------------------------------------------
 
     @Autowired
-    private PeriodStore periodStore;
+    private PeriodService periodService;
 
     @Autowired
     private AttributeService attributeService;
+
+    @Autowired
+    private ExpressionService expressionService;
+
+    @Autowired
+    private DataElementOperandService dataElementOperandService;
 
     @Autowired
     private ObjectBridge objectBridge;
 
     @Autowired
     private SessionFactory sessionFactory;
+
+    @Autowired( required = false )
+    private List<ObjectHandler> objectHandlers;
+
+    @Autowired( required = false )
+    private List<FieldHandler> fieldHandlers;
 
     //-------------------------------------------------------------------------------------------------------
     // Constructor
@@ -93,7 +108,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     private final Class<T> importerClass;
 
     //-------------------------------------------------------------------------------------------------------
-    // Current import counts
+    // Internal state
     //-------------------------------------------------------------------------------------------------------
 
     protected int totalImported;
@@ -101,6 +116,8 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     protected int totalUpdated;
 
     protected int totalIgnored;
+
+    protected ImportOptions options;
 
     //-------------------------------------------------------------------------------------------------------
     // Generic implementations of newObject and updatedObject
@@ -112,7 +129,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
      * @param object Object to import
      * @return An ImportConflict instance if there was a conflict, otherwise null
      */
-    protected List<ImportConflict> newObject( T object, ImportOptions options )
+    protected List<ImportConflict> newObject( T object )
     {
         List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
 
@@ -124,16 +141,16 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         log.debug( "Trying to save new object => " + getDisplayName( object ) + " (" + object.getClass().getSimpleName() + ")" );
 
-        Map<Field, Set<? extends IdentifiableObject>> identifiableObjectCollections =
-            scanIdentifiableObjectCollections( object );
+        Map<Field, Object> fields = detachFields( object );
+        importConflicts.addAll( reattachFields( object, fields ) );
 
-        importConflicts.addAll( updateIdentifiableObjects( object, scanIdentifiableObjects( object ), options ) );
+        Map<Field, Collection<Object>> collectionFields = detachCollectionFields( object );
 
         objectBridge.saveObject( object );
 
-        importConflicts.addAll( updateIdentifiableObjectCollections( object, identifiableObjectCollections, options ) );
-
         updatePeriodTypes( object );
+        importConflicts.addAll( reattachCollectionFields( object, collectionFields ) );
+
         objectBridge.updateObject( object );
 
         log.debug( "Save successful." );
@@ -148,18 +165,22 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
      * @param oldObject The current version of the object
      * @return An ImportConflict instance if there was a conflict, otherwise null
      */
-    protected List<ImportConflict> updatedObject( T object, T oldObject, ImportOptions options )
+    protected List<ImportConflict> updatedObject( T object, T oldObject )
     {
         List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
 
         log.debug( "Starting update of object " + getDisplayName( oldObject ) + " (" + oldObject.getClass()
             .getSimpleName() + ")" );
 
-        importConflicts.addAll( updateIdentifiableObjects( object, scanIdentifiableObjects( object ), options ) );
-        importConflicts.addAll( updateIdentifiableObjectCollections( object, scanIdentifiableObjectCollections( object ), options ) );
+        Map<Field, Object> fields = detachFields( object );
+        importConflicts.addAll( reattachFields( object, fields ) );
+
+        Map<Field, Collection<Object>> collectionFields = detachCollectionFields( object );
 
         oldObject.mergeWith( object );
         updatePeriodTypes( oldObject );
+
+        importConflicts.addAll( reattachCollectionFields( oldObject, collectionFields ) );
 
         objectBridge.updateObject( oldObject );
 
@@ -199,39 +220,137 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         init( options );
 
-        // FIXME a bit too static.. implement "pre handler" for types?
-        if ( OrganisationUnit.class.isAssignableFrom( objects.get( 0 ).getClass() ) )
-        {
-            OrganisationUnitUtils.updateParents( (Collection<OrganisationUnit>) objects );
-            Collections.sort( (List<OrganisationUnit>) objects, new OrganisationUnitComparator() );
-        }
+        preObjectsHandlers( objects );
 
         for ( T object : objects )
         {
+            preObjectHandlers( object );
+
+            // FIXME add to scanner, and use field handlers for this
             Set<AttributeValue> attributeValues = getAndClearAttributeValues( object );
-            List<ImportConflict> conflicts = importObjectLocal( object, options );
+            Set<DataElementOperand> compulsoryDataElementOperands = getAndClearDataElementOperands( object, "compulsoryDataElementOperands" );
+            Set<DataElementOperand> greyedFields = getAndClearDataElementOperands( object, "greyedFields" );
+            Expression leftSide = getAndClearExpression( object, "leftSide" );
+            Expression rightSide = getAndClearExpression( object, "rightSide" );
+
+            List<ImportConflict> conflicts = importObjectLocal( object );
+            importConflicts.addAll( conflicts );
 
             if ( !options.isDryRun() )
             {
                 sessionFactory.getCurrentSession().flush();
+
+                newAttributeValues( object, attributeValues );
+                newExpression( object, "leftSide", leftSide );
+                newExpression( object, "rightSide", rightSide );
+                // newDataElementOperands( object, "compulsoryDataElementOperands", compulsoryDataElementOperands );
+                newDataElementOperands( object, "greyedFields", greyedFields );
+
+                sessionFactory.getCurrentSession().flush();
             }
 
-            updateAttributeValues( object, attributeValues, options.isDryRun() );
-
-            if ( !conflicts.isEmpty() )
-            {
-                importConflicts.addAll( conflicts );
-            }
+            postObjectHandlers( object );
         }
+
+        postObjectsHandlers( objects );
 
         return importConflicts;
     }
 
-    private void setAttributeValues( T object, Set<AttributeValue> attributeValues )
+
+    @SuppressWarnings( "unchecked" )
+    private void preObjectHandlers( T object )
     {
-        ReflectionUtils.invokeSetterMethod( "attributeValues", object, attributeValues );
+        for ( ObjectHandler objectHandler : objectHandlers )
+        {
+            if ( objectHandler.canHandle( object.getClass() ) )
+            {
+                objectHandler.preImportObject( object );
+            }
+        }
     }
 
+    @SuppressWarnings( "unchecked" )
+    private void postObjectHandlers( T object )
+    {
+        for ( ObjectHandler objectHandler : objectHandlers )
+        {
+            if ( objectHandler.canHandle( object.getClass() ) )
+            {
+                objectHandler.postImportObject( object );
+            }
+        }
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private void preObjectsHandlers( List<T> objects )
+    {
+        if ( objects.size() > 0 )
+        {
+            for ( ObjectHandler objectHandler : objectHandlers )
+            {
+                if ( objectHandler.canHandle( objects.get( 0 ).getClass() ) )
+                {
+                    objectHandler.preImportObjects( objects );
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings( "unchecked" )
+    private void postObjectsHandlers( List<T> objects )
+    {
+        if ( objects.size() > 0 )
+        {
+            for ( ObjectHandler objectHandler : objectHandlers )
+            {
+                if ( objectHandler.canHandle( objects.get( 0 ).getClass() ) )
+                {
+                    objectHandler.postImportObjects( objects );
+                }
+            }
+        }
+    }
+
+    // FIXME add type check
+    private Expression getAndClearExpression( T object, String fieldName )
+    {
+        Expression expression = null;
+
+        if ( ReflectionUtils.findGetterMethod( fieldName, object ) != null )
+        {
+            expression = ReflectionUtils.invokeGetterMethod( fieldName, object );
+
+            if ( expression != null )
+            {
+                ReflectionUtils.invokeSetterMethod( fieldName, object, new Object[] { null } );
+            }
+        }
+
+        return expression;
+    }
+
+    // FIXME add type check
+    private Set<DataElementOperand> getAndClearDataElementOperands( T object, String fieldName )
+    {
+        Set<DataElementOperand> dataElementOperands = new HashSet<DataElementOperand>();
+
+        if ( ReflectionUtils.findGetterMethod( fieldName, object ) != null )
+        {
+            Set<DataElementOperand> detachedDataElementOperands = ReflectionUtils.invokeGetterMethod( fieldName, object );
+            dataElementOperands = new HashSet<DataElementOperand>( detachedDataElementOperands );
+
+            if ( detachedDataElementOperands.size() > 0 )
+            {
+                detachedDataElementOperands.clear();
+                ReflectionUtils.invokeSetterMethod( fieldName, object, new HashSet<DataElementOperand>() );
+            }
+        }
+
+        return dataElementOperands;
+    }
+
+    // FIXME add type check
     private Set<AttributeValue> getAndClearAttributeValues( T object )
     {
         Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
@@ -242,14 +361,47 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
             if ( attributeValues.size() > 0 )
             {
-                setAttributeValues( object, new HashSet<AttributeValue>() );
+                ReflectionUtils.invokeSetterMethod( "attributeValues", object, new HashSet<AttributeValue>() );
             }
         }
 
         return attributeValues;
     }
 
-    private void updateAttributeValues( T object, Set<AttributeValue> attributeValues, boolean dryRun )
+    private void newExpression( T object, String field, Expression expression )
+    {
+        if ( expression != null )
+        {
+            Map<Field, Collection<Object>> identifiableObjectCollections = detachCollectionFields( expression );
+            reattachCollectionFields( expression, identifiableObjectCollections );
+
+            expression.setId( 0 );
+            expressionService.addExpression( expression );
+
+            sessionFactory.getCurrentSession().flush();
+
+            ReflectionUtils.invokeSetterMethod( field, object, expression );
+        }
+    }
+
+    private void newDataElementOperands( T object, String field, Set<DataElementOperand> dataElementOperands )
+    {
+        if ( dataElementOperands.size() > 0 )
+        {
+            for ( DataElementOperand dataElementOperand : dataElementOperands )
+            {
+                Map<Field, Object> identifiableObjects = detachFields( dataElementOperand );
+                reattachFields( dataElementOperand, identifiableObjects );
+
+                dataElementOperand.setId( 0 );
+                dataElementOperandService.addDataElementOperand( dataElementOperand );
+            }
+
+            ReflectionUtils.invokeSetterMethod( field, object, dataElementOperands );
+        }
+    }
+
+    private void newAttributeValues( T object, Set<AttributeValue> attributeValues )
     {
         if ( attributeValues.size() > 0 )
         {
@@ -272,17 +424,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 attributeService.addAttributeValue( attributeValue );
             }
 
-            if ( !dryRun )
-            {
-                sessionFactory.getCurrentSession().flush();
-            }
-
-            setAttributeValues( object, attributeValues );
-
-            if ( !dryRun )
-            {
-                sessionFactory.getCurrentSession().flush();
-            }
+            ReflectionUtils.invokeSetterMethod( "attributeValues", object, attributeValues );
         }
     }
 
@@ -291,7 +433,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     {
         init( options );
 
-        return importObjectLocal( object, options );
+        return importObjectLocal( object );
     }
 
     @Override
@@ -314,23 +456,29 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
      * @param object Object to get display name for
      * @return A usable display name
      */
-    protected String getDisplayName( IdentifiableObject object )
+    protected String getDisplayName( Object object )
     {
         if ( object == null )
         {
             return "[ object is null ]";
         }
-        else if ( object.getName() != null && object.getName().length() > 0 )
+        else if ( IdentifiableObject.class.isInstance( object ) )
         {
-            return object.getName();
-        }
-        else if ( object.getUid() != null && object.getName().length() > 0 )
-        {
-            return object.getUid();
-        }
-        else if ( object.getCode() != null && object.getName().length() > 0 )
-        {
-            return object.getCode();
+            IdentifiableObject identifiableObject = (IdentifiableObject) object;
+
+            if ( identifiableObject.getName() != null && identifiableObject.getName().length() > 0 )
+            {
+                return identifiableObject.getName();
+            }
+            else if ( identifiableObject.getUid() != null && identifiableObject.getName().length() > 0 )
+            {
+                return identifiableObject.getUid();
+            }
+            else if ( identifiableObject.getCode() != null && identifiableObject.getName().length() > 0 )
+            {
+                return identifiableObject.getCode();
+            }
+
         }
 
         return object.getClass().getName();
@@ -342,19 +490,20 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     private void init( ImportOptions options )
     {
+        this.options = options;
         totalImported = 0;
         totalUpdated = 0;
         totalIgnored = 0;
     }
 
-    private List<ImportConflict> importObjectLocal( T object, ImportOptions options )
+    private List<ImportConflict> importObjectLocal( T object )
     {
         List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
-        ImportConflict importConflict = validateIdentifiableObject( object, options );
+        ImportConflict importConflict = validateIdentifiableObject( object );
 
         if ( importConflict == null )
         {
-            importConflicts.addAll( startImport( object, options ) );
+            importConflicts.addAll( startImport( object ) );
         }
         else
         {
@@ -369,14 +518,14 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         return importConflicts;
     }
 
-    private List<ImportConflict> startImport( T object, ImportOptions options )
+    private List<ImportConflict> startImport( T object )
     {
         T oldObject = objectBridge.getObject( object );
         List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
 
         if ( ImportStrategy.NEW.equals( options.getImportStrategy() ) )
         {
-            importConflicts.addAll( newObject( object, options ) );
+            importConflicts.addAll( newObject( object ) );
 
             if ( importConflicts.isEmpty() )
             {
@@ -385,7 +534,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         }
         else if ( ImportStrategy.UPDATES.equals( options.getImportStrategy() ) )
         {
-            importConflicts.addAll( updatedObject( object, oldObject, options ) );
+            importConflicts.addAll( updatedObject( object, oldObject ) );
 
             if ( importConflicts.isEmpty() )
             {
@@ -396,7 +545,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         {
             if ( oldObject != null )
             {
-                importConflicts.addAll( updatedObject( object, oldObject, options ) );
+                importConflicts.addAll( updatedObject( object, oldObject ) );
 
                 if ( importConflicts.isEmpty() )
                 {
@@ -405,7 +554,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             }
             else
             {
-                importConflicts.addAll( newObject( object, options ) );
+                importConflicts.addAll( newObject( object ) );
 
                 if ( importConflicts.isEmpty() )
                 {
@@ -417,7 +566,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         return importConflicts;
     }
 
-    private ImportConflict validateIdentifiableObject( T object, ImportOptions options )
+    private ImportConflict validateIdentifiableObject( T object )
     {
         ImportConflict conflict = null;
 
@@ -507,7 +656,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         return new ImportConflict( getDisplayName( object ), "Object already exists." );
     }
 
-    private IdentifiableObject findObjectByReference( IdentifiableObject identifiableObject, ImportOptions options )
+    private IdentifiableObject findObjectByReference( IdentifiableObject identifiableObject )
     {
         if ( identifiableObject == null )
         {
@@ -517,7 +666,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         else if ( Period.class.isAssignableFrom( identifiableObject.getClass() ) )
         {
             Period period = (Period) identifiableObject;
-            period = periodStore.reloadForceAddPeriod( period );
+            period = periodService.reloadPeriod( period );
 
             if ( !options.isDryRun() )
             {
@@ -530,107 +679,111 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         return objectBridge.getObject( identifiableObject );
     }
 
-    private Map<Field, IdentifiableObject> scanIdentifiableObjects( IdentifiableObject identifiableObject )
+    private Map<Field, Object> detachFields( Object object )
     {
-        Map<Field, IdentifiableObject> identifiableObjects = new HashMap<Field, IdentifiableObject>();
-        Field[] fields = identifiableObject.getClass().getDeclaredFields();
+        Map<Field, Object> fieldMap = new HashMap<Field, Object>();
+        Field[] fields = object.getClass().getDeclaredFields();
 
         for ( Field field : fields )
         {
+
             if ( ReflectionUtils.isType( field, IdentifiableObject.class ) )
             {
-                IdentifiableObject ref = ReflectionUtils.invokeGetterMethod( field.getName(), identifiableObject );
+                Object ref = ReflectionUtils.invokeGetterMethod( field.getName(), object );
 
                 if ( ref != null )
                 {
-                    identifiableObjects.put( field, ref );
-                    ReflectionUtils.invokeSetterMethod( field.getName(), identifiableObject, new Object[]{ null } );
+                    fieldMap.put( field, ref );
+                    ReflectionUtils.invokeSetterMethod( field.getName(), object, new Object[] { null } );
                 }
             }
 
         }
 
-        return identifiableObjects;
+        return fieldMap;
     }
 
-    private List<ImportConflict> updateIdentifiableObjects( IdentifiableObject identifiableObject,
-        Map<Field, IdentifiableObject> identifiableObjects, ImportOptions options )
+    private List<ImportConflict> reattachFields( Object object, Map<Field, Object> fields )
     {
         List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
 
-        for ( Field field : identifiableObjects.keySet() )
+        for ( Field field : fields.keySet() )
         {
-            IdentifiableObject idObject = identifiableObjects.get( field );
-            IdentifiableObject ref = findObjectByReference( idObject, options );
+            IdentifiableObject idObject = (IdentifiableObject) fields.get( field );
+            IdentifiableObject ref = findObjectByReference( idObject );
 
             if ( ref == null )
             {
                 String referenceName = idObject != null ? idObject.getClass().getSimpleName() : "null";
-                String objectName = identifiableObject != null ? identifiableObject.getClass().getSimpleName() : "null";
+                String objectName = object != null ? object.getClass().getSimpleName() : "null";
 
                 String logMsg = "Unknown reference to " + idObject + " (" + referenceName + ")" +
-                    " on object " + identifiableObject + " (" + objectName + ").";
+                    " on object " + object + " (" + objectName + ").";
 
                 log.warn( logMsg );
 
-                ImportConflict importConflict = new ImportConflict( getDisplayName( identifiableObject ), logMsg );
+                ImportConflict importConflict = new ImportConflict( getDisplayName( object ), logMsg );
                 importConflicts.add( importConflict );
             }
 
             if ( !options.isDryRun() )
             {
-                ReflectionUtils.invokeSetterMethod( field.getName(), identifiableObject, ref );
+                ReflectionUtils.invokeSetterMethod( field.getName(), object, ref );
             }
         }
 
         return importConflicts;
     }
 
-    private Map<Field, Set<? extends IdentifiableObject>> scanIdentifiableObjectCollections(
-        IdentifiableObject identifiableObject )
+    private Map<Field, Collection<Object>> detachCollectionFields( Object object )
     {
-        Map<Field, Set<? extends IdentifiableObject>> collected = new HashMap<Field, Set<? extends IdentifiableObject>>();
-        Field[] fields = identifiableObject.getClass().getDeclaredFields();
+        Map<Field, Collection<Object>> collectionFields = new HashMap<Field, Collection<Object>>();
+        Field[] fields = object.getClass().getDeclaredFields();
 
         for ( Field field : fields )
         {
-            boolean b = ReflectionUtils.isCollection( field.getName(), identifiableObject, IdentifiableObject.class,
+            boolean b = ReflectionUtils.isCollection( field.getName(), object, IdentifiableObject.class,
                 Scanned.class );
 
             if ( b )
             {
-                Collection<IdentifiableObject> objects = ReflectionUtils.invokeGetterMethod( field.getName(),
-                    identifiableObject );
+                Collection<Object> objects = ReflectionUtils.invokeGetterMethod( field.getName(), object );
 
                 if ( objects != null && !objects.isEmpty() )
                 {
-                    Set<IdentifiableObject> identifiableObjects = new HashSet<IdentifiableObject>( objects );
-                    collected.put( field, identifiableObjects );
-                    objects.clear();
+                    collectionFields.put( field, objects );
+
+                    if ( List.class.isAssignableFrom( field.getType() ) )
+                    {
+                        ReflectionUtils.invokeSetterMethod( field.getName(), object, new ArrayList<Object>() );
+                    }
+                    else if ( Set.class.isAssignableFrom( field.getType() ) )
+                    {
+                        ReflectionUtils.invokeSetterMethod( field.getName(), object, new HashSet<Object>() );
+                    }
                 }
             }
         }
 
-        return collected;
+        return collectionFields;
     }
 
-    private List<ImportConflict> updateIdentifiableObjectCollections( IdentifiableObject identifiableObject,
-        Map<Field, Set<? extends IdentifiableObject>> identifiableObjectCollections, ImportOptions options )
+    private List<ImportConflict> reattachCollectionFields( Object object, Map<Field, Collection<Object>> collectionFields )
     {
         List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
 
-        for ( Field field : identifiableObjectCollections.keySet() )
+        for ( Field field : collectionFields.keySet() )
         {
-            Collection<? extends IdentifiableObject> identifiableObjects = identifiableObjectCollections.get( field );
-            Collection<IdentifiableObject> objects;
+            Collection<Object> collection = collectionFields.get( field );
+            Collection<Object> objects;
 
             if ( List.class.isAssignableFrom( field.getType() ) )
             {
-                objects = new ArrayList<IdentifiableObject>();
+                objects = new ArrayList<Object>();
             }
             else if ( Set.class.isAssignableFrom( field.getType() ) )
             {
-                objects = new HashSet<IdentifiableObject>();
+                objects = new HashSet<Object>();
             }
             else
             {
@@ -638,9 +791,9 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 continue;
             }
 
-            for ( IdentifiableObject idObject : identifiableObjects )
+            for ( Object idObject : collection )
             {
-                IdentifiableObject ref = findObjectByReference( idObject, options );
+                IdentifiableObject ref = findObjectByReference( (IdentifiableObject) idObject );
 
                 if ( ref != null )
                 {
@@ -649,21 +802,21 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 else
                 {
                     String referenceName = idObject != null ? idObject.getClass().getSimpleName() : "null";
-                    String objectName = identifiableObject != null ? identifiableObject.getClass().getSimpleName() : "null";
+                    String objectName = object != null ? object.getClass().getSimpleName() : "null";
 
                     String logMsg = "Unknown reference to " + idObject + " (" + referenceName + ")" +
-                        " on object " + identifiableObject + " (" + objectName + ").";
+                        " on object " + object + " (" + objectName + ").";
 
                     log.warn( logMsg );
 
-                    ImportConflict importConflict = new ImportConflict( getDisplayName( identifiableObject ), logMsg );
+                    ImportConflict importConflict = new ImportConflict( getDisplayName( object ), logMsg );
                     importConflicts.add( importConflict );
                 }
             }
 
             if ( !options.isDryRun() )
             {
-                ReflectionUtils.invokeSetterMethod( field.getName(), identifiableObject, objects );
+                ReflectionUtils.invokeSetterMethod( field.getName(), object, objects );
             }
         }
 

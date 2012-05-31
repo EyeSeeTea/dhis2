@@ -28,7 +28,8 @@ package org.hisp.dhis.api.controller;
  */
 
 import org.hisp.dhis.api.utils.IdentifiableObjectParams;
-import org.hisp.dhis.api.utils.WebLinkPopulator;
+import org.hisp.dhis.api.utils.WebUtils;
+import org.hisp.dhis.api.webdomain.Resource;
 import org.hisp.dhis.api.webdomain.Resources;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -57,12 +58,14 @@ public class ResourceController
 
         if ( params.hasLinks() )
         {
-            WebLinkPopulator listener = new WebLinkPopulator( request );
-            listener.addLinks( resources );
+            for ( Resource resource : resources.getResources() )
+            {
+                resource.setLink( WebUtils.getPath( resource.getClazz() ) );
+            }
         }
 
         model.addAttribute( "model", resources );
-        model.addAttribute( "view", "detailed" );
+        model.addAttribute( "viewClass", "detailed" );
 
         return "resources";
     }

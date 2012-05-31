@@ -85,19 +85,20 @@ public class GetEnrollmentProgramListAction
     // Input & Output
     // -------------------------------------------------------------------------
     
-    private String beneficiaryId;
+    private Integer patientId;
+    
+    public Integer getPatientId()
 
-    public String getBeneficiaryId()
     {
-        return beneficiaryId;
+        return patientId;
     }
 
-    public void setBeneficiaryId( String beneficiaryId )
+    public void setPatientId( Integer patientId )
     {
-        this.beneficiaryId = beneficiaryId;
+        this.patientId = patientId;
     }
 
-    private List<Program> programList =  new ArrayList<Program>();
+    private List<Program> programList = new ArrayList<Program>();
 
     public List<Program> getProgramList()
     {
@@ -132,9 +133,9 @@ public class GetEnrollmentProgramListAction
     {
         this.patient = patient;
     }
-    
+
     private boolean validated;
-    
+
     public boolean isValidated()
     {
         return validated;
@@ -149,20 +150,25 @@ public class GetEnrollmentProgramListAction
     public String execute()
         throws Exception
     {
-        patient = patientService.getPatient( Integer.parseInt( beneficiaryId ) );
+
+        patient = patientService.getPatient(  patientId  );
         for ( Program program :  programService.getPrograms( patient.getOrganisationUnit() ) )
+
         {
-            if ( !program.getAnonymous() && !program.getSingleEvent() )
+            if ( !program.isSingleEvent() )
             {
                 if ( programInstanceService.getProgramInstances( patient, program ).size() > 0 )
                 {
                     enrolledProgramList.add( program );
-                    
-                } else {
+
+                }
+                else
+                {
                     programList.add( program );
                 }
             }
         }
+        
         return SUCCESS;
     }
 

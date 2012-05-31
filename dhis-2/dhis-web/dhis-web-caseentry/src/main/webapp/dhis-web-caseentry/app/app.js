@@ -3,11 +3,17 @@ TR.conf = {
 		ajax: {
 			jsonfy: function(r) {
 				r = Ext.JSON.decode(r.responseText);
-				var obj = {system: {rootnode: {id: r.rn[0], name: r.rn[1], level: 1}, user: {id: r.user.id, isadmin: r.user.isAdmin, organisationunit: {id: r.user.ou[0], name: r.user.ou[1]}}}};
+				var obj = { 
+					system: {
+						rootnode: {id: r.rn[0], name: r.rn[1], level: 1}, 
+						user: {id: r.user.id, isadmin: r.user.isAdmin, organisationunit: {id: r.user.ou[0], name: r.user.ou[1]}},
+						maxLevels: r.levels.length
+					}
+				};
 				for (var program in r.programs) {
 					obj.system.program = [];
 					for (var i = 0; i < r.programs.length; i++) {
-						obj.system.program.push({id: r.programs[i].id, name: r.programs[i].name, anonymous: r.programs[i].anonymous });
+						obj.system.program.push({id: r.programs[i].id, name: r.programs[i].name, type: r.programs[i].type });
 					}
 				}
 				
@@ -30,9 +36,7 @@ TR.conf = {
             path_api: '../../api/',
             path_images: 'images/',
 			initialize: 'tabularInitialize.action',
-			program_get: 'getReportPrograms.action',
-			identifiertypes_get: 'loadReportIdentifierTypes.action',
-			patientattributes_get: 'loadReportAttributes.action',
+			patientproperties_get: 'loadPatientProperties.action',
 			programstages_get: 'loadReportProgramStages.action',
 			dataelements_get: 'loadDataElements.action',
 			organisationunitchildren_get: 'getOrganisationUnitChildren.action',
@@ -42,6 +46,9 @@ TR.conf = {
 			favorite_rename: 'updateTabularReportName.action',
 			favorite_save: 'saveTabularReport.action',
             favorite_delete: 'deleteTabularReport.action',
+			datavalue_save: 'saveValue.action',
+			datavalue_view: 'viewRecord.action',
+			datavalue_delete: 'removeCurrentEncounter.action',
             redirect: 'index.action'
         },
         params: {
@@ -63,13 +70,9 @@ TR.conf = {
 					filter: TR.i18n.wm_multiple_filter_orgunit
 				}
             },
-            identifierType: {
-                value: 'identifierType',
-                rawvalue: TR.i18n.identifiers
-            },
-            patientAttribute: {
-                value: 'patientAttribute',
-                rawvalue: TR.i18n.attributes
+            patientProperties: {
+                value: 'patientProperties',
+                rawvalue: TR.i18n.patientProperties
             },
             programStage: {
                 value: 'programStage',
@@ -103,6 +106,7 @@ TR.conf = {
     layout: {
         west_width: 424,
         west_fieldset_width: 402,
+		west_multiselect: 100,
         west_width_subtractor: 18,
         west_fill: 117,
         west_fill_accordion_organisationunit: 50,
@@ -114,6 +118,8 @@ TR.conf = {
 		grid_favorite_height: 250,
         window_favorite_ypos: 100,
         window_confirm_width: 250,
+		window_record_width: 450,
+		window_record_height: 300,
     }
 };
 
@@ -140,14 +146,10 @@ Ext.onReady( function() {
         settings: {},
         params: {
             program:{},
-			identifierType: {},
-			patientAttribute: {},
+			patientProperty: {},
 			programStage: {},
 			dataelement: {},
-			organisationunit: {},
-			fixedAttributes:{
-				checkbox: []
-			}
+			organisationunit: {}
         },
         options: {},
         toolbar: {
@@ -192,8 +194,8 @@ Ext.onReady( function() {
                 return ((screen.height/2)-((cmp.height/2)-100));
             },
             resizeParams: function() {
-				var a = [TR.cmp.params.identifierType.panel, TR.cmp.params.patientAttribute.panel, 
-						 TR.cmp.params.dataelement.panel, TR.cmp.params.organisationunit.treepanel];
+				var a = [TR.cmp.params.patientProperty.panel, TR.cmp.params.dataelement.panel, 
+						 TR.cmp.params.organisationunit.treepanel];
 				for (var i = 0; i < a.length; i++) {
 					if (!a[i].collapsed) {
 						a[i].fireEvent('expand');
@@ -259,7 +261,6 @@ Ext.onReady( function() {
                     });
                     return filter;
                 });
-                a.store.sort('name', 'ASC');
             },
 			filterSelector: function(selectors, queryString) {
                 var elements = selectors.boundList.all.elements;
@@ -278,7 +279,7 @@ Ext.onReady( function() {
             },
             setHeight: function(ms, panel, fill) {
 				for (var i = 0; i < ms.length; i++) {
-					ms[i].setHeight(panel.getHeight() - 45);
+					ms[i].setHeight(panel.getHeight() - 49);
 				}
 			}
         },
@@ -402,33 +403,6 @@ Ext.onReady( function() {
 			
 			return value;
 		},
-		setEnabledFixedAttr: function()
-		{
-			var fixedAttributes = TR.cmp.params.fixedAttributes.checkbox;
-			Ext.Array.each(fixedAttributes, function(item) {
-				item.enable();
-			});
-		},
-		setDisabledFixedAttr: function()
-		{
-			var fixedAttributes = TR.cmp.params.fixedAttributes.checkbox;
-			Ext.Array.each(fixedAttributes, function(item) {
-				item.setValue(false);
-				item.disable();
-			});
-		},
-		getSelectedFixedAttr: function()
-		{
-			var p = [];
-			var fixedAttributes = TR.cmp.params.fixedAttributes.checkbox;
-			Ext.Array.each(fixedAttributes, function(item) {
-				if( item.value )
-				{
-					p.push( item.paramName );
-				}
-			});
-			return p;
-		},
         crud: {
             favorite: {
                 create: function(fn, isupdate) {
@@ -514,76 +488,32 @@ Ext.onReady( function() {
 							Ext.getCmp('levelCombobox').setValue( f.level );
 							TR.state.orgunitId = f.organisationUnitId;
 							
-							TR.cmp.params.identifierType.objects = [];
-							TR.cmp.params.patientAttribute.objects = [];
-							TR.cmp.params.fixedAttributes.objects = [];
+							TR.cmp.params.patientProperty.objects = [];
 							TR.cmp.params.dataelement.objects = [];
 							
-							// IDENTIFIER TYPE
-							TR.store.identifierType.selected.removeAll();
-							if (f.identifiers && f.anonymous == "false" ) {
-								for (var i = 0; i < f.identifiers.length; i++) {
-									TR.cmp.params.identifierType.objects.push({id: f.identifiers[i].id, name: TR.util.string.getEncodedString(f.identifiers[i].name)});
-								}
-								TR.store.identifierType.selected.add(TR.cmp.params.identifierType.objects);
+							// Patient properties
+							TR.store.patientProperty.selected.removeAll();
 							
-								var storeIdentifierType = TR.store.identifierType.available;
-								storeIdentifierType.parent = f.programId;
-								if (TR.util.store.containsParent(storeIdentifierType)) {
-									TR.util.store.loadFromStorage(storeIdentifierType);
-									TR.util.multiselect.filterAvailable(TR.cmp.params.identifierType.available, TR.cmp.params.identifierType.selected);
+							// programs with registration
+							if (f.patientProperties && f.type != "3" ) {
+								for (var i = 0; i < f.patientProperties.length; i++) {
+									TR.cmp.params.patientProperty.objects.push({id: f.patientProperties[i].id, name: TR.util.string.getEncodedString(f.patientProperties[i].name)});
+								}
+								TR.store.patientProperty.selected.add(TR.cmp.params.patientProperty.objects);
+							
+								var storePatientProperty = TR.store.patientProperty.available;
+								storePatientProperty.parent = f.programId;
+								if (TR.util.store.containsParent(storePatientProperty)) {
+									TR.util.store.loadFromStorage(storePatientProperty);
+									TR.util.multiselect.filterAvailable(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected);
 								}
 								else {
-									storeIdentifierType.load({params: {programId: f.programId}});
+									storePatientProperty.load({params: {programId: f.programId}});
 								}
+							
 							}
 							
-							// PATIENT ATTRIBUTE
-							TR.store.patientAttribute.selected.removeAll();
-							if (f.attributes && f.anonymous == "false") {
-								for (var i = 0; i < f.attributes.length; i++) {
-									TR.cmp.params.patientAttribute.objects.push({id: f.attributes[i].id, name: TR.util.string.getEncodedString(f.attributes[i].name)});
-								}
-								TR.store.patientAttribute.selected.add(TR.cmp.params.patientAttribute.objects);
-								
-								var storePatientAttribute = TR.store.patientAttribute.available;
-								storePatientAttribute.parent = f.programId;
-								if (TR.util.store.containsParent(storePatientAttribute)) {
-									TR.util.store.loadFromStorage(storePatientAttribute);
-									TR.util.multiselect.filterAvailable(TR.cmp.params.patientAttribute.available, TR.cmp.params.patientAttribute.selected);						
-								}
-								else {
-									storePatientAttribute.load({params: {programId: f.programId}});
-								}
-							}
-							
-							// FIXED ATTRIBUTES
-							TR.util.setEnabledFixedAttr();
-							if (f.fixedAttributes && f.anonymous == "false") {
-								var fixedAttributes = TR.cmp.params.fixedAttributes.checkbox;
-								Ext.Array.each(fixedAttributes, function(item) {
-									for (var i = 0; i < f.fixedAttributes.length; i++) {
-										var flag = false;
-										if( item.paramName == f.fixedAttributes[i] )
-										{
-											item.setValue( true );
-											flag = true;
-											break;
-										}
-									}
-									if( !flag ){
-										item.setValue( false );
-									}
-								});
-							}
-							
-							// PROGRAM-STAGE										
-							var storeProgramStage = TR.store.programStage;
-							storeProgramStage.parent = f.programStageId;
-							storeProgramStage.load({params: {programId: f.programId}});
-							Ext.getCmp('programStageCombobox').setValue( f.programStageId );
-							
-							// DATAELEMENT
+							// Data element
 							TR.store.dataelement.selected.removeAll();
 							if (f.dataElements) {
 								for (var i = 0; i < f.dataElements.length; i++) {
@@ -591,16 +521,27 @@ Ext.onReady( function() {
 								}
 								TR.store.dataelement.selected.add(TR.cmp.params.dataelement.objects);
 								
-								var store = TR.store.dataelement.available;
-								store.parent = f.programStageId;
-								if (TR.util.store.containsParent(store)) {
-									TR.util.store.loadFromStorage(store);
-									TR.util.multiselect.filterAvailable(TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected);
-								}
-								else {
-									store.load({params: {programStageId: f.programStageId}});
+								if( f.singleEvent == 'false' )
+								{
+									var store = TR.store.dataelement.available;
+									store.parent = f.programStageId;
+									if (TR.util.store.containsParent(store)) {
+										TR.util.store.loadFromStorage(store);
+										TR.util.multiselect.filterAvailable(TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected);
+									}
+									else {
+										store.load({params: {programStageId: f.programStageId}});
+									}
 								}
 							}
+							
+							// Program stage									
+							var storeProgramStage = TR.store.programStage;
+							storeProgramStage.parent = f.programStageId;
+							storeProgramStage.isLoadFromFavorite = true;
+							storeProgramStage.load({params: {programId: f.programId}});
+							
+							Ext.getCmp('programStageCombobox').setValue( f.programStageId );
 							
 							TR.cmp.params.organisationunit.treepanel.getSelectionModel().deselectAll();
 							TR.exe.execute();
@@ -613,18 +554,18 @@ Ext.onReady( function() {
     
     TR.store = {
         program: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'anonymous'],
+                fields: ['id', 'name', 'type'],
 				data:TR.init.system.program
             }),
-		identifierType: {
+		patientProperty: {
             available: Ext.create('Ext.data.Store', {
                 fields: ['id', 'name'],
                 proxy: {
                     type: 'ajax',
-                    url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.identifiertypes_get,
+                    url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.patientproperties_get,
                     reader: {
                         type: 'json',
-                        root: 'identifierTypes'
+                        root: 'patientProperties'
                     }
                 },
 				isloaded: false,
@@ -632,34 +573,8 @@ Ext.onReady( function() {
                 listeners: {
                     load: function(s) {
 						this.isloaded = true;
-                        TR.util.store.addToStorage(s);
-                        TR.util.multiselect.filterAvailable(TR.cmp.params.identifierType.available, TR.cmp.params.identifierType.selected);
-                    }
-                }
-            }),
-            selected: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                data: []
-            })
-        },
-		patientAttribute: {
-            available: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
-                proxy: {
-                    type: 'ajax',
-                    url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.patientattributes_get,
-                    reader: {
-                        type: 'json',
-                        root: 'patientAttributes'
-                    }
-                },
-				isloaded: false,
-                storage: {},
-                listeners: {
-                    load: function(s) {
-						this.isloaded = true;
-                        TR.util.store.addToStorage(s);
-                        TR.util.multiselect.filterAvailable(TR.cmp.params.patientAttribute.available, TR.cmp.params.patientAttribute.selected);
+						TR.util.store.addToStorage(s);
+                        TR.util.multiselect.filterAvailable(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected);
                     }
                 }
             }),
@@ -678,6 +593,7 @@ Ext.onReady( function() {
 					root: 'programStages'
 				}
 			},
+			isLoadFromFavorite: false,
 			listeners:{
 				load: function(s) {
 					Ext.override(Ext.LoadMask, {
@@ -685,6 +601,32 @@ Ext.onReady( function() {
 							  this.callParent();
 						 }
 					});
+					
+					if( TR.store.programStage.data.items.length > 1 )
+					{
+						Ext.getCmp('programStageCombobox').setVisible(true);
+					}
+					else
+					{
+						Ext.getCmp('programStageCombobox').setVisible(false);
+						var programStageId = TR.store.programStage.data.items[0].raw.id;
+						Ext.getCmp('programStageCombobox').setValue( programStageId );
+						var store = TR.store.dataelement.available;
+						TR.store.dataelement.available.loadData([],false);
+						if( !TR.store.programStage.isLoadFromFavorite)
+						{
+							TR.store.dataelement.selected.loadData([],false);
+						}
+						store.parent = programStageId;
+						
+						if (TR.util.store.containsParent(store)) {
+							TR.util.store.loadFromStorage(store);
+							TR.util.multiselect.filterAvailable(TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected);
+						}
+						else {
+							store.load({params: {programStageId: programStageId}});
+						}
+					}
 				}
 			}
 		}),
@@ -716,20 +658,9 @@ Ext.onReady( function() {
         },
         datatable: null,
         getDataTableStore: function() {
-			
-			this.datatable = Ext.create('Ext.data.Store', {
+			this.datatable = Ext.create('Ext.data.ArrayStore', {
 				fields: TR.value.fields,
-				data: TR.value.values,
-				remoteSort:true,
-				autoLoad: false,
-				proxy: {
-					type: 'memory',
-					reader: {
-						type: 'json',
-						root: 'items'
-					}
-				},
-				storage: {}
+				data: TR.value.values
 			});
         },
 		favorite: Ext.create('Ext.data.Store', {
@@ -779,7 +710,7 @@ Ext.onReady( function() {
 			}
 			// Get url
 			var url = TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.generatetabularreport_get;
-			// Export to XLS or PDF
+			// Export to XLS 
 			if( type)
 			{
 				window.location.href = url + "?" + this.getURLParams(type);
@@ -788,7 +719,6 @@ Ext.onReady( function() {
 			else
 			{
 				TR.util.mask.showMask(TR.cmp.region.center, TR.i18n.loading);
-			
 				Ext.Ajax.request({
 					url: url,
 					method: "POST",
@@ -797,11 +727,17 @@ Ext.onReady( function() {
 					success: function(r) {
 						var json = Ext.JSON.decode(r.responseText);
 						TR.state.total = json.total;
-						TR.value.valueTypes = json.valueTypes;
-						TR.value.fields = json.fields;
-						TR.value.hidden= json.hidden;
 						TR.value.columns = json.columns;
-						TR.value.values = json.items;
+						TR.value.values=json.items;
+						
+						var fields = [];
+						fields[0] = 'id';
+						for( var index=1; index < TR.value.columns.length; index++ )
+						{
+							fields[index] = 'col' + index;
+						}
+		
+						TR.value.fields = fields;
 						
 						if ( json.items.length > 1 )
 						{
@@ -809,7 +745,6 @@ Ext.onReady( function() {
 							TR.datatable.getDataTable();
 							TR.datatable.setPagingToolbarStatus();
 							
-							Ext.getCmp('btnReset').enable();
 							Ext.getCmp('btnFilter').enable();
 							Ext.getCmp('btnClean').enable();
 							Ext.getCmp('btnSortBy').enable();
@@ -841,54 +776,41 @@ Ext.onReady( function() {
 			p.programStageId = TR.cmp.params.programStage.getValue();
 			p.currentPage = this.currentPage;
 			
-			// Get fixed attributes
-			p.fixedAttributes = TR.util.getSelectedFixedAttr();
-			
 			// Get searching values
 			p.searchingValues = [];
-			if( TR.store.datatable && TR.store.datatable.data.length)
+			if( !TR.state.paramChanged() )
 			{
-				var grid = TR.datatable.datatable;
-				var cols = grid.columns;
-				var editor = grid.getStore().getAt(0);
-				var colLen = cols.length;
-				for( var i=0; i<colLen; i++ )
+				var cols = TR.datatable.datatable.columns;
+				for( var i=0; i<cols.length; i++ )
 				{
-					var col = cols[i];	
-					var dataIndex = col.dataIndex;
-					
-					if( col.name )
+					var col = cols[i];
+					if( col.name && col.name.indexOf('meta_')!=-1 )
 					{
-						var value = editor.data[dataIndex];
-						var hidden = (col.hidden==undefined)? false : col.hidden;
-						if( value!=null && value!= '')
-						{
-							value = TR.util.getValueFormula(value);
-							p.searchingValues.push( col.name + hidden + "_" + value );
-						}
-						else
-						{
-							p.searchingValues.push( col.name + hidden + "_" );
-						}
+						var param = TR.state.getFilterValueByColumn(col.name);
+						p.searchingValues.push(param);
 					}
 				}
+				var colNames = new Array();
+				TR.cmp.params.patientProperty.selected.store.each( function(r) {
+					var param = TR.state.getFilterValueByColumn(r.data.id);
+					p.searchingValues.push(param);
+				});
+				TR.cmp.params.dataelement.selected.store.each( function(r) {
+					var param = TR.state.getFilterValueByColumn(r.data.id);
+					p.searchingValues.push(param);
+				});
 			}
 			else
 			{
-				// Identifier Types
-				TR.cmp.params.identifierType.selected.store.each( function(r) {
-					p.searchingValues.push( 'iden_' + r.data.id + '_false_' );
-				});
-				// Patient Attributes
-				TR.cmp.params.patientAttribute.selected.store.each( function(r) {
-					p.searchingValues.push( 'attr_' + r.data.id + '_false_' );
+				// Patient properties
+				TR.cmp.params.patientProperty.selected.store.each( function(r) {
+					p.searchingValues.push( r.data.id + '_false_' );
 				});
 				// Data elements
 				TR.cmp.params.dataelement.selected.store.each( function(r) {
-					p.searchingValues.push( 'de_' + r.data.id +  '_false_' );
+					p.searchingValues.push( r.data.id +  '_false_' );
 				});
 			}
-		
             return p;
         },
 		getURLParams: function( type ) {
@@ -903,53 +825,92 @@ Ext.onReady( function() {
 			p += "&programStageId=" + TR.cmp.params.programStage.getValue();
 			p += "&type=" + type;
 			
-			// Get fixed attributes
-			var fixedAttributes = TR.cmp.params.fixedAttributes.checkbox;
-			Ext.Array.each(fixedAttributes, function(item) {
-				if( item.value )
-					p+="&fixedAttributes=" + item.paramName;
-			});
-			
-			if( TR.store.datatable && TR.store.datatable.data.length)
+			if( !TR.state.paramChanged() )
 			{
-				var grid = TR.datatable.datatable;
-				var cols = grid.columns;
-				var editor = grid.getStore().getAt(0);
-				var colLen = cols.length;
-				for( var i=0; i<colLen; i++ )
+				var colNames = new Array();
+				TR.cmp.params.patientProperty.selected.store.each( function(r) {
+					var param = TR.state.getFilterValueByColumn(r.data.id);
+					p += "&searchingValues=" + param;
+				});
+				TR.cmp.params.dataelement.selected.store.each( function(r) {
+					var param = TR.state.getFilterValueByColumn(r.data.id);
+					p += "&searchingValues=" + param;
+				});
+				var cols = TR.datatable.datatable.columns;
+				for( var i=0; i<cols.length; i++ )
 				{
-					var col = cols[i];	
-					if( col.name )
+					var col = cols[i];
+					if( col.name && col.name.indexOf('meta_')!=-1 )
 					{
-						var dataIndex = col.dataIndex;
-						var value = editor.data[dataIndex];
-						if( value!=null && value!= '')
-						{
-							value = TR.util.getValueFormula(value);
-						}
-						var hidden = (col.hidden==undefined)? false : col.hidden;
-						p += "&searchingValues=" +  col.name + hidden + "_" + value;
+						var param = TR.state.getFilterValueByColumn(col.name);
+						p += "&searchingValues=" + param;
 					}
 				}
 			}
 			else
 			{
-				// Identifier Types
-				TR.cmp.params.identifierType.selected.store.each( function(r) {
-					p += "&searchingValues=" + 'iden_' + r.data.id + '_false_';
-				});
-				// Patient Attributes
-				TR.cmp.params.patientAttribute.selected.store.each( function(r) {
-					p += "&searchingValues=" +'attr_' + r.data.id + '_false_';
+				// Patient properties
+				TR.cmp.params.patientProperty.selected.store.each( function(r) {
+					p += "&searchingValues=" + r.data.id + '_false_';
 				});
 				// Data elements
 				TR.cmp.params.dataelement.selected.store.each( function(r) {
-					p += "&searchingValues=" + 'de_' + r.data.id + '_false_';
+					p += "&searchingValues=" + r.data.id + '_false_';
 				});
 			}
 			
             return p;
         },
+		getFilterValueByColumn: function( colname ) {
+			var grid = TR.datatable.datatable;
+			var cols = grid.columns;
+			var editor = grid.getStore().getAt(0);
+			var p = "";
+			for( var i=0; i<cols.length; i++ )
+			{
+				var col = cols[i];
+				if( col.name && col.name == colname )
+				{
+					var value = editor.data[col.dataIndex];
+					var hidden = (col.hidden==undefined)? false : col.hidden;
+					if( value!=null && value!= '')
+					{
+						value = TR.util.getValueFormula(value);
+						p = colname + '_' + hidden + "_" + value ;
+					}
+					else 
+					{
+						p = colname + '_' + col.hidden + "_";
+					}
+					return p;
+				}
+			}		
+			return colname + "_false_";
+		},
+		paramChanged: function() {
+			if( TR.store.datatable && TR.store.datatable.data.length)
+			{
+				var colNames = new Array();
+				TR.cmp.params.patientProperty.selected.store.each( function(r) {
+					colNames.push( r.data.id );
+				});
+				TR.cmp.params.dataelement.selected.store.each( function(r) {
+					colNames.push( r.data.id );
+				});
+					
+				var cols = TR.datatable.datatable.columns;
+				for( var i=0; i<cols.length; i++ )
+				{
+					var col = cols[i];
+					if( col.name && col.name.indexOf('meta_')==-1 && colNames.indexOf(col.name) == -1 )
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+			return true;
+		},
 		validation: {
 			params: function() {
 				if (!TR.c.params.program ) {
@@ -965,6 +926,12 @@ Ext.onReady( function() {
 					return false;
 				}
 				
+				if( TR.cmp.settings.startDate.getValue() > TR.cmp.settings.endDate.getValue() )
+				{
+					TR.util.notification.error(TR.i18n.start_date_must_be_less_then_or_equals_to_end_date, TR.i18n.start_date_must_be_less_then_or_equals_to_end_date);
+					return false;
+				}
+			
 				if (TR.state.orgunitId == '') {
 					TR.util.notification.error(TR.i18n.et_no_orgunits, TR.i18n.em_no_orgunits);
 					return false;
@@ -997,169 +964,239 @@ Ext.onReady( function() {
     };
     
     TR.value = {
-		valueTypes: [],
 		columns: [],
 		fields: [],
-		hidden: [],
 		values: [],
-		getValueType: function( index )
+		save: function( psiId, deId, value)
 		{
-			if( TR.value.valueTypes[index] == null )
-			{
-				return 'textfield';
-			}
-			return TR.value.valueTypes[index].valueType;
+			var params = 'programStageInstanceId=' + psiId; 
+				params += '&dataElementId=' + deId;
+				params += '&value=' ;
+			if( value != '')
+				params += value;
+			
+			Ext.Ajax.request({
+				url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.datavalue_save,
+				method: 'POST',
+				params: params,
+				success: function() {}
+			});
 		},
-		getSuggestedValues: function( index )
+		view: function( psiId )
 		{
-			if( TR.value.valueTypes[index] == null )
-			{
-				return [];
-			}
-			return TR.value.valueTypes[index].suggestedValues;
+			TR.util.mask.showMask(TR.cmp.region.center, TR.i18n.loading);
+			var params = 'programStageInstanceId=' + psiId;
+			Ext.Ajax.request({
+				url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.datavalue_view,
+				method: 'GET',
+				params: params,
+				success: function ( response, request ) { 
+					var htmlWindow = Ext.create('Ext.window.Window', {
+						title: TR.i18n.data_entry_form,
+						cls: 'tr-messagebox',
+						modal: true,
+						width: TR.conf.layout.window_record_width,
+						height: TR.conf.layout.window_record_height,
+						autoScroll: true,
+					}).show();
+					
+					htmlWindow.update("<style>input{width:220px;} select{width:225px;}</style>" + response.responseText);
+					document.getElementById('programDiv').style.display = 'none';
+					var form = document.getElementById('dataEntryFormDiv');
+					for (var i = 0; i < form.elements.length; i++)
+					{
+						form.elements[i].disabled = true;
+					}
+					TR.util.mask.hideMask();
+				}
+			});
+		},
+		remove: function( psiId, rowIdx )
+		{
+			Ext.Msg.confirm( TR.i18n.confirmation, TR.i18n.are_you_sure, function(btn){
+				if (btn == 'yes')
+				{
+					var params = 'programStageInstanceId=' + psiId; 
+					Ext.Ajax.request({
+						url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.datavalue_delete,
+						method: 'GET',
+						params: params,
+						success: function() {
+							var grid = TR.datatable.datatable;
+							grid.getView().getNode(rowIdx).classList.add('hidden');
+						}
+					});
+				}
+            });
 		}
     };
       
     TR.datatable = {
         datatable: null,
-		rowEditing: null,
+		cellEditing: null,
 		getDataTable: function() {
-			
-			var index = 1;
-			
-			var paramsLen = TR.cmp.params.identifierType.selected.store.data.length
-						+ TR.cmp.params.patientAttribute.selected.store.data.length
-						+ TR.cmp.params.dataelement.selected.store.data.length;
-			var metaDatatColsLen = TR.value.columns.length - paramsLen ;
-			
-			// column
+						
+			var orgUnitCols = ( TR.init.system.maxLevels + 1 - TR.cmp.settings.level.getValue() );
+			var index = 0;
 			var cols = [];
-			cols[0] = {
-				header: TR.i18n.no, 
+			
+			// id of event
+			
+			cols[index] = {
+				header: TR.value.columns[index].name, 
 				dataIndex: 'id',
-				width: 50,
+				height: TR.conf.layout.east_gridcolumn_height,
+				sortable: false,
+				draggable: false,
+				hidden: true,
+				menuDisabled: true
+			};
+			
+			cols[++index] = {
+				header: TR.value.columns[index].name, 
+				dataIndex: 'col' + index,
 				height: TR.conf.layout.east_gridcolumn_height,
 				sortable: false,
 				draggable: false,
 				hideable: false,
 				menuDisabled: true
 			};
+						
+			// Org unit level columns
 			
-			cols[1] = {
-				header: TR.value.columns[1], 
-				dataIndex: 'col1',
-				height: TR.conf.layout.east_gridcolumn_height,
-				sortable: false,
-				draggable: false,
-				hideable: false
-			};
-				
-			index = 2;
-			for( index=2; index < metaDatatColsLen; index++ )
+			for( var i = 0; i < orgUnitCols; i++ )
 			{
-				cols[index] = {
-					header: TR.value.columns[index], 
+				cols[++index] = {
+					header: TR.value.columns[index].name, 
 					dataIndex: 'col' + index,
 					height: TR.conf.layout.east_gridcolumn_height,
-					name:"meta_" + index + "_",
+					name: 'meta_' + index,
 					sortable: false,
 					draggable: false,
-					hidden: eval(TR.value.hidden['col' + index])
+					hidden: eval(TR.value.columns[index].hidden)
 				}
 			}
 			
-			TR.cmp.params.identifierType.selected.store.each( function(r) {
-				var dataIndex = "col" + index;
-				cols[index] = { 
+			// Patient properties columns
+			
+			TR.cmp.params.patientProperty.selected.store.each( function(r) {
+				cols[++index] = {
 					header: r.data.name, 
-					dataIndex: dataIndex,
+					dataIndex: 'col' + index,
 					height: TR.conf.layout.east_gridcolumn_height,
-					name: "iden_"+ r.data.id + "_",
-					hidden: eval(TR.value.hidden['col' + index]),
+					name: r.data.id,
 					sortable: false,
-					draggable: true,
+					draggable: false,
+					hidden: eval(TR.value.columns[index].hidden ),
 					editor: {
-						xtype: 'textfield',
-						allowBlank: true
+						xtype: TR.value.columns[index].valueType,
+						queryMode: 'local',
+						editable: true,
+						valueField: 'name',
+						displayField: 'name',
+						allowBlank: true,
+						store:  new Ext.data.ArrayStore({
+							fields: ['name'],
+							data: TR.value.columns[index].suggested
+						})
 					}
-				};
-				index++;
+				}
 			});
 			
-			TR.cmp.params.patientAttribute.selected.store.each( function(r) {
-				var dataIndex = "col" + index;
-				cols[index] = { 
-					header: r.data.name, 
-					dataIndex: dataIndex,
-					height: TR.conf.layout.east_gridcolumn_height,
-					name: "attr_"+ r.data.id + "_",
-					hidden: eval(TR.value.hidden['col' + index]),
-					flex:1,
-					sortable: false,
-					draggable: true,
-					emptyText: TR.i18n.et_no_data,
-					editor: {
-							xtype: TR.value.getValueType(index),
-							queryMode: 'local',
-							editable: true,
-							valueField: 'name',
-							displayField: 'name',
-							allowBlank: true,
-							store:  new Ext.data.ArrayStore({
-								fields: ['name'],
-								data: TR.value.TR.value.valueTypes(index)
-							})
-						}
-					};
-				index++;
-			});
+			// Data element columns
 			
 			TR.cmp.params.dataelement.selected.store.each( function(r) {
-				var dataIndex = "col" + index;
-				cols[index] = { 
-					header: r.data.name, 
-					dataIndex: dataIndex,
+				cols[++index] = {
+					header: TR.value.columns[index].name, 
+					dataIndex: 'col' + index,
 					height: TR.conf.layout.east_gridcolumn_height,
-					name: "de_"+ r.data.id + "_",
-					hidden: eval(TR.value.hidden['col' + index]),
-					flex:1,
+					name: r.data.id,
+					hidden: eval(TR.value.columns[index].hidden ),
 					sortable: false,
 					draggable: true,
+					isEditAllowed: true,
+					emptyText: TR.i18n.et_no_data,
+					selectOnTab: true,
 					editor: {
-						xtype: TR.value.getValueType(index),
-							queryMode: 'local',
-							editable: true,
-							valueField: 'name',
-							displayField: 'name',
-							allowBlank: true,
-							store: new Ext.data.ArrayStore({
-								fields: ['name'],
-								data: TR.value.getSuggestedValues(index)
-							})
+						xtype: TR.value.columns[index].valueType,
+						queryMode: 'local',
+						editable: true,
+						valueField: 'name',
+						displayField: 'name',
+						allowBlank: true,
+						store:  new Ext.data.ArrayStore({
+							fields: ['name'],
+							data: TR.value.columns[index].suggested
+						})
 					}
 				};
-				index++;
 			});
 			
-			this.rowEditing = Ext.create('Ext.grid.plugin.RowEditing', {
+			cols[++index]={
+				xtype:'actioncolumn',
+				width:50,
+				//locked: true,
+				items: [{
+					icon: 'images/view.png',  // Use a URL in the icon config
+					tooltip: TR.i18n.view,
+					handler: function(grid, rowIndex, colIndex) {
+						var psiId = grid.getStore().getAt(rowIndex).data['id'];
+						TR.value.view( psiId );
+					}
+				},
+				'->',
+				{
+					icon: 'images/delete.png',
+					tooltip: 'Delete',
+					handler: function(grid, rowIndex, colIndex) {
+						var psiId = grid.getStore().getAt(rowIndex).data['id'];
+						TR.value.remove( psiId, rowIndex );
+					}
+				}]
+			}
+			
+			this.cellEditing = Ext.create('Ext.grid.plugin.CellEditing', {
 				clicksToEdit: 1,
-				editStyle: 'row',
 				autoScroll: true,
-				errorSummary: false,
+				errorSummary: true,
 				listeners: {
-					beforeedit: function( editor, e) 
+					beforeedit: function( e, editor) 
 					{
-						if( editor.rowIdx > 0 )
+						if( e.rowIdx > 0 && !e.column.isEditAllowed )
 						{
 							return false;
 						}
 					},
 					edit: function( editor, e ){
-						TR.exe.execute();
+						var grid = TR.datatable.datatable;
+						grid.getView().getNode(e.rowIdx).classList.remove('hidden');
+						
+						var oldValue = e.originalValue;
+						var newValue = e.value;
+						if( newValue != oldValue)
+						{
+							// filter
+							if( e.rowIdx==0 ){
+								TR.exe.execute();
+							}
+							// save data-value of data element
+							else{
+								var psiId = TR.store.datatable.getAt(e.rowIdx).data['id'];
+								var deId = e.column.name.split('_')[1];
+								TR.value.save( psiId, deId, newValue);
+								//e.record.commit();
+							}
+						}
 					},
 					canceledit: function( grid, eOpts ){
-						var grid = TR.datatable.datatable;
-						grid.getView().getNode(0).classList.add('hidden');
+						if( e.rowIdx == 0 ){
+							var grid = TR.datatable.datatable;
+							grid.getView().getNode(0).classList.add('hidden');
+						}
+					},
+					validateedit: function( editor, e, eOpts )
+					{
+						return true;
 					}
 				}
 			});
@@ -1171,6 +1208,7 @@ Ext.onReady( function() {
 				columns: cols,
 				scroll: 'both',
 				title: TR.cmp.settings.program.rawValue + " - " + TR.cmp.params.programStage.rawValue + " " + TR.i18n.report,
+				selType: 'cellmodel',
 				viewConfig: {
 					getRowClass: function(record, rowIndex, rp, ds){ 
 						if(rowIndex == 0){
@@ -1266,12 +1304,12 @@ Ext.onReady( function() {
 						}
 					}
 				], 
-				plugins: [this.rowEditing],
+				plugins: [this.cellEditing],
 				store: TR.store.datatable
 			});
 										
 			if (Ext.grid.RowEditor) {
-				Ext.apply(Ext.grid.RowEditor.prototype, {
+				Ext.apply(Ext.grid.CellEditor.prototype, {
 					saveBtnText : TR.i18n.filter,
 					cancelBtnText : TR.i18n.cancel
 				});
@@ -1364,7 +1402,7 @@ Ext.onReady( function() {
                             items: [
                             {
 								xtype: 'label',
-								text: TR.i18n.programs,
+								text: TR.i18n.program,
 								style: 'font-size:11px; font-weight:bold; padding:0 0 0 3px'
 							},
 							{ bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
@@ -1386,44 +1424,26 @@ Ext.onReady( function() {
 									},
 									select: function(cb) {
 										var pId = cb.getValue();
-										if( cb.displayTplData[0].anonymous=='false' )
+										// Regular programs
+										if( cb.displayTplData[0].type !='3' )
 										{
-											// IDENTIFIER TYPE
-											var storeIdentifierType = TR.store.identifierType.available;
-											TR.store.identifierType.selected.removeAll();
-											storeIdentifierType.parent = pId;
+											// IDENTIFIER TYPE && PATIENT ATTRIBUTES
+											var storePatientProperty = TR.store.patientProperty.available;
+											TR.store.patientProperty.selected.removeAll();
+											storePatientProperty.parent = pId;
 											
-											if (TR.util.store.containsParent(storeIdentifierType)) {
-												TR.util.store.loadFromStorage(storeIdentifierType);
-												TR.util.multiselect.filterAvailable(TR.cmp.params.identifierType.available, TR.cmp.params.identifierType.selected);
+											if (TR.util.store.containsParent(storePatientProperty)) {
+												TR.util.store.loadFromStorage(storePatientProperty);
+												TR.util.multiselect.filterAvailable(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected);
 											}
 											else {
-												storeIdentifierType.load({params: {programId: pId}});
+												storePatientProperty.load({params: {programId: pId}});
 											}
-											
-											// PATIENT ATTRIBUTE
-											var storePatientAttribute = TR.store.patientAttribute.available;
-											storePatientAttribute.parent = pId;
-											TR.store.patientAttribute.selected.removeAll();
-											
-											if (TR.util.store.containsParent(storePatientAttribute)) {
-												TR.util.store.loadFromStorage(storePatientAttribute);
-												TR.util.multiselect.filterAvailable(TR.cmp.params.patientAttribute.available, TR.cmp.params.patientAttribute.selected);
-											}
-											else {
-												storePatientAttribute.load({params: {programId: pId}});
-											}
-											TR.util.setEnabledFixedAttr();
 										}
 										else
 										{
-											TR.util.setDisabledFixedAttr();
-											
-											TR.store.identifierType.available.removeAll();
-											TR.store.identifierType.selected.removeAll();
-											
-											TR.store.patientAttribute.available.removeAll();
-											TR.store.patientAttribute.selected.removeAll();
+											TR.store.patientProperty.available.removeAll();
+											TR.store.patientProperty.selected.removeAll();
 										}
 										
 										// PROGRAM-STAGE										
@@ -1431,6 +1451,7 @@ Ext.onReady( function() {
 										TR.store.dataelement.available.removeAll();
 										TR.store.dataelement.selected.removeAll();
 										storeProgramStage.parent = pId;
+										TR.store.dataelement.isLoadFromFavorite = false;
 										storeProgramStage.load({params: {programId: pId}});
 									}
 								}
@@ -1571,9 +1592,9 @@ Ext.onReady( function() {
 										}
 									},
 									
-									// IDENTIFIER TYPE
+									// IDENTIFIER TYPE and PATIENT-ATTRIBUTE
 									{
-										title: '<div style="height:17px">' + TR.i18n.identifiers + '</div>',
+										title: '<div style="height:17px">' + TR.i18n.identifiers_and_attributes + '</div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -1581,14 +1602,16 @@ Ext.onReady( function() {
 												layout: 'column',
 												bodyStyle: 'border-style:none',
 												items: [
-													Ext.create('Ext.ux.form.MultiSelect', {
-														name: 'availableIdentifierTypes',
+													{
+														xtype: 'multiselect',
+														name: 'availablePatientProperties',
 														cls: 'tr-toolbar-multiselect-left',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														height: TR.conf.layout.west_multiselect,
 														displayField: 'name',
 														valueField: 'id',
 														queryMode: 'local',
-														store: TR.store.identifierType.available,
+														store: TR.store.patientProperty.available,
 														tbar: [
 															{
 																xtype: 'label',
@@ -1601,7 +1624,7 @@ Ext.onReady( function() {
 																icon: 'images/arrowright.png',
 																width: 22,
 																handler: function() {
-																	TR.util.multiselect.select(TR.cmp.params.identifierType.available, TR.cmp.params.identifierType.selected);
+																	TR.util.multiselect.select(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected);
 																}
 															},
 															{
@@ -1609,32 +1632,33 @@ Ext.onReady( function() {
 																icon: 'images/arrowrightdouble.png',
 																width: 22,
 																handler: function() {
-																	TR.util.multiselect.selectAll(TR.cmp.params.identifierType.available, TR.cmp.params.identifierType.selected);
+																	TR.util.multiselect.selectAll(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected);
 																}
 															},
 															' '
 														],
 														listeners: {
 															added: function() {
-																TR.cmp.params.identifierType.available = this;
+																TR.cmp.params.patientProperty.available = this;
 															},                                                                
 															afterrender: function() {
 																this.boundList.on('itemdblclick', function() {
-																	TR.util.multiselect.select(this, TR.cmp.params.identifierType.selected);
+																	TR.util.multiselect.select(this, TR.cmp.params.patientProperty.selected);
 																}, this);
 															}
 														}
-													}),                                            
+													},                                            
 													{
 														xtype: 'multiselect',
-														name: 'selectedIdentifierTypes',
+														name: 'selectedPatientProperties',
 														cls: 'tr-toolbar-multiselect-right',
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
+														height: TR.conf.layout.west_multiselect,
 														displayField: 'name',
 														valueField: 'id',
 														ddReorder: true,
 														queryMode: 'local',
-														store: TR.store.identifierType.selected,
+														store: TR.store.patientProperty.selected,
 														tbar: [
 															' ',
 															{
@@ -1642,7 +1666,7 @@ Ext.onReady( function() {
 																icon: 'images/arrowleftdouble.png',
 																width: 22,
 																handler: function() {
-																	TR.util.multiselect.unselectAll(TR.cmp.params.identifierType.available, TR.cmp.params.identifierType.selected);
+																	TR.util.multiselect.unselectAll(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected);
 																}
 															},
 															{
@@ -1650,7 +1674,7 @@ Ext.onReady( function() {
 																icon: 'images/arrowleft.png',
 																width: 22,
 																handler: function() {
-																	TR.util.multiselect.unselect(TR.cmp.params.identifierType.available, TR.cmp.params.identifierType.selected);
+																	TR.util.multiselect.unselect(TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected);
 																}
 															},
 															'->',
@@ -1662,259 +1686,33 @@ Ext.onReady( function() {
 														],
 														listeners: {
 															added: function() {
-																TR.cmp.params.identifierType.selected = this;
+																TR.cmp.params.patientProperty.selected = this;
 															},          
 															afterrender: function() {
 																this.boundList.on('itemdblclick', function() {
-																	TR.util.multiselect.unselect(TR.cmp.params.identifierType.available, this);
+																	TR.util.multiselect.unselect(TR.cmp.params.patientProperty.available, this);
 																}, this);
 															}
 														}
 													}
 												]
 											}
+											
 										],
 										listeners: {
 											added: function() {
-												TR.cmp.params.identifierType.panel = this;
+												TR.cmp.params.patientProperty.panel = this;
 											},
 											expand: function() {
+												// IDENTIFIER TYPE
 												TR.util.multiselect.setHeight(
-													[TR.cmp.params.identifierType.available, TR.cmp.params.identifierType.selected],
-													TR.cmp.params.identifierType.panel
+													[TR.cmp.params.patientProperty.available, TR.cmp.params.patientProperty.selected],
+													TR.cmp.params.patientProperty.panel
 												);
 												
 												var programId = TR.cmp.settings.program.getValue();													
-												if (programId != null && !TR.store.identifierType.available.isloaded) {
-													TR.store.identifierType.available.load({params: {programId: programId}});
-												}
-											}
-										}
-									},
-									
-									// PATIENT-ATTRIBUTE
-									{
-										title: '<div style="height:17px">' + TR.i18n.attributes + '</div>',
-										hideCollapseTool: true,
-										items: [
-											{
-												xtype: 'label',
-												text: TR.i18n.fixed_attributes,
-												style: 'font-size:11px; font-weight:bold; color:#444; padding:0 0 0 3px'
-											},
-											{
-												xtype: 'panel',
-												layout: 'column',
-												bodyStyle: 'border-style:none; padding:5px 0 10px 8px;',
-												items: [
-													{
-														xtype: 'panel',
-														layout: 'anchor',
-														bodyStyle: 'border-style:none; padding:0 0 0 5px',
-														defaults: {
-															labelSeparator: '',
-															listeners: {
-																added: function(chb) {
-																	if (chb.xtype === 'checkbox') {
-																		TR.cmp.params.fixedAttributes.checkbox.push(chb);
-																	}
-																}
-															}
-														},
-														items: [
-															{
-																xtype: 'checkbox',
-																paramName: 'fullName',
-																boxLabel: TR.i18n.full_name
-															},
-															{
-																xtype: 'checkbox',
-																paramName: 'gender',
-																boxLabel: TR.i18n.gender
-															},
-															{
-																xtype: 'checkbox',
-																paramName: 'birthDate',
-																boxLabel: TR.i18n.date_of_birth
-															}
-														]
-													},
-													{
-														xtype: 'panel',
-														layout: 'anchor',
-														bodyStyle: 'border-style:none; padding:0 0 0 32px',
-														defaults: {
-															labelSeparator: '',
-															listeners: {
-																added: function(chb) {
-																	if (chb.xtype === 'checkbox') {
-																		TR.cmp.params.fixedAttributes.checkbox.push(chb);
-																	}
-																}
-															}
-														},
-														items: [
-															{
-																xtype: 'checkbox',
-																paramName: 'bloodGroup',
-																boxLabel: TR.i18n.blood_group
-															},
-															{
-																xtype: 'checkbox',
-																paramName: 'phoneNumber',
-																boxLabel: TR.i18n.phone_number
-															},
-															{
-																xtype: 'checkbox',
-																paramName: 'deathdate',
-																boxLabel: TR.i18n.death_date
-															}
-														]
-													},
-													
-													{
-														xtype: 'panel',
-														layout: 'anchor',
-														bodyStyle: 'border-style:none; padding:0 0 0 32px',
-														defaults: {
-															labelSeparator: '',
-															listeners: {
-																added: function(chb) {
-																	if (chb.xtype === 'checkbox') {
-																		TR.cmp.params.fixedAttributes.checkbox.push(chb);
-																	}
-																}
-															}
-														},
-														items: [
-															{
-																xtype: 'checkbox',
-																paramName: 'registrationDate',
-																boxLabel: TR.i18n.registration_date
-															},
-															{
-																xtype: 'checkbox',
-																paramName: 'dobType',
-																boxLabel: TR.i18n.dob_type
-															}
-														]
-													}
-													
-												]
-											},											
-											{
-												xtype: 'label',
-												text: TR.i18n.dynamic_attributes,
-												style: 'font-size:11px; font-weight:bold; color:#444; padding:0 0 0 3px'
-											},
-											{
-												xtype: 'panel',
-												layout: 'column',
-												bodyStyle: 'border-style:none; padding:5px 0 0 0',
-												items: [
-													Ext.create('Ext.ux.form.MultiSelect', {
-														name: 'availablePatientAttributes',
-														cls: 'tr-toolbar-multiselect-left',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
-														height: 159,
-														displayField: 'name',
-														valueField: 'id',
-														queryMode: 'local',
-														store: TR.store.patientAttribute.available,
-														tbar: [
-															{
-																xtype: 'label',
-																text: TR.i18n.available,
-																cls: 'tr-toolbar-multiselect-left-label'
-															},
-															'->',
-															{
-																xtype: 'button',
-																icon: 'images/arrowright.png',
-																width: 22,
-																handler: function() {
-																	TR.util.multiselect.select(TR.cmp.params.patientAttribute.available, TR.cmp.params.patientAttribute.selected);
-																}
-															},
-															{
-																xtype: 'button',
-																icon: 'images/arrowrightdouble.png',
-																width: 22,
-																handler: function() {
-																	TR.util.multiselect.selectAll(TR.cmp.params.patientAttribute.available, TR.cmp.params.patientAttribute.selected);
-																}
-															},
-															' '
-														],
-														listeners: {
-															added: function() {
-																TR.cmp.params.patientAttribute.available = this;
-															},                                                                
-															afterrender: function() {
-																this.boundList.on('itemdblclick', function() {
-																	TR.util.multiselect.select(this, TR.cmp.params.patientAttribute.selected);
-																}, this);
-															}
-														}
-													}),                                            
-													{
-														xtype: 'multiselect',
-														name: 'selectedPatientAttribute',
-														cls: 'tr-toolbar-multiselect-right',
-														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) / 2,
-														height: 159,
-														displayField: 'name',
-														valueField: 'id',
-														ddReorder: true,
-														queryMode: 'local',
-														store: TR.store.patientAttribute.selected,
-														tbar: [
-															' ',
-															{
-																xtype: 'button',
-																icon: 'images/arrowleftdouble.png',
-																width: 22,
-																handler: function() {
-																	TR.util.multiselect.unselectAll(TR.cmp.params.patientAttribute.available, TR.cmp.params.patientAttribute.selected);
-																}
-															},
-															{
-																xtype: 'button',
-																icon: 'images/arrowleft.png',
-																width: 22,
-																handler: function() {
-																	TR.util.multiselect.unselect(TR.cmp.params.patientAttribute.available, TR.cmp.params.patientAttribute.selected);
-																}
-															},
-															'->',
-															{
-																xtype: 'label',
-																text: TR.i18n.selected,
-																cls: 'tr-toolbar-multiselect-right-label'
-															}
-														],
-														listeners: {
-															added: function() {
-																TR.cmp.params.patientAttribute.selected = this;
-															},          
-															afterrender: function() {
-																this.boundList.on('itemdblclick', function() {
-																	TR.util.multiselect.unselect(TR.cmp.params.patientAttribute.available, this);
-																}, this);
-															}
-														}
-													}
-												]
-											}
-										],
-										listeners: {
-											added: function() {
-												TR.cmp.params.patientAttribute.panel = this;
-											},
-											expand: function() {
-												var programId = TR.cmp.settings.program.getValue();													
-												if ( programId!=null && !TR.store.patientAttribute.available.isloaded ) {
-													TR.store.patientAttribute.available.load({params: {programId: programId}});
+												if (programId != null && !TR.store.patientProperty.available.isloaded) {
+													TR.store.patientProperty.available.load({params: {programId: programId}});
 												}
 											}
 										}
@@ -2299,10 +2097,9 @@ Ext.onReady( function() {
 								grid.getView().getNode(0).classList.remove('hidden');
 								var record = grid.getView().getRecord( grid.getView().getNode(0) );
 								grid.getView().getSelectionModel().select(record, false, false);
-								TR.datatable.rowEditing.startEdit(0, 0);
 							}
 							else {
-								TR.exe.execute();
+								grid.getView().getNode(0).classList.add('hidden');
 							}
 						}
 					},
@@ -2361,19 +2158,6 @@ Ext.onReady( function() {
 										}
 									]                                            
 								});
-							}
-						}
-					},
-					{
-						xtype: 'button',
-						cls: 'tr-toolbar-btn-2',
-						text: TR.i18n.reset,
-						id:'btnReset',
-						width: 50,
-						disabled: true,
-						listeners: {
-							click: function() {
-								TR.exe.reset();
 							}
 						}
 					},
@@ -2972,4 +2756,4 @@ Ext.onReady( function() {
     });
     
     }});
-});
+}); 

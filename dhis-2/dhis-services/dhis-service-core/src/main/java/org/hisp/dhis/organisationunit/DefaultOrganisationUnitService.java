@@ -205,12 +205,6 @@ public class DefaultOrganisationUnitService
         return organisationUnitStore.getOrganisationUnitByNameIgnoreCase( name );
     }
 
-    @Override
-    public List<OrganisationUnit> getOrganisationUnitsByLastUpdated( Date lastUpdated )
-    {
-        return organisationUnitStore.getByLastUpdated( lastUpdated );
-    }
-
     public Collection<OrganisationUnit> getRootOrganisationUnits()
     {
         return organisationUnitStore.getRootOrganisationUnits();
@@ -685,18 +679,6 @@ public class DefaultOrganisationUnitService
     public int getMaxOfOrganisationUnitLevels()
     {
         return organisationUnitLevelStore.getMaxLevels();
-    }
-
-    @Override
-    public void updateOrganisationUnits( Collection<OrganisationUnit> units )
-    {
-        organisationUnitStore.update( units );
-    }
-
-    @Override
-    public Collection<OrganisationUnit> getOrganisationUnits( Boolean hasPatients )
-    {
-        return organisationUnitStore.get( hasPatients );
     }
 
     // -------------------------------------------------------------------------

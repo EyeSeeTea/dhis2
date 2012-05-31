@@ -3,7 +3,13 @@
 	"name": "$!encoder.jsonEncode( ${tabularReport.name} )",
 	"lastUpdated": "$!format.formatDate( ${tabularReport.lastUpdated} )",
 	"programId": "${tabularReport.programStage.program.id}",
-	"anonymous": "${tabularReport.programStage.program.anonymous}",
+	"singleEvent": 
+		#if($tabularReport.programStage.program.programStages.size() == 1 )
+			"true",
+		#else
+			"false",
+		#end
+	"type": "${tabularReport.programStage.program.type}",
 	"programStageId": "${tabularReport.programStage.id}",
 	"programStageName": "${tabularReport.programStage.name}",
 	"startDate": "$!format.formatDate( $tabularReport.startDate )",
@@ -12,23 +18,27 @@
 	"level": "${tabularReport.level}",
 	"sortedOrgunitAsc": "${tabularReport.sortedOrgunitAsc}",
 	"facilityLB": "${tabularReport.facilityLB}",
-	"identifiers": [
-		#set( $size = ${tabularReport.identifiers.size()} )
+	"patientProperties": [
+		#set( $fixedAttributes = ${tabularReport.fixedAttributes} )
+		#foreach( ${fixedAttribute} in $!{fixedAttributes} )
+			{	
+				#set( $attr = $i18n.getString($fixedAttribute) )
+				"id": "fixedAttr_${fixedAttribute}",
+				"name": "$attr"
+			},
+		#end
 		#set( $identifiers = ${tabularReport.identifiers} )
 		#foreach( ${identifier} in $!{identifiers} )
 			{
-				"id": "${identifier.id}",
+				"id": "iden_${identifier.id}",
 				"name": "${identifier.name}"
-			}
-			#if( $velocityCount < $size ),#end
+			},
 		#end
-	],
-	"attributes": [
 		#set( $size = ${tabularReport.attributes.size()} )
 		#set( $attributes = ${tabularReport.attributes} )
 		#foreach( ${attribute} in $!{attributes} )
 			{
-				"id": "${attribute.id}",
+				"id": "attr_${attribute.id}",
 				"name": "${attribute.name}"
 			}
 			#if( $velocityCount < $size ),#end
@@ -38,7 +48,7 @@
 		#set( $size = ${tabularReport.fixedAttributes.size()} )
 		#set( $fixedAttributes = ${tabularReport.fixedAttributes} )
 		#foreach( ${fixedAttribute} in $!{fixedAttributes} )
-			"${fixedAttribute}"
+			"fixedAttr_${fixedAttribute}"
 			#if( $velocityCount < $size ),#end
 		#end
 	],
@@ -47,7 +57,7 @@
 		#set( $dataElements = ${tabularReport.dataElements} )
 		#foreach( ${dataElement} in $!{dataElements} )
 			{
-				"id": "${dataElement.id}",
+				"id": "de_${dataElement.id}",
 				"name": "${dataElement.name}"
 			}
 			#if( $velocityCount < $size ),#end

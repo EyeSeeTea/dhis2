@@ -56,6 +56,7 @@ var COLOR_RED = '#ff8a8a';
 var COLOR_ORANGE = '#ff6600';
 var COLOR_WHITE = '#ffffff';
 var COLOR_GREY = '#cccccc';
+var COLOR_PINK = '#cd78cd';
 
 var DEFAULT_TYPE = 'int';
 var DEFAULT_NAME = '[unknown]';
@@ -220,12 +221,21 @@ function loadForm( dataSetId, value )
 	hideExportDiv();
 	showLoader();
 
-	$( '#contentDiv' ).load( 'loadForm.action', {
+	$( '#contentDiv' ).load( 'loadForm.action',
+	{
 		dataSetId : dataSetId,
 		value: value
-	}, function(html){
-		loadDataValues(dataSetId);
-	});
+	}, 
+	function ( responseText, textStatus, req )
+	{
+		if ( textStatus == "error" ) {
+			hideLoader();
+			clearEntryForm();
+			setHeaderDelayMessage( i18n_disconnect_server );
+			return;
+        }
+		loadDataValues( dataSetId );
+	} );
 }
 
 function getDataElementType( dataElementId )
@@ -333,6 +343,9 @@ function dataSetSelected()
 	clearListById( 'selectedPeriodId' );
 	hideById('attributeDiv');
 	
+	$( '#valueInput' ).unbind( 'change' );
+	$( '#value' ).unbind( 'select' );
+	$( '#selectedPeriodId' ).unbind( 'change' );
 	$( '#selectedPeriodId' ).removeAttr( 'disabled' );
     $( '#prevButton' ).removeAttr( 'disabled' );
     $( '#nextButton' ).removeAttr( 'disabled' );
@@ -377,9 +390,10 @@ function loadSubDataSets( dataSetId )
 		},
 		function( json ) 
 		{
-			if( json.department.length > 0 )
+			clearListById( 'subDataSetId' );
+		
+			if ( json.department.length > 0 )
 			{
-				clearListById( 'subDataSetId' );
 				$('#subDataSetId').append('<option value=-1>' + i18n_please_select_department + '</option>');
 				for ( i in json.department ) 
 				{ 
@@ -387,12 +401,11 @@ function loadSubDataSets( dataSetId )
 				}
 				
 				byId( 'inputCriteria' ).style.width = '840px';
-				showById('departmentTitleDiv');
-				showById('departmentDiv');
+				showById( 'departmentTitleDiv' );
+				showById( 'departmentDiv' );
 				
-				jQuery("#valueInput").unbind('change');
-				jQuery("#value").unbind('select');
-				jQuery('#selectedPeriodId').unbind('change');
+				jQuery( '#valueInput' ).unbind( 'change' );
+				jQuery( '#value' ).unbind( 'select' );
 			}
 			else 
 			{
@@ -402,38 +415,43 @@ function loadSubDataSets( dataSetId )
 				hideById('departmentTitleDiv');
 				hideById('departmentDiv');
 			}
+
+			jQuery( '#selectedPeriodId' ).bind( 'change', periodSelected );
 		} );
 }
 
 function loadAttributeValues( dataSetId )
 {
 	$.getJSON( 'loadAttribueValues.action',
+	{
+		dataSetId: dataSetId
+	}
+	, function( json )
+	{
+		clearListById( 'value' );
+	
+		if( json.attributeValues.length > 0 )
 		{
-			dataSetId: dataSetId
+			for ( i in json.attributeValues ) 
+			{ 
+				jQuery( '#value' ).append( '<option value="' + json.attributeValues[i] + '">' + json.attributeValues[i] + '</option>' );
+			}
+
+			autoCompletedField();
+
+			jQuery( '#valueInput' ).bind( 'change', periodSelected() );
+			jQuery( '#value' ).bind( 'select', periodSelected() );
+			
+			showById( 'attributeDiv' );
 		}
-		, function( json ) 
+		else
 		{
-			if( json.attributeValues.length > 0 )
-			{
-				clearListById( 'value' );
-				for ( i in json.attributeValues ) 
-				{ 
-					$('#value').append('<option value=' + json.attributeValues[i] + '>' + json.attributeValues[i] + '</option>');
-				}
-				autoCompletedField();
-				jQuery("#valueInput").bind('change', periodSelected);
-				jQuery("#value").bind('select', periodSelected);
-				jQuery('#selectedPeriodId').unbind('change');
-				showById('attributeDiv');
-			}
-			else
-			{
-				jQuery("#valueInput").unbind('change');
-				jQuery("#value").unbind('change');
-				jQuery('#selectedPeriodId').bind('change', periodSelected);
-				hideById('attributeDiv');
-			}
-		} );
+			jQuery( '#valueInput' ).unbind( 'change' );
+			jQuery( '#value' ).unbind( 'select' );
+
+			hideById( 'attributeDiv' );
+		}
+	} );
 }
 
 // -----------------------------------------------------------------------------
@@ -442,7 +460,7 @@ function loadAttributeValues( dataSetId )
 
 function loadDepartmentFormSelected()
 {
-    var periodName = $( '#selectedPeriodId  option:selected' ).text();
+    var periodName = $( '#selectedPeriodId option:selected' ).text();
     var dataSetId = $( '#subDataSetId option:selected' ).val();
 
     $( '#currentPeriod' ).html( periodName );
@@ -452,7 +470,7 @@ function loadDepartmentFormSelected()
     if ( periodId && periodId != -1 && dataSetId != -1 )
     {
         showLoader();
-        loadForm( dataSetId, byId( 'valueInput' ).value );
+        loadForm( dataSetId, getFieldValue( 'valueInput' ) );
     }
 	else
 	{
@@ -462,17 +480,26 @@ function loadDepartmentFormSelected()
 
 function periodSelected()
 {
-    var periodName = $( '#selectedPeriodId  option:selected' ).text();
+	var periodName = $( '#selectedPeriodId option:selected' ).text();
     var dataSetId = $( '#selectedDataSetId option:selected' ).val();
 
     $( '#currentPeriod' ).html( periodName );
 
-    var periodId = $( '#selectedPeriodId' ).val();
+    var periodId = getFieldValue( 'selectedPeriodId' );
 
     if ( periodId && periodId != -1 )
     {
-        showLoader();
-        loadForm( dataSetId, byId( 'valueInput' ).value );
+		if ( hasElements( 'subDataSetId' ) && getFieldValue( 'subDataSetId' ) == null )
+		{
+			return;
+		}
+		else if ( getFieldValue( 'subDataSetId' ) )
+		{
+			dataSetId = $( '#subDataSetId option:selected' ).val();
+		}
+
+		showLoader();
+		loadForm( dataSetId, getFieldValue( 'valueInput' ) );
     }
 	else
 	{
@@ -484,17 +511,17 @@ function periodSelected()
 // Form
 // -----------------------------------------------------------------------------
 
-function loadDataValues(dataSetId)
+function loadDataValues( dataSetId )
 {
     $( '#completeButton' ).removeAttr( 'disabled' );
     $( '#undoButton' ).attr( 'disabled', 'disabled' );
     $( '#infoDiv' ).css( 'display', 'none' );
 
-    insertDataValues(dataSetId);
+    insertDataValues( dataSetId );
     displayEntryFormCompleted();
 }
 
-function insertDataValues(dataSetId)
+function insertDataValues( dataSetId )
 {
     var dataValueMap = [];
 	currentMinMaxValueMap = []; // Reset
@@ -513,7 +540,7 @@ function insertDataValues(dataSetId)
     $( '[name="max"]' ).html( '' );
 
     $( '[name="entryfield"]' ).filter( ':disabled' ).css( 'background-color', COLOR_GREY );
-
+	
     $.ajax( {
     	url: 'getDataValues.action',
     	data:
@@ -521,15 +548,17 @@ function insertDataValues(dataSetId)
 	        periodId : periodId,
 	        dataSetId : dataSetId,
 			attributeId: getFieldValue( 'attributeId' ),
-			value: byId( 'valueInput' ).value,
+			value: getFieldValue( 'valueInput' ),
 	        organisationUnitId : currentOrganisationUnitId
 	    },
 	    dataType: 'json',
-	    error: function() // offline
+	    error: function() // disconnect to server
 	    {
 	    	$( '#contentDiv' ).show();
 	    	$( '#completenessDiv' ).show();
 	    	$( '#infoDiv' ).hide();
+			setHeaderDelayMessage( i18n_disconnect_server );
+			return;
 	    },
 	    success: function( json ) // online
 	    {
@@ -608,8 +637,7 @@ function insertDataValues(dataSetId)
 	            $( '#undoButton' ).attr( 'disabled', 'disabled' );
 	            $( '#infoDiv' ).hide();
 	        }
-			
-			
+
 			showById('completenessDiv');
 			hideLoader();
 	    }
@@ -732,7 +760,7 @@ function registerCompleteDataSet( json )
 {
     var params = storageManager.getCurrentCompleteDataSetParams();
 
-	storageManager.saveCompleteDataSet( params );
+	//storageManager.saveCompleteDataSet( params );
 
     $.ajax( {
     	url: 'registerCompleteDataSet.action',
@@ -749,7 +777,7 @@ function registerCompleteDataSet( json )
             {
                 disableCompleteButton();
 
-                storageManager.clearCompleteDataSet( params );
+                //storageManager.clearCompleteDataSet( params );
 
                 if ( json.response == 'input' )
                 {
@@ -785,13 +813,13 @@ function undoCompleteDataSet()
                 else
                 {
                     disableUndoButton();
-	                storageManager.clearCompleteDataSet( params );
+	                //storageManager.clearCompleteDataSet( params );
                 }
 
 	        },
 	        error: function()
 	        {
-	            storageManager.clearCompleteDataSet( params );
+	            //storageManager.clearCompleteDataSet( params );
 	        }
         } );
     }
@@ -931,6 +959,7 @@ function closeCurrentSelection()
 // Local storage of forms
 // -----------------------------------------------------------------------------
 
+/*
 function updateForms()
 {
     purgeLocalForms();
@@ -995,6 +1024,7 @@ function downloadRemoteForms()
         }
     }
 }
+*/
 
 // TODO break if local storage is full
 
@@ -1021,7 +1051,7 @@ function StorageManager()
      *
      * @return number of characters.
      */
-    this.totalSize = function()
+    /*this.totalSize = function()
     {
         var totalSize = new Number();
 
@@ -1036,7 +1066,7 @@ function StorageManager()
         }
 
         return totalSize;
-    };
+    };*/
 
     /**
      * Returns the total numbers of characters in stored forms currently in the
@@ -1044,7 +1074,7 @@ function StorageManager()
      *
      * @return number of characters.
      */
-    this.totalFormSize = function()
+    /*this.totalFormSize = function()
     {
         var totalSize = new Number();
 
@@ -1062,16 +1092,16 @@ function StorageManager()
         }
 
         return totalSize;
-    };
+    };*/
 
     /**
      * Return the remaining capacity of the local storage in characters, ie. the
      * maximum size minus the current size.
      */
-    this.remainingStorage = function()
+    /*this.remainingStorage = function()
     {
         return MAX_SIZE - this.totalSize();
-    };
+    };*/
 
     /**
      * Saves the content of a data entry form.
@@ -1080,7 +1110,7 @@ function StorageManager()
      * @param html the form HTML content.
      * @return true if the form saved successfully, false otherwise.
      */
-    this.saveForm = function( dataSetId, html )
+    /*this.saveForm = function( dataSetId, html )
     {
         var id = KEY_FORM_PREFIX + dataSetId;
 
@@ -1104,7 +1134,7 @@ function StorageManager()
         }
 
         return true;
-    };
+    };*/
 
     /**
      * Gets the content of a data entry form.
@@ -1112,31 +1142,31 @@ function StorageManager()
      * @param dataSetId the identifier of the data set of the form.
      * @return the content of a data entry form.
      */
-    this.getForm = function( dataSetId, attributeId, value )
+    /*this.getForm = function( dataSetId, attributeId, value )
     {
         var id = KEY_FORM_PREFIX + dataSetId + "_" + attributeId + "_" + value;
 
         return localStorage[id];
-    };
+    };*/
 
     /**
      * Removes a form.
      *
      * @param dataSetId the identifier of the data set of the form.
      */
-    this.deleteForm = function( dataSetId, attributeId, value )
+    /*this.deleteForm = function( dataSetId, attributeId, value )
     {
     	var id = KEY_FORM_PREFIX + dataSetId + "_" + attributeId + "_" + value;
 
         localStorage.removeItem( id );
-    };
+    };*/
 
     /**
      * Returns an array of the identifiers of all forms.
      *
      * @return array with form identifiers.
      */
-    this.getAllForms = function()
+    /*this.getAllForms = function()
     {
         var formIds = [];
 
@@ -1155,7 +1185,7 @@ function StorageManager()
         }
 
         return formIds;
-    };
+    };*/
 
     /**
      * Indicates whether a form exists.
@@ -1163,12 +1193,12 @@ function StorageManager()
      * @param dataSetId the identifier of the data set of the form.
      * @return true if a form exists, false otherwise.
      */
-    this.formExists = function( dataSetId, attributeId, value )
+    /*this.formExists = function( dataSetId, attributeId, value )
     {
         var id = KEY_FORM_PREFIX + dataSetId + "_" + attributeId + "_" +  value;
 
         return localStorage[id] != null;
-    };
+    };*/
 
     /**
      * Downloads the form for the data set with the given identifier from the
@@ -1178,7 +1208,7 @@ function StorageManager()
      * @param dataSetId the identifier of the data set of the form.
      * @param formVersion the version of the form of the remote data set.
      */
-    this.downloadForm = function( dataSetId, attributeId, value, formVersion )
+    /*this.downloadForm = function( dataSetId, attributeId, value, formVersion )
     {
         $.ajax( {
             url: 'loadForm.action',
@@ -1197,7 +1227,7 @@ function StorageManager()
                 storageManager.saveFormVersion( this.dataSetId, attributeId, value, this.formVersion );
             }
         } );
-    };
+    };*/
 
     /**
      * Saves a version for a form.
@@ -1205,7 +1235,7 @@ function StorageManager()
      * @param the identifier of the data set of the form.
      * @param formVersion the version of the form.
      */
-    this.saveFormVersion = function( dataSetId, attributeId, value, formVersion )
+    /*this.saveFormVersion = function( dataSetId, attributeId, value, formVersion )
     {
 		var id = dataSetId + "_" + attributeId + "_" + value;
 		
@@ -1227,7 +1257,7 @@ function StorageManager()
         {
             log( 'Max local storage quota reached, ignored form version: ' + dataSetId );
         }
-    };
+    };*/
 
     /**
      * Returns the version of the form of the data set with the given
@@ -1236,7 +1266,7 @@ function StorageManager()
      * @param dataSetId the identifier of the data set of the form.
      * @return the form version.
      */
-    this.getFormVersion = function( dataSetId, attributeId, value )
+    /*this.getFormVersion = function( dataSetId, attributeId, value )
     {
 		var id = dataSetId + "_" + attributeId + "_" + value;
 		
@@ -1248,14 +1278,14 @@ function StorageManager()
         }
 
         return null;
-    };
+    };*/
 
     /**
      * Deletes the form version of the data set with the given identifier.
      *
      * @param dataSetId the identifier of the data set of the form.
      */
-    this.deleteFormVersion = function( dataSetId, attributeId, value )
+    /*this.deleteFormVersion = function( dataSetId, attributeId, value )
     {
     	if ( localStorage[KEY_FORM_VERSIONS] != null )
         {
@@ -1269,26 +1299,26 @@ function StorageManager()
                 localStorage[KEY_FORM_VERSIONS] = JSON.stringify( formVersions );
             }
         }
-    }
+    }*/
 
-    this.getAllFormVersions = function()
+    /*this.getAllFormVersions = function()
     {
         return localStorage[KEY_FORM_VERSIONS] != null ? JSON.parse( localStorage[KEY_FORM_VERSIONS] ) : null;
-    };
+    };*/
 
     /**
      * Saves a data value.
      *
      * @param dataValue The datavalue and identifiers in json format.
      */
-    this.saveDataValue = function( dataValue )
+    /*this.saveDataValue = function( dataValue )
     {
         var id = this.getDataValueIdentifier( dataValue.dataElementId, dataValue.optionComboId, dataValue.periodId,
                 dataValue.organisationUnitId );
 
         var dataValues = {};
 
-        /* if ( localStorage[KEY_DATAVALUES] != null )
+        if ( localStorage[KEY_DATAVALUES] != null )
         {
             dataValues = JSON.parse( localStorage[KEY_DATAVALUES] );
         }
@@ -1303,8 +1333,8 @@ function StorageManager()
         } catch ( e )
         {
             log( 'Max local storage quota reached, ignored data value' );
-        } */
-    };
+        }
+    };*/
 
     /**
      * Gets the value for the data value with the given arguments, or null if it
@@ -1317,7 +1347,7 @@ function StorageManager()
      * @return the value for the data value with the given arguments, null if
      *         non-existing.
      */
-    this.getDataValue = function( dataElementId, categoryOptionComboId, periodId, organisationUnitId )
+    /*this.getDataValue = function( dataElementId, categoryOptionComboId, periodId, organisationUnitId )
     {
         var id = this.getDataValueIdentifier( dataElementId, categoryOptionComboId, periodId, organisationUnitId );
 
@@ -1329,18 +1359,18 @@ function StorageManager()
         }
 
         return null;
-    };
+    };*/
 
     /**
      * Removes the given dataValue from localStorage.
      *
      * @param dataValue The datavalue and identifiers in json format.
      */
-    this.clearDataValueJSON = function( dataValue )
+    /*this.clearDataValueJSON = function( dataValue )
     {
         this.clearDataValue( dataValue.dataElementId, dataValue.optionComboId, dataValue.periodId,
                 dataValue.organisationUnitId );
-    };
+    };*/
 
     /**
      * Removes the given dataValue from localStorage.
@@ -1350,7 +1380,7 @@ function StorageManager()
      * @param periodId the period identifier.
      * @param organisationUnitId the organisation unit identifier.
      */
-    this.clearDataValue = function( dataElementId, categoryOptionComboId, periodId, organisationUnitId )
+    /*this.clearDataValue = function( dataElementId, categoryOptionComboId, periodId, organisationUnitId )
     {
         var id = this.getDataValueIdentifier( dataElementId, categoryOptionComboId, periodId, organisationUnitId );
         var dataValues = this.getAllDataValues();
@@ -1360,7 +1390,7 @@ function StorageManager()
             delete dataValues[id];
             localStorage[KEY_DATAVALUES] = JSON.stringify( dataValues );
         }
-    };
+    };*/
 
     /**
      * Returns a JSON associative array where the keys are on the form <data
@@ -1369,10 +1399,10 @@ function StorageManager()
      *
      * @return a JSON associative array.
      */
-    this.getAllDataValues = function()
+    /*this.getAllDataValues = function()
     {
         return localStorage[KEY_DATAVALUES] != null ? JSON.parse( localStorage[KEY_DATAVALUES] ) : null;
-    };
+    };*/
 
     /**
      * Supportive method.
@@ -1411,7 +1441,7 @@ function StorageManager()
      *
      * @return all complete data set registrations as JSON.
      */
-    this.getCompleteDataSets = function()
+    /*this.getCompleteDataSets = function()
     {
         if ( localStorage[KEY_COMPLETEDATASETS] != null )
         {
@@ -1419,14 +1449,14 @@ function StorageManager()
         }
 
         return null;
-    };
+    };*/
 
     /**
      * Saves a complete data set registration.
      *
      * @param json the complete data set registration as JSON.
      */
-    this.saveCompleteDataSet = function( json )
+    /*this.saveCompleteDataSet = function( json )
     {
         var completeDataSets = this.getCompleteDataSets();
         var completeDataSetId = this.getCompleteDataSetId( json );
@@ -1442,14 +1472,14 @@ function StorageManager()
         }
 
         localStorage[KEY_COMPLETEDATASETS] = JSON.stringify( completeDataSets );
-    };
+    };*/
 
     /**
      * Removes the given complete data set registration.
      *
      * @param the complete data set registration as JSON.
      */
-    this.clearCompleteDataSet = function( json )
+    /*this.clearCompleteDataSet = function( json )
     {
         var completeDataSets = this.getCompleteDataSets();
         var completeDataSetId = this.getCompleteDataSetId( json );
@@ -1467,7 +1497,7 @@ function StorageManager()
                 localStorage[KEY_COMPLETEDATASETS] = JSON.stringify( completeDataSets );
             }
         }
-    };
+    };*/
 
     /**
      * Indicates whether there exists data values or complete data set
@@ -1475,7 +1505,7 @@ function StorageManager()
      *
      * @return true if local data exists, false otherwise.
      */
-    this.hasLocalData = function()
+    /*this.hasLocalData = function()
     {
         var dataValues = this.getAllDataValues();
         var completeDataSets = this.getCompleteDataSets();
@@ -1500,22 +1530,23 @@ function StorageManager()
         }
 
         return true;
-    };
+    };*/
 }
 
 function getAttributes()
 {
 	clearListById( 'attributeId' );
+
 	$.getJSON( '../dhis-web-commons-ajax-json/getAttributes.action',{}
-		, function( json ) 
-		{
-			addOptionById( 'attributeId', '', i18n_please_select_attribute );
-			
-			for ( i in json.attributes ) 
-			{ 
-				$('#attributeId').append('<option value=' + json.attributes[i].id + '>' + json.attributes[i].name + '</option>');
-			}
-		} );
+	, function( json ) 
+	{
+		addOptionById( 'attributeId', '', i18n_please_select_attribute );
+		
+		for ( i in json.attributes ) 
+		{ 
+			$('#attributeId').append('<option value=' + json.attributes[i].id + '>' + json.attributes[i].name + '</option>');
+		}
+	} );
 }
 
 function getSuggestedAttrValue()
@@ -1538,13 +1569,12 @@ function getSuggestedAttrValue()
 		} );
 }
 
-
 function autoCompletedField()
 {
 	var select = jQuery( "#value" );
 	$( "#valueButton" ).unbind('click');
 	enable( 'valueButton' );
-	var selected = select.children( ":selected" );
+	var selected = select.children( "option:selected" );
 	var value = selected.val() ? selected.text() : "";
 	
 	var input = jQuery( "#valueInput" )
@@ -1558,35 +1588,21 @@ function autoCompletedField()
 				response( select.children( "option" ).map(function() {
 					var text = $( this ).text();
 					if ( this.value && ( !request.term || matcher.test(text) ) )
+					{
 						return {
 							label: text,
 							value: text,
 							option: this
 						};
+					}
 				}) );
 			},
 			select: function( event, ui ) {
 				ui.item.option.selected = true;
+				setFieldValue( 'valueInput', ui.item.option.value );
 				periodSelected();
-			},
-			change: function( event, ui ) {
-				if ( !ui.item ) {
-					var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( $(this).val() ) + "$", "i" ),
-						valid = false;
-					select.children( "option" ).each(function() {
-						if ( $( this ).text().match( matcher ) ) {
-							this.selected = valid = true;
-							periodSelected();
-							return false;
-						}
-					});
-					if ( !valid ) {
-						return false;
-					}
-				}
 			}
-		})
-		.addClass( "ui-widget ui-widget-content ui-corner-left" );
+		}).addClass( "ui-widget ui-widget-content ui-corner-left" );
 
 	input.data( "autocomplete" )._renderItem = function( ul, item ) {
 		return $( "<li></li>" )
@@ -1595,6 +1611,14 @@ function autoCompletedField()
 			.appendTo( ul );
 	};
 
+	input.keypress( function( e )
+	{
+		code= (e.keyCode ? e.keyCode : e.which);
+		if ( code == 13 ) {
+			periodSelected();
+		}
+	});
+	
 	showById('valueButton');
 	var button = $( "#valueButton" )
 		.attr( "title", i18n_show_all_items )

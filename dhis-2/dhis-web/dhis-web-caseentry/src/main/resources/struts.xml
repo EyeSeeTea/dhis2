@@ -351,14 +351,6 @@
 			<param name="requiredAuthorities">F_PATIENT_MANAGEMENT</param>
 		</action>
 
-		<action name="organisationUnitHasPatients"
-			class="org.hisp.dhis.caseentry.action.patient.VerifyOrganisationUnitHasParentAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
-			<result name="input" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseInput.vm</result>
-		</action>
-
 		<action name="searchRegistrationPatient"
 			class="org.hisp.dhis.caseentry.action.patient.SearchPatientAction">
 			<result name="success" type="velocity">/content.vm</result>
@@ -460,14 +452,6 @@
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/patientLocation.vm</param>			
 			<param name="requiredAuthorities">F_PATIENT_UPDATE</param>
-		</action>
-		
-		<action name="verifyOrgunitRegistration"
-			class="org.hisp.dhis.caseentry.action.patient.VerifyOrgunitRegistrationAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
-			<result name="input" type="velocity-json">
-				/dhis-web-commons/ajax/jsonResponseInput.vm</result>
 		</action>
 		
 		<action name="registerPatientLocation"
@@ -653,7 +637,7 @@
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-caseentry/tabularReportSelect.vm</param>
 			<param name="menu">/dhis-web-caseentry/reportsMenu.vm</param>
-			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/tabularReport.js,javascript/commons.js</param>
+			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js,javascript/commons.js</param>
 			<param name="stylesheets">style/report.css</param>
 			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
 		</action>
@@ -667,31 +651,20 @@
 		<action name="tabularInitialize"
 			class="org.hisp.dhis.caseentry.action.report.TabularInitializeAction">
 			 <result name="success" type="velocity-json">
-		              /dhis-web-caseentry/jsonTabularInitialize.vm</result>
+		        /dhis-web-caseentry/jsonTabularInitialize.vm</result>
 		</action>
 		
-		<action name="getReportPrograms"
-			class="org.hisp.dhis.caseentry.action.report.LoadProgramsAction">
+		<action name="loadPatientProperties"
+			class="org.hisp.dhis.caseentry.action.report.LoadPatientPropertiesAction">
 			<result name="success" type="velocity-json">
-				/dhis-web-commons/ajax/jsonPrograms.vm</result>
-		</action>
-				
-		<action name="loadReportIdentifierTypes"
-			class="org.hisp.dhis.caseentry.action.report.LoadIdentifierTypesAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-caseentry/jsonIdentifierTypes.vm</result>
+				/dhis-web-caseentry/jsonPatientProperties.vm</result>
 		</action>
 		
 		<action name="loadReportProgramStages"
 			class="org.hisp.dhis.caseentry.action.report.LoadProgramStagesAction">
 			<result name="success" type="velocity-json">/dhis-web-caseentry/responseProgramStages.vm</result>
 		</action>
-		
-		<action name="loadReportAttributes"
-			class="org.hisp.dhis.caseentry.action.report.LoadAttributesAction">
-			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonPatientAttributes.vm</result>
-		</action>
-		
+	
 		<action name="loadDataElements"
 			class="org.hisp.dhis.caseentry.action.report.LoadDataElementsAction">
 			<result name="success" type="velocity-json">/dhis-web-caseentry/responseDataElements.vm</result>
@@ -714,7 +687,7 @@
 			class="org.hisp.dhis.caseentry.action.report.GenerateTabularReportAction">
 			<result name="success" type="velocity-json">/dhis-web-caseentry/jsonTabularReportResult.vm</result>
 			<result name="xls" type="gridXlsResult" />
-		    		<result name="pdf" type="gridPdfResult" />
+		    <result name="pdf" type="gridPdfResult" />
 			<param name="requiredAuthorities">F_GENERATE_BENEFICIARY_TABULAR_REPORT</param>
 		</action>
 			
@@ -747,6 +720,12 @@
             <result name="success" type="velocity-json">
 				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
         </action>
+        
+        <action name="viewRecord"
+			class="org.hisp.dhis.caseentry.action.caseentry.ProgramStageCustomDataEntryAction">
+			<result name="success" type="velocity">/content.vm</result>
+			<param name="page">/dhis-web-caseentry/programStageDataEntryForm.vm</param>
+		</action>
 		
 	</package>
 </struts>

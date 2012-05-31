@@ -75,14 +75,14 @@ public class SaveBeneficiaryAction
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private String orgUnitId;
+    private Integer orgUnitId;
 
-    public String getOrgUnitId()
+    public Integer getOrgUnitId()
     {
         return orgUnitId;
     }
 
-    public void setOrgUnitId( String orgUnitId )
+    public void setOrgUnitId( Integer orgUnitId )
     {
         this.orgUnitId = orgUnitId;
     }
@@ -98,19 +98,7 @@ public class SaveBeneficiaryAction
     {
         this.patientFullName = patientFullName;
     }
-
-    private String bloodGroup;
-
-    public String getBloodGroup()
-    {
-        return bloodGroup;
-    }
-
-    public void setBloodGroup( String bloodGroup )
-    {
-        this.bloodGroup = bloodGroup;
-    }
-
+    
     private String gender;
 
     public String getGender()
@@ -177,7 +165,7 @@ public class SaveBeneficiaryAction
     {
         Patient patient = new Patient();
 
-        patient.setOrganisationUnit( organisationUnitService.getOrganisationUnit( Integer.parseInt( orgUnitId ) ) );
+        patient.setOrganisationUnit( organisationUnitService.getOrganisationUnit( orgUnitId ) );
 
         if ( this.patientFullName.trim().equals( "" ) )
         {
@@ -215,7 +203,6 @@ public class SaveBeneficiaryAction
         }
 
         patient.setGender( gender );
-        patient.setBloodGroup( bloodGroup );
         patient.setRegistrationDate( new Date() );
         try
         {
@@ -233,7 +220,6 @@ public class SaveBeneficiaryAction
             this.validated = false;
             this.previousValues.put( "fullName", this.patientFullName );
             this.previousValues.put( "gender", this.gender );
-            this.previousValues.put( "bloodGroup", this.bloodGroup );
             this.previousValues.put( "dob", this.dateOfBirth );
             return SUCCESS;
         }

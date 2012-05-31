@@ -5,31 +5,12 @@ var COLOR_ORANGE = '#ff6600';
 var COLOR_RED = '#ff8a8a';
 var COLOR_GREY = '#cccccc';
 
-function organisationUnitSelected( orgUnits )
+function organisationUnitSelected( orgUnits, orgunitNames )
 {	
 	showById('selectDiv');
-	disable('listPatientBtn');
 	hideById('listPatientDiv');
-	
-	$.getJSON( 'organisationUnitHasPatients.action', {orgunitId:orgUnits[0]}
-		, function( json ) 
-		{
-			var type = json.response;
-			setFieldValue('selectedOrgunitText', json.message );
-				
-			if( type == 'success' )
-			{
-				showById('searchPatientDiv');
-				enable('listPatientBtn');
-				setInnerHTML('warnmessage','');
-				setFieldValue('selectedOrgunitText', json.message );
-			}
-			else if( type == 'input' )
-			{
-				setInnerHTML('warnmessage', i18n_can_not_register_patient_for_orgunit);
-				disable('listPatientBtn');
-			}
-		} );
+	showById('searchPatientDiv');
+	setFieldValue('selectedOrgunitText', orgunitNames[0] );
 }
 
 selection.setListenerFunction( organisationUnitSelected );
@@ -217,7 +198,6 @@ function showListPatientDuplicate( rootElement, validate )
 			sPatient += "<tr><td class='bold'>" + i18n_patient_gender + "</td><td>" + jQuery(patient).find('gender').text() + "</td></tr>" ;
 			sPatient += "<tr><td class='bold'>" + i18n_patient_date_of_birth + "</td><td>" + jQuery(patient).find('dateOfBirth').text() + "</td></tr>" ;
 			sPatient += "<tr><td class='bold'>" + i18n_patient_age + "</td><td>" + jQuery(patient).find('age').text() + "</td></tr>" ;
-			sPatient += "<tr><td class='bold'>" + i18n_patient_blood_group + "</td><td>" + jQuery(patient).find('bloodGroup').text() + "</td></tr>";
 			sPatient += "<tr><td class='bold'>" + i18n_patient_phone_number + "</td><td>" + jQuery(patient).find('phoneNumber').text() + "</td></tr>";
         	
 			var identifiers = jQuery(patient).find('identifier');

@@ -4,7 +4,6 @@
 # Skips test phase
 
 mvn clean install -DskipTests=true
-cd dhis-web
-mvn clean install -DskipTests=true
-cd ..
+mvn clean install -DskipTests=true -f dhis-web/pom.xml
+
 

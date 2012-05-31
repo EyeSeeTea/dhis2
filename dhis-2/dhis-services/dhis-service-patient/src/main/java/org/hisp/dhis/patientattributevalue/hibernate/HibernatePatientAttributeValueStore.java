@@ -33,6 +33,7 @@ import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeOption;
@@ -293,9 +294,31 @@ public class HibernatePatientAttributeValueStore
         else if ( patientAttributeId == -1 )
         {
             hql += " ( SELECT p" + index + " FROM Patient AS p" + index 
-                + " WHERE p" + index + ".birthDate='" + searchText+ "'";
+                + " WHERE p" + index + ".birthDate " + searchText;
+            isSearchByAttribute = false; 
+        } 
+        // gender
+        else if ( patientAttributeId == -2 )
+        {
+            hql += " ( SELECT p" + index + " FROM Patient AS p" + index 
+                + " WHERE p" + index + ".gender='" + searchText + "'";
             isSearchByAttribute = false; 
         }
+        // age
+        else if ( patientAttributeId == -3 )
+        {
+            hql += " ( SELECT p" + index + " FROM Patient AS p" + index 
+                + " WHERE p" + index + ".integerValueOfAge='" + searchText + "'";
+            isSearchByAttribute = false; 
+        }
+        // phone number
+        else if ( patientAttributeId == -4 )
+        {
+            hql += " ( SELECT p" + index + " FROM Patient AS p" + index 
+                + " WHERE p" + index + ".phoneNumber='" + searchText + "'";
+            isSearchByAttribute = false; 
+        }
+        
         
         // ---------------------------------------------------------------------
         // search patients by program
@@ -334,4 +357,52 @@ public class HibernatePatientAttributeValueStore
 
     }
 
+    @Override
+    public int countSearchPatients( List<Integer> patientAttributeIds, List<String> searchTexts,
+        OrganisationUnit orgunit )
+    {
+        String hql = "SELECT COUNT( DISTINCT p ) FROM Patient as p WHERE p in ";
+        String end = "";
+
+        int index = 0;
+        for ( Integer patientAttributeId : patientAttributeIds )
+        {
+            end += ")";
+
+            hql += createHQL( patientAttributeId, searchTexts.get( index ), index, patientAttributeIds.size() );
+
+            index++;
+        }
+
+        Query query = getQuery( hql + end + " AND p.organisationUnit.id=" + orgunit.getId() );
+
+        Number rs = (Number) query.uniqueResult();
+
+        return (rs != null) ? rs.intValue() : 0;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<Patient> searchPatients( List<Integer> patientAttributeIds, List<String> searchTexts,
+        OrganisationUnit orgunit, int min, int max )
+    {
+        String hql = "SELECT DISTINCT p FROM Patient as p WHERE p in ";
+        String end = "";
+        
+        int index = 0;
+        for ( Integer patientAttributeId : patientAttributeIds )
+        {
+            end += ")";
+
+            hql += createHQL( patientAttributeId, searchTexts.get( index ), index, patientAttributeIds.size() );
+
+            index++;
+        }
+
+        hql += " ORDER BY p.id ASC";
+
+        Query query = getQuery( hql + end + " AND p.organisationUnit.id=" + orgunit.getId() ).setFirstResult( min ).setMaxResults( max );
+
+        return query.list();
+    }
 }

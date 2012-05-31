@@ -33,7 +33,10 @@ import org.springframework.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Lars Helge Overland
@@ -94,9 +97,9 @@ public class ReflectionUtils
      */
     public static void setProperty( Object object, String name, String value )
     {
-        Object[] arguments = new Object[]{value};
+        Object[] arguments = new Object[] { value };
 
-        Class<?>[] parameterTypes = new Class<?>[]{String.class};
+        Class<?>[] parameterTypes = new Class<?>[] { String.class };
 
         if ( name.length() > 0 )
         {
@@ -170,10 +173,9 @@ public class ReflectionUtils
     {
         Field field;
 
-        try
-        {
-            field = object.getClass().getDeclaredField( fieldName );
-        } catch ( NoSuchFieldException e )
+        field = _findField( object.getClass(), fieldName );
+
+        if ( field == null )
         {
             return false;
         }
@@ -210,108 +212,196 @@ public class ReflectionUtils
         return false;
     }
 
-    public static Method findGetterMethod( String fieldName, Object object, Class<?>... classes )
+    public static Method findGetterMethod( String fieldName, Object target )
     {
-        try
+        String[] getterNames = new String[] {
+            "get",
+            "is",
+            "has"
+        };
+
+        Field field = _findField( target.getClass(), StringUtils.uncapitalize( fieldName ) );
+        Method method;
+
+        if ( field != null )
         {
-            return object.getClass().getMethod( "get" + StringUtils.capitalize( fieldName ), classes );
-        } catch ( NoSuchMethodException e )
+            for ( String getterName : getterNames )
+            {
+                method = _findMethod( target.getClass(), getterName + StringUtils.capitalize( field.getName() ) );
+
+                if ( method != null )
+                {
+                    return method;
+                }
+            }
+        }
+
+        System.err.println( "Did not find getter" );
+
+        return null;
+
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public static <T> T invokeGetterMethod( String fieldName, Object target )
+    {
+        Method method = findGetterMethod( fieldName, target );
+
+        if ( method != null )
         {
-            // log.warn( "Getter method was not found for fieldName: " + fieldName );
+            return invokeMethod( target, method );
         }
 
         return null;
     }
 
-    public static Method findSetterMethod( String fieldName, Object object, Class<?>... classes )
+    public static Method findSetterMethod( String fieldName, Object target )
     {
-        Method method = null;
+        String[] setterNames = new String[] {
+            "set"
+        };
 
-        try
-        {
-            method = object.getClass().getMethod( "set" + StringUtils.capitalize( fieldName ), classes );
-        } catch ( NoSuchMethodException e )
-        {
-        }
+        Field field = _findField( target.getClass(), StringUtils.uncapitalize( fieldName ) );
+        Method method;
 
-        // If parameter classes was not given, we will retry using the field type
-
-        if ( method == null && classes.length == 0 )
+        if ( field != null )
         {
-            try
+            for ( String setterName : setterNames )
             {
-                Field field = object.getClass().getDeclaredField( fieldName );
-                method = findSetterMethod( fieldName, object, field.getType() );
-            } catch ( NoSuchFieldException ignored )
-            {
+                method = _findMethod( target.getClass(), setterName + StringUtils.capitalize( field.getName() ), field.getType() );
+
+                if ( method != null )
+                {
+                    return method;
+                }
             }
         }
 
-        if ( method == null )
-        {
-            // log.warn( "Setter method was not found for fieldName: " + fieldName );
-        }
-
-        return method;
+        return null;
     }
 
     @SuppressWarnings( "unchecked" )
-    public static <T> T invokeGetterMethod( String fieldName, Object object )
+    public static <T> T invokeSetterMethod( String fieldName, Object target, Object... args )
     {
-        Method method = findGetterMethod( fieldName, object );
+        Method method = findSetterMethod( fieldName, target );
 
-        if ( method == null )
+        if ( method != null )
         {
-            return null;
+            return invokeMethod( target, method, args );
         }
 
-        try
-        {
-            return (T) method.invoke( object );
-        } catch ( InvocationTargetException e )
-        {
-            log.warn( "InvocationTargetException for fieldName: " + fieldName );
-            return null;
-        } catch ( IllegalAccessException e )
-        {
-            log.warn( "IllegalAccessException for fieldName: " + fieldName );
-            return null;
-        }
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public static <T> T invokeSetterMethod( String fieldName, Object object, Object... objects )
-    {
-        Method method = findSetterMethod( fieldName, object );
-
-        if ( method == null )
-        {
-            return null;
-        }
-
-        try
-        {
-            return (T) method.invoke( object, objects );
-        } catch ( InvocationTargetException e )
-        {
-            log.warn( "InvocationTargetException for fieldName: " + fieldName );
-            return null;
-        } catch ( IllegalAccessException e )
-        {
-            log.warn( "IllegalAccessException for fieldName: " + fieldName );
-            return null;
-        }
+        return null;
     }
 
     public static boolean isType( Field field, Class<?> clazz )
     {
         Class<?> type = field.getType();
 
-        if ( clazz.isAssignableFrom( type ) )
+        return clazz.isAssignableFrom( type );
+    }
+
+    private static Field _findField( Class<?> clazz, String name )
+    {
+        return _findField( clazz, name, null );
+    }
+
+    private static Field _findField( Class<?> clazz, String name, Class<?> type )
+    {
+        Class<?> searchType = clazz;
+
+        while ( !Object.class.equals( searchType ) && searchType != null )
         {
-            return true;
+            Field[] fields = searchType.getDeclaredFields();
+
+            for ( Field field : fields )
+            {
+                // && (type == null || type.equals( field.getType() ))
+                if ( (name == null || name.equals( field.getName() )) )
+                {
+                    return field;
+                }
+            }
+
+            searchType = searchType.getSuperclass();
         }
 
-        return false;
+        return null;
+    }
+
+    public static List<Field> getAllFields( Class<?> clazz )
+    {
+        Class<?> searchType = clazz;
+        List<Field> fields = new ArrayList<Field>();
+
+        while ( !Object.class.equals( searchType ) && searchType != null )
+        {
+            fields.addAll( Arrays.asList( searchType.getDeclaredFields() ) );
+            searchType = searchType.getSuperclass();
+        }
+
+        return fields;
+    }
+
+    private static Method _findMethod( Class<?> clazz, String name )
+    {
+        return _findMethod( clazz, name, new Class[0] );
+    }
+
+    private static Method _findMethod( Class<?> clazz, String name, Class<?>... paramTypes )
+    {
+        Class<?> searchType = clazz;
+
+        while ( searchType != null )
+        {
+            Method[] methods = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
+
+            for ( Method method : methods )
+            {
+                if ( name.equals( method.getName() ) && (paramTypes == null || Arrays.equals( paramTypes, method.getParameterTypes() )) )
+                {
+                    return method;
+                }
+            }
+
+            searchType = searchType.getSuperclass();
+        }
+
+        return null;
+    }
+
+    public static List<Method> getAllMethods( Class<?> clazz )
+    {
+        Class<?> searchType = clazz;
+        List<Method> methods = new ArrayList<Method>();
+
+        while ( searchType != null )
+        {
+            Method[] methodArray = (searchType.isInterface() ? searchType.getMethods() : searchType.getDeclaredMethods());
+            methods.addAll( Arrays.asList( methodArray ) );
+            searchType = searchType.getSuperclass();
+        }
+
+        return methods;
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public static <T> T invokeMethod( Object target, Method method, Object... args )
+    {
+        try
+        {
+            return (T) method.invoke( target, args );
+        } catch ( InvocationTargetException e )
+        {
+            throw new RuntimeException( e );
+        } catch ( IllegalAccessException e )
+        {
+            throw new RuntimeException( e );
+        }
+    }
+
+    @SuppressWarnings( "unchecked" )
+    public static <T> T getFieldObject( Field field, T target )
+    {
+        return (T) invokeGetterMethod( field.getName(), target );
     }
 }

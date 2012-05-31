@@ -64,7 +64,11 @@ public interface MessageService
     
     List<MessageConversation> getMessageConversations( int first, int max );
     
+    List<MessageConversation> getMessageConversations( boolean followUpOnly, boolean unreadOnly, int first, int max );
+    
     int getMessageConversationCount();
+    
+    int getMessageConversationCount( boolean followUpOnly, boolean unreadOnly );
     
     List<MessageConversation> getAllMessageConversations();    
 

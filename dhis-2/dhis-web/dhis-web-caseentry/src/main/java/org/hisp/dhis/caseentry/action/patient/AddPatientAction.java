@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.caseentry.idgen.PatientIdentifierGenerator;
+import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
@@ -49,8 +51,6 @@ import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.patient.PatientService;
-import org.hisp.dhis.caseentry.idgen.PatientIdentifierGenerator;
-import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 
 import com.opensymphony.xwork2.Action;
@@ -99,8 +99,6 @@ public class AddPatientAction
     private Boolean verified;
 
     private String gender;
-
-    private String bloodGroup;
 
     private String phoneNumber;
 
@@ -168,7 +166,6 @@ public class AddPatientAction
 
         patient.setGender( gender );
         patient.setIsDead( false );
-        patient.setBloodGroup( bloodGroup );
         patient.setPhoneNumber( phoneNumber );
         patient.setUnderAge( underAge );
         patient.setOrganisationUnit( organisationUnit );
@@ -382,11 +379,6 @@ public class AddPatientAction
     public void setGender( String gender )
     {
         this.gender = gender;
-    }
-
-    public void setBloodGroup( String bloodGroup )
-    {
-        this.bloodGroup = bloodGroup;
     }
 
     public void setPhoneNumber( String phoneNumber )

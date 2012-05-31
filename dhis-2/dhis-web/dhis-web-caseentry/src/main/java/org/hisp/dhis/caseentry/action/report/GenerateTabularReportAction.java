@@ -31,10 +31,10 @@ import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_DATA_ELEME
 import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_IDENTIFIER_TYPE;
 import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_META_DATA;
 import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_PATIENT_ATTRIBUTE;
+import static org.hisp.dhis.patientreport.PatientTabularReport.PREFIX_FIXED_ATTRIBUTE;
 import static org.hisp.dhis.patientreport.PatientTabularReport.VALUE_TYPE_OPTION_SET;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +48,6 @@ import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.paging.ActionPagingSupport;
 import org.hisp.dhis.patient.PatientAttribute;
@@ -60,6 +59,7 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.system.util.ConversionUtils;
 
 /**
  * @author Chau Thu Tran
@@ -168,13 +168,6 @@ public class GenerateTabularReportAction
         this.orderByOrgunitAsc = orderByOrgunitAsc;
     }
 
-    private boolean orderByExecutionDateByAsc;
-
-    public void setOrderByExecutionDateByAsc( boolean orderByExecutionDateByAsc )
-    {
-        this.orderByExecutionDateByAsc = orderByExecutionDateByAsc;
-    }
-
     private Integer level;
 
     public void setLevel( Integer level )
@@ -238,7 +231,7 @@ public class GenerateTabularReportAction
         this.type = type;
     }
 
-    private String facilityLB;
+    private String facilityLB; // All, children, current
 
     public void setFacilityLB( String facilityLB )
     {
@@ -285,37 +278,29 @@ public class GenerateTabularReportAction
         // Get orgunitIds
         // ---------------------------------------------------------------------
 
-        OrganisationUnit selectedOrgunit = organisationUnitService.getOrganisationUnit( orgunitId );
-
-        Set<Integer> upperOrgunitIds = new HashSet<Integer>();
-
-        Set<Integer> bottomOrgunitIds = new HashSet<Integer>();
+        Set<Integer> organisationUnits = new HashSet<Integer>();
 
         if ( facilityLB.equals( "selected" ) )
         {
-            upperOrgunitIds.add( orgunitId );
+            organisationUnits.add( orgunitId );
         }
         else if ( facilityLB.equals( "childrenOnly" ) )
         {
-            Set<OrganisationUnit> children = selectedOrgunit.getChildren();
-
-            for ( OrganisationUnit child : children )
-            {
-                upperOrgunitIds.add( child.getId() );
-            }
+            OrganisationUnit selectedOrgunit = organisationUnitService.getOrganisationUnit( orgunitId );
+            organisationUnits = new HashSet<Integer>( ConversionUtils.getIdentifiers( OrganisationUnit.class, selectedOrgunit.getChildren() ) );
         }
         else
         {
-            OrganisationUnitHierarchy hierarchy = organisationUnitService.getOrganisationUnitHierarchy();
-
-            Set<Integer> childOrgUnitIdentifiers = hierarchy.getChildren( selectedOrgunit.getId() );
-            upperOrgunitIds.add( orgunitId );
-            upperOrgunitIds.addAll( childOrgUnitIdentifiers );
+            OrganisationUnit selectedOrgunit = organisationUnitService.getOrganisationUnit( orgunitId );
             
-            // Get bottom orgunit
-            int maxLevel = organisationUnitService.getMaxOfOrganisationUnitLevels();
-            bottomOrgunitIds = getOrganisationUnitsAtLevel( selectedOrgunit, maxLevel - 1 );
-            upperOrgunitIds.removeAll( bottomOrgunitIds );
+            if ( selectedOrgunit.getParent() == null )
+            {
+                organisationUnits = null; // Ignore org unit criteria when root
+            }
+            else
+            {
+                organisationUnits = organisationUnitService.getOrganisationUnitHierarchy().getChildren( orgunitId );
+            }
         }
 
         // ---------------------------------------------------------------------
@@ -324,6 +309,8 @@ public class GenerateTabularReportAction
 
         ProgramStage programStage = programStageService.getProgramStage( programStageId );
 
+        //TODO check sql traffic
+        
         Date startValue = format.parseDate( startDate );
 
         Date endValue = format.parseDate( endDate );
@@ -338,40 +325,37 @@ public class GenerateTabularReportAction
         // Generate tabular report
         // ---------------------------------------------------------------------
 
-        if ( type == null )
+        if ( type == null ) // Tabular report
         {
-            Set<Integer> orgunitIds = new HashSet<Integer>();
-            orgunitIds.addAll( upperOrgunitIds );
-            orgunitIds.addAll( bottomOrgunitIds );
-
-            int totalRecords = programStageInstanceService.countProgramStageInstances( programStage, searchingIdenKeys,
-                searchingAttrKeys, searchingDEKeys, orgunitIds, startValue, endValue );
+            int totalRecords = programStageInstanceService.getTabularReportCount( programStage, identifierTypes, fixedAttributes, patientAttributes, dataElements, 
+                searchingIdenKeys, searchingAttrKeys, searchingDEKeys, organisationUnits, level, startValue, endValue );
 
             total = getNumberOfPages( totalRecords );
-
+            
             this.paging = createPaging( totalRecords );
-
+            //total = paging.getTotal(); //TODO
+            
             grid = programStageInstanceService.getTabularReport( programStage, hiddenCols, identifierTypes,
                 fixedAttributes, patientAttributes, dataElements, searchingIdenKeys, searchingAttrKeys,
-                searchingDEKeys, upperOrgunitIds, bottomOrgunitIds, level, startValue, endValue, orderByOrgunitAsc,
-                orderByExecutionDateByAsc, paging.getStartPos(), paging.getPageSize(), format, i18n );
-
-            return SUCCESS;
+                searchingDEKeys, organisationUnits, level, startValue, endValue, !orderByOrgunitAsc,
+                paging.getStartPos(), paging.getPageSize() );
+        }
+        else // Download as Excel
+        {
+            grid = programStageInstanceService.getTabularReport( programStage, hiddenCols, identifierTypes,
+                fixedAttributes, patientAttributes, dataElements, searchingIdenKeys, searchingAttrKeys,
+                searchingDEKeys, organisationUnits, level, startValue, endValue, !orderByOrgunitAsc,
+                null, null );
         }
 
-        grid = programStageInstanceService.getTabularReport( programStage, hiddenCols, identifierTypes,
-            fixedAttributes, patientAttributes, dataElements, searchingIdenKeys, searchingAttrKeys, searchingDEKeys,
-            upperOrgunitIds, bottomOrgunitIds, level, startValue, endValue, orderByOrgunitAsc,
-            orderByExecutionDateByAsc, format, i18n );
-
-        return type;
+        return type == null ? SUCCESS : type;
     }
 
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    public int getNumberOfPages( int totalRecord )
+    private int getNumberOfPages( int totalRecord )
     {
         int pageSize = this.getDefaultPageSize();
         return (totalRecord % pageSize == 0) ? (totalRecord / pageSize) : (totalRecord / pageSize + 1);
@@ -382,19 +366,25 @@ public class GenerateTabularReportAction
         // ---------------------------------------------------------------------
         // Get Patient-Identifier searching-keys
         // ---------------------------------------------------------------------
+        
         int index = 0;
         for ( String searchingValue : searchingValues )
         {
             String[] infor = searchingValue.split( "_" );
             String objectType = infor[0];
-            int objectId = Integer.parseInt( infor[1] );
-
+            
             if ( objectType.equals( PREFIX_META_DATA ) )
             {
                 hiddenCols.add( Boolean.parseBoolean( infor[2] ) );
             }
+            else if ( objectType.equals( PREFIX_FIXED_ATTRIBUTE ) )
+            {
+                fixedAttributes.add( infor[1] );
+                hiddenCols.add( Boolean.parseBoolean( infor[2] ) );
+            }
             else if ( objectType.equals( PREFIX_IDENTIFIER_TYPE ) )
             {
+                int objectId = Integer.parseInt( infor[1] );
                 PatientIdentifierType identifierType = identifierTypeService.getPatientIdentifierType( objectId );
                 identifierTypes.add( identifierType );
 
@@ -416,12 +406,13 @@ public class GenerateTabularReportAction
             }
             else if ( objectType.equals( PREFIX_PATIENT_ATTRIBUTE ) )
             {
+                int objectId = Integer.parseInt( infor[1] );
                 PatientAttribute attribute = patientAttributeService.getPatientAttribute( objectId );
                 patientAttributes.add( attribute );
 
                 // Get value-type && suggested-values
                 valueTypes.add( attribute.getValueType() );
-                mapSuggestedValues.put( index, getSuggestedAttrValues( attribute ) );
+                mapSuggestedValues.put( index, getSuggestedAttributeValues( attribute ) );
                 hiddenCols.add( Boolean.parseBoolean( infor[2] ) );
 
                 // Get searching-value
@@ -443,13 +434,14 @@ public class GenerateTabularReportAction
             }
             else if ( objectType.equals( PREFIX_DATA_ELEMENT ) )
             {
+                int objectId = Integer.parseInt( infor[1] );
                 DataElement dataElement = dataElementService.getDataElement( objectId );
                 dataElements.add( dataElement );
 
                 // Get value-type && suggested-values
                 String valueType = (dataElement.getOptionSet() != null) ? VALUE_TYPE_OPTION_SET : dataElement.getType();
                 valueTypes.add( valueType );
-                mapSuggestedValues.put( index, getSuggestedDEValues( dataElement ) );
+                mapSuggestedValues.put( index, getSuggestedDataElementValues( dataElement ) );
                 hiddenCols.add( Boolean.parseBoolean( infor[2] ) );
 
                 if ( infor.length == 4 )
@@ -472,11 +464,10 @@ public class GenerateTabularReportAction
                 }
                 index++;
             }
-
         }
     }
 
-    private List<String> getSuggestedAttrValues( PatientAttribute patientAttribute )
+    private List<String> getSuggestedAttributeValues( PatientAttribute patientAttribute )
     {
         List<String> values = new ArrayList<String>();
         String valueType = patientAttribute.getValueType();
@@ -497,7 +488,7 @@ public class GenerateTabularReportAction
         return values;
     }
 
-    private List<String> getSuggestedDEValues( DataElement dataElement )
+    private List<String> getSuggestedDataElementValues( DataElement dataElement )
     {
         List<String> values = new ArrayList<String>();
         String valueType = dataElement.getType();
@@ -514,48 +505,4 @@ public class GenerateTabularReportAction
 
         return values;
     }
-
-    private Set<Integer> getOrganisationUnitsAtLevel( OrganisationUnit orgunit, int level )
-    {
-        Set<Integer> result = new HashSet<Integer>();
-
-        if ( level < 1 )
-        {
-            throw new IllegalArgumentException( "Level must be greater than zero" );
-        }
-
-        if ( level == 1 )
-        {
-            result.add( orgunit.getId() );
-            return result;
-        }
-
-        for ( OrganisationUnit root : orgunit.getChildren() )
-        {
-            addOrganisationUnitChildrenAtLevel( root, 2, level, result );
-        }
-
-        return result;
-    }
-
-    private void addOrganisationUnitChildrenAtLevel( OrganisationUnit parent, int currentLevel, int targetLevel,
-        Set<Integer> result )
-    {
-        if ( currentLevel == targetLevel )
-        {
-            Collection<OrganisationUnit> orgunits = parent.getChildren();
-            for ( OrganisationUnit orgunit : orgunits )
-            {
-                result.add( orgunit.getId() );
-            }
-        }
-        else
-        {
-            for ( OrganisationUnit child : parent.getChildren() )
-            {
-                addOrganisationUnitChildrenAtLevel( child, currentLevel + 1, targetLevel, result );
-            }
-        }
-    }
-
 }

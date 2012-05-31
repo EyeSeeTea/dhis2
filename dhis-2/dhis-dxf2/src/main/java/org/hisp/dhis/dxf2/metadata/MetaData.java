@@ -83,7 +83,7 @@ public class MetaData
 
     private List<User> users = new ArrayList<User>();
 
-    private List<UserAuthorityGroup> userAuthorityGroups = new ArrayList<UserAuthorityGroup>();
+    private List<UserAuthorityGroup> userRoles = new ArrayList<UserAuthorityGroup>();
 
     private List<UserGroup> userGroups = new ArrayList<UserGroup>();
 
@@ -143,7 +143,7 @@ public class MetaData
 
     private List<DataDictionary> dataDictionaries = new ArrayList<DataDictionary>();
 
-    private List<Section> sections = new ArrayList<Section>(  );
+    private List<Section> sections = new ArrayList<Section>();
 
     private List<DataSet> dataSets = new ArrayList<DataSet>();
 
@@ -180,14 +180,14 @@ public class MetaData
     @JsonProperty
     @JacksonXmlElementWrapper( localName = "userAuthorityGroups", namespace = Dxf2Namespace.NAMESPACE )
     @JacksonXmlProperty( localName = "userAuthorityGroup", namespace = Dxf2Namespace.NAMESPACE )
-    public List<UserAuthorityGroup> getUserAuthorityGroups()
+    public List<UserAuthorityGroup> getUserRoles()
     {
-        return userAuthorityGroups;
+        return userRoles;
     }
 
-    public void setUserAuthorityGroups( List<UserAuthorityGroup> userAuthorityGroups )
+    public void setUserRoles( List<UserAuthorityGroup> userRoles )
     {
-        this.userAuthorityGroups = userAuthorityGroups;
+        this.userRoles = userRoles;
     }
 
     @JsonProperty
@@ -638,7 +638,7 @@ public class MetaData
         return "MetaData{" +
             "attributeTypes=" + attributeTypes.size() +
             ", users=" + users.size() +
-            ", userAuthorityGroups=" + userAuthorityGroups.size() +
+            ", userAuthorityGroups=" + userRoles.size() +
             ", userGroups=" + userGroups.size() +
             ", messageConversations=" + messageConversations.size() +
             ", dataElements=" + dataElements.size() +

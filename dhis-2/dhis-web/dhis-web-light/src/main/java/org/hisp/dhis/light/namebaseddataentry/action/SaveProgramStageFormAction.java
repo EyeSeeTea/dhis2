@@ -45,6 +45,7 @@ import org.hisp.dhis.light.utils.NamebasedUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.patient.PatientService;
+import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.util.ContextUtils;
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
@@ -52,6 +53,9 @@ import com.opensymphony.xwork2.ActionContext;
 public class SaveProgramStageFormAction
     implements Action
 {
+    private static final String SUCCESS_AND_BACK_TO_PROGRAMSTAGE = "success_back_to_programstage";
+
+    private static final String REGISTER_NEXT_DUEDATE = "register_next_duedate";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -114,6 +118,18 @@ public class SaveProgramStageFormAction
         this.dataElementCategoryService = dataElementCategoryService;
     }
 
+    private ProgramStageService programStageService;
+
+    public ProgramStageService getProgramStageService()
+    {
+        return programStageService;
+    }
+
+    public void setProgramStageService( ProgramStageService programStageService )
+    {
+        this.programStageService = programStageService;
+    }
+
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
@@ -132,62 +148,62 @@ public class SaveProgramStageFormAction
 
     private OrganisationUnit organisationUnit;
 
-    private String programStageInstanceId;
+    private Integer programStageInstanceId;
 
-    public String getProgramStageInstanceId()
+    public Integer getProgramStageInstanceId()
     {
         return programStageInstanceId;
     }
 
-    public void setProgramStageInstanceId( String programStageInstanceId )
+    public void setProgramStageInstanceId( Integer programStageInstanceId )
     {
         this.programStageInstanceId = programStageInstanceId;
     }
 
-    private String programInstanceId;
+    // private Integer programInstanceId;
+    //
+    // public Integer getProgramInstanceId()
+    // {
+    // return programInstanceId;
+    // }
+    //
+    // public void setProgramInstanceId( Integer programInstanceId )
+    // {
+    // this.programInstanceId = programInstanceId;
+    // }
 
-    public String getProgramInstanceId()
+    private Integer patientId;
+
+    public Integer getPatientId()
     {
-        return programInstanceId;
+        return patientId;
     }
 
-    public void setProgramInstanceId( String programInstanceId )
+    public void setPatientId( Integer patientId )
     {
-        this.programInstanceId = programInstanceId;
+        this.patientId = patientId;
     }
 
-    private String beneficiaryId;
+    private Integer programId;
 
-    public void setBeneficiaryId( String beneficiaryId )
-    {
-        this.beneficiaryId = beneficiaryId;
-    }
-
-    public String getBeneficiaryId()
-    {
-        return beneficiaryId;
-    }
-
-    private String programId;
-
-    public void setProgramId( String programId )
+    public void setProgramId( Integer programId )
     {
         this.programId = programId;
     }
 
-    public String getProgramId()
+    public Integer getProgramId()
     {
         return programId;
     }
 
-    private String programStageId;
+    private Integer programStageId;
 
-    public void setProgramStageId( String programStageId )
+    public void setProgramStageId( Integer programStageId )
     {
         this.programStageId = programStageId;
     }
 
-    public String getProgramStageId()
+    public Integer getProgramStageId()
     {
         return programStageId;
     }
@@ -243,10 +259,10 @@ public class SaveProgramStageFormAction
         }
         else
         {
-            organisationUnit = patientService.getPatient( Integer.parseInt( beneficiaryId ) ).getOrganisationUnit();
+            organisationUnit = patientService.getPatient( patientId ).getOrganisationUnit();
         }
 
-        programStage = util.getProgramStage( Integer.parseInt( programId ), Integer.parseInt( programStageId ) );
+        programStage = util.getProgramStage( programId, programStageId );
 
         dataElements = programStage.getDataElements();
         int defaultCategoryOptionId = dataElementCategoryService.getDefaultDataElementCategoryOptionCombo().getId();
@@ -263,7 +279,7 @@ public class SaveProgramStageFormAction
         {
             if ( key.startsWith( "DE" ) )
             {
-                Integer dataElementId = Integer.parseInt( key.substring( 2, key.length()) );
+                Integer dataElementId = Integer.parseInt( key.substring( 2, key.length() ) );
                 // Integer categoryOptComboId = Integer.parseInt( splitKey[1] );
                 String value = parameterMap.get( key );
 
@@ -301,7 +317,7 @@ public class SaveProgramStageFormAction
 
         ActivityValue activityValue = new ActivityValue();
         activityValue.setDataValues( dataValues );
-        activityValue.setProgramInstanceId( Integer.parseInt( programStageInstanceId ) );
+        activityValue.setProgramInstanceId( programStageInstanceId );
 
         try
         {
@@ -313,15 +329,18 @@ public class SaveProgramStageFormAction
             return ERROR;
         }
 
+        if ( programStageService.getProgramStage( programStageId ).getIrregular() )
+        {
+            return REGISTER_NEXT_DUEDATE;
+        }
+
         if ( orgUnitId != 0 )
         {
             return SUCCESS;
         }
         else
         {
-            return "success_find";
+            return SUCCESS_AND_BACK_TO_PROGRAMSTAGE;
         }
-
     }
-
 }
