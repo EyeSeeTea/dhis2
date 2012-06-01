@@ -28,13 +28,16 @@ package org.hisp.dhis.dd.action.indicatorgroup;
  */
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorService;
 
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.system.util.AttributeUtils;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -53,6 +56,13 @@ public class UpdateIndicatorGroupAction
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
+    }
+
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
@@ -87,6 +97,13 @@ public class UpdateIndicatorGroupAction
         return indicatorGroup;
     }
 
+    private List<String> jsonAttributeValues;
+
+    public void setJsonAttributeValues( List<String> jsonAttributeValues )
+    {
+        this.jsonAttributeValues = jsonAttributeValues;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -105,6 +122,12 @@ public class UpdateIndicatorGroupAction
         for ( String memberId : groupMembers )
         {
             members.add( indicatorService.getIndicator( Integer.parseInt( memberId ) ) );
+        }
+
+        if ( jsonAttributeValues != null )
+        {
+            AttributeUtils.updateAttributeValuesFromJson( indicatorGroup.getAttributeValues(), jsonAttributeValues,
+                attributeService );
         }
 
         indicatorGroup.updateIndicators( members );

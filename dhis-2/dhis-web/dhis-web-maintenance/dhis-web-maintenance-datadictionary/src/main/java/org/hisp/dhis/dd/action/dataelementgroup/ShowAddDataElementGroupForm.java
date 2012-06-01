@@ -27,36 +27,21 @@ package org.hisp.dhis.dd.action.dataelementgroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.hisp.dhis.attribute.AttributeService;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
-
 import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.system.util.AttributeUtils;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
 
-/**
- * @author Torgeir Lorange Ostby
- * @version $Id: UpdateDataElementGroupAction.java 2869 2007-02-20 14:26:09Z
- *          andegje $
- */
-public class UpdateDataElementGroupAction
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class ShowAddDataElementGroupForm
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
 
     private AttributeService attributeService;
 
@@ -66,46 +51,14 @@ public class UpdateDataElementGroupAction
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input/output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private List<Attribute> attributes;
 
-    public void setId( Integer id )
+    public List<Attribute> getAttributes()
     {
-        this.id = id;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    private Set<String> groupMembers = new HashSet<String>();
-
-    public void setGroupMembers( Set<String> groupMembers )
-    {
-        this.groupMembers = groupMembers;
-    }
-
-    private List<String> jsonAttributeValues;
-
-    public void setJsonAttributeValues( List<String> jsonAttributeValues )
-    {
-        this.jsonAttributeValues = jsonAttributeValues;
-    }
-
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private DataElementGroup dataElementGroup;
-
-    public DataElementGroup getDataElementGroup()
-    {
-        return dataElementGroup;
+        return attributes;
     }
 
     // -------------------------------------------------------------------------
@@ -114,29 +67,8 @@ public class UpdateDataElementGroupAction
 
     public String execute()
     {
-        dataElementGroup = dataElementService.getDataElementGroup( id );
-
-        if ( name != null && name.trim().length() > 0 )
-        {
-            dataElementGroup.setName( name );
-        }
-
-        Set<DataElement> members = new HashSet<DataElement>();
-
-        for ( String id : groupMembers )
-        {
-            members.add( dataElementService.getDataElement( Integer.parseInt( id ) ) );
-        }
-
-        if ( jsonAttributeValues != null )
-        {
-            AttributeUtils.updateAttributeValuesFromJson( dataElementGroup.getAttributeValues(), jsonAttributeValues,
-                attributeService );
-        }
-
-        dataElementGroup.updateDataElements( members );
-
-        dataElementService.updateDataElementGroup( dataElementGroup );
+        attributes = new ArrayList<Attribute>( attributeService.getDataElementGroupAttributes() );
+        Collections.sort( attributes, new AttributeSortOrderComparator() );
 
         return SUCCESS;
     }
