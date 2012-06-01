@@ -38,6 +38,9 @@ import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.mapping.MapView;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.user.User;
 
 import java.util.ArrayList;
@@ -53,6 +56,12 @@ public class Interpretation
 {
     private Chart chart;
 
+    private MapView mapView;
+    
+    private ReportTable reportTable;
+    
+    private OrganisationUnit organisationUnit; // Applicable to report table only
+    
     private String text;
 
     private User user;
@@ -78,6 +87,21 @@ public class Interpretation
         this.created = new Date();
     }
 
+    public Interpretation( MapView mapView, String text )
+    {
+        this.mapView = mapView;
+        this.text = text;
+        this.created = new Date();
+    }
+    
+    public Interpretation( ReportTable reportTable, OrganisationUnit organisationUnit, String text )
+    {
+        this.reportTable = reportTable;
+        this.organisationUnit = organisationUnit;
+        this.text = text;
+        this.created = new Date();
+    }
+
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
@@ -87,6 +111,21 @@ public class Interpretation
         this.comments.add( comment );
     }
 
+    public boolean isChartInterpretation()
+    {
+        return chart != null;
+    }
+    
+    public boolean isMapViewInterpretation()
+    {
+        return mapView != null;
+    }
+    
+    public boolean isReportTableInterpretation()
+    {
+        return reportTable != null;
+    }
+        
     // -------------------------------------------------------------------------
     // Get and set methods
     // -------------------------------------------------------------------------
@@ -103,6 +142,48 @@ public class Interpretation
     public void setChart( Chart chart )
     {
         this.chart = chart;
+    }
+
+    @JsonProperty
+    @JsonDeserialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    public MapView getMapView()
+    {
+        return mapView;
+    }
+
+    public void setMapView( MapView mapView )
+    {
+        this.mapView = mapView;
+    }
+
+    @JsonProperty
+    @JsonDeserialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    public ReportTable getReportTable()
+    {
+        return reportTable;
+    }
+
+    public void setReportTable( ReportTable reportTable )
+    {
+        this.reportTable = reportTable;
+    }
+
+    @JsonProperty
+    @JsonDeserialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
+
+    public void setOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        this.organisationUnit = organisationUnit;
     }
 
     @JsonProperty

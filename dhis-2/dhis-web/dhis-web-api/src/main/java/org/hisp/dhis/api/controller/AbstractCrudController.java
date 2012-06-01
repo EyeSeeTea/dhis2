@@ -55,16 +55,16 @@ import java.util.Map;
  */
 public abstract class AbstractCrudController<T extends IdentifiableObject>
 {
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // Dependencies
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     @Autowired
     protected IdentifiableObjectManager manager;
 
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // GET
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET )
     public String getObjectList( @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws Exception
@@ -103,9 +103,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return StringUtils.uncapitalize( getEntitySimpleName() );
     }
 
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // POST
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, headers = { "Content-Type=application/xml, text/xml" } )
     public void postXmlObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
@@ -119,9 +119,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
     }
 
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // PUT
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, headers = { "Content-Type=application/xml, text/xml" } )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
@@ -137,9 +137,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
     }
 
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // DELETE
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
@@ -148,9 +148,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
     }
 
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // Helpers
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     protected List<T> getEntityList( WebMetaData metaData, WebOptions options )
     {
@@ -170,7 +170,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             metaData.setPager( pager );
 
             entityList = new ArrayList<T>( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
-
         }
         else
         {
@@ -185,9 +184,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return manager.get( getEntityClass(), uid );
     }
 
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // Reflection helpers
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     private Class<T> entityClass;
 
@@ -233,13 +232,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         try
         {
             return (T) Class.forName( getEntityName() ).newInstance();
-        } catch ( InstantiationException e )
+        }
+        catch ( InstantiationException e )
         {
             throw new RuntimeException( e );
-        } catch ( IllegalAccessException e )
+        }
+        catch ( IllegalAccessException e )
         {
             throw new RuntimeException( e );
-        } catch ( ClassNotFoundException e )
+        }
+        catch ( ClassNotFoundException e )
         {
             throw new RuntimeException( e );
         }

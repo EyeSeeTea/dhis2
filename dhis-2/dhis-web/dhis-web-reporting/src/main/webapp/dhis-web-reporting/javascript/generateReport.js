@@ -73,3 +73,38 @@ function exportReport( type )
 
     window.location.href = url;
 }
+
+function viewShareForm()
+{
+	$( "#shareForm" ).dialog( {
+		modal : true,
+		width : 500,
+		resizable: false,
+		title : i18n_share_your_interpretation
+	} );
+}
+
+function shareInterpretation( uid, ou )
+{
+    var text = $( "#interpretationArea" ).val();
+    
+    if ( text.length && $.trim( text ).length )
+    {
+    	text = $.trim( text );
+    	
+	    var url = "../api/interpretations/reportTable/" + uid;
+	    
+	    url += ( ou && ou.length ) ? "?ou=" + ou : "";
+	    
+	    $.ajax( url, {
+	    	type: "POST",
+	    	contentType: "text/html",
+	    	data: text,
+	    	success: function() {
+	    		$( "#shareForm" ).dialog( "close" );
+	    		$( "#interpretationArea" ).val( "" );
+	    		setHeaderDelayMessage( i18n_interpretation_was_shared );
+	    	}    	
+	    } );
+    }
+}
