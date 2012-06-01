@@ -1266,6 +1266,11 @@ Ext.onReady( function() {
                         params: p,
                         success: function() {
                             DV.store.favorite.load({callback: function() {
+								DV.store.favorite.sort('lastUpdated', 'DESC');
+								DV.c.shareid = DV.store.favorite.getAt(0).data.id;
+								DV.cmp.toolbar.share.xable();
+								DV.store.favorite.sortStore();
+
                                 DV.util.mask.hideMask();
                                 if (fn) {
                                     fn();
@@ -1902,9 +1907,9 @@ Ext.onReady( function() {
 				}
 			},
 			render: function() {
-				if (!DV.c.isrendered) {
+				if (!DV.c.rendered) {
 					DV.cmp.toolbar.datatable.enable();
-					DV.c.isrendered = true;
+					DV.c.rendered = true;
 				}
 			},
 			response: function(r) {
@@ -2002,8 +2007,8 @@ Ext.onReady( function() {
 			targetlinelabel: null,
 			baselinevalue: null,
 			baselinelabel: null,
-			isrendered: false,
-			sharable: false
+			rendered: false,
+			shareid: null
 		},
 		reset: function() {
 			this.model.type = DV.conf.finals.chart.column;
@@ -2374,7 +2379,6 @@ Ext.onReady( function() {
     DV.viewport = Ext.create('Ext.container.Viewport', {
         layout: 'border',
         renderTo: Ext.getBody(),
-        isrendered: false,
         items: [
             {
                 region: 'west',
@@ -3208,7 +3212,7 @@ Ext.onReady( function() {
 												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
 												autoScroll: true,
 												multiSelect: true,
-												isrendered: false,
+												rendered: false,
 												storage: {},
 												addToStorage: function(objects) {
 													for (var i = 0; i < objects.length; i++) {
@@ -3216,7 +3220,7 @@ Ext.onReady( function() {
 													}
 												},
 												selectRoot: function() {
-													if (this.isrendered) {
+													if (this.rendered) {
 														if (!this.getSelectionModel().getSelection().length) {
 															this.getSelectionModel().select(this.getRootNode());
 														}
@@ -3605,6 +3609,7 @@ Ext.onReady( function() {
 							cls: 'dv-toolbar-btn-1',
                             text: DV.i18n.update,
                             handler: function() {
+								DV.c.shareid = null;
                                 DV.exe.execute();
                             }
                         },
@@ -3988,7 +3993,7 @@ Ext.onReady( function() {
                                                                     text: DV.i18n.save,
                                                                     disabled: true,
                                                                     xable: function() {
-                                                                        if (DV.c.isrendered) {
+                                                                        if (DV.c.rendered) {
                                                                             if (DV.cmp.favorite.name.getValue()) {
                                                                                 var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
                                                                                 if (index != -1) {
@@ -4136,6 +4141,7 @@ Ext.onReady( function() {
                                                     itemclick: function(g, r) {
                                                         g.getSelectionModel().select([], false);
                                                         this.up('menu').hide();
+                                                        DV.c.shareid = r.data.id;
                                                         DV.exe.execute(r.data.id);
                                                     }
                                                 }
@@ -4163,7 +4169,7 @@ Ext.onReady( function() {
 							text: 'Share..',
 							disabled: true,
 							xable: function() {
-								if (DV.c.sharable) {
+								if (DV.c.shareid) {
 									this.enable();
 								}
 								else {
@@ -4342,6 +4348,13 @@ Ext.onReady( function() {
                 
                 if (DV.datatable.datatable) {
                     DV.datatable.datatable.setHeight(DV.util.viewport.getSize().y - DV.conf.layout.east_tbar_height);
+                }
+            }
+        }
+    });
+    
+    }});
+});
                 }
             }
         }
