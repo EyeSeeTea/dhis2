@@ -1190,7 +1190,14 @@ Ext.onReady( function() {
                     }
                 }
             }
-        },                
+        },
+        toolbar: {
+			separator: {
+				xtype: 'tbseparator',
+				height: 18,
+				style: 'border-left: 1px solid #bbb; border-right: 1px solid #ececec'
+			}
+		},
         number: {
             isInteger: function(n) {
                 var str = new String(n);
@@ -1995,7 +2002,8 @@ Ext.onReady( function() {
 			targetlinelabel: null,
 			baselinevalue: null,
 			baselinelabel: null,
-			isrendered: false
+			isrendered: false,
+			sharable: false
 		},
 		reset: function() {
 			this.model.type = DV.conf.finals.chart.column;
@@ -2284,6 +2292,7 @@ Ext.onReady( function() {
             }
             
             DV.init.cmd = false;
+			DV.cmp.toolbar.share.xable();
         }
     };
     
@@ -3599,6 +3608,7 @@ Ext.onReady( function() {
                                 DV.exe.execute();
                             }
                         },
+						' ', DV.util.toolbar.separator, ' ',
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
@@ -3779,7 +3789,7 @@ Ext.onReady( function() {
                                                                             },
                                                                             '->',
                                                                             {
-                                                                                text: DV.i18n.rename,
+                                                                                text: DV.i18n.rename + '..',
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 disabled: true,
                                                                                 xable: function() {
@@ -3879,7 +3889,7 @@ Ext.onReady( function() {
                                                                                 }
                                                                             },
                                                                             {
-                                                                                text: DV.i18n.delete_object,
+                                                                                text: DV.i18n.delete_object + '..',
                                                                                 cls: 'dv-toolbar-btn-2',
                                                                                 disabled: true,
                                                                                 xable: function() {
@@ -4147,6 +4157,36 @@ Ext.onReady( function() {
                                 }
                             }
                         },
+                        {
+							xtype: 'button',
+							cls: 'dv-toolbar-btn-2',
+							text: 'Share..',
+							disabled: true,
+							xable: function() {
+								if (DV.c.sharable) {
+									this.enable();
+								}
+								else {
+									this.disable();
+								}
+							},
+							handler: function() {
+								Ext.Ajax.request({
+									url: DV.conf.finals.ajax.path_api + 'interpretations/chart/' + 'EbRN2VIbPdV',
+									method: 'POST',
+									params: 'Min interpretasjon',
+									headers: {'Content-Type': 'text/html'},
+									success: function() {
+										console.log("success");
+									}
+								});
+							},
+                            listeners: {
+                                added: function() {
+                                    DV.cmp.toolbar.share = this;
+                                }
+                            }
+						},
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
