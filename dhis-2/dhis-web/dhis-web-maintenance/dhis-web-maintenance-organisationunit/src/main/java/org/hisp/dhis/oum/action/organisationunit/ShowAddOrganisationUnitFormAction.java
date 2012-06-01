@@ -1,7 +1,7 @@
-package org.hisp.dhis.oum.action.organisationunitgroupset;
+package org.hisp.dhis.oum.action.organisationunit;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2011, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,26 +27,37 @@ package org.hisp.dhis.oum.action.organisationunitgroupset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
+import org.hisp.dhis.period.Cal;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 /**
- * @author Lars Helge Overland
+ * @author Nguyen Dang Quang
  */
-public class PrepareUpdateGroupSetAction
+public class ShowAddOrganisationUnitFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+
+    private DataSetService dataSetService;
+
+    public void setDataSetService( DataSetService dataSetService )
+    {
+        this.dataSetService = dataSetService;
+    }
 
     private OrganisationUnitGroupService organisationUnitGroupService;
 
@@ -55,29 +66,43 @@ public class PrepareUpdateGroupSetAction
         this.organisationUnitGroupService = organisationUnitGroupService;
     }
 
-    // -------------------------------------------------------------------------
-    // Input/output
-    // -------------------------------------------------------------------------
+    private AttributeService attributeService;
 
-    private Integer id;
-
-    public void setId( Integer id )
+    public void setAttributeService( AttributeService attributeService )
     {
-        this.id = id;
+        this.attributeService = attributeService;
     }
 
-    private OrganisationUnitGroupSet organisationUnitGroupSet;
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
 
-    public OrganisationUnitGroupSet getOrganisationUnitGroupSet()
+    private Date defaultDate;
+
+    public Date getDefaultDate()
     {
-        return organisationUnitGroupSet;
+        return defaultDate;
     }
 
-    private List<OrganisationUnitGroup> selectedGroups;
+    private List<DataSet> dataSets;
 
-    public List<OrganisationUnitGroup> getSelectedGroups()
+    public List<DataSet> getDataSets()
     {
-        return selectedGroups;
+        return dataSets;
+    }
+
+    private List<OrganisationUnitGroupSet> groupSets;
+
+    public List<OrganisationUnitGroupSet> getGroupSets()
+    {
+        return groupSets;
+    }
+
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
     }
 
     // -------------------------------------------------------------------------
@@ -85,13 +110,19 @@ public class PrepareUpdateGroupSetAction
     // -------------------------------------------------------------------------
 
     public String execute()
-        throws Exception
     {
-        organisationUnitGroupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( id, true );
+        defaultDate = new Cal().set( 1900, 1, 1 ).time();
 
-        selectedGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupSet.getOrganisationUnitGroups() );
+        dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
 
-        Collections.sort( selectedGroups, IdentifiableObjectNameComparator.INSTANCE );
+        groupSets = new ArrayList<OrganisationUnitGroupSet>(
+            organisationUnitGroupService.getCompulsoryOrganisationUnitGroupSetsWithMembers() );
+
+        attributes = new ArrayList<Attribute>( attributeService.getOrganisationUnitAttributes() );
+
+        Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( attributes, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }
