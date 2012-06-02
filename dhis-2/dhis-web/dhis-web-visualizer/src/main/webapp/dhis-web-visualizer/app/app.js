@@ -282,7 +282,8 @@ Ext.onReady( function() {
         statusbar: {},
         favorite: {
             rename: {}
-        }
+        },
+        share: {}
     };
     
     DV.util = {
@@ -4166,7 +4167,7 @@ Ext.onReady( function() {
                         {
 							xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
-							text: 'Share..',
+							text: DV.i18n.share + '..',
 							disabled: true,
 							xable: function() {
 								if (DV.c.shareid) {
@@ -4177,15 +4178,73 @@ Ext.onReady( function() {
 								}
 							},
 							handler: function() {
-								Ext.Ajax.request({
-									url: DV.conf.finals.ajax.path_api + 'interpretations/chart/' + 'EbRN2VIbPdV',
-									method: 'POST',
-									params: 'Min interpretasjon',
-									headers: {'Content-Type': 'text/html'},
-									success: function() {
-										console.log("success");
-									}
-								});
+								if (DV.cmp.share.window) {
+									DV.cmp.share.window.show();
+								}
+								else {
+									DV.cmp.share.window = Ext.create('Ext.window.Window', {
+										title: DV.i18n.share + ' ' + DV.i18n.interpretation,
+										iconCls: 'dv-window-title-interpretation',
+										layout: 'fit',
+										bodyStyle: 'padding:8px 8px 4px 8px; background-color:#fff',
+										width: DV.conf.layout.grid_favorite_width,
+										height: 250,
+										emptyText: 'Write your interpretation..',										
+										closeAction: 'hide',
+										resizable: true,
+										modal: true,
+										items: [
+											{
+												xtype: 'textarea',
+												style: 'font-size:11px',
+												enableKeyEvents: true,
+												listeners: {
+													added: function() {
+														DV.cmp.share.textarea = this;
+													},
+													keyup: function() {
+														DV.cmp.share.button.xable();
+													}
+												}
+											}
+										],
+										bbar: [
+											'->',
+											{
+												text: DV.i18n.share,
+												disabled: true,
+												xable: function() {
+													if (DV.cmp.share.textarea.getValue()) {
+														this.enable();
+													}
+													else {
+														this.disable();
+													}
+												},
+												handler: function() {
+													if (DV.cmp.share.textarea.getValue() && DV.c.shareid) {
+														Ext.Ajax.request({
+															url: DV.conf.finals.ajax.path_api + 'interpretations/chart/' + DV.c.shareid,
+															method: 'POST',
+															params: DV.cmp.share.textarea.getValue(),
+															headers: {'Content-Type': 'text/html'},
+															success: function() {
+																DV.cmp.share.textarea.reset();
+																DV.cmp.share.button.disable();
+																DV.cmp.share.window.hide();
+															}
+														});
+													}
+												},
+												listeners: {
+													added: function() {
+														DV.cmp.share.button = this;
+													}
+												}
+											}
+										]
+									}).show();
+								}
 							},
                             listeners: {
                                 added: function() {
@@ -4348,13 +4407,6 @@ Ext.onReady( function() {
                 
                 if (DV.datatable.datatable) {
                     DV.datatable.datatable.setHeight(DV.util.viewport.getSize().y - DV.conf.layout.east_tbar_height);
-                }
-            }
-        }
-    });
-    
-    }});
-});
                 }
             }
         }

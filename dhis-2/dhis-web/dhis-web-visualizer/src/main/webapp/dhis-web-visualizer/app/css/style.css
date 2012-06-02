@@ -518,6 +518,10 @@ body {
     padding-left: 19px;
     background-image: url('../images/favorite.png');
 }
+.dv-window-title-interpretation {
+    padding-left: 19px;
+    background-image: url('../images/interpretation.png');
+}
 .dv-window-title-datatable {
     padding-left: 19px;
     background-image: url('../images/datatable.png');
