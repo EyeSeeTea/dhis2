@@ -1266,13 +1266,10 @@ Ext.onReady( function() {
                         url: DV.conf.finals.ajax.path_visualizer + url,
                         method: 'POST',
                         params: p,
-                        success: function() {
+                        success: function(r) {
                             DV.store.favorite.load({callback: function() {
-								DV.store.favorite.sort('lastUpdated', 'DESC');
-								DV.c.shareid = DV.store.favorite.getAt(0).data.id;
+								DV.c.shareid = r.responseText;
 								DV.cmp.toolbar.share.xable();
-								DV.store.favorite.sortStore();
-
                                 DV.util.mask.hideMask();
                                 if (fn) {
                                     fn();
