@@ -1,4 +1,4 @@
-package org.hisp.dhis.oum.action.organisationunitgroupset;
+package org.hisp.dhis.user.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,71 +27,49 @@ package org.hisp.dhis.oum.action.organisationunitgroupset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
-
-import com.opensymphony.xwork2.Action;
-
-/**
- * @author Lars Helge Overland
- */
-public class PrepareUpdateGroupSetAction
+public class AddUserGroupFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitGroupService organisationUnitGroupService;
+    private AttributeService attributeService;
 
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
+    public void setAttributeService( AttributeService attributeService )
     {
-        this.organisationUnitGroupService = organisationUnitGroupService;
+        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
-    // Input/output
+    // Parameters
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private List<Attribute> attributes;
 
-    public void setId( Integer id )
+    public List<Attribute> getAttributes()
     {
-        this.id = id;
-    }
-
-    private OrganisationUnitGroupSet organisationUnitGroupSet;
-
-    public OrganisationUnitGroupSet getOrganisationUnitGroupSet()
-    {
-        return organisationUnitGroupSet;
-    }
-
-    private List<OrganisationUnitGroup> selectedGroups;
-
-    public List<OrganisationUnitGroup> getSelectedGroups()
-    {
-        return selectedGroups;
+        return attributes;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action Implementation
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        organisationUnitGroupSet = organisationUnitGroupService.getOrganisationUnitGroupSet( id, true );
-
-        selectedGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupSet.getOrganisationUnitGroups() );
-
-        Collections.sort( selectedGroups, IdentifiableObjectNameComparator.INSTANCE );
+        attributes = new ArrayList<Attribute>( attributeService.getUserGroupAttributes() );
+        Collections.sort( attributes, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }

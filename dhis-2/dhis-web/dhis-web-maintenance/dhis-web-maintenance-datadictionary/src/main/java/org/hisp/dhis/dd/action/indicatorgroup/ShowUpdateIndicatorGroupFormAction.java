@@ -27,21 +27,21 @@
 
 package org.hisp.dhis.dd.action.indicatorgroup;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorService;
+import org.hisp.dhis.system.util.AttributeUtils;
 
-import com.opensymphony.xwork2.Action;
+import java.util.*;
 
 /**
  * @author Chau Thu Tran
  * @version $ ShowUpdateIndicatorGroupFormAction.java May 30, 2011 3:01:41 PM $
- * 
  */
 public class ShowUpdateIndicatorGroupFormAction
     implements Action
@@ -55,6 +55,13 @@ public class ShowUpdateIndicatorGroupFormAction
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
+    }
+
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
@@ -82,6 +89,20 @@ public class ShowUpdateIndicatorGroupFormAction
         return groupMembers;
     }
 
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public Map<Integer, String> attributeValues = new HashMap<Integer, String>();
+
+    public Map<Integer, String> getAttributeValues()
+    {
+        return attributeValues;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -92,7 +113,12 @@ public class ShowUpdateIndicatorGroupFormAction
 
         groupMembers = new ArrayList<Indicator>( indicatorGroup.getMembers() );
 
+        attributes = new ArrayList<Attribute>( attributeService.getIndicatorGroupAttributes() );
+
+        attributeValues = AttributeUtils.getAttributeValueMap( indicatorGroup.getAttributeValues() );
+
         Collections.sort( groupMembers, new IdentifiableObjectNameComparator() );
+        Collections.sort( attributes, new AttributeSortOrderComparator() );
 
         return SUCCESS;
     }

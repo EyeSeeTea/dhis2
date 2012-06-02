@@ -209,6 +209,10 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 
 	<!-- User groups -->
 
+  <bean id="org.hisp.dhis.user.action.AddUserGroupFormAction" class="org.hisp.dhis.user.action.AddUserGroupFormAction">
+    <property name="attributeService" ref="org.hisp.dhis.attribute.AttributeService" />
+  </bean>
+
   <bean id="org.hisp.dhis.user.action.GetUserGroupListAction" class="org.hisp.dhis.user.action.GetUserGroupListAction"
     scope="prototype">
     <property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
@@ -218,17 +222,20 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     scope="prototype">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
     <property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
+    <property name="attributeService" ref="org.hisp.dhis.attribute.AttributeService" />
   </bean>
 
   <bean id="org.hisp.dhis.user.action.EditUserGroupFormAction" class="org.hisp.dhis.user.action.EditUserGroupFormAction"
     scope="prototype">
     <property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
+    <property name="attributeService" ref="org.hisp.dhis.attribute.AttributeService" />
   </bean>
 
   <bean id="org.hisp.dhis.user.action.UpdateUserGroupAction" class="org.hisp.dhis.user.action.UpdateUserGroupAction"
     scope="prototype">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
     <property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
+    <property name="attributeService" ref="org.hisp.dhis.attribute.AttributeService" />
   </bean>
 
   <bean id="org.hisp.dhis.user.action.RemoveUserGroupAction" class="org.hisp.dhis.user.action.RemoveUserGroupAction"

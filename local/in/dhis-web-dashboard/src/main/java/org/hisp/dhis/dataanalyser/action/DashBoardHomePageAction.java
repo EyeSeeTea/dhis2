@@ -240,7 +240,7 @@ public class DashBoardHomePageAction
     public String execute()
         throws Exception
     {
-        statementManager.initialise();
+        //statementManager.initialise();
 
         immChildrenList = new ArrayList<OrganisationUnit>();
         totalEnrollCountMap = new HashMap<String, Integer>();
@@ -273,7 +273,8 @@ public class DashBoardHomePageAction
             while( progIterator.hasNext() )
             {
                 Program prg = progIterator.next();
-                if( prg.getOrganisationUnits() == null || prg.getOrganisationUnits().size() <= 0 || prg.getAnonymous() )
+                
+                if( prg.getOrganisationUnits() == null || prg.getOrganisationUnits().size() <= 0 || prg.getType() == Program.SINGLE_EVENT_WITHOUT_REGISTRATION )
                 {
                     progIterator.remove();
                 }
@@ -380,7 +381,7 @@ public class DashBoardHomePageAction
             }
         }
         
-        statementManager.destroy();
+        //statementManager.destroy();
 
         return SUCCESS;
     }

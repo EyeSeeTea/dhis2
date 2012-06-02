@@ -30,8 +30,10 @@ package org.hisp.dhis.dxf2.datavalueset;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
-import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.*;
-import static org.hisp.dhis.importexport.ImportStrategy.*;
+import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.CODE;
+import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.UID;
+import static org.hisp.dhis.importexport.ImportStrategy.NEW_AND_UPDATES;
+import static org.hisp.dhis.importexport.ImportStrategy.UPDATES;
 
 import java.io.InputStreamReader;
 import java.util.Collection;
@@ -242,5 +244,17 @@ public class DataValueSetServiceTest
         
         assertNotNull( dataValues );
         assertEquals( 0, dataValues.size() );
+    }
+
+    @Test
+    public void testImportDataValuesWithNewPeriod()
+        throws Exception
+    {
+        dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetC.xml" ).getInputStream() );
+        
+        Collection<DataValue> dataValues = dataValueService.getAllDataValues();
+        
+        assertNotNull( dataValues );
+        assertEquals( 3, dataValues.size() );
     }
 }

@@ -27,16 +27,19 @@ package org.hisp.dhis.oum.action.organisationunitgroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
+import org.hisp.dhis.system.util.AttributeUtils;
 
-import com.opensymphony.xwork2.Action;
+import java.util.*;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: GetOrganisationUnitGroupAction.java 1901 2006-09-22 14:42:40Z
- *          torgeilo $
  */
 public class GetOrganisationUnitGroupAction
     implements Action
@@ -57,7 +60,14 @@ public class GetOrganisationUnitGroupAction
     public void setSelectionTreeManager( SelectionTreeManager selectionTreeManager )
     {
         this.selectionTreeManager = selectionTreeManager;
-    }  
+    }
+
+    private AttributeService attributeService;
+
+    public void setAttributeService( AttributeService attributeService )
+    {
+        this.attributeService = attributeService;
+    }
 
     // -------------------------------------------------------------------------
     // Input/output
@@ -84,6 +94,20 @@ public class GetOrganisationUnitGroupAction
         return memberCount;
     }
 
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public Map<Integer, String> attributeValues = new HashMap<Integer, String>();
+
+    public Map<Integer, String> getAttributeValues()
+    {
+        return attributeValues;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -94,10 +118,16 @@ public class GetOrganisationUnitGroupAction
         organisationUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( id );
 
         memberCount = organisationUnitGroup.getMembers().size();
-        
+
         selectionTreeManager.clearSelectedOrganisationUnits();
 
         selectionTreeManager.setSelectedOrganisationUnits( organisationUnitGroup.getMembers() );
+
+        attributes = new ArrayList<Attribute>( attributeService.getOrganisationUnitGroupAttributes() );
+
+        attributeValues = AttributeUtils.getAttributeValueMap( organisationUnitGroup.getAttributeValues() );
+
+        Collections.sort( attributes, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }

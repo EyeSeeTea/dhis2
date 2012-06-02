@@ -54,6 +54,8 @@ public class Dxf2DataProducer
         ImportSummary summary = endpoint.getDataValueSetService().saveDataValueSet( (InputStream)exchange.getIn().getBody(), 
              endpoint.getImportOptions() );
         
-        exchange.getOut().setBody(JacksonUtils.toXmlAsString( summary ) );
+        //exchange.getOut().setBody(JacksonUtils.toXmlAsString( summary ) );
+        exchange.getOut().setBody( summary );
+        log.info( this.getEndpoint().getEndpointUri() + " : " + JacksonUtils.toXmlAsString(exchange.getOut().getBody()) );
     }
 }
