@@ -765,6 +765,7 @@ Ext.onReady( function() {
 				getChart: function(axes, series) {
 					return Ext.create('Ext.chart.Chart', {
 						animate: true,
+						shadow: false,
 						store: DV.store.chart,
 						insetPadding: DV.conf.chart.style.inset,
 						items: DV.c.hidesubtitle ? false : DV.util.chart.def.getTitle(),
@@ -2243,7 +2244,7 @@ Ext.onReady( function() {
 			DV.util.chart.pie.series.setTheme();
             this.chart = Ext.create('Ext.chart.Chart', {
                 animate: true,
-                shadow: true,
+                shadow: false,
                 store: DV.store.chart,
                 insetPadding: 60,
                 items: DV.c.hidesubtitle ? false : DV.util.chart.pie.getTitle(),
