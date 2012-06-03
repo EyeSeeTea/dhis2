@@ -2578,7 +2578,7 @@ Ext.onReady( function() {
 								height: 430,
 								items: [
 									{
-										title: '<div style="height:17px">' + DV.i18n.indicators + '</div>',
+										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.indicators + '</div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -2739,7 +2739,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px">' + DV.i18n.data_elements + '</div>',
+										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.data_elements + '</div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -2899,7 +2899,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px">' + DV.i18n.reporting_rates + '</div>',
+										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.reporting_rates + '</div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -3019,7 +3019,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px">' + DV.i18n.periods + '</div>',
+										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.periods + '</div>',
 										hideCollapseTool: true,
 										autoScroll: true,
 										items: [
@@ -3182,7 +3182,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px">' + DV.i18n.organisation_units + '</div>',
+										title: '<div style="height:17px; background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.organisation_units + '</div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -3299,7 +3299,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px">' + DV.i18n.chart_options + '</div>',
+										title: '<div style="height:17px; background-image:url(images/options.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.chart_options + '</div>',
 										hideCollapseTool: true,
 										cls: 'dv-accordion-options',
 										items: [
