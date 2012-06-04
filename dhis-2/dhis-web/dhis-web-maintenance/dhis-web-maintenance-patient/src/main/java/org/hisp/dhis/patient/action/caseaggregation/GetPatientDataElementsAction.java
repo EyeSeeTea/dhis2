@@ -28,18 +28,30 @@
 package org.hisp.dhis.patient.action.caseaggregation;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElementService;
+import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
 
-public class GetProgramStagesAction implements Action
+/**
+ * @author Chau Thu Tran
+ * 
+ * @version $Id: GetPatientDataElementsAction.java Mar 09, 2011 01:24:49 PM $
+ */
+public class GetPatientDataElementsAction
+    implements Action
 {
 
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
     private ProgramService programService;
@@ -48,32 +60,71 @@ public class GetProgramStagesAction implements Action
     {
         this.programService = programService;
     }
-    
+
+    private ProgramStageService programStageService;
+
+    public void setProgramStageService( ProgramStageService programStageService )
+    {
+        this.programStageService = programStageService;
+    }
+
+    private ProgramStageDataElementService programStageDataElementService;
+
+    public void setProgramStageDataElementService( ProgramStageDataElementService programStageDataElementService )
+    {
+        this.programStageDataElementService = programStageDataElementService;
+    }
+
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private List<ProgramStage> programStages;
-    
-    public List<ProgramStage> getProgramStages()
-    {
-        return programStages;
-    }
-    
     private Integer programId;
-    
+
     public void setProgramId( Integer programId )
     {
         this.programId = programId;
     }
 
+    private Integer programStageId;
+
+    public void setProgramStageId( Integer programStageId )
+    {
+        this.programStageId = programStageId;
+    }
+
+    private List<DataElement> dataElements;
+
+    public List<DataElement> getDataElements()
+    {
+        return dataElements;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
+
     public String execute()
     {
-        programStages = new ArrayList<ProgramStage>( programService.getProgram( programId ).getProgramStages() );
-        
+        if ( programStageId == null )
+        {
+            Program program = programService.getProgram( programId );
+
+            Set<DataElement> dataElementsInProgram = new HashSet<DataElement>();
+
+            for ( ProgramStage programStage : program.getProgramStages() )
+            {
+                dataElementsInProgram.addAll( programStageDataElementService.getListDataElement( programStage ) );
+            }
+            
+            dataElements = new ArrayList<DataElement>( dataElementsInProgram );
+        }
+        else
+        {
+            dataElements = new ArrayList<DataElement>( programStageDataElementService
+                .getListDataElement( programStageService.getProgramStage( programStageId ) ) );
+        }
+
         return SUCCESS;
     }
 }
