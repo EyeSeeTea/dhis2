@@ -28,95 +28,84 @@
 package org.hisp.dhis.patient.action.caseaggregation;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.program.ProgramStageDataElementService;
-import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStage;
 
 import com.opensymphony.xwork2.Action;
 
-public class GetPSDataElementsAction
+/**
+ * @author Chau Thu Tran
+ * 
+ * @version $Id: GetParamsByProgramAction.java Jun 02, 2012 02:24:49 PM $
+ */
+public class GetParamsByProgramAction
     implements Action
 {
 
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private ProgramStageService programStageService;
+    private ProgramService programService;
 
-    public void setProgramStageService( ProgramStageService programStageService )
+    public void setProgramService( ProgramService programService )
     {
-        this.programStageService = programStageService;
+        this.programService = programService;
     }
 
-    private ProgramStageDataElementService programStageDataElementService;
+    private PatientAttributeService attributeService;
 
-    public void setProgramStageDataElementService( ProgramStageDataElementService programStageDataElementService )
+    public void setAttributeService( PatientAttributeService attributeService )
     {
-        this.programStageDataElementService = programStageDataElementService;
+        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private List<String> optionComboNames;
+    private List<ProgramStage> programStages;
 
-    public List<String> getOptionComboNames()
+    public List<ProgramStage> getProgramStages()
     {
-        return optionComboNames;
+        return programStages;
     }
 
-    private List<String> optionComboIds;
+    private Integer programId;
 
-    public List<String> getOptionComboIds()
+    public void setProgramId( Integer programId )
     {
-        return optionComboIds;
+        this.programId = programId;
     }
 
-    private List<String> optionComboType;
+    private Collection<PatientAttribute> patientAttributes = new HashSet<PatientAttribute>();
 
-    public List<String> getOptionComboType()
+    public Collection<PatientAttribute> getPatientAttributes()
     {
-        return optionComboType;
-    }
-
-    private Integer psId;
-
-    public void setPsId( Integer psId )
-    {
-        this.psId = psId;
-    }
-    
-    public Integer getPsId()
-    {
-        return psId;
-    }
-
-    private List<DataElement> dataElementList;
-
-    public List<DataElement> getDataElementList()
-    {
-        return dataElementList;
+        return patientAttributes;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-   
     public String execute()
     {
-        optionComboNames = new ArrayList<String>();
+        Program program = programService.getProgram( programId );
+        programStages = new ArrayList<ProgramStage>( program.getProgramStages() );
 
-        optionComboIds = new ArrayList<String>();
-
-        optionComboType = new ArrayList<String>();
-
-        dataElementList = new ArrayList<DataElement>( programStageDataElementService
-            .getListDataElement( programStageService.getProgramStage( psId ) ) );
-
+        if ( program.isRegistration() )
+        {
+            patientAttributes.addAll( attributeService.getPatientAttributes( null, null ) );
+            patientAttributes.addAll( attributeService.getPatientAttributes( program ) );
+        }
+        
         return SUCCESS;
     }
 }
