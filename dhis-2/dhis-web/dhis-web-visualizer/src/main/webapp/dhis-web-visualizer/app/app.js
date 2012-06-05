@@ -106,7 +106,6 @@ DV.conf = {
             path_lib: '../../dhis-web-commons/javascripts/',
             initialize: 'initialize.action',
             redirect: 'redirect.action',
-            //data_get: 'getAggregatedValues.action',
             data_get: 'chartValues.json',
             indicator_get: 'getIndicatorsMinified.action',
             indicatorgroup_get: 'getIndicatorGroupsMinified.action',
@@ -1969,6 +1968,8 @@ Ext.onReady( function() {
             
             Ext.Ajax.request({
                 url: baseurl,
+                method: 'GET',
+                params: {periodIsFilter: (DV.c.dimension.filter === DV.conf.finals.dimension.period.value)},
                 disableCaching: false,
                 success: function(r) {
                     DV.value.values = DV.util.value.jsonfy(r);
