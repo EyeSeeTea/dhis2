@@ -1340,11 +1340,13 @@ Ext.onReady( function() {
                         root: 'indicators'
                     }
                 },
+                storage: {},
                 listeners: {
                     load: function(s) {
 						s.each( function(r) {
 							r.data.name = DV.conf.util.jsonEncode(r.data.name);
 						});
+						DV.util.store.addToStorage(s);
                         DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
                     }
                 }
@@ -1365,11 +1367,13 @@ Ext.onReady( function() {
                         root: 'dataElements'
                     }
                 },
+                storage: {},
                 listeners: {
                     load: function(s) {
 						s.each( function(r) {
 							r.data.name = DV.conf.util.jsonEncode(r.data.name);
 						});
+						DV.util.store.addToStorage(s);
                         DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
                     }
                 }
@@ -1390,6 +1394,7 @@ Ext.onReady( function() {
                         root: 'dataSets'
                     }
                 },
+                storage: {},
                 isloaded: false,
                 listeners: {
                     load: function(s) {
@@ -1397,6 +1402,7 @@ Ext.onReady( function() {
 						s.each( function(r) {
 							r.data.name = DV.conf.util.jsonEncode(r.data.name);
 						});
+						DV.util.store.addToStorage(s);
                         DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
                     }
                 }
@@ -3142,7 +3148,6 @@ Ext.onReady( function() {
 															{
 																xtype: 'checkbox',
 																paramName: 'thisYear',
-																number: 1,
 																boxLabel: DV.i18n.this_year
 															},
 															{
