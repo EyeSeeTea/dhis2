@@ -1829,7 +1829,7 @@ Ext.onReady( function() {
 				return true;
 			},
 			categories: function() {
-				if (DV.c.category.names.length < 2 && (DV.c.type === DV.conf.finals.chart.line || DV.c.type === DV.conf.finals.chart.area)) {
+				if (DV.c.category.objects.length < 2 && (DV.c.type === DV.conf.finals.chart.line || DV.c.type === DV.conf.finals.chart.area)) {
 					DV.util.notification.error(DV.i18n.et_line_area_categories, DV.i18n.em_line_area_categories);
 					return false;
 				}
@@ -1847,7 +1847,7 @@ Ext.onReady( function() {
 						DV.c.trendline = false;
 					}
 					
-					if (DV.c.category.names.length < 2) {
+					if (DV.c.category.objects.length < 2) {
 						reasons.push(DV.i18n.wm_required_categories);
 						DV.c.trendline = false;
 					}
@@ -1875,7 +1875,7 @@ Ext.onReady( function() {
 						DV.c.targetlinevalue = null;
 					}
 					
-					if (DV.c.category.names.length < 2) {
+					if (DV.c.category.objects.length < 2) {
 						reasons.push(DV.i18n.wm_required_categories);
 						DV.c.targetlinevalue = null;
 					}
@@ -1903,7 +1903,7 @@ Ext.onReady( function() {
 						DV.c.baselinevalue = null;
 					}
 					
-					if (DV.c.category.names.length < 2) {
+					if (DV.c.category.objects.length < 2) {
 						reasons.push(DV.i18n.wm_required_categories);
 						DV.c.baselinevalue = null;
 					}
@@ -1962,7 +1962,7 @@ Ext.onReady( function() {
             params = params.concat(DV.c.period.url);
             params = params.concat(DV.c.organisationunit.url);
             
-            var baseurl = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.data_get;
+            var baseurl = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.data_get;
             Ext.Array.each(params, function(item) {
                 baseurl = Ext.String.urlAppend(baseurl, item);
             });
