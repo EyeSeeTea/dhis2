@@ -73,6 +73,20 @@ function selectDataElements()
 	});
 }
 
+
+function selectAllDataElements()
+{
+	var selectedList = jQuery("#selectedList");
+	jQuery("#availableList").children().each(function(i, item){
+		html = "<tr class='selected' id='" + item.value + "' ondblclick='unSelectDataElement( this )'><td onclick='select(this)'>" + item.text + "</td>";
+		html += "<td align='center'><input type='checkbox' name='compulsory' value='" + item.value + "'></td>";
+		html += "<td align='center'><input type='checkbox' name='allowProvided' value='" + item.value + "'></td>";
+		html += "</tr>";
+		selectedList.append( html );
+		jQuery( item ).remove();
+	});
+}
+
 function unSelectDataElements()
 {
 	var availableList = jQuery("#availableList");
@@ -83,6 +97,17 @@ function unSelectDataElements()
 			availableList.append( "<option value='" + item.attr( "id" ) + "' selected='true'>" + item.find("td:first").text() + "</option>" );
 			item.remove();
 		}
+	});
+}
+
+
+function unSelectAllDataElements()
+{
+	var availableList = jQuery("#availableList");
+	jQuery("#selectedList").find("tr").each( function( i, item ){
+		item = jQuery(item);
+		availableList.append( "<option value='" + item.attr( "id" ) + "' selected='true'>" + item.find("td:first").text() + "</option>" );
+		item.remove();
 	});
 }
 
@@ -111,9 +136,14 @@ function moveUpDataElement()
 function moveDownDataElement()
 {
 	var selectedList = jQuery("#selectedList");
-
+	var items = new Array();
 	jQuery("#selectedList").find("tr").each( function( i, item ){
-		item = jQuery(item);
+		items.push(jQuery(item));
+	});
+	
+	for( var i=items.length-1;i>=0;i--)
+	{	
+		var item = items[i];
 		if( item.hasClass("selected") )
 		{
 			var next = item.next('#selectedList tr');
@@ -122,7 +152,7 @@ function moveDownDataElement()
 				next.after(item);
 			}
 		}
-	});
+	}
 }
 
 function unSelectDataElement( element )

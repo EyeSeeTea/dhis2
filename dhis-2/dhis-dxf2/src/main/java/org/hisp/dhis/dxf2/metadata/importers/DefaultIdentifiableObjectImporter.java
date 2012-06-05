@@ -717,16 +717,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
             if ( ref == null )
             {
-                String referenceName = idObject != null ? idObject.getClass().getSimpleName() : "null";
-                String objectName = object != null ? object.getClass().getSimpleName() : "null";
-
-                String logMsg = "Unknown reference to " + idObject + " (" + referenceName + ")" +
-                    " on object " + object + " (" + objectName + ").";
-
-                log.warn( logMsg );
-
-                ImportConflict importConflict = new ImportConflict( getDisplayName( object ), logMsg );
-                importConflicts.add( importConflict );
+                reportReferenceError(object, importConflicts, idObject);
             }
 
             if ( !options.isDryRun() )
@@ -753,15 +744,8 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 if ( objects != null && !objects.isEmpty() )
                 {
                     collectionFields.put( field, objects );
-
-                    if ( List.class.isAssignableFrom( field.getType() ) )
-                    {
-                        ReflectionUtils.invokeSetterMethod( field.getName(), object, new ArrayList<Object>() );
-                    }
-                    else if ( Set.class.isAssignableFrom( field.getType() ) )
-                    {
-                        ReflectionUtils.invokeSetterMethod( field.getName(), object, new HashSet<Object>() );
-                    }
+                    Collection<Object> emptyCollection = ReflectionUtils.newCollectionInstance( field.getType() );
+                    ReflectionUtils.invokeSetterMethod( field.getName(), object, emptyCollection );
                 }
             }
         } );
@@ -776,21 +760,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         for ( Field field : collectionFields.keySet() )
         {
             Collection<Object> collection = collectionFields.get( field );
-            Collection<Object> objects;
-
-            if ( List.class.isAssignableFrom( field.getType() ) )
-            {
-                objects = new ArrayList<Object>();
-            }
-            else if ( Set.class.isAssignableFrom( field.getType() ) )
-            {
-                objects = new HashSet<Object>();
-            }
-            else
-            {
-                log.warn( "Unknown Collection type." );
-                continue;
-            }
+            Collection<Object> objects = ReflectionUtils.newCollectionInstance( field.getType() );
 
             for ( Object idObject : collection )
             {
@@ -802,16 +772,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 }
                 else
                 {
-                    String referenceName = idObject != null ? idObject.getClass().getSimpleName() : "null";
-                    String objectName = object != null ? object.getClass().getSimpleName() : "null";
-
-                    String logMsg = "Unknown reference to " + idObject + " (" + referenceName + ")" +
-                        " on object " + object + " (" + objectName + ").";
-
-                    log.warn( logMsg );
-
-                    ImportConflict importConflict = new ImportConflict( getDisplayName( object ), logMsg );
-                    importConflicts.add( importConflict );
+                    reportReferenceError( object, importConflicts, idObject );
                 }
             }
 
@@ -822,5 +783,19 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         }
 
         return importConflicts;
+    }
+
+    private void reportReferenceError( Object object, List<ImportConflict> importConflicts, Object idObject )
+    {
+        String referenceName = idObject != null ? idObject.getClass().getSimpleName() : "null";
+        String objectName = object != null ? object.getClass().getSimpleName() : "null";
+
+        String logMsg = "Unknown reference to " + idObject + " (" + referenceName + ")" +
+            " on object " + object + " (" + objectName + ").";
+
+        log.warn( logMsg );
+
+        ImportConflict importConflict = new ImportConflict( getDisplayName( object ), logMsg );
+        importConflicts.add( importConflict );
     }
 }

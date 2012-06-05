@@ -189,6 +189,17 @@ DV.conf = {
 			urlparam: 'id'
         }
     },
+    relativePeriodUnits: {
+		lastSixMonth: 1,
+		thisYear: 1,
+		lastYear: 1,
+		last5Years: 5,
+		last12Months: 12,
+		last4Quarters: 4,
+		last2SixMonths: 2,
+		lastMonth: 1,
+		lastQuarter: 1
+	},
     chart: {
         style: {
             inset: 30,
@@ -545,21 +556,18 @@ Ext.onReady( function() {
                     return a;
                 },
                 getObjectsByRelativePeriods: function(rp) {
-                    var relatives = [],
-                        a = [];
+					var a = [],
+						count = 0;
                     for (var r in rp) {
                         if (rp[r]) {
-                            relatives.push(r);
+							count += DV.conf.relativePeriodUnits[r];
                         }
                     }
-                    for (var i = 0; i < relatives.length; i++) {
-                        var r = DV.init.system.periods[relatives[i]] || [];
-                        for (var j = 0; j < r.length; j++) {
-                            a.push({id: r[j].id, name: r[j].name});
-                        }
-                    }
-                    return a;
-                },
+                    for (var i = 0; i < count; i++) {
+						a.push({});
+					}
+					return a;
+				},
                 getNames: function(exception, isFilter) {
 					var obj = DV.c.period.objects,
 						a = [];
@@ -578,24 +586,8 @@ Ext.onReady( function() {
 							a.push(r + '=true');
 						}
 					}
-					return 
-					//var obj = DV.c.period.objects,
-						//a = [];
-					//for (var i = 0; i < obj.length; i++) {	
-					
-                    //Ext.Array.each(DHIS.chart.state.state.conf.periods, function(r) {
-						//a.push(r + '=true')
-                    //});
-                    //return (isFilter && a.length > 1) ? a.slice(0,1) : a;
-                },
-                //getUrl: function(isFilter) {
-					//var obj = DV.c.period.objects,
-						//a = [];
-                    //for (var i = 0; i < obj.length; i++) {
-						//a.push('periodIds=' + obj[i].id);
-					//}
-                    //return (isFilter && a.length > 1) ? a.slice(0,1) : a;
-                //},
+					return a;
+				},
                 getIds: function() {
 					var obj = DV.c.period.objects,
 						a = [];
@@ -3171,6 +3163,7 @@ Ext.onReady( function() {
 															{
 																xtype: 'checkbox',
 																paramName: 'thisYear',
+																number: 1,
 																boxLabel: DV.i18n.this_year
 															},
 															{
