@@ -106,14 +106,15 @@ DV.conf = {
             path_lib: '../../dhis-web-commons/javascripts/',
             initialize: 'initialize.action',
             redirect: 'redirect.action',
-            data_get: 'getAggregatedValues.action',
+            //data_get: 'getAggregatedValues.action',
+            data_get: 'chartValues.json',
             indicator_get: 'getIndicatorsMinified.action',
             indicatorgroup_get: 'getIndicatorGroupsMinified.action',
             dataelement_get: 'getDataElementsMinified.action',
             dataelementgroup_get: 'getDataElementGroupsMinified.action',
             dataelement_get: 'getDataElementsMinified.action',
             dataset_get: 'getDataSetsMinified.action',
-            organisationunitgroupset_get: 'getOrganisationUnitGroupSets.action',
+            organisationunitgroupset_get: 'getOrganisationUnitGroupSetsMinified.action',
             organisationunitchildren_get: 'getOrganisationUnitChildren.action',
             favorite_addorupdate: 'addOrUpdateChart.action',
             favorite_addorupdatesystem: 'addOrUpdateSystemChart.action',
@@ -241,6 +242,30 @@ DV.conf = {
 		}
 	}
 };
+    
+DV.cmp = {
+	region: {},
+	charttype: [],
+	settings: {},
+	dimension: {
+		indicator: {},
+		dataelement: {},
+		dataset: {},
+		period: {
+			checkbox: []
+		},
+		organisationunit: {}
+	},
+	options: {},
+	toolbar: {
+		menuitem: {}
+	},
+	statusbar: {},
+	favorite: {
+		rename: {}
+	},
+	share: {}
+};
 
 Ext.Loader.setConfig({enabled: true});
 Ext.Loader.setPath('Ext.ux', DV.conf.finals.ajax.path_lib + 'ext-ux');
@@ -261,30 +286,6 @@ Ext.onReady( function() {
         
         DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
         DV.exe.execute(DV.init.cmd);
-    };
-    
-    DV.cmp = {
-        region: {},
-        charttype: [],
-        settings: {},
-        dimension: {
-            indicator: {},
-            dataelement: {},
-            dataset: {},
-            period: {
-				checkbox: []
-			},
-            organisationunit: {}
-        },
-        options: {},
-        toolbar: {
-            menuitem: {}
-        },
-        statusbar: {},
-        favorite: {
-            rename: {}
-        },
-        share: {}
     };
     
     DV.util = {
@@ -571,13 +572,30 @@ Ext.onReady( function() {
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
                 getUrl: function(isFilter) {
-					var obj = DV.c.period.objects,
-						a = [];
-                    for (var i = 0; i < obj.length; i++) {
-						a.push('periodIds=' + obj[i].id);
+					var a = [];
+					for (var r in DV.c.period.rp) {
+						if (DV.c.period.rp[r]) {
+							a.push(r + '=true');
+						}
 					}
-                    return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+					return 
+					//var obj = DV.c.period.objects,
+						//a = [];
+					//for (var i = 0; i < obj.length; i++) {	
+					
+                    //Ext.Array.each(DHIS.chart.state.state.conf.periods, function(r) {
+						//a.push(r + '=true')
+                    //});
+                    //return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
+                //getUrl: function(isFilter) {
+					//var obj = DV.c.period.objects,
+						//a = [];
+                    //for (var i = 0; i < obj.length; i++) {
+						//a.push('periodIds=' + obj[i].id);
+					//}
+                    //return (isFilter && a.length > 1) ? a.slice(0,1) : a;
+                //},
                 getIds: function() {
 					var obj = DV.c.period.objects,
 						a = [];
@@ -1358,13 +1376,11 @@ Ext.onReady( function() {
                         root: 'indicators'
                     }
                 },
-                storage: {},
                 listeners: {
                     load: function(s) {
 						s.each( function(r) {
 							r.data.name = DV.conf.util.jsonEncode(r.data.name);
 						});
-                        DV.util.store.addToStorage(s);
                         DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
                     }
                 }
@@ -1385,13 +1401,11 @@ Ext.onReady( function() {
                         root: 'dataElements'
                     }
                 },
-                storage: {},
                 listeners: {
                     load: function(s) {
 						s.each( function(r) {
 							r.data.name = DV.conf.util.jsonEncode(r.data.name);
 						});
-                        DV.util.store.addToStorage(s);
                         DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
                     }
                 }
@@ -1412,7 +1426,6 @@ Ext.onReady( function() {
                         root: 'dataSets'
                     }
                 },
-                storage: {},
                 isloaded: false,
                 listeners: {
                     load: function(s) {
@@ -1420,7 +1433,6 @@ Ext.onReady( function() {
 						s.each( function(r) {
 							r.data.name = DV.conf.util.jsonEncode(r.data.name);
 						});
-                        DV.util.store.addToStorage(s);
                         DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
                     }
                 }
@@ -1649,9 +1661,9 @@ Ext.onReady( function() {
 			DV.c.category.dimension = DV.conf.finals.chart.category;
 			DV.c.filter.dimension = DV.conf.finals.chart.filter;
 			
-			DV.c.series.names = DV.util.dimension[DV.c.dimension.series].getNames(true);
-			DV.c.category.names = DV.util.dimension[DV.c.dimension.category].getNames(true);
-			DV.c.filter.names = DV.util.dimension[DV.c.dimension.filter].getNames(true, true);
+			//DV.c.series.names = DV.util.dimension[DV.c.dimension.series].getNames(true);
+			//DV.c.category.names = DV.util.dimension[DV.c.dimension.category].getNames(true);
+			//DV.c.filter.names = DV.util.dimension[DV.c.dimension.filter].getNames(true, true);
 			
 			DV.c.series.url = DV.util.dimension[DV.c.dimension.series].getUrl();
 			DV.c.category.url = DV.util.dimension[DV.c.dimension.category].getUrl();
@@ -1972,7 +1984,7 @@ Ext.onReady( function() {
 						return;
 					}
 					
-                    Ext.Array.each(DV.value.values, function(item) {						
+                    Ext.Array.each(DV.value.values, function(item) {
                         item[DV.conf.finals.dimension.data.value] = DV.store[item.type].available.storage[item.dataid].name;
                         item[DV.conf.finals.dimension.period.value] = DV.util.dimension.period.getNameById(item.periodid);
                         item[DV.conf.finals.dimension.organisationunit.value] = DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitid);
