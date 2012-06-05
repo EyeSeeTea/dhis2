@@ -83,12 +83,6 @@ DV.conf = {
 						organisationunitchildren: []							
 					}
 				};
-				for (var relative in r.p) {
-					obj.system.periods[relative] = [];
-					for (var i = 0; i < r.p[relative].length; i++) {
-						obj.system.periods[relative].push({id: r.p[relative][i][0], name: DV.conf.util.jsonEncode(r.p[relative][i][1])});
-					}
-				}
 				for (var i = 0; i < r.user.ouc.length; i++) {
 					obj.user.organisationunitchildren.push({id: r.user.ouc[i][0], name: DV.conf.util.jsonEncode(r.user.ouc[i][1])});
 				}
@@ -670,27 +664,11 @@ Ext.onReady( function() {
                 getUrl: function(isFilter) {
 					var ou = DV.c.organisationunit,
 						a = [];
-					if (DV.c.userorganisationunit || DV.c.userorganisationunitchildren) {
-						if (DV.c.userorganisationunit) {
-							a.push('organisationUnitIds=' + DV.init.user.organisationunit.id);
-						}
-						if (DV.c.userorganisationunitchildren) {
-							var c = DV.init.user.organisationunitchildren;
-							for (var i = 0; i < c.length; i++) {
-								a.push('organisationUnitIds=' + c[i].id);
-							}
-						}
+					for (var i = 0; i < ou.objects.length; i++) {
+						a.push('organisationUnitIds=' + ou.objects[i].id);
 					}
-					else {
-						for (var i = 0; i < ou.objects.length; i++) {
-							a.push('organisationUnitIds=' + ou.objects[i].id);
-						}
-						if ((isFilter || ou.groupsetid) && a.length > 1) {
-							a = a.slice(0,1);
-						}
-					}
-					if (ou.groupsetid) {
-						a.push('organisationUnitGroupSetId=' + ou.groupsetid);
+					if (isFilter && a.length > 1) {
+						a = a.slice(0,1);
 					}
 					return a;
                 },
@@ -1241,26 +1219,21 @@ Ext.onReady( function() {
 			}
 		},
         value: {
-            jsonfy: function(r) {
-                r = Ext.JSON.decode(r.responseText),
-                values = [];
-                for (var i = 0; i < r.length; i++) {
-					var t = r[i][1];
+            jsonfy: function(values) {
+                var a = [];
+                for (var i = 0; i < values.length; i++) {
                     var v = {
-						value: r[i][0],
-						type: t === 'in' ? DV.conf.finals.dimension.indicator.value :
-							  t === 'de' ? DV.conf.finals.dimension.dataelement.value :
-							  t === 'ds' ? DV.conf.finals.dimension.dataset.value : t,
-						dataid: r[i][2],
-						periodid: r[i][3],
-						organisationunitid: r[i][4]
+						value: parseFloat(values[i][0]),
+						data: values[i][1],
+						period: values[i][2],
+						organisationunit: values[i][3]
 					};
-					if (DV.util.variable.isNotEmpty(r[i][5])) {
-						v.organisationunitgroupid = r[i][5];
-					}
-					values.push(v);					
+					//if (DV.util.variable.isNotEmpty(r[i][5])) {
+						//v.organisationunitgroupid = r[i][5];
+					//}
+					a.push(v);					
                 }
-                return values;
+                return a;
             }
         },
         crud: {
@@ -1972,23 +1945,28 @@ Ext.onReady( function() {
                 params: {periodIsFilter: (DV.c.dimension.filter === DV.conf.finals.dimension.period.value)},
                 disableCaching: false,
                 success: function(r) {
-                    DV.value.values = DV.util.value.jsonfy(r);
+					r = Ext.JSON.decode(r.responseText);
+                    DV.value.values = DV.util.value.jsonfy(r.v);
                     if (!DV.state.validation.value()) {
 						return;
 					}
 					
-                    Ext.Array.each(DV.value.values, function(item) {
-                        item[DV.conf.finals.dimension.data.value] = DV.store[item.type].available.storage[item.dataid].name;
-                        item[DV.conf.finals.dimension.period.value] = DV.util.dimension.period.getNameById(item.periodid);
-                        item[DV.conf.finals.dimension.organisationunit.value] = DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitid);
+					DV.c.data.names = r.d;
+					DV.c.period.names = r.p;
+					DV.c.organisationunit.names = r.o;
+					
+                    //Ext.Array.each(DV.value.values, function(item) {
+                        //item[DV.conf.finals.dimension.data.value] = DV.store[item.type].available.storage[item.dataid].name;
+                        //item[DV.conf.finals.dimension.period.value] = DV.util.dimension.period.getNameById(item.periodid);
+                        //item[DV.conf.finals.dimension.organisationunit.value] = DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitid);
                         
-                        if (item.organisationunitgroupid) {
-							item[DV.conf.finals.dimension.organisationunit.value] = DV.util.dimension.organisationunit.getGroupNameByGroupId(item.organisationunitgroupid);
-							item.organisationunitid = item.organisationunitgroupid;
-						}
+                        //if (item.organisationunitgroupid) {
+							//item[DV.conf.finals.dimension.organisationunit.value] = DV.util.dimension.organisationunit.getGroupNameByGroupId(item.organisationunitgroupid);
+							//item.organisationunitid = item.organisationunitgroupid;
+						//}
 						
-                        item.value = parseFloat(item.value);
-                    });
+                        //item.value = parseFloat(item.value);
+                    //});
                     
                     if (exe) {
                         DV.chart.getData(true);
