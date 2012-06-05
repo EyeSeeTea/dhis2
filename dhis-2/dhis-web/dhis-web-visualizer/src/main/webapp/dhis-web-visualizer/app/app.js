@@ -1547,25 +1547,25 @@ Ext.onReady( function() {
                         
                         if (f.indicators) {
 							for (var i = 0; i < f.indicators.length; i++) {
-								DV.c.indicator.objects.push({id: f.indicators[i].internalId, name: DV.conf.util.jsonEncode(f.indicators[i].shortName)});
+								DV.c.indicator.objects.push({id: f.indicators[i].id, name: DV.conf.util.jsonEncode(f.indicators[i].shortName)});
 							}
 						}
 						
 						if (f.dataElements) {
 							for (var i = 0; i < f.dataElements.length; i++) {
-								DV.c.dataelement.objects.push({id: f.dataElements[i].internalId, name: DV.conf.util.jsonEncode(f.dataElements[i].shortName)});
+								DV.c.dataelement.objects.push({id: f.dataElements[i].id, name: DV.conf.util.jsonEncode(f.dataElements[i].shortName)});
 							}
 						}
 						if (f.dataSets) {
 							for (var i = 0; i < f.dataSets.length; i++) {
-								DV.c.dataset.objects.push({id: f.dataSets[i].internalId, name: DV.conf.util.jsonEncode(f.dataSets[i].shortName)});
+								DV.c.dataset.objects.push({id: f.dataSets[i].id, name: DV.conf.util.jsonEncode(f.dataSets[i].shortName)});
 							}
 						}						
 						DV.c.period.rp = f.relativePeriods;
 						for (var i = 0; i < f.organisationUnits.length; i++) {
-							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].internalId, name: DV.conf.util.jsonEncode(f.organisationUnits[i].shortName)});
+							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].id, name: DV.conf.util.jsonEncode(f.organisationUnits[i].shortName)});
 						}
-						DV.c.organisationunit.groupsetid = f.organisationUnitGroupSet ? f.organisationUnitGroupSet.internalId : null;
+						DV.c.organisationunit.groupsetid = f.organisationUnitGroupSet ? f.organisationUnitGroupSet.id : null;
 						
                         DV.c.hidesubtitle = f.hideSubtitle;
                         DV.c.hidelegend = f.hideLegend;
