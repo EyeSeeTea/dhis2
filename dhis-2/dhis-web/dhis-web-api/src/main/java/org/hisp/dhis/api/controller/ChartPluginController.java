@@ -115,7 +115,7 @@ public class ChartPluginController
         @RequestParam( required = false ) Set<String> dataSetIds,
         @RequestParam Set<String> organisationUnitIds,
         @RequestParam( required = false ) boolean orgUnitIsParent,
-        @RequestParam( required = false ) Integer organisationUnitGroupSetId,
+        @RequestParam( required = false ) String organisationUnitGroupSetId,
         @RequestParam( required = false ) boolean userOrganisationUnit,
         @RequestParam( required = false ) boolean userOrganisationUnitChildren,
         @RequestParam( required = false ) boolean periodIsFilter,

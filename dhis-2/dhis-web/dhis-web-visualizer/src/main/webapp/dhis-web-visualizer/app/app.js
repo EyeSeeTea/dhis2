@@ -101,12 +101,13 @@ DV.conf = {
             initialize: 'initialize.action',
             redirect: 'redirect.action',
             data_get: 'chartValues.json',
-            indicator_get: 'getIndicatorsMinified.action',
-            indicatorgroup_get: 'getIndicatorGroupsMinified.action',
-            dataelement_get: 'getDataElementsMinified.action',
-            dataelementgroup_get: 'getDataElementGroupsMinified.action',
-            dataelement_get: 'getDataElementsMinified.action',
-            dataset_get: 'getDataSetsMinified.action',
+            indicator_get: 'indicatorGroups/',
+            indicator_getall: 'indicators.json?paging=false&links=false',
+            indicatorgroup_get: 'indicatorGroups.json?paging=false&links=false',
+            dataelement_get: 'dataElementGroups/',
+            dataelement_getall: 'dataelements.json?paging=false&links=false',
+            dataelementgroup_get: 'dataElementGroups.json?paging=false&links=false',
+            dataset_get: 'dataSets.json?paging=false&links=false',
             organisationunitgroupset_get: 'getOrganisationUnitGroupSetsMinified.action',
             organisationunitchildren_get: 'getOrganisationUnitChildren.action',
             favorite_addorupdate: 'addOrUpdateChart.action',
@@ -1334,7 +1335,7 @@ Ext.onReady( function() {
                 fields: ['id', 'name'],
                 proxy: {
                     type: 'ajax',
-                    url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.indicator_get,
+                    url: '',
                     reader: {
                         type: 'json',
                         root: 'indicators'
@@ -1361,7 +1362,7 @@ Ext.onReady( function() {
                 fields: ['id', 'name'],
                 proxy: {
                     type: 'ajax',
-                    url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.dataelement_get,
+                    url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.dataelement_get,
                     reader: {
                         type: 'json',
                         root: 'dataElements'
@@ -1388,7 +1389,7 @@ Ext.onReady( function() {
                 fields: ['id', 'name'],
                 proxy: {
                     type: 'ajax',
-                    url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.dataset_get,
+                    url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.dataset_get,
                     reader: {
                         type: 'json',
                         root: 'dataSets'
@@ -1404,6 +1405,7 @@ Ext.onReady( function() {
 						});
 						DV.util.store.addToStorage(s);
                         DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
+						s.sort('name', 'ASC');
                     }
                 }
             }),
@@ -1945,10 +1947,19 @@ Ext.onReady( function() {
                 baseurl = Ext.String.urlAppend(baseurl, item);
             });
             
+            params = {
+				periodIsFilter: (DV.c.dimension.filter === DV.conf.finals.dimension.period.value),
+				userOrganisationUnit: DV.c.userorganisationunit,
+				userOrganisationUnitChildren: DV.c.userorganisationunitchildren
+			};
+			if (DV.c.organisationunit.groupsetid) {
+				params.organisationUnitGroupSetId = DV.c.organisationunit.groupsetid;
+			}
+			
             Ext.Ajax.request({
                 url: baseurl,
                 method: 'GET',
-                params: {periodIsFilter: (DV.c.dimension.filter === DV.conf.finals.dimension.period.value)},
+                params: params,
                 disableCaching: false,
                 success: function(r) {
 					r = Ext.JSON.decode(r.responseText);
@@ -1960,19 +1971,6 @@ Ext.onReady( function() {
 					DV.c.data.names = r.d;
 					DV.c.period.names = r.p;
 					DV.c.organisationunit.names = r.o;
-					
-                    //Ext.Array.each(DV.value.values, function(item) {
-                        //item[DV.conf.finals.dimension.data.value] = DV.store[item.type].available.storage[item.dataid].name;
-                        //item[DV.conf.finals.dimension.period.value] = DV.util.dimension.period.getNameById(item.periodid);
-                        //item[DV.conf.finals.dimension.organisationunit.value] = DV.cmp.dimension.organisationunit.treepanel.findNameById(item.organisationunitid);
-                        
-                        //if (item.organisationunitgroupid) {
-							//item[DV.conf.finals.dimension.organisationunit.value] = DV.util.dimension.organisationunit.getGroupNameByGroupId(item.organisationunitgroupid);
-							//item.organisationunitid = item.organisationunitgroupid;
-						//}
-						
-                        //item.value = parseFloat(item.value);
-                    //});
                     
                     if (exe) {
                         DV.chart.getData(true);
@@ -2590,7 +2588,7 @@ Ext.onReady( function() {
 													fields: ['id', 'name', 'index'],
 													proxy: {
 														type: 'ajax',
-														url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.indicatorgroup_get,
+														url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicatorgroup_get,
 														reader: {
 															type: 'json',
 															root: 'indicatorGroups'
@@ -2599,7 +2597,10 @@ Ext.onReady( function() {
 													listeners: {
 														load: function(s) {
 															s.add({id: 0, name: DV.i18n.all_indicator_groups, index: -1});
-															s.sort('index', 'ASC');
+															s.sort([																
+																{ property: 'index', direction: 'ASC' },
+																{ property: 'name', direction: 'ASC' }
+															]);
 														}
 													}
 												}),
@@ -2613,7 +2614,14 @@ Ext.onReady( function() {
 															DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
 														}
 														else {
-															store.load({params: {id: cb.getValue()}});
+															if (cb.getValue() === 0) {
+																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_getall;
+																store.load();
+															}
+															else {
+																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
+																store.load();
+															}
 														}
 													}
 												}
@@ -2751,7 +2759,7 @@ Ext.onReady( function() {
 													fields: ['id', 'name', 'index'],
 													proxy: {
 														type: 'ajax',
-														url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.dataelementgroup_get,
+														url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.dataelementgroup_get,
 														reader: {
 															type: 'json',
 															root: 'dataElementGroups'
@@ -2760,7 +2768,10 @@ Ext.onReady( function() {
 													listeners: {
 														load: function(s) {
 															s.add({id: 0, name: '[ All data element groups ]', index: -1});
-															s.sort('index', 'ASC');
+															s.sort([																
+																{ property: 'index', direction: 'ASC' },
+																{ property: 'name', direction: 'ASC' }
+															]);
 														}
 													}
 												}),
@@ -2774,7 +2785,14 @@ Ext.onReady( function() {
 															DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
 														}
 														else {
-															store.load({params: {id: cb.getValue()}});
+															if (cb.getValue() === 0) {
+																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.dataelement_getall;
+																store.load();
+															}
+															else {
+																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.dataelement_get + cb.getValue() + '.json';
+																store.load();
+															}
 														}
 													}
 												}
