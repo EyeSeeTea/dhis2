@@ -37,6 +37,8 @@ public interface IncomingSmsStore
     static final String ID = IncomingSmsStore.class.getName();
     
     int save( IncomingSms incomingSms );
+    
+    void update ( IncomingSms incomingSms );
 
     IncomingSms get( int id );
 

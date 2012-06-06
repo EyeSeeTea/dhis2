@@ -1,4 +1,4 @@
-package org.hisp.dhis.interceptor;
+package org.hisp.dhis.mobile.action.incoming;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,56 +27,63 @@ package org.hisp.dhis.interceptor;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.user.UserSettingService.KEY_STYLE;
-import static org.hisp.dhis.user.UserSettingService.KEY_STYLE_DIRECTORY;
+import org.hisp.dhis.sms.incoming.IncomingSms;
+import org.hisp.dhis.sms.incoming.IncomingSmsService;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.hisp.dhis.setting.StyleManager;
-
-import com.opensymphony.xwork2.ActionInvocation;
-import com.opensymphony.xwork2.interceptor.Interceptor;
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author mortenoh
- */
-public class UserSettingInterceptor
-    implements Interceptor
+* @author Nguyen Kim Lai
+* @version $Id$
+*/
+
+public class UpdateReceiveSMSAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private StyleManager styleManager;
+    private IncomingSmsService incomingSmsService;
 
-    public void setStyleManager( StyleManager styleManager )
+    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
     {
-        this.styleManager = styleManager;
+        this.incomingSmsService = incomingSmsService;
     }
-
+    
     // -------------------------------------------------------------------------
-    // UserSettingInterceptor implementation
+    // Input
     // -------------------------------------------------------------------------
 
-    public void destroy()
+    private Integer id;
+
+    public void setId( Integer id )
     {
+        this.id = id;
+    }
+    
+    private String text;
+    
+    public void setText( String text )
+    {
+        this.text = text;
     }
 
-    public void init()
-    {
-    }
-
-    public String intercept( ActionInvocation invocation )
+    @Override
+    public String execute()
         throws Exception
     {
-        Map<String, Object> map = new HashMap<String, Object>();
-
-        map.put( KEY_STYLE, styleManager.getCurrentStyle() );
-        map.put( KEY_STYLE_DIRECTORY, styleManager.getCurrentStyleDirectory() );
-
-        invocation.getStack().push( map );
-
-        return invocation.invoke();
+        System.out.println("welcome to update sMS function!!!!");
+        System.out.println("id: " + id);
+        System.out.println("text: " + text);
+        
+        IncomingSms incomingSms = incomingSmsService.findBy( id );
+        
+        incomingSms.setText( text );
+        
+        incomingSmsService.update( incomingSms );
+        
+        return SUCCESS;
     }
+
 }
