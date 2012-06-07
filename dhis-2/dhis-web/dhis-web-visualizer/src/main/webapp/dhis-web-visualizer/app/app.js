@@ -4187,42 +4187,45 @@ Ext.onReady( function() {
 												}
 											}
 										],
-										bbar: [
-											'->',
-											{
-												text: DV.i18n.share,
-												disabled: true,
-												xable: function() {
-													if (DV.cmp.share.textarea.getValue()) {
-														this.enable();
-													}
-													else {
-														this.disable();
-													}
-												},
-												handler: function() {
-													if (DV.cmp.share.textarea.getValue() && DV.c.currentFavorite) {
-														Ext.Ajax.request({
-															url: DV.conf.finals.ajax.path_api + 'interpretations/chart/' + DV.c.currentFavorite.id,
-															method: 'POST',
-															params: DV.cmp.share.textarea.getValue(),
-															headers: {'Content-Type': 'text/html'},
-															success: function() {
-																DV.cmp.share.textarea.reset();
-																DV.cmp.share.button.disable();
-																DV.cmp.share.window.hide();
-																DV.util.notification.interpretation(DV.i18n.interpretation_was_shared + '.');
-															}
-														});
-													}
-												},
-												listeners: {
-													added: function() {
-														DV.cmp.share.button = this;
+										bbar: {
+											cls: 'dv-toolbar-2',
+											items: [
+												'->',
+												{
+													text: DV.i18n.share,
+													disabled: true,
+													xable: function() {
+														if (DV.cmp.share.textarea.getValue()) {
+															this.enable();
+														}
+														else {
+															this.disable();
+														}
+													},
+													handler: function() {
+														if (DV.cmp.share.textarea.getValue() && DV.c.currentFavorite) {
+															Ext.Ajax.request({
+																url: DV.conf.finals.ajax.path_api + 'interpretations/chart/' + DV.c.currentFavorite.id,
+																method: 'POST',
+																params: DV.cmp.share.textarea.getValue(),
+																headers: {'Content-Type': 'text/html'},
+																success: function() {
+																	DV.cmp.share.textarea.reset();
+																	DV.cmp.share.button.disable();
+																	DV.cmp.share.window.hide();
+																	DV.util.notification.interpretation(DV.i18n.interpretation_was_shared + '.');
+																}
+															});
+														}
+													},
+													listeners: {
+														added: function() {
+															DV.cmp.share.button = this;
+														}
 													}
 												}
-											}
-										]
+											]
+										}
 									}).show();
 								}
 							},
