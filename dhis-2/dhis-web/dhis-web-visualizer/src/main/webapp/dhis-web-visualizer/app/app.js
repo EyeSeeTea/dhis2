@@ -2351,8 +2351,9 @@ Ext.onReady( function() {
                 items: [
                     {
                         xtype: 'toolbar',
+                        cls: 'dv-toolbar-charttype',
                         height: 45,
-                        style: 'padding-top:1px; border-style:none',
+                        style: 'padding-top:0px; border-style:none',
                         defaults: {
                             height: 40,
                             toggleGroup: 'chartsettings',
@@ -4065,7 +4066,7 @@ Ext.onReady( function() {
                                             {
 												xtype: 'menuseparator',
 												height: 1,
-												style: 'margin:1px 0; border-color:#ccc'
+												style: 'margin:1px 0; border-color:#dadada'
 											},
                                             {
                                                 xtype: 'grid',
