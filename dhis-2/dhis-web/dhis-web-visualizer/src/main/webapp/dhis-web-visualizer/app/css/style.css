@@ -524,18 +524,17 @@ body {
 /* Menu item icon */
 .dv-menu-item-png {
     background-image:url('../images/png.png');
+    padding-left: 18px;
 }
 
 .dv-menu-item-pdf {
     background-image:url('../images/pdf.png');
-}
-
-.dv-menu-item-datatable {
-    background-image:url('../images/datatable.png');
+    padding-left: 18px;
 }
 
 .dv-menu-item-edit {
     background-image:url('../images/edit.png');
+    padding-left: 18px;
 }
 
 /* Textfield */
@@ -577,7 +576,7 @@ body {
 
 /* DV menu grid icon/text position aligned with menuitem */
 .dv-menugrid .x-grid-cell-inner {
-    padding: 4px 3px;
+    padding: 4px 3px 4px 5px;
     font-size: 10px;
     color: #444;
     line-height: 16px;
