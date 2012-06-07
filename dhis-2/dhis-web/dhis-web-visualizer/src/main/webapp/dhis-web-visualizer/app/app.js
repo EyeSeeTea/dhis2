@@ -3695,10 +3695,11 @@ Ext.onReady( function() {
                                                                                     afterrender: function(b) {
                                                                                         this.addCls('dv-menu-togglegroup');
                                                                                         this.menu = Ext.create('Ext.menu.Menu', {
-                                                                                            shadowOffset: 1,
+																							margin: '2 0 0 0',
+																							shadow: false,
                                                                                             showSeparator: false,
                                                                                             width: 109,
-                                                                                            height: 70,
+                                                                                            height: 67,
                                                                                             items: [
                                                                                                 {
                                                                                                     xtype: 'radiogroup',
