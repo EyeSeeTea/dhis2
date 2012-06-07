@@ -212,29 +212,29 @@ body {
     background-image: url('../images/checkbox.gif');
 }
 
-/* Ext toolbar */
-.dv-toolbar {
+/* DV toolbar */
+.dv-toolbar-1 {
 	padding: 0;
 }
 
 /* DV toolbar checkbox */
-.dv-toolbar .x-form-cb-wrap {
+.dv-toolbar-1 .x-form-cb-wrap {
     padding-top: 5px;
 }
-.dv-toolbar .x-form-cb-label-after {
+.dv-toolbar-1 .x-form-cb-label-after {
     margin-left: 3px;
     color: #333;
 }
 
 /* Button dv-toolbar font size */
-.dv-toolbar * {
+.dv-toolbar-1 * {
     font-size: 11px;
 }
-.dv-toolbar .dv-toolbar-btn-1 * {
+.dv-toolbar-1 .dv-toolbar-btn-1 * {
     color: #111;
     font-weight: bold;
 }
-.dv-toolbar .dv-toolbar-btn-2 * {
+.dv-toolbar-1 .dv-toolbar-btn-2 * {
     color: #444;
 }
 
@@ -257,9 +257,9 @@ body {
     border-radius: 0px;
     border: 1px solid transparent;
 }
-.dv-toolbar-charttype .x-btn-default-toolbar-small,
-.dv-toolbar-charttype .x-btn-default-toolbar-small-over,
-.dv-toolbar-charttype .x-btn-default-toolbar-small-pressed,
+.dv-toolbar-2 .x-btn-default-toolbar-small,
+.dv-toolbar-2 .x-btn-default-toolbar-small-over,
+.dv-toolbar-2 .x-btn-default-toolbar-small-pressed,
 .dv-toolbar-multiselect-left .x-btn-default-toolbar-small,
 .dv-toolbar-multiselect-left .x-btn-default-toolbar-small-over,
 .dv-toolbar-multiselect-right .x-btn-default-toolbar-small,
@@ -272,7 +272,7 @@ body {
     background-color: #e1e1e1;
     background-image: none;
 }
-.dv-toolbar-charttype .x-btn-default-toolbar-small-over,
+.dv-toolbar-2 .x-btn-default-toolbar-small-over,
 .dv-toolbar-multiselect-left .x-btn-default-toolbar-small-over,
 .dv-toolbar-multiselect-right .x-btn-default-toolbar-small-over {
 	border-color: #ccc;
@@ -286,7 +286,7 @@ body {
     background-image: linear-gradient(top, #fbfbfb,#e9e9e9);
 }
 
-.dv-toolbar-charttype .x-btn-default-toolbar-small-pressed,
+.dv-toolbar-2 .x-btn-default-toolbar-small-pressed,
 .dv-toolbar-multiselect-left .x-btn-default-toolbar-small-pressed,
 .dv-toolbar-multiselect-right .x-btn-default-toolbar-small-pressed {
 	border-color: #aaa;
@@ -568,7 +568,7 @@ body {
 }
 .dv-radiogroup .x-form-cb-label-after {
     padding-left: 2px;
-    font-size: 11px;
+    font-size: 10px;
     color: #444;
 }
 .dv-radiogroup .x-form-radio-group {

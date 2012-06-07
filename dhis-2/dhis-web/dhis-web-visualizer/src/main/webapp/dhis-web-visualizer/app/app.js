@@ -2351,7 +2351,7 @@ Ext.onReady( function() {
                 items: [
                     {
                         xtype: 'toolbar',
-                        cls: 'dv-toolbar-charttype',
+                        cls: 'dv-toolbar-2',
                         height: 45,
                         style: 'padding-top:0px; border-style:none',
                         defaults: {
@@ -3537,7 +3537,7 @@ Ext.onReady( function() {
                 bodyStyle: 'padding-top:5px',
                 tbar: {
                     xtype: 'toolbar',
-                    cls: 'dv-toolbar',
+                    cls: 'dv-toolbar-1',
                     height: DV.conf.layout.center_tbar_height,
                     defaults: {
                         height: 30
@@ -3675,7 +3675,7 @@ Ext.onReady( function() {
                                                                     store: DV.store.favorite,
                                                                     tbar: {
                                                                         id: 'favorite_t',
-                                                                        cls: 'dv-toolbar',
+                                                                        cls: 'dv-toolbar-2',
                                                                         height: 30,
                                                                         defaults: {
                                                                             height: 24
@@ -3788,53 +3788,56 @@ Ext.onReady( function() {
                                                                                                 }
                                                                                             }
                                                                                         ],
-                                                                                        bbar: [
-																							{
-																								xtype: 'label',
-																								style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:50%',
-																								listeners: {
-																									added: function() {
-																										DV.cmp.favorite.rename.label = this;
+                                                                                        bbar: {
+																							cls: 'dv-toolbar-2',
+																							items: [
+																								{
+																									xtype: 'label',
+																									style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:50%',
+																									listeners: {
+																										added: function() {
+																											DV.cmp.favorite.rename.label = this;
+																										}
+																									}
+																								},
+																								'->',
+																								{
+																									text: DV.i18n.cancel,
+																									handler: function() {
+																										this.up('window').close();
+																									}
+																								},
+																								{
+																									text: DV.i18n.rename,
+																									disabled: true,
+																									xable: function() {
+																										var value = this.up('window').cmp.name.getValue();
+																										if (value) {
+																											if (DV.store.favorite.findExact('name', value) == -1) {
+																												this.enable();
+																												DV.cmp.favorite.rename.label.setText('');
+																												return;
+																											}
+																											else {
+																												DV.cmp.favorite.rename.label.setText(DV.i18n.name_already_in_use);
+																											}
+																										}
+																										this.disable();
+																									},
+																									handler: function() {
+																										DV.util.crud.favorite.updateName(this.up('window').cmp.name.getValue());
+																									},
+																									listeners: {
+																										afterrender: function() {
+																											this.up('window').cmp.rename = this;
+																										},
+																										change: function() {
+																											this.xable();
+																										}
 																									}
 																								}
-																							},
-																							'->',
-                                                                                            {
-                                                                                                text: DV.i18n.cancel,
-                                                                                                handler: function() {
-                                                                                                    this.up('window').close();
-                                                                                                }
-                                                                                            },
-                                                                                            {
-                                                                                                text: DV.i18n.rename,
-                                                                                                disabled: true,
-                                                                                                xable: function() {
-                                                                                                    var value = this.up('window').cmp.name.getValue();
-                                                                                                    if (value) {
-																										if (DV.store.favorite.findExact('name', value) == -1) {
-																											this.enable();
-																											DV.cmp.favorite.rename.label.setText('');
-																											return;
-																										}
-																										else {
-																											DV.cmp.favorite.rename.label.setText(DV.i18n.name_already_in_use);
-																										}
-																									}
-																									this.disable();
-                                                                                                },
-                                                                                                handler: function() {
-                                                                                                    DV.util.crud.favorite.updateName(this.up('window').cmp.name.getValue());
-                                                                                                },
-                                                                                                listeners: {
-                                                                                                    afterrender: function() {
-                                                                                                        this.up('window').cmp.rename = this;
-                                                                                                    },
-                                                                                                    change: function() {
-                                                                                                        this.xable();
-                                                                                                    }
-                                                                                                }
-                                                                                            }
-                                                                                        ],
+																							]
+																						},
                                                                                         listeners: {
                                                                                             afterrender: function() {
                                                                                                 DV.cmp.favorite.rename.window = this;
@@ -3885,25 +3888,28 @@ Ext.onReady( function() {
                                                                                                     cls: 'dv-window-confirm-list'
                                                                                                 }                                                                                                    
                                                                                             ],
-                                                                                            bbar: [
-                                                                                                {
-                                                                                                    text: DV.i18n.cancel,
-                                                                                                    handler: function() {
-                                                                                                        this.up('window').close();
-                                                                                                    }
-                                                                                                },
-                                                                                                '->',
-                                                                                                {
-                                                                                                    text: DV.i18n.delete_object,
-                                                                                                    handler: function() {
-                                                                                                        this.up('window').close();
-                                                                                                        DV.util.crud.favorite.del(function() {
-                                                                                                            DV.cmp.favorite.name.setValue('');
-                                                                                                            DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
-                                                                                                        });                                                                                                        
-                                                                                                    }
-                                                                                                }
-                                                                                            ]
+                                                                                            bbar: {
+																								cls: 'dv-toolbar-2',
+																								items: [
+																									{
+																										text: DV.i18n.cancel,
+																										handler: function() {
+																											this.up('window').close();
+																										}
+																									},
+																									'->',
+																									{
+																										text: DV.i18n.delete_object,
+																										handler: function() {
+																											this.up('window').close();
+																											DV.util.crud.favorite.del(function() {
+																												DV.cmp.favorite.name.setValue('');
+																												DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
+																											});                                                                                                        
+																										}
+																									}
+																								]
+																							}
                                                                                         });
                                                                                         w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
                                                                                         w.show();
@@ -3935,113 +3941,116 @@ Ext.onReady( function() {
                                                                     }
                                                                 }
                                                             ],
-                                                            bbar: [
-                                                                {
-                                                                    xtype: 'label',
-                                                                    style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:70%',
-                                                                    listeners: {
-                                                                        added: function() {
-                                                                            DV.cmp.favorite.label = this;
-                                                                        }
-                                                                    }
-                                                                },																
-                                                                '->',
-                                                                {
-                                                                    text: DV.i18n.save,
-                                                                    disabled: true,
-                                                                    xable: function() {
-                                                                        if (DV.c.rendered) {
-                                                                            if (DV.cmp.favorite.name.getValue()) {
-                                                                                var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
-                                                                                if (index != -1) {
-                                                                                    if (DV.store.favorite.getAt(index).data.userId || DV.init.user.isadmin) {
-                                                                                        this.enable();
-                                                                                        DV.cmp.favorite.label.setText('');
-                                                                                        return true;
-                                                                                    }
-                                                                                    else {
-                                                                                        DV.cmp.favorite.label.setText(DV.i18n.system_favorite_overwrite_not_allowed);
-                                                                                    }
-                                                                                }
-                                                                                else {
-                                                                                    this.enable();
-                                                                                    DV.cmp.favorite.label.setText('');
-                                                                                    return true;
-                                                                                }
-                                                                            }
-                                                                            else {
-                                                                                DV.cmp.favorite.label.setText('');
-                                                                            }
-                                                                        }
-                                                                        else {
-                                                                            if (DV.cmp.favorite.name.getValue()) {
-                                                                                DV.cmp.favorite.label.setText(DV.i18n.example_chart_cannot_be_saved);
-                                                                            }
-                                                                            else {
-                                                                                DV.cmp.favorite.label.setText('');
-                                                                            }																				
-                                                                        }
-                                                                        this.disable();
-                                                                        return false;
-                                                                    },
-                                                                    handler: function() {
-                                                                        if (this.xable()) {
-                                                                            var value = DV.cmp.favorite.name.getValue();
-                                                                            if (DV.store.favorite.findExact('name', value) != -1) {
-                                                                                var item = value.length > 40 ? (value.substr(0,40) + '...') : value;
-                                                                                var w = Ext.create('Ext.window.Window', {
-                                                                                    title: DV.i18n.save_favorite,
-                                                                                    width: DV.conf.layout.window_confirm_width,
-                                                                                    bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
-                                                                                    modal: true,
-                                                                                    items: [
-                                                                                        {
-                                                                                            html: DV.i18n.are_you_sure,
-                                                                                            bodyStyle: 'border-style:none'
-                                                                                        },
-                                                                                        {
-                                                                                            html: '<br/>' + item,
-                                                                                            cls: 'dv-window-confirm-list'
-                                                                                        }
-                                                                                    ],
-                                                                                    bbar: [
-                                                                                        {
-                                                                                            text: DV.i18n.cancel,
-                                                                                            handler: function() {
-                                                                                                this.up('window').close();
-                                                                                            }
-                                                                                        },
-                                                                                        '->',
-                                                                                        {
-                                                                                            text: DV.i18n.overwrite,
-                                                                                            handler: function() {
-                                                                                                this.up('window').close();
-                                                                                                DV.util.crud.favorite.update(function() {
-                                                                                                    DV.cmp.favorite.window.resetForm();
-                                                                                                });
-                                                                                                
-                                                                                            }
-                                                                                        }
-                                                                                    ]
-                                                                                });
-                                                                                w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
-                                                                                w.show();
-                                                                            }
-                                                                            else {
-                                                                                DV.util.crud.favorite.create(function() {
-                                                                                    DV.cmp.favorite.window.resetForm();
-                                                                                    DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
-                                                                                });
-                                                                            }                                                                                    
-                                                                        }
-                                                                    },
-                                                                    listeners: {
-                                                                        added: function() {
-                                                                            DV.cmp.favorite.save = this;
-                                                                        }
-                                                                    }
-                                                                }
-                                                            ],
+                                                            bbar: {
+																cls: 'dv-toolbar-2',
+																items: [
+																	{
+																		xtype: 'label',
+																		style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:70%',
+																		listeners: {
+																			added: function() {
+																				DV.cmp.favorite.label = this;
+																			}
+																		}
+																	},																
+																	'->',
+																	{
+																		text: DV.i18n.save,
+																		disabled: true,
+																		xable: function() {
+																			if (DV.c.rendered) {
+																				if (DV.cmp.favorite.name.getValue()) {
+																					var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
+																					if (index != -1) {
+																						if (DV.store.favorite.getAt(index).data.userId || DV.init.user.isadmin) {
+																							this.enable();
+																							DV.cmp.favorite.label.setText('');
+																							return true;
+																						}
+																						else {
+																							DV.cmp.favorite.label.setText(DV.i18n.system_favorite_overwrite_not_allowed);
+																						}
+																					}
+																					else {
+																						this.enable();
+																						DV.cmp.favorite.label.setText('');
+																						return true;
+																					}
+																				}
+																				else {
+																					DV.cmp.favorite.label.setText('');
+																				}
+																			}
+																			else {
+																				if (DV.cmp.favorite.name.getValue()) {
+																					DV.cmp.favorite.label.setText(DV.i18n.example_chart_cannot_be_saved);
+																				}
+																				else {
+																					DV.cmp.favorite.label.setText('');
+																				}																				
+																			}
+																			this.disable();
+																			return false;
+																		},
+																		handler: function() {
+																			if (this.xable()) {
+																				var value = DV.cmp.favorite.name.getValue();
+																				if (DV.store.favorite.findExact('name', value) != -1) {
+																					var item = value.length > 40 ? (value.substr(0,40) + '...') : value;
+																					var w = Ext.create('Ext.window.Window', {
+																						title: DV.i18n.save_favorite,
+																						width: DV.conf.layout.window_confirm_width,
+																						bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
+																						modal: true,
+																						items: [
+																							{
+																								html: DV.i18n.are_you_sure,
+																								bodyStyle: 'border-style:none'
+																							},
+																							{
+																								html: '<br/>' + item,
+																								cls: 'dv-window-confirm-list'
+																							}
+																						],
+																						bbar: [
+																							{
+																								text: DV.i18n.cancel,
+																								handler: function() {
+																									this.up('window').close();
+																								}
+																							},
+																							'->',
+																							{
+																								text: DV.i18n.overwrite,
+																								handler: function() {
+																									this.up('window').close();
+																									DV.util.crud.favorite.update(function() {
+																										DV.cmp.favorite.window.resetForm();
+																									});
+																									
+																								}
+																							}
+																						]
+																					});
+																					w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
+																					w.show();
+																				}
+																				else {
+																					DV.util.crud.favorite.create(function() {
+																						DV.cmp.favorite.window.resetForm();
+																						DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
+																					});
+																				}                                                                                    
+																			}
+																		},
+																		listeners: {
+																			added: function() {
+																				DV.cmp.favorite.save = this;
+																			}
+																		}
+																	}
+																]
+															},
                                                             listeners: {
                                                                 show: function() {                                               
                                                                     DV.cmp.favorite.save.xable();
