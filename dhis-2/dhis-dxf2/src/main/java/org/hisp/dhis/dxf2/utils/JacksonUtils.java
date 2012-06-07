@@ -34,13 +34,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.xml.ser.ToXmlGenerator;
+import org.hisp.dhis.common.view.BasicView;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.common.view.IdentifiableObjectView;
+import org.hisp.dhis.common.view.ShortNameView;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,9 +61,11 @@ public class JacksonUtils
     static
     {
         ObjectMapper[] objectMappers = new ObjectMapper[] { jsonMapper, xmlMapper };
+        DateFormat format = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssZ" );
 
         for ( ObjectMapper objectMapper : objectMappers )
         {
+            objectMapper.setDateFormat( format );
             objectMapper.setSerializationInclusion( JsonInclude.Include.NON_NULL );
             objectMapper.configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false );
             objectMapper.configure( SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false );
@@ -76,8 +81,9 @@ public class JacksonUtils
         xmlMapper.configure( ToXmlGenerator.Feature.WRITE_XML_DECLARATION, true );
 
         // register view classes
-        viewClasses.put( "default", IdentifiableObjectView.class );
-        viewClasses.put( "basic", IdentifiableObjectView.class );
+        viewClasses.put( "default", BasicView.class );
+        viewClasses.put( "basic", BasicView.class );
+        viewClasses.put( "shortName", ShortNameView.class );
         viewClasses.put( "detailed", DetailedView.class );
         viewClasses.put( "export", ExportView.class );
     }
