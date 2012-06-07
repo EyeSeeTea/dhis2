@@ -1767,8 +1767,13 @@ Ext.onReady( function() {
 					}
 				},
 				organisationunit: function(isFilter) {
-					if (isFilter && DV.c.organisationunit.objects.length > 1) {
-						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_used);
+					if (isFilter) {
+						if (DV.c.organisationunit.objects.length > 1) {
+							DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_used);
+						}
+						else if (DV.c.organisationunit.groupsetid) {
+							DV.chart.warnings.push(DV.i18n.wm_multiple_filter_groups + ' ' + DV.i18n.wm_first_filter_used);
+						}
 						DV.c.organisationunit.objects = DV.c.organisationunit.objects.slice(0,1);
 					}
 				}
