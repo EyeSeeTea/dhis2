@@ -33,11 +33,6 @@ body {
 
 /* Combobox border-radius */
 .dv-combo input {
-    -moz-border-radius: 2px 0px 0px 0px;
-    -webkit-border-radius: 2px 0px 0px 0px;
-    -o-border-radius: 2px 0px 0px 0px;
-    -ms-border-radius: 2px 0px 0px 0px;
-    -khtml-border-radius: 2px 0px 0px 0px;
     border-radius: 2px 0px 0px 0px;
 }
 
@@ -60,12 +55,7 @@ body {
 /* Fieldset border */
 .x-fieldset {
     border: 1px solid #ddd;
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;
+    border-radius: 2px;
     padding-top: 8px;
     padding-bottom: 4px;
 }
@@ -124,20 +114,10 @@ body {
 }
 
 .x-grid-row-over .x-grid-cell-first, .x-grid-row-selected .x-grid-cell-first {
-    -moz-border-radius: 2px 0 0 2px;
-    -webkit-border-radius: 2px 0 0 2px;
-    -o-border-radius: 2px 0 0 2px;
-    -ms-border-radius: 2px 0 0 2px;
-    -khtml-border-radius: 2px 0 0 2px;
     border-radius: 2px 0 0 2px;
 }
 
 .x-grid-row-over .x-grid-cell-last, .x-grid-row-selected .x-grid-cell-last {
-    -moz-border-radius: 0 2px 2px 0;
-    -webkit-border-radius: 0 2px 2px 0;
-    -o-border-radius: 0 2px 2px 0;
-    -ms-border-radius: 0 2px 2px 0;
-    -khtml-border-radius: 0 2px 2px 0;
     border-radius: 0 2px 2px 0;
 }
 
@@ -173,22 +153,19 @@ body {
 .dv-menugrid .x-grid-row-over .x-grid-cell-first {
     border: 1px solid #9d9d9d;
     border-right: 0 none;
-    -moz-border-radius: 3px 0 0 3px;
-    -webkit-border-radius: 3px 0 0 3px;
-    -o-border-radius: 3px 0 0 3px;
-    -ms-border-radius: 3px 0 0 3px;
-    -khtml-border-radius: 3px 0 0 3px;
-    border-radius: 3px 0 0 3px;
+    border-radius: 2px 0 0 2px;
 }
 .dv-menugrid .x-grid-row-over .x-grid-cell-last {
     border: 1px solid #9d9d9d;
     border-left: 0 none;
-    -moz-border-radius: 0 3px 3px 0;
-    -webkit-border-radius: 0 3px 3px 0;
-    -o-border-radius: 0 3px 3px 0;
-    -ms-border-radius: 0 3px 3px 0;
-    -khtml-border-radius: 0 3px 3px 0;
-    border-radius: 0 3px 3px 0;
+    border-radius: 0 2px 2px 0;
+}
+
+.dv-menugrid .x-grid-row-focused .x-grid-cell-inner {
+	background-color: #f1f1f1;
+}
+.dv-menugrid .x-grid-row-focused .x-grid-cell {
+	border-color: #f1f1f1;
 }
 
 /* Tree panel node height */
@@ -199,21 +176,11 @@ body {
 /* Tree panel selected row background */
 .dv-tree .x-grid-row-selected .x-grid-cell, .dv-tree .x-grid-row-selected .x-grid-rowwrap-div {
     background-color: #e0e0e0;
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
     border-radius: 2px 2px 2px 2px;
 }
 
 /* Tree panel hover row background */
 .dv-tree .x-grid-cell {
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
     border-radius: 2px 2px 2px 2px;
 }
 
@@ -297,12 +264,7 @@ body {
 
 /* Button border */
 .x-btn-default-toolbar-small, .x-btn-default-toolbar-small-over, .x-btn-default-toolbar-small-pressed {
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;
+    border-radius: 2px;
     border: 1px solid transparent;
 }
 
@@ -335,12 +297,7 @@ body {
 
 /* Tooltip */
 .x-tip {
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;
+    border-radius: 2px;
     padding: 3px 4px;
     border: 1px solid #444;
     background-color: #444;
@@ -396,30 +353,15 @@ body {
 /* Toolbar favorites */
 #favorite_t {
     border-bottom-width: 1px !important;
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;
+    border-radius: 2px;
 }    
 
 /* Multiselect dock border radius */
-.dv-toolbar-multiselect-left .x-docked-top {    
-    -o-border-top-left-radius: 2px;
-	-icab-border-top-left-radius: 2px;
-	-khtml-border-top-left-radius: 2px;
-    -moz-border-radius-topleft: 2px;
-	-webkit-border-top-left-radius: 2px;
+.dv-toolbar-multiselect-left .x-docked-top {
 	border-top-left-radius: 2px;
 }
 
-.dv-toolbar-multiselect-right .x-docked-top { 
-    -o-border-top-right-radius: 2px;
-	-icab-border-top-right-radius: 2px;
-	-khtml-border-top-right-radius: 2px;
-    -moz-border-radius-topright: 2px;
-	-webkit-border-top-right-radius: 2px;
+.dv-toolbar-multiselect-right .x-docked-top {
 	border-top-right-radius: 2px;
 }
 
@@ -455,22 +397,12 @@ body {
 /* Menu */
 .x-menu-body {
     border-color: #bbb;
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;
+    border-radius: 2px;
 }
 
 /* Treepanel contextmenu */
 #treepanel-contextmenu {
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;
+    border-radius: 2px;
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;
@@ -507,12 +439,7 @@ body {
 
 /* Chart tips */
 .dv-chart-tips, .dv-chart-tips-pie {
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;
+    border-radius: 2px;
     padding: 3px 4px 2px;
     border: 2px solid #777;
     background-color: #f1f1f1;
@@ -590,12 +517,7 @@ body {
 .dv-textfield .x-form-field, .dv-textfield-alt1 .x-form-field {  
     height: 26px;
     padding-left: 4px;
-    -moz-border-radius: 2px 2px 2px 2px;
-    -webkit-border-radius: 2px 2px 2px 2px;
-    -o-border-radius: 2px 2px 2px 2px;
-    -ms-border-radius: 2px 2px 2px 2px;
-    -khtml-border-radius: 2px 2px 2px 2px;
-    border-radius: 2px 2px 2px 2px;
+    border-radius: 2px;
     font-size: 11px;
     color: #333;
 }
@@ -669,17 +591,7 @@ body {
 	padding: 6px 5px 4px 8px;
 	border: 0 none;
 	cursor: pointer;
-    -o-border-top-left-radius: 1px;
-	-icab-border-top-left-radius: 1px;
-	-khtml-border-top-left-radius: 1px;
-    -moz-border-radius-topleft: 1px;
-	-webkit-border-top-left-radius: 1px;
 	border-top-left-radius: 1px;
-    -o-border-top-right-radius: 1px;
-	-icab-border-top-right-radius: 1px;
-	-khtml-border-top-right-radius: 1px;
-    -moz-border-radius-topright: 1px;
-	-webkit-border-top-right-radius: 1px;
 	border-top-right-radius: 1px;
 }
 .dv-accordion .x-accordion-item .x-accordion-hd { /* accordion title dock, default */
@@ -707,17 +619,7 @@ body {
 }
 
 .dv-accordion .x-accordion-item, .dv-accordion-options .x-accordion-item { /* accordion title dock outer, shared */
-    -o-border-top-left-radius: 2px;
-	-icab-border-top-left-radius: 2px;
-	-khtml-border-top-left-radius: 2px;
-    -moz-border-radius-topleft: 2px;
-	-webkit-border-top-left-radius: 2px;
 	border-top-left-radius: 2px;
-    -o-border-top-right-radius: 2px;
-	-icab-border-top-right-radius: 2px;
-	-khtml-border-top-right-radius: 2px;
-    -moz-border-radius-topright: 2px;
-	-webkit-border-top-right-radius: 2px;
 	border-top-right-radius: 2px;
 }
 .dv-accordion .x-accordion-item { /* accordion title dock outer, default */
@@ -760,4 +662,9 @@ body {
 /* DV textarea */
 .dv-textarea .x-form-field {
 	font-size: 11px;
+}
+
+/* Ext menu */
+.x-menu-item-active .x-menu-item-link {
+	border-radius: 2px;
 }

@@ -104,6 +104,24 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return StringUtils.uncapitalize( getEntitySimpleName() );
     }
 
+    // FIXME proper error handling?
+    @RequestMapping( value = "/search/{query}", method = RequestMethod.GET )
+    public String search( @PathVariable String query, @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws Exception
+    {
+        WebOptions options = new WebOptions( parameters );
+        T entity = manager.search( getEntityClass(), query );
+
+        if ( options.hasLinks() )
+        {
+            WebUtils.generateLinks( entity );
+        }
+
+        model.addAttribute( "model", entity );
+        model.addAttribute( "viewClass", "detailed" );
+
+        return StringUtils.uncapitalize( getEntitySimpleName() );
+    }
+
     //--------------------------------------------------------------------------
     // POST
     //--------------------------------------------------------------------------
@@ -166,7 +184,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( lastUpdated != null )
         {
-            entityList = new ArrayList<T>( manager.getByLastUpdated( getEntityClass(), lastUpdated ) );
+            entityList = new ArrayList<T>( manager.getByLastUpdatedSorted( getEntityClass(), lastUpdated ) );
         }
         else if ( options.hasPaging() )
         {
@@ -179,7 +197,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
         else
         {
-            entityList = new ArrayList<T>( manager.getAll( getEntityClass() ) );
+            entityList = new ArrayList<T>( manager.getAllSorted( getEntityClass() ) );
         }
 
         return entityList;

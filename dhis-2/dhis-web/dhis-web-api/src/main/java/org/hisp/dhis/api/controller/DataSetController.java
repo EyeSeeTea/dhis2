@@ -40,5 +40,4 @@ public class DataSetController
     extends AbstractCrudController<DataSet>
 {
     public static final String RESOURCE_PATH = "/dataSets";
-
 }

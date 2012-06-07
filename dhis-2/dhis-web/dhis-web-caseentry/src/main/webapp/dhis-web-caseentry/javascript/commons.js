@@ -61,7 +61,7 @@ function addAttributeOption()
 	var rowId = 'advSearchBox' + jQuery('#advancedSearchTB select[name=searchingAttributeId]').length + 1;
 	var contend  = '<td>' + getInnerHTML('searchingAttributeIdTD') + '</td>';
 		contend += '<td>' + searchTextBox ;
-		contend += '<input type="button" value="-" onclick="removeAttributeOption(' + "'" + rowId + "'" + ');"></td>';
+		contend += '<input type="button" class="small-button" value="-" onclick="removeAttributeOption(' + "'" + rowId + "'" + ');"></td>';
 		contend = '<tr id="' + rowId + '">' + contend + '</tr>';
 
 	jQuery('#advancedSearchTB > tbody:last').append( contend );
@@ -262,4 +262,40 @@ function exportPatientHistory( patientId, type )
 {
 	var url = "getPatientHistory.action?patientId=" + patientId + "&type=" + type;
 	window.location.href = url;
+}
+
+var prefixStageId = 'ps_';
+var COLOR_RED = "#fb4754";
+var COLOR_GREEN = "#8ffe8f";
+var COLOR_YELLOW = "#f9f95a";
+var COLOR_LIGHTRED = "#fb6bfb";
+var COLOR_LIGHT_RED = "#ff7676";
+var COLOR_LIGHT_YELLOW = "#ffff99";
+var COLOR_LIGHT_GREEN = "#ccffcc";
+var COLOR_LIGHT_LIGHTRED = "#ff99ff";
+
+function setEventColorStatus( elementId, status )
+{
+	status = eval(status);
+	switch(status)
+	{
+		case 1:
+			jQuery('#' + elementId ).css('border-color', COLOR_GREEN);
+			jQuery('#' + elementId ).css('background-color', COLOR_LIGHT_GREEN);
+			return;
+		case 2:
+		  jQuery('#' + elementId ).css('border-color', COLOR_LIGHTRED);
+			jQuery('#' + elementId ).css('background-color', COLOR_LIGHT_LIGHTRED);
+			return;
+		case 3:
+			jQuery('#' + elementId ).css('border-color', COLOR_YELLOW);
+			jQuery('#' + elementId ).css('background-color', COLOR_LIGHT_YELLOW);
+			return;
+		case 4:
+			jQuery('#' + elementId ).css('border-color', COLOR_RED);
+			jQuery('#' + elementId ).css('background-color', COLOR_LIGHT_RED);
+			return;
+		default:
+		  return;
+	}
 }

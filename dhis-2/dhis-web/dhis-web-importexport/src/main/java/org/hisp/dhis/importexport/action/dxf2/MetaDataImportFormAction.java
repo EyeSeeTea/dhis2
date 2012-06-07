@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.controller.organisationunit;
+package org.hisp.dhis.importexport.action.dxf2;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,18 +27,17 @@ package org.hisp.dhis.api.controller.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.api.controller.AbstractCrudController;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Controller
-@RequestMapping( value = OrganisationUnitController.RESOURCE_PATH )
-public class OrganisationUnitController
-    extends AbstractCrudController<OrganisationUnit>
+public class MetaDataImportFormAction
+    implements Action
 {
-    public static final String RESOURCE_PATH = "/organisationUnits";
+    @Override
+    public String execute() throws Exception
+    {
+        return SUCCESS;
+    }
 }

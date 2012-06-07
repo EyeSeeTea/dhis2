@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.action.dxf2;
+package org.hisp.dhis.api.controller;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,16 +27,17 @@ package org.hisp.dhis.importexport.action.dxf2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.dataset.Section;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class MetaDataImportAction implements Action
+@Controller
+@RequestMapping( value = SectionController.RESOURCE_PATH )
+public class SectionController
+    extends AbstractCrudController<Section>
 {
-    @Override
-    public String execute() throws Exception
-    {
-        return SUCCESS;
-    }
+    public static final String RESOURCE_PATH = "/sections";
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.importexport.action.dxf2;
+package org.hisp.dhis.api.controller;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,43 +27,17 @@ package org.hisp.dhis.importexport.action.dxf2;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
-import org.apache.commons.lang3.StringUtils;
-import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.hisp.dhis.datadictionary.DataDictionary;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class MetaDataExportAction
-    implements Action
+@Controller
+@RequestMapping( value = DataDictionaryController.RESOURCE_PATH )
+public class DataDictionaryController
+    extends AbstractCrudController<DataDictionary>
 {
-    // -------------------------------------------------------------------------
-    // Input & Output
-    // -------------------------------------------------------------------------
-
-    private Map<String, String> exportClasses = new LinkedHashMap<String, String>();
-
-    public Map<String, String> getExportClasses()
-    {
-        return exportClasses;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action Implementation
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String execute() throws Exception
-    {
-        for ( String key : ExchangeClasses.getExportMap().values() )
-        {
-            String[] camelCaseWords = StringUtils.capitalize( key ).split( "(?=[A-Z])" );
-            exportClasses.put( key, StringUtils.join( camelCaseWords, " " ) );
-        }
-
-        return SUCCESS;
-    }
+    public static final String RESOURCE_PATH = "/dataDictionaries";
 }

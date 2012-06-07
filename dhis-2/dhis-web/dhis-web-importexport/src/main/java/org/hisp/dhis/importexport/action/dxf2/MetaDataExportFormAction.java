@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.controller.organisationunit;
+package org.hisp.dhis.importexport.action.dxf2;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,18 +27,43 @@ package org.hisp.dhis.api.controller.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.api.controller.AbstractCrudController;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.opensymphony.xwork2.Action;
+import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Controller
-@RequestMapping( value = OrganisationUnitController.RESOURCE_PATH )
-public class OrganisationUnitController
-    extends AbstractCrudController<OrganisationUnit>
+public class MetaDataExportFormAction
+    implements Action
 {
-    public static final String RESOURCE_PATH = "/organisationUnits";
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private Map<String, String> exportClasses = new LinkedHashMap<String, String>();
+
+    public Map<String, String> getExportClasses()
+    {
+        return exportClasses;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action Implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String execute() throws Exception
+    {
+        for ( String key : ExchangeClasses.getExportMap().values() )
+        {
+            String[] camelCaseWords = StringUtils.capitalize( key ).split( "(?=[A-Z])" );
+            exportClasses.put( key, StringUtils.join( camelCaseWords, " " ) );
+        }
+
+        return SUCCESS;
+    }
 }

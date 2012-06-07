@@ -1,5 +1,3 @@
-package org.hisp.dhis.api.utils;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,74 +25,31 @@ package org.hisp.dhis.api.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
+package org.hisp.dhis.program.comparator;
+
+import java.util.Comparator;
+
+import org.hisp.dhis.program.ProgramStageInstance;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Chau Thu Tran
+ * 
+ * @version $ProgramStageInstanceDueDateComparator.java Jun 7, 2012 9:49:25 AM$
  */
-public class IdentifiableObjectParams
+public class ProgramStageInstanceDueDateComparator
+    implements Comparator<ProgramStageInstance>
 {
-    private boolean links = true;
-
-    private Date lastUpdated;
-
-    private String nameLike;
-
-    private boolean paging = true;
-
-    private int page = 1;
-
-    public IdentifiableObjectParams()
+    public int compare( ProgramStageInstance programStageInstance1, ProgramStageInstance programStageInstance2 )
     {
+        if ( programStageInstance1.getDueDate().before( programStageInstance2.getDueDate() ) )
+        {
+            return -1;
+        }
+        else if ( programStageInstance1.getDueDate().after( programStageInstance2.getDueDate() ) )
+        {
+            return 1;
+        }
+        return 0;
     }
 
-    public boolean hasLinks()
-    {
-        return links;
-    }
-
-    public void setLinks( boolean links )
-    {
-        this.links = links;
-    }
-
-    public Date getLastUpdated()
-    {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated( Date lastUpdated )
-    {
-        this.lastUpdated = lastUpdated;
-    }
-
-    public String getNameLike()
-    {
-        return nameLike;
-    }
-
-    public void setNameLike( String nameLike )
-    {
-        this.nameLike = nameLike;
-    }
-
-    public boolean isPaging()
-    {
-        return paging;
-    }
-
-    public void setPaging( boolean paging )
-    {
-        this.paging = paging;
-    }
-
-    public int getPage()
-    {
-        return page;
-    }
-
-    public void setPage( int page )
-    {
-        this.page = page;
-    }
 }

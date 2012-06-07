@@ -508,17 +508,12 @@ Ext.onReady( function() {
 				}
             },
             data: {
-                getNames: function(exception, isFilter) {
-					var obj = DV.c.data.objects,
-						a = [];
-                    for (var i = 0; i < obj.length; i++) {
-						a.push(obj[i].name);
-					}
-                    if (exception && isFilter && a.length > 1) {
-						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_ind_de_ds + ' ' + DV.i18n.wm_first_filter_used);
-					}
-					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
-                },
+				getObjects: function() {
+					var objects = DV.c.indicator.objects;
+					objects = objects.concat(DV.c.dataelement.objects);
+					objects = objects.concat(DV.c.dataset.objects);
+					return objects;
+				},
                 getUrl: function(isFilter) {
 					var obj = DV.c.indicator.objects,
 						a = [];
@@ -562,17 +557,6 @@ Ext.onReady( function() {
 					}
 					return a;
 				},
-                getNames: function(exception, isFilter) {
-					var obj = DV.c.period.objects,
-						a = [];
-                    for (var i = 0; i < obj.length; i++) {
-						a.push(obj[i].name);
-					}
-                    if (exception && isFilter && a.length > 1) {
-						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_period + ' ' + DV.i18n.wm_first_filter_used);
-					}
-					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
-                },
                 getUrl: function(isFilter) {
 					var a = [];
 					for (var r in DV.c.period.rp) {
@@ -627,40 +611,6 @@ Ext.onReady( function() {
 						a.push({id: r.data.id, name: r.data.text});
 					});
 					return a;
-                },
-                getNames: function(exception, isFilter) {
-					var ou = DV.c.organisationunit,
-						a = [];
-					if (ou.groupsetid) {
-						var groups = DV.init.system.organisationunitgroupsets[ou.groupsetid];
-						for (var i = 0; i < groups.length; i++) {
-							a.push(groups[i].name);
-						}
-					}
-					else {
-						if (DV.c.userorganisationunit || DV.c.userorganisationunitchildren) {
-							if (DV.c.userorganisationunit) {
-								a.push(DV.init.user.organisationunit.name);
-								DV.cmp.dimension.organisationunit.treepanel.addToStorage([DV.init.user.organisationunit]);
-							}
-							if (DV.c.userorganisationunitchildren) {
-								var ouc = DV.init.user.organisationunitchildren;
-								for (var i = 0; i < ouc.length; i++) {
-									a.push(ouc[i].name);
-								}
-								DV.cmp.dimension.organisationunit.treepanel.addToStorage(DV.init.user.organisationunitchildren);
-							}
-						}
-						else {
-							for (var i = 0; i < ou.objects.length; i++) {
-								a.push(ou.objects[i].name);
-							}
-						}
-					}
-					if (exception && isFilter && a.length > 1) {
-						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_used);
-					}
-					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
                 },
                 getUrl: function(isFilter) {
 					var ou = DV.c.organisationunit,
@@ -1189,8 +1139,8 @@ Ext.onReady( function() {
         toolbar: {
 			separator: {
 				xtype: 'tbseparator',
-				height: 18,
-				style: 'border-left: 1px solid #bbb; border-right: 1px solid #ececec'
+				height: 26,
+				style: 'border-left: 1px solid #d1d1d1; border-right: 1px solid #f1f1f1'
 			}
 		},
         number: {
@@ -1523,7 +1473,7 @@ Ext.onReady( function() {
 			
 			if (id) {
                 Ext.Ajax.request({
-                    url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + id + '.json?links=false',
+                    url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.favorite_get + id + '.json?links=false&paging=false',
                     scope: this,
                     success: function(r) {
 						if (!this.validation.response(r)) {
@@ -1614,16 +1564,16 @@ Ext.onReady( function() {
 			}
 			
 			DV.c.data = {};
-			DV.c.data.objects = [];
-			DV.c.data.objects = DV.c.data.objects.concat(DV.c.indicator.objects);
-			DV.c.data.objects = DV.c.data.objects.concat(DV.c.dataelement.objects);
-			DV.c.data.objects = DV.c.data.objects.concat(DV.c.dataset.objects);
-			
+			DV.c.data.objects = DV.util.dimension.data.getObjects();
 			DV.c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(DV.c.period.rp);
 			
-			if (!this.validation.objects()) {
+			if (!this.validation.objects.selection()) {
 				return;
 			}
+			
+			this.validation.objects[DV.c.dimension.series]();
+			this.validation.objects[DV.c.dimension.category]();
+			this.validation.objects[DV.c.dimension.filter](true);
 			
 			DV.c.series = DV.c[DV.c.dimension.series];
 			DV.c.category = DV.c[DV.c.dimension.category];
@@ -1632,10 +1582,6 @@ Ext.onReady( function() {
 			DV.c.series.dimension = DV.conf.finals.chart.series;
 			DV.c.category.dimension = DV.conf.finals.chart.category;
 			DV.c.filter.dimension = DV.conf.finals.chart.filter;
-			
-			//DV.c.series.names = DV.util.dimension[DV.c.dimension.series].getNames(true);
-			//DV.c.category.names = DV.util.dimension[DV.c.dimension.category].getNames(true);
-			//DV.c.filter.names = DV.util.dimension[DV.c.dimension.filter].getNames(true, true);
 			
 			DV.c.series.url = DV.util.dimension[DV.c.dimension.series].getUrl();
 			DV.c.category.url = DV.util.dimension[DV.c.dimension.category].getUrl();
@@ -1793,20 +1739,40 @@ Ext.onReady( function() {
 				}
 				return true;
 			},
-			objects: function() {
-				if (!DV.c.data.objects.length) {
-					DV.util.notification.error(DV.i18n.et_no_indicators_dataelements_datasets, DV.i18n.em_no_indicators_dataelements_datasets);
-					return false;
+			objects: {
+				selection: function() {
+					if (!DV.c.data.objects.length) {
+						DV.util.notification.error(DV.i18n.et_no_indicators_dataelements_datasets, DV.i18n.em_no_indicators_dataelements_datasets);
+						return false;
+					}
+					if (!DV.c.period.objects.length) {
+						DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
+						return false;
+					}
+					if (!DV.c.organisationunit.objects.length) {
+						DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
+						return false;
+					}
+					return true;
+				},
+				data: function(isFilter) {
+					if (isFilter && DV.c.data.objects.length > 1) {
+						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_ind_de_ds + ' ' + DV.i18n.wm_first_filter_used);
+						DV.c.data.objects = DV.c.data.objects.slice(0,1);
+					}
+				},
+				period: function(isFilter) {
+					if (isFilter && DV.c.period.objects.length > 1) {
+						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_period + ' ' + DV.i18n.wm_first_filter_used);
+						DV.c.period.objects = DV.c.period.objects.slice(0,1);
+					}
+				},
+				organisationunit: function(isFilter) {
+					if (isFilter && DV.c.organisationunit.objects.length > 1) {
+						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_used);
+						DV.c.organisationunit.objects = DV.c.organisationunit.objects.slice(0,1);
+					}
 				}
-				if (!DV.c.period.objects.length) {
-					DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
-					return false;
-				}
-				if (!DV.c.organisationunit.objects.length) {
-					DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
-					return false;
-				}
-				return true;
 			},
 			categories: function() {
 				if (DV.c.category.objects.length < 2 && (DV.c.type === DV.conf.finals.chart.line || DV.c.type === DV.conf.finals.chart.area)) {
@@ -3223,29 +3189,12 @@ Ext.onReady( function() {
 												autoScroll: true,
 												multiSelect: true,
 												rendered: false,
-												storage: {},
-												addToStorage: function(objects) {
-													for (var i = 0; i < objects.length; i++) {
-														this.storage[objects[i].id] = objects[i];
-													}
-												},
 												selectRoot: function() {
 													if (this.rendered) {
 														if (!this.getSelectionModel().getSelection().length) {
 															this.getSelectionModel().select(this.getRootNode());
 														}
 													}
-												},
-												findNameById: function(id) {					
-													var name = this.store.getNodeById(id) ? this.store.getNodeById(id).data.text : null;
-													if (!name) {
-														for (var k in this.storage) {
-															if (k == id) {
-																name = this.storage[k].name;
-															}
-														}
-													}
-													return name;
 												},
 												store: Ext.create('Ext.data.TreeStore', {
 													proxy: {
@@ -4296,6 +4245,7 @@ Ext.onReady( function() {
                             listeners: {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
+										cls: 'dv-menu',
                                         margin: '2 0 0 0',
                                         shadow: false,
                                         showSeparator: false,
