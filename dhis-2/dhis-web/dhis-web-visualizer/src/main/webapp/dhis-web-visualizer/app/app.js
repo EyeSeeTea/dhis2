@@ -370,6 +370,7 @@ Ext.onReady( function() {
             unselectAll: function(a, s) {
                 s.store.removeAll();
                 a.store.clearFilter();
+                this.filterAvailable(a, s);
             },
             filterAvailable: function(a, s) {
                 a.store.filterBy( function(r) {
@@ -1712,8 +1713,6 @@ Ext.onReady( function() {
 			}
 			
 			DV.util.checkbox.setRelativePeriods(DV.c.period.rp);
-			
-			DV.cmp.dimension.organisationunit.treepanel.addToStorage(DV.c.organisationunit.objects);
 			
 			if (DV.c.organisationunit.groupsetid) {
 				if (DV.store.groupset.isloaded) {
