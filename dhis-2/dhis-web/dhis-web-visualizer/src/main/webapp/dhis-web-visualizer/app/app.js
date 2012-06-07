@@ -3539,7 +3539,7 @@ Ext.onReady( function() {
                     cls: 'dv-toolbar',
                     height: DV.conf.layout.center_tbar_height,
                     defaults: {
-                        height: 26
+                        height: 30
                     },
                     items: [
                         {
@@ -3571,7 +3571,6 @@ Ext.onReady( function() {
                                 DV.exe.execute();
                             }
                         },
-						' ', DV.util.toolbar.separator, ' ',
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
@@ -3579,7 +3578,6 @@ Ext.onReady( function() {
                             listeners: {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
-                                        margin: '2 0 0 0',
                                         shadow: false,
                                         showSeparator: false,
                                         items: [
@@ -4064,7 +4062,11 @@ Ext.onReady( function() {
                                                     }
                                                 }
                                             },
-                                            '-',
+                                            {
+												xtype: 'menuseparator',
+												height: 1,
+												style: 'margin:1px 0; border-color:#ccc'
+											},
                                             {
                                                 xtype: 'grid',
                                                 cls: 'dv-menugrid',
@@ -4246,7 +4248,6 @@ Ext.onReady( function() {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
 										cls: 'dv-menu',
-                                        margin: '2 0 0 0',
                                         shadow: false,
                                         showSeparator: false,
                                         items: [

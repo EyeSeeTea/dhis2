@@ -124,41 +124,49 @@ body {
 /* DV menu grid */
 .dv-menugrid .x-grid-row .x-grid-cell, .dv-menugrid .x-grid-row-selected .x-grid-cell {
     border: 0 none;
+/*
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
+*/
     background: #f1f1f1;
 }
 .dv-menugrid .x-grid-row .x-grid-cell-first, .dv-menugrid .x-grid-row-selected .x-grid-cell-first {
+/*
     border: 1px solid transparent;
     border-right: 0 none;
+*/
+	border: 0 none;
 }
 .dv-menugrid .x-grid-row .x-grid-cell-last, .dv-menugrid .x-grid-row-selected .x-grid-cell-last {
+/*
     border: 1px solid transparent;
     border-left: 0 none;
+*/
+	border: 0 none;
 }
     
 .dv-menugrid .x-grid-row-over .x-grid-cell {
     border: 0 none;
-    border-top: 1px solid #9d9d9d;
-    border-bottom: 1px solid #9d9d9d;
+/*
+    border-top: 1px solid #e1e1e1;
+    border-bottom: 1px solid #e1e1e1;
+*/
+    background-color: #e1e1e1;
     background-image: none;
-    background-color: #E6E6E6;
-    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #eeeeee), color-stop(100%, #dcdcdc));
-    background-image: -webkit-linear-gradient(top, #eeeeee,#dcdcdc);
-    background-image: -moz-linear-gradient(top, #eeeeee,#dcdcdc);
-    background-image: -o-linear-gradient(top, #eeeeee,#dcdcdc);
-    background-image: -ms-linear-gradient(top, #eeeeee,#dcdcdc);
-    background-image: linear-gradient(top, #eeeeee,#dcdcdc);
 }
 .dv-menugrid .x-grid-row-over .x-grid-cell-first {
-    border: 1px solid #9d9d9d;
+/*
+    border: 1px solid #e1e1e1;
     border-right: 0 none;
-    border-radius: 2px 0 0 2px;
+*/
+	border: 0 none;
 }
 .dv-menugrid .x-grid-row-over .x-grid-cell-last {
-    border: 1px solid #9d9d9d;
+/*
+    border: 1px solid #e1e1e1;
     border-left: 0 none;
-    border-radius: 0 2px 2px 0;
+*/
+	border: 0 none;
 }
 
 .dv-menugrid .x-grid-row-focused .x-grid-cell-inner {
@@ -229,6 +237,11 @@ body {
     background-image: url('../images/checkbox.gif');
 }
 
+/* Ext toolbar */
+.x-toolbar {
+	padding: 0;
+}
+
 /* DV toolbar checkbox */
 .dv-toolbar .x-form-cb-wrap {
     padding-top: 5px;
@@ -264,17 +277,15 @@ body {
 
 /* Button border */
 .x-btn-default-toolbar-small, .x-btn-default-toolbar-small-over, .x-btn-default-toolbar-small-pressed {
-    border-radius: 2px;
+    border-radius: 0px;
     border: 1px solid transparent;
 }
 
 .x-btn-default-toolbar-small-over {
-    border-color: #ccc;
-}
-
-.x-btn-default-toolbar-small-pressed {
-    border-color: #aaa;
-}
+    border-color: #e1e1e1;
+    background-color: #e1e1e1;
+    background-image: none;
+}	
 
 /* Toolbar separator */
 .x-toolbar .x-toolbar-separator-horizontal {
@@ -666,5 +677,11 @@ body {
 
 /* Ext menu */
 .x-menu-item-active .x-menu-item-link {
-	border-radius: 2px;
+	border-radius: 0;
+	border-color: #e1e1e1;
+	background-color: #e1e1e1;
+	background-image: none;
+}
+.x-menu-body {
+	padding: 0;
 }
