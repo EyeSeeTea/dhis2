@@ -3549,7 +3549,7 @@ Ext.onReady( function() {
                 bodyStyle: 'padding-top:5px',
                 tbar: {
                     xtype: 'toolbar',
-                    cls: 'dv-toolbar-1a',
+                    cls: 'dv-toolbar-1',
                     defaults: {
                         height: 30
                     },
@@ -3686,9 +3686,9 @@ Ext.onReady( function() {
                                                                     store: DV.store.favorite,
                                                                     tbar: {
                                                                         id: 'favorite_t',
-                                                                        cls: 'dv-toolbar-1b',
+                                                                        cls: 'dv-toolbar-tbar',
                                                                         defaults: {
-                                                                            height: 29
+                                                                            height: 28
                                                                         },
                                                                         items: [
                                                                             {
@@ -3701,7 +3701,7 @@ Ext.onReady( function() {
                                                                                     afterrender: function(b) {
                                                                                         this.addCls('dv-menu-togglegroup');
                                                                                         this.menu = Ext.create('Ext.menu.Menu', {
-																							margin: '2 0 0 0',
+																							margin: '-1 0 0 -1',
 																							shadow: false,
                                                                                             showSeparator: false,
                                                                                             width: 109,
@@ -3800,7 +3800,10 @@ Ext.onReady( function() {
                                                                                             }
                                                                                         ],
                                                                                         bbar: {
-																							cls: 'dv-toolbar-2',
+																							cls: 'dv-toolbar-bbar',
+																							defaults: {
+																								height: 28
+																							},
 																							items: [
 																								{
 																									xtype: 'label',
@@ -3900,7 +3903,10 @@ Ext.onReady( function() {
                                                                                                 }                                                                                                    
                                                                                             ],
                                                                                             bbar: {
-																								cls: 'dv-toolbar-2',
+																								cls: 'dv-toolbar-bbar',
+																								defaults: {
+																									height: 28
+																								},
 																								items: [
 																									{
 																										text: DV.i18n.cancel,
@@ -3953,14 +3959,14 @@ Ext.onReady( function() {
                                                                 }
                                                             ],
                                                             bbar: {
-																cls: 'dv-toolbar-1b',
+																cls: 'dv-toolbar-bbar',
 																defaults: {
-																	height: 29
+																	height: 28
 																},
 																items: [
 																	{
 																		xtype: 'label',
-																		style: 'padding-left:6px; line-height:27px; font-size:10px; color:#666; width:70%',
+																		style: 'padding-left:6px; line-height:29px; font-size:10px; color:#666; width:70%',
 																		listeners: {
 																			added: function() {
 																				DV.cmp.favorite.label = this;
@@ -4026,25 +4032,31 @@ Ext.onReady( function() {
 																								cls: 'dv-window-confirm-list'
 																							}
 																						],
-																						bbar: [
-																							{
-																								text: DV.i18n.cancel,
-																								handler: function() {
-																									this.up('window').close();
-																								}
+																						bbar: {
+																							cls: 'dv-toolbar-bbar',
+																							defaults: {
+																								height: 28
 																							},
-																							'->',
-																							{
-																								text: DV.i18n.overwrite,
-																								handler: function() {
-																									this.up('window').close();
-																									DV.util.crud.favorite.update(function() {
-																										DV.cmp.favorite.window.resetForm();
-																									});
-																									
+																							items: [
+																								{
+																									text: DV.i18n.cancel,
+																									handler: function() {
+																										this.up('window').close();
+																									}
+																								},
+																								'->',
+																								{
+																									text: DV.i18n.overwrite,
+																									handler: function() {
+																										this.up('window').close();
+																										DV.util.crud.favorite.update(function() {
+																											DV.cmp.favorite.window.resetForm();
+																										});
+																										
+																									}
 																								}
-																							}
-																						]
+																							]
+																						}
 																					});
 																					w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
 																					w.show();
@@ -4198,7 +4210,10 @@ Ext.onReady( function() {
 											}
 										],
 										bbar: {
-											cls: 'dv-toolbar-2',
+											cls: 'dv-toolbar-1',
+											defaults: {
+												height: 30
+											},
 											items: [
 												'->',
 												{

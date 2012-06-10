@@ -213,34 +213,37 @@ body {
 }
 
 /* DV toolbar */
-.dv-toolbar-1a, .dv-toolbar-1b, .dv-toolbar-2 {
+.dv-toolbar-1, .dv-toolbar-2, .dv-toolbar-tbar, .dv-toolbar-bbar {
 	padding: 0;
 }
-.dv-toolbar-1a {
+.dv-toolbar-1 {
 	height: 31px;
 }
-.dv-toolbar-1b {
+.dv-toolbar-tbar {
 	height: 30px;
+}
+.dv-toolbar-bbar {
+	height: 29px;
 }
 
 /* DV toolbar checkbox */
-.dv-toolbar-1a .x-form-cb-wrap {
+.dv-toolbar-1 .x-form-cb-wrap {
     padding-top: 5px;
 }
-.dv-toolbar-1a .x-form-cb-label-after {
+.dv-toolbar-1 .x-form-cb-label-after {
     margin-left: 3px;
     color: #333;
 }
 
 /* Button dv-toolbar font size */
-.dv-toolbar-1a * {
+.dv-toolbar-1 * {
     font-size: 11px;
 }
-.dv-toolbar-1a .dv-toolbar-btn-1 * {
+.dv-toolbar-1 .dv-toolbar-btn-1 * {
     color: #111;
     font-weight: bold;
 }
-.dv-toolbar-1a .dv-toolbar-btn-2 * {
+.dv-toolbar-1 .dv-toolbar-btn-2 * {
     color: #444;
 }
 
