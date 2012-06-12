@@ -54,7 +54,6 @@ TR.conf = {
 			favorite_save: 'saveTabularReport.action',
             favorite_delete: 'deleteTabularReport.action',
 			datavalue_save: 'saveValue.action',
-			datavalue_view: 'viewRecord.action',
 			datavalue_delete: 'removeCurrentEncounter.action',
             redirect: 'index.action'
         },
@@ -528,7 +527,7 @@ Ext.onReady( function() {
 							TR.store.dataelement.selected.removeAll();
 							if (f.dataElements) {
 								for (var i = 0; i < f.dataElements.length; i++) {
-									TR.cmp.params.dataelement.objects.push({id: f.dataElements[i].id, name: TR.util.string.getEncodedString(f.dataElements[i].name), valueType:f.dataElements[i].valueType });
+									TR.cmp.params.dataelement.objects.push({id: f.dataElements[i].id, name: TR.util.string.getEncodedString(f.dataElements[i].name), compulsory: f.dataElements[i].compulsory, valueType:f.dataElements[i].valueType });
 								}
 								TR.store.dataelement.selected.add(TR.cmp.params.dataelement.objects);
 								
@@ -652,7 +651,7 @@ Ext.onReady( function() {
 		}),
 		dataelement: {
             available: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'valueType'],
+                fields: ['id', 'name', 'compulsory', 'valueType'],
                 proxy: {
                     type: 'ajax',
                     url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.dataelements_get,
@@ -672,7 +671,7 @@ Ext.onReady( function() {
 				}
             }),
             selected: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name', 'valueType'],
+                fields: ['id', 'name', 'compulsory', 'valueType'],
                 data: []
             })
         },
@@ -1112,19 +1111,39 @@ Ext.onReady( function() {
 			}
 			return 'textfield';
 		},
-		save: function( psiId, deId, value)
+		save: function(e)
 		{
+			var grid = TR.datatable.datatable;
+			grid.getView().getNode(e.rowIdx).classList.remove('hidden');
+			
+			var oldValue = e.originalValue;
+			var value = e.value;
+			if( value == oldValue)
+			{
+				return false;
+			}
+			
+			var psiId = TR.store.datatable.getAt(e.rowIdx).data['id'];
+			var deId = e.column.name.split('_')[1];
 			var params = 'programStageInstanceId=' + psiId; 
 				params += '&dataElementId=' + deId;
 				params += '&value=' ;
 			if( value != '')
-				params += value;
+				params += encodeURIComponent(value);
 			
 			Ext.Ajax.request({
 				url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.datavalue_save,
 				method: 'POST',
 				params: params,
-				success: function() {}
+				success: function() {
+					var rowIdx = e.rowIdx;
+					var colIdx = e.colIdx + 1;
+					if( e.colIdx == TR.datatable.datatable.columns.length - 1 ){
+						colIdx = 0;
+						rowIdx++;
+					}
+					TR.datatable.cellEditing.startEditByPosition({row: rowIdx, column: colIdx});
+				}
 			});
 		},
 		remove: function( psiId, rowIdx )
@@ -1168,6 +1187,8 @@ Ext.onReady( function() {
 				hideable: false,
 				menuDisabled: true
 			};
+			
+			// report date
 			
 			cols[++index] = {
 				header: TR.value.columns[index].name, 
@@ -1223,7 +1244,7 @@ Ext.onReady( function() {
 			// Data element columns
 			
 			TR.cmp.params.dataelement.selected.store.each( function(r) {
-				cols[++index] = TR.datatable.createColumn( r.data.valueType, r.data.id, cols, index );
+				cols[++index] = TR.datatable.createColumn( r.data.valueType, r.data.id, r.data.compulsory, cols, index );
 			});
 			
 			cols[++index]={
@@ -1395,24 +1416,7 @@ Ext.onReady( function() {
 						}
 					},
 					edit: function( editor, e ){
-						var grid = TR.datatable.datatable;
-						grid.getView().getNode(e.rowIdx).classList.remove('hidden');
-						
-						var oldValue = e.originalValue;
-						var newValue = editor.editors.items[0].field.rawValue;
-						if( newValue != oldValue)
-						{
-							// filter
-							if( e.rowIdx==0 ){
-								TR.exe.execute();
-							}
-							// save data-value of data element
-							else{
-								var psiId = TR.store.datatable.getAt(e.rowIdx).data['id'];
-								var deId = e.column.name.split('_')[1];
-								TR.value.save( psiId, deId, newValue);
-							}
-						}
+						TR.value.save(e);
 					},
 					canceledit: function( grid, eOpts ){
 						if( e.rowIdx == 0 ){
@@ -1422,12 +1426,19 @@ Ext.onReady( function() {
 					},
 					validateedit: function( editor, e, eOpts )
 					{
+						var newValue = editor.editors.items[editor.editors.items.length-1].field.rawValue;
+						if( e.column.compulsory && newValue =='' )
+						{
+							TR.util.notification.error( TR.i18n.not_empty, TR.i18n.not_empty );
+							return false;
+						}
 						return true;
 					}
 				}
 			});
+			
 		},
-		createColumn: function( type, id, cols, index )
+		createColumn: function( type, id, compulsory, cols, index )
 		{
 			if( type.toLowerCase() == 'date' )
 			{
@@ -1440,6 +1451,7 @@ Ext.onReady( function() {
 					sortable: false,
 					draggable: true,
 					isEditAllowed: true,
+					compulsory: compulsory,
 					renderer: Ext.util.Format.dateRenderer( TR.i18n.format_date ),
 					filter: {
 						type:TR.value.covertValueType( type ),
@@ -1473,6 +1485,7 @@ Ext.onReady( function() {
 				sortable: false,
 				draggable: true,
 				isEditAllowed: true,
+				compulsory: compulsory,
 				filter: {
 					type:TR.value.covertValueType( type ),
 					options: TR.value.columns[index].suggested
