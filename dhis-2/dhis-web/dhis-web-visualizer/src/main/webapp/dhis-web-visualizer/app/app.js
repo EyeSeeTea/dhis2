@@ -105,7 +105,7 @@ DV.conf = {
             indicator_getall: 'indicators.json?paging=false&links=false',
             indicatorgroup_get: 'indicatorGroups.json?paging=false&links=false',
             dataelement_get: 'dataElementGroups/',
-            dataelement_getall: 'dataelements.json?paging=false&links=false',
+            dataelement_getall: 'dataElements.json?paging=false&links=false',
             dataelementgroup_get: 'dataElementGroups.json?paging=false&links=false',
             dataset_get: 'dataSets.json?paging=false&links=false',
             organisationunitgroupset_get: 'getOrganisationUnitGroupSetsMinified.action',
