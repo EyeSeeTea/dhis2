@@ -28,8 +28,8 @@ package org.hisp.dhis.option;
  */
 
 import java.util.Collection;
+import java.util.List;
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -39,45 +39,50 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultOptionService
     implements OptionService
 {
-    private GenericIdentifiableObjectStore<OptionSet> optionSetStore;
+    private OptionStore optionStore;
 
-    public void setOptionSetStore( GenericIdentifiableObjectStore<OptionSet> optionSetStore )
+    public void setOptionStore( OptionStore optionStore )
     {
-        this.optionSetStore = optionSetStore;
+        this.optionStore = optionStore;
     }
 
     public int saveOptionSet( OptionSet optionSet )
     {
-        return optionSetStore.save( optionSet );
+        return optionStore.save( optionSet );
     }
 
     public void updateOptionSet( OptionSet optionSet )
     {
-        optionSetStore.update( optionSet );
+        optionStore.update( optionSet );
     }
     
     public OptionSet getOptionSet( int id )
     {
-        return optionSetStore.get( id );
+        return optionStore.get( id );
     }
 
     public OptionSet getOptionSet( String uid )
     {
-        return optionSetStore.getByUid( uid );
+        return optionStore.getByUid( uid );
     }
     
     public OptionSet getOptionSetByName( String name )
     {
-        return optionSetStore.getByName( name );
+        return optionStore.getByName( name );
     }
 
     public void deleteOptionSet( OptionSet optionSet )
     {
-        optionSetStore.delete( optionSet );
+        optionStore.delete( optionSet );
     }
 
     public Collection<OptionSet> getAllOptionSets()
     {
-        return optionSetStore.getAll();
+        return optionStore.getAll();
+    }
+    
+    public List<String> getOptions( OptionSet optionSet, String key  )
+    {
+        return optionStore.getOptions( optionSet, key );
     }
 }
