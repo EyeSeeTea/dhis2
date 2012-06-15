@@ -1,5 +1,7 @@
+package org.hisp.dhis.coldchain.action;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2007, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,68 +27,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.programstage;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
-
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Bharath Kumar
+ * 
+ * @version ExportToExcelAction.java June 7, 2012 12:30 PM
  */
-public class ShowSortProgramStageFormAction
+
+public class ExportToExcelAction
     implements Action
 {
-    // -------------------------------------------------------------------------
-    // Dependency
-    // -------------------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // Input & Output
+    // ---------------------------------------------------------------
+    
+    private InputStream inputStream;
 
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
+    public InputStream getInputStream()
     {
-        this.programService = programService;
+        return inputStream;
     }
 
-    // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
+    private String fileName;
 
-    private Integer id;
-
-    public Integer getId()
+    public String getFileName()
     {
-        return id;
+        return fileName;
     }
 
-    public void setId( Integer id )
+    private String htmlCode;
+
+    public void setHtmlCode( String htmlCode )
     {
-        this.id = id;
-    }
-
-    private Program program;
-
-    public Program getProgram()
-    {
-        return program;
-    }
-
-    public void setProgram( Program program )
-    {
-        this.program = program;
-    }
-
-    private Collection<ProgramStage> programStages = new ArrayList<ProgramStage>();
-
-    public Collection<ProgramStage> getProgramStages()
-    {
-        return programStages;
+        this.htmlCode = htmlCode;
     }
 
     // -------------------------------------------------------------------------
@@ -94,11 +71,12 @@ public class ShowSortProgramStageFormAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        program = programService.getProgram( id );
-
-        programStages = program.getProgramStages();
-
+        fileName = "Output.xls";
+        
+        inputStream = new BufferedInputStream( new ByteArrayInputStream( htmlCode.getBytes() ) );
+        
         return SUCCESS;
-    }
+    }  
 }

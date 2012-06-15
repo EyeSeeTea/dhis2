@@ -165,13 +165,13 @@ public class LoadDataEntryAction
         // ---------------------------------------------------------------------
         // Get program-stage-instance
         // ---------------------------------------------------------------------
+        if ( programStageInstanceId != null )
+        { 
+            programStageInstance = programStageInstanceService.getProgramStageInstance( programStageInstanceId );
+       
+            program = programStageInstance.getProgramStage().getProgram();
 
-        programStageInstance = programStageInstanceService.getProgramStageInstance( programStageInstanceId );
-        program = programStageInstance.getProgramStage().getProgram();
-
-        if ( programStageInstance != null )
-        {
-            if ( program.getType() == Program.SINGLE_EVENT_WITHOUT_REGISTRATION && programStageInstance.isCompleted() )
+            if ( !program.isRegistration() && programStageInstance.isCompleted() )
             {
                 return SUCCESS;
             }

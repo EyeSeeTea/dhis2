@@ -136,7 +136,10 @@ public class WebUtils
 
                     for ( IdentifiableObject object : objects )
                     {
-                        object.setLink( getPathWithUid( object ) );
+                        if ( object != null )
+                        {
+                            object.setLink( getPathWithUid( object ) );
+                        }
                     }
                 }
             }
@@ -179,7 +182,6 @@ public class WebUtils
         {
             builder.append( request.getScheme() );
         }
-
 
         builder.append( "://" ).append( request.getServerName() );
 
