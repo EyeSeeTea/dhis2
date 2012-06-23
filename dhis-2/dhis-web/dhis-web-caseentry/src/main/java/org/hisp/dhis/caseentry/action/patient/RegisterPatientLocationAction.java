@@ -61,7 +61,7 @@ public class RegisterPatientLocationAction
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Setter
     // -------------------------------------------------------------------------
 
     private Integer patientId;

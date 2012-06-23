@@ -27,88 +27,61 @@
 
 package org.hisp.dhis.caseentry.action.caseentry;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramStageService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version $Id: LoadAnonymousProgramsAction.java Dec 14, 2011 9:12:34 AM $
+ * @version $GetProgramStageDataElementsAction.java Jun 21, 2012 9:43:56 PM$
  */
-public class LoadAnonymousProgramsAction
+public class GetProgramStageDataElementsAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitSelectionManager selectionManager;
+    private ProgramStageService programStageService;
 
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    public void setProgramStageService( ProgramStageService programStageService )
     {
-        this.selectionManager = selectionManager;
-    }
-
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
+        this.programStageService = programStageService;
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input/Output
     // -------------------------------------------------------------------------
 
-    private OrganisationUnit orgunit;
+    private Integer programStageId;
 
-    public OrganisationUnit getOrgunit()
+    public void setProgramStageId( Integer programStageId )
     {
-        return orgunit;
+        this.programStageId = programStageId;
     }
 
-    private Collection<Program> programs;
+    private List<ProgramStageDataElement> programStageDataElements;
 
-    public Collection<Program> getPrograms()
+    public List<ProgramStageDataElement> getProgramStageDataElements()
     {
-        return programs;
-    }
-
-    private List<OrganisationUnitLevel> levels;
-
-    public List<OrganisationUnitLevel> getLevels()
-    {
-        return levels;
+        return programStageDataElements;
     }
 
     // -------------------------------------------------------------------------
     // Implementation Action
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
-        orgunit = selectionManager.getSelectedOrganisationUnit();
-
-        programs = programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION, orgunit );
-
-        levels = organisationUnitService.getFilledOrganisationUnitLevels();
+        programStageDataElements = new ArrayList<ProgramStageDataElement>( programStageService.getProgramStage(
+            programStageId ).getProgramStageDataElements() );
 
         return SUCCESS;
     }
