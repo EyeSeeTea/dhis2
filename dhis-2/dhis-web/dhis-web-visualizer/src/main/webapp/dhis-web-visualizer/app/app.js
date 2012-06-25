@@ -2537,27 +2537,23 @@ Ext.onReady( function() {
                         ]
                     },
                     {
-                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:0 10px;',
+                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:8px 10px;',
                         items: [
+							{
+								xtype: 'label',
+								style: 'font-weight:bold; padding-left:3px',
+								text: 'Data'
+							},
 							{
 								layout: 'accordion',
 								activeOnTop: true,
 								cls: 'dv-accordion',
-								bodyStyle: 'border:0 none',
-								height: 112,
+								bodyStyle: 'border:0 none; margin-top:3px',
+								height: 89,
 								items: [
 									{
-										title: '<div style="height:17px; cursor:auto">' + DV.i18n.data + '</div>',
-										cls: 'dv-accordion-title',
-										hideCollapseTool: true,
-										listeners: {
-											added: function() {
-												DV.cmp.dimension.data.title = this;
-											},
-											beforeexpand: function() {
-												return false;
-											}
-										}
+										hidden: true,
+										collapsed: false
 									},
 									{
 										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.indicators + '</div>',
@@ -4409,8 +4405,7 @@ Ext.onReady( function() {
 							cls: 'dv-toolbar-btn-2',
                             text: 'col',
                             handler: function() {
-								//DV.cmp.dimension.data.title.expand();
-								DV.cmp.dimension.data.panel.setHeight(112);
+								DV.cmp.dimension.data.panel.setHeight(88);
                             }
                         },
                         {

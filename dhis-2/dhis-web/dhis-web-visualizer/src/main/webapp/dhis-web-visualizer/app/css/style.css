@@ -648,18 +648,6 @@ body {
     background-image: linear-gradient(top, #cccccc, #d3d3d3) !important;
 }
 
-.dv-accordion .dv-accordion-title {
-	border: 0 none !important;
-	border-width: 0 !important;
-}
-.dv-accordion .dv-accordion-title .x-accordion-hd {
-	padding: 6px 5px 4px 3px;
-	cursor: auto;
-    background-image: none;
-    background: #fff !important;
-    line-height: 20px;
-}
-
 .dv-accordion .collapsed .x-accordion-hd { /* accordion title dock, default, collapsed */
 	padding-bottom: 5px !important;
 }
