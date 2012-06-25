@@ -219,9 +219,7 @@ DV.conf = {
         west_fill_accordion_dataelement: 77,
         west_fill_accordion_dataset: 45,
         west_fill_accordion_organisationunit: 75,
-        west_maxheight_accordion_indicator: 450,
-        west_maxheight_accordion_dataelement: 450,
-        west_maxheight_accordion_dataset: 450,
+        west_maxheight_accordion_data: 400,
         west_maxheight_accordion_period: 340,
         west_maxheight_accordion_organisationunit: 700,
         west_maxheight_accordion_options: 393,
@@ -258,6 +256,7 @@ DV.cmp = {
 	charttype: [],
 	settings: {},
 	dimension: {
+		data: {},
 		indicator: {},
 		dataelement: {},
 		dataset: {},
@@ -2538,1049 +2537,1051 @@ Ext.onReady( function() {
                         ]
                     },
                     {
-                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:8px 10px 0 10px;',
-                        layout: 'fit',
+                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:0 10px;',
+                        layout: 'auto',
                         items: [
 							{
-								bodyStyle: 'border:0 none',
+								layout: 'accordion',
+								activeOnTop: true,
+								cls: 'dv-accordion',
+								bodyStyle: 'border:0 none; margin-top:5px; margin-bottom:10px',
+								height: 127,
 								items: [
 									{
-										xtype: 'label',
-										style: 'font-weight:bold; margin-left:3px',
-										text: 'Data'
-									},
+										title: '<div style="height:17px; cursor:auto">Data</div>',
+										cls: 'dv-accordion-title',
+										hideCollapseTool: true,
+										listeners: {
+											beforeexpand: function() {
+												return false;
+											}
+										}
+									},										
 									{
-										layout: 'accordion',
-										activeOnTop: true,
-										cls: 'dv-accordion',
-										bodyStyle: 'border:0 none; margin-top:5px; margin-bottom:10px',
-										height: 210,
+										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.indicators + '</div>',
+										hideCollapseTool: true,
 										items: [
 											{
-												hidden: true,
-												collapsed: false
-											},
-											{
-												title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.indicators + '</div>',
-												hideCollapseTool: true,
-												items: [
-													{
-														xtype: 'combobox',
-														cls: 'dv-combo',
-														style: 'margin-bottom:8px',
-														width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
-														valueField: 'id',
-														displayField: 'name',
-														fieldLabel: DV.i18n.select_group,
-														labelStyle: 'padding-left:7px;',
-														labelWidth: 90,
-														editable: false,
-														queryMode: 'remote',
-														store: Ext.create('Ext.data.Store', {
-															fields: ['id', 'name', 'index'],
-															proxy: {
-																type: 'ajax',
-																url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicatorgroup_get,
-																reader: {
-																	type: 'json',
-																	root: 'indicatorGroups'
-																}
-															},
-															listeners: {
-																load: function(s) {
-																	s.add({id: 0, name: DV.i18n.all_indicator_groups, index: -1});
-																	s.sort([																
-																		{ property: 'index', direction: 'ASC' },
-																		{ property: 'name', direction: 'ASC' }
-																	]);
-																}
-															}
-														}),
-														listeners: {
-															select: function(cb) {
-																var store = DV.store.indicator.available;
-																store.parent = cb.getValue();
-																
-																if (DV.util.store.containsParent(store)) {
-																	DV.util.store.loadFromStorage(store);
-																	DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
-																}
-																else {
-																	if (cb.getValue() === 0) {
-																		store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_getall;
-																		store.load();
-																	}
-																	else {
-																		store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
-																		store.load();
-																	}
-																}
-															}
+												xtype: 'combobox',
+												cls: 'dv-combo',
+												style: 'margin-bottom:8px',
+												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
+												valueField: 'id',
+												displayField: 'name',
+												fieldLabel: DV.i18n.select_group,
+												labelStyle: 'padding-left:7px;',
+												labelWidth: 90,
+												editable: false,
+												queryMode: 'remote',
+												store: Ext.create('Ext.data.Store', {
+													fields: ['id', 'name', 'index'],
+													proxy: {
+														type: 'ajax',
+														url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicatorgroup_get,
+														reader: {
+															type: 'json',
+															root: 'indicatorGroups'
 														}
 													},
-													{
-														xtype: 'panel',
-														layout: 'column',
-														bodyStyle: 'border-style:none',
-														items: [
-															{
-																xtype: 'multiselect',
-																name: 'availableIndicators',
-																cls: 'dv-toolbar-multiselect-left',
-																width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
-																valueField: 'id',
-																displayField: 'name',
-																queryMode: 'remote',
-																store: DV.store.indicator.available,
-																tbar: [
-																	{
-																		xtype: 'label',
-																		text: DV.i18n.available,
-																		cls: 'dv-toolbar-multiselect-left-label'
-																	},
-																	'->',
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowright.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.select(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
-																		}
-																	},
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowrightdouble.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.selectAll(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
-																		}
-																	},
-																	' '
-																],
-																listeners: {
-																	added: function() {
-																		DV.cmp.dimension.indicator.available = this;
-																	},
-																	afterrender: function() {
-																		this.boundList.on('itemdblclick', function() {
-																			DV.util.multiselect.select(this, DV.cmp.dimension.indicator.selected);
-																		}, this);
-																	}
-																}
-															},                                            
-															{
-																xtype: 'multiselect',
-																name: 'selectedIndicators',
-																cls: 'dv-toolbar-multiselect-right',
-																width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
-																displayField: 'name',
-																valueField: 'id',
-																ddReorder: true,
-																queryMode: 'local',
-																store: DV.store.indicator.selected,
-																tbar: [
-																	' ',
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowleftdouble.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.unselectAll(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
-																		}
-																	},
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowleft.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.unselect(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
-																		}
-																	},
-																	'->',
-																	{
-																		xtype: 'label',
-																		text: DV.i18n.selected,
-																		cls: 'dv-toolbar-multiselect-right-label'
-																	}
-																],
-																listeners: {
-																	added: function() {
-																		DV.cmp.dimension.indicator.selected = this;
-																	},
-																	afterrender: function() {
-																		this.boundList.on('itemdblclick', function() {
-																			DV.util.multiselect.unselect(DV.cmp.dimension.indicator.available, this);
-																		}, this);
-																	}
-																}
-															}
-														]
-													}
-												],
-												listeners: {
-													added: function() {
-														DV.cmp.dimension.indicator.panel = this;
-													},
-													expand: function() {
-														DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_indicator);
-														DV.util.multiselect.setHeight(
-															[DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected],
-															DV.cmp.dimension.indicator.panel,
-															DV.conf.layout.west_fill_accordion_indicator
-														);
-													}
-												}
-											},
-											{
-												title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.data_elements + '</div>',
-												hideCollapseTool: true,
-												items: [
-													{
-														xtype: 'combobox',
-														cls: 'dv-combo',
-														style: 'margin-bottom:8px',
-														width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
-														valueField: 'id',
-														displayField: 'name',
-														fieldLabel: DV.i18n.select_group,
-														labelStyle: 'padding-left:7px;',
-														labelWidth: 90,
-														editable: false,
-														queryMode: 'remote',
-														store: Ext.create('Ext.data.Store', {
-															fields: ['id', 'name', 'index'],
-															proxy: {
-																type: 'ajax',
-																url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.dataelementgroup_get,
-																reader: {
-																	type: 'json',
-																	root: 'dataElementGroups'
-																}
-															},
-															listeners: {
-																load: function(s) {
-																	s.add({id: 0, name: '[ All data element groups ]', index: -1});
-																	s.sort([																
-																		{ property: 'index', direction: 'ASC' },
-																		{ property: 'name', direction: 'ASC' }
-																	]);
-																}
-															}
-														}),
-														listeners: {
-															select: function(cb) {
-																var store = DV.store.dataelement.available;
-																store.parent = cb.getValue();
-																
-																if (DV.util.store.containsParent(store)) {
-																	DV.util.store.loadFromStorage(store);
-																	DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
-																}
-																else {
-																	if (cb.getValue() === 0) {
-																		store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.dataelement_getall;
-																		store.load();
-																	}
-																	else {
-																		store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.dataelement_get + cb.getValue() + '.json';
-																		store.load();
-																	}
-																}
-															}
+													listeners: {
+														load: function(s) {
+															s.add({id: 0, name: DV.i18n.all_indicator_groups, index: -1});
+															s.sort([																
+																{ property: 'index', direction: 'ASC' },
+																{ property: 'name', direction: 'ASC' }
+															]);
 														}
-													},                                    
-													{
-														xtype: 'panel',
-														layout: 'column',
-														bodyStyle: 'border-style:none',
-														items: [
-															Ext.create('Ext.ux.form.MultiSelect', {
-																name: 'availableDataElements',
-																cls: 'dv-toolbar-multiselect-left',
-																width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
-																displayField: 'name',
-																valueField: 'id',
-																queryMode: 'remote',
-																store: DV.store.dataelement.available,
-																tbar: [
-																	{
-																		xtype: 'label',
-																		text: DV.i18n.available,
-																		cls: 'dv-toolbar-multiselect-left-label'
-																	},
-																	'->',
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowright.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.select(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
-																		}
-																	},
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowrightdouble.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.selectAll(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
-																		}
-																	},
-																	' '
-																],
-																listeners: {
-																	added: function() {
-																		DV.cmp.dimension.dataelement.available = this;
-																	},                                                                
-																	afterrender: function() {
-																		this.boundList.on('itemdblclick', function() {
-																			DV.util.multiselect.select(this, DV.cmp.dimension.dataelement.selected);
-																		}, this);
-																	}
-																}
-															}),                                            
-															{
-																xtype: 'multiselect',
-																name: 'selectedDataElements',
-																cls: 'dv-toolbar-multiselect-right',
-																width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
-																displayField: 'name',
-																valueField: 'id',
-																ddReorder: true,
-																queryMode: 'remote',
-																store: DV.store.dataelement.selected,
-																tbar: [
-																	' ',
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowleftdouble.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.unselectAll(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
-																		}
-																	},
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowleft.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.unselect(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
-																		}
-																	},
-																	'->',
-																	{
-																		xtype: 'label',
-																		text: DV.i18n.selected,
-																		cls: 'dv-toolbar-multiselect-right-label'
-																	}
-																],
-																listeners: {
-																	added: function() {
-																		DV.cmp.dimension.dataelement.selected = this;
-																	},          
-																	afterrender: function() {
-																		this.boundList.on('itemdblclick', function() {
-																			DV.util.multiselect.unselect(DV.cmp.dimension.dataelement.available, this);
-																		}, this);
-																	}
-																}
-															}
-														]
 													}
-												],
+												}),
 												listeners: {
-													added: function() {
-														DV.cmp.dimension.dataelement.panel = this;
-													},
-													expand: function() {
-														DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_dataelement);
-														DV.util.multiselect.setHeight(
-															[DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected],
-															DV.cmp.dimension.dataelement.panel,
-															DV.conf.layout.west_fill_accordion_dataelement
-														);
-													}
-												}
-											},
-											{
-												title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.reporting_rates + '</div>',
-												hideCollapseTool: true,
-												cls: 'dv-accordion-last',
-												items: [
-													{
-														xtype: 'panel',
-														layout: 'column',
-														bodyStyle: 'border-style:none',
-														items: [
-															Ext.create('Ext.ux.form.MultiSelect', {
-																name: 'availableDataSets',
-																cls: 'dv-toolbar-multiselect-left',
-																width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
-																displayField: 'name',
-																valueField: 'id',
-																queryMode: 'remote',
-																store: DV.store.dataset.available,
-																tbar: [
-																	{
-																		xtype: 'label',
-																		text: DV.i18n.available,
-																		cls: 'dv-toolbar-multiselect-left-label'
-																	},
-																	'->',
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowright.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.select(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
-																		}
-																	},
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowrightdouble.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.selectAll(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
-																		}
-																	},
-																	' '
-																],
-																listeners: {
-																	added: function() {
-																		DV.cmp.dimension.dataset.available = this;
-																	},                                                                
-																	afterrender: function() {
-																		this.boundList.on('itemdblclick', function() {
-																			DV.util.multiselect.select(this, DV.cmp.dimension.dataset.selected);
-																		}, this);
-																	}
-																}
-															}),                                            
-															{
-																xtype: 'multiselect',
-																name: 'selectedDataSets',
-																cls: 'dv-toolbar-multiselect-right',
-																width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
-																displayField: 'name',
-																valueField: 'id',
-																ddReorder: true,
-																queryMode: 'remote',
-																store: DV.store.dataset.selected,
-																tbar: [
-																	' ',
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowleftdouble.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.unselectAll(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
-																		}
-																	},
-																	{
-																		xtype: 'button',
-																		icon: 'images/arrowleft.png',
-																		width: 22,
-																		handler: function() {
-																			DV.util.multiselect.unselect(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
-																		}
-																	},
-																	'->',
-																	{
-																		xtype: 'label',
-																		text: DV.i18n.selected,
-																		cls: 'dv-toolbar-multiselect-right-label'
-																	}
-																],
-																listeners: {
-																	added: function() {
-																		DV.cmp.dimension.dataset.selected = this;
-																	},          
-																	afterrender: function() {
-																		this.boundList.on('itemdblclick', function() {
-																			DV.util.multiselect.unselect(DV.cmp.dimension.dataset.available, this);
-																		}, this);
-																	}
-																}
-															}
-														]
-													}
-												],
-												listeners: {
-													added: function() {
-														DV.cmp.dimension.dataset.panel = this;
-													},
-													expand: function() {
-														DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_dataset);
-														DV.util.multiselect.setHeight(
-															[DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected],
-															DV.cmp.dimension.dataset.panel,
-															DV.conf.layout.west_fill_accordion_dataset
-														);
+													select: function(cb) {
+														var store = DV.store.indicator.available;
+														store.parent = cb.getValue();
 														
-														if (!DV.store.dataset.available.isloaded) {
-															DV.store.dataset.available.load();
+														if (DV.util.store.containsParent(store)) {
+															DV.util.store.loadFromStorage(store);
+															DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+														}
+														else {
+															if (cb.getValue() === 0) {
+																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_getall;
+																store.load();
+															}
+															else {
+																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
+																store.load();
+															}
 														}
 													}
 												}
-											}
-										]
-									},
-									
-									{
-										xtype: 'label',
-										style: 'font-weight:bold; margin-left:3px',
-										text: 'Period'
-									},
-									
-									{
-										layout: 'accordion',
-										activeOnTop: true,
-										cls: 'dv-accordion',
-										bodyStyle: 'border:0 none; margin-top:5px; margin-bottom:10px',
-										height: 220,
-										items: [
-											{
-												hidden: true,
-												collapsed: false
 											},
 											{
-												title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.relative_periods + '</div>',
-												hideCollapseTool: true,
-												cls: 'dv-accordion-last',
-												autoScroll: true,
+												xtype: 'panel',
+												layout: 'column',
+												bodyStyle: 'border-style:none',
 												items: [
 													{
-														xtype: 'panel',
-														layout: 'column',
-														bodyStyle: 'border-style:none',
-														items: [
-															{
-																xtype: 'panel',
-																layout: 'anchor',
-																bodyStyle: 'border-style:none; padding:0 0 0 10px',
-																defaults: {
-																	labelSeparator: '',
-																	listeners: {
-																		added: function(chb) {
-																			if (chb.xtype === 'checkbox') {
-																				DV.cmp.dimension.period.checkbox.push(chb);
-																			}
-																		}
-																	}
-																},
-																items: [
-																	{
-																		xtype: 'label',
-																		text: DV.i18n.months,
-																		cls: 'dv-label-period-heading'
-																	},
-																	{
-																		xtype: 'checkbox',
-																		paramName: 'reportingMonth',
-																		boxLabel: DV.i18n.last_month
-																	},
-																	{
-																		xtype: 'checkbox',
-																		paramName: 'last12Months',
-																		boxLabel: DV.i18n.last_12_months,
-																		checked: true
-																	}
-																]
-															},
-															{
-																xtype: 'panel',
-																layout: 'anchor',
-																bodyStyle: 'border-style:none; padding:0 0 0 32px',
-																defaults: {
-																	labelSeparator: '',
-																	listeners: {
-																		added: function(chb) {
-																			if (chb.xtype === 'checkbox') {
-																				DV.cmp.dimension.period.checkbox.push(chb);
-																			}
-																		}
-																	}
-																},
-																items: [
-																	{
-																		xtype: 'label',
-																		text: DV.i18n.quarters,
-																		cls: 'dv-label-period-heading'
-																	},
-																	{
-																		xtype: 'checkbox',
-																		paramName: 'reportingQuarter',
-																		boxLabel: DV.i18n.last_quarter
-																	},
-																	{
-																		xtype: 'checkbox',
-																		paramName: 'last4Quarters',
-																		boxLabel: DV.i18n.last_4_quarters
-																	}
-																]
-															},
-															{
-																xtype: 'panel',
-																layout: 'anchor',
-																bodyStyle: 'border-style:none; padding:0 0 0 32px',
-																defaults: {
-																	labelSeparator: '',
-																	listeners: {
-																		added: function(chb) {
-																			if (chb.xtype === 'checkbox') {
-																				DV.cmp.dimension.period.checkbox.push(chb);
-																			}
-																		}
-																	}
-																},
-																items: [
-																	{
-																		xtype: 'label',
-																		text: DV.i18n.six_months,
-																		cls: 'dv-label-period-heading'
-																	},
-																	{
-																		xtype: 'checkbox',
-																		paramName: 'lastSixMonth',
-																		boxLabel: DV.i18n.last_six_month
-																	},
-																	{
-																		xtype: 'checkbox',
-																		paramName: 'last2SixMonths',
-																		boxLabel: DV.i18n.last_two_six_month
-																	}
-																]
-															}
-														]
-													},
-													{
-														xtype: 'panel',
-														layout: 'column',
-														bodyStyle: 'border-style:none',
-														items: [
-															{
-																xtype: 'panel',
-																layout: 'anchor',
-																bodyStyle: 'border-style:none; padding:5px 0 0 10px',
-																defaults: {
-																	labelSeparator: '',
-																	listeners: {
-																		added: function(chb) {
-																			if (chb.xtype === 'checkbox') {
-																				DV.cmp.dimension.period.checkbox.push(chb);
-																			}
-																		}
-																	}
-																},
-																items: [
-																	{
-																		xtype: 'label',
-																		text: DV.i18n.years,
-																		cls: 'dv-label-period-heading'
-																	},
-																	{
-																		xtype: 'checkbox',
-																		paramName: 'thisYear',
-																		boxLabel: DV.i18n.this_year
-																	},
-																	{
-																		xtype: 'checkbox',
-																		paramName: 'lastYear',
-																		boxLabel: DV.i18n.last_year
-																	},
-																	{
-																		xtype: 'checkbox',
-																		paramName: 'last5Years',
-																		boxLabel: DV.i18n.last_5_years
-																	}
-																]
-															}
-														]
-													}
-												],
-												listeners: {
-													added: function() {
-														DV.cmp.dimension.period.panel = this;
-													},
-													expand: function() {
-														DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_period);
-													}
-												}
-											}
-										]
-									},
-									
-									{
-										xtype: 'label',
-										style: 'font-weight:bold; margin-left:3px',
-										text: 'Organisation unit'
-									},
-									
-									{
-										layout: 'accordion',
-										activeOnTop: true,
-										cls: 'dv-accordion',
-										bodyStyle: 'border:0 none; margin-top:5px',
-										height: 130,
-										items: [
-											{
-												hidden: true,
-												collapsed: false
-											},
-											{
-												title: '<div style="height:17px; background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.organisation_units + '</div>',
-												hideCollapseTool: true,
-												items: [
-													{
-														xtype: 'combobox',
-														cls: 'dv-combo',
-														style: 'margin-bottom:8px',
-														width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
+														xtype: 'multiselect',
+														name: 'availableIndicators',
+														cls: 'dv-toolbar-multiselect-left',
+														width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
 														valueField: 'id',
 														displayField: 'name',
-														fieldLabel: DV.i18n.group_sets,
-														labelWidth: 85,
-														labelStyle: 'padding-left:7px;',
-														editable: false,
 														queryMode: 'remote',
-														value: DV.i18n.none,
-														store: DV.store.groupset,
+														store: DV.store.indicator.available,
+														tbar: [
+															{
+																xtype: 'label',
+																text: DV.i18n.available,
+																cls: 'dv-toolbar-multiselect-left-label'
+															},
+															'->',
+															{
+																xtype: 'button',
+																icon: 'images/arrowright.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.select(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+																}
+															},
+															{
+																xtype: 'button',
+																icon: 'images/arrowrightdouble.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.selectAll(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+																}
+															},
+															' '
+														],
 														listeners: {
 															added: function() {
-																this.up('panel').groupsets = this;
+																DV.cmp.dimension.indicator.available = this;
+															},
+															afterrender: function() {
+																this.boundList.on('itemdblclick', function() {
+																	DV.util.multiselect.select(this, DV.cmp.dimension.indicator.selected);
+																}, this);
 															}
 														}
-													},
+													},                                            
 													{
-														xtype: 'treepanel',
-														cls: 'dv-tree',
-														width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
-														autoScroll: true,
-														multiSelect: true,
-														rendered: false,
-														selectRoot: function() {
-															if (this.rendered) {
-																if (!this.getSelectionModel().getSelection().length) {
-																	this.getSelectionModel().select(this.getRootNode());
+														xtype: 'multiselect',
+														name: 'selectedIndicators',
+														cls: 'dv-toolbar-multiselect-right',
+														width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
+														displayField: 'name',
+														valueField: 'id',
+														ddReorder: true,
+														queryMode: 'local',
+														store: DV.store.indicator.selected,
+														tbar: [
+															' ',
+															{
+																xtype: 'button',
+																icon: 'images/arrowleftdouble.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.unselectAll(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+																}
+															},
+															{
+																xtype: 'button',
+																icon: 'images/arrowleft.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.unselect(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+																}
+															},
+															'->',
+															{
+																xtype: 'label',
+																text: DV.i18n.selected,
+																cls: 'dv-toolbar-multiselect-right-label'
+															}
+														],
+														listeners: {
+															added: function() {
+																DV.cmp.dimension.indicator.selected = this;
+															},
+															afterrender: function() {
+																this.boundList.on('itemdblclick', function() {
+																	DV.util.multiselect.unselect(DV.cmp.dimension.indicator.available, this);
+																}, this);
+															}
+														}
+													}
+												]
+											}
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.dimension.indicator.panel = this;
+											},
+											expand: function() {
+												DV.cmp.dimension.data.panel.setHeight(DV.conf.layout.west_maxheight_accordion_data);
+												DV.util.multiselect.setHeight(
+													[DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected],
+													DV.cmp.dimension.indicator.panel,
+													DV.conf.layout.west_fill_accordion_indicator
+												);
+												
+											}
+										}
+									},
+									{
+										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.data_elements + '</div>',
+										hideCollapseTool: true,
+										items: [
+											{
+												xtype: 'combobox',
+												cls: 'dv-combo',
+												style: 'margin-bottom:8px',
+												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
+												valueField: 'id',
+												displayField: 'name',
+												fieldLabel: DV.i18n.select_group,
+												labelStyle: 'padding-left:7px;',
+												labelWidth: 90,
+												editable: false,
+												queryMode: 'remote',
+												store: Ext.create('Ext.data.Store', {
+													fields: ['id', 'name', 'index'],
+													proxy: {
+														type: 'ajax',
+														url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.dataelementgroup_get,
+														reader: {
+															type: 'json',
+															root: 'dataElementGroups'
+														}
+													},
+													listeners: {
+														load: function(s) {
+															s.add({id: 0, name: '[ All data element groups ]', index: -1});
+															s.sort([																
+																{ property: 'index', direction: 'ASC' },
+																{ property: 'name', direction: 'ASC' }
+															]);
+														}
+													}
+												}),
+												listeners: {
+													select: function(cb) {
+														var store = DV.store.dataelement.available;
+														store.parent = cb.getValue();
+														
+														if (DV.util.store.containsParent(store)) {
+															DV.util.store.loadFromStorage(store);
+															DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
+														}
+														else {
+															if (cb.getValue() === 0) {
+																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.dataelement_getall;
+																store.load();
+															}
+															else {
+																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.dataelement_get + cb.getValue() + '.json';
+																store.load();
+															}
+														}
+													}
+												}
+											},                                    
+											{
+												xtype: 'panel',
+												layout: 'column',
+												bodyStyle: 'border-style:none',
+												items: [
+													Ext.create('Ext.ux.form.MultiSelect', {
+														name: 'availableDataElements',
+														cls: 'dv-toolbar-multiselect-left',
+														width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
+														displayField: 'name',
+														valueField: 'id',
+														queryMode: 'remote',
+														store: DV.store.dataelement.available,
+														tbar: [
+															{
+																xtype: 'label',
+																text: DV.i18n.available,
+																cls: 'dv-toolbar-multiselect-left-label'
+															},
+															'->',
+															{
+																xtype: 'button',
+																icon: 'images/arrowright.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.select(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
+																}
+															},
+															{
+																xtype: 'button',
+																icon: 'images/arrowrightdouble.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.selectAll(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
+																}
+															},
+															' '
+														],
+														listeners: {
+															added: function() {
+																DV.cmp.dimension.dataelement.available = this;
+															},                                                                
+															afterrender: function() {
+																this.boundList.on('itemdblclick', function() {
+																	DV.util.multiselect.select(this, DV.cmp.dimension.dataelement.selected);
+																}, this);
+															}
+														}
+													}),                                            
+													{
+														xtype: 'multiselect',
+														name: 'selectedDataElements',
+														cls: 'dv-toolbar-multiselect-right',
+														width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
+														displayField: 'name',
+														valueField: 'id',
+														ddReorder: true,
+														queryMode: 'remote',
+														store: DV.store.dataelement.selected,
+														tbar: [
+															' ',
+															{
+																xtype: 'button',
+																icon: 'images/arrowleftdouble.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.unselectAll(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
+																}
+															},
+															{
+																xtype: 'button',
+																icon: 'images/arrowleft.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.unselect(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
+																}
+															},
+															'->',
+															{
+																xtype: 'label',
+																text: DV.i18n.selected,
+																cls: 'dv-toolbar-multiselect-right-label'
+															}
+														],
+														listeners: {
+															added: function() {
+																DV.cmp.dimension.dataelement.selected = this;
+															},          
+															afterrender: function() {
+																this.boundList.on('itemdblclick', function() {
+																	DV.util.multiselect.unselect(DV.cmp.dimension.dataelement.available, this);
+																}, this);
+															}
+														}
+													}
+												]
+											}
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.dimension.dataelement.panel = this;
+											},
+											expand: function() {
+												DV.cmp.dimension.data.panel.setHeight(DV.conf.layout.west_maxheight_accordion_data);
+												DV.util.multiselect.setHeight(
+													[DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected],
+													DV.cmp.dimension.dataelement.panel,
+													DV.conf.layout.west_fill_accordion_dataelement
+												);
+											}
+										}
+									},
+									{
+										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.reporting_rates + '</div>',
+										hideCollapseTool: true,
+										cls: 'dv-accordion-last',
+										items: [
+											{
+												xtype: 'panel',
+												layout: 'column',
+												bodyStyle: 'border-style:none',
+												items: [
+													Ext.create('Ext.ux.form.MultiSelect', {
+														name: 'availableDataSets',
+														cls: 'dv-toolbar-multiselect-left',
+														width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
+														displayField: 'name',
+														valueField: 'id',
+														queryMode: 'remote',
+														store: DV.store.dataset.available,
+														tbar: [
+															{
+																xtype: 'label',
+																text: DV.i18n.available,
+																cls: 'dv-toolbar-multiselect-left-label'
+															},
+															'->',
+															{
+																xtype: 'button',
+																icon: 'images/arrowright.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.select(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
+																}
+															},
+															{
+																xtype: 'button',
+																icon: 'images/arrowrightdouble.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.selectAll(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
+																}
+															},
+															' '
+														],
+														listeners: {
+															added: function() {
+																DV.cmp.dimension.dataset.available = this;
+															},                                                                
+															afterrender: function() {
+																this.boundList.on('itemdblclick', function() {
+																	DV.util.multiselect.select(this, DV.cmp.dimension.dataset.selected);
+																}, this);
+															}
+														}
+													}),                                            
+													{
+														xtype: 'multiselect',
+														name: 'selectedDataSets',
+														cls: 'dv-toolbar-multiselect-right',
+														width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
+														displayField: 'name',
+														valueField: 'id',
+														ddReorder: true,
+														queryMode: 'remote',
+														store: DV.store.dataset.selected,
+														tbar: [
+															' ',
+															{
+																xtype: 'button',
+																icon: 'images/arrowleftdouble.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.unselectAll(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
+																}
+															},
+															{
+																xtype: 'button',
+																icon: 'images/arrowleft.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.unselect(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
+																}
+															},
+															'->',
+															{
+																xtype: 'label',
+																text: DV.i18n.selected,
+																cls: 'dv-toolbar-multiselect-right-label'
+															}
+														],
+														listeners: {
+															added: function() {
+																DV.cmp.dimension.dataset.selected = this;
+															},          
+															afterrender: function() {
+																this.boundList.on('itemdblclick', function() {
+																	DV.util.multiselect.unselect(DV.cmp.dimension.dataset.available, this);
+																}, this);
+															}
+														}
+													}
+												]
+											}
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.dimension.dataset.panel = this;
+											},
+											expand: function() {
+												DV.cmp.dimension.data.panel.setHeight(DV.conf.layout.west_maxheight_accordion_data);
+												DV.util.multiselect.setHeight(
+													[DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected],
+													DV.cmp.dimension.dataset.panel,
+													DV.conf.layout.west_fill_accordion_dataset
+												);
+												
+												if (!DV.store.dataset.available.isloaded) {
+													DV.store.dataset.available.load();
+												}
+											}
+										}
+									}
+								],
+								listeners: {
+									added: function() {
+										DV.cmp.dimension.data.panel = this;
+									}
+								}
+							},
+							
+							{
+								xtype: 'label',
+								style: 'font-weight:bold; margin-left:3px',
+								text: DV.i18n.period
+							},
+							
+							{
+								layout: 'accordion',
+								activeOnTop: true,
+								cls: 'dv-accordion',
+								bodyStyle: 'border:0 none; margin-top:5px; margin-bottom:10px',
+								height: 44,
+								items: [
+									{
+										hidden: true,
+										collapsed: false
+									},
+									{
+										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.relative_periods + '</div>',
+										hideCollapseTool: true,
+										cls: 'dv-accordion-last',
+										autoScroll: true,
+										items: [
+											{
+												xtype: 'panel',
+												layout: 'column',
+												bodyStyle: 'border-style:none',
+												items: [
+													{
+														xtype: 'panel',
+														layout: 'anchor',
+														bodyStyle: 'border-style:none; padding:0 0 0 10px',
+														defaults: {
+															labelSeparator: '',
+															listeners: {
+																added: function(chb) {
+																	if (chb.xtype === 'checkbox') {
+																		DV.cmp.dimension.period.checkbox.push(chb);
+																	}
 																}
 															}
 														},
-														store: Ext.create('Ext.data.TreeStore', {
-															proxy: {
-																type: 'ajax',
-																url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunitchildren_get
+														items: [
+															{
+																xtype: 'label',
+																text: DV.i18n.months,
+																cls: 'dv-label-period-heading'
 															},
-															root: {
-																id: DV.init.system.rootnode.id,
-																text: DV.init.system.rootnode.name,
-																expanded: false
+															{
+																xtype: 'checkbox',
+																paramName: 'reportingMonth',
+																boxLabel: DV.i18n.last_month
 															},
+															{
+																xtype: 'checkbox',
+																paramName: 'last12Months',
+																boxLabel: DV.i18n.last_12_months,
+																checked: true
+															}
+														]
+													},
+													{
+														xtype: 'panel',
+														layout: 'anchor',
+														bodyStyle: 'border-style:none; padding:0 0 0 32px',
+														defaults: {
+															labelSeparator: '',
 															listeners: {
-																load: function(s, node, r) {
-																	for (var i = 0; i < r.length; i++) {
-																		r[i].data.text = DV.conf.util.jsonEncodeString(r[i].data.text);
+																added: function(chb) {
+																	if (chb.xtype === 'checkbox') {
+																		DV.cmp.dimension.period.checkbox.push(chb);
 																	}
 																}
 															}
-														}),
-														listeners: {
-															added: function() {
-																DV.cmp.dimension.organisationunit.treepanel = this;
+														},
+														items: [
+															{
+																xtype: 'label',
+																text: DV.i18n.quarters,
+																cls: 'dv-label-period-heading'
 															},
-															itemcontextmenu: function(v, r, h, i, e) {
-																if (v.menu) {
-																	v.menu.destroy();
-																}
-																v.menu = Ext.create('Ext.menu.Menu', {
-																	id: 'treepanel-contextmenu',
-																	showSeparator: false
-																});
-																if (!r.data.leaf) {
-																	v.menu.add({
-																		id: 'treepanel-contextmenu-item',
-																		text: DV.i18n.select_all_children,
-																		icon: 'images/node-select-child.png',
-																		handler: function() {
-																			r.expand(false, function() {
-																				v.getSelectionModel().select(r.childNodes, true);
-																				v.getSelectionModel().deselect(r);
-																			});
-																		}
-																	});
-																}
-																else {
-																	return;
-																}
-																
-																v.menu.showAt(e.xy);
+															{
+																xtype: 'checkbox',
+																paramName: 'reportingQuarter',
+																boxLabel: DV.i18n.last_quarter
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'last4Quarters',
+																boxLabel: DV.i18n.last_4_quarters
 															}
-														}
+														]
+													},
+													{
+														xtype: 'panel',
+														layout: 'anchor',
+														bodyStyle: 'border-style:none; padding:0 0 0 32px',
+														defaults: {
+															labelSeparator: '',
+															listeners: {
+																added: function(chb) {
+																	if (chb.xtype === 'checkbox') {
+																		DV.cmp.dimension.period.checkbox.push(chb);
+																	}
+																}
+															}
+														},
+														items: [
+															{
+																xtype: 'label',
+																text: DV.i18n.six_months,
+																cls: 'dv-label-period-heading'
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'lastSixMonth',
+																boxLabel: DV.i18n.last_six_month
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'last2SixMonths',
+																boxLabel: DV.i18n.last_two_six_month
+															}
+														]
 													}
-												],
+												]
+											},
+											{
+												xtype: 'panel',
+												layout: 'column',
+												bodyStyle: 'border-style:none',
+												items: [
+													{
+														xtype: 'panel',
+														layout: 'anchor',
+														bodyStyle: 'border-style:none; padding:5px 0 0 10px',
+														defaults: {
+															labelSeparator: '',
+															listeners: {
+																added: function(chb) {
+																	if (chb.xtype === 'checkbox') {
+																		DV.cmp.dimension.period.checkbox.push(chb);
+																	}
+																}
+															}
+														},
+														items: [
+															{
+																xtype: 'label',
+																text: DV.i18n.years,
+																cls: 'dv-label-period-heading'
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'thisYear',
+																boxLabel: DV.i18n.this_year
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'lastYear',
+																boxLabel: DV.i18n.last_year
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'last5Years',
+																boxLabel: DV.i18n.last_5_years
+															}
+														]
+													}
+												]
+											}
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.dimension.period.panel = this;
+											},
+											expand: function() {
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_period);
+											}
+										}
+									}
+								]
+							},
+							
+							{
+								xtype: 'label',
+								style: 'font-weight:bold; margin-left:3px',
+								text: DV.i18n.organisation_unit
+							},
+							
+							{
+								layout: 'accordion',
+								activeOnTop: true,
+								cls: 'dv-accordion',
+								bodyStyle: 'border:0 none; margin-top:5px',
+								height: 130,
+								items: [
+									{
+										hidden: true,
+										collapsed: false
+									},
+									{
+										title: '<div style="height:17px; background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.organisation_units + '</div>',
+										hideCollapseTool: true,
+										items: [
+											{
+												xtype: 'combobox',
+												cls: 'dv-combo',
+												style: 'margin-bottom:8px',
+												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
+												valueField: 'id',
+												displayField: 'name',
+												fieldLabel: DV.i18n.group_sets,
+												labelWidth: 85,
+												labelStyle: 'padding-left:7px;',
+												editable: false,
+												queryMode: 'remote',
+												value: DV.i18n.none,
+												store: DV.store.groupset,
 												listeners: {
 													added: function() {
-														DV.cmp.dimension.organisationunit.panel = this;
-													},
-													expand: function() {
-														DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_organisationunit);
-														DV.cmp.dimension.organisationunit.treepanel.setHeight(DV.cmp.dimension.organisationunit.panel.getHeight() - DV.conf.layout.west_fill_accordion_organisationunit);
+														this.up('panel').groupsets = this;
 													}
 												}
 											},
 											{
-												title: '<div style="height:17px; background-image:url(images/options.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.chart_options + '</div>',
-												hideCollapseTool: true,
-												cls: 'dv-accordion-options',
-												items: [
-													{
-														xtype: 'panel',
-														bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
-														items: [
-															{
-																xtype: 'panel',
-																layout: 'column',
-																bodyStyle: 'border-style:none; background-color:transparent; padding-bottom:3px',
-																items: [
-																	{
-																		xtype: 'checkbox',
-																		width: 126,
-																		boxLabel: DV.i18n.show_data,
-																		labelWidth: DV.conf.layout.form_label_width,
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.showdata = this;
-																			}
-																		}
-																	},
-																	{
-																		xtype: 'checkbox',
-																		width: 124,
-																		boxLabel: DV.i18n.hide_subtitle,
-																		labelWidth: DV.conf.layout.form_label_width,
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.hidesubtitle = this;
-																			}
-																		}
-																	},
-																	{
-																		xtype: 'checkbox',
-																		width: 128,
-																		boxLabel: DV.i18n.user_orgunit,
-																		labelWidth: DV.conf.layout.form_label_width,
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.userorganisationunit = this;
-																			}
-																		}
-																	}
-																]
-															},
-															{
-																xtype: 'panel',
-																layout: 'column',
-																bodyStyle: 'border-style:none; background-color:transparent; padding-bottom:15px',
-																items: [
-																	{
-																		xtype: 'checkbox',
-																		width: 126,
-																		boxLabel: DV.i18n.trend_line,
-																		labelWidth: DV.conf.layout.form_label_width,
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.trendline = this;
-																			}
-																		}
-																	},
-																	{
-																		xtype: 'checkbox',
-																		width: 124,
-																		boxLabel: DV.i18n.hide_legend,
-																		labelWidth: DV.conf.layout.form_label_width,
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.hidelegend = this;
-																			}
-																		}
-																	},
-																	{
-																		xtype: 'checkbox',
-																		width: 128,
-																		boxLabel: DV.i18n.user_orgunit_children,
-																		labelWidth: DV.conf.layout.form_label_width,
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.userorganisationunitchildren = this;
-																			}
-																		}
-																	}
-																]
-															},
-															{
-																xtype: 'panel',
-																layout: 'column',
-																bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:8px',
-																items: [
-																	{
-																		xtype: 'textfield',
-																		cls: 'dv-textfield-alt1',
-																		style: 'margin-right:6px',
-																		fieldLabel: DV.i18n.domain_axis_label,
-																		labelAlign: 'top',
-																		labelSeparator: '',
-																		maxLength: 100,
-																		enforceMaxLength: true,
-																		labelWidth: DV.conf.layout.form_label_width,
-																		width: 187,
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.domainaxislabel = this;
-																			}
-																		}
-																	},
-																	{
-																		xtype: 'textfield',
-																		cls: 'dv-textfield-alt1',
-																		fieldLabel: DV.i18n.range_axis_label,
-																		labelAlign: 'top',
-																		labelSeparator: '',
-																		maxLength: 100,
-																		enforceMaxLength: true,
-																		labelWidth: DV.conf.layout.form_label_width,
-																		width: 187,
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.rangeaxislabel = this;
-																			}
-																		}
-																	}
-																]
-															},
-															{
-																xtype: 'panel',
-																layout: 'column',
-																bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:8px',
-																items: [
-																	{
-																		xtype: 'numberfield',
-																		cls: 'dv-textfield-alt1',
-																		style: 'margin-right:6px',
-																		hideTrigger: true,
-																		fieldLabel: DV.i18n.target_line_value,
-																		labelAlign: 'top',
-																		labelSeparator: '',
-																		maxLength: 100,
-																		enforceMaxLength: true,
-																		width: 187,
-																		spinUpEnabled: true,
-																		spinDownEnabled: true,
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.targetlinevalue = this;
-																			},
-																			change: function() {
-																				DV.cmp.favorite.targetlinelabel.xable();
-																			}
-																		}
-																	},
-																	{
-																		xtype: 'textfield',
-																		cls: 'dv-textfield-alt1',
-																		fieldLabel: DV.i18n.target_line_label,
-																		labelAlign: 'top',
-																		labelSeparator: '',
-																		maxLength: 100,
-																		enforceMaxLength: true,
-																		width: 187,
-																		disabled: true,
-																		xable: function() {
-																			if (DV.cmp.favorite.targetlinevalue.getValue()) {
-																				this.enable();
-																			}
-																			else {
-																				this.disable();
-																			}
-																		},
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.targetlinelabel = this;
-																			}
-																		}
-																	}
-																]
-															},
-															{
-																xtype: 'panel',
-																layout: 'column',
-																bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:5px',
-																items: [
-																	{
-																		xtype: 'numberfield',
-																		cls: 'dv-textfield-alt1',
-																		style: 'margin-right:6px',
-																		hideTrigger: true,
-																		fieldLabel: DV.i18n.base_line_value,
-																		labelAlign: 'top',
-																		labelSeparator: '',
-																		maxLength: 100,
-																		enforceMaxLength: true,
-																		width: 187,
-																		spinUpEnabled: true,
-																		spinDownEnabled: true,
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.baselinevalue = this;
-																			},
-																			change: function() {
-																				DV.cmp.favorite.baselinelabel.xable();
-																			}
-																		}
-																	},
-																	{
-																		xtype: 'textfield',
-																		cls: 'dv-textfield-alt1',
-																		fieldLabel: DV.i18n.base_line_label,
-																		labelAlign: 'top',
-																		labelSeparator: '',
-																		maxLength: 100,
-																		enforceMaxLength: true,
-																		width: 187,
-																		disabled: true,
-																		xable: function() {
-																			if (DV.cmp.favorite.baselinevalue.getValue()) {
-																				this.enable();
-																			}
-																			else {
-																				this.disable();
-																			}
-																		},
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.baselinelabel = this;
-																			}
-																		}
-																	}
-																]
-															}
-														]
+												xtype: 'treepanel',
+												cls: 'dv-tree',
+												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
+												autoScroll: true,
+												multiSelect: true,
+												rendered: false,
+												selectRoot: function() {
+													if (this.rendered) {
+														if (!this.getSelectionModel().getSelection().length) {
+															this.getSelectionModel().select(this.getRootNode());
+														}
 													}
-												],
+												},
+												store: Ext.create('Ext.data.TreeStore', {
+													proxy: {
+														type: 'ajax',
+														url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunitchildren_get
+													},
+													root: {
+														id: DV.init.system.rootnode.id,
+														text: DV.init.system.rootnode.name,
+														expanded: false
+													},
+													listeners: {
+														load: function(s, node, r) {
+															for (var i = 0; i < r.length; i++) {
+																r[i].data.text = DV.conf.util.jsonEncodeString(r[i].data.text);
+															}
+														}
+													}
+												}),
 												listeners: {
 													added: function() {
-														DV.cmp.options.panel = this;
+														DV.cmp.dimension.organisationunit.treepanel = this;
 													},
-													expand: function() {
-														DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_options);
+													itemcontextmenu: function(v, r, h, i, e) {
+														if (v.menu) {
+															v.menu.destroy();
+														}
+														v.menu = Ext.create('Ext.menu.Menu', {
+															id: 'treepanel-contextmenu',
+															showSeparator: false
+														});
+														if (!r.data.leaf) {
+															v.menu.add({
+																id: 'treepanel-contextmenu-item',
+																text: DV.i18n.select_all_children,
+																icon: 'images/node-select-child.png',
+																handler: function() {
+																	r.expand(false, function() {
+																		v.getSelectionModel().select(r.childNodes, true);
+																		v.getSelectionModel().deselect(r);
+																	});
+																}
+															});
+														}
+														else {
+															return;
+														}
+														
+														v.menu.showAt(e.xy);
 													}
 												}
 											}
 										],
 										listeners: {
 											added: function() {
-												DV.cmp.dimension.panel = this;
+												DV.cmp.dimension.organisationunit.panel = this;
+											},
+											expand: function() {
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_organisationunit);
+												DV.cmp.dimension.organisationunit.treepanel.setHeight(DV.cmp.dimension.organisationunit.panel.getHeight() - DV.conf.layout.west_fill_accordion_organisationunit);
+											}
+										}
+									},
+									{
+										title: '<div style="height:17px; background-image:url(images/options.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.chart_options + '</div>',
+										hideCollapseTool: true,
+										cls: 'dv-accordion-options',
+										items: [
+											{
+												xtype: 'panel',
+												bodyStyle: 'border-style:none; background-color:transparent; padding:0 2px',
+												items: [
+													{
+														xtype: 'panel',
+														layout: 'column',
+														bodyStyle: 'border-style:none; background-color:transparent; padding-bottom:3px',
+														items: [
+															{
+																xtype: 'checkbox',
+																width: 126,
+																boxLabel: DV.i18n.show_data,
+																labelWidth: DV.conf.layout.form_label_width,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.showdata = this;
+																	}
+																}
+															},
+															{
+																xtype: 'checkbox',
+																width: 124,
+																boxLabel: DV.i18n.hide_subtitle,
+																labelWidth: DV.conf.layout.form_label_width,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.hidesubtitle = this;
+																	}
+																}
+															},
+															{
+																xtype: 'checkbox',
+																width: 128,
+																boxLabel: DV.i18n.user_orgunit,
+																labelWidth: DV.conf.layout.form_label_width,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.userorganisationunit = this;
+																	}
+																}
+															}
+														]
+													},
+													{
+														xtype: 'panel',
+														layout: 'column',
+														bodyStyle: 'border-style:none; background-color:transparent; padding-bottom:15px',
+														items: [
+															{
+																xtype: 'checkbox',
+																width: 126,
+																boxLabel: DV.i18n.trend_line,
+																labelWidth: DV.conf.layout.form_label_width,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.trendline = this;
+																	}
+																}
+															},
+															{
+																xtype: 'checkbox',
+																width: 124,
+																boxLabel: DV.i18n.hide_legend,
+																labelWidth: DV.conf.layout.form_label_width,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.hidelegend = this;
+																	}
+																}
+															},
+															{
+																xtype: 'checkbox',
+																width: 128,
+																boxLabel: DV.i18n.user_orgunit_children,
+																labelWidth: DV.conf.layout.form_label_width,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.userorganisationunitchildren = this;
+																	}
+																}
+															}
+														]
+													},
+													{
+														xtype: 'panel',
+														layout: 'column',
+														bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:8px',
+														items: [
+															{
+																xtype: 'textfield',
+																cls: 'dv-textfield-alt1',
+																style: 'margin-right:6px',
+																fieldLabel: DV.i18n.domain_axis_label,
+																labelAlign: 'top',
+																labelSeparator: '',
+																maxLength: 100,
+																enforceMaxLength: true,
+																labelWidth: DV.conf.layout.form_label_width,
+																width: 187,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.domainaxislabel = this;
+																	}
+																}
+															},
+															{
+																xtype: 'textfield',
+																cls: 'dv-textfield-alt1',
+																fieldLabel: DV.i18n.range_axis_label,
+																labelAlign: 'top',
+																labelSeparator: '',
+																maxLength: 100,
+																enforceMaxLength: true,
+																labelWidth: DV.conf.layout.form_label_width,
+																width: 187,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.rangeaxislabel = this;
+																	}
+																}
+															}
+														]
+													},
+													{
+														xtype: 'panel',
+														layout: 'column',
+														bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:8px',
+														items: [
+															{
+																xtype: 'numberfield',
+																cls: 'dv-textfield-alt1',
+																style: 'margin-right:6px',
+																hideTrigger: true,
+																fieldLabel: DV.i18n.target_line_value,
+																labelAlign: 'top',
+																labelSeparator: '',
+																maxLength: 100,
+																enforceMaxLength: true,
+																width: 187,
+																spinUpEnabled: true,
+																spinDownEnabled: true,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.targetlinevalue = this;
+																	},
+																	change: function() {
+																		DV.cmp.favorite.targetlinelabel.xable();
+																	}
+																}
+															},
+															{
+																xtype: 'textfield',
+																cls: 'dv-textfield-alt1',
+																fieldLabel: DV.i18n.target_line_label,
+																labelAlign: 'top',
+																labelSeparator: '',
+																maxLength: 100,
+																enforceMaxLength: true,
+																width: 187,
+																disabled: true,
+																xable: function() {
+																	if (DV.cmp.favorite.targetlinevalue.getValue()) {
+																		this.enable();
+																	}
+																	else {
+																		this.disable();
+																	}
+																},
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.targetlinelabel = this;
+																	}
+																}
+															}
+														]
+													},
+													{
+														xtype: 'panel',
+														layout: 'column',
+														bodyStyle: 'border:0 none; background-color:transparent; padding-bottom:5px',
+														items: [
+															{
+																xtype: 'numberfield',
+																cls: 'dv-textfield-alt1',
+																style: 'margin-right:6px',
+																hideTrigger: true,
+																fieldLabel: DV.i18n.base_line_value,
+																labelAlign: 'top',
+																labelSeparator: '',
+																maxLength: 100,
+																enforceMaxLength: true,
+																width: 187,
+																spinUpEnabled: true,
+																spinDownEnabled: true,
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.baselinevalue = this;
+																	},
+																	change: function() {
+																		DV.cmp.favorite.baselinelabel.xable();
+																	}
+																}
+															},
+															{
+																xtype: 'textfield',
+																cls: 'dv-textfield-alt1',
+																fieldLabel: DV.i18n.base_line_label,
+																labelAlign: 'top',
+																labelSeparator: '',
+																maxLength: 100,
+																enforceMaxLength: true,
+																width: 187,
+																disabled: true,
+																xable: function() {
+																	if (DV.cmp.favorite.baselinevalue.getValue()) {
+																		this.enable();
+																	}
+																	else {
+																		this.disable();
+																	}
+																},
+																listeners: {
+																	added: function() {
+																		DV.cmp.favorite.baselinelabel = this;
+																	}
+																}
+															}
+														]
+													}
+												]
+											}
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.options.panel = this;
+											},
+											expand: function() {
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_options);
 											}
 										}
 									}
-								]
+								],
+								listeners: {
+									added: function() {
+										DV.cmp.dimension.panel = this;
+									}
+								}
 							}
 						]
 					}
@@ -4396,6 +4397,15 @@ Ext.onReady( function() {
                             }
                         },
                         '->',
+                        {
+                            xtype: 'button',
+							cls: 'dv-toolbar-btn-2',
+                            text: 'col',
+                            handler: function() {
+								DV.cmp.dimension.data.panel.setHeight(127);
+								Ext.getCmp('temp').expand();
+                            }
+                        },
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
