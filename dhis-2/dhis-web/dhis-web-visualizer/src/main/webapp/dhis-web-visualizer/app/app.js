@@ -2538,25 +2538,27 @@ Ext.onReady( function() {
                     },
                     {
                         bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:0 10px;',
-                        layout: 'auto',
                         items: [
 							{
 								layout: 'accordion',
 								activeOnTop: true,
 								cls: 'dv-accordion',
-								bodyStyle: 'border:0 none; margin-top:5px; margin-bottom:10px',
-								height: 127,
+								bodyStyle: 'border:0 none',
+								height: 112,
 								items: [
 									{
-										title: '<div style="height:17px; cursor:auto">Data</div>',
+										title: '<div style="height:17px; cursor:auto">' + DV.i18n.data + '</div>',
 										cls: 'dv-accordion-title',
 										hideCollapseTool: true,
 										listeners: {
+											added: function() {
+												DV.cmp.dimension.data.title = this;
+											},
 											beforeexpand: function() {
 												return false;
 											}
 										}
-									},										
+									},
 									{
 										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.indicators + '</div>',
 										hideCollapseTool: true,
@@ -3029,21 +3031,21 @@ Ext.onReady( function() {
 							},
 							
 							{
-								xtype: 'label',
-								style: 'font-weight:bold; margin-left:3px',
-								text: DV.i18n.period
-							},
-							
-							{
 								layout: 'accordion',
 								activeOnTop: true,
 								cls: 'dv-accordion',
 								bodyStyle: 'border:0 none; margin-top:5px; margin-bottom:10px',
-								height: 44,
+								height: 70,
 								items: [
 									{
-										hidden: true,
-										collapsed: false
+										title: '<div style="height:17px; cursor:auto">' + DV.i18n.period + '</div>',
+										cls: 'dv-accordion-title',
+										hideCollapseTool: true,
+										listeners: {
+											beforeexpand: function() {
+												return false;
+											}
+										}
 									},
 									{
 										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.relative_periods + '</div>',
@@ -3202,14 +3204,19 @@ Ext.onReady( function() {
 										],
 										listeners: {
 											added: function() {
-												DV.cmp.dimension.period.panel = this;
+												//DV.cmp.dimension.period.panel = this;
 											},
 											expand: function() {
-												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_period);
+												DV.cmp.dimension.period.panel.setHeight(200);
 											}
 										}
 									}
-								]
+								],
+								listeners: {
+									added: function() {
+										DV.cmp.dimension.period.panel = this;
+									}
+								}										
 							},
 							
 							{
@@ -4402,8 +4409,8 @@ Ext.onReady( function() {
 							cls: 'dv-toolbar-btn-2',
                             text: 'col',
                             handler: function() {
-								DV.cmp.dimension.data.panel.setHeight(127);
-								Ext.getCmp('temp').expand();
+								//DV.cmp.dimension.data.title.expand();
+								DV.cmp.dimension.data.panel.setHeight(112);
                             }
                         },
                         {

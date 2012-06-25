@@ -653,10 +653,11 @@ body {
 	border-width: 0 !important;
 }
 .dv-accordion .dv-accordion-title .x-accordion-hd {
-	padding: 6px 5px 4px 8px;
+	padding: 6px 5px 4px 3px;
 	cursor: auto;
     background-image: none;
     background: #fff !important;
+    line-height: 20px;
 }
 
 .dv-accordion .collapsed .x-accordion-hd { /* accordion title dock, default, collapsed */
