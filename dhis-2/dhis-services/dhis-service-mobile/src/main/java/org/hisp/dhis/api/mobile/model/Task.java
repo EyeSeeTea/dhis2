@@ -34,6 +34,8 @@ import java.io.IOException;
 public class Task
     implements DataStreamSerializable
 {
+    private String clientVersion;
+
     private int id;
 
     private int programStageId;
@@ -82,6 +84,16 @@ public class Task
         this.completed = completed;
     }
 
+    public String getClientVersion()
+    {
+        return clientVersion;
+    }
+
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
+    }
+
     @Override
     public void serialize( DataOutputStream dout )
         throws IOException
@@ -97,6 +109,27 @@ public class Task
         throws IOException
     {
         // Fixme
+
+    }
+
+    @Override
+    public void serializeVerssion2_8( DataOutputStream dout )
+        throws IOException
+    {
+        dout.writeInt( this.getId() );
+        dout.writeInt( this.getProgramStageId() );
+        dout.writeInt( this.getProgramId() );
+        dout.writeBoolean( this.isCompleted() );
+    }
+
+    @Override
+    public void serializeVerssion2_9( DataOutputStream dout )
+        throws IOException
+    {
+        dout.writeInt( this.getId() );
+        dout.writeInt( this.getProgramStageId() );
+        dout.writeInt( this.getProgramId() );
+        dout.writeBoolean( this.isCompleted() );
 
     }
 }

@@ -1,14 +1,8 @@
-var COLOR_GREEN = '#b9ffb9';
-var COLOR_YELLOW = '#fffe8c';
-var COLOR_WHITE = '#ffffff';
-var COLOR_ORANGE = '#ff6600';
-var COLOR_RED = '#ff8a8a';
-var COLOR_GREY = '#cccccc';
 
 function organisationUnitSelected( orgUnits, orgUnitNames )
 {	
 	showById('selectDiv');
-	showById('searchPatientDiv');
+	showById('searchDiv');
 	hideById('listPatientDiv');
 	hideById('editPatientDiv');
 	hideById('enrollmentDiv');
@@ -38,8 +32,7 @@ function sortPatients()
 	jQuery('#listPatientDiv').load("searchRegistrationPatient.action", 
 		{
 			sortPatientAttributeId: getFieldValue('sortPatientAttributeId')
-		}
-		, function(){
+		}, function(){
 			showById('listPatientDiv');
 			jQuery( "#loaderDiv" ).hide();
 		});
@@ -57,7 +50,7 @@ function validateAddPatient()
 		url: 'validatePatient.action',
 		data: getParamsForDiv('editPatientDiv'),
 		success:addValidationCompleted
-     });	
+    });	
 }
 
 function addValidationCompleted( data )
@@ -146,44 +139,6 @@ function getIdParams()
 	return params;
 }
 
-// -----------------------------------------------------------------------------
-// check duplicate patient
-// -----------------------------------------------------------------------------
-
-function checkDuplicate( divname )
-{
-	$.postUTF8( 'validatePatient.action', 
-		{
-			fullName: jQuery( '#' + divname + ' [id=fullName]' ).val(),
-			dobType: jQuery( '#' + divname + ' [id=dobType]' ).val(),
-			gender: jQuery( '#' + divname + ' [id=gender]' ).val(),
-			birthDate: jQuery( '#' + divname + ' [id=birthDate]' ).val(),        
-			age: jQuery( '#' + divname + ' [id=age]' ).val()
-		}, function( xmlObject, divname )
-		{
-			checkDuplicateCompleted( xmlObject, divname );
-		});
-}
-
-function checkDuplicateCompleted( messageElement, divname )
-{
-	checkedDuplicate = true;    
-	var type = jQuery(messageElement).find('message').attr('type');
-	var message = jQuery(messageElement).find('message').text();
-    
-    if( type == 'success')
-    {
-    	showSuccessMessage(i18n_no_duplicate_found);
-    }
-    if ( type == 'input' )
-    {
-        showWarningMessage(message);
-    }
-    else if( type == 'duplicate' )
-    {
-    	showListPatientDuplicate( messageElement, true );
-    }
-}
 /**
  * Show list patient duplicate  by jQuery thickbox plugin
  * @param rootElement : root element of the response xml
@@ -295,7 +250,7 @@ function showAddPatientForm()
 {
 	hideById('listPatientDiv');
 	hideById('selectDiv');
-	hideById('searchPatientDiv');
+	hideById('searchDiv');
 	hideById('migrationPatientDiv');
 	
 	jQuery('#loaderDiv').show();
@@ -336,7 +291,7 @@ function showUpdatePatientForm( patientId )
 	hideById('listPatientDiv');
 	setInnerHTML('editPatientDiv', '');
 	hideById('selectDiv');
-	hideById('searchPatientDiv');
+	hideById('searchDiv');
 	hideById('migrationPatientDiv');
 				
 	jQuery('#loaderDiv').show();
@@ -374,7 +329,7 @@ function showProgramEnrollmentSelectForm( patientId )
 	hideById('listPatientDiv');
 	hideById('editPatientDiv');
 	hideById('selectDiv');
-	hideById('searchPatientDiv');
+	hideById('searchDiv');
 	hideById('migrationPatientDiv');
 				
 	jQuery('#loaderDiv').show();
@@ -384,7 +339,6 @@ function showProgramEnrollmentSelectForm( patientId )
 		}, function()
 		{	
 			showById('enrollmentDiv');
-			
 			jQuery('#loaderDiv').hide();
 		});
 }
@@ -486,7 +440,7 @@ function showUnenrollmentSelectForm( patientId )
 	hideById('listPatientDiv');
 	hideById('editPatientDiv');
 	hideById('selectDiv');
-	hideById('searchPatientDiv');
+	hideById('searchDiv');
 	hideById('migrationPatientDiv');
 				
 	jQuery('#loaderDiv').show();
@@ -577,7 +531,7 @@ function showRelationshipList( patientId )
 	if ( getFieldValue('isShowPatientList') == 'false' )
 	{
 		hideById('selectDiv');
-		hideById('searchPatientDiv');
+		hideById('searchDiv');
 		hideById('listPatientDiv');
 
 		jQuery('#loaderDiv').show();
@@ -603,7 +557,7 @@ function showRelationshipList( patientId )
 function onClickBackBtn()
 {
 	showById('selectDiv');
-	showById('searchPatientDiv');
+	showById('searchDiv');
 	showById('listPatientDiv');
 	
 	hideById('editPatientDiv');
@@ -624,15 +578,15 @@ function loadPatientList()
 	hideById('migrationPatientDiv');
 	
 	showById('selectDiv');
-	showById('searchPatientDiv');
+	showById('searchDiv');
 	
 	if( statusSearching == 0)
 	{
-		loadAllPatients();
+		listAllPatient();
 	}
 	else if( statusSearching == 1 )
 	{
-		searchAdvancedPatients();
+		validateAdvancedSearch();
 	}
 }
 
@@ -640,7 +594,7 @@ function loadPatientList()
 // Load all patients
 // -----------------------------------------------------------------------------
 
-function loadAllPatients()
+function listAllPatient()
 {
 	hideById('listPatientDiv');
 	hideById('editPatientDiv');
@@ -797,7 +751,7 @@ function saveIdentifierAndAttribute()
 function showSelectedDataRecoding( patientId )
 {
 	showLoader();
-	hideById('searchPatientDiv');
+	hideById('searchDiv');
 	hideById('dataEntryFormDiv');
 	hideById('migrationPatientDiv');
 	jQuery('#dataRecordingSelectDiv').load( 'selectDataRecording.action', 
@@ -820,12 +774,12 @@ function showSelectedDataRecoding( patientId )
 		});
 }
 
-function searchPatient()
+function advancedSearch( params )
 {
 	$.ajax({
 		url: 'searchRegistrationPatient.action',
 		type:"POST",
-		data: getParamsForDiv('searchPatientDiv'),
+		data: params,
 		success: function( html ){
 				statusSearching = 1;
 				setInnerHTML( 'listPatientDiv', html );
@@ -843,7 +797,7 @@ function getPatientLocation( patientId )
 {
 	hideById('listPatientDiv');
 	hideById('selectDiv');
-	hideById('searchPatientDiv');
+	hideById('searchDiv');
 				
 	jQuery('#loaderDiv').show();
 	

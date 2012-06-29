@@ -1,189 +1,351 @@
 
-function organisationUnitSelected( orgUnits )
+function organisationUnitSelected( orgUnits, orgUnitNames )
 {
-	hideById('dataEntryFormDiv');
-	disable( 'executionDate' );
-	setFieldValue('executionDate', '');
-	$('#executionDate').unbind('change');
+	hideById('dataEntryInfor');
+	hideById('listDiv');
 	
-	disable('createEventBtn');
-	disable('deleteCurrentEventBtn');
-	
-	$.getJSON( 'loadAnonymousPrograms.action',{}
-		, function( json ) 
-		{
-			clearListById( 'programId' );
-			addOptionById( 'programId', '', i18n_please_select );
+	jQuery.getJSON( "anonymousPrograms.action",{}, 
+		function( json ) 
+		{   
+			clearListById('searchObjectId');
+			clearListById('compulsoryDE');
+			clearListById('programId');
 			
-			var preSelectedProgramId = getFieldValue('selectedProgramId');
-			for ( i in json.programInstances ) 
-			{ 
-				if( preSelectedProgramId == json.programInstances[i].id )
-				{
-					$('#programId').append('<option selected value=' + json.programInstances[i].id + ' type="3" programInstanceId=' + json.programInstances[i].programInstanceId + '>' + json.programInstances[i].name + '</option>');
-				}
-				else
-				{
-					$('#programId').append('<option value=' + json.programInstances[i].id + ' type="3" programInstanceId=' + json.programInstances[i].programInstanceId + '>' + json.programInstances[i].name + '</option>');
-				}
+			jQuery( '#programId').append( '<option value="" programStageId="">[' + i18n_please_select + ']</option>' );
+			for ( i in json.programs ) {
+				jQuery( '#programId').append( '<option value="' + json.programs[i].id +'" programStageId="' + json.programs[i].programStageId + '">' + json.programs[i].name + '</option>' );
 			}
-
-			if( byId('programId').selectedIndex > 0 )
-			{
-				loadEventForm();
-			}
-		} );
+			
+			disableCriteriaDiv();
+		});
+		
+	setFieldValue( 'orgunitId', orgUnits[0] );
+	setFieldValue( 'orgunitName', orgUnitNames[0] );
+	hideById('listDiv');
+	hideById('dataEntryInfor');
 }
 
 selection.setListenerFunction( organisationUnitSelected );
 
+function disableCriteriaDiv()
+{
+	jQuery('#criteriaDiv :input').each( function( idx, item ){
+		disable(this.id);
+	});
+	enable('orgunitName');
+	enable('programId');
+}
 
-function loadEventForm()
-{	
-	hideById('dataEntryFormDiv');
-	setFieldValue('executionDate', '');
-	disable( 'executionDate' );
-	disable('createEventBtn');
-	disable('deleteCurrentEventBtn');
-		
-	var programId = getFieldValue('programId');
-	if( programId == '' )
-	{
-		$('#executionDate').unbind('change');
-		return;
-	}
-	
-	showLoader();
-	
-	jQuery.getJSON( "loadProgramStageInstances.action",
-		{
-			programId: programId
-		}, 
-		function( json ) 
-		{    
-			if( json.programStageInstances.length > 0 )
-			{
-				setFieldValue( 'programStageInstanceId', json.programStageInstances[0].id );
-				setFieldValue( 'selectedProgramId', programId );
-				$('#executionDate').bind('change');
-				loadEventRegistrationForm();
-			}
-			else
-			{
-				enable( 'executionDate' );
-				enable('createEventBtn');
-				disable('deleteCurrentEventBtn');
-				disable('completeBtn');
-				hideById('loaderDiv');
-			}
-			
+function enableCriteriaDiv()
+{
+	jQuery('#criteriaDiv :input').each( function( idx, item ){
+		enable(this.id);
 	});
 }
 
-function loadEventRegistrationForm()
+function getDataElements()
 {
-	$( '#dataEntryFormDiv' ).load( "dataentryform.action", 
-		{ 
-			programStageInstanceId:getFieldValue('programStageInstanceId')
-		},function( )
+	hideById('dataEntryInfor');
+	hideById('listDiv');
+	clearListById('searchObjectId');
+	programStageId = jQuery('#programId option:selected').attr('programStageId');
+	setFieldValue('programStageId', programStageId );
+	
+	if( programStageId == '')
+	{
+		removeAllAttributeOption();
+		disableCriteriaDiv();
+		enable('orgunitName');
+		enable('programId');
+		hideById('listDiv');
+		setFieldValue('searchText');
+		return;
+	}
+	
+	jQuery.getJSON( "getProgramStageDataElementList.action",
 		{
-			hideById('loaderDiv');
-			showById('dataEntryFormDiv');
+			programStageId: getFieldValue('programStageId')
+		}, 
+		function( json ) 
+		{   
+			clearListById('searchObjectId');
+			clearListById('compulsoryDE');
 			
-			var programStageInstanceId = getFieldValue('programStageInstanceId');
-			if( programStageInstanceId == '' )
-			{
-				enable('createEventBtn');
-				disable('deleteCurrentEventBtn');
-				disable('completeBtn');
-				enable( 'executionDate' );
-				$('#executionDate').bind('change');
-			}
-			else
-			{
-				enable( 'executionDate' );
-				if( getFieldValue('completed') == 'true')
-				{
-					enable('createEventBtn');
-					disable('deleteCurrentEventBtn');
-					disable('completeBtn');
-					jQuery('#executionDate').unbind('change');
-				} 
-				else
-				{
-					disable('createEventBtn');
-					enable('deleteCurrentEventBtn');
-					enable('completeBtn');
-					jQuery('#executionDate').bind('change');
+			jQuery( '#searchObjectId').append( '<option value="" >[' + i18n_please_select + ']</option>' );
+			for ( i in json.programStageDataElements ) {
+				jQuery( '#searchObjectId').append( '<option value="' + json.programStageDataElements[i].id + '" type="' + json.programStageDataElements[i].type +'">' + json.programStageDataElements[i].name + '</option>' );
+				
+				if( json.programStageDataElements[i].compulsory=='true' ){
+					jQuery( '#compulsoryDE').append( '<option value="' + json.programStageDataElements[i].id + '"></option>');
 				}
 			}
 			
+			enableCriteriaDiv();
+		});
+}
+
+function dataElementOnChange( this_ )
+{
+	var container = jQuery(this_).parent().parent().attr('id');
+	var element = jQuery('#' + container + ' [id=searchText]');
+	var valueType = jQuery('#' + container+ ' [id=searchObjectId] option:selected').attr('type');
+	
+	if( valueType == 'date' ){
+		element.replaceWith( getDateField( container ) );
+		datePickerValid( 'searchText_' + container );
+		return;
+	}
+	else
+	{
+		$( '#searchText_' + container ).datepicker("destroy");
+		$('#' + container + ' [id=dateOperator]').replaceWith("");
+		
+		if( valueType == 'bool' ){
+			element.replaceWith( getTrueFalseBox() );
+		}
+		else if ( valueType=='optionset' ){
+			element.replaceWith( searchTextBox );
+			autocompletedFilterField( container + " [id=searchText]" , jQuery(this_).val() );
+		}
+		else{
+			element.replaceWith( searchTextBox );
+		}
+	}
+}
+
+function autocompletedFilterField( idField, searchObjectId )
+{
+	var input = jQuery( "#" +  idField );
+	input.autocomplete({
+		delay: 0,
+		minLength: 0,
+		source: function( request, response ){
+			$.ajax({
+				url: "getOptions.action?id=" + searchObjectId + "&query=" + input.val(),
+				dataType: "json",
+				success: function(data) {
+					response($.map(data.options, function(item) {
+						return {
+							label: item.o,
+							id: item.o
+						};
+					}));
+				}
+			});
+		},
+		minLength: 2,
+		select: function( event, ui ) {
+			input.val(ui.item.value);
+			input.autocomplete( "close" );
+		}
+	})
+	.addClass( "ui-widget" );
+}
+
+function removeAllAttributeOption()
+{
+	jQuery( '#advancedSearchTB tbody tr' ).each( function( i, item )
+    {
+		if(i>0){
+			jQuery( item ).remove();
+		}
+	})
+}
+
+function validateSearchEvents( listAll )
+{	
+	var flag = true;
+	if( !listAll )
+	{
+		jQuery( '#advancedSearchTB tbody tr' ).each( function( i, row ){
+			jQuery( this ).find(':input').each( function( idx, item ){
+				var input = jQuery( item );
+				if( input.attr('type') != 'button' && idx==0 && input.val()=='' ){
+					showWarningMessage( i18n_specify_data_element );
+					flag = false;
+				}
+			})
+		});
+	}
+	
+	if(flag){
+		searchEvents( listAll );
+	}
+}
+
+function searchEvents( listAll )
+{
+	hideById('dataEntryInfor');
+	hideById('listDiv');
+	setFieldValue('isShowEventList', listAll );
+	
+	var params = '';
+	if(listAll){	
+		params += '&startDate=';
+		params += '&endDate=';
+		jQuery( '#compulsoryDE option' ).each( function( i, item ){
+			var input = jQuery( item );
+			params += '&searchingValues=de_' + input.val() + '_false_';
+		});
+	}
+	else{
+		params += '&startDate=' + getFieldValue('startDate');
+		params += '&endDate=' + getFieldValue('endDate');
+		var value = '';
+		var searchingValue = '';
+		jQuery( '#advancedSearchTB tbody tr' ).each( function(){
+			jQuery( this ).find(':input').each( function( idx, item ){
+				var input = jQuery( item );
+				if( input.attr('type') != 'button' ){
+					if( idx==0 && input.val()!=''){
+						searchingValue = 'de_' + input.val() + '_false_';
+					}
+					else if( input.val()!='' ){
+						value += input.val().toLowerCase();
+					}
+				}
+			});
+			
+			if( value !=''){
+				searchingValue += getValueFormula(value);
+			}
+			params += '&searchingValues=' + searchingValue;
+			searchingValue = '';
+			value = '';
+		})
+	}
+	
+	params += '&facilityLB=' + $('input[name=facilityLB]:checked').val();
+	params += '&level=' + $('input[name=level]:checked').val();
+	params += '&orgunitIds=' + getFieldValue('orgunitId');
+	params += '&programStageId=' + getFieldValue('programStageId');
+	params += '&orderByOrgunitAsc=false';
+	
+	contentDiv = 'listDiv';
+	showLoader();
+	
+	$.ajax({
+		type: "POST",
+		url: 'searchProgramStageInstances.action',
+		data: params,
+		success: function( html ){
+			hideById('loaderDiv');
+			hideById('dataEntryInfor');
+			setInnerHTML( 'listDiv', html );
+			
+			var searchInfor = (listAll) ? i18n_list_all_events : i18n_search_events_by_dataelements;
+			setInnerHTML( 'searchInforTD', searchInfor);
+				
+			showById('listDiv');
+		}
+    });
+}
+
+function getValueFormula( value )
+{
+	if( value.indexOf('"') != value.lastIndexOf('"') )
+	{
+		value = value.replace(/"/g,"'");
+	}
+	// if key is [xyz] && [=xyz]
+	if( value.indexOf("'")==-1 ){
+		var flag = value.match(/[>|>=|<|<=|=|!=]+[ ]*/);
+	
+		if( flag == null )
+		{
+			value = "='"+ value + "'";
+		}
+		else
+		{
+			value = value.replace( flag, flag + "'");
+			value +=  "'";
+		}
+	}
+	// if key is ['xyz'] && [='xyz']
+	// if( value.indexOf("'") != value.lastIndexOf("'") )
+	else
+	{
+		var flag = value.match(/[>|>=|<|<=|=|!=]+[ ]*/);
+	
+		if( flag == null )
+		{
+			value = "="+ value;
+		}
+	}
+	
+	return value;
+}
+
+function removeEvent( psId )
+{	
+	removeItem( psId, '', i18n_comfirm_delete_event, 'removeCurrentEncounter.action' );	
+}
+
+function showUpdateEvent( psId )
+{
+	hideById('selectDiv');
+	hideById('searchDiv');
+	hideById('listDiv');
+	setFieldValue('programStageInstanceId', psId);
+	setInnerHTML('dataEntryFormDiv','');
+	showLoader();
+	
+	$( '#dataEntryFormDiv' ).load( "dataentryform.action", 
+		{ 
+			programStageInstanceId: psId
+		},function( )
+		{
+			var programName  = jQuery('#programId option:selected').text();
+				programName += ' - ' + i18n_report_date + ' : ' + jQuery('#incidentDate').val();
+			
+			setInnerHTML('programName', programName );
+			
+			if( getFieldValue('completed')=='true' ){
+				disable('completeBtn');
+				disable('completeAndAddNewBtn');
+			}
+			else{
+				enable('completeBtn');
+				enable('completeAndAddNewBtn');
+			}
+				
+			hideById('loaderDiv');
+			showById('dataEntryInfor');
+			showById('entryFormContainer');
 		} );
 }
 
-function createNewEvent()
+function backEventList()
+{
+	hideById('dataEntryInfor'); 
+	showById('selectDiv');
+	showById('searchDiv');
+	showById('listDiv');
+	searchEvents( getFieldValue('isShowEventList') );
+}
+
+function showAddEventForm()
 {
 	jQuery.postJSON( "createAnonymousEncounter.action",
 		{
-			programInstanceId: jQuery('select[id=programId] option:selected').attr('programInstanceId'),
-			executionDate: getFieldValue('executionDate')
+			programId: jQuery('#programId option:selected').val(),
+			executionDate: getFieldValue('executionDateNewEvent')
 		}, 
 		function( json ) 
 		{    
-			selection.enable();
-			
 			if(json.response=='success')
 			{
-				disable('createEventBtn');
-				enable('deleteCurrentEventBtn');
 				setFieldValue('programStageInstanceId', json.message );
-				
-				selection.disable();
-				
-				loadEventRegistrationForm();
+				showUpdateEvent( json.message )
 			}
 			else
 			{
 				showWarningMessage( json.message );
 			}
-			
 		});
 }
 
-function deleteCurrentEvent()
-{	
-	var result = window.confirm( i18n_comfirm_delete_current_event );
-    
-    if ( result )
-    {
-		jQuery.postJSON( "removeCurrentEncounter.action",
-			{
-				programStageInstanceId: getFieldValue('programStageInstanceId')
-			}, 
-			function( json ) 
-			{    
-				var type = json.response;
-				
-				if( type == 'success' )
-				{
-					hideById('dataEntryFormDiv');
-					byId('programId').selectedIndex = 0;
-					
-					disable('deleteCurrentEventBtn');
-					enable('createEventBtn');
-					
-					setFieldValue('executionDate','');
-					enable( 'executionDate' );
-					$('#executionDate').unbind('change');
-					
-					selection.enable();
-					
-					showSuccessMessage( i18n_delete_current_event_success );
-				}
-				else if( type == 'input' )
-				{
-					showWarningMessage( json.message );
-				}
-			});
-	}
+function completedAndAddNewEvent()
+{
+	doComplete( true );
 }

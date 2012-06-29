@@ -723,10 +723,11 @@ Ext.onReady( function() {
 			DHIS.chart.value.getValues(project);
         },
         setState: function(conf) {
-            if (conf.uid) {
-                Ext.data.JsonP.request({
+            if (conf.uid) {            	
+            	var options = {
                     url: conf.url + DHIS.chart.conf.finals.ajax.favorite_get + conf.uid + '.jsonp',
                     scope: this,
+                    disableCaching: false,
                     success: function(r) {
                         if (!r) {
                             alert('Invalid uid');
@@ -761,7 +762,13 @@ Ext.onReady( function() {
                         
                         this.getState(conf);                        
                     }
-                });
+                };
+                
+                if (DHIS.chart.util.value.isDefined(conf.callbackName)) {
+            	    options.callbackName = conf.callbackName;            	
+                }
+            
+                Ext.data.JsonP.request( options );
             }
         }
     };
@@ -1178,6 +1185,9 @@ DHIS.table.utils = {
 	getDynamicDataUrl: function(conf) {
 		var url = conf.url + DHIS.table.finals.dynamicDataGet + '.' + conf.format;
 		return this.getDataQuery(conf, url);
+	},
+	isDefined: function(variable) {
+		return (typeof(variable) !== 'undefined'); 
 	}
 };
 
@@ -1207,7 +1217,7 @@ DHIS.table.grid = {
 	},
 	render: function(conf) {
 		DHIS.table.utils.destroy(conf.el);
-		Ext.data.JsonP.request({
+		var options = {
 			url: DHIS.table.utils.getTableDataUrl(conf),
 			disableCaching: false,
 			success: function(data) {
@@ -1217,7 +1227,13 @@ DHIS.table.grid = {
 					renderTo: conf.el
 				});
 			}
-		});
+		};
+		
+        if (DHIS.table.utils.isDefined(conf.callbackName)) {
+        	options.callbackName = conf.callbackName;            	
+        }
+        
+		Ext.data.JsonP.request(options);
 	}
 };
 
@@ -1251,14 +1267,20 @@ DHIS.table.plain = {
 		return html;
 	},	
 	render: function(conf) {
-		Ext.data.JsonP.request({
+		var options = {
 			url: DHIS.table.utils.getTableDataUrl(conf),
 			disableCaching: false,
 			success: function(data) {
 				var html = DHIS.table.plain.getMarkup(conf, data);
 				Ext.get(conf.el).update(html);
 			}
-		});
+		};
+		
+        if (DHIS.table.utils.isDefined(conf.callbackName)) {
+        	options.callbackName = conf.callbackName;            	
+        }
+        
+		Ext.data.JsonP.request(options);
 	}
 };
 

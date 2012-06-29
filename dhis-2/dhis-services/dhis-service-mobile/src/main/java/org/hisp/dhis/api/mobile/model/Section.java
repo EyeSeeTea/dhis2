@@ -36,6 +36,7 @@ import javax.xml.bind.annotation.XmlElement;
 public class Section
     extends Model
 {
+    private String clientVersion;
 
     private List<DataElement> dataElements;
 
@@ -48,6 +49,16 @@ public class Section
     public void setDataElements( List<DataElement> des )
     {
         this.dataElements = des;
+    }
+
+    public String getClientVersion()
+    {
+        return clientVersion;
+    }
+
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
     }
 
     @Override
@@ -68,6 +79,50 @@ public class Section
             {
                 DataElement de = (DataElement) dataElements.get( i );
                 de.serialize( dout );
+            }
+        }
+    }
+
+    @Override
+    public void serializeVerssion2_8( DataOutputStream dout )
+        throws IOException
+    {
+        dout.writeInt( this.getId() );
+        dout.writeUTF( getName() );
+
+        if ( dataElements == null )
+        {
+            dout.writeInt( 0 );
+        }
+        else
+        {
+            dout.writeInt( dataElements.size() );
+            for ( int i = 0; i < dataElements.size(); i++ )
+            {
+                DataElement de = (DataElement) dataElements.get( i );
+                de.serializeVerssion2_8( dout );
+            }
+        }
+    }
+    
+    @Override
+    public void serializeVerssion2_9( DataOutputStream dout )
+        throws IOException
+    {
+        dout.writeInt( this.getId() );
+        dout.writeUTF( getName() );
+
+        if ( dataElements == null )
+        {
+            dout.writeInt( 0 );
+        }
+        else
+        {
+            dout.writeInt( dataElements.size() );
+            for ( int i = 0; i < dataElements.size(); i++ )
+            {
+                DataElement de = (DataElement) dataElements.get( i );
+                de.serializeVerssion2_9( dout );
             }
         }
     }

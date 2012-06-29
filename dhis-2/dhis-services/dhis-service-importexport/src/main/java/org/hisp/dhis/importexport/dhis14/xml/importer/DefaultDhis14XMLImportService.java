@@ -39,6 +39,7 @@ import org.amplecode.staxwax.factory.XMLFactory;
 import org.amplecode.staxwax.reader.XMLReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.hisp.dhis.cache.HibernateCacheManager;
 import org.hisp.dhis.common.ProcessState;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -74,22 +75,24 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.system.process.OutputHolderState;
 import org.hisp.dhis.system.util.StreamUtils;
 
+
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class DefaultDhis14XMLImportService
-    implements ImportService
+implements ImportService
 {
     private static final Log log = LogFactory.getLog( DefaultDhis14XMLImportService.class );
-    
+
     private static final String DATA_FILE_NAME = "routinedata.txt";
+
     private static final String META_DATA_FILE_SUFFIX = ".xml";
-    
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
+
     private DataElementCategoryService categoryService;
 
     public void setCategoryService( DataElementCategoryService categoryService )
@@ -98,54 +101,54 @@ public class DefaultDhis14XMLImportService
     }
 
     private DataElementService dataElementService;
-    
+
     public void setDataElementService( DataElementService dataElementService )
     {
         this.dataElementService = dataElementService;
     }
-    
+
     private IndicatorService indicatorService;
 
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
     }
-        
+
     private PeriodService periodService;
 
     public void setPeriodService( PeriodService periodService )
     {
         this.periodService = periodService;
     }
-    
+
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
     }
-    
+
     private ImportObjectService importObjectService;
 
     public void setImportObjectService( ImportObjectService importObjectService )
     {
         this.importObjectService = importObjectService;
     }
-    
+
     private BatchHandlerFactory batchHandlerFactory;
 
     public void setBatchHandlerFactory( BatchHandlerFactory batchHandlerFactory )
     {
         this.batchHandlerFactory = batchHandlerFactory;
     }
-    
+
     private ObjectMappingGenerator objectMappingGenerator;
 
     public void setObjectMappingGenerator( ObjectMappingGenerator objectMappingGenerator )
     {
         this.objectMappingGenerator = objectMappingGenerator;
     }
-    
+
     private ConverterInvoker converterInvoker;
 
     public void setConverterInvoker( ConverterInvoker converterInvoker )
@@ -154,7 +157,7 @@ public class DefaultDhis14XMLImportService
     }
 
     private ExpressionService expressionService;
-        
+
     public void setExpressionService( ExpressionService expressionService )
     {
         this.expressionService = expressionService;
@@ -177,7 +180,7 @@ public class DefaultDhis14XMLImportService
     {
         super();
     }
-    
+
     // -------------------------------------------------------------------------
     // ImportService implementation
     // -------------------------------------------------------------------------
@@ -186,63 +189,71 @@ public class DefaultDhis14XMLImportService
     {
         importData( params, inputStream, new OutputHolderState() );
     }
-    
+
     public void importData( ImportParams params, InputStream inputStream, ProcessState state )
-    {   
-        DataElementCategoryOptionCombo defaultCategoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        
+    {
+        DataElementCategoryOptionCombo defaultCategoryOptionCombo = categoryService
+            .getDefaultDataElementCategoryOptionCombo();
+
         NameMappingUtil.clearMapping();
-        
+
         importAnalyser = new DefaultImportAnalyser( expressionService );
-        
-        if ( !( params.isPreview() || params.isAnalysis() ) )
+
+        if ( !(params.isPreview() || params.isAnalysis()) )
         {
             throw new RuntimeException( "Only preview mode allowed for DHIS 1.4 XML import" );
         }
-        
+
         importObjectService.deleteImportObjects();
 
-        ZipInputStream zipIn = new ZipInputStream ( inputStream );
+        ZipInputStream zipIn = new ZipInputStream( inputStream );
 
         ZipEntry zipEntry = StreamUtils.getNextZipEntry( zipIn );
-        
+
         while ( zipEntry != null )
         {
             log.info( "Reading file: " + zipEntry.getName() );
-                
+
             if ( zipEntry.getName().toLowerCase().trim().endsWith( META_DATA_FILE_SUFFIX ) )
             {
                 // -------------------------------------------------------------
                 // Meta-data
                 // -------------------------------------------------------------
 
-
-                state.setMessage( "importing_meta_data" );                
+                state.setMessage( "importing_meta_data" );
                 log.info( "Importing meta data" );
-        
+
                 XMLReader reader = XMLFactory.getXMLReader( zipIn );
-                
-                XMLConverter categoryOptionConverter = new DataElementCategoryOptionConverter( importObjectService, categoryService );
+
+                XMLConverter categoryOptionConverter = new DataElementCategoryOptionConverter( importObjectService,
+                    categoryService );
                 XMLConverter categoryConverter = new DataElementCategoryConverter( importObjectService, categoryService );
-                XMLConverter categoryComboConverter = new DataElementCategoryComboConverter( importObjectService, categoryService );
-                XMLConverter categoryOptionComboConverter = new DataElementCategoryOptionComboConverter( importObjectService, categoryService );                
-                XMLConverter dataElementConverter = new DataElementConverter( importObjectService, dataElementService, categoryService, importAnalyser );
+                XMLConverter categoryComboConverter = new DataElementCategoryComboConverter( importObjectService,
+                    categoryService );
+                XMLConverter categoryOptionComboConverter = new DataElementCategoryOptionComboConverter(
+                    importObjectService, categoryService );
+                XMLConverter dataElementConverter = new DataElementConverter( importObjectService, dataElementService,
+                    categoryService, importAnalyser );
                 XMLConverter indicatorTypeConverter = new IndicatorTypeConverter( importObjectService, indicatorService );
-                XMLConverter indicatorConverter = new IndicatorConverter( importObjectService, indicatorService, importAnalyser, defaultCategoryOptionCombo );
-                XMLConverter organisationUnitConverter = new OrganisationUnitConverter( importObjectService, organisationUnitService, importAnalyser );
-                XMLConverter hierarchyConverter = new OrganisationUnitHierarchyConverter( importObjectService, organisationUnitService );
-                XMLConverter periodConverter = new PeriodConverter( importObjectService, periodService, objectMappingGenerator.getPeriodTypeMapping() );
+                XMLConverter indicatorConverter = new IndicatorConverter( importObjectService, indicatorService,
+                    importAnalyser, defaultCategoryOptionCombo );
+                XMLConverter organisationUnitConverter = new OrganisationUnitConverter( importObjectService,
+                    organisationUnitService, importAnalyser );
+                XMLConverter hierarchyConverter = new OrganisationUnitHierarchyConverter( importObjectService,
+                    organisationUnitService );
+                XMLConverter periodConverter = new PeriodConverter( importObjectService, periodService,
+                    objectMappingGenerator.getPeriodTypeMapping() );
 
                 converterInvoker.invokeRead( categoryOptionConverter, reader, params );
                 converterInvoker.invokeRead( categoryConverter, reader, params );
                 converterInvoker.invokeRead( categoryComboConverter, reader, params );
                 converterInvoker.invokeRead( categoryOptionComboConverter, reader, params );
-                
+
                 while ( reader.next() )
                 {
                     if ( reader.isStartElement( DataElementConverter.ELEMENT_NAME ) )
                     {
-                        converterInvoker.invokeRead( dataElementConverter, reader, params );  
+                        converterInvoker.invokeRead( dataElementConverter, reader, params );
                     }
                     else if ( reader.isStartElement( IndicatorTypeConverter.ELEMENT_NAME ) )
                     {
@@ -265,7 +276,7 @@ public class DefaultDhis14XMLImportService
                         converterInvoker.invokeRead( periodConverter, reader, params );
                     }
                 }
-                
+
                 reader.closeReader();
             }
             else if ( zipEntry.getName().toLowerCase().trim().equals( DATA_FILE_NAME ) )
@@ -274,25 +285,24 @@ public class DefaultDhis14XMLImportService
                 // Data
                 // -------------------------------------------------------------
 
-                state.setMessage( "importing_data_values" );                
+                state.setMessage( "importing_data_values" );
                 log.info( "Importing DataValues" );
-    
+
                 BufferedReader streamReader = new BufferedReader( new InputStreamReader( zipIn ) );
-                
-                BatchHandler<ImportDataValue> importDataValueBatchHandler = batchHandlerFactory.createBatchHandler( ImportDataValueBatchHandler.class ).init();
-                
-                CSVConverter dataValueConverter = new DataValueConverter( importDataValueBatchHandler,
-                    categoryService,
-                    importObjectService,
-                    importAnalyser,
-                    params );
-                
+
+                BatchHandler<ImportDataValue> importDataValueBatchHandler = batchHandlerFactory.createBatchHandler(
+                    ImportDataValueBatchHandler.class ).init();
+
+                CSVConverter dataValueConverter = new DataValueConverter( importDataValueBatchHandler, categoryService,
+                    importObjectService, importAnalyser, params );
+
                 dataValueConverter.read( streamReader, params );
-                
+
                 importDataValueBatchHandler.flush();
             }
 
-            zipEntry = StreamUtils.getNextZipEntry( zipIn ); // Move to next entry in archive
+            zipEntry = StreamUtils.getNextZipEntry( zipIn ); // Move to next
+            // entry in archive
         }
 
         if ( params.isAnalysis() )
@@ -303,7 +313,7 @@ public class DefaultDhis14XMLImportService
         StreamUtils.closeInputStream( zipIn );
 
         NameMappingUtil.clearMapping();
-        
+
         cacheManager.clearCache();
     }
 }

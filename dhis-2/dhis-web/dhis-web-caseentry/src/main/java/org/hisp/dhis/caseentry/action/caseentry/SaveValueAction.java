@@ -151,7 +151,7 @@ public class SaveValueAction
             programStageInstanceService.updateProgramStageInstance( programStageInstance );
         }
 
-        providedElsewhere = (providedElsewhere == null) ? false : true;
+        providedElsewhere = (providedElsewhere == null) ? false : providedElsewhere;
 
         if ( patientDataValue == null && value != null )
         {
@@ -162,7 +162,11 @@ public class SaveValueAction
 
             patientDataValueService.savePatientDataValue( patientDataValue );
         }
-        else
+        if( patientDataValue != null && value == null )
+        {
+            patientDataValueService.deletePatientDataValue( patientDataValue );
+        }
+        else if( patientDataValue != null && value != null )
         {
             LOG.debug( "Updating PatientDataValue, value added/changed" );
 

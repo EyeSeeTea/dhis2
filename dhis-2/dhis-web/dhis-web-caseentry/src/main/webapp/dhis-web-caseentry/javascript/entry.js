@@ -1,14 +1,9 @@
-var prefixId = 'ps_';
-
-var COLOR_RED = "#fb4754";
-var COLOR_GREEN = "#8ffe8f";
-var COLOR_YELLOW = "#f9f95a";
-var COLOR_LIGHTRED = "#fb6bfb";
-var COLOR_LIGHT_RED = "#ff7676";
-var COLOR_LIGHT_YELLOW = "#ffff99";
-var COLOR_LIGHT_GREEN = "#ccffcc";
-var COLOR_LIGHT_LIGHTRED = "#ff99ff";
-
+var SUCCESS_COLOR = '#ccffcc';
+var ERROR_COLOR = '#ccccff';
+var SAVING_COLOR = '#ffffcc';
+var SUCCESS = 'success';
+var ERROR = 'error';
+	
 //--------------------------------------------------------------------------------------------
 // Load program-stages by the selected program
 //--------------------------------------------------------------------------------------------
@@ -162,10 +157,14 @@ function loadDataEntry( programStageInstanceId )
 
 function saveVal( dataElementId )
 {
+	if( byId('programStageId') == null) return;
 	var programStageId = byId('programStageId').value;
+	
 	var fieldId = programStageId + '-' + dataElementId + '-val';
 	
 	var field = byId( fieldId ); 
+	if( field == null) return;
+	
 	var fieldValue = jQuery.trim( field.value );
 
 	var arrData = jQuery( "#" + fieldId ).attr('data').replace('{','').replace('}','').replace(/'/g,"").split(',');
@@ -181,7 +180,7 @@ function saveVal( dataElementId )
 	var dataElementName = data['deName']; 
     var type = data['deType'];
  
-	field.style.backgroundColor = '#ffffcc';
+	field.style.backgroundColor = SAVING_COLOR;
     
     if( fieldValue != '' )
     {
@@ -225,7 +224,7 @@ function saveVal( dataElementId )
     	
     }
     
-	var valueSaver = new ValueSaver( dataElementId, fieldValue, type, '#ccffcc'  );
+	var valueSaver = new ValueSaver( dataElementId, fieldValue, type, SUCCESS_COLOR );
     valueSaver.save();
 }
 
@@ -233,9 +232,9 @@ function saveOpt( dataElementId )
 {
 	var programStageId = byId('programStageId').value;
 	var field = byId( programStageId + '-' + dataElementId + '-val' );	
-	field.style.backgroundColor = '#ffffcc';
+	field.style.backgroundColor = SAVING_COLOR;
 	
-	var valueSaver = new ValueSaver( dataElementId, field.options[field.selectedIndex].value, 'bool', '#ccffcc' );
+	var valueSaver = new ValueSaver( dataElementId, field.options[field.selectedIndex].value, 'bool', SUCCESS_COLOR );
     valueSaver.save();
 }
 
@@ -243,9 +242,10 @@ function updateProvidingFacility( dataElementId, checkField )
 {
 	var programStageId = byId( 'programStageId' ).value;
 	var checked= checkField.checked;
-    checkField.style.backgroundColor = '#ffffcc';
-	
-    var facilitySaver = new FacilitySaver( dataElementId, checked, '#ccffcc' );
+	var spanField = byId( 'span_' + checkField.id );
+	spanField.style.backgroundColor = SAVING_COLOR;
+    
+    var facilitySaver = new FacilitySaver( dataElementId, checked, SUCCESS_COLOR );
     facilitySaver.save();
     
 }
@@ -254,9 +254,9 @@ function saveExecutionDate( programId, executionDateValue )
 {
     var field = document.getElementById( 'executionDate' );
 	
-    field.style.backgroundColor = '#ffffcc';
+    field.style.backgroundColor = SAVING_COLOR;
 	
-    var executionDateSaver = new ExecutionDateSaver( programId, executionDateValue, '#ccffcc' );
+    var executionDateSaver = new ExecutionDateSaver( programId, executionDateValue, SUCCESS_COLOR );
     executionDateSaver.save();
 	
     if( !jQuery("#entryForm").is(":visible") )
@@ -389,9 +389,6 @@ function getNextEntryField( field )
 
 function ValueSaver( dataElementId_, value_, dataElementType_, resultColor_  )
 {
-    var SUCCESS = '#ccffcc';
-    var ERROR = '#ccccff';
-	
     var dataElementId = dataElementId_;
 	var providedElsewhereId = getFieldValue('programStageId') + "_" + dataElementId_ + "_facility";
 	var value = value_;
@@ -463,9 +460,6 @@ function ValueSaver( dataElementId_, value_, dataElementType_, resultColor_  )
 
 function FacilitySaver( dataElementId_, providedElsewhere_, resultColor_ )
 {
-    var SUCCESS = 'success';
-    var ERROR = '#error';
-	
     var dataElementId = dataElementId_;
 	var providedElsewhere = providedElsewhere_;
     var resultColor = resultColor_;
@@ -512,23 +506,20 @@ function FacilitySaver( dataElementId_, providedElsewhere_, resultColor_ )
     function markValue( result )
     {
 		var programStageId = byId( 'programStageId' ).value;
+		var element = byId('span_' + programStageId + '_' + dataElementId + '_facility');
         if( result == SUCCESS )
         {
-            jQuery('label[for="' + programStageId + '_facility"]').toggleClass('checked');
+            element.style.backgroundColor = SUCCESS_COLOR;
         }
         else if( result == ERROR )
         {
-            jQuery('label[for="' + programStageId + '_facility"]').removeClass('checked');
-            jQuery('label[for="' + programStageId + '_facility"]').addClass('error');
+            element.style.backgroundColor = ERROR_COLOR;
         }
     }
 }
 
 function ExecutionDateSaver( programId_, executionDate_, resultColor_ )
 {
-    var SUCCESS = '#ccffcc';
-    var ERROR = '#ffcc00';
-	
     var programId = programId_;
     var executionDate = executionDate_;
     var resultColor = resultColor_;
@@ -627,21 +618,29 @@ function toggleContentForReportDate(show)
     }
 }
 
-function doComplete()
+function doComplete( isCreateEvent )
 {
     var flag = false;
     jQuery("#dataEntryFormDiv input[name='entryfield'],select[name='entryselect']").each(function(){
         jQuery(this).parent().removeClass("errorCell");
-        if( jQuery(this).metadata({
-            "type":"attr",
-            "name":"data"
-        }).compulsory ){
-            if( !jQuery(this).val() || jQuery(this).val() == "undifined" ){
+        
+		var arrData = jQuery( this ).attr('data').replace('{','').replace('}','').replace(/'/g,"").split(',');
+		var data = new Array();
+		for( var i in arrData )
+		{	
+			var values = arrData[i].split(':');
+			var key = jQuery.trim( values[0] );
+			var value = jQuery.trim( values[1] )
+			data[key] = value;
+		}
+		var compulsory = data['compulsory']; 
+		if( compulsory == 'true' && 
+			( !jQuery(this).val() || jQuery(this).val() == "undifined" ) ){
                 flag = true;
                 jQuery(this).parent().addClass("errorCell");
             }
-        }
     });
+	
     if( flag ){
         alert(i18n_error_required_field);
         return;
@@ -695,6 +694,11 @@ function doComplete()
 					selection.enable();
 					hideLoader();
 					hideById('contentDiv');
+					
+					if( isCreateEvent )
+					{
+						showAddEventForm();
+					}
 				});
 		}
     }
@@ -724,11 +728,6 @@ TOGGLE = {
         });
     }
 };
-
-function initCustomCheckboxes()
-{
-    jQuery('input[type=checkbox]').prettyCheckboxes();
-}
 
 function entryFormContainerOnReady()
 {
@@ -822,31 +821,70 @@ function registerIrregularEncounter( dueDate )
 
 function autocompletedField( idField )
 {
-	var input = jQuery( "#" +  idField )
+	var input = jQuery( "#" +  idField );
 	var dataElementId = input.attr('id').split('-')[1];
+	
 	input.autocomplete({
-			delay: 0,
-			minLength: 0,
-			source: function( request, response ){
-                $.ajax({
-                    url: "getOptions.action?id=" + dataElementId + "&key=" + input.val(),
-                    dataType: "json",
-                    success: function(data) {
-						response($.map(data.options, function(item) {
-							return {
-								label: item,
-								id: item
-							};
-                        }));
-                    }
-                });
-            },
-			minLength: 2,
-			select: function( event, ui ) {
-				input.val(ui.item.value);
-				saveVal( dataElementId );
-				input.autocomplete( "close" );
+		delay: 0,
+		minLength: 0,
+		source: function( request, response ){
+			$.ajax({
+				url: "getOptions.action?id=" + dataElementId + "&query=" + input.val(),
+				dataType: "json",
+				success: function(data) {
+					response($.map(data.options, function(item) {
+						return {
+							label: item.o,
+							id: item.o
+						};
+					}));
+				}
+			});
+		},
+		minLength: 0,
+		select: function( event, ui ) {
+			input.val(ui.item.value);
+			saveVal( dataElementId );
+			input.autocomplete( "close" );
+		},
+		change: function( event, ui ) {
+			if ( !ui.item ) {
+				var matcher = new RegExp( "^" + $.ui.autocomplete.escapeRegex( $(this).val() ) + "$", "i" ),
+					valid = false;
+				if ( !valid ) {
+					// remove invalid value, as it didn't match anything
+					$( this ).val( "" );
+					saveVal( dataElementId );
+					input.data( "autocomplete" ).term = "";
+					return false;
+				}
 			}
+		}
+	})
+	.addClass( "ui-widget" );
+	
+	input.blur(function(){
+		input.autocomplete( "close" );
+	});
+
+	var button = $( "<button>&nbsp;</button>" )
+		.attr( "tabIndex", -1 )
+		.attr( "title", i18n_show_all_items )
+		.insertAfter( input )
+		.button({
+			icons: {
+				primary: "ui-icon-triangle-1-s"
+			},
+			text: false
 		})
-		.addClass( "ui-widget" );
+		.addClass( "small-button" )
+		.click(function() {
+			if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
+				input.autocomplete( "close" );
+				return;
+			}
+			$( this ).blur();
+			input.autocomplete( "search", "" );
+			input.focus();
+		});
 }

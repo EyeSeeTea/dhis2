@@ -37,6 +37,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 public class Activity
     implements DataStreamSerializable
 {
+    private String clientVersion;
 
     private Beneficiary beneficiary;
 
@@ -45,7 +46,7 @@ public class Activity
     private Task task;
 
     private Date dueDate;
-    
+
     private Date expireDate;
 
     public Beneficiary getBeneficiary()
@@ -89,15 +90,27 @@ public class Activity
         this.late = late;
     }
 
-    public Date getExpireDate() {
-		return expireDate;
-	}
+    public Date getExpireDate()
+    {
+        return expireDate;
+    }
 
-	public void setExpireDate(Date expireDate) {
-		this.expireDate = expireDate;
-	}
+    public void setExpireDate( Date expireDate )
+    {
+        this.expireDate = expireDate;
+    }
 
-	@Override
+    public String getClientVersion()
+    {
+        return clientVersion;
+    }
+
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
+    }
+
+    @Override
     public void serialize( DataOutputStream dout )
         throws IOException
     {
@@ -105,7 +118,7 @@ public class Activity
         this.getBeneficiary().serialize( dout );
         dout.writeBoolean( late );
         dout.writeLong( this.getDueDate().getTime() );
-        dout.writeLong(this.getExpireDate().getTime());
+        dout.writeLong( this.getExpireDate().getTime() );
     }
 
     @Override
@@ -120,7 +133,30 @@ public class Activity
 
         this.late = dataInputStream.readBoolean();
         this.dueDate = new Date( dataInputStream.readLong() );
-        this.expireDate = new Date(dataInputStream.readLong());
+        this.expireDate = new Date( dataInputStream.readLong() );
+    }
+
+    @Override
+    public void serializeVerssion2_8( DataOutputStream dout )
+        throws IOException
+    {
+        this.getTask().serializeVerssion2_8( dout );
+        this.getBeneficiary().serializeVerssion2_8( dout );
+        dout.writeBoolean( late );
+        dout.writeLong( this.getDueDate().getTime() );
+        dout.writeLong( this.getExpireDate().getTime() );
+    }
+
+    @Override
+    public void serializeVerssion2_9( DataOutputStream dout )
+        throws IOException
+    {
+        this.getTask().serializeVerssion2_9( dout );
+        this.getBeneficiary().serializeVerssion2_9( dout );
+        dout.writeBoolean( late );
+        dout.writeLong( this.getDueDate().getTime() );
+        dout.writeLong( this.getExpireDate().getTime() );
+
     }
 
 }

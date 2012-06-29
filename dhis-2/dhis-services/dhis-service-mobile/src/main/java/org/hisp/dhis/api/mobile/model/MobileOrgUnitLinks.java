@@ -34,10 +34,12 @@ import java.io.IOException;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(name="orgUnit")
+@XmlRootElement( name = "orgUnit" )
 public class MobileOrgUnitLinks
     implements DataStreamSerializable
 {
+    private String clientVersion;
+
     private int id;
 
     private String name;
@@ -51,9 +53,9 @@ public class MobileOrgUnitLinks
     private String uploadActivityReportUrl;
 
     private String updateDataSetUrl;
-    
+
     private String changeUpdateDataSetLangUrl;
-    
+
     private String searchUrl;
 
     @XmlAttribute
@@ -116,7 +118,7 @@ public class MobileOrgUnitLinks
     public void setUpdateDataSetUrl( String updateDataSetUrl )
     {
         this.updateDataSetUrl = updateDataSetUrl;
-    }    
+    }
 
     public String getChangeUpdateDataSetLangUrl()
     {
@@ -138,21 +140,33 @@ public class MobileOrgUnitLinks
         this.searchUrl = searchUrl;
     }
 
-    public String getUpdateActivityPlanUrl() {
-		return updateActivityPlanUrl;
-	}
+    public String getClientVersion()
+    {
+        return clientVersion;
+    }
 
-	public void setUpdateActivityPlanUrl(String updateActivityPlanUrl) {
-		this.updateActivityPlanUrl = updateActivityPlanUrl;
-	}
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
+    }
 
-	public void serialize( DataOutputStream dataOutputStream )
+    public String getUpdateActivityPlanUrl()
+    {
+        return updateActivityPlanUrl;
+    }
+
+    public void setUpdateActivityPlanUrl( String updateActivityPlanUrl )
+    {
+        this.updateActivityPlanUrl = updateActivityPlanUrl;
+    }
+
+    public void serialize( DataOutputStream dataOutputStream )
         throws IOException
     {
         dataOutputStream.writeInt( this.id );
         dataOutputStream.writeUTF( this.name );
         dataOutputStream.writeUTF( this.downloadAllUrl );
-        dataOutputStream.writeUTF(this.updateActivityPlanUrl);
+        dataOutputStream.writeUTF( this.updateActivityPlanUrl );
         dataOutputStream.writeUTF( this.uploadFacilityReportUrl );
         dataOutputStream.writeUTF( this.uploadActivityReportUrl );
         dataOutputStream.writeUTF( this.updateDataSetUrl );
@@ -172,6 +186,36 @@ public class MobileOrgUnitLinks
         this.updateDataSetUrl = dataInputStream.readUTF();
         this.changeUpdateDataSetLangUrl = dataInputStream.readUTF();
         this.searchUrl = dataInputStream.readUTF();
+    }
+
+    @Override
+    public void serializeVerssion2_8( DataOutputStream dataOutputStream )
+        throws IOException
+    {
+        dataOutputStream.writeInt( this.id );
+        dataOutputStream.writeUTF( this.name );
+        dataOutputStream.writeUTF( this.downloadAllUrl );
+        dataOutputStream.writeUTF( this.updateActivityPlanUrl );
+        dataOutputStream.writeUTF( this.uploadFacilityReportUrl );
+        dataOutputStream.writeUTF( this.uploadActivityReportUrl );
+        dataOutputStream.writeUTF( this.updateDataSetUrl );
+        dataOutputStream.writeUTF( this.changeUpdateDataSetLangUrl );
+        dataOutputStream.writeUTF( this.searchUrl );
+    }
+
+    @Override
+    public void serializeVerssion2_9( DataOutputStream dataOutputStream )
+        throws IOException
+    {
+        dataOutputStream.writeInt( this.id );
+        dataOutputStream.writeUTF( this.name );
+        dataOutputStream.writeUTF( this.downloadAllUrl );
+        dataOutputStream.writeUTF( this.updateActivityPlanUrl );
+        dataOutputStream.writeUTF( this.uploadFacilityReportUrl );
+        dataOutputStream.writeUTF( this.uploadActivityReportUrl );
+        dataOutputStream.writeUTF( this.updateDataSetUrl );
+        dataOutputStream.writeUTF( this.changeUpdateDataSetLangUrl );
+        dataOutputStream.writeUTF( this.searchUrl );
     }
 
 }

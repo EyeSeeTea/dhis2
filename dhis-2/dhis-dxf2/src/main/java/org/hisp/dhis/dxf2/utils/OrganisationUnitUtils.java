@@ -28,9 +28,11 @@ package org.hisp.dhis.dxf2.utils;
  */
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.system.util.functional.Predicate;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -80,20 +82,25 @@ public class OrganisationUnitUtils
             {
                 if ( parent.getUid() != null )
                 {
-                    organisationUnit.setParent( organisationUnitMap.get( parent.getUid() ) );
+                    parent = organisationUnitMap.get( parent.getUid() );
                 }
                 else if ( parent.getCode() != null )
                 {
-                    organisationUnit.setParent( organisationUnitMap.get( parent.getCode() ) );
+                    parent = organisationUnitMap.get( parent.getCode() );
                 }
                 else if ( parent.getName() != null )
                 {
-                    organisationUnit.setParent( organisationUnitMap.get( parent.getName() ) );
+                    parent = organisationUnitMap.get( parent.getName() );
                 }
                 else if ( parent.getShortName() != null )
                 {
-                    organisationUnit.setParent( organisationUnitMap.get( parent.getShortName() ) );
+                    parent = organisationUnitMap.get( parent.getShortName() );
                 }
+            }
+
+            if ( parent != null )
+            {
+                organisationUnit.setParent( parent );
             }
         }
     }

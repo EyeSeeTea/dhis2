@@ -34,8 +34,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
@@ -70,13 +68,6 @@ public class DataRecordingSelectAction
     public void setSelectedStateManager( SelectedStateManager selectedStateManager )
     {
         this.selectedStateManager = selectedStateManager;
-    }
-
-    private ProgramInstanceService programInstanceService;
-
-    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
-    {
-        this.programInstanceService = programInstanceService;
     }
 
     // -------------------------------------------------------------------------
@@ -116,22 +107,6 @@ public class DataRecordingSelectAction
         patient = patientService.getPatient( patientId );
 
         // ---------------------------------------------------------------------
-        // Get single programs with un-completed program-instances
-        // ---------------------------------------------------------------------
-
-        Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( patient, true );
-
-        Collection<Program> completedPrograms = new HashSet<Program>();
-
-        for ( ProgramInstance programInstance : programInstances )
-        {
-            if ( programInstance.getProgram().isSingleEvent() )
-            {
-                completedPrograms.add( programInstance.getProgram() );
-            }
-        }
-
-        // ---------------------------------------------------------------------
         // Get programs which patient enrolls
         // ---------------------------------------------------------------------
 
@@ -140,8 +115,6 @@ public class DataRecordingSelectAction
         programs.retainAll( patient.getPrograms() );
 
         programs.addAll( programService.getPrograms( Program.SINGLE_EVENT_WITH_REGISTRATION, orgunit ) );
-
-        programs.removeAll( completedPrograms );
 
         selectedStateManager.setSelectedPatient( patient );
 

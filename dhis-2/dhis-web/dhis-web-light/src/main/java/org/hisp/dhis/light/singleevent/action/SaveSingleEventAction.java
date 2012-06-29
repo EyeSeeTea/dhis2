@@ -304,7 +304,6 @@ public class SaveSingleEventAction
 
             PatientDataValue patientDataValue = new PatientDataValue();
             patientDataValue.setDataElement( dataElement );
-            patientDataValue.setProgramStageInstance( programStageInstance );
             patientDataValue.setValue( dynForm.get( i ).trim() );
             patientDataValue.setProgramStageInstance( programStageInstance );
             patientDataValueService.savePatientDataValue( patientDataValue );

@@ -38,6 +38,7 @@ DV.conf = {
 				obj5.value = this.values[4];
 				obj6[s] = this.series[1];
 				obj6[c] = this.category[1];
+				obj6[c] = this.category[1];
 				obj6.value = this.values[5];
 				obj7[s] = this.series[2];
 				obj7[c] = this.category[1];
@@ -65,11 +66,7 @@ DV.conf = {
 				r = Ext.JSON.decode(r.responseText);
 				var obj = {
 					system: {
-						rootnode: {
-							id: r.rn[0],
-							name: DV.conf.util.jsonEncodeString(r.rn[1]),
-							level: 1
-						},
+						rootnodes: [],
 						periods: {},
 						organisationunitgroupsets: r.ougs
 					},
@@ -83,6 +80,9 @@ DV.conf = {
 						organisationunitchildren: []							
 					}
 				};
+				for (var i = 0; i < r.rn.length; i++) {
+					obj.system.rootnodes.push({id: r.rn[i][0], text: r.rn[i][1], level: 1});
+				}
 				for (var i = 0; i < r.user.ouc.length; i++) {
 					obj.user.organisationunitchildren.push({id: r.user.ouc[i][0], name: DV.conf.util.jsonEncodeString(r.user.ouc[i][1])});
 				}
@@ -108,7 +108,12 @@ DV.conf = {
             dataelement_getall: 'dataElements.json?paging=false&links=false',
             dataelementgroup_get: 'dataElementGroups.json?paging=false&links=false',
             dataset_get: 'dataSets.json?paging=false&links=false',
+            organisationunit_getbygroup: 'getOrganisationUnitPathsByGroup.action',
+            organisationunit_getbylevel: 'getOrganisationUnitPathsByLevel.action',
+            organisationunit_getbyids: 'getOrganisationUnitPaths.action',
+            organisationunitgroup_getall: 'organisationUnitGroups.json?paging=false&links=false',
             organisationunitgroupset_get: 'getOrganisationUnitGroupSetsMinified.action',
+            organisationunitlevel_getall: 'organisationUnitLevels.json?paging=false&links=false&viewClass=detailed',
             organisationunitchildren_get: 'getOrganisationUnitChildren.action',
             favorite_addorupdate: 'addOrUpdateChart.action',
             favorite_addorupdatesystem: 'addOrUpdateSystemChart.action',
@@ -181,7 +186,10 @@ DV.conf = {
             init: 'init_',
             none: 'none_',
 			urlparam: 'id'
-        }
+        },
+        root: {
+			id: 'root'
+		}
     },
     relativePeriodUnits: {
 		lastSixMonth: 1,
@@ -219,10 +227,13 @@ DV.conf = {
         west_fill_accordion_dataelement: 77,
         west_fill_accordion_dataset: 45,
         west_fill_accordion_organisationunit: 75,
-        west_maxheight_accordion_data: 400,
-        west_maxheight_accordion_period: 340,
-        west_maxheight_accordion_organisationunit: 700,
-        west_maxheight_accordion_options: 393,
+        west_maxheight_accordion_indicator: 478,
+        west_maxheight_accordion_dataelement: 478,
+        west_maxheight_accordion_dataset: 478,
+        west_maxheight_accordion_period: 368,
+        west_maxheight_accordion_organisationunit: 728,
+        west_maxheight_accordion_organisationunitgroup: 270,
+        west_maxheight_accordion_options: 421,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
         form_label_width: 55,
@@ -233,6 +244,8 @@ DV.conf = {
         treepanel_minheight: 135,
         treepanel_maxheight: 400,
         treepanel_fill_default: 310,
+        treepanel_toolbar_menu_width_group: 140,
+        treepanel_toolbar_menu_width_level: 120,
         multiselect_minheight: 100,
         multiselect_maxheight: 250,
         multiselect_fill_default: 345,
@@ -263,7 +276,8 @@ DV.cmp = {
 		period: {
 			checkbox: []
 		},
-		organisationunit: {}
+		organisationunit: {},
+		organisationunitgroup: {}
 	},
 	options: {},
 	toolbar: {
@@ -609,8 +623,8 @@ Ext.onReady( function() {
 					tp = DV.cmp.dimension.organisationunit.treepanel,
 	                selection = tp.getSelectionModel().getSelection();
 					if (!selection.length) {
-						selection = [tp.getRootNode()];
-						tp.selectRoot();
+						var root = tp.selectRootIf();
+						selection = [root];
 					}
 					Ext.Array.each(selection, function(r) {
 						a.push({id: r.data.id, name: r.data.text});
@@ -637,7 +651,7 @@ Ext.onReady( function() {
 					return a;
 				},
                 getGroupSetId: function() {
-					var value = DV.cmp.dimension.organisationunit.panel.groupsets.getValue();
+					var value = DV.cmp.dimension.organisationunitgroup.panel.groupsets.getValue();
 					return !value || value === DV.i18n.none || value === DV.conf.finals.cmd.none ? null : value;
 				},
 				getGroupNameByGroupId: function(id) {
@@ -1466,6 +1480,41 @@ Ext.onReady( function() {
 					this.sort('index', 'ASC');
 				}
 			}
+		}),
+        group: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.organisationunitgroup_getall,
+				reader: {
+					type: 'json',
+					root: 'organisationUnitGroups'
+				}
+			},
+			isloaded: false,
+			listeners: {
+				load: function() {
+					this.isloaded = true;
+				}
+			}
+		}),
+        level: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'level'],
+			proxy: {
+				type: 'ajax',
+				url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.organisationunitlevel_getall,
+				reader: {
+					type: 'json',
+					root: 'organisationUnitLevels'
+				}
+			},
+			isloaded: false,
+			listeners: {
+				load: function() {
+					this.isloaded = true;
+					this.sort('level', 'ASC');
+				}
+			}
 		})
     };
     
@@ -1715,20 +1764,22 @@ Ext.onReady( function() {
 			
 			DV.util.checkbox.setRelativePeriods(DV.c.period.rp);
 			
+			DV.cmp.dimension.organisationunit.treepanel.selectByIds(DV.c.organisationunit.ids);
+			
 			if (DV.c.organisationunit.groupsetid) {
 				if (DV.store.groupset.isloaded) {
-					DV.cmp.dimension.organisationunit.panel.groupsets.setValue(DV.c.organisationunit.groupsetid);
+					DV.cmp.dimension.organisationunitgroup.panel.groupsets.setValue(DV.c.organisationunit.groupsetid);
 				}
 				else {
 					DV.store.groupset.load({
 						callback: function() {
-							DV.cmp.dimension.organisationunit.panel.groupsets.setValue(DV.c.organisationunit.groupsetid);
+							DV.cmp.dimension.organisationunitgroup.panel.groupsets.setValue(DV.c.organisationunit.groupsetid);
 						}
 					});
 				}
 			}
 			else {
-				DV.cmp.dimension.organisationunit.panel.groupsets.setValue(DV.store.isloaded ? DV.conf.finals.cmd.none : DV.i18n.none);
+				DV.cmp.dimension.organisationunitgroup.panel.groupsets.setValue(DV.store.isloaded ? DV.conf.finals.cmd.none : DV.i18n.none);
 			}
 		},
 		validation: {
@@ -1887,7 +1938,7 @@ Ext.onReady( function() {
 			},
 			favorite: function(f) {				
 				if (!f.organisationUnits || !f.organisationUnits.length) {
-					alert(DV.i18n.favorite_no_orgunits);
+					console.log(DV.i18n.favorite_no_orgunits);
 					return false;
 				}
 				return true;
@@ -3237,48 +3288,220 @@ Ext.onReady( function() {
 										hideCollapseTool: true,
 										items: [
 											{
-												xtype: 'combobox',
-												cls: 'dv-combo',
-												style: 'margin-bottom:8px',
-												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
-												valueField: 'id',
-												displayField: 'name',
-												fieldLabel: DV.i18n.group_sets,
-												labelWidth: 85,
-												labelStyle: 'padding-left:7px;',
-												editable: false,
-												queryMode: 'remote',
-												value: DV.i18n.none,
-												store: DV.store.groupset,
-												listeners: {
-													added: function() {
-														this.up('panel').groupsets = this;
+												id: 'organisationunit_t',
+												xtype: 'toolbar',
+												cls: 'dv-toolbar-tbar',
+												style: 'margin-bottom: 5px',
+												defaults: {
+													height: 28
+												},
+												items: [
+													{
+														xtype: 'label',
+														text: 'Auto-select organisation units by',
+														style: 'padding-left:8px; color:#666; line-height:28px'
+													},
+													'->',
+													{
+														text: 'Group..',
+														cls: 'dv-toolbar-btn-2',
+														handler: function() {},
+														listeners: {
+															added: function() {
+																this.menu = Ext.create('Ext.menu.Menu', {
+																	shadow: false,
+																	showSeparator: false,
+																	width: DV.conf.layout.treepanel_toolbar_menu_width_group,
+																	items: [
+																		{
+																			xtype: 'grid',
+																			cls: 'dv-menugrid',
+																			width: DV.conf.layout.treepanel_toolbar_menu_width_group,
+																			scroll: 'vertical',
+																			columns: [
+																				{
+																					dataIndex: 'name',
+																					width: DV.conf.layout.treepanel_toolbar_menu_width_group,
+																					style: 'display:none'
+																				}
+																			],
+																			setHeightInMenu: function(store) {
+																				var h = store.getCount() * 24,
+																					sh = DV.util.viewport.getSize().y * 0.6;
+																				this.setHeight(h > sh ? sh : h);
+																				this.doLayout();
+																				this.up('menu').doLayout();
+																			},
+																			store: DV.store.group,
+																			listeners: {
+																				itemclick: function(g, r) {
+																					g.getSelectionModel().select([], false);
+																					this.up('menu').hide();
+																					DV.cmp.dimension.organisationunit.treepanel.selectByGroup(r.data.id);
+																				}
+																			}
+																		}
+																	],
+																	listeners: {
+																		show: function() {
+																			if (!DV.store.group.isloaded) {
+																				DV.store.group.load({scope: this, callback: function() {
+																					this.down('grid').setHeightInMenu(DV.store.group);
+																				}});
+																			}
+																			else {
+																				this.down('grid').setHeightInMenu(DV.store.group);
+																			}
+																		}
+																	}
+																});
+															}
+														}
+													},
+													{
+														text: 'Level..',
+														cls: 'dv-toolbar-btn-2',
+														handler: function() {},
+														listeners: {
+															added: function() {
+																this.menu = Ext.create('Ext.menu.Menu', {
+																	shadow: false,
+																	showSeparator: false,
+																	width: DV.conf.layout.treepanel_toolbar_menu_width_level,
+																	items: [
+																		{
+																			xtype: 'grid',
+																			cls: 'dv-menugrid',
+																			width: DV.conf.layout.treepanel_toolbar_menu_width_level,
+																			scroll: 'vertical',
+																			columns: [
+																				{
+																					dataIndex: 'name',
+																					width: DV.conf.layout.treepanel_toolbar_menu_width_level,
+																					style: 'display:none'
+																				}
+																			],
+																			setHeightInMenu: function(store) {
+																				var h = store.getCount() * 24,
+																					sh = DV.util.viewport.getSize().y * 0.6;
+																				this.setHeight(h > sh ? sh : h);
+																				this.doLayout();
+																				this.up('menu').doLayout();
+																			},
+																			store: DV.store.level,
+																			listeners: {
+																				itemclick: function(g, r) {
+																					g.getSelectionModel().select([], false);
+																					this.up('menu').hide();
+																					DV.cmp.dimension.organisationunit.treepanel.selectByLevel(r.data.level);
+																				}
+																			}
+																		}
+																	],
+																	listeners: {
+																		show: function() {
+																			if (!DV.store.level.isloaded) {
+																				DV.store.level.load({scope: this, callback: function() {
+																					this.down('grid').setHeightInMenu(DV.store.level);
+																				}});
+																			}
+																			else {
+																				this.down('grid').setHeightInMenu(DV.store.level);
+																			}
+																		}
+																	}
+																});
+															}
+														}
 													}
-												}
+												]
 											},
 											{
 												xtype: 'treepanel',
 												cls: 'dv-tree',
 												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
+												rootVisible: false,
 												autoScroll: true,
 												multiSelect: true,
 												rendered: false,
-												selectRoot: function() {
-													if (this.rendered) {
-														if (!this.getSelectionModel().getSelection().length) {
-															this.getSelectionModel().select(this.getRootNode());
+												selectRootIf: function() {
+													if (this.getSelectionModel().getSelection().length < 1) {
+														var node = this.getRootNode().findChild('id', DV.init.system.rootnodes[0].id, true);
+														if (this.rendered) {
+															this.getSelectionModel().select(node);
 														}
+														return node;
 													}
 												},
+												numberOfRecords: 0,
+												recordsToSelect: [],
+												multipleSelectIf: function() {
+													if (this.recordsToSelect.length === this.numberOfRecords) {
+														this.getSelectionModel().select(this.recordsToSelect);
+														this.recordsToSelect = [];
+														this.numberOfRecords = 0;
+													}
+												},
+												multipleExpand: function(id, path) {
+													this.expandPath('/' + DV.conf.finals.root.id + path, 'id', '/', function() {
+														var record = this.getRootNode().findChild('id', id, true);
+														this.recordsToSelect.push(record);
+														this.multipleSelectIf();
+													}, this);
+												},
+												select: function(url, params) {
+													if (!params) {
+														params = {};
+													}
+													Ext.Ajax.request({
+														url: url,
+														method: 'GET',
+														params: params,
+														scope: this,
+														success: function(r) {
+															var a = Ext.JSON.decode(r.responseText).organisationUnits;
+															this.numberOfRecords = a.length;
+															for (var i = 0; i < a.length; i++) {
+																this.multipleExpand(a[i].id, a[i].path);
+															}
+														}
+													});
+												},
+												selectByGroup: function(id) {
+													if (id) {
+														var url = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunit_getbygroup,
+															params = {id: id};															
+														this.select(url, params);
+													}
+												},
+												selectByLevel: function(level) {
+													if (level) {
+														var url = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunit_getbylevel,
+															params = {level: level};															
+														this.select(url, params);
+													}
+												},
+												selectByIds: function(ids) {
+													if (ids) {
+														var url = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunit_getbyids;
+														Ext.Array.each(ids, function(item) {
+															url = Ext.String.urlAppend(url, 'ids=' + item);
+														});
+														if (!this.rendered) {
+															DV.cmp.dimension.organisationunit.panel.expand();
+														}
+														this.select(url);
+													}
+												},														
 												store: Ext.create('Ext.data.TreeStore', {
 													proxy: {
 														type: 'ajax',
 														url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunitchildren_get
 													},
 													root: {
-														id: DV.init.system.rootnode.id,
-														text: DV.init.system.rootnode.name,
-														expanded: false
+														id: DV.conf.finals.root.id,
+														expanded: true,
+														children: DV.init.system.rootnodes
 													},
 													listeners: {
 														load: function(s, node, r) {
@@ -3292,7 +3515,12 @@ Ext.onReady( function() {
 													added: function() {
 														DV.cmp.dimension.organisationunit.treepanel = this;
 													},
+													render: function() {
+														this.rendered = true;
+													},
 													itemcontextmenu: function(v, r, h, i, e) {
+														v.getSelectionModel().select(r, false);
+														
 														if (v.menu) {
 															v.menu.destroy();
 														}
@@ -3329,6 +3557,47 @@ Ext.onReady( function() {
 											expand: function() {
 												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_organisationunit);
 												DV.cmp.dimension.organisationunit.treepanel.setHeight(DV.cmp.dimension.organisationunit.panel.getHeight() - DV.conf.layout.west_fill_accordion_organisationunit);
+												DV.cmp.dimension.organisationunit.treepanel.selectRootIf();
+											}
+										}
+									},
+									{
+										title: '<div style="height:17px; background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.organisation_unit_groups + '</div>',
+										hideCollapseTool: true,
+										items: [
+											{
+												xtype: 'label',
+												style: 'font-style:italic; font-size:11px; color:#666',
+												margin: '0 0 0 7',
+												text: DV.i18n.nb_groups_replace_orgunits
+											},
+											{
+												xtype: 'combobox',
+												cls: 'dv-combo',
+												style: 'margin-top:10px',
+												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
+												valueField: 'id',
+												displayField: 'name',
+												fieldLabel: 'By group set',
+												labelWidth: 85,
+												labelStyle: 'padding-left:7px;',
+												editable: false,
+												queryMode: 'remote',
+												value: DV.i18n.none,
+												store: DV.store.groupset,
+												listeners: {
+													added: function() {
+														this.up('panel').groupsets = this;
+													}
+												}
+											}
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.dimension.organisationunitgroup.panel = this;
+											},
+											expand: function() {
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_organisationunitgroup);
 											}
 										}
 									},

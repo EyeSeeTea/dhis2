@@ -136,20 +136,6 @@ public class Expression
     // -------------------------------------------------------------------------
 
     @Override
-    public int hashCode()
-    {
-        final int PRIME = 31;
-
-        int result = 1;
-
-        result = PRIME * result + ((description == null) ? 0 : description.hashCode());
-
-        result = PRIME * result + ((expression == null) ? 0 : expression.hashCode());
-
-        return result;
-    }
-
-    @Override
     public boolean equals( Object obj )
     {
         if ( this == obj )
@@ -194,6 +180,29 @@ public class Expression
         }
 
         return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        final int PRIME = 31;
+        int result = 1;
+        result = PRIME * result + ((description == null) ? 0 : description.hashCode());
+        result = PRIME * result + ((expression == null) ? 0 : expression.hashCode());
+
+        return result;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Expression{" +
+            "id=" + id +
+            ", expression='" + expression + '\'' +
+            ", description='" + description + '\'' +
+            ", dataElementsInExpression=" + dataElementsInExpression.size() +
+            ", optionCombosInExpression=" + optionCombosInExpression.size() +
+            '}';
     }
 
     // -------------------------------------------------------------------------

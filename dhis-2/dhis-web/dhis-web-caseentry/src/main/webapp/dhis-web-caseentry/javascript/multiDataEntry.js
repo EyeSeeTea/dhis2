@@ -2,28 +2,14 @@
 function multiDataEntryOrgunitSelected( orgUnits, orgUnitNames )
 {
 	hideById("listPatient");
-	jQuery.getJSON( "getPrograms.action",{}, 
-		function( json ) 
-		{    
-			enable('programId');
-			enable('patientAttributeId');
-			
-			clearListById('programId');
-			if(json.programs.length == 0)
-			{
-				disable('programId');
-				disable('patientAttributeId');
-			}
-			else
-			{
-				addOptionById( 'programId', "0", i18n_select );
-				
-				for ( var i in json.programs ) 
-				{
-					addOptionById( 'programId', json.programs[i].id, json.programs[i].name );
-				} 
-			}	
+	jQuery('#programDiv').load("getPrograms.action",{}, 
+		function()
+		{
+			hideById('btnBack');
+			hideById('programName');
+			showById('programDiv');
 			setFieldValue( 'orgunitName', orgUnitNames[0] );
+			hideLoader();
 		});
 }
 
@@ -48,6 +34,7 @@ function selectProgram( programId, programName )
 			showById('programName');
 			
 			showById('btnBack');
+			showById('programName');
 			showById("listPatient");
 			hideLoader();
 		});
@@ -65,7 +52,7 @@ function viewPrgramStageRecords( programStageInstanceId )
 	jQuery("#patientList input[name='programStageBtn']").each(function(i,item){
 		jQuery(item).removeClass('stage-object-selected');
 	});
-	jQuery( '#' + prefixStageId + programStageInstanceId ).addClass('stage-object-selected');
+	jQuery( '#' + prefixId + programStageInstanceId ).addClass('stage-object-selected');
 	
 	$('#contentDataRecord').dialog('destroy').remove();
     $('<div id="contentDataRecord">' ).load("viewProgramStageRecords.action",
@@ -73,13 +60,13 @@ function viewPrgramStageRecords( programStageInstanceId )
 			programStageInstanceId: programStageInstanceId
 		}).dialog(
 		{
-			title: 'ProgramStage',
-			maximize: true, 
-			closable: true,
+			title:i18n_program_stage,
+			maximize:true, 
+			closable:true,
 			modal:false,
 			overlay:{background:'#000000', opacity:0.1},
-			width: 800,
-			height: 400
+			width:800,
+			height:400
 		});
 }
 

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
-
 import org.hisp.dhis.api.mobile.ActivityReportingService;
 import org.hisp.dhis.api.mobile.FacilityReportingService;
 import org.hisp.dhis.api.mobile.IProgramService;
@@ -13,6 +12,7 @@ import org.hisp.dhis.api.mobile.model.ActivityPlan;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
 import org.hisp.dhis.api.mobile.model.DataSetList;
 import org.hisp.dhis.api.mobile.model.DataSetValue;
+import org.hisp.dhis.api.mobile.model.DataStreamSerializable;
 import org.hisp.dhis.api.mobile.model.MobileModel;
 import org.hisp.dhis.api.mobile.model.ModelList;
 import org.hisp.dhis.i18n.I18nService;
@@ -32,10 +32,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class MobileOrganisationUnitController
     extends AbstractMobileController
 {
-	private static final String ACTIVITY_REPORT_UPLOADED = "activity_report_uploaded";
-    
+    private static final String ACTIVITY_REPORT_UPLOADED = "activity_report_uploaded";
+
     private static final String DATASET_REPORT_UPLOADED = "dataset_report_uploaded";
-	
+
     @Autowired
     private ActivityReportingService activityReportingService;
 
@@ -56,11 +56,26 @@ public class MobileOrganisationUnitController
     public MobileModel getAllDataForOrgUnit( @PathVariable int id, @RequestHeader( "accept-language" ) String locale )
     {
         MobileModel mobileModel = new MobileModel();
-
+        mobileModel.setClientVersion( DataStreamSerializable.TWO_POINT_EIGHT );
         OrganisationUnit unit = getUnit( id );
         mobileModel.setActivityPlan( activityReportingService.getCurrentActivityPlan( unit, locale ) );
         mobileModel.setPrograms( programService.getPrograms( unit, locale ) );
-
+        mobileModel.setDatasets( facilityReportingService.getMobileDataSetsForUnit( unit, locale ) );
+        mobileModel.setServerCurrentDate( new Date() );
+        mobileModel.setLocales( getLocalStrings( i18nService.getAvailableLocales() ) );
+        return mobileModel;
+    }
+    
+    @RequestMapping( method = RequestMethod.GET, value = "{id}/all/2.9" )
+    @ResponseBody
+    public MobileModel getAllDataForOrgUnit2_9( @PathVariable int id, @RequestHeader( "accept-language" ) String locale )
+    {
+        System.out.println("download all 2.9");
+        MobileModel mobileModel = new MobileModel();
+        mobileModel.setClientVersion( DataStreamSerializable.TWO_POINT_NINE );
+        OrganisationUnit unit = getUnit( id );
+        mobileModel.setActivityPlan( activityReportingService.getCurrentActivityPlan( unit, locale ) );
+        mobileModel.setPrograms( programService.getPrograms( unit, locale ) );
         mobileModel.setDatasets( facilityReportingService.getMobileDataSetsForUnit( unit, locale ) );
         mobileModel.setServerCurrentDate( new Date() );
         mobileModel.setLocales( getLocalStrings( i18nService.getAvailableLocales() ) );

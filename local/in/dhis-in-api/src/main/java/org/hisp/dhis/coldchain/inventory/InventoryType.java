@@ -1,8 +1,6 @@
 package org.hisp.dhis.coldchain.inventory;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.coldchain.catalog.CatalogType;
@@ -26,23 +24,20 @@ public class InventoryType extends BaseNameableObject
     
     private boolean tracking;
     
-    
- 
     private CatalogType catalogType;
     
    // private Set<InventoryTypeAttribute> inventoryTypeAttributes;
     
-    private List<InventoryTypeAttribute> inventoryTypeAttributes = new ArrayList<InventoryTypeAttribute>();
+    //private List<InventoryTypeAttribute> inventoryTypeAttributes = new ArrayList<InventoryTypeAttribute>();
     
-    /**
-     * All DataSets associated with this InventoryType.
-     */
+    //private List<Boolean> display = new ArrayList<Boolean>();
+    
+    private Set<InventoryType_Attribute> inventoryType_Attributes;
+    
     private Set<DataSet> dataSets = new HashSet<DataSet>();
     
-
     private DataEntryForm dataEntryForm;
     
-
     // -------------------------------------------------------------------------
     // Contructors
     // -------------------------------------------------------------------------
@@ -64,8 +59,6 @@ public class InventoryType extends BaseNameableObject
         this.tracking = tracking;
         this.catalogType = catalogType;
     }
-    
-    
     
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
@@ -153,6 +146,7 @@ public class InventoryType extends BaseNameableObject
         this.inventoryTypeAttributes = inventoryTypeAttributes;
     }
     */
+    /*
     public List<InventoryTypeAttribute> getInventoryTypeAttributes()
     {
         return inventoryTypeAttributes;
@@ -161,6 +155,7 @@ public class InventoryType extends BaseNameableObject
     {
         this.inventoryTypeAttributes = inventoryTypeAttributes;
     }
+    */
     public DataEntryForm getDataEntryForm()
     {
         return dataEntryForm;
@@ -177,6 +172,25 @@ public class InventoryType extends BaseNameableObject
     public void setDataSets( Set<DataSet> dataSets )
     {
         this.dataSets = dataSets;
+    }
+    /*
+    public boolean isDisplay()
+    {
+        return display;
+    }
+    public void setDisplay( boolean display )
+    {
+        this.display = display;
+    }
+    */
+    
+    public Set<InventoryType_Attribute> getInventoryType_Attributes()
+    {
+        return inventoryType_Attributes;
+    }
+    public void setInventoryType_Attributes( Set<InventoryType_Attribute> inventoryType_Attributes )
+    {
+        this.inventoryType_Attributes = inventoryType_Attributes;
     }
     
 }

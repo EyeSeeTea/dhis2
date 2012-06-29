@@ -55,7 +55,8 @@ TR.conf = {
             favorite_delete: 'deleteTabularReport.action',
 			datavalue_save: 'saveValue.action',
 			datavalue_delete: 'removeCurrentEncounter.action',
-            redirect: 'index.action'
+			suggested_dataelement_get: 'getOptions.action',
+			redirect: 'index.action'
         },
         params: {
             data: {
@@ -836,7 +837,7 @@ Ext.onReady( function() {
 				var value = compare + "'"+ filter.data.value + "'";
 				
 				var record = grid.getView().getRecord( grid.getView().getNode(0) );
-				record.set(filter.field, value);
+				record.set(filter.field, value.toLowerCase());
 			}
 		},
 		getParams: function() {
@@ -955,7 +956,7 @@ Ext.onReady( function() {
 				var col = cols[i];
 				if( col.name && col.name == colname )
 				{
-					var value = editor.data[col.dataIndex];
+					var value = editor.data[col.dataIndex].toLowerCase();
 					var hidden = (col.hidden==undefined)? false : col.hidden;
 					if( value!=null && value!= '')
 					{
@@ -1230,17 +1231,8 @@ Ext.onReady( function() {
 					sortable: false,
 					draggable: false,
 					hidden: eval(TR.value.columns[index].hidden ),
-					editor: {
-						xtype: TR.value.columns[index].xtype,
-						queryMode: 'local',
-						editable: true,
-						valueField: 'name',
-						displayField: 'name',
-						allowBlank: true,
-						store:  new Ext.data.ArrayStore({
-							fields: ['name'],
-							data: TR.value.columns[index].suggested
-						})
+					filter:{
+						type: "string"
 					}
 				}
 			});
@@ -1253,7 +1245,8 @@ Ext.onReady( function() {
 			
 			cols[++index]={
 				xtype:'actioncolumn',
-				width:25,
+				header: TR.i18n.operations,
+				width:80,
 				sortable: false,
 				draggable: false,
 				hideable: false,
@@ -1444,69 +1437,68 @@ Ext.onReady( function() {
 		},
 		createColumn: function( type, id, compulsory, cols, index )
 		{
+			var objectType = id.split('_')[0];
+			var objectId = id.split('_')[1];
+			
+			var params = {};
+			params.header = TR.value.columns[index].name;
+			params.dataIndex = 'col' + index;
+			params.name = id;
+			params.hidden = eval(TR.value.columns[index].hidden );
+			params.menuFilterText = TR.value.filter;
+			params.sortable = false;
+			params.draggable = true;
+			params.isEditAllowed = true;
+			params.compulsory = compulsory;
+			
+			params.editor = {}; 
+			params.editor.xtype = TR.value.covertXType( type ); 
+			params.editor.editable = true;
+
+			params.filter = {};
+			params.filter.type = TR.value.covertValueType( type );
+				
 			if( type.toLowerCase() == 'date' )
 			{
-				return {
-					header: TR.value.columns[index].name, 
-					dataIndex: 'col' + index,
-					name: id,
-					hidden: eval(TR.value.columns[index].hidden ),
-					menuFilterText: TR.value.filter,
-					sortable: false,
-					draggable: true,
-					isEditAllowed: true,
-					compulsory: compulsory,
-					renderer: Ext.util.Format.dateRenderer( TR.i18n.format_date ),
-					filter: {
-						type:TR.value.covertValueType( type ),
-						dateFormat: TR.i18n.format_date,
-						beforeText: TR.i18n.before,
-						afterText: TR.i18n.after,
-						onText: TR.i18n.on
-					},
-					editor: {
-						xtype: TR.value.covertXType( type ),
-						format: TR.i18n.format_date,
-						queryMode: 'local',
-						editable: true,
-						valueField: 'name',
-						displayField: 'name',
-						allowBlank: true,
-						store:  new Ext.data.ArrayStore({
-							fields: ['name'],
-							data: TR.value.columns[index].suggested
-						})
+				params.renderer = Ext.util.Format.dateRenderer( TR.i18n.format_date );
+				params.filter.dateFormat = TR.i18n.format_date;
+				params.filter.beforeText = TR.i18n.before;
+				params.filter.afterText = TR.i18n.after;
+				params.filter.onText = TR.i18n.on;
+				
+				params.editor.format = TR.i18n.format_date;
+			}
+			else if( type.toLowerCase() == 'list' )
+			{
+				params.editor.xtype = 'combobox';
+				params.editor.typeAhead = true;
+				params.editor.triggerAction = 'all';
+				params.editor.transform = 'light';
+				params.editor.lazyRender = true;
+				params.editor.forceSelection = true;
+				params.editor.minChars = 2;
+				params.editor.hideTrigger = true;
+				params.editor.validateOnBlur = true;
+				params.editor.queryMode = 'remote';
+				params.editor.valueField = 'o';
+				params.editor.displayField = 'o';
+				params.editor.store = Ext.create('Ext.data.Store', {
+					fields: ['o'],
+					data:[],
+					expandData: true,
+					proxy: {
+						type: 'ajax',
+						url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.suggested_dataelement_get,
+						extraParams:{id: objectId},
+						reader: {
+							type: 'json',
+							root: 'options'
+						}
 					}
-				}
+				})		
 			}
 			
-			return {
-				header: TR.value.columns[index].name, 
-				dataIndex: 'col' + index,
-				name: id,
-				hidden: eval(TR.value.columns[index].hidden ),
-				menuFilterText: TR.value.filter,
-				sortable: false,
-				draggable: true,
-				isEditAllowed: true,
-				compulsory: compulsory,
-				filter: {
-					type:TR.value.covertValueType( type ),
-					options: TR.value.columns[index].suggested
-				},
-				editor: {
-					xtype: TR.value.covertXType( type ),
-					queryMode: 'local',
-					editable: true,
-					valueField: 'name',
-					displayField: 'name',
-					allowBlank: true,
-					store:  new Ext.data.ArrayStore({
-						fields: ['name'],
-						data: TR.value.columns[index].suggested
-					})
-				}
-			}
+			return params;
 		},
         setPagingToolbarStatus: function() {
 			Ext.getCmp('currentPage').enable();

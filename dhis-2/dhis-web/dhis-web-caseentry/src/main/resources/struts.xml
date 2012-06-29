@@ -19,7 +19,7 @@
 		<!-- Data Entry -->
 
 		<action name="dataEntrySelect"
-			class="org.hisp.dhis.caseentry.action.caseentry.DataEntrySelectAction">
+			class="org.hisp.dhis.caseentry.action.patient.SelectAction">
 			<interceptor-ref name="organisationUnitTreeStack" />
 			<result name="success" type="velocity">/main.vm</result>
 			<param name="page">/dhis-web-caseentry/select.vm</param>
@@ -75,8 +75,7 @@
 			class="org.hisp.dhis.caseentry.action.caseentry.LoadDataEntryAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/dataEntryForm.vm</param>
-			<param name="javascripts">javascript/customcheckbox/prettyCheckboxes.js</param>
-			<param name="stylesheets">style/style.css,javascript/customcheckbox/prettyCheckboxes.css</param>
+			<param name="stylesheets">style/style.css</param>
 		</action>
 
 		<action name="completeDataEntry"
@@ -118,6 +117,12 @@
 			<param name="requiredAuthorities">F_NAME_BASED_DATA_ENTRY</param>
 		</action>
 		
+		<action name="anonymousPrograms"
+			class="org.hisp.dhis.caseentry.action.caseentry.LoadAnonymousProgramsAction">
+			<result name="success" type="velocity-json">/dhis-web-caseentry/jsonSingleEventPrograms.vm</result>
+			<param name="requiredAuthorities">F_NAME_BASED_DATA_ENTRY</param>
+		</action>
+		
 		<action name="createAnonymousEncounter"
 			class="org.hisp.dhis.caseentry.action.caseentry.CreateAnonymousEncounterAction">
 			<result name="success" type="velocity-json">
@@ -151,6 +156,18 @@
 		<action name="getOptions" class="org.hisp.dhis.caseentry.action.caseentry.GetOptionsByDataElementAction">
 	      <result name="success" type="velocity-json">/dhis-web-caseentry/jsonOptions.vm</result>
 	    </action>
+		
+		<action name="getProgramStageDataElementList"
+			class="org.hisp.dhis.caseentry.action.caseentry.GetProgramStageDataElementsAction">
+			<result name="success" type="velocity-json">/dhis-web-caseentry/jsonProgramStageDataElements.vm</result>
+		</action>
+		
+		<action name="searchProgramStageInstances"
+			class="org.hisp.dhis.caseentry.action.report.GenerateTabularReportAction">
+			<result name="success" type="velocity">/content.vm</result>
+			<param name="page">/dhis-web-caseentry/programStageInstancesList.vm</param>
+			<param name="requiredAuthorities">F_NAME_BASED_DATA_ENTRY</param>
+		</action>
 		
 		<!-- save value -->
 
@@ -189,16 +206,15 @@
 
 		<action name="getPrograms"
 			class="org.hisp.dhis.caseentry.action.caseentry.GetProgramsByOrgunitAction">
-			<result name="success" type="velocity-json">
-				/dhis-web-caseentry/responsePrograms.vm</result>
+			<result name="success" type="velocity">/content.vm</result>
+			<param name="page">/dhis-web-caseentry/multiDataEntryIndex.vm</param>
 		</action>
 
 		<action name="getDataRecords"
 			class="org.hisp.dhis.caseentry.action.caseentry.GetDataRecordsAction">
 			<result name="success" type="velocity">/content.vm</result>
 			<param name="page">/dhis-web-caseentry/dataentryRecords.vm</param>
-			<param name="javascripts">javascript/customcheckbox/prettyCheckboxes.js</param>
-			<param name="stylesheets">style/style.css,javascript/customcheckbox/prettyCheckboxes.css</param>
+			<param name="stylesheets">style/style.css</param>
 		</action>
 
 		<action name="viewProgramStageRecords"
@@ -220,6 +236,44 @@
 			class="org.hisp.dhis.caseentry.action.caseentry.CompleteDataEntryAction">
 			<result name="success" type="redirect">
 				getDataRecords.action?programId=${programId}</result>
+			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_UPDATE,F_PATIENT_DATAVALUE_DELETE</param>
+		</action>
+		
+		<!-- Single-event DataEntry -->
+		
+		<action name="singleEventSelect"
+			class="org.hisp.dhis.caseentry.action.patient.SelectAction">
+			<interceptor-ref name="organisationUnitTreeStack" />
+			<result name="success" type="velocity">/main.vm</result>
+			<param name="page">/dhis-web-caseentry/singleEventSelect.vm</param>
+			<param name="menu">/dhis-web-caseentry/dataEntryMenu.vm</param>
+			<param name="javascripts">../dhis-web-commons/ouwt/ouwt.js
+				,javascript/commons.js
+				,javascript/singleEvent.js
+				,javascript/form.js
+				,javascript/entry.js
+				,../dhis-web-commons/javascripts/date.js
+			</param>
+			<param name="stylesheets">style/style.css</param>
+			<param name="requiredAuthorities">F_NAME_BASED_DATA_ENTRY</param>
+		</action>
+		
+		<action name="singleEventPrograms"
+			class="org.hisp.dhis.caseentry.action.caseentry.GetSingleEventProgramListAction">
+			<result name="success" type="velocity-json">/dhis-web-caseentry/jsonSingleEventPrograms.vm</result>
+			<param name="requiredAuthorities">F_NAME_BASED_DATA_ENTRY</param>
+		</action>
+		
+		<action name="showEventWithRegistrationForm"
+			class="org.hisp.dhis.caseentry.action.caseentry.ShowEventWithRegistrationFormAction">
+			<result name="success" type="velocity">/content.vm</result>
+			<param name="page">/dhis-web-caseentry/addSingleEventRegistration.vm</param>
+			<param name="stylesheets">style/style.css</param>
+		</action>
+		
+		<action name="saveValues"
+			class="org.hisp.dhis.caseentry.action.caseentry.SaveValuesAction">
+			<result name="success" type="velocity-xml">status.vm</result>
 			<param name="requiredAuthorities">F_PATIENT_DATAVALUE_ADD,F_PATIENT_DATAVALUE_UPDATE,F_PATIENT_DATAVALUE_DELETE</param>
 		</action>
 		

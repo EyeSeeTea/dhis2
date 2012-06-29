@@ -37,10 +37,10 @@ import org.hisp.dhis.dxf2.metadata.ImportService;
 /**
  * metadataendpoint is created using a uri of the form:
  * dhis2:metadata?dryRun=true|false
- * 
+ *
  * @author bobj
  */
-public class Dxf2MetaDataEndpoint 
+public class Dxf2MetaDataEndpoint
     extends DefaultEndpoint
 {
     protected ImportService importService;
@@ -49,9 +49,9 @@ public class Dxf2MetaDataEndpoint
     {
         return importService;
     }
-    
+
     protected ImportOptions options;
-    
+
     public ImportOptions getImportOptions()
     {
         return this.options;
@@ -60,17 +60,22 @@ public class Dxf2MetaDataEndpoint
     // -------------------------------------------------------------------------
     // Parameters supported by this end point 
     // -------------------------------------------------------------------------
-    
+
     public void setDryRun( Boolean dryRun )
     {
         options.setDryRun( dryRun );
     }
-    
+
+    public void setStrategy( String strategy )
+    {
+        options.setStrategy( strategy );
+    }
+
     public Dxf2MetaDataEndpoint( String uri, Dxf2Component component, ImportService importService )
     {
         super( uri, component );
         this.importService = importService;
-        options= new ImportOptions();
+        options = new ImportOptions();
     }
 
     @Override

@@ -37,11 +37,22 @@ import java.io.IOException;
  */
 public interface DataStreamSerializable
 {
+    public static final String BLANK = "";
+
+    public static final String TWO_POINT_EIGHT = "2.8";
+
+    public static final String TWO_POINT_NINE = "2.9";
 
     public void serialize( DataOutputStream dataOutputStream )
         throws IOException;
 
     public void deSerialize( DataInputStream dataInputStream )
+        throws IOException;
+
+    public void serializeVerssion2_8( DataOutputStream dataOutputStream )
+        throws IOException;
+
+    public void serializeVerssion2_9( DataOutputStream dataOutputStream )
         throws IOException;
 
 }

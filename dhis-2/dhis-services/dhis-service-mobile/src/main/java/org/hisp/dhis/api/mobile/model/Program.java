@@ -35,7 +35,8 @@ import java.util.List;
 public class Program
     extends Model
 {
-
+    private String clientVersion;
+    
     private int version;
 
     public int getVersion()
@@ -59,6 +60,16 @@ public class Program
     {
         this.programStages = programStages;
     }
+    
+    public String getClientVersion()
+    {
+        return clientVersion;
+    }
+
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
+    }
 
     @Override
     public void serialize( DataOutputStream dout )
@@ -72,6 +83,36 @@ public class Program
         {
             ProgramStage programStage = (ProgramStage) programStages.get( i );
             programStage.serialize( dout );
+        }
+    }
+    
+    @Override
+    public void serializeVerssion2_8( DataOutputStream dout )
+        throws IOException
+    {
+        dout.writeInt( this.getId() );
+        dout.writeUTF( this.getName() );
+        dout.writeInt( this.getVersion() );
+        dout.writeInt( programStages.size() );
+        for ( int i = 0; i < programStages.size(); i++ )
+        {
+            ProgramStage programStage = (ProgramStage) programStages.get( i );
+            programStage.serializeVerssion2_8( dout );
+        }
+    }
+    
+    @Override
+    public void serializeVerssion2_9( DataOutputStream dout )
+        throws IOException
+    {
+        dout.writeInt( this.getId() );
+        dout.writeUTF( this.getName() );
+        dout.writeInt( this.getVersion() );
+        dout.writeInt( programStages.size() );
+        for ( int i = 0; i < programStages.size(); i++ )
+        {
+            ProgramStage programStage = (ProgramStage) programStages.get( i );
+            programStage.serializeVerssion2_9( dout );
         }
     }
 

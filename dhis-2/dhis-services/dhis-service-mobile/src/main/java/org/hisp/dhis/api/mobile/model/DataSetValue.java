@@ -41,7 +41,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class DataSetValue
     extends Model
 {
-
+    private String clientVersion;
+    
     private String periodName;
 
     private boolean completed;
@@ -80,6 +81,16 @@ public class DataSetValue
     {
         return dataValues;
     }
+    
+    public String getClientVersion()
+    {
+        return clientVersion;
+    }
+
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
+    }
 
     @Override
     public void serialize( DataOutputStream dataOutputStream )
@@ -92,7 +103,6 @@ public class DataSetValue
     public void deSerialize( DataInputStream din )
         throws IOException
     {
-
         this.setId( din.readInt() );
         this.setName( din.readUTF() );
         this.setPeriodName( din.readUTF() );

@@ -61,7 +61,7 @@ function getPatientsByName( divname )
 
 function addAttributeOption()
 {
-	var rowId = 'advSearchBox' + jQuery('#advancedSearchTB select[name=searchingAttributeId]').length + 1;
+	var rowId = 'advSearchBox' + jQuery('#advancedSearchTB select[name=searchObjectId]').length + 1;
 	var contend  = '<td>' + getInnerHTML('searchingAttributeIdTD') + '</td>';
 		contend += '<td>' + searchTextBox ;
 		contend += '<input type="button" class="small-button" value="-" onclick="removeAttributeOption(' + "'" + rowId + "'" + ');"></td>';
@@ -79,33 +79,33 @@ function removeAttributeOption( rowId )
 // Search patients by selected attribute
 //------------------------------------------------------------------------------
 
-function searchingAttributeOnChange( this_ )
+function searchObjectOnChange( this_ )
 {	
 	var container = jQuery(this_).parent().parent().attr('id');
-	var attributeId = jQuery('#' + container+ ' [id=searchingAttributeId]').val(); 
+	var attributeId = jQuery('#' + container + ' [id=searchObjectId]').val(); 
 	var element = jQuery('#' + container + ' [id=searchText]');
-	var valueType = jQuery('#' + container+ ' [id=searchingAttributeId] option:selected').attr('valueType');
+	var valueType = jQuery('#' + container+ ' [id=searchObjectId] option:selected').attr('valueType');
 	
 	if( attributeId == '-1' )
 	{
 		element.replaceWith( getDateField( container ) );
-		datePickerValid( container + ' [id=searchText]' );
+		datePickerValid( 'searchText_' + container );
 		return;
 	}
 	
-	$('#' + container+ ' [id=searchText]').datepicker("destroy");
-	$('#' + container+ ' [id=dateOperator]').replaceWith("");
+	$( '#searchText_' + container ).datepicker("destroy");
+	$('#' + container + ' [id=dateOperator]').replaceWith("");
 	if( attributeId == '0' )
 	{
 		element.replaceWith( programComboBox );
 	}
 	else if ( attributeId=='-2' )
 	{
-		element.replaceWith( genderSelector );
+		element.replaceWith( getGenderSelector() );
 	}
 	else if ( valueType=='YES/NO' )
 	{
-		element.replaceWith( trueFalseBox );
+		element.replaceWith( getTrueFalseBox() );
 	}
 	else
 	{
@@ -115,11 +115,29 @@ function searchingAttributeOnChange( this_ )
 
 function getDateField( container )
 {
-	var dateField = '<select id="dateOperator" name="dateOperator" ><option value=">"> > </option><option value="="> = </option><option value="<"> < </option></select>';
-	dateField += '<input type="text" id="searchText" name="searchText" maxlength="30" style="width:18em" onkeyup="searchPatientsOnKeyUp( event );">';
+	var dateField = '<select id="dateOperator" style="width:30px;" name="dateOperator" ><option value=">"> > </option><option value="="> = </option><option value="<"> < </option></select>';
+	dateField += '<input type="text" id="searchText_' + container + '" name="searchText" style="width:210px;">';
 	return dateField;
 }
+
+function getTrueFalseBox()
+{
+	var trueFalseBox  = '<select id="searchText" name="searchText">';
+	trueFalseBox += '<option value="true">' + i18n_yes + '</option>';
+	trueFalseBox += '<option value="false">' + i18n_no + '</option>';
+	trueFalseBox += '</select>';
+	return trueFalseBox;
+}
 	
+function getGenderSelector()
+{
+	var genderSelector = '<select id="searchText" name="searchText">';
+		genderSelector += '<option value="M">' + i18n_male + '</option>';
+		genderSelector += '<option value="F">' + i18n_female + '</option>';
+		genderSelector += '</select>';
+	return genderSelector;
+}
+
 //-----------------------------------------------------------------------------
 // Search Patient
 //-----------------------------------------------------------------------------
@@ -130,7 +148,7 @@ function searchPatientsOnKeyUp( event )
 	
 	if ( key==13 )// Enter
 	{
-		searchAdvancedPatients();
+		validateAdvancedSearch();
 	}
 }
 
@@ -141,26 +159,51 @@ function getKeyCode(e)
 	 return (e)? e.which : null;
 }
 
-function searchAdvancedPatients()
+function validateAdvancedSearch()
 {
 	hideById( 'listPatientDiv' );
-	var searchTextFields = jQuery('[name=searchText]');
 	var flag = true;
-	jQuery( searchTextFields ).each( function( i, item )
+	var params = '';
+	var dateOperator = '';
+	jQuery("#searchDiv :input").each( function( i, item )
     {
-		if( jQuery( item ).val() == '' )
+		var elementName = $(this).attr('name');
+		if( elementName=='searchText' && jQuery( item ).val() == '' )
 		{
 			showWarningMessage( i18n_specify_search_criteria );
 			flag = false;
 		}
 	});
 	
-	if(!flag) return;
-	
-	contentDiv = 'listPatientDiv';
-	jQuery( "#loaderDiv" ).show();
-	searchPatient();
-	
+	if(flag){
+		jQuery("#searchDiv :input").each( function( i, item )
+		{
+			var elementId = $(this).attr('id');
+			var elementName = $(this).attr('name');
+			if( elementId =='dateOperator' )
+			{
+				dateOperator = jQuery(this).val();
+			}
+			else
+			{
+				var value =jQuery(this).val();
+				if( dateOperator != '' )
+				{
+					value = dateOperator + "'" + value + "'";
+					dateOperator = "";
+				}
+				if( elementName=='searchText')
+					params += "searchText=";
+				else
+					params +=  elementId + "=";
+					
+				params += htmlEncode(value) + "&";
+			}
+		});
+		contentDiv = 'listPatientDiv';
+		jQuery( "#loaderDiv" ).show();
+		advancedSearch( params );
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -267,7 +310,7 @@ function exportPatientHistory( patientId, type )
 	window.location.href = url;
 }
 
-var prefixStageId = 'ps_';
+var prefixId = 'ps_';
 var COLOR_RED = "#fb4754";
 var COLOR_GREEN = "#8ffe8f";
 var COLOR_YELLOW = "#f9f95a";
@@ -301,4 +344,44 @@ function setEventColorStatus( elementId, status )
 		default:
 		  return;
 	}
+}
+
+
+// -----------------------------------------------------------------------------
+// check duplicate patient
+// -----------------------------------------------------------------------------
+
+function checkDuplicate( divname )
+{
+	$.postUTF8( 'validatePatient.action', 
+		{
+			fullName: jQuery( '#' + divname + ' [id=fullName]' ).val(),
+			dobType: jQuery( '#' + divname + ' [id=dobType]' ).val(),
+			gender: jQuery( '#' + divname + ' [id=gender]' ).val(),
+			birthDate: jQuery( '#' + divname + ' [id=birthDate]' ).val(),        
+			age: jQuery( '#' + divname + ' [id=age]' ).val()
+		}, function( xmlObject, divname )
+		{
+			checkDuplicateCompleted( xmlObject, divname );
+		});
+}
+
+function checkDuplicateCompleted( messageElement, divname )
+{
+	checkedDuplicate = true;    
+	var type = jQuery(messageElement).find('message').attr('type');
+	var message = jQuery(messageElement).find('message').text();
+    
+    if( type == 'success')
+    {
+    	showSuccessMessage(i18n_no_duplicate_found);
+    }
+    if ( type == 'input' )
+    {
+        showWarningMessage(message);
+    }
+    else if( type == 'duplicate' )
+    {
+    	showListPatientDuplicate( messageElement, true );
+    }
 }

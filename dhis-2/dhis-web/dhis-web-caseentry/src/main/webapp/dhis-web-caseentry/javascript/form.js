@@ -7,9 +7,9 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 	
 	hideById('dataEntryFormDiv');
 	hideById('dataRecordingSelectDiv');
-	showById('searchPatientDiv');
+	showById('searchDiv');
 	
-	enable('searchingAttributeId');
+	enable('searchObjectId');
 	jQuery('#searchText').removeAttr('readonly');
 	enable('searchBtn');	
 	enable('listPatientBtn');
@@ -23,9 +23,11 @@ function showSearchForm()
 {
 	hideById('dataRecordingSelectDiv');
 	hideById('dataEntryFormDiv');
-	showById('searchPatientDiv');
+	showById('searchDiv');
 	showById('contentDiv');
+	hideById('addNewDiv');
 	jQuery('#createNewEncounterDiv').dialog('close');
+	jQuery('#resultSearchDiv').dialog('close');
 }
 
 //--------------------------------------------------------------------------------------------
@@ -41,29 +43,10 @@ function listAllPatient()
 		{
 			hideById('dataRecordingSelectDiv');
 			hideById('dataEntryFormDiv');
-			showById('searchPatientDiv');
+			showById('searchDiv');
+			setInnerHTML('searchInforTD', i18n_list_all_patients );
+			setFieldValue('listAll', true);
 			hideLoader();
-		});
-}
-
-//--------------------------------------------------------------------------------------------
-// Show selected data-recording
-//--------------------------------------------------------------------------------------------
-
-function showSelectedDataRecoding( patientId )
-{
-	showLoader();
-	hideById('searchPatientDiv');
-	hideById('dataEntryFormDiv');
-	jQuery('#dataRecordingSelectDiv').load( 'selectDataRecording.action', 
-		{
-			patientId: patientId
-		},
-		function()
-		{
-			showById('dataRecordingSelectDiv');
-			hideLoader();
-			hideById('contentDiv');
 		});
 }
 
@@ -107,13 +90,14 @@ function searchValidationCompleted( messageElement )
 		hideById('dataRecordingSelectDiv');
 		$('#contentDiv').load( 'searchPatient.action', 
 			{
-				searchingAttributeId: getFieldValue('searchingAttributeId'), 
+				searchObjectId: getFieldValue('searchObjectId'), 
 				searchText: getFieldValue('searchText'),
 				searchBySelectedOrgunit: byId('searchBySelectedOrgunit').checked
 			},
 			function()
 			{
-				showById('searchPatientDiv');
+				showById('searchDiv');
+				setFieldValue('listAll', false);
 				hideLoader();
 			});
     }
@@ -134,7 +118,7 @@ function searchValidationCompleted( messageElement )
 function showSelectedDataRecoding( patientId )
 {
 	showLoader();
-	hideById('searchPatientDiv');
+	hideById('searchDiv');
 	hideById('dataEntryFormDiv');
 	jQuery('#dataRecordingSelectDiv').load( 'selectDataRecording.action', 
 		{
@@ -145,19 +129,35 @@ function showSelectedDataRecoding( patientId )
 			showById('dataRecordingSelectDiv');
 			hideLoader();
 			hideById('contentDiv');
+			jQuery("#dataRecordingSelectDiv [id=inputCriteria]").show();
+			if( getFieldValue('isRegistration') == 'true' )
+			{
+				jQuery("#dataRecordingSelectDiv [id=inputCriteria]").hide();
+				var singleProgramId = getFieldValue('programIdAddPatient');
+				jQuery("#dataRecordingSelectDiv select[id='programId'] option").each(function(){
+					if( jQuery(this).val()==singleProgramId){
+						jQuery(this).attr('selected', 'selected');
+						if( jQuery("#dataRecordingSelectDiv select[id='programId'] option").length > 2)
+						{
+							loadProgramStages();
+						}
+					}
+				});
+			}
 		});
 }
 
-function searchPatient()
+function advancedSearch( params )
 {
 	$.ajax({
 		url: 'searchPatient.action',
 		type:"POST",
-		data: getParamsForDiv('searchPatientDiv'),
+		data: params,
 		success: function( html ){
 				statusSearching = 1;
 				setInnerHTML( 'contentDiv', html );
 				showById('contentDiv');
+				setInnerHTML('searchInforTD', i18n_search_patients_by_attributes );
 				jQuery( "#loaderDiv" ).hide();
 			}
 		});

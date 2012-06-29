@@ -36,6 +36,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 public class Model
     implements DataStreamSerializable
 {
+    private String clientVersion;
 
     private int id;
 
@@ -63,6 +64,16 @@ public class Model
         this.name = name;
     }
 
+    public String getClientVersion()
+    {
+        return clientVersion;
+    }
+
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
+    }
+
     @Override
     public void serialize( DataOutputStream dout )
         throws IOException
@@ -77,6 +88,22 @@ public class Model
     {
         this.id = dataInputStream.readInt();
         this.name = dataInputStream.readUTF();
+    }
+
+    @Override
+    public void serializeVerssion2_8( DataOutputStream dout )
+        throws IOException
+    {
+        dout.writeInt( this.id );
+        dout.writeUTF( this.name );
+    }
+
+    @Override
+    public void serializeVerssion2_9( DataOutputStream dout )
+        throws IOException
+    {
+        dout.writeInt( this.id );
+        dout.writeUTF( this.name );
     }
 
 }

@@ -39,6 +39,8 @@ public class DataValue
 
     private int id;
 
+    private String clientVersion;
+
     private int categoryOptComboID;
 
     private String value;
@@ -76,6 +78,16 @@ public class DataValue
         this.categoryOptComboID = categoryOptComboID;
     }
 
+    public String getClientVersion()
+    {
+        return clientVersion;
+    }
+
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
+    }
+
     @Override
     public void serialize( DataOutputStream dataOutputStream )
         throws IOException
@@ -91,6 +103,21 @@ public class DataValue
         setId( din.readInt() );
         setCategoryOptComboID( din.readInt() );
         setValue( din.readUTF() );
+    }
+
+    @Override
+    public void serializeVerssion2_8( DataOutputStream dataOutputStream )
+        throws IOException
+    {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void serializeVerssion2_9( DataOutputStream dataOutputStream )
+        throws IOException
+    {
+        // TODO Auto-generated method stub
     }
 
 }

@@ -39,6 +39,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class ActivityPlan
     implements DataStreamSerializable
 {
+    private String clientVersion;
 
     private List<Activity> activitiesList;
 
@@ -53,14 +54,23 @@ public class ActivityPlan
         this.activitiesList = activitiesList;
     }
 
-    public ActivityPlan( )
+    public ActivityPlan()
     {
     }
 
-    
     public ActivityPlan( List<Activity> activitiesList )
     {
         this.activitiesList = activitiesList;
+    }
+
+    public String getClientVersion()
+    {
+        return clientVersion;
+    }
+
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
     }
 
     @Override
@@ -89,6 +99,42 @@ public class ActivityPlan
     {
         // FIXME: Get implementation from client
 
+    }
+
+    @Override
+    public void serializeVerssion2_8( DataOutputStream dout )
+        throws IOException
+    {
+        if ( activitiesList == null )
+        {
+            dout.writeInt( 0 );
+        }
+        else
+        {
+            dout.writeInt( activitiesList.size() );
+            for ( int i = 0; i < activitiesList.size(); i++ )
+            {
+                activitiesList.get( i ).serializeVerssion2_8( dout );
+            }
+        }
+    }
+
+    @Override
+    public void serializeVerssion2_9( DataOutputStream dout )
+        throws IOException
+    {
+        if ( activitiesList == null )
+        {
+            dout.writeInt( 0 );
+        }
+        else
+        {
+            dout.writeInt( activitiesList.size() );
+            for ( int i = 0; i < activitiesList.size(); i++ )
+            {
+                activitiesList.get( i ).serializeVerssion2_9( dout );
+            }
+        }
     }
 
 }

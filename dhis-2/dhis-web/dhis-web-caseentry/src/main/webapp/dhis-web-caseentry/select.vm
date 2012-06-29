@@ -1,58 +1,17 @@
+<script type="text/javascript">
+   jQuery(document).ready(	function(){
+		hideById('addPatientBtn');
+});		
+</script>
+
 <h3>$i18n.getString( "name_based_data_entry" ) #openHelp('name_based_data_entry')</h3>
+<input type='hidden' id='isRegistration' name= 'isRegistration' value='false'>
+<input type='hidden' id='listAll' name= 'listAll' >
 
-<div id='searchPatientDiv'>
-	<table style="margin-bottom:8px">    
-		<tr>
-			<td>
-				<label>$i18n.getString( "registering_unit" )</label>
-			</td>
-			<td>
-				<input type="text" id='orgunitName' readonly="readonly" #if( $organisationUnit ) value="$encoder.htmlEncode( $organisationUnit.name )" #else value="[$i18n.getString( "please_select_village" )]" #end style="min-width:350px">
-			</td>
-			<td>
-				<input type="button" class='large-button' id='listPatientBtn' value="$i18n.getString( 'list_all_patients' )" onclick="javascript:listAllPatient();" #if($organisationUnit) #else disabled #end>
-			</td>        
-		</tr> 
-	</table>
-
-		
-	<div id='searchPatientDiv'>
-		<table id='advancedSearchTB'>	
-			<tbody>
-				<tr id='advSearchBox0'>	       
-					<td id='searchingAttributeIdTD'>
-					  <select id="searchingAttributeId" name="searchingAttributeId" style="width:20.2em"  #if( $patientAttributes.size() == 0 ) disabled="disabled" #end onchange="searchingAttributeOnChange(this)">
-						<option value="">$i18n.getString( "search_by_name_identifier" )</option>
-						<option value="0">$i18n.getString( "search_by_program" )</option>
-						<option value="-1">$i18n.getString( "date_of_birth" )</option>
-						<option value="-2">$i18n.getString( "gender" )</option>
-						<!-- option value="-3">$i18n.getString( "age" )</option -->
-						<option value="-4">$i18n.getString( "phone_number" )</option>
-						#foreach( $attribute in $patientAttributes )
-							<option value="$attribute.id" valueType='$attribute.valueType'>$encoder.htmlEncode( $attribute.name )</option>
-						#end
-					  </select>
-					  <em title="$i18n.getString( "required" )" class="required">*</em></label>
-					</td>		
-					<td>
-						<input type="text" id="searchText" name="searchText" maxlength="30" style="width:20em" value="$!searchText" onkeyup='searchPatientsOnKeyUp( event );'>
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					</td>	
-					<td></td>
-					<td><input type="button" class='small-button' value='+' onclick='addAttributeOption();'>
-						<td>
-							$i18n.getString('search_by_selected_unit')
-							<input type='checkbox' id='searchBySelectedOrgunit' name='searchBySelectedOrgunit' value='true' />
-						</td>
-						<td>
-							<input type="button" class='large-button' value='$i18n.getString( "search" )' onclick='searchAdvancedPatients();'>
-						</td>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
+<div id='searchDiv'>
+	#parse( "dhis-web-caseentry/searchPatientCriteria.vm" )	
 </div>
+
 <span id='message'></span>
 <div id='contentDiv'></div>
 <div id='dataRecordingSelectDiv'></div>
@@ -88,24 +47,14 @@
 	var i18n_yes = '$encoder.jsEscape( $i18n.getString( "yes" ) , "'")';
 	var i18n_no = '$encoder.jsEscape( $i18n.getString( "no" ) , "'")';
 	var i18n_events = '$encoder.jsEscape( $i18n.getString( "events" ) , "'")';
-	
+	var i18n_male = '$encoder.jsEscape( $i18n.getString( "male" ) , "'")';
+	var i18n_female = '$encoder.jsEscape( $i18n.getString( "female" ) , "'")';
+	var i18n_specify_search_criteria = '$encoder.jsEscape( $i18n.getString( "specify_search_criteria" ) , "'")';
+
 	selection.setListenerFunction( organisationUnitSelected );
 	
-	
-	var searchTextBox = '<input type="text" id="searchText" name="searchText" maxlength="30" style="width:20em" onkeyup="searchPatientsOnKeyUp( event );">';
-	
-	var trueFalseBox  = '<select id="searchText" name="searchText" style="width:20.2em" >';
-		trueFalseBox += '<option value="true">' + i18n_yes + '</option>';
-		trueFalseBox += '<option value="false">' + i18n_no + '</option>';
-		trueFalseBox += '</select>';
-		
-	var programComboBox = '<select id="searchText" name="searchText" style="width:20.2em" >';
-	
-	var genderSelector = '<select id="searchText" name="searchText" style="width:20.2em" >';
-		genderSelector += '<option value="M">$i18n.getString( "male" )</option>';
-		genderSelector += '<option value="F">$i18n.getString( "female" )</option>';
-		genderSelector += '</select>';
-		
+	var searchTextBox = '<input type="text" id="searchText" name="searchText" onkeyup="searchPatientsOnKeyUp( event );">';
+	var programComboBox = '<select id="searchText" name="searchText">';
 	#foreach ( $program in $programs ) 
 		programComboBox += '<option value="$program.id">$program.name</option>';
 	#end

@@ -14,7 +14,7 @@
 				<input type='hidden' id='programId' name='programId' value='$programInstance.program.id'>
 				<input type='hidden' id='patientId' name='patientId' value='$programInstance.patient.id'>
 				<!-- IDENTIFIERS -->
-				<table id='enrollmentInforDiv' name='enrollmentInforDiv' style='width:100%' >
+				<table id='enrollmentInforDiv' name='enrollmentInforDiv' class='mainPageTable' >
 					#if( $identifierTypes.size() > 0 )
 					<tr>
 						<th colspan='2'>$i18n.getString( "identifier" )</th> 
@@ -33,14 +33,14 @@
 						</tr>
 						#set( $mark = !$mark  )
 					#end
-
+					
 				<!-- ATTRIBUTES IN GROUPS -->
-				<tr><td>&nbsp;</td></tr>	
 				#foreach ($attributeGroup in $attributeGroups )
+					<tr><td>&nbsp;</td></tr>	
 					<tr><th colspan="2" class="heading-column">$attributeGroup.name</th></tr>
 					#set( $mark = false )
 					#foreach($attribute in $attributeGroup.attributes)
-						#if( $!attribute.program )
+						#if( $attribute.program && $attribute.program.id == $programInstance.program.id )
 							#set( $attributeValue = '')
 							#set( $attributeValue = $!patientAttributeValueMap.get( $attribute.id ) )
 							<tr #alternate( $mark )>
@@ -81,7 +81,7 @@
 					<tr><th colspan="2" class="heading-column">$i18n.getString( "Other details" )</th></tr>
 					#set( $mark = false )
 					#foreach($attribute in $noGroupAttributes )
-						#if( $attribute.program )
+						#if( $attribute.program && $attribute.program.id == $programInstance.program.id)
 							#set( $attributeValue = '')
 							#set( $attributeValue = $!patientAttributeValueMap.get( $attribute.id ) )
 							<tr #alternate( $mark )>
@@ -189,9 +189,12 @@
 		#if( $hasDataEntry == 'true' )
 			showSelectedDataRecoding( getFieldValue('patientId') );
 		#else
-			var disabled = $( ".selector" ).tabs( "option", "disabled" );
 			$( "#tabs" ).tabs( "option", "disabled", [2] );
 			$("#tabs").tabs("remove", 2);
+		#end
+		
+		#if( $programInstance.program.type!='1' )
+			$("#tabs").tabs("remove", 1);
 		#end
 		
 		#if( $identifierTypes.size() > 0 || $noGroupAttributes.size() > 0 || $attributeGroups.size() > 0 )

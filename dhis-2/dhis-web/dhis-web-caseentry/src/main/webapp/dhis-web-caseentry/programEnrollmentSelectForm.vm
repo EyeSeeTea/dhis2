@@ -1,29 +1,39 @@
 <h3>$i18n.getString( "patient_info" )</h3>
 
 <div>
-	<table>
+	<table class='mainPageTable'>
 		<tr>
-			<td class='bold text-column'>$i18n.getString( "full_name" ):</td>
-			<td>$encoder.htmlEncode( $patient.getFullName() )</td>
+			<td>
+				<table>
+					<tr>
+						<td class='bold text-column'>$i18n.getString( "full_name" ): </td>
+						<td>$encoder.htmlEncode( $patient.getFullName() )</td>
+					</tr>
+					<tr>
+						<td class='bold text-column'>$i18n.getString( "gender" ):</td>
+						<td>$i18n.getString( $patient.gender )</td>
+					</tr>
+					<tr>
+						<td class='bold text-column'>$i18n.getString( "date_of_birth" ):</td>
+						<td>$format.formatDate( $patient.birthDate ) $patient.getAge()</td>
+					</tr>
+				</table>
+			<td>
+			#if( $patient.programs.size() > 0 )
+			<td align="right">
+				<table>
+					<tr>
+						<td class='bold text-column' style="vertical-align:top">$i18n.getString( "enrolled_for" ):</td>
+						<td rowspan='$patient.programs.size()' style="vertical-align:right">
+							#foreach( $program in $patient.programs ) 
+								$program.name<br>
+							#end
+						</td>
+					</tr>
+				</table>
+			</td>
+			#end
 		</tr>
-		<tr>
-			<td class='bold text-column'>$i18n.getString( "gender" ):</td>
-			<td>$i18n.getString( $patient.gender )</td>
-		</tr>
-		<tr>
-			<td class='bold text-column'>$i18n.getString( "date_of_birth" ):</td>
-			<td>$format.formatDate( $patient.birthDate ) $patient.getAge()</td>
-		</tr>
-		#if( $patient.programs.size() > 0 )
-			<tr>
-				<td class='bold text-column'>$i18n.getString( "enrolled_for" ):</td>
-				#foreach( $program in $patient.programs ) 
-					<td>$program.name</td>
-				</tr>
-				<tr><td></td>
-				#end
-			</tr>
-		#end
 		<tr>
 			<td>&nbsp;</td>
 		</tr>
@@ -36,12 +46,11 @@
 	
 	<p></p>
 	
-	<fieldset>
-		<legend>$i18n.getString( "enroll_for" )</legend>
+	<div class='enrollment-form'>
 		<form id='programEnrollmentSelectDiv' name='programEnrollmentSelectDiv' method='POST'>
 			<input type="hidden" id="patientId" name="patientId" value="$patient.id">    
 
-			<table>  
+			<table>
 				<tr>
 					<td class='text-column'><label for="programId">$i18n.getString( "program" )</label></td>
 					<td class='input-column'>
@@ -57,7 +66,7 @@
 				</tr>   
 				<tr id='enrollmentDateTR' class='hidden'>
 					<td class='text-column'><label for="enrollmentDate"><span id='enrollmentDateDescription'></span><em title="$i18n.getString( "required" )" class="required"> * </em></label></td>
-                    <td colspan='2' class='input-column'><input type="text" id="enrollmentDate" name="enrollmentDate" ></td>
+					<td colspan='2' class='input-column'><input type="text" id="enrollmentDate" name="enrollmentDate" ></td>
 				</tr>
 				
 				<tr id='dateOfIncidentTR' class='hidden'>
@@ -78,11 +87,11 @@
 					</td>
 				</tr>
 				<tr>
-                	<td colspan='3'><span id='message'></span></td>
-                </tr>
+					<td colspan='3'><span id='message'></span></td>
+				</tr>
 			</table>
 		</form>
-	</fieldset>
+	</div>
 	
 	<p></p>
 	<div id='programEnrollmentDiv' class='hidden'></div>

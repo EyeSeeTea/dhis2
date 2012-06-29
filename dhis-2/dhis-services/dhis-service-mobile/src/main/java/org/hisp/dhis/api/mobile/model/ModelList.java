@@ -38,6 +38,7 @@ import javax.xml.bind.annotation.XmlElement;
 public class ModelList
     implements DataStreamSerializable
 {
+    private String clientVersion;
 
     private List<Model> models;
 
@@ -50,6 +51,16 @@ public class ModelList
     public void setModels( List<Model> models )
     {
         this.models = models;
+    }
+
+    public String getClientVersion()
+    {
+        return clientVersion;
+    }
+
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
     }
 
     @Override
@@ -67,7 +78,6 @@ public class ModelList
         {
             models.get( i ).serialize( dataOutputStream );
         }
-
     }
 
     @Override
@@ -84,6 +94,41 @@ public class ModelList
             models.add( m );
         }
 
+    }
+
+    @Override
+    public void serializeVerssion2_8( DataOutputStream dataOutputStream )
+        throws IOException
+    {
+        if ( models == null )
+        {
+            dataOutputStream.writeInt( 0 );
+        }
+
+        dataOutputStream.writeInt( models.size() );
+
+        for ( int i = 0; i < models.size(); i++ )
+        {
+            models.get( i ).serialize( dataOutputStream );
+        }
+
+    }
+
+    @Override
+    public void serializeVerssion2_9( DataOutputStream dataOutputStream )
+        throws IOException
+    {
+        if ( models == null )
+        {
+            dataOutputStream.writeInt( 0 );
+        }
+
+        dataOutputStream.writeInt( models.size() );
+
+        for ( int i = 0; i < models.size(); i++ )
+        {
+            models.get( i ).serializeVerssion2_9( dataOutputStream );
+        }
     }
 
 }

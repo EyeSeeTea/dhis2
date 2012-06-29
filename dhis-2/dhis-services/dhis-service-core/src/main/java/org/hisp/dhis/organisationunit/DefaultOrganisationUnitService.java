@@ -98,6 +98,13 @@ public class DefaultOrganisationUnitService
     {
         int id = organisationUnitStore.save( organisationUnit );
 
+        if ( organisationUnit.getParent() == null && currentUserService.getCurrentUser() != null )
+        {
+            // we are adding a new root node, add this node to the current user
+            // this makes sense in most cases, and makes sure that we don't have "zombie nodes"
+            currentUserService.getCurrentUser().getOrganisationUnits().add( organisationUnit );
+        }
+
         log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_ADD,
             OrganisationUnit.class.getSimpleName(), organisationUnit.getName() ) );
 
@@ -112,6 +119,8 @@ public class DefaultOrganisationUnitService
 
         log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_EDIT,
             OrganisationUnit.class.getSimpleName(), organisationUnit.getName() ) );
+
+        updateVersion();
     }
 
     public void updateOrganisationUnit( OrganisationUnit organisationUnit, boolean updateHierarchy )

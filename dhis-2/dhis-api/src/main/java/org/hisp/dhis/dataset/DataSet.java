@@ -96,7 +96,6 @@ public class DataSet
      * The DataElementOperands for which data must be entered in order for the
      * DataSet to be considered as complete.
      */
-    @Scanned
     private Set<DataElementOperand> compulsoryDataElementOperands = new HashSet<DataElementOperand>();
 
     /**
@@ -120,6 +119,11 @@ public class DataSet
      */
     private boolean mobile;
 
+    /**
+     * Property indicating whether it should allow to enter data for future periods.
+     */
+    private boolean allowFuturePeriods;
+    
     /**
      * Indicating custom data entry form.
      */
@@ -482,6 +486,19 @@ public class DataSet
     public void setMobile( boolean mobile )
     {
         this.mobile = mobile;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    public boolean isAllowFuturePeriods()
+    {
+        return allowFuturePeriods;
+    }
+
+    public void setAllowFuturePeriods( boolean allowFuturePeriods )
+    {
+        this.allowFuturePeriods = allowFuturePeriods;
     }
 
     @JsonProperty

@@ -217,6 +217,34 @@
 	
 	
 	<!-- Catalog List -->
+	
+	<bean id="org.hisp.dhis.coldchain.catalog.action.CatalogSelectAction"
+		class="org.hisp.dhis.coldchain.catalog.action.CatalogSelectAction"
+		scope="prototype">
+		<property name="catalogTypeService"
+			ref="org.hisp.dhis.coldchain.catalog.CatalogTypeService" />
+	</bean>		
+
+	<bean id="org.hisp.dhis.coldchain.catalog.action.GetCatalogTypeAttributeListAction"
+		class="org.hisp.dhis.coldchain.catalog.action.GetCatalogTypeAttributeListAction"
+		scope="prototype">
+		<property name="catalogTypeService"
+			ref="org.hisp.dhis.coldchain.catalog.CatalogTypeService" />
+	</bean>		
+	
+	
+	<bean id="org.hisp.dhis.coldchain.catalog.action.GetCatalogListAction"
+		class="org.hisp.dhis.coldchain.catalog.action.GetCatalogListAction"
+		scope="prototype">
+		<property name="catalogService"
+			ref="org.hisp.dhis.coldchain.catalog.CatalogService" />
+		<property name="catalogTypeService"
+			ref="org.hisp.dhis.coldchain.catalog.CatalogTypeService" />
+		<property name="catalogTypeAttributeService"
+			ref="org.hisp.dhis.coldchain.catalog.CatalogTypeAttributeService" />				
+	</bean>	
+	
+<!--	
 	<bean id="org.hisp.dhis.coldchain.catalog.action.CatalogListAction"
 		class="org.hisp.dhis.coldchain.catalog.action.CatalogListAction"
 		scope="prototype">
@@ -226,8 +254,11 @@
 			ref="org.hisp.dhis.coldchain.catalog.CatalogTypeService" />	
 		<property name="userSettingService"
 			ref="org.hisp.dhis.user.UserSettingService" />					
-	</bean>		
-
+	</bean>	
+	
+-->	
+	
+	
 	<!-- Add Catalog  Form -->
 	<bean id="org.hisp.dhis.coldchain.catalog.action.AddCatalogFormAction"
 		class="org.hisp.dhis.coldchain.catalog.action.AddCatalogFormAction"
@@ -376,17 +407,20 @@
         <property name="inventoryTypeAttributeService" ref="org.hisp.dhis.coldchain.inventory.InventoryTypeAttributeService" />
 		<property name="catalogTypeService" ref="org.hisp.dhis.coldchain.catalog.CatalogTypeService" />
     </bean>
+
     <bean id="org.hisp.dhis.coldchain.inventory.action.ValidateInventoryTypeAction"
         class="org.hisp.dhis.coldchain.inventory.action.ValidateInventoryTypeAction"
         scope="prototype">
         <property name="inventoryTypeService" ref="org.hisp.dhis.coldchain.inventory.InventoryTypeService" />
     </bean>
+	
     <bean id="org.hisp.dhis.coldchain.inventory.action.AddInventoryTypeAction"
         class="org.hisp.dhis.coldchain.inventory.action.AddInventoryTypeAction"
         scope="prototype">
         <property name="inventoryTypeAttributeService" ref="org.hisp.dhis.coldchain.inventory.InventoryTypeAttributeService" />
         <property name="catalogTypeService" ref="org.hisp.dhis.coldchain.catalog.CatalogTypeService" />
 		<property name="inventoryTypeService" ref="org.hisp.dhis.coldchain.inventory.InventoryTypeService" />
+		<property name="inventoryType_AttributeService" ref="org.hisp.dhis.coldchain.inventory.InventoryType_AttributeService" />
     </bean>
     <bean id="org.hisp.dhis.coldchain.inventory.action.ShowUpdateInventoryTypeAction"
         class="org.hisp.dhis.coldchain.inventory.action.ShowUpdateInventoryTypeAction"
@@ -401,6 +435,7 @@
         <property name="inventoryTypeAttributeService" ref="org.hisp.dhis.coldchain.inventory.InventoryTypeAttributeService" />
         <property name="inventoryTypeService" ref="org.hisp.dhis.coldchain.inventory.InventoryTypeService" />
 		<property name="catalogTypeService" ref="org.hisp.dhis.coldchain.catalog.CatalogTypeService" />
+		<property name="inventoryType_AttributeService" ref="org.hisp.dhis.coldchain.inventory.InventoryType_AttributeService" />
     </bean>
     <bean id="org.hisp.dhis.coldchain.inventory.action.RemoveInventoryTypeAction"
         class="org.hisp.dhis.coldchain.inventory.action.RemoveInventoryTypeAction"
@@ -458,6 +493,7 @@
         <property name="inventoryTypeService" ref="org.hisp.dhis.coldchain.inventory.InventoryTypeService" />
         <property name="inventoryTypeAttributeService" ref="org.hisp.dhis.coldchain.inventory.InventoryTypeAttributeService" />
 		<property name="equipmentService" ref="org.hisp.dhis.coldchain.inventory.EquipmentService" />
+		<property name="inventoryType_AttributeService" ref="org.hisp.dhis.coldchain.inventory.InventoryType_AttributeService" />
     </bean>
     <bean id="org.hisp.dhis.coldchain.equipment.action.ShowAddEquipmentFormAction"
         class="org.hisp.dhis.coldchain.equipment.action.ShowAddEquipmentFormAction"
