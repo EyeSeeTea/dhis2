@@ -295,12 +295,12 @@ Ext.onReady( function() {
             
     DV.init = DV.conf.init.ajax.jsonfy(r);
     DV.init.initialize = function() {
+		DV.cmp.dimension.indicator.panel.expand();
+		
 		DV.c = DV.chart.model;
         DV.util.combobox.filter.category();
         
         DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
-       
-		DV.cmp.dimension.indicator.panel.expand();
 		
         DV.exe.execute(DV.init.cmd);
     };
@@ -3228,6 +3228,7 @@ Ext.onReady( function() {
 												xtype: 'toolbar',
 												cls: 'dv-toolbar-tbar',
 												style: 'margin-bottom: 5px',
+												width: DV.conf.layout.west_fieldset_width - 18,
 												defaults: {
 													height: 28
 												},
