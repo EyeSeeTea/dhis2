@@ -634,14 +634,14 @@ body {
 }
 
 /* DV accordion */
-.dv-accordion .x-accordion-item .x-accordion-hd,
-.dv-accordion .dv-accordion-options .x-accordion-hd,
-.dv-accordion .dv-accordion-last .x-accordion-hd { /* accordion title bars, shared */
+.dv-accordion .x-accordion-item .x-accordion-hd, .dv-accordion .dv-accordion-options .x-accordion-hd { /* accordion title bar, shared */
 	padding: 6px 5px 4px 8px;
 	border: 0 none;
 	cursor: pointer;
 	border-top-left-radius: 1px;
 	border-top-right-radius: 1px;
+}
+.dv-accordion .x-accordion-item .x-accordion-hd { /* accordion title dock, default */
     background-image: none;
     background-color: #e0e0e0;
     background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dcdcdc), color-stop(100%, #e5e5e5)) !important;
@@ -661,14 +661,11 @@ body {
     background-image: -ms-linear-gradient(top, #cccccc, #d3d3d3) !important;
     background-image: linear-gradient(top, #cccccc, #d3d3d3) !important;
 }
-
 .dv-accordion .collapsed .x-accordion-hd { /* accordion title dock, default, collapsed */
 	padding-bottom: 5px !important;
 }
 
-.dv-accordion .x-accordion-item,
-.dv-accordion-options .x-accordion-item,
-.dv-accordion-last .x-accordion-item { /* accordion title dock outer, shared */
+.dv-accordion .x-accordion-item, .dv-accordion-options .x-accordion-item { /* accordion title dock outer, shared */
 	border-top-left-radius: 2px;
 	border-top-right-radius: 2px;
 }
@@ -676,8 +673,7 @@ body {
 	border: 1px solid #c5c5c5;
 	border-bottom: 0 none;
 }
-.dv-accordion .dv-accordion-options,
-.dv-accordion .dv-accordion-last { /* accordion title dock outer, options */
+.dv-accordion .dv-accordion-options { /* accordion title dock outer, options */
 	border: 1px solid #c0c0c0;
 }
 
@@ -689,10 +685,6 @@ body {
 .dv-accordion .x-accordion-body { /* accordion item body */
 	padding: 8px 8px 2px 8px;
 	border-top: 1px solid #c5c5c5 !important;
-}
-.dv-accordion .dv-accordion-title .x-accordion-body { /* accordion item body */
-	padding: 8px 8px 2px 8px;
-	border-top: 0 none !important;
 }
 
 .dv-accordion .x-accordion-hd-sibling-expanded {
