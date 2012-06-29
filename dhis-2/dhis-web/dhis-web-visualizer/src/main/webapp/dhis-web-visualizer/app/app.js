@@ -72,19 +72,11 @@ DV.conf = {
 					},
 					user: {
 						id: r.user.id,
-						isadmin: r.user.isAdmin,
-						organisationunit: {
-							id: r.user.ou[0],
-							name: DV.conf.util.jsonEncodeString(r.user.ou[1])
-						},
-						organisationunitchildren: []							
+						isadmin: r.user.isAdmin							
 					}
 				};
 				for (var i = 0; i < r.rn.length; i++) {
 					obj.system.rootnodes.push({id: r.rn[i][0], text: r.rn[i][1], level: 1});
-				}
-				for (var i = 0; i < r.user.ouc.length; i++) {
-					obj.user.organisationunitchildren.push({id: r.user.ouc[i][0], name: DV.conf.util.jsonEncodeString(r.user.ouc[i][1])});
 				}
 				return obj;
 			}
@@ -269,7 +261,6 @@ DV.cmp = {
 	charttype: [],
 	settings: {},
 	dimension: {
-		data: {},
 		indicator: {},
 		dataelement: {},
 		dataset: {},
@@ -308,6 +299,9 @@ Ext.onReady( function() {
         DV.util.combobox.filter.category();
         
         DV.init.cmd = DV.util.getUrlParam(DV.conf.finals.cmd.urlparam) || DV.conf.finals.cmd.init;
+       
+		DV.cmp.dimension.indicator.panel.expand();
+		
         DV.exe.execute(DV.init.cmd);
     };
     
@@ -2428,7 +2422,7 @@ Ext.onReady( function() {
                             {
                                 xtype: 'label',
                                 text: DV.i18n.chart_type,
-                                style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 13px'
+                                style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 10px'
                             },
                             {
 								xtype: 'button',
@@ -2588,26 +2582,20 @@ Ext.onReady( function() {
                         ]
                     },
                     {
-                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:8px 10px;',
+                        xtype: 'panel',
+                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:10px 10px 0 10px;',
+                        layout: 'fit',
                         items: [
 							{
-								xtype: 'label',
-								style: 'font-weight:bold; padding-left:3px',
-								text: 'Data'
-							},
-							{
+								xtype: 'panel',
 								layout: 'accordion',
 								activeOnTop: true,
 								cls: 'dv-accordion',
-								bodyStyle: 'border:0 none; margin-top:3px',
-								height: 89,
+								bodyStyle: 'border:0 none',
+								height: 430,
 								items: [
 									{
-										hidden: true,
-										collapsed: false
-									},
-									{
-										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.indicators + '</div>',
+										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.indicators + '</div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -2768,18 +2756,17 @@ Ext.onReady( function() {
 												DV.cmp.dimension.indicator.panel = this;
 											},
 											expand: function() {
-												DV.cmp.dimension.data.panel.setHeight(DV.conf.layout.west_maxheight_accordion_data);
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_indicator);
 												DV.util.multiselect.setHeight(
 													[DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected],
 													DV.cmp.dimension.indicator.panel,
 													DV.conf.layout.west_fill_accordion_indicator
 												);
-												
 											}
 										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.data_elements + '</div>',
+										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.data_elements + '</div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -2939,7 +2926,7 @@ Ext.onReady( function() {
 												DV.cmp.dimension.dataelement.panel = this;
 											},
 											expand: function() {
-												DV.cmp.dimension.data.panel.setHeight(DV.conf.layout.west_maxheight_accordion_data);
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_dataelement);
 												DV.util.multiselect.setHeight(
 													[DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected],
 													DV.cmp.dimension.dataelement.panel,
@@ -2949,9 +2936,8 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.reporting_rates + '</div>',
+										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.reporting_rates + '</div>',
 										hideCollapseTool: true,
-										cls: 'dv-accordion-last',
 										items: [
 											{
 												xtype: 'panel',
@@ -3056,7 +3042,7 @@ Ext.onReady( function() {
 												DV.cmp.dimension.dataset.panel = this;
 											},
 											expand: function() {
-												DV.cmp.dimension.data.panel.setHeight(DV.conf.layout.west_maxheight_accordion_data);
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_dataset);
 												DV.util.multiselect.setHeight(
 													[DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected],
 													DV.cmp.dimension.dataset.panel,
@@ -3068,36 +3054,10 @@ Ext.onReady( function() {
 												}
 											}
 										}
-									}
-								],
-								listeners: {
-									added: function() {
-										DV.cmp.dimension.data.panel = this;
-									}
-								}
-							},
-							
-							{
-								layout: 'accordion',
-								activeOnTop: true,
-								cls: 'dv-accordion',
-								bodyStyle: 'border:0 none; margin-top:5px; margin-bottom:10px',
-								height: 70,
-								items: [
-									{
-										title: '<div style="height:17px; cursor:auto">' + DV.i18n.period + '</div>',
-										cls: 'dv-accordion-title',
-										hideCollapseTool: true,
-										listeners: {
-											beforeexpand: function() {
-												return false;
-											}
-										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.relative_periods + '</div>',
+										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.periods + '</div>',
 										hideCollapseTool: true,
-										cls: 'dv-accordion-last',
 										autoScroll: true,
 										items: [
 											{
@@ -3251,41 +3211,17 @@ Ext.onReady( function() {
 										],
 										listeners: {
 											added: function() {
-												//DV.cmp.dimension.period.panel = this;
+												DV.cmp.dimension.period.panel = this;
 											},
 											expand: function() {
-												DV.cmp.dimension.period.panel.setHeight(200);
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_period);
 											}
 										}
-									}
-								],
-								listeners: {
-									added: function() {
-										DV.cmp.dimension.period.panel = this;
-									}
-								}										
-							},
-							
-							{
-								xtype: 'label',
-								style: 'font-weight:bold; margin-left:3px',
-								text: DV.i18n.organisation_unit
-							},
-							
-							{
-								layout: 'accordion',
-								activeOnTop: true,
-								cls: 'dv-accordion',
-								bodyStyle: 'border:0 none; margin-top:5px',
-								height: 130,
-								items: [
-									{
-										hidden: true,
-										collapsed: false
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.organisation_units + '</div>',
+										title: '<div style="height:17px; background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.organisation_units + '</div>',
 										hideCollapseTool: true,
+										collapsed: false,
 										items: [
 											{
 												id: 'organisationunit_t',
@@ -3351,62 +3287,6 @@ Ext.onReady( function() {
 																			}
 																			else {
 																				this.down('grid').setHeightInMenu(DV.store.group);
-																			}
-																		}
-																	}
-																});
-															}
-														}
-													},
-													{
-														text: 'Level..',
-														cls: 'dv-toolbar-btn-2',
-														handler: function() {},
-														listeners: {
-															added: function() {
-																this.menu = Ext.create('Ext.menu.Menu', {
-																	shadow: false,
-																	showSeparator: false,
-																	width: DV.conf.layout.treepanel_toolbar_menu_width_level,
-																	items: [
-																		{
-																			xtype: 'grid',
-																			cls: 'dv-menugrid',
-																			width: DV.conf.layout.treepanel_toolbar_menu_width_level,
-																			scroll: 'vertical',
-																			columns: [
-																				{
-																					dataIndex: 'name',
-																					width: DV.conf.layout.treepanel_toolbar_menu_width_level,
-																					style: 'display:none'
-																				}
-																			],
-																			setHeightInMenu: function(store) {
-																				var h = store.getCount() * 24,
-																					sh = DV.util.viewport.getSize().y * 0.6;
-																				this.setHeight(h > sh ? sh : h);
-																				this.doLayout();
-																				this.up('menu').doLayout();
-																			},
-																			store: DV.store.level,
-																			listeners: {
-																				itemclick: function(g, r) {
-																					g.getSelectionModel().select([], false);
-																					this.up('menu').hide();
-																					DV.cmp.dimension.organisationunit.treepanel.selectByLevel(r.data.level);
-																				}
-																			}
-																		}
-																	],
-																	listeners: {
-																		show: function() {
-																			if (!DV.store.level.isloaded) {
-																				DV.store.level.load({scope: this, callback: function() {
-																					this.down('grid').setHeightInMenu(DV.store.level);
-																				}});
-																			}
-																			else {
-																				this.down('grid').setHeightInMenu(DV.store.level);
 																			}
 																		}
 																	}
@@ -3569,7 +3449,7 @@ Ext.onReady( function() {
 												xtype: 'label',
 												style: 'font-style:italic; font-size:11px; color:#666',
 												margin: '0 0 0 7',
-												text: DV.i18n.nb_groups_replace_orgunits
+												text: DV.i18n.groups_replace_orgunits
 											},
 											{
 												xtype: 'combobox',
@@ -3602,7 +3482,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/options.png); background-repeat:no-repeat; padding-left:20px; font-weight:normal">' + DV.i18n.chart_options + '</div>',
+										title: '<div style="height:17px; background-image:url(images/options.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.chart_options + '</div>',
 										hideCollapseTool: true,
 										cls: 'dv-accordion-options',
 										items: [
@@ -3856,7 +3736,7 @@ Ext.onReady( function() {
 								}
 							}
 						]
-					}
+					}					
 				],
                 listeners: {
                     added: function() {
@@ -4669,14 +4549,6 @@ Ext.onReady( function() {
                             }
                         },
                         '->',
-                        {
-                            xtype: 'button',
-							cls: 'dv-toolbar-btn-2',
-                            text: 'col',
-                            handler: function() {
-								DV.cmp.dimension.data.panel.setHeight(88);
-                            }
-                        },
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
