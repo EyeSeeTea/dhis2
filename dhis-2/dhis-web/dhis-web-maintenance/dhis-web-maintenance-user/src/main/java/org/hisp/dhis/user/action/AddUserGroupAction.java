@@ -27,9 +27,7 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.system.util.AttributeUtils;
@@ -100,15 +98,13 @@ public class AddUserGroupAction
     public String execute()
         throws Exception
     {
-        Set<User> userList = new HashSet<User>();
-
+        UserGroup userGroup = new UserGroup( name );
+        
         for ( Integer groupMember : groupMembersList )
         {
             User user = userService.getUser( groupMember );
-            userList.add( user );
+            userGroup.addUser( user );
         }
-
-        UserGroup userGroup = new UserGroup( name, userList );
 
         if ( jsonAttributeValues != null )
         {
