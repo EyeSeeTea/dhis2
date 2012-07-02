@@ -27,6 +27,10 @@ package org.hisp.dhis.dashboard;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.document.Document;
+import org.hisp.dhis.mapping.MapView;
+import org.hisp.dhis.report.Report;
+import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.user.User;
 
 import java.util.Collection;
@@ -46,4 +50,14 @@ public interface DashboardService
     DashboardContent getDashboardContent( User user );
 
     Collection<DashboardContent> getAllDashboardContent();
+    
+    void deleteDashboardContent( DashboardContent content );
+    
+    void removeDocumentAssociations( Document document );
+    
+    void removeMapViewAssocations( MapView mapView );
+    
+    void removeReportAssociations( Report report );
+    
+    void removeReportTableAssociations( ReportTable reportTable );
 }

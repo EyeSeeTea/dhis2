@@ -131,6 +131,8 @@ public class DefaultOrganisationUnitService
     public void deleteOrganisationUnit( OrganisationUnit organisationUnit )
         throws HierarchyViolationException
     {
+        organisationUnit = getOrganisationUnit( organisationUnit.getId() );
+        
         if ( !organisationUnit.getChildren().isEmpty() )
         {
             throw new HierarchyViolationException( "Cannot delete an OrganisationUnit with children" );
@@ -145,10 +147,10 @@ public class DefaultOrganisationUnitService
             organisationUnitStore.update( parent );
         }
 
-        organisationUnitStore.delete( organisationUnit );
-
         log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_DELETE,
             OrganisationUnit.class.getSimpleName(), organisationUnit.getName() ) );
+
+        organisationUnitStore.delete( organisationUnit );
 
         updateVersion();
     }
@@ -538,7 +540,7 @@ public class DefaultOrganisationUnitService
     {
         return organisationUnitStore.getBetweenByName( name, first, max );
     }
-
+    
     // -------------------------------------------------------------------------
     // OrganisationUnitHierarchy
     // -------------------------------------------------------------------------

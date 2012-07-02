@@ -32,6 +32,7 @@ import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.hisp.dhis.user.User;
 
 /**
  * @author Lars Helge Overland
@@ -59,48 +60,32 @@ public class DashboardContentDeletionHandler
     @Override
     public void deleteReport( Report report )
     {
-        for ( DashboardContent content : dashboardService.getAllDashboardContent() )
-        {
-            if ( content.getReports().remove( report ) )
-            {
-                dashboardService.saveDashboardContent( content );
-            }
-        }
+        dashboardService.removeReportAssociations( report );
     }
             
     @Override
     public void deleteDocument( Document document )
     {
-        for ( DashboardContent content : dashboardService.getAllDashboardContent() )
-        {
-            if ( content.getDocuments().remove( document ) )
-            {
-                dashboardService.saveDashboardContent( content );
-            }
-        }
+        dashboardService.removeDocumentAssociations( document );
     }
     
     @Override
     public void deleteReportTable( ReportTable reportTable )
     {
-        for ( DashboardContent content : dashboardService.getAllDashboardContent() )
-        {
-            if ( content.getReportTables().remove( reportTable ) )
-            {
-                dashboardService.saveDashboardContent( content );
-            }
-        }
+        dashboardService.removeReportTableAssociations( reportTable );
     }
     
     @Override
     public void deleteMapView( MapView mapView )
     {
-        for ( DashboardContent content : dashboardService.getAllDashboardContent() )
-        {
-            if ( content.getMapViews().remove( mapView ) )
-            {
-                dashboardService.saveDashboardContent( content );
-            }
-        }
+        dashboardService.removeMapViewAssocations( mapView );
+    }
+    
+    @Override
+    public void deleteUser( User user )
+    {
+        DashboardContent content = dashboardService.getDashboardContent( user );
+        
+        dashboardService.deleteDashboardContent( content );
     }
 }

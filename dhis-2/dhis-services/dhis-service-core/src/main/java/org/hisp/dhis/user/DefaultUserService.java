@@ -111,11 +111,16 @@ public class DefaultUserService
 
     public boolean isLastSuperUser( UserCredentials userCredentials )
     {
+        if ( !isSuperUser( userCredentials ) )
+        {
+            return false; // Cannot be last if not super user
+        }
+        
         Collection<UserCredentials> users = userCredentialsStore.getAllUserCredentials();
 
         for ( UserCredentials user : users )
         {
-            if ( isSuperUser( user ) && user.getId() != userCredentials.getId() )
+            if ( isSuperUser( user ) && !user.equals( userCredentials ) )
             {
                 return false;
             }
@@ -161,20 +166,20 @@ public class DefaultUserService
         return userStore.save( user );
     }
 
-    public void deleteUser( User user )
-    {
-        userStore.delete( user );
-
-        log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_DELETE,
-            User.class.getSimpleName(), user.getName() ) );
-    }
-
     public void updateUser( User user )
     {
         userStore.update( user );
 
         log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_EDIT,
             User.class.getSimpleName(), user.getName() ) );
+    }
+
+    public void deleteUser( User user )
+    {
+        log.info( AuditLogUtil.logMessage( currentUserService.getCurrentUsername(), AuditLogUtil.ACTION_DELETE,
+            User.class.getSimpleName(), user.getName() ) );
+        
+        userStore.delete( user );
     }
 
     public Collection<User> getAllUsers()
@@ -489,5 +494,10 @@ public class DefaultUserService
     public Collection<User> getUsersByOrganisationUnits( Collection<OrganisationUnit> units )
     {
         return userStore.getUsersByOrganisationUnits( units );
+    }
+    
+    public void removeUserSettings( User user )
+    {
+        userStore.removeUserSettings( user );
     }
 }
