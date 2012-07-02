@@ -46,6 +46,7 @@ public class OrgUnitTest
         throws IOException
     {
         MobileOrgUnitLinks unit = new MobileOrgUnitLinks();
+        unit.setUpdateNewVersionUrl( "" );
         unit.setId( 1 );
         unit.setName( "name" );
         unit.setUpdateActivityPlanUrl("updateActivityPlanUrl");
