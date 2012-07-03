@@ -222,14 +222,16 @@ DV.conf = {
         west_fill_accordion_indicator: 77,
         west_fill_accordion_dataelement: 77,
         west_fill_accordion_dataset: 45,
-        west_fill_accordion_organisationunit: 75,
+        west_fill_accordion_fixedperiod: 77,
+        west_fill_accordion_organisationunit: 103,
         west_maxheight_accordion_indicator: 478,
         west_maxheight_accordion_dataelement: 478,
         west_maxheight_accordion_dataset: 478,
-        west_maxheight_accordion_period: 368,
-        west_maxheight_accordion_organisationunit: 728,
-        west_maxheight_accordion_organisationunitgroup: 270,
-        west_maxheight_accordion_options: 421,
+        west_maxheight_accordion_relativeperiod: 396,
+        west_maxheight_accordion_fixedperiod: 478,
+        west_maxheight_accordion_organisationunit: 756,
+        west_maxheight_accordion_organisationunitgroup: 298,
+        west_maxheight_accordion_options: 449,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
         form_label_width: 55,
@@ -268,9 +270,10 @@ DV.cmp = {
 		indicator: {},
 		dataelement: {},
 		dataset: {},
-		period: {
+		relativeperiod: {
 			checkbox: []
 		},
+		fixedperiod: {},
 		organisationunit: {},
 		organisationunitgroup: {}
 	},
@@ -346,7 +349,8 @@ Ext.onReady( function() {
             },
             resizeDimensions: function() {
 				var a = [DV.cmp.dimension.indicator.panel, DV.cmp.dimension.dataelement.panel, DV.cmp.dimension.dataset.panel,
-						DV.cmp.dimension.period.panel, DV.cmp.dimension.organisationunit.panel, DV.cmp.options.panel];
+						DV.cmp.dimension.relativeperiod.panel, DV.cmp.dimension.fixedperiod.panel, DV.cmp.dimension.organisationunit.panel,
+						DV.cmp.dimension.organisationunitgroup.panel, DV.cmp.options.panel];
 				for (var i = 0; i < a.length; i++) {
 					if (!a[i].collapsed) {
 						a[i].fireEvent('expand');
@@ -551,7 +555,7 @@ Ext.onReady( function() {
             period: {
                 getObjects: function() {
                     var a = [],
-                        cmp = DV.cmp.dimension.period;
+                        cmp = DV.cmp.dimension.relativeperiod;
                     Ext.Array.each(cmp, function(item) {
                         if (item.getValue()) {
                             Ext.Array.each(DV.init.system.periods[item.paramName], function(item) {
@@ -603,7 +607,7 @@ Ext.onReady( function() {
                 },
                 getRelativePeriodObject: function(exception) {
                     var a = {},
-                        cmp = DV.cmp.dimension.period.checkbox,
+                        cmp = DV.cmp.dimension.relativeperiod.checkbox,
                         valid = false;
                     Ext.Array.each(cmp, function(item) {
                         a[item.paramName] = item.getValue();
@@ -3066,7 +3070,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.periods + '</div>',
+										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.relative_periods + '</div>',
 										hideCollapseTool: true,
 										autoScroll: true,
 										items: [
@@ -3084,7 +3088,7 @@ Ext.onReady( function() {
 															listeners: {
 																added: function(chb) {
 																	if (chb.xtype === 'checkbox') {
-																		DV.cmp.dimension.period.checkbox.push(chb);
+																		DV.cmp.dimension.relativeperiod.checkbox.push(chb);
 																	}
 																}
 															}
@@ -3117,7 +3121,7 @@ Ext.onReady( function() {
 															listeners: {
 																added: function(chb) {
 																	if (chb.xtype === 'checkbox') {
-																		DV.cmp.dimension.period.checkbox.push(chb);
+																		DV.cmp.dimension.relativeperiod.checkbox.push(chb);
 																	}
 																}
 															}
@@ -3149,7 +3153,7 @@ Ext.onReady( function() {
 															listeners: {
 																added: function(chb) {
 																	if (chb.xtype === 'checkbox') {
-																		DV.cmp.dimension.period.checkbox.push(chb);
+																		DV.cmp.dimension.relativeperiod.checkbox.push(chb);
 																	}
 																}
 															}
@@ -3188,7 +3192,7 @@ Ext.onReady( function() {
 															listeners: {
 																added: function(chb) {
 																	if (chb.xtype === 'checkbox') {
-																		DV.cmp.dimension.period.checkbox.push(chb);
+																		DV.cmp.dimension.relativeperiod.checkbox.push(chb);
 																	}
 																}
 															}
@@ -3221,10 +3225,181 @@ Ext.onReady( function() {
 										],
 										listeners: {
 											added: function() {
-												DV.cmp.dimension.period.panel = this;
+												DV.cmp.dimension.relativeperiod.panel = this;
 											},
 											expand: function() {
-												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_period);
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_relativeperiod);
+											}
+										}
+									},
+									{
+										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.fixed_periods + '</div>',
+										hideCollapseTool: true,
+										items: [
+											{
+												xtype: 'combobox',
+												cls: 'dv-combo',
+												style: 'margin-bottom:8px',
+												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor,
+												valueField: 'id',
+												displayField: 'name',
+												fieldLabel: DV.i18n.select_type,
+												labelStyle: 'padding-left:7px;',
+												labelWidth: 90,
+												editable: false,
+												queryMode: 'remote',
+												store: Ext.create('Ext.data.Store', {
+													fields: ['id', 'name', 'index'],
+													proxy: {
+														type: 'ajax',
+														url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicatorgroup_get,
+														reader: {
+															type: 'json',
+															root: 'indicatorGroups'
+														}
+													},
+													listeners: {
+														load: function(s) {
+															s.add({id: 0, name: DV.i18n.all_indicator_groups, index: -1});
+															s.sort([																
+																{ property: 'index', direction: 'ASC' },
+																{ property: 'name', direction: 'ASC' }
+															]);
+														}
+													}
+												}),
+												listeners: {
+													select: function(cb) {
+														var store = DV.store.indicator.available;
+														store.parent = cb.getValue();
+														
+														if (DV.util.store.containsParent(store)) {
+															DV.util.store.loadFromStorage(store);
+															DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+														}
+														else {
+															if (cb.getValue() === 0) {
+																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_getall;
+																store.load();
+															}
+															else {
+																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
+																store.load();
+															}
+														}
+													}
+												}
+											},
+											{
+												xtype: 'panel',
+												layout: 'column',
+												bodyStyle: 'border-style:none',
+												items: [
+													{
+														xtype: 'multiselect',
+														name: 'availableFixedPeriods',
+														cls: 'dv-toolbar-multiselect-left',
+														width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
+														valueField: 'id',
+														displayField: 'name',
+														queryMode: 'remote',
+														store: DV.store.indicator.available,
+														tbar: [
+															{
+																xtype: 'label',
+																text: DV.i18n.available,
+																cls: 'dv-toolbar-multiselect-left-label'
+															},
+															'->',
+															{
+																xtype: 'button',
+																icon: 'images/arrowright.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.select(DV.cmp.dimension.fixedperiod.available, DV.cmp.dimension.fixedperiod.selected);
+																}
+															},
+															{
+																xtype: 'button',
+																icon: 'images/arrowrightdouble.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.selectAll(DV.cmp.dimension.fixedperiod.available, DV.cmp.dimension.fixedperiod.selected);
+																}
+															},
+															' '
+														],
+														listeners: {
+															added: function() {
+																DV.cmp.dimension.fixedperiod.available = this;
+															},
+															afterrender: function() {
+																this.boundList.on('itemdblclick', function() {
+																	DV.util.multiselect.select(this, DV.cmp.dimension.fixedperiod.selected);
+																}, this);
+															}
+														}
+													},                                            
+													{
+														xtype: 'multiselect',
+														name: 'selectedFixedPeriods',
+														cls: 'dv-toolbar-multiselect-right',
+														width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
+														displayField: 'name',
+														valueField: 'id',
+														ddReorder: true,
+														queryMode: 'local',
+														store: DV.store.indicator.selected,
+														tbar: [
+															' ',
+															{
+																xtype: 'button',
+																icon: 'images/arrowleftdouble.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.unselectAll(DV.cmp.dimension.fixedperiod.available, DV.cmp.dimension.fixedperiod.selected);
+																}
+															},
+															{
+																xtype: 'button',
+																icon: 'images/arrowleft.png',
+																width: 22,
+																handler: function() {
+																	DV.util.multiselect.unselect(DV.cmp.dimension.fixedperiod.available, DV.cmp.dimension.fixedperiod.selected);
+																}
+															},
+															'->',
+															{
+																xtype: 'label',
+																text: DV.i18n.selected,
+																cls: 'dv-toolbar-multiselect-right-label'
+															}
+														],
+														listeners: {
+															added: function() {
+																DV.cmp.dimension.fixedperiod.selected = this;
+															},
+															afterrender: function() {
+																this.boundList.on('itemdblclick', function() {
+																	DV.util.multiselect.unselect(DV.cmp.dimension.fixedperiod.available, this);
+																}, this);
+															}
+														}
+													}
+												]
+											}
+										],
+										listeners: {
+											added: function() {
+												DV.cmp.dimension.fixedperiod.panel = this;
+											},
+											expand: function() {
+												DV.util.dimension.panel.setHeight(DV.conf.layout.west_maxheight_accordion_fixedperiod);
+												DV.util.multiselect.setHeight(
+													[DV.cmp.dimension.fixedperiod.available, DV.cmp.dimension.fixedperiod.selected],
+													DV.cmp.dimension.fixedperiod.panel,
+													DV.conf.layout.west_fill_accordion_fixedperiod
+												);
 											}
 										}
 									},
