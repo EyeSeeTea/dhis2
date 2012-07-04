@@ -53,9 +53,9 @@ function PeriodType()
     periodTypes['Quarterly'] = new QuarterlyPeriodType( format_yyyymmdd, monthNames, this.reverse );
     periodTypes['SixMonthly'] = new SixMonthlyPeriodType( monthNames );
     periodTypes['Yearly'] = new YearlyPeriodType( format_yyyymmdd, this.reverse );
-    periodTypes['FinancialOct'] = new FinancialOctoberPeriodType( dateFormat );
-    periodTypes['FinancialJuly'] = new FinancialJulyPeriodType( dateFormat );
-    periodTypes['FinancialApril'] = new FinancialAprilPeriodType( dateFormat );
+    periodTypes['FinancialOct'] = new FinancialOctoberPeriodType( format_yyyymmdd, monthNames, this.reverse );
+    periodTypes['FinancialJuly'] = new FinancialJulyPeriodType( format_yyyymmdd, monthNames, this.reverse );
+    periodTypes['FinancialApril'] = new FinancialAprilPeriodType( format_yyyymmdd, monthNames, this.reverse );
 
     this.get = function( key )
     {
@@ -266,84 +266,81 @@ function YearlyPeriodType( format_yyyymmdd, rev )
             date.setDate(0);
         }
 
-        return rev(periods);
+        return rev( periods );
     };
 }
 
-function FinancialOctoberPeriodType( dateFormat )
+function FinancialOctoberPeriodType( format_yyyymmdd, monthNames, rev )
 {
     this.generatePeriods = function( offset )
     {
         var periods = [];
         var year = new Date().getFullYear() + offset;
-        var startDate = $.date( year + '-10-01', dateFormat ).adjust( 'Y', -5 );
-        var endDate = startDate.clone().adjust( 'Y', +1 ).adjust( 'D', -1 );
-
-        for ( var i = 0; i < 11; i++ )
+        var date = new Date( '30 Sep ' + ( year + 1 ) );
+        
+        for ( var i = 0; i < 10; i++ )
         {
-            var period = [];
-            period['startDate'] = startDate.format( dateFormat );
-            period['endDate'] = endDate.format( dateFormat );
-            period['name'] =  monthNames[9] + ' ' +  startDate.date().getFullYear() + '-' + monthNames[8] + ' ' + (startDate.date().getFullYear() +1 );
-            period['id'] = 'FinancialOct_' + period['startDate'];
-            periods[i] = period;
-
-            startDate.adjust( 'Y', +1 );
-            endDate = startDate.clone().adjust( 'Y', +1 ).adjust( 'D', -1 );
-        }
-
-        return periods;
+			var period = [];
+			period['endDate'] = format_yyyymmdd( date );
+			date.setYear( date.getFullYear() - 1 );
+			date.setDate( date.getDate() + 1 );
+			period['startDate'] = format_yyyymmdd( date );
+			period['name'] = monthNames[9] + ' ' + date.getFullYear() + ' - ' + monthNames[8] + ' ' + ( date.getFullYear() + 1 );
+			period['id'] = 'FinancialOct_' + period['startDate'];
+			periods.push( period );
+			date.setDate( date.getDate() - 1 );
+		}
+		
+		return rev( periods );
     };
 }
 
-function FinancialJulyPeriodType( dateFormat )
+function FinancialJulyPeriodType( format_yyyymmdd, monthNames, rev )
 {
     this.generatePeriods = function( offset )
     {
         var periods = [];
         var year = new Date().getFullYear() + offset;
-        var startDate = $.date( year + '-07-01', dateFormat ).adjust( 'Y', -5 );
-        var endDate = startDate.clone().adjust( 'Y', +1 ).adjust( 'D', -1 );
-
-        for ( var i = 0; i < 11; i++ )
+        var date = new Date( '30 Jun ' + ( year + 1 ) );
+        
+        for ( var i = 0; i < 10; i++ )
         {
-            var period = [];
-            period['startDate'] = startDate.format( dateFormat );
-            period['endDate'] = endDate.format( dateFormat );
-            period['name'] =  monthNames[6] + ' ' +  startDate.date().getFullYear() + '-' + monthNames[5] + ' ' + (startDate.date().getFullYear() +1 );
-            period['id'] = 'FinancialJuly_' + period['startDate'];
-            periods[i] = period;
-
-            startDate.adjust( 'Y', +1 );
-            endDate = startDate.clone().adjust( 'Y', +1 ).adjust( 'D', -1 );
-        }
-
-        return periods;
+			var period = [];
+			period['endDate'] = format_yyyymmdd( date );
+			date.setYear( date.getFullYear() - 1 );
+			date.setDate( date.getDate() + 1 );
+			period['startDate'] = format_yyyymmdd( date );
+			period['name'] = monthNames[6] + ' ' + date.getFullYear() + ' - ' + monthNames[5] + ' ' + ( date.getFullYear() + 1 );
+			period['id'] = 'FinancialJuly_' + period['startDate'];
+			periods.push( period );
+			date.setDate( date.getDate() - 1 );
+		}
+		
+		return rev( periods );
     };
 }
 
-function FinancialAprilPeriodType( dateFormat )
+function FinancialAprilPeriodType( format_yyyymmdd, monthNames, rev )
 {
     this.generatePeriods = function( offset )
     {
         var periods = [];
         var year = new Date().getFullYear() + offset;
-        var startDate = $.date( year + '-04-01', dateFormat ).adjust( 'Y', -5 );
-        var endDate = startDate.clone().adjust( 'Y', +1 ).adjust( 'D', -1 );
-
-        for ( var i = 0; i < 11; i++ )
+        var date = new Date( '31 Mar ' + ( year + 1 ) );
+        
+        for ( var i = 0; i < 10; i++ )
         {
-            var period = [];
-            period['startDate'] = startDate.format( dateFormat );
-            period['endDate'] = endDate.format( dateFormat );
-            period['name'] =  monthNames[3] + ' ' +  startDate.date().getFullYear() + '-' + monthNames[2] + ' ' + (startDate.date().getFullYear() +1 );
-            period['id'] = 'FinancialApril_' + period['startDate'];
-            periods[i] = period;
-
-            startDate.adjust( 'Y', +1 );
-            endDate = startDate.clone().adjust( 'Y', +1 ).adjust( 'D', -1 );
-        }
-
-        return periods;
+			var period = [];
+			period['endDate'] = format_yyyymmdd( date );
+			date.setYear( date.getFullYear() - 1 );
+			date.setDate( date.getDate() + 1 );
+			period['startDate'] = format_yyyymmdd( date );
+			period['name'] = monthNames[3] + ' ' + date.getFullYear() + ' - ' + monthNames[2] + ' ' + ( date.getFullYear() + 1 );
+			period['id'] = 'FinancialApril_' + period['startDate'];
+			periods.push( period );
+			date.setDate( date.getDate() - 1 );
+		}
+		
+		return rev( periods );
     };
 }
