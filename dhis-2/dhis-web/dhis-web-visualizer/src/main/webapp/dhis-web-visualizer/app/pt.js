@@ -49,7 +49,7 @@ function PeriodType()
     periodTypes['Daily'] = new DailyPeriodType( format_yyyymmdd );
     periodTypes['Weekly'] = new WeeklyPeriodType( format_yyyymmdd );
     periodTypes['Monthly'] = new MonthlyPeriodType( format_yyyymmdd, monthNames, this.reverse );
-    periodTypes['BiMonthly'] = new BiMonthlyPeriodType( dateFormat );
+    periodTypes['BiMonthly'] = new BiMonthlyPeriodType( format_yyyymmdd, monthNames, this.reverse );
     periodTypes['Quarterly'] = new QuarterlyPeriodType( dateFormat );
     periodTypes['SixMonthly'] = new SixMonthlyPeriodType( dateFormat );
     periodTypes['Yearly'] = new YearlyPeriodType( dateFormat );
@@ -110,8 +110,8 @@ function WeeklyPeriodType( format_yyyymmdd )
 		{
 			var period = [];
 			period['startDate'] = format_yyyymmdd( date );
-			period['iso'] = year + 'W' + week;
 			period['id'] = 'Weekly_' + period['startDate'];
+			period['iso'] = year + 'W' + week;
 			date.setDate( date.getDate() + 6 );
 			period['endDate'] = format_yyyymmdd( date );
 			period['name'] = 'W' + week + ' - ' + period['startDate'] + ' - ' + period['endDate'];
@@ -145,9 +145,9 @@ function MonthlyPeriodType( format_yyyymmdd, monthNames, rev )
 			period['endDate'] = format_yyyymmdd( date );
 			date.setDate( 1 );
 			period['startDate'] = format_yyyymmdd( date );
-			period['iso'] = format_iso( date );
 			period['name'] = monthNames[date.getMonth()] + ' ' + date.getFullYear();
 			period['id'] = 'Monthly_' + period['startDate'];
+			period['iso'] = format_iso( date );
 			periods.push( period );
 			date.setDate( 0 );
 		}
@@ -156,34 +156,36 @@ function MonthlyPeriodType( format_yyyymmdd, monthNames, rev )
     };
 }
 
-function BiMonthlyPeriodType( dateFormat )
+function BiMonthlyPeriodType( format_yyyymmdd, monthNames, rev )
 {
+	var format_iso = function( date ) {
+		var y = date.getFullYear(),
+			m = new String(date.getMonth() + 1);
+		m = m.length < 2 ? '0' + m : m;
+		return y + m + 'B';
+	};
+	
     this.generatePeriods = function( offset )
     {
         var periods = [];
         var year = new Date().getFullYear() + offset;
-        var startDate = $.date( year + '-01-01', dateFormat );
-        var endDate = startDate.clone().adjust( 'M', +2 ).adjust( 'D', -1 );
-        var i = 0;
-        var j = 0;
+        var date = new Date( '31 Dec ' + year );
 
-        while ( startDate.date().getFullYear() == year )
+        while ( date.getFullYear() === year )
         {
             var period = [];
-            period['startDate'] = startDate.format( dateFormat );
-            period['endDate'] = endDate.format( dateFormat );
-            period['name'] = monthNames[i] + ' - ' + monthNames[i + 1] + ' ' + year;
-            period['id'] = 'BiMonthly_' + period['startDate'];
-            period['iso'] = startDate.format( 'yyyyMM' ) + 'B';
-            periods[j] = period;
-
-            startDate.adjust( 'M', +2 );
-            endDate = startDate.clone().adjust( 'M', +2 ).adjust( 'D', -1 );
-            i += 2;
-            j++;
+            period['endDate'] = format_yyyymmdd( date );
+            date.setDate( 0 );
+            date.setDate( 1 );
+			period['startDate'] = format_yyyymmdd( date );
+            period['name'] = monthNames[date.getMonth()] + ' - ' + monthNames[date.getMonth() + 1] + ' ' + date.getFullYear();
+            period['id'] = 'BiMonthly_' + period['startDate'];            
+            period['iso'] = format_iso( date );
+            periods.push(period);
+            date.setDate( 0 );
         }
 
-        return periods;
+        return rev(periods);
     };
 }
 
