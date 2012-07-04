@@ -11,8 +11,6 @@ function PeriodType()
 		d = d.length < 2 ? '0' + d : d;
 		return y + '-' + m + '-' + d;
 	};
-	
-	var dateFormat = 'yyyy-MM-dd';
 
     this.reverse = function( array )
     {
@@ -30,13 +28,13 @@ function PeriodType()
     this.filterFuturePeriods = function( periods )
     {
         var array = [],
-			now = new Date().getTime();
+			now = new Date();
 
         for ( var i = 0; i < periods.length; i++ )
         {
 			if ( new Date( periods[i]['startDate'] ) <= now )
             {
-                array[i++] = periods[j];
+                array[i] = periods[i];
             }
         }
 

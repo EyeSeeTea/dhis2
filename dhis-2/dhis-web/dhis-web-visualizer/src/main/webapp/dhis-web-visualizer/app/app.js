@@ -3278,12 +3278,12 @@ Ext.onReady( function() {
 													select: function(cb) {
 														var store = DV.store.fixedperiod.available;
 														//store.parent = cb.getValue();
-																											
-														var m = new PeriodType().get(cb.getValue());
-														var periods = m.generatePeriods(0);
+														
+														var pt = new PeriodType();
+														var periods = pt.filterFuturePeriods( pt.get(cb.getValue()).generatePeriods(0) );
 														console.log(periods);
 														
-														
+													
 														
 														//if (DV.util.store.containsParent(store)) {
 															//DV.util.store.loadFromStorage(store);
