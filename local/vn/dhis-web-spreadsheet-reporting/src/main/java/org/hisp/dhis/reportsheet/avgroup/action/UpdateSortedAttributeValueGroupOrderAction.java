@@ -1,7 +1,7 @@
 package org.hisp.dhis.reportsheet.avgroup.action;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,6 @@ import java.util.List;
 
 import org.hisp.dhis.reportsheet.AttributeValueGroupOrder;
 import org.hisp.dhis.reportsheet.AttributeValueGroupOrderService;
-import org.hisp.dhis.reportsheet.ExportReport;
-import org.hisp.dhis.reportsheet.ExportReportAttribute;
-import org.hisp.dhis.reportsheet.ExportReportService;
 import org.hisp.dhis.reportsheet.action.ActionSupport;
 
 /**
@@ -55,41 +52,15 @@ public class UpdateSortedAttributeValueGroupOrderAction
         this.attributeValueGroupOrderService = attributeValueGroupOrderService;
     }
 
-    private ExportReportService exportReportService;
-
-    public void setExportReportService( ExportReportService exportReportService )
-    {
-        this.exportReportService = exportReportService;
-    }
-
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer reportId;
+    private List<Integer> groupIds = new ArrayList<Integer>();
 
-    public Integer getReportId()
+    public void setGroupIds( List<Integer> groupIds )
     {
-        return reportId;
-    }
-
-    public void setReportId( Integer reportId )
-    {
-        this.reportId = reportId;
-    }
-
-    private String clazzName;
-
-    public void setClazzName( String clazzName )
-    {
-        this.clazzName = clazzName;
-    }
-
-    private List<String> attributeValueGroupOrderId = new ArrayList<String>();
-
-    public void setAttributeValueGroupOrderId( List<String> attributeValueGroupOrderId )
-    {
-        this.attributeValueGroupOrderId = attributeValueGroupOrderId;
+        this.groupIds = groupIds;
     }
 
     // -------------------------------------------------------------------------
@@ -99,29 +70,18 @@ public class UpdateSortedAttributeValueGroupOrderAction
     public String execute()
         throws Exception
     {
-        List<AttributeValueGroupOrder> attributeValueGroupOrders = new ArrayList<AttributeValueGroupOrder>();
-
-        for ( String id : this.attributeValueGroupOrderId )
+        for ( int i = 0; i < groupIds.size(); i++ )
         {
-            AttributeValueGroupOrder daElementGroupOrder = attributeValueGroupOrderService
-                .getAttributeValueGroupOrder( Integer.parseInt( id ) );
+            AttributeValueGroupOrder group = attributeValueGroupOrderService.getAttributeValueGroupOrder( groupIds
+                .get( i ) );
 
-            attributeValueGroupOrders.add( daElementGroupOrder );
-        }
+            group.setSortOrder( i );
 
-        if ( clazzName.equals( ExportReport.class.getSimpleName() ) )
-        {
-            ExportReportAttribute exportReportAttribute = (ExportReportAttribute) exportReportService
-                .getExportReport( reportId );
-
-            exportReportAttribute.setAttributeValueOrders( attributeValueGroupOrders );
-
-            exportReportService.updateExportReport( exportReportAttribute );
+            attributeValueGroupOrderService.updateAttributeValueGroupOrder( group );
         }
 
         message = i18n.getString( "update_successful" );
 
         return SUCCESS;
     }
-
 }

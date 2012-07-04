@@ -1,4 +1,4 @@
-package org.hisp.dhis.reportsheet.impl;
+package org.hisp.dhis.reportsheet.avgroup.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,64 +27,58 @@ package org.hisp.dhis.reportsheet.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.hisp.dhis.reportsheet.AttributeValueGroupOrder;
 import org.hisp.dhis.reportsheet.AttributeValueGroupOrderService;
-import org.hisp.dhis.reportsheet.AttributeValueGroupOrderStore;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.reportsheet.comparator.AttributeValueGroupOrderSortOrderComparator;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Dang Duy Hieu
  * @version $Id$
  */
-@Transactional
-public class DefaultAttributeValueGroupOrderService
-    implements AttributeValueGroupOrderService
+public class ListAttributeValueGroupOrdersAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private AttributeValueGroupOrderStore attributeValueGroupOrderStore;
+    private AttributeValueGroupOrderService attributeValueGroupOrderService;
 
-    public void setAttributeValueGroupOrderStore( AttributeValueGroupOrderStore attributeValueGroupOrderStore )
+    public void setAttributeValueGroupOrderService( AttributeValueGroupOrderService attributeValueGroupOrderService )
     {
-        this.attributeValueGroupOrderStore = attributeValueGroupOrderStore;
+        this.attributeValueGroupOrderService = attributeValueGroupOrderService;
     }
 
     // -------------------------------------------------------------------------
-    // Data Element Group Order
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    public AttributeValueGroupOrder getAttributeValueGroupOrder( Integer id )
+    List<AttributeValueGroupOrder> attributeValueGroupOrders;
+
+    public List<AttributeValueGroupOrder> getAttributeValueGroupOrders()
     {
-        return attributeValueGroupOrderStore.getAttributeValueGroupOrder( id );
+        return attributeValueGroupOrders;
     }
 
-    public void updateAttributeValueGroupOrder( AttributeValueGroupOrder attributeValueGroupOrder )
-    {
-        attributeValueGroupOrderStore.updateAttributeValueGroupOrder( attributeValueGroupOrder );
-    }
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
-    public void deleteAttributeValueGroupOrder( Integer id )
+    public String execute()
+        throws Exception
     {
-        attributeValueGroupOrderStore.deleteAttributeValueGroupOrder( id );
-    }
+        attributeValueGroupOrders = new ArrayList<AttributeValueGroupOrder>( attributeValueGroupOrderService
+            .getAllAttributeValueGroupOrder() );
+        
+        Collections.sort( attributeValueGroupOrders, new AttributeValueGroupOrderSortOrderComparator() );
 
-    public AttributeValueGroupOrder getAttributeValueGroupOrderByName( String name )
-    {
-        return attributeValueGroupOrderStore.getAttributeValueGroupOrderByName( name );
-    }
-
-    public AttributeValueGroupOrder getAttributeValueGroupOrder( String name, String clazzName, Integer reportId )
-    {
-        return attributeValueGroupOrderStore.getAttributeValueGroupOrder( name, clazzName, reportId );
-    }
-
-    public Collection<AttributeValueGroupOrder> getAllAttributeValueGroupOrder()
-    {
-        return attributeValueGroupOrderStore.getAllAttributeValueGroupOrder();
+        return SUCCESS;
     }
 
 }

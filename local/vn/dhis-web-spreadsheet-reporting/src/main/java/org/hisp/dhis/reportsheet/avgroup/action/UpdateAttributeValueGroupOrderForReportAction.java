@@ -30,10 +30,10 @@ package org.hisp.dhis.reportsheet.avgroup.action;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.reportsheet.AttributeValueGroupOrder;
 import org.hisp.dhis.reportsheet.AttributeValueGroupOrderService;
+import org.hisp.dhis.reportsheet.ExportReportAttribute;
+import org.hisp.dhis.reportsheet.ExportReportService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -41,18 +41,18 @@ import com.opensymphony.xwork2.Action;
  * @author Dang Duy Hieu
  * @version $Id$
  */
-public class UpdateAttributeValueGroupOrderAction
+public class UpdateAttributeValueGroupOrderForReportAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
 
-    private AttributeService attributeService;
+    private ExportReportService exportReportService;
 
-    public void setAttributeService( AttributeService attributeService )
+    public void setExportReportService( ExportReportService exportReportService )
     {
-        this.attributeService = attributeService;
+        this.exportReportService = exportReportService;
     }
 
     private AttributeValueGroupOrderService attributeValueGroupOrderService;
@@ -66,36 +66,22 @@ public class UpdateAttributeValueGroupOrderAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer attributeId;
+    private Integer reportId;
 
-    private Integer attributeValueGroupOrderId;
-
-    private String name;
-
-    private List<String> attributeValues = new ArrayList<String>();
+    private List<Integer> groupMembers = new ArrayList<Integer>();
 
     // -------------------------------------------------------------------------
     // Getter & Setter
     // -------------------------------------------------------------------------
 
-    public void setAttributeValueGroupOrderId( Integer attributeValueGroupOrderId )
+    public void setReportId( Integer reportId )
     {
-        this.attributeValueGroupOrderId = attributeValueGroupOrderId;
+        this.reportId = reportId;
     }
 
-    public void setName( String name )
+    public void setGroupMembers( List<Integer> groupMembers )
     {
-        this.name = name;
-    }
-
-    public void setAttributeId( Integer attributeId )
-    {
-        this.attributeId = attributeId;
-    }
-
-    public void setAttributeValues( List<String> attributeValues )
-    {
-        this.attributeValues = attributeValues;
+        this.groupMembers = groupMembers;
     }
 
     // -------------------------------------------------------------------------
@@ -105,34 +91,26 @@ public class UpdateAttributeValueGroupOrderAction
     public String execute()
         throws Exception
     {
-        AttributeValueGroupOrder attributeValueGroupOrder = attributeValueGroupOrderService
-            .getAttributeValueGroupOrder( attributeValueGroupOrderId );
+        ExportReportAttribute exportReport = (ExportReportAttribute) exportReportService.getExportReport( reportId );
+        List<AttributeValueGroupOrder> newList = new ArrayList<AttributeValueGroupOrder>();
 
-        Attribute attribute = attributeService.getAttribute( attributeId );
+        if ( exportReport != null )
+        {
+            for ( Integer id : groupMembers )
+            {
+                AttributeValueGroupOrder group = attributeValueGroupOrderService.getAttributeValueGroupOrder( id );
 
-        attributeValueGroupOrder.setName( name );
+                if ( group != null )
+                {
+                    newList.add( group );
+                }
+            }
 
-        attributeValueGroupOrder.setAttribute( attribute );
+            exportReport.setAttributeValueOrders( newList );
 
-        List<String> finalList = new ArrayList<String>();
-
-        removeDuplicatedItems( attributeValues, finalList );
-
-        attributeValueGroupOrder.setAttributeValues( finalList );
-
-        attributeValueGroupOrderService.updateAttributeValueGroupOrder( attributeValueGroupOrder );
+            exportReportService.updateExportReport( exportReport );
+        }
 
         return SUCCESS;
-    }
-
-    private static void removeDuplicatedItems( List<String> a, List<String> b )
-    {
-        for ( String s1 : a )
-        {
-            if ( !b.contains( s1 ) )
-            {
-                b.add( s1 );
-            }
-        }
     }
 }
