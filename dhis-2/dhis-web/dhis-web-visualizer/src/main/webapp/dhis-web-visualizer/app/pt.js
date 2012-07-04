@@ -46,7 +46,7 @@ function PeriodType()
     };
 
     var periodTypes = [];
-    periodTypes['Daily'] = new DailyPeriodType( dateFormat );
+    periodTypes['Daily'] = new DailyPeriodType( format_yyyymmdd );
     periodTypes['Weekly'] = new WeeklyPeriodType( format_yyyymmdd );
     periodTypes['Monthly'] = new MonthlyPeriodType( format_yyyymmdd, monthNames, this.reverse );
     periodTypes['BiMonthly'] = new BiMonthlyPeriodType( dateFormat );
@@ -63,27 +63,24 @@ function PeriodType()
     };
 }
 
-function DailyPeriodType( dateFormat )
-{
+function DailyPeriodType( format_yyyymmdd )
+{	
     this.generatePeriods = function( offset )
     {
         var periods = [];
         var year = new Date().getFullYear() + offset;
-        var startDate = $.date( year + '-01-01', dateFormat );
-        var i = 0;
+        var date = new Date( '01 Jan ' + year );
 
-        while ( startDate.date().getFullYear() <= year )
+        while ( date.getFullYear() === year )
         {
             var period = [];
-            period['startDate'] = startDate.format( dateFormat );
-            period['endDate'] = startDate.format( dateFormat );
-            period['name'] = startDate.format( dateFormat );
+            period['startDate'] = format_yyyymmdd( date );
+            period['endDate'] = period['startDate'];
+            period['name'] = period['startDate'];
             period['id'] = 'Daily_' + period['startDate'];
-            period['iso'] = startDate.format( 'yyyyMMdd' );
-            periods[i] = period;
-
-            startDate.adjust( 'D', +1 );
-            i++;
+            period['iso'] = period['startDate'].replace( /-/g, '' );
+            periods.push( period );
+            date.setDate( date.getDate() + 1 );
         }
 
         return periods;
@@ -96,7 +93,7 @@ function WeeklyPeriodType( format_yyyymmdd )
     {
 		var periods = [];
 		var year = new Date().getFullYear() + offset;
-		var date = new Date('01 Jan ' + year);
+		var date = new Date( '01 Jan ' + year );
 		var day = date.getDay();
 		var week = 1;
 		
@@ -109,16 +106,16 @@ function WeeklyPeriodType( format_yyyymmdd )
 			date.setDate( date.getDate() + ( 8 - day ) );
 		}		
 		
-		while (date.getFullYear() === year)
+		while ( date.getFullYear() === year )
 		{
 			var period = [];
-			period['startDate'] = format_yyyymmdd(date);
+			period['startDate'] = format_yyyymmdd( date );
 			period['iso'] = year + 'W' + week;
 			period['id'] = 'Weekly_' + period['startDate'];
 			date.setDate( date.getDate() + 6 );
-			period['endDate'] = format_yyyymmdd(date);
+			period['endDate'] = format_yyyymmdd( date );
 			period['name'] = 'W' + week + ' - ' + period['startDate'] + ' - ' + period['endDate'];
-			periods.push(period);			
+			periods.push( period );			
 			date.setDate( date.getDate() + 1 );
 			week++;
 		}
@@ -140,19 +137,19 @@ function MonthlyPeriodType( format_yyyymmdd, monthNames, rev )
     {
 		var periods = [];
 		var year = new Date().getFullYear() + offset;
-		var date = new Date('31 Dec ' + year);
+		var date = new Date( '31 Dec ' + year );
 		
-		while (date.getFullYear() === year)
+		while ( date.getFullYear() === year )
 		{
 			var period = [];
-			period['endDate'] = format_yyyymmdd(date);
-			date.setDate(1);
-			period['startDate'] = format_yyyymmdd(date);
-			period['iso'] = format_iso(date);
+			period['endDate'] = format_yyyymmdd( date );
+			date.setDate( 1 );
+			period['startDate'] = format_yyyymmdd( date );
+			period['iso'] = format_iso( date );
 			period['name'] = monthNames[date.getMonth()] + ' ' + date.getFullYear();
 			period['id'] = 'Monthly_' + period['startDate'];
-			periods.push(period);
-			date.setDate(0);
+			periods.push( period );
+			date.setDate( 0 );
 		}
 		
         return rev(periods);
