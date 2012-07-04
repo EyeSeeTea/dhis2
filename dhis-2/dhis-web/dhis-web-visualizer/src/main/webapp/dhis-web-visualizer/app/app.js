@@ -617,7 +617,20 @@ Ext.onReady( function() {
 						DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
                     }
                     return a;
-                }   
+                },
+                getPeriodTypes: function() {
+					var data = [
+						{id: 'Daily', name: 'Daily'},
+						{id: 'Weekly', name: 'Weekly'},
+						{id: 'BiMonthly', name: 'BiMonthly'},
+						{id: 'Quarterly', name: 'Quarterly'},
+						{id: 'SixMonthly', name: 'SixMonthly'},
+						{id: 'Yearly', name: 'Yearly'},
+						{id: 'FinancialOct', name: 'FinancialOct'},
+						{id: 'FinancialJuly', name: 'FinancialJuly'},
+						{id: 'FinancialApril', name: 'FinancialApril'}
+					];						
+				}
             },
             organisationunit: {
                 getObjects: function() {
@@ -1382,6 +1395,72 @@ Ext.onReady( function() {
                 data: []
             })
         },
+        periodtype: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: [
+				{id: 'Daily', name: 'Daily'},
+				{id: 'Weekly', name: 'Weekly'},
+				{id: 'Monthly', name: 'Monthly'},
+				{id: 'BiMonthly', name: 'BiMonthly'},
+				{id: 'Quarterly', name: 'Quarterly'},
+				{id: 'SixMonthly', name: 'SixMonthly'},
+				{id: 'Yearly', name: 'Yearly'},
+				{id: 'FinancialOct', name: 'FinancialOct'},
+				{id: 'FinancialJuly', name: 'FinancialJuly'},
+				{id: 'FinancialApril', name: 'FinancialApril'}
+			]
+		}),
+        fixedperiod: {
+            available: Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                data: [],
+                listeners: {
+                    load: function(s) {
+                        //DV.util.multiselect.filterAvailable(DV.cmp.dimension.fixedperiod.available, DV.cmp.dimension.fixedperiod.selected);
+                    }
+                }
+            }),
+            selected: Ext.create('Ext.data.Store', {
+                fields: ['id', 'name'],
+                data: []
+            })
+        },
+        groupset: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'index'],
+			proxy: {
+				type: 'ajax',
+				url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.organisationunitgroupset_get,
+				reader: {
+					type: 'json',
+					root: 'organisationUnitGroupSets'
+				}
+			},
+			isloaded: false,
+			listeners: {
+				load: function() {
+					this.isloaded = true;
+					this.add({id: DV.conf.finals.cmd.none, name: DV.i18n.none, index: -1});
+					this.sort('index', 'ASC');
+				}
+			}
+		}),
+        group: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.organisationunitgroup_getall,
+				reader: {
+					type: 'json',
+					root: 'organisationUnitGroups'
+				}
+			},
+			isloaded: false,
+			listeners: {
+				load: function() {
+					this.isloaded = true;
+				}
+			}
+		}),
         chart: null,
         getChartStore: function(exe) {
             var keys = [];
@@ -1464,61 +1543,7 @@ Ext.onReady( function() {
                     });
                 }
             }
-        }),
-        groupset: Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'index'],
-			proxy: {
-				type: 'ajax',
-				url: DV.conf.finals.ajax.path_commons + DV.conf.finals.ajax.organisationunitgroupset_get,
-				reader: {
-					type: 'json',
-					root: 'organisationUnitGroupSets'
-				}
-			},
-			isloaded: false,
-			listeners: {
-				load: function() {
-					this.isloaded = true;
-					this.add({id: DV.conf.finals.cmd.none, name: DV.i18n.none, index: -1});
-					this.sort('index', 'ASC');
-				}
-			}
-		}),
-        group: Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.organisationunitgroup_getall,
-				reader: {
-					type: 'json',
-					root: 'organisationUnitGroups'
-				}
-			},
-			isloaded: false,
-			listeners: {
-				load: function() {
-					this.isloaded = true;
-				}
-			}
-		}),
-        level: Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'level'],
-			proxy: {
-				type: 'ajax',
-				url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.organisationunitlevel_getall,
-				reader: {
-					type: 'json',
-					root: 'organisationUnitLevels'
-				}
-			},
-			isloaded: false,
-			listeners: {
-				load: function() {
-					this.isloaded = true;
-					this.sort('level', 'ASC');
-				}
-			}
-		})
+        })
     };
     
     DV.state = {
@@ -3248,45 +3273,35 @@ Ext.onReady( function() {
 												labelWidth: 90,
 												editable: false,
 												queryMode: 'remote',
-												store: Ext.create('Ext.data.Store', {
-													fields: ['id', 'name', 'index'],
-													proxy: {
-														type: 'ajax',
-														url: DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicatorgroup_get,
-														reader: {
-															type: 'json',
-															root: 'indicatorGroups'
-														}
-													},
-													listeners: {
-														load: function(s) {
-															s.add({id: 0, name: DV.i18n.all_indicator_groups, index: -1});
-															s.sort([																
-																{ property: 'index', direction: 'ASC' },
-																{ property: 'name', direction: 'ASC' }
-															]);
-														}
-													}
-												}),
+												store: DV.store.periodtype,
 												listeners: {
 													select: function(cb) {
-														var store = DV.store.indicator.available;
-														store.parent = cb.getValue();
+														var store = DV.store.fixedperiod.available;
+														//store.parent = cb.getValue();
 														
-														if (DV.util.store.containsParent(store)) {
-															DV.util.store.loadFromStorage(store);
-															DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
-														}
-														else {
-															if (cb.getValue() === 0) {
-																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_getall;
-																store.load();
-															}
-															else {
-																store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
-																store.load();
-															}
-														}
+														console.log(cb.getValue());
+														
+														var m = new PeriodType().get(cb.getValue());
+														console.log(m);
+														var periods = m.generatePeriods(0);
+														console.log(periods);
+														
+														
+														
+														//if (DV.util.store.containsParent(store)) {
+															//DV.util.store.loadFromStorage(store);
+															//DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
+														//}
+														//else {
+															//if (cb.getValue() === 0) {
+																//store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_getall;
+																//store.load();
+															//}
+															//else {
+																//store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
+																//store.load();
+															//}
+														//}
 													}
 												}
 											},
@@ -3303,7 +3318,7 @@ Ext.onReady( function() {
 														valueField: 'id',
 														displayField: 'name',
 														queryMode: 'remote',
-														store: DV.store.indicator.available,
+														store: DV.store.fixedperiod.available,
 														tbar: [
 															{
 																xtype: 'label',
@@ -3349,7 +3364,7 @@ Ext.onReady( function() {
 														valueField: 'id',
 														ddReorder: true,
 														queryMode: 'local',
-														store: DV.store.indicator.selected,
+														store: DV.store.fixedperiod.selected,
 														tbar: [
 															' ',
 															{
