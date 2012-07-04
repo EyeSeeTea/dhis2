@@ -29,14 +29,12 @@ function PeriodType()
 
     this.filterFuturePeriods = function( periods )
     {
-        var array = [];
-        var i = 0;
+        var array = [],
+			now = new Date().getTime();
 
-        var now = new Date().getTime();
-
-        for ( var j = 0; j < periods.length; j++ )
+        for ( var i = 0; i < periods.length; i++ )
         {
-            if ( $.date( periods[j]['endDate'], dateFormat ).date().getTime() <= now )
+			if ( new Date( periods[i]['startDate'] ) <= now )
             {
                 array[i++] = periods[j];
             }
