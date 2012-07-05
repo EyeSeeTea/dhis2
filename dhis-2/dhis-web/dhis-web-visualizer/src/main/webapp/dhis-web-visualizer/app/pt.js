@@ -69,7 +69,7 @@ function DailyPeriodType( format_yyyymmdd )
 
         while ( date.getFullYear() === year )
         {
-            var period = [];
+            var period = {};
             period['startDate'] = format_yyyymmdd( date );
             period['endDate'] = period['startDate'];
             period['name'] = period['startDate'];
@@ -104,7 +104,7 @@ function WeeklyPeriodType( format_yyyymmdd )
 		
 		while ( date.getFullYear() === year )
 		{
-			var period = [];
+			var period = {};
 			period['startDate'] = format_yyyymmdd( date );
 			period['id'] = 'Weekly_' + period['startDate'];
 			period['iso'] = year + 'W' + week;
@@ -137,7 +137,7 @@ function MonthlyPeriodType( format_yyyymmdd, monthNames, rev )
 		
 		while ( date.getFullYear() === year )
 		{
-			var period = [];
+			var period = {};
 			period['endDate'] = format_yyyymmdd( date );
 			date.setDate( 1 );
 			period['startDate'] = format_yyyymmdd( date );
@@ -169,7 +169,7 @@ function BiMonthlyPeriodType( format_yyyymmdd, monthNames, rev )
 
         while ( date.getFullYear() === year )
         {
-            var period = [];
+            var period = {};
             period['endDate'] = format_yyyymmdd( date );
             date.setDate( 0 );
             date.setDate( 1 );
@@ -196,7 +196,7 @@ function QuarterlyPeriodType( format_yyyymmdd, monthNames, rev )
 
         while ( date.getFullYear() === year )
         {
-            var period = [];
+            var period = {};
             period['endDate'] = format_yyyymmdd( date );
             date.setDate( 0 );
             date.setDate( 0 );
@@ -221,7 +221,7 @@ function SixMonthlyPeriodType( monthNames )
         var periods = [];
         var year = new Date().getFullYear() + offset;
 
-        var period = [];
+        var period = {};
         period['startDate'] = year + '-01-01';
         period['endDate'] = year + '-06-30';
         period['name'] = monthNames[0] + ' - ' + monthNames[5] + ' ' + year;
@@ -251,7 +251,7 @@ function YearlyPeriodType( format_yyyymmdd, rev )
 
         while ( ( year - date.getFullYear() ) < 10 )
         {
-            var period = [];
+            var period = {};
             period['endDate'] = format_yyyymmdd( date );
             date.setMonth( 0, 1 );
             period['startDate'] = format_yyyymmdd( date );
@@ -276,7 +276,7 @@ function FinancialOctoberPeriodType( format_yyyymmdd, monthNames, rev )
         
         for ( var i = 0; i < 10; i++ )
         {
-			var period = [];
+			var period = {};
 			period['endDate'] = format_yyyymmdd( date );
 			date.setYear( date.getFullYear() - 1 );
 			date.setDate( date.getDate() + 1 );
@@ -301,7 +301,7 @@ function FinancialJulyPeriodType( format_yyyymmdd, monthNames, rev )
         
         for ( var i = 0; i < 10; i++ )
         {
-			var period = [];
+			var period = {};
 			period['endDate'] = format_yyyymmdd( date );
 			date.setYear( date.getFullYear() - 1 );
 			date.setDate( date.getDate() + 1 );
@@ -326,7 +326,7 @@ function FinancialAprilPeriodType( format_yyyymmdd, monthNames, rev )
         
         for ( var i = 0; i < 10; i++ )
         {
-			var period = [];
+			var period = {};
 			period['endDate'] = format_yyyymmdd( date );
 			date.setYear( date.getFullYear() - 1 );
 			date.setDate( date.getDate() + 1 );

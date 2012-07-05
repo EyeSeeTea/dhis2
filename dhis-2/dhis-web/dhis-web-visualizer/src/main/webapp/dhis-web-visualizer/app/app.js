@@ -402,7 +402,7 @@ Ext.onReady( function() {
                     });
                     return filter;
                 });
-                a.store.sort('name', 'ASC');
+                a.store.sortStore();
             },
             setHeight: function(ms, panel, fill) {
 				for (var i = 0; i < ms.length; i++) {
@@ -1323,6 +1323,9 @@ Ext.onReady( function() {
                     }
                 },
                 storage: {},
+                sortStore: function() {
+					this.sort('name', 'ASC');
+				},
                 listeners: {
                     load: function(s) {
 						s.each( function(r) {
@@ -1350,6 +1353,9 @@ Ext.onReady( function() {
                     }
                 },
                 storage: {},
+                sortStore: function() {
+					this.sort('name', 'ASC');
+				},
                 listeners: {
                     load: function(s) {
 						s.each( function(r) {
@@ -1412,13 +1418,16 @@ Ext.onReady( function() {
 		}),
         fixedperiod: {
             available: Ext.create('Ext.data.Store', {
-                fields: ['id', 'name'],
+                fields: ['id', 'name', 'index'],
                 data: [],
-                listeners: {
-                    load: function(s) {
-                        //DV.util.multiselect.filterAvailable(DV.cmp.dimension.fixedperiod.available, DV.cmp.dimension.fixedperiod.selected);
-                    }
-                }
+                setIndex: function(periods) {
+					for (var i = 0; i < periods.length; i++) {
+						periods[i].index = i;
+					}
+				},
+                sortStore: function() {
+					this.sort('index', 'ASC');
+				}
             }),
             selected: Ext.create('Ext.data.Store', {
                 fields: ['id', 'name'],
@@ -3275,30 +3284,12 @@ Ext.onReady( function() {
 												queryMode: 'remote',
 												store: DV.store.periodtype,
 												listeners: {
-													select: function(cb) {
-														var store = DV.store.fixedperiod.available;
-														//store.parent = cb.getValue();
-														
+													select: function(cb) {														
 														var pt = new PeriodType();
-														var periods = pt.filterFuturePeriods( pt.get(cb.getValue()).generatePeriods(0) );
-														console.log(periods);
+														var periods = pt.reverse( pt.filterFuturePeriods( pt.get(cb.getValue()).generatePeriods(0) ) );
 														
-													
-														
-														//if (DV.util.store.containsParent(store)) {
-															//DV.util.store.loadFromStorage(store);
-															//DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
-														//}
-														//else {
-															//if (cb.getValue() === 0) {
-																//store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_getall;
-																//store.load();
-															//}
-															//else {
-																//store.proxy.url = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
-																//store.load();
-															//}
-														//}
+														DV.store.fixedperiod.available.setIndex(periods);
+														DV.store.fixedperiod.available.loadData(periods);
 													}
 												}
 											},
@@ -3314,7 +3305,6 @@ Ext.onReady( function() {
 														width: (DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2,
 														valueField: 'id',
 														displayField: 'name',
-														queryMode: 'remote',
 														store: DV.store.fixedperiod.available,
 														tbar: [
 															{
