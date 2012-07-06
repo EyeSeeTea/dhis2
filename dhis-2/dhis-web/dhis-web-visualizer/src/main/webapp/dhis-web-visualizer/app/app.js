@@ -1383,6 +1383,9 @@ Ext.onReady( function() {
                     }
                 },
                 storage: {},
+                sortStore: function() {
+					this.sort('name', 'ASC');
+				},
                 isloaded: false,
                 listeners: {
                     load: function(s) {
@@ -3287,7 +3290,7 @@ Ext.onReady( function() {
 													select: function(cb) {														
 														var pt = new PeriodType();
 														var periods = pt.reverse( pt.filterFuturePeriods( pt.get(cb.getValue()).generatePeriods(0) ) );
-														
+														console.log(periods);
 														DV.store.fixedperiod.available.setIndex(periods);
 														DV.store.fixedperiod.available.loadData(periods);
 													}
