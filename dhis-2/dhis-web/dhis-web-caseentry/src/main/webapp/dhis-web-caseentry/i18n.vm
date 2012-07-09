@@ -84,4 +84,9 @@ orgunit_groups:'$encoder.jsEscape($i18n.getString( 'orgunit_groups' ) , "'")',
 none:'[' + '$encoder.jsEscape($i18n.getString( 'none' ) , "'")' + ']',
 not_empty:'$encoder.jsEscape($i18n.getString( 'not_empty' ) , "'")',
 operations:'$encoder.jsEscape($i18n.getString( 'operations' ) , "'")',
+deleting:'$encoder.jsEscape($i18n.getString( 'deleting' ) , "'")',
+saving:'$encoder.jsEscape($i18n.getString( 'saving' ) , "'")',
+renaming:'$encoder.jsEscape($i18n.getString( 'renaming' ) , "'")',
+true_value:'$encoder.jsEscape($i18n.getString( 'true_value' ) , "'")',
+false_value:'$encoder.jsEscape($i18n.getString( 'false_value' ) , "'")'
 };
