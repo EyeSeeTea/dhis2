@@ -140,7 +140,10 @@ public class ChartPluginController
             {
                 Period period = PeriodType.getPeriodFromIsoString( iso );
                 
-                periods.add( period );
+                if ( !periods.contains( period ) )
+                {
+                    periods.add( period );
+                }
             }
         }
         

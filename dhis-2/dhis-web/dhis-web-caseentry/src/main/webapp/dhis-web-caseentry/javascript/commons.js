@@ -1,22 +1,35 @@
 
+// Disable caching for ajax requests in general 
+
+$( document ).ready( function() {
+	$.ajaxSetup ({
+    	cache: false
+	});
+} );
+
 function dobTypeOnChange( container ){
 
 	var type = jQuery('#' + container + ' [id=dobType]').val();
-	if(type == 'V' || type == 'D'){
+	if(type == 'V' || type == 'D')
+	{
 		jQuery('#' + container + ' [id=age]').rules("remove");
 		jQuery('#' + container + ' [id=age]').css("display","none");
 		
 		jQuery('#' + container + ' [id=birthDate]').rules("add",{required:true});
 		datePickerValid( container + ' [id=birthDate]' );
 		jQuery('#' + container + ' [id=birthDate]').css("display","");
-	}else if(type == 'A'){
+	}
+	else if(type == 'A')
+	{
 		jQuery('#' + container + ' [id=age]').rules("add",{required:true, number: true});
 		jQuery('#' + container + ' [id=age]').css("display","");
 		
 		jQuery('#' + container + ' [id=birthDate]').rules("remove","required");
 		$('#' + container+ ' [id=birthDate]').datepicker("destroy");
 		jQuery('#' + container + ' [id=birthDate]').css("display","none");
-	}else {
+	}
+	else 
+	{
 		jQuery('#' + container + ' [id=age]').rules("remove");
 		jQuery('#' + container + ' [id=age]').css("display","");
 		
@@ -176,30 +189,19 @@ function validateAdvancedSearch()
 	});
 	
 	if(flag){
-		jQuery("#searchDiv :input").each( function( i, item )
-		{
-			var elementId = $(this).attr('id');
-			var elementName = $(this).attr('name');
-			if( elementId =='dateOperator' )
-			{
-				dateOperator = jQuery(this).val();
-			}
-			else
-			{
-				var value =jQuery(this).val();
-				if( dateOperator != '' )
-				{
-					value = dateOperator + "'" + value + "'";
-					dateOperator = "";
+		jQuery( '#advancedSearchTB tbody tr' ).each( function( i, row ){
+			jQuery( this ).find(':input').each( function( idx, item ){
+				if( idx == 0){
+					params += "searchTexts=" + item.value;
 				}
-				if( elementName=='searchText')
-					params += "searchText=";
-				else
-					params +=  elementId + "=";
-					
-				params += htmlEncode(value) + "&";
-			}
+				else if( idx == 1){
+					params += "_" + htmlEncode( item.value.toLowerCase() );
+				}
+			})
 		});
+		params += '&listAll=false';
+		params += '&searchBySelectedOrgunit=' + byId('searchBySelectedOrgunit').checked;
+		
 		contentDiv = 'listPatientDiv';
 		jQuery( "#loaderDiv" ).show();
 		advancedSearch( params );

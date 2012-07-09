@@ -52,6 +52,6 @@
 
     <many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" column="organisationunitid"
       foreign-key="fk_patient_organisationunitid" />
-
+ 	
   </class>
 </hibernate-mapping>

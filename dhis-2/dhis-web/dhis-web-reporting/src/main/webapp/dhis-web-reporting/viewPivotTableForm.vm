@@ -20,15 +20,6 @@
 </script>
 
 <style type="text/css">
-.pivot td
-{
-  border: 1px solid #d0d0d0;
-  padding-top: 2px;
-  padding-bottom: 3px;
-  padding-left: 10px;
-  padding-right: 10px;
-}
-
 div#control
 {
   margin-bottom: 15px;
@@ -47,10 +38,28 @@ div#pivot
   border-radius: 3px;
 }
 
+div#pivotMenu
+{
+  position: absolute;
+  display: none;
+}
+
 div.inputSection
 {
   padding-top: 7px;
   padding-bottom: 5px;
+}
+
+.pivot
+{ 
+  border-collapse: collapse;
+}
+
+.pivot td
+{
+  border: 1px solid #c0c0c0;
+  padding: 3px 10px 10px 3px;
+  padding-bottom: 3px;
 }
 
 td.column
@@ -72,12 +81,6 @@ td.cell
   cursor: pointer;
 }
 
-div#pivotMenu
-{
-  position: absolute;
-  display: none;
-}
-
 </style>
 
 <h3>$i18n.getString( "pivot_table" ) #openHelp( "web_pivot_table" )</h3>
@@ -87,7 +90,8 @@ div#pivotMenu
 <div id="control">
 <input type="button" value="$i18n.getString( 'data' )" style="width:110px" onclick="showCriteria()" />
 <input type="button" value="$i18n.getString( 'pivot' )" style="width:110px" onclick="showPivot()" />
-<input type="button" value="$i18n.getString( 'get_report_as_xls' )" onclick="exportXls()" style="width:130px">&nbsp;
+<input type="button" value="$i18n.getString( 'get_report_as_xls' )" onclick="exportXls()" style="width:130px">
+<input type="button" value="$i18n.getString( 'back' )" style="width:110px" onclick="window.location='index.action'" />&nbsp;&nbsp;
 <label id="dataLabel" style="color:#606060"></label>
 </div>
 

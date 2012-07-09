@@ -35,6 +35,17 @@ import com.opensymphony.xwork2.Action;
 public class MetaDataImportFormAction
     implements Action
 {
+    private boolean running;
+
+    public boolean isRunning()
+    {
+        return running;
+    }
+    public void setRunning( boolean running )
+    {
+        this.running = running;
+    }
+
     @Override
     public String execute() throws Exception
     {

@@ -9,7 +9,8 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 	hideById('listRelationshipDiv');
 	hideById('addRelationshipDiv');
 	hideById('migrationPatientDiv');
-	setFieldValue("selectedOrgunitText", orgUnitNames[0]);
+	enable('listPatientBtn');
+	setFieldValue("orgunitName", orgUnitNames[0]);
 }
 
 selection.setListenerFunction( organisationUnitSelected );
@@ -347,11 +348,9 @@ function showProgramEnrollmentForm( patientId, programId )
 {				
 	if( programId == 0 )
 	{
-		jQuery('#enrollBtn').attr('value',i18n_enroll_to_program);
+		jQuery('#enrollBtn').attr('value',i18n_enroll);
 		hideEnrolmentField();
-
 		hideById('programEnrollmentDiv');
-		
 		return;
 	}
 		
@@ -366,22 +365,17 @@ function showProgramEnrollmentForm( patientId, programId )
 			showEnrolmentField();
 			
 			var type = jQuery('#enrollmentDiv [name=programId] option:selected').attr('type');
-			
-			if(type=='2')
-			{
+			if(type=='2'){
 				hideEnrolmentField();
 			}
-			else
-			{
+			else{
 				showEnrolmentField();
 				var type = jQuery('#programEnrollmentSelectDiv [name=programId] option:selected').attr('type');
 					
-				if( type=='2')
-				{
+				if( type=='2'){
 					hideById( 'dateOfIncidentTR');
 				}
-				else
-				{
+				else{
 					showById( 'dateOfIncidentTR');
 				}
 			}
@@ -392,6 +386,7 @@ function showProgramEnrollmentForm( patientId, programId )
 
 function validateProgramEnrollment()
 {	
+	jQuery('#loaderDiv').show();
 	$.ajax({
 		type: "GET",
 		url: 'validatePatientProgramEnrollment.action',
@@ -399,21 +394,18 @@ function validateProgramEnrollment()
 		success: function(json) {
 			hideById('message');
 			var type = json.response;
-			if ( type == 'success' )
-			{
+			if ( type == 'success' ){
 				saveProgramEnrollment();
 			}
-			else if ( type == 'error' )
-			{
+			else if ( type == 'error' ){
 				setMessage( i18n_program_enrollment_failed + ':' + '\n' + message );
 			}
-			else if ( type == 'input' )
-			{
+			else if ( type == 'input' ){
 				setMessage( json.message );
 			}
+			jQuery('#loaderDiv').hide();
       }
     });
-    return false;
 }
 
 function saveProgramEnrollment()
@@ -474,18 +466,12 @@ function showUnenrollmentForm( programInstanceId )
 		});
 }
 
-function unenrollmentForm( programInstanceId )
-{				
-	if( programInstanceId == 0 )
-	{
-		disable('enrollBtn');
-		return;
-	}
-		
+function unenrollmentForm()
+{	
 	$.ajax({
 		type: "POST",
 		url: 'removeEnrollment.action',
-		data: getParamsForDiv('enrollmentDiv'),
+		data: "programInstanceId=" + getFieldValue('programInstanceId'),
 		success: function( json ) 
 		{
 			showSuccessMessage( i18n_unenrol_success );
@@ -722,6 +708,7 @@ function hideEnrolmentField()
 	hideById('enrollmentDateTR');
 	hideById('dateOfIncidentTR');
 	hideById('enrollBtn');
+	hideById('unenrollBtn');
 }
   
 function showEnrolmentField()

@@ -1,5 +1,7 @@
 package org.hisp.dhis.reportsheet;
 
+import java.util.Collection;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -41,10 +43,14 @@ public interface AttributeValueGroupOrderStore
 
     public AttributeValueGroupOrder getAttributeValueGroupOrder( Integer id );
 
+    public AttributeValueGroupOrder getAttributeValueGroupOrderByName( String name );
+
     public AttributeValueGroupOrder getAttributeValueGroupOrder( String name, String clazzName, Integer reportId );
 
     public void updateAttributeValueGroupOrder( AttributeValueGroupOrder attributeValueGroupOrder );
 
     public void deleteAttributeValueGroupOrder( Integer id );
+
+    public Collection<AttributeValueGroupOrder> getAllAttributeValueGroupOrder();
 
 }

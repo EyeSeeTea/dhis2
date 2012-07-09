@@ -187,16 +187,30 @@ DV.conf = {
 			id: 'root'
 		}
     },
-    relativePeriodUnits: {
-		lastSixMonth: 1,
-		thisYear: 1,
-		lastYear: 1,
-		last5Years: 5,
-		last12Months: 12,
-		last4Quarters: 4,
-		last2SixMonths: 2,
-		reportingMonth: 1,
-		reportingQuarter: 1
+    period: {
+		relativeperiodunits: {
+			lastSixMonth: 1,
+			thisYear: 1,
+			lastYear: 1,
+			last5Years: 5,
+			last12Months: 12,
+			last4Quarters: 4,
+			last2SixMonths: 2,
+			reportingMonth: 1,
+			reportingQuarter: 1
+		},
+		periodtypes: [
+			{id: 'Daily', name: 'Daily'},
+			{id: 'Weekly', name: 'Weekly'},
+			{id: 'Monthly', name: 'Monthly'},
+			{id: 'BiMonthly', name: 'BiMonthly'},
+			{id: 'Quarterly', name: 'Quarterly'},
+			{id: 'SixMonthly', name: 'SixMonthly'},
+			{id: 'Yearly', name: 'Yearly'},
+			{id: 'FinancialOct', name: 'FinancialOct'},
+			{id: 'FinancialJuly', name: 'FinancialJuly'},
+			{id: 'FinancialApril', name: 'FinancialApril'}
+		]
 	},
     chart: {
         style: {
@@ -552,25 +566,13 @@ Ext.onReady( function() {
 					return (isFilter && a.length > 1) ? a.slice(0,1) : a;
 				}
             },
-            period: {
-                getObjects: function() {
-                    var a = [],
-                        cmp = DV.cmp.dimension.relativeperiod;
-                    Ext.Array.each(cmp, function(item) {
-                        if (item.getValue()) {
-                            Ext.Array.each(DV.init.system.periods[item.paramName], function(item) {
-                                a.push({id: item.id, name: item.name});
-                            });
-                        }
-                    });
-                    return a;
-                },
+            relativeperiod: {
                 getObjectsByRelativePeriods: function(rp) {
 					var a = [],
 						count = 0;
                     for (var r in rp) {
                         if (rp[r]) {
-							count += DV.conf.relativePeriodUnits[r];
+							count += DV.conf.period.relativeperiodunits[r];
                         }
                     }
                     for (var i = 0; i < count; i++) {
@@ -578,60 +580,70 @@ Ext.onReady( function() {
 					}
 					return a;
 				},
-                getUrl: function(isFilter) {
-					var a = [];
-					for (var r in DV.c.period.rp) {
-						if (DV.c.period.rp[r]) {
-							a.push(r + '=true');
-						}
-					}
-					return a;
-				},
                 getIds: function() {
-					var obj = DV.c.period.objects,
+					var obj = DV.c.relativeperiod.objects,
 						a = [];
 					for (var i = 0; i < obj.length; i++) {
 						a.push(obj[i].id);
 					}
 					return a;
 				},
-                getNameById: function(id) {
-                    for (var obj in DV.init.system.periods) {
-                        var a = DV.init.system.periods[obj];
-                        for (var i = 0; i < a.length; i++) {
-                            if (a[i].id == id) {
-                                return a[i].name;
-                            }
-                        };
-                    }
-                },
-                getRelativePeriodObject: function(exception) {
+                getRelativePeriodObject: function() {
                     var a = {},
-                        cmp = DV.cmp.dimension.relativeperiod.checkbox,
-                        valid = false;
+                        cmp = DV.cmp.dimension.relativeperiod.checkbox;
                     Ext.Array.each(cmp, function(item) {
                         a[item.paramName] = item.getValue();
-                        valid = item.getValue() ? true : valid;
                     });
-                    if (exception && !valid) {
-						DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
-                    }
                     return a;
                 },
-                getPeriodTypes: function() {
-					var data = [
-						{id: 'Daily', name: 'Daily'},
-						{id: 'Weekly', name: 'Weekly'},
-						{id: 'BiMonthly', name: 'BiMonthly'},
-						{id: 'Quarterly', name: 'Quarterly'},
-						{id: 'SixMonthly', name: 'SixMonthly'},
-						{id: 'Yearly', name: 'Yearly'},
-						{id: 'FinancialOct', name: 'FinancialOct'},
-						{id: 'FinancialJuly', name: 'FinancialJuly'},
-						{id: 'FinancialApril', name: 'FinancialApril'}
-					];						
+                relativePeriodObjectIsValid: function(obj) {
+					for (var rp in obj) {
+						if (obj[rp]) {
+							return true;
+						}
+					}
+					return false;
 				}
             },
+            fixedperiod: {
+                getObjects: function() {
+                    var a = [];
+                    DV.cmp.dimension.fixedperiod.selected.store.each( function(r) {
+                        a.push({id: r.data.id, name: r.data.name});
+                    });
+                    return a;
+                },
+                getIds: function() {
+					var obj = DV.c.fixedperiod.objects,
+						a = [];
+					for (var i = 0; i < obj.length; i++) {
+						a.push(obj[i].id);
+					}
+					return a;
+				}
+			},
+			period: {
+				getObjects: function() {
+					var a = DV.util.dimension.relativeperiod.getObjectsByRelativePeriods(DV.c.relativeperiod.rp);
+					return a.concat(DV.util.dimension.fixedperiod.getObjects());
+				},
+                getUrl: function() {
+					var a = [],
+						obj = DV.c.relativeperiod.rp;
+					for (var rp in obj) {
+						if (obj[rp]) {
+							a.push(rp + '=true');
+						}
+					}
+					
+					var array = DV.c.fixedperiod.objects;
+					for (var i = 0; i < array.length; i++) {
+						a.push('p=' + array[i].id);
+					}
+										
+					return a;
+				}
+			},
             organisationunit: {
                 getObjects: function() {
                     var a = [],
@@ -1406,18 +1418,7 @@ Ext.onReady( function() {
         },
         periodtype: Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
-			data: [
-				{id: 'Daily', name: 'Daily'},
-				{id: 'Weekly', name: 'Weekly'},
-				{id: 'Monthly', name: 'Monthly'},
-				{id: 'BiMonthly', name: 'BiMonthly'},
-				{id: 'Quarterly', name: 'Quarterly'},
-				{id: 'SixMonthly', name: 'SixMonthly'},
-				{id: 'Yearly', name: 'Yearly'},
-				{id: 'FinancialOct', name: 'FinancialOct'},
-				{id: 'FinancialJuly', name: 'FinancialJuly'},
-				{id: 'FinancialApril', name: 'FinancialApril'}
-			]
+			data: DV.conf.period.periodtypes
 		}),
         fixedperiod: {
             available: Ext.create('Ext.data.Store', {
@@ -1637,7 +1638,8 @@ Ext.onReady( function() {
 				DV.c.indicator.objects = DV.util.dimension.indicator.getObjects();
 				DV.c.dataelement.objects = DV.util.dimension.dataelement.getObjects();
 				DV.c.dataset.objects = DV.util.dimension.dataset.getObjects();
-				DV.c.period.rp = DV.util.dimension.period.getRelativePeriodObject();
+				DV.c.relativeperiod.rp = DV.util.dimension.relativeperiod.getRelativePeriodObject();
+				DV.c.fixedperiod.objects = DV.util.dimension.fixedperiod.getObjects();
 				DV.c.organisationunit.objects = DV.util.dimension.organisationunit.getObjects();
 				DV.c.organisationunit.groupsetid = DV.util.dimension.organisationunit.getGroupSetId();
 				this.setOptions();
@@ -1656,7 +1658,7 @@ Ext.onReady( function() {
 			
 			DV.c.data = {};
 			DV.c.data.objects = DV.util.dimension.data.getObjects();
-			DV.c.period.objects = DV.util.dimension.period.getObjectsByRelativePeriods(DV.c.period.rp);
+			DV.c.period.objects = DV.util.dimension.period.getObjects();
 			
 			if (!this.validation.objects.selection()) {
 				return;
@@ -1681,7 +1683,8 @@ Ext.onReady( function() {
 			DV.c.indicator.ids = DV.util.dimension.indicator.getIds();
 			DV.c.dataelement.ids = DV.util.dimension.dataelement.getIds();
 			DV.c.dataset.ids = DV.util.dimension.dataset.getIds();
-			DV.c.period.ids = DV.util.dimension.period.getIds();
+			//DV.c.relativeperiod.ids = DV.util.dimension.relativeperiod.getIds();
+			DV.c.fixedperiod.ids = DV.util.dimension.fixedperiod.getIds();
 			DV.c.organisationunit.ids = DV.util.dimension.organisationunit.getIds();
 						
 			if (!this.validation.categories()) {
@@ -1699,7 +1702,7 @@ Ext.onReady( function() {
             if (id) {
 				this.setUI();
 			}
-            
+            //console.log(DV.c);return;
             if (exe) {
                 DV.value.getValues(true);
             }
@@ -1751,7 +1754,8 @@ Ext.onReady( function() {
             p.indicatorIds = DV.c.indicator.ids;
             p.dataElementIds = DV.c.dataelement.ids;
             p.dataSetIds = DV.c.dataset.ids;
-            p = Ext.Object.merge(p, DV.c.period.rp);
+            p = Ext.Object.merge(p, DV.c.relativeperiod.rp);
+            p.periods = DV.c.fixedperiod.ids;
             p.organisationUnitIds = DV.c.organisationunit.ids;
             if (DV.c.organisationunit.groupsetid) {
 				p.organisationUnitGroupSetId = DV.c.organisationunit.groupsetid;
@@ -1805,6 +1809,12 @@ Ext.onReady( function() {
 			}
 			
 			DV.util.checkbox.setRelativePeriods(DV.c.period.rp);
+			
+			DV.store.fixedperiod.selected.removeAll();
+			if (DV.c.fixedperiod.objects) {
+				DV.store.fixedperiod.selected.add(DV.c.fixedperiod.objects);
+				DV.util.multiselect.filterAvailable(DV.cmp.dimension.fixedperiod.available, DV.cmp.dimension.fixedperiod.selected);
+			}
 			
 			DV.cmp.dimension.organisationunit.treepanel.selectByIds(DV.c.organisationunit.ids);
 			
@@ -2056,7 +2066,8 @@ Ext.onReady( function() {
 			indicator: {},
 			dataelement: {},
 			dataset: {},
-			period: {},
+			relativeperiod: {},
+			fixedperiod: {},
 			organisationunit: {},
 			hidesubtitle: false,
 			hidelegend: false,

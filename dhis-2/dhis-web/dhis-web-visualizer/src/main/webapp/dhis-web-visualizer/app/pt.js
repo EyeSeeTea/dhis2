@@ -73,8 +73,9 @@ function DailyPeriodType( format_yyyymmdd )
             period['startDate'] = format_yyyymmdd( date );
             period['endDate'] = period['startDate'];
             period['name'] = period['startDate'];
-            period['id'] = 'Daily_' + period['startDate'];
+            //period['id'] = 'Daily_' + period['startDate'];
             period['iso'] = period['startDate'].replace( /-/g, '' );
+            period['id'] = period['iso'];
             periods.push( period );
             date.setDate( date.getDate() + 1 );
         }
@@ -106,8 +107,9 @@ function WeeklyPeriodType( format_yyyymmdd )
 		{
 			var period = {};
 			period['startDate'] = format_yyyymmdd( date );
-			period['id'] = 'Weekly_' + period['startDate'];
+			//period['id'] = 'Weekly_' + period['startDate'];
 			period['iso'] = year + 'W' + week;
+            period['id'] = period['iso'];
 			date.setDate( date.getDate() + 6 );
 			period['endDate'] = format_yyyymmdd( date );
 			period['name'] = 'W' + week + ' - ' + period['startDate'] + ' - ' + period['endDate'];
@@ -142,8 +144,9 @@ function MonthlyPeriodType( format_yyyymmdd, monthNames, rev )
 			date.setDate( 1 );
 			period['startDate'] = format_yyyymmdd( date );
 			period['name'] = monthNames[date.getMonth()] + ' ' + date.getFullYear();
-			period['id'] = 'Monthly_' + period['startDate'];
+			//period['id'] = 'Monthly_' + period['startDate'];
 			period['iso'] = format_iso( date );
+            period['id'] = period['iso'];
 			periods.push( period );
 			date.setDate( 0 );
 		}
@@ -175,8 +178,9 @@ function BiMonthlyPeriodType( format_yyyymmdd, monthNames, rev )
             date.setDate( 1 );
 			period['startDate'] = format_yyyymmdd( date );
             period['name'] = monthNames[date.getMonth()] + ' - ' + monthNames[date.getMonth() + 1] + ' ' + date.getFullYear();
-            period['id'] = 'BiMonthly_' + period['startDate'];            
+            //period['id'] = 'BiMonthly_' + period['startDate'];
             period['iso'] = format_iso( date );
+            period['id'] = period['iso'];
             periods.push(period);
             date.setDate( 0 );
         }
@@ -203,8 +207,9 @@ function QuarterlyPeriodType( format_yyyymmdd, monthNames, rev )
             date.setDate( 1 );
 			period['startDate'] = format_yyyymmdd( date );
             period['name'] = monthNames[date.getMonth()] + ' - ' + monthNames[date.getMonth() + 2] + ' ' + date.getFullYear();
-            period['id'] = 'Quarterly_' + period['startDate'];            
+            //period['id'] = 'Quarterly_' + period['startDate'];
             period['iso'] = year + 'Q' + quarter;
+            period['id'] = period['iso'];
             periods.push(period);
             date.setDate( 0 );
             quarter--;
@@ -225,16 +230,18 @@ function SixMonthlyPeriodType( monthNames )
         period['startDate'] = year + '-01-01';
         period['endDate'] = year + '-06-30';
         period['name'] = monthNames[0] + ' - ' + monthNames[5] + ' ' + year;
-        period['id'] = 'SixMonthly_' + period['startDate'];
+        //period['id'] = 'SixMonthly_' + period['startDate'];
         period['iso'] = year + 'S1';
+		period['id'] = period['iso'];
         periods.push(period);
 
         period = [];
         period['startDate'] = year + '-07-01';
         period['endDate'] = year + '-12-31';
         period['name'] = monthNames[6] + ' - ' + monthNames[11] + ' ' + year;
-        period['id'] = 'SixMonthly_' + period['startDate'];
+        //period['id'] = 'SixMonthly_' + period['startDate'];
         period['iso'] = year + 'S2';
+		period['id'] = period['iso'];
         periods.push(period);
 
         return periods;
@@ -256,8 +263,9 @@ function YearlyPeriodType( format_yyyymmdd, rev )
             date.setMonth( 0, 1 );
             period['startDate'] = format_yyyymmdd( date );
             period['name'] = date.getFullYear();
-            period['id'] = 'Yearly_' + period['startDate'];
+            //period['id'] = 'Yearly_' + period['startDate'];
             period['iso'] = date.getFullYear();
+            period['id'] = period['iso'];
             periods.push(period);
             date.setDate(0);
         }
