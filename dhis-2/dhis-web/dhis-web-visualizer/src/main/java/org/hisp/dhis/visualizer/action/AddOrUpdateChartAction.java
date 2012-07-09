@@ -36,6 +36,7 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.user.CurrentUserService;
 
@@ -229,6 +230,13 @@ public class AddOrUpdateChartAction
     {
         this.last5Years = last5Years;
     }
+    
+    private List<String> periodIds;
+    
+    public void setPeriodIds( List<String> periodIds )
+    {
+        this.periodIds = periodIds;
+    }
 
     private List<String> organisationUnitIds;
 
@@ -416,6 +424,14 @@ public class AddOrUpdateChartAction
             rp.setLast5Years( last5Years );
 
             chart.setRelatives( rp );
+        }
+        
+        if ( periodIds != null )
+        {
+            for ( String id : periodIds )
+            {
+                chart.getPeriods().add( PeriodType.getPeriodFromIsoString( id ) );
+            }
         }
 
         chart.getOrganisationUnits().clear();
