@@ -66,17 +66,17 @@ DV.conf = {
 				r = Ext.JSON.decode(r.responseText);
 				var obj = {
 					system: {
-						rootnodes: [],
-						periods: {},
-						organisationunitgroupsets: r.ougs
+						rootnodes: []
 					},
 					user: {
 						id: r.user.id,
-						isadmin: r.user.isAdmin							
+						isadmin: r.user.isAdmin,
+						ou: r.user.ou,
+						ouc: r.user.ouc
 					}
 				};
-				for (var i = 0; i < r.rn.length; i++) {
-					obj.system.rootnodes.push({id: r.rn[i][0], text: r.rn[i][1], level: 1});
+				for (var i = 0; i < r.system.rn.length; i++) {
+					obj.system.rootnodes.push({id: r.system.rn[i][0], text: r.system.rn[i][1], level: 1});
 				}
 				return obj;
 			}
@@ -85,11 +85,11 @@ DV.conf = {
     finals: {
         ajax: {
             path_visualizer: '../',
-            path_commons: '../../dhis-web-commons-ajax-json/',
             path_api: '../../api/',
+            path_commons: '../../dhis-web-commons-ajax-json/',
             path_portal: '../../dhis-web-portal/',
-            path_images: 'images/',
             path_lib: '../../dhis-web-commons/javascripts/',
+            path_images: 'images/',
             initialize: 'initialize.action',
             redirect: 'redirect.action',
             data_get: 'chartValues.json',
@@ -492,7 +492,7 @@ Ext.onReady( function() {
         },
         dimension: {
             indicator: {
-                getObjects: function() {
+                getRecords: function() {
                     var a = [];
                     DV.cmp.dimension.indicator.selected.store.each( function(r) {
                         a.push({id: r.data.id, name: r.data.name});
@@ -500,7 +500,7 @@ Ext.onReady( function() {
                     return a;
                 },
                 getIds: function() {
-					var obj = DV.c.indicator.objects,
+					var obj = DV.c.indicator.records,
 						a = [];
 					for (var i = 0; i < obj.length; i++) {
 						a.push(obj[i].id);
@@ -509,7 +509,7 @@ Ext.onReady( function() {
 				}
             },
             dataelement: {
-                getObjects: function() {
+                getRecords: function() {
 					var a = [];
 					DV.cmp.dimension.dataelement.selected.store.each( function(r) {
 						a.push({id: r.data.id, name: r.data.name});
@@ -517,7 +517,7 @@ Ext.onReady( function() {
 					return a;
                 },
                 getIds: function() {
-					var obj = DV.c.dataelement.objects,
+					var obj = DV.c.dataelement.records,
 						a = [];
 					for (var i = 0; i < obj.length; i++) {
 						a.push(obj[i].id);
@@ -526,7 +526,7 @@ Ext.onReady( function() {
 				}
             },
             dataset: {
-                getObjects: function() {
+                getRecords: function() {
 					var a = [];
 					DV.cmp.dimension.dataset.selected.store.each( function(r) {
 						a.push({id: r.data.id, name: r.data.name});
@@ -534,7 +534,7 @@ Ext.onReady( function() {
 					return a;
                 },
                 getIds: function() {
-					var obj = DV.c.dataset.objects,
+					var obj = DV.c.dataset.records,
 						a = [];
 					for (var i = 0; i < obj.length; i++) {
 						a.push(obj[i].id);
@@ -543,23 +543,23 @@ Ext.onReady( function() {
 				}
             },
             data: {
-				getObjects: function() {
-					var objects = DV.c.indicator.objects;
-					objects = objects.concat(DV.c.dataelement.objects);
-					objects = objects.concat(DV.c.dataset.objects);
-					return objects;
+				getRecords: function() {
+					var records = DV.c.indicator.records;
+					records = records.concat(DV.c.dataelement.records);
+					records = records.concat(DV.c.dataset.records);
+					return records;
 				},
                 getUrl: function(isFilter) {
-					var obj = DV.c.indicator.objects,
+					var obj = DV.c.indicator.records,
 						a = [];
                     for (var i = 0; i < obj.length; i++) {
 						a.push(DV.conf.finals.dimension.indicator.paramname + '=' + obj[i].id);
 					}
-					obj = DV.c.dataelement.objects;
+					obj = DV.c.dataelement.records;
                     for (var i = 0; i < obj.length; i++) {
 						a.push(DV.conf.finals.dimension.dataelement.paramname + '=' + obj[i].id);
 					}
-					obj = DV.c.dataset.objects;
+					obj = DV.c.dataset.records;
                     for (var i = 0; i < obj.length; i++) {
 						a.push(DV.conf.finals.dimension.dataset.paramname + '=' + obj[i].id);
 					}
@@ -567,7 +567,7 @@ Ext.onReady( function() {
 				}
             },
             relativeperiod: {
-                getObjectsByRelativePeriods: function(rp) {
+                getRecordsByRelativePeriods: function(rp) {
 					var a = [],
 						count = 0;
                     for (var r in rp) {
@@ -581,7 +581,7 @@ Ext.onReady( function() {
 					return a;
 				},
                 getIds: function() {
-					var obj = DV.c.relativeperiod.objects,
+					var obj = DV.c.relativeperiod.records,
 						a = [];
 					for (var i = 0; i < obj.length; i++) {
 						a.push(obj[i].id);
@@ -606,7 +606,7 @@ Ext.onReady( function() {
 				}
             },
             fixedperiod: {
-                getObjects: function() {
+                getRecords: function() {
                     var a = [];
                     DV.cmp.dimension.fixedperiod.selected.store.each( function(r) {
                         a.push({id: r.data.id, name: r.data.name});
@@ -614,7 +614,7 @@ Ext.onReady( function() {
                     return a;
                 },
                 getIds: function() {
-					var obj = DV.c.fixedperiod.objects,
+					var obj = DV.c.fixedperiod.records,
 						a = [];
 					for (var i = 0; i < obj.length; i++) {
 						a.push(obj[i].id);
@@ -623,9 +623,9 @@ Ext.onReady( function() {
 				}
 			},
 			period: {
-				getObjects: function() {
-					var a = DV.util.dimension.relativeperiod.getObjectsByRelativePeriods(DV.c.relativeperiod.rp);
-					return a.concat(DV.util.dimension.fixedperiod.getObjects());
+				getRecords: function() {
+					var a = DV.util.dimension.relativeperiod.getRecordsByRelativePeriods(DV.c.relativeperiod.rp);
+					return a.concat(DV.util.dimension.fixedperiod.getRecords());
 				},
                 getUrl: function() {
 					var a = [],
@@ -636,7 +636,7 @@ Ext.onReady( function() {
 						}
 					}
 					
-					var array = DV.c.fixedperiod.objects;
+					var array = DV.c.fixedperiod.records;
 					for (var i = 0; i < array.length; i++) {
 						a.push('p=' + array[i].id);
 					}
@@ -645,7 +645,7 @@ Ext.onReady( function() {
 				}
 			},
             organisationunit: {
-                getObjects: function() {
+                getRecords: function() {
                     var a = [],
 					tp = DV.cmp.dimension.organisationunit.treepanel,
 	                selection = tp.getSelectionModel().getSelection();
@@ -661,8 +661,8 @@ Ext.onReady( function() {
                 getUrl: function(isFilter) {
 					var ou = DV.c.organisationunit,
 						a = [];
-					for (var i = 0; i < ou.objects.length; i++) {
-						a.push(DV.conf.finals.dimension.organisationunit.paramname + '=' + ou.objects[i].id);
+					for (var i = 0; i < ou.records.length; i++) {
+						a.push(DV.conf.finals.dimension.organisationunit.paramname + '=' + ou.records[i].id);
 					}
 					if (isFilter && a.length > 1) {
 						a = a.slice(0,1);
@@ -670,7 +670,7 @@ Ext.onReady( function() {
 					return a;
                 },
                 getIds: function() {
-					var obj = DV.c.organisationunit.objects,
+					var obj = DV.c.organisationunit.records,
 						a = [];
 					for (var i = 0; i < obj.length; i++) {
 						a.push(obj[i].id);
@@ -680,17 +680,6 @@ Ext.onReady( function() {
                 getGroupSetId: function() {
 					var value = DV.cmp.dimension.organisationunitgroup.panel.groupsets.getValue();
 					return !value || value === DV.i18n.none || value === DV.conf.finals.cmd.none ? null : value;
-				},
-				getGroupNameByGroupId: function(id) {
-					var gs = DV.init.system.organisationunitgroupsets;
-					for (var k in gs) {
-						for (var i = 0; i < gs[k].length; i++) {
-							if (gs[k][i].id == id) {
-								return gs[k][i].name;
-							}
-						}
-					}
-					return null;
 				}
             },
             panel: {
@@ -1583,31 +1572,39 @@ Ext.onReady( function() {
                         DV.c.dimension.category = f.category.toLowerCase();
                         DV.c.dimension.filter = f.filter.toLowerCase();
                         
-                        DV.c.indicator.objects = [];
-                        DV.c.dataelement.objects = [];
-                        DV.c.dataset.objects = [];
-                        DV.c.period.objects = [];
-                        DV.c.organisationunit.objects = [];
+                        DV.c.indicator.records = [];
+                        DV.c.dataelement.records = [];
+                        DV.c.dataset.records = [];
+                        DV.c.relativeperiod.rp = {};
+                        DV.c.fixedperiod.records = [];
+                        DV.c.organisationunit.records = [];
                         
                         if (f.indicators) {
 							for (var i = 0; i < f.indicators.length; i++) {
-								DV.c.indicator.objects.push({id: f.indicators[i].id, name: DV.conf.util.jsonEncodeString(f.indicators[i].name)});
+								DV.c.indicator.records.push({id: f.indicators[i].id, name: DV.conf.util.jsonEncodeString(f.indicators[i].name)});
 							}
 						}
 						
 						if (f.dataElements) {
 							for (var i = 0; i < f.dataElements.length; i++) {
-								DV.c.dataelement.objects.push({id: f.dataElements[i].id, name: DV.conf.util.jsonEncodeString(f.dataElements[i].name)});
+								DV.c.dataelement.records.push({id: f.dataElements[i].id, name: DV.conf.util.jsonEncodeString(f.dataElements[i].name)});
 							}
 						}
 						if (f.dataSets) {
 							for (var i = 0; i < f.dataSets.length; i++) {
-								DV.c.dataset.objects.push({id: f.dataSets[i].id, name: DV.conf.util.jsonEncodeString(f.dataSets[i].name)});
+								DV.c.dataset.records.push({id: f.dataSets[i].id, name: DV.conf.util.jsonEncodeString(f.dataSets[i].name)});
 							}
-						}						
-						DV.c.period.rp = f.relativePeriods;
+						}
+						
+						DV.c.relativeperiod.rp = f.relativePeriods;
+						if (f.periods) {
+							for (var i = 0; i < f.periods.length; i++) {
+								DV.c.fixedperiod.records.push({id: f.periods[i].id, name: DV.conf.util.jsonEncodeString(f.periods[i].name)});
+							}
+						}							
+						
 						for (var i = 0; i < f.organisationUnits.length; i++) {
-							DV.c.organisationunit.objects.push({id: f.organisationUnits[i].id, name: DV.conf.util.jsonEncodeString(f.organisationUnits[i].name)});
+							DV.c.organisationunit.records.push({id: f.organisationUnits[i].id, name: DV.conf.util.jsonEncodeString(f.organisationUnits[i].name)});
 						}
 						DV.c.organisationunit.groupsetid = f.organisationUnitGroupSet ? f.organisationUnitGroupSet.id : null;
 						
@@ -1635,12 +1632,12 @@ Ext.onReady( function() {
 				DV.c.dimension.series = DV.cmp.settings.series.getValue();
 				DV.c.dimension.category = DV.cmp.settings.category.getValue();
 				DV.c.dimension.filter = DV.cmp.settings.filter.getValue();
-				DV.c.indicator.objects = DV.util.dimension.indicator.getObjects();
-				DV.c.dataelement.objects = DV.util.dimension.dataelement.getObjects();
-				DV.c.dataset.objects = DV.util.dimension.dataset.getObjects();
+				DV.c.indicator.records = DV.util.dimension.indicator.getRecords();
+				DV.c.dataelement.records = DV.util.dimension.dataelement.getRecords();
+				DV.c.dataset.records = DV.util.dimension.dataset.getRecords();
 				DV.c.relativeperiod.rp = DV.util.dimension.relativeperiod.getRelativePeriodObject();
-				DV.c.fixedperiod.objects = DV.util.dimension.fixedperiod.getObjects();
-				DV.c.organisationunit.objects = DV.util.dimension.organisationunit.getObjects();
+				DV.c.fixedperiod.records = DV.util.dimension.fixedperiod.getRecords();
+				DV.c.organisationunit.records = DV.util.dimension.organisationunit.getRecords();
 				DV.c.organisationunit.groupsetid = DV.util.dimension.organisationunit.getGroupSetId();
 				this.setOptions();
                         
@@ -1657,16 +1654,12 @@ Ext.onReady( function() {
 			}
 			
 			DV.c.data = {};
-			DV.c.data.objects = DV.util.dimension.data.getObjects();
-			DV.c.period.objects = DV.util.dimension.period.getObjects();
+			DV.c.data.records = DV.util.dimension.data.getRecords();
+			DV.c.period.records = DV.util.dimension.period.getRecords();
 			
-			if (!this.validation.objects.selection()) {
+			if (!this.validation.records.selection()) {
 				return;
 			}
-			
-			this.validation.objects[DV.c.dimension.series]();
-			this.validation.objects[DV.c.dimension.category]();
-			this.validation.objects[DV.c.dimension.filter](true);
 			
 			DV.c.series = DV.c[DV.c.dimension.series];
 			DV.c.category = DV.c[DV.c.dimension.category];
@@ -1686,23 +1679,11 @@ Ext.onReady( function() {
 			//DV.c.relativeperiod.ids = DV.util.dimension.relativeperiod.getIds();
 			DV.c.fixedperiod.ids = DV.util.dimension.fixedperiod.getIds();
 			DV.c.organisationunit.ids = DV.util.dimension.organisationunit.getIds();
-						
-			if (!this.validation.categories()) {
-				return;
-			}
-            
-            this.validation.trendline();
-            
-            this.validation.targetline();
-            
-            this.validation.baseline();
-            
-            this.validation.render();
             
             if (id) {
 				this.setUI();
 			}
-            //console.log(DV.c);return;
+			
             if (exe) {
                 DV.value.getValues(true);
             }
@@ -1788,31 +1769,31 @@ Ext.onReady( function() {
 			DV.cmp.settings.filter.setValue(DV.conf.finals.dimension[DV.c.dimension.filter].value);
 			
 			DV.store.indicator.selected.removeAll();
-			if (DV.c.indicator.objects) {
-				DV.store.indicator.selected.add(DV.c.indicator.objects);
-				DV.util.store.addToStorage(DV.store.indicator.available, DV.c.indicator.objects);
+			if (DV.c.indicator.records) {
+				DV.store.indicator.selected.add(DV.c.indicator.records);
+				DV.util.store.addToStorage(DV.store.indicator.available, DV.c.indicator.records);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.indicator.available, DV.cmp.dimension.indicator.selected);
 			}
 			
 			DV.store.dataelement.selected.removeAll();
-			if (DV.c.dataelement.objects) {
-				DV.store.dataelement.selected.add(DV.c.dataelement.objects);
-				DV.util.store.addToStorage(DV.store.dataelement.available, DV.c.dataelement.objects);
+			if (DV.c.dataelement.records) {
+				DV.store.dataelement.selected.add(DV.c.dataelement.records);
+				DV.util.store.addToStorage(DV.store.dataelement.available, DV.c.dataelement.records);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataelement.available, DV.cmp.dimension.dataelement.selected);
 			}
 												
 			DV.store.dataset.selected.removeAll();
-			if (DV.c.dataset.objects) {
-				DV.store.dataset.selected.add(DV.c.dataset.objects);
-				DV.util.store.addToStorage(DV.store.dataset.available, DV.c.dataset.objects);
+			if (DV.c.dataset.records) {
+				DV.store.dataset.selected.add(DV.c.dataset.records);
+				DV.util.store.addToStorage(DV.store.dataset.available, DV.c.dataset.records);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.dataset.available, DV.cmp.dimension.dataset.selected);
 			}
 			
 			DV.util.checkbox.setRelativePeriods(DV.c.period.rp);
 			
 			DV.store.fixedperiod.selected.removeAll();
-			if (DV.c.fixedperiod.objects) {
-				DV.store.fixedperiod.selected.add(DV.c.fixedperiod.objects);
+			if (DV.c.fixedperiod.records) {
+				DV.store.fixedperiod.selected.add(DV.c.fixedperiod.records);
 				DV.util.multiselect.filterAvailable(DV.cmp.dimension.fixedperiod.available, DV.cmp.dimension.fixedperiod.selected);
 			}
 			
@@ -1842,75 +1823,80 @@ Ext.onReady( function() {
 				}
 				return true;
 			},
-			objects: {
+			records: {
 				selection: function() {
-					if (!DV.c.data.objects.length) {
+					if (!DV.c.data.records.length) {
 						DV.util.notification.error(DV.i18n.et_no_indicators_dataelements_datasets, DV.i18n.em_no_indicators_dataelements_datasets);
 						return false;
 					}
-					if (!DV.c.period.objects.length) {
+					if (!DV.c.period.records.length) {
 						DV.util.notification.error(DV.i18n.et_no_periods, DV.i18n.em_no_periods);
 						return false;
 					}
-					if (!DV.c.organisationunit.objects.length) {
+					if (DV.c.organisationunit.groupsetid) {
+						if (DV.init.system.ougs[DV.c.organisationunit.groupsetid]) {
+							if (DV.init.system.ougs[DV.c.organisationunit.groupsetid].length < 1) {
+								DV.util.notification.error(DV.i18n.et_no_orgunitgroups, DV.i18n.em_no_orgunitgroups);
+								return false;
+							}
+						}
+					}
+					else if (!DV.c.organisationunit.records.length) {
 						DV.util.notification.error(DV.i18n.et_no_orgunits, DV.i18n.em_no_orgunits);
 						return false;
-					}
+					}						
 					return true;
 				},
 				data: function(isFilter) {
-					if (isFilter && DV.c.data.objects.length > 1) {
+					if (isFilter && DV.c.data.records.length > 1) {
 						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_ind_de_ds + ' ' + DV.i18n.wm_first_filter_used);
-						DV.c.data.objects = DV.c.data.objects.slice(0,1);
+						DV.c.data.records = DV.c.data.records.slice(0,1);
 					}
 				},
 				period: function(isFilter) {
-					if (isFilter && DV.c.period.objects.length > 1) {
+					if (isFilter && DV.c.period.records.length > 1) {
 						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_period + ' ' + DV.i18n.wm_first_filter_used);
-						DV.c.period.objects = DV.c.period.objects.slice(0,1);
+						DV.c.period.records = DV.c.period.records.slice(0,1);
 					}
 				},
 				organisationunit: function(isFilter) {
-					if (isFilter) {
-						if (DV.c.organisationunit.objects.length > 1) {
-							DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_used);
-						}
-						else if (DV.c.organisationunit.groupsetid) {
-							DV.chart.warnings.push(DV.i18n.wm_multiple_filter_groups + ' ' + DV.i18n.wm_first_filter_used);
-						}
-						DV.c.organisationunit.objects = DV.c.organisationunit.objects.slice(0,1);
+					if (isFilter && DV.c.organisationunit.names.length > 1) {
+						var msg = DV.c.organisationunit.groupsetid ? DV.i18n.wm_multiple_filter_groups : DV.i18n.wm_multiple_filter_orgunit;
+						DV.chart.warnings.push(msg + ' ' + DV.i18n.wm_first_filter_used);
+						DV.c.organisationunit.names = DV.c.organisationunit.names.slice(0,1);
 					}
 				}
 			},
 			categories: function() {
-				if (DV.c.category.objects.length < 2 && (DV.c.type === DV.conf.finals.chart.line || DV.c.type === DV.conf.finals.chart.area)) {
+				if (DV.c.category.names.length < 2 && (DV.c.type === DV.conf.finals.chart.line || DV.c.type === DV.conf.finals.chart.area)) {
 					DV.util.notification.error(DV.i18n.et_line_area_categories, DV.i18n.em_line_area_categories);
+					DV.util.mask.hideMask();
 					return false;
 				}
 				return true;
 			},
 			trendline: function() {
 				if (DV.c.trendline) {
-					var reasons = [];
+					var warnings = [];
 					if (DV.c.type === DV.conf.finals.chart.stackedcolumn || DV.c.type === DV.conf.finals.chart.stackedbar || DV.c.type === DV.conf.finals.chart.area) {
-						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
+						warnings.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
 						DV.c.trendline = false;
 					}
 					else if (DV.c.type === DV.conf.finals.chart.pie) {
-						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
+						warnings.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
 						DV.c.trendline = false;
 					}
 					
-					if (DV.c.category.objects.length < 2) {
-						reasons.push(DV.i18n.wm_required_categories);
+					if (DV.c.category.names.length < 2) {					
+						warnings.push(DV.i18n.wm_required_categories);
 						DV.c.trendline = false;
 					}
 					
-					if (reasons.length) {
+					if (warnings.length) {
 						var text = DV.i18n.wm_trendline_deactivated + ' (';
-						for (var i = 0; i < reasons.length; i++) {
+						for (var i = 0; i < warnings.length; i++) {
 							text += i > 0 ? ' + ' : '';
-							text += reasons[i];
+							text += warnings[i];
 						}
 						text += ').';
 						DV.chart.warnings.push(text);
@@ -1919,26 +1905,26 @@ Ext.onReady( function() {
 			},
 			targetline: function() {
 				if (DV.c.targetlinevalue) {
-					var reasons = [];
+					var warnings = [];
 					if (DV.c.type === DV.conf.finals.chart.stackedcolumn || DV.c.type === DV.conf.finals.chart.stackedbar || DV.c.type === DV.conf.finals.chart.area) {
-						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
+						warnings.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
 						DV.c.targetlinevalue = null;
 					}
 					else if (DV.c.type === DV.conf.finals.chart.pie) {
-						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
+						warnings.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
 						DV.c.targetlinevalue = null;
 					}
 					
-					if (DV.c.category.objects.length < 2) {
-						reasons.push(DV.i18n.wm_required_categories);
+					if (DV.c.category.names.length < 2) {
+						warnings.push(DV.i18n.wm_required_categories);
 						DV.c.targetlinevalue = null;
 					}
 					
-					if (reasons.length) {
+					if (warnings.length) {
 						var text = DV.i18n.wm_targetline_deactivated + ' (';
-						for (var i = 0; i < reasons.length; i++) {
+						for (var i = 0; i < warnings.length; i++) {
 							text += i > 0 ? ' + ' : '';
-							text += reasons[i];
+							text += warnings[i];
 						}
 						text += ').';
 						DV.chart.warnings.push(text);
@@ -1947,26 +1933,26 @@ Ext.onReady( function() {
 			},
 			baseline: function() {
 				if (DV.c.baselinevalue) {
-					var reasons = [];
+					var warnings = [];
 					if (DV.c.type === DV.conf.finals.chart.stackedcolumn || DV.c.type === DV.conf.finals.chart.stackedbar || DV.c.type === DV.conf.finals.chart.area) {
-						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
+						warnings.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_stacked_chart);
 						DV.c.baselinevalue = null;
 					}
 					else if (DV.c.type === DV.conf.finals.chart.pie) {
-						reasons.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
+						warnings.push(DV.i18n.wm_not_applicable + ' ' + DV.i18n.wm_pie_chart);
 						DV.c.baselinevalue = null;
 					}
 					
-					if (DV.c.category.objects.length < 2) {
-						reasons.push(DV.i18n.wm_required_categories);
+					if (DV.c.category.names.length < 2) {
+						warnings.push(DV.i18n.wm_required_categories);
 						DV.c.baselinevalue = null;
 					}
 					
-					if (reasons.length) {
+					if (warnings.length) {
 						var text = DV.i18n.wm_baseline_deactivated + ' (';
-						for (var i = 0; i < reasons.length; i++) {
+						for (var i = 0; i < warnings.length; i++) {
 							text += i > 0 ? ' + ' : '';
-							text += reasons[i];
+							text += warnings[i];
 						}
 						text += ').';
 						DV.chart.warnings.push(text);
@@ -2043,11 +2029,25 @@ Ext.onReady( function() {
 					}
 					
                     DV.value.values = DV.util.value.jsonfy(r.v);
-					
+                    
 					DV.c.data.names = DV.conf.util.jsonEncodeArray(r.d);
 					DV.c.period.names = DV.conf.util.jsonEncodeArray(r.p);
 					DV.c.organisationunit.names = DV.conf.util.jsonEncodeArray(r.o);
-                    
+			
+					DV.state.validation.records[DV.c.dimension.series]();
+					DV.state.validation.records[DV.c.dimension.category]();
+					DV.state.validation.records[DV.c.dimension.filter](true);
+								
+					if (!DV.state.validation.categories()) {
+						return;
+					}
+            
+					DV.state.validation.trendline();					
+					DV.state.validation.targetline();					
+					DV.state.validation.baseline();
+            
+					DV.state.validation.render();
+							
                     if (exe) {
                         DV.chart.getData(true);
                     }
@@ -2198,8 +2198,7 @@ Ext.onReady( function() {
 				yField: DV.c.series.names,
 				stacked: stacked,
 				style: {
-					opacity: 0.8,
-					stroke: '#333'
+					opacity: 0.8
 				},
 				tips: DV.util.chart.def.series.getTips()
 			};
@@ -2240,8 +2239,7 @@ Ext.onReady( function() {
 				yField: DV.c.series.names,
 				stacked: stacked,
 				style: {
-					opacity: 0.8,
-					stroke: '#333'
+					opacity: 0.8
 				},
 				tips: DV.util.chart.def.series.getTips()
 			};
@@ -2299,8 +2297,7 @@ Ext.onReady( function() {
 				xField: DV.conf.finals.data.domain,
 				yField: DV.c.series.names,
 				style: {
-					opacity: 0.65,
-					stroke: '#555'
+					opacity: 0.65
 				}
 			});
 			
@@ -2330,7 +2327,7 @@ Ext.onReady( function() {
                     },
                     highlight: {
                         segment: {
-                            margin: 10
+                            margin: 8
                         }
                     },
                     style: {
