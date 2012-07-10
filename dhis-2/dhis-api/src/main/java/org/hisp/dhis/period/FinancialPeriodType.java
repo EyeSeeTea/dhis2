@@ -169,20 +169,13 @@ public abstract class FinancialPeriodType
     }
 
     @Override
-    public String getIsoDate( Period period )
-    {
-        return null; // TODO
-    }
-
-    @Override
     public Period createPeriod( String isoDate )
     {
-        return null; // TODO
-    }
-
-    @Override
-    public String getIsoFormat()
-    {
-        return null; // TODO
+        int year = Integer.parseInt( isoDate.substring( 0, 4 ) );
+        Calendar cal = createCalendarInstance();
+        cal.set( Calendar.YEAR, year );
+        cal.set( Calendar.MONTH, 11 );
+        cal.set( Calendar.DAY_OF_MONTH, 31 );
+        return createPeriod( cal );
     }
 }

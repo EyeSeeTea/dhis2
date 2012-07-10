@@ -99,7 +99,7 @@ function searchObjectOnChange( this_ )
 	var element = jQuery('#' + container + ' [id=searchText]');
 	var valueType = jQuery('#' + container+ ' [id=searchObjectId] option:selected').attr('valueType');
 	
-	if( attributeId == '-1' )
+	if( attributeId == 'fixedAttr_birthDate' )
 	{
 		element.replaceWith( getDateField( container ) );
 		datePickerValid( 'searchText_' + container );
@@ -108,11 +108,11 @@ function searchObjectOnChange( this_ )
 	
 	$( '#searchText_' + container ).datepicker("destroy");
 	$('#' + container + ' [id=dateOperator]').replaceWith("");
-	if( attributeId == '0' )
+	if( attributeId == 'prg' )
 	{
 		element.replaceWith( programComboBox );
 	}
-	else if ( attributeId=='-2' )
+	else if ( attributeId=='fixedAttr_gender' )
 	{
 		element.replaceWith( getGenderSelector() );
 	}
@@ -147,6 +147,7 @@ function getGenderSelector()
 	var genderSelector = '<select id="searchText" name="searchText">';
 		genderSelector += '<option value="M">' + i18n_male + '</option>';
 		genderSelector += '<option value="F">' + i18n_female + '</option>';
+		genderSelector += '<option value="T">' + i18n_transgender + '</option>';
 		genderSelector += '</select>';
 	return genderSelector;
 }

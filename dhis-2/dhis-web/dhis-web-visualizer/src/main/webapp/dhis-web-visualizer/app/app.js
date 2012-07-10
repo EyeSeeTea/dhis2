@@ -4,7 +4,7 @@ DV.conf = {
 			series: ['Series 1', 'Series 2', 'Series 3', 'Series 4'],
 			category: ['Category 1', 'Category 2', 'Category 3'],
 			filter: [DV.i18n.example_chart],
-			values: [84, 77, 87, 82, 91, 69, 82, 78, 83, 76, 73, 85],
+			values: [84, 73, 87, 82, 91, 69, 82, 75, 83, 76, 73, 85],
 			setState: function() {
 				DV.c.type = DV.conf.finals.chart.column;
 				DV.c.dimension.series = DV.conf.finals.dimension.data.value;
@@ -13,7 +13,7 @@ DV.conf = {
 				DV.c.series = DV.c.data = {names: this.series};
 				DV.c.category = DV.c.period = {names: this.category};
 				DV.c.filter = DV.c.organisationunit = {names: this.filter};
-				DV.c.targetlinevalue = 80;
+				DV.c.targetlinevalue = 78;
 				DV.c.targetlinelabel = 'Target label';
 				DV.c.rangeaxislabel = 'Range axis label';
 				DV.c.domainaxislabel = 'Domain axis label';

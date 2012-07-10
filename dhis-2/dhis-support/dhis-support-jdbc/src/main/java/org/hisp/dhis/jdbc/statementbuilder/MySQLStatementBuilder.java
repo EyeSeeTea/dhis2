@@ -276,28 +276,6 @@ public class MySQLStatementBuilder
             "AND a.timestamp<=d.timestamp;";
     }
 
-    public String getPatientsByFullName( String fullName )
-    {
-        return "SELECT patientid FROM patient " +
-            "where lower(concat( firstname, \" \",middleName , \" \" , lastname) ) " +
-            "like lower('%" + fullName + "%') ";
-    }
-   
-    public String getPatientsByFullName( String fullName, int min, int max )
-    {
-        return "SELECT patientid FROM patient " +
-            "where lower(concat( firstname, \" \",middleName , \" \" , lastname) ) " +
-            "like lower('%" + fullName + "%') " +
-            "limit " + min + " ," + max;
-    }
-   
-    public String countPatientsByFullName( String fullName )
-    {
-        return "SELECT count(patientid) FROM patient " +
-            "where lower(concat( firstname, \" \",middleName , \" \" , lastname) ) " +
-            "like lower('%" + fullName + "%')";
-    }
-
     public String queryDataElementStructureForOrgUnit()
     {
         StringBuffer sqlsb = new StringBuffer();
@@ -340,5 +318,10 @@ public class MySQLStatementBuilder
     public String getAddDate( String dateField, int days )
     {
         return "ADDDATE(" + dateField + "," + days + ")";
+    }
+    
+    public String getPatientFullName()
+    {
+        return  "concat( firstname, \" \",middleName , \" \" , lastname)";
     }
 }

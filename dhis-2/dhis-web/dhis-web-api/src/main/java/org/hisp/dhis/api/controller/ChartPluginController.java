@@ -146,7 +146,7 @@ public class ChartPluginController
                 }
             }
         }
-        
+
         periods = periodService.reloadPeriods( setNames( periods, format ) );
         
         if ( periodIsFilter )

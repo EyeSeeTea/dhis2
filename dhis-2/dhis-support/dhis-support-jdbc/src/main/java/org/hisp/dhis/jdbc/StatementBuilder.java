@@ -154,12 +154,6 @@ public interface StatementBuilder
     
     String deleteOldestOverlappingPatientArchiveData();
     
-    String getPatientsByFullName( String fullName );
-    
-    String getPatientsByFullName( String fullName, int min, int max );
-    
-    String countPatientsByFullName( String fullName );
-
     String queryDataElementStructureForOrgUnit();
 
     String queryRawDataElementsForOrgUnitBetweenPeriods( Integer orgUnitId, List<Integer> betweenPeriodIds);
@@ -167,4 +161,6 @@ public interface StatementBuilder
     String limitRecord( int min, int max );
     
     String getAddDate( String dateField, int days );
+    
+    String getPatientFullName();
 }
