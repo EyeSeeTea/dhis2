@@ -156,6 +156,8 @@ public class TableAlteror
         
         executeSql( "ALTER TABLE organisationunit DROP COLUMN hasPatients" );
         
+        executeSql( "update dataelement set texttype='text' where valuetype='string'" );
+        
         // ---------------------------------------------------------------------
         // Update tables for dimensional model
         // ---------------------------------------------------------------------
@@ -281,7 +283,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE chart DROP COLUMN quartersLastYear" );
         executeSql( "ALTER TABLE chart DROP COLUMN last6BiMonths" );
         
-        executeSql( "DROP TABLE chart_periods" );
         executeSql( "ALTER TABLE chart DROP CONSTRAINT chart_title_key" );
         executeSql( "ALTER TABLE chart DROP CONSTRAINT chart_name_key" );
         

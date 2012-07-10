@@ -87,7 +87,6 @@ public class OrgUnits
         {
             unit.serialize( dataOutputStream );
         }
-
     }
 
     @Override
