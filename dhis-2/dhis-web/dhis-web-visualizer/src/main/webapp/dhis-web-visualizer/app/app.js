@@ -66,7 +66,8 @@ DV.conf = {
 				r = Ext.JSON.decode(r.responseText);
 				var obj = {
 					system: {
-						rootnodes: []
+						rootnodes: [],
+						ougs: r.system.ougs
 					},
 					user: {
 						id: r.user.id,
@@ -275,7 +276,7 @@ DV.conf = {
 		}
 	}
 };
-    
+
 DV.cmp = {
 	region: {},
 	charttype: [],
@@ -567,12 +568,12 @@ Ext.onReady( function() {
 				}
             },
             relativeperiod: {
-                getRecordsByRelativePeriods: function(rp) {
+                getRecordsByRelativePeriods: function(obj) {
 					var a = [],
 						count = 0;
-                    for (var r in rp) {
-                        if (rp[r]) {
-							count += DV.conf.period.relativeperiodunits[r];
+                    for (var rp in obj) {
+                        if (obj[rp]) {
+							count += DV.conf.period.relativeperiodunits[rp];
                         }
                     }
                     for (var i = 0; i < count; i++) {
@@ -625,7 +626,7 @@ Ext.onReady( function() {
 			period: {
 				getRecords: function() {
 					var a = DV.util.dimension.relativeperiod.getRecordsByRelativePeriods(DV.c.relativeperiod.rp);
-					return a.concat(DV.util.dimension.fixedperiod.getRecords());
+					return a.concat(DV.c.fixedperiod.records);
 				},
                 getUrl: function() {
 					var a = [],
@@ -1590,6 +1591,7 @@ Ext.onReady( function() {
 								DV.c.dataelement.records.push({id: f.dataElements[i].id, name: DV.conf.util.jsonEncodeString(f.dataElements[i].name)});
 							}
 						}
+						
 						if (f.dataSets) {
 							for (var i = 0; i < f.dataSets.length; i++) {
 								DV.c.dataset.records.push({id: f.dataSets[i].id, name: DV.conf.util.jsonEncodeString(f.dataSets[i].name)});
@@ -1597,9 +1599,11 @@ Ext.onReady( function() {
 						}
 						
 						DV.c.relativeperiod.rp = f.relativePeriods;
+						
 						if (f.periods) {
 							for (var i = 0; i < f.periods.length; i++) {
-								DV.c.fixedperiod.records.push({id: f.periods[i].id, name: DV.conf.util.jsonEncodeString(f.periods[i].name)});
+								//DV.c.fixedperiod.records.push({id: f.periods[i].id, name: DV.conf.util.jsonEncodeString(f.periods[i].name)});
+								DV.c.fixedperiod.records.push({id: f.periods[i], name: DV.conf.util.jsonEncodeString(f.periods[i])});
 							}
 						}							
 						
@@ -1661,6 +1665,10 @@ Ext.onReady( function() {
 				return;
 			}
 			
+			this.validation.records[DV.c.dimension.series]();
+			this.validation.records[DV.c.dimension.category]();
+			this.validation.records[DV.c.dimension.filter](true);
+			
 			DV.c.series = DV.c[DV.c.dimension.series];
 			DV.c.category = DV.c[DV.c.dimension.category];
 			DV.c.filter = DV.c[DV.c.dimension.filter];
@@ -1676,7 +1684,6 @@ Ext.onReady( function() {
 			DV.c.indicator.ids = DV.util.dimension.indicator.getIds();
 			DV.c.dataelement.ids = DV.util.dimension.dataelement.getIds();
 			DV.c.dataset.ids = DV.util.dimension.dataset.getIds();
-			//DV.c.relativeperiod.ids = DV.util.dimension.relativeperiod.getIds();
 			DV.c.fixedperiod.ids = DV.util.dimension.fixedperiod.getIds();
 			DV.c.organisationunit.ids = DV.util.dimension.organisationunit.getIds();
             
@@ -1736,7 +1743,7 @@ Ext.onReady( function() {
             p.dataElementIds = DV.c.dataelement.ids;
             p.dataSetIds = DV.c.dataset.ids;
             p = Ext.Object.merge(p, DV.c.relativeperiod.rp);
-            p.periods = DV.c.fixedperiod.ids;
+            p.periodIds = DV.c.fixedperiod.ids;
             p.organisationUnitIds = DV.c.organisationunit.ids;
             if (DV.c.organisationunit.groupsetid) {
 				p.organisationUnitGroupSetId = DV.c.organisationunit.groupsetid;
@@ -1850,20 +1857,35 @@ Ext.onReady( function() {
 				data: function(isFilter) {
 					if (isFilter && DV.c.data.records.length > 1) {
 						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_ind_de_ds + ' ' + DV.i18n.wm_first_filter_used);
-						DV.c.data.records = DV.c.data.records.slice(0,1);
 					}
 				},
 				period: function(isFilter) {
 					if (isFilter && DV.c.period.records.length > 1) {
 						DV.chart.warnings.push(DV.i18n.wm_multiple_filter_period + ' ' + DV.i18n.wm_first_filter_used);
-						DV.c.period.records = DV.c.period.records.slice(0,1);
 					}
 				},
 				organisationunit: function(isFilter) {
-					if (isFilter && DV.c.organisationunit.names.length > 1) {
-						var msg = DV.c.organisationunit.groupsetid ? DV.i18n.wm_multiple_filter_groups : DV.i18n.wm_multiple_filter_orgunit;
-						DV.chart.warnings.push(msg + ' ' + DV.i18n.wm_first_filter_used);
-						DV.c.organisationunit.names = DV.c.organisationunit.names.slice(0,1);
+					if (isFilter) {
+						if (DV.c.organisationunit.groupsetid) {
+							if (DV.init.system.ougs[DV.c.organisationunit.groupsetid]) {
+								if (DV.init.system.ougs[DV.c.organisationunit.groupsetid].length > 1) {
+									DV.chart.warnings.push(DV.i18n.wm_multiple_filter_groups + ' ' + DV.i18n.wm_first_filter_used);
+								}
+							}
+						}
+						else {
+							if (DV.c.userorganisationunit || DV.c.userorganisationunitchildren) {
+								var i = 0;
+								i += DV.c.userorganisationunit ? 1 : 0;
+								i += DV.c.userorganisationunitchildren && DV.init.user.ouc ? DV.init.user.ouc.length : 0;
+								if (i > 1) {
+									DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_used);
+								}
+							}
+							else if (DV.c.organisationunit.records.length > 1) {
+								DV.chart.warnings.push(DV.i18n.wm_multiple_filter_orgunit + ' ' + DV.i18n.wm_first_filter_used);
+							}
+						}
 					}
 				}
 			},
@@ -2029,21 +2051,19 @@ Ext.onReady( function() {
 					}
 					
                     DV.value.values = DV.util.value.jsonfy(r.v);
-                    
+                                        
 					DV.c.data.names = DV.conf.util.jsonEncodeArray(r.d);
 					DV.c.period.names = DV.conf.util.jsonEncodeArray(r.p);
 					DV.c.organisationunit.names = DV.conf.util.jsonEncodeArray(r.o);
-			
-					DV.state.validation.records[DV.c.dimension.series]();
-					DV.state.validation.records[DV.c.dimension.category]();
-					DV.state.validation.records[DV.c.dimension.filter](true);
 								
 					if (!DV.state.validation.categories()) {
 						return;
 					}
             
-					DV.state.validation.trendline();					
-					DV.state.validation.targetline();					
+					DV.state.validation.trendline();
+					
+					DV.state.validation.targetline();
+					
 					DV.state.validation.baseline();
             
 					DV.state.validation.render();
@@ -3298,9 +3318,9 @@ Ext.onReady( function() {
 													select: function(cb) {														
 														var pt = new PeriodType();
 														var periods = pt.reverse( pt.filterFuturePeriods( pt.get(cb.getValue()).generatePeriods(0) ) );
-														console.log(periods);
 														DV.store.fixedperiod.available.setIndex(periods);
 														DV.store.fixedperiod.available.loadData(periods);
+														DV.util.multiselect.filterAvailable(DV.cmp.dimension.fixedperiod.available, DV.cmp.dimension.fixedperiod.selected);
 													}
 												}
 											},
