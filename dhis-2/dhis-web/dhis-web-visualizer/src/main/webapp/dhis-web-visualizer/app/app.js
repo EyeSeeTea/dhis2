@@ -767,7 +767,7 @@ Ext.onReady( function() {
 				getTitle: function() {
 					return {
 						type: 'text',
-						text: DV.c.filter.names[0],
+						text: DV.c.currentFavorite ? DV.c.currentFavorite.name + ' (' + DV.c.filter.names[0] + ')' : DV.c.filter.names[0],
 						font: 'bold 15px ' + DV.conf.chart.style.font,
 						fill: '#222',
 						width: 300,
