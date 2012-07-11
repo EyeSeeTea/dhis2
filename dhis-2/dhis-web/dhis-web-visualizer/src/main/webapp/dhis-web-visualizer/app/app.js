@@ -4635,13 +4635,18 @@ Ext.onReady( function() {
 									this.setTooltip(DV.i18n.save_load_favorite_before_sharing);
 								}
 							},
+							getTitle: function() {
+								return DV.i18n.share + ' ' + DV.i18n.interpretation +
+										': <span style="font-weight:normal; font-size:10px">' + DV.c.currentFavorite.name + '</span>';
+							},
 							handler: function() {
 								if (DV.cmp.share.window) {
+									DV.cmp.share.window.setTitle(this.getTitle());
 									DV.cmp.share.window.show();
 								}
 								else {
 									DV.cmp.share.window = Ext.create('Ext.window.Window', {
-										title: DV.i18n.share + ' ' + DV.i18n.interpretation + ': <span style="font-weight:normal; font-size:10px">' + DV.c.currentFavorite.name + '</span>',
+										title: this.getTitle(),
 										iconCls: 'dv-window-title-interpretation',
 										layout: 'fit',
 										bodyStyle: 'padding:8px 8px 3px; background-color:#fff',
@@ -4668,9 +4673,9 @@ Ext.onReady( function() {
 											}
 										],
 										bbar: {
-											cls: 'dv-toolbar-1',
+											cls: 'dv-toolbar-bbar',
 											defaults: {
-												height: 30
+												height: 28
 											},
 											items: [
 												'->',
