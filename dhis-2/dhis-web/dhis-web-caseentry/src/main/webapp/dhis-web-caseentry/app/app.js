@@ -753,11 +753,14 @@ Ext.onReady( function() {
 						// Get fields
 						var fields = [];
 						fields[0] = 'id';
+						var record = new Array();
 						for( var index=1; index < TR.value.columns.length; index++ )
 						{
 							fields[index] = 'col' + index;
+							record.push('');
 						}
 						TR.value.fields = fields;
+						TR.value.values.unshift(record);
 						
 						// Set data for grid
 						TR.store.getDataTableStore();
@@ -1249,7 +1252,7 @@ Ext.onReady( function() {
 			// Data element columns
 			
 			TR.cmp.params.dataelement.selected.store.each( function(r) {
-				cols[++index] = TR.datatable.createColumn( r.data.valueType, r.data.id, r.data.compulsory, cols, index );
+				cols[++index] = TR.datatable.createColumn( r.data.valueType, r.data.id, r.data.compulsory, r.data.name, index );
 			});
 			
 			cols[++index]={
@@ -1432,7 +1435,7 @@ Ext.onReady( function() {
 					},
 					validateedit: function( editor, e, eOpts )
 					{
-						if( e.column.compulsory && e.value =='' )
+						if( e.column.compulsory && e.column.field.rawValue =='' )
 						{
 							TR.util.notification.error( TR.i18n.not_empty, TR.i18n.not_empty );
 							return false;
@@ -1443,13 +1446,13 @@ Ext.onReady( function() {
 			});
 			
 		},
-		createColumn: function( type, id, compulsory, cols, index )
+		createColumn: function( type, id, compulsory, colname, index )
 		{
 			var objectType = id.split('_')[0];
 			var objectId = id.split('_')[1];
 			
 			var params = {};
-			params.header = TR.value.columns[index].name;
+			params.header = colname;
 			params.dataIndex = 'col' + index;
 			params.name = id;
 			params.hidden = eval(TR.value.columns[index].hidden );
@@ -1487,13 +1490,13 @@ Ext.onReady( function() {
 				if( type.toLowerCase() == 'bool' ){
 					params.editor.store = new Ext.data.ArrayStore({
 						fields: ['value', 'name'],
-						data: [['true', TR.i18n.true_value], ['false', TR.i18n.false_value]]
+						data: [['', ''],['true', TR.i18n.true_value], ['false', TR.i18n.false_value]]
 					});
 				}
 				else{
 					params.editor.store = new Ext.data.ArrayStore({
 						fields: ['value', 'name'],
-						data: [['', TR.i18n.none], ['true', TR.i18n.true_value]]
+						data: [['', ''], ['true', TR.i18n.true_value]]
 					});
 				}
 			}
