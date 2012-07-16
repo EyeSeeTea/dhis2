@@ -289,6 +289,7 @@ public class DefaultProgramDataEntryService
                 // -----------------------------------------------------------
 
                 inputHTML = inputHTML.replace( "$DATAELEMENTID", String.valueOf( dataElementId ) );
+                inputHTML = inputHTML.replace( "$VALUE",dataElementValue );
                 inputHTML = inputHTML.replace( "$PROGRAMSTAGEID", String.valueOf( programStageId ) );
                 inputHTML = inputHTML.replace( "$PROGRAMSTAGENAME", programStageName );
                 inputHTML = inputHTML.replace( "$DATAELEMENTNAME", dataElement.getName() );
@@ -507,8 +508,8 @@ public class DefaultProgramDataEntryService
 
     private String populateCustomDataEntryForTextBox( DataElement dataElement, String inputHTML, String dataElementValue )
     {
-        final String jsCodeForInputs = " name=\"entryfield\" tabIndex=\"$TABINDEX\" $DISABLED data=\"{compulsory:$COMPULSORY, deName:'$DATAELEMENTNAME', deType:'$DATAELEMENTTYPE'}\" options='$OPTIONS' style=\" text-align:center;\"  ";
-        final String jsCodeForOnchange = " name=\"entryfield\" tabIndex=\"$TABINDEX\" onchange=\"saveVal( $DATAELEMENTID )\" onkeypress=\"return keyPress(event, this)\" ";
+        final String jsCodeForInputs = " name=\"entryfield\" tabIndex=\"$TABINDEX\" $DISABLED data=\"{compulsory:$COMPULSORY, deName:'$DATAELEMENTNAME', deType:'$DATAELEMENTTYPE'}\" options='$OPTIONS' maxlength=255 style=\" text-align:center;\"  ";
+        final String jsCodeForOnchange = " name=\"entryfield\" tabIndex=\"$TABINDEX\" onchange=\"saveVal( $DATAELEMENTID )\" onkeypress=\"return keyPress(event, this)\" maxlength=255 ";
 
         // -------------------------------------------------------------
         // Insert value of data element in output code
@@ -533,7 +534,7 @@ public class DefaultProgramDataEntryService
         }
 
         if( DataElement.VALUE_TYPE_LONG_TEXT.equals( dataElement.getDetailedTextType() ))
-            inputHTML += " >";
+            inputHTML += " >$VALUE";
         
         return inputHTML;
     }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.common.adapter;
+package org.hisp.dhis.system.filter;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,34 +27,18 @@ package org.hisp.dhis.common.adapter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
-
-import java.io.IOException;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.system.util.Filter;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public class JacksonPeriodDeserializer
-    extends JsonDeserializer<Period>
+public class DataElementWithAggregationFilter
+    implements Filter<DataElement>
 {
     @Override
-    public Period deserialize( JsonParser jp, DeserializationContext ctxt )
-        throws IOException, JsonProcessingException
+    public boolean retain( DataElement element )
     {
-        while ( jp.nextToken() != JsonToken.END_OBJECT )
-        {
-            if ( "id".equals( jp.getCurrentName() ) )
-            {
-                return PeriodType.getPeriodFromIsoString( jp.getText() );
-            }
-        }
-        
-        return null;        
+        return element != null && !element.isSkipAggregation();
     }
 }
