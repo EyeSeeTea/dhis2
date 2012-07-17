@@ -409,13 +409,14 @@ Ext.onReady( function() {
             },
             filterAvailable: function(a, s) {
                 a.store.filterBy( function(r) {
-                    var filter = true;
+                    var keep = true;
                     s.store.each( function(r2) {
-                        if (r.data.id === r2.data.id) {
-                            filter = false;
+                        if (r.data.id == r2.data.id) {
+                            keep = false;
                         }
+                        
                     });
-                    return filter;
+                    return keep;
                 });
                 a.store.sortStore();
             },
