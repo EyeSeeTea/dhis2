@@ -173,7 +173,7 @@ a.x-menu-item-custom {
     background-image:url('../images/drilldown.png');
 }
 .menu-mapview {
-    background-image:url('../images/favorite.png');
+    background-image:url('../images/favorite_medium.png');
 }
 .menu-history {
     background-image:url('../images/history2.png');
@@ -239,8 +239,8 @@ a.x-menu-item-custom {
 
 /* Ext Button */
 .x-btn-icon .x-btn-small .x-btn-text {
-    height:14px;
-    width:14px;
+    height:15px;
+    width:15px;
 }
 .x-btn button {
 	font:normal 10px lucida sans unicode,arial,ubuntu;
@@ -262,6 +262,7 @@ a.x-menu-item-custom {
 }
 .x-btn .icon-zoomin  {
 	background-image:url('../images/zoom_in2.png');
+	height:
 }
 .x-btn .icon-zoomout  {
 	background-image:url('../images/zoom_out2.png');
