@@ -29,7 +29,6 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
   <bean id="org.hisp.dhis.dataelement.DataElementStore" class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElement" />
     <property name="sessionFactory" ref="sessionFactory" />
-    <property name="statementManager" ref="statementManager" />
 	<property name="jdbcTemplate" ref="jdbcTemplate" />
     <property name="cacheable" value="true" />
   </bean>
@@ -56,6 +55,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="statementManager" ref="statementManager" />
     <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore" />
+	<property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
   <bean id="org.hisp.dhis.indicator.IndicatorStore" class="org.hisp.dhis.indicator.hibernate.HibernateIndicatorStore">
@@ -368,7 +368,9 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />	
+    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+	<property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
+	<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
@@ -404,11 +406,6 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="dataAnalysisStore" ref="org.hisp.dhis.dataanalysis.jdbc.DataAnalysisStore" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataanalysis.GapAnalysisService" class="org.hisp.dhis.dataanalysis.GapAnalysisService">
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-    <property name="dataAnalysisStore" ref="org.hisp.dhis.dataanalysis.jdbc.DataAnalysisStore" />
-  </bean>
-
   <bean id="org.hisp.dhis.dataanalysis.FollowupAnalysisService" class="org.hisp.dhis.dataanalysis.FollowupAnalysisService">
     <property name="dataAnalysisStore" ref="org.hisp.dhis.dataanalysis.jdbc.DataAnalysisStore" />
   </bean>
@@ -427,12 +424,6 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
             <value>minmaxoutlier</value>
           </key>
           <ref bean="org.hisp.dhis.dataanalysis.MinMaxOutlierAnalysisService" />
-        </entry>
-        <entry>
-          <key>
-            <value>gap</value>
-          </key>
-          <ref bean="org.hisp.dhis.dataanalysis.GapAnalysisService" />
         </entry>
         <entry>
           <key>
@@ -915,8 +906,6 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     </aop:aspect>
 
     <aop:aspect ref="statementInterceptor">
-      <aop:around pointcut="execution( * org.hisp.dhis.validation.ValidationRuleService.validate*(..) )"
-        method="intercept" />
       <aop:around pointcut="execution( * org.hisp.dhis.dataanalysis.DataAnalysisService.analyse(..) )"
         method="intercept" />
     </aop:aspect>

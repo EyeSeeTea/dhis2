@@ -299,16 +299,6 @@ public class DefaultDataElementService
         return i18n( i18nService, dataElementStore.getDataElementsWithDataSets() );
     }
 
-    public boolean dataElementExists( int id )
-    {
-        return dataElementStore.dataElementExists( id );
-    }
-
-    public boolean dataElementCategoryOptionComboExists( int id )
-    {
-        return dataElementStore.dataElementCategoryOptionComboExists( id );
-    }
-
     public Collection<DataElement> getDataElementsLikeName( String name )
     {
         return getObjectsByName( i18nService, dataElementStore, name );
@@ -584,19 +574,4 @@ public class DefaultDataElementService
     {
         return getObjectsBetweenByName( i18nService, dataElementGroupSetStore, name, first, max );
     }
-
-    // -------------------------------------------------------------------------
-    // DataElementOperand
-    // -------------------------------------------------------------------------
-
-    public Collection<DataElementOperand> getAllGeneratedOperands()
-    {
-        return dataElementStore.getAllGeneratedOperands();
-    }
-
-    public Collection<DataElementOperand> getAllGeneratedOperands( Collection<DataElement> dataElements )
-    {
-        return dataElementStore.getAllGeneratedOperands( dataElements );
-    }
-
 }

@@ -35,10 +35,7 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
 
-import org.amplecode.quick.StatementHolder;
-import org.amplecode.quick.StatementManager;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewExpandStore;
@@ -58,22 +55,11 @@ public class JdbcSqlViewExpandStore
 
     private static final String PREFIX_SELECT_QUERY = "SELECT * FROM ";
 
-    private static final String PREFIX_VIEWNAME = "_view";
-
     private static final String[] types = { "VIEW" };
-
-    private static final Pattern p = Pattern.compile( "\\W" );
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private StatementManager statementManager;
-
-    public void setStatementManager( StatementManager statementManager )
-    {
-        this.statementManager = statementManager;
-    }
 
     private JdbcTemplate jdbcTemplate;
 
@@ -89,29 +75,23 @@ public class JdbcSqlViewExpandStore
     @Override
     public Collection<String> getAllSqlViewNames()
     {
-        final StatementHolder holder = statementManager.getHolder();
         DatabaseMetaData mtdt;
         Set<String> viewersName = new HashSet<String>();
 
         try
         {
-            mtdt = holder.getConnection().getMetaData();
+            mtdt = jdbcTemplate.getDataSource().getConnection().getMetaData();
 
-            ResultSet rs = mtdt.getTables( null, null, PREFIX_VIEWNAME + "%", types );
+            ResultSet rs = mtdt.getTables( null, null, SqlView.PREFIX_VIEWNAME + "%", types );
 
             while ( rs.next() )
             {
                 viewersName.add( rs.getString( "TABLE_NAME" ) );
             }
-
         }
         catch ( SQLException e )
         {
             e.printStackTrace();
-        }
-        finally
-        {
-            holder.close();
         }
 
         return viewersName;
@@ -121,12 +101,11 @@ public class JdbcSqlViewExpandStore
     @Override
     public boolean isViewTableExists( String viewTableName )
     {
-        final StatementHolder holder = statementManager.getHolder();
         DatabaseMetaData mtdt;
 
         try
         {
-            mtdt = holder.getConnection().getMetaData();
+            mtdt = jdbcTemplate.getDataSource().getConnection().getMetaData();
             ResultSet rs = mtdt.getTables( null, null, viewTableName.toLowerCase(), types );
 
             return rs.next();
@@ -135,16 +114,12 @@ public class JdbcSqlViewExpandStore
         {
             return false;
         }
-        finally
-        {
-            holder.close();
-        }
     }
 
     @Override
     public String createView( SqlView sqlViewInstance )
     {
-        String viewName = setUpViewTableName( sqlViewInstance.getName() );
+        String viewName = sqlViewInstance.getViewName();
 
         try
         {
@@ -163,12 +138,11 @@ public class JdbcSqlViewExpandStore
     @Override
     public void setUpDataSqlViewTable( Grid grid, String viewTableName )
     {
-        final StatementHolder holder = statementManager.getHolder();
-
         ResultSet rs;
+
         try
         {
-            rs = this.getScrollableResult( PREFIX_SELECT_QUERY + viewTableName, holder );
+            rs = this.getResultSet( PREFIX_SELECT_QUERY + viewTableName, jdbcTemplate );
         }
         catch ( SQLException e )
         {
@@ -177,23 +151,6 @@ public class JdbcSqlViewExpandStore
 
         grid.addHeaders( rs );
         grid.addRow( rs );
-
-        holder.close();
-    }
-
-    @Override
-    public String setUpViewTableName( String input )
-    {
-        String[] items = p.split( input.trim().replaceAll( "_", "" ) );
-
-        input = "";
-
-        for ( String s : items )
-        {
-            input += (s.equals( "" ) == true) ? "" : ("_" + s);
-        }
-
-        return PREFIX_VIEWNAME + input;
     }
 
     @Override
@@ -214,19 +171,13 @@ public class JdbcSqlViewExpandStore
     @Override
     public void dropViewTable( String viewName )
     {
-        final StatementHolder holder = statementManager.getHolder();
-
         try
         {
-            holder.getStatement().executeUpdate( PREFIX_DROPVIEW_QUERY + viewName );
+            jdbcTemplate.update( PREFIX_DROPVIEW_QUERY + viewName );
         }
-        catch ( SQLException ex )
+        catch ( Exception ex )
         {
             throw new RuntimeException( "Failed to drop view: " + viewName, ex );
-        }
-        finally
-        {
-            holder.close();
         }
     }
 
@@ -242,10 +193,10 @@ public class JdbcSqlViewExpandStore
      * @param holder the StatementHolder object
      * @return null or the ResultSet
      */
-    private ResultSet getScrollableResult( String sql, StatementHolder holder )
+    private ResultSet getResultSet( String sql, JdbcTemplate jdbcTemplate )
         throws SQLException
     {
-        Connection con = holder.getConnection();
+        Connection con = jdbcTemplate.getDataSource().getConnection();
         Statement stm = con.createStatement( ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY );
         stm.execute( sql );
         return stm.getResultSet();

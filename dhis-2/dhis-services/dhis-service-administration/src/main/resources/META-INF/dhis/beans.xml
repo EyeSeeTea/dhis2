@@ -33,6 +33,8 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="validationRuleService" ref="org.hisp.dhis.validation.ValidationRuleService" />
     <property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
 	<property name="dataEntryFormService" ref="org.hisp.dhis.dataentryform.DataEntryFormService" />
+	<property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
+	<property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
   </bean>
   
   <!-- Maintenance -->
@@ -56,7 +58,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
   <bean id="org.hisp.dhis.databrowser.DataBrowserGridStore" class="org.hisp.dhis.databrowser.jdbc.JDBCDataBrowserStore">
     <property name="statementBuilder" ref="statementBuilder" />
-    <property name="statementManager" ref="statementManager" />
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
   </bean>
 
@@ -128,7 +130,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   </bean>
 
   <bean id="org.hisp.dhis.sqlview.SqlViewExpandStore" class="org.hisp.dhis.sqlview.jdbc.JdbcSqlViewExpandStore">
-    <property name="statementManager" ref="statementManager" />
     <property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
@@ -137,23 +138,4 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="sqlViewExpandStore" ref="org.hisp.dhis.sqlview.SqlViewExpandStore" />
   </bean>
   
-  <!-- AOP definitions -->
-
-  <aop:config>
-
-    <aop:aspect ref="statementInterceptor">
-      <aop:around pointcut="execution( * org.hisp.dhis.dataintegrity.DataIntegrityService.getInvalidIndicatorNumerators() )"
-        method="intercept" />
-      <aop:around pointcut="execution( * org.hisp.dhis.dataintegrity.DataIntegrityService.getInvalidIndicatorDenominators() )"
-        method="intercept" />
-      <aop:around
-        pointcut="execution( * org.hisp.dhis.dataintegrity.DataIntegrityService.getInvalidValidationRuleLeftSideExpressions() )"
-        method="intercept" />
-      <aop:around
-        pointcut="execution( * org.hisp.dhis.dataintegrity.DataIntegrityService.getInvalidValidationRuleRightSideExpressions() )"
-        method="intercept" />
-    </aop:aspect>
-
-  </aop:config>
-
 </beans>

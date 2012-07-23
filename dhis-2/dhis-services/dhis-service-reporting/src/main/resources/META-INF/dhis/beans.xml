@@ -87,12 +87,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
           </key>
           <ref bean="compulsoryDataCompletenessService" />
         </entry>
-        <entry>
-          <key>
-            <value>ratio</value>
-          </key>
-          <ref bean="ratioDataCompletenessService" />
-        </entry>
       </map>
     </property>
   </bean>
@@ -118,9 +112,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
 
-  <bean id="ratioDataCompletenessService" class="org.hisp.dhis.completeness.impl.RatioDataSetCompletenessService"
-    parent="compulsoryDataCompletenessService" />
-
   <bean id="registrationDataCompletenessService" class="org.hisp.dhis.completeness.impl.RegistrationDataSetCompletenessService"
     parent="compulsoryDataCompletenessService">
   </bean>
@@ -144,7 +135,11 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
 
   <bean id="org.hisp.dhis.datasetreport.DataSetReportService" class="org.hisp.dhis.datasetreport.impl.DefaultDataSetReportService">
     <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-    <property name="aggregatedDataValueService" ref="org.hisp.dhis.aggregation.AggregatedDataValueService" />
+	<property name="dataSetReportStore" ref="org.hisp.dhis.datasetreport.DataSetReportStore" />
+  </bean>
+  
+  <bean id="org.hisp.dhis.datasetreport.DataSetReportStore" class="org.hisp.dhis.datasetreport.jdbc.JdbcDataSetReportStore">
+	<property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
   <!-- Dashboard -->
@@ -353,12 +348,6 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
       <aop:around pointcut="execution( * org.hisp.dhis.completeness.DataSetCompletenessService.exportDataSetCompleteness(..) )"
         method="intercept" />
       <aop:around pointcut="execution( * org.hisp.dhis.completeness.DataSetCompletenessService.getDataSetCompleteness(..) )"
-        method="intercept" />
-      <aop:around pointcut="execution( * org.hisp.dhis.datasetreport.DataSetReportService.getCustomDataSetReport(..) )"
-        method="intercept" />
-      <aop:around pointcut="execution( * org.hisp.dhis.datasetreport.DataSetReportService.getSectionDataSetReport(..) )"
-        method="intercept" />
-      <aop:around pointcut="execution( * org.hisp.dhis.datasetreport.DataSetReportService.getDefaultDataSetReport(..) )"
         method="intercept" />
     </aop:aspect>
 

@@ -1,4 +1,4 @@
-package org.hisp.dhis.completeness.impl;
+package org.hisp.dhis.datasetreport;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,38 +27,24 @@ package org.hisp.dhis.completeness.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.Map;
 
-import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
-public class RatioDataSetCompletenessService
-    extends AbstractDataSetCompletenessService
+public interface DataSetReportStore
 {
-    @Override
-    public int getRegistrations( DataSet dataSet, Collection<Integer> relevantSources, Collection<Integer> periods )
-    {
-        return completenessStore.getNumberOfValues( dataSet, relevantSources, periods );
-    }
+    final String SEPARATOR = "-";
+    
+    Map<String, Double> getAggregatedValues( DataSet dataSet, Period period, OrganisationUnit unit, boolean rawData );
 
-    @Override
-    public int getRegistrationsOnTime( DataSet dataSet, Collection<Integer> relevantSources, Collection<Integer> periods, int completenessOffset )
-    {
-        return completenessStore.getNumberOfValues( dataSet, relevantSources, periods );
-    }
-
-    @Override
-    public int getSources( DataSet dataSet, Collection<Integer> relevantSources, Period period )
-    {
-        Collection<DataElementOperand> operands = dataElementService.getAllGeneratedOperands( dataSet.getDataElements() );
-        
-        // Number of operands in data set times number of organisation units times number of periods
-        
-        return operands != null && relevantSources != null ? ( operands.size() * relevantSources.size() * period.getPeriodSpan( dataSet.getPeriodType() ) ) : 0; 
-    }
+    Map<String, Double> getAggregatedSubTotals( DataSet dataSet, Period period, OrganisationUnit unit );
+    
+    Map<String, Double> getAggregatedTotals( DataSet dataSet, Period period, OrganisationUnit unit );
+    
+    Map<String, Double> getAggregatedIndicatorValues( DataSet dataSet, Period period, OrganisationUnit unit );
 }

@@ -168,6 +168,14 @@ public class DefaultExpressionService
 
         return expressionString != null ? calculateExpression( expressionString ) : null;
     }
+    
+    public Double getExpressionValue( Expression expression, Map<DataElementOperand, Double> valueMap, 
+        Map<Integer, Double> constantMap, Integer days, boolean nullIfNoValues )
+    {
+        final String expressionString = generateExpression( expression.getExpression(), valueMap, constantMap, days, nullIfNoValues );
+
+        return expressionString != null ? calculateExpression( expressionString ) : null;
+    }
 
     public Set<DataElement> getDataElementsInExpression( String expression )
     {
@@ -307,6 +315,11 @@ public class DefaultExpressionService
 
     public String expressionIsValid( String formula )
     {
+        return expressionIsValid( formula, null, null, null );
+    }
+    
+    public String expressionIsValid( String formula, Set<Integer> dataElements, Set<Integer> categoryOptionCombos, Set<Integer> constants )
+    {
         if ( formula == null )
         {
             return EXPRESSION_IS_EMPTY;
@@ -339,7 +352,7 @@ public class DefaultExpressionService
                     return ID_NOT_NUMERIC;
                 }
                 
-                if ( constantService.getConstant( id ) == null )
+                if ( constants != null ? !constants.contains( id ) : constantService.getConstant( id ) == null )
                 {
                     return CONSTANT_DOES_NOT_EXIST;
                 }                    
@@ -355,12 +368,13 @@ public class DefaultExpressionService
                     return ID_NOT_NUMERIC;
                 }
 
-                if ( !dataElementService.dataElementExists( operand.getDataElementId() ) )
+                if ( dataElements != null ? !dataElements.contains( operand.getDataElementId() ) : dataElementService.getDataElement( operand.getDataElementId() ) == null )
                 {
                     return DATAELEMENT_DOES_NOT_EXIST;
                 }
 
-                if ( !operand.isTotal() && !dataElementService.dataElementCategoryOptionComboExists( operand.getOptionComboId() ) )
+                if ( !operand.isTotal() && ( categoryOptionCombos != null ? !categoryOptionCombos.contains( operand.getOptionComboId() ) :
+                    categoryService.getDataElementCategoryOptionCombo( operand.getOptionComboId() ) == null ) )
                 {
                     return CATEGORYOPTIONCOMBO_DOES_NOT_EXIST;
                 }
@@ -637,7 +651,7 @@ public class DefaultExpressionService
         return buffer != null ? buffer.toString() : null;
     }
 
-    public String generateExpression( String expression, Map<DataElementOperand, Double> valueMap, Map<Integer, Double> constantMap, Integer days )
+    public String generateExpression( String expression, Map<DataElementOperand, Double> valueMap, Map<Integer, Double> constantMap, Integer days, boolean nullIfNoValues )
     {
         StringBuffer buffer = null;
 
@@ -665,9 +679,14 @@ public class DefaultExpressionService
                 {
                     final DataElementOperand operand = DataElementOperand.getOperand( match );
 
-                    final Double aggregatedValue = valueMap.get( operand );
+                    final Double value = valueMap.get( operand );
 
-                    match = aggregatedValue != null ? String.valueOf( aggregatedValue ) : NULL_REPLACEMENT;
+                    if ( value == null && nullIfNoValues )
+                    {
+                        return null;
+                    }
+
+                    match = value != null ? String.valueOf( value ) : NULL_REPLACEMENT;
                 }
 
                 matcher.appendReplacement( buffer, match );

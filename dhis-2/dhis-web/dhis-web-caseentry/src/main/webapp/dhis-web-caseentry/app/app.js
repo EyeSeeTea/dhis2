@@ -625,6 +625,7 @@ Ext.onReady( function() {
 					if( TR.store.programStage.data.items.length > 1 )
 					{
 						Ext.getCmp('programStageCombobox').setVisible(true);
+						Ext.getCmp('programStageCombobox').setValue( "" );
 					}
 					else
 					{
@@ -911,8 +912,8 @@ Ext.onReady( function() {
             p += "&endDate=" + TR.cmp.settings.endDate.rawValue;
 			p += "&facilityLB=" + TR.cmp.settings.facilityLB.getValue();
 			p += "&level=" + TR.cmp.settings.level.getValue();
-			p += "&orderByOrgunitAsc=" + 'true';
-			p += "&orderByExecutionDateByAsc=" +'true';
+			p += "&orderByOrgunitAsc=" + this.orderByOrgunitAsc;
+			p += "&orderByExecutionDateByAsc=" + this.orderByExecutionDateByAsc;
 			p += "&programStageId=" + TR.cmp.params.programStage.getValue();
 			p += "&type=" + type;
 			
@@ -1051,20 +1052,9 @@ Ext.onReady( function() {
 					TR.util.notification.error( message, message);
 					return false;
 				}
-				
-				if( TR.cmp.settings.startDate.getValue() > TR.cmp.settings.endDate.getValue() )
-				{
-					TR.util.notification.error(TR.i18n.start_date_must_be_less_then_or_equals_to_end_date, TR.i18n.start_date_must_be_less_then_or_equals_to_end_date);
-					return false;
-				}
 			
 				if (TR.state.orgunitId == '') {
 					TR.util.notification.error(TR.i18n.et_no_orgunits, TR.i18n.em_no_orgunits);
-					return false;
-				}
-				
-				if (!TR.cmp.params.dataelement.selected.store.data.length) {
-					TR.util.notification.error(TR.i18n.et_no_dataelement, TR.i18n.et_no_dataelement);
 					return false;
 				}
 				
@@ -2016,8 +2006,9 @@ Ext.onReady( function() {
 													TR.cmp.params.patientProperty.panel
 												);
 												
-												var programId = TR.cmp.settings.program.getValue();													
-												if (programId != null && !TR.store.patientProperty.available.isloaded) {
+												var programId = TR.cmp.settings.program.getValue();			
+												var programType = TR.cmp.settings.program.displayTplData[0].type;											
+												if (programId != null && !TR.store.patientProperty.available.isloaded && programType !='3') {
 													TR.store.patientProperty.available.load({params: {programId: programId}});
 												}
 											}

@@ -27,18 +27,13 @@ package org.hisp.dhis.api.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import javassist.util.proxy.ProxyObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.controller.WebMetaData;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
 import org.hisp.dhis.system.util.ReflectionUtils;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,7 +79,7 @@ public class WebUtils
 
         if ( metaData.getPager() != null && baseType != null )
         {
-            String basePath = getPath( baseType );
+            String basePath = ContextUtils.getPath( baseType );
             Pager pager = metaData.getPager();
 
             if ( pager.getPage() < pager.getPageCount() )
@@ -110,7 +105,7 @@ public class WebUtils
     @SuppressWarnings( "unchecked" )
     public static void generateLinks( IdentifiableObject identifiableObject )
     {
-        identifiableObject.setLink( getPathWithUid( identifiableObject ) );
+        identifiableObject.setHref( ContextUtils.getPathWithUid( identifiableObject ) );
 
         Collection<Field> fields = ReflectionUtils.collectFields( identifiableObject.getClass(), alwaysTrue );
 
@@ -123,7 +118,7 @@ public class WebUtils
                 if ( object != null )
                 {
                     IdentifiableObject idObject = (IdentifiableObject) object;
-                    idObject.setLink( getPathWithUid( idObject ) );
+                    idObject.setHref( ContextUtils.getPathWithUid( idObject ) );
                 }
             }
             else if ( ReflectionUtils.isCollection( field.getName(), identifiableObject, IdentifiableObject.class ) )
@@ -138,73 +133,11 @@ public class WebUtils
                     {
                         if ( object != null )
                         {
-                            object.setLink( getPathWithUid( object ) );
+                            object.setHref( ContextUtils.getPathWithUid( object ) );
                         }
                     }
                 }
             }
         }
     }
-
-    public static HttpServletRequest getRequest()
-    {
-        return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-    }
-
-    public static String getPathWithUid( IdentifiableObject identifiableObject )
-    {
-        return getPath( identifiableObject.getClass() ) + "/" + identifiableObject.getUid();
-    }
-
-    public static String getPath( Class<?> clazz )
-    {
-        if ( ProxyObject.class.isAssignableFrom( clazz ) )
-        {
-            clazz = clazz.getSuperclass();
-        }
-
-        String resourcePath = ExchangeClasses.getExportMap().get( clazz );
-
-        return getRootPath( getRequest() ) + "/" + resourcePath;
-    }
-
-    private static String getRootPath( HttpServletRequest request )
-    {
-        StringBuilder builder = new StringBuilder();
-        String xForwardedProto = request.getHeader( "X-Forwarded-Proto" );
-        String xForwardedPort = request.getHeader( "X-Forwarded-Port" );
-
-        if ( xForwardedProto != null && (xForwardedProto.equalsIgnoreCase( "http" ) || xForwardedProto.equalsIgnoreCase( "https" )) )
-        {
-            builder.append( xForwardedProto );
-        }
-        else
-        {
-            builder.append( request.getScheme() );
-        }
-
-        builder.append( "://" ).append( request.getServerName() );
-
-        int port;
-
-        try
-        {
-            port = Integer.parseInt( xForwardedPort );
-        } 
-        catch ( NumberFormatException e )
-        {
-            port = request.getServerPort();
-        }
-
-        if ( port != 80 && port != 443 )
-        {
-            builder.append( ":" ).append( port );
-        }
-
-        builder.append( request.getContextPath() );
-        builder.append( request.getServletPath() );
-
-        return builder.toString();
-    }
-
 }
