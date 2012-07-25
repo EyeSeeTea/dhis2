@@ -1641,6 +1641,7 @@ Ext.onReady( function() {
 				DV.c.dataelement.records = DV.util.dimension.dataelement.getRecords();
 				DV.c.dataset.records = DV.util.dimension.dataset.getRecords();
 				DV.c.relativeperiod.rp = DV.util.dimension.relativeperiod.getRelativePeriodObject();
+				DV.c.relativeperiod.rewind = DV.cmp.dimension.relativeperiod.rewind.getValue();
 				DV.c.fixedperiod.records = DV.util.dimension.fixedperiod.getRecords();
 				DV.c.organisationunit.records = DV.util.dimension.organisationunit.getRecords();
 				DV.c.organisationunit.groupsetid = DV.util.dimension.organisationunit.getGroupSetId();
@@ -1697,7 +1698,6 @@ Ext.onReady( function() {
             }
         },
         setOptions: function() {
-			DV.c.relativeperiod.rewind = DV.cmp.dimension.relativeperiod.rewind.getValue();
             DV.c.hidesubtitle = DV.cmp.favorite.hidesubtitle.getValue();
             DV.c.hidelegend = DV.cmp.favorite.hidelegend.getValue();
             DV.c.trendline = DV.cmp.favorite.trendline.getValue();
@@ -1745,6 +1745,9 @@ Ext.onReady( function() {
             p.dataElementIds = DV.c.dataelement.ids;
             p.dataSetIds = DV.c.dataset.ids;
             p = Ext.Object.merge(p, DV.c.relativeperiod.rp);
+            if (DV.c.relativeperiod.rewind) {
+				p.rewind = true;
+			}
             p.periodIds = DV.c.fixedperiod.ids;
             p.organisationUnitIds = DV.c.organisationunit.ids;
             if (DV.c.organisationunit.groupsetid) {
@@ -1799,6 +1802,7 @@ Ext.onReady( function() {
 			}
 			
 			DV.util.checkbox.setRelativePeriods(DV.c.period.rp);
+			DV.cmp.dimension.relativeperiod.rewind.setValue(DV.c.relativeperiod.rewind);
 			
 			DV.store.fixedperiod.selected.removeAll();
 			if (DV.c.fixedperiod.records) {
@@ -2090,7 +2094,6 @@ Ext.onReady( function() {
 			dataelement: {},
 			dataset: {},
 			relativeperiod: {},
-			rewind: false,
 			fixedperiod: {},
 			organisationunit: {},
 			hidesubtitle: false,
@@ -2117,7 +2120,8 @@ Ext.onReady( function() {
 			this.model.indicator = {};
 			this.model.dataelement = {};
 			this.model.dataset = {};
-			this.model.period = {};
+			this.model.relativeperiod = {};
+			this.model.fixedperiod = {};
 			this.model.organisationunit = {};
 			this.model.hidesubtitle = false;
 			this.model.hidelegend = false;
