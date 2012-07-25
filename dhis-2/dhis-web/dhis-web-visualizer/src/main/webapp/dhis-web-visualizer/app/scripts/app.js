@@ -195,6 +195,7 @@ DV.conf = {
 			lastYear: 1,
 			last5Years: 5,
 			last12Months: 12,
+			last3Months: 3,
 			last4Quarters: 4,
 			last2SixMonths: 2,
 			reportingMonth: 1,
@@ -3182,13 +3183,18 @@ Ext.onReady( function() {
 																paramName: 'last12Months',
 																boxLabel: DV.i18n.last_12_months,
 																checked: true
+															},
+															{
+																xtype: 'checkbox',
+																paramName: 'last3Months',
+																boxLabel: DV.i18n.last_3_months
 															}
 														]
 													},
 													{
 														xtype: 'panel',
 														layout: 'anchor',
-														bodyStyle: 'border-style:none; padding:0 0 0 32px',
+														bodyStyle: 'border-style:none; padding:0 0 0 15px',
 														defaults: {
 															labelSeparator: '',
 															listeners: {
@@ -3220,7 +3226,7 @@ Ext.onReady( function() {
 													{
 														xtype: 'panel',
 														layout: 'anchor',
-														bodyStyle: 'border-style:none; padding:0 0 0 32px',
+														bodyStyle: 'border-style:none; padding:0 0 0 15px',
 														defaults: {
 															labelSeparator: '',
 															listeners: {
@@ -3296,7 +3302,7 @@ Ext.onReady( function() {
 													{
 														xtype: 'panel',
 														layout: 'anchor',
-														bodyStyle: 'border-style:none; padding:5px 0 0 46px',
+														bodyStyle: 'border-style:none; padding:5px 0 0 15px',
 														defaults: {
 															labelSeparator: ''
 														},

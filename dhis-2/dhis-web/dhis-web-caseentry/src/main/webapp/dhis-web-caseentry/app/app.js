@@ -10,25 +10,20 @@ TR.conf = {
 						maxLevels: r.levels.length
 					}
 				};
-				for (var program in r.programs) {
-					obj.system.program = [];
-					for (var i = 0; i < r.programs.length; i++) {
-						obj.system.program.push({id: r.programs[i].id, name: r.programs[i].name, type: r.programs[i].type });
-					}
+				
+				obj.system.program = [];
+				for (var i = 0; i < r.programs.length; i++) {
+					obj.system.program.push({id: r.programs[i].id, name: r.programs[i].name, type: r.programs[i].type });
 				}
 				
-				for (var orgunitGroup in r.orgunitGroups) {
-					obj.system.orgunitGroup = [];
-					for (var i = 0; i < r.orgunitGroups.length; i++) {
-						obj.system.orgunitGroup.push({id: r.orgunitGroups[i].id, name: r.orgunitGroups[i].name });
-					}
+				obj.system.orgunitGroup = [];
+				for (var i = 0; i < r.orgunitGroups.length; i++) {
+					obj.system.orgunitGroup.push({id: r.orgunitGroups[i].id, name: r.orgunitGroups[i].name });
 				}
 				
-				for (var level in r.levels) {
-					obj.system.level = [];
-					for (var i = 0; i < r.levels.length; i++) {
-						obj.system.level.push({value: r.levels[i].value, name: r.levels[i].name});
-					}
+				obj.system.level = [];
+				for (var i = 0; i < r.levels.length; i++) {
+					obj.system.level.push({value: r.levels[i].value, name: r.levels[i].name});
 				}
 				
 				return obj;
@@ -255,7 +250,7 @@ Ext.onReady( function() {
 				Ext.Array.each(s.store.data.items, function(item) {
 					if( elements[index].style.display != 'none' )
 					{
-					  array.push({id: a.store.getAt(i).data.id, name: a.store.getAt(i).data.name, compulsory: a.store.getAt(i).data.compulsory, valueType: a.store.getAt(i).data.valueType});
+					  arr.push(item.data.id);
 					}
 					index++;
 				}); 
@@ -1055,6 +1050,11 @@ Ext.onReady( function() {
 			
 				if (TR.state.orgunitId == '') {
 					TR.util.notification.error(TR.i18n.et_no_orgunits, TR.i18n.em_no_orgunits);
+					return false;
+				}
+				
+				if (Ext.getCmp('programStageCombobox').getValue() == '') {
+					TR.util.notification.error(TR.i18n.em_no_program_stage, TR.i18n.em_no_program_stage);
 					return false;
 				}
 				
@@ -3028,7 +3028,7 @@ Ext.onReady( function() {
                 if (TR.datatable.datatable) {
                     TR.datatable.datatable.setHeight( TR.util.viewport.getSize().y - 68 );
                 }
-            }
+            } 
         }
     });
     
