@@ -747,6 +747,83 @@ public class GenerateJRXMLReportAction
             jr = DynamicJasperHelper.generateJasperReport( dynamicReport, new ClassicLayoutManager(), hash );
             jasperPrint = JasperFillManager.fillReport( jr, hash, ds );
         }
+        else if( ccemReport.getReportType().equals( CCEMReport.VACCINE_STORAGE_CAPACITY ) )
+        {
+            List<String> tableHeadings = new ArrayList<String>();
+            List<List<String>> tableSubHeadings = new ArrayList<List<String>>();
+            List<String> oneSubHeadingRow = new ArrayList<String>();
+            List tableData = new ArrayList();
+            
+            List<OrganisationUnit> orgUnitList = new ArrayList<OrganisationUnit>();
+            List<OrganisationUnit> orgUnitGroupMembers = new ArrayList<OrganisationUnit>();
+            String orgUnitGroupIdsByComma = "-1";
+            
+            Integer periodId = 0;
+            Date date2 = new Date();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime( date2 );
+            String periodStartDate = "";
+            
+            periodStartDate = calendar.get( Calendar.YEAR ) + "-01-01";
+           
+            periodId = ccemReportManager.getPeriodId( periodStartDate, "Yearly" );
+            
+            FastReportBuilder frb = new FastReportBuilder();            
+            frb.addColumn( "OrgUnit Hierarchy", "OrgUnit Hierarchy", String.class.getName(), 100,true );
+            frb.addColumn( "OrgUnit", "OrgUnit", String.class.getName(), 100,true );    
+            frb.addColumn( "OrgUnit Code", "OrgUnit Code", String.class.getName(), 100,true );
+            frb.setPrintColumnNames(true);
+            
+            frb.setColumnsPerPage(1, 10).setUseFullPageWidth(true); 
+            frb.setTemplateFile( path+"ORGUNIT_EQUIPMENT_ROUTINE_DATAVALUE.jrxml" );
+
+            String dataElementIdsByComma = "-1";
+            String optComboIdsByComma = "-1";            
+            
+            for( Integer orgUnitGroupId : orgunitGroupList )
+            {
+                OrganisationUnitGroup orgUnitGroup = organisationUnitGroupService.getOrganisationUnitGroup( orgUnitGroupId );
+                orgUnitGroupMembers.addAll( orgUnitGroup.getMembers() );
+            }
+            
+            for( Integer orgUnitId : selOrgUnitList )
+            {
+                orgUnitList.addAll( organisationUnitService.getOrganisationUnitWithChildren( orgUnitId ) );
+            }
+            
+            orgUnitList.retainAll( orgUnitGroupMembers );
+            for( OrganisationUnit orgUnit : orgUnitList )
+            {
+                Map<String, String> numberOfData=new HashMap<String, String>(); 
+                List<String> oneTableDataRow = new ArrayList<String>();
+                String orgUnitBranch = "";
+                if( orgUnit.getParent() != null )
+                {
+                    orgUnitBranch = getOrgunitBranch( orgUnit.getParent() );
+                }
+                else
+                {
+                    orgUnitBranch = " ";
+                }
+                
+                numberOfData.put( "OrgUnit Hierarchy", orgUnitBranch );
+                numberOfData.put( "OrgUnit", orgUnit.getName()+"" );
+                numberOfData.put( "OrgUnit Code", orgUnit.getCode()+"" );                
+                tableData.add( numberOfData );
+            }
+            
+            JRDataSource ds = new JRMapCollectionDataSource(tableData );
+            DynamicReport dynamicReport = frb.build();
+            dynamicReport.getOptions().getDefaultDetailStyle().setBackgroundColor( Color.BLUE );
+            dynamicReport.getOptions().getDefaultHeaderStyle().setBorder(Border.THIN());
+            dynamicReport.getOptions().getDefaultHeaderStyle().setHorizontalAlign(HorizontalAlign.CENTER );
+            dynamicReport.getOptions().getDefaultDetailStyle().setBorder(Border.THIN()); 
+            dynamicReport.getOptions().getDefaultDetailStyle().setHorizontalAlign(HorizontalAlign.CENTER );
+            dynamicReport.getOptions().getDefaultDetailStyle().setVerticalAlign( VerticalAlign.MIDDLE );            
+            jr = DynamicJasperHelper.generateJasperReport( dynamicReport, new ClassicLayoutManager(), hash );
+            jasperPrint = JasperFillManager.fillReport( jr, hash, ds );
+                      
+        }
         
         ServletOutputStream ouputStream = response.getOutputStream();
         JRExporter exporter = null;

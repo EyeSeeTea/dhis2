@@ -74,12 +74,13 @@ public class LoginAction
     public String execute()
     {
         Device device = deviceResolver.resolveDevice( ServletActionContext.getRequest() );
-
+        
         if ( device.isMobile() )
         {
+            System.out.println("mobile");
             return "mobile";
         }
-
+            System.out.println("PC");
         return "standard";
     }
 }
