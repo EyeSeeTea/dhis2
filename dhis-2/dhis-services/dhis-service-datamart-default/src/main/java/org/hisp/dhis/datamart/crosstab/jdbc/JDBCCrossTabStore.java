@@ -44,7 +44,6 @@ import org.hisp.dhis.datamart.CrossTabDataValue;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: JDBCCrossTabStore.java 6216 2008-11-06 18:06:42Z eivindwa $
  */
 public class JDBCCrossTabStore
     implements CrossTabStore
@@ -59,7 +58,7 @@ public class JDBCCrossTabStore
     {
         this.statementManager = statementManager;
     }
-
+    
     // -------------------------------------------------------------------------
     // CrossTabStore implementation
     // -------------------------------------------------------------------------
@@ -238,7 +237,7 @@ public class JDBCCrossTabStore
             holder.close();
         }
     }
-    
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
