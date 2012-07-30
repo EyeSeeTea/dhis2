@@ -5651,10 +5651,7 @@ elements. The &apos;Sort&apos; button can be used to sort the data elements into
           <listitem>
             <para><emphasis role="italic">Mandatory</emphasis>: Entering value for this attribute is required or not.</para>
           </listitem>
-          <listitem>
-            <para><emphasis role="italic">Inheritable</emphasis></para>
-          </listitem>
-          <listitem>
+         <listitem>
             <para><emphasis role="italic">Value Type</emphasis>: Data type of value inputed.</para>
           </listitem>
           <listitem>
@@ -6161,7 +6158,7 @@ The case update  is designed in the same manner so that services which are recei
               <para>YELLOW: Coming stages.</para>
             </listitem>
             <listitem>
-              <para>GREEN: Compete stages.</para>
+              <para>GREEN: Completed stages.</para>
             </listitem>
           </itemizedlist>
         </section>
