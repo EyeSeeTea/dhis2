@@ -27,7 +27,6 @@
 
 package org.hisp.dhis.patient.action.validation;
 
-import org.hisp.dhis.caseaggregation.CaseAggregationConditionService;
 import org.hisp.dhis.program.ProgramValidation;
 import org.hisp.dhis.program.ProgramValidationService;
 
@@ -45,9 +44,7 @@ public class GetProgramValidationAction
     // -------------------------------------------------------------------------
 
     private ProgramValidationService programValidationService;
-
-    private CaseAggregationConditionService aggregationConditionService;
-
+    
     // -------------------------------------------------------------------------
     // Input && Output
     // -------------------------------------------------------------------------
@@ -79,11 +76,6 @@ public class GetProgramValidationAction
         this.programValidationService = programValidationService;
     }
 
-    public void setAggregationConditionService( CaseAggregationConditionService aggregationConditionService )
-    {
-        this.aggregationConditionService = aggregationConditionService;
-    }
-
     public void setValidationId( Integer validationId )
     {
         this.validationId = validationId;
@@ -104,8 +96,8 @@ public class GetProgramValidationAction
     {
         validation = programValidationService.getProgramValidation( validationId );
 
-        leftDescription = aggregationConditionService.getConditionDescription( validation.getLeftSide() );
-        rightDescription = aggregationConditionService.getConditionDescription( validation.getRightSide() );
+        leftDescription = programValidationService.getValidationDescription( validation.getLeftSide() );
+        rightDescription = programValidationService.getValidationDescription( validation.getRightSide() );
 
         return SUCCESS;
     }

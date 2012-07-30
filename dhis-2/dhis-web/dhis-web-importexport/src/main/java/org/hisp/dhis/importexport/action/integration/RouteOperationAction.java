@@ -28,25 +28,41 @@ package org.hisp.dhis.importexport.action.integration;
  */
 
 import com.opensymphony.xwork2.Action;
-import java.io.File;
-import java.io.FileInputStream;
 import org.apache.camel.CamelContext;
 import org.apache.camel.model.ModelCamelContext;
-import org.apache.camel.model.RouteDefinition;
-import org.apache.camel.model.RoutesDefinition;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.system.util.StreamUtils;
 
 /**
  * @author Bob Jolliffe
  * @version $Id$
  */
-public class AddRouteAction
+public class RouteOperationAction
     implements Action
 {
-    private static final Log log = LogFactory.getLog( AddRouteAction.class );
 
+    private static final Log log = LogFactory.getLog( RouteOperationAction.class );
+    
+    // -------------------------------------------------------------------------
+    // Http Parameters
+    // -------------------------------------------------------------------------
+    
+    private String id;
+    
+    public void setId( String id )
+    {
+        this.id = id;
+    }
+
+    public enum Operation { enable, disable ; }
+    
+    private Operation operation;
+
+    public void setOperation( Operation operation )
+    {
+        this.operation = operation;
+    }
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -58,20 +74,11 @@ public class AddRouteAction
         this.builtinCamelContext = (ModelCamelContext) camelContext;
     }
 
-    private File file;
-
-    public void setUpload( File file )
+    public CamelContext getBuiltinCamelContext()
     {
-        this.file = file;
+        return builtinCamelContext;
     }
-
-    private String fileName;
-
-    public void setUploadFileName( String fileName )
-    {
-        this.fileName = fileName;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -80,38 +87,42 @@ public class AddRouteAction
     public String execute()
         throws Exception
     {
-        log.info( "Uploaded " + fileName );
-        
-        if ( file != null )
-        {
-            FileInputStream is = new FileInputStream( file );
-            
-            try
-            {
-                RoutesDefinition routes = builtinCamelContext.loadRoutesDefinition( is );
-                for (RouteDefinition route : routes.getRoutes() ) 
-                {
-                    // remove any existing route with this id before adding ...
-                    RouteDefinition existingRoute = builtinCamelContext.getRouteDefinition( route.getId() );
-                    if (existingRoute != null) 
-                    {
-                        builtinCamelContext.stopRoute( route.getId());
-                        builtinCamelContext.removeRouteDefinition( route );
-                    }
-                    builtinCamelContext.addRouteDefinitions( routes.getRoutes() );
-                }
-            }
-            catch ( Exception e )
-            {
-                log.info( "Unable to load route: " + e.getMessage() );
-                return ERROR;
-            }
-            finally
-            {
-                StreamUtils.closeInputStream( is );
-            }
+        switch (operation) {
+            case enable:
+                enableRoute();
+                break;
+                
+            case disable:
+                disableRoute();
+                break;
+                
+            default:
+                log.debug( "Unsupported route operation");
+                break;
         }
         
         return SUCCESS;
+    }
+
+    private void enableRoute()
+    {
+        try
+        {
+            builtinCamelContext.startRoute( id );
+        } catch ( Exception ex )
+        {
+            log.info( "Route start exception: " + ex.getMessage());
+        }
+    }
+
+    private void disableRoute()
+    {
+        try
+        {
+            builtinCamelContext.stopRoute( id );
+        } catch ( Exception ex )
+        {
+            log.info( "Route stop exception: " + ex.getMessage());
+        }
     }
 }

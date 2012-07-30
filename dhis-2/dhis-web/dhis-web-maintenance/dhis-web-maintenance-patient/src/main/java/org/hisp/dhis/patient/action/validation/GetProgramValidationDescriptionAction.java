@@ -1,5 +1,3 @@
-package org.hisp.dhis.importexport.action.integration;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -26,42 +24,51 @@ package org.hisp.dhis.importexport.action.integration;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.patient.action.validation;
+
+import org.hisp.dhis.program.ProgramValidationService;
 
 import com.opensymphony.xwork2.Action;
-import java.util.Collection;
-import java.util.LinkedList;
-import org.apache.camel.CamelContext;
-import org.apache.camel.model.ModelCamelContext;
-import org.apache.camel.model.RouteDefinition;
 
 /**
- * @author Bob Jolliffe
- * @version $Id$
+ * @author Chau Thu Tran
+ * @version $ID : GetAggConditionDescriptionAction.java Jan 11, 2011 9:14:19 PM
+ *          $
  */
-public class DisplayRoutesAction
+public class GetProgramValidationDescriptionAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Dependency
     // -------------------------------------------------------------------------
 
-    private ModelCamelContext builtinCamelContext;
+    private ProgramValidationService programValidationService;
 
-    public void setBuiltinCamelContext( CamelContext camelContext )
+    // -------------------------------------------------------------------------
+    // Input && Output
+    // -------------------------------------------------------------------------
+
+    private String condition;
+
+    private String description;
+
+    // -------------------------------------------------------------------------
+    // Getters && Setters
+    // -------------------------------------------------------------------------
+
+    public void setProgramValidationService( ProgramValidationService programValidationService )
     {
-        this.builtinCamelContext = (ModelCamelContext) camelContext;
+        this.programValidationService = programValidationService;
     }
 
-    public CamelContext getBuiltinCamelContext()
+    public String getDescription()
     {
-        return builtinCamelContext;
+        return description;
     }
-    
-    private Collection<RouteDefinition> routeDefinitions;
 
-    public Collection<RouteDefinition> getRouteDefinitions()
+    public void setCondition( String condition )
     {
-        return routeDefinitions;
+        this.condition = condition;
     }
 
     // -------------------------------------------------------------------------
@@ -72,15 +79,8 @@ public class DisplayRoutesAction
     public String execute()
         throws Exception
     {
-        routeDefinitions = new LinkedList<RouteDefinition>();
-        for (RouteDefinition routeDefinition : builtinCamelContext.getRouteDefinitions()) 
-        {
-            // hide the internal routes
-            if (!routeDefinition.getId().startsWith( "internal") )
-            {
-                routeDefinitions.add( routeDefinition);
-            }
-        }
+        description = programValidationService.getValidationDescription( condition );
+
         return SUCCESS;
     }
 }
