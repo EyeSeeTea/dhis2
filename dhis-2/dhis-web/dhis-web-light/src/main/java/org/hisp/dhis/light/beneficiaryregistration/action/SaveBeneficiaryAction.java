@@ -86,6 +86,18 @@ public class SaveBeneficiaryAction
         this.patientIdentifierTypeService = patientIdentifierTypeService;
     }
 
+    private PatientIdentifierService patientIdentifierService;
+
+    public PatientIdentifierService getPatientIdentifierService()
+    {
+        return patientIdentifierService;
+    }
+
+    public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
+    {
+        this.patientIdentifierService = patientIdentifierService;
+    }
+
     private PatientAttributeService patientAttributeService;
 
     public PatientAttributeService getPatientAttributeService()
@@ -259,9 +271,9 @@ public class SaveBeneficiaryAction
         patientAttributes = patientAttributeService.getAllPatientAttributes();
         patient.setOrganisationUnit( organisationUnitService.getOrganisationUnit( orgUnitId ) );
 
-        if ( this.patientFullName.trim().length() < 2 )
+        if ( this.patientFullName.trim().length() < 7 )
         {
-            validationMap.put( "fullName", "is_invalid_name" );
+            validationMap.put( "fullName", "is_invalid_name_length" );
         }
         else
         {
@@ -331,15 +343,27 @@ public class SaveBeneficiaryAction
             {
                 String key = "IDT" + patientIdentifierType.getId();
                 String value = parameterMap.get( key );
+
+                PatientIdentifier duplicateId = null;
+
+                if ( !value.isEmpty() )
+                {
+                    patientIdentifierService.get( patientIdentifierType, value );
+                }
+
                 if ( value != null )
                 {
                     if ( patientIdentifierType.isMandatory() && value.trim().equals( "" ) )
                     {
-                        this.validationMap.put( key, "is_empty" );
+                        this.validationMap.put( key, "is_mandatory" );
                     }
                     else if ( patientIdentifierType.getType().equals( "number" ) && !FormUtils.isNumber( value ) )
                     {
                         this.validationMap.put( key, "is_invalid_number" );
+                    }
+                    else if ( duplicateId != null )
+                    {
+                        this.validationMap.put( key, "is_duplicate" );
                     }
                     else
                     {
@@ -349,6 +373,7 @@ public class SaveBeneficiaryAction
                         patientIdentifierSet.add( patientIdentifier );
                         patientIdentifier.setIdentifier( value.trim() );
                     }
+
                     this.previousValues.put( key, value );
                 }
             }
@@ -366,14 +391,16 @@ public class SaveBeneficiaryAction
                 {
                     if ( patientAttribute.isMandatory() && value.trim().equals( "" ) )
                     {
-                        this.validationMap.put( key, "is_empty" );
+                        this.validationMap.put( key, "is_mandatory" );
                     }
-                    else if ( value.trim().length() > 0 && patientAttribute.getValueType().equals( PatientAttribute.TYPE_INT )
+                    else if ( value.trim().length() > 0
+                        && patientAttribute.getValueType().equals( PatientAttribute.TYPE_INT )
                         && !FormUtils.isInteger( value ) )
                     {
                         this.validationMap.put( key, "is_invalid_number" );
                     }
-                    else if ( value.trim().length() > 0 && patientAttribute.getValueType().equals( PatientAttribute.TYPE_DATE )
+                    else if ( value.trim().length() > 0
+                        && patientAttribute.getValueType().equals( PatientAttribute.TYPE_DATE )
                         && !FormUtils.isDate( value ) )
                     {
                         this.validationMap.put( key, "is_invalid_date" );
@@ -386,6 +413,7 @@ public class SaveBeneficiaryAction
                         {
                             PatientAttributeOption option = patientAttributeOptionService.get( NumberUtils.toInt(
                                 value, 0 ) );
+
                             if ( option != null )
                             {
                                 patientAttributeValue.setPatientAttributeOption( option );
