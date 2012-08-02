@@ -11,8 +11,8 @@ var currentOptionComboId = $!{dataElementHistory.optionCombo.id};
 	<tr>		
 		<!-- Comment -->
 		<td style="height:24px" valign="bottom">
-			<h4>$i18n.getString( "dataelement_comment" )
-			
+            <h4>$i18n.getString( "dataelement_comment" )
+
 			#if ( $dataValue && $dataValue.isFollowup() )
 		        <img id="followup" src="../images/marked.png" alt="$i18n.getString( 'mark_value_for_followup' )" onclick="markValueForFollowup()" style="cursor:pointer"/>
 			#elseif ( $dataValue )
@@ -29,7 +29,7 @@ var currentOptionComboId = $!{dataElementHistory.optionCombo.id};
     </tr>
     <tr>
 		<td valign="top">
-			<textarea id="commentTextArea" style="height:130px;width:240px">$!encoder.htmlEncode( $dataValue.comment )</textarea><br>
+			<textarea id="commentTextArea" maxlength="360" style="height:130px;width:240px">$!encoder.htmlEncode( $dataValue.comment )</textarea><br>
 			<input type="button" value="$i18n.getString( 'save_comment' )" style="width:130px" onclick="saveComment()">
 		</td>		
         <td valign="top">

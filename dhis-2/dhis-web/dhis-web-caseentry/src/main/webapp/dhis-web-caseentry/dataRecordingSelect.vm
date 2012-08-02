@@ -1,5 +1,7 @@
 <form id='dataRecordingSelectForm' name='dataRecordingSelectForm' method='post'>
-
+<div class="actions" style='margin-top:30px;' #if($program.type!=1) style='display:none;' #end>
+	<input type="button" class='stage-object' id="newEncounterBtn" value="$i18n.getString('create_new_event')" onClick="javascript: registerIrregularEncounter( getFieldValue('executionDate') );" disabled="disabled" >
+</div>
 <table class="mainPageTable" id='patientInfoDiv'> 
 	<tr>
 		<td valign="top">
@@ -20,17 +22,8 @@
 	</tr>
 </table>
 
-<p>
 #parse( "/dhis-web-caseentry/colorHelp.vm" )
 </p>
-			
-<div class="actions">	
-	<input type="button" class='button' id="newEncounterBtn" value="$i18n.getString('create_new_event')" onClick="javascript: registerIrregularEncounter( getFieldValue('executionDate') );" disabled="disabled" >
-	<input type="button" class='button' id="validationBtn" value="$i18n.getString('run_validation')" onClick="javascript: runValidation();" disabled="disabled" >
-	<input type="button" class='button' id="completeBtn" value="$i18n.getString('complete')" onClick="doComplete()" disabled="disabled" >
-	<input type="button" onclick="doUnComplete()" value="$i18n.getString('incomplete')" id="uncompleteBtn" disabled="disabled" >
-	<input type="button" class='button' value="$i18n.getString( 'back_to_search' )" id='backBtnFromEntry' onclick="javascript:showSearchForm();" >
-</div>
 		
 <div id='inputCriteria' class="page inputCriteria" style="width:490px;height:29px;">	
 	<input type='hidden' id='programStageId' name='programStageId'>
@@ -50,14 +43,13 @@
 </div>
 
 <div id='programInstanceDiv' class='hidden '>
-	<div id='programInstanceFlowDiv' style="width:500px;height:115px;overflow-x:auto;">
+	<div id='programInstanceFlowDiv' style="width:78%;height:115px;overflow-x:auto;">
 		<table>
 			<tr id='programStageIdTR'></tr>
 		</table>
 	</div>
 	
-	<br>
-	
+	<br>		
 	<table id='executionDateTB'>
 		<tr>
 			<th class='text-column'><label for="executionDate">$i18n.getString( "report_date" ) </label></th>
@@ -70,7 +62,6 @@
 			<th><input type="text" id="dueDate" name="dueDate" class='criteria' value="$!format.formatDate( $programStageInstance.dueDate )" readonly > </th>
 		</tr>
 	</table>
-	
 </div>
 
 </form>
@@ -81,7 +72,7 @@
 	<table>
 		<tr>
 			<td>$i18n.getString( 'due_date' )</td>
-			<td><input id='dueDateNewEncounter' name='dueDateNewEncounter' ></td>
+			<td><input id='dueDateNewEncounter' name='dueDateNewEncounter' style='width:260px;'></td>
 			<script type="text/javascript">
 			   datePicker( 'dueDateNewEncounter', false );
 			</script>

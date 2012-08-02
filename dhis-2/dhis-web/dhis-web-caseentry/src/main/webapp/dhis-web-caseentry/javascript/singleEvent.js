@@ -1,3 +1,4 @@
+var _continue = false;
 function orgunitSelected( orgUnits, orgUnitNames )
 {	
 	organisationUnitSelected( orgUnits, orgUnitNames );
@@ -8,6 +9,7 @@ function orgunitSelected( orgUnits, orgUnitNames )
 			for ( i in json.programs ) {
 				jQuery( '#programIdAddPatient').append( '<option value="' + json.programs[i].id +'" programStageId="' + json.programs[i].programStageId + '" type="' + json.programs[i].type + '">' + json.programs[i].name + '</option>' );
 			}
+			enableBtn();
 		});
 }
 selection.setListenerFunction( orgunitSelected );
@@ -17,7 +19,9 @@ function showAddPatientForm()
 	hideById('contentDiv');
 	hideById('searchDiv');
 	hideById('advanced-search');
-	
+	setInnerHTML('addNewDiv','');
+	setInnerHTML('dataRecordingSelectDiv','');
+	unSave = true;
 	jQuery('#loaderDiv').show();
 	jQuery('#addNewDiv').load('showEventWithRegistrationForm.action',
 		{
@@ -26,6 +30,13 @@ function showAddPatientForm()
 		{
 			showById('addNewDiv');
 			showById('entryForm');
+			hideById('newEncounterBtn');
+			jQuery("#dataForm :input").each(function()
+			{
+				$( this ).attr('onchange','');
+				$( this ).attr('onblur','');
+				$( this ).attr('onkeypress','');
+			});
 			jQuery('#loaderDiv').hide();
 		});
 }
@@ -105,8 +116,36 @@ function addData( programId, patientId )
 		success: function(json) {
 			showSuccessMessage( i18n_save_success );
 			jQuery("#resultSearchDiv").dialog("close");
-			setFieldvalue('listAll', true);
-		  }
+			if( _continue==true )
+			{
+				jQuery('#patientForm :input').each(function()
+				{
+					var type=$( this ).attr('type');
+					if(type!='button'){
+						$( this ).val('');
+					}
+					enable(this.id);
+				});
+				jQuery('#dataForm :input').each(function()
+				{
+					var type=$( this ).attr('type');
+					if(type!='button'){
+						$( this ).val('');
+					}
+				});
+			}
+			else
+			{
+				hideById('addNewDiv');
+				if( getFieldValue('listAll')=='true'){
+					listAllPatient();
+				}
+				else{
+					showById('searchDiv');
+					showById('contentDiv');
+				}
+			}
+		}
      });
     return false;
 }
@@ -192,9 +231,11 @@ function removeDisabledIdentifier()
 	});
 }
 
-function backAddNewBtn()
+function backMainPage()
 {
 	showSearchForm();
-	if( getFieldvalue('listAll')=='true')
-		listPatientBtn();
+	if( getFieldValue('listAll')=='true'){
+		listAllPatient();
+	}
+	hideById('backBtnFromEntry');
 }

@@ -77,7 +77,7 @@ function addAttributeOption()
 	var rowId = 'advSearchBox' + jQuery('#advancedSearchTB select[name=searchObjectId]').length + 1;
 	var contend  = '<td>' + getInnerHTML('searchingAttributeIdTD') + '</td>';
 		contend += '<td>' + searchTextBox ;
-		contend += '<input type="button" class="small-button" value="-" onclick="removeAttributeOption(' + "'" + rowId + "'" + ');"></td>';
+		contend += '&nbsp;<input type="button" class="small-button" value="-" onclick="removeAttributeOption(' + "'" + rowId + "'" + ');"></td>';
 		contend = '<tr id="' + rowId + '">' + contend + '</tr>';
 
 	jQuery('#advancedSearchTB > tbody:last').append( contend );
@@ -156,6 +156,13 @@ function getAgeTextBox( container )
 	return ageField;
 }
 
+function getDateField( container )
+{
+	var dateField = '<select id="dateOperator" name="dateOperator" style="width:30px"><option value=">"> > </option><option value=">="> >= </option><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option></select>';
+	dateField += '<input type="text" id="searchText_' + container + '" name="searchText" maxlength="30" style="width:18em" onkeyup="searchPatientsOnKeyUp( event );">';
+	return dateField;
+}
+
 //-----------------------------------------------------------------------------
 // Search Patient
 //-----------------------------------------------------------------------------
@@ -198,7 +205,7 @@ function validateAdvancedSearch()
 			var dateOperator = "";
 			jQuery( this ).find(':input').each( function( idx, item ){
 				if( idx == 0){
-					params += "searchTexts=" + item.value;
+					params += "&searchTexts=" + item.value;
 				}
 				else if( item.name == 'dateOperator'){
 					dateOperator = item.value;
@@ -409,6 +416,18 @@ function enableBtn(){
 		enable('listPatientBtn');
 		enable('addPatientBtn');
 		enable('advancedSearchBtn');
+		jQuery('#criteriaDiv :input').each( function( idx, item ){
+			enable(this.id);
+		});
+	}
+	else
+	{
+		disable('listPatientBtn');
+		disable('addPatientBtn');
+		disable('advancedSearchBtn');
+		jQuery('#criteriaDiv :input').each( function( idx, item ){
+			disable(this.id);
+		});
 	}
 }
 
@@ -419,7 +438,7 @@ function showColorHelp()
 		maximize: true, 
 		closable: true,
 		modal:false,
-		width: 500,
-		height: 180
+		width: 380,
+		height: 250
 	}).show('fast');
 }

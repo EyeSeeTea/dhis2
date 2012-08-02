@@ -16,9 +16,7 @@ function loadProgramStages()
 	setFieldValue('dueDate','');
 	disableCompletedButton(true);
 	disable('uncompleteBtn');
-	disable('uncompleteInBelowBtn');
 	disable('validationBtn');
-	disable('validationInBelowBtn');
 	disable('newEncounterBtn');
 	hideById('inputCriteriaDiv');
 	$('#programStageIdTR').html('');
@@ -70,7 +68,6 @@ function loadProgramStages()
 				
 				disableCompletedButton(true);
 				disable('validationBtn');
-				disable('validationInBelowBtn');
 				showById('programStageIdTR');
 				showById('programInstanceFlowDiv');
 			}
@@ -103,10 +100,8 @@ function loadDataEntry( programStageInstanceId )
 	setFieldValue( 'dueDate', '' );
 	setFieldValue( 'executionDate', '' );
 	disable('validationBtn');
-	disable('validationInBelowBtn');
 	disableCompletedButton(true);
 	disable('uncompleteBtn');
-	disable('uncompleteInBelowBtn');
 	disable('newEncounterBtn');
 	
 	jQuery(".stage-object-selected").removeClass('stage-object-selected');
@@ -125,11 +120,9 @@ function loadDataEntry( programStageInstanceId )
 			var irregular = jQuery('#entryFormContainer input[id=irregular]').val();
 			showById('inputCriteriaDiv');
 			enable('validationBtn');
-			enable('validationInBelowBtn');
 			if( executionDate == '' )
 			{
 				disable('validationBtn');
-				disable('validationInBelowBtn');
 			}
 			else if( executionDate != '' && completed == 'false' )
 			{
@@ -156,9 +149,9 @@ function loadDataEntry( programStageInstanceId )
 
 function saveVal( dataElementId )
 {
-	if( byId('programStageId') == null) return;
-	var programStageId = byId('programStageId').value;
-	
+	if( jQuery('#entryFormContainer [id=programStageId]') == null) return;
+	var programStageId = jQuery('#entryFormContainer [id=programStageId]').val();
+        
 	var fieldId = programStageId + '-' + dataElementId + '-val';
 	
 	var field = byId( fieldId ); 
@@ -236,7 +229,7 @@ function saveVal( dataElementId )
 
 function saveOpt( dataElementId )
 {
-	var programStageId = byId('programStageId').value;
+	var programStageId = jQuery('#entryFormContainer [id=programStageId]').val();
 	var field = byId( programStageId + '-' + dataElementId + '-val' );	
 	field.style.backgroundColor = SAVING_COLOR;
 	
@@ -425,8 +418,8 @@ function ValueSaver( dataElementId_, value_, dataElementType_, resultColor_  )
  
     function markValue( color )
     {
-		var programStageId = getFieldValue('programStageId');
-        var element = byId( programStageId + "-" + dataElementId + '-val' );
+		var programStageId = jQuery('#entryFormContainer [id=programStageId]').val();
+		var element = byId( programStageId + "-" + dataElementId + '-val' );
         element.style.backgroundColor = color;
     }
 }
@@ -515,7 +508,6 @@ function ExecutionDateSaver( programId_, executionDate_, resultColor_ )
 					jQuery(".stage-object-selected").css('background-color', COLOR_LIGHT_LIGHTRED);
 					disableCompletedButton(false);
 					enable('validationBtn');
-					enable('validationInBelowBtn');
 					disable('newEncounterBtn');
 					setFieldValue( 'programStageId', selectedProgramStageInstance.attr('psid') );
 					
@@ -639,8 +631,8 @@ function doComplete( isCreateEvent )
 								closable: true,
 								modal:false,
 								overlay:{background:'#000000', opacity:0.1},
-								width: 300,
-								height: 100
+								width: 400,
+								height: 140
 							}).show('fast');
 							
 						var standardInterval =  jQuery('#dataRecordingSelectDiv [name=programStageId] option:selected').attr('standardInterval');
@@ -851,7 +843,8 @@ function autocompletedField( idField )
 		minLength: 0,
 		select: function( event, ui ) {
 			input.val(ui.item.value);
-			saveVal( dataElementId );
+			if(!unSave)
+				saveVal( dataElementId );
 			input.autocomplete( "close" );
 		},
 		change: function( event, ui ) {
@@ -860,7 +853,8 @@ function autocompletedField( idField )
 					valid = false;
 				if ( !valid ) {
 					$( this ).val( "" );
-					saveVal( dataElementId );
+					if(!unSave)
+						saveVal( dataElementId );
 					input.data( "autocomplete" ).term = "";
 					return false;
 				}
@@ -869,17 +863,28 @@ function autocompletedField( idField )
 	})
 	.addClass( "ui-widget" );
 	
-	var button = $( "<button>&nbsp;</button>" )
+	input.data( "autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li></li>" )
+			.data( "item.autocomplete", item )
+			.append( "<a>" + item.label + "</a>" )
+			.appendTo( ul );
+	};
+		
+	var wrapper = this.wrapper = $( "<span style='width:200px'>" )
+			.addClass( "ui-combobox" )
+			.insertAfter( input );
+						
+	var button = $( "<a style='width:20px; margin-bottom:-5px;height:20px;'>" )
 		.attr( "tabIndex", -1 )
 		.attr( "title", i18n_show_all_items )
-		.insertAfter( input )
+		.appendTo( wrapper )
 		.button({
 			icons: {
 				primary: "ui-icon-triangle-1-s"
 			},
 			text: false
 		})
-		.addClass( "small-button" )
+		.addClass('small-button')
 		.click(function() {
 			if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
 				input.autocomplete( "close" );
@@ -896,17 +901,13 @@ function disableCompletedButton( disabled )
 	if(disabled){
 		disable('completeBtn');
 		disable('completeAndAddNewBtn');
-		disable('completeInBelowBtn');
 		enable('uncompleteBtn');
 		enable('uncompleteAndAddNewBtn');
-		enable('uncompleteBelowBtn');
 	}
 	else{
 		enable('completeBtn');
 		enable('completeAndAddNewBtn');
-		enable('completeInBelowBtn');
 		disable('uncompleteBtn');
 		disable('uncompleteAndAddNewBtn');
-		disable('uncompleteBelowBtn');
 	}
 }
