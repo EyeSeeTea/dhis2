@@ -774,7 +774,7 @@ mapfish.widgets.geostat.Choropleth = Ext.extend(Ext.Panel, {
             }
         });
         
-        this.cmp.bounds = new Ext.form.ComboBox({
+        this.cmp.bounds = new Ext.form.TextField({
             fieldLabel: G.i18n.bounds,
             width: G.conf.combo_width,
             hidden: true,

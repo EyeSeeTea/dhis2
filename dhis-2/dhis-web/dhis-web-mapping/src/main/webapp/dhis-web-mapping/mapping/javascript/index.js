@@ -6,7 +6,11 @@ Ext.onReady( function() {
 	document.body.oncontextmenu = function(){return false;};
     
 	G.vars.map = new OpenLayers.Map({
-        controls: [new OpenLayers.Control.MouseToolbar()],
+        controls: [
+			new OpenLayers.Control.Navigation({
+				dragPanOptions: {enableKinetic: true}
+			})
+		],
         displayProjection: new OpenLayers.Projection('EPSG:4326'),
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });

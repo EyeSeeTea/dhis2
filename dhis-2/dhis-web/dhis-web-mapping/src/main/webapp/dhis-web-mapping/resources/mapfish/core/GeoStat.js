@@ -80,7 +80,12 @@ mapfish.GeoStat = OpenLayers.Class({
         this.url = url;
         if (this.url) {
             var success = G.vars.activeWidget == centroid ? this.onSuccess2 : this.onSuccess;
-            OpenLayers.loadURL(this.url, '', this, success, this.onFailure);
+            OpenLayers.Request.GET({
+				url: this.url,
+				scope: this,
+				success: success,
+				failure: this.onFailure
+			});
         }
     },
 
