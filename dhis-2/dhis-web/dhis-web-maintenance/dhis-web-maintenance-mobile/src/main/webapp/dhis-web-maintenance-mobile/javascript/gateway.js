@@ -3,7 +3,6 @@ currentType = '';
 function changeValueType( value )
 {
 	hideAll();
-
     if ( value == 'modem' ) {
         showById( "modemFields" );
     } else if ( value == 'bulksms' ) {
@@ -13,7 +12,6 @@ function changeValueType( value )
     } else {
 	    showById( "genericHTTPFields" );
 	}
-	
 	currentType = value;
 }
 
@@ -67,6 +65,7 @@ function getValidationRulesGateway()
 
 function saveGatewayConfig()
 {
+	lockScreen();
 	if ( currentType == 'modem' )
 	{
 		jQuery.postJSON( "saveModemConfig.action", {
@@ -80,6 +79,7 @@ function saveGatewayConfig()
 			inbound: getFieldValue( 'modemFields select[id=inbound]' ),
 			outbound: getFieldValue( 'modemFields select[id=outbound]' )
 		}, function ( json ) {
+			unLockScreen();
 			showMessage( json );
 		} );
 	}
@@ -92,6 +92,7 @@ function saveGatewayConfig()
 			password: getFieldValue( 'bulksmsFields input[id=password]' ),
 			region: getFieldValue( 'bulksmsFields select[id=region]' )
 		}, function ( json ) {
+			unLockScreen();
 			showMessage( json );
 		} );
 	}
@@ -104,6 +105,7 @@ function saveGatewayConfig()
 			password: getFieldValue( 'clickatellFields input[id=password]' ),
 			apiId: getFieldValue( 'clickatellFields input[id=apiId]' )
 		}, function ( json ) {
+			unLockScreen();
 			showMessage( json );
 		} );
 	}
@@ -116,6 +118,7 @@ function saveGatewayConfig()
 			password: getFieldValue( 'genericHTTPFields input[id=password]' ),
 			urlTemplate: getFieldValue( 'genericHTTPFields input[id=urlTemplate]' )
 		}, function ( json ) {
+			unLockScreen();
 			showMessage( json );
 		} );
 	}

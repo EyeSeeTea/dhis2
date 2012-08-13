@@ -1,0 +1,34 @@
+<table id='programStageIdTB' style="width:850px;height:125px;">
+	<tr>
+		<td>
+			<div class="arrow-left" onclick="moveLeft('flow_$!programInstance.id')">&nbsp;</div>
+		</td>
+		<td>
+			<div id='flow_$!programInstance.id' class="stage-flow">
+				<table class="stage-flow">											
+					<tr id='programStageIdTR'>
+						#foreach( $programStageInstance in $programStageInstances )
+						<td>
+							<img src='images/rightarrow.png'>
+						</td>
+						<td>
+							<input type='button' id='ps_$programStageInstance.id' name='programStageBtn' class='stage-object' value='$programStageInstance.programStage.name $format.formatDate( $programStageInstance.dueDate )' onclick='javascript:viewPrgramStageRecords( $programStageInstance.id );'>
+							<script>	
+								var status = $statusMap.get( $programStageInstance.id ); 
+								setEventColorStatus( 'ps_' + $programStageInstance.id ,status);
+							</script>
+						</td>
+						#end
+					</tr>
+				</table>
+			</div>
+		</td>
+		<td>
+			<div class="arrow-right" onclick="moveRight('flow_$!programInstance.id')">&nbsp;</div>
+		</td>
+		<td>&nbsp;</td>
+		<td>
+			<input type="button" class='stage-object' id="newEncounterBtn" value="$i18n.getString('create_new_event')" onClick="javascript: registerIrregularEncounter( getFieldValue('executionDate') );" disabled="disabled" #if($!programInstance.id) style='display:none' #end>
+		</td>
+	</tr>					
+</table>

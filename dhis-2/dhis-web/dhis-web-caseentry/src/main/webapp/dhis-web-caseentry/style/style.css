@@ -10,6 +10,7 @@ input[type="button"], input[type="submit"]
 input.small-button[type="button"] 
 {
     width: 30px;
+	height: 30px;
 }
 
 input.large-button[type="button"] 
@@ -166,7 +167,7 @@ input.stage-object-selected[type="button"]
 
 input.patient-object[type="button"]
 {
-	width: 140px;
+	width: 130px;
 	height: 60px;
     white-space: normal;
 	border-color: #bbbbbb;
@@ -175,6 +176,17 @@ input.patient-object[type="button"]
 	border: 1px solid #aaa;
 	margin: 5px;
 	border-radius: 2px;
+}
+
+input.move-button
+{
+	width: 20px;
+	height: 60px;
+    white-space: normal;
+	border-color: #bbbbbb;
+	cursor: pointer;
+	border: 1px solid #aaa;
+	margin: 0px;
 }
 
 input.optionset[type="text"]
@@ -190,7 +202,6 @@ div.provided-elsewhere
 
 .ui-button
 {
-	max-height: 100px;
 	max-height: 100px;
 }
 
@@ -209,4 +220,144 @@ div.provided-elsewhere
 .colorHelpTable td
 {
 	height: 32px;
+}
+
+/* --------------------------------------------------------------
+// Dashboard
+// -------------------------------------------------------------- */
+
+div.link-area
+{
+  border:1px solid #d0d0d0;
+  padding-top:1px;
+  padding-right:1px;
+  padding-left:1px;
+  padding-bottom:0px;
+  height:200px;
+  width:350px;
+  overflow:hidden;
+  position:relative;
+  top: 45px;
+}
+
+.contentProviderTable
+{
+  height: 150px;
+  width: 340px;
+  margin-top:-10px;
+  overflow-y: auto;
+  overflow-x:hidden;
+}
+
+.contentProviderTable td
+{
+  padding-top:3px;
+  padding-bottom:3px;
+  border-bottom:1px solid #cad5e5;
+}
+
+div.event-dashboard
+{
+	width:900px;
+	border:1px solid #d0d0d0;
+	position:relative;
+	top: 47px;
+}
+
+div.link-area-active
+{
+	width:900px;
+	border:10px solid #d0d0d0;
+	position:relative;
+	top: 47px;
+}
+
+div.event-flow-dashboard
+{
+	width:900px;
+	height:140px;
+	overflow-x:auto;
+	overflow-y:hidden;
+}
+
+#subMenu
+{
+  position:absolute;
+}
+
+#subMenu ul
+{
+  list-style-type:none;
+  margin: 0;
+}
+
+#subMenu li
+{
+  float:left;
+}
+
+#subMenu a
+{
+  padding: 6px 12px;
+  height: 25px;
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  margin-right: 4px;
+  font-family: LiberationSansBold, arial;
+  font-size: 13px;
+  color: #606060;
+  background-color: #f3f3f3;
+}
+
+#subMenu a:hover
+{
+  text-decoration: none;
+  background-color: #f8f8f8;
+}
+
+/* --------------------------------------------------------------
+// program-stage-instances
+// -------------------------------------------------------------- */
+
+.stage-container
+{
+	width:850px;
+	height:125px;
+}
+
+.stage-flow
+{
+	width:750px;
+	height:125px;
+	overflow-x:hidden;
+	overflow-y:hidden;
+}
+
+table.stage-object
+{
+	white-space: normal;
+	border: 2px solid;
+	opacity: 1.0;
+	border: 1px solid;
+	margin: 5px;
+	border-radius: 2px;
+	text-align:center;
+}
+
+.arrow-right {
+	width: 0; 
+	height: 0; 
+	border-top: 30px solid transparent;
+	border-bottom: 30px solid transparent;
+	border-left: 30px solid #d0d0d0;
+	cursor:pointer;
+}
+
+.arrow-left {
+	width: 0; 
+	height: 0; 
+	border-top: 30px solid transparent;
+	border-bottom: 30px solid transparent; 
+	border-right:30px solid #d0d0d0; 
+	cursor:pointer;
 }

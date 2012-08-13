@@ -55,26 +55,31 @@ public class GetSmsConfigurationAction
 
     @Autowired
     private SmsConfigurationManager smsConfigurationManager;
-    
+
     @Autowired
     private OutboundSmsTransportService smsLibService;
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private Map<Integer, SmsGatewayConfig> gatewayConfigMap1 = new HashMap<Integer, SmsGatewayConfig>();
+    private String index;
 
-    public Map<Integer, SmsGatewayConfig> getGatewayConfigMap1()
+    public String getIndex()
     {
-        return gatewayConfigMap1;
+        return index;
     }
 
-    private Map<Integer, Integer> gatewayConfigMap2 = new HashMap<Integer, Integer>();
-
-    public Map<Integer, Integer> getGatewayConfigMap2()
+    public void setIndex( String index )
     {
-        return gatewayConfigMap2;
+        this.index = index;
+    }
+
+    private Map<Integer, SmsGatewayConfig> gatewayConfigMap = new HashMap<Integer, SmsGatewayConfig>();
+
+    public Map<Integer, SmsGatewayConfig> getGatewayConfigMap()
+    {
+        return gatewayConfigMap;
     }
 
     private SmsConfiguration smsConfig;
@@ -85,10 +90,38 @@ public class GetSmsConfigurationAction
     }
 
     private String smsServiceStatus;
-    
+
     public String getSmsServiceStatus()
     {
         return this.smsServiceStatus;
+    }
+
+    public Integer bulkIndex;
+
+    public Integer getBulkIndex()
+    {
+        return bulkIndex;
+    }
+
+    public Integer clickatellIndex;
+
+    public Integer getClickatellIndex()
+    {
+        return clickatellIndex;
+    }
+
+    public Integer modemIndex;
+
+    public Integer getModemIndex()
+    {
+        return modemIndex;
+    }
+
+    public Integer httpIndex;
+
+    public Integer getHttpIndex()
+    {
+        return httpIndex;
     }
 
     // -------------------------------------------------------------------------
@@ -98,8 +131,9 @@ public class GetSmsConfigurationAction
     public String execute()
         throws Exception
     {
+
         smsServiceStatus = smsLibService.getServiceStatus();
-        
+
         smsConfig = smsConfigurationManager.getSmsConfiguration();
 
         if ( smsConfig != null )
@@ -110,23 +144,23 @@ public class GetSmsConfigurationAction
             {
                 index = smsConfig.getGateways().indexOf( gw );
 
-                gatewayConfigMap1.put( index, gw );
+                gatewayConfigMap.put( index, gw );
 
                 if ( gw instanceof BulkSmsGatewayConfig )
                 {
-                    gatewayConfigMap2.put( 0, index );
+                    bulkIndex = index;
                 }
                 else if ( gw instanceof ClickatellGatewayConfig )
                 {
-                    gatewayConfigMap2.put( 1, index );
+                    clickatellIndex = index;
                 }
                 else if ( gw instanceof ModemGatewayConfig )
                 {
-                    gatewayConfigMap2.put( 2, index );
+                    modemIndex = index;
                 }
                 else
                 {
-                    gatewayConfigMap2.put( 3, index );
+                    httpIndex = index;
                 }
             }
         }

@@ -1,7 +1,5 @@
-package org.hisp.dhis.phieusanh.action;
-
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,71 +25,93 @@ package org.hisp.dhis.phieusanh.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.patient.Patient;
-import org.hisp.dhis.patient.PatientService;
+package org.hisp.dhis.caseentry.action.reminder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.sms.outbound.OutboundSms;
+import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Dang Duy Hieu
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version GetOutboundSmsListAction.java 10:57:08 AM Aug 9, 2012 $
  */
-public class ReregisterPatientLocationAction
+public class GetOutboundSmsListAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PatientService patientService;
+    private ProgramStageInstanceService programStageInstanceService;
 
-    public void setPatientService( PatientService patientService )
+    @Autowired
+    private OutboundSmsTransportService transportService;
+
+    // -------------------------------------------------------------------------
+    // Input/Output
+    // -------------------------------------------------------------------------
+
+    private Integer programStageInstanceId;
+
+    private ProgramStageInstance programStageInstance;
+
+    private List<OutboundSms> outboundSms;
+
+    public Map<String, String> gatewayMap;
+
+    // -------------------------------------------------------------------------
+    // Getter/Setter
+    // -------------------------------------------------------------------------
+
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
-        this.patientService = patientService;
+        this.programStageInstanceService = programStageInstanceService;
     }
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    public ProgramStageInstance getProgramStageInstance()
     {
-        this.organisationUnitService = organisationUnitService;
+        return programStageInstance;
+    }
+
+    public void setProgramStageInstanceId( Integer programStageInstanceId )
+    {
+        this.programStageInstanceId = programStageInstanceId;
+    }
+
+    public List<OutboundSms> getOutboundSms()
+    {
+        return outboundSms;
+    }
+
+    public Map<String, String> getGatewayMap()
+    {
+        return gatewayMap;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
-    private Integer patientId;
-
-    public void setPatientId( Integer patientId )
-    {
-        this.patientId = patientId;
-    }
-
-    private Integer newUnitId;
-
-    public void setNewUnitId( Integer newUnitId )
-    {
-        this.newUnitId = newUnitId;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
+    @Override
     public String execute()
         throws Exception
     {
-        OrganisationUnit newUnit = organisationUnitService.getOrganisationUnit( newUnitId );
+        programStageInstance = programStageInstanceService.getProgramStageInstance( programStageInstanceId );
+
+        outboundSms = new ArrayList<OutboundSms>( programStageInstance.getOutboundSms() );
         
-        Patient patient = patientService.getPatient( patientId );
-
-        patient.setOrganisationUnit( newUnit );
-
-        patientService.savePatient( patient );
-
+        gatewayMap = transportService.getGatewayMap();
+        
         return SUCCESS;
     }
+
 }

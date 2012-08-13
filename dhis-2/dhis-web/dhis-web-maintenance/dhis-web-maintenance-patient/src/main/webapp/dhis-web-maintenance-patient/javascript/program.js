@@ -20,6 +20,9 @@ function showProgramDetails( programId )
 		var displayProvidedOtherFacility = ( json.program.displayProvidedOtherFacility == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'displayProvidedOtherFacilityField', displayProvidedOtherFacility );   	
 		
+		var displayIncidentDate = ( json.program.displayIncidentDate == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'displayIncidentDateField', displayIncidentDate );   	
+		
 		setInnerHTML( 'dateOfEnrollmentDescriptionField', json.program.dateOfEnrollmentDescription );   
 		setInnerHTML( 'dateOfIncidentDescriptionField', json.program.dateOfIncidentDescription );   		
 		setInnerHTML( 'programStageCountField',  json.program.programStageCount );
@@ -38,7 +41,7 @@ function removeProgram( programId, name )
 	removeItem( programId, name, i18n_confirm_delete, 'removeProgram.action' );
 }
 
-function programTypeOnChange()
+function programOnChange()
 {
 	var type = getFieldValue('type');
 	
@@ -46,17 +49,17 @@ function programTypeOnChange()
 	if(type == "3")
 	{
 		disable('dateOfEnrollmentDescription');
-		disable('dateOfIncidentDescription');
+		disable("displayIncidentDate");
+		disable("dateOfIncidentDescription");
 	}
-	// single-event
-	else if( type=='2')
-	{
+	else{
 		enable('dateOfEnrollmentDescription');
-		disable('dateOfIncidentDescription');
-	}
-	else
-	{
-		enable('dateOfEnrollmentDescription');
-		enable('dateOfIncidentDescription');
+		enable("displayIncidentDate");
+		if(byId('displayIncidentDate').checked){
+			enable("dateOfIncidentDescription");
+		}
+		else {
+			disable("dateOfIncidentDescription");
+		}
 	}
 }
