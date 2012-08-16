@@ -18,13 +18,13 @@
  */
 
 /**
- * @requires core/GeoStat/Centroid.js
+ * @requires core/GeoStat/Symbol.js
  * @requires core/Color.js
  */
 
-Ext.define('mapfish.widgets.geostat.Centroid', {
+Ext.define('mapfish.widgets.geostat.Symbol', {
 	extend: 'Ext.panel.Panel',
-	alias: 'widget.centroid',
+	alias: 'widget.symbol',
 
     layer: null,
 
@@ -225,7 +225,7 @@ Ext.define('mapfish.widgets.geostat.Centroid', {
         
         this.createSelectFeatures();
         
-		mapfish.widgets.geostat.Centroid.superclass.initComponent.apply(this);
+		mapfish.widgets.geostat.Symbol.superclass.initComponent.apply(this);
     },
     
     setUrl: function(url) {
@@ -865,7 +865,7 @@ Ext.define('mapfish.widgets.geostat.Centroid', {
             
         G.stores.organisationUnitLevel.load({scope: this, callback: function() {
             this.cmp.level.setValue(this.mapView.organisationUnitLevel);
-            G.vars.activePanel.setCentroid();
+            G.vars.activePanel.setSymbol();
             this.loadGeoJson();
         }});
     },
@@ -1128,7 +1128,7 @@ Ext.define('mapfish.widgets.geostat.Centroid', {
     },
     
     onRender: function(ct, position) {
-        mapfish.widgets.geostat.Centroid.superclass.onRender.apply(this, arguments);
+        mapfish.widgets.geostat.Symbol.superclass.onRender.apply(this, arguments);
 
 		var coreOptions = {
             'layer': this.layer,
@@ -1142,6 +1142,6 @@ Ext.define('mapfish.widgets.geostat.Centroid', {
             'labelGenerator': this.labelGenerator
         };
 
-        this.coreComp = new mapfish.GeoStat.Centroid(this.map, coreOptions);
+        this.coreComp = new mapfish.GeoStat.Symbol(this.map, coreOptions);
     }
 });
