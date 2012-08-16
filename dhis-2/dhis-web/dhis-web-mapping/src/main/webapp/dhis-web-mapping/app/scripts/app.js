@@ -53,7 +53,7 @@ Ext.onReady( function() {
 	/* Init */
 	
 	GIS.init.onRender = function() {
-		GIS.layers.openStreetMap.layer.setVisibility(false);
+		//GIS.layers.googleStreets.layer.setVisibility(false);
 	};
 	
 	/* Map */
@@ -91,7 +91,7 @@ Ext.onReady( function() {
         GIS.map.addLayer(GIS.layers.googleHybrid.layer);
     }
     
-    GIS.layers.openStreetMap.layer = new OpenLayers.Layer.OSM('OpenStreetMap');
+    GIS.layers.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.layers.openStreetMap.name);
     GIS.layers.openStreetMap.layer.layerType = GIS.conf.finals.layertype_base;
     GIS.map.addLayer(GIS.layers.openStreetMap.layer);
     
@@ -145,6 +145,7 @@ Ext.onReady( function() {
 				{
 					text: 'Edit layer..',//i18n
 					iconCls: 'gis-menu-item-icon-edit',
+					cls: 'gis-menu-item-first',
 					alwaysEnabled: true
 				},
 				{
@@ -153,8 +154,7 @@ Ext.onReady( function() {
 				},
 				{
 					text: 'Refresh',//i18n
-					iconCls: 'gis-menu-item-icon-refresh',
-					cls: 'gis-menu-item-afterseparator'
+					iconCls: 'gis-menu-item-icon-refresh'
 				},
 				{
 					text: 'Clear',//i18n
@@ -183,6 +183,7 @@ Ext.onReady( function() {
 				{
 					text: 'Opacity',//i18n
 					iconCls: 'gis-menu-item-icon-opacity',
+					cls: 'gis-menu-item-last',
 					menu: Ext.create('Ext.menu.Menu', {
 						shadow: false,
 						showSeparator: false
@@ -203,6 +204,7 @@ Ext.onReady( function() {
 	};
     
 	/* Graphical user interface */
+	
 	GIS.gui.viewport = Ext.create('Ext.container.Viewport', {
 		layout: 'border',		
 		items: [
@@ -215,10 +217,7 @@ Ext.onReady( function() {
             {
                 xtype: 'gx_mappanel',
                 region: 'center',
-                height: 1000,
-                width: 800,
                 map: GIS.map,
-                zoom: 3,
                 lbar: {
 					defaults: {
 						height: 30,

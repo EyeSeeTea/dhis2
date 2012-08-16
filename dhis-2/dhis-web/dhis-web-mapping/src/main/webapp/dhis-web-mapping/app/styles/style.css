@@ -64,25 +64,25 @@
 	}
 
 		/* Vertical toolbar btn menu */
-		.gis-vertical-toolbar-btn-menu {
+		.gis-vertical-toolbar-btn-menu { /* Align menu */
 			margin-left: 5px;
 		}		
-		.gis-vertical-toolbar-btn-menu .x-panel-body-default {
+		.gis-vertical-toolbar-btn-menu .x-panel-body-default { /* Menu border */
 			border-radius: 3px;
-			border-color: #aaa;
+			border-color: #999;
 		}
 		
 		
 		
 /* Menu */
 
-.x-menu-body {
+.x-menu-body { /* General menu */
 	background: #fff !important;
 	padding: 0;
 }
 
 	/* Menu item */
-	.x-menu-item-link {
+	.x-menu-item-link { /* Menu item normal */
 		line-height: 12px;
 		padding-bottom: 6px;
 		padding-left: 30px;
@@ -91,6 +91,14 @@
 		background: #ddd;
 		border-color: #ddd;
 		border-radius: 1px;
+	}
+	.gis-menu-item-first.x-menu-item-active .x-menu-item-link { /* Menu item (first) hover */
+		border-top-left-radius: 2px;
+		border-top-right-radius: 2px;
+	}
+	.gis-menu-item-last.x-menu-item-active .x-menu-item-link { /* Menu item (first) hover */
+		border-bottom-left-radius: 2px;
+		border-bottom-right-radius: 2px;
 	}
 	
 	.gis-menu-item-icon-edit,
