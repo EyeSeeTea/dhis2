@@ -76,36 +76,68 @@ Ext.onReady( function() {
 					},
 					items: [
 						{
-							iconCls: 'gis-button-icon-boundary',
+							iconCls: 'gis-btn-icon-boundary',
 							menu: Ext.create('Ext.menu.Menu', {
 								shadow: false,
+								showSeparator: false,
 								items: [
 									{
-										text: 'nisslion'
+										text: 'Edit layer..',//i18n
+										iconCls: 'gis-menu-item-icon'
+									},
+									'-',
+									{
+										text: 'Refresh',//i18n
+										iconCls: 'gis-menu-item-icon',
+										cls: 'gis-menu-item-afterseparator'
 									},
 									{
-										text: 'nisslion'
+										text: 'Clear',//i18n
+										iconCls: 'gis-menu-item-icon'
+									},
+									'-',
+									{
+										text: 'Labels..',//i18n
+										iconCls: 'gis-menu-item-icon'
 									},
 									{
-										text: 'nisslion'
+										text: 'Filter..',//i18n
+										iconCls: 'gis-menu-item-icon'
 									},
 									{
-										text: 'nisslion'
+										text: 'Search..',//i18n
+										iconCls: 'gis-menu-item-icon'
+									},
+									'-',
+									{
+										text: 'Opacity',//i18n
+										iconCls: 'gis-menu-item-icon',
+										menu: Ext.create('Ext.menu.Menu', {
+											shadow: false,
+											showSeparator: false,
+											items: []
+										})
 									},
 									{
-										text: 'nisslion'
+										text: 'History',//i18n
+										iconCls: 'gis-menu-item-icon',
+										menu: Ext.create('Ext.menu.Menu', {
+											shadow: false,
+											showSeparator: false,
+											items: []
+										})
 									}
 								],
 								listeners: {
 									afterrender: function() {
-										this.getEl().addCls('gis-vertical-toolbar-button-menu');
+										this.getEl().addCls('gis-vertical-toolbar-btn-menu');
 									}
 								}
 							})
 						},
 						
 						{
-							iconCls: 'gis-button-icon-thematic1',
+							iconCls: 'gis-btn-icon-thematic1',
 							listeners: {
 								afterrender: function() {
 									this.menu = Ext.create('Ext.menu.Menu', {
@@ -132,7 +164,7 @@ Ext.onReady( function() {
 						},
 						
 						{
-							iconCls: 'gis-button-icon-thematic2',
+							iconCls: 'gis-btn-icon-thematic2',
 							listeners: {
 								afterrender: function() {
 									this.menu = Ext.create('Ext.menu.Menu', {
@@ -159,7 +191,7 @@ Ext.onReady( function() {
 						},
 						
 						{
-							iconCls: 'gis-button-icon-facility',
+							iconCls: 'gis-btn-icon-facility',
 							listeners: {
 								afterrender: function() {
 									this.menu = Ext.create('Ext.menu.Menu', {
@@ -186,7 +218,7 @@ Ext.onReady( function() {
 						},
 						
 						{
-							iconCls: 'gis-button-icon-symbol',
+							iconCls: 'gis-btn-icon-symbol',
 							listeners: {
 								afterrender: function() {
 									this.menu = Ext.create('Ext.menu.Menu', {
