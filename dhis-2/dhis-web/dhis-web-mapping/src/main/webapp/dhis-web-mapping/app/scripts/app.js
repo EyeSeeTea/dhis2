@@ -1,6 +1,13 @@
 var GIS = {
+	conf: {
+		finals: {
+			layertype_base: 'base',
+			layertype_vector: 'vector'
+		}
+	},
+	init: {},
 	map: {},
-	layer: {
+	layers: {
 		boundary: {
 			name: 'boundary',
 		},
@@ -15,6 +22,15 @@ var GIS = {
 		},
 		symbol: {
 			name: 'symbol',
+		},
+		openStreetMap: {
+			name: 'OpenStreetMap'
+		},
+		googleStreets: {
+			name: 'Google Streets'
+		},
+		googleHybrid: {
+			name: 'Google Hybrid'
 		}
 	},
 	obj: {},
@@ -34,11 +50,16 @@ Ext.onReady( function() {
     Ext.QuickTips.init();
 	document.body.oncontextmenu = function(){return false;};
 	
+	/* Init */
+	
+	GIS.init.onRender = function() {
+		GIS.layers.openStreetMap.layer.setVisibility(false);
+	};
+	
 	/* Map */
 	
 	GIS.map = new OpenLayers.Map({
         controls: [
-			//new OpenLayers.Control.Graticule(),
 			new OpenLayers.Control.Navigation(),
 			new OpenLayers.Control.LayerSwitcher(),
 			new OpenLayers.Control.MousePosition({
@@ -49,15 +70,34 @@ Ext.onReady( function() {
 			new OpenLayers.Control.Permalink()
 		],
         displayProjection: new OpenLayers.Projection('EPSG:4326'),
-        maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
-        layers: [
-			new OpenLayers.Layer.OSM("OpenStreetMap")
-		]
+        maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });
     
-    /* Vector */
+    /* Base layers */
     
-    GIS.layer.boundary.vector = new OpenLayers.Layer.Vector(G.i18n.boundary_layer, {
+    if (window.google) {
+        GIS.layers.googleStreets.layer = new OpenLayers.Layer.Google(
+            GIS.layers.googleStreets.name,
+            {numZoomLevels: 20, animationEnabled: true}
+        );        
+        GIS.layers.googleStreets.layer.layerType = GIS.conf.finals.layertype_base;
+        GIS.map.addLayer(GIS.layers.googleStreets.layer);
+        
+        GIS.layers.googleHybrid.layer = new OpenLayers.Layer.Google(
+            GIS.layers.googleHybrid.name,
+            {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 20, animationEnabled: true}
+        );        
+        GIS.layers.googleHybrid.layer.layerType = GIS.conf.finals.layertype_base;
+        GIS.map.addLayer(GIS.layers.googleHybrid.layer);
+    }
+    
+    GIS.layers.openStreetMap.layer = new OpenLayers.Layer.OSM('OpenStreetMap');
+    GIS.layers.openStreetMap.layer.layerType = GIS.conf.finals.layertype_base;
+    GIS.map.addLayer(GIS.layers.openStreetMap.layer);
+    
+    /* Vector layers */
+    
+    GIS.layers.boundary.layer = new OpenLayers.Layer.Vector(G.i18n.boundary_layer, {
         strategies: [
 			new OpenLayers.Strategy.Refresh({force:true})
 		],
@@ -76,10 +116,10 @@ Ext.onReady( function() {
 				)
             )
         }),
-        layerType: 'vector' //conf
+        layerType: GIS.conf.finals.layertype_vector
     });
-        
-    GIS.map.addLayer(GIS.layer.boundary.vector);
+            
+    GIS.map.addLayer(GIS.layers.boundary.layer);
     
     /* Objects */
     
@@ -187,120 +227,31 @@ Ext.onReady( function() {
 					},
 					items: [
 						{
-							iconCls: 'gis-btn-icon-boundary',
-							menu: new GIS.obj.LayerMenu(GIS.layer.boundary.name)
+							iconCls: 'gis-btn-icon-' + GIS.layers.boundary.name,
+							menu: new GIS.obj.LayerMenu(GIS.layers.boundary.name)
 						},
-						
 						{
-							iconCls: 'gis-btn-icon-thematic1',
-							listeners: {
-								afterrender: function() {
-									this.menu = Ext.create('Ext.menu.Menu', {
-										items: [
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											}
-										]
-									});
-								}
-							}
+							iconCls: 'gis-btn-icon-' + GIS.layers.thematic1.name,
+							menu: new GIS.obj.LayerMenu(GIS.layers.thematic1.name)
 						},
-						
 						{
-							iconCls: 'gis-btn-icon-thematic2',
-							listeners: {
-								afterrender: function() {
-									this.menu = Ext.create('Ext.menu.Menu', {
-										items: [
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											}
-										]
-									});
-								}
-							}
+							iconCls: 'gis-btn-icon-' + GIS.layers.thematic2.name,
+							menu: new GIS.obj.LayerMenu(GIS.layers.thematic2.name)
 						},
-						
 						{
-							iconCls: 'gis-btn-icon-facility',
-							listeners: {
-								afterrender: function() {
-									this.menu = Ext.create('Ext.menu.Menu', {
-										items: [
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											}
-										]
-									});
-								}
-							}
+							iconCls: 'gis-btn-icon-' + GIS.layers.facility.name,
+							menu: new GIS.obj.LayerMenu(GIS.layers.facility.name)
 						},
-						
 						{
-							iconCls: 'gis-btn-icon-symbol',
-							listeners: {
-								afterrender: function() {
-									this.menu = Ext.create('Ext.menu.Menu', {
-										items: [
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											},
-											{
-												text: 'danslion'
-											}
-										]
-									});
-								}
-							}
+							iconCls: 'gis-btn-icon-' + GIS.layers.symbol.name,
+							menu: new GIS.obj.LayerMenu(GIS.layers.symbol.name)
 						}
 					]
 				}
             }
-		]
+		],
+		listeners: {
+			render: GIS.init.onRender
+		}
 	});	
 });
