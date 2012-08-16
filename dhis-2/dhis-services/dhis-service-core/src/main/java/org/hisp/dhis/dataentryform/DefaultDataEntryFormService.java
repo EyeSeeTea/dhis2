@@ -141,16 +141,16 @@ public class DefaultDataEntryFormService
             // -----------------------------------------------------------------
 
             String dataElementCode = inputMatcher.group();
-
+            
             Matcher valueTagMatcher = VALUE_TAG_PATTERN.matcher( dataElementCode );
             Matcher titleTagMatcher = TITLE_TAG_PATTERN.matcher( dataElementCode );
 
             if ( valueTagMatcher.find() && valueTagMatcher.groupCount() > 0 )
             {
-                dataElementCode = dataElementCode.replace( valueTagMatcher.group( 1 ), EMPTY );
+                dataElementCode = dataElementCode.replace( valueTagMatcher.group( 1 ), EMPTY );                
             }
 
-            if ( titleTagMatcher.find() && valueTagMatcher.groupCount() > 0 )
+            if ( titleTagMatcher.find() && titleTagMatcher.groupCount() > 0 )
             {
                 dataElementCode = dataElementCode.replace( titleTagMatcher.group( 1 ), EMPTY );
             }
@@ -273,7 +273,7 @@ public class DefaultDataEntryFormService
 
                 if ( categoryOptionCombo == null )
                 {
-                    return i18n.getString( "cate_option_combo_with_id" ) + ": " + optionComboId + " " + i18n.getString( "does_not_exist" );
+                    return i18n.getString( "category_option_combo_with_id" ) + ": " + optionComboId + " " + i18n.getString( "does_not_exist" );
                 }
 
                 if ( dataElement.getType().equals( DataElement.VALUE_TYPE_BOOL ) )
