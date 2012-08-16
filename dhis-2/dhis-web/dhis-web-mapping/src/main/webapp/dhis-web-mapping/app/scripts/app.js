@@ -1,4 +1,7 @@
 var GIS = {
+	cmp: {
+		menu: {}
+	},
 	map: {},
 	layers: {},
 	gui: {}
@@ -80,12 +83,31 @@ Ext.onReady( function() {
 							menu: Ext.create('Ext.menu.Menu', {
 								shadow: false,
 								showSeparator: false,
+								itemsXableAlways: function() {
+									Ext.Array.each(this.items.items, function(item) {
+										if (!item.alwaysEnabled) {
+											console.log(item);
+											item.disable();
+										}
+									});
+								},
+								itemsXableHistory: function() {
+									Ext.each(this.items, function(item) {
+										if (!item.alwaysEnabled && !item.historyEnabled) {
+											item.disable();
+										}
+									});
+								},
 								items: [
 									{
 										text: 'Edit layer..',//i18n
-										iconCls: 'gis-menu-item-icon'
+										iconCls: 'gis-menu-item-icon',
+										alwaysEnabled: true
 									},
-									'-',
+									{
+										xtype: 'menuseparator',
+										alwaysEnabled: true
+									},
 									{
 										text: 'Refresh',//i18n
 										iconCls: 'gis-menu-item-icon',
@@ -95,7 +117,10 @@ Ext.onReady( function() {
 										text: 'Clear',//i18n
 										iconCls: 'gis-menu-item-icon'
 									},
-									'-',
+									{
+										xtype: 'menuseparator',
+										alwaysEnabled: true
+									},
 									{
 										text: 'Labels..',//i18n
 										iconCls: 'gis-menu-item-icon'
@@ -108,7 +133,10 @@ Ext.onReady( function() {
 										text: 'Search..',//i18n
 										iconCls: 'gis-menu-item-icon'
 									},
-									'-',
+									{
+										xtype: 'menuseparator',
+										alwaysEnabled: true
+									},
 									{
 										text: 'Opacity',//i18n
 										iconCls: 'gis-menu-item-icon',
@@ -119,8 +147,13 @@ Ext.onReady( function() {
 										})
 									},
 									{
+										xtype: 'menuseparator',
+										alwaysEnabled: true
+									},
+									{
 										text: 'History',//i18n
 										iconCls: 'gis-menu-item-icon',
+										historyEnabled: true,
 										menu: Ext.create('Ext.menu.Menu', {
 											shadow: false,
 											showSeparator: false,
@@ -129,8 +162,13 @@ Ext.onReady( function() {
 									}
 								],
 								listeners: {
+									added: function() {
+										GIS.cmp.menu.boundary = this;
+									},
 									afterrender: function() {
 										this.getEl().addCls('gis-vertical-toolbar-btn-menu');
+										
+										this.itemsXableAlways();
 									}
 								}
 							})
