@@ -1,0 +1,71 @@
+/* General */
+
+.el-opacity-1 {
+	opacity: 1;
+}
+.text-mouseposition-lonlat {
+	color: #555;
+}
+
+/* OpenLayers overrides */
+
+.olControlPermalink {
+	display: none !important;
+}
+.olControlScaleLine {
+	bottom: 3px !important;
+	left: 3px !important;
+}
+.olControlMousePosition {
+	background: #fff !important;
+	opacity: 0.75 !important;
+	right: 0 !important;
+	bottom: 0 !important;
+	border-top-left-radius: 2px !important;
+	padding: 3px 5px 2px !important;
+	color: #000 !important;
+}
+
+/* GIS */
+
+/* Vertical toolbar */
+
+.x-toolbar-vertical { /* Same space on both sides of toolbar buttons */
+	padding-left: 1px;
+}
+
+	/* Vertical toolbar button */
+	.x-toolbar-vertical .x-btn-default-toolbar-small-icon button,
+	.x-toolbar-vertical .gis-button-icon-boundary,
+	.x-toolbar-vertical .gis-button-icon-thematic1,
+	.x-toolbar-vertical .gis-button-icon-thematic2,
+	.x-toolbar-vertical .gis-button-icon-facility,
+	.x-toolbar-vertical .gis-button-icon-symbol {
+		width: 24px !important;
+		height: 24px !important;
+	}
+	.x-toolbar-vertical .gis-button-icon-boundary {
+		background: url('../images/boundary.png') no-repeat;
+	}
+	.x-toolbar-vertical .gis-button-icon-thematic1 {
+		background: url('../images/thematic1.png') no-repeat;
+	}
+	.x-toolbar-vertical .gis-button-icon-thematic2 {
+		background: url('../images/thematic2.png') no-repeat;
+	}
+	.x-toolbar-vertical .gis-button-icon-facility {
+		background: url('../images/facility.png') no-repeat;
+	}
+	.x-toolbar-vertical .gis-button-icon-symbol {
+		background: url('../images/symbol.png') no-repeat;
+	}
+
+		/* Vertical toolbar button menu */
+		.gis-vertical-toolbar-button-menu {
+			margin-left: 5px;
+		}
+		
+		.gis-vertical-toolbar-button-menu .x-panel-body-default {
+			border-radius: 3px;
+			border-color: #aaa;
+		}

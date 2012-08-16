@@ -46,14 +46,14 @@
 		"core/GeoStat/Boundary.js",
 		"core/GeoStat/Choropleth.js",
 		"core/GeoStat/Point.js",
+		"core/GeoStat/Facility.js",
 		"core/GeoStat/Symbol.js",
-		"core/GeoStat/Centroid.js",
 		"core/Util.js",
 		"widgets/geostat/Boundary.js",
 		"widgets/geostat/Choropleth.js",
 		"widgets/geostat/Point.js",
-		"widgets/geostat/Symbol.js",
-		"widgets/geostat/Centroid.js"
+		"widgets/geostat/Facility.js",
+		"widgets/geostat/Symbol.js"
 	);
 
 	var allScriptTags = "";
