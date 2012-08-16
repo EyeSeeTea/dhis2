@@ -21,7 +21,7 @@
  * @requires core/GeoStat.js
  */
 
-mapfish.GeoStat.Centroid = OpenLayers.Class(mapfish.GeoStat, {
+mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
 
     colors: [
         new mapfish.ColorRgb(120, 120, 0),
@@ -167,5 +167,5 @@ mapfish.GeoStat.Centroid = OpenLayers.Class(mapfish.GeoStat, {
         }
     },
 
-    CLASS_NAME: "mapfish.GeoStat.Centroid"
+    CLASS_NAME: "mapfish.GeoStat.Symbol"
 });

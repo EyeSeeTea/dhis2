@@ -18,13 +18,13 @@
  */
 
 /**
- * @requires core/GeoStat/Symbol.js
+ * @requires core/GeoStat/Facility.js
  * @requires core/Color.js
  */
 
-Ext.define('mapfish.widgets.geostat.Symbol', {
+Ext.define('mapfish.widgets.geostat.Facility', {
 	extend: 'Ext.panel.Panel',
-	alias: 'widget.symbol',
+	alias: 'widget.facility',
 
     layer: null,
 
@@ -189,7 +189,7 @@ Ext.define('mapfish.widgets.geostat.Symbol', {
         
         this.createSelectFeatures();
         
-		mapfish.widgets.geostat.Symbol.superclass.initComponent.apply(this);
+		mapfish.widgets.geostat.Facility.superclass.initComponent.apply(this);
     },
     
     setUrl: function(url) {
@@ -832,7 +832,7 @@ Ext.define('mapfish.widgets.geostat.Symbol', {
     },
     
     onRender: function(ct, position) {
-        mapfish.widgets.geostat.Symbol.superclass.onRender.apply(this, arguments);
+        mapfish.widgets.geostat.Facility.superclass.onRender.apply(this, arguments);
         if (this.loadMask) {
             this.loadMask = new Ext.LoadMask(this.bwrap, this.loadMask);
             this.loadMask.show();
@@ -850,7 +850,7 @@ Ext.define('mapfish.widgets.geostat.Symbol', {
             'labelGenerator': this.labelGenerator
         };
 
-        this.coreComp = new mapfish.GeoStat.Symbol(this.map, coreOptions);
+        this.coreComp = new mapfish.GeoStat.Facility(this.map, coreOptions);
         
         if (G.vars.parameter.id) {
             G.util.expandWidget(this);
