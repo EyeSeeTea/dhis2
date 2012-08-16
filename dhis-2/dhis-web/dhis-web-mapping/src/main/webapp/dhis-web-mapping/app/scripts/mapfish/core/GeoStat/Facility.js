@@ -21,7 +21,7 @@
  * @requires core/GeoStat.js
  */
 
-mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
+mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
 
     classification: null,
 
@@ -105,5 +105,5 @@ mapfish.GeoStat.Symbol = OpenLayers.Class(mapfish.GeoStat, {
         }
     },
 
-    CLASS_NAME: "mapfish.GeoStat.Symbol"
+    CLASS_NAME: "mapfish.GeoStat.Facility"
 });
