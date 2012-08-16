@@ -90,16 +90,39 @@
 		border-radius: 1px;
 	}
 	
-/*
-	.gis-menu-item-afterseparator .x-menu-item-link,
-	.gis-menu-item-afterseparator.x-menu-item-active .x-menu-item-link {
-		border-top: 0 none;
-	}
-*/
-	
-	.gis-menu-item-icon {
-		background: url('../images/edit16.png') no-repeat;
+	.gis-menu-item-icon-edit,
+	.gis-menu-item-icon-refresh,
+	.gis-menu-item-icon-clear,
+	.gis-menu-item-icon-labels,
+	.gis-menu-item-icon-filter,
+	.gis-menu-item-icon-search,
+	.gis-menu-item-icon-opacity,
+	.gis-menu-item-icon-history {
 		left: 6px;
+	}	
+	.gis-menu-item-icon-edit {
+		background: url('../images/edit16.png') no-repeat;
+	}
+	.gis-menu-item-icon-refresh {
+		background: url('../images/refresh16.png') no-repeat;
+	}
+	.gis-menu-item-icon-clear {
+		background: url('../images/clear16.png') no-repeat;
+	}
+	.gis-menu-item-icon-labels {
+		background: url('../images/labels16.png') no-repeat;
+	}
+	.gis-menu-item-icon-filter {
+		background: url('../images/filter16.png') no-repeat;
+	}
+	.gis-menu-item-icon-search {
+		background: url('../images/search16.png') no-repeat;
+	}
+	.gis-menu-item-icon-opacity {
+		background: url('../images/opacity16.png') no-repeat;
+	}
+	.gis-menu-item-icon-history {
+		background: url('../images/history16.png') no-repeat;
 	}
 	
 	.x-menu-item-separator {

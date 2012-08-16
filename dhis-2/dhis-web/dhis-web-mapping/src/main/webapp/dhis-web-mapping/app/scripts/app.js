@@ -1,22 +1,40 @@
 var GIS = {
+	map: {},
+	layer: {
+		boundary: {
+			name: 'boundary',
+		},
+		thematic1: {
+			name: 'thematic1',
+		},
+		thematic2: {
+			name: 'thematic2',
+		},
+		facility: {
+			name: 'facility',
+		},
+		symbol: {
+			name: 'symbol',
+		}
+	},
+	obj: {},
 	cmp: {
 		menu: {}
 	},
-	map: {},
-	layers: {},
 	gui: {}
 };
 
-Ext.Loader.setConfig({enabled: true, disableCaching: false});
-Ext.Loader.setPath('GeoExt', 'scripts/geoext/src/GeoExt');
-Ext.require([
-	'GeoExt.panel.Map'
-]);
-
 Ext.onReady( function() {
+	Ext.Loader.setConfig({enabled: true, disableCaching: false});
+	Ext.Loader.setPath('GeoExt', 'scripts/geoext/src/GeoExt');
+	Ext.require([
+		'GeoExt.panel.Map'
+	]);
 	Ext.Ajax.method = 'GET';
     Ext.QuickTips.init();
 	document.body.oncontextmenu = function(){return false;};
+	
+	/* Map */
 	
 	GIS.map = new OpenLayers.Map({
         controls: [
@@ -37,22 +55,112 @@ Ext.onReady( function() {
 		]
     });
     
-    GIS.layers.boundary = new OpenLayers.Layer.Vector(G.i18n.boundary_layer, {
-        strategies: [ new OpenLayers.Strategy.Refresh({force:true}) ],
-        'visibility': false,
-        'displayInLayerSwitcher': false,
-        'styleMap': new OpenLayers.StyleMap({
+    /* Vector */
+    
+    GIS.layer.boundary.vector = new OpenLayers.Layer.Vector(G.i18n.boundary_layer, {
+        strategies: [
+			new OpenLayers.Strategy.Refresh({force:true})
+		],
+        visibility: false,
+        displayInLayerSwitcher: false,
+        styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
-                    {'fillOpacity': 0, 'strokeColor': '#000', 'strokeWidth': 1, 'pointRadius': 5},
-                    OpenLayers.Feature.Vector.style['default']
-                )
+					{
+						fillOpacity: 0,
+						strokeColor: '#000',
+						strokeWidth: 1,
+						pointRadius: 5
+					},
+					OpenLayers.Feature.Vector.style['default']
+				)
             )
-        })
+        }),
+        layerType: 'vector' //conf
     });
+        
+    GIS.map.addLayer(GIS.layer.boundary.vector);
     
-    GIS.layers.boundary.layerType = 'thematic';//i18n
-    GIS.map.addLayer(GIS.layers.boundary);
+    /* Objects */
+    
+    GIS.obj.LayerMenu = function(cmpRef) {
+		return Ext.create('Ext.menu.Menu', {
+			shadow: false,
+			showSeparator: false,
+			itemsXableAlways: function() {
+				Ext.Array.each(this.items.items, function(item) {
+					if (!item.alwaysEnabled) {
+						item.disable();
+					}
+				});
+			},
+			itemsXableHistory: function() {
+				Ext.each(this.items, function(item) {
+					if (!item.alwaysEnabled && !item.historyEnabled) {
+						item.disable();
+					}
+				});
+			},
+			items: [
+				{
+					text: 'Edit layer..',//i18n
+					iconCls: 'gis-menu-item-icon-edit',
+					alwaysEnabled: true
+				},
+				{
+					xtype: 'menuseparator',
+					alwaysEnabled: true
+				},
+				{
+					text: 'Refresh',//i18n
+					iconCls: 'gis-menu-item-icon-refresh',
+					cls: 'gis-menu-item-afterseparator'
+				},
+				{
+					text: 'Clear',//i18n
+					iconCls: 'gis-menu-item-icon-clear'
+				},
+				{
+					xtype: 'menuseparator',
+					alwaysEnabled: true
+				},
+				{
+					text: 'Labels..',//i18n
+					iconCls: 'gis-menu-item-icon-labels'
+				},
+				{
+					text: 'Filter..',//i18n
+					iconCls: 'gis-menu-item-icon-filter'
+				},
+				{
+					text: 'Search..',//i18n
+					iconCls: 'gis-menu-item-icon-search'
+				},
+				{
+					xtype: 'menuseparator',
+					alwaysEnabled: true
+				},
+				{
+					text: 'Opacity',//i18n
+					iconCls: 'gis-menu-item-icon-opacity',
+					menu: Ext.create('Ext.menu.Menu', {
+						shadow: false,
+						showSeparator: false
+					})
+				}
+			],
+			listeners: {
+				added: function() {
+					GIS.cmp.menu[cmpRef] = this;
+				},
+				afterrender: function() {
+					this.getEl().addCls('gis-vertical-toolbar-btn-menu');
+					
+					this.itemsXableAlways();
+				}
+			}
+		});
+	};
     
 	/* Graphical user interface */
 	GIS.gui.viewport = Ext.create('Ext.container.Viewport', {
@@ -80,98 +188,7 @@ Ext.onReady( function() {
 					items: [
 						{
 							iconCls: 'gis-btn-icon-boundary',
-							menu: Ext.create('Ext.menu.Menu', {
-								shadow: false,
-								showSeparator: false,
-								itemsXableAlways: function() {
-									Ext.Array.each(this.items.items, function(item) {
-										if (!item.alwaysEnabled) {
-											console.log(item);
-											item.disable();
-										}
-									});
-								},
-								itemsXableHistory: function() {
-									Ext.each(this.items, function(item) {
-										if (!item.alwaysEnabled && !item.historyEnabled) {
-											item.disable();
-										}
-									});
-								},
-								items: [
-									{
-										text: 'Edit layer..',//i18n
-										iconCls: 'gis-menu-item-icon',
-										alwaysEnabled: true
-									},
-									{
-										xtype: 'menuseparator',
-										alwaysEnabled: true
-									},
-									{
-										text: 'Refresh',//i18n
-										iconCls: 'gis-menu-item-icon',
-										cls: 'gis-menu-item-afterseparator'
-									},
-									{
-										text: 'Clear',//i18n
-										iconCls: 'gis-menu-item-icon'
-									},
-									{
-										xtype: 'menuseparator',
-										alwaysEnabled: true
-									},
-									{
-										text: 'Labels..',//i18n
-										iconCls: 'gis-menu-item-icon'
-									},
-									{
-										text: 'Filter..',//i18n
-										iconCls: 'gis-menu-item-icon'
-									},
-									{
-										text: 'Search..',//i18n
-										iconCls: 'gis-menu-item-icon'
-									},
-									{
-										xtype: 'menuseparator',
-										alwaysEnabled: true
-									},
-									{
-										text: 'Opacity',//i18n
-										iconCls: 'gis-menu-item-icon',
-										menu: Ext.create('Ext.menu.Menu', {
-											shadow: false,
-											showSeparator: false,
-											items: []
-										})
-									},
-									{
-										xtype: 'menuseparator',
-										alwaysEnabled: true
-									},
-									{
-										text: 'History',//i18n
-										iconCls: 'gis-menu-item-icon',
-										historyEnabled: true,
-										menu: Ext.create('Ext.menu.Menu', {
-											shadow: false,
-											showSeparator: false,
-											items: []
-										})
-									}
-								],
-								listeners: {
-									added: function() {
-										GIS.cmp.menu.boundary = this;
-									},
-									afterrender: function() {
-										this.getEl().addCls('gis-vertical-toolbar-btn-menu');
-										
-										this.itemsXableAlways();
-									}
-								}
-							})
+							menu: new GIS.obj.LayerMenu(GIS.layer.boundary.name)
 						},
 						
 						{
