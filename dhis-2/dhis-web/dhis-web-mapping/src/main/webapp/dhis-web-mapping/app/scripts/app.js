@@ -60,7 +60,11 @@ Ext.onReady( function() {
 	/* Init */
 	
 	GIS.init.onRender = function() {
-		//GIS.layers.googleStreets.layer.setVisibility(false);
+		//GIS.layers.googleStreets.layer.setVisibility(false);		
+	};
+	
+	GIS.init.afterRender = function() {
+		document.getElementsByClassName('olControlButtonItemActive')[0].innerHTML = '+';
 	};
 	
 	/* Util */
@@ -74,7 +78,7 @@ Ext.onReady( function() {
 	GIS.map = new OpenLayers.Map({
         controls: [
 			new OpenLayers.Control.Navigation(),
-			new OpenLayers.Control.LayerSwitcher(),
+			//new OpenLayers.Control.LayerSwitcher(),
 			new OpenLayers.Control.MousePosition({
 				prefix: '<span class="el-opacity-1"><span class="text-mouseposition-lonlat">LON </span>',
 				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
@@ -86,6 +90,16 @@ Ext.onReady( function() {
         displayProjection: new OpenLayers.Projection('EPSG:4326'),
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });
+    
+    /////////////////////////////
+    
+    var button = new OpenLayers.Control.Button({displayClass: 'olControlButton', trigger: function() {alert("yay");}, text: 'Button is to be clicked'});
+    
+    var panel = new OpenLayers.Control.Panel({defaultControl: button});
+    
+    panel.addControls([button]);
+    
+    GIS.map.addControl(panel);
     
     /* Base layers */
     
@@ -265,7 +279,8 @@ Ext.onReady( function() {
             }
 		],
 		listeners: {
-			render: GIS.init.onRender
+			render: GIS.init.onRender,
+			afterrender: GIS.init.afterRender
 		}
 	});	
 });

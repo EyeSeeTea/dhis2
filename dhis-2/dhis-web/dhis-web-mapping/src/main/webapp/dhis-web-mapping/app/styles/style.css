@@ -9,6 +9,52 @@
 
 /* OpenLayers overrides */
 
+
+
+
+
+.olControlButtonItemActive {
+    background: #555566;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-bottom-left-radius: 3px;
+    opacity: 0.8;
+    cursor: pointer;
+    cursor: hand;
+    text-align: center;
+    font-size: 21px;
+    text-shadow: 0 0 1px #ddd;
+}
+
+.olControlPanel {
+	position: absolute;
+	top: 0;
+	right: 0;
+    border: 0 none;
+}
+
+
+
+
+
+
+
+
+
+
+
+.olControlLayerSwitcher .layersDiv {
+	padding-bottom: 10px !important;
+	background-color: #fff !important;
+	border-top-left-radius: 5px;
+	border-bottom-left-radius: 5px;
+	opacity: 0.85;
+}
+.olControlLayerSwitcher .layersDiv * {
+	color: #000;
+}
+
 .olControlPermalink {
 	display: none !important;
 }
@@ -22,7 +68,7 @@
 	right: 0 !important;
 	bottom: 0 !important;
 	border-top-left-radius: 2px !important;
-	padding: 3px 3px 2px 5px !important;
+	padding: 3px 2px 2px 5px !important;
 	color: #000 !important;
 }
 .olLayerGoogleCopyright, .olLayerGoogleV3.olLayerGooglePoweredBy {
