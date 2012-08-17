@@ -22,11 +22,22 @@
 	right: 0 !important;
 	bottom: 0 !important;
 	border-top-left-radius: 2px !important;
-	padding: 3px 5px 2px !important;
+	padding: 3px 3px 2px 5px !important;
 	color: #000 !important;
 }
 .olLayerGoogleCopyright, .olLayerGoogleV3.olLayerGooglePoweredBy {
 	display: none;
+}
+
+#google-logo {
+	background: url('../images/google-logo.png') no-repeat;
+	width: 40px;
+	height: 13px;
+	margin-left: 6px;
+	display: inline-block;
+	vertical-align: bottom;
+	cursor: pointer;
+	cursor: hand;
 }
 
 /* GIS */

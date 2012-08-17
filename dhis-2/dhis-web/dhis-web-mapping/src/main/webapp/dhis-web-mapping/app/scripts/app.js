@@ -3,9 +3,16 @@ var GIS = {
 		finals: {
 			layertype_base: 'base',
 			layertype_vector: 'vector'
+		},
+		url: {
+			google_terms: 'http://www.google.com/intl/en-US_US/help/terms_maps.html',
+			target_blank: '_blank'
 		}
 	},
 	init: {},
+	util: {
+		google: {}
+	},
 	map: {},
 	layers: {
 		boundary: {
@@ -56,6 +63,12 @@ Ext.onReady( function() {
 		//GIS.layers.googleStreets.layer.setVisibility(false);
 	};
 	
+	/* Util */
+	
+	GIS.util.google.openTerms = function() {
+		window.open('http://www.google.com/intl/en-US_US/help/terms_maps.html', '_blank');
+	};
+	
 	/* Map */
 	
 	GIS.map = new OpenLayers.Map({
@@ -65,7 +78,8 @@ Ext.onReady( function() {
 			new OpenLayers.Control.MousePosition({
 				prefix: '<span class="el-opacity-1"><span class="text-mouseposition-lonlat">LON </span>',
 				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
-				suffix: '</span>'
+				//suffix: '<a href="http://www.vg.no"><img src="images/google-logo.png"></a></span>'
+				suffix: '<div id="google-logo" onclick="javascript:GIS.util.google.openTerms();"></div></span>'
 			}),
 			new OpenLayers.Control.Permalink()
 		],
@@ -210,6 +224,7 @@ Ext.onReady( function() {
 		items: [
 			{
 				region: 'east',
+				width: 200,
 				items: {
 					html: 'east'
 				}
