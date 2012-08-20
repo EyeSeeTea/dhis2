@@ -151,7 +151,7 @@ Ext.onReady( function() {
     
     /* Objects */
     
-    GIS.obj.LayerMenu = function(cmpRef) {
+    GIS.obj.LayerMenu = function(cmpRef, cls) {
 		return Ext.create('Ext.menu.Menu', {
 			shadow: false,
 			showSeparator: false,
@@ -223,7 +223,10 @@ Ext.onReady( function() {
 					GIS.cmp.menu[cmpRef] = this;
 				},
 				afterrender: function() {
-					this.getEl().addCls('gis-vertical-toolbar-btn-menu');
+					this.getEl().addCls('gis-toolbar-btn-menu');					
+					if (cls) {
+						this.getEl().addCls('gis-toolbar-btn-menu-first');
+					}
 					
 					this.itemsXableAlways();
 				}
@@ -238,42 +241,48 @@ Ext.onReady( function() {
 		items: [
 			{
 				region: 'east',
-				width: 200,
-				items: {
-					html: 'east'
-				}
+				width: 200
 			},
             {
                 xtype: 'gx_mappanel',
                 region: 'center',
                 map: GIS.map,
-                lbar: {
+                height: 31,
+                tbar: {
 					defaults: {
-						height: 30,
-						width: 30,
-						menuAlign: 'tr'
 					},
 					items: [
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layers.boundary.name,
-							menu: new GIS.obj.LayerMenu(GIS.layers.boundary.name)
+							menu: new GIS.obj.LayerMenu(GIS.layers.boundary.name, 'gis-menu-first'),
+							height: 26,
+							width: 26
 						},
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layers.thematic1.name,
-							menu: new GIS.obj.LayerMenu(GIS.layers.thematic1.name)
+							menu: new GIS.obj.LayerMenu(GIS.layers.thematic1.name),
+							height: 26,
+							width: 26
 						},
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layers.thematic2.name,
-							menu: new GIS.obj.LayerMenu(GIS.layers.thematic2.name)
+							menu: new GIS.obj.LayerMenu(GIS.layers.thematic2.name),
+							height: 26,
+							width: 26
 						},
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layers.facility.name,
-							menu: new GIS.obj.LayerMenu(GIS.layers.facility.name)
+							menu: new GIS.obj.LayerMenu(GIS.layers.facility.name),
+							height: 26,
+							width: 26
 						},
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layers.symbol.name,
-							menu: new GIS.obj.LayerMenu(GIS.layers.symbol.name)
-						}
+							menu: new GIS.obj.LayerMenu(GIS.layers.symbol.name),
+							height: 26,
+							width: 26
+						},
+						'-'
 					]
 				}
             }

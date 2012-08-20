@@ -88,45 +88,45 @@
 
 /* GIS */
 
-/* Vertical toolbar */
+/* Toolbar */
 
-.x-toolbar-vertical { /* Same space on both sides of toolbar btns */
-	padding-left: 1px;
+.x-toolbar {
+	
 }
 
-	/* Vertical toolbar btn */
-	.x-toolbar-vertical .x-btn-default-toolbar-small-icon button,
-	.x-toolbar-vertical .gis-btn-icon-boundary,
-	.x-toolbar-vertical .gis-btn-icon-thematic1,
-	.x-toolbar-vertical .gis-btn-icon-thematic2,
-	.x-toolbar-vertical .gis-btn-icon-facility,
-	.x-toolbar-vertical .gis-btn-icon-symbol {
+	/* Toolbar btn */
+	.x-toolbar .x-btn-default-toolbar-small-icon button,
+	.x-toolbar .gis-btn-icon-boundary,
+	.x-toolbar .gis-btn-icon-thematic1,
+	.x-toolbar .gis-btn-icon-thematic2,
+	.x-toolbar .gis-btn-icon-facility,
+	.x-toolbar .gis-btn-icon-symbol {
 		width: 24px !important;
 		height: 24px !important;
 	}
-	.x-toolbar-vertical .gis-btn-icon-boundary {
+	.x-toolbar .gis-btn-icon-boundary {
 		background: url('../images/boundary.png') no-repeat;
 	}
-	.x-toolbar-vertical .gis-btn-icon-thematic1 {
+	.x-toolbar .gis-btn-icon-thematic1 {
 		background: url('../images/thematic1.png') no-repeat;
 	}
-	.x-toolbar-vertical .gis-btn-icon-thematic2 {
+	.x-toolbar .gis-btn-icon-thematic2 {
 		background: url('../images/thematic2.png') no-repeat;
 	}
-	.x-toolbar-vertical .gis-btn-icon-facility {
+	.x-toolbar .gis-btn-icon-facility {
 		background: url('../images/facility.png') no-repeat;
 	}
-	.x-toolbar-vertical .gis-btn-icon-symbol {
+	.x-toolbar .gis-btn-icon-symbol {
 		background: url('../images/symbol.png') no-repeat;
 	}
 
-		/* Vertical toolbar btn menu */
-		.gis-vertical-toolbar-btn-menu { /* Align menu */
-			margin-left: 5px;
+		/* Toolbar btn menu */
+		.gis-toolbar-btn-menu { /* Align menu */
+			margin-top: 5px;
 		}		
-		.gis-vertical-toolbar-btn-menu .x-panel-body-default { /* Menu border */
+		.gis-toolbar-btn-menu .x-panel-body-default { /* Menu border */
 			border-radius: 3px;
-			border-color: #999;
+			border-color: #aaa;
 		}
 		
 		
@@ -136,6 +136,10 @@
 .x-menu-body { /* General menu */
 	background: #fff !important;
 	padding: 0;
+}
+
+.gis-toolbar-btn-menu-first { /* Boundary layer menu spacing from viewport */
+	left: 3px !important;
 }
 
 	/* Menu item */
@@ -199,3 +203,5 @@
 	.x-menu-item-text {
 		font-size: 10px;
 	}
+	
+	
