@@ -44,14 +44,14 @@
 		"core/Color.js",
 		"core/GeoStat.js",
 		"core/GeoStat/Boundary.js",
-		"core/GeoStat/Choropleth.js",
-		"core/GeoStat/Point.js",
+		"core/GeoStat/Thematic1.js",
+		"core/GeoStat/Thematic2.js",
 		"core/GeoStat/Facility.js",
 		"core/GeoStat/Symbol.js",
 		"core/Util.js",
 		"widgets/geostat/Boundary.js",
-		"widgets/geostat/Choropleth.js",
-		"widgets/geostat/Point.js",
+		"widgets/geostat/Thematic1.js",
+		"widgets/geostat/Thematic2.js",
 		"widgets/geostat/Facility.js",
 		"widgets/geostat/Symbol.js"
 	);

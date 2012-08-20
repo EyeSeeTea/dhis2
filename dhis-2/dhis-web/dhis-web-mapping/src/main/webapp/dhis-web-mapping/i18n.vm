@@ -1,6 +1,6 @@
-var G = {};
+var GIS = {};
 
-G.i18n = {
+GIS.i18n = {
     save: '$encoder.jsEscape($i18n.getString( 'save' ) , "'")',
     saved: '$encoder.jsEscape($i18n.getString( 'saved' ) , "'")',
     delete_: '$encoder.jsEscape($i18n.getString( 'delete' ) , "'")',

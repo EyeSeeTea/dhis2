@@ -1,51 +1,84 @@
-var GIS = {
-	conf: {
-		finals: {
+GIS.conf = {
+	finals: {
+		layer: {
 			layertype_base: 'base',
 			layertype_vector: 'vector'
 		},
-		url: {
-			google_terms: 'http://www.google.com/intl/en-US_US/help/terms_maps.html',
-			target_blank: '_blank'
+		widget: {
+			valuetype_indicator: 'indicator',
+			valuetype_dataelement: 'dataelement'
 		}
 	},
-	init: {},
-	util: {
-		google: {}
+	url: {
+		path_api: '../../api/',
+		google_terms: 'http://www.google.com/intl/en-US_US/help/terms_maps.html',
+		target_blank: '_blank'
 	},
-	map: {},
-	layers: {
-		boundary: {
-			name: 'boundary',
-		},
-		thematic1: {
-			name: 'thematic1',
-		},
-		thematic2: {
-			name: 'thematic2',
-		},
-		facility: {
-			name: 'facility',
-		},
-		symbol: {
-			name: 'symbol',
-		},
-		openStreetMap: {
-			name: 'OpenStreetMap'
-		},
-		googleStreets: {
-			name: 'Google Streets'
-		},
-		googleHybrid: {
-			name: 'Google Hybrid'
+	layout: {
+		widget: {
+			combo_width: 150
 		}
 	},
-	obj: {},
-	cmp: {
-		menu: {}
-	},
-	gui: {}
+	period: {
+		periodTypes: [
+			{id: 'Daily', name: 'Daily'},
+			{id: 'Weekly', name: 'Weekly'},
+			{id: 'Monthly', name: 'Monthly'},
+			{id: 'BiMonthly', name: 'BiMonthly'},
+			{id: 'Quarterly', name: 'Quarterly'},
+			{id: 'SixMonthly', name: 'SixMonthly'},
+			{id: 'Yearly', name: 'Yearly'},
+			{id: 'FinancialOct', name: 'FinancialOct'},
+			{id: 'FinancialJuly', name: 'FinancialJuly'},
+			{id: 'FinancialApril', name: 'FinancialApril'}
+		]
+	}
 };
+
+GIS.init = {};
+
+GIS.util = {
+	google: {}
+};
+
+GIS.map = {};
+
+GIS.layer = {
+	boundary: {
+		name: 'boundary',
+	},
+	thematic1: {
+		name: 'thematic1',
+	},
+	thematic2: {
+		name: 'thematic2',
+	},
+	facility: {
+		name: 'facility',
+	},
+	symbol: {
+		name: 'symbol',
+	},
+	openStreetMap: {
+		name: 'OpenStreetMap'
+	},
+	googleStreets: {
+		name: 'Google Streets'
+	},
+	googleHybrid: {
+		name: 'Google Hybrid'
+	}
+};
+
+GIS.store = {};
+
+GIS.obj = {};
+
+GIS.cmp = {
+	menu: {}
+};
+
+GIS.gui = {};
 
 Ext.onReady( function() {
 	Ext.Loader.setConfig({enabled: true, disableCaching: false});
@@ -60,7 +93,7 @@ Ext.onReady( function() {
 	/* Init */
 	
 	GIS.init.onRender = function() {
-		//GIS.layers.googleStreets.layer.setVisibility(false);		
+		//GIS.layer.googleStreets.layer.setVisibility(false);
 	};
 	
 	GIS.init.afterRender = function() {
@@ -99,28 +132,28 @@ Ext.onReady( function() {
     /* Base layers */
     
     if (window.google) {
-        GIS.layers.googleStreets.layer = new OpenLayers.Layer.Google(
-            GIS.layers.googleStreets.name,
+        GIS.layer.googleStreets.layer = new OpenLayers.Layer.Google(
+            GIS.layer.googleStreets.name,
             {numZoomLevels: 20, animationEnabled: true}
         );        
-        GIS.layers.googleStreets.layer.layerType = GIS.conf.finals.layertype_base;
-        GIS.map.addLayer(GIS.layers.googleStreets.layer);
+        GIS.layer.googleStreets.layer.layerType = GIS.conf.finals.layer.layertype_base;
+        GIS.map.addLayer(GIS.layer.googleStreets.layer);
         
-        GIS.layers.googleHybrid.layer = new OpenLayers.Layer.Google(
-            GIS.layers.googleHybrid.name,
+        GIS.layer.googleHybrid.layer = new OpenLayers.Layer.Google(
+            GIS.layer.googleHybrid.name,
             {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 20, animationEnabled: true}
         );        
-        GIS.layers.googleHybrid.layer.layerType = GIS.conf.finals.layertype_base;
-        GIS.map.addLayer(GIS.layers.googleHybrid.layer);
+        GIS.layer.googleHybrid.layer.layerType = GIS.conf.finals.layer.layertype_base;
+        GIS.map.addLayer(GIS.layer.googleHybrid.layer);
     }
     
-    GIS.layers.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.layers.openStreetMap.name);
-    GIS.layers.openStreetMap.layer.layerType = GIS.conf.finals.layertype_base;
-    GIS.map.addLayer(GIS.layers.openStreetMap.layer);
+    GIS.layer.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.layer.openStreetMap.name);
+    GIS.layer.openStreetMap.layer.layerType = GIS.conf.finals.layer.layertype_base;
+    GIS.map.addLayer(GIS.layer.openStreetMap.layer);
     
     /* Vector layers */
     
-    GIS.layers.boundary.layer = new OpenLayers.Layer.Vector(G.i18n.boundary_layer, {
+    GIS.layer.boundary.layer = new OpenLayers.Layer.Vector(GIS.i18n.boundary_layer, {
         strategies: [
 			new OpenLayers.Strategy.Refresh({force:true})
 		],
@@ -140,9 +173,101 @@ Ext.onReady( function() {
             )
         }),
         layerType: GIS.conf.finals.layertype_vector
-    });
-            
-    GIS.map.addLayer(GIS.layers.boundary.layer);
+    });            
+    GIS.map.addLayer(GIS.layer.boundary.layer);
+    
+    GIS.layer.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
+        strategies: [
+			new OpenLayers.Strategy.Refresh({force:true})
+		],
+        visibility: false,
+        displayInLayerSwitcher: false,
+        styleMap: new OpenLayers.StyleMap({
+            'default': new OpenLayers.Style(
+                OpenLayers.Util.applyDefaults(
+					{
+						fillOpacity: 0,
+						strokeColor: '#000',
+						strokeWidth: 1,
+						pointRadius: 5
+					},
+					OpenLayers.Feature.Vector.style['default']
+				)
+            )
+        }),
+        layerType: GIS.conf.finals.layertype_vector
+    });            
+    GIS.map.addLayer(GIS.layer.thematic1.layer);
+    
+    /* Stores */
+    
+    GIS.store.indicatorGroups = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'indicatorGroups.json?links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'indicatorGroups'
+			}
+		},
+		isLoaded: false,
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					//GIS.init.afterLoad();
+					this.isLoaded = true;
+				}
+			}
+		}
+	});
+    
+    GIS.store.dataElementGroups = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'dataElementGroups.json?links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'dataElementGroups'
+			}
+		},
+		isLoaded: false,
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					//GIS.init.afterLoad();
+					this.isLoaded = true;
+				}
+			}
+		}
+	});
+	
+	GIS.store.periodTypes = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		data: GIS.conf.period.periodtypes
+	});
+    
+    GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'organisationUnitLevels.json?links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'organisationUnitLevels'
+			}
+		},
+		isLoaded: false,
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					//GIS.init.afterLoad();
+					this.isLoaded = true;
+				}
+			}
+		}
+	});
     
     /* Objects */
     
@@ -231,12 +356,34 @@ Ext.onReady( function() {
     
 	/* Graphical user interface */
 	
+	GIS.layer.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
+        map: GIS.map,
+        layer: GIS.layer.thematic1.layer,
+        featureSelection: false,
+        legendDiv: 'thematic1Legend',
+        defaults: {width: 130},
+        listeners: {
+            'expand': function() {
+                //GIS.vars.activePanel.setPolygon();
+            },
+            'afterrender': function() {
+                //this.layer.widget = this;
+            }
+        }
+    });
+	
 	GIS.gui.viewport = Ext.create('Ext.container.Viewport', {
 		layout: 'border',		
 		items: [
 			{
 				region: 'east',
-				width: 200
+				width: 200,
+				items: [
+                    {
+                        title: 'Thematic layer 1 legend', //i18n
+                        contentEl: 'thematic1Legend'
+                    }
+				]
 			},
             {
                 xtype: 'gx_mappanel',
@@ -249,28 +396,28 @@ Ext.onReady( function() {
 					},
 					items: [
 						{
-							iconCls: 'gis-btn-icon-' + GIS.layers.boundary.name,
-							menu: new GIS.obj.LayerMenu(GIS.layers.boundary.name, 'gis-menu-first'),
+							iconCls: 'gis-btn-icon-' + GIS.layer.boundary.name,
+							menu: new GIS.obj.LayerMenu(GIS.layer.boundary.name, 'gis-menu-first'),
 							width: 26
 						},
 						{
-							iconCls: 'gis-btn-icon-' + GIS.layers.thematic1.name,
-							menu: new GIS.obj.LayerMenu(GIS.layers.thematic1.name),
+							iconCls: 'gis-btn-icon-' + GIS.layer.thematic1.name,
+							menu: new GIS.obj.LayerMenu(GIS.layer.thematic1.name),
 							width: 26
 						},
 						{
-							iconCls: 'gis-btn-icon-' + GIS.layers.thematic2.name,
-							menu: new GIS.obj.LayerMenu(GIS.layers.thematic2.name),
+							iconCls: 'gis-btn-icon-' + GIS.layer.thematic2.name,
+							menu: new GIS.obj.LayerMenu(GIS.layer.thematic2.name),
 							width: 26
 						},
 						{
-							iconCls: 'gis-btn-icon-' + GIS.layers.facility.name,
-							menu: new GIS.obj.LayerMenu(GIS.layers.facility.name),
+							iconCls: 'gis-btn-icon-' + GIS.layer.facility.name,
+							menu: new GIS.obj.LayerMenu(GIS.layer.facility.name),
 							width: 26
 						},
 						{
-							iconCls: 'gis-btn-icon-' + GIS.layers.symbol.name,
-							menu: new GIS.obj.LayerMenu(GIS.layers.symbol.name),
+							iconCls: 'gis-btn-icon-' + GIS.layer.symbol.name,
+							menu: new GIS.obj.LayerMenu(GIS.layer.symbol.name),
 							width: 26
 						},
 						{

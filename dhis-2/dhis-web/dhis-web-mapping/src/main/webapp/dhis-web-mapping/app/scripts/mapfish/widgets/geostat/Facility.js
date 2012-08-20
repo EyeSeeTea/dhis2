@@ -113,14 +113,14 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                 layout: 'fit',
                 autoHeight: true,
                 height: 'auto',
-                width: G.conf.window_width,
+                width: GIS.conf.window_width,
                 items: [
                     {
                         xtype: 'form',
                         bodyStyle:'padding:8px',
                         autoHeight: true,
                         height: 'auto',
-                        labelWidth: G.conf.label_width,
+                        labelWidth: GIS.conf.label_width,
                         items: [
                             { html: 'Show organisation units where <b>type</b> is..' },
                             { html: '<div class="window-p"></div>' },
@@ -130,9 +130,9 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                                 dataFields: ['id', 'name'],
                                 valueField: 'name',
                                 displayField: 'name',
-                                width: G.conf.multiselect_width,
-                                height: G.util.getMultiSelectHeight() / 2,
-                                store: G.stores.groupsByGroupSet,
+                                width: GIS.conf.multiselect_width,
+                                height: GIS.util.getMultiSelectHeight() / 2,
+                                store: GIS.stores.groupsByGroupSet,
                                 listeners: {
                                     'change': {
                                         scope: this,
@@ -149,7 +149,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                     '->',
                     {
                         xtype: 'button',
-                        text: G.i18n.update,
+                        text: GIS.i18n.update,
                         iconCls: 'icon-assign',
                         scope: this,
                         handler: function() {
@@ -174,7 +174,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                     }
                 }
             });
-            window.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
+            window.setPagePosition(GIS.conf.window_x_left,GIS.conf.window_y_left);
             window.show();
         }
     },
@@ -206,7 +206,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
     },
 
     requestFailure: function(request) {
-        OpenLayers.Console.error(G.i18n.ajax_request_failed);
+        OpenLayers.Console.error(GIS.i18n.ajax_request_failed);
     },
     
     getColors: function() {
@@ -214,12 +214,12 @@ Ext.define('mapfish.widgets.geostat.Facility', {
     
     initProperties: function() {
         this.legend = {
-            value: G.conf.map_legendset_type_automatic,
-            method: G.conf.classify_by_equal_intervals,
+            value: GIS.conf.map_legendset_type_automatic,
+            method: GIS.conf.classify_by_equal_intervals,
             classes: 5,
             reset: function() {
-                this.value = G.conf.map_legendset_type_automatic;
-                this.method = G.conf.classify_by_equal_intervals;
+                this.value = GIS.conf.map_legendset_type_automatic;
+                this.method = GIS.conf.classify_by_equal_intervals;
                 this.classes = 5;
             }
         };
@@ -259,26 +259,26 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                 this.parent.name = pn;
                 this.parent.level = this.level.level;
                 this.level.level++;
-                this.level.name = G.stores.organisationUnitLevel.getAt(
-                    G.stores.organisationUnitLevel.find('level', this.level.level)).data.name;
+                this.level.name = GIS.stores.organisationUnitLevel.getAt(
+                    GIS.stores.organisationUnitLevel.find('level', this.level.level)).data.name;
                 
                 return [this.parent.name, this.level.name];
             }                
         };
         
         this.valueType = {
-            value: G.conf.map_value_type_indicator,
+            value: GIS.conf.map_value_type_indicator,
             setIndicator: function() {
-                this.value = G.conf.map_value_type_indicator;
+                this.value = GIS.conf.map_value_type_indicator;
             },
             setDatElement: function() {
-                this.value = G.conf.map_value_type_dataelement;
+                this.value = GIS.conf.map_value_type_dataelement;
             },
             isIndicator: function() {
-                return this.value == G.conf.map_value_type_indicator;
+                return this.value == GIS.conf.map_value_type_indicator;
             },
             isDataElement: function() {
-                return this.value == G.conf.map_value_type_dataelement;
+                return this.value == GIS.conf.map_value_type_dataelement;
             }
         };
         
@@ -302,14 +302,14 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                 ]
             }),
             infrastructuralDataElementMapValue: new Ext.data.JsonStore({
-                url: G.conf.path_mapping + 'getInfrastructuralDataElementMapValues' + G.conf.type,
+                url: GIS.conf.path_mapping + 'getInfrastructuralDataElementMapValues' + GIS.conf.type,
                 root: 'mapValues',
                 fields: ['dataElementName', 'value'],
                 sortInfo: {field: 'dataElementName', direction: 'ASC'},
                 autoLoad: false,
                 isLoaded: false,
                 listeners: {
-                    'load': G.func.storeLoadListener
+                    'load': GIS.func.storeLoadListener
                 }
             })
         };
@@ -318,7 +318,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
     createItems: function() {
         
         this.cmp.groupSet = new Ext.form.ComboBox({
-            fieldLabel: G.i18n.groupset,
+            fieldLabel: GIS.i18n.groupset,
             typeAhead: true,
             editable: false,
             valueField: 'id',
@@ -326,25 +326,25 @@ Ext.define('mapfish.widgets.geostat.Facility', {
             mode: 'remote',
             forceSelection: true,
             triggerAction: 'all',
-            emptyText: G.conf.emptytext,
-            labelSeparator: G.conf.labelseparator,
+            emptyText: GIS.conf.emptytext,
+            labelSeparator: GIS.conf.labelseparator,
             selectOnFocus: true,
-            width: G.conf.combo_width,
+            width: GIS.conf.combo_width,
             currentValue: false,
-            store: G.stores.groupSet,
+            store: GIS.stores.groupSet,
             listeners: {
                 'select': {
                     scope: this,
                     fn: function(cb) {
                         if (cb.currentValue != cb.getValue()) {
                             cb.currentValue = cb.getValue();
-                            G.stores.groupsByGroupSet.setBaseParam('id', cb.getValue());
-                            G.stores.groupsByGroupSet.load({scope: this, callback: function() {
+                            GIS.stores.groupsByGroupSet.setBaseParam('id', cb.getValue());
+                            GIS.stores.groupsByGroupSet.load({scope: this, callback: function() {
                                 this.cmp.group.removeAll();
                                 
-                                for (var i = 0; i < G.stores.groupsByGroupSet.getTotalCount(); i++) {
+                                for (var i = 0; i < GIS.stores.groupsByGroupSet.getTotalCount(); i++) {
                                     var combo = {
-                                        fieldLabel: G.stores.groupsByGroupSet.getAt(i).data.name,
+                                        fieldLabel: GIS.stores.groupsByGroupSet.getAt(i).data.name,
                                         value: i
                                     };
                                     this.cmp.group.add(combo);
@@ -375,9 +375,9 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                 triggerAction: 'all',
                 mode: 'local',
                 labelStyle: 'color:#000;',
-                labelSeparator: G.conf.labelseparator,
-                width: G.conf.combo_number_width_small,
-                listWidth: G.conf.combo_number_width_small,
+                labelSeparator: GIS.conf.labelseparator,
+                width: GIS.conf.combo_number_width_small,
+                listWidth: GIS.conf.combo_number_width_small,
                 store: this.stores.icon,
                 listeners: {
                     'select': {
@@ -391,7 +391,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
         });
         
         this.cmp.level = new Ext.form.ComboBox({
-            fieldLabel: G.i18n.level,
+            fieldLabel: GIS.i18n.level,
             editable: false,
             valueField: 'level',
             displayField: 'name',
@@ -399,9 +399,9 @@ Ext.define('mapfish.widgets.geostat.Facility', {
             forceSelection: true,
             triggerAction: 'all',
             selectOnFocus: true,
-            fieldLabel: G.i18n.level,
-            width: G.conf.combo_width,
-            store: G.stores.organisationUnitLevel,
+            fieldLabel: GIS.i18n.level,
+            width: GIS.conf.combo_width,
+            store: GIS.stores.organisationUnitLevel,
             listeners: {
                 'select': {
                     scope: this,
@@ -419,13 +419,13 @@ Ext.define('mapfish.widgets.geostat.Facility', {
             autoScroll: true,
             lines: false,
             loader: new Ext.tree.TreeLoader({
-                dataUrl: G.conf.path_mapping + 'getOrganisationUnitChildren' + G.conf.type
+                dataUrl: GIS.conf.path_mapping + 'getOrganisationUnitChildren' + GIS.conf.type
             }),
             root: {
-                id: G.system.rootNode.id,
-                text: G.system.rootNode.name,
-                level: G.system.rootNode.level,
-                hasChildrenWithCoordinates: G.system.rootNode.hasChildrenWithCoordinates,
+                id: GIS.system.rootNode.id,
+                text: GIS.system.rootNode.name,
+                level: GIS.system.rootNode.level,
+                hasChildrenWithCoordinates: GIS.system.rootNode.hasChildrenWithCoordinates,
                 nodeType: 'async',
                 draggable: false,
                 expanded: true
@@ -488,7 +488,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                                 ]
                             },                            
                             { html: '<div class="thematic-br"></div>' },                            
-                            { html: '<div class="window-info">' + G.i18n.parent_organisation_unit + '</div>' },
+                            { html: '<div class="window-info">' + GIS.i18n.parent_organisation_unit + '</div>' },
                             this.cmp.parent
                         ]
                     }
@@ -511,7 +511,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
         
         var onHoverUnselect = function onHoverUnselect(feature) {
             if (feature.attributes.name) {
-                document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + G.i18n.no_feature_selected + '</div>';
+                document.getElementById('featuredatatext').innerHTML = '<div style="color:#666">' + GIS.i18n.no_feature_selected + '</div>';
             }
             else {
                 document.getElementById('featuredatatext').innerHTML = '';
@@ -519,7 +519,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
         };
         
         var onClickSelect = function onClickSelect(feature) {
-            if (feature.geometry.CLASS_NAME == G.conf.map_feature_type_point_class_name) {                
+            if (feature.geometry.CLASS_NAME == GIS.conf.map_feature_type_point_class_name) {                
                 if (scope.featureOptions.menu) {
                     scope.featureOptions.menu.destroy();
                 }
@@ -527,7 +527,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                 scope.featureOptions.menu = new Ext.menu.Menu({
                     showInfo: function() {                        
                         Ext.Ajax.request({
-                            url: G.conf.path_mapping + 'getFacilityInfo' + G.conf.type,
+                            url: GIS.conf.path_mapping + 'getFacilityInfo' + GIS.conf.type,
                             params: {id: feature.attributes.id},
                             success: function(r) {
                                 var ou = Ext.util.JSON.decode(r.responseText);
@@ -539,13 +539,13 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                                 scope.featureOptions.info = new Ext.Window({
                                     title: '<span class="window-information-title">Facility information sheet</span>',
                                     layout: 'table',
-                                    width: G.conf.window_width + 178,
-                                    height: G.util.getMultiSelectHeight() + 100,
+                                    width: GIS.conf.window_width + 178,
+                                    height: GIS.util.getMultiSelectHeight() + 100,
                                     bodyStyle: 'background-color:#fff',
                                     defaults: {
                                         bodyStyle: 'vertical-align:top',
-                                        labelSeparator: G.conf.labelseparator,
-                                        emptyText: G.conf.emptytext
+                                        labelSeparator: GIS.conf.labelseparator,
+                                        emptyText: GIS.conf.emptytext
                                     },
                                     layoutConfig: {
                                         columns: 2
@@ -557,26 +557,26 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                                             bodyStyle: 'padding:8px 4px 8px 8px',
                                             width: 160,
                                             items: [
-                                                {html: '<div class="window-info">' + G.i18n.name + '<p style="font-weight:normal">' + feature.attributes.name + '</p></div>'},
-                                                {html: '<div class="window-info">' + G.i18n.type + '<p style="font-weight:normal">' + ou.ty + '</p></div>'},
-                                                {html: '<div class="window-info">' + G.i18n.code + '<p style="font-weight:normal">' + ou.co + '</p></div>'},
-                                                {html: '<div class="window-info">' + G.i18n.address + '<p style="font-weight:normal">' + ou.ad + '</p></div>'},
-                                                {html: '<div class="window-info">' + G.i18n.contact_person + '<p style="font-weight:normal">' + ou.cp + '</p></div>'},
-                                                {html: '<div class="window-info">' + G.i18n.email + '<p style="font-weight:normal">' + ou.em + '</p></div>'},
-                                                {html: '<div class="window-info">' + G.i18n.phone_number + '<p style="font-weight:normal">' + ou.pn + '</p></div>'}
+                                                {html: '<div class="window-info">' + GIS.i18n.name + '<p style="font-weight:normal">' + feature.attributes.name + '</p></div>'},
+                                                {html: '<div class="window-info">' + GIS.i18n.type + '<p style="font-weight:normal">' + ou.ty + '</p></div>'},
+                                                {html: '<div class="window-info">' + GIS.i18n.code + '<p style="font-weight:normal">' + ou.co + '</p></div>'},
+                                                {html: '<div class="window-info">' + GIS.i18n.address + '<p style="font-weight:normal">' + ou.ad + '</p></div>'},
+                                                {html: '<div class="window-info">' + GIS.i18n.contact_person + '<p style="font-weight:normal">' + ou.cp + '</p></div>'},
+                                                {html: '<div class="window-info">' + GIS.i18n.email + '<p style="font-weight:normal">' + ou.em + '</p></div>'},
+                                                {html: '<div class="window-info">' + GIS.i18n.phone_number + '<p style="font-weight:normal">' + ou.pn + '</p></div>'}
                                             ]
                                         },
                                         {
                                             xtype: 'form',
                                             bodyStyle: 'padding:8px 8px 8px 4px',
-                                            width: G.conf.window_width + 20,
-                                            labelWidth: G.conf.label_width,
+                                            width: GIS.conf.window_width + 20,
+                                            labelWidth: GIS.conf.label_width,
                                             items: [
-                                                {html: '<div class="window-info">' + G.i18n.infrastructural_data + '</div>'},
+                                                {html: '<div class="window-info">' + GIS.i18n.infrastructural_data + '</div>'},
                                                 {
                                                     xtype: 'combo',
                                                     name: 'period',
-                                                    fieldLabel: G.i18n.period,
+                                                    fieldLabel: GIS.i18n.period,
                                                     typeAhead: true,
                                                     editable: false,
                                                     valueField: 'id',
@@ -585,8 +585,8 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                                                     forceSelection: true,
                                                     triggerAction: 'all',
                                                     selectOnFocus: true,
-                                                    width: G.conf.combo_width,
-                                                    store: G.stores.infrastructuralPeriodsByType,
+                                                    width: GIS.conf.combo_width,
+                                                    store: GIS.stores.infrastructuralPeriodsByType,
                                                     lockPosition: false,
                                                     listeners: {
                                                         'select': function(cb) {
@@ -600,7 +600,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                                                 {html: '<div style="padding:4px 0 0 0"></div>'},
                                                 {
                                                     xtype: 'grid',
-                                                    height: G.util.getMultiSelectHeight(),
+                                                    height: GIS.util.getMultiSelectHeight(),
                                                     width: 242,
                                                     cm: new Ext.grid.ColumnModel({
                                                         columns: [
@@ -638,12 +638,12 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                             title: '<span class="window-relocate-title">' + feature.attributes.name + '</span>',
 							bodyStyle: 'padding:8px; background-color:#fff',
                             layout: 'fit',
-                            width: G.conf.window_width,
+                            width: GIS.conf.window_width,
                             items: [
                                 {
                                     xtype: 'panel',
                                     items: [
-                                        {html: G.i18n.select_new_location_on_map}
+                                        {html: GIS.i18n.select_new_location_on_map}
                                     ]
                                 }
                             ],
@@ -653,9 +653,9 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                                     xtype: 'button',
                                     iconCls: 'icon-cancel',
                                     hideLabel: true,
-                                    text: G.i18n.cancel,
+                                    text: GIS.i18n.cancel,
                                     handler: function() {
-                                        G.vars.relocate.active = false;
+                                        GIS.vars.relocate.active = false;
                                         scope.featureOptions.coordinate.destroy();
                                         document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
                                     }
@@ -663,7 +663,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                             ],
                             listeners: {
                                 'close': function() {
-                                    G.vars.relocate.active = false;
+                                    GIS.vars.relocate.active = false;
                                     document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
                                 }
                             }
@@ -673,35 +673,35 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                     },
                     items: [
                         {
-                            text: G.i18n.show_information_sheet,
+                            text: GIS.i18n.show_information_sheet,
                             iconCls: 'menu-featureoptions-info',
                             handler: function(item) {
-                                if (G.stores.infrastructuralPeriodsByType.isLoaded) {
+                                if (GIS.stores.infrastructuralPeriodsByType.isLoaded) {
                                     item.parentMenu.showInfo();
                                 }
                                 else {
-                                    G.stores.infrastructuralPeriodsByType.setBaseParam('name', G.system.infrastructuralPeriodType);
-                                    G.stores.infrastructuralPeriodsByType.load({callback: function() {
+                                    GIS.stores.infrastructuralPeriodsByType.setBaseParam('name', GIS.system.infrastructuralPeriodType);
+                                    GIS.stores.infrastructuralPeriodsByType.load({callback: function() {
                                         item.parentMenu.showInfo();
                                     }});
                                 }
                             }
                         },
                         {
-                            text: G.i18n.relocate,
+                            text: GIS.i18n.relocate,
                             iconCls: 'menu-featureoptions-relocate',
-                            disabled: !G.user.isAdmin,
+                            disabled: !GIS.user.isAdmin,
                             handler: function(item) {
-                                G.vars.relocate.active = true;
-                                G.vars.relocate.widget = scope;
-                                G.vars.relocate.feature = feature;
+                                GIS.vars.relocate.active = true;
+                                GIS.vars.relocate.widget = scope;
+                                GIS.vars.relocate.feature = feature;
                                 document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'crosshair';
                                 item.parentMenu.showRelocate();
                             }
                         }
                     ]
                 });
-                scope.featureOptions.menu.showAt([G.vars.mouseMove.x, G.vars.mouseMove.y]);
+                scope.featureOptions.menu.showAt([GIS.vars.mouseMove.x, GIS.vars.mouseMove.y]);
             }
         };
         
@@ -713,7 +713,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
             }
         );
         
-        G.vars.map.addControl(this.selectFeatures);
+        GIS.vars.map.addControl(this.selectFeatures);
         this.selectFeatures.activate();
     },
     
@@ -753,15 +753,15 @@ Ext.define('mapfish.widgets.geostat.Facility', {
     formValues: { //todo
 		getAllValues: function() {
 			return {
-				featureType: G.conf.map_feature_type_point,
+				featureType: GIS.conf.map_feature_type_point,
 				parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
                 parentOrganisationUnitLevel: this.organisationUnitSelection.parent.level,
                 parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
 				organisationUnitLevel: this.organisationUnitSelection.level.level,
                 organisationUnitLevelName: this.organisationUnitSelection.level.name,
-				longitude: G.vars.map.getCenter().lon,
-				latitude: G.vars.map.getCenter().lat,
-				zoom: parseFloat(G.vars.map.getZoom())
+				longitude: GIS.vars.map.getCenter().lon,
+				latitude: GIS.vars.map.getCenter().lat,
+				zoom: parseFloat(GIS.vars.map.getZoom())
 			};
 		},
         
@@ -792,12 +792,12 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 	},
     
     loadGeoJson: function() {
-        G.vars.mask.msg = G.i18n.loading_geojson;
-        G.vars.mask.show();
-        G.vars.activeWidget = this;
+        GIS.vars.mask.msg = GIS.i18n.loading_geojson;
+        GIS.vars.mask.show();
+        GIS.vars.activeWidget = this;
         this.updateValues = true;
         
-        this.setUrl(G.conf.path_mapping + 'getGeoJsonFacilities.action?' +
+        this.setUrl(GIS.conf.path_mapping + 'getGeoJsonFacilities.action?' +
             'parentId=' + this.organisationUnitSelection.parent.id +
             '&level=' + this.organisationUnitSelection.level.level
         );
@@ -809,11 +809,11 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                 this.loadGeoJson();
             }
             
-            G.vars.lockPosition = lockPosition;
+            GIS.vars.lockPosition = lockPosition;
             
             for (var i = 0; i < this.layer.features.length; i++) {
                 this.layer.features[i].attributes.labelString = this.layer.features[i].attributes.name;
-                this.layer.features[i].attributes.fixedName = G.util.cutString(this.layer.features[i].attributes.name, 30);
+                this.layer.features[i].attributes.fixedName = GIS.util.cutString(this.layer.features[i].attributes.name, 30);
             }
              
             this.applyValues();
@@ -823,12 +823,12 @@ Ext.define('mapfish.widgets.geostat.Facility', {
     applyValues: function() {
 		var options = {indicator: this.cmp.groupSet.getRawValue()};
         
-        G.vars.activeWidget = this;
+        GIS.vars.activeWidget = this;
 		this.coreComp.updateOptions(options);
         this.coreComp.applyClassification(this.form, this);
         this.classificationApplied = true;
         
-        G.vars.mask.hide();
+        GIS.vars.mask.hide();
     },
     
     onRender: function(ct, position) {
@@ -852,9 +852,9 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 
         this.coreComp = new mapfish.GeoStat.Facility(this.map, coreOptions);
         
-        if (G.vars.parameter.id) {
-            G.util.expandWidget(this);
-			G.vars.parameter = false;
+        if (GIS.vars.parameter.id) {
+            GIS.util.expandWidget(this);
+			GIS.vars.parameter = false;
 		}
     }
 });

@@ -111,7 +111,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
     },
 
     requestFailure: function(request) {
-        OpenLayers.Console.error(G.i18n.ajax_request_failed);
+        OpenLayers.Console.error(GIS.i18n.ajax_request_failed);
     },
     
     getColors: function() {
@@ -124,12 +124,12 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
     
     initProperties: function() {
         this.legend = {
-            value: G.conf.map_legendset_type_automatic,
-            method: G.conf.classify_by_equal_intervals,
+            value: GIS.conf.map_legendset_type_automatic,
+            method: GIS.conf.classify_by_equal_intervals,
             classes: 5,
             reset: function() {
-                this.value = G.conf.map_legendset_type_automatic;
-                this.method = G.conf.classify_by_equal_intervals;
+                this.value = GIS.conf.map_legendset_type_automatic;
+                this.method = GIS.conf.classify_by_equal_intervals;
                 this.classes = 5;
             }
         };
@@ -169,41 +169,41 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
                 this.parent.name = pn;
                 this.parent.level = this.level.level;
                 this.level.level++;
-                this.level.name = G.stores.organisationUnitLevel.getAt(
-                    G.stores.organisationUnitLevel.find('level', this.level.level)).data.name;
+                this.level.name = GIS.stores.organisationUnitLevel.getAt(
+                    GIS.stores.organisationUnitLevel.find('level', this.level.level)).data.name;
             }                
         };
         
         this.valueType = {
-            value: G.conf.map_value_type_indicator,
+            value: GIS.conf.map_value_type_indicator,
             setIndicator: function() {
-                this.value = G.conf.map_value_type_indicator;
+                this.value = GIS.conf.map_value_type_indicator;
             },
             setDatElement: function() {
-                this.value = G.conf.map_value_type_dataelement;
+                this.value = GIS.conf.map_value_type_dataelement;
             },
             isIndicator: function() {
-                return this.value == G.conf.map_value_type_indicator;
+                return this.value == GIS.conf.map_value_type_indicator;
             },
             isDataElement: function() {
-                return this.value == G.conf.map_value_type_dataelement;
+                return this.value == GIS.conf.map_value_type_dataelement;
             }
         };
         
         this.stores = {
             infrastructuralDataElementMapValue: new Ext.data.JsonStore({
-                url: G.conf.path_mapping + 'getInfrastructuralDataElementMapValues' + G.conf.type,
+                url: GIS.conf.path_mapping + 'getInfrastructuralDataElementMapValues' + GIS.conf.type,
                 root: 'mapValues',
                 fields: ['dataElementName', 'value'],
                 sortInfo: {field: 'dataElementName', direction: 'ASC'},
                 autoLoad: false,
                 isLoaded: false,
                 listeners: {
-                    'load': G.func.storeLoadListener
+                    'load': GIS.func.storeLoadListener
                 }
             }),
             indicatorsByGroup: new Ext.data.JsonStore({
-                url: G.conf.path_mapping + 'getIndicatorsByIndicatorGroup' + G.conf.type,
+                url: GIS.conf.path_mapping + 'getIndicatorsByIndicatorGroup' + GIS.conf.type,
                 root: 'indicators',
                 fields: ['id', 'name', 'shortName'],
                 idProperty: 'id',
@@ -224,7 +224,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
                 }
             }),
             dataElementsByGroup: new Ext.data.JsonStore({
-                url: G.conf.path_mapping + 'getDataElementsByDataElementGroup' + G.conf.type,
+                url: GIS.conf.path_mapping + 'getDataElementsByDataElementGroup' + GIS.conf.type,
                 root: 'dataElements',
                 fields: ['id', 'name', 'shortName'],
                 sortInfo: {field: 'name', direction: 'ASC'},
@@ -244,13 +244,13 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
                 }
             }),
             periodsByType: new Ext.data.JsonStore({
-                url: G.conf.path_mapping + 'getPeriodsByPeriodType' + G.conf.type,
+                url: GIS.conf.path_mapping + 'getPeriodsByPeriodType' + GIS.conf.type,
                 root: 'periods',
                 fields: ['id', 'name'],
                 autoLoad: false,
                 isLoaded: false,
                 listeners: {
-                    'load': G.func.storeLoadListener
+                    'load': GIS.func.storeLoadListener
                 }
             })
         };
@@ -259,7 +259,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
     createItems: function() {
         
         this.cmp.level = new Ext.form.ComboBox({
-            fieldLabel: G.i18n.level,
+            fieldLabel: GIS.i18n.level,
             editable: false,
             valueField: 'level',
             displayField: 'name',
@@ -267,9 +267,9 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
             forceSelection: true,
             triggerAction: 'all',
             selectOnFocus: true,
-            fieldLabel: G.i18n.level,
-            width: G.conf.combo_width,
-            store: G.stores.organisationUnitLevel,
+            fieldLabel: GIS.i18n.level,
+            width: GIS.conf.combo_width,
+            store: GIS.stores.organisationUnitLevel,
             listeners: {
                 'select': {
                     scope: this,
@@ -287,13 +287,13 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
             autoScroll: true,
             lines: false,
             loader: new Ext.tree.TreeLoader({
-                dataUrl: G.conf.path_mapping + 'getOrganisationUnitChildren' + G.conf.type
+                dataUrl: GIS.conf.path_mapping + 'getOrganisationUnitChildren' + GIS.conf.type
             }),
             root: {
-                id: G.system.rootNode.id,
-                text: G.system.rootNode.name,
-                level: G.system.rootNode.level,
-                hasChildrenWithCoordinates: G.system.rootNode.hasChildrenWithCoordinates,
+                id: GIS.system.rootNode.id,
+                text: GIS.system.rootNode.name,
+                level: GIS.system.rootNode.level,
+                hasChildrenWithCoordinates: GIS.system.rootNode.hasChildrenWithCoordinates,
                 nodeType: 'async',
                 draggable: false,
                 expanded: true
@@ -330,7 +330,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 				xtype: 'panel',
 				width: 270,
 				items: [
-					{ html: '<div class="window-info">' + G.i18n.organisation_unit_level + '</div>' },                            
+					{ html: '<div class="window-info">' + GIS.i18n.organisation_unit_level + '</div>' },                            
 					{
 						xtype: 'panel',
 						layout: 'form',
@@ -339,7 +339,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 						]
 					},                            
 					{ html: '<div class="thematic-br"></div>' },                            
-					{ html: '<div class="window-info">' + G.i18n.parent_organisation_unit + '</div>' },
+					{ html: '<div class="window-info">' + GIS.i18n.parent_organisation_unit + '</div>' },
 					this.cmp.parent
 				]
 			}
@@ -381,9 +381,9 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
                 parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
                 organisationUnitLevel: this.organisationUnitSelection.level.level,
                 organisationUnitLevelName: this.organisationUnitSelection.level.name,
-                longitude: G.vars.map.getCenter().lon,
-                latitude: G.vars.map.getCenter().lat,
-                zoom: parseFloat(G.vars.map.getZoom())
+                longitude: GIS.vars.map.getCenter().lon,
+                latitude: GIS.vars.map.getCenter().lat,
+                zoom: parseFloat(GIS.vars.map.getZoom())
 			};
 		},
         
@@ -401,12 +401,12 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 	},
     
     loadGeoJson: function() {
-        G.vars.mask.msg = G.i18n.loading;
-        G.vars.mask.show();
-        G.vars.activeWidget = this;
+        GIS.vars.mask.msg = GIS.i18n.loading;
+        GIS.vars.mask.show();
+        GIS.vars.activeWidget = this;
         this.updateValues = false;
         
-        var url = G.conf.path_mapping + 'getGeoJson.action?' + 
+        var url = GIS.conf.path_mapping + 'getGeoJson.action?' + 
             '&parentId=' + this.organisationUnitSelection.parent.id +
             '&level=' + this.organisationUnitSelection.level.level;
         this.setUrl(url);
@@ -426,15 +426,15 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		for (var i = 0; i < this.layer.features.length; i++) {
 			var f = this.layer.features[i];
 			f.attributes.labelString = f.attributes.name;
-			f.attributes.fixedName = G.util.cutString(f.attributes.name, 30);
+			f.attributes.fixedName = GIS.util.cutString(f.attributes.name, 30);
 		}
 		
 		this.layer.renderer.clear();
 		this.layer.redraw();
 		this.layer.setVisibility(true);
 		
-		G.util.zoomToVisibleExtent();
-		G.vars.mask.hide();
+		GIS.util.zoomToVisibleExtent();
+		GIS.vars.mask.hide();
 	},
     
     onRender: function(ct, position) {
