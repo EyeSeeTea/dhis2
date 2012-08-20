@@ -250,39 +250,46 @@ Ext.onReady( function() {
                 height: 31,
                 tbar: {
 					defaults: {
+						height: 26
 					},
 					items: [
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layers.boundary.name,
 							menu: new GIS.obj.LayerMenu(GIS.layers.boundary.name, 'gis-menu-first'),
-							height: 26,
 							width: 26
 						},
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layers.thematic1.name,
 							menu: new GIS.obj.LayerMenu(GIS.layers.thematic1.name),
-							height: 26,
 							width: 26
 						},
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layers.thematic2.name,
 							menu: new GIS.obj.LayerMenu(GIS.layers.thematic2.name),
-							height: 26,
 							width: 26
 						},
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layers.facility.name,
 							menu: new GIS.obj.LayerMenu(GIS.layers.facility.name),
-							height: 26,
 							width: 26
 						},
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layers.symbol.name,
 							menu: new GIS.obj.LayerMenu(GIS.layers.symbol.name),
-							height: 26,
 							width: 26
 						},
-						'-'
+						{
+							text: 'Favorites', //i18n
+							menu: {}
+						},
+						{
+							text: 'Legends', //i18n
+							menu: {}
+						},
+						{
+							text: 'Download', //i18n
+							menu: {}
+						}							
 					]
 				}
             }

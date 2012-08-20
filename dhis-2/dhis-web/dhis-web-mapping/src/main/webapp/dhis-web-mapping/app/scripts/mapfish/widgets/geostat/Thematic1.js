@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (C) 2007-2008  Camptocamp|
  *
  * This file is part of MapFish Client
@@ -18,13 +18,13 @@
  */
 
 /**
- * @requires core/GeoStat/Point.js
+ * @requires core/GeoStat/Thematic1.js
  * @requires core/Color.js
  */
 
-Ext.define('mapfish.widgets.geostat.Point', {
+Ext.define('mapfish.widgets.geostat.Thematic1', {
 	extend: 'Ext.panel.Panel',
-	alias: 'widget.point',
+	alias: 'widget.thematic1',
 
     layer: null,
 
@@ -245,7 +245,7 @@ Ext.define('mapfish.widgets.geostat.Point', {
         
         this.createSelectFeatures();
         
-		mapfish.widgets.geostat.Point.superclass.initComponent.apply(this);
+		mapfish.widgets.geostat.Thematic1.superclass.initComponent.apply(this);
     },
     
     setUrl: function(url) {
@@ -700,7 +700,7 @@ Ext.define('mapfish.widgets.geostat.Point', {
                     scope: this,
                     fn: function(cb) {
                         if (cb.getValue() == G.conf.map_legendset_type_predefined && cb.getValue() != this.legend.value) {
-                            this.legend.value = G.conf.map_legendset_type_predefined;
+                            this.legend.value = G.conf.map_legendset_type_predefined;                            
                             this.prepareMapViewLegend();
                             
                             if (this.cmp.mapLegendSet.getValue()) {
@@ -1495,7 +1495,7 @@ Ext.define('mapfish.widgets.geostat.Point', {
             
         G.stores.organisationUnitLevel.load({scope: this, callback: function() {
             this.cmp.level.setValue(this.mapView.organisationUnitLevel);
-            G.vars.activePanel.setPoint();
+            G.vars.activePanel.setPolygon();
             this.loadGeoJson();
         }});
     },
@@ -1808,7 +1808,7 @@ Ext.define('mapfish.widgets.geostat.Point', {
     },
     
     onRender: function(ct, position) {
-        mapfish.widgets.geostat.Point.superclass.onRender.apply(this, arguments);
+        mapfish.widgets.geostat.Thematic1.superclass.onRender.apply(this, arguments);
 
 		var coreOptions = {
             'layer': this.layer,
@@ -1822,6 +1822,6 @@ Ext.define('mapfish.widgets.geostat.Point', {
             'labelGenerator': this.labelGenerator
         };
 
-        this.coreComp = new mapfish.GeoStat.Point(this.map, coreOptions);
+        this.coreComp = new mapfish.GeoStat.Thematic1(this.map, coreOptions);
     }
 });

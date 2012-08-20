@@ -21,7 +21,7 @@
  * @requires core/GeoStat.js
  */
 
-mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
+mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 
     colors: [
         new mapfish.ColorRgb(120, 120, 0),
@@ -198,5 +198,5 @@ mapfish.GeoStat.Choropleth = OpenLayers.Class(mapfish.GeoStat, {
         }
     },
 
-    CLASS_NAME: "mapfish.GeoStat.Choropleth"
+    CLASS_NAME: "mapfish.GeoStat.Thematic1"
 });

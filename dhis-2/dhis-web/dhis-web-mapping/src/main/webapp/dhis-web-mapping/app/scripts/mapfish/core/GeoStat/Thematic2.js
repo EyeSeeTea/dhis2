@@ -21,7 +21,7 @@
  * @requires core/GeoStat.js
  */
 
-mapfish.GeoStat.Point = OpenLayers.Class(mapfish.GeoStat, {
+mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
 
     colors: [
         new mapfish.ColorRgb(120, 120, 0),
@@ -198,5 +198,5 @@ mapfish.GeoStat.Point = OpenLayers.Class(mapfish.GeoStat, {
         }
     },
 
-    CLASS_NAME: "mapfish.GeoStat.Point"
+    CLASS_NAME: "mapfish.GeoStat.Thematic2"
 });

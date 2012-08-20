@@ -88,10 +88,28 @@
 
 /* GIS */
 
+/* Button */
+
+.x-btn-arrow {
+	background-image: url('../images/arrow.png') !important;
+}
+
+.x-btn-default-toolbar-small-over {
+	border-color: #bbb;
+	border-radius: 3px;
+}
+
 /* Toolbar */
 
-.x-toolbar {
-	
+.x-toolbar-default {
+	background-image: none;
+	background-color: #F3F3F3;
+	background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #F1F1F1), color-stop(100%, whiteSmoke));
+	background-image: -webkit-linear-gradient(top, #F1F1F1,whiteSmoke);
+	background-image: -moz-linear-gradient(top, #F1F1F1,whiteSmoke);
+	background-image: -o-linear-gradient(top, #F1F1F1,whiteSmoke);
+	background-image: -ms-linear-gradient(top, #F1F1F1,whiteSmoke);
+	background-image: linear-gradient(top, #F1F1F1,whiteSmoke);
 }
 
 	/* Toolbar btn */
@@ -126,10 +144,8 @@
 		}		
 		.gis-toolbar-btn-menu .x-panel-body-default { /* Menu border */
 			border-radius: 3px;
-			border-color: #aaa;
-		}
-		
-		
+			border-color: #999;
+		}		
 		
 /* Menu */
 
