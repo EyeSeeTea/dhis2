@@ -82,7 +82,6 @@ Ext.onReady( function() {
 			new OpenLayers.Control.MousePosition({
 				prefix: '<span class="el-opacity-1"><span class="text-mouseposition-lonlat">LON </span>',
 				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
-				//suffix: '<a href="http://www.vg.no"><img src="images/google-logo.png"></a></span>'
 				suffix: '<div id="google-logo" onclick="javascript:GIS.util.google.openTerms();"></div></span>'
 			}),
 			new OpenLayers.Control.Permalink()
@@ -91,15 +90,11 @@ Ext.onReady( function() {
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });
     
-    /////////////////////////////
-    
-    var button = new OpenLayers.Control.Button({displayClass: 'olControlButton', trigger: function() {alert("yay");}, text: 'Button is to be clicked'});
-    
-    var panel = new OpenLayers.Control.Panel({defaultControl: button});
-    
-    panel.addControls([button]);
-    
-    GIS.map.addControl(panel);
+    GIS.map.layerController = {};
+    GIS.map.layerController.button = new OpenLayers.Control.Button({displayClass: 'olControlButton', trigger: function() {alert('clicky');}});
+    GIS.map.layerController.panel = new OpenLayers.Control.Panel({defaultControl: GIS.map.layerController.button});
+    GIS.map.layerController.panel.addControls([GIS.map.layerController.button]);    
+    GIS.map.addControl(GIS.map.layerController.panel);
     
     /* Base layers */
     
