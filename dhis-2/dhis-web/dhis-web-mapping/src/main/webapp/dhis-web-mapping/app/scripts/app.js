@@ -381,7 +381,9 @@ Ext.onReady( function() {
 				items: [
                     {
                         title: 'Thematic layer 1 legend', //i18n
-                        contentEl: 'thematic1Legend'
+                        contentEl: 'thematic1Legend',
+                        id: 'nissa',
+                        html: 'Jej jeje'
                     }
 				]
 			},
