@@ -6,11 +6,14 @@ GIS.conf = {
 		},
 		widget: {
 			valuetype_indicator: 'indicator',
-			valuetype_dataelement: 'dataelement'
+			valuetype_dataelement: 'dataelement',
+			legendtype_automatic: 'automatic',
+			legendtype_predefined: 'predefined'
 		}
 	},
 	url: {
 		path_api: '../../api/',
+		path_gis: '../',
 		google_terms: 'http://www.google.com/intl/en-US_US/help/terms_maps.html',
 		target_blank: '_blank'
 	},
@@ -38,7 +41,10 @@ GIS.conf = {
 GIS.init = {};
 
 GIS.util = {
-	google: {}
+	google: {},	
+	jsonEncodeString: function(str) {
+		return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
+	}
 };
 
 GIS.map = {};
@@ -89,6 +95,12 @@ Ext.onReady( function() {
 	Ext.Ajax.method = 'GET';
     Ext.QuickTips.init();
 	document.body.oncontextmenu = function(){return false;};
+	
+	Ext.Ajax.request({
+		url: GIS.conf.url.path_gis + 'initialize.action',
+		success: function(r) {
+			var init = Ext.decode(r.responseText);
+			GIS.init.rootNodes = init.rootNodes;
 	
 	/* Init */
 	
@@ -245,8 +257,8 @@ Ext.onReady( function() {
 	
 	GIS.store.periodTypes = Ext.create('Ext.data.Store', {
 		fields: ['id', 'name'],
-		data: GIS.conf.period.periodtypes
-	});
+		data: GIS.conf.period.periodTypes
+	}),
     
     GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
 		fields: ['id', 'name'],
@@ -294,7 +306,10 @@ Ext.onReady( function() {
 					text: 'Edit layer..',//i18n
 					iconCls: 'gis-menu-item-icon-edit',
 					cls: 'gis-menu-item-first',
-					alwaysEnabled: true
+					alwaysEnabled: true,
+					handler: function() {
+						GIS.layer.thematic1.window.show();
+					}
 				},
 				{
 					xtype: 'menuseparator',
@@ -371,6 +386,15 @@ Ext.onReady( function() {
             }
         }
     });
+    
+    GIS.layer.thematic1.window = Ext.create('Ext.window.Window', {
+		title: '<span id="window-thematic1-title">' + GIS.i18n.thematic_layer + ' 1' + '</span>',
+		layout: 'fit',
+        bodyStyle: 'padding:8px; background-color:#fff',
+        closeAction: 'hide',
+        width: 570,
+        items: GIS.layer.thematic1.widget
+	});
 	
 	GIS.gui.viewport = Ext.create('Ext.container.Viewport', {
 		layout: 'border',		
@@ -383,7 +407,7 @@ Ext.onReady( function() {
                         title: 'Thematic layer 1 legend', //i18n
                         contentEl: 'thematic1Legend',
                         id: 'nissa',
-                        html: 'Jej jeje'
+                        html: 'East'
                     }
 				]
 			},
@@ -442,5 +466,7 @@ Ext.onReady( function() {
 			render: GIS.init.onRender,
 			afterrender: GIS.init.afterRender
 		}
-	});	
+	});
+	
+	}});
 });

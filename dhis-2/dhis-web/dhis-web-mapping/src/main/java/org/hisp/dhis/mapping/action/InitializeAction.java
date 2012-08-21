@@ -126,11 +126,11 @@ public class InitializeAction
         return infrastructuralPeriodType;
     }
 
-    private OrganisationUnit rootNode;
+    private Collection<OrganisationUnit> rootNodes;
 
-    public OrganisationUnit getRootNode()
+    public Collection<OrganisationUnit> getRootNodes()
     {
-        return rootNode;
+        return rootNodes;
     }
 
     // -------------------------------------------------------------------------
@@ -158,10 +158,7 @@ public class InitializeAction
 
         infrastructuralPeriodType = configurationService.getConfiguration().getInfrastructuralPeriodTypeDefaultIfNull();
 
-        Collection<OrganisationUnit> rootUnits = new ArrayList<OrganisationUnit>(
-            organisationUnitService.getOrganisationUnitsAtLevel( 1 ) );
-        
-        rootNode = rootUnits.size() > 0 ? rootUnits.iterator().next() : new OrganisationUnit();
+        rootNodes = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitsAtLevel( 1 ) );
 
         return SUCCESS;
     }

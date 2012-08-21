@@ -1,5 +1,6 @@
 #set( $baseLayersSize = $baseLayers.size() )
 #set( $overlaysSize = $overlays.size() )
+#set( $rootNodesSize = $roteNodes.size() )
 {
   "mapView": { 
     "id": "$!{mapView.id}",
@@ -29,9 +30,6 @@
     "longitude": "$!encoder.jsonEncode( ${mapView.longitude} )",
     "latitude": "$!encoder.jsonEncode( ${mapView.latitude} )",
     "zoom": "$!{mapView.zoom}"
-  },
-  "userSettings": {
-    "mapDateType": "$!encoder.jsonEncode( ${mapDateType} )"
   },
   "systemSettings": {
     "infrastructuralDataElements": "$!{infrastructuralDataElements.id}",
@@ -67,10 +65,14 @@
   "security": {
     "isAdmin": $auth.hasAccess( "dhis-web-mapping", "deleteMapLegendSet" )
   },
-  "rootNode": {
-    "id": "$!{rootNode.id}",
-    "name": "$!encoder.jsonEncode( ${rootNode.name} )",
-    "level": 1,
-    "hasChildrenWithCoordinates": $!{rootNode.hasChildrenWithCoordinates()}
-  }
+  "rootNodes": [
+#foreach( $node in $rootNodes )  
+	{
+	  "id": "$!{node.id}",
+	  "name": "$!encoder.jsonEncode( ${node.name} )",
+	  "level": 1,
+	  "hasChildrenWithCoordinates": $!{node.hasChildrenWithCoordinates()}
+    }#if( $velocityCount < $rootNodesSize ),#end
+#end
+  ]
 }
