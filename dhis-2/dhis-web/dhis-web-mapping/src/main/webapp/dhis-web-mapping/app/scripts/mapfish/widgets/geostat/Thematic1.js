@@ -149,6 +149,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     },
     
     createItems: function() {
+		
+		// Data options
+		
         this.cmp.valueType = Ext.create('Ext.form.field.ComboBox', {
             fieldLabel: 'Value type', //i18n
             editable: false,
@@ -318,12 +321,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         });
         
         this.cmp.periodType = Ext.create('Ext.form.field.ComboBox', {
+			fieldLabel: GIS.i18n.period_type,
             editable: false,
             valueField: 'id',
             displayField: 'name',
             forceSelection: true,
             queryMode: 'local',
-            width: 82,
+            width: GIS.conf.layout.widget.combo_width,
+            labelWidth: GIS.conf.layout.widget.combolabel_width,
             store: GIS.store.periodTypes,
 			periodOffset: 0,
             listeners: {
@@ -343,7 +348,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         
         this.cmp.periodTypePrev = Ext.create('Ext.button.Button', {
 			xtype: 'button',
-			text: 'Prev',
+			text: '<',
+			width: 20,
 			style: 'margin-left: 3px',
 			scope: this,
 			handler: function() {
@@ -356,7 +362,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         
         this.cmp.periodTypeNext = Ext.create('Ext.button.Button', {
 			xtype: 'button',
-			text: 'Next',
+			text: '>',
+			width: 20,
 			style: 'margin-left: 3px',
 			scope: this,
 			handler: function() {
@@ -368,14 +375,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		});
         
         this.cmp.period = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: GIS.i18n.period,
             editable: false,
             valueField: 'id',
             displayField: 'name',
             queryMode: 'local',
             forceSelection: true,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: 116,
             store: this.store.periodsByType,
             listeners: {
                 select: {
@@ -386,6 +391,36 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 }
             }
         });
+        
+        this.cmp.periodPrev = Ext.create('Ext.button.Button', {
+			xtype: 'button',
+			text: '<',
+			width: 20,
+			style: 'margin-left: 3px',
+			scope: this,
+			handler: function() {
+				if (this.cmp.periodType.getValue()) {
+					this.cmp.periodType.periodOffset--;
+					this.cmp.periodType.fireEvent('select');
+				}
+			}
+		});
+        
+        this.cmp.periodNext = Ext.create('Ext.button.Button', {
+			xtype: 'button',
+			text: '>',
+			width: 20,
+			style: 'margin-left: 3px',
+			scope: this,
+			handler: function() {
+				if (this.cmp.periodType.getValue() && this.cmp.periodType.periodOffset < 0) {
+					this.cmp.periodType.periodOffset++;
+					this.cmp.periodType.fireEvent('select');
+				}
+			}
+		});
+		
+		// Legend options
         
         this.cmp.legendType = Ext.create('Ext.form.field.ComboBox', {
             editable: false,
@@ -466,14 +501,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         
         this.cmp.colorLow = Ext.create('Ext.button.Button', {
 			width: 109,
-			text: 'Low',
+			height: 22,
 			style: 'margin-right: 3px',
 			menu: {}
 		});
         
         this.cmp.colorHigh = Ext.create('Ext.button.Button', {
 			width: 109,
-			text: 'High',
+			height: 22,
 			style: 'margin-right: 3px',
 			menu: {}
 		});
@@ -492,6 +527,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             value: 15
         });
         
+        // Organisation unit options
+        
         this.cmp.level = Ext.create('Ext.form.field.ComboBox', {
             fieldLabel: GIS.i18n.level,
             editable: false,
@@ -501,6 +538,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             forceSelection: true,
             width: GIS.conf.layout.widget.combo_width,
             labelWidth: GIS.conf.layout.widget.combolabel_width,
+            style: 'margin-bottom: 5px',
             store: GIS.store.organisationUnitLevels
         });
         
@@ -510,6 +548,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             lines: false,
 			rootVisible: false,
 			multiSelect: false,
+			height: 220,
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
@@ -530,18 +569,20 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			})
         });
         
-        this.cmp.periodTypePanel = Ext.create('Ext.panel.Panel', {
+        // Custom panels
+        
+        this.cmp.periodPanel = Ext.create('Ext.panel.Panel', {
 			layout: 'hbox',
 			items: [
 				{
-					html: 'Period type:', //i18n
+					html: 'Period:', //i18n
 					width: 100,
 					bodyStyle: 'color: #444',
 					style: 'padding: 3px 0 0 4px'
 				},
-				this.cmp.periodType,
-				this.cmp.periodTypePrev,
-				this.cmp.periodTypeNext
+				this.cmp.period,
+				this.cmp.periodPrev,
+				this.cmp.periodNext
 			]
 		});			
         
@@ -610,8 +651,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                             this.cmp.indicator,
                             this.cmp.dataElementGroup,
                             this.cmp.dataElement,
-                            this.cmp.periodTypePanel,
-                            this.cmp.period,
+                            this.cmp.periodType,
+                            this.cmp.periodPanel,
                             { html: '<div class="thematic-br">' },
                             {
 								html: GIS.i18n.legend_options,

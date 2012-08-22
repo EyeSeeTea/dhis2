@@ -68,10 +68,11 @@
   "rootNodes": [
 #foreach( $node in $rootNodes )  
 	{
-	  "id": "$!{node.id}",
-	  "name": "$!encoder.jsonEncode( ${node.name} )",
+	  "id": "$!{node.uid}",
+	  "text": "$!encoder.jsonEncode( ${node.name} )",
 	  "level": 1,
-	  "hasChildrenWithCoordinates": $!{node.hasChildrenWithCoordinates()}
+	  "hasChildrenWithCoordinates": $!{node.hasChildrenWithCoordinates()},
+	  "expanded": true
     }#if( $velocityCount < $rootNodesSize ),#end
 #end
   ]

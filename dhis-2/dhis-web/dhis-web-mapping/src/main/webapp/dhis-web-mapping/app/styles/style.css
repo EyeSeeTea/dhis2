@@ -80,6 +80,13 @@ html * {
 
 /* GIS */
 
+/* Panel */	
+	
+.x-panel-header	{ /* Panel header */
+	height: 30px;
+	padding: 7px 4px 4px 7px;
+}
+
 /* Form */
 
 .gis-form-subtitle,
@@ -239,11 +246,11 @@ html * {
 		font-size: 10px;
 	}
 	
-	
-	
-	
-.x-panel-header	{
-	height: 30px;
-	padding: 7px 4px 4px 7px;
+/* Treepanel */
+
+.x-tree-panel .x-grid-row .x-grid-cell-inner { /* Tree font */
+	font-size: 10px !important;
+	height: 17px;
 }
+
 	
