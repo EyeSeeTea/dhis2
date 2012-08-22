@@ -396,16 +396,33 @@ Ext.onReady( function() {
 		cls: 'gis-container-default',
         closeAction: 'hide',
         width: 570,
+        //resizable: false,
+        isRendered: false,
+        isCollapsed: false,
         items: GIS.layer.thematic1.widget,
         bbar: [
-			{
-				text: '<<<'
-			},
 			'->',
+			{
+				text: '<<<',
+				handler: function() {
+					var w = GIS.layer.thematic1.window;					
+					w.setWidth(w.isCollapsed ? 570 : 290);
+					this.setText(w.isCollapsed ? '<<<' : '>>>');
+					w.isCollapsed = w.isCollapsed ? false : true;
+				}
+			},
 			{
 				text: 'Update'
 			}
-		]
+		],
+		listeners: {
+			show: function(w) {
+				if (!this.isRendered) {
+					this.setPosition(8,38);
+					this.isRendered = true;
+				}
+			}
+		}
 	});
 	
 	GIS.gui.viewport = Ext.create('Ext.container.Viewport', {

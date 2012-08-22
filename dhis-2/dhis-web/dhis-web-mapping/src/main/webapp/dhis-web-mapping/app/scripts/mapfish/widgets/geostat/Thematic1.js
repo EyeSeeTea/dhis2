@@ -544,17 +544,16 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             forceSelection: true,
             width: GIS.conf.layout.widget.combo_width,
             labelWidth: GIS.conf.layout.widget.combolabel_width,
-            style: 'margin-bottom: 5px',
             store: GIS.store.organisationUnitLevels
         });
         
         this.cmp.parent = Ext.create('Ext.tree.Panel', {
-            cls: 'treepanel-layer-border',
             autoScroll: true,
             lines: false,
 			rootVisible: false,
 			multiSelect: false,
-			height: 220,
+			height: 222,
+			bodyStyle: 'border: 1px solid #ccc !important; border-radius: 2px; padding: 3px 0 0px 3px',
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
