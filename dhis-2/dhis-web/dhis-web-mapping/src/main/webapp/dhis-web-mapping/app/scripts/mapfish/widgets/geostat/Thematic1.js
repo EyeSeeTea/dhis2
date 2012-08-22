@@ -165,8 +165,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             displayField: 'name',
             queryMode: 'local',
             forceSelection: true,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
             value: GIS.conf.finals.widget.valuetype_indicator,
             store: Ext.create('Ext.data.ArrayStore', {
                 fields: ['id', 'name'],
@@ -193,8 +193,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             valueField: 'id',
             displayField: 'name',
             forceSelection: true,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
             store: GIS.store.indicatorGroups,
             listeners: {
                 select: {
@@ -202,6 +202,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                     fn: function(cb) {
                         this.cmp.indicator.clearValue();
                         this.store.indicatorsByGroup.param = cb.getValue();
+                        this.store.indicatorsByGroup.load({scope: this, callback: function() {
+							this.cmp.indicator.selectFirst();
+						}});
                     }
                 }
             }
@@ -213,9 +216,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             valueField: 'id',
             displayField: 'name',
             forceSelection: true,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
             store: this.store.indicatorsByGroup,
+            selectFirst: function() {
+				this.setValue(this.store.getAt(0).data.id);
+			},
             listeners: {
                 select: {
                     scope: this,
@@ -259,8 +265,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             valueField: 'id',
             displayField: 'name',
             forceSelection: true,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
             hidden: true,
             store: GIS.store.dataElementGroup,
             listeners: {
@@ -280,8 +286,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             valueField: 'id',
             displayField: 'name',
             forceSelection: true,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
             hidden: true,
             store: this.store.dataElementsByGroup,
             listeners: {
@@ -338,45 +344,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             listeners: {
                 select: {
                     scope: this,
-                    fn: function(cb) {
+                    fn: function() {
 						var pt = new PeriodType();
 						var periods = pt.reverse( pt.filterFuturePeriods( pt.get(this.cmp.periodType.getValue()).generatePeriods(this.cmp.periodType.periodOffset) ) );
 						this.store.periodsByType.setIndex(periods);
 						this.store.periodsByType.loadData(periods);
 						
-                        this.cmp.period.setValue(this.cmp.period.store.getAt(0).data.id);						
+                        this.cmp.period.selectFirst();
                     }
                 }
             }
         });
-        
-        this.cmp.periodTypePrev = Ext.create('Ext.button.Button', {
-			xtype: 'button',
-			text: '<',
-			width: 20,
-			style: 'margin-left: 3px',
-			scope: this,
-			handler: function() {
-				if (this.cmp.periodType.getValue()) {
-					this.cmp.periodType.periodOffset--;
-					this.cmp.periodType.fireEvent('select');
-				}
-			}
-		});
-        
-        this.cmp.periodTypeNext = Ext.create('Ext.button.Button', {
-			xtype: 'button',
-			text: '>',
-			width: 20,
-			style: 'margin-left: 3px',
-			scope: this,
-			handler: function() {
-				if (this.cmp.periodType.getValue() && this.cmp.periodType.periodOffset < 0) {
-					this.cmp.periodType.periodOffset++;
-					this.cmp.periodType.fireEvent('select');
-				}
-			}
-		});
         
         this.cmp.period = Ext.create('Ext.form.field.ComboBox', {
 			fieldLabel: GIS.i18n.period,
@@ -385,17 +363,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             displayField: 'name',
             queryMode: 'local',
             forceSelection: true,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
-            store: this.store.periodsByType,
-            listeners: {
-                select: {
-                    scope: this,
-                    fn: function(cb) {
-						
-                    }
-                }
-            }
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            selectFirst: function() {
+				this.setValue(this.store.getAt(0).data.id);
+			},
+            store: this.store.periodsByType
         });
         
         this.cmp.periodPrev = Ext.create('Ext.button.Button', {
@@ -435,8 +408,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             fieldLabel: GIS.i18n.legend_type,
             value: GIS.conf.finals.widget.legendtype_automatic,
             queryMode: 'local',
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
             store: Ext.create('Ext.data.ArrayStore', {
                 fields: ['id', 'name'],
                 data: [
@@ -467,8 +440,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             editable: false,
             valueField: 'id',
             displayField: 'name',
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
             hidden: true,
             store: GIS.store.predefinedColorMapLegendSet
         });
@@ -542,8 +515,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             displayField: 'name',
             mode: 'remote',
             forceSelection: true,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
             store: GIS.store.organisationUnitLevels
         });
         
@@ -552,7 +525,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             lines: false,
 			rootVisible: false,
 			multiSelect: false,
-			height: 222,
+			width: GIS.conf.layout.widget.item_width,
+			height: 220,
 			bodyStyle: 'border: 1px solid #ccc !important; border-radius: 2px; padding: 3px 0 0px 3px',
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
@@ -638,53 +612,37 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         
         this.items = [
             {
-                xtype: 'panel',
-                layout: 'column',
-                width: 570,
+                xtype: 'form',
+				cls: 'el-border-0',
+                width: 270,
                 items: [
-                    {
-                        xtype: 'form',
-						cls: 'el-border-0',
-                        width: 270,
-                        items: [
-                            {
-								html: GIS.i18n.data_options,
-								cls: 'gis-form-subtitle'
-							},
-                            this.cmp.valueType,
-                            this.cmp.indicatorGroup,
-                            this.cmp.indicator,
-                            this.cmp.dataElementGroup,
-                            this.cmp.dataElement,
-                            this.cmp.periodTypePanel,
-                            this.cmp.period,
-                            { html: '<div class="thematic-br">' },
-                            {
-								html: GIS.i18n.legend_options,
-								cls: 'gis-form-subtitle',
-								style: 'padding-top: 5px'
-							},
-                            this.cmp.legendType,
-                            this.cmp.legendSet,
-                            this.cmp.methodPanel,
-                            this.cmp.lowPanel,
-                            this.cmp.highPanel
-                        ]
-                    },
-                    {
-                        xtype: 'form',
-                        width: 270,
-                        bodyStyle: 'padding:0 0 0 8px;',
-                        items: [
-                            {
-								html: 'Organisation unit level / parent', //i18n
-								cls: 'gis-form-subtitle'
-							},
-							this.cmp.level,
-                            this.cmp.parent
-                        ]
-                    }
-                ]
+					{
+						html: GIS.i18n.data_options,
+						cls: 'gis-form-subtitle-first'
+					},
+					this.cmp.valueType,
+					this.cmp.indicatorGroup,
+					this.cmp.indicator,
+					this.cmp.dataElementGroup,
+					this.cmp.dataElement,
+					this.cmp.periodTypePanel,
+					this.cmp.period,
+					{
+						html: GIS.i18n.legend_options,
+						cls: 'gis-form-subtitle'
+					},
+					this.cmp.legendType,
+					this.cmp.legendSet,
+					this.cmp.methodPanel,
+					this.cmp.lowPanel,
+					this.cmp.highPanel,
+					{
+						html: 'Organisation unit level / parent', //i18n
+						cls: 'gis-form-subtitle'
+					},
+					this.cmp.level,
+					this.cmp.parent
+				]
             }
         ];
     },

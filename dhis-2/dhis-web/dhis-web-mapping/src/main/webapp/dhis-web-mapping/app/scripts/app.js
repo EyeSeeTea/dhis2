@@ -19,8 +19,9 @@ GIS.conf = {
 	},
 	layout: {
 		widget: {
-			combo_width: 262,
-			combolabel_width: 95
+			item_width: 262,
+			itemlabel_width: 95,
+			window_width: 290
 		}
 	},
 	period: {
@@ -264,10 +265,10 @@ Ext.onReady( function() {
 	}),
     
     GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
+		fields: ['id', 'name', 'level'],
 		proxy: {
 			type: 'ajax',
-			url: GIS.conf.url.path_api + 'organisationUnitLevels.json?links=false&paging=false',
+			url: GIS.conf.url.path_api + 'organisationUnitLevels.json?viewClass=detailed&links=false&paging=false',
 			reader: {
 				type: 'json',
 				root: 'organisationUnitLevels'
@@ -280,13 +281,14 @@ Ext.onReady( function() {
 					//GIS.init.afterLoad();
 					this.isLoaded = true;
 				}
+				this.sort('level', 'ASC');
 			}
 		}
 	});
     
     /* Objects */
     
-    GIS.obj.LayerMenu = function(cmpRef, cls) {
+    GIS.obj.LayerMenu = function(layerName, cls) {
 		return Ext.create('Ext.menu.Menu', {
 			shadow: false,
 			showSeparator: false,
@@ -311,7 +313,7 @@ Ext.onReady( function() {
 					cls: 'gis-menu-item-first',
 					alwaysEnabled: true,
 					handler: function() {
-						GIS.layer.thematic1.window.show();
+						GIS.layer[layerName].window.show();
 					}
 				},
 				{
@@ -358,7 +360,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					GIS.cmp.menu[cmpRef] = this;
+					GIS.cmp.menu[layerName] = this;
 				},
 				afterrender: function() {
 					this.getEl().addCls('gis-toolbar-btn-menu');					
@@ -395,8 +397,8 @@ Ext.onReady( function() {
 		layout: 'fit',
 		cls: 'gis-container-default',
         closeAction: 'hide',
-        width: 570,
-        //resizable: false,
+        width: GIS.conf.layout.widget.window_width,
+        resizable: false,
         isRendered: false,
         isCollapsed: false,
         items: GIS.layer.thematic1.widget,
@@ -418,7 +420,7 @@ Ext.onReady( function() {
 		listeners: {
 			show: function(w) {
 				if (!this.isRendered) {
-					this.setPosition(8,38);
+					this.setPosition(7,38);
 					this.isRendered = true;
 				}
 			}

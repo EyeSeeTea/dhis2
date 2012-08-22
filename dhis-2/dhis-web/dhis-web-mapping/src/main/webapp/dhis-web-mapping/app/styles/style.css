@@ -90,9 +90,15 @@ html * {
 /* Form */
 
 .gis-form-subtitle,
-.gis-form-subtitle .x-panel-body { /* Subtitle */
-	font-weight: bold;
+.gis-form-subtitle-first { /* Subtitle panel */
 	margin-bottom: 6px;
+}
+.gis-form-subtitle {
+	margin-top: 6px;
+}
+.gis-form-subtitle .x-panel-body,
+.gis-form-subtitle-first .x-panel-body { /* Subtitle */
+	font-weight: bold;
 }
 
 .gis-form-widget .x-form-item-label-left { /* (Combo) label */
@@ -243,7 +249,7 @@ html * {
 		height: 1px;
 	}
 	.x-menu-item-text {
-		font-size: 10px;
+		font-size: 10px !important;
 	}
 	
 /* Treepanel */
