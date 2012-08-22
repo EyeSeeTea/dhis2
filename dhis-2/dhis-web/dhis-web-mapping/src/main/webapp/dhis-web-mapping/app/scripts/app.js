@@ -124,7 +124,9 @@ Ext.onReady( function() {
 	
 	GIS.map = new OpenLayers.Map({
         controls: [
-			new OpenLayers.Control.Navigation(),
+			new OpenLayers.Control.Navigation({
+				documentDrag: true
+			}),
 			//new OpenLayers.Control.LayerSwitcher(),
 			new OpenLayers.Control.MousePosition({
 				prefix: '<span class="el-opacity-1"><span class="text-mouseposition-lonlat">LON </span>',

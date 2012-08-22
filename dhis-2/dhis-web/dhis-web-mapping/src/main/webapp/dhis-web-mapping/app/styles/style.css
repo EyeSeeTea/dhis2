@@ -259,4 +259,12 @@ html * {
 	height: 17px;
 }
 
-	
+/* ColorPicker */
+
+.x-color-picker a { /* Square spacing */
+	padding: 0;
+}
+.x-color-picker em span { /* Square size */
+	width: 14px;
+	height: 14px;
+}

@@ -482,14 +482,61 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			width: 109,
 			height: 22,
 			style: 'margin-right: 3px',
-			menu: {}
+			value: 'ff0000',
+			getValue: function() {
+				return this.value;
+			},
+			menu: {
+				showSeparator: false,
+				items: {
+					xtype: 'colorpicker',
+					closeAction: 'hide',
+					listeners: {
+						scope: this,
+						select: function(cp, color) {
+							this.cmp.colorLow.getEl().dom.style.background = '#' + color;
+							this.cmp.colorLow.value = color;
+							this.cmp.colorLow.menu.hide();
+						}
+					}
+				}
+			},
+			listeners: {
+				render: function() {
+					this.getEl().dom.style.background = '#' + this.value;
+				}
+			}
 		});
         
         this.cmp.colorHigh = Ext.create('Ext.button.Button', {
 			width: 109,
 			height: 22,
 			style: 'margin-right: 3px',
-			menu: {}
+			value: '00ff00',
+			getValue: function() {
+				return this.value;
+			},
+			menu: {
+				showSeparator: false,
+				items: {
+					xtype: 'colorpicker',
+					closeAction: 'hide',
+					//colors: ['888888', '993300', '333300', '003300'],
+					listeners: {
+						scope: this,
+						select: function(cp, color) {
+							this.cmp.colorHigh.getEl().dom.style.background = '#' + color;
+							this.cmp.colorHigh.value = color;
+							this.cmp.colorHigh.menu.hide();
+						}
+					}
+				}
+			},
+			listeners: {
+				render: function() {
+					this.getEl().dom.style.background = '#' + this.value;
+				}
+			}
 		});
         
         this.cmp.radiusLow = Ext.create('Ext.form.field.Number', {
@@ -517,6 +564,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             forceSelection: true,
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            style: 'margin-bottom: 4px',
             store: GIS.store.organisationUnitLevels
         });
         
