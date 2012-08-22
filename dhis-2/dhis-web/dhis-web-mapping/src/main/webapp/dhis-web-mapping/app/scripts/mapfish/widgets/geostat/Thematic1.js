@@ -25,6 +25,8 @@
 Ext.define('mapfish.widgets.geostat.Thematic1', {
 	extend: 'Ext.panel.Panel',
 	alias: 'widget.thematic1',
+	
+	cls: 'gis-form-widget el-border-0',
 
     layer: null,
     format: null,
@@ -147,13 +149,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     createItems: function() {
         
         this.cmp.valueType = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: GIS.i18n.mapvaluetype,
+            fieldLabel: 'Value type', //i18n
             editable: false,
             valueField: 'id',
             displayField: 'name',
             mode: 'local',
             forceSelection: true,
-            width: GIS.conf.layout.widget.combo_width,
+            //width: GIS.conf.layout.widget.combo_width,
+            width: 250,
             value: GIS.conf.finals.widget.valuetype_indicator,
             store: Ext.create('Ext.data.ArrayStore', {
                 fields: ['id', 'name'],
@@ -466,7 +469,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         //});
         
         this.cmp.radiusLow = Ext.create('Ext.form.field.Number', {
-            fieldLabel: GIS.i18n.low_point_size,
             width: 73,
             allowDecimals: false,
             minValue: 1,
@@ -474,7 +476,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         });
         
         this.cmp.radiusHigh = Ext.create('Ext.form.field.Number', {
-            fieldLabel: GIS.i18n.low_point_size,
             width: 73,
             allowDecimals: false,
             minValue: 1,
@@ -563,13 +564,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 xtype: 'panel',
                 layout: 'column',
                 width: 570,
-                style: 'padding-bottom:3px',
                 items: [
                     {
                         xtype: 'form',
+                        bodyStyle: 'background:red',
+						cls: 'el-border-0',
                         width: 270,
                         items: [
-                            { html: '<div class="window-info">' + GIS.i18n.data_options + '</div>' },
+                            {
+								html: GIS.i18n.data_options,
+								cls: 'gis-form-subtitle'
+							},
                             this.cmp.valueType,
                             this.cmp.indicatorGroup,
                             this.cmp.indicator,

@@ -390,7 +390,7 @@ Ext.onReady( function() {
     GIS.layer.thematic1.window = Ext.create('Ext.window.Window', {
 		title: '<span id="window-thematic1-title">' + GIS.i18n.thematic_layer + ' 1' + '</span>',
 		layout: 'fit',
-        bodyStyle: 'padding:8px; background-color:#fff',
+		cls: 'gis-container-default',
         closeAction: 'hide',
         width: 570,
         items: GIS.layer.thematic1.widget
