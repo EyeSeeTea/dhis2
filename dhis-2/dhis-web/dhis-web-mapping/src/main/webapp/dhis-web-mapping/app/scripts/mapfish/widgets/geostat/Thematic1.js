@@ -339,12 +339,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function(cb) {
-                        this.cmp.period.clearValue();
-
 						var pt = new PeriodType();
 						var periods = pt.reverse( pt.filterFuturePeriods( pt.get(this.cmp.periodType.getValue()).generatePeriods(this.cmp.periodType.periodOffset) ) );
 						this.store.periodsByType.setIndex(periods);
 						this.store.periodsByType.loadData(periods);
+						
+                        this.cmp.period.setValue(this.cmp.period.store.getAt(0).data.id);						
                     }
                 }
             }
