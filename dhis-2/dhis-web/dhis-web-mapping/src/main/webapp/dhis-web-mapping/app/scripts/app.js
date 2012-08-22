@@ -19,7 +19,8 @@ GIS.conf = {
 	},
 	layout: {
 		widget: {
-			combo_width: 150
+			combo_width: 262,
+			combolabel_width: 95
 		}
 	},
 	period: {
@@ -393,7 +394,16 @@ Ext.onReady( function() {
 		cls: 'gis-container-default',
         closeAction: 'hide',
         width: 570,
-        items: GIS.layer.thematic1.widget
+        items: GIS.layer.thematic1.widget,
+        bbar: [
+			'->',
+			{
+				text: '<<'
+			},
+			{
+				text: 'Update'
+			}
+		]
 	});
 	
 	GIS.gui.viewport = Ext.create('Ext.container.Viewport', {

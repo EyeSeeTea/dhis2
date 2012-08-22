@@ -36,7 +36,7 @@ html * {
     cursor: pointer;
     cursor: hand;
     text-align: center;
-    font-size: 21px;
+    font-size: 21px !important;
     text-shadow: 0 0 1px #ddd;
 }
 .olControlPanel {
@@ -44,17 +44,6 @@ html * {
 	top: 0;
 	right: 0;
     border: 0 none;
-}
-
-.olControlLayerSwitcher .layersDiv { /* Layer switcher */
-	padding-bottom: 10px !important;
-	background-color: #fff !important;
-	border-top-left-radius: 5px;
-	border-bottom-left-radius: 5px;
-	opacity: 0.85;
-}
-.olControlLayerSwitcher .layersDiv * {
-	color: #000;
 }
 
 .olControlPermalink { /* Perma link */
@@ -93,15 +82,29 @@ html * {
 
 /* Form */
 
-.gis-form-widget .x-form-item-label-left {
-	padding-left: 3px;
-	color: #444;
+.gis-form-subtitle,
+.gis-form-subtitle .x-panel-body { /* Subtitle */
+	font-weight: bold;
+	margin-bottom: 6px;
 }
 
-.gis-form-subtitle,
-.gis-form-subtitle .x-panel-body {
-	font-weight: bold;
-	margin-bottom: 4px;
+.gis-form-widget .x-form-item-label-left { /* (Combo) label */
+	padding-left: 4px;
+	color: #444;
+}
+.gis-form-widget .x-form-text { /* Combo text */
+	font-size: 10px !important;
+	padding: 3px 1px 1px 4px;
+}
+.x-boundlist-item { /* Combo list text */
+	font-size: 10px !important;
+}
+.gis-form-widget .x-form-item { /* (Combo) spacing */
+	margin-bottom: 3px;
+}
+
+.gis-form-widget .x-btn-default-small { /* Button */
+	border-radius: 2px;
 }
 
 /* Button */
