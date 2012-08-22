@@ -231,6 +231,7 @@ Ext.onReady( function() {
 					//GIS.init.afterLoad();
 					this.isLoaded = true;
 				}
+				this.sort('name', 'ASC');
 			}
 		}
 	});
@@ -252,6 +253,7 @@ Ext.onReady( function() {
 					//GIS.init.afterLoad();
 					this.isLoaded = true;
 				}
+				this.sort('name', 'ASC');
 			}
 		}
 	});
@@ -396,10 +398,10 @@ Ext.onReady( function() {
         width: 570,
         items: GIS.layer.thematic1.widget,
         bbar: [
-			'->',
 			{
-				text: '<<'
+				text: '<<<'
 			},
+			'->',
 			{
 				text: 'Update'
 			}
@@ -416,7 +418,6 @@ Ext.onReady( function() {
                     {
                         title: 'Thematic layer 1 legend', //i18n
                         contentEl: 'thematic1Legend',
-                        id: 'nissa',
                         html: 'East'
                     }
 				]

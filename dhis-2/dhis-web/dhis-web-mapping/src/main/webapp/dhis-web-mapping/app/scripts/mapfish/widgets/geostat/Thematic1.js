@@ -68,6 +68,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						//GIS.init.afterLoad();
 						this.isLoaded = true;
 					}
+					this.sort('name', 'ASC');
 				}
 			}
 		}),
@@ -95,6 +96,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						//GIS.init.afterLoad();
 						this.isLoaded = true;
 					}
+					this.sort('name', 'ASC');
 				}
 			}
 		}),
@@ -316,15 +318,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         });
         
         this.cmp.periodType = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: GIS.i18n.period_type,
             editable: false,
             valueField: 'id',
             displayField: 'name',
             forceSelection: true,
             queryMode: 'local',
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: 82,
             store: GIS.store.periodTypes,
+			periodOffset: 0,
             listeners: {
                 select: {
                     scope: this,
@@ -332,13 +333,39 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                         this.cmp.period.clearValue();
 
 						var pt = new PeriodType();
-						var periods = pt.reverse( pt.filterFuturePeriods( pt.get(this.getValue()).generatePeriods(this.periodOffset) ) );
+						var periods = pt.reverse( pt.filterFuturePeriods( pt.get(this.cmp.periodType.getValue()).generatePeriods(this.cmp.periodType.periodOffset) ) );
 						this.store.periodsByType.setIndex(periods);
 						this.store.periodsByType.loadData(periods);
                     }
                 }
             }
         });
+        
+        this.cmp.periodTypePrev = Ext.create('Ext.button.Button', {
+			xtype: 'button',
+			text: 'Prev',
+			style: 'margin-left: 3px',
+			scope: this,
+			handler: function() {
+				if (this.cmp.periodType.getValue()) {
+					this.cmp.periodType.periodOffset--;
+					this.cmp.periodType.fireEvent('select');
+				}
+			}
+		});
+        
+        this.cmp.periodTypeNext = Ext.create('Ext.button.Button', {
+			xtype: 'button',
+			text: 'Next',
+			style: 'margin-left: 3px',
+			scope: this,
+			handler: function() {
+				if (this.cmp.periodType.getValue() && this.cmp.periodType.periodOffset < 0) {
+					this.cmp.periodType.periodOffset++;
+					this.cmp.periodType.fireEvent('select');
+				}
+			}
+		});
         
         this.cmp.period = Ext.create('Ext.form.field.ComboBox', {
             fieldLabel: GIS.i18n.period,
@@ -503,11 +530,26 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			})
         });
         
+        this.cmp.periodTypePanel = Ext.create('Ext.panel.Panel', {
+			layout: 'hbox',
+			items: [
+				{
+					html: 'Period type:', //i18n
+					width: 100,
+					bodyStyle: 'color: #444',
+					style: 'padding: 3px 0 0 4px'
+				},
+				this.cmp.periodType,
+				this.cmp.periodTypePrev,
+				this.cmp.periodTypeNext
+			]
+		});			
+        
         this.cmp.methodPanel = Ext.create('Ext.panel.Panel', {
 			layout: 'hbox',
 			items: [
 				{
-					html: 'Method / classes:',
+					html: 'Method / classes:', //i18n
 					width: 100,
 					bodyStyle: 'color: #444',
 					style: 'padding: 3px 0 0 4px'
@@ -521,7 +563,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			layout: 'hbox',
 			items: [
 				{
-					html: 'Low color / size:',
+					html: 'Low color / size:', //i18n
 					width: 100,
 					bodyStyle: 'color: #444',
 					style: 'padding: 3px 0 0 4px'
@@ -533,10 +575,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         
         this.cmp.highPanel = Ext.create('Ext.panel.Panel', {
 			layout: 'hbox',
-			//style: 'padding-bottom: 3px',
 			items: [
 				{
-					html: 'High color / size:',
+					html: 'High color / size:', //i18n
 					width: 100,
 					bodyStyle: 'color: #444',
 					style: 'padding: 3px 0 0 4px'
@@ -569,7 +610,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                             this.cmp.indicator,
                             this.cmp.dataElementGroup,
                             this.cmp.dataElement,
-                            this.cmp.periodType,
+                            this.cmp.periodTypePanel,
                             this.cmp.period,
                             { html: '<div class="thematic-br">' },
                             {
