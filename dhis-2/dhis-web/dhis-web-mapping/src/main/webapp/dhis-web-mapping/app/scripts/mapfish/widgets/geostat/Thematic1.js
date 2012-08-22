@@ -62,6 +62,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					if (store.param) {
 						store.proxy.url = GIS.conf.url.path_api +  'indicatorGroups/' + store.param + '.json?links=false&paging=false';
 					}
+					else {
+						return false;
+					}
 				},
 				load: function() {
 					if (!this.isLoaded) {
@@ -89,6 +92,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				beforeload: function(store) {
 					if (store.param) {
 						store.proxy.url = GIS.conf.url.path_api +  'dataElementGroups/' + store.param + '.json?links=false&paging=false';
+					}
+					else {
+						return false;
 					}
 				},
 				load: function() {
@@ -321,14 +327,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         });
         
         this.cmp.periodType = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: GIS.i18n.period_type,
             editable: false,
             valueField: 'id',
             displayField: 'name',
             forceSelection: true,
             queryMode: 'local',
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: 116,
             store: GIS.store.periodTypes,
 			periodOffset: 0,
             listeners: {
@@ -375,12 +379,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		});
         
         this.cmp.period = Ext.create('Ext.form.field.ComboBox', {
+			fieldLabel: GIS.i18n.period,
             editable: false,
             valueField: 'id',
             displayField: 'name',
             queryMode: 'local',
             forceSelection: true,
-            width: 116,
+            width: GIS.conf.layout.widget.combo_width,
+            labelWidth: GIS.conf.layout.widget.combolabel_width,
             store: this.store.periodsByType,
             listeners: {
                 select: {
@@ -571,16 +577,16 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         
         // Custom panels
         
-        this.cmp.periodPanel = Ext.create('Ext.panel.Panel', {
+        this.cmp.periodTypePanel = Ext.create('Ext.panel.Panel', {
 			layout: 'hbox',
 			items: [
 				{
-					html: 'Period:', //i18n
+					html: 'Period type:', //i18n
 					width: 100,
 					bodyStyle: 'color: #444',
 					style: 'padding: 3px 0 0 4px'
 				},
-				this.cmp.period,
+				this.cmp.periodType,
 				this.cmp.periodPrev,
 				this.cmp.periodNext
 			]
@@ -651,8 +657,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                             this.cmp.indicator,
                             this.cmp.dataElementGroup,
                             this.cmp.dataElement,
-                            this.cmp.periodType,
-                            this.cmp.periodPanel,
+                            this.cmp.periodTypePanel,
+                            this.cmp.period,
                             { html: '<div class="thematic-br">' },
                             {
 								html: GIS.i18n.legend_options,

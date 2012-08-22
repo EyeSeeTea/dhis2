@@ -234,8 +234,8 @@ function SixMonthlyPeriodType( monthNames )
         period['iso'] = year + 'S1';
 		period['id'] = period['iso'];
         periods.push(period);
-
-        period = [];
+        
+        period = {};
         period['startDate'] = year + '-07-01';
         period['endDate'] = year + '-12-31';
         period['name'] = monthNames[6] + ' - ' + monthNames[11] + ' ' + year;
@@ -243,7 +243,7 @@ function SixMonthlyPeriodType( monthNames )
         period['iso'] = year + 'S2';
 		period['id'] = period['iso'];
         periods.push(period);
-
+        
         return periods;
     };
 }
