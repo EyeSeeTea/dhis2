@@ -406,89 +406,63 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         });
         
         this.cmp.method = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: GIS.i18n.method,
             editable: false,
             valueField: 'id',
             displayField: 'name',
             queryMode: 'local',
             value: 2,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            width: 109,
+            style: 'margin-right: 3px',
             store: Ext.create('Ext.data.ArrayStore', {
                 fields: ['id', 'name'],
                 data: [
-                    [2, GIS.i18n.equal_intervals],
-                    [3, GIS.i18n.equal_group_count],
-                    [1, GIS.i18n.fixed_intervals]
+                    [2, 'By class range'],
+                    [3, 'By class count'] //i18n
                 ]
             })
         });
         
-        this.cmp.bounds = Ext.create('Ext.form.field.Text', {
-            fieldLabel: GIS.i18n.bounds,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
-            hidden: true
-        });
-        
-        this.cmp.classes = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: GIS.i18n.classes,
+        this.cmp.classes = Ext.create('Ext.form.field.Number', {
             editable: false,
             valueField: 'id',
             displayField: 'id',
             queryMode: 'local',
             value: 5,
-            width: GIS.conf.layout.widget.combo_width,
-            labelWidth: GIS.conf.layout.widget.combolabel_width,
+            minValue: 1,
+            maxValue: 7,
+            width: 50,
             store: Ext.create('Ext.data.ArrayStore', {
                 fields: ['id'],
                 data: [[1], [2], [3], [4], [5], [6], [7]]
             })
         });
-
-        //this.cmp.startColor = new Ext.ux.ColorField({
-            //fieldLabel: GIS.i18n.low_color,
-            //allowBlank: false,
-            //width: 73,
-            //value: "#FF0000",
-            //listeners: {
-                //'select': {
-                    //scope: this,
-                    //fn: function() {
-                        //this.classify(false, true);
-                    //}
-                //}
-            //}
-        //});
         
-        //this.cmp.endColor = new Ext.ux.ColorField({
-            //allowBlank: false,
-            //width: 73,
-            //value: "#FFFF00",
-            //listeners: {
-                //'select': {
-                    //scope: this,
-                    //fn: function() {
-                        //this.classify(false, true);
-                    //}
-                //}
-            //}
-        //});
+        this.cmp.colorLow = Ext.create('Ext.button.Button', {
+			width: 109,
+			text: 'Low',
+			style: 'margin-right: 3px',
+			menu: {}
+		});
+        
+        this.cmp.colorHigh = Ext.create('Ext.button.Button', {
+			width: 109,
+			text: 'High',
+			style: 'margin-right: 3px',
+			menu: {}
+		});
         
         this.cmp.radiusLow = Ext.create('Ext.form.field.Number', {
-            width: 73,
+            width: 50,
             allowDecimals: false,
             minValue: 1,
-            maxValue: 7,
-            value: 5
+            value: 3
         });
         
         this.cmp.radiusHigh = Ext.create('Ext.form.field.Number', {
-            width: 73,
+            width: 50,
             allowDecimals: false,
             minValue: 1,
-            maxValue: 7,
-            value: 5
+            value: 15
         });
         
         this.cmp.level = Ext.create('Ext.form.field.ComboBox', {
@@ -529,9 +503,22 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			})
         });
         
+        this.cmp.methodPanel = Ext.create('Ext.panel.Panel', {
+			layout: 'hbox',
+			items: [
+				{
+					html: 'Method / classes:',
+					width: 100,
+					bodyStyle: 'color: #444',
+					style: 'padding: 3px 0 0 4px'
+				},
+				this.cmp.method,
+				this.cmp.classes
+			]
+		});
+        
         this.cmp.lowPanel = Ext.create('Ext.panel.Panel', {
 			layout: 'hbox',
-			//style: 'padding-bottom: 3px',
 			items: [
 				{
 					html: 'Low color / size:',
@@ -539,13 +526,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					bodyStyle: 'color: #444',
 					style: 'padding: 3px 0 0 4px'
 				},
-				{
-					xtype: 'button',
-					width: 80,
-					text: 'Color',
-					style: 'margin-right: 3px',
-					menu: {}
-				},
+				this.cmp.colorLow,
 				this.cmp.radiusLow
 			]
 		});
@@ -560,13 +541,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					bodyStyle: 'color: #444',
 					style: 'padding: 3px 0 0 4px'
 				},
-				{
-					xtype: 'button',
-					width: 80,
-					text: 'Color',
-					style: 'margin-right: 3px',
-					menu: {}
-				},
+				this.cmp.colorHigh,
 				this.cmp.radiusHigh
 			]
 		});
@@ -604,9 +579,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 							},
                             this.cmp.legendType,
                             this.cmp.legendSet,
-                            this.cmp.method,
-                            this.cmp.bounds,
-                            this.cmp.classes,
+                            this.cmp.methodPanel,
                             this.cmp.lowPanel,
                             this.cmp.highPanel
                         ]
