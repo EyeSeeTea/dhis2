@@ -382,16 +382,7 @@ Ext.onReady( function() {
         map: GIS.map,
         layer: GIS.layer.thematic1.layer,
         featureSelection: false,
-        legendDiv: 'thematic1Legend',
-        defaults: {width: 130},
-        listeners: {
-            'expand': function() {
-                //GIS.vars.activePanel.setPolygon();
-            },
-            'afterrender': function() {
-                //this.layer.widget = this;
-            }
-        }
+        legendDiv: 'thematic1Legend'
     });
     
     GIS.layer.thematic1.window = Ext.create('Ext.window.Window', {
@@ -406,15 +397,15 @@ Ext.onReady( function() {
         items: GIS.layer.thematic1.widget,
         bbar: [
 			'->',
-			{
-				text: '<<<',
-				handler: function() {
-					var w = GIS.layer.thematic1.window;					
-					w.setWidth(w.isCollapsed ? 570 : 290);
-					this.setText(w.isCollapsed ? '<<<' : '>>>');
-					w.isCollapsed = w.isCollapsed ? false : true;
-				}
-			},
+			//{
+				//text: '<<<',
+				//handler: function() {
+					//var w = GIS.layer.thematic1.window;					
+					//w.setWidth(w.isCollapsed ? 570 : 290);
+					//this.setText(w.isCollapsed ? '<<<' : '>>>');
+					//w.isCollapsed = w.isCollapsed ? false : true;
+				//}
+			//},
 			{
 				text: 'Update'
 			}

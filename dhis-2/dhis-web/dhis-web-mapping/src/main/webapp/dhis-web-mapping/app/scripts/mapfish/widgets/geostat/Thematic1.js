@@ -120,6 +120,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			}
 		})
 	},
+	
+	toggler: {},
     
     setUrl: function(url) {
         this.url = url;
@@ -147,12 +149,48 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     },
     
     initComponent: function() {
+		this.createUtils();
+		
 		this.createItems();
 		
 		this.addItems();
 		
 		mapfish.widgets.geostat.Thematic1.superclass.initComponent.apply(this);
     },
+    
+    createUtils: function() {
+		var self = this;
+		
+		this.toggler.valueType = function(valueType) {
+			if (valueType === GIS.conf.finals.widget.valuetype_indicator) {
+				self.cmp.indicatorGroup.show();
+				self.cmp.indicator.show();
+				self.cmp.dataElementGroup.hide();
+				self.cmp.dataElement.hide();
+			}
+			else if (valueType === GIS.conf.finals.widget.valuetype_dataelement) {
+				self.cmp.indicatorGroup.hide();
+				self.cmp.indicator.hide();
+				self.cmp.dataElementGroup.show();
+				self.cmp.dataElement.show();
+			}
+		};
+		
+		this.toggler.legendType = function(legendType) {
+			if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
+				self.cmp.methodPanel.show();
+				self.cmp.lowPanel.show();
+				self.cmp.highPanel.show();
+				self.cmp.legendSet.hide();
+			}
+			else if (legendType === GIS.conf.finals.widget.legendtype_predefined) {
+				self.cmp.methodPanel.hide();
+				self.cmp.lowPanel.hide();
+				self.cmp.highPanel.hide();
+				self.cmp.legendSet.show();
+			}
+		};
+	},
     
     createItems: function() {
 		
@@ -179,9 +217,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function(cb) {
-                        //this.valueType.value = cb.getValue();
-                        //this.prepareMapViewValueType();
-                        //this.classify(false, true);
+						this.toggler.valueType(cb.getValue());
                     }
                 }
             }
@@ -289,47 +325,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             hidden: true,
-            store: this.store.dataElementsByGroup,
-            listeners: {
-                select: {
-                    scope: this,
-                    fn: function(cb) {
-						
-                        //Ext.Ajax.request({
-                            //url: GIS.conf.path_mapping + 'getMapLegendSetByDataElement' + GIS.conf.type,
-                            //params: {dataElementId: cb.getValue()},
-                            //scope: this,
-                            //success: function(r) {
-                                //var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
-                                //if (mapLegendSet.id) {
-                                    //this.legend.value = GIS.conf.map_legendset_type_predefined;
-                                    //this.prepareMapViewLegend();
-                                    
-                                    //function load() {
-                                        //this.cmp.legendSet.setValue(mapLegendSet.id);
-                                        //this.applyPredefinedLegend();
-                                    //}
-                                    
-                                    //if (!GIS.stores.predefinedMapLegendSet.isLoaded) {
-                                        //GIS.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
-                                            //load.call(this);
-                                        //}});
-                                    //}
-                                    //else {
-                                        //load.call(this);
-                                    //}
-                                //}
-                                //else {
-                                    //this.legend.value = GIS.conf.map_legendset_type_automatic;
-                                    //this.prepareMapViewLegend();
-                                    //this.classify(false, cb.lockPosition);
-                                    //GIS.util.setLockPosition(cb);
-                                //}
-                            //}
-                        //});
-                    }
-                }
-            }
+            store: this.store.dataElementsByGroup
         });
         
         this.cmp.periodType = Ext.create('Ext.form.field.ComboBox', {
@@ -421,15 +417,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function(cb) {
-                        //if (cb.getValue() == GIS.conf.map_legendset_type_predefined && cb.getValue() != this.legend.value) {
-                            //this.legend.value = GIS.conf.map_legendset_type_predefined;                            
-                            //this.prepareMapViewLegend();
-                            
-                        //}
-                        //else if (cb.getValue() == GIS.conf.map_legendset_type_automatic && cb.getValue() != this.legend.value) {
-                            //this.legend.value = GIS.conf.map_legendset_type_automatic;
-                            //this.prepareMapViewLegend();
-                        //}
+						this.toggler.legendType(cb.getValue());
                     }
                 }
             }
