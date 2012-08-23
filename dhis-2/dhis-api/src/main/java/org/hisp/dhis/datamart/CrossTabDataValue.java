@@ -30,22 +30,21 @@ package org.hisp.dhis.datamart;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hisp.dhis.dataelement.DataElementOperand;
-
 /**
  * @author Lars Helge Overland
- * @version $Id: CrossTabDataValue.java 5514 2008-08-04 10:48:07Z larshelg $
  */
 public class CrossTabDataValue
 {
-    private int periodId;
+    private int dataElementId;
     
-    private int sourceId;
+    private int categoryOptionComboId;
+    
+    private int periodId;
     
     /**
      * Contains Operand (data element id and category option combo id) and data value.
      */
-    private Map<DataElementOperand, String> valueMap = new HashMap<DataElementOperand, String>();
+    private Map<Integer, String> valueMap = new HashMap<Integer, String>();
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -55,10 +54,11 @@ public class CrossTabDataValue
     {   
     }
     
-    public CrossTabDataValue( int periodId, int sourceId, Map<DataElementOperand, String> valueMap )
+    public CrossTabDataValue( int dataElementId, int categoryOptionComboId, int periodId, Map<Integer, String> valueMap )
     {
+        this.dataElementId = dataElementId;
+        this.categoryOptionComboId = categoryOptionComboId;
         this.periodId = periodId;
-        this.sourceId = sourceId;
         this.valueMap = valueMap;
     }
 
@@ -66,6 +66,26 @@ public class CrossTabDataValue
     // Getters & setters
     // -------------------------------------------------------------------------
     
+    public int getDataElementId()
+    {
+        return dataElementId;
+    }
+
+    public void setDataElementId( int dataElementId )
+    {
+        this.dataElementId = dataElementId;
+    }
+
+    public int getCategoryOptionComboId()
+    {
+        return categoryOptionComboId;
+    }
+
+    public void setCategoryOptionComboId( int categoryOptionComboId )
+    {
+        this.categoryOptionComboId = categoryOptionComboId;
+    }
+
     public int getPeriodId()
     {
         return periodId;
@@ -76,22 +96,12 @@ public class CrossTabDataValue
         this.periodId = periodId;
     }
 
-    public int getSourceId()
-    {
-        return sourceId;
-    }
-
-    public void setSourceId( int sourceId )
-    {
-        this.sourceId = sourceId;
-    }
-
-    public Map<DataElementOperand, String> getValueMap()
+    public Map<Integer, String> getValueMap()
     {
         return valueMap;
     }
 
-    public void setValueMap( Map<DataElementOperand, String> valueMap )
+    public void setValueMap( Map<Integer, String> valueMap )
     {
         this.valueMap = valueMap;
     }
@@ -106,9 +116,10 @@ public class CrossTabDataValue
         final int PRIME = 31;
         
         int result = 1;
-        
+
+        result = PRIME * result + dataElementId;
+        result = PRIME * result + categoryOptionComboId;
         result = PRIME * result + periodId;
-        result = PRIME * result + sourceId;
         
         return result;
     }
@@ -133,13 +144,15 @@ public class CrossTabDataValue
         
         final CrossTabDataValue other = (CrossTabDataValue) object;
         
-        return periodId == other.periodId && sourceId == other.sourceId;
+        return dataElementId == other.dataElementId && 
+            categoryOptionComboId == other.categoryOptionComboId && periodId == other.periodId;
     }
     
     @Override
     public String toString()
     {
-        String toString = "[period id: " + periodId + ", source id: " + sourceId + "]";
+        String toString = "[data element id: " + dataElementId + 
+            ", category option combo id: " + categoryOptionComboId + ", period id: " + periodId + "]";
         
         return toString;
     }

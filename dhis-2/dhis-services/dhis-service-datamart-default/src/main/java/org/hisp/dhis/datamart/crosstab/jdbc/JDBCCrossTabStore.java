@@ -142,7 +142,7 @@ public class JDBCCrossTabStore
         
         final String operandIds = getCommadelimitedString( operands );
         
-        final String sql = "SELECT periodid, sourceid, " + operandIds + " FROM " + CROSSTAB_TABLE_PREFIX + key + " AS c WHERE c.periodid IN (" + 
+        final String sql = "SELECT * FROM " + CROSSTAB_TABLE_PREFIX + key + " AS c WHERE c.periodid IN (" + 
             getCommaDelimitedString( periodIds ) + ") AND c.sourceid IN (" + getCommaDelimitedString( sourceIds ) + ")";
         
         try
