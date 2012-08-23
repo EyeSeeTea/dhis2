@@ -63,19 +63,20 @@ public class JDBCCrossTabStore
     // CrossTabStore implementation
     // -------------------------------------------------------------------------
 
-    public void createCrossTabTable( List<DataElementOperand> operands, String key )
+    public void createCrossTabTable( List<Integer> organisationUnitIds, String key )
     {
         final StringBuffer sql = new StringBuffer( "CREATE TABLE " + CROSSTAB_TABLE_PREFIX + key + " ( " );
         
+        sql.append( "dataelementid INTEGER NOT NULL, " );
+        sql.append( "categoryoptioncomboid INTEGER NOT NULL, " );
         sql.append( "periodid INTEGER NOT NULL, " );
-        sql.append( "sourceid INTEGER NOT NULL, " );
         
-        for ( DataElementOperand operand : operands )
+        for ( Integer id : organisationUnitIds )
         {
-            sql.append( operand.getColumnName() ).append( " VARCHAR(20), " );
+            sql.append( CrossTabStore.COLUMN_PREFIX + id + " VARCHAR(20), " );
         }
         
-        sql.append( "PRIMARY KEY ( periodid, sourceid ) );" );
+        sql.append( "PRIMARY KEY ( dataelementid, categoryoptioncomboid, periodid ) );" );
         
         statementManager.getHolder().executeUpdate( sql.toString() );
     }

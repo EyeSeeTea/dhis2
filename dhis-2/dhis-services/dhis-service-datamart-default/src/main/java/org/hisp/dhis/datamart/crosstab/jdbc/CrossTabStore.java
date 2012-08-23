@@ -42,6 +42,7 @@ public interface CrossTabStore
 {
     final String ID = CrossTabStore.class.getName();
     final String CROSSTAB_TABLE_PREFIX = "crosstab_table_";
+    final String COLUMN_PREFIX = "col";
     final String AGGREGATEDDATA_CACHE_PREFIX = "aggregateddata_cache_";
     final String AGGREGATEDORGUNITDATA_CACHE_PREFIX = "aggregatedorgunitdata_cache_";
     
@@ -52,7 +53,7 @@ public interface CrossTabStore
      * 
      * @param operands the DataElementOperands.
      */
-    void createCrossTabTable( List<DataElementOperand> operands, String key );
+    void createCrossTabTable( List<Integer> organisationUnitIds, String key );
 
     /**
      * Drops the crosstab table.

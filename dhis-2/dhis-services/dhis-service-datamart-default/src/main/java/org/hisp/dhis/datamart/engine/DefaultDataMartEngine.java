@@ -298,17 +298,18 @@ public class DefaultDataMartEngine
         // ---------------------------------------------------------------------
 
         final Collection<Integer> intersectingPeriodIds = ConversionUtils.getIdentifiers( Period.class, periodService.getIntersectionPeriods( periods ) );
-        final Set<Integer> childrenIds = organisationUnitService.getOrganisationUnitHierarchy().getChildren( organisationUnitIds );
-        final List<List<Integer>> childrenPages = new PaginatedList<Integer>( childrenIds ).setNumberOfPages( cpuCores ).getPages();
+        final Set<Integer> orgUnitChildrenIds = organisationUnitService.getOrganisationUnitHierarchy().getChildren( organisationUnitIds );
+        final List<Integer> crossTabOrgUnitIds = new ArrayList<Integer>( orgUnitChildrenIds );
+        
+        final String key = crossTabService.createCrossTabTable( crossTabOrgUnitIds );
 
-        final List<DataElementOperand> crossTabOperands = new ArrayList<DataElementOperand>( allOperands );
-        final String key = crossTabService.createCrossTabTable( crossTabOperands );
+        final List<List<DataElementOperand>> operandPages = new PaginatedList<DataElementOperand>( allOperands ).setNumberOfPages( cpuCores ).getPages();
         
         List<Future<?>> crossTabFutures = new ArrayList<Future<?>>();
         
-        for ( List<Integer> childrenPage : childrenPages )
+        for ( List<DataElementOperand> operandPage : operandPages )
         {
-            crossTabFutures.add( crossTabService.populateCrossTabTable( crossTabOperands, intersectingPeriodIds, childrenPage, key ) );
+            crossTabFutures.add( crossTabService.populateCrossTabTable( operandPage, intersectingPeriodIds, crossTabOrgUnitIds, key ) );
         }
 
         ConcurrentUtils.waitForCompletion( crossTabFutures );

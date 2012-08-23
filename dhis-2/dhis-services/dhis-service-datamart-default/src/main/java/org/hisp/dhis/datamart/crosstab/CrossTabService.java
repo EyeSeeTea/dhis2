@@ -45,19 +45,20 @@ public interface CrossTabService
 {
     String ID = CrossTabService.class.getName();
 
-    String createCrossTabTable( List<DataElementOperand> operands );
+    String createCrossTabTable( List<Integer> organisationUnitIds );
     
     /**
      * Creates and populates the crosstab table. Operands without data will be
      * removed from the operands argument collection.
      * 
-     * @param operands the list of DataElementOperands.
+     * @param operands the collection of DataElementOperands.
      * @param periodIds the collection of Period identifiers.
      * @param organisationUnitIds the collection of OrganisationUnit identifiers.
+     *        The order of the list must be equal to the order of the table columns.
      * @return a List of random keys for each generated crosstab table. 
      */
-    Future<?> populateCrossTabTable( List<DataElementOperand> operands, 
-        Collection<Integer> periodIds, Collection<Integer> organisationUnitIds, String key );
+    Future<?> populateCrossTabTable( Collection<DataElementOperand> operands, 
+        Collection<Integer> periodIds, List<Integer> organisationUnitIds, String key );
 
     /**
      * Drops the crosstab table.

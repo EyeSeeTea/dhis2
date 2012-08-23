@@ -17,7 +17,14 @@ public interface DataMartManager
      */
     Set<DataElementOperand> getOperandsWithData( Set<DataElementOperand> operands );
 
-    Map<DataElementOperand, String> getDataValueMap( int periodId, int sourceId );
+    /**
+     * Returns a map of organisation unit identifiers and data values.
+     * 
+     * @param operand the data element operand.
+     * @param periodId the period identifier.
+     * @return a map of organisation unit identifiers and data values.
+     */
+    Map<Integer, String> getDataValueMap( DataElementOperand operand, int periodId );
     
     Map<DataElementOperand, String> getAggregatedValueMap( int periodId, int organisationUnitId );
     
