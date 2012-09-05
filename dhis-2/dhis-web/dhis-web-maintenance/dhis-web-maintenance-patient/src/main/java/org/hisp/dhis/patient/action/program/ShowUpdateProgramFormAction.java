@@ -28,7 +28,11 @@
 package org.hisp.dhis.patient.action.program;
 
 import java.util.Collection;
+import java.util.List;
 
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.patient.PatientAttribute;
 import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.patient.PatientIdentifierType;
@@ -39,14 +43,14 @@ import org.hisp.dhis.program.ProgramService;
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Chau Thu Tran
  * @version $Id$
  */
-public class ShowAddProgramFormAction
+public class ShowUpdateProgramFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
     private ProgramService programService;
@@ -71,8 +75,65 @@ public class ShowAddProgramFormAction
     }
 
     // -------------------------------------------------------------------------
-    // Output
+    // Input/Output
     // -------------------------------------------------------------------------
+
+    private int id;
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    private Program program;
+
+    public Program getProgram()
+    {
+        return program;
+    }
+
+    private List<OrganisationUnitLevel> levels;
+
+    public List<OrganisationUnitLevel> getLevels()
+    {
+        return levels;
+    }
+
+    private List<OrganisationUnitGroup> groups;
+
+    public List<OrganisationUnitGroup> getGroups()
+    {
+        return groups;
+    }
+
+    private Integer level;
+
+    public Integer getLevel()
+    {
+        return level;
+    }
+
+    public void setLevel( Integer level )
+    {
+        this.level = level;
+    }
+
+    private Integer organisationUnitGroupId;
+
+    public Integer getOrganisationUnitGroupId()
+    {
+        return organisationUnitGroupId;
+    }
+
+    public void setOrganisationUnitGroupId( Integer organisationUnitGroupId )
+    {
+        this.organisationUnitGroupId = organisationUnitGroupId;
+    }
 
     private Collection<PatientIdentifierType> availableIdentifierTypes;
 
@@ -93,19 +154,22 @@ public class ShowAddProgramFormAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
+        program = programService.getProgram( id );
+
         availableIdentifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
 
         availableAttributes = patientAttributeService.getAllPatientAttributes();
 
         Collection<Program> programs = programService.getAllPrograms();
-        
+
         for ( Program program : programs )
         {
             availableIdentifierTypes.removeAll( program.getPatientIdentifierTypes() );
             availableAttributes.removeAll( program.getPatientAttributes() );
         }
-        
+
         return SUCCESS;
     }
 }
