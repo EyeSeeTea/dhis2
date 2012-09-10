@@ -121,8 +121,13 @@ public class TableAlteror
         moveStoredByFormStageInstanceToDataValue();
         
         executeSql( "ALTER TABLE patientattribute DROP COLUMN inheritable" );
-
-        executeSql( "ALTER TABLE patientattribute DROP COLUMN inheritable" );
+        executeSql( "ALTER TABLE programstageinstance DROP COLUMN stageInProgram" );
+        
+        updateRelationshipIdentifiers();
+        updateRelationshipAttributes();
+        
+        executeSql( "UPDATE programstage SET reportDateDescription='Report date' WHERE reportDateDescription is null" );
+        
     }
 
     // -------------------------------------------------------------------------
@@ -306,6 +311,62 @@ public class TableAlteror
         }
     }
 
+    private void updateRelationshipIdentifiers()
+    {
+        StatementHolder holder = statementManager.getHolder();
+
+        try
+        {
+            Statement statement = holder.getStatement();
+
+            ResultSet resultSet = statement
+                .executeQuery( "SELECT distinct programid, patientidentifiertypeid FROM patientidentifiertype" );
+
+            while ( resultSet.next() )
+            {
+                executeSql( "INSERT into program_patientIdentifierTypes( programid, patientidentifiertypeid) values (" + resultSet.getString( 1 ) + "," + resultSet.getString( 2 ) + ")");
+            }
+
+            executeSql( "ALTER TABLE patientidentifiertype DROP COLUMN programid" );
+        }
+        catch ( Exception ex )
+        {
+            log.debug( ex );
+        }
+        finally
+        {
+            holder.close();
+        } 
+    }
+    
+    private void updateRelationshipAttributes()
+    {
+        StatementHolder holder = statementManager.getHolder();
+
+        try
+        {
+            Statement statement = holder.getStatement();
+
+            ResultSet resultSet = statement
+                .executeQuery( "SELECT distinct programid, patientattributeid FROM program_patientAttributes" );
+
+            while ( resultSet.next() )
+            {
+                executeSql( "INSERT into program_patientAttributes( programid, patientattributeid) values (" + resultSet.getString( 1 ) + "," + resultSet.getString( 2 ) + ")");
+            }
+
+            executeSql( "ALTER TABLE patientattribute DROP COLUMN programid" );
+        }
+        catch ( Exception ex )
+        {
+            log.debug( ex );
+        }
+        finally
+        {
+            holder.close();
+        } 
+    }
+    
     private int executeSql( String sql )
     {
         try

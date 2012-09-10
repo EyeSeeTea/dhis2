@@ -98,6 +98,8 @@ public class DataElementOperand
 
     private String operandType;
 
+    private boolean hasAggregationLevels;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -145,6 +147,14 @@ public class DataElementOperand
     // -------------------------------------------------------------------------
 
     /**
+     * Tests whether the operand has any aggregation levels.
+     */
+    public boolean hasAggregationLevels()
+    {
+        return aggregationLevels.size() > 0;
+    }
+    
+    /**
      * Tests whether the hierarchy level of the OrganisationUnit associated with
      * the relevant DataValue is equal to or higher than the relevant
      * aggregation level. Returns true if no aggregation levels exist.
@@ -156,7 +166,7 @@ public class DataElementOperand
      */
     public boolean aggregationLevelIsValid( int organisationUnitLevel, int dataValueLevel )
     {
-        if ( aggregationLevels == null || aggregationLevels.size() == 0 )
+        if ( aggregationLevels.size() == 0 )
         {
             return true;
         }
@@ -456,6 +466,16 @@ public class DataElementOperand
         this.operandType = operandType;
     }
 
+    public boolean isHasAggregationLevels()
+    {
+        return hasAggregationLevels;
+    }
+
+    public void setHasAggregationLevels( boolean hasAggregationLevels )
+    {
+        this.hasAggregationLevels = hasAggregationLevels;
+    }
+
     // -------------------------------------------------------------------------
     // hashCode, equals, toString, compareTo
     // -------------------------------------------------------------------------
@@ -466,8 +486,8 @@ public class DataElementOperand
         final int prime = 31;
         int result = 1;
 
-        result = prime * result + ((categoryOptionCombo == null) ? 0 : categoryOptionCombo.hashCode());
-        result = prime * result + ((dataElement == null) ? 0 : dataElement.hashCode());
+        result = prime * result + ( ( categoryOptionCombo == null) ? 0 : categoryOptionCombo.hashCode() );
+        result = prime * result + ( ( dataElement == null) ? 0 : dataElement.hashCode() );
         result = prime * result + dataElementId;
         result = prime * result + optionComboId;
 

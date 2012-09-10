@@ -153,6 +153,27 @@ public class AddProgramStageAction
         this.standardInterval = standardInterval;
     }
 
+    private String reportDateDescription;
+
+    public void setReportDateDescription( String reportDateDescription )
+    {
+        this.reportDateDescription = reportDateDescription;
+    }
+
+    private Integer daysAllowedSendMessage;
+
+    public void setDaysAllowedSendMessage( Integer daysAllowedSendMessage )
+    {
+        this.daysAllowedSendMessage = daysAllowedSendMessage;
+    }
+
+    private String templateMessage;
+
+    public void setTemplateMessage( String templateMessage )
+    {
+        this.templateMessage = templateMessage;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -170,6 +191,9 @@ public class AddProgramStageAction
         programStage.setStageInProgram( program.getProgramStages().size() + 1 );
         programStage.setProgram( program );
         programStage.setStandardInterval( standardInterval );
+        programStage.setReportDateDescription( reportDateDescription );
+        programStage.setDaysAllowedSendMessage( daysAllowedSendMessage );
+        programStage.setTemplateMessage( templateMessage );
 
         irregular = (irregular == null) ? false : irregular;
         programStage.setIrregular( irregular );

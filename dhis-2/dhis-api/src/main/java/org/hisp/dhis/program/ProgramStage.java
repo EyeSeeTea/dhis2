@@ -38,6 +38,19 @@ import org.hisp.dhis.dataentryform.DataEntryForm;
 public class ProgramStage
     extends BaseIdentifiableObject
 {
+    public static final String TYPE_DEFAULT = "default";
+
+    public static final String TYPE_SECTION = "section";
+
+    public static final String TYPE_CUSTOM = "custom";
+    
+    public static final String TEMPLATE_MESSSAGE_PATIENT_NAME = "patient-name";
+    public static final String TEMPLATE_MESSSAGE_PROGRAM_NAME = "program-name";
+    public static final String TEMPLATE_MESSSAGE_PROGAM_STAGE_NAME = "program-stage-name";
+    public static final String TEMPLATE_MESSSAGE_DUE_DATE = "due-date";
+    public static final String TEMPLATE_MESSSAGE_ORGUNIT_NAME = "orgunit-name";
+    public static final String TEMPLATE_MESSSAGE_DAYS_SINCE_DUE_DATE = "days-since-due-date";
+
     /**
      * Determines if a de-serialized file is compatible with this class.
      */
@@ -55,10 +68,18 @@ public class ProgramStage
 
     private Set<ProgramStageDataElement> programStageDataElements = new HashSet<ProgramStageDataElement>();
 
+    private Set<ProgramStageSection> programStageSections = new HashSet<ProgramStageSection>();
+
     private DataEntryForm dataEntryForm;
-    
+
     private Integer standardInterval;
 
+    private String reportDateDescription;
+    
+    private Integer daysAllowedSendMessage;
+    
+    private String templateMessage;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -116,7 +137,7 @@ public class ProgramStage
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-  
+
     public DataEntryForm getDataEntryForm()
     {
         return dataEntryForm;
@@ -130,6 +151,36 @@ public class ProgramStage
     public String getDescription()
     {
         return description;
+    }
+
+    public Set<ProgramStageSection> getProgramStageSections()
+    {
+        return programStageSections;
+    }
+
+    public void setProgramStageSections( Set<ProgramStageSection> programStageSections )
+    {
+        this.programStageSections = programStageSections;
+    }
+
+    public Integer getDaysAllowedSendMessage()
+    {
+        return daysAllowedSendMessage;
+    }
+
+    public void setDaysAllowedSendMessage( Integer daysAllowedSendMessage )
+    {
+        this.daysAllowedSendMessage = daysAllowedSendMessage;
+    }
+
+    public String getTemplateMessage()
+    {
+        return templateMessage;
+    }
+
+    public void setTemplateMessage( String templateMessage )
+    {
+        this.templateMessage = templateMessage;
     }
 
     public Integer getStandardInterval()
@@ -197,4 +248,33 @@ public class ProgramStage
         this.programStageDataElements = programStageDataElements;
     }
 
+    public String getReportDateDescription()
+    {
+        return reportDateDescription;
+    }
+
+    public void setReportDateDescription( String reportDateDescription )
+    {
+        this.reportDateDescription = reportDateDescription;
+    }
+
+    public String getDataEntryType()
+    {
+        if ( dataEntryForm != null )
+        {
+            return TYPE_CUSTOM;
+        }
+
+        if ( programStageSections.size() > 0 )
+        {
+            return TYPE_SECTION;
+        }
+
+        return TYPE_DEFAULT;
+    }
+    
+    public String getDefaultTemplateMessage()
+    {
+        return "Dear {person-name}, please come to your appointment on {program-stage-name} at {due-date}";
+    }
 }

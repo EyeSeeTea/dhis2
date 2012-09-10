@@ -1,3 +1,17 @@
+var prefixId = 'ps_';
+var COLOR_RED = "#fb4754";
+var COLOR_GREEN = "#8ffe8f";
+var COLOR_YELLOW = "#f9f95a";
+var COLOR_LIGHTRED = "#fb6bfb";
+var COLOR_LIGHT_RED = "#ff7676";
+var COLOR_LIGHT_YELLOW = "#ffff99";
+var COLOR_LIGHT_GREEN = "#ccffcc";
+var COLOR_LIGHT_LIGHTRED = "#ff99ff";
+var SUCCESS_COLOR = '#ccffcc';
+var ERROR_COLOR = '#ccccff';
+var SAVING_COLOR = '#ffffcc';
+var SUCCESS = 'success';
+var ERROR = 'error';
 
 // Disable caching for ajax requests in general 
 
@@ -80,7 +94,7 @@ function addAttributeOption()
 		contend += '&nbsp;<input type="button" class="small-button" value="-" onclick="removeAttributeOption(' + "'" + rowId + "'" + ');"></td>';
 		contend = '<tr id="' + rowId + '">' + contend + '</tr>';
 
-	jQuery('#advancedSearchTB > tbody:last').append( contend );
+	jQuery('#advancedSearchTB').append( contend );
 }	
 
 function removeAttributeOption( rowId )
@@ -99,6 +113,8 @@ function searchObjectOnChange( this_ )
 	var element = jQuery('#' + container + ' [id=searchText]');
 	var valueType = jQuery('#' + container+ ' [id=searchObjectId] option:selected').attr('valueType');
 	
+	jQuery('#searchText_' + container).removeAttr('readonly', false);
+	jQuery('#searchText_' + container).val("");
 	if( attributeId == 'fixedAttr_birthDate' )
 	{
 		element.replaceWith( getDateField( container ) );
@@ -188,12 +204,18 @@ function validateAdvancedSearch()
 {
 	hideById( 'listPatientDiv' );
 	var flag = true;
-	var params = '';
 	var dateOperator = '';
+	
+	if (getFieldValue('searchByProgramStage') == "true" 
+		&& getFieldValue('programStageAddPatient') == '' 
+		&& jQuery("#searchDiv :input[name=searchText]").val() == ''){
+		flag = false;
+	}
+	
 	jQuery("#searchDiv :input").each( function( i, item )
-    {
+	{
 		var elementName = $(this).attr('name');
-		if( elementName=='searchText' && jQuery( item ).val() == '' )
+		if( elementName=='searchText' && jQuery( item ).val() == '' && !flag)
 		{
 			showWarningMessage( i18n_specify_search_criteria );
 			flag = false;
@@ -201,40 +223,70 @@ function validateAdvancedSearch()
 	});
 	
 	if(flag){
-		jQuery( '#advancedSearchTB tbody tr' ).each( function( i, row ){
-			var dateOperator = "";
-			jQuery( this ).find(':input').each( function( idx, item ){
-				if( idx == 0){
-					params += "&searchTexts=" + item.value;
-				}
-				else if( item.name == 'dateOperator'){
-					dateOperator = item.value;
-				}
-				else if( item.name == 'searchText'){
-					params += "_";
-					if ( dateOperator.length >0 ) {
-						params += dateOperator + "'" +  item.value.toLowerCase() + "'";
-					}
-					else{
-						params += htmlEncode( item.value.toLowerCase().replace(/^\s*/, "").replace(/\s*$/, "") );
-					}
-				}
-			})
-		});
-		
-		if( getFieldValue('searchByProgramStage') == "true"){
-			var programStageId = jQuery('#programStageAddPatientTR [id=programStageAddPatient_' + getFieldValue('programIdAddPatient') + ']').val();
-			var statusEvent = jQuery('#programStageAddPatientTR [id=statusEvent]:checked').val();
-			params += '&searchTexts=prgst_' + programStageId + '_' + statusEvent;
-		}
-		
-		params += '&listAll=false';
-		params += '&searchBySelectedOrgunit=' + byId('searchBySelectedOrgunit').checked;
-		
 		contentDiv = 'listPatientDiv';
 		jQuery( "#loaderDiv" ).show();
-		advancedSearch( params );
+		advancedSearch( getSearchParams() );
 	}
+}
+
+function getSearchParams()
+{
+	var params = "";
+	var programIds = "";
+	var programStageId = jQuery('#programStageAddPatient').val();
+	if( getFieldValue('searchByProgramStage') == "true" && programStageId!=''){
+		var statusEvent = jQuery('#programStageAddPatientTR [id=statusEvent]').val();
+		var startDueDate = getFieldValue('startDueDate');
+		var endDueDate = getFieldValue('endDueDate');
+		params += '&searchTexts=prgst_' + programStageId + '_' + statusEvent 
+				+ '_' + startDueDate + '_' + endDueDate + "_" 
+				+ getFieldValue('orgunitId');
+	}
+	
+	var flag = false;
+	jQuery( '#advancedSearchTB tr' ).each( function( i, row ){
+		var dateOperator = "";
+		var p = "";
+		jQuery( this ).find(':input').each( function( idx, item ){
+			if( idx == 0){
+				p = "&searchTexts=" + item.value;
+				if(item.value=='prg'){
+					programIds += '&programIds=';
+					flag = true;
+				}
+			}
+			else if( item.name == 'dateOperator'){
+				dateOperator = item.value;
+			}
+			else if( item.name == 'searchText'){
+				if( item.value!='')
+				{
+					p += "_";
+					if ( dateOperator.length >0 ) {
+						p += dateOperator + "'" +  item.value.toLowerCase() + "'";
+					}
+					else{
+						p += htmlEncode( item.value.toLowerCase().replace(/^\s*/, "").replace(/\s*$/, "") );
+					}
+					
+					if( flag ){
+						programIds += item.value;
+						flag = false;
+					}
+				}
+				else {
+					p = "";
+				}
+			}
+		})
+		params += p;
+	});
+		
+	params += '&listAll=false';
+	params += '&searchBySelectedOrgunit=' + byId('searchBySelectedOrgunit').checked;
+	params += programIds;
+	
+	return params;
 }
 
 // ----------------------------------------------------------------------------
@@ -341,16 +393,6 @@ function exportPatientHistory( patientId, type )
 	window.location.href = url;
 }
 
-var prefixId = 'ps_';
-var COLOR_RED = "#fb4754";
-var COLOR_GREEN = "#8ffe8f";
-var COLOR_YELLOW = "#f9f95a";
-var COLOR_LIGHTRED = "#fb6bfb";
-var COLOR_LIGHT_RED = "#ff7676";
-var COLOR_LIGHT_YELLOW = "#ffff99";
-var COLOR_LIGHT_GREEN = "#ccffcc";
-var COLOR_LIGHT_LIGHTRED = "#ff99ff";
-
 function setEventColorStatus( elementId, status )
 {
 	status = eval(status);
@@ -419,32 +461,44 @@ function checkDuplicateCompleted( messageElement, divname )
 
 function enableBtn(){
 	var programIdAddPatient = getFieldValue('programIdAddPatient');
-	jQuery('#programStageAddPatientTR [name=programStageAddPatient]').addClass("hidden");
-	jQuery('#programStageAddPatientTR [id=programStageAddPatient_' + programIdAddPatient + ']').removeClass("hidden");
-	
 	if( programIdAddPatient!='' ){
-		enable('listPatientBtn');
-		enable('addPatientBtn');
-		enable('advancedSearchBtn');
-		jQuery('#advanced-search :input').each( function( idx, item ){
-			enable(this.id);
+		$.getJSON( 'loadReportProgramStages.action', 
+		{
+			programId: getFieldValue('programIdAddPatient')
+		}, function( json )
+		{	
+			clearListById('programStageAddPatient');
+			$('#programStageAddPatient').append("<option value=''>" + i18n_please_select_program_stage + "</option>");
+			for ( i in json.programStages ) 
+			{
+				$('#programStageAddPatient').append("<option value='" + json.programStages[i].id + "'>" + json.programStages[i].name + "</option>");
+			}
+			enable('listPatientBtn');
+			enable('addPatientBtn');
+			enable('advancedSearchBtn');
+			jQuery('#advanced-search :input').each( function( idx, item ){
+				enable(this.id);
+			});
+			jQuery('#programStageAddPatientTR [name=statusEvent]').attr("disabled", true);
 		});
-		jQuery('#programStageAddPatientTR [name=statusEvent]').attr("disabled", true);
 	}
 	else
 	{
-		disable('listPatientBtn');
-		disable('addPatientBtn');
-		disable('advancedSearchBtn');
-		jQuery('#advanced-search :input').each( function( idx, item ){
-			disable(this.id);
-		});
+		
+			
+			disable('listPatientBtn');
+			disable('addPatientBtn');
+			disable('advancedSearchBtn');
+			jQuery('#advanced-search :input').each( function( idx, item ){
+				disable(this.id);
+			});	
+		
 	}
 }
 
 function enableRadioButton( programId )
 {
-	var prorgamStageId = jQuery('#programStageAddPatientTR [id=programStageAddPatient_' + programId + ']').val();
+	var prorgamStageId = jQuery('#programStageAddPatient').val();
 	if( prorgamStageId== ''){
 		jQuery('#programStageAddPatientTR [name=statusEvent]').attr("disabled", true);
 	}
@@ -481,8 +535,9 @@ function moveRight(programInstanceFlowDiv){
 // Create New Event
 // ----------------------------------------------------------------------------
 
-function showCreateNewEvent( programInstanceId )
+function showCreateNewEvent( programInstanceId, programStageId )
 {
+	setInnerHTML('createEventMessage_' + programInstanceId, '');
 	jQuery('#createNewEncounterDiv_' + programInstanceId ).dialog({
 			title: i18n_create_new_event,
 			maximize: true, 
@@ -493,13 +548,21 @@ function showCreateNewEvent( programInstanceId )
 			height: 160
 		}).show('fast');
 		
-	var standardInterval =  jQuery('#dataRecordingSelectDiv [name=programStageId] option:selected').attr('standardInterval');
+	if( programStageId != undefined )
+	{
+		jQuery('#repeatableProgramStageId').val(programStageId);
+	}
+	setSuggestedDueDate( programInstanceId );
+}
+
+function setSuggestedDueDate( programInstanceId )
+{
+	var standardInterval =  jQuery('#repeatableProgramStageId option:selected').attr('standardInterval');
 	var date = new Date();
 	var d = date.getDate() + eval(standardInterval);
 	var m = date.getMonth();
 	var y = date.getFullYear();
 	var edate= new Date(y, m, d);
-							
 	jQuery( '#dueDateNewEncounter_' + programInstanceId ).datepicker( "setDate" , edate );
 }
 
@@ -514,7 +577,7 @@ function closeDueDateDiv( programInstanceId )
 
 function registerIrregularEncounter( programInstanceId, programStageId, programStageName, dueDate )
 {
-	setInnerHTML('createEventMessage_' + programInstanceId,'');
+	setInnerHTML('createEventMessage_' + programInstanceId, '');
 	jQuery.postJSON( "registerIrregularEncounter.action",
 		{ 
 			programInstanceId:programInstanceId,
@@ -528,18 +591,20 @@ function registerIrregularEncounter( programInstanceId, programStageId, programS
 			
 			var elementId = prefixId + programStageInstanceId;
 			var flag = false;
+			var programType = jQuery('.stage-object-selected').attr('type');
+			
 			jQuery("#programStageIdTR_" + programInstanceId + " input[name='programStageBtn']").each(function(i,item){
 				var element = jQuery(item);
 				var dueDateInStage = element.attr('dueDate');
-				
 				if( dueDate < dueDateInStage && !flag)
 				{	
 					jQuery('<td><input name="programStageBtn" '
 						+ 'id="' + elementId + '" ' 
-						+ 'psid="' + programStageInstanceId + '" '
+						+ 'psid="' + programStageId + '" '
+						+ 'programType="' + programType + '" '
 						+ 'psname="' + programStageName + '" '
 						+ 'dueDate="' + dueDate + '" '
-						+ 'value="'+ programStageName + ' ' + dueDate + '" '
+						+ 'value="'+ programStageName + '&#13;&#10;' + dueDate + '" '
 						+ 'onclick="javascript:loadDataEntry(' + programStageInstanceId + ')" '
 						+ 'type="button" class="stage-object" '
 						+ '></td>'
@@ -555,10 +620,11 @@ function registerIrregularEncounter( programInstanceId, programStageId, programS
 				jQuery("#programStageIdTR_" + programInstanceId).append('<td><img src="images/rightarrow.png"></td>'
 					+ '<td><input name="programStageBtn" '
 					+ 'id="' + elementId + '" ' 
-					+ 'psid="' + programStageInstanceId + '" '
+					+ 'psid="' + programStageId + '" '
+					+ 'programType="' + programType + '" '
 					+ 'psname="' + programStageName + '" '
 					+ 'dueDate="' + dueDate + '" '
-					+ 'value="'+ programStageName + ' ' + dueDate + '" '
+					+ 'value="'+ programStageName + '&#13;&#10;' + dueDate + '" '
 					+ 'onclick="javascript:loadDataEntry(' + programStageInstanceId + ')" '
 					+ 'type="button" class="stage-object" '
 					+ '></td>');
@@ -581,5 +647,199 @@ function disableCompletedButton( disabled )
 		enable('completeAndAddNewBtn');
 		disable('uncompleteBtn');
 		disable('uncompleteAndAddNewBtn');
+	}
+}
+
+// load program instance history
+function programReports( programInstanceId )
+{
+	$('#programReportDiv').load("getProgramReportHistory.action", {programInstanceId:programInstanceId});
+}
+
+// load SMS message and comments
+function getEventMessages( programInstanceId )
+{
+	$('#eventMessagesDiv').load("getEventMessages.action", {programInstanceId:programInstanceId});
+}
+
+// ----------------------------------------------------------------
+// Dash board
+// ----------------------------------------------------------------
+
+function activeProgramInstanceDiv( programInstanceId )
+{
+	jQuery(".selected").each(function(){
+		jQuery(this).removeClass();
+	});
+	
+	jQuery("#infor_" + programInstanceId).each(function(){
+		jQuery(this).addClass('selected bold');
+	});
+	
+	showById('pi_' + programInstanceId);
+}
+
+function hideProgramInstanceDiv( programInstanceId )
+{
+	hideById('pi_' + programInstanceId);
+	jQuery('#pi_' + programInstanceId).removeClass("link-area-active");
+	jQuery("#img_" + programInstanceId).attr('src','');
+}
+
+function showPatientDashboardForm( patientId )
+{
+	hideById('listPatientDiv');
+	hideById('editPatientDiv');
+	hideById('selectDiv');
+	hideById('searchDiv');
+	hideById('migrationPatientDiv');
+				
+	jQuery('#loaderDiv').show();
+	jQuery('#patientDashboard').load('patientDashboard.action',
+		{
+			patientId:patientId
+		}, function()
+		{	
+			showById('patientDashboard');
+			jQuery('#loaderDiv').hide();
+		});
+}
+
+function loadActiveProgramStageRecords(programInstanceId, activeProgramStageInstanceId)
+{
+	jQuery('#loaderDiv').show();
+	jQuery('#programEnrollmentDiv').load('enrollmentform.action',
+		{
+			programInstanceId:programInstanceId
+		}, function()
+		{
+			showById('programEnrollmentDiv');
+			var type = jQuery('#tr_'+programInstanceId).attr('programType');
+			if(type=='2'){
+				hideById('programInstanceDiv');
+				var programStageInstanceId = jQuery('#tr_'+programInstanceId).attr('programStageInstanceId');
+				loadDataEntry( programStageInstanceId );
+			}
+			else{
+				showById('programInstanceDiv');
+			}
+			activeProgramInstanceDiv( programInstanceId );
+			loadDataEntry( activeProgramStageInstanceId );
+			jQuery('#loaderDiv').hide();
+		});
+}
+
+function loadProgramStageRecords( programStageInstanceId, completed ) 
+{
+	showLoader();
+    jQuery('#dataEntryFormDiv').load( "viewProgramStageRecords.action",
+		{
+			programStageInstanceId: programStageInstanceId
+		}, function() {
+			if(completed){
+				jQuery( "#dataEntryFormDiv :input").each(function(){
+					disable(this.id);
+				});
+			}
+			showById('dataEntryFormDiv');
+			hideLoader();
+		});
+}
+
+function updateEnrollment( patientId, programId, programInstanceId, programName )
+{
+	var dateOfIncident = jQuery('#tab-3 [id=dateOfIncident]').val();
+	var enrollmentDate = jQuery('#tab-3 [id=enrollmentDate]').val();
+	
+	jQuery.postJSON( "saveProgramEnrollment.action",
+		{
+			patientId: getFieldValue('patientId'),
+			programId: programId,
+			dateOfIncident: dateOfIncident,
+			enrollmentDate: enrollmentDate
+		}, 
+		function( json ) 
+		{    
+			var infor = programName + " (" + enrollmentDate + ")";
+			setInnerHTML("infor_" + programInstanceId, infor );
+			showSuccessMessage(i18n_enrol_success);
+		});
+}
+
+//-----------------------------------------------------------------------------
+// Save due-date
+//-----------------------------------------------------------------------------
+
+function saveDueDate( programStageInstanceId, programStageInstanceName )
+{
+	var field = document.getElementById( 'value_' + programStageInstanceId + '_date' );
+	
+	var dateOfIncident = new Date( byId('dateOfIncident').value );
+	var dueDate = new Date(field.value);
+	
+	if( dueDate < dateOfIncident )
+	{
+		field.style.backgroundColor = '#FFCC00';
+		alert( i18n_date_less_incident );
+		return;
+	}
+	
+	field.style.backgroundColor = '#ffffcc';
+	
+	var dateDueSaver = new DateDueSaver( programStageInstanceId, field.value, '#ccffcc' );
+	dateDueSaver.save();
+}
+
+function DateDueSaver( programStageInstanceId_, dueDate_, resultColor_ )
+{
+	var programStageInstanceId = programStageInstanceId_;	
+	var dueDate = dueDate_;
+	var resultColor = resultColor_;	
+
+	this.save = function()
+	{
+		var params = 'programStageInstanceId=' + programStageInstanceId + '&dueDate=' + dueDate;
+		$.ajax({
+			   type: "POST",
+			   url: "saveDueDate.action",
+			   data: params,
+			   dataType: "xml",
+			   success: function(result){
+					handleResponse (result);
+			   },
+			   error: function(request,status,errorThrown) {
+					handleHttpError (request);
+			   }
+			});
+	};
+
+	function handleResponse( rootElement )
+	{
+		var codeElement = rootElement.getElementsByTagName( 'code' )[0];
+		var code = parseInt( codeElement.firstChild.nodeValue );
+   
+		if ( code == 0 )
+		{
+			markValue( resultColor );                   
+		}
+		else
+		{
+			markValue( COLOR_GREY );
+			window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
+		}
+	}
+
+	function handleHttpError( errorCode )
+	{
+		markValue( COLOR_GREY );
+		window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
+	}   
+
+	function markValue( color )
+	{       
+   
+		var element = document.getElementById( 'value_' + programStageInstanceId + '_date' );	
+           
+		element.style.backgroundColor = color;
 	}
 }

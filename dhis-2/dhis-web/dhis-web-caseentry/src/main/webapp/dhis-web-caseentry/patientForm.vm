@@ -31,9 +31,8 @@
 	<td class='text-column'><label for="gender">$i18n.getString( "gender" )<em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
 	<td class="input-column">
 		<select id="gender" name="gender" class="{validate:{required:true}}">
-			<option value="" selected="selected">[$i18n.getString( "please_select" )]</option>
-			<option value="M" >$i18n.getString( "male" )</option>
-			<option value="F">$i18n.getString( "female" )</option>
+ 			<option value="M">$i18n.getString( "male" )</option>
+			<option value="F" selected>$i18n.getString( "female" )</option>
 			<option value="T">$i18n.getString( "transgender" )</option>
 		</select>
 	</td>		
@@ -91,12 +90,11 @@
 #end
 
 <!-- ATTRIBUTES IN GROUPS -->
-#foreach ($attributeGroup in $attributeGroups )
+#foreach ($attributeGroup in $attributeGroupsMap.keySet() )
 	<tr><td>&nbsp;</td></tr>
 	<tr><th colspan="2" class="heading-column">$attributeGroup.name</th></tr>
-	#foreach($attribute in $attributeGroup.attributes )
-		#if( $!attribute && $attribute.program )
-		#elseif( $!attribute)
+	#set($attributes = $attributeGroupsMap.get($attributeGroup))
+	#foreach($attribute in $attributes )
 		<tr>
 			<td class='text-column'><label>$attribute.name #if($attribute.mandatory)<em title="$i18n.getString( 'required' )" class="required">*</em> #end</label></td>
 			<td class="input-column">
@@ -123,7 +121,6 @@
 				#end
 			</td>		
 		</tr>
-		#end
 	#end
 #end
 

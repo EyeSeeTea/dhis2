@@ -106,14 +106,14 @@ public class GetDataRecordsAction
     {
         this.listAll = listAll;
     }
-    
+
     private Boolean searchBySelectedOrgunit;
-    
+
     public void setSearchBySelectedOrgunit( Boolean searchBySelectedOrgunit )
     {
         this.searchBySelectedOrgunit = searchBySelectedOrgunit;
     }
-    
+
     private List<String> searchTexts = new ArrayList<String>();
 
     public void setSearchTexts( List<String> searchTexts )
@@ -163,6 +163,20 @@ public class GetDataRecordsAction
         return patients;
     }
 
+    private Collection<Integer> programStageInstanceIds;
+
+    public Collection<Integer> getProgramStageInstanceIds()
+    {
+        return programStageInstanceIds;
+    }
+
+    private Program program;
+
+    public Program getProgram()
+    {
+        return program;
+    }
+
     // -------------------------------------------------------------------------
     // Implementation Action
     // -------------------------------------------------------------------------
@@ -172,12 +186,12 @@ public class GetDataRecordsAction
     {
         OrganisationUnit orgunit = selectedStateManager.getSelectedOrganisationUnit();
 
-        Program program = programService.getProgram( programId );
+        program = programService.getProgram( programId );
 
         // ---------------------------------------------------------------------
         // Program instances for the selected program
         // ---------------------------------------------------------------------
-        
+
         // List all patients
         if ( listAll )
         {
@@ -192,11 +206,13 @@ public class GetDataRecordsAction
         else if ( searchTexts.size() > 0 )
         {
             orgunit = (searchBySelectedOrgunit) ? orgunit : null;
-            
+
             total = patientService.countSearchPatients( searchTexts, orgunit );
             this.paging = createPaging( total );
-            patients = patientService.searchPatients( searchTexts, orgunit, paging.getStartPos(),
-                paging.getPageSize() );
+            patients = patientService.searchPatients( searchTexts, orgunit, paging.getStartPos(), paging.getPageSize() );
+
+            programStageInstanceIds = patientService.getProgramStageInstances( searchTexts, orgunit,
+                paging.getStartPos(), paging.getPageSize() );
         }
 
         Collection<ProgramStageInstance> programStageInstances = new ArrayList<ProgramStageInstance>();

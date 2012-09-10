@@ -1,29 +1,16 @@
 package org.hisp.dhis.sms.input;
 
 import java.text.ParseException;
-import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.exolab.castor.types.Date;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DataValueService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.CalendarPeriodType;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsStore;
 import org.hisp.dhis.sms.incoming.SmsMessageEncoding;
 import org.hisp.dhis.sms.incoming.SmsMessageStatus;
-import org.hisp.dhis.sms.output.SMSOutput;
-import org.hisp.dhis.smscommand.SMSCode;
-import org.hisp.dhis.smscommand.SMSCommand;
-import org.hisp.dhis.smscommand.SMSCommandService;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hisp.dhis.sms.outbound.OutboundSms;
+import org.hisp.dhis.sms.outbound.OutboundSmsService;
+import org.hisp.dhis.sms.parse.ParserManager;
+import org.hisp.dhis.sms.parse.SMSParserException;
 
 import com.opensymphony.xwork2.Action;
 
@@ -34,6 +21,8 @@ import com.opensymphony.xwork2.Action;
 public class SMSInput
     implements Action
 {
+
+    private ParserManager smsParserManager;
 
     private String msisdn, sender, message, dca, reffering_batch, network_id, concat_reference, concat_num_segments,
         concat_seq_num, received_time;
@@ -46,19 +35,12 @@ public class SMSInput
 
     private IncomingSmsStore smsStore;
 
-    // Services
-    private CurrentUserService currentUserService;
+    private OutboundSmsService outboundSmsService;
 
-    private DataValueService dataValueService;
-
-    private UserService userService;
-
-    private SMSCommandService smsCommandService;
-    
-    @Autowired
-    private DataElementCategoryService dataElementCategoryService;
-    
-    private SMSOutput smsOutput;
+    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
+    {
+        this.outboundSmsService = outboundSmsService;
+    }
 
     public SMSInput()
     {
@@ -68,6 +50,7 @@ public class SMSInput
     public String execute()
         throws Exception
     {
+
         System.out.println( "Sender: " + sender + ", Message: " + message );
         IncomingSms sms = new IncomingSms();
         sms.setText( message );
@@ -93,139 +76,40 @@ public class SMSInput
         sms.setId( msg_id );
         sms.setGatewayId( "HARDCODEDTESTGATEWAY" );
 
-        int result = smsStore.save( sms );
-        System.out.println( "The result of SMS save is *trommevirvel* " + result );
+        smsStore.save( sms );
 
-        OrganisationUnit orgunit = null;
-        for ( User user : userService.getUsersByPhoneNumber( sender ) )
+        try
         {
-            OrganisationUnit ou = user.getOrganisationUnit();
-
-            // Might be undefined if the user has more than one org.units
-            // "attached"
-
-            if ( orgunit == null )
-            {
-                orgunit = ou;
-            }
-            else if ( orgunit.getId() == ou.getId() )
-            {
-                // same orgunit, no problem...
-            }
-            else
-            {
-                // orgunit and ou are different, ie. the phone number is
-                // registered to users at multiple facilities.
-                // Now what should we do?
-                System.out.println( "user is registered to more than one orgunit, what orgunit should we pick?" );
-                return ERROR;
-            }
+            smsParserManager.parse( sender, message );
         }
-
-        String[] marr = message.trim().split( " " );
-        if ( marr.length < 1 )
+        catch ( SMSParserException e )
         {
+            sendSMS( e.getMessage() );
             return ERROR;
         }
-        String commandString = marr[0];
 
-        for ( SMSCommand command : smsCommandService.getSMSCommands() )
-        {
-            if ( command.getName().equalsIgnoreCase( commandString ) )
-            {
-                // Insert message type handler later :)
-                IParser p = new SMSParserKeyValue( command.getSeperator(), " ", " ", true, false );
-                Map<String, String> parsedMessage = p.parse( message );
-
-                for ( SMSCode code : command.getCodes() )
-                {
-
-                    String upperCaseCode = code.getCode().toUpperCase();
-                    if ( parsedMessage.containsKey( upperCaseCode ) )  // Or fail hard??? 
-                    {
-
-                        String storedBy = currentUserService.getCurrentUsername();
-
-                        if ( StringUtils.isBlank( storedBy ) )
-                        {
-                            storedBy = "[unknown] from [" + sender + "]";
-                        }
-
-                        DataElementCategoryOptionCombo optionCombo = null;
-                        optionCombo = dataElementCategoryService.getDataElementCategoryOptionCombo( code.getOptionId() );
-
-                        Period period = code.getDataElement().getPeriodType().createPeriod();
-                        CalendarPeriodType cpt = (CalendarPeriodType) period.getPeriodType();
-                        period = cpt.getPreviousPeriod( period );
-
-                        DataValue dv = dataValueService.getDataValue( orgunit, code.getDataElement(), period,
-                            optionCombo );
-
-                        if ( dv == null )
-                        {
-                            // New data element
-                            DataValue dataVal = new DataValue();
-
-                            dataVal.setOptionCombo( optionCombo );
-
-                            dataVal.setSource( orgunit );
-                            dataVal.setDataElement( code.getDataElement() );
-
-                            dataVal.setPeriod( period );
-                            dataVal.setComment( "" );
-                            dataVal.setTimestamp( new java.util.Date() );
-                            dataVal.setStoredBy( storedBy );
-                            dataVal.setValue( parsedMessage.get( upperCaseCode ) );
-                            dataValueService.addDataValue( dataVal );
-                        }
-                        else
-                        {
-                            // Update data element
-                            dv.setValue( parsedMessage.get( upperCaseCode ) );
-                            dv.setOptionCombo( optionCombo );
-                            dataValueService.updateDataValue( dv );
-                        }
-                    }
-                }
-            }
-        }
-
-
-        smsOutput.sendSMS( "Your sms has been received", sender );
-
+        sendSMS( "SMS successfully received" );
         // TODO DataEntry stuff
         return SUCCESS;
     }
 
-    public void setDataElementCategoryService( DataElementCategoryService dataElementCategoryService )
+    private void sendSMS( String message )
     {
-        this.dataElementCategoryService = dataElementCategoryService;
-    }
-
-    public void setSmsCommandService( SMSCommandService smsCommandService )
-    {
-        this.smsCommandService = smsCommandService;
-    }
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
-    public void setDataValueService( DataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
+        if ( outboundSmsService != null )
+        {
+            outboundSmsService.sendMessage( new OutboundSms( message, sender ), null );
+        }
+        else
+        {
+            // Just for testing
+            System.out.println( "\n\n\n SMS: " + message + "\n\n\n" );
+        }
     }
 
     public void setSmsStore( IncomingSmsStore smsStore )
     {
         System.out.println( "Setting SMSStore: " + smsStore );
         this.smsStore = smsStore;
-    }
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
     }
 
     public String getConcat_num_segments()
@@ -358,9 +242,9 @@ public class SMSInput
         this.source_id = source_id;
     }
 
-    public void setSmsOutput( SMSOutput smsOutput )
+    public void setSmsParserManager( ParserManager smsParserManager )
     {
-        this.smsOutput = smsOutput;
+        this.smsParserManager = smsParserManager;
     }
 
 }

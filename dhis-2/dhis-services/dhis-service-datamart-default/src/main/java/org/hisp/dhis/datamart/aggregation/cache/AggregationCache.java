@@ -29,7 +29,9 @@ package org.hisp.dhis.datamart.aggregation.cache;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 
@@ -41,13 +43,15 @@ public interface AggregationCache
 {
     Collection<Integer> getIntersectingPeriods( Date startDate, Date endDate );
     
-    Collection<Integer> getPeriodsBetweenDates( Date startDate, Date endDate );
+    Collection<Integer> getPeriodsBetweenDatesPeriodType( final PeriodType periodType, final Date startDate, final Date endDate );
     
-    Collection<Integer> getPeriodsBetweenDatesPeriodType( PeriodType periodType, Date startDate, Date endDate );
+    Collection<Integer> getPeriodsBetweenDates( Date startDate, Date endDate );
     
     Period getPeriod( int id );
     
     int getLevelOfOrganisationUnit( int id );
+    
+    void filterForAggregationLevel( Set<Integer> organisationUnits, DataElementOperand operand, int unitLevel );
     
     void clearCache();
 }

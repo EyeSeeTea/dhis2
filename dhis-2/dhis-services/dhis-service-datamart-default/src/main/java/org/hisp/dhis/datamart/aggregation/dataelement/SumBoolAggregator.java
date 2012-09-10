@@ -30,19 +30,23 @@ package org.hisp.dhis.datamart.aggregation.dataelement;
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_SUM;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElementOperand;
-import org.hisp.dhis.datamart.CrossTabDataValue;
+import org.hisp.dhis.datamart.OrgUnitOperand;
 import org.hisp.dhis.datamart.aggregation.cache.AggregationCache;
 import org.hisp.dhis.datamart.crosstab.CrossTabService;
+import org.hisp.dhis.datamart.crosstab.jdbc.CrossTabStore;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
+import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodHierarchy;
 import org.hisp.dhis.period.PeriodType;
-import org.springframework.util.CollectionUtils;
+import org.hisp.dhis.system.util.MathUtils;
 
 /**
  * @author Lars Helge Overland
@@ -72,37 +76,60 @@ public class SumBoolAggregator
     // DataElementAggregator implementation
     // -------------------------------------------------------------------------
 
-    public Map<DataElementOperand, Double> getAggregatedValues( final Collection<DataElementOperand> operands, 
-        final Period period, int unitLevel, final Collection<Integer> organisationUnits, String key )
-    {
-        if ( CollectionUtils.isEmpty( operands ) )
+    public List<OrgUnitOperand> getAggregatedValues( DataElementOperand operand, Collection<Period> periods,
+        Collection<Integer> organisationUnits, Collection<OrganisationUnitGroup> organisationUnitGroups, 
+        PeriodHierarchy periodHierarchy, OrganisationUnitHierarchy orgUnitHierarchy, String key )
+    {        
+        final Map<String, String> crossTabValues = crossTabService.getCrossTabDataValues( operand, 
+            periodHierarchy.getPeriodsBetween( periods ), orgUnitHierarchy.getChildren( organisationUnits ), key );
+
+        final List<OrgUnitOperand> values = new ArrayList<OrgUnitOperand>();
+
+        if ( crossTabValues.size() == 0 )
         {
-            return EMPTY_MAP;
+            return values;
         }
-        
-        final Collection<CrossTabDataValue> crossTabValues = crossTabService.getCrossTabDataValues( operands, 
-            aggregationCache.getIntersectingPeriods( period.getStartDate(), period.getEndDate() ), organisationUnits, key );
 
-        final Map<DataElementOperand, Double> values = new HashMap<DataElementOperand, Double>(); // <Operand, total value>
-
-        for ( final CrossTabDataValue crossTabValue : crossTabValues )
+        for ( Period period : periods )
         {
-            final int dataValueLevel = aggregationCache.getLevelOfOrganisationUnit( crossTabValue.getSourceId() );
+            final PeriodType periodType = period.getPeriodType();
             
-            for ( final Entry<DataElementOperand, String> entry : crossTabValue.getValueMap().entrySet() ) // <Operand, value>
+            if ( !isApplicable( operand, periodType ) )
             {
-                if ( entry.getValue() != null && entry.getKey().aggregationLevelIsValid( unitLevel, dataValueLevel ) )
-                {
-                    double value = 0.0;
+                continue;
+            }
+            
+            final Collection<Integer> periodsBetween = periodHierarchy.getPeriodsBetween( period );
+            
+            for ( Integer organisationUnit : organisationUnits )
+            {
+                final int unitLevel = operand.isHasAggregationLevels() ? aggregationCache.getLevelOfOrganisationUnit( organisationUnit ) : 0;
+                
+                for ( OrganisationUnitGroup group : organisationUnitGroups )
+                {   
+                    final Set<Integer> orgUnitChildren = orgUnitHierarchy.getChildren( organisationUnit, group );
 
-                    if ( entry.getValue().toLowerCase().equals( TRUE ) )
+                    aggregationCache.filterForAggregationLevel( orgUnitChildren, operand, unitLevel );
+                    
+                    double value = 0d;
+
+                    for ( Integer periodBetween : periodsBetween )
                     {
-                        value = 1;
+                        for ( Integer orgUnitChild : orgUnitChildren )
+                        {
+                            final String val = crossTabValues.get( periodBetween + CrossTabStore.SEPARATOR + orgUnitChild );
+                            
+                            if ( TRUE.equalsIgnoreCase( val ) )
+                            {
+                                value++;
+                            }
+                        }
                     }
-
-                    final Double current = values.get( entry.getKey() );
-                    value += current != null ? current : 0.0;        
-                    values.put( entry.getKey(), value );
+                                        
+                    if ( !MathUtils.isZero( value ) )
+                    {
+                        values.add( new OrgUnitOperand( period.getId(), periodType.getId(), organisationUnit, group != null ? group.getId() : 0, value ) );
+                    }
                 }
             }
         }
@@ -110,19 +137,17 @@ public class SumBoolAggregator
         return values;
     }
     
-    public Collection<DataElementOperand> filterOperands( final Collection<DataElementOperand> operands, final PeriodType periodType )
+    public boolean isApplicable( DataElementOperand operand )
     {
-        final Collection<DataElementOperand> filteredOperands = new HashSet<DataElementOperand>();
-        
-        for ( final DataElementOperand operand : operands )
-        {
-            if ( operand.getValueType().equals( VALUE_TYPE_BOOL ) && operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_SUM ) &&
-                operand.getFrequencyOrder() <= periodType.getFrequencyOrder() ) // Ignore disaggregation
-            {
-                filteredOperands.add( operand );
-            }
-        }
-        
-        return filteredOperands;
+        return operand.getValueType().equals( VALUE_TYPE_BOOL ) && operand.getAggregationOperator().equals( AGGREGATION_OPERATOR_SUM );
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private boolean isApplicable( DataElementOperand operand, PeriodType periodType )
+    {
+        return operand.getFrequencyOrder() <= periodType.getFrequencyOrder(); // Ignore disaggregation
     }
 }

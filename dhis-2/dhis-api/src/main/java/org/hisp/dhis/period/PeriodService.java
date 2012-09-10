@@ -271,6 +271,14 @@ public interface PeriodService
      */
     Period reloadPeriod( Period period );
     
+    /**
+     * Returns a PeriodHierarchy instance.
+     * 
+     * @param periods the Periods to include in the PeriodHierarchy.
+     * @return a PeriodHierarchy instance.
+     */
+    PeriodHierarchy getPeriodHierarchy( Collection<Period> periods );
+    
     // -------------------------------------------------------------------------
     // PeriodType
     // -------------------------------------------------------------------------

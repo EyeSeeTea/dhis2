@@ -34,5 +34,16 @@
       
     <property name="standardInterval" />
     
+    <set name="programStageSections" order-by="sortOrder" cascade="all">
+      <key column="programStageid" />
+      <one-to-many class="org.hisp.dhis.program.ProgramStageSection" />
+    </set>
+    
+    <property name="reportDateDescription" />
+    
+    <property name="daysAllowedSendMessage" />
+     
+    <property name="templateMessage" />
+    
   </class>
 </hibernate-mapping>

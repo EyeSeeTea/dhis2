@@ -160,7 +160,7 @@ public interface PatientService
      * @return
      */
     Collection<Patient> getPatients( OrganisationUnit organisationUnit, Program program, Integer min, Integer max );
-
+    
     /**
      * Sort the result by PatientAttribute
      * 
@@ -206,4 +206,9 @@ public interface PatientService
     Collection<Patient> searchPatients( List<String> searchKeys, OrganisationUnit orgunit, Integer min, Integer max );
     
     int countSearchPatients( List<String> searchKeys, OrganisationUnit orgunit );
+    
+    Collection<String> getPatientPhoneNumbers( List<String> searchKeys, OrganisationUnit orgunit, Integer min, Integer max );
+
+    Collection<Integer> getProgramStageInstances( List<String> searchKeys, OrganisationUnit orgunit, Integer min, Integer max );
+
 }

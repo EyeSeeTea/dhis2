@@ -117,6 +117,11 @@ public class SmsConfigurationManagerImpl
     @Override
     public SmsGatewayConfig checkInstanceOfGateway( Class<?> clazz )
     {
+        if( getSmsConfiguration() == null)
+        {
+            SmsConfiguration smsConfig = new SmsConfiguration( true );
+            updateSmsConfiguration( smsConfig );
+        }
         for ( SmsGatewayConfig gateway : getSmsConfiguration().getGateways() )
         {
             if ( gateway.getClass().equals( clazz ) )
@@ -124,7 +129,6 @@ public class SmsConfigurationManagerImpl
                 return gateway;
             }
         }
-
         return null;
     }
 }

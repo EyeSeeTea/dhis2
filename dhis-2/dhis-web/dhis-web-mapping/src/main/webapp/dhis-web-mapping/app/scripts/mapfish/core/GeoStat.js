@@ -76,10 +76,9 @@ mapfish.GeoStat = OpenLayers.Class({
         this.legendDiv = Ext.get(options.legendDiv);
     },
  
-    setUrl: function(url, params) {
+    setUrl: function(url, success) {
         this.url = url;
         if (this.url) {
-            var success = G.vars.activeWidget == centroid ? this.onSuccess2 : this.onSuccess;
             OpenLayers.Request.GET({
 				url: this.url,
 				scope: this,

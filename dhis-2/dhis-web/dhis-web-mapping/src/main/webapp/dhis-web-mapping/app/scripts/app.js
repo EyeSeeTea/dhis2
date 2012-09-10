@@ -43,7 +43,9 @@ GIS.conf = {
 GIS.init = {};
 
 GIS.util = {
-	google: {},	
+	google: {},
+	geojson: {},
+	vector: {},
 	jsonEncodeString: function(str) {
 		return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
 	}
@@ -120,6 +122,43 @@ Ext.onReady( function() {
 		window.open('http://www.google.com/intl/en-US_US/help/terms_maps.html', '_blank');
 	};
 	
+	GIS.util.geojson.decode = function(doc) {
+        doc = Ext.decode(doc);
+        var geo = {};
+        geo.type = 'FeatureCollection';
+        geo.crs = {
+            type: 'EPSG',
+            properties: {
+                code: '4326'
+            }
+        };
+        geo.features = [];
+        for (var i = 0; i < doc.length; i++) {
+            geo.features.push({
+                geometry: {
+                    type: doc[i].t == 1 ? 'MultiPolygon' : 'Point',
+                    coordinates: doc[i].c
+                },
+                properties: {
+                    id: doc[i].i,
+                    name: doc[i].n,
+                    value: doc[i].v,
+                    hcwc: doc[i].h
+                }
+            });
+        }
+        return geo;
+    };
+    
+    GIS.util.vector.getTransformedFeatureArray = function(features) {
+        var sourceProjection = new OpenLayers.Projection("EPSG:4326"),
+			destinationProjection = new OpenLayers.Projection("EPSG:900913");
+        for (var i = 0; i < features.length; i++) {
+            features[i].geometry.transform(sourceProjection, destinationProjection);
+        }
+        return features;
+    };
+	
 	/* Map */
 	
 	GIS.map = new OpenLayers.Map({
@@ -148,17 +187,18 @@ Ext.onReady( function() {
     /* Base layers */
     
     if (window.google) {
-        GIS.layer.googleStreets.layer = new OpenLayers.Layer.Google(
-            GIS.layer.googleStreets.name,
-            {numZoomLevels: 20, animationEnabled: true}
-        );        
+        GIS.layer.googleStreets.layer = new OpenLayers.Layer.Google(GIS.layer.googleStreets.name, {
+			numZoomLevels: 20,
+			animationEnabled: true
+		});        
         GIS.layer.googleStreets.layer.layerType = GIS.conf.finals.layer.layertype_base;
         GIS.map.addLayer(GIS.layer.googleStreets.layer);
         
-        GIS.layer.googleHybrid.layer = new OpenLayers.Layer.Google(
-            GIS.layer.googleHybrid.name,
-            {type: google.maps.MapTypeId.HYBRID, numZoomLevels: 20, animationEnabled: true}
-        );        
+        GIS.layer.googleHybrid.layer = new OpenLayers.Layer.Google(GIS.layer.googleHybrid.name, {
+			type: google.maps.MapTypeId.HYBRID,
+			numZoomLevels: 20,
+			animationEnabled: true
+		});        
         GIS.layer.googleHybrid.layer.layerType = GIS.conf.finals.layer.layertype_base;
         GIS.map.addLayer(GIS.layer.googleHybrid.layer);
     }
@@ -194,7 +234,9 @@ Ext.onReady( function() {
     
     GIS.layer.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
         strategies: [
-			new OpenLayers.Strategy.Refresh({force:true})
+			new OpenLayers.Strategy.Refresh({
+				force:true
+			})
 		],
         visibility: false,
         displayInLayerSwitcher: false,
@@ -365,11 +407,11 @@ Ext.onReady( function() {
 					GIS.cmp.menu[layerName] = this;
 				},
 				afterrender: function() {
-					this.getEl().addCls('gis-toolbar-btn-menu');					
+					this.getEl().addCls('gis-toolbar-btn-menu');
 					if (cls) {
-						this.getEl().addCls('gis-toolbar-btn-menu-first');
+						this.getEl().addCls(cls);
 					}
-					
+										
 					this.itemsXableAlways();
 				}
 			}
@@ -407,7 +449,10 @@ Ext.onReady( function() {
 				//}
 			//},
 			{
-				text: 'Update'
+				text: 'Update',
+				handler: function() {
+					console.log(GIS.layer.thematic1.widget.getValues());
+				}
 			}
 		],
 		listeners: {
@@ -446,7 +491,7 @@ Ext.onReady( function() {
 					items: [
 						{
 							iconCls: 'gis-btn-icon-' + GIS.layer.boundary.name,
-							menu: new GIS.obj.LayerMenu(GIS.layer.boundary.name, 'gis-menu-first'),
+							menu: new GIS.obj.LayerMenu(GIS.layer.boundary.name, 'gis-toolbar-btn-menu-first'),
 							width: 26
 						},
 						{
@@ -474,7 +519,7 @@ Ext.onReady( function() {
 							menu: {}
 						},
 						{
-							text: 'Legends', //i18n
+							text: 'Legend', //i18n
 							menu: {}
 						},
 						{

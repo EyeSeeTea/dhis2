@@ -7,6 +7,12 @@ input[type="button"], input[type="submit"]
     width: 130px;
 }
 
+input.tiny-button[type="button"] 
+{
+    width: 20px;
+	height: 20px;
+}
+
 input.small-button[type="button"] 
 {
     width: 30px;
@@ -116,14 +122,6 @@ div.actions
 	text-align: right;
 }
 
-div.enrollment-form
-{
-	border:1px solid #c0c0c0; 
-	padding:10px;
-	margin-right:10px;
-	border-radius:3px;
-}
-
 /*----------------------------------------------------------------------------*/
 /* Data entry form                                                        */
 /*----------------------------------------------------------------------------*/
@@ -144,15 +142,12 @@ input.criteria
 
 input.stage-object[type="button"]
 {
-	width: 100px;
+	width: 120px;
 	height: 60px;
-    white-space: normal;
-	border: 2px solid; 
-	cursor: pointer;
+    cursor: pointer;
 	opacity: 1.0;
-	border: 1px solid;
+	border: 2px solid;
 	margin: 5px;
-	border-radius: 2px;
 }
 
 input.stage-object[type="button"]:hover
@@ -226,6 +221,19 @@ div.provided-elsewhere
 // Dashboard
 // -------------------------------------------------------------- */
 
+td.link-area
+{
+  border:1px solid #d0d0d0;
+  padding-top:1px;
+  padding-right:1px;
+  padding-left:1px;
+  padding-bottom:0px;
+  height:200px;
+  width:350px;
+  overflow:hidden;
+  position:relative;
+}
+
 div.link-area
 {
   border:1px solid #d0d0d0;
@@ -237,14 +245,12 @@ div.link-area
   width:350px;
   overflow:hidden;
   position:relative;
-  top: 45px;
 }
 
 .contentProviderTable
 {
   height: 150px;
   width: 340px;
-  margin-top:-10px;
   overflow-y: auto;
   overflow-x:hidden;
 }
@@ -315,6 +321,43 @@ div.event-flow-dashboard
   background-color: #f8f8f8;
 }
 
+.tooltip {
+	border-bottom: dashed 1px #aaa;
+	text-decoration: none;
+	cursor: help;
+	text-align: left;
+}
+.tooltip-target {
+	width: 250px;
+	top: 29px;
+	left: 764px;
+	display: none;
+	padding: 10px;
+	background: #ffffff;
+	position: absolute;
+	display: none;
+	float: left;
+	-webkit-border-radius: 7px;
+	-moz-border-radius: 7px;
+	border-radius: 7px;
+	border: solid 1px #ddd;
+	z-index:1001;
+}
+
+.comment-table
+{
+  width:320px;
+  overflow-y: auto;
+  overflow-x:hidden;
+}
+
+.comment-table td
+{
+  padding-top:3px;
+  padding-bottom:3px;
+  border-bottom:1px solid #cad5e5;
+}
+
 /* --------------------------------------------------------------
 // program-stage-instances
 // -------------------------------------------------------------- */
@@ -331,17 +374,6 @@ div.event-flow-dashboard
 	height:145px;
 	overflow-x:hidden;
 	overflow-y:hidden;
-}
-
-table.stage-object
-{
-	white-space: normal;
-	border: 2px solid;
-	opacity: 1.0;
-	border: 1px solid;
-	margin: 5px;
-	border-radius: 2px;
-	text-align:center;
 }
 
 .arrow-right {

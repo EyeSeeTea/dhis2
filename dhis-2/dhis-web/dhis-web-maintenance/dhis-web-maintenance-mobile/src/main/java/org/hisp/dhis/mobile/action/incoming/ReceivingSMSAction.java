@@ -102,15 +102,16 @@ public class ReceivingSMSAction
     public String execute()
         throws Exception
     {
-        SmsConfiguration smsConfig = smsConfigurationManager.getSmsConfiguration();
+        ModemGatewayConfig gatewayConfig = (ModemGatewayConfig) smsConfigurationManager
+        .checkInstanceOfGateway( ModemGatewayConfig.class );
 
-        if ( smsConfig == null )
+        if ( gatewayConfig != null )
         {
-            pollingInterval = 0;
+            pollingInterval = gatewayConfig.getPollingInterval()*1000;
         }
         else
         {
-            pollingInterval = smsConfig.getPollingInterval()*1000;
+            pollingInterval = 0;
         }
         listIncomingSms = incomingSmsService.listAllMessageFromModem();
 

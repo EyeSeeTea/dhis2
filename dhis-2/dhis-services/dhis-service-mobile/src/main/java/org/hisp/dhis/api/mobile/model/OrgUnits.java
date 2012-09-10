@@ -99,7 +99,7 @@ public class OrgUnits
         throws IOException
     {
         orgUnits = new ArrayList<MobileOrgUnitLinks>();
-        double version = dataInputStream.readDouble();
+        dataInputStream.readDouble(); // TODO fix
         int size = dataInputStream.readInt();
 
         for ( int i = 0; i < size; i++ )

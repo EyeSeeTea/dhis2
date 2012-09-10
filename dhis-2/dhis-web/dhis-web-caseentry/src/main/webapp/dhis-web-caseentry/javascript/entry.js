@@ -1,9 +1,3 @@
-var SUCCESS_COLOR = '#ccffcc';
-var ERROR_COLOR = '#ccccff';
-var SAVING_COLOR = '#ffffcc';
-var SUCCESS = 'success';
-var ERROR = 'error';
-	
 //--------------------------------------------------------------------------------------------
 // Load program-stages by the selected program
 //--------------------------------------------------------------------------------------------
@@ -96,7 +90,7 @@ function loadProgramStages()
 function saveVal( dataElementId )
 {
 	if( jQuery('#entryFormContainer [id=programStageId]') == null) return;
-	var programStageId = jQuery('#entryFormContainer [id=programStageId]').val();
+	var programStageId = jQuery('.stage-object-selected').attr('psid');
         
 	var fieldId = programStageId + '-' + dataElementId + '-val';
 	
@@ -175,7 +169,7 @@ function saveVal( dataElementId )
 
 function saveOpt( dataElementId )
 {
-	var programStageId = jQuery('#entryFormContainer [id=programStageId]').val();
+	var programStageId = jQuery('.stage-object-selected').attr('psid');
 	var field = byId( programStageId + '-' + dataElementId + '-val' );	
 	field.style.backgroundColor = SAVING_COLOR;
 	
@@ -560,30 +554,36 @@ function doComplete( isCreateEvent )
 				{
 					programStageInstanceId: getFieldValue('programStageInstanceId')
 				},
-				function (data)
+				function (json)
 				{
 					jQuery(".stage-object-selected").css('border-color', COLOR_GREEN);
 					jQuery(".stage-object-selected").css('background-color', COLOR_LIGHT_GREEN);
 
 					disableCompletedButton(true);
 					var irregular = jQuery('#entryFormContainer [name=irregular]').val();
+					var programInstanceId = jQuery('#entryFormContainer [id=programInstanceId]').val();
 					if( irregular == 'true' )
 					{
-						var programInstanceId = jQuery('#entryFormContainer [id=programInstanceId]').val()
-						showCreateNewEvent( programInstanceId );
+						var programStageId = jQuery(".stage-object-selected").attr('psid');
+						showCreateNewEvent( programInstanceId, programStageId );
 					}
 					
-					var selectedProgram = jQuery('#dataRecordingSelectForm [name=programId] option:selected');
-					if( selectedProgram.attr('type')=='2' && irregular == 'false' )
+					var selectedProgram = jQuery('.stage-object-selected');
+					if( selectedProgram.attr('programType')=='2' || json.response == 'programcompleted' )
 					{
 						selectedProgram.remove();
 						hideById('programInstanceDiv');
 						hideById('entryFormContainer');
+						var completedRow = jQuery('#td_' + programInstanceId).html();
+						jQuery('#completedTB' ).prepend("<tr><td>" + completedRow + "</td></tr>");
+						hideById('tr1_' + programInstanceId );
+						hideById('tr2_' + programInstanceId );
 					}
 					
 					selection.enable();
 					hideLoader();
 					hideById('contentDiv');
+					
 					
 					if( isCreateEvent )
 					{
