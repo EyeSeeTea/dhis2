@@ -226,7 +226,9 @@ Ext.onReady( function() {
     
     GIS.layer.boundary.layer = new OpenLayers.Layer.Vector(GIS.i18n.boundary_layer, {
         strategies: [
-			new OpenLayers.Strategy.Refresh({force:true})
+			new OpenLayers.Strategy.Refresh({
+				force:true
+			})
 		],
         visibility: false,
         displayInLayerSwitcher: false,

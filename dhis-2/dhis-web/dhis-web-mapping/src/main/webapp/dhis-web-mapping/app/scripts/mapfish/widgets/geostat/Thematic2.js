@@ -1695,8 +1695,8 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 	},
     
     loadGeoJson: function() {
-        GIS.vars.mask.msg = GIS.i18n.loading;
-        GIS.vars.mask.show();
+        GIS.mask.msg = GIS.i18n.loading;
+        GIS.mask.show();
         GIS.vars.activeWidget = this;
         this.updateValues = true;
         
@@ -1712,8 +1712,8 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
                 this.loadGeoJson();
             }
             
-            GIS.vars.mask.msg = GIS.i18n.loading;
-            GIS.vars.mask.show();
+            GIS.mask.msg = GIS.i18n.loading;
+            GIS.mask.show();
             
             GIS.vars.lockPosition = lockPosition;
             
@@ -1746,7 +1746,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
                         
                         if (mapvalues.length === 0) {
                             Ext.message.msg(false, GIS.i18n.current_selection_no_data);
-                            GIS.vars.mask.hide();
+                            GIS.mask.hide();
                             return;
                         }
                         
@@ -1784,7 +1784,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
             }
         }
         if (!this.layer.features.length) {
-            GIS.vars.mask.hide();
+            GIS.mask.hide();
             Ext.message.msg(false, GIS.i18n.no_values_found);
             return;
         }
@@ -1804,7 +1804,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
-        GIS.vars.mask.hide();
+        GIS.mask.hide();
     },
     
     onRender: function(ct, position) {

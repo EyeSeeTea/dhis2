@@ -401,8 +401,8 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 	},
     
     loadGeoJson: function() {
-        GIS.vars.mask.msg = GIS.i18n.loading;
-        GIS.vars.mask.show();
+        GIS.mask.msg = GIS.i18n.loading;
+        GIS.mask.show();
         GIS.vars.activeWidget = this;
         this.updateValues = false;
         
@@ -434,7 +434,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		this.layer.setVisibility(true);
 		
 		GIS.util.zoomToVisibleExtent();
-		GIS.vars.mask.hide();
+		GIS.mask.hide();
 	},
     
     onRender: function(ct, position) {

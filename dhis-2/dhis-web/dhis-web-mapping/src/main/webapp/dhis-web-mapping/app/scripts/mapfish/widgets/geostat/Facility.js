@@ -792,8 +792,8 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 	},
     
     loadGeoJson: function() {
-        GIS.vars.mask.msg = GIS.i18n.loading_geojson;
-        GIS.vars.mask.show();
+        GIS.mask.msg = GIS.i18n.loading_geojson;
+        GIS.mask.show();
         GIS.vars.activeWidget = this;
         this.updateValues = true;
         
@@ -828,7 +828,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
         this.coreComp.applyClassification(this.form, this);
         this.classificationApplied = true;
         
-        GIS.vars.mask.hide();
+        GIS.mask.hide();
     },
     
     onRender: function(ct, position) {

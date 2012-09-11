@@ -136,23 +136,23 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	
 	getValues: function(conf) {
 		var model = conf ? {
-			valueType: this.cmp.valueType.getValue(),
-			indicatorGroup: this.cmp.indicatorGroup.getValue(),
-			indicator: this.cmp.indicator.getValue(),
-			dataElementGroup: this.cmp.dataElementGroup.getValue(),
-			dataElement: this.cmp.dataElement.getValue(),
-			periodType: this.cmp.periodType.getValue(),
-			period: this.cmp.period.getValue(),
-			legendType: this.cmp.legendType.getValue(),
-			legendSet: this.cmp.legendSet.getValue(),
-			classes: this.cmp.classes.getValue(),
-			method: this.cmp.method.getValue(),
-			colorLow: this.cmp.colorLow.getValue(),
-			colorHigh: this.cmp.colorHigh.getValue(),
-			radiusLow: this.cmp.radiusLow.getValue(),
-			radiusHigh: this.cmp.radiusHigh.getValue(),
-			level: this.cmp.level.getValue(),
-			parent: this.cmp.parent.getSelectionModel().getSelection()[0].getId()
+			valueType: conf.valueType,
+			indicatorGroup: conf.indicatorGroup,
+			indicator: conf.indicator,
+			dataElementGroup: conf.dataElementGroup,
+			dataElement: conf.dataElement,
+			periodType: conf.periodType,
+			period: conf.period,
+			legendType: conf.legendType,
+			legendSet: conf.legendSet,
+			classes: conf.classes,
+			method: conf.method,
+			colorLow: conf.colorLow,
+			colorHigh: conf.colorHigh,
+			radiusLow: conf.radiusLow,
+			radiusHigh: conf.radiusHigh,
+			level: conf.level,
+			parent: conf.parent.getSelectionModel().getSelection()[0].getId()
 		} : {
 			valueType: this.cmp.valueType.getValue(),
 			indicatorGroup: this.cmp.indicatorGroup.getValue(),
@@ -1418,8 +1418,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	},
     
     execute: function() {
-		GIS.vars.mask.msg = GIS.i18n.loading;
-		GIS.vars.mask.show();
+		GIS.mask.msg = GIS.i18n.loading;
+		GIS.mask.show();
 		
 		if (this.update.isOrganisationUnit) {
 			this.loadOrganisationUnits();
@@ -1428,7 +1428,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		} else if (this.update.isLegend) {
 			this.loadLegend();
 		} else {
-			GIS.vars.mask.hide();
+			GIS.mask.hide();
 		}
 	},
 	
@@ -1461,7 +1461,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				
 				if (mapvalues.length === 0) {
 					//Ext.message.msg(false, GIS.i18n.current_selection_no_data);
-					GIS.vars.mask.hide();
+					GIS.mask.hide();
 					return;
 				}
 				
@@ -1491,8 +1491,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 this.loadGeoJson();
             }
             
-            GIS.vars.mask.msg = GIS.i18n.loading;
-            GIS.vars.mask.show();
+            GIS.mask.msg = GIS.i18n.loading;
+            GIS.mask.show();
             
             GIS.vars.lockPosition = lockPosition;
             
@@ -1525,7 +1525,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                         
                         //if (mapvalues.length === 0) {
                             //Ext.message.msg(false, GIS.i18n.current_selection_no_data);
-                            //GIS.vars.mask.hide();
+                            //GIS.mask.hide();
                             //return;
                         //}
                         
@@ -1563,7 +1563,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             }
         }
         if (!this.layer.features.length) {
-            GIS.vars.mask.hide();
+            GIS.mask.hide();
             Ext.message.msg(false, GIS.i18n.no_values_found);
             return;
         }
@@ -1583,7 +1583,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
-        GIS.vars.mask.hide();
+        GIS.mask.hide();
     },
     
     onRender: function(ct, position) {
