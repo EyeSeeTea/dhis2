@@ -49,7 +49,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     update: {
 		isOrganisationUnit: false,
 		isData: false,
-		isLegend: false
+		isLegend: false,
+		reset: function() {
+			this.isOrganisationUnit = false;
+			this.isData = false;
+			this.isLegend = false;
+		}
 	},
     
     store: {

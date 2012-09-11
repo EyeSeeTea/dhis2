@@ -42,6 +42,8 @@ GIS.conf = {
 
 GIS.init = {};
 
+GIS.mask;
+
 GIS.util = {
 	google: {},
 	geojson: {},
@@ -51,7 +53,7 @@ GIS.util = {
 	}
 };
 
-GIS.map = {};
+GIS.map;
 
 GIS.layer = {
 	boundary: {
@@ -116,6 +118,12 @@ Ext.onReady( function() {
 		document.getElementsByClassName('olControlButtonItemActive')[0].innerHTML = '+';
 	};
 	
+	/* Mask */
+	
+	GIS.mask = new Ext.LoadMask(Ext.getBody(), {
+		msg: GIS.i18n.loading
+	});
+	
 	/* Util */
 	
 	GIS.util.google.openTerms = function() {
@@ -123,18 +131,18 @@ Ext.onReady( function() {
 	};
 	
 	GIS.util.geojson.decode = function(doc) {
+		var geojson = {};
         doc = Ext.decode(doc);
-        var geo = {};
-        geo.type = 'FeatureCollection';
-        geo.crs = {
+        geojson.type = 'FeatureCollection';
+        geojson.crs = {
             type: 'EPSG',
             properties: {
                 code: '4326'
             }
         };
-        geo.features = [];
+        geojson.features = [];
         for (var i = 0; i < doc.length; i++) {
-            geo.features.push({
+            geojson.features.push({
                 geometry: {
                     type: doc[i].t == 1 ? 'MultiPolygon' : 'Point',
                     coordinates: doc[i].c
@@ -147,7 +155,7 @@ Ext.onReady( function() {
                 }
             });
         }
-        return geo;
+        return geojson;
     };
     
     GIS.util.vector.getTransformedFeatureArray = function(features) {
@@ -179,8 +187,15 @@ Ext.onReady( function() {
     });
     
     GIS.map.layerController = {};
-    GIS.map.layerController.button = new OpenLayers.Control.Button({displayClass: 'olControlButton', trigger: function() {alert('clicky');}});
-    GIS.map.layerController.panel = new OpenLayers.Control.Panel({defaultControl: GIS.map.layerController.button});
+    GIS.map.layerController.button = new OpenLayers.Control.Button({
+		displayClass: 'olControlButton',
+		trigger: function() {
+			alert('clicky');
+		}
+	});
+    GIS.map.layerController.panel = new OpenLayers.Control.Panel({
+		defaultControl: GIS.map.layerController.button
+	});
     GIS.map.layerController.panel.addControls([GIS.map.layerController.button]);    
     GIS.map.addControl(GIS.map.layerController.panel);
     
