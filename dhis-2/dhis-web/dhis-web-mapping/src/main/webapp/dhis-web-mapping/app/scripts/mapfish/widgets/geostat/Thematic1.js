@@ -42,6 +42,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     loadMask: false,
     labelGenerator: null,
     
+    model: null,
+    
     cmp: {},
     
     toggler: {},
@@ -54,6 +56,32 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.isOrganisationUnit = false;
 			this.isData = false;
 			this.isLegend = false;
+		}
+	},
+	organisationUnitSelection: {
+		parent: {
+			id: null,
+			name: null,
+			level: null
+		},
+		level: {
+			level: null,
+			name: null
+		},
+		setValues: function(parentId, parentName, parentLevel, levelLevel, levelName) {
+			this.parent.id = parentId || this.parent.id;
+			this.parent.name = parentName || this.parent.name;
+			this.parent.level = parentLevel || this.parent.level;
+			this.level.level = levelLevel || this.level.level;
+			this.level.name = levelName || this.level.name;
+		},
+		setValuesOnDrillDown: function(parentId, parentName) {
+			this.parent.id = parentId;
+			this.parent.name = parentName;
+			this.parent.level = this.level.level;
+			this.level.level++;
+			this.level.name = G.stores.organisationUnitLevel.getAt(
+				GIS.store.organisationUnitLevels.find('level', this.level.level)).data.name;
 		}
 	},
     
@@ -134,47 +162,58 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		})
 	},
 	
-	getValues: function(conf) {
-		var model = conf ? {
-			valueType: conf.valueType,
-			indicatorGroup: conf.indicatorGroup,
-			indicator: conf.indicator,
-			dataElementGroup: conf.dataElementGroup,
-			dataElement: conf.dataElement,
-			periodType: conf.periodType,
-			period: conf.period,
-			legendType: conf.legendType,
-			legendSet: conf.legendSet,
-			classes: conf.classes,
-			method: conf.method,
-			colorLow: conf.colorLow,
-			colorHigh: conf.colorHigh,
-			radiusLow: conf.radiusLow,
-			radiusHigh: conf.radiusHigh,
-			level: conf.level,
-			parent: conf.parent.getSelectionModel().getSelection()[0].getId()
-		} : {
-			valueType: this.cmp.valueType.getValue(),
-			indicatorGroup: this.cmp.indicatorGroup.getValue(),
-			indicator: this.cmp.indicator.getValue(),
-			dataElementGroup: this.cmp.dataElementGroup.getValue(),
-			dataElement: this.cmp.dataElement.getValue(),
-			periodType: this.cmp.periodType.getValue(),
-			period: this.cmp.period.getValue(),
-			legendType: this.cmp.legendType.getValue(),
-			legendSet: this.cmp.legendSet.getValue(),
-			classes: this.cmp.classes.getValue(),
-			method: this.cmp.method.getValue(),
-			colorLow: this.cmp.colorLow.getValue(),
-			colorHigh: this.cmp.colorHigh.getValue(),
-			colors: this.getColors(),
-			radiusLow: this.cmp.radiusLow.getValue(),
-			radiusHigh: this.cmp.radiusHigh.getValue(),
-			level: this.cmp.level.getValue(),
-			parent: this.cmp.parent.getSelectionModel().getSelection()[0].getId()
+	getValues: function(conf) {		
+		if (conf) {
+			this.model = {
+				valueType: conf.valueType,
+				indicatorGroup: conf.indicatorGroup,
+				indicator: conf.indicator,
+				dataElementGroup: conf.dataElementGroup,
+				dataElement: conf.dataElement,
+				periodType: conf.periodType,
+				period: conf.period,
+				legendType: conf.legendType,
+				legendSet: conf.legendSet,
+				classes: conf.classes,
+				method: conf.method,
+				colorLow: conf.colorLow,
+				colorHigh: conf.colorHigh,
+				radiusLow: conf.radiusLow,
+				radiusHigh: conf.radiusHigh,
+				level: conf.level,
+				parent: conf.parent.getSelectionModel().getSelection()[0].getId()
+			};
+			
+			//more
+		} else {
+			var parent = this.cmp.parent.getSelectionModel().getSelection()[0],
+				level = this.cmp.level;
+				
+			this.model = {
+				valueType: this.cmp.valueType.getValue(),
+				indicatorGroup: this.cmp.indicatorGroup.getValue(),
+				indicator: this.cmp.indicator.getValue(),
+				dataElementGroup: this.cmp.dataElementGroup.getValue(),
+				dataElement: this.cmp.dataElement.getValue(),
+				periodType: this.cmp.periodType.getValue(),
+				period: this.cmp.period.getValue(),
+				legendType: this.cmp.legendType.getValue(),
+				legendSet: this.cmp.legendSet.getValue(),
+				classes: this.cmp.classes.getValue(),
+				method: this.cmp.method.getValue(),
+				colorLow: this.cmp.colorLow.getValue(),
+				colorHigh: this.cmp.colorHigh.getValue(),
+				colors: this.getColors(),
+				radiusLow: parseInt(this.cmp.radiusLow.getValue()),
+				radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
+				level: level.getValue(),
+				parent: parent.getId()
+			};
+			
+			this.organisationUnitSelection.setValues(parent.data.id, parent.data.text, parent.data.level, level.getValue(), level.getRawValue());
 		};
 		
-		return model;
+		this.execute();
 	},			
     
     setUrl: function(url) {
@@ -191,14 +230,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         }                
         if (doc.length) {
             doc = GIS.util.geojson.decode(doc);
-        }
+        } else {
+			//todo alert error message
+		}
         
         this.layer.removeFeatures(this.layer.features);
         this.layer.addFeatures(format.read(doc));
 		this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
         this.features = this.layer.features.slice(0);
         this.requestSuccess(request);
-        //this.classify(false, false, true);
         this.loadData();
     },		
 
@@ -339,6 +379,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function(cb) {
+						this.update.isData = true;
 						
                         //Ext.Ajax.request({
                             //url: GIS.conf.path_mapping + 'getMapLegendSetByIndicator' + GIS.conf.type,
@@ -402,7 +443,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             hidden: true,
-            store: this.store.dataElementsByGroup
+            store: this.store.dataElementsByGroup,
+            listeners: {
+				select: {
+					scope: this,
+					fn: function() {
+						this.update.isData = true;
+					}
+				}
+			}
         });
         
         this.cmp.periodType = Ext.create('Ext.form.field.ComboBox', {
@@ -439,6 +488,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             selectFirst: function() {
+				this.update.isData = true;
 				this.setValue(this.store.getAt(0).data.id);
 			},
             store: this.store.periodsByType
@@ -508,7 +558,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             hidden: true,
-            store: GIS.store.predefinedColorMapLegendSet
+            store: GIS.store.predefinedColorMapLegendSet,
+            listeners: {
+				select: {
+					scope: this,
+					fn: function() {
+						this.update.isLegend = true;
+					}
+				}
+			}
         });
         
         this.cmp.method = Ext.create('Ext.form.field.ComboBox', {
@@ -524,7 +582,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                     [2, 'By class range'],
                     [3, 'By class count'] //i18n
                 ]
-            })
+            }),
+            listeners: {
+				select: {
+					scope: this,
+					fn: function() {
+						this.update.isLegend = true;
+					}
+				}
+			}
         });
         
         this.cmp.classes = Ext.create('Ext.form.field.Number', {
@@ -540,7 +606,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             store: Ext.create('Ext.data.ArrayStore', {
                 fields: ['id'],
                 data: [[1], [2], [3], [4], [5], [6], [7]]
-            })
+            }),
+            listeners: {
+				change: {
+					scope: this,
+					fn: function() {
+						this.update.isLegend = true;
+					}
+				}
+			}
         });
         
         this.cmp.colorLow = Ext.create('Ext.button.Button', {
@@ -562,6 +636,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 							this.cmp.colorLow.getEl().dom.style.background = '#' + color;
 							this.cmp.colorLow.value = color;
 							this.cmp.colorLow.menu.hide();
+						}
+					}
+				},
+				listeners: {
+					click: {
+						scope: this,
+						fn: function() {
+							this.update.isLegend = true;
 						}
 					}
 				}
@@ -595,6 +677,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 							this.cmp.colorHigh.menu.hide();
 						}
 					}
+				},
+				listeners: {
+					click: {
+						scope: this,
+						fn: function() {
+							this.update.isLegend = true;
+						}
+					}
 				}
 			},
 			listeners: {
@@ -608,14 +698,30 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: 50,
             allowDecimals: false,
             minValue: 1,
-            value: 3
+            value: 3,
+            listeners: {
+				change: {
+					scope: this,
+					fn: function() {
+						this.update.isLegend = true;
+					}
+				}
+			}
         });
         
         this.cmp.radiusHigh = Ext.create('Ext.form.field.Number', {
             width: 50,
             allowDecimals: false,
             minValue: 1,
-            value: 15
+            value: 15,
+            listeners: {
+				change: {
+					scope: this,
+					fn: function() {
+						this.update.isLegend = true;
+					}
+				}
+			}
         });
         
         // Organisation unit options
@@ -630,7 +736,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             style: 'margin-bottom: 4px',
-            store: GIS.store.organisationUnitLevels
+            store: GIS.store.organisationUnitLevels,
+			listeners: {
+				select: {
+					scope: this,
+					fn: function() {
+						this.update.isOrganisationUnit = true;
+					}
+				}
+			}
         });
         
         this.cmp.parent = Ext.create('Ext.tree.Panel', {
@@ -658,7 +772,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						}
 					}
 				}
-			})
+			}),
+			listeners: {
+				select: {
+					scope: this,
+					fn: function() {
+						this.update.isOrganisationUnit = true;
+					}
+				}
+			}
         });
         
         // Custom panels
@@ -1433,17 +1555,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	},
 	
     loadOrganisationUnits: function() {        
-        var url = GIS.conf.path_mapping + 'getGeoJson.action?' +
+        var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
             'parentId=' + this.organisationUnitSelection.parent.id +
             '&level=' + this.organisationUnitSelection.level.level;
         this.setUrl(url);
     },
     
     loadData: function() {
-		//var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
+		//todo var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
 		dataUrl = 'getIndicatorMapValues'; //tmp
 		var params = {
-			//id: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : this.cmp.dataElement.getValue(),
+			//todo id: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : this.cmp.dataElement.getValue(),
 			id: this.cmp.indicator.getValue(), //tmp
 			periodId: this.cmp.period.getValue(),
 			parentId: this.organisationUnitSelection.parent.id,
@@ -1456,20 +1578,20 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			disableCaching: false,
 			scope: this,
 			success: function(r) {
-				var mapvalues = GIS.util.mapValueDecode(r);
-				this.layer.features = this.featureStorage.slice(0);
-				
-				if (mapvalues.length === 0) {
-					//Ext.message.msg(false, GIS.i18n.current_selection_no_data);
+				var values = GIS.util.json.decodeAggregatedValues(r.responseText);				
+				if (values.length === 0) {
+					//todo Ext.message.msg(false, GIS.i18n.current_selection_no_data);
 					GIS.mask.hide();
 					return;
 				}
 				
+				this.layer.features = this.featureStorage.slice(0);
+				
 				for (var i = 0; i < this.layer.features.length; i++) {
 					this.layer.features[i].attributes.value = 0;
-					for (var j = 0; j < mapvalues.length; j++) {
-						if (this.layer.features[i].attributes.id == mapvalues[j].oi) {
-							this.layer.features[i].attributes.value = parseFloat(mapvalues[j].v);
+					for (var j = 0; j < values.length; j++) {
+						if (this.layer.features[i].attributes.id == values[j].oi) {
+							this.layer.features[i].attributes.value = parseFloat(values[j].v);
 							break;
 						}
 					}
@@ -1482,28 +1604,58 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	},
 	
 	loadLegend: function() {
+        for (var i = 0; i < this.layer.features.length; i++) { // remove features with value 0, else add label properties
+            var f = this.layer.features[i];
+            if (!f.attributes.value) {
+                this.layer.features.splice(i,1);
+                i--;
+            }
+            else {
+                f.attributes.labelString = f.attributes.name + ' (' + f.attributes.value + ')';
+                f.attributes.fixedName = GIS.util.cutString(f.attributes.name, 30);
+            }
+        }
+        
+        if (!this.layer.features.length) {
+            GIS.mask.hide();
+            alert("no orgunits with value > 0");
+            //todo Ext.message.msg(false, GIS.i18n.no_values_found);
+            return;
+        }
+        
+		var options = {
+            indicator: 'value',
+            method: this.model.method,
+            numClasses: this.model.classes,
+            colors: this.model.colors,
+            minSize: this.model.radiusLow,
+            maxSize: this.model.radiusHigh
+        };
+        
+        GIS.vars.activeWidget = this;
+        this.coreComp.applyClassification(options, this);
+        this.classificationApplied = true;
+        
+        GIS.mask.hide();
 		
 	},
 
     classify: function(exception, lockPosition, loaded) {
-        if (this.formValidation.validateForm.apply(this, [exception])) {
-            if (!this.layer.features.length && !loaded) {
-                this.loadGeoJson();
-            }
+        //todo if (this.formValidation.validateForm.apply(this, [exception])) {
+            //if (!this.layer.features.length && !loaded) {
+                //this.loadGeoJson();
+            //}
             
-            GIS.mask.msg = GIS.i18n.loading;
-            GIS.mask.show();
+            //todo GIS.vars.lockPosition = lockPosition;
             
-            GIS.vars.lockPosition = lockPosition;
-            
-            if (this.mapView) {
-                if (this.mapView.longitude && this.mapView.latitude && this.mapView.zoom) {
-                    var point = GIS.util.getTransformedPointByXY(this.mapView.longitude, this.mapView.latitude);
-                    GIS.vars.map.setCenter(new OpenLayers.LonLat(point.x, point.y), this.mapView.zoom);
-                    GIS.vars.lockPosition = true;
-                }
-                this.mapView = false;
-            }
+            //todo if (this.mapView) {
+                //if (this.mapView.longitude && this.mapView.latitude && this.mapView.zoom) {
+                    //var point = GIS.util.getTransformedPointByXY(this.mapView.longitude, this.mapView.latitude);
+                    //GIS.vars.map.setCenter(new OpenLayers.LonLat(point.x, point.y), this.mapView.zoom);
+                    //GIS.vars.lockPosition = true;
+                //}
+                //this.mapView = false;
+            //}
             
             //if (this.updateValues) {
                 //var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
@@ -1547,44 +1699,44 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             //else {
                 //this.applyValues();
             //}
-        }
+        //}
     },
     
-    applyValues: function() {
-        for (var i = 0; i < this.layer.features.length; i++) {
-            var f = this.layer.features[i];
-            if (!f.attributes.value) {
-                this.layer.features.splice(i,1);
-                i--;
-            }
-            else {
-                f.attributes.labelString = f.attributes.name + ' (' + f.attributes.value + ')';
-                f.attributes.fixedName = GIS.util.cutString(f.attributes.name, 30);
-            }
-        }
-        if (!this.layer.features.length) {
-            GIS.mask.hide();
-            Ext.message.msg(false, GIS.i18n.no_values_found);
-            return;
-        }
+    //applyValues: function() {
+        //for (var i = 0; i < this.layer.features.length; i++) {
+            //var f = this.layer.features[i];
+            //if (!f.attributes.value) {
+                //this.layer.features.splice(i,1);
+                //i--;
+            //}
+            //else {
+                //f.attributes.labelString = f.attributes.name + ' (' + f.attributes.value + ')';
+                //f.attributes.fixedName = GIS.util.cutString(f.attributes.name, 30);
+            //}
+        //}
+        //if (!this.layer.features.length) {
+            //GIS.mask.hide();
+            //Ext.message.msg(false, GIS.i18n.no_values_found);
+            //return;
+        //}
         
-        this.button.menu.find('name','history')[0].addItem(this);
+        //this.button.menu.find('name','history')[0].addItem(this);
         
-		var options = {
-            indicator: 'value',
-            method: this.cmp.method.getValue(),
-            numClasses: this.cmp.classes.getValue(),
-            colors: this.getColors(),
-            minSize: parseInt(this.cmp.radiusLow.getValue()),
-            maxSize: parseInt(this.cmp.radiusHigh.getValue())
-        };
+		//var options = {
+            //indicator: 'value',
+            //method: this.cmp.method.getValue(),
+            //numClasses: this.cmp.classes.getValue(),
+            //colors: this.getColors(),
+            //minSize: parseInt(this.cmp.radiusLow.getValue()),
+            //maxSize: parseInt(this.cmp.radiusHigh.getValue())
+        //};
         
-        GIS.vars.activeWidget = this;
-        this.coreComp.applyClassification(options, this);
-        this.classificationApplied = true;
+        //GIS.vars.activeWidget = this;
+        //this.coreComp.applyClassification(options, this);
+        //this.classificationApplied = true;
         
-        GIS.mask.hide();
-    },
+        //GIS.mask.hide();
+    //},
     
     onRender: function(ct, position) {
         mapfish.widgets.geostat.Thematic1.superclass.onRender.apply(this, arguments);

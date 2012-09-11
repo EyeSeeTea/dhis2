@@ -48,6 +48,7 @@ GIS.util = {
 	google: {},
 	geojson: {},
 	vector: {},
+	json: {},
 	jsonEncodeString: function(str) {
 		return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
 	}
@@ -156,6 +157,19 @@ Ext.onReady( function() {
             });
         }
         return geojson;
+    };
+    
+    GIS.util.json.decodeAggregatedValues = function(responseText) {
+		responseText = Ext.decode(responseText);
+		var values = [];
+		
+        for (var i = 0; i < responseText.length; i++) {
+            values.push({
+                oi: responseText[i][0],
+                v: responseText[i][1]
+            });
+        }
+        return values;        
     };
     
     GIS.util.vector.getTransformedFeatureArray = function(features) {
@@ -468,7 +482,7 @@ Ext.onReady( function() {
 			{
 				text: 'Update',
 				handler: function() {
-					console.log(GIS.layer.thematic1.widget.getValues());
+					GIS.layer.thematic1.widget.execute();
 				}
 			}
 		],
