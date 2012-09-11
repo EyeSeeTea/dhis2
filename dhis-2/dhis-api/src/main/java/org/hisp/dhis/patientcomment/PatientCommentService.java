@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.comment;
+package org.hisp.dhis.patientcomment;
 
 import java.util.Collection;
 
@@ -34,18 +34,18 @@ import java.util.Collection;
  * 
  * @version CommentService.java 9:27:31 AM Aug 17, 2012 $
  */
-public interface CommentService
+public interface PatientCommentService
 {
-    String ID = CommentService.class.getName();
+    String ID = PatientCommentService.class.getName();
 
-    int addComment( Comment comment );
+    int addPatientComment( PatientComment patientComment );
 
-    void deleteComment( Comment comment );
+    void deletePatientComment( PatientComment patientComment );
 
-    void updateComment( Comment comment );
+    void updatePatientComment( PatientComment patientComment );
 
-    Comment getComment( int id );
+    PatientComment getPatientComment( int id );
 
-    Collection<Comment> getAllComments();
+    Collection<PatientComment> getAllPatientComments();
 
 }

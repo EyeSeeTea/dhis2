@@ -25,7 +25,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.comment;
+package org.hisp.dhis.patientcomment;
 
 import java.util.Collection;
 
@@ -34,54 +34,54 @@ import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 /**
  * @author Chau Thu Tran
  * 
- * @version DefaultCommentService.java 9:45:40 AM Aug 17, 2012 $
+ * @version DefaultPatientCommentService.java 9:45:40 AM Aug 17, 2012 $
  */
-public class DefaultCommentService
-    implements CommentService
+public class DefaultPatientCommentService
+    implements PatientCommentService
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericIdentifiableObjectStore<Comment> commentStore;
+    private GenericIdentifiableObjectStore<PatientComment> patientCommentStore;
 
-    public void setCommentStore( GenericIdentifiableObjectStore<Comment> commentStore )
+    public void setPatientCommentStore( GenericIdentifiableObjectStore<PatientComment> patientCommentStore )
     {
-        this.commentStore = commentStore;
+        this.patientCommentStore = patientCommentStore;
     }
-
+    
     // -------------------------------------------------------------------------
     // Implementation methods
     // -------------------------------------------------------------------------
 
     @Override
-    public int addComment( Comment comment )
+    public int addPatientComment( PatientComment patientComment )
     {
-        return commentStore.save( comment );
+        return patientCommentStore.save( patientComment );
     }
 
     @Override
-    public void deleteComment( Comment comment )
+    public void deletePatientComment( PatientComment patientComment )
     {
-        commentStore.delete( comment );
+        patientCommentStore.delete( patientComment );
     }
 
     @Override
-    public void updateComment( Comment comment )
+    public void updatePatientComment( PatientComment patientComment )
     {
-        commentStore.update( comment );
+        patientCommentStore.update( patientComment );
     }
 
     @Override
-    public Comment getComment( int id )
+    public PatientComment getPatientComment( int id )
     {
-        return commentStore.get( id );
+        return patientCommentStore.get( id );
     }
 
     @Override
-    public Collection<Comment> getAllComments()
+    public Collection<PatientComment> getAllPatientComments()
     {
-        return commentStore.getAll();
+        return patientCommentStore.getAll();
     }
 
 }

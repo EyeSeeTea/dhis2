@@ -25,16 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.comment;
+package org.hisp.dhis.patientcomment;
 
 import java.util.Date;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version Comment.java 9:24:52 AM Aug 17, 2012 $
+ * @version PatientComment.java 9:24:52 AM Aug 17, 2012 $
  */
-public class Comment
+public class PatientComment
 {
     private int id;
 
@@ -48,12 +48,12 @@ public class Comment
     // Constructor
     // -------------------------------------------------------------------------
 
-    public Comment()
+    public PatientComment()
     {
 
     }
 
-    public Comment( String commentText, String creator, Date createdDate )
+    public PatientComment( String commentText, String creator, Date createdDate )
     {
         this.commentText = commentText;
         this.creator = creator;
@@ -102,12 +102,6 @@ public class Comment
     public void setCreator( String creator )
     {
         this.creator = creator;
-    }
-    
-    @Override
-    public String toString()
-    {
-        return createdDate + " - "  + creator + "_" + commentText;
     }
 
 }
