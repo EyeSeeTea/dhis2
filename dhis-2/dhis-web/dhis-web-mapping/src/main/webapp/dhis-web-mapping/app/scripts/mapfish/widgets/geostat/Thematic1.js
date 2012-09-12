@@ -60,6 +60,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.isLegend = false;
 		}
 	},
+	
 	organisationUnitSelection: {
 		parent: {
 			id: null,
@@ -84,6 +85,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.level.level++;
 			this.level.name = G.stores.organisationUnitLevel.getAt(
 				GIS.store.organisationUnitLevels.find('level', this.level.level)).data.name;
+		}
+	},
+	
+	legend: {
+		value: 'automatic', //todo
+		method: 2, //todo
+		classes: 5,
+		reset: function() {
+			this.value = 'automatic'; //todo
+			this.method = 2; //todo
+			this.classes = 5;
 		}
 	},
     
@@ -1492,7 +1504,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         
         getLegendInfo: function() {
             return {
-                name: this.valueType.isIndicator() ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+                name: this.model.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
                 time: this.cmp.period.getRawValue(),
                 map: this.organisationUnitSelection.level.name + ' / ' + this.organisationUnitSelection.parent.name
             };

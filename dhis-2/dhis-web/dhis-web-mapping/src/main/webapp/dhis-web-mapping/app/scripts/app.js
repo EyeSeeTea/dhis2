@@ -26,6 +26,11 @@ GIS.conf = {
 			value: 'value',
 			legendtype_automatic: 'automatic',
 			legendtype_predefined: 'predefined'
+		},
+		mapfish: {
+			classify_with_bounds: 1,
+			classify_by_equal_intervals: 2,
+			classify_by_quantils: 3
 		}
 	},
 	url: {

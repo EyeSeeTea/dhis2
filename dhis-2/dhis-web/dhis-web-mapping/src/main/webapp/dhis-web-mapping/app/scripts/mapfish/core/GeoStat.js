@@ -180,7 +180,7 @@ mapfish.GeoStat = OpenLayers.Class({
         this.updateLegend();
         this.layer.setVisibility(true);
         
-        G.util.zoomToVisibleExtent();
+        //G.util.zoomToVisibleExtent();
     },
 
     showDetails: function(obj) {},
@@ -291,63 +291,64 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
         return Math.floor(1 + 3.3 * Math.log(this.nbVal, 10));
     },
 	
-    classify: function(method, nbBins, bounds) {
-		if (G.vars.activeWidget.legend.value == G.conf.map_legendset_type_automatic) {
-			if (method == mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS) {
-				var str = G.vars.activeWidget.cmp.bounds.getValue();
+    classify: function(method, nbBins, bounds, that) {
+		//if (this.widget.model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			//if (method === mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS) {
+				//var str = this.widget.model.boundsG.vars.activeWidget.cmp.bounds.getValue();
                 				
-				for (var i = 0; i < str.length; i++) {
-					str = str.replace(' ','');
-				}				
-				if (str.charAt(str.length-1) == ',') {
-					str = str.substring(0, str.length-1);
-				}
+				//for (var i = 0; i < str.length; i++) {
+					//str = str.replace(' ','');
+				//}				
+				//if (str.charAt(str.length-1) == ',') {
+					//str = str.substring(0, str.length-1);
+				//}
 				
-				bounds = [];
-				bounds = str.split(',');
+				//bounds = [];
+				//bounds = str.split(',');
 				
-				for (var j = 0; j < bounds.length; j++) {
-					if (!Ext.num(parseFloat(bounds[j]), false)) {
-						bounds.remove(bounds[j]);
-						j--;
-					}
-				}
+				//for (var j = 0; j < bounds.length; j++) {
+					//if (!Ext.num(parseFloat(bounds[j]), false)) {
+						//bounds.remove(bounds[j]);
+						//j--;
+					//}
+				//}
 				
-				var newInput = bounds.join(',');                
-                G.vars.activeWidget.cmp.bounds.setValue(newInput);
+				//var newInput = bounds.join(',');                
+                //G.vars.activeWidget.cmp.bounds.setValue(newInput);
 				
-				for (var k = 0; k < bounds.length; k++) {
-					bounds[k] = parseFloat(bounds[k]);
-					if (bounds[k] < this.minVal || bounds[k] > this.maxVal) {
-						Ext.message.msg(false, 'Class breaks must be higher than <span class="x-msg-hl">' + this.minVal + '</span> and lower than <span class="x-msg-hl">' + this.maxVal + '</span>.');
-					}
-				}
+				//for (var k = 0; k < bounds.length; k++) {
+					//bounds[k] = parseFloat(bounds[k]);
+					//if (bounds[k] < this.minVal || bounds[k] > this.maxVal) {
+						//Ext.message.msg(false, 'Class breaks must be higher than <span class="x-msg-hl">' + this.minVal + '</span> and lower than <span class="x-msg-hl">' + this.maxVal + '</span>.');
+					//}
+				//}
 				
-				bounds.unshift(this.minVal);
-				bounds.push(this.maxVal);
-			}
-		}
-		else if (G.vars.activeWidget.legend.value == G.conf.map_legendset_type_predefined) {
-			bounds = G.vars.activeWidget.bounds;
+				//bounds.unshift(this.minVal);
+				//bounds.push(this.maxVal);
+			//}
+		//}
+		
+		if (that.model.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			bounds = that.bounds;
 
 			if (bounds[0] > this.minVal) {
 				bounds.unshift(this.minVal);        
-                if (G.vars.activeWidget == centroid) {
-                    G.vars.activeWidget.symbolizerInterpolation.unshift('blank');
-                }
-                else {
-                    G.vars.activeWidget.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
-                }
+                //if (this.widget == centroid) {
+                    //this.widget.symbolizerInterpolation.unshift('blank');
+                //}
+                //else {
+                    that.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
+                //}
 			}
 
 			if (bounds[bounds.length-1] < this.maxVal) {
 				bounds.push(this.maxVal); 
-                if (G.vars.activeWidget == centroid) {
-                    G.vars.activeWidget.symbolizerInterpolation.push('blank');
-                }
-                else {
-                    G.vars.activeWidget.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
-                }
+                //todo if (G.vars.activeWidget == centroid) {
+                    //G.vars.activeWidget.symbolizerInterpolation.push('blank');
+                //}
+                //else {
+                    that.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
+                //}
 			}
 			
 			method = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS;

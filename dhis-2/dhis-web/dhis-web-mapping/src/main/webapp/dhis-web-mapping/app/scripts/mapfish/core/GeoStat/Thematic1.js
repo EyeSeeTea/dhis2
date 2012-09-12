@@ -62,10 +62,10 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     
     createColorInterpolation: function() {
         var numColors = this.classification.bins.length;
-		var mapLegendType = this.widget.cmp.mapLegendType.getValue();
+		var mapLegendType = this.widget.model.legendType;
         this.widget.imageLegend = [];
         
-        this.colorInterpolation = mapLegendType == GIS.conf.map_legendset_type_automatic ?
+        this.colorInterpolation = mapLegendType == GIS.conf.finals.widget.legendtype_automatic ?
             mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors) : this.widget.colorInterpolation;
             
         for (var i = 0; i < this.classification.bins.length; i++) {
@@ -93,14 +93,14 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
         this.classification = dist.classify(
             this.method,
             this.numClasses,
-            null
+            null,
+            this.widget
         );
 
         this.createColorInterpolation();
     },
 
     applyClassification: function(options, widget) {
-        this.widget = widget;
         this.updateOptions(options);
         
 		var calculateRadius = OpenLayers.Function.bind(
@@ -157,7 +157,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
         element.style.height = "5px";
         this.legendDiv.appendChild(element);
         
-        if (GIS.vars.activeWidget.legend.value == GIS.conf.map_legendset_type_automatic) {        
+        if (this.widget.legend.value === GIS.conf.finals.widget.legendtype_automatic) {        
             for (var i = 0; i < this.classification.bins.length; i++) {
                 var element = document.createElement("div");
                 element.style.backgroundColor = this.colorInterpolation[i].toHexString();
@@ -176,7 +176,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
                 this.legendDiv.appendChild(element);
             }
         }
-        else if (GIS.vars.activeWidget.legend.value == GIS.conf.map_legendset_type_predefined) {
+        else if (this.widget.legend.value === GIS.conf.finals.widget.legendtype_predefined) {
             for (var i = 0; i < this.classification.bins.length; i++) {
                 var element = document.createElement("div");
                 element.style.backgroundColor = this.colorInterpolation[i].toHexString();
