@@ -44,6 +44,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     
     model: null,
     
+    features: [],
+    
     cmp: {},
     
     toggler: {},
@@ -185,7 +187,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			};
 			
 			//more
-		} else {
+		}
+		else {
 			var parent = this.cmp.parent.getSelectionModel().getSelection()[0],
 				level = this.cmp.level;
 				
@@ -207,13 +210,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				radiusLow: parseInt(this.cmp.radiusLow.getValue()),
 				radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
 				level: level.getValue(),
-				parent: parent.getId()
+				parent: parent.data.id
 			};
 			
-			this.organisationUnitSelection.setValues(parent.data.id, parent.data.text, parent.data.level, level.getValue(), level.getRawValue());
+			this.organisationUnitSelection.setValues(
+				parent.data.id,
+				parent.data.text,
+				parent.data.level,
+				level.getValue(),
+				level.getRawValue()
+			);
 		};
-		
-		this.execute();
 	},			
     
     setUrl: function(url) {
@@ -237,9 +244,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.layer.removeFeatures(this.layer.features);
         this.layer.addFeatures(format.read(doc));
 		this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
-        this.features = this.layer.features.slice(0);
+        this.widget.features = this.layer.features.slice(0);
         this.requestSuccess(request);
-        this.loadData();
+        this.widget.loadData();
     },		
 
     requestSuccess: function(request) {
@@ -323,8 +330,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             store: Ext.create('Ext.data.ArrayStore', {
                 fields: ['id', 'name'],
                 data: [
-                    [GIS.conf.finals.widget.valuetype_indicator, 'Indicator'], //i18n
-                    [GIS.conf.finals.widget.valuetype_dataelement, 'Data element'] //i18n
+                    [GIS.conf.finals.dimension.indicator.id, 'Indicator'], //i18n
+                    [GIS.conf.finals.dimension.dataElement.id, 'Data element'] //i18n
                 ]
             }),
             listeners: {
@@ -729,7 +736,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.cmp.level = Ext.create('Ext.form.field.ComboBox', {
             fieldLabel: GIS.i18n.level,
             editable: false,
-            valueField: 'id',
+            valueField: 'level',
             displayField: 'name',
             mode: 'remote',
             forceSelection: true,
@@ -1543,13 +1550,18 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
 		
+		this.getValues();
+		
 		if (this.update.isOrganisationUnit) {
 			this.loadOrganisationUnits();
-		} else if (this.update.isData) {
+		}
+		else if (this.update.isData) {
 			this.loadData();
-		} else if (this.update.isLegend) {
+		}
+		else if (this.update.isLegend) {
 			this.loadLegend();
-		} else {
+		}
+		else {
 			GIS.mask.hide();
 		}
 	},
@@ -1562,38 +1574,60 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     },
     
     loadData: function() {
-		//todo var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
-		dataUrl = 'getIndicatorMapValues'; //tmp
-		var params = {
-			//todo id: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : this.cmp.dataElement.getValue(),
-			id: this.cmp.indicator.getValue(), //tmp
-			periodId: this.cmp.period.getValue(),
-			parentId: this.organisationUnitSelection.parent.id,
-			level: this.organisationUnitSelection.level.level
-		};
+		var type = this.model.valueType,
+			dataUrl = '../api/mapValues/' + GIS.conf.finals.dimension[type].param + '.json',
+			indicator = GIS.conf.finals.dimension.indicator,
+			dataElement = GIS.conf.finals.dimension.dataElement,
+			period = GIS.conf.finals.dimension.period,
+			organisationUnit = GIS.conf.finals.dimension.organisationUnit,
+			params = {};
+		
+		params[type === indicator.id ? indicator.param : dataElement.param] = this.model[type];
+		params[period.param] = this.model.period;
+		params[organisationUnit.param] = this.model.parent;
+		params.level = this.model.level;
 		
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_gis + dataUrl + '.action',
+			url: GIS.conf.url.path_gis + dataUrl,
 			params: params,
 			disableCaching: false,
 			scope: this,
 			success: function(r) {
-				var values = GIS.util.json.decodeAggregatedValues(r.responseText);				
+				var values = Ext.decode(r.responseText),
+					featureMap = {},
+					valueMap = {};
+					
 				if (values.length === 0) {
-					//todo Ext.message.msg(false, GIS.i18n.current_selection_no_data);
+					alert("no data"); //todo Ext.message.msg(false, GIS.i18n.current_selection_no_data);
 					GIS.mask.hide();
 					return;
 				}
 				
-				this.layer.features = this.featureStorage.slice(0);
+				this.layer.features = this.features.slice(0);
 				
-				for (var i = 0; i < this.layer.features.length; i++) {
-					this.layer.features[i].attributes.value = 0;
-					for (var j = 0; j < values.length; j++) {
-						if (this.layer.features[i].attributes.id == values[j].oi) {
-							this.layer.features[i].attributes.value = parseFloat(values[j].v);
-							break;
-						}
+				for (var i = 0; i < this.layer.features.length; i++) { // feature map (orgunitid : array index)
+					featureMap[this.layer.features[i].attributes.id] = i;
+				}
+				
+				var allZeros = true;
+				for (var i = 0; i < values.length; i++) { // value map (orgunitid : value)
+					if (featureMap.hasOwnProperty(values[i].organisationUnitId)) {
+						valueMap[values[i].organisationUnitId] = values[i][GIS.conf.finals.widget.value];
+						allZeros = false;
+					}
+				}
+				
+				if (allZeros) {
+					alert("zero values only");
+					GIS.mask.hide();
+					return;
+				}
+				
+				for (var f in featureMap) { // set feature value and label string
+					if (featureMap.hasOwnProperty(f)) {
+						var feature = this.layer.features[featureMap[f]];
+						feature.attributes[GIS.conf.finals.widget.value] = valueMap[f];
+						feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
 					}
 				}
 				
@@ -1603,28 +1637,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 	},
 	
-	loadLegend: function() {
-        for (var i = 0; i < this.layer.features.length; i++) { // remove features with value 0, else add label properties
-            var f = this.layer.features[i];
-            if (!f.attributes.value) {
-                this.layer.features.splice(i,1);
-                i--;
-            }
-            else {
-                f.attributes.labelString = f.attributes.name + ' (' + f.attributes.value + ')';
-                f.attributes.fixedName = GIS.util.cutString(f.attributes.name, 30);
-            }
-        }
-        
-        if (!this.layer.features.length) {
-            GIS.mask.hide();
-            alert("no orgunits with value > 0");
-            //todo Ext.message.msg(false, GIS.i18n.no_values_found);
-            return;
-        }
-        
+	loadLegend: function() {         
 		var options = {
-            indicator: 'value',
+            indicator: GIS.conf.finals.widget.value,
             method: this.model.method,
             numClasses: this.model.classes,
             colors: this.model.colors,
@@ -1632,7 +1647,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             maxSize: this.model.radiusHigh
         };
         
-        GIS.vars.activeWidget = this;
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
@@ -1742,15 +1756,16 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         mapfish.widgets.geostat.Thematic1.superclass.onRender.apply(this, arguments);
 		
 		this.coreComp = new mapfish.GeoStat.Thematic1(this.map, {
-            'layer': this.layer,
-            'format': this.format,
-            'url': this.url,
-            'requestSuccess': Ext.Function.bind(this.requestSuccess, this),
-            'requestFailure': Ext.Function.bind(this.requestFailure, this),
-            'featureSelection': this.featureSelection,
-            'nameAttribute': this.nameAttribute,
-            'legendDiv': this.legendDiv,
-            'labelGenerator': this.labelGenerator
+            layer: this.layer,
+            format: this.format,
+            url: this.url,
+            requestSuccess: Ext.Function.bind(this.requestSuccess, this),
+            requestFailure: Ext.Function.bind(this.requestFailure, this),
+            featureSelection: this.featureSelection,
+            nameAttribute: this.nameAttribute,
+            legendDiv: this.legendDiv,
+            labelGenerator: this.labelGenerator,
+            widget: this
         });
     }
 });

@@ -4,9 +4,26 @@ GIS.conf = {
 			layertype_base: 'base',
 			layertype_vector: 'vector'
 		},
+		dimension: {
+			indicator: {
+				id: 'indicator',
+				param: 'in'
+			},
+			dataElement: {
+				id: 'dataElement',
+				param: 'de'
+			},
+			period: {
+				id: 'period',
+				param: 'pe'
+			},
+			organisationUnit: {
+				id: 'organisationUnit',
+				param: 'ou'
+			}
+		},
 		widget: {
-			valuetype_indicator: 'indicator',
-			valuetype_dataelement: 'dataelement',
+			value: 'value',
 			legendtype_automatic: 'automatic',
 			legendtype_predefined: 'predefined'
 		}

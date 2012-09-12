@@ -61,9 +61,9 @@ public class GetGeoJsonAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer parentId;
+    private String parentId;
 
-    public void setParentId( Integer id )
+    public void setParentId( String id )
     {
         this.parentId = id;
     }
@@ -104,7 +104,7 @@ public class GetGeoJsonAction
         boolean modified = !clearIfNotModified( ServletActionContext.getRequest(), ServletActionContext.getResponse(), organisationUnits );
         
         if ( modified )
-        {        
+        {
             for ( OrganisationUnit unit : organisationUnits )
             {
                 if ( !unit.getFeatureType().equals( OrganisationUnit.FEATURETYPE_POINT ) )
