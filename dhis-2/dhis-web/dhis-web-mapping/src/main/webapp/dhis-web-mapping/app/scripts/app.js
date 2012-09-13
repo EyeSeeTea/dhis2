@@ -115,7 +115,10 @@ GIS.cmp = {
 
 GIS.gui = {};
 
-Ext.onReady( function() {
+Ext.onReady( function() {	
+	Ext.removeNode(document.getElementById('slow')); // remove element when ext is loaded
+	
+	console.log('clear');
 	Ext.Loader.setConfig({enabled: true, disableCaching: false});
 	Ext.Loader.setPath('GeoExt', 'scripts/geoext/src/GeoExt');
 	Ext.require([
@@ -281,8 +284,9 @@ Ext.onReady( function() {
 				)
             )
         }),
-        layerType: GIS.conf.finals.layertype_vector
-    });            
+        layerType: GIS.conf.finals.layer.layertype_vector,
+        opacity: 1
+    });
     GIS.map.addLayer(GIS.layer.boundary.layer);
     
     GIS.layer.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
@@ -313,8 +317,9 @@ Ext.onReady( function() {
 				}
             )
         }),
-        layerType: GIS.conf.finals.layertype_vector
-    });            
+        layerType: GIS.conf.finals.layer.layertype_vector,
+        opacity: 0.8
+    });
     GIS.map.addLayer(GIS.layer.thematic1.layer);
     
     /* Stores */
