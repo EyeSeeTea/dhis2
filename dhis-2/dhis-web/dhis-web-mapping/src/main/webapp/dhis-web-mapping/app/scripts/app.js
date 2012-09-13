@@ -296,14 +296,21 @@ Ext.onReady( function() {
         styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
-					{
-						fillOpacity: 0,
-						strokeColor: '#000',
+                    {
+						fillOpacity: 1,
+						strokeColor: '#fff',
 						strokeWidth: 1,
 						pointRadius: 5
 					},
-					OpenLayers.Feature.Vector.style['default']
-				)
+                    OpenLayers.Feature.Vector.style['default']
+                )
+            ),
+            select: new OpenLayers.Style(
+                {
+					strokeColor: '#111',
+					strokeWidth: 2,
+					cursor: 'pointer'
+				}
             )
         }),
         layerType: GIS.conf.finals.layertype_vector
