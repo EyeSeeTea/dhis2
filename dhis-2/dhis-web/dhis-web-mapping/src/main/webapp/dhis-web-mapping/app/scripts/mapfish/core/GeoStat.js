@@ -38,10 +38,6 @@ mapfish.GeoStat = OpenLayers.Class({
 
     requestFailure: function(request) {},
 
-    featureSelection: true,
-
-    nameAttribute: null,
-
     indicator: null,
 
     defaultSymbolizer: {},
@@ -54,19 +50,9 @@ mapfish.GeoStat = OpenLayers.Class({
         this.map = map;
         this.addOptions(options);
         if (!this.layer) {
-            var styleMap = new OpenLayers.StyleMap({
-                'default': new OpenLayers.Style(
-                    OpenLayers.Util.applyDefaults(
-                        this.defaultSymbolizer,
-                        OpenLayers.Feature.Vector.style['default']
-                    )
-                ),
-                'select': new OpenLayers.Style(this.selectSymbolizer)
-            });
             var layer = new OpenLayers.Layer.Vector('geostat', {
                 'displayInLayerSwitcher': false,
-                'visibility': false,
-                'styleMap': styleMap
+                'visibility': false
             });
             map.addLayer(layer);
             this.layer = layer;

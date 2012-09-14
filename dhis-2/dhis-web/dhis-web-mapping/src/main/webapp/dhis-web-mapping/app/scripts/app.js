@@ -212,7 +212,6 @@ Ext.onReady( function() {
 			new OpenLayers.Control.Navigation({
 				documentDrag: true
 			}),
-			//new OpenLayers.Control.LayerSwitcher(),
 			new OpenLayers.Control.MousePosition({
 				prefix: '<span class="el-opacity-1"><span class="text-mouseposition-lonlat">LON </span>',
 				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
@@ -224,12 +223,10 @@ Ext.onReady( function() {
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });
     
-    GIS.map.vectorLayers = [];
-    
     GIS.map.getVisibleVectorLayers = function() {
 		var a = [];
 		for (var i = 0; i < GIS.map.layers.length; i++) {
-			if (GIS.map.layers[i].layerType === 'vector' && GIS.map.layers[i].visibility) {
+			if (GIS.map.layers[i].layerType === GIS.conf.finals.layer.layertype_vector && GIS.map.layers[i].visibility) {
 				a.push(GIS.map.layers[i]);
 			}
 		}
@@ -303,8 +300,6 @@ Ext.onReady( function() {
 				force:true
 			})
 		],
-        visibility: false,
-        displayInLayerSwitcher: false,
         styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
@@ -318,11 +313,12 @@ Ext.onReady( function() {
 				)
             )
         }),
+        visibility: false,
+        displayInLayerSwitcher: false,
         layerType: GIS.conf.finals.layer.layertype_vector,
         opacity: 1
     });
     GIS.map.addLayer(GIS.layer.boundary.layer);
-    GIS.map.vectorLayers.push(GIS.layer.boundary.layer);
     
     GIS.layer.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
         strategies: [
@@ -330,8 +326,6 @@ Ext.onReady( function() {
 				force:true
 			})
 		],
-        visibility: false,
-        displayInLayerSwitcher: false,
         styleMap: new OpenLayers.StyleMap({
             'default': new OpenLayers.Style(
                 OpenLayers.Util.applyDefaults(
@@ -352,11 +346,18 @@ Ext.onReady( function() {
 				}
             )
         }),
+        visibility: false,
+        displayInLayerSwitcher: false,
         layerType: GIS.conf.finals.layer.layertype_vector,
-        opacity: 0.8
+        layerOpacity: 0.8,
+        setLayerOpacity: function(number) {
+			if (number) {
+				this.layerOpacity = number;
+			}
+			this.setOpacity(parseFloat(this.layerOpacity));
+		}
     });
     GIS.map.addLayer(GIS.layer.thematic1.layer);
-    GIS.map.vectorLayers.push(GIS.layer.boundary.layer);
     
     /* Stores */
     
@@ -524,7 +525,6 @@ Ext.onReady( function() {
 	GIS.layer.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
         map: GIS.map,
         layer: GIS.layer.thematic1.layer,
-        featureSelection: false,
         legendDiv: 'thematic1Legend'
     });
     
@@ -540,15 +540,6 @@ Ext.onReady( function() {
         items: GIS.layer.thematic1.widget,
         bbar: [
 			'->',
-			//{
-				//text: '<<<',
-				//handler: function() {
-					//var w = GIS.layer.thematic1.window;					
-					//w.setWidth(w.isCollapsed ? 570 : 290);
-					//this.setText(w.isCollapsed ? '<<<' : '>>>');
-					//w.isCollapsed = w.isCollapsed ? false : true;
-				//}
-			//},
 			{
 				text: 'Update',
 				handler: function() {
@@ -559,7 +550,7 @@ Ext.onReady( function() {
 		listeners: {
 			show: function(w) {
 				if (!this.isRendered) {
-					this.setPosition(7,38);
+					this.setPosition(5,36);
 					this.isRendered = true;
 				}
 			}
