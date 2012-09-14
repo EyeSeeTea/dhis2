@@ -12,10 +12,9 @@
 </head>
 
 <body>
-	<div id="slow" style="height:200px; width: 200px;"></div>	
-	<script type="text/javascript">		
-		console.log('start');
-		document.getElementById('slow').innerHTML = "LOADING";
+	<div id="slow" style="height:200px; width: 200px; padding: 20px"></div>	
+	<script type="text/javascript">	
+		document.getElementById('slow').innerHTML = "<a href=''>SLOW CONNECTION?</a>";
 	</script>
 	
 	<div id="boundaryLegend"></div>
@@ -24,7 +23,7 @@
 	<div id="facilityLegend"></div>
 	<div id="symbolLegend"></div>
 	
-    <script type="text/javascript">window.google = null;</script>
+	<script type="text/javascript">var GIS = {}; window.google = null;</script>
     <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
 
     <script type="text/javascript" src="scripts/ext/ext-all.js"></script>

@@ -118,7 +118,6 @@ GIS.gui = {};
 Ext.onReady( function() {	
 	Ext.removeNode(document.getElementById('slow')); // remove element when ext is loaded
 	
-	console.log('clear');
 	Ext.Loader.setConfig({enabled: true, disableCaching: false});
 	Ext.Loader.setPath('GeoExt', 'scripts/geoext/src/GeoExt');
 	Ext.require([
@@ -225,6 +224,41 @@ Ext.onReady( function() {
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });
     
+    GIS.map.vectorLayers = [];
+    
+    GIS.map.getVisibleVectorLayers = function() {
+		var a = [];
+		for (var i = 0; i < GIS.map.layers.length; i++) {
+			if (GIS.map.layers[i].layerType === 'vector' && GIS.map.layers[i].visibility) {
+				a.push(GIS.map.layers[i]);
+			}
+		}
+		return a;
+	};
+	
+	GIS.map.getExtendedBounds = function(layers) {
+		var bounds = null;
+		if (layers.length) {
+			bounds = layers[0].getDataExtent();
+			if (layers.length > 1) {
+				for (var i = 1; i < layers.length; i++) {
+					bounds.extend(layers[i].getDataExtent());
+				}
+			}
+		}
+		return bounds;
+	};
+	
+	GIS.map.zoomToVisibleExtent = function() {
+		var bounds = GIS.map.getExtendedBounds(GIS.map.getVisibleVectorLayers());
+		if (bounds) {
+			GIS.map.zoomToExtent(bounds);
+		}
+		else {
+			console.log("abort");
+		}
+	};
+    
     GIS.map.layerController = {};
     GIS.map.layerController.button = new OpenLayers.Control.Button({
 		displayClass: 'olControlButton',
@@ -288,6 +322,7 @@ Ext.onReady( function() {
         opacity: 1
     });
     GIS.map.addLayer(GIS.layer.boundary.layer);
+    GIS.map.vectorLayers.push(GIS.layer.boundary.layer);
     
     GIS.layer.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
         strategies: [
@@ -321,6 +356,7 @@ Ext.onReady( function() {
         opacity: 0.8
     });
     GIS.map.addLayer(GIS.layer.thematic1.layer);
+    GIS.map.vectorLayers.push(GIS.layer.boundary.layer);
     
     /* Stores */
     

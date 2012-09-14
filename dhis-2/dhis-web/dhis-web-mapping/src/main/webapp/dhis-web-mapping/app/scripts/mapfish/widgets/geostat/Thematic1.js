@@ -83,19 +83,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.parent.name = parentName;
 			this.parent.level = this.level.level;
 			this.level.level++;
-			this.level.name = G.stores.organisationUnitLevel.getAt(
+			this.level.name = GIS.store.organisationUnitLevel.getAt(
 				GIS.store.organisationUnitLevels.find('level', this.level.level)).data.name;
-		}
-	},
-	
-	legend: {
-		value: 'automatic', //todo
-		method: 2, //todo
-		classes: 5,
-		reset: function() {
-			this.value = 'automatic'; //todo
-			this.method = 2; //todo
-			this.classes = 5;
 		}
 	},
     
@@ -249,7 +238,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         }                
         if (doc.length) {
             doc = GIS.util.geojson.decode(doc);
-        } else {
+        }
+        else {
 			//todo alert error message
 		}
         
@@ -1662,8 +1652,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
-        GIS.mask.hide();
+        if (this.update.isOrganisationUnit) {
+			GIS.map.zoomToVisibleExtent();
+		}
+        
+        this.afterLoad();		
+	},
+	
+	afterLoad: function() {
+		this.update.reset();
 		
+        GIS.mask.hide();
 	},
 
     classify: function(exception, lockPosition, loaded) {
