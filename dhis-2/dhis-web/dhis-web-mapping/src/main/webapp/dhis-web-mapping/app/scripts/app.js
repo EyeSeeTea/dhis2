@@ -139,8 +139,11 @@ Ext.onReady( function() {
 		//GIS.layer.googleStreets.layer.setVisibility(false);
 	};
 	
-	GIS.init.afterRender = function() {
-		document.getElementsByClassName('olControlButtonItemActive')[0].innerHTML = '+';
+	GIS.init.afterRender = function() {	
+		document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin24.png" />';
+		document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout24.png" />';
+		document.getElementsByClassName('zoomVisibleButton')[0].innerHTML = '<img src="images/zoomvisible24.png" />';
+		document.getElementsByClassName('layersButton')[0].innerHTML = '<img src="images/layers24.png" />';
 	};
 	
 	/* Mask */
@@ -257,17 +260,66 @@ Ext.onReady( function() {
 	};
     
     GIS.map.layerController = {};
-    GIS.map.layerController.button = new OpenLayers.Control.Button({
+    
+    // Zoom in
+    GIS.map.layerController.zoomIn = new OpenLayers.Control.Button({
+		displayClass: 'olControlButton',
+		trigger: function() {
+			GIS.map.zoomIn();
+		}
+	});
+    GIS.map.layerController.zoomInPanel = new OpenLayers.Control.Panel({
+		defaultControl: GIS.map.layerController.zoomIn
+	});	
+    GIS.map.layerController.zoomInPanel.addControls([GIS.map.layerController.zoomIn]);
+    GIS.map.addControl(GIS.map.layerController.zoomInPanel);
+    GIS.map.layerController.zoomInPanel.div.className += ' zoomIn';
+    GIS.map.layerController.zoomInPanel.div.childNodes[0].className += ' zoomInButton';
+    
+    // Zoom out
+    GIS.map.layerController.zoomOut = new OpenLayers.Control.Button({
+		displayClass: 'olControlButton',
+		trigger: function() {
+			GIS.map.zoomOut();
+		}
+	});
+    GIS.map.layerController.zoomOutPanel = new OpenLayers.Control.Panel({
+		defaultControl: GIS.map.layerController.zoomOut
+	});	
+    GIS.map.layerController.zoomOutPanel.addControls([GIS.map.layerController.zoomOut]);
+    GIS.map.addControl(GIS.map.layerController.zoomOutPanel);
+    GIS.map.layerController.zoomOutPanel.div.className += ' zoomOut';
+    GIS.map.layerController.zoomOutPanel.div.childNodes[0].className += ' zoomOutButton';
+    
+    // Zoom to visible extent
+    GIS.map.layerController.zoomVisible = new OpenLayers.Control.Button({
+		displayClass: 'olControlButton',
+		trigger: function() {
+			GIS.map.zoomToVisibleExtent();
+		}
+	});
+    GIS.map.layerController.zoomVisiblePanel = new OpenLayers.Control.Panel({
+		defaultControl: GIS.map.layerController.zoomVisible
+	});	
+    GIS.map.layerController.zoomVisiblePanel.addControls([GIS.map.layerController.zoomVisible]);
+    GIS.map.addControl(GIS.map.layerController.zoomVisiblePanel);
+    GIS.map.layerController.zoomVisiblePanel.div.className += ' zoomVisible';
+    GIS.map.layerController.zoomVisiblePanel.div.childNodes[0].className += ' zoomVisibleButton';
+    
+    // Layers
+    GIS.map.layerController.layers = new OpenLayers.Control.Button({
 		displayClass: 'olControlButton',
 		trigger: function() {
 			alert('clicky');
 		}
 	});
-    GIS.map.layerController.panel = new OpenLayers.Control.Panel({
-		defaultControl: GIS.map.layerController.button
-	});
-    GIS.map.layerController.panel.addControls([GIS.map.layerController.button]);    
-    GIS.map.addControl(GIS.map.layerController.panel);
+    GIS.map.layerController.layersPanel = new OpenLayers.Control.Panel({
+		defaultControl: GIS.map.layerController.layers
+	});	
+    GIS.map.layerController.layersPanel.addControls([GIS.map.layerController.layers]);
+    GIS.map.addControl(GIS.map.layerController.layersPanel);
+    GIS.map.layerController.layersPanel.div.className += ' layers';
+    GIS.map.layerController.layersPanel.div.childNodes[0].className += ' layersButton';
     
     /* Base layers */
     

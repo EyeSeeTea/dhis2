@@ -26,12 +26,17 @@ html * {
 
 /* OpenLayers overrides */
 
-.olControlButtonItemActive { /* Panel button */
+.olControlPanel { /* Control panel */
+	position: absolute;
+	top: 0;
+	right: 0;
+    border: 0 none;
+}
+.olControlButtonItemActive {
     background: #555566;
     color: #fff;
     width: 24px;
     height: 24px;
-    border-bottom-left-radius: 3px;
     opacity: 0.7;
     cursor: pointer;
     cursor: hand;
@@ -39,11 +44,20 @@ html * {
     font-size: 21px !important;
     text-shadow: 0 0 1px #ddd;
 }
-.olControlPanel {
-	position: absolute;
-	top: 0;
-	right: 0;
-    border: 0 none;
+
+.olControlPanel.zoomIn {
+	right: 72px;
+}
+.olControlPanel.zoomIn .olControlButtonItemActive {
+	border-bottom-left-radius: 3px;
+}
+
+.olControlPanel.zoomOut {
+	right: 48px;
+}
+
+.olControlPanel.zoomVisible {
+	right: 24px;
 }
 
 .olControlPermalink { /* Perma link */
