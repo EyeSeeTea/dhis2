@@ -67,7 +67,7 @@ html * {
 	right: 72px;
 }
 .olControlPanel.zoomIn .olControlButtonItemActive {
-	border-bottom-left-radius: 3px;
+	border-bottom-left-radius: 2px;
 }
 
 .olControlPanel.zoomOut {

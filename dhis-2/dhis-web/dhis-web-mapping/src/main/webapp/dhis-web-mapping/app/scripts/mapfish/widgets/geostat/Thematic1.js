@@ -1643,7 +1643,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.classificationApplied = true;
         
         if (this.update.isOrganisationUnit) {
-			GIS.map.zoomToVisibleExtent();
+			GIS.util.map.zoomToVisibleExtent();
 		}
         
         this.afterLoad();		

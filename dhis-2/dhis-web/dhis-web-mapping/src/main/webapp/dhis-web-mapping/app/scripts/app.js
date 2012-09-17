@@ -68,6 +68,7 @@ GIS.mask;
 
 GIS.util = {
 	google: {},
+	map: {},
 	geojson: {},
 	vector: {},
 	json: {},
@@ -134,7 +135,7 @@ Ext.onReady( function() {
 			var init = Ext.decode(r.responseText);
 			GIS.init.rootNodes = init.rootNodes;
 	
-	/* Init */
+	// Init
 	
 	GIS.init.onRender = function() {
 		//GIS.layer.googleStreets.layer.setVisibility(false);
@@ -147,16 +148,49 @@ Ext.onReady( function() {
 		document.getElementsByClassName('layersButton')[0].innerHTML = '<img src="images/layers24.png" />';
 	};
 	
-	/* Mask */
+	// Mask
 	
 	GIS.mask = new Ext.LoadMask(Ext.getBody(), {
 		msg: GIS.i18n.loading
 	});
 	
-	/* Util */
+	// Util
 	
 	GIS.util.google.openTerms = function() {
 		window.open('http://www.google.com/intl/en-US_US/help/terms_maps.html', '_blank');
+	};
+	
+	GIS.util.map.getVisibleVectorLayers = function() {
+		var a = [];
+		for (var i = 0; i < GIS.map.layers.length; i++) {
+			if (GIS.map.layers[i].layerType === GIS.conf.finals.layer.layertype_vector && GIS.map.layers[i].visibility) {
+				a.push(GIS.map.layers[i]);
+			}
+		}
+		return a;
+	};
+	
+	GIS.util.map.getExtendedBounds = function(layers) {
+		var bounds = null;
+		if (layers.length) {
+			bounds = layers[0].getDataExtent();
+			if (layers.length > 1) {
+				for (var i = 1; i < layers.length; i++) {
+					bounds.extend(layers[i].getDataExtent());
+				}
+			}
+		}
+		return bounds;
+	};
+	
+	GIS.util.map.zoomToVisibleExtent = function() {
+		var bounds = GIS.util.map.getExtendedBounds(GIS.util.map.getVisibleVectorLayers());
+		if (bounds) {
+			GIS.map.zoomToExtent(bounds);
+		}
+		else {
+			console.log("abort");
+		}
 	};
 	
 	GIS.util.geojson.decode = function(doc) {
@@ -227,39 +261,6 @@ Ext.onReady( function() {
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });
     
-    GIS.map.getVisibleVectorLayers = function() {
-		var a = [];
-		for (var i = 0; i < GIS.map.layers.length; i++) {
-			if (GIS.map.layers[i].layerType === GIS.conf.finals.layer.layertype_vector && GIS.map.layers[i].visibility) {
-				a.push(GIS.map.layers[i]);
-			}
-		}
-		return a;
-	};
-	
-	GIS.map.getExtendedBounds = function(layers) {
-		var bounds = null;
-		if (layers.length) {
-			bounds = layers[0].getDataExtent();
-			if (layers.length > 1) {
-				for (var i = 1; i < layers.length; i++) {
-					bounds.extend(layers[i].getDataExtent());
-				}
-			}
-		}
-		return bounds;
-	};
-	
-	GIS.map.zoomToVisibleExtent = function() {
-		var bounds = GIS.map.getExtendedBounds(GIS.map.getVisibleVectorLayers());
-		if (bounds) {
-			GIS.map.zoomToExtent(bounds);
-		}
-		else {
-			console.log("abort");
-		}
-	};
-    
     GIS.map.layerController = {};
     
     // Zoom in
@@ -296,7 +297,7 @@ Ext.onReady( function() {
     GIS.map.layerController.zoomVisible = new OpenLayers.Control.Button({
 		displayClass: 'olControlButton',
 		trigger: function() {
-			GIS.map.zoomToVisibleExtent();
+			GIS.util.map.zoomToVisibleExtent();
 		}
 	});
     GIS.map.layerController.zoomVisiblePanel = new OpenLayers.Control.Panel({
@@ -322,7 +323,7 @@ Ext.onReady( function() {
     GIS.map.layerController.layersPanel.div.className += ' layers';
     GIS.map.layerController.layersPanel.div.childNodes[0].className += ' layersButton';
     
-    /* Base layers */
+    // Base layers
     
     if (window.google) {
         GIS.layer.googleStreets.layer = new OpenLayers.Layer.Google(GIS.layer.googleStreets.name, {
@@ -345,7 +346,7 @@ Ext.onReady( function() {
     GIS.layer.openStreetMap.layer.layerType = GIS.conf.finals.layer.layertype_base;
     GIS.map.addLayer(GIS.layer.openStreetMap.layer);
     
-    /* Vector layers */
+    // Vector layers
     
     GIS.layer.boundary.layer = new OpenLayers.Layer.Vector(GIS.i18n.boundary_layer, {
         strategies: [
@@ -412,7 +413,7 @@ Ext.onReady( function() {
     });
     GIS.map.addLayer(GIS.layer.thematic1.layer);
     
-    /* Stores */
+    // Stores
     
     GIS.store.indicatorGroups = Ext.create('Ext.data.Store', {
 		fields: ['id', 'name'],
@@ -485,7 +486,7 @@ Ext.onReady( function() {
 		}
 	});
     
-    /* Objects */
+    // Objects
     
     GIS.obj.LayerMenu = function(layerName, cls) {
 		return Ext.create('Ext.menu.Menu', {
@@ -573,7 +574,7 @@ Ext.onReady( function() {
 		});
 	};
     
-	/* Graphical user interface */
+	// User interface
 	
 	GIS.layer.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
         map: GIS.map,
