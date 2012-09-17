@@ -110,7 +110,8 @@ GIS.store = {};
 GIS.obj = {};
 
 GIS.cmp = {
-	menu: {}
+	menu: {},
+	region: {}
 };
 
 GIS.gui = {};
@@ -615,19 +616,41 @@ Ext.onReady( function() {
 			{
 				region: 'east',
 				width: 200,
+                preventHeader: true,
+                collapsible: true,
+                collapseMode: 'mini',
 				items: [
                     {
                         title: 'Thematic layer 1 legend', //i18n
                         contentEl: 'thematic1Legend',
-                        html: 'East'
+                        bodyStyle: 'padding: 6px; border: 0 none'
+                    },
+                    {
+                        title: 'Thematic layer 2 legend', //i18n
+                        contentEl: 'thematic2Legend',
+                        bodyStyle: 'padding: 6px; border: 0 none'
                     }
-				]
+				],
+				listeners: {
+					added: function() {
+						GIS.cmp.region.east = this;
+					},
+                    collapse: function() {
+                        GIS.cmp.region.center.cmp.tbar.resize.setText('<<<');
+                    },
+                    expand: function() {
+                        GIS.cmp.region.center.cmp.tbar.resize.setText('>>>');
+                    }
+				}
 			},
             {
                 xtype: 'gx_mappanel',
                 region: 'center',
                 map: GIS.map,
                 height: 31,
+                cmp: {
+					tbar: {}
+				},
                 tbar: {
 					defaults: {
 						height: 26
@@ -669,8 +692,32 @@ Ext.onReady( function() {
 						{
 							text: 'Download', //i18n
 							menu: {}
-						}							
+						},
+						'->',
+						{
+							text: 'Exit', //i18n
+							handler: function() {
+								alert('Exit');
+							}
+						},
+						{
+							text: '>>>', //i18n
+							handler: function() {
+								GIS.cmp.region.east.toggleCollapse();
+							},
+							listeners: {
+								render: function() {
+									GIS.cmp.region.center.cmp.tbar.resize = this;
+								}
+							}
+						}
+						
 					]
+				},
+				listeners: {
+					added: function() {
+						GIS.cmp.region.center = this;
+					}
 				}
             }
 		],

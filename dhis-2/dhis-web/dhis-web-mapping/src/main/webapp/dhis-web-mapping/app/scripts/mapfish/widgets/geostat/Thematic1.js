@@ -165,65 +165,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			}
 		})
 	},
-	
-	getValues: function(conf) {		
-		if (conf) {
-			this.model = {
-				valueType: conf.valueType,
-				indicatorGroup: conf.indicatorGroup,
-				indicator: conf.indicator,
-				dataElementGroup: conf.dataElementGroup,
-				dataElement: conf.dataElement,
-				periodType: conf.periodType,
-				period: conf.period,
-				legendType: conf.legendType,
-				legendSet: conf.legendSet,
-				classes: conf.classes,
-				method: conf.method,
-				colorLow: conf.colorLow,
-				colorHigh: conf.colorHigh,
-				radiusLow: conf.radiusLow,
-				radiusHigh: conf.radiusHigh,
-				level: conf.level,
-				parent: conf.parent.getSelectionModel().getSelection()[0].getId()
-			};
-			
-			//more
-		}
-		else {
-			var parent = this.cmp.parent.getSelectionModel().getSelection()[0],
-				level = this.cmp.level;
-				
-			this.model = {
-				valueType: this.cmp.valueType.getValue(),
-				indicatorGroup: this.cmp.indicatorGroup.getValue(),
-				indicator: this.cmp.indicator.getValue(),
-				dataElementGroup: this.cmp.dataElementGroup.getValue(),
-				dataElement: this.cmp.dataElement.getValue(),
-				periodType: this.cmp.periodType.getValue(),
-				period: this.cmp.period.getValue(),
-				legendType: this.cmp.legendType.getValue(),
-				legendSet: this.cmp.legendSet.getValue(),
-				classes: this.cmp.classes.getValue(),
-				method: this.cmp.method.getValue(),
-				colorLow: this.cmp.colorLow.getValue(),
-				colorHigh: this.cmp.colorHigh.getValue(),
-				colors: this.getColors(),
-				radiusLow: parseInt(this.cmp.radiusLow.getValue()),
-				radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
-				level: level.getValue(),
-				parent: parent.data.id
-			};
-			
-			this.organisationUnitSelection.setValues(
-				parent.data.id,
-				parent.data.text,
-				parent.data.level,
-				level.getValue(),
-				level.getRawValue()
-			);
-		};
-	},			
     
     setUrl: function(url) {
         this.url = url;
@@ -1537,7 +1478,66 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             }
         }
 	},
-    
+    	
+	getValues: function(conf) {		
+		if (conf) {
+			this.model = {
+				valueType: conf.valueType,
+				indicatorGroup: conf.indicatorGroup,
+				indicator: conf.indicator,
+				dataElementGroup: conf.dataElementGroup,
+				dataElement: conf.dataElement,
+				periodType: conf.periodType,
+				period: conf.period,
+				legendType: conf.legendType,
+				legendSet: conf.legendSet,
+				classes: conf.classes,
+				method: conf.method,
+				colorLow: conf.colorLow,
+				colorHigh: conf.colorHigh,
+				radiusLow: conf.radiusLow,
+				radiusHigh: conf.radiusHigh,
+				level: conf.level,
+				parent: conf.parent.getSelectionModel().getSelection()[0].getId()
+			};
+			
+			//more
+		}
+		else {
+			var parent = this.cmp.parent.getSelectionModel().getSelection()[0],
+				level = this.cmp.level;
+				
+			this.model = {
+				valueType: this.cmp.valueType.getValue(),
+				indicatorGroup: this.cmp.indicatorGroup.getValue(),
+				indicator: this.cmp.indicator.getValue(),
+				dataElementGroup: this.cmp.dataElementGroup.getValue(),
+				dataElement: this.cmp.dataElement.getValue(),
+				periodType: this.cmp.periodType.getValue(),
+				period: this.cmp.period.getValue(),
+				legendType: this.cmp.legendType.getValue(),
+				legendSet: this.cmp.legendSet.getValue(),
+				classes: this.cmp.classes.getValue(),
+				method: this.cmp.method.getValue(),
+				colorLow: this.cmp.colorLow.getValue(),
+				colorHigh: this.cmp.colorHigh.getValue(),
+				colors: this.getColors(),
+				radiusLow: parseInt(this.cmp.radiusLow.getValue()),
+				radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
+				level: level.getValue(),
+				parent: parent.data.id
+			};
+			
+			this.organisationUnitSelection.setValues(
+				parent.data.id,
+				parent.data.text,
+				parent.data.level,
+				level.getValue(),
+				level.getRawValue()
+			);
+		};
+	},
+	
     execute: function() {
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
@@ -1653,6 +1653,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.layer.setLayerOpacity();
 		
 		this.update.reset();
+		
+		GIS.cmp.region.east.doLayout();
 		
         GIS.mask.hide();
 	},

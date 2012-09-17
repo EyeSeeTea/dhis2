@@ -1,9 +1,22 @@
+/* General
+ * Div
+ * OpenLayers
+ * 
+ * Panel
+ * Form
+ * Button
+ * Toolbar
+ * Menu
+ * Treepanel
+ * Colorpicker 
+*/
+
+/* General */
+
 html * {
 	font-family: arial, sans-serif, liberation sans, consolas !important;
 	font-size: 11px !important;
 }
-
-/* General */
 
 .el-opacity-1 {
 	opacity: 1 !important;
@@ -15,13 +28,18 @@ html * {
 	font-size: 10px !important;
 }
 
-.text-mouseposition-lonlat {
+/* Div */
+.text-mouseposition-lonlat { /* Mouse position text */
 	color: #555;
 }
 
-.gis-container-default .x-window-body {
+.gis-container-default .x-window-body { /* Default settings for panels */
 	padding: 8px;
 	background: #fff;
+}
+
+.x-splitter-collapsed .x-layout-split-bottom { /* Hide expand arrow when east panel is collapsed */
+	display: none;
 }
 
 /* OpenLayers overrides */
