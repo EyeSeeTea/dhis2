@@ -492,7 +492,7 @@ function filterOnSection()
     }
 }
 
-function filterInSection($this)
+function filterInSection( $this )
 {
     var $tbody = $this.parent().parent().parent();
     var $trTarget = $tbody.find( 'tr:not([colspan])' );
@@ -526,8 +526,8 @@ function filterInSection($this)
 
 function refreshZebraStripes( $tbody )
 {
-    $tbody.find( 'tr:not([colspan]):visible:even' ).find( 'td:first-child' ).removeClass( 'reg alt' ).addClass('alt' );
-    $tbody.find( 'tr:not([colspan]):visible:odd' ).find( 'td:first-child' ).removeClass( 'reg alt' ).addClass('reg' );
+    $tbody.find( 'tr:not([colspan]):visible:even' ).find( 'td:first-child' ).removeClass( 'reg alt' ).addClass( 'alt' );
+    $tbody.find( 'tr:not([colspan]):visible:odd' ).find( 'td:first-child' ).removeClass( 'reg alt' ).addClass( 'reg' );
 }
 
 function getDataElementType( dataElementId )
@@ -798,9 +798,12 @@ function insertDataValues()
 
     $( '[name="entryfield"]' ).val( '' );
     $( '[name="entryselect"]' ).val( '' );
+    $( '[name="dyninput"]' ).val( '' );
+    $( '[name="dynselect"]' ).val( '' );
 
     $( '[name="entryfield"]' ).css( 'background-color', COLOR_WHITE );
     $( '[name="entryselect"]' ).css( 'background-color', COLOR_WHITE );
+    $( '[name="dyninput"]' ).css( 'background-color', COLOR_WHITE );
 
     $( '[name="min"]' ).html( '' );
     $( '[name="max"]' ).html( '' );
@@ -843,9 +846,42 @@ function insertDataValues()
 	        {
 	            var fieldId = '#' + value.id + '-val';
 
-	            if ( $( fieldId ) )
+	            if ( $( fieldId ).length > 0 ) // Insert for fixed input fields
 	            {
 	                $( fieldId ).val( value.val );
+	            }
+	            else // Insert for potential dynamic input fields
+	            {
+	                var dataElementId = value.id.split( '-' )[0];
+	                var optionComboId = value.id.split( '-' )[1];
+	                
+	                var selectElementId = '#' + getDynamicSelectElementId( dataElementId );
+	                
+	                if ( $( selectElementId ).length == 0 )
+	                {
+	                	log( 'Could not find dynamic select element for data element: ' + dataElementId );
+	                	return true;
+	                }
+
+                	var code = $( selectElementId ).attr( 'id' ).split( '-' )[0];
+        			
+        			if ( !isDefined( code ) )
+        			{
+        				log( 'Could not find code on select element: ' + selectElementId );
+        				return true;
+        			}
+
+    				var dynamicInputId = '#' + code + '-' + optionComboId + '-dyninput';
+    				
+        			if ( $( dynamicInputId ).length == 0 )
+    				{
+        				log( 'Could not find find dynamic input element for option combo: ' + optionComboId );
+        				return true;
+    				}
+        			
+        			$( selectElementId ).val( dataElementId );
+        			
+    				$( dynamicInputId ).val( value.val );
 	            }
 
 	            dataValueMap[value.id] = value.val;
@@ -901,6 +937,42 @@ function insertDataValues()
 	        }
 	    }
 	} );
+}
+
+function getDynamicSelectElementId( dataElementId )
+{
+	// Search for element where data element is already selected
+	
+	var id = null;
+	
+	$( '[name="dynselect"]' ).each( function( i )
+	{
+		if ( $( this ).val() == dataElementId )
+		{
+			id = $( this ).attr( 'id' );
+			return false;
+		}
+	} );
+
+	if ( id != null )
+	{
+		return id;
+	}
+	
+	// Search for unselected element
+	
+	$( '[name="dynselect"]' ).each( function( i )
+	{
+		if ( $( this ).val() == -1 )
+		{
+			id = $( this ).attr( 'id' );
+			return false;
+		}
+	} );
+	
+	// No element exists in form
+	
+	return id;
 }
 
 function displayEntryFormCompleted()
