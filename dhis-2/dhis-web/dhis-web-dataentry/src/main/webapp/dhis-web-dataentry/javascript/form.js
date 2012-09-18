@@ -1320,7 +1320,7 @@ function validateCompulsoryCombinations()
 	if ( violations )
 	{
 		$( '#validationDiv' ).html( '<h3>' + i18n_validation_result + '</h3>' +
-				'<p class="bold">' + i18n_all_values_for_data_element_must_be_filled ) + '</p>';
+			'<p class="bold">' + i18n_all_values_for_data_element_must_be_filled ) + '</p>';
 			
 		displayValidationDialog();
 		return false;
