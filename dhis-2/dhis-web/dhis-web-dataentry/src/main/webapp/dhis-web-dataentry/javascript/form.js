@@ -367,14 +367,27 @@ function addEventListeners()
         $( this ).css( 'width', '100%' );
     } );
     
-    $( '[name="dyninput"]' ).each( function( i ) // Custom only
+    $( '[name="dynselect"]' ).each( function( i )
+    {
+    	var id = $( this ).attr( 'id' );
+    	var code = id.split( '-' )[0];
+    	
+    	$( this ).unbind( 'change' );
+    	
+    	$( this ).change( function()
+    	{
+            dynamicSelectChanged( id, code );
+    	} );
+    } );
+    
+    $( '[name="dyninput"]' ).each( function( i )
     {
     	var id = $( this ).attr( 'id' );
     	var code = id.split( '-' )[0];
         var optionComboId = id.split( '-' )[1];
         
-        $( this ).unbind( 'focus' );
         $( this ).unbind( 'change' );
+        $( this ).unbind( 'keyup' );
 
         $( this ).change( function()
         {
@@ -392,21 +405,6 @@ function clearPeriod()
 {
     clearListById( 'selectedPeriodId' );
     clearEntryForm();
-}
-
-function insertDynamicOptions()
-{
-	var optionMarkup = $( '#dynselect' ).html();
-	
-	if ( !isDefined( optionMarkup ) )
-	{
-		return;
-	}
-	
-    $( '[name="dynselect"]' ).each( function( i )
-    {
-    	$( this ).append( optionMarkup );
-    } );
 }
 
 function clearEntryForm()
@@ -451,6 +449,81 @@ function loadForm( dataSetId )
         } );
     }
 }
+
+//------------------------------------------------------------------------------
+// Dynamic input
+//------------------------------------------------------------------------------
+
+function insertDynamicOptions()
+{
+	var optionMarkup = $( '#dynselect' ).html();
+	
+	if ( !isDefined( optionMarkup ) )
+	{
+		return;
+	}
+	
+    $( '[name="dynselect"]' ).each( function( i )
+    {
+    	$( this ).append( optionMarkup );
+    } );
+}
+
+function dynamicSelectChanged( id, code )
+{
+	var validSelection = $( '#' + id ).val() != -1;
+	var color = validSelection ? COLOR_WHITE : COLOR_GREY;
+	
+	$( '[name="dyninput"]' ).each( function( i )
+	{
+		var dynamicInputId = $( this ).attr( 'id' );
+		var dynamicInputCode = dynamicInputId.split( '-' )[0];
+		
+		if ( code == dynamicInputCode )
+		{
+			$( this ).prop( 'disabled', !validSelection );    
+			$( this ).css( 'background-color', color );
+		}
+	} );
+}
+
+function getDynamicSelectElementId( dataElementId )
+{
+	// Search for element where data element is already selected
+	
+	var id = null;
+	
+	$( '[name="dynselect"]' ).each( function( i )
+	{
+		if ( $( this ).val() == dataElementId )
+		{
+			id = $( this ).attr( 'id' );
+			return false;
+		}
+	} );
+
+	if ( id != null )
+	{
+		return id;
+	}
+	
+	// Search for unselected element
+	
+	$( '[name="dynselect"]' ).each( function( i )
+	{
+		if ( $( this ).val() == -1 )
+		{
+			id = $( this ).attr( 'id' );
+			return false;
+		}
+	} );
+	
+	return id; // No element exists in form
+}
+
+//------------------------------------------------------------------------------
+// Section filter
+//------------------------------------------------------------------------------
 
 function enableSectionFilter()
 {
@@ -523,6 +596,10 @@ function filterInSection( $this )
 
     refreshZebraStripes( $tbody );
 }
+
+//------------------------------------------------------------------------------
+// Supportive methods
+//------------------------------------------------------------------------------
 
 function refreshZebraStripes( $tbody )
 {
@@ -809,7 +886,12 @@ function insertDataValues()
     $( '[name="max"]' ).html( '' );
 
     $( '[name="entryfield"]' ).filter( ':disabled' ).css( 'background-color', COLOR_GREY );
+    
+    // Disable and grey dynamic fields to start with and enable later
 
+    $( '[name="dyninput"]' ).prop( 'disabled', true );    
+    $( '[name="dyninput"]' ).css( 'background-color', COLOR_GREY );
+    
     $.ajax( {
     	url: 'getDataValues.action',
     	data:
@@ -878,9 +960,13 @@ function insertDataValues()
         				log( 'Could not find find dynamic input element for option combo: ' + optionComboId );
         				return true;
     				}
-        			
+
+        			// Enable dynamic input field and set value
+        			    		    
         			$( selectElementId ).val( dataElementId );
-        			
+
+        		    $( dynamicInputId ).prop( 'disabled', false );    
+        		    $( dynamicInputId ).css( 'background-color', COLOR_WHITE );    
     				$( dynamicInputId ).val( value.val );
 	            }
 
@@ -937,42 +1023,6 @@ function insertDataValues()
 	        }
 	    }
 	} );
-}
-
-function getDynamicSelectElementId( dataElementId )
-{
-	// Search for element where data element is already selected
-	
-	var id = null;
-	
-	$( '[name="dynselect"]' ).each( function( i )
-	{
-		if ( $( this ).val() == dataElementId )
-		{
-			id = $( this ).attr( 'id' );
-			return false;
-		}
-	} );
-
-	if ( id != null )
-	{
-		return id;
-	}
-	
-	// Search for unselected element
-	
-	$( '[name="dynselect"]' ).each( function( i )
-	{
-		if ( $( this ).val() == -1 )
-		{
-			id = $( this ).attr( 'id' );
-			return false;
-		}
-	} );
-	
-	// No element exists in form
-	
-	return id;
 }
 
 function displayEntryFormCompleted()
