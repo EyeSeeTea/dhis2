@@ -460,7 +460,7 @@ function insertDynamicOptions()
 	
 	if ( !isDefined( optionMarkup ) )
 	{
-		return;
+		return; // Custom form only
 	}
 	
     $( '[name="dynselect"]' ).each( function( i )
