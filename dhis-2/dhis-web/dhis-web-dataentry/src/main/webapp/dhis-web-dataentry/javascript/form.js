@@ -1114,6 +1114,11 @@ function validateCompleteDataSet()
 {
     var confirmed = confirm( i18n_confirm_complete );
 
+	if ( !validateCompulsoryCombinations() )
+	{
+		return false;
+	}
+	
     if ( confirmed )
     {
         var params = storageManager.getCurrentCompleteDataSetParams();
@@ -1183,9 +1188,9 @@ function undoCompleteDataSet()
         	dataType: 'json',
         	success: function(data)
 	        {
-                if( data.status == 2 )
+                if ( data.status == 2 )
                 {
-                    log( 'DataSet is locked' );
+                    log( 'Data set is locked' );
                     setHeaderMessage( i18n_unregister_complete_failed_dataset_is_locked );
                 }
                 else
@@ -1255,6 +1260,11 @@ function displayValidationDialog()
 
 function validate()
 {
+	if ( !validateCompulsoryCombinations() )
+	{
+		return false;
+	}
+	
     var periodId = $( '#selectedPeriodId' ).val();
     var dataSetId = $( '#selectedDataSetId' ).val();
 
@@ -1262,7 +1272,8 @@ function validate()
         periodId : periodId,
         dataSetId : dataSetId,
         organisationUnitId : currentOrganisationUnitId
-    }, function( response, status, xhr )
+    }, 
+    function( response, status, xhr )
     {
         if ( status == 'error' )
         {
@@ -1273,6 +1284,49 @@ function validate()
             displayValidationDialog();
         }
     } );
+}
+
+function validateCompulsoryCombinations()
+{
+	var violatingDataElements = {};
+	
+	var violations = false;
+	
+	$( '[name="entryfield"]' ).add( '[name="entryselect"]' ).each( function( i )
+	{
+		var id = $( this ).attr( 'id' );
+		var dataElementId = id.split( '-' )[0];		
+		var hasValue = $.trim( $( this ).val() ).length > 0;
+		
+		if ( hasValue )
+		{
+			$selector = $( '[name="entryfield"][id^="' + dataElementId + '-"]' ).
+				add( '[name="entryselect"][id^="' + dataElementId + '-"]' );
+			
+			$selector.each( function( i )
+			{
+				if ( $.trim( $( this ).val() ).length == 0 )
+				{
+					violations = true;
+					
+					$selector.css( 'background-color', COLOR_RED );
+					
+					return false;
+				}
+			} );
+		}
+	} );
+	
+	if ( violations )
+	{
+		$( '#validationDiv' ).html( '<h3>' + i18n_validation_result + '</h3>' +
+				'<p class="bold">' + i18n_all_values_for_data_element_must_be_filled ) + '</p>';
+			
+		displayValidationDialog();
+		return false;
+	}
+	
+	return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -1302,7 +1356,8 @@ function viewHist( dataElementId, optionComboId )
         optionComboId : optionComboId,
         periodId : periodId,
         organisationUnitId : currentOrganisationUnitId
-    }, function( response, status, xhr )
+    }, 
+    function( response, status, xhr )
     {
         if ( status == 'error' )
         {
@@ -1475,7 +1530,8 @@ function StorageManager()
             localStorage[id] = html;
 
             log( 'Successfully stored form: ' + dataSetId );
-        } catch ( e )
+        } 
+        catch ( e )
         {
             log( 'Max local storage quota reached, ignored form: ' + dataSetId );
             return false;
