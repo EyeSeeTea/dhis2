@@ -474,17 +474,8 @@ function dynamicSelectChanged( id, code )
 	var validSelection = $( '#' + id ).val() != -1;
 	var color = validSelection ? COLOR_WHITE : COLOR_GREY;
 	
-	$( '[name="dyninput"]' ).each( function( i )
-	{
-		var dynamicInputId = $( this ).attr( 'id' );
-		var dynamicInputCode = dynamicInputId.split( '-' )[0];
-		
-		if ( code == dynamicInputCode )
-		{
-			$( this ).prop( 'disabled', !validSelection );    
-			$( this ).css( 'background-color', color );
-		}
-	} );
+	$( 'input[code="' + code + '"]' ).prop( 'disabled', !validSelection );
+	$( 'input[code="' + code + '"]' ).css( 'background-color', color );
 }
 
 function getDynamicSelectElementId( dataElementId )
@@ -961,12 +952,15 @@ function insertDataValues()
         				return true;
     				}
 
-        			// Enable dynamic input field and set value
+        			// Set data element in select list
         			    		    
         			$( selectElementId ).val( dataElementId );
 
-        		    $( dynamicInputId ).prop( 'disabled', false );    
-        		    $( dynamicInputId ).css( 'background-color', COLOR_WHITE );    
+        			// Enable input fields and set value
+        			
+        		    $( 'input[code="' + code + '"]' ).prop( 'disabled', false );    
+        		    $( 'input[code="' + code + '"]' ).css( 'background-color', COLOR_WHITE );
+        		    
     				$( dynamicInputId ).val( value.val );
 	            }
 
