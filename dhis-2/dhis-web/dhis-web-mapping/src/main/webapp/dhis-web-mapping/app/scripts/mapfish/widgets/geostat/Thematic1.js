@@ -86,7 +86,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.level.level++;
 			this.level.name = GIS.store.organisationUnitLevel.getAt(
 				GIS.store.organisationUnitLevels.find('level', this.level.level)).data.name;
-		}
+		},
+		reset: function() {
+			this.parent.id = null;
+			this.parent.name = null;
+			this.parent.level = null;
+			this.level.level = null;
+			this.level.name = null;
+		}			
 	},
     
     store: {
@@ -1478,10 +1485,32 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             }
         }
 	},
+	
+    execute: function() {
+		GIS.mask.msg = GIS.i18n.loading;
+		GIS.mask.show();
+		
+		this.getModel();
+		
+		if (this.update.isOrganisationUnit) {
+			this.loadOrganisationUnits();
+		}
+		else if (this.update.isData) {
+			this.loadData();
+		}
+		else if (this.update.isLegend) {
+			this.loadLegend();
+		}
+		else {
+			GIS.mask.hide();
+		}
+	},
     	
-	getValues: function(conf) {		
+	getModel: function(conf) {
+		var model;
+		
 		if (conf) {
-			this.model = {
+			model = {
 				valueType: conf.valueType,
 				indicatorGroup: conf.indicatorGroup,
 				indicator: conf.indicator,
@@ -1507,7 +1536,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			var parent = this.cmp.parent.getSelectionModel().getSelection()[0],
 				level = this.cmp.level;
 				
-			this.model = {
+			model = {
 				valueType: this.cmp.valueType.getValue(),
 				indicatorGroup: this.cmp.indicatorGroup.getValue(),
 				indicator: this.cmp.indicator.getValue(),
@@ -1524,8 +1553,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				colors: this.getColors(),
 				radiusLow: parseInt(this.cmp.radiusLow.getValue()),
 				radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
-				level: level.getValue(),
-				parent: parent.data.id
+				level: this.cmp.level,
+				parent: this.cmp.parent.getSelectionModel().getSelection()[0]
 			};
 			
 			this.organisationUnitSelection.setValues(
@@ -1536,26 +1565,80 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				level.getRawValue()
 			);
 		};
+		
+		this.validateModel(model);
+		
+		this.model = model;
 	},
 	
-    execute: function() {
-		GIS.mask.msg = GIS.i18n.loading;
-		GIS.mask.show();
+	validateModel: function(model) {
+		if (model.valueType === GIS.conf.finals.dimension.indicator.id) {
+			if (!model.indicatorGroup || !Ext.isString(model.indicatorGroup)) {
+				GIS.logg.push(model.indicatorGroup, this.xtype + '.indicatorGroup: string');
+				return false;
+			}
+			if (!model.indicator || !Ext.isString(model.indicator)) {
+				GIS.logg.push(model.indicator, this.xtype + '.indicator: string');
+				return false;
+			}
+		}
+		else if (model.valueType === GIS.conf.finals.dimension.dataElement.id) {
+			if (!model.dataElementGroup || !Ext.isString(model.dataElementGroup)) {
+				GIS.logg.push(model.dataElementGroup, this.xtype + '.dataElementGroup: string');
+				return false;
+			}
+			if (!model.dataElement || !Ext.isString(model.dataElement)) {
+				GIS.logg.push(model.dataElement, this.xtype + '.dataElement: string');
+				return false;
+			}
+		}
 		
-		this.getValues();
+		if (!model.periodType || !Ext.isString(model.periodType)) {
+			GIS.logg.push(model.periodType, this.xtype + '.periodType: string');
+			return false;
+		}
+		if (!model.period || !Ext.isString(model.period)) {
+			GIS.logg.push(model.period, this.xtype + '.period: string');
+			return false;
+		}
 		
-		if (this.update.isOrganisationUnit) {
-			this.loadOrganisationUnits();
+		if (model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			if (!model.classes || !Ext.isNumber(model.classes)) {
+				GIS.logg.push(model.classes, this.xtype + '.classes: number');
+				return false;
+			}
+			if (!model.method || !Ext.isString(model.method)) {
+				GIS.logg.push(model.method, this.xtype + '.method: string');
+				return false;
+			}
+			if (!model.colorLow || !Ext.isString(model.colorLow)) {
+				GIS.logg.push(model.colorLow, this.xtype + '.colorLow: string');
+				return false;
+			}
+			if (!model.radiusLow || !Ext.isString(model.radiusLow)) {
+				GIS.logg.push(model.radiusLow, this.xtype + '.radiusLow: string');
+				return false;
+			}
+			if (!model.colorHigh || !Ext.isString(model.colorHigh)) {
+				GIS.logg.push(model.colorHigh, this.xtype + '.colorHigh: string');
+				return false;
+			}
+			if (!model.radiusHigh || !Ext.isString(model.radiusHigh)) {
+				GIS.logg.push(model.radiusHigh, this.xtype + '.radiusHigh: string');
+				return false;
+			}
 		}
-		else if (this.update.isData) {
-			this.loadData();
+		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {			
+			if (!model.legendSet || !Ext.isString(model.legendSet)) {
+				GIS.logg.push(model.legendSet, this.xtype + '.legendSet: string');
+				return false;
+			}
 		}
-		else if (this.update.isLegend) {
-			this.loadLegend();
-		}
-		else {
-			GIS.mask.hide();
-		}
+		
+		if (
+			
+			
+		
 	},
 	
     loadOrganisationUnits: function() {        

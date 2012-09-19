@@ -117,6 +117,8 @@ GIS.cmp = {
 
 GIS.gui = {};
 
+GIS.logg = [];
+
 Ext.onReady( function() {	
 	Ext.removeNode(document.getElementById('slow')); // remove element when ext is loaded
 	
