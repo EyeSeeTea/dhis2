@@ -45,11 +45,13 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     
     model: null,
     
-    features: [],
+    config: null,
     
     cmp: {},
     
     toggler: {},
+    
+    features: [],
     
     update: {
 		isOrganisationUnit: false,
@@ -705,7 +707,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action',
+					reader: 'json'
 				},
 				root: {
 					id: 'root',
@@ -1105,192 +1108,192 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.selectFeatures.activate();
     },
     
-    prepareMapViewValueType: function() {
-        var obj = {};
-        if (this.valueType.isIndicator()) {
-            this.cmp.indicatorGroup.show();
-            this.cmp.indicator.show();
-            this.cmp.dataElementGroup.hide();
-            this.cmp.dataElement.hide();
-            obj.components = {
-                valueTypeGroup: this.cmp.indicatorGroup,
-                valueType: this.cmp.indicator
-            };
-            obj.stores = {
-                valueTypeGroup: GIS.stores.indicatorGroup,
-                valueType: this.stores.indicatorsByGroup
-            };
-            obj.mapView = {
-                valueTypeGroup: 'indicatorGroupId',
-                valueType: 'indicatorId'
-            };
-        }
-        else if (this.valueType.isDataElement()) {
-            this.cmp.indicatorGroup.hide();
-            this.cmp.indicator.hide();
-            this.cmp.dataElementGroup.show();
-            this.cmp.dataElement.show();
-            obj.components = {
-                valueTypeGroup: this.cmp.dataElementGroup,
-                valueType: this.cmp.dataElement
-            };
-            obj.stores = {
-                valueTypeGroup: GIS.stores.dataElementGroup,
-                valueType: this.stores.dataElementsByGroup
-            };
-            obj.mapView = {
-                valueTypeGroup: 'dataElementGroupId',
-                valueType: 'dataElementId'
-            };
-        }
-        return obj;
-    },
+    //prepareMapViewValueType: function() {
+        //var obj = {};
+        //if (this.valueType.isIndicator()) {
+            //this.cmp.indicatorGroup.show();
+            //this.cmp.indicator.show();
+            //this.cmp.dataElementGroup.hide();
+            //this.cmp.dataElement.hide();
+            //obj.components = {
+                //valueTypeGroup: this.cmp.indicatorGroup,
+                //valueType: this.cmp.indicator
+            //};
+            //obj.stores = {
+                //valueTypeGroup: GIS.stores.indicatorGroup,
+                //valueType: this.stores.indicatorsByGroup
+            //};
+            //obj.mapView = {
+                //valueTypeGroup: 'indicatorGroupId',
+                //valueType: 'indicatorId'
+            //};
+        //}
+        //else if (this.valueType.isDataElement()) {
+            //this.cmp.indicatorGroup.hide();
+            //this.cmp.indicator.hide();
+            //this.cmp.dataElementGroup.show();
+            //this.cmp.dataElement.show();
+            //obj.components = {
+                //valueTypeGroup: this.cmp.dataElementGroup,
+                //valueType: this.cmp.dataElement
+            //};
+            //obj.stores = {
+                //valueTypeGroup: GIS.stores.dataElementGroup,
+                //valueType: this.stores.dataElementsByGroup
+            //};
+            //obj.mapView = {
+                //valueTypeGroup: 'dataElementGroupId',
+                //valueType: 'dataElementId'
+            //};
+        //}
+        //return obj;
+    //},
     
-    prepareMapViewPeriod: function() {
-        var obj = {};        
-        this.cmp.periodType.show();
-        this.cmp.period.show();
-        obj.components = {
-            c1: this.cmp.periodType,
-            c2: this.cmp.period
-        };
-        obj.stores = {
-            c1: GIS.stores.periodType,
-            c2: this.stores.periodsByType
-        };
-        obj.mapView = {
-            c1: 'periodTypeId',
-            c2: 'periodId'
-        };
-        return obj;
-    },
+    //prepareMapViewPeriod: function() {
+        //var obj = {};        
+        //this.cmp.periodType.show();
+        //this.cmp.period.show();
+        //obj.components = {
+            //c1: this.cmp.periodType,
+            //c2: this.cmp.period
+        //};
+        //obj.stores = {
+            //c1: GIS.stores.periodType,
+            //c2: this.stores.periodsByType
+        //};
+        //obj.mapView = {
+            //c1: 'periodTypeId',
+            //c2: 'periodId'
+        //};
+        //return obj;
+    //},
     
-    prepareMapViewLegend: function() {
-        this.cmp.legendType.setValue(this.legend.value);
+    //prepareMapViewLegend: function() {
+        //this.cmp.legendType.setValue(this.legend.value);
         
-        if (this.legend.value == GIS.conf.map_legendset_type_automatic) {
-            this.cmp.method.show();
-            this.cmp.colorPanel.show();
-            this.cmp.legendSet.hide();
+        //if (this.legend.value == GIS.conf.map_legendset_type_automatic) {
+            //this.cmp.method.show();
+            //this.cmp.colorPanel.show();
+            //this.cmp.legendSet.hide();
             
-            if (this.legend.method == GIS.conf.classify_with_bounds) {
-                this.cmp.classes.hide();
-                this.cmp.bounds.show();
-            }
-            else {
-                this.cmp.classes.show();
-                this.cmp.bounds.hide();
-            }                
-        }
-        else if (this.legend.value == GIS.conf.map_legendset_type_predefined) {
-            this.cmp.method.hide();
-            this.cmp.classes.hide();
-            this.cmp.bounds.hide();
-            this.cmp.colorPanel.hide();
-            this.cmp.legendSet.show();
-        }
-    },
+            //if (this.legend.method == GIS.conf.classify_with_bounds) {
+                //this.cmp.classes.hide();
+                //this.cmp.bounds.show();
+            //}
+            //else {
+                //this.cmp.classes.show();
+                //this.cmp.bounds.hide();
+            //}                
+        //}
+        //else if (this.legend.value == GIS.conf.map_legendset_type_predefined) {
+            //this.cmp.method.hide();
+            //this.cmp.classes.hide();
+            //this.cmp.bounds.hide();
+            //this.cmp.colorPanel.hide();
+            //this.cmp.legendSet.show();
+        //}
+    //},
     
-    setMapView: function() {
-        var obj = this.prepareMapViewValueType();
+    //setMapView: function() {
+        //var obj = this.prepareMapViewValueType();
         
-        function valueTypeGroupStoreCallback() {
-            obj.components.valueTypeGroup.setValue(this.mapView[obj.mapView.valueTypeGroup]);
-            obj.stores.valueType.setBaseParam(obj.mapView.valueTypeGroup, obj.components.valueTypeGroup.getValue());
-            obj.stores.valueType.load({scope: this, callback: function() {
-                obj.components.valueType.setValue(this.mapView[obj.mapView.valueType]);
-                obj.components.valueType.currentValue = this.mapView[obj.mapView.valueType];
+        //function valueTypeGroupStoreCallback() {
+            //obj.components.valueTypeGroup.setValue(this.mapView[obj.mapView.valueTypeGroup]);
+            //obj.stores.valueType.setBaseParam(obj.mapView.valueTypeGroup, obj.components.valueTypeGroup.getValue());
+            //obj.stores.valueType.load({scope: this, callback: function() {
+                //obj.components.valueType.setValue(this.mapView[obj.mapView.valueType]);
+                //obj.components.valueType.currentValue = this.mapView[obj.mapView.valueType];
                 
-                obj = this.prepareMapViewPeriod();
-                if (obj.stores.c1.isLoaded) {
-                    dateTypeGroupStoreCallback.call(this);
-                }
-                else {
-                    obj.stores.c1.load({scope: this, callback: function() {
-                        dateTypeGroupStoreCallback.call(this);
-                    }});
-                }
-            }});
-        }
+                //obj = this.prepareMapViewPeriod();
+                //if (obj.stores.c1.isLoaded) {
+                    //dateTypeGroupStoreCallback.call(this);
+                //}
+                //else {
+                    //obj.stores.c1.load({scope: this, callback: function() {
+                        //dateTypeGroupStoreCallback.call(this);
+                    //}});
+                //}
+            //}});
+        //}
         
-        function dateTypeGroupStoreCallback() {
-            obj.components.c1.setValue(this.mapView[obj.mapView.c1]);
+        //function dateTypeGroupStoreCallback() {
+            //obj.components.c1.setValue(this.mapView[obj.mapView.c1]);
             
-            obj.stores.c2.setBaseParam('name', this.mapView[obj.mapView.c1]);
-            obj.stores.c2.load({scope: this, callback: function() {
-                obj.components.c2.setValue(this.mapView[obj.mapView.c2]);
-                obj.components.c2.currentValue = this.mapView[obj.mapView.c2];
-                obj.components.c2.lockPosition = true;
+            //obj.stores.c2.setBaseParam('name', this.mapView[obj.mapView.c1]);
+            //obj.stores.c2.load({scope: this, callback: function() {
+                //obj.components.c2.setValue(this.mapView[obj.mapView.c2]);
+                //obj.components.c2.currentValue = this.mapView[obj.mapView.c2];
+                //obj.components.c2.lockPosition = true;
                 
-                this.setMapViewLegend();
-            }});
-        }
+                //this.setMapViewLegend();
+            //}});
+        //}
 
-        if (obj.stores.valueTypeGroup.isLoaded) {
-            valueTypeGroupStoreCallback.call(this);
-        }
-        else {
-            obj.stores.valueTypeGroup.load({scope: this, callback: function() {
-                valueTypeGroupStoreCallback.call(this);
-            }});
-        }
-    },
+        //if (obj.stores.valueTypeGroup.isLoaded) {
+            //valueTypeGroupStoreCallback.call(this);
+        //}
+        //else {
+            //obj.stores.valueTypeGroup.load({scope: this, callback: function() {
+                //valueTypeGroupStoreCallback.call(this);
+            //}});
+        //}
+    //},
     
-    setMapViewLegend: function() {
-        this.prepareMapViewLegend();
+    //setMapViewLegend: function() {
+        //this.prepareMapViewLegend();
 
-        function predefinedMapLegendSetStoreCallback() {
-            this.cmp.legendSet.setValue(this.mapView.mapLegendSetId);
-            this.applyPredefinedLegend(true);
-        }
+        //function predefinedMapLegendSetStoreCallback() {
+            //this.cmp.legendSet.setValue(this.mapView.mapLegendSetId);
+            //this.applyPredefinedLegend(true);
+        //}
         
-        this.cmp.radiusLow.setValue(this.mapView.radiusLow || GIS.conf.defaultLowRadius);
-        this.cmp.radiusHigh.setValue(this.mapView.radiusHigh || GIS.conf.defaultHighRadius);
+        //this.cmp.radiusLow.setValue(this.mapView.radiusLow || GIS.conf.defaultLowRadius);
+        //this.cmp.radiusHigh.setValue(this.mapView.radiusHigh || GIS.conf.defaultHighRadius);
         
-        if (this.legend.value == GIS.conf.map_legendset_type_automatic) {
-            this.cmp.method.setValue(this.mapView.method);
-            this.cmp.startColor.setValue(this.mapView.colorLow);
-            this.cmp.endColor.setValue(this.mapView.colorHigh);
+        //if (this.legend.value == GIS.conf.map_legendset_type_automatic) {
+            //this.cmp.method.setValue(this.mapView.method);
+            //this.cmp.startColor.setValue(this.mapView.colorLow);
+            //this.cmp.endColor.setValue(this.mapView.colorHigh);
 
-            if (this.legend.method == GIS.conf.classify_with_bounds) {
-                this.cmp.bounds.setValue(this.mapView.bounds);
-            }
-            else {
-                this.cmp.classes.setValue(this.mapView.classes);
-            }
+            //if (this.legend.method == GIS.conf.classify_with_bounds) {
+                //this.cmp.bounds.setValue(this.mapView.bounds);
+            //}
+            //else {
+                //this.cmp.classes.setValue(this.mapView.classes);
+            //}
 
-            this.setMapViewMap();
-        }
-        else if (this.legend.value == GIS.conf.map_legendset_type_predefined) {
-            if (GIS.stores.predefinedColorMapLegendSet.isLoaded) {
-                predefinedMapLegendSetStoreCallback.call(this);
-            }
-            else {
-                GIS.stores.predefinedColorMapLegendSet.load({scope: this, callback: function() {
-                    predefinedMapLegendSetStoreCallback.call(this);
-                }});
-            }
-        }
-    },
+            //this.setMapViewMap();
+        //}
+        //else if (this.legend.value == GIS.conf.map_legendset_type_predefined) {
+            //if (GIS.stores.predefinedColorMapLegendSet.isLoaded) {
+                //predefinedMapLegendSetStoreCallback.call(this);
+            //}
+            //else {
+                //GIS.stores.predefinedColorMapLegendSet.load({scope: this, callback: function() {
+                    //predefinedMapLegendSetStoreCallback.call(this);
+                //}});
+            //}
+        //}
+    //},
     
-    setMapViewMap: function() {
-        this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
-            this.mapView.parentOrganisationUnitLevel, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
+    //setMapViewMap: function() {
+        //this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
+            //this.mapView.parentOrganisationUnitLevel, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
             
-        this.cmp.parent.reset();
+        //this.cmp.parent.reset();
         
-        this.cmp.parent.selectedNode = {attributes: {
-            id: this.mapView.parentOrganisationUnitId,
-            text: this.mapView.parentOrganisationUnitName,
-            level: this.mapView.parentOrganisationUnitLevel
-        }};
+        //this.cmp.parent.selectedNode = {attributes: {
+            //id: this.mapView.parentOrganisationUnitId,
+            //text: this.mapView.parentOrganisationUnitName,
+            //level: this.mapView.parentOrganisationUnitLevel
+        //}};
             
-        GIS.stores.organisationUnitLevel.load({scope: this, callback: function() {
-            this.cmp.level.setValue(this.mapView.organisationUnitLevel);
-            GIS.vars.activePanel.setPolygon();
-            this.loadGeoJson();
-        }});
-    },
+        //GIS.stores.organisationUnitLevel.load({scope: this, callback: function() {
+            //this.cmp.level.setValue(this.mapView.organisationUnitLevel);
+            //GIS.vars.activePanel.setPolygon();
+            //this.loadGeoJson();
+        //}});
+    //},
 	
 	applyPredefinedLegend: function(isMapView) {
         this.legend.value = GIS.conf.map_legendset_type_predefined;
@@ -1332,159 +1335,159 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		});
 	},
     
-    formValidation: {
-        validateForm: function() {
-            if (this.cmp.valueType.getValue() == GIS.conf.map_value_type_indicator) {
-                if (!this.cmp.indicator.getValue()) {
-                    this.window.cmp.apply.disable();
-                    return false;
-                }
-            }
-            else if (this.cmp.valueType.getValue() == GIS.conf.map_value_type_dataelement) {
-                if (!this.cmp.dataElement.getValue()) {
-                    this.window.cmp.apply.disable();
-                    return false;
-                }
-            }
+    //formValidation: {
+        //validateForm: function() {
+            //if (this.cmp.valueType.getValue() == GIS.conf.map_value_type_indicator) {
+                //if (!this.cmp.indicator.getValue()) {
+                    //this.window.cmp.apply.disable();
+                    //return false;
+                //}
+            //}
+            //else if (this.cmp.valueType.getValue() == GIS.conf.map_value_type_dataelement) {
+                //if (!this.cmp.dataElement.getValue()) {
+                    //this.window.cmp.apply.disable();
+                    //return false;
+                //}
+            //}
             
-            if (!this.cmp.period.getValue()) {
-                this.window.cmp.apply.disable();
-                return false;
-            }
+            //if (!this.cmp.period.getValue()) {
+                //this.window.cmp.apply.disable();
+                //return false;
+            //}
 
-            if (!this.cmp.parent.selectedNode || !this.cmp.level.getValue()) {
-                this.window.cmp.apply.disable();
-                return false;
-            }
+            //if (!this.cmp.parent.selectedNode || !this.cmp.level.getValue()) {
+                //this.window.cmp.apply.disable();
+                //return false;
+            //}
             
-            if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
-                this.window.cmp.apply.disable();
-                return false;
-            }
+            //if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
+                //this.window.cmp.apply.disable();
+                //return false;
+            //}
 
-            if (this.cmp.legendType.getValue() == GIS.conf.map_legendset_type_automatic) {
-                if (this.cmp.method.getValue() == GIS.conf.classify_with_bounds) {
-                    if (!this.cmp.bounds.getValue()) {
-                        this.window.cmp.apply.disable();
-                        return false;
-                    }
-                }
-            }
-            else if (this.cmp.legendType.getValue() == GIS.conf.map_legendset_type_predefined) {
-                if (!this.cmp.legendSet.getValue()) {
-                    this.window.cmp.apply.disable();
-                    return false;
-                }
-            }
+            //if (this.cmp.legendType.getValue() == GIS.conf.map_legendset_type_automatic) {
+                //if (this.cmp.method.getValue() == GIS.conf.classify_with_bounds) {
+                    //if (!this.cmp.bounds.getValue()) {
+                        //this.window.cmp.apply.disable();
+                        //return false;
+                    //}
+                //}
+            //}
+            //else if (this.cmp.legendType.getValue() == GIS.conf.map_legendset_type_predefined) {
+                //if (!this.cmp.legendSet.getValue()) {
+                    //this.window.cmp.apply.disable();
+                    //return false;
+                //}
+            //}
             
-            if (!this.cmp.radiusLow.getValue() || !this.cmp.radiusHigh.getValue()) {
-                this.window.cmp.apply.disable();
-                return false;
-            }
+            //if (!this.cmp.radiusLow.getValue() || !this.cmp.radiusHigh.getValue()) {
+                //this.window.cmp.apply.disable();
+                //return false;
+            //}
             
-            if (this.requireUpdate) {
-                if (this.window.isUpdate) {
-                    this.window.cmp.apply.disable();
-                    this.requireUpdate = false;
-                    this.window.isUpdate = false;
-                }
-                else {
-                    this.window.cmp.apply.enable();
-                }
-            }
+            //if (this.requireUpdate) {
+                //if (this.window.isUpdate) {
+                    //this.window.cmp.apply.disable();
+                    //this.requireUpdate = false;
+                    //this.window.isUpdate = false;
+                //}
+                //else {
+                    //this.window.cmp.apply.enable();
+                //}
+            //}
             
-            return true;
-        }
-    },
+            //return true;
+        //}
+    //},
     
-    formValues: {
-		getAllValues: function() {
-			return {
-                mapValueType: this.cmp.valueType.getValue(),
-                indicatorGroupId: this.valueType.isIndicator() ? this.cmp.indicatorGroup.getValue() : null,
-                indicatorId: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : null,
-				indicatorName: this.valueType.isIndicator() ? this.cmp.indicator.getRawValue() : null,
-                dataElementGroupId: this.valueType.isDataElement() ? this.cmp.dataElementGroup.getValue() : null,
-                dataElementId: this.valueType.isDataElement() ? this.cmp.dataElement.getValue() : null,
-				dataElementName: this.valueType.isDataElement() ? this.cmp.dataElement.getRawValue() : null,
-                periodTypeId: this.cmp.periodType.getValue(),
-                periodId: this.cmp.period.getValue(),
-                periodName: this.cmp.period.getRawValue(),
-                parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
-                parentOrganisationUnitLevel: this.organisationUnitSelection.parent.level,
-                parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
-                organisationUnitLevel: this.organisationUnitSelection.level.level,
-                organisationUnitLevelName: this.organisationUnitSelection.level.name,
-                mapLegendType: this.cmp.legendType.getValue(),
-                method: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.method.getValue() : null,
-                classes: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.classes.getValue() : null,
-                bounds: this.legend.value == GIS.conf.map_legendset_type_automatic && this.legend.method == GIS.conf.classify_with_bounds ? this.cmp.bounds.getValue() : null,
-                colorLow: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.startColor.getValue() : null,
-                colorHigh: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.endColor.getValue() : null,
-                mapLegendSetId: this.legend.value == GIS.conf.map_legendset_type_predefined ? this.cmp.legendSet.getValue() : null,
-				radiusLow: this.cmp.radiusLow.getValue(),
-				radiusHigh: this.cmp.radiusHigh.getValue(),
-                longitude: GIS.vars.map.getCenter().lon,
-                latitude: GIS.vars.map.getCenter().lat,
-                zoom: parseFloat(GIS.vars.map.getZoom())
-			};
-		},
+    //formValues: {
+		//getAllValues: function() {
+			//return {
+                //mapValueType: this.cmp.valueType.getValue(),
+                //indicatorGroupId: this.valueType.isIndicator() ? this.cmp.indicatorGroup.getValue() : null,
+                //indicatorId: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : null,
+				//indicatorName: this.valueType.isIndicator() ? this.cmp.indicator.getRawValue() : null,
+                //dataElementGroupId: this.valueType.isDataElement() ? this.cmp.dataElementGroup.getValue() : null,
+                //dataElementId: this.valueType.isDataElement() ? this.cmp.dataElement.getValue() : null,
+				//dataElementName: this.valueType.isDataElement() ? this.cmp.dataElement.getRawValue() : null,
+                //periodTypeId: this.cmp.periodType.getValue(),
+                //periodId: this.cmp.period.getValue(),
+                //periodName: this.cmp.period.getRawValue(),
+                //parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
+                //parentOrganisationUnitLevel: this.organisationUnitSelection.parent.level,
+                //parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
+                //organisationUnitLevel: this.organisationUnitSelection.level.level,
+                //organisationUnitLevelName: this.organisationUnitSelection.level.name,
+                //mapLegendType: this.cmp.legendType.getValue(),
+                //method: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.method.getValue() : null,
+                //classes: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.classes.getValue() : null,
+                //bounds: this.legend.value == GIS.conf.map_legendset_type_automatic && this.legend.method == GIS.conf.classify_with_bounds ? this.cmp.bounds.getValue() : null,
+                //colorLow: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.startColor.getValue() : null,
+                //colorHigh: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.endColor.getValue() : null,
+                //mapLegendSetId: this.legend.value == GIS.conf.map_legendset_type_predefined ? this.cmp.legendSet.getValue() : null,
+				//radiusLow: this.cmp.radiusLow.getValue(),
+				//radiusHigh: this.cmp.radiusHigh.getValue(),
+                //longitude: GIS.vars.map.getCenter().lon,
+                //latitude: GIS.vars.map.getCenter().lat,
+                //zoom: parseFloat(GIS.vars.map.getZoom())
+			//};
+		//},
         
-        getLegendInfo: function() {
-            return {
-                name: this.model.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-                time: this.cmp.period.getRawValue(),
-                map: this.organisationUnitSelection.level.name + ' / ' + this.organisationUnitSelection.parent.name
-            };
-        },
+        //getLegendInfo: function() {
+            //return {
+                //name: this.model.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+                //time: this.cmp.period.getRawValue(),
+                //map: this.organisationUnitSelection.level.name + ' / ' + this.organisationUnitSelection.parent.name
+            //};
+        //},
         
-        getImageExportValues: function() {
-			return {
-				mapValueTypeValue: this.cmp.valueType.getValue() == GIS.conf.map_value_type_indicator ?
-					this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-				dateValue: this.cmp.period.getRawValue()
-			};
-		},
+        //getImageExportValues: function() {
+			//return {
+				//mapValueTypeValue: this.cmp.valueType.getValue() == GIS.conf.map_value_type_indicator ?
+					//this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+				//dateValue: this.cmp.period.getRawValue()
+			//};
+		//},
         
-        clearForm: function(clearLayer) {
-            this.cmp.mapview.clearValue();
+        //clearForm: function(clearLayer) {
+            //this.cmp.mapview.clearValue();
             
-            this.cmp.valueType.setValue(GIS.conf.map_value_type_indicator);
-            this.valueType.setIndicator();
-            this.prepareMapViewValueType();
-            this.cmp.indicatorGroup.clearValue();
-            this.cmp.indicator.clearValue();
-            this.cmp.dataElementGroup.clearValue();
-            this.cmp.dataElement.clearValue();
+            //this.cmp.valueType.setValue(GIS.conf.map_value_type_indicator);
+            //this.valueType.setIndicator();
+            //this.prepareMapViewValueType();
+            //this.cmp.indicatorGroup.clearValue();
+            //this.cmp.indicator.clearValue();
+            //this.cmp.dataElementGroup.clearValue();
+            //this.cmp.dataElement.clearValue();
             
-            this.prepareMapViewPeriod();
-            this.cmp.periodType.clearValue();
-            this.cmp.period.clearValue();
+            //this.prepareMapViewPeriod();
+            //this.cmp.periodType.clearValue();
+            //this.cmp.period.clearValue();
             
-            this.cmp.level.clearValue();
-            this.cmp.parent.reset();
+            //this.cmp.level.clearValue();
+            //this.cmp.parent.reset();
             
-            this.legend.reset();
-            this.prepareMapViewLegend();
-            this.cmp.method.setValue(this.legend.method);
-            this.cmp.classes.setValue(this.legend.classes);
-            this.cmp.bounds.reset();
+            //this.legend.reset();
+            //this.prepareMapViewLegend();
+            //this.cmp.method.setValue(this.legend.method);
+            //this.cmp.classes.setValue(this.legend.classes);
+            //this.cmp.bounds.reset();
             
-            this.cmp.startColor.setValue('#FF0000');
-            this.cmp.endColor.setValue('#FFFF00');
+            //this.cmp.startColor.setValue('#FF0000');
+            //this.cmp.endColor.setValue('#FFFF00');
             
-            this.cmp.radiusLow.reset();
-            this.cmp.radiusHigh.reset();
+            //this.cmp.radiusLow.reset();
+            //this.cmp.radiusHigh.reset();
             
-            this.window.cmp.apply.disable();
+            //this.window.cmp.apply.disable();
             
-            if (clearLayer) {            
-                document.getElementById(this.legendDiv).innerHTML = '';                
-                this.layer.destroyFeatures();
-                this.layer.setVisibility(false);
-            }
-        }
-	},
+            //if (clearLayer) {            
+                //document.getElementById(this.legendDiv).innerHTML = '';                
+                //this.layer.destroyFeatures();
+                //this.layer.setVisibility(false);
+            //}
+        //}
+	//},
 	
     execute: function() {
 		GIS.mask.msg = GIS.i18n.loading;
@@ -1506,69 +1509,73 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		}
 	},
     	
-	getModel: function(conf) {
-		var model;
+	getModel: function() {
+		var level = this.cmp.level,
+			parent = this.cmp.parent.getSelectionModel().getSelection();
+			
+			console.log(parent);return;
 		
-		if (conf) {
-			model = {
-				valueType: conf.valueType,
-				indicatorGroup: conf.indicatorGroup,
-				indicator: conf.indicator,
-				dataElementGroup: conf.dataElementGroup,
-				dataElement: conf.dataElement,
-				periodType: conf.periodType,
-				period: conf.period,
-				legendType: conf.legendType,
-				legendSet: conf.legendSet,
-				classes: conf.classes,
-				method: conf.method,
-				colorLow: conf.colorLow,
-				colorHigh: conf.colorHigh,
-				radiusLow: conf.radiusLow,
-				radiusHigh: conf.radiusHigh,
-				level: conf.level,
-				parent: conf.parent.getSelectionModel().getSelection()[0].getId()
-			};
-			
-			//more
-		}
-		else {
-			var parent = this.cmp.parent.getSelectionModel().getSelection()[0],
-				level = this.cmp.level;
-				
-			model = {
-				valueType: this.cmp.valueType.getValue(),
-				indicatorGroup: this.cmp.indicatorGroup.getValue(),
-				indicator: this.cmp.indicator.getValue(),
-				dataElementGroup: this.cmp.dataElementGroup.getValue(),
-				dataElement: this.cmp.dataElement.getValue(),
-				periodType: this.cmp.periodType.getValue(),
-				period: this.cmp.period.getValue(),
-				legendType: this.cmp.legendType.getValue(),
-				legendSet: this.cmp.legendSet.getValue(),
-				classes: this.cmp.classes.getValue(),
-				method: this.cmp.method.getValue(),
-				colorLow: this.cmp.colorLow.getValue(),
-				colorHigh: this.cmp.colorHigh.getValue(),
-				colors: this.getColors(),
-				radiusLow: parseInt(this.cmp.radiusLow.getValue()),
-				radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
-				level: this.cmp.level,
-				parent: this.cmp.parent.getSelectionModel().getSelection()[0]
-			};
-			
-			this.organisationUnitSelection.setValues(
-				parent.data.id,
-				parent.data.text,
-				parent.data.level,
-				level.getValue(),
-				level.getRawValue()
-			);
+		var model = {
+			valueType: this.cmp.valueType.getValue(),
+			indicatorGroup: this.cmp.indicatorGroup.getValue(),
+			indicator: this.cmp.indicator.getValue(),
+			dataElementGroup: this.cmp.dataElementGroup.getValue(),
+			dataElement: this.cmp.dataElement.getValue(),
+			periodType: this.cmp.periodType.getValue(),
+			period: this.cmp.period.getValue(),
+			legendType: this.cmp.legendType.getValue(),
+			legendSet: this.cmp.legendSet.getValue(),
+			classes: this.cmp.classes.getValue(),
+			method: this.cmp.method.getValue(),
+			colorLow: this.cmp.colorLow.getValue(),
+			colorHigh: this.cmp.colorHigh.getValue(),
+			colors: this.getColors(),
+			radiusLow: parseInt(this.cmp.radiusLow.getValue()),
+			radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
+			level: level.getValue(),
+			levelName: level.getRawValue(),
+			parentId: parent.length ? parent[0].data.id : null,
+			parentName: parent.length ? parent[0].data.text : null,
+			parentLevel: parent.length ? parent[0].data.level : null,
+			updateOrganisationUnit: false,
+			updateData: false,
+			updateLegend: false
 		};
 		
-		this.validateModel(model);
+		model.valueType = this.config.valueType || model.valueType;
+		model.indicatorGroup = this.config.indicatorGroup || model.indicatorGroup;
+		model.indicator = this.config.indicator || model.indicator;
+		model.dataElementGroup = this.config.dataElementGroup || model.dataElementGroup;
+		model.dataElement = this.config.valueType || model.dataElement;
+		model.periodType = this.config.valueType || model.periodType;
+		model.period = this.config.valueType || model.period;
+		model.legendType = this.config.legendType || model.legendType;
+		model.legendSet = this.config.legendSet || model.legendSet;
+		model.classes = this.config.classes || model.classes;
+		model.method = this.config.method || model.method;
+		model.colorLow = this.config.colorLow || model.colorLow;
+		model.colorHigh = this.config.colorHigh || model.colorHigh;
+		model.radiusLow = this.config.radiusLow || model.radiusLow;
+		model.radiusHigh = this.config.radiusHigh || model.radiusHigh;
+		model.level = this.config.level || model.level;
+		model.levelName = this.config.levelName || model.levelName;
+		model.parentId = this.config.valueType || model.parentId;
+		model.parentName = this.config.valueType || model.parentName;
+		model.parentLevel = this.config.valueType || model.parentLevel;
+		model.updateOrganisationUnit = this.config.updateOrganisationUnit || false;
+		model.updateData = this.config.updateData || false;
+		model.updateLegend = this.config.updateLegend || false;
+		console.log(model);return;
+		
+		if (!this.validateModel(model)) {
+			return;
+		}
 		
 		this.model = model;
+		
+		this.config = {};
+		
+		return this.model;
 	},
 	
 	validateModel: function(model) {
@@ -1635,10 +1642,28 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			}
 		}
 		
-		if (
-			
-			
+		if (!model.level || !Ext.isNumber(model.level)) {
+			GIS.logg.push(model.level, this.xtype + '.level: number');
+			return false;
+		}
+		if (!model.levelName || !Ext.isString(model.levelName)) {
+			GIS.logg.push(model.levelName, this.xtype + '.levelName: string');
+			return false;
+		}
+		if (!model.parentId || !Ext.isString(model.parentId)) {
+			GIS.logg.push(model.parentId, this.xtype + '.parentId: string');
+			return false;
+		}
+		if (!model.parentName || !Ext.isString(model.parentName)) {
+			GIS.logg.push(model.parentName, this.xtype + '.parentName: string');
+			return false;
+		}
+		if (!model.parentLevel || !Ext.isNumber(model.parentLevel)) {
+			GIS.logg.push(model.parentLevel, this.xtype + '.parentLevel: number');
+			return false;
+		}
 		
+		return true;
 	},
 	
     loadOrganisationUnits: function() {        
