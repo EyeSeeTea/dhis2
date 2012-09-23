@@ -45,6 +45,7 @@ import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.report.ReportService;
 import org.hisp.dhis.reporttable.ReportTable;
@@ -100,6 +101,13 @@ public class DefaultReportService
     public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
     {
         this.organisationUnitGroupService = organisationUnitGroupService;
+    }
+    
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
     }
 
     // -------------------------------------------------------------------------
@@ -166,7 +174,11 @@ public class DefaultReportService
 
     public void deleteReport( Report report )
     {
-        reportStore.delete( report );
+        if ( report != null )
+        {   
+            periodService.deleteRelativePeriods( report.getRelatives() );
+            reportStore.delete( report );
+        }
     }
 
     public Collection<Report> getAllReports()
