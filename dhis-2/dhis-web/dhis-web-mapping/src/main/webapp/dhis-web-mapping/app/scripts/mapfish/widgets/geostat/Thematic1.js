@@ -52,51 +52,40 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     toggler: {},
     
     features: [],
-    
-    update: {
-		isOrganisationUnit: false,
-		isData: false,
-		isLegend: false,
-		reset: function() {
-			this.isOrganisationUnit = false;
-			this.isData = false;
-			this.isLegend = false;
-		}
-	},
 	
-	organisationUnitSelection: {
-		parent: {
-			id: null,
-			name: null,
-			level: null
-		},
-		level: {
-			level: null,
-			name: null
-		},
-		setValues: function(parentId, parentName, parentLevel, levelLevel, levelName) {
-			this.parent.id = parentId || this.parent.id;
-			this.parent.name = parentName || this.parent.name;
-			this.parent.level = parentLevel || this.parent.level;
-			this.level.level = levelLevel || this.level.level;
-			this.level.name = levelName || this.level.name;
-		},
-		setValuesOnDrillDown: function(parentId, parentName) {
-			this.parent.id = parentId;
-			this.parent.name = parentName;
-			this.parent.level = this.level.level;
-			this.level.level++;
-			this.level.name = GIS.store.organisationUnitLevel.getAt(
-				GIS.store.organisationUnitLevels.find('level', this.level.level)).data.name;
-		},
-		reset: function() {
-			this.parent.id = null;
-			this.parent.name = null;
-			this.parent.level = null;
-			this.level.level = null;
-			this.level.name = null;
-		}			
-	},
+	//organisationUnitSelection: {
+		//parent: {
+			//id: null,
+			//name: null,
+			//level: null
+		//},
+		//level: {
+			//level: null,
+			//name: null
+		//},
+		//setValues: function(parentId, parentName, parentLevel, levelLevel, levelName) {
+			//this.parent.id = parentId || this.parent.id;
+			//this.parent.name = parentName || this.parent.name;
+			//this.parent.level = parentLevel || this.parent.level;
+			//this.level.level = levelLevel || this.level.level;
+			//this.level.name = levelName || this.level.name;
+		//},
+		//setValuesOnDrillDown: function(parentId, parentName) {
+			//this.parent.id = parentId;
+			//this.parent.name = parentName;
+			//this.parent.level = this.level.level;
+			//this.level.level++;
+			//this.level.name = GIS.store.organisationUnitLevel.getAt(
+				//GIS.store.organisationUnitLevels.find('level', this.level.level)).data.name;
+		//},
+		//reset: function() {
+			//this.parent.id = null;
+			//this.parent.name = null;
+			//this.parent.level = null;
+			//this.level.level = null;
+			//this.level.name = null;
+		//}			
+	//},
     
     store: {
 		indicatorsByGroup: Ext.create('Ext.data.Store', {
@@ -206,10 +195,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 
     requestSuccess: function(request) {
         this.ready = true;
-
-        if (this.loadMask && this.rendered) {
-            this.loadMask.hide();
-        }
     },
 
     requestFailure: function(request) {
@@ -231,6 +216,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 		this.addItems();
 		
+		this.createSelectFeatures();
+		
 		mapfish.widgets.geostat.Thematic1.superclass.initComponent.apply(this);
     },
     
@@ -238,13 +225,13 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		var that = this;
 		
 		this.toggler.valueType = function(valueType) {
-			if (valueType === GIS.conf.finals.widget.valuetype_indicator) {
+			if (valueType === GIS.conf.finals.dimension.indicator.id) {
 				that.cmp.indicatorGroup.show();
 				that.cmp.indicator.show();
 				that.cmp.dataElementGroup.hide();
 				that.cmp.dataElement.hide();
 			}
-			else if (valueType === GIS.conf.finals.widget.valuetype_dataelement) {
+			else if (valueType === GIS.conf.finals.dimension.dataElement.id) {
 				that.cmp.indicatorGroup.hide();
 				that.cmp.indicator.hide();
 				that.cmp.dataElementGroup.show();
@@ -386,7 +373,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             hidden: true,
-            store: GIS.store.dataElementGroup,
+            store: GIS.store.dataElementGroups,
             listeners: {
                 select: {
                     scope: this,
@@ -758,6 +745,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					fn: function() {
 						this.config.updateOrganisationUnit = true;
 					}
+				},
+				afterrender: function() {
+					if (!this.getSelectionModel().getSelection().length) {
+						this.getSelectionModel().select(0);
+					}
 				}
 			}
         });
@@ -864,25 +856,45 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     createSelectFeatures: function() {
         var that = this;
         
+        var window = Ext.create('Ext.window.Window', {
+			cls: 'gis-window-widget-feature',
+			width: 100,
+			height: 100,
+			closeAction: 'hide',
+			preventHeader: true
+		});
+        
         var onHoverSelect = function onHoverSelect(feature) {
-            if (feature.attributes.fixedName) {
-                document.getElementById('featuredatatext').innerHTML =
-                    '<div style="' + GIS.conf.feature_data_style_name + '">' + feature.attributes.fixedName + '</div>' +
-                    '<div style="' + GIS.conf.feature_data_style_value + '">' + feature.attributes.value + '</div>';
+            if (feature.attributes.name) {
+				window.removeAll();
+				window.add({
+					html: feature.attributes.name
+				});
+				
+				window.show();
+				
+				var x = window.getPosition()[0];
+				window.setPosition(x, 30);
+				//window.showAt(null, 20);
+				
+                //document.getElementById('featuredatatext').innerHTML =
+                    //'<div style="' + GIS.conf.feature_data_style_name + '">' + feature.attributes.fixedName + '</div>' +
+                    //'<div style="' + GIS.conf.feature_data_style_value + '">' + feature.attributes.value + '</div>';
             }
             else {
-                document.getElementById('featuredatatext').innerHTML = '';
+                //document.getElementById('featuredatatext').innerHTML = '';
             }
         };
         
         var onHoverUnselect = function onHoverUnselect(feature) {
-            if (feature.attributes.name) {
-                document.getElementById('featuredatatext').innerHTML = 
-                    '<div style="' + GIS.conf.feature_data_style_empty + '">' + GIS.i18n.no_feature_selected + '</div>';
-            }
-            else {
-                document.getElementById('featuredatatext').innerHTML = '';
-            }
+			window.hide();
+            //if (feature.attributes.name) {
+                //document.getElementById('featuredatatext').innerHTML = 
+                    //'<div style="' + GIS.conf.feature_data_style_empty + '">' + GIS.i18n.no_feature_selected + '</div>';
+            //}
+            //else {
+                //document.getElementById('featuredatatext').innerHTML = '';
+            //}
         };
         
         var onClickSelect = function onClickSelect(feature) {

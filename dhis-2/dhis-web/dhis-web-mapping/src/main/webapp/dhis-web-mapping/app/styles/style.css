@@ -9,6 +9,7 @@
  * Menu
  * Treepanel
  * Colorpicker 
+ * Window
 */
 
 /* General */
@@ -300,3 +301,10 @@ html * {
 	width: 14px;
 	height: 14px;
 }
+
+/* Window */
+
+.gis-window-widget-feature {
+
+}
+
