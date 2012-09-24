@@ -216,7 +216,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 		this.addItems();
 		
-		this.createSelectFeatures();
+		this.createSelectHandlers();
 		
 		mapfish.widgets.geostat.Thematic1.superclass.initComponent.apply(this);
     },
@@ -853,28 +853,25 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         ];
     },
     
-    createSelectFeatures: function() {
-        var that = this;
-        
-        var window = Ext.create('Ext.window.Window', {
-			cls: 'gis-window-widget-feature',
-			width: 100,
-			height: 100,
-			closeAction: 'hide',
-			preventHeader: true
-		});
+    createSelectHandlers: function() {
+        var that = this,
+			window;
         
         var onHoverSelect = function onHoverSelect(feature) {
             if (feature.attributes.name) {
-				window.removeAll();
-				window.add({
-					html: feature.attributes.name
+				window = Ext.create('Ext.window.Window', {
+					cls: 'gis-window-widget-feature',
+					height: 80,
+					preventHeader: true,
+					items: {
+						html: feature.attributes.name
+					}
 				});
 				
 				window.show();
 				
 				var x = window.getPosition()[0];
-				window.setPosition(x, 30);
+				window.setPosition(x, 32);
 				//window.showAt(null, 20);
 				
                 //document.getElementById('featuredatatext').innerHTML =
@@ -887,14 +884,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         };
         
         var onHoverUnselect = function onHoverUnselect(feature) {
-			window.hide();
-            //if (feature.attributes.name) {
-                //document.getElementById('featuredatatext').innerHTML = 
-                    //'<div style="' + GIS.conf.feature_data_style_empty + '">' + GIS.i18n.no_feature_selected + '</div>';
-            //}
-            //else {
-                //document.getElementById('featuredatatext').innerHTML = '';
-            //}
+			//window.destroy();
         };
         
         var onClickSelect = function onClickSelect(feature) {
@@ -1729,7 +1719,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 				
 				if (allZeros) {
-					alert("zero values only");
+					alert("zeros only");
 					GIS.mask.hide();
 					return;
 				}
