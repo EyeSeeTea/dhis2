@@ -190,9 +190,6 @@ Ext.onReady( function() {
 		if (bounds) {
 			GIS.map.zoomToExtent(bounds);
 		}
-		else {
-			console.log("abort");
-		}
 	};
 	
 	GIS.util.geojson.decode = function(doc) {
@@ -606,7 +603,7 @@ Ext.onReady( function() {
 		listeners: {
 			show: function(w) {
 				if (!this.isRendered) {
-					this.setPosition(5,36);
+					this.setPosition(4,35);
 					this.isRendered = true;
 				}
 			}
@@ -695,6 +692,17 @@ Ext.onReady( function() {
 						{
 							text: 'Download', //i18n
 							menu: {}
+						},
+						{
+							text: 'floating', //i18n
+							handler: function() {
+								var w = Ext.create('Ext.window.Window', {
+									width: 100,
+									height: 100,
+									preventHeader: true
+								});
+								w.show();
+							}
 						},
 						'->',
 						{

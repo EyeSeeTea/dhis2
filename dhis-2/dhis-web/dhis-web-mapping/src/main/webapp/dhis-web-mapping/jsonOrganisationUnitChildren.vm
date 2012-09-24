@@ -1,5 +1,5 @@
-[
 #set( $size = $units.size() )
+[
 #foreach( $unit in $units )
 {
   "id": "${unit.uid}",

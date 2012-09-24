@@ -43,9 +43,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     
     // Properties
     
-    model: null,
+    model: {},
     
-    config: null,
+    config: {},
     
     cmp: {},
     
@@ -187,12 +187,13 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			
         if (!doc || !doc.documentElement) {
             doc = request.responseText;
-        }                
+        }
+        
         if (doc.length) {
             doc = GIS.util.geojson.decode(doc);
         }
         else {
-			//todo alert error message
+			alert("no coordinates");
 		}
         
         that.layer.removeFeatures(that.layer.features);
@@ -280,7 +281,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             forceSelection: true,
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
-            value: GIS.conf.finals.widget.valuetype_indicator,
+            value: GIS.conf.finals.dimension.indicator.id,
             store: Ext.create('Ext.data.ArrayStore', {
                 fields: ['id', 'name'],
                 data: [
@@ -340,7 +341,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function(cb) {
-						this.update.isData = true;
+						this.config.updateData = true;
 						
                         //Ext.Ajax.request({
                             //url: GIS.conf.path_mapping + 'getMapLegendSetByIndicator' + GIS.conf.type,
@@ -409,7 +410,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				select: {
 					scope: this,
 					fn: function() {
-						this.update.isData = true;
+						this.config.updateData = true;
 					}
 				}
 			}
@@ -428,8 +429,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function() {
-						var pt = new PeriodType();
-						var periods = pt.reverse( pt.filterFuturePeriods( pt.get(this.cmp.periodType.getValue()).generatePeriods(this.cmp.periodType.periodOffset) ) );
+						var pt = new PeriodType(),
+							periodType = this.cmp.periodType.getValue();
+						
+						var periods = pt.get(periodType).generatePeriods({
+							offset: this.cmp.periodType.periodOffset,
+							filterFuturePeriods: true,
+							reversePeriods: true
+						});
+						
 						this.store.periodsByType.setIndex(periods);
 						this.store.periodsByType.loadData(periods);
 						
@@ -448,8 +456,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             forceSelection: true,
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            scope: this,
             selectFirst: function() {
-				this.update.isData = true;
+				this.scope.model.updateData = true;
 				this.setValue(this.store.getAt(0).data.id);
 			},
             store: this.store.periodsByType
@@ -524,7 +533,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				select: {
 					scope: this,
 					fn: function() {
-						this.update.isLegend = true;
+						this.config.updateLegend = true;
 					}
 				}
 			}
@@ -548,7 +557,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				change: {
 					scope: this,
 					fn: function() {
-						this.update.isLegend = true;
+						this.config.updateLegend = true;
 					}
 				}
 			}
@@ -572,7 +581,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				select: {
 					scope: this,
 					fn: function() {
-						this.update.isLegend = true;
+						this.config.updateLegend = true;
 					}
 				}
 			}
@@ -598,7 +607,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 							this.cmp.colorLow.value = color;
 							this.cmp.colorLow.menu.hide();
 							
-							this.update.isLegend = true;
+							this.config.updateLegend = true;
 						}
 					}
 				}
@@ -631,7 +640,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 							this.cmp.colorHigh.value = color;
 							this.cmp.colorHigh.menu.hide();
 							
-							this.update.isLegend = true;
+							this.config.updateLegend = true;
 						}
 					}
 				}
@@ -652,7 +661,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				change: {
 					scope: this,
 					fn: function() {
-						this.update.isLegend = true;
+						this.config.updateLegend = true;
 					}
 				}
 			}
@@ -667,7 +676,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				change: {
 					scope: this,
 					fn: function() {
-						this.update.isLegend = true;
+						this.config.updateLegend = true;
 					}
 				}
 			}
@@ -690,7 +699,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				select: {
 					scope: this,
 					fn: function() {
-						this.update.isOrganisationUnit = true;
+						this.config.updateOrganisationUnit = true;
 					}
 				}
 			}
@@ -707,8 +716,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action',
-					reader: 'json'
+					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
 				},
 				root: {
 					id: 'root',
@@ -727,7 +735,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				select: {
 					scope: this,
 					fn: function() {
-						this.update.isOrganisationUnit = true;
+						this.config.updateOrganisationUnit = true;
 					}
 				}
 			}
@@ -833,7 +841,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     },
     
     createSelectFeatures: function() {
-        var scope = this;
+        var that = this;
         
         var onHoverSelect = function onHoverSelect(feature) {
             if (feature.attributes.fixedName) {
@@ -863,8 +871,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					GIS.vars.locateFeatureWindow.destroy();
 				}
 						 
-				scope.updateValues = true;
-				scope.isDrillDown = true;
+				that.updateValues = true;
+				that.isDrillDown = true;
 				
 				function organisationUnitLevelCallback() {
 					this.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
@@ -881,21 +889,21 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 				
 				if (GIS.stores.organisationUnitLevel.isLoaded) {
-					organisationUnitLevelCallback.call(scope);
+					organisationUnitLevelCallback.call(that);
 				}
 				else {
-					GIS.stores.organisationUnitLevel.load({scope: scope, callback: function() {
+					GIS.stores.organisationUnitLevel.load({scope: that, callback: function() {
 						organisationUnitLevelCallback.call(this);
 					}});
 				}
 			}
 			
             if (feature.geometry.CLASS_NAME == GIS.conf.map_feature_type_point_class_name) {
-                if (scope.featureOptions.menu) {
-                    scope.featureOptions.menu.destroy();
+                if (that.featureOptions.menu) {
+                    that.featureOptions.menu.destroy();
                 }
                 
-                scope.featureOptions.menu = new Ext.menu.Menu({
+                that.featureOptions.menu = new Ext.menu.Menu({
                     showInfo: function() {
                         Ext.Ajax.request({
                             url: GIS.conf.path_mapping + 'getFacilityInfo' + GIS.conf.type,
@@ -903,11 +911,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                             success: function(r) {
                                 var ou = Ext.util.JSON.decode(r.responseText);
                                 
-                                if (scope.featureOptions.info) {
-                                    scope.featureOptions.info.destroy();
+                                if (that.featureOptions.info) {
+                                    that.featureOptions.info.destroy();
                                 }
                                 
-                                scope.featureOptions.info = new Ext.Window({
+                                that.featureOptions.info = new Ext.Window({
                                     title: '<span class="window-information-title">Facility information sheet</span>',
                                     layout: 'table',
                                     width: GIS.conf.window_width + 178,
@@ -961,10 +969,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                                                     lockPosition: false,
                                                     listeners: {
                                                         'select': function(cb) {
-                                                            scope.infrastructuralPeriod = cb.getValue();
-                                                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
-                                                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                                                            scope.stores.infrastructuralDataElementMapValue.load();
+                                                            that.infrastructuralPeriod = cb.getValue();
+                                                            that.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
+                                                            that.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+                                                            that.stores.infrastructuralDataElementMapValue.load();
                                                         }
                                                     }
                                                 },
@@ -981,31 +989,31 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                                                     }),
                                                     disableSelection: true,
                                                     viewConfig: {forceFit: true},
-                                                    store: scope.stores.infrastructuralDataElementMapValue
+                                                    store: that.stores.infrastructuralDataElementMapValue
                                                 }
                                             ]
                                         }
                                     ]
                                 });
             
-                                if (scope.infrastructuralPeriod) {
-                                    scope.featureOptions.info.find('name', 'period')[0].setValue(scope.infrastructuralPeriod);
-                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', scope.infrastructuralPeriod);
-                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                                    scope.stores.infrastructuralDataElementMapValue.load();
+                                if (that.infrastructuralPeriod) {
+                                    that.featureOptions.info.find('name', 'period')[0].setValue(that.infrastructuralPeriod);
+                                    that.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', that.infrastructuralPeriod);
+                                    that.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+                                    that.stores.infrastructuralDataElementMapValue.load();
                                 }
-                                scope.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
-                                scope.featureOptions.info.show();
-                                scope.featureOptions.menu.destroy();
+                                that.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (that.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
+                                that.featureOptions.info.show();
+                                that.featureOptions.menu.destroy();
                             }
                         });
                     },
                     showRelocate: function() {
-                        if (scope.featureOptions.coordinate) {
-                            scope.featureOptions.coordinate.destroy();
+                        if (that.featureOptions.coordinate) {
+                            that.featureOptions.coordinate.destroy();
                         }
                         
-                        scope.featureOptions.coordinate = new Ext.Window({
+                        that.featureOptions.coordinate = new Ext.Window({
                             title: '<span class="window-relocate-title">' + feature.attributes.name + '</span>',
 							bodyStyle: 'padding:8px; background-color:#fff',
                             layout: 'fit',
@@ -1027,7 +1035,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                                     text: GIS.i18n.cancel,
                                     handler: function() {
                                         GIS.vars.relocate.active = false;
-                                        scope.featureOptions.coordinate.destroy();
+                                        that.featureOptions.coordinate.destroy();
                                         document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
                                     }
                                 }
@@ -1039,8 +1047,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                                 }
                             }
                         });
-                        scope.featureOptions.coordinate.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.coordinate.width + 15), Ext.getCmp('center').y + 41);
-                        scope.featureOptions.coordinate.show();                        
+                        that.featureOptions.coordinate.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.coordinate.width + 15), Ext.getCmp('center').y + 41);
+                        that.featureOptions.coordinate.show();                        
                     },
                     items: [
                         {
@@ -1064,7 +1072,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                             disabled: !GIS.user.isAdmin,
                             handler: function(item) {
                                 GIS.vars.relocate.active = true;
-                                GIS.vars.relocate.widget = scope;
+                                GIS.vars.relocate.widget = that;
                                 GIS.vars.relocate.feature = feature;
                                 document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'crosshair';
                                 item.parentMenu.showRelocate();
@@ -1074,7 +1082,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 });
                 
                 if (feature.attributes.hcwc) {
-					scope.featureOptions.menu.add({
+					that.featureOptions.menu.add({
 						text: 'Drill down',
 						iconCls: 'menu-featureoptions-drilldown',
 						scope: this,
@@ -1084,7 +1092,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					});
 				}
                 
-                scope.featureOptions.menu.showAt([GIS.vars.mouseMove.x, GIS.vars.mouseMove.y]);
+                that.featureOptions.menu.showAt([GIS.vars.mouseMove.x, GIS.vars.mouseMove.y]);
             }
             else {
                 if (feature.attributes.hcwc) {
@@ -1104,7 +1112,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             }
         );
         
-        GIS.vars.map.addControl(this.selectFeatures);
+        GIS.map.addControl(this.selectFeatures);
         this.selectFeatures.activate();
     },
     
@@ -1400,7 +1408,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         //}
     //},
     
-    //formValues: {
+    formValues: {
 		//getAllValues: function() {
 			//return {
                 //mapValueType: this.cmp.valueType.getValue(),
@@ -1433,13 +1441,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			//};
 		//},
         
-        //getLegendInfo: function() {
-            //return {
-                //name: this.model.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-                //time: this.cmp.period.getRawValue(),
-                //map: this.organisationUnitSelection.level.name + ' / ' + this.organisationUnitSelection.parent.name
-            //};
-        //},
+        getLegendInfo: function() {
+            return {
+                name: this.model.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+                time: this.cmp.period.getRawValue(),
+                map: this.model.levelName + ' / ' + this.model.parentName
+            };
+        }
+        //,
         
         //getImageExportValues: function() {
 			//return {
@@ -1487,33 +1496,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 //this.layer.setVisibility(false);
             //}
         //}
-	//},
-	
-    execute: function() {
-		GIS.mask.msg = GIS.i18n.loading;
-		GIS.mask.show();
-		
-		this.getModel();
-		
-		if (this.update.isOrganisationUnit) {
-			this.loadOrganisationUnits();
-		}
-		else if (this.update.isData) {
-			this.loadData();
-		}
-		else if (this.update.isLegend) {
-			this.loadLegend();
-		}
-		else {
-			GIS.mask.hide();
-		}
 	},
     	
 	getModel: function() {
 		var level = this.cmp.level,
-			parent = this.cmp.parent.getSelectionModel().getSelection();
-			
-			console.log(parent);return;
+			parent = this.cmp.parent.getSelectionModel().getSelection() || [];
 		
 		var model = {
 			valueType: this.cmp.valueType.getValue(),
@@ -1534,9 +1521,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
 			level: level.getValue(),
 			levelName: level.getRawValue(),
-			parentId: parent.length ? parent[0].data.id : null,
-			parentName: parent.length ? parent[0].data.text : null,
-			parentLevel: parent.length ? parent[0].data.level : null,
+			parentId: parent.length ? parent[0].raw.id : null,
+			parentName: parent.length ? parent[0].raw.text : null,
+			parentLevel: parent.length ? parent[0].raw.level : null,
 			updateOrganisationUnit: false,
 			updateData: false,
 			updateLegend: false
@@ -1559,23 +1546,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		model.radiusHigh = this.config.radiusHigh || model.radiusHigh;
 		model.level = this.config.level || model.level;
 		model.levelName = this.config.levelName || model.levelName;
-		model.parentId = this.config.valueType || model.parentId;
-		model.parentName = this.config.valueType || model.parentName;
-		model.parentLevel = this.config.valueType || model.parentLevel;
-		model.updateOrganisationUnit = this.config.updateOrganisationUnit || false;
-		model.updateData = this.config.updateData || false;
-		model.updateLegend = this.config.updateLegend || false;
-		console.log(model);return;
+		model.parentId = this.config.parentId || model.parentId;
+		model.parentName = this.config.parentName || model.parentName;
+		model.parentLevel = this.config.parentLevel || model.parentLevel;
+		model.updateOrganisationUnit = this.config.updateOrganisationUnit;
+		model.updateData = this.config.updateData;
+		model.updateLegend = this.config.updateLegend;
 		
-		if (!this.validateModel(model)) {
-			return;
-		}
-		
-		this.model = model;
-		
-		this.config = {};
-		
-		return this.model;
+		return model;
 	},
 	
 	validateModel: function(model) {
@@ -1614,24 +1592,24 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				GIS.logg.push(model.classes, this.xtype + '.classes: number');
 				return false;
 			}
-			if (!model.method || !Ext.isString(model.method)) {
-				GIS.logg.push(model.method, this.xtype + '.method: string');
+			if (!model.method || !Ext.isNumber(model.method)) {
+				GIS.logg.push(model.method, this.xtype + '.method: number');
 				return false;
 			}
 			if (!model.colorLow || !Ext.isString(model.colorLow)) {
 				GIS.logg.push(model.colorLow, this.xtype + '.colorLow: string');
 				return false;
 			}
-			if (!model.radiusLow || !Ext.isString(model.radiusLow)) {
-				GIS.logg.push(model.radiusLow, this.xtype + '.radiusLow: string');
+			if (!model.radiusLow || !Ext.isNumber(model.radiusLow)) {
+				GIS.logg.push(model.radiusLow, this.xtype + '.radiusLow: number');
 				return false;
 			}
 			if (!model.colorHigh || !Ext.isString(model.colorHigh)) {
 				GIS.logg.push(model.colorHigh, this.xtype + '.colorHigh: string');
 				return false;
 			}
-			if (!model.radiusHigh || !Ext.isString(model.radiusHigh)) {
-				GIS.logg.push(model.radiusHigh, this.xtype + '.radiusHigh: string');
+			if (!model.radiusHigh || !Ext.isNumber(model.radiusHigh)) {
+				GIS.logg.push(model.radiusHigh, this.xtype + '.radiusHigh: number');
 				return false;
 			}
 		}
@@ -1666,10 +1644,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		return true;
 	},
 	
-    loadOrganisationUnits: function() {        
+    loadOrganisationUnits: function() {
         var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
-            'parentId=' + this.organisationUnitSelection.parent.id +
-            '&level=' + this.organisationUnitSelection.level.level;
+            'parentId=' + this.model.parentId +
+            '&level=' + this.model.level;
         this.setUrl(url);
     },
     
@@ -1684,7 +1662,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 		params[type === indicator.id ? indicator.param : dataElement.param] = this.model[type];
 		params[period.param] = this.model.period;
-		params[organisationUnit.param] = this.model.parent;
+		params[organisationUnit.param] = this.model.parentId;
 		params.level = this.model.level;
 		
 		Ext.Ajax.request({
@@ -1750,17 +1728,44 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
-        if (this.update.isOrganisationUnit) {
+        if (this.model.updateOrganisationUnit) {
 			GIS.util.map.zoomToVisibleExtent();
 		}
         
         this.afterLoad();		
 	},
 	
+    execute: function() {		
+		var model = this.getModel();
+		
+		if (this.validateModel(model)) {
+			this.model = model;
+			this.config = {};
+		}
+		else {
+			alert("validation failed");
+			return;
+		}
+				
+		GIS.mask.msg = GIS.i18n.loading;
+		GIS.mask.show();
+		
+		if (this.model.updateOrganisationUnit) {
+			this.loadOrganisationUnits();
+		}
+		else if (this.model.updateData) {
+			this.loadData();
+		}
+		else if (this.model.updateLegend) {
+			this.loadLegend();
+		}
+		else {
+			GIS.mask.hide();
+		}
+	},
+	
 	afterLoad: function() {
 		this.layer.setLayerOpacity();
-		
-		this.update.reset();
 		
 		GIS.cmp.region.east.doLayout();
 		
