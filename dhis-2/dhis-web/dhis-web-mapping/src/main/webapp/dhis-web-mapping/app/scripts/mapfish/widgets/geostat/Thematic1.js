@@ -334,8 +334,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             store: this.store.indicatorsByGroup,
+            scope: this,
             selectFirst: function() {
 				this.setValue(this.store.getAt(0).data.id);
+				this.scope.config.updateData = true;
 			},
             listeners: {
                 select: {
@@ -391,6 +393,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                     fn: function(cb) {
                         this.cmp.dataElement.clearValue();
                         this.store.dataElementsByGroup.param = cb.getValue();
+                        this.store.dataElementsByGroup.load({
+							scope: this,
+							callback: function() {
+								this.cmp.dataElement.selectFirst();
+							}
+						});
                     }
                 }
             }
@@ -406,6 +414,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             hidden: true,
             store: this.store.dataElementsByGroup,
+            scope: this,
+            selectFirst: function() {
+				this.setValue(this.store.getAt(0).data.id);
+				this.scope.config.updateData = true;
+			},
             listeners: {
 				select: {
 					scope: this,
@@ -456,12 +469,20 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             forceSelection: true,
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            store: this.store.periodsByType,
             scope: this,
             selectFirst: function() {
-				this.scope.model.updateData = true;
 				this.setValue(this.store.getAt(0).data.id);
+				this.scope.config.updateData = true;
 			},
-            store: this.store.periodsByType
+			listeners: {
+				select: {
+					scope: this,
+					fn: function() {
+						this.config.updateData = true;
+					}
+				}
+			}	
         });
         
         this.cmp.periodPrev = Ext.create('Ext.button.Button', {
