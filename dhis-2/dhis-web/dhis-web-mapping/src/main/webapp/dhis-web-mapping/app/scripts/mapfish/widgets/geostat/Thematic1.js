@@ -859,12 +859,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         
         var onHoverSelect = function onHoverSelect(feature) {
             if (feature.attributes.name) {
+				if (window) {
+					window.destroy();
+				}
 				window = Ext.create('Ext.window.Window', {
 					cls: 'gis-window-widget-feature',
-					height: 80,
+					height: 30,
 					preventHeader: true,
+					shadow: false,
+					resizable: false,
 					items: {
-						html: feature.attributes.name
+						html: feature.attributes.name + ' (' + feature.attributes.value + ')'
 					}
 				});
 				
@@ -884,7 +889,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         };
         
         var onHoverUnselect = function onHoverUnselect(feature) {
-			//window.destroy();
+			window.destroy();
         };
         
         var onClickSelect = function onClickSelect(feature) {
