@@ -1,8 +1,11 @@
 GIS.conf = {
 	finals: {
 		layer: {
-			layertype_base: 'base',
-			layertype_vector: 'vector'
+			type_base: 'base',
+			type_vector: 'vector'
+		},
+		feature: {
+			type_point_class: 'OpenLayers.Geometry.Point'
 		},
 		dimension: {
 			indicator: {
@@ -165,7 +168,7 @@ Ext.onReady( function() {
 	GIS.util.map.getVisibleVectorLayers = function() {
 		var a = [];
 		for (var i = 0; i < GIS.map.layers.length; i++) {
-			if (GIS.map.layers[i].layerType === GIS.conf.finals.layer.layertype_vector && GIS.map.layers[i].visibility) {
+			if (GIS.map.layers[i].layerType === GIS.conf.finals.layer.type_vector && GIS.map.layers[i].visibility) {
 				a.push(GIS.map.layers[i]);
 			}
 		}
@@ -329,7 +332,7 @@ Ext.onReady( function() {
 			numZoomLevels: 20,
 			animationEnabled: true
 		});        
-        GIS.layer.googleStreets.layer.layerType = GIS.conf.finals.layer.layertype_base;
+        GIS.layer.googleStreets.layer.layerType = GIS.conf.finals.layer.type_base;
         GIS.map.addLayer(GIS.layer.googleStreets.layer);
         
         GIS.layer.googleHybrid.layer = new OpenLayers.Layer.Google(GIS.layer.googleHybrid.name, {
@@ -337,12 +340,12 @@ Ext.onReady( function() {
 			numZoomLevels: 20,
 			animationEnabled: true
 		});        
-        GIS.layer.googleHybrid.layer.layerType = GIS.conf.finals.layer.layertype_base;
+        GIS.layer.googleHybrid.layer.layerType = GIS.conf.finals.layer.type_base;
         GIS.map.addLayer(GIS.layer.googleHybrid.layer);
     }
     
     GIS.layer.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.layer.openStreetMap.name);
-    GIS.layer.openStreetMap.layer.layerType = GIS.conf.finals.layer.layertype_base;
+    GIS.layer.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
     GIS.map.addLayer(GIS.layer.openStreetMap.layer);
     
     // Vector layers
@@ -368,7 +371,7 @@ Ext.onReady( function() {
         }),
         visibility: false,
         displayInLayerSwitcher: false,
-        layerType: GIS.conf.finals.layer.layertype_vector,
+        layerType: GIS.conf.finals.layer.type_vector,
         opacity: 1
     });
     GIS.map.addLayer(GIS.layer.boundary.layer);
@@ -393,15 +396,15 @@ Ext.onReady( function() {
             ),
             select: new OpenLayers.Style(
                 {
-					strokeColor: '#111',
-					strokeWidth: 2,
+					strokeColor: '#fff',
+					strokeWidth: 3,
 					cursor: 'pointer'
 				}
             )
         }),
         visibility: false,
         displayInLayerSwitcher: false,
-        layerType: GIS.conf.finals.layer.layertype_vector,
+        layerType: GIS.conf.finals.layer.type_vector,
         layerOpacity: 0.8,
         setLayerOpacity: function(number) {
 			if (number) {

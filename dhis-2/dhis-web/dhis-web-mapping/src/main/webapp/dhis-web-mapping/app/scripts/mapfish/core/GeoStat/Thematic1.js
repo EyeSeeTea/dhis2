@@ -141,8 +141,8 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
             return;
         }
         
-        var info = this.widget.formValues.getLegendInfo.call(this.widget);
-        var element;
+        var info = this.widget.formValues.getLegendInfo.call(this.widget),
+			element;
         this.legendDiv.update("");
         
         for (var p in info) {
@@ -161,7 +161,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
         element.style.height = "5px";
         this.legendDiv.appendChild(element);
         
-        if (this.widget.model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+        if (this.widget.tmpModel.legendType === GIS.conf.finals.widget.legendtype_automatic) {
             for (var i = 0; i < this.classification.bins.length; i++) {
                 var element = document.createElement("div");
                 element.style.backgroundColor = this.colorInterpolation[i].toHexString();
@@ -180,7 +180,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
                 this.legendDiv.appendChild(element);
             }
         }
-        else if (this.widget.model.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+        else if (this.widget.tmpModel.legendType === GIS.conf.finals.widget.legendtype_predefined) {
             for (var i = 0; i < this.classification.bins.length; i++) {
                 var element = document.createElement("div");
                 element.style.backgroundColor = this.colorInterpolation[i].toHexString();

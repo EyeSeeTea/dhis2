@@ -51,9 +51,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     
     cmp: {},
     
-    toggler: {},
+    togglers: {},
     
     features: [],
+    
+    selectHandlers: {},
 	
 	//organisationUnitSelection: {
 		//parent: {
@@ -227,7 +229,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     createUtils: function() {
 		var that = this;
 		
-		this.toggler.valueType = function(valueType) {
+		this.togglers.valueType = function(valueType) {
 			if (valueType === GIS.conf.finals.dimension.indicator.id) {
 				that.cmp.indicatorGroup.show();
 				that.cmp.indicator.show();
@@ -242,7 +244,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			}
 		};
 		
-		this.toggler.legendType = function(legendType) {
+		this.togglers.legendType = function(legendType) {
 			if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
 				that.cmp.methodPanel.show();
 				that.cmp.lowPanel.show();
@@ -283,7 +285,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function(cb) {
-						this.toggler.valueType(cb.getValue());
+						this.togglers.valueType(cb.getValue());
                     }
                 }
             }
@@ -525,7 +527,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function(cb) {
-						this.toggler.legendType(cb.getValue());
+						this.togglers.legendType(cb.getValue());
                     }
                 }
             }
@@ -858,9 +860,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     
     createSelectHandlers: function() {
         var that = this,
-			window;
+			window,
+			menu;
         
-        var onHoverSelect = function onHoverSelect(feature) {
+        var onHoverSelect = function fn(feature) {
 			if (window) {
 				window.destroy();
 			}
@@ -880,22 +883,20 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			window.setPosition(x, 32);
         };
         
-        var onHoverUnselect = function onHoverUnselect(feature) {
+        var onHoverUnselect = function fn(feature) {
 			window.destroy();
         };
         
-        var onClickSelect = function onClickSelect(feature) {
-			
+        var onClickSelect = function fn(feature) {
 						
-			function drill() {
+			var drill = function() {
 				//if (GIS.vars.locateFeatureWindow) {
 					//GIS.vars.locateFeatureWindow.destroy();
 				//}
 						 
-				that.updateValues = true;
-				that.isDrillDown = true;
+				that.config.updateOrganisationUnit = true;
 				
-				function organisationUnitLevelCallback() {
+				var organisationUnitLevelCallback = function() {
 					this.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
 					
 					this.cmp.parent.reset();
@@ -907,7 +908,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					
 					this.cmp.level.setValue(this.organisationUnitSelection.level.level);
 					this.loadGeoJson();
-				}
+				};
 				
 				if (GIS.stores.organisationUnitLevel.isLoaded) {
 					organisationUnitLevelCallback.call(that);
@@ -917,14 +918,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						organisationUnitLevelCallback.call(this);
 					}});
 				}
-			}
+			};
 			
-            if (feature.geometry.CLASS_NAME == GIS.conf.map_feature_type_point_class_name) {
-                if (that.featureOptions.menu) {
-                    that.featureOptions.menu.destroy();
-                }
+            if (feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class) {
+                //if (that.featureOptions.menu) {
+                    //that.featureOptions.menu.destroy();
+                //}
                 
-                that.featureOptions.menu = new Ext.menu.Menu({
+                //that.featureOptions.menu = new Ext.menu.Menu({
+				var menu = new Ext.menu.Menu({
                     showInfo: function() {
                         Ext.Ajax.request({
                             url: GIS.conf.path_mapping + 'getFacilityInfo' + GIS.conf.type,
@@ -1116,6 +1118,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 that.featureOptions.menu.showAt([GIS.vars.mouseMove.x, GIS.vars.mouseMove.y]);
             }
             else {
+				console.log(feature);
                 if (feature.attributes.hcwc) {
 					drill.call(this);
                 }
@@ -1125,16 +1128,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             }
         };
         
-        this.selectFeatures = new OpenLayers.Control.newSelectFeature(
-            this.layer, {
-                onHoverSelect: onHoverSelect,
-                onHoverUnselect: onHoverUnselect,
-                onClickSelect: onClickSelect
-            }
-        );
+        this.selectHandlers = new OpenLayers.Control.newSelectFeature(this.layer, {
+			onHoverSelect: onHoverSelect,
+			onHoverUnselect: onHoverUnselect,
+			onClickSelect: onClickSelect
+		});
         
-        GIS.map.addControl(this.selectFeatures);
-        this.selectFeatures.activate();
+        GIS.map.addControl(this.selectHandlers);
+        this.selectHandlers.activate();
     },
     
     //prepareMapViewValueType: function() {
@@ -1367,9 +1368,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     formValues: {
         getLegendInfo: function() {
             return {
-                name: this.model.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+                name: this.tmpModel.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
                 time: this.cmp.period.getRawValue(),
-                map: this.model.levelName + ' / ' + this.model.parentName
+                map: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
             };
         }
         //,
