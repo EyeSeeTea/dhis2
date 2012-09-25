@@ -206,14 +206,14 @@ Ext.onReady( function() {
         for (var i = 0; i < doc.length; i++) {
             geojson.features.push({
                 geometry: {
-                    type: doc[i].t == 1 ? 'MultiPolygon' : 'Point',
-                    coordinates: doc[i].c
+                    type: doc[i].ty == 1 ? 'MultiPolygon' : 'Point',
+                    coordinates: doc[i].co
                 },
                 properties: {
-                    id: doc[i].i,
-                    name: doc[i].n,
-                    value: doc[i].v,
-                    hcwc: doc[i].h
+                    id: doc[i].id,
+                    name: doc[i].na,
+                    value: doc[i].va || null,
+                    hcwc: doc[i].hc
                 }
             });
         }

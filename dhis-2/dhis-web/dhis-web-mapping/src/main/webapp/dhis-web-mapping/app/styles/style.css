@@ -323,14 +323,16 @@ html * {
 }
 .gis-window-widget-feature .x-window-body-default .x-panel-body-default {
 	border: 0 none;
-	background: #fff;
+	background: #556;
 	opacity: 0.92;
 	filter: alpha(opacity=92);
 	-ms-filter: "alpha(opacity=92)";
-	padding: 3px 8px 3px 7px;
+	padding: 5px 8px 5px 8px;
 	border-bottom-left-radius: 2px;
 	border-bottom-right-radius: 2px;
 	-webkit-text-stroke-width: 0.2px;
-	-webkit-text-stroke-color: #555;
+	-webkit-text-stroke-color: #fff;
+	color: #fff;
+	font-weight: bold;
 	letter-spacing: 1px;
 }

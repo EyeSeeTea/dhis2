@@ -182,7 +182,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             doc = GIS.util.geojson.decode(doc);
         }
         else {
-			alert("no coordinates");
+			alert("no coordinates"); //todo
 		}
         
         that.layer.removeFeatures(that.layer.features);
@@ -190,6 +190,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		that.layer.features = GIS.util.vector.getTransformedFeatureArray(that.layer.features);
         that.features = that.layer.features.slice(0);
         that.requestSuccess(request);
+        
         that.loadData();
     },		
 
@@ -664,7 +665,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: 50,
             allowDecimals: false,
             minValue: 1,
-            value: 3,
+            value: 5,
             listeners: {
 				change: {
 					scope: this,
@@ -858,34 +859,23 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			window;
         
         var onHoverSelect = function onHoverSelect(feature) {
-            if (feature.attributes.name) {
-				if (window) {
-					window.destroy();
+			if (window) {
+				window.destroy();
+			}
+			window = Ext.create('Ext.window.Window', {
+				cls: 'gis-window-widget-feature',
+				preventHeader: true,
+				shadow: false,
+				resizable: false,
+				items: {
+					html: feature.attributes.label
 				}
-				window = Ext.create('Ext.window.Window', {
-					cls: 'gis-window-widget-feature',
-					height: 30,
-					preventHeader: true,
-					shadow: false,
-					resizable: false,
-					items: {
-						html: feature.attributes.name + ' (' + feature.attributes.value + ')'
-					}
-				});
-				
-				window.show();
-				
-				var x = window.getPosition()[0];
-				window.setPosition(x, 32);
-				//window.showAt(null, 20);
-				
-                //document.getElementById('featuredatatext').innerHTML =
-                    //'<div style="' + GIS.conf.feature_data_style_name + '">' + feature.attributes.fixedName + '</div>' +
-                    //'<div style="' + GIS.conf.feature_data_style_value + '">' + feature.attributes.value + '</div>';
-            }
-            else {
-                //document.getElementById('featuredatatext').innerHTML = '';
-            }
+			});
+			
+			window.show();
+			
+			var x = window.getPosition()[0];
+			window.setPosition(x, 32);
         };
         
         var onHoverUnselect = function onHoverUnselect(feature) {
@@ -893,11 +883,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         };
         
         var onClickSelect = function onClickSelect(feature) {
+			
 						
 			function drill() {
-				if (GIS.vars.locateFeatureWindow) {
-					GIS.vars.locateFeatureWindow.destroy();
-				}
+				//if (GIS.vars.locateFeatureWindow) {
+					//GIS.vars.locateFeatureWindow.destroy();
+				//}
 						 
 				that.updateValues = true;
 				that.isDrillDown = true;
@@ -1701,7 +1692,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			success: function(r) {
 				var values = Ext.decode(r.responseText),
 					featureMap = {},
-					valueMap = {};
+					valueMap = {},
+					features = [];
 					
 				if (values.length === 0) {
 					alert("no data"); //todo Ext.message.msg(false, GIS.i18n.current_selection_no_data);
@@ -1709,33 +1701,27 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					return;
 				}
 				
-				this.layer.features = this.features.slice(0);
-				
-				for (var i = 0; i < this.layer.features.length; i++) { // feature map (orgunitid : array index)
-					featureMap[this.layer.features[i].attributes.id] = i;
+				for (var i = 0; i < this.layer.features.length; i++) {
+					var id = this.layer.features[i].attributes.id;
+					featureMap[id] = true;
+				}
+				for (var i = 0; i < values.length; i++) {
+					var id = values[i].organisationUnitId,
+						value = values[i].value;						
+					valueMap[id] = value;
 				}
 				
-				var allZeros = true;
-				for (var i = 0; i < values.length; i++) { // value map (orgunitid : value)
-					if (featureMap.hasOwnProperty(values[i].organisationUnitId)) {
-						valueMap[values[i].organisationUnitId] = values[i][GIS.conf.finals.widget.value];
-						allZeros = false;
-					}
-				}
-				
-				if (allZeros) {
-					alert("zeros only");
-					GIS.mask.hide();
-					return;
-				}
-				
-				for (var f in featureMap) { // set feature value and label string
-					if (featureMap.hasOwnProperty(f)) {
-						var feature = this.layer.features[featureMap[f]];
-						feature.attributes[GIS.conf.finals.widget.value] = valueMap[f];
+				for (var i = 0; i < this.layer.features.length; i++) {
+					var feature = this.layer.features[i],
+						id = feature.attributes.id;						
+					if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
+						feature.attributes.value = valueMap[id];
 						feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
+						features.push(feature);
 					}
 				}
+				
+				this.layer.features = features;
 				
 				this.loadLegend();
 			}
