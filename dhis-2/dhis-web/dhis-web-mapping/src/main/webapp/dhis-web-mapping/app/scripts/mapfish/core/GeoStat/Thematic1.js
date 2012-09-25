@@ -61,12 +61,16 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     },
     
     createColorInterpolation: function() {
-        var numColors = this.classification.bins.length;
-		var mapLegendType = this.widget.model.legendType;
+        var numColors = this.classification.bins.length,
+			legendType = this.widget.tmpModel.legendType;
         this.widget.imageLegend = [];
         
-        this.colorInterpolation = mapLegendType == GIS.conf.finals.widget.legendtype_automatic ?
-            mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors) : this.widget.colorInterpolation;
+        if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
+		}
+		else if (legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			this.colorInterpolation = this.widget.colorInterpolation;
+		}
             
         for (var i = 0; i < this.classification.bins.length; i++) {
             this.widget.imageLegend.push({
@@ -83,7 +87,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
         }
         
         var distOptions = {
-            'labelGenerator': this.options.labelGenerator
+            labelGenerator: this.options.labelGenerator
         };
         var dist = new mapfish.GeoStat.Distribution(values, distOptions);
 

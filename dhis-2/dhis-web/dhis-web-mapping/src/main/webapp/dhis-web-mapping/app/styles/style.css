@@ -52,13 +52,13 @@ html * {
     border: 0 none;
 }
 .olControlButtonItemActive {
-    background: #555566;
+    background: #556;
     color: #fff;
     width: 24px;
     height: 24px;
-    opacity: 0.8;
-    filter: alpha(opacity=80);
-	-ms-filter: "alpha(opacity=80)";
+    opacity: 0.85;
+    filter: alpha(opacity=85);
+	-ms-filter: "alpha(opacity=85)";
     cursor: pointer;
     cursor: hand;
     text-align: center;

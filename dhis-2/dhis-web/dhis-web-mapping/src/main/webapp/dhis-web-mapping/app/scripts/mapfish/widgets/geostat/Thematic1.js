@@ -42,10 +42,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     labelGenerator: null,
     
     // Properties
+        
+    config: {},
+    
+    tmpModel: {},
     
     model: {},
-    
-    config: {},
     
     cmp: {},
     
@@ -1362,104 +1364,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		});
 	},
     
-    //formValidation: {
-        //validateForm: function() {
-            //if (this.cmp.valueType.getValue() == GIS.conf.map_value_type_indicator) {
-                //if (!this.cmp.indicator.getValue()) {
-                    //this.window.cmp.apply.disable();
-                    //return false;
-                //}
-            //}
-            //else if (this.cmp.valueType.getValue() == GIS.conf.map_value_type_dataelement) {
-                //if (!this.cmp.dataElement.getValue()) {
-                    //this.window.cmp.apply.disable();
-                    //return false;
-                //}
-            //}
-            
-            //if (!this.cmp.period.getValue()) {
-                //this.window.cmp.apply.disable();
-                //return false;
-            //}
-
-            //if (!this.cmp.parent.selectedNode || !this.cmp.level.getValue()) {
-                //this.window.cmp.apply.disable();
-                //return false;
-            //}
-            
-            //if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
-                //this.window.cmp.apply.disable();
-                //return false;
-            //}
-
-            //if (this.cmp.legendType.getValue() == GIS.conf.map_legendset_type_automatic) {
-                //if (this.cmp.method.getValue() == GIS.conf.classify_with_bounds) {
-                    //if (!this.cmp.bounds.getValue()) {
-                        //this.window.cmp.apply.disable();
-                        //return false;
-                    //}
-                //}
-            //}
-            //else if (this.cmp.legendType.getValue() == GIS.conf.map_legendset_type_predefined) {
-                //if (!this.cmp.legendSet.getValue()) {
-                    //this.window.cmp.apply.disable();
-                    //return false;
-                //}
-            //}
-            
-            //if (!this.cmp.radiusLow.getValue() || !this.cmp.radiusHigh.getValue()) {
-                //this.window.cmp.apply.disable();
-                //return false;
-            //}
-            
-            //if (this.requireUpdate) {
-                //if (this.window.isUpdate) {
-                    //this.window.cmp.apply.disable();
-                    //this.requireUpdate = false;
-                    //this.window.isUpdate = false;
-                //}
-                //else {
-                    //this.window.cmp.apply.enable();
-                //}
-            //}
-            
-            //return true;
-        //}
-    //},
-    
     formValues: {
-		//getAllValues: function() {
-			//return {
-                //mapValueType: this.cmp.valueType.getValue(),
-                //indicatorGroupId: this.valueType.isIndicator() ? this.cmp.indicatorGroup.getValue() : null,
-                //indicatorId: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : null,
-				//indicatorName: this.valueType.isIndicator() ? this.cmp.indicator.getRawValue() : null,
-                //dataElementGroupId: this.valueType.isDataElement() ? this.cmp.dataElementGroup.getValue() : null,
-                //dataElementId: this.valueType.isDataElement() ? this.cmp.dataElement.getValue() : null,
-				//dataElementName: this.valueType.isDataElement() ? this.cmp.dataElement.getRawValue() : null,
-                //periodTypeId: this.cmp.periodType.getValue(),
-                //periodId: this.cmp.period.getValue(),
-                //periodName: this.cmp.period.getRawValue(),
-                //parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
-                //parentOrganisationUnitLevel: this.organisationUnitSelection.parent.level,
-                //parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
-                //organisationUnitLevel: this.organisationUnitSelection.level.level,
-                //organisationUnitLevelName: this.organisationUnitSelection.level.name,
-                //mapLegendType: this.cmp.legendType.getValue(),
-                //method: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.method.getValue() : null,
-                //classes: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.classes.getValue() : null,
-                //bounds: this.legend.value == GIS.conf.map_legendset_type_automatic && this.legend.method == GIS.conf.classify_with_bounds ? this.cmp.bounds.getValue() : null,
-                //colorLow: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.startColor.getValue() : null,
-                //colorHigh: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.endColor.getValue() : null,
-                //mapLegendSetId: this.legend.value == GIS.conf.map_legendset_type_predefined ? this.cmp.legendSet.getValue() : null,
-				//radiusLow: this.cmp.radiusLow.getValue(),
-				//radiusHigh: this.cmp.radiusHigh.getValue(),
-                //longitude: GIS.vars.map.getCenter().lon,
-                //latitude: GIS.vars.map.getCenter().lat,
-                //zoom: parseFloat(GIS.vars.map.getZoom())
-			//};
-		//},
-        
         getLegendInfo: function() {
             return {
                 name: this.model.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
@@ -1515,6 +1420,31 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 //this.layer.setVisibility(false);
             //}
         //}
+	},
+	
+    execute: function() {		
+		this.tmpModel = this.getModel();
+		
+		if (!this.validateModel(this.tmpModel)) {
+			alert("validation failed");
+			return;
+		}
+				
+		GIS.mask.msg = GIS.i18n.loading;
+		GIS.mask.show();
+		
+		if (this.tmpModel.updateOrganisationUnit) {
+			this.loadOrganisationUnits();
+		}
+		else if (this.tmpModel.updateData) {
+			this.loadData();
+		}
+		else if (this.tmpModel.updateLegend) {
+			this.loadLegend();
+		}
+		else {
+			GIS.mask.hide();
+		}
 	},
     	
 	getModel: function() {
@@ -1665,13 +1595,13 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	
     loadOrganisationUnits: function() {
         var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
-            'parentId=' + this.model.parentId +
-            '&level=' + this.model.level;
+            'parentId=' + this.tmpModel.parentId +
+            '&level=' + this.tmpModel.level;
         this.setUrl(url);
     },
     
     loadData: function() {
-		var type = this.model.valueType,
+		var type = this.tmpModel.valueType,
 			dataUrl = '../api/mapValues/' + GIS.conf.finals.dimension[type].param + '.json',
 			indicator = GIS.conf.finals.dimension.indicator,
 			dataElement = GIS.conf.finals.dimension.dataElement,
@@ -1679,10 +1609,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			organisationUnit = GIS.conf.finals.dimension.organisationUnit,
 			params = {};
 		
-		params[type === indicator.id ? indicator.param : dataElement.param] = this.model[type];
-		params[period.param] = this.model.period;
-		params[organisationUnit.param] = this.model.parentId;
-		params.level = this.model.level;
+		params[type === indicator.id ? indicator.param : dataElement.param] = this.tmpModel[type];
+		params[period.param] = this.tmpModel.period;
+		params[organisationUnit.param] = this.tmpModel.parentId;
+		params.level = this.tmpModel.level;
 		
 		Ext.Ajax.request({
 			url: GIS.conf.url.path_gis + dataUrl,
@@ -1732,53 +1662,27 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	loadLegend: function() {         
 		var options = {
             indicator: GIS.conf.finals.widget.value,
-            method: this.model.method,
-            numClasses: this.model.classes,
-            colors: this.model.colors,
-            minSize: this.model.radiusLow,
-            maxSize: this.model.radiusHigh
+            method: this.tmpModel.method,
+            numClasses: this.tmpModel.classes,
+            colors: this.tmpModel.colors,
+            minSize: this.tmpModel.radiusLow,
+            maxSize: this.tmpModel.radiusHigh
         };
-        
+
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
-        
-        if (this.model.updateOrganisationUnit) {
-			GIS.util.map.zoomToVisibleExtent();
-		}
         
         this.afterLoad();		
 	},
 	
-    execute: function() {		
-		var model = this.getModel();
-		
-		if (this.validateModel(model)) {
-			this.model = model;
-			this.config = {};
-		}
-		else {
-			alert("validation failed");
-			return;
-		}
-				
-		GIS.mask.msg = GIS.i18n.loading;
-		GIS.mask.show();
-		
-		if (this.model.updateOrganisationUnit) {
-			this.loadOrganisationUnits();
-		}
-		else if (this.model.updateData) {
-			this.loadData();
-		}
-		else if (this.model.updateLegend) {
-			this.loadLegend();
-		}
-		else {
-			GIS.mask.hide();
-		}
-	},
-	
 	afterLoad: function() {
+		this.model = this.tmpModel;
+		this.config = {};
+        
+        if (this.model.updateOrganisationUnit) {
+			GIS.util.map.zoomToVisibleExtent();
+		}
+		
 		this.layer.setLayerOpacity();
 		
 		GIS.cmp.region.east.doLayout();
