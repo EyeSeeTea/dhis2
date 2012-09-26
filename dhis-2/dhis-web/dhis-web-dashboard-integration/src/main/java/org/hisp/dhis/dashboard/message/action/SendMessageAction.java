@@ -27,17 +27,20 @@ package org.hisp.dhis.dashboard.message.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.opensymphony.xwork2.Action;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupService;
+import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.util.ContextUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.Action;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Lars Helge Overland
@@ -62,13 +65,26 @@ public class SendMessageAction
     {
         this.selectionTreeManager = selectionTreeManager;
     }
-    
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserGroupService userGroupService;
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
 
+    private String additionalUsers;
+
+    public void setAdditionalUsers( String additionalUsers )
+    {
+        this.additionalUsers = additionalUsers;
+    }
+
     private String subject;
-    
+
     public void setSubject( String subject )
     {
         this.subject = subject;
@@ -80,25 +96,49 @@ public class SendMessageAction
     {
         this.text = text;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        String metaData = MessageService.META_USER_AGENT + 
+        String metaData = MessageService.META_USER_AGENT +
             ServletActionContext.getRequest().getHeader( ContextUtils.HEADER_USER_AGENT );
 
         Set<User> users = new HashSet<User>();
-        
+
         for ( OrganisationUnit unit : selectionTreeManager.getReloadedSelectedOrganisationUnits() )
         {
             users.addAll( unit.getUsers() );
         }
-        
+
+        String[] recipients = additionalUsers.split( "," );
+
+        for ( String recipient : recipients )
+        {
+            if ( recipient.startsWith( "u:" ) )
+            {
+                User user = userService.getUser( recipient.substring( 2 ) );
+
+                if(user != null)
+                {
+                    users.add( user );
+                }
+            }
+            else if ( recipient.startsWith( "ug:" ) )
+            {
+                UserGroup userGroup = userGroupService.getUserGroup( recipient.substring( 3 ) );
+
+                if(userGroup != null)
+                {
+                    users.addAll( userGroup.getMembers() );
+                }
+            }
+        }
+
         messageService.sendMessage( subject, text, metaData, users );
-        
+
         return SUCCESS;
     }
 }

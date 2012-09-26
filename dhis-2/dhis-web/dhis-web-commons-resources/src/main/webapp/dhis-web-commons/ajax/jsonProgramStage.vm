@@ -7,9 +7,11 @@
 	"minDaysFromStart": "${programStage.minDaysFromStart}",
 	"dataElementCount": "${programStageDataElements.size()}",
 	"standardInterval": "$!programStage.standardInterval",
-	"reportDateDescription": "$!programStage.reportDateDescription",
+	"reportDateDescription": "$!encoder.jsonEncode( ${programStage.reportDateDescription} )",
 	"daysAllowedSendMessage": "$!programStage.daysAllowedSendMessage",
-	"templateMessage": "$!encoder.jsonEncode($!programStage.templateMessage)",
+	"templateMessage": "$!encoder.jsonEncode( ${programStage.templateMessage} )",
+	"irregular": "$!programStage.irregular",
+	"autoGenerateEvent": "$!programStage.autoGenerateEvent",
 	
 	#set( $size = ${programStageDataElements.size()} )
 	"dataElement": [

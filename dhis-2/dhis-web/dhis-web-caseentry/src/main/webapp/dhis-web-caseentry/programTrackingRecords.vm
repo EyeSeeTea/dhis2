@@ -4,34 +4,45 @@
 		<td class='text-column' >$i18n.getString( "search_result_matching_the_search_criteria" ):</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
-		<td>
+		<td id='searchInforLbl'>
 		#if($!listAll)
 			$i18n.getString( "list_all_patients" )
 		#else
-			$i18n.getString( "advanced_search_patients" )
+			$i18n.getString( "search_patients" )
 		#end
 		</td>
 	</tr>	
 	
 	<tr>
-		<td class='text-column' >$i18n.getString( "total_result" ):</td>
+		<td class='text-column'>$i18n.getString( "total_result" ):</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
-		<td>$!total</td>
+		<td id='totalTd'>$!total</td>
 	</tr>
 </table>
 
 #if( $patients && $patients.size()>0 )
 	<p>#parse( "/dhis-web-caseentry/colorHelp.vm" )</p>
 	
-	<table class="listTable mainPageTable" id="patientList">
+	<table id="patientList">
 		#set( $mark = false )                 
 		#foreach( $patient in $patients )
 			#set( $programInstance = '')
 			#set( $programInstance = $programInstanceMap.get( $patient ) )
-				<tr #alternate( $mark )>
+				<tr #alternate( $mark ) id='event_$programInstance.id'>
 					<td>
-						<input type='button' class='patient-object' value='$patient.getFullName()' onclick='javascript:showPatientProgramTracking( "$programInstance.id" );' title='$i18n.getString( "patient_dashboard" )'>
+						#set( $value="")
+						#foreach( $identifierType in $programInstance.program.patientIdentifierTypes )
+							#foreach( $pIdentifier in $patient.identifiers )
+								#if($identifierType.personDisplayName=="true" && $identifierType.id==$pIdentifier.identifierType.id)
+									#set($value=$value + $pIdentifier.identifier + "&#13;&#10;" )
+								#end
+							#end
+						#end
+						#if($value=="")
+							#set($value=$patient.getFullName())
+						#end
+						<input type='button' class='patient-object' value='$value' onclick='javascript:showPatientDashboardForm( "$programInstance.patient.id" );' title='$i18n.getString( "patient_dashboard" )'>
 					</td>
 					<td class='bold' style='cursor:pointer;font-size:25px' onclick="eventFlowToggle($programInstance.id)">
 						<a>&raquo;</a>
@@ -39,52 +50,53 @@
 					#if($!programStageInstanceMap.get($programInstance))
 						#set($programStageInstances = $programStageInstanceMap.get($programInstance) )
 					<td>
-						<table class="stage-container" id='tb_$programInstance.id'>	
+						<table id='tb_$programInstance.id' class="stage-container">	
 							<tr>
 								<td>
 									<div class="arrow-left" onclick="moveLeft('flow_$programInstance.id')">&nbsp;</div>
 								</td>
-								<td class='stage-flow'>
-									<div id='flow_$programInstance.id' class='stage-flow'><table class="stage-flow">
+								<td>
+									<div id='flow_$!programInstance.id' class="stage-flow">
+										<table class="table-flow">
 										<tr>
 										#set( $flag = "false" )
 										#foreach( $programStageInstance in $programStageInstances )
-											<td id="arrow_$programStageInstance.id" width="5px" style='font-size:25px;'>&rarr;</td>
+											<td id="arrow_$programStageInstance.id" style='font-size:25px;'>&rarr;</td>
 											<td id="td_$programStageInstance.id">
-												<table class='stage-object'>
-													<tr>
-														<td>
-															#set($title="")
-															#set($index = 0)
-															#foreach( $comment in $programStageInstance.comments)
-																#if( $index < 5)
-																	#set( $title= $title + "$format.formatDate( $comment.createdDate ) - $comment.creator - $comment.commentText &#13;&#10;" )
-																	#set( $index = $index + 1 )
-																#end
-															#end
-															#foreach( $sms in $programStageInstance.outboundSms)
-																#if( $index < 5)
-																	#set( $title= $title + "$format.formatDate( $sms.date ) - $sms.message &#13;&#10;")
-																	#set( $index = $index + 1)
-																#end
-															#end
-																	
-															<input type='button' id='box_$programStageInstance.id' name='programStageBtn' 
-																programStageInstanceId='$programStageInstance.id' 
-																programStageName='$programStageInstance.programStage.name' 
-																programStageId='$programStageInstance.programStage.id' 
-																status="$statusMap.get( $programStageInstance.id )" 
-																class='stage-object' 
-																value='$programStageInstance.programStage.name&#13;&#10;$format.formatDate( $programStageInstance.dueDate )' 
-																title="$title" onclick='javascript:getOutboundSmsList( $programStageInstance.id, false );'>
-														</td>
-														<script>
-															var status = $statusMap.get( $programStageInstance.id ); 
-															var dueDate = "$format.formatDate($programStageInstance.dueDate)";
-															setEventColorStatus( 'box_' + $programStageInstance.id ,status, dueDate );
-														</script>
-													</tr>
-												</table>
+												#set($title="")
+												#set($index = 0)
+												#foreach( $comment in $programStageInstance.patientComments)
+													#if( $index < 5)
+														#set( $title= $title + "$format.formatDate( $comment.createdDate ) - $comment.creator - $comment.commentText &#13;&#10;" )
+														#set( $index = $index + 1 )
+													#end
+												#end
+												#foreach( $sms in $programStageInstance.outboundSms)
+													#if( $index < 5)
+														#set( $title= $title + "$format.formatDate( $sms.date ) - $sms.message &#13;&#10;")
+														#set( $index = $index + 1)
+													#end
+												#end
+												
+												#set($valueDate=$format.formatDate( $programStageInstance.dueDate ))
+												#if($!programStageInstance.executionDate)
+													#set($valueDate=$format.formatDate( $programStageInstance.executionDate ))
+												#end												
+												<input type='button' id='ps_$programStageInstance.id' name='programStageBtn' 
+													programStageInstanceId='$programStageInstance.id' 
+													programStageName='$programStageInstance.programStage.name' 
+													programStageId='$programStageInstance.programStage.id' 
+													programInstanceId='$programInstance.id'
+													dueDate='$format.formatDate( $programStageInstance.dueDate )'
+													status='$statusMap.get( $programStageInstance.id )'
+													class='stage-object'
+													value='$programStageInstance.programStage.name&#13;&#10;$valueDate' 
+													title="$title" onclick='javascript:programTrackingList( $programStageInstance.id, false );'>
+												<script>
+													var status = $statusMap.get( $programStageInstance.id ); 
+													var dueDate = "$format.formatDate($programStageInstance.dueDate)";
+													setEventColorStatus( $programStageInstance.id ,status, dueDate );
+												</script>
 											</td>
 										#end
 										</tr>
@@ -115,19 +127,8 @@
 #end
 
 <script>
-	#if( $programStageInstanceIds && $programStageInstanceIds.size() > 0 )
-		jQuery("#patientList .stage-object").each( function(){
-			var programStageInstance = this.id.split('_')[1];
-			hideById('arrow_' + programStageInstance );
-			hideById('td_' + programStageInstance );
-		});
-		
-		jQuery(".arrow-left").css("display", "none");
-		jQuery(".arrow-right").css("display", "none");
-		#foreach( $id in $programStageInstanceIds )
-			showById('arrow_$id');
-			showById('td_$id');
-			jQuery("#box_$id").addClass("stage-object-selected searched");
-		#end
-	#end
+	reloadRecordList();
+	$(window).bind('resize', function(e){ 
+		resize();
+	});
 </script>

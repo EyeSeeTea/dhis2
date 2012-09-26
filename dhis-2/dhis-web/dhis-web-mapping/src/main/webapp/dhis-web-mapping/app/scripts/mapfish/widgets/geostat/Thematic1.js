@@ -861,9 +861,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     createSelectHandlers: function() {
         var that = this,
 			window,
-			menu;
+			menu,
+			onHoverSelect,
+			onHoverUnselect,
+			onClickSelect;
         
-        var onHoverSelect = function fn(feature) {
+        onHoverSelect = function fn(feature) {
 			if (window) {
 				window.destroy();
 			}
@@ -883,249 +886,269 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			window.setPosition(x, 32);
         };
         
-        var onHoverUnselect = function fn(feature) {
+        onHoverUnselect = function fn(feature) {
 			window.destroy();
         };
         
-        var onClickSelect = function fn(feature) {
+        onClickSelect = function fn(feature) {
+			var showInfo,
+				showRelocate,
+				drill,
+				menu;
+				
+			showInfo = function() {
+				Ext.Ajax.request({
+					url: GIS.conf.path_mapping + 'getFacilityInfo' + GIS.conf.type,
+					params: {id: feature.attributes.id},
+					success: function(r) {
+						var ou = Ext.util.JSON.decode(r.responseText);
 						
-			var drill = function() {
+						if (that.featureOptions.info) {
+							that.featureOptions.info.destroy();
+						}
+						
+						that.featureOptions.info = new Ext.Window({
+							title: '<span class="window-information-title">Facility information sheet</span>',
+							layout: 'table',
+							width: GIS.conf.window_width + 178,
+							height: GIS.util.getMultiSelectHeight() + 100,
+							bodyStyle: 'background-color:#fff',
+							defaults: {
+								bodyStyle: 'vertical-align:top',
+								labelSeparator: GIS.conf.labelseparator,
+								emptyText: GIS.conf.emptytext
+							},
+							layoutConfig: {
+								columns: 2
+							},
+							items: [
+								{
+									xtype: 'panel',
+									layout: 'anchor',
+									bodyStyle: 'padding:8px 4px 8px 8px',
+									width: 160,
+									items: [
+										{html: '<div class="window-info">' + GIS.i18n.name + '<p style="font-weight:normal">' + feature.attributes.name + '</p></div>'},
+										{html: '<div class="window-info">' + GIS.i18n.type + '<p style="font-weight:normal">' + ou.ty + '</p></div>'},
+										{html: '<div class="window-info">' + GIS.i18n.code + '<p style="font-weight:normal">' + ou.co + '</p></div>'},
+										{html: '<div class="window-info">' + GIS.i18n.address + '<p style="font-weight:normal">' + ou.ad + '</p></div>'},
+										{html: '<div class="window-info">' + GIS.i18n.contact_person + '<p style="font-weight:normal">' + ou.cp + '</p></div>'},
+										{html: '<div class="window-info">' + GIS.i18n.email + '<p style="font-weight:normal">' + ou.em + '</p></div>'},
+										{html: '<div class="window-info">' + GIS.i18n.phone_number + '<p style="font-weight:normal">' + ou.pn + '</p></div>'}
+									]
+								},
+								{
+									xtype: 'form',
+									bodyStyle: 'padding:8px 8px 8px 4px',
+									width: GIS.conf.window_width + 20,
+									labelWidth: GIS.conf.label_width,
+									items: [
+										{html: '<div class="window-info">' + GIS.i18n.infrastructural_data + '</div>'},
+										{
+											xtype: 'combo',
+											name: 'period',
+											fieldLabel: GIS.i18n.period,
+											typeAhead: true,
+											editable: false,
+											valueField: 'id',
+											displayField: 'name',
+											mode: 'remote',
+											forceSelection: true,
+											triggerAction: 'all',
+											selectOnFocus: true,
+											width: GIS.conf.combo_width,
+											store: GIS.stores.infrastructuralPeriodsByType,
+											lockPosition: false,
+											listeners: {
+												'select': function(cb) {
+													that.infrastructuralPeriod = cb.getValue();
+													that.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
+													that.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+													that.stores.infrastructuralDataElementMapValue.load();
+												}
+											}
+										},
+										{html: '<div style="padding:4px 0 0 0"></div>'},
+										{
+											xtype: 'grid',
+											height: GIS.util.getMultiSelectHeight(),
+											width: 242,
+											cm: new Ext.grid.ColumnModel({
+												columns: [
+													{id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
+													{id: 'value', header: 'Value', dataIndex: 'value', sortable: true, width: 50}
+												]
+											}),
+											disableSelection: true,
+											viewConfig: {forceFit: true},
+											store: that.stores.infrastructuralDataElementMapValue
+										}
+									]
+								}
+							]
+						});
+	
+						if (that.infrastructuralPeriod) {
+							that.featureOptions.info.find('name', 'period')[0].setValue(that.infrastructuralPeriod);
+							that.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', that.infrastructuralPeriod);
+							that.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+							that.stores.infrastructuralDataElementMapValue.load();
+						}
+						that.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (that.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
+						that.featureOptions.info.show();
+						that.featureOptions.menu.destroy();
+					}
+				});
+			};
+			
+			showRelocate = function() {
+				if (that.featureOptions.coordinate) {
+					that.featureOptions.coordinate.destroy();
+				}
+				
+				that.featureOptions.coordinate = new Ext.Window({
+					title: '<span class="window-relocate-title">' + feature.attributes.name + '</span>',
+					bodyStyle: 'padding:8px; background-color:#fff',
+					layout: 'fit',
+					width: GIS.conf.window_width,
+					items: [
+						{
+							xtype: 'panel',
+							items: [
+								{html: GIS.i18n.select_new_location_on_map}
+							]
+						}
+					],
+					bbar: [
+						'->',
+						{
+							xtype: 'button',
+							iconCls: 'icon-cancel',
+							hideLabel: true,
+							text: GIS.i18n.cancel,
+							handler: function() {
+								GIS.vars.relocate.active = false;
+								that.featureOptions.coordinate.destroy();
+								document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
+							}
+						}
+					],
+					listeners: {
+						'close': function() {
+							GIS.vars.relocate.active = false;
+							document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
+						}
+					}
+				});
+				that.featureOptions.coordinate.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.coordinate.width + 15), Ext.getCmp('center').y + 41);
+				that.featureOptions.coordinate.show();                        
+			};
+						
+			drill = function(direction) {
 				//if (GIS.vars.locateFeatureWindow) {
 					//GIS.vars.locateFeatureWindow.destroy();
 				//}
-						 
-				that.config.updateOrganisationUnit = true;
 				
-				var organisationUnitLevelCallback = function() {
-					this.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
+				var callback = function() {
+					var store = GIS.store.organisationUnitLevels;
 					
-					this.cmp.parent.reset();
-					this.cmp.parent.selectedNode = {attributes: {
-						id: this.organisationUnitSelection.parent.id,
-						text: this.organisationUnitSelection.parent.name,
-						level: this.organisationUnitSelection.parent.level
-					}};
+					if (direction === 'up') {
+						var rootNode = GIS.init.rootNodes[0];
+						
+						that.config.level = that.model.level - 1;
+						that.config.levelName = store.getAt(store.find('level', that.config.level)).data.name;
+						that.config.parentId = rootNode.id;
+						that.config.parentName = rootNode.text;
+						that.config.parentLevel = rootNode.level;
+					}
+					else if (direction === 'down') {
+						that.config.level = that.model.level + 1;
+						that.config.levelName = store.getAt(store.find('level', that.config.level)).data.name;
+						that.config.parentId = feature.attributes.id;
+						that.config.parentName = feature.attributes.name;
+						that.config.parentLevel = that.model.level;
+					}
 					
-					this.cmp.level.setValue(this.organisationUnitSelection.level.level);
-					this.loadGeoJson();
+					that.config.updateOrganisationUnit = true;
+					
+					//this.cmp.parent.reset();
+					//this.cmp.parent.selectedNode = {attributes: {
+						//id: this.organisationUnitSelection.parent.id,
+						//text: this.organisationUnitSelection.parent.name,
+						//level: this.organisationUnitSelection.parent.level
+					//}};					
+					//this.cmp.level.setValue(this.organisationUnitSelection.level.level);
+					
+					that.execute();
 				};
 				
-				if (GIS.stores.organisationUnitLevel.isLoaded) {
-					organisationUnitLevelCallback.call(that);
+				if (GIS.store.organisationUnitLevels.isLoaded) {
+					callback();
 				}
 				else {
-					GIS.stores.organisationUnitLevel.load({scope: that, callback: function() {
-						organisationUnitLevelCallback.call(this);
+					GIS.store.organisationUnitLevels.load({callback: function() {
+						callback();
 					}});
 				}
 			};
 			
-            if (feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class) {
-                //if (that.featureOptions.menu) {
-                    //that.featureOptions.menu.destroy();
-                //}
-                
-                //that.featureOptions.menu = new Ext.menu.Menu({
-				var menu = new Ext.menu.Menu({
-                    showInfo: function() {
-                        Ext.Ajax.request({
-                            url: GIS.conf.path_mapping + 'getFacilityInfo' + GIS.conf.type,
-                            params: {id: feature.attributes.id},
-                            success: function(r) {
-                                var ou = Ext.util.JSON.decode(r.responseText);
-                                
-                                if (that.featureOptions.info) {
-                                    that.featureOptions.info.destroy();
-                                }
-                                
-                                that.featureOptions.info = new Ext.Window({
-                                    title: '<span class="window-information-title">Facility information sheet</span>',
-                                    layout: 'table',
-                                    width: GIS.conf.window_width + 178,
-                                    height: GIS.util.getMultiSelectHeight() + 100,
-                                    bodyStyle: 'background-color:#fff',
-                                    defaults: {
-                                        bodyStyle: 'vertical-align:top',
-                                        labelSeparator: GIS.conf.labelseparator,
-                                        emptyText: GIS.conf.emptytext
-                                    },
-                                    layoutConfig: {
-                                        columns: 2
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'panel',
-                                            layout: 'anchor',
-                                            bodyStyle: 'padding:8px 4px 8px 8px',
-                                            width: 160,
-                                            items: [
-                                                {html: '<div class="window-info">' + GIS.i18n.name + '<p style="font-weight:normal">' + feature.attributes.name + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.type + '<p style="font-weight:normal">' + ou.ty + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.code + '<p style="font-weight:normal">' + ou.co + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.address + '<p style="font-weight:normal">' + ou.ad + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.contact_person + '<p style="font-weight:normal">' + ou.cp + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.email + '<p style="font-weight:normal">' + ou.em + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.phone_number + '<p style="font-weight:normal">' + ou.pn + '</p></div>'}
-                                            ]
-                                        },
-                                        {
-                                            xtype: 'form',
-                                            bodyStyle: 'padding:8px 8px 8px 4px',
-                                            width: GIS.conf.window_width + 20,
-                                            labelWidth: GIS.conf.label_width,
-                                            items: [
-                                                {html: '<div class="window-info">' + GIS.i18n.infrastructural_data + '</div>'},
-                                                {
-                                                    xtype: 'combo',
-                                                    name: 'period',
-                                                    fieldLabel: GIS.i18n.period,
-                                                    typeAhead: true,
-                                                    editable: false,
-                                                    valueField: 'id',
-                                                    displayField: 'name',
-                                                    mode: 'remote',
-                                                    forceSelection: true,
-                                                    triggerAction: 'all',
-                                                    selectOnFocus: true,
-                                                    width: GIS.conf.combo_width,
-                                                    store: GIS.stores.infrastructuralPeriodsByType,
-                                                    lockPosition: false,
-                                                    listeners: {
-                                                        'select': function(cb) {
-                                                            that.infrastructuralPeriod = cb.getValue();
-                                                            that.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
-                                                            that.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                                                            that.stores.infrastructuralDataElementMapValue.load();
-                                                        }
-                                                    }
-                                                },
-                                                {html: '<div style="padding:4px 0 0 0"></div>'},
-                                                {
-                                                    xtype: 'grid',
-                                                    height: GIS.util.getMultiSelectHeight(),
-                                                    width: 242,
-                                                    cm: new Ext.grid.ColumnModel({
-                                                        columns: [
-                                                            {id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
-                                                            {id: 'value', header: 'Value', dataIndex: 'value', sortable: true, width: 50}
-                                                        ]
-                                                    }),
-                                                    disableSelection: true,
-                                                    viewConfig: {forceFit: true},
-                                                    store: that.stores.infrastructuralDataElementMapValue
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                });
-            
-                                if (that.infrastructuralPeriod) {
-                                    that.featureOptions.info.find('name', 'period')[0].setValue(that.infrastructuralPeriod);
-                                    that.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', that.infrastructuralPeriod);
-                                    that.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                                    that.stores.infrastructuralDataElementMapValue.load();
-                                }
-                                that.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (that.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
-                                that.featureOptions.info.show();
-                                that.featureOptions.menu.destroy();
-                            }
-                        });
-                    },
-                    showRelocate: function() {
-                        if (that.featureOptions.coordinate) {
-                            that.featureOptions.coordinate.destroy();
-                        }
-                        
-                        that.featureOptions.coordinate = new Ext.Window({
-                            title: '<span class="window-relocate-title">' + feature.attributes.name + '</span>',
-							bodyStyle: 'padding:8px; background-color:#fff',
-                            layout: 'fit',
-                            width: GIS.conf.window_width,
-                            items: [
-                                {
-                                    xtype: 'panel',
-                                    items: [
-                                        {html: GIS.i18n.select_new_location_on_map}
-                                    ]
-                                }
-                            ],
-                            bbar: [
-                                '->',
-                                {
-                                    xtype: 'button',
-                                    iconCls: 'icon-cancel',
-                                    hideLabel: true,
-                                    text: GIS.i18n.cancel,
-                                    handler: function() {
-                                        GIS.vars.relocate.active = false;
-                                        that.featureOptions.coordinate.destroy();
-                                        document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
-                                    }
-                                }
-                            ],
-                            listeners: {
-                                'close': function() {
-                                    GIS.vars.relocate.active = false;
-                                    document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
-                                }
-                            }
-                        });
-                        that.featureOptions.coordinate.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.coordinate.width + 15), Ext.getCmp('center').y + 41);
-                        that.featureOptions.coordinate.show();                        
-                    },
-                    items: [
-                        {
-                            text: GIS.i18n.show_information_sheet,
-                            iconCls: 'menu-featureoptions-info',
-                            handler: function(item) {
-                                if (GIS.stores.infrastructuralPeriodsByType.isLoaded) {
-                                    item.parentMenu.showInfo();
-                                }
-                                else {
-                                    GIS.stores.infrastructuralPeriodsByType.setBaseParam('name', GIS.system.infrastructuralPeriodType);
-                                    GIS.stores.infrastructuralPeriodsByType.load({callback: function() {
-                                        item.parentMenu.showInfo();
-                                    }});
-                                }
-                            }
-                        },
-                        {
-                            text: GIS.i18n.relocate,
-                            iconCls: 'menu-featureoptions-relocate',
-                            disabled: !GIS.user.isAdmin,
-                            handler: function(item) {
-                                GIS.vars.relocate.active = true;
-                                GIS.vars.relocate.widget = that;
-                                GIS.vars.relocate.feature = feature;
-                                document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'crosshair';
-                                item.parentMenu.showRelocate();
-                            }
-                        }
-                    ]
-                });
-                
-                if (feature.attributes.hcwc) {
-					that.featureOptions.menu.add({
-						text: 'Drill down',
-						iconCls: 'menu-featureoptions-drilldown',
-						scope: this,
-						handler: function() {
-							drill.call(this);
+			menu = new Ext.menu.Menu({});
+			
+			if (feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class) {
+				menu.add([
+					{
+						text: GIS.i18n.show_information_sheet,
+						iconCls: 'menu-featureoptions-info',
+						handler: function(item) {
+							if (GIS.stores.infrastructuralPeriodsByType.isLoaded) {
+								item.parentMenu.showInfo();
+							}
+							else {
+								GIS.stores.infrastructuralPeriodsByType.setBaseParam('name', GIS.system.infrastructuralPeriodType);
+								GIS.stores.infrastructuralPeriodsByType.load({callback: function() {
+									item.parentMenu.showInfo();
+								}});
+							}
 						}
-					});
-				}
-                
-                that.featureOptions.menu.showAt([GIS.vars.mouseMove.x, GIS.vars.mouseMove.y]);
-            }
-            else {
-				console.log(feature);
-                if (feature.attributes.hcwc) {
-					drill.call(this);
-                }
-                else {
-                    Ext.message.msg(false, GIS.i18n.no_coordinates_found);
-                }
-            }
+					},
+					{
+						text: GIS.i18n.relocate,
+						iconCls: 'menu-featureoptions-relocate',
+						disabled: !GIS.user.isAdmin,
+						handler: function(item) {
+							GIS.vars.relocate.active = true;
+							GIS.vars.relocate.widget = that;
+							GIS.vars.relocate.feature = feature;
+							document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'crosshair';
+							item.parentMenu.showRelocate();
+						}
+					}
+				]);
+			}
+			
+			if (feature.attributes.hcwc) {
+				menu.add({
+					text: 'Drill down',
+					iconCls: 'menu-featureoptions-drilldown',
+					scope: this,
+					handler: function() {
+						drill('down');
+					}
+				});
+			}
+			
+			if (feature.attributes.hcwc) { //todo if parent level has coordinates
+				menu.add({
+					text: 'Float up',
+					iconCls: 'menu-featureoptions-drilldown',
+					scope: this,
+					handler: function() {
+						drill('up');
+					}
+				});
+			}
+            
+            menu.showAt([GIS.map.mouseMove.x, GIS.map.mouseMove.y]);
         };
         
         this.selectHandlers = new OpenLayers.Control.newSelectFeature(this.layer, {
@@ -1633,20 +1656,20 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 				
 				for (var i = 0; i < this.layer.features.length; i++) {
-					var id = this.layer.features[i].attributes.id;
-					featureMap[id] = true;
+					var iid = this.layer.features[i].attributes.internalId;
+					featureMap[iid] = true;
 				}
 				for (var i = 0; i < values.length; i++) {
-					var id = values[i].organisationUnitId,
+					var iid = values[i].organisationUnitId,
 						value = values[i].value;						
-					valueMap[id] = value;
+					valueMap[iid] = value;
 				}
 				
 				for (var i = 0; i < this.layer.features.length; i++) {
 					var feature = this.layer.features[i],
-						id = feature.attributes.id;						
-					if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
-						feature.attributes.value = valueMap[id];
+						iid = feature.attributes.internalId;						
+					if (featureMap.hasOwnProperty(iid) && valueMap.hasOwnProperty(iid)) {
+						feature.attributes.value = valueMap[iid];
 						feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
 						features.push(feature);
 					}

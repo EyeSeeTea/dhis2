@@ -28,9 +28,7 @@
 package org.hisp.dhis.patient.action.program;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 
 import org.hisp.dhis.patient.Patient;
@@ -55,6 +53,7 @@ public class AddProgramAction
     implements Action
 {
     private static String SINGLE_EVENT = "Single-Event";
+
     private static String REPORT_DATE_DESCRIPTION = "Report date";
 
     // -------------------------------------------------------------------------
@@ -170,6 +169,13 @@ public class AddProgramAction
         this.personDisplayNames = personDisplayNames;
     }
 
+    private Boolean generateBydEnrollmentDate;
+
+    public void setGeneratedByEnrollmentDate( Boolean generateBydEnrollmentDate )
+    {
+        this.generateBydEnrollmentDate = generateBydEnrollmentDate;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -179,7 +185,8 @@ public class AddProgramAction
     {
         displayProvidedOtherFacility = (displayProvidedOtherFacility == null) ? false : displayProvidedOtherFacility;
         displayIncidentDate = (displayIncidentDate == null) ? false : displayIncidentDate;
-
+        generateBydEnrollmentDate= (generateBydEnrollmentDate == null) ? false : generateBydEnrollmentDate;
+        
         Program program = new Program();
 
         program.setName( name );
@@ -191,9 +198,10 @@ public class AddProgramAction
         program.setType( type );
         program.setDisplayProvidedOtherFacility( displayProvidedOtherFacility );
         program.setDisplayIncidentDate( displayIncidentDate );
+        program.setGeneratedByEnrollmentDate( generateBydEnrollmentDate );
 
-        Collection<PatientIdentifierType> identifierTypes = new HashSet<PatientIdentifierType>();
-        Collection<PatientAttribute> patientAttributes = new HashSet<PatientAttribute>();
+        List<PatientIdentifierType> identifierTypes = new ArrayList<PatientIdentifierType>();
+        List<PatientAttribute> patientAttributes = new ArrayList<PatientAttribute>();
         int index = 0;
         for ( String selectedPropertyId : selectedPropertyIds )
         {

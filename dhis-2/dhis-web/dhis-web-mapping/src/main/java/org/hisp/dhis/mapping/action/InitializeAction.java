@@ -98,13 +98,6 @@ public class InitializeAction
         return mapView;
     }
 
-    private List<MapLayer> baseLayers;
-
-    public List<MapLayer> getBaseLayers()
-    {
-        return baseLayers;
-    }
-
     private List<MapLayer> overlays;
 
     public List<MapLayer> getOverlays()
@@ -144,11 +137,6 @@ public class InitializeAction
         {
             mapView = mappingService.getMapView( id );
         }
-
-        baseLayers = new ArrayList<MapLayer>(
-            mappingService.getMapLayersByType( MappingService.MAP_LAYER_TYPE_BASELAYER ) );
-
-        Collections.sort( baseLayers, new MapLayerNameComparator() );
 
         overlays = new ArrayList<MapLayer>( mappingService.getMapLayersByType( MappingService.MAP_LAYER_TYPE_OVERLAY ) );
 

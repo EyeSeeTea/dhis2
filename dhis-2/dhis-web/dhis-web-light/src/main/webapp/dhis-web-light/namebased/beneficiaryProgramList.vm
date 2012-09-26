@@ -30,7 +30,18 @@
         #end
 	</ul>
 </p>
-
+<h2>Completed Programs</h2>
+<p>
+	<ul>
+		#if( $listOfCompletedProgram.size() != 0 )
+			#foreach( $programInstance in $listOfCompletedProgram )
+				$programInstance.getProgram().getName()
+			#end
+		#else
+			<li>$i18n.getString("no_completed_programs")</li>
+		#end
+	</ul>
+</p>
 <h2>$i18n.getString("details")</h2>
 <p>
 	<ul>
@@ -43,6 +54,7 @@
 			<li><strong>$i18n.getString("phone_number"):</strong>  $patient.getPhoneNumber()</li>
 		#end
 		<li><strong>$i18n.getString("orgunit"):</strong>  $patient.getOrganisationUnit().getName() <a href="showPatientLocationForm.action?patientId=$patient.id">[$i18n.getString("change")]</a></li>
+        #if($patient.getIsDead() == true) <li><strong>$i18n.getString("status"):</strong> $i18n.getString("dead")</li> #end
 		#foreach($patientIdentifier in $patientIdentifiers)
 			#if($patientIdentifier.getIdentifierType())
 				<li><strong>$patientIdentifier.getIdentifierType().getName():</strong>  $patientIdentifier.getIdentifier()</li>
@@ -77,9 +89,11 @@
 <p>
 	<ul>
         #if( $relatedPeople.size() > 0)
-            #foreach( $person in $relatedPeople )
-          			<li><a href="showPatientProgramList.action?patientId=$person.id">$!encoder.htmlEncode( ${person.getFullName()} )</a></li>
-          		#end
+            #foreach( $key in $relatedPeople.keySet() )
+				#set ( $person = $relatedPeople.get($key))
+          		<li><a href="showPatientProgramList.action?patientId=$person.id">$!encoder.htmlEncode( $person.fullName ) ($key.getRelationshipType().getName())</a> -
+				<a href="deleteRelationship.action?currentPatientId=$patient.id&relationshipTypeId=$key.id">Remove</a></li>
+          	#end
         #else
             <li>$i18n.getString("no_relationships")</li>
         #end
@@ -91,7 +105,7 @@
 <p>
 	<ul>
 		#foreach( $relationshipType in $relationshipTypes )
-			<li><a href="showFindRelatedPatientForm.action?originalPatientId=$patient.id&relationshipTypeId=$relationshipType.id">Add $relationshipType.getName()</a></li>
+			<li><a href="showFindRelatedPatientForm.action?originalPatientId=$patient.id&relationshipTypeId=$relationshipType.id&orgUnitId=$patient.getOrganisationUnit().getId()">Add $relationshipType.getName()</a></li>
 		#end
 	</ul>
 </p>

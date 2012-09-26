@@ -29,6 +29,7 @@ package org.hisp.dhis.program.hibernate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,7 @@ import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceStore;
+import org.hisp.dhis.program.SchedulingProgramObject;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.hisp.dhis.system.grid.ListGrid;
@@ -57,7 +59,6 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
  * @author Abyot Asalefew
- * @version $Id$
  */
 public class HibernateProgramStageInstanceStore
     extends HibernateGenericStore<ProgramStageInstance>
@@ -253,19 +254,81 @@ public class HibernateProgramStageInstanceStore
             if ( programStageInstanceId != null && programStageInstanceId != 0 )
             {
                 ProgramStageInstance programStageInstance = get( programStageInstanceId );
-                
+
                 List<OutboundSms> outboundSmsList = programStageInstance.getOutboundSms();
-                
-                if( outboundSmsList == null)
+
+                if ( outboundSmsList == null )
                 {
                     outboundSmsList = new ArrayList<OutboundSms>();
                 }
-                
+
                 outboundSmsList.add( outboundSms );
                 programStageInstance.setOutboundSms( outboundSmsList );
                 update( programStageInstance );
             }
         }
+    }
+
+    public Collection<SchedulingProgramObject> getSendMesssageEvents()
+    {
+        String sql = "select psi.programstageinstanceid, p.phonenumber, prm.templatemessage, p.firstname, p.middlename, p.lastname, org.name as orgunitName "
+            + ",pg.name as programName, ps.name as programStageName, psi.duedate,(DATE(now()) - DATE(psi.duedate) ) as days_since_due_date,psi.duedate "
+            + "from patient p INNER JOIN programinstance pi "
+            + "     ON p.patientid=pi.patientid "
+            + " INNER JOIN programstageinstance psi  "
+            + "     ON psi.programinstanceid=pi.programinstanceid "
+            + " INNER JOIN program pg  "
+            + "     ON pg.programid=pi.programid "
+            + " INNER JOIN programstage ps  "
+            + "     ON ps.programstageid=psi.programstageid "
+            + " INNER JOIN organisationunit org  "
+            + "     ON org.organisationunitid = p.organisationunitid "
+            + " INNER JOIN patientreminder prm  "
+            + "     ON prm.programstageid = ps.programstageid "
+            + "WHERE pi.completed=false  "
+            + "     and p.phonenumber is not NULL and p.phonenumber != '' "
+            + "     and prm.templatemessage is not NULL and prm.templatemessage != '' "
+            + "     and pg.type=1 and prm.daysallowedsendmessage is not null  "
+            + "     and psi.executiondate is null "
+            + "     and (  DATE(now()) - DATE(psi.duedate) ) = prm.daysallowedsendmessage ";
+
+        SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
+
+        int cols = rs.getMetaData().getColumnCount();
+
+        Collection<SchedulingProgramObject> schedulingProgramObjects = new HashSet<SchedulingProgramObject>();
+
+        while ( rs.next() )
+        {
+            String message = "";
+            for ( int i = 1; i <= cols; i++ )
+            {
+
+                message = rs.getString( "templatemessage" );
+                String patientName = rs.getString( "firstName" );
+                String organisationunitName = rs.getString( "orgunitName" );
+                String programName = rs.getString( "programName" );
+                String programStageName = rs.getString( "programStageName" );
+                String daysSinceDueDate = rs.getString( "days_since_due_date" );
+                String dueDate = rs.getString( "duedate" );
+
+                message = message.replace( ProgramStage.TEMPLATE_MESSSAGE_PATIENT_NAME, patientName );
+                message = message.replace( ProgramStage.TEMPLATE_MESSSAGE_PROGRAM_NAME, programName );
+                message = message.replace( ProgramStage.TEMPLATE_MESSSAGE_PROGAM_STAGE_NAME, programStageName );
+                message = message.replace( ProgramStage.TEMPLATE_MESSSAGE_DUE_DATE, dueDate );
+                message = message.replace( ProgramStage.TEMPLATE_MESSSAGE_ORGUNIT_NAME, organisationunitName );
+                message = message.replace( ProgramStage.TEMPLATE_MESSSAGE_DAYS_SINCE_DUE_DATE, daysSinceDueDate );
+            }
+
+            SchedulingProgramObject schedulingProgramObject = new SchedulingProgramObject();
+            schedulingProgramObject.setProgramStageInstanceId( rs.getInt( "programstageinstanceid" ) );
+            schedulingProgramObject.setPhoneNumber( rs.getString( "phonenumber" ) );
+            schedulingProgramObject.setMessage( message );
+
+            schedulingProgramObjects.add( schedulingProgramObject );
+        }
+
+        return schedulingProgramObjects;
     }
 
     // -------------------------------------------------------------------------
@@ -278,7 +341,7 @@ public class HibernateProgramStageInstanceStore
     {
         String selector = count ? "count(*) " : "* ";
 
-        String sql = "select " + selector + "from ( select psi.programstageinstanceid, psi.executiondate,";
+        String sql = "select " + selector + "from ( select DISTINCT psi.programstageinstanceid, psi.executiondate,";
         String where = "";
         String operator = "where ";
 

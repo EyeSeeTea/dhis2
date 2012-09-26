@@ -337,6 +337,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 
   <bean id="org.hisp.dhis.dataset.CompleteDataSetRegistrationService" class="org.hisp.dhis.dataset.DefaultCompleteDataSetRegistrationService">
     <property name="completeDataSetRegistrationStore" ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationStore" />
+    <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
   </bean>
 
   <bean id="org.hisp.dhis.dataset.SectionService" class="org.hisp.dhis.dataset.DefaultSectionService">
@@ -364,8 +365,6 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="validationRuleGroupStore" ref="org.hisp.dhis.validation.ValidationRuleGroupStore" />
     <property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
-    <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-    <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
 	<property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
 	<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
@@ -507,13 +506,15 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
     <property name="systemSettingStore" ref="org.hisp.dhis.setting.SystemSettingStore" />
     <property name="flags">
       <list>
-        <value>armenia</value>
+        <value>afghanistan</value>      
+		<value>armenia</value>
         <value>bangladesh</value>
         <value>benin</value>
         <value>botswana</value>
         <value>burkina_faso</value>
         <value>burkina_faso_coat_of_arms</value>
-        <value>cambodia</value>
+		<value>cambodia</value>
+		<value>china</value>
         <value>ethiopia</value>
         <value>gambia</value>
         <value>ghana</value>
@@ -526,7 +527,8 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
         <value>kenya</value>
         <value>lesotho</value>
         <value>liberia</value>
-        <value>malawi</value>
+		<value>malawi</value>
+		<value>myanmar</value>
         <value>mali</value>
         <value>mozambique</value>
         <value>namibia</value>
@@ -606,17 +608,22 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 	  <value>de</value>
 	  <value>en</value>
 	  <value>es</value>
+	  <value>fa</value>
 	  <value>fr</value>
 	  <value>gu</value>
 	  <value>hi</value>
+	  <value>id</value>
 	  <value>it</value>
+	  <value>mm</value>
 	  <value>nl</value>
 	  <value>no</value>
+	  <value>ps</value>
 	  <value>pt</value>
 	  <value>ru</value>
 	  <value>rw</value>
 	  <value>sw</value>
 	  <value>vi</value>
+	  <value>zh</value>
 	</list>
 	</property>
   </bean>

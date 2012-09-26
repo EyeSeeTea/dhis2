@@ -34,6 +34,7 @@
 				</td>		
 				<td>
 					<select type="text" id="programId" name="programId" onchange='getDataElements();' class='stage-object-selected'>
+						<option value="" psid="">[$i18n.getString("please_select")]</option>
 						#foreach( $program in $programs )
 							#foreach( $programStage in $program.programStages )
 								<option value='$program.id' psid='$programStage.id' reportDateDes="$programStage.reportDateDescription">$program.name</option>
@@ -45,13 +46,13 @@
 					<input type="button" class='large-button' id='listBtn' value="$i18n.getString( 'list_all_events' )" onclick='validateSearchEvents( true );'>
 				</td>
 				<td>
-					<input type="button" class='large-button' id='addBtn' value='$i18n.getString( "add_new" )' onclick="showAddEventForm();">
+					<input type="button" class='large-button' id='addBtn' value='$i18n.getString( "add_new" )' onclick="setFieldValue('isShowEventList', true);showAddEventForm();">
 				</td>
 				<td>
 					<input type="button" class='large-button' id='removeBtn' value='$i18n.getString( "remove_empty_events" )' onclick="removeEmptyEvents();">
 				</td>
 				<td>
-					<input type="button" class='large-button' id='advancedBtn' value='$i18n.getString( "advanced_search" )' onclick="jQuery('#advanced-search').toggle();">
+					<input type="button" class='large-button' id='advancedBtn' value='$i18n.getString( "search" )' onclick="jQuery('#advanced-search').toggle();">
 				</td>
 			</tr>
 		</table>
@@ -76,10 +77,10 @@
 				</td>
 			</tr>
 			<tr>
-				<td><span id="reportDateDescriptionField"></span>$i18n.getString('from_to')</td>
+				<td><span id="reportDateDescriptionField"></span> $i18n.getString('from_to')</td>
 				<td><input type="text" id='startDate' name='startDate' style='width:240px'></td>
 				<td><input type="text" id='endDate' name='endDate' style='width:240px'></td>
-				<td><input type="button" id='searchBtn' value='$i18n.getString( "search" )' onclick='validateSearchEvents( false )'></td>
+				<td><input type="button" id='searchBtn' value='$i18n.getString( "search" )' onclick='setFieldValue("isShowEventList", false);validateSearchEvents( false )'></td>
 			</tr>
 			<tr>
 				<td valign="top">$i18n.getString('data_elements')</td>
@@ -115,13 +116,13 @@
 	</p>
 	<table>
 		<tr>
-		    <th><span id="reportDateDescriptionField2">$i18n.getString( "report_date" ) </label></th>
+		    <th><span id="reportDateDescriptionField2">$i18n.getString( "report_date" ) </span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
             <th><input type="text" id="executionDate" name="executionDate" onchange="addNewEvent();"></th>
                 <script type="text/javascript">
                    datePickerValid( 'executionDate', false );
                 </script>  
-			<th><label for="dueDate">$i18n.getString( "due_date" ) </label></th>
-            <th><input type="text" id="dueDate" name="dueDate" value="$!format.formatDate( $programStageInstance.dueDate )" disabled="disabled"></th>
+			<th><label for="dueDate">$i18n.getString( "due_date" ) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label></th>
+            <th><input type="text" id="dueDate" name="dueDate" value="$!format.formatDate( $programStageInstance.dueDate )" disabled="disabled">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
         </tr>
 	</table>
 	<div id='dataEntryFormDiv'></div>

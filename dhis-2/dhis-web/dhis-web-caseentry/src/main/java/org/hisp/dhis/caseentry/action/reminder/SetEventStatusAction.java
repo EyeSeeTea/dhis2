@@ -27,8 +27,6 @@
 
 package org.hisp.dhis.caseentry.action.reminder;
 
-import java.util.Date;
-
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 
@@ -82,26 +80,29 @@ public class SetEventStatusAction
         ProgramStageInstance programStageInstance = programStageInstanceService
             .getProgramStageInstance( programStageInstanceId );
 
-        if ( ProgramStageInstance.COMPLETED_STATUS == status.intValue() )
+        switch ( status.intValue() )
         {
-            programStageInstance.setExecutionDate( new Date() );
+        case ProgramStageInstance.COMPLETED_STATUS:
             programStageInstance.setCompleted( true );
             programStageInstance.setStatus( null );
-        }
-        else if ( ProgramStageInstance.VISITED_STATUS == status.intValue() )
-        {
+            break;
+        case ProgramStageInstance.VISITED_STATUS:
             programStageInstance.setCompleted( false );
             programStageInstance.setStatus( null );
-        }
-        else if ( ProgramStageInstance.UNKNOWN_STATUS == status.intValue() )
-        {
+            break;
+        case ProgramStageInstance.LATE_VISIT_STATUS:
+            programStageInstance.setCompleted( false );
             programStageInstance.setStatus( null );
-        }
-        else if ( ProgramStageInstance.SKIPPED_STATUS == status.intValue() )
-        {
-            programStageInstance.setExecutionDate( new Date() );
-            programStageInstance.setCompleted( true );
+            break;
+        case ProgramStageInstance.FUTURE_VISIT_STATUS:
+            programStageInstance.setCompleted( false );
+            programStageInstance.setStatus( null );
+            break;
+        case ProgramStageInstance.SKIPPED_STATUS:
             programStageInstance.setStatus( status );
+            break;
+        default:
+            break;
         }
 
         programStageInstanceService.updateProgramStageInstance( programStageInstance );

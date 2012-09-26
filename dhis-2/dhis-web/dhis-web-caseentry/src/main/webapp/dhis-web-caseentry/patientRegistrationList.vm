@@ -7,7 +7,7 @@
 		#if($!listAll)
 			$i18n.getString( "list_all_patients" )
 		#else
-			$i18n.getString( "advanced_search_patients" )
+			$i18n.getString( "search_patients" )
 		#end
 		</td>
 	</tr>
@@ -38,6 +38,7 @@
           <col/>
           <col/>
           <col/>
+		  <col/>
 		  #if($mapPatientOrgunit.size()!=0)
           <col/>
 		  #end
@@ -64,6 +65,7 @@
 				<th>$i18n.getString( "gender" )</th>
 				<th>$i18n.getString( "date_of_birth" )</th> 
 				<th class="{sorter: false}">$i18n.getString( "age" )</th>
+				<th class="{sorter: false}">$i18n.getString( "phone_number" )</th>
 				
 				#if($mapPatientOrgunit.size()!=0)
 					<th>$i18n.getString( "hierachy_orgunit" )</th>
@@ -96,21 +98,20 @@
 					#end
 				#end
 					
+				#set($value="")
 				#foreach( $identifierType in $identifierTypes)
 					#foreach( $identifier in $patient.identifiers)
 						#if($identifier.identifierType.id==$identifierType.id)
-							<td onclick="javascript:showPatientDashboardForm( '$patient.id' )">
-								$identifier.identifier
-							</td>
+							#set($value=$identifier.identifier)
 						#end
 					#end
 				#end
-				#if( $identifierTypes.size()==0 )
-					<td onclick="javascript:showPatientDashboardForm( '$patient.id' )">
-						$!patient.getFullName()
-					</td>
+				#if($value=="")
+					#set($value=$patient.getFullName())
 				#end
-				
+				<td onclick="javascript:showPatientDashboardForm( '$patient.id' )">
+					$value
+				</td>
 				
 				<td>$i18n.getString($!patient.gender)</td>
 				
@@ -118,10 +119,10 @@
 				
 				<td>$!patient.getAge()</td>
 				
+				<td>$!patient.phoneNumber</td>
+				
 				#if($mapPatientOrgunit.size()!=0)
-				
 					<td>$!mapPatientOrgunit.get($patient.id)</td>
-				
 				#end
 				
 				<td>

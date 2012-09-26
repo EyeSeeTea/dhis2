@@ -341,6 +341,7 @@ public class HibernatePatientStore
         String patientGroupBy = " GROUP BY  p.patientid, p.firstname, p.middlename, p.lastname, p.gender, p.phonenumber, p.birthdate, p.deathdate ";
         String otherWhere = "";
         String operator = " where ";
+        String orderBy = "";
         boolean hasIdentifier = false;
         boolean isSearchEvent = false;
 
@@ -403,43 +404,62 @@ public class HibernatePatientStore
             }
             else if ( keys[0].equals( Patient.PREFIX_PROGRAM_EVENT_BY_STATUS ) )
             {
-                sql += "(select programid from patient_programs where patientid=p.patientid and programid=" + keys[1]
-                    + " ) as " + Patient.PREFIX_PROGRAM + "_" + id + ",";
-                otherWhere += operator + Patient.PREFIX_PROGRAM + "_" + id + "=" + id;
-                operator = " and ";
-
-                sql += " MIN( psi.programstageinstanceid ) as programstageinstanceid,";
+                patientGroupBy += ",pgi.programid ";
                 isSearchEvent = true;
                 patientWhere += patientOperator + "pgi.patientid=p.patientid and ";
-                patientWhere += "psi.duedate>='" + keys[3] + "' and psi.duedate<='" + keys[4] + "' and ";
-                patientWhere += "psi.organisationunitid = " + keys[5] + " and ";
+                patientWhere += "programid=" + id + " and ";
+                patientWhere += "psi.duedate>='" + keys[2] + "' and psi.duedate<='" + keys[3] + "' and ";
+                patientWhere += "pgi.completed = false ";
 
-                int statusEvent = Integer.parseInt( keys[2] );
-                switch ( statusEvent )
+                String operatorStatus = "";
+                String condition = " and ( ";
+
+                for ( int index = 5; index < keys.length; index++ )
                 {
-                case ProgramStageInstance.COMPLETED_STATUS:
-                    patientWhere += "psi.completed=true";
-                    break;
-                case ProgramStageInstance.VISITED_STATUS:
-                    patientWhere += "psi.executiondate is not null and psi.completed=false";
-                    break;
-                case ProgramStageInstance.FUTURE_VISIT_STATUS:
-                    patientWhere += "psi.executiondate is null and psi.duedate >= now()";
-                    break;
-                case ProgramStageInstance.LATE_VISIT_STATUS:
-                    patientWhere += "psi.executiondate is null and psi.duedate < now()";
-                    break;
-                default:
-                    break;
+                    int statusEvent = Integer.parseInt( keys[index] );
+                    switch ( statusEvent )
+                    {
+                    case ProgramStageInstance.COMPLETED_STATUS:
+                        patientWhere += condition + operatorStatus + "("
+                            + " psi.completed=true and psi.organisationunitid=" + keys[4] + ")";
+                        condition = "";
+                        operatorStatus = " OR ";
+                        continue;
+                    case ProgramStageInstance.VISITED_STATUS:
+                        patientWhere += condition + operatorStatus + "("
+                            + " psi.executiondate is not null and psi.completed=false and psi.organisationunitid="
+                            + keys[4] + ")";
+                        operatorStatus = " OR ";
+                        condition = "";
+                        continue;
+                    case ProgramStageInstance.FUTURE_VISIT_STATUS:
+                        patientWhere += condition + operatorStatus + "("
+                            + " psi.status is null and psi.executiondate is null and psi.duedate >= now() and p.organisationunitid=" + keys[4]
+                            + ")";
+                        operatorStatus = " OR ";
+                        condition = "";
+                        continue;
+                    case ProgramStageInstance.LATE_VISIT_STATUS:
+                        patientWhere += condition + operatorStatus + "("
+                            + " psi.status is null and psi.executiondate is null and psi.duedate < now() and p.organisationunitid=" + keys[4]
+                            + ")";
+                        operatorStatus = " OR ";
+                        condition = "";
+                        continue;
+                    default:
+                        continue;
+                    }
                 }
-
+                if ( condition.isEmpty() )
+                {
+                    patientWhere += ")";
+                }
                 patientWhere += " and pgi.completed=false ";
                 patientOperator = " and ";
 
             }
             else if ( keys[0].equals( Patient.PREFIX_PROGRAM_STAGE ) )
             {
-                sql += " MIN( psi.programstageinstanceid ) as programstageinstanceid,";
                 isSearchEvent = true;
                 patientWhere += patientOperator + "pgi.patientid=p.patientid and psi.programstageid=" + id + " and ";
                 patientWhere += "psi.duedate>='" + keys[3] + "' and psi.duedate<='" + keys[4] + "' and ";
@@ -466,7 +486,6 @@ public class HibernatePatientStore
 
                 patientWhere += " and pgi.completed=false ";
                 patientOperator = " and ";
-
             }
         }
 
@@ -474,28 +493,33 @@ public class HibernatePatientStore
         {
             sql += "(select organisationunitid from patient where patientid=p.patientid and organisationunitid = "
                 + orgunit.getId() + " ) as orgunitid,";
-            otherWhere += operator + "orgunitid=" + orgunit.getId();
+            otherWhere += otherWhere + operator + "orgunitid=" + orgunit.getId();
         }
 
         sql = sql.substring( 0, sql.length() - 1 ) + " "; // Removing last comma
 
-        sql += " from patient p ";
-        if ( hasIdentifier )
-        {
-            sql += " left join patientidentifier pi on p.patientid=pi.patientid ";
-        }
+        String from = " from patient p ";
         if ( isSearchEvent )
         {
-            sql += " left join programinstance pgi on " + " (pgi.patientid=p.patientid) "
+            String subSQL = " ,MIN( psi.programstageinstanceid ) as programstageinstanceid,min(psi.duedate) as duedate ";
+            sql = sql + subSQL + from + " left join programinstance pgi on " + " (pgi.patientid=p.patientid) "
                 + " left join programstageinstance psi on " + " (psi.programinstanceid=pgi.programinstanceid) ";
+            orderBy = " ORDER BY duedate DESC ";
+            from = " ";
         }
 
-        sql += patientWhere;
+        if ( hasIdentifier )
+        {
+            sql += from + " left join patientidentifier pi on p.patientid=pi.patientid ";
+            from = " ";
+        }
+
+        sql += from + patientWhere;
         if ( isSearchEvent )
         {
             sql += patientGroupBy;
         }
-
+        sql += orderBy;
         sql += " ) as searchresult";
         sql += otherWhere;
 
@@ -503,7 +527,7 @@ public class HibernatePatientStore
         {
             sql += statementBuilder.limitRecord( min, max );
         }
-
+        
         return sql;
     }
 

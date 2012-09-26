@@ -140,44 +140,10 @@ input.criteria
 	margin-right: 5px;
 }
 
-input.stage-object[type="button"]
-{
-	width: 120px;
-	height: 60px;
-    cursor: pointer;
-	opacity: 1.0;
-	border: 2px solid;
-	margin: 5px;
-}
-
-input.stage-object[type="button"]:hover
-{
-	border: 5px solid;
-}
-
-input.stage-object-selected[type="button"]
-{
-    border: 5px solid;
-}
-
-input.patient-object[type="button"]
-{
-	width: 130px;
-	height: 60px;
-    white-space: normal;
-	border-color: #bbbbbb;
-	background-color: #ddd;
-	cursor: pointer;
-	border: 1px solid #aaa;
-	margin: 5px;
-	border-radius: 2px;
-}
-
 input.move-button
 {
 	width: 20px;
 	height: 60px;
-    white-space: normal;
 	border-color: #bbbbbb;
 	cursor: pointer;
 	border: 1px solid #aaa;
@@ -228,7 +194,7 @@ td.link-area
   padding-right:1px;
   padding-left:1px;
   padding-bottom:0px;
-  height:200px;
+  height:120px;
   width:350px;
   overflow:hidden;
   position:relative;
@@ -241,7 +207,7 @@ div.link-area
   padding-right:1px;
   padding-left:1px;
   padding-bottom:0px;
-  height:200px;
+  height:172px;
   width:350px;
   overflow:hidden;
   position:relative;
@@ -249,8 +215,8 @@ div.link-area
 
 .contentProviderTable
 {
-  height: 150px;
-  width: 340px;
+  height: 122px;
+  width: 350px;
   overflow-y: auto;
   overflow-x:hidden;
 }
@@ -364,14 +330,20 @@ div.event-flow-dashboard
 
 .stage-container
 {
-	width:850px;
-	height:125px;
+	width:100%;
+	height:100px;
 }
 
 .stage-flow
 {
-	width:750px;
-	height:145px;
+	height:100px;
+	overflow-x:hidden;
+	overflow-y:hidden;
+}
+
+.table-flow
+{
+	height:100px;
 	overflow-x:hidden;
 	overflow-y:hidden;
 }
@@ -392,4 +364,57 @@ div.event-flow-dashboard
 	border-bottom: 30px solid transparent; 
 	border-right:30px solid #d0d0d0; 
 	cursor:pointer;
+}
+
+input.stage-object[type="button"]
+{
+	width: 120px;
+	height: 60px;
+    cursor: pointer;
+	opacity: 1.0;
+	border: 2px solid;
+	margin: 5px;
+}
+
+input.stage-object[type="button"]:hover
+{
+	border: 5px solid;
+}
+
+input.stage-object-selected[type="button"]
+{
+    border: 5px solid;
+}
+
+input .stage-scheduled[type="button"]
+{
+    border: 5px solid;
+}
+
+input.patient-object[type="button"]
+{
+	width: 130px;
+	height: 60px;
+	border-color: #bbbbbb;
+	background-color: #ddd;
+	cursor: pointer;
+	border: 1px solid #aaa;
+	margin: 5px;
+	border-radius: 2px;
+}
+
+div.dashboard-history
+{
+	z-index:100; 
+	width:400px; 
+	height:200px; 
+	position:absolute; 
+	left:650px; 
+	top:95px; 
+	background-color:#ffffff;
+	border:4px solid #d0d0d0;
+	padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	padding-bottom:1px;
 }

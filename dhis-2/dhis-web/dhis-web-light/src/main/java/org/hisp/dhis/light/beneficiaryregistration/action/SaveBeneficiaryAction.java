@@ -272,6 +272,44 @@ public class SaveBeneficiaryAction
         this.patientAttributes = patientAttributes;
     }
 
+    private String phoneNumber;
+
+    public String getPhoneNumber()
+    {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber( String phoneNumber )
+    {
+        this.phoneNumber = phoneNumber;
+    }
+
+    // Register patient on-the-fly
+
+    private Integer originalPatientId;
+
+    public Integer getOriginalPatientId()
+    {
+        return originalPatientId;
+    }
+
+    public void setOriginalPatientId( Integer originalPatientId )
+    {
+        this.originalPatientId = originalPatientId;
+    }
+
+    private Integer relationshipTypeId;
+
+    public Integer getRelationshipTypeId()
+    {
+        return relationshipTypeId;
+    }
+
+    public void setRelationshipTypeId( Integer relationshipTypeId )
+    {
+        this.relationshipTypeId = relationshipTypeId;
+    }
+
     @Override
     public String execute()
         throws Exception
@@ -283,6 +321,14 @@ public class SaveBeneficiaryAction
 
         patientIdentifierTypes = patientIdentifierTypeService.getAllPatientIdentifierTypes();
         patientAttributes = patientAttributeService.getAllPatientAttributes();
+        Collection<Program> programs = programService.getAllPrograms();
+        
+        for ( Program program : programs )
+        {
+            patientIdentifierTypes.removeAll( program.getPatientIdentifierTypes() );
+            patientAttributes.removeAll( program.getPatientAttributes() );
+        }
+        
         patient.setOrganisationUnit( organisationUnitService.getOrganisationUnit( orgUnitId ) );
 
         if ( this.patientFullName.trim().length() < 7 )
@@ -349,6 +395,15 @@ public class SaveBeneficiaryAction
             }
         }
 
+        if ( phoneNumber.matches( "^(\\+)?\\d+$" ) )
+        {
+            patient.setPhoneNumber( phoneNumber );
+        }
+        else
+        {
+            validationMap.put( "phoneNumber", "invalid_phone_number" );
+        }
+
         HttpServletRequest request = (HttpServletRequest) ActionContext.getContext().get(
             ServletActionContext.HTTP_REQUEST );
         Map<String, String> parameterMap = ContextUtils.getParameterMap( request );
@@ -357,7 +412,7 @@ public class SaveBeneficiaryAction
         Collection<PatientIdentifierType> patientIdentifierTypes = patientIdentifierTypeService
             .getAllPatientIdentifierTypes();
         Collection<PatientAttribute> patientAttributes = patientAttributeService.getAllPatientAttributes();
-        Collection<Program> programs = programService.getAllPrograms();
+        
 
         for ( Program program : programs )
         {
@@ -464,6 +519,7 @@ public class SaveBeneficiaryAction
             this.previousValues.put( "gender", this.gender );
             this.previousValues.put( "dob", this.dateOfBirth );
             this.previousValues.put( "dobType", this.dobType );
+            this.previousValues.put( "phoneNumber", this.phoneNumber );
             return ERROR;
         }
 
@@ -472,6 +528,10 @@ public class SaveBeneficiaryAction
         patientId = patientService.createPatient( patient, null, null, patientAttributeValues );
         validated = true;
 
+        if ( this.originalPatientId != null )
+        {
+            return "redirect";
+        }
         return SUCCESS;
     }
 }

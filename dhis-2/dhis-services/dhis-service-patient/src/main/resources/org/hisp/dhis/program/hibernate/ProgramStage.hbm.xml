@@ -41,9 +41,12 @@
     
     <property name="reportDateDescription" />
     
-    <property name="daysAllowedSendMessage" />
-     
-    <property name="templateMessage" />
+    <set name="patientReminders" order-by="daysAllowedSendMessage" cascade="all">
+      <key column="programStageid" />
+      <one-to-many class="org.hisp.dhis.patient.PatientReminder" />
+    </set>
+    
+    <property name="autoGenerateEvent"/>
     
   </class>
 </hibernate-mapping>

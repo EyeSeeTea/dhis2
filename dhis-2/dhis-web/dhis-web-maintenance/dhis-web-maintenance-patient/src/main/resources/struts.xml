@@ -346,14 +346,6 @@
 			<param name="javascripts">javascript/programStage.js</param>
 		</action>
 		
-		<action name="validateProgramStageSection"
-			class="org.hisp.dhis.patient.action.programstage.ValidateProgramStageSectionAction">
-			<result name="success" type="velocity-json">
-				../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
-			<result name="error" type="velocity-json">
-				../dhis-web-commons/ajax/jsonResponseError.vm</result>
-		</action>
-		
 		<!-- Program stage section -->
 		
 		<action name="programStageSectionList"
@@ -430,6 +422,13 @@
 			<result name="success" type="redirect">programStageSectionList.action?id=${id}</result>
 		</action>
 		
+		<action name="validateProgramStageSection"
+			class="org.hisp.dhis.patient.action.programstage.ValidateProgramStageSectionAction">
+			<result name="success" type="velocity-json">
+				../dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+			<result name="error" type="velocity-json">
+				../dhis-web-commons/ajax/jsonResponseError.vm</result>
+		</action>
 		
 		<!-- Data Entry Form -->
 
@@ -926,6 +925,29 @@
 				/dhis-web-maintenance-patient/responseCaseAggDescription.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
 		</action>
+		
+		<!-- Scheduling -->
+		
+		<action name="viewScheduleTasks" class="org.hisp.dhis.patient.action.schedule.GetScheduleParamsAction">
+	      <result name="success" type="velocity">/main.vm</result>
+	      <param name="page">/dhis-web-maintenance-patient/scheduleSendMessage.vm</param>
+	      <param name="menu">/dhis-web-maintenance-patient/menu.vm</param>
+	      <param name="javascripts">javascript/scheduling.js</param>
+		  <param name="schedule">true</param>
+	      <param name="requiredAuthorities">F_SCHEDULING_ADMIN</param>
+	    </action>
+	    
+		<action name="scheduleTasks" class="org.hisp.dhis.patient.action.schedule.ScheduleSendMessageTasksAction">
+	      <result name="success" type="velocity-json">
+				/dhis-web-maintenance-patient/jsonResponseScheduleTasks.vm</result>
+	      <param name="requiredAuthorities">F_SCHEDULING_SEND_MESSAGE</param>
+	    </action>
+	    
+	    <action name="executeSendMessage" class="org.hisp.dhis.patient.action.schedule.ExecuteSendMessageAction">
+	      <result name="success" type="velocity-json">
+				/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+	      <param name="requiredAuthorities">F_SCHEDULING_SEND_MESSAGE</param>
+	    </action>
 		
 	</package>
 </struts>

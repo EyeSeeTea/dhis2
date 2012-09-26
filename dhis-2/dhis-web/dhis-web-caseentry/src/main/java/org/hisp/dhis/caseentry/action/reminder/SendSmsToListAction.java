@@ -41,6 +41,7 @@ import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsService;
+import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -64,6 +65,8 @@ public class SendSmsToListAction
 
     private ProgramStageInstanceService programStageInstanceService;
 
+    private CurrentUserService currentUserService;
+
     private I18n i18n;
 
     // -------------------------------------------------------------------------
@@ -77,6 +80,11 @@ public class SendSmsToListAction
     // -------------------------------------------------------------------------
     // Getters && Setters
     // -------------------------------------------------------------------------
+    
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
 
     public void setOutboundSmsService( OutboundSmsService outboundSmsService )
     {
@@ -116,13 +124,6 @@ public class SendSmsToListAction
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
-    
-    private String gatewayId;
-
-    public void setGatewayId( String gatewayId )
-    {
-        this.gatewayId = gatewayId;
-    }
 
     private String msg;
 
@@ -159,8 +160,9 @@ public class SendSmsToListAction
             OutboundSms outboundSms = new OutboundSms();
             outboundSms.setMessage( msg );
             outboundSms.setRecipients( phoneNumberList );
+            outboundSms.setSender( currentUserService.getCurrentUsername() );
 
-            outboundSmsService.sendMessage( outboundSms, gatewayId );
+            outboundSmsService.sendMessage( outboundSms, null );
 
             programStageInstanceService.updateProgramStageInstances( programStageInstanceIds, outboundSms );
 
@@ -173,17 +175,5 @@ public class SendSmsToListAction
 
         return SUCCESS;
     }
-    
-//    private String convertPhoneNumberList( Collection<String> phoneNumberList )
-//    {
-//        String result = "";
-//        
-//        for( String phoneNumber : phoneNumberList )
-//        {
-//            result = phoneNumber + ";";
-//        }
-//        
-//        return result;
-//    }
 
 }

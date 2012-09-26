@@ -41,6 +41,7 @@ import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientIdentifierTypeService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.user.User;
 
 import com.opensymphony.xwork2.Action;
 
@@ -87,25 +88,40 @@ public class ShowAddPatientFormAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private Boolean addNewForm;
-
-    public Boolean getAddNewForm()
+    private Collection<User> healthWorkers;
+    
+    public Collection<User> getHealthWorkers()
     {
-        return addNewForm;
+        return healthWorkers;
     }
-
-    public void setAddNewForm( Boolean addNewForm )
-    {
-        this.addNewForm = addNewForm;
-    }
-
+    
     private Collection<PatientAttribute> noGroupAttributes = new HashSet<PatientAttribute>();
+
+    public Collection<PatientAttribute> getNoGroupAttributes()
+    {
+        return noGroupAttributes;
+    }
 
     private Collection<PatientIdentifierType> identifierTypes;
 
+    public Collection<PatientIdentifierType> getIdentifierTypes()
+    {
+        return identifierTypes;
+    }
+
     private OrganisationUnit organisationUnit;
 
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
+
     private Map<PatientAttributeGroup, Collection<PatientAttribute>> attributeGroupsMap = new HashMap<PatientAttributeGroup, Collection<PatientAttribute>>();
+
+    public Map<PatientAttributeGroup, Collection<PatientAttribute>> getAttributeGroupsMap()
+    {
+        return attributeGroupsMap;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -147,7 +163,8 @@ public class ShowAddPatientFormAction
         }
 
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
+        healthWorkers = organisationUnit.getUsers();
+        
         return SUCCESS;
     }
 
@@ -155,23 +172,4 @@ public class ShowAddPatientFormAction
     // Getter/Setter
     // -------------------------------------------------------------------------
 
-    public Collection<PatientIdentifierType> getIdentifierTypes()
-    {
-        return identifierTypes;
-    }
-    
-    public Collection<PatientAttribute> getNoGroupAttributes()
-    {
-        return noGroupAttributes;
-    }
-
-    public OrganisationUnit getOrganisationUnit()
-    {
-        return organisationUnit;
-    }
-
-    public Map<PatientAttributeGroup, Collection<PatientAttribute>> getAttributeGroupsMap()
-    {
-        return attributeGroupsMap;
-    }
 }

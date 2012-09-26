@@ -36,9 +36,11 @@
 </table>
 
 <table style="margin-top: 15px;">
-    <col style="width: 450px"/>
-    <col/>
-    <col style="width: 450px"/>
+    <colgroup>
+      <col style="width: 500px;"/>
+      <col/>
+      <col style="width: 500px;"/>
+    </colgroup>
 
     <tr>
         <th>$i18n.getString( "available_validation_rules" )</th>

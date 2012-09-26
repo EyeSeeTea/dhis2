@@ -53,10 +53,12 @@
   </table>
 
   <table id="dataElementSelectionArea">
-    <col style="width: 450px"/>
-    <col/>
-    <col style="width: 450px"/>
-    <col/>
+      <colgroup>
+        <col style="width: 500px;"/>
+        <col/>
+        <col style="width: 500px;"/>
+        <col/>
+      </colgroup>
 
     <thead>
       <tr>                

@@ -154,7 +154,7 @@ public class DefaultReportTableService
 
         return getGrid( reportTable, minimal );
     }
-    
+
     public ReportTable getReportTable( String uid, String mode )
     {
         if ( mode.equals( MODE_REPORT_TABLE ) )
@@ -165,10 +165,10 @@ public class DefaultReportTableService
         {
             return reportService.getReport( uid ).getReportTable();
         }
-
+        
         return null;
     }
-
+    
     // -------------------------------------------------------------------------
     // Persistence
     // -------------------------------------------------------------------------

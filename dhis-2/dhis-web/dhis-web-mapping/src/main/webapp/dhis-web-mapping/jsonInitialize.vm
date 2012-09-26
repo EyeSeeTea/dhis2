@@ -35,18 +35,6 @@
     "infrastructuralDataElements": "$!{infrastructuralDataElements.id}",
     "infrastructuralPeriodType": "$!{infrastructuralPeriodType.name}"
   },
-  "baseLayers": [
-#foreach( $baseLayer in $baseLayers )
-    {
-      "data": {
-        "id": "$!{baseLayer.id}",
-        "name": "$!encoder.jsonEncode( ${baseLayer.name} )",
-        "url": "$!encoder.jsonEncode( ${baseLayer.url} )",
-        "layers": "$!encoder.jsonEncode( ${baseLayer.layers} )"
-      }
-    }#if( $velocityCount < $baseLayersSize ),#end
-#end
-  ],
   "overlays": [
 #foreach( $overlay in $overlays )
     {

@@ -120,6 +120,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE indicator DROP COLUMN numeratoraggregationtype" );
         executeSql( "ALTER TABLE indicator DROP COLUMN denominatoraggregationtype" );
         executeSql( "ALTER TABLE dataset DROP COLUMN locked" );
+        executeSql( "ALTER TABLE configuration DROP COLUMN completenessrecipientsid" );
         
         executeSql( "DROP INDEX crosstab" );
         
@@ -377,6 +378,7 @@ public class TableAlteror
         
         // replace null with false for boolean fields
         
+        executeSql( "update dataset set fieldcombinationrequired = false where fieldcombinationrequired is null" );
         executeSql( "update chart set hidelegend = false where hidelegend is null" );
         executeSql( "update chart set regression = false where regression is null" );
         executeSql( "update chart set targetline = false where targetline is null" );
@@ -386,6 +388,7 @@ public class TableAlteror
         executeSql( "update indicatortype set indicatornumber = false where indicatornumber is null" );
         executeSql( "update dataset set mobile = false where mobile is null" );
         executeSql( "update dataset set allowfutureperiods = false where allowfutureperiods is null" );
+        executeSql( "update dataset set validcompleteonly = false where validcompleteonly is null" );
         executeSql( "update dataelement set zeroissignificant = false where zeroissignificant is null" );
         executeSql( "update organisationunit set haspatients = false where haspatients is null" );
         executeSql( "update dataset set expirydays = 0 where expirydays is null" );

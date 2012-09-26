@@ -61,13 +61,22 @@
 
     <property name="mobile" not-null="true" />
 	
-	<property name="allowFuturePeriods" />
-
     <property name="version" />
 
     <property name="expiryDays" />
 	
 	<property name="skipAggregation" />
+	
+	<many-to-one name="notificationRecipients" class="org.hisp.dhis.user.UserGroup"
+	   foreign-key="fk_dataset_notificationrecipients" />
+
+	<!-- Form properties -->
+
+	<property name="allowFuturePeriods" />
+
+	<property name="fieldCombinationRequired" />
+	
+	<property name="validCompleteOnly" />
 
   </class>
 </hibernate-mapping>

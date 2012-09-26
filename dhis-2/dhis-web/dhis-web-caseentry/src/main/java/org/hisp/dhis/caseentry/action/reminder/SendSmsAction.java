@@ -36,6 +36,7 @@ import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsService;
+import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -65,6 +66,13 @@ public class SendSmsAction
         this.programStageInstanceService = programStageInstanceService;
     }
 
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
     private I18n i18n;
 
     public void setI18n( I18n i18n )
@@ -81,13 +89,6 @@ public class SendSmsAction
     public void setProgramStageInstanceId( Integer programStageInstanceId )
     {
         this.programStageInstanceId = programStageInstanceId;
-    }
-
-    private String gatewayId;
-
-    public void setGatewayId( String gatewayId )
-    {
-        this.gatewayId = gatewayId;
     }
 
     private String msg;
@@ -122,29 +123,33 @@ public class SendSmsAction
             try
             {
                 OutboundSms outboundSms = new OutboundSms( msg, phoneNumber );
-                outboundSmsService.sendMessage( outboundSms, gatewayId );
-                
+                outboundSms.setSender( currentUserService.getCurrentUsername() );
+                outboundSmsService.sendMessage( outboundSms, null );
+
                 List<OutboundSms> outboundSmsList = programStageInstance.getOutboundSms();
-                if( outboundSmsList == null)
+                if ( outboundSmsList == null )
                 {
                     outboundSmsList = new ArrayList<OutboundSms>();
                 }
                 outboundSmsList.add( outboundSms );
                 programStageInstance.setOutboundSms( outboundSmsList );
                 programStageInstanceService.updateProgramStageInstance( programStageInstance );
-                
+
                 message = i18n.getString( "sent_message_to" ) + " " + phoneNumber;
+
+                return SUCCESS;
             }
             catch ( SmsServiceException e )
             {
                 message = e.getMessage();
+
+                return ERROR;
             }
         }
-        else
-        {
-            message = i18n.getString( "patient_did_not_register_a_phone_number" );
-        }
-        return SUCCESS;
+
+        message = i18n.getString( "patient_did_not_register_a_phone_number" );
+        
+        return INPUT;
     }
 
 }

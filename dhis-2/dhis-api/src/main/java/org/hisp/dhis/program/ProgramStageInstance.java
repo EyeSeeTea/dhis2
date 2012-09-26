@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.patient.comment.Comment;
+import org.hisp.dhis.patientcomment.PatientComment;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 
 /**
@@ -56,9 +56,7 @@ public class ProgramStageInstance
 
     public static final int LATE_VISIT_STATUS = 4;
 
-    public static final int UNKNOWN_STATUS = 5;
-
-    public static final int SKIPPED_STATUS = 6;
+    public static final int SKIPPED_STATUS = 5;
 
     private int id;
 
@@ -76,7 +74,7 @@ public class ProgramStageInstance
 
     private List<OutboundSms> outboundSms;
 
-    private Set<Comment> comments;
+    private Set<PatientComment> patientComments;
 
     private Integer status;
 
@@ -256,14 +254,14 @@ public class ProgramStageInstance
         this.outboundSms = outboundSms;
     }
 
-    public Set<Comment> getComments()
+    public Set<PatientComment> getPatientComments()
     {
-        return comments;
+        return patientComments;
     }
 
-    public void setComments( Set<Comment> comments )
+    public void setPatientComments( Set<PatientComment> patientComments )
     {
-        this.comments = comments;
+        this.patientComments = patientComments;
     }
 
     public Integer getStatus()

@@ -55,7 +55,6 @@ public interface ExpressionService
     final String EXPRESSION_NOT_WELL_FORMED = "expression_not_well_formed";
     final String CONSTANT_DOES_NOT_EXIST = "constant_does_not_exist";
 
-
     final String DAYS_DESCRIPTION = "[Number of days]";
     final String NULL_REPLACEMENT = "0";
     final String SPACE = " ";

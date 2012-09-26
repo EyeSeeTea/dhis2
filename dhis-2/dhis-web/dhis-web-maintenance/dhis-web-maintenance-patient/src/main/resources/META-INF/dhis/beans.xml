@@ -536,9 +536,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="patientIdentifierTypeService">
 			<ref bean="org.hisp.dhis.patient.PatientIdentifierTypeService" />
 		</property>
-		<property name="programService">
-			<ref bean="org.hisp.dhis.program.ProgramService" />
-		</property>
 	</bean>
 	<bean
 		id="org.hisp.dhis.patient.action.patientidentifiertype.ValidatePatientIdentifierTypeAction"
@@ -879,6 +876,29 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="programValidationService">
 			<ref bean="org.hisp.dhis.program.ProgramValidationService" />
 		</property>
+	</bean>
+	
+	<!-- Scheduling -->
+	
+	<bean id="org.hisp.dhis.patient.action.schedule.GetScheduleParamsAction"
+		class="org.hisp.dhis.patient.action.schedule.GetScheduleParamsAction"
+		scope="prototype">
+		<property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
+		<property name="schedulingManager" ref="org.hisp.dhis.patient.scheduling.ProgramSchedulingManager" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.patient.action.schedule.ScheduleSendMessageTasksAction" class="org.hisp.dhis.patient.action.schedule.ScheduleSendMessageTasksAction"  scope="prototype">
+ 		 <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
+ 		 <property name="schedulingManager" ref="org.hisp.dhis.patient.scheduling.ProgramSchedulingManager" />
+ 	</bean>
+ 	
+ 	<bean id="org.hisp.dhis.patient.action.schedule.ExecuteSendMessageAction"
+		class="org.hisp.dhis.patient.action.schedule.ExecuteSendMessageAction"
+		scope="prototype">
+		<property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
+		<property name="programStageInstanceService" ref="org.hisp.dhis.program.ProgramStageInstanceService" />
+		<property name="jdbcTemplate" ref="jdbcTemplate" />
+		<property name="outboundSmsService" ref="org.hisp.dhis.sms.outbound.OutboundSmsService" />
 	</bean>
 
 </beans>

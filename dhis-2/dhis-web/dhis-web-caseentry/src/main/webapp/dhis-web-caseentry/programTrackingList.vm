@@ -8,7 +8,11 @@
 	});
 </script>
 
-<h4>$programStageInstance.programStage.name</h4>
+<h3>
+ <a href="javascript:onClickBackBtn();">$i18n.getString( 'program_tracking' )</a>
+ &#8226; <a href="javascript:showPatientDashboardForm( $programStageInstance.programInstance.patient.id );">$i18n.getString( 'patient_dashboard' )</a>
+ &raquo; $programStageInstance.programStage.name
+</h3>
 
 <input type='hidden' id='currentUsername' name='currentUsername' value='$currentUsername'>
 <input type='hidden' id='programInstanceId' name='programInstanceId' value='$programStageInstance.programInstance.id'>
@@ -40,9 +44,22 @@
 		</td>
 	</tr>
 	<tr>
+		<td class="bold">$i18n.getString("health_worker")</td>
 		<td>
-			<br><input type='button' value='$i18n.getString("back")' onclick='onClickBackBtn();'>
-			<input type='button' value='$i18n.getString("patient_dashboard")' onclick='javascript:showPatientProgramTracking( "$programStageInstance.programInstance.id" );'>
+			#if($!programStageInstance.programInstance.patient.healthWorker )
+				$!programStageInstance.programInstance.patient.healthWorker.name
+			#else
+				[$i18n.getString('none')]
+			#end
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<br>
+			#set($status = $programStageInstance.getEventStatus())
+			#if( $programStageInstance.irregular!='true' && ($status==3 || $status==4 || $status==5 ) )
+				<input type="button" value="$i18n.getString('remove_this_event')" onclick="javascript:removeEvent($programStageInstance.id, true)" title='$i18n.getString( "remove_this_event" )'></a>
+			#end
 		</td>
 	</tr>
 </table>
@@ -50,25 +67,24 @@
 <div id="smsManagementForm">
 	<ul>
 		<li><a href="#tab-1">$i18n.getString("reschedule_and_set_status")</a></li>
-		<li><a href="#tab-3">$i18n.getString("send_sms")</a></li>
 		<li><a href="#tab-2">$i18n.getString("tracking_history")</a></li>
 	</ul>
 	
 	<div id="tab-1">
 		<table class='mainPageTable' id='progarmStageListDiv' name='progarmStageListDiv' >
-				<tr>
-					<th></th>       
-					<th>$i18n.getString( "operation" )</th>
-				</tr>
 			<tr>
 				<td>$i18n.getString( "reschedule_due_date" )</td>        
 				#set( $duedateId = "value_" + $programStageInstance.id + "_date" )        
 				<td>        
-					<input type="text" id="$duedateId" value="$!format.formatDate( $programStageInstance.dueDate )" onchange="saveDueDate( $programStageInstance.id, '$encoder.jsEncode( $programStageInstance.programStage.name )' )" />
+					<input type="text" id="$duedateId" value="$!format.formatDate( $programStageInstance.dueDate )" onchange="saveDueDate( $programInstance.id, $programStageInstance.id, '$encoder.jsEncode( $programStageInstance.programStage.name )' )" />
 					<input type="hidden" name="enrollmentDate" id="enrollmentDate" value="$!format.formatDate( $programInstance.enrollmentDate )">
 					<input type="hidden" name="dateOfIncident" id="dateOfIncident" value="$!format.formatDate( $programInstance.dateOfIncident )">
 					<script type="text/javascript">
-						datePicker( '$duedateId' );
+						#if($status==1 || $status==5 )
+							disable('$duedateId');
+						#else
+							datePicker( '$duedateId' );
+						#end
 					</script> 
 				</td> 
 			</tr>
@@ -76,32 +92,44 @@
 				<td>$i18n.getString( "status" )</td>
 				<td>
 					<select id="stat_$programStageInstance.id" name="status_$programStageInstance.id" onchange="setEventStatus(this, $programStageInstance.id)">
-						<option value='5'>$i18n.getString("unknown")</option>
-						<option value='1'>$i18n.getString("completed")</option>
-						<option value='2'>$i18n.getString("incompleted")</option>
-						<option value='6'>$i18n.getString("skipped")</option>
+						#if($status==4)
+							<option value='4'>$i18n.getString("overdue")</option>
+							<option value='5'>$i18n.getString("skipped")</option>
+						#elseif($status==3)
+							<option value='3'>$i18n.getString("scheduled_in_future")</option>
+							<option value='5'>$i18n.getString("skipped")</option>
+						#elseif($status==5)
+							<option value='4'>$i18n.getString("overdue")</option>
+							<option value='3'>$i18n.getString("scheduled_in_future")</option>
+							<option value='5'>$i18n.getString("skipped")</option>
+						#else
+							<option value='1'>$i18n.getString("completed")</option>
+							<option value='2'>$i18n.getString("incompleted")</option>
+						#end
 					</select>
-						<script>
-							var status = $programStageInstance.getEventStatus(); 
-							setFieldValue("stat_$programStageInstance.id", status);
-						</script>
+					<script>
+						setFieldValue("stat_$programStageInstance.id", $status);
+					</script>
 				</td>
 			</tr>
 			<tr>
 				<td>$i18n.getString( "post_comment" )</td>
 				<td>
-					<input type='text' id='commentText' name='commentText' onkeypress="keypress(event,this,'$programStageInstance.id')">
-					<input type='button' value="+" class='tiny-button' title='$i18n.getString("post_comment")' onclick="addComment(this,'$programStageInstance.id')">
+					<input type='text' id='commentText' name='commentText' onkeypress="keypress(event,this,'$programStageInstance.id');">
+					<input type='button' value="+" class='tiny-button' title='$i18n.getString("post_comment")' onclick="addComment( byId('commentText'),'$programStageInstance.id');">
 				</td>
 			</tr>
-			
-			#if($programStageInstance.irregular!='true')
 			<tr>
+				<td>$i18n.getString( "message" )</td>
 				<td>
-					<input type="hidden" value="$i18n.getString('remove_this_event')" onclick="javascript:removeEvent($programStageInstance.id)" title='$i18n.getString( "remove_this_event" )'></a>
+					<textarea id="smsMessage" name="smsMessage" style="width:260px;height:100px;" class="{validate:{required:true,maxlength:160}}"></textarea>
+					<input type="button" value="$i18n.getString( 'send_sms' )" onclick="sendSmsOnePatient( byId('smsMessage'),'$programStageInstance.id' );"/>
 				</td>
 			</tr>
-			#end
+			<tr>
+				<td></td>
+				<td id="smsError" style="color:red;"></td>
+			</tr>
 		</table>
 	</div>
 	
@@ -114,77 +142,71 @@
 			<tr>
 				<th>$i18n.getString( "date" )</th>
 				<th>$i18n.getString( "program_stage" )</th>
+				<th>$i18n.getString( "sender" )</th>
 				<th>$i18n.getString( "message" )</th>
 			</tr>
 			
 			<tbody id='commentTB'>
 				#set($index = 0)
-				#set( $mark = false )
 				#foreach( $comment in $comments )
 					#if( $index < 5 )
-						<tr id="comment_$comment.id" #alternate($mark)>
-							<td>$format.formatDate($comment.createdDate)</td>
+						<tr id="comment_$comment.id">
+							<td>$format.formatDateTime($comment.createdDate)</td>
 							<td>$programStageInstance.programStage.name</td>
-							<td>$comment.creator - $comment.commentText</td>
+							<td>$comment.creator</td>
+							<td>$comment.commentText</td>
 							#set($index = $index + 1)
-							#set( $mark = !$mark)
 						</tr>
 					#end
 				#end
-			</tbody>	
-			
-			<tbody id='smsManagementList'>
-				  #foreach( $sms in $outboundSms )
+				
+				#foreach( $sms in $outboundSms )
 					#if( $index < 5 )
-						<tr id="tr${sms.id}" #alternate($mark) >
-							<td>$format.formatDate($!sms.date)</td>
-							<td> $programStageInstance.programStage.name</td>
+						<tr id="tr${sms.id}" >
+							<td>$format.formatDateTime($!sms.date)</td>
+							<td>$programStageInstance.programStage.name</td>
+							<td>$sms.sender</td>
 							<td>$sms.message</td>
-							#set( $mark = !$mark)
 						</tr>
 					#end
 				#end
-			</tbody>
-			
-			<tbody id='moreComments' class='hidden'>
 				#foreach( $comment in $comments )
 					#if( $index >= 5 )
-						<tr id="comment_$comment.id" #alternate($mark)>
-							<td>$format.formatDate($comment.createdDate)</td>
-							<td> $programStageInstance.programStage.name</td>
-							<td>$comment.creator - $comment.commentText</td>
-							#set( $mark = !$mark)
+						<tr id="comment_$comment.id" class='hidden'>
+							<td>$format.formatDateTime($comment.createdDate)</td>
+							<td>$programStageInstance.programStage.name</td>
+							<td>$comment.creator</td>
+							<td>$comment.commentText</td>
 						</tr>
 					#end
 				#end	
 				
 				#foreach( $sms in $outboundSms )
 					#if( $index >= 5 )
-						<tr id="tr${sms.id}" #alternate($mark) >
-							<td>$format.formatDate($!sms.date)</td>
+						<tr id="tr${sms.id}" class='hidden' >
+							<td>$format.formatDateTime($!sms.date)</td>
 							<td>$programStageInstance.programStage.name</td>
+							<td>$sms.sender</td>
 							<td>$sms.message</td>
-							#set( $mark = !$mark)
 						</tr>
 					#end
 				#end
 			</tbody>
 		</table>
 		<br>
-		<input type='button' value='$i18n.getString("show_hide_more")' onclick='jQuery("#moreComments").toggle();'>
+		#set($count = $comments.size() + $outboundSms.size() )
+		<input type='button' id="showCommentBtn" name="showCommentBtn" value='$i18n.getString("show_hide_more")' #if($count && $count<=5) class='hidden' #end onclick='commentDivToggle(false);'>
+		<input type='button' id="hideCommentBtn" name="hideCommentBtn" value='$i18n.getString("show_hide_more")' class='hidden' onclick='commentDivToggle(true);'>
 	</div>
-	
-	<div id="tab-3">
-		#parse( "/dhis-web-caseentry/sendSmsForm.vm" )
-	</div>
-	
 </div>
 
 <script type="text/javascript">
 	jQuery(document).ready(	function(){
-		var i18n_color_quick_help = '$encoder.jsEscape( $i18n.getString( "color_quick_help" ) , "'")';
-		var i18n_comment_added = '$encoder.jsEscape( $i18n.getString( "comment_added" ) , "'")';
 		setFieldValue( "programStageInstanceId", "$!programStageInstance.id" );
 	});
+	
+	var i18n_color_quick_help = '$encoder.jsEscape( $i18n.getString( "color_quick_help" ) , "'")';
+	var i18n_comment_added = '$encoder.jsEscape( $i18n.getString( "comment_added" ) , "'")';
+	var i18n_this_field_is_required = '$encoder.jsEscape( $i18n.getString( "this_field_is_required" ) , "'")';
 	
 </script>

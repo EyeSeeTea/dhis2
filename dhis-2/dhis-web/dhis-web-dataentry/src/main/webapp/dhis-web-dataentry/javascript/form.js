@@ -249,7 +249,7 @@ function uploadLocalData()
         var key = array[0];
         var value = dataValues[key];
 
-        if( value.value.length > 254 )
+        if ( value.value.length > 254 )
         {
             value.value = value.value.slice(0, 254);
         }
@@ -320,7 +320,7 @@ function addEventListeners()
 
         $( this ).change( function()
         {
-            saveVal( dataElementId, optionComboId );
+            saveVal( dataElementId, optionComboId, id );
         } );
 
         $( this ).dblclick( function()
@@ -328,7 +328,7 @@ function addEventListeners()
             viewHist( dataElementId, optionComboId );
         } );
 
-        $( this ).keyup( function(event)
+        $( this ).keyup( function( event )
         {
             keyPress( event, this );
         } );
@@ -361,10 +361,43 @@ function addEventListeners()
 
         $( this ).change( function()
         {
-            saveBoolean( dataElementId, optionComboId );
+            saveBoolean( dataElementId, optionComboId, id );
         } );
 
         $( this ).css( 'width', '100%' );
+    } );
+    
+    $( '[name="dynselect"]' ).each( function( i )
+    {
+    	var id = $( this ).attr( 'id' );
+    	var code = id.split( '-' )[0];
+    	
+    	$( this ).unbind( 'change' );
+    	
+    	$( this ).change( function()
+    	{
+            dynamicSelectChanged( id, code );
+    	} );
+    } );
+    
+    $( '[name="dyninput"]' ).each( function( i )
+    {
+    	var id = $( this ).attr( 'id' );
+    	var code = id.split( '-' )[0];
+        var optionComboId = id.split( '-' )[1];
+        
+        $( this ).unbind( 'change' );
+        $( this ).unbind( 'keyup' );
+
+        $( this ).change( function()
+        {
+            saveDynamicVal( code, optionComboId, id );
+        } );
+
+        $( this ).keyup( function( event )
+        {
+            keyPress( event, this );
+        } );
     } );
 }
 
@@ -396,16 +429,173 @@ function loadForm( dataSetId )
 
         $( '#contentDiv' ).html( html );
 
+        enableSectionFilter();
+        insertDynamicOptions();
         loadDataValues();
     }
     else
     {
         log( 'Loading form remotely: ' + dataSetId );
 
-        $( '#contentDiv' ).load( 'loadForm.action', {
+        $( '#contentDiv' ).load( 'loadForm.action', 
+        {
             dataSetId : dataSetId
-        }, loadDataValues );
+        }, 
+        function() 
+        {
+            enableSectionFilter();
+            insertDynamicOptions();
+            loadDataValues()
+        } );
     }
+}
+
+//------------------------------------------------------------------------------
+// Dynamic input
+//------------------------------------------------------------------------------
+
+function insertDynamicOptions()
+{
+	var optionMarkup = $( '#dynselect' ).html();
+	
+	if ( !isDefined( optionMarkup ) )
+	{
+		return; // Custom form only
+	}
+	
+    $( '[name="dynselect"]' ).each( function( i )
+    {
+    	$( this ).append( optionMarkup );
+    } );
+}
+
+function dynamicSelectChanged( id, code )
+{
+	var validSelection = $( '#' + id ).val() != -1;
+	var color = validSelection ? COLOR_WHITE : COLOR_GREY;
+	
+	$( 'input[code="' + code + '"]' ).prop( 'disabled', !validSelection );
+	$( 'input[code="' + code + '"]' ).css( 'background-color', color );
+}
+
+function getDynamicSelectElementId( dataElementId )
+{
+	// Search for element where data element is already selected
+	
+	var id = null;
+	
+	$( '[name="dynselect"]' ).each( function( i )
+	{
+		if ( $( this ).val() == dataElementId )
+		{
+			id = $( this ).attr( 'id' );
+			return false;
+		}
+	} );
+
+	if ( id != null )
+	{
+		return id;
+	}
+	
+	// Search for unselected element
+	
+	$( '[name="dynselect"]' ).each( function( i )
+	{
+		if ( $( this ).val() == -1 )
+		{
+			id = $( this ).attr( 'id' );
+			return false;
+		}
+	} );
+	
+	return id;
+}
+
+//------------------------------------------------------------------------------
+// Section filter
+//------------------------------------------------------------------------------
+
+function enableSectionFilter()
+{
+    var $sectionsHeaders = $( '.formSection .cent h3' );
+    $( '#filterDataSetSection' ).children().remove();
+
+    if ( $sectionsHeaders.size() > 1)
+    {
+        $( '#selectionBox' ).css( 'height', '123px' );
+
+        $( '#filterDataSetSection' ).append( "<option value='all'>" + i18n_show_all_sections + "</option>" );
+
+        $sectionsHeaders.each(function(idx, value) {
+            $( '#filterDataSetSection' ).append( "<option value='" + idx + "'>" + value.innerHTML + "</option>" );
+        } );
+
+        $( '#filterDataSetSectionTr' ).show();
+    }
+    else
+    {
+        $( '#selectionBox' ).css( 'height', '93px' );
+        $( '#filterDataSetSectionTr' ).hide();
+    }
+}
+
+function filterOnSection()
+{
+    var $filterDataSetSection = $( '#filterDataSetSection' );
+    var value = $filterDataSetSection.val();
+
+    if ( value == 'all' )
+    {
+        $( '.formSection' ).show();
+    }
+    else
+    {
+        $( '.formSection' ).hide();
+        $( $( '.formSection' )[value] ).show();
+    }
+}
+
+function filterInSection( $this )
+{
+    var $tbody = $this.parent().parent().parent();
+    var $trTarget = $tbody.find( 'tr:not([colspan])' );
+
+    if ( $this.val() == '' )
+    {
+        $trTarget.show();
+    }
+    else
+    {
+        var $trTargetChildren = $trTarget.find( 'td:first-child' );
+
+        $trTargetChildren.each( function( idx, item ) 
+        {
+            var text1 = $this.val().toUpperCase();
+            var text2 = $( item ).find( 'span' ).html().toUpperCase();
+
+            if ( text2.indexOf( text1 ) >= 0 )
+            {
+                $( item ).parent().show();
+            }
+            else
+            {
+                $( item ).parent().hide();
+            }
+        } );
+    }
+
+    refreshZebraStripes( $tbody );
+}
+
+//------------------------------------------------------------------------------
+// Supportive methods
+//------------------------------------------------------------------------------
+
+function refreshZebraStripes( $tbody )
+{
+    $tbody.find( 'tr:not([colspan]):visible:even' ).find( 'td:first-child' ).removeClass( 'reg alt' ).addClass( 'alt' );
+    $tbody.find( 'tr:not([colspan]):visible:odd' ).find( 'td:first-child' ).removeClass( 'reg alt' ).addClass( 'reg' );
 }
 
 function getDataElementType( dataElementId )
@@ -557,7 +747,7 @@ function displayPeriodsInternal()
     var periods = periodTypeFactory.get( periodType ).generatePeriods( currentPeriodOffset );
     periods = periodTypeFactory.reverse( periods );
     
-    if ( allowFuturePeriods == "false" )
+    if ( allowFuturePeriods == false )
     {
     	periods = periodTypeFactory.filterFuturePeriods( periods );
     }
@@ -589,7 +779,7 @@ function dataSetSelected()
     var periods = periodTypeFactory.get( periodType ).generatePeriods( currentPeriodOffset );
     periods = periodTypeFactory.reverse( periods );
     
-    if ( allowFuturePeriods == "false" )
+    if ( allowFuturePeriods == false )
     {
     	periods = periodTypeFactory.filterFuturePeriods( periods );
     }
@@ -676,15 +866,23 @@ function insertDataValues()
 
     $( '[name="entryfield"]' ).val( '' );
     $( '[name="entryselect"]' ).val( '' );
+    $( '[name="dyninput"]' ).val( '' );
+    $( '[name="dynselect"]' ).val( '' );
 
     $( '[name="entryfield"]' ).css( 'background-color', COLOR_WHITE );
     $( '[name="entryselect"]' ).css( 'background-color', COLOR_WHITE );
+    $( '[name="dyninput"]' ).css( 'background-color', COLOR_WHITE );
 
     $( '[name="min"]' ).html( '' );
     $( '[name="max"]' ).html( '' );
 
     $( '[name="entryfield"]' ).filter( ':disabled' ).css( 'background-color', COLOR_GREY );
+    
+    // Disable and grey dynamic fields to start with and enable later
 
+    $( '[name="dyninput"]' ).prop( 'disabled', true );    
+    $( '[name="dyninput"]' ).css( 'background-color', COLOR_GREY );
+    
     $.ajax( {
     	url: 'getDataValues.action',
     	data:
@@ -721,9 +919,49 @@ function insertDataValues()
 	        {
 	            var fieldId = '#' + value.id + '-val';
 
-	            if ( $( fieldId ) )
+	            if ( $( fieldId ).length > 0 ) // Insert for fixed input fields
 	            {
 	                $( fieldId ).val( value.val );
+	            }
+	            else // Insert for potential dynamic input fields
+	            {
+	                var dataElementId = value.id.split( '-' )[0];
+	                var optionComboId = value.id.split( '-' )[1];
+	                
+	                var selectElementId = '#' + getDynamicSelectElementId( dataElementId );
+	                
+	                if ( $( selectElementId ).length == 0 )
+	                {
+	                	log( 'Could not find dynamic select element for data element: ' + dataElementId );
+	                	return true;
+	                }
+
+                	var code = $( selectElementId ).attr( 'id' ).split( '-' )[0];
+        			
+        			if ( !isDefined( code ) )
+        			{
+        				log( 'Could not find code on select element: ' + selectElementId );
+        				return true;
+        			}
+
+    				var dynamicInputId = '#' + code + '-' + optionComboId + '-dyninput';
+    				
+        			if ( $( dynamicInputId ).length == 0 )
+    				{
+        				log( 'Could not find find dynamic input element for option combo: ' + optionComboId );
+        				return true;
+    				}
+
+        			// Set data element in select list
+        			    		    
+        			$( selectElementId ).val( dataElementId );
+
+        			// Enable input fields and set value
+        			
+        		    $( 'input[code="' + code + '"]' ).prop( 'disabled', false );    
+        		    $( 'input[code="' + code + '"]' ).css( 'background-color', COLOR_WHITE );
+        		    
+    				$( dynamicInputId ).val( value.val );
 	            }
 
 	            dataValueMap[value.id] = value.val;
@@ -872,64 +1110,44 @@ function getPreviousEntryField( field )
 // Data completeness
 // -----------------------------------------------------------------------------
 
-function validateCompleteDataSet()
+function registerCompleteDataSet()
 {
-    var confirmed = confirm( i18n_confirm_complete );
-
-    if ( confirmed )
-    {
-        var params = storageManager.getCurrentCompleteDataSetParams();
-
-        $.ajax( { url: 'getValidationViolations.action',
-        	data: params,
-        	dataType: 'json',
-        	success: function( data )
+	var confirmed = confirm( i18n_confirm_complete );
+	
+	if ( !confirmed )
+	{
+		return false;
+	}
+	
+	validate( true, function() {	
+	    var params = storageManager.getCurrentCompleteDataSetParams();
+	
+		storageManager.saveCompleteDataSet( params );
+	
+	    $.ajax( {
+	    	url: 'registerCompleteDataSet.action',
+	    	data: params,
+	        dataType: 'json',
+	    	success: function(data)
 	        {
-	            registerCompleteDataSet( data );
+	            if ( data.status == 2 )
+	            {
+	                log( 'Data set is locked' );
+	                setHeaderMessage( i18n_register_complete_failed_dataset_is_locked );
+	            }
+	            else
+	            {
+	                disableCompleteButton();
+	
+	                storageManager.clearCompleteDataSet( params );
+	            }
 	        },
-	        error: function()
-	        {
-	            // no response from server, fake a positive result and save it
-	            registerCompleteDataSet( { 'response' : 'success' } );
-	        }
-    	} );
-    }
-}
-
-function registerCompleteDataSet( json )
-{
-    var params = storageManager.getCurrentCompleteDataSetParams();
-
-	storageManager.saveCompleteDataSet( params );
-
-    $.ajax( {
-    	url: 'registerCompleteDataSet.action',
-    	data: params,
-        dataType: 'json',
-    	success: function(data)
-        {
-            if( data.status == 2 )
-            {
-                log( 'DataSet is locked' );
-                setHeaderMessage( i18n_register_complete_failed_dataset_is_locked );
-            }
-            else
-            {
-                disableCompleteButton();
-
-                storageManager.clearCompleteDataSet( params );
-
-                if ( json.response == 'input' )
-                {
-                    validate();
-                }
-            }
-        },
-	    error: function()
-	    {
-	    	disableCompleteButton();
-	    }
-    } );
+		    error: function()
+		    {
+		    	disableCompleteButton();
+		    }
+	    } );
+	} );
 }
 
 function undoCompleteDataSet()
@@ -945,9 +1163,9 @@ function undoCompleteDataSet()
         	dataType: 'json',
         	success: function(data)
 	        {
-                if( data.status == 2 )
+                if ( data.status == 2 )
                 {
-                    log( 'DataSet is locked' );
+                    log( 'Data set is locked' );
                     setHeaderMessage( i18n_unregister_complete_failed_dataset_is_locked );
                 }
                 else
@@ -1005,8 +1223,10 @@ function displayUserDetails()
 // Validation
 // -----------------------------------------------------------------------------
 
-function displayValidationDialog()
+function displayValidationDialog( data )
 {
+	$( '#validationDiv' ).html( data );
+	
     $( '#validationDiv' ).dialog( {
         modal : true,
         title : 'Validation',
@@ -1015,26 +1235,101 @@ function displayValidationDialog()
     } );
 }
 
-function validate()
+function validate( ignoreSuccessfulValidation, successCallback )
 {
-    var periodId = $( '#selectedPeriodId' ).val();
-    var dataSetId = $( '#selectedDataSetId' ).val();
+	var compulsoryCombinationsValid = validateCompulsoryCombinations();
+	
+	// Check for compulsory combinations and return false if violated
+	
+	if ( !compulsoryCombinationsValid )
+	{
+    	var html = '<h3>' + i18n_validation_result + '</h3>' +
+        	'<p class="bold">' + i18n_all_values_for_data_element_must_be_filled + '</p>';
+		
+    	displayValidationDialog( html );
+	
+		return false;
+	}
 
-    $( '#validationDiv' ).load( 'validate.action', {
-        periodId : periodId,
-        dataSetId : dataSetId,
-        organisationUnitId : currentOrganisationUnitId
-    }, function( response, status, xhr )
+	// Check for validation rules and whether complete is only allowed if valid
+	
+	var successHtml = '<h3>' + i18n_validation_result + '</h3>' +
+		'<p class="bold">' + i18n_successful_validation + '</p>';
+
+	var validCompleteOnly = dataSets[currentDataSetId].validCompleteOnly;
+
+    var params = storageManager.getCurrentCompleteDataSetParams();
+    
+    $( '#validationDiv' ).load( 'validate.action', params, 
+    function( response, status, xhr )
     {
-        if ( status == 'error' )
+    	var success = null;
+    	
+        if ( status == 'error' && !ignoreSuccessfulValidation )
         {
             window.alert( i18n_operation_not_available_offline );
+            success = true;  // Accept if offline
         }
         else
         {
-            displayValidationDialog();
+        	var hasViolations = isDefined( response ) && $.trim( response ).length > 0;
+        	var success = !( hasViolations && validCompleteOnly );
+        	
+        	if ( hasViolations )
+        	{
+        		displayValidationDialog( response );
+        	}
+        	else if ( !ignoreSuccessfulValidation )
+        	{
+        		displayValidationDialog( successHtml );
+        	}        	
+        }
+        
+        if ( success && $.isFunction( successCallback ) )
+        {
+        	successCallback.call();
         }
     } );
+}
+
+function validateCompulsoryCombinations()
+{
+	var fieldCombinationRequired = dataSets[currentDataSetId].fieldCombinationRequired;
+	
+    if ( fieldCombinationRequired )
+    {
+        var violations = false;
+		
+        $( '[name="entryfield"]' ).add( '[name="entryselect"]' ).each( function( i )
+        {
+            var id = $( this ).attr( 'id' );
+            var dataElementId = id.split( '-' )[0];		
+            var hasValue = $.trim( $( this ).val() ).length > 0;
+            
+            if ( hasValue )
+            {
+            	$selector = $( '[name="entryfield"][id^="' + dataElementId + '-"]' ).
+            		add( '[name="entryselect"][id^="' + dataElementId + '-"]' );
+				
+                $selector.each( function( i )
+                {
+                    if ( $.trim( $( this ).val() ).length == 0 )
+                    {
+                        violations = true;						
+                        $selector.css( 'background-color', COLOR_RED );						
+                        return false;
+                    }
+                } );
+            }
+        } );
+		
+        if ( violations )
+        {
+            return false;
+        }
+    }
+	
+	return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -1064,7 +1359,8 @@ function viewHist( dataElementId, optionComboId )
         optionComboId : optionComboId,
         periodId : periodId,
         organisationUnitId : currentOrganisationUnitId
-    }, function( response, status, xhr )
+    }, 
+    function( response, status, xhr )
     {
         if ( status == 'error' )
         {
@@ -1237,7 +1533,8 @@ function StorageManager()
             localStorage[id] = html;
 
             log( 'Successfully stored form: ' + dataSetId );
-        } catch ( e )
+        } 
+        catch ( e )
         {
             log( 'Max local storage quota reached, ignored form: ' + dataSetId );
             return false;

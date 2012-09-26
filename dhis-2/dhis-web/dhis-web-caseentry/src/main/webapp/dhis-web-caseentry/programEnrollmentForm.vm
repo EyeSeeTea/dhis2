@@ -7,7 +7,7 @@
 	<ul>
 		<li><a href="#tab-1">$i18n.getString("data_entry_screen")</a></li>
 		<li><a href="#tab-2">$i18n.getString("identifier_and_attribute")</a></li>
-		<li><a href="#tab-3">$i18n.getString("modify_due_date_or_visit_date")</a></li>
+		<li><a href="#tab-3">$i18n.getString("reschedule_and_set_status")</a></li>
 		<li><a href="#tab-4">$i18n.getString("comments_and_sms_message")</a></li>
 		<li><a href="#tab-5">$i18n.getString("program_reports")</a></li>
 	</ul>
@@ -21,14 +21,14 @@
 					<br>		
 					<table id='executionDateTB' name="executionDateTB" class='hidden'>
 						<tr>
-							<th class='text-column'><span id="reportDateDescriptionField">$i18n.getString( "report_date" ) </span></th>
+							<th class='text-column'><span id="reportDateDescriptionField">$i18n.getString( "report_date" ) </span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 							<th><input type="text" id="executionDate" name="executionDate" class='criteria' value="$!format.formatDate( $programStageInstance.executionDate )" >
 								<script type="text/javascript">
 								   datePickerValid( 'executionDate', false );
 								</script>
 							</th>
-							<th class='text-column'><label for="dueDate">$i18n.getString( "due_date" ) </label></th>
-							<th><input type="text" id="dueDate" name="dueDate" class='criteria' value="$!format.formatDate( $programStageInstance.dueDate )" readonly > </th>
+							<th class='text-column'><label for="dueDate">$i18n.getString( "due_date" ) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label></th>
+							<th><input type="text" id="dueDate" name="dueDate" class='criteria' value="$!format.formatDate( $programStageInstance.dueDate )" readonly > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
 						</tr>
 					</table>
 				</div>
@@ -41,8 +41,6 @@
 	<div id="tab-2">
 		<form id='programEnrollmentInforForm' name='programEnrollmentInforForm' action='#' method="POST" >
 			#if( ( $!noIden && $!noIden > 0) || ( $!noOtherGroup && $!noOtherGroup > 0) || ( $!noGroup && $!noGroup > 0 ) )
-				<input type='hidden' id='programId' name='programId' value='$programInstance.program.id'>
-				<input type='hidden' id='patientId' name='patientId' value='$programInstance.patient.id'>
 				<!-- IDENTIFIERS -->
 				<table id='enrollmentInforDiv' name='enrollmentInforDiv' class='mainPageTable' >
 					#if( $!noIden && $noIden > 0 )
@@ -113,65 +111,7 @@
 
 	<!-- Program-stage-instance TAB -->
 	<div id="tab-3">
-		<fieldset>
-			<legend>$i18n.getString("program")</legend>
-			<table>
-				<tr>
-					<td class='text-column'><label for="enrollmentDate">$programInstance.program.dateOfEnrollmentDescription<em title="$i18n.getString( "required" )" class="required"> * </em></label></td>
-					<td><input type="text" id="enrollmentDate" name="enrollmentDate" class="{validate:{required:true}}"></td>
-				</tr>
-				<tr>
-					<td class='text-column'><label for="dateOfIncident">$programInstance.program.dateOfIncidentDescription<em title="$i18n.getString( "required" )" class="required"> * </em></label></td>
-					<td><input type="text" id="dateOfIncident" name="dateOfIncident"  class="{validate:{required:true}}"></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>
-						<input type="button" class='button' value="$i18n.getString( 'update' )" onclick='updateEnrollment($programInstance.patient.id, $programInstance.program.id, $programInstance.id, "$programInstance.program.name")'/>
-						<input type="button" class='button' value="$i18n.getString( 'unenroll' )" onclick='unenrollmentForm($programInstance.id)'/>
-					</td>
-				<tr>
-			</table>
-		</fieldset>
-		<br>
-		#if( $programStageInstances.size() > 0 )
-			<table class='mainPageTable' id='progarmStageListDiv' name='progarmStageListDiv' >
-				<col id="noCol"/>
-				<col id="stageCol"/>    
-				<col id="entryCol"/>    
-				<tr>
-					<th>$i18n.getString( "nr" )</th>
-					<th>$i18n.getString( "program_stage" )</th>                   
-					<th>$i18n.getString( "due_date" )</th>        
-				</tr>
-				
-			#set( $rowCount = 0 )
-			#set( $mark = false )
-			#foreach( $programStageInstance in $programStageInstances )
-				#set( $rowCount = $rowCount + 1 )   
-				<tr #alternate( $mark ) >
-					##rowCount
-					<td>$rowCount</td>        
-					##stage name
-					<td class='textColumn'>
-						<span id="value[$programStageInstance.id].name" title="$!encoder.htmlEncode( $programStageInstance.programStage.description )">
-							$encoder.htmlEncode( $programStageInstance.programStage.name )            
-						</span>
-					</td>        
-						   
-					##entry
-					#set( $duedateId = "value_" + $programStageInstance.id + "_date" )        
-					<td class='input-column '>        
-						<input type="text" id="$duedateId" name="entryfield" value="$!format.formatDate( $programStageInstance.dueDate )" onchange="saveDueDate( $programStageInstance.id, '$encoder.jsEncode( $programStageInstance.programStage.name )' )" />
-						<script type="text/javascript">
-							datePicker( '$duedateId' );
-						</script> 
-					</td>      
-				</tr>
-				#set( $mark = !$mark  )
-			#end
-			</table>
-		#end
+		#parse("/dhis-web-caseentry/visitSchedule.vm")
 	</div>
 	
 	<!-- Comments and SMS messages -->
@@ -188,18 +128,15 @@
 	
 	jQuery("#programEnrollmentInforForm").ready( function(){
 		validation( 'programEnrollmentInforForm', function(form){
-			saveIdentifierAndAttribute();
+			saveIdentifierAndAttribute(programInstance.patient.id,$programInstance.program.id,'programEnrollmentInforForm');
 		});	
 		
-		#if( $!programInstance )
-			showById('unenrollBtn');
-		#end
-		
 		#if( $programInstance.completed)
-			jQuery(":input").prop('disabled', true);
-			jQuery(":input").datepicker("destroy");
-		#else
-			datePickerInRangeValid( 'dateOfIncident' , 'enrollmentDate' );
+			jQuery("[id=tab-2] :input").prop('disabled', true);
+			jQuery("[id=tab-3] :input").prop('disabled', true);
+			jQuery("[id=tab-4] :input").prop('disabled', true);
+			jQuery("[id=tab-5] :input").prop('disabled', true);
+			jQuery("[id=tab-3] :input").datepicker("destroy");
 		#end
 	});
 
@@ -226,22 +163,15 @@
 	#end
 	
 	$( "#tabs" ).bind( "tabsselect", function(event, ui) {
-		if( ui.tab.hash == '#tab-5' ){
+		if( ui.tab.hash == '#tab-3' ){
+			getVisitSchedule(getFieldValue('programInstanceId'));
+		}
+		else if( ui.tab.hash == '#tab-5' ){
 			programReports(getFieldValue('programInstanceId'));
 		}
 		else if( ui.tab.hash == '#tab-4' ){
 			getEventMessages(getFieldValue('programInstanceId'));
 		}
 	});
-	
-	setInnerHTML('enrollmentDateDescription', "$!program.dateOfEnrollmentDescription" );
-	setInnerHTML('dateOfIncidentDescription', "$!program.dateOfIncidentDescription" );
-	setFieldValue('enrollmentDate', "$!format.formatDate( $programInstance.enrollmentDate )" );
-	setFieldValue('dateOfIncident', "$!format.formatDate( $programInstance.dateOfIncident )");
-	
-	if ( getFieldValue('enrollmentDate' ) == ''){	
-		jQuery('#enrollBtn').attr( 'value',i18n_enroll );
-	}else{
-		jQuery('#enrollBtn').attr( 'value',i18n_update );
-	}	
+	resize();
 </script>

@@ -54,11 +54,11 @@
 </table>
 
 <table>
-	<colgroup>
-	    <col style="width: 450px"/>
-	    <col/>
-	    <col style="width: 450px"/>
-  	</colgroup>
+    <colgroup>
+      <col style="width: 500px;"/>
+      <col/>
+      <col style="width: 500px;"/>
+    </colgroup>
 	
   	<tr>
   		<th>$i18n.getString( "available_groups" )</th>

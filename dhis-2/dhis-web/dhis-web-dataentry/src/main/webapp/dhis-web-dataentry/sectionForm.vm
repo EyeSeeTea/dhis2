@@ -25,12 +25,13 @@
     #set( $categories = $orderedCategories.get( $categoryComboId ) )
     #set( $optionsMap = $orderedOptionsMap.get( $categoryComboId ) )
     #set( $colRepeat = $catColRepeat.get( $categoryComboId ) )
-	
+    #set( $hasFilterInSection = false )
+
     #foreach( $category in $categories )
     #set( $categoryOptions = $optionsMap.get( $category.id ) )
     #set( $colCount = $colCount / $categoryOptions.size() )
     <tr colspan="$colCount">
-    <td></td>
+    <td>#if( $hasFilterInSection == false )<input style="width: 90%; padding: 5px; border: solid 1px #E5E5E5; outline: 0; font: normal 13px/100% Verdana, Tahoma, sans-serif; background: #FFFFFF;" type="text" class="filterInSection" placeholder="$encoder.jsEscape( $i18n.getString( "filter_in_section" ) , "'")" class="reg" onkeyup="filterInSection($(this));">#set( $hasFilterInSection = true )#end</td>
     #set( $cols = $colRepeat.get( $category.id ) )
     #foreach( $col in $cols )
     #foreach( $categoryOption in $categoryOptions )

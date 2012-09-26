@@ -37,11 +37,12 @@ import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.period.RelativePeriods;
+import org.hisp.dhis.reporttable.ReportParams;
 import org.hisp.dhis.reporttable.ReportTable;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 @JacksonXmlRootElement( localName = "report", namespace = Dxf2Namespace.NAMESPACE )
 public class Report
@@ -57,6 +58,10 @@ public class Report
 
     private Boolean usingOrgUnitGroupSets;
 
+    private RelativePeriods relatives;
+
+    private ReportParams reportParams;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -71,11 +76,29 @@ public class Report
         this.designContent = designContent;
         this.reportTable = reportTable;
     }
+    
+    public Report( String name, String designContent, RelativePeriods relatives, ReportParams reportParams )
+    {
+        this.name = name;
+        this.designContent = designContent;
+        this.relatives = relatives;
+        this.reportParams = reportParams;
+    }
 
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
 
+    public boolean isReportTableDataSource()
+    {
+        return reportTable != null;
+    }
+    
+    public boolean isJdbcDataSource()
+    {
+        return reportTable == null;
+    }
+    
     public boolean hasReportTable()
     {
         return reportTable != null;
@@ -86,6 +109,22 @@ public class Report
         return usingOrgUnitGroupSets != null && usingOrgUnitGroupSets;
     }
 
+    /**
+     * Indicates whether this report has relative periods.
+     */
+    public boolean hasRelativePeriods()
+    {
+        return relatives != null && !relatives.getRelativePeriods().isEmpty();
+    }
+    
+    /**
+     * Indicates whether this report has report parameters set.
+     */
+    public boolean hasReportParams()
+    {
+        return reportParams != null && reportParams.isSet();
+    }
+    
     // -------------------------------------------------------------------------
     // Equals and hashCode
     // -------------------------------------------------------------------------
@@ -167,6 +206,32 @@ public class Report
     public void setUsingOrgUnitGroupSets( Boolean usingOrgUnitGroupSets )
     {
         this.usingOrgUnitGroupSets = usingOrgUnitGroupSets;
+    }
+
+    @JsonProperty( value = "relativePeriods" )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    public RelativePeriods getRelatives()
+    {
+        return relatives;
+    }
+
+    public void setRelatives( RelativePeriods relatives )
+    {
+        this.relatives = relatives;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    public ReportParams getReportParams()
+    {
+        return reportParams;
+    }
+
+    public void setReportParams( ReportParams reportParams )
+    {
+        this.reportParams = reportParams;
     }
 
     @Override

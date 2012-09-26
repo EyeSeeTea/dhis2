@@ -107,6 +107,7 @@ public class ReportTable
 
     public static final String REPORTING_MONTH_COLUMN_NAME = "reporting_month_name";
     public static final String PARAM_ORGANISATIONUNIT_COLUMN_NAME = "param_organisationunit_name";
+    public static final String PARAM_ORGANISATIONUNIT_LEVEL = "organisationunit_level";
     public static final String ORGANISATION_UNIT_IS_PARENT_COLUMN_NAME = "organisation_unit_is_parent";
 
     public static final String SEPARATOR = "_";
@@ -746,6 +747,14 @@ public class ReportTable
         return organisationUnitGroups != null && organisationUnitGroups.size() > 0;
     }
 
+    /**
+     * Indicates whether this report table has relative periods.
+     */
+    public boolean hasRelativePeriods()
+    {
+        return relatives != null && !relatives.getRelativePeriods().isEmpty();
+    }
+    
     public void removeAllDataElements()
     {
         dataElements.clear();

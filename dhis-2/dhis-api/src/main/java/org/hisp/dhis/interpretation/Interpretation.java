@@ -29,7 +29,7 @@ package org.hisp.dhis.interpretation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.chart.Chart;
@@ -157,7 +157,7 @@ public class Interpretation
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonDeserialize( as = BaseIdentifiableObject.class )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public Chart getChart()
@@ -171,7 +171,7 @@ public class Interpretation
     }
 
     @JsonProperty
-    @JsonDeserialize( as = BaseIdentifiableObject.class )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public MapView getMapView()
@@ -185,7 +185,7 @@ public class Interpretation
     }
 
     @JsonProperty
-    @JsonDeserialize( as = BaseIdentifiableObject.class )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public ReportTable getReportTable()
@@ -199,7 +199,7 @@ public class Interpretation
     }
 
     @JsonProperty
-    @JsonDeserialize( as = BaseIdentifiableObject.class )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public DataSet getDataSet()
@@ -213,7 +213,7 @@ public class Interpretation
     }
 
     @JsonProperty
-    @JsonDeserialize( as = BaseIdentifiableObject.class )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public Period getPeriod()
@@ -227,7 +227,7 @@ public class Interpretation
     }
 
     @JsonProperty
-    @JsonDeserialize( as = BaseIdentifiableObject.class )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public OrganisationUnit getOrganisationUnit()
@@ -254,7 +254,7 @@ public class Interpretation
     }
 
     @JsonProperty
-    @JsonDeserialize( as = BaseIdentifiableObject.class )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public User getUser()
@@ -281,7 +281,7 @@ public class Interpretation
     }
 
     @JsonProperty
-    @JsonDeserialize( contentAs = BaseIdentifiableObject.class )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public List<InterpretationComment> getComments()

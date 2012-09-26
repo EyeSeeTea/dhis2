@@ -25,6 +25,7 @@
       <result name="selectPeriod" type="redirect">
         /light/selectPeriod.action?organisationUnitId=${organisationUnitId}&amp;dataSetId=${dataSetId}
       </result>
+      <param name="requiredAuthorities">M_dhis-web-dataentry</param>
     </action>
 
     <action name="selectDataSet"
@@ -76,6 +77,7 @@
     <action name="trackingMenu" class="org.hisp.dhis.light.action.NoAction">
       <result name="success" type="velocity">/dhis-web-light/main.vm</result>
       <param name="page">/dhis-web-light/trackingMenu.vm</param>
+      <param name="requiredAuthorities">M_dhis-web-maintenance-patient</param>
     </action>
     <action name="selectNamebasedOrganisationUnit"
         class="org.hisp.dhis.light.namebaseddataentry.action.GetNamebasedOrganisationUnitsAction">
@@ -181,6 +183,12 @@
       <result name="redirect" type="redirect">showPatientProgramList.action?patientId=${originalPatientId}&amp;validated=true
       </result>
     </action>
+    
+    <action name="deleteRelationship"
+    	class="org.hisp.dhis.light.namebaseddataentry.action.DeleteRelationshipAction">
+      <result name="redirect" type="redirect">showPatientProgramList.action?patientId=${currentPatientId}&amp;validated=true
+      </result>
+    </action>
 
     <action name="showPatientProgramList"
         class="org.hisp.dhis.light.namebaseddataentry.action.GetPatientProgramListAction">
@@ -235,6 +243,8 @@
     <action name="saveBeneficiary"
         class="org.hisp.dhis.light.beneficiaryregistration.action.SaveBeneficiaryAction">
       <result name="success" type="redirect">/light/showPatientProgramList.action?patientId=${patientId}</result>
+      <result name="error" type="velocity">/dhis-web-light/main.vm</result>
+	  <result name="redirect" type="redirect">/light/showAddNewRelationshipForm.action?originalPatientId=${originalPatientId}&amp;relatedPatientId=${patientId}&amp;relationshipTypeId=${relationshipTypeId}</result>
       <result name="error" type="velocity">/dhis-web-light/main.vm</result>
       <param name="page">/dhis-web-light/registration/beneficiaryRegistrationForm.vm</param>
     </action>

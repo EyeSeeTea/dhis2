@@ -23,10 +23,15 @@ function showProgramDetails( programId )
 		var displayIncidentDate = ( json.program.displayIncidentDate == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'displayIncidentDateField', displayIncidentDate );   	
 		
+		var generatedByEnrollmentDate = ( json.program.generatedByEnrollmentDate == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'generatedByEnrollmentDateField', generatedByEnrollmentDate );   	
+		
 		setInnerHTML( 'dateOfEnrollmentDescriptionField', json.program.dateOfEnrollmentDescription );   
 		setInnerHTML( 'dateOfIncidentDescriptionField', json.program.dateOfIncidentDescription );   		
 		setInnerHTML( 'programStageCountField',  json.program.programStageCount );
 		setInnerHTML( 'durationInDaysField',  json.program.maxDay );
+		setInnerHTML( 'noAttributesField', json.program.noAttributes );
+		setInnerHTML( 'noIdentifierTypesField', json.program.noIdentifierTypes );
 		
 		showDetails();
 	});   
@@ -159,4 +164,47 @@ function getKeyCode(e)
 		}
 	}
 	return ctrlPressed;
+}
+
+//-----------------------------------------------------------------------------
+//Move Table Row Up and Down
+//-----------------------------------------------------------------------------
+
+function moveUpPropertyList()
+{
+	var selectedList = jQuery("#selectedList");
+
+	jQuery("#selectedList").find("tr").each( function( i, item ){
+		item = jQuery(item);
+		if( item.hasClass("selected") )
+		{
+			var prev = item.prev('#selectedList tr');
+			if (prev.length == 1) 
+			{ 
+				prev.before(item);
+			}
+		}
+	});
+}
+
+function moveDownPropertyList()
+{
+	var selectedList = jQuery("#selectedList");
+	var items = new Array();
+	jQuery("#selectedList").find("tr").each( function( i, item ){
+		items.push(jQuery(item));
+	});
+	
+	for( var i=items.length-1;i>=0;i--)
+	{	
+		var item = items[i];
+		if( item.hasClass("selected") )
+		{
+			var next = item.next('#selectedList tr');
+			if (next.length == 1) 
+			{ 
+				next.after(item);
+			}
+		}
+	}
 }

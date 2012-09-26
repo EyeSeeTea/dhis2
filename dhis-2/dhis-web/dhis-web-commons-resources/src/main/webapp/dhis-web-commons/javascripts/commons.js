@@ -930,6 +930,36 @@ function datePickerValid( id, today )
 	}
 }
 
+function datePickerFuture( id, today )
+{
+	jQuery("#" + id).datepicker(
+	{
+		dateFormat: dateFormat,
+		changeMonth: true,
+		changeYear: true,
+		monthNamesShort: monthNames,
+		dayNamesMin: dayNamesMin,
+		showOn: 'both',
+		buttonImage: '../images/calendar.png',
+		buttonImageOnly: true,
+		minDate: '+0d +0w',
+		constrainInput: true,
+        yearRange: '-100:+100'
+	});
+	jQuery( "#" + id ).attr("readonly", true );
+	
+	if ( today == undefined )
+	{
+		today = false;
+	}
+	
+	if( today )
+	{
+		s = jQuery("#" + id );
+		if( s.val()=='' ) s.val( getCurrentDate() );
+	}
+}
+
 /**
  * Create jQuery datepicker for start date and end date text with id
  * 
@@ -1482,7 +1512,7 @@ function relativePeriodsChecked()
  */
 function isValidZeroNumber( value )
 {
-	var regex = /^0(?:\.0*)?$/;
+	var regex = /^0(\.0*)?$/;
 	return regex.test( value );
 }
 
@@ -1547,6 +1577,21 @@ function isZeroNumber( value )
 function getRandomNumber()
 {
 	return Math.floor( 100000000 * Math.random() );
+}
+
+function getRandomCode()
+{
+	var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";	
+	var len = 11;	
+	var string = "";
+	
+	for ( var i=0; i < len; i++ ) 
+	{
+		var rnum = Math.floor( Math.random() * chars.length );
+		string += chars.substring( rnum, rnum+1 );
+	}
+	
+	return string;
 }
 
 function getDC()

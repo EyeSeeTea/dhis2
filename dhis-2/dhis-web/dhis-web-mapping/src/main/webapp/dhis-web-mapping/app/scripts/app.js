@@ -134,23 +134,34 @@ Ext.onReady( function() {
     Ext.QuickTips.init();
 	document.body.oncontextmenu = function(){return false;};
 	
+	// Init
+	
+	GIS.init.onInitialize = function(r) {
+		var init = Ext.decode(r.responseText);
+		GIS.init.rootNodes = init.rootNodes;
+	};
+	
 	Ext.Ajax.request({
 		url: GIS.conf.url.path_gis + 'initialize.action',
 		success: function(r) {
-			var init = Ext.decode(r.responseText);
-			GIS.init.rootNodes = init.rootNodes;
-	
-	// Init
+			GIS.init.onInitialize(r);	
 	
 	GIS.init.onRender = function() {
 		//GIS.layer.googleStreets.layer.setVisibility(false);
 	};
 	
 	GIS.init.afterRender = function() {	
+		// Map tools
 		document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin24.png" />';
 		document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout24.png" />';
 		document.getElementsByClassName('zoomVisibleButton')[0].innerHTML = '<img src="images/zoomvisible24.png" />';
 		document.getElementsByClassName('layersButton')[0].innerHTML = '<img src="images/layers24.png" />';
+		
+		// Map events
+		GIS.map.events.register('mousemove', null, function(e) {
+			GIS.map.mouseMove.x = e.clientX;
+			GIS.map.mouseMove.y = e.clientY;
+		});
 	};
 	
 	// Mask
@@ -213,7 +224,8 @@ Ext.onReady( function() {
                     coordinates: doc[i].co
                 },
                 properties: {
-                    id: doc[i].id,
+                    id: doc[i].uid,
+                    internalId: doc[i].iid,
                     name: doc[i].na,
                     value: doc[i].va || null,
                     hcwc: doc[i].hc
@@ -263,8 +275,11 @@ Ext.onReady( function() {
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
     });
     
-    GIS.map.layerController = {};
+    // Track all mouse moves
+    GIS.map.mouseMove = {};
     
+    // Map tools
+    GIS.map.layerController = {};    
     // Zoom in
     GIS.map.layerController.zoomIn = new OpenLayers.Control.Button({
 		displayClass: 'olControlButton',

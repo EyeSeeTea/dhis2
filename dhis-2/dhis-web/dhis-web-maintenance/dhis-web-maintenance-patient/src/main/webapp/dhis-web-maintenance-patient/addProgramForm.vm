@@ -50,6 +50,12 @@
 		</tr>
 		
 		<tr>
+			<td><label>$i18n.getString( "generated_by_enrollment_date" )</label></td>
+			<td><input style="margin: 0;"type="checkbox" id="generatedByEnrollmentDate" name="generatedByEnrollmentDate" value='true'></td>
+			<td></td>
+		</tr>
+		
+		<tr>
 			<td><label>$i18n.getString( "date_of_enrollment_description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input style="width: 330px;" type="text" id="dateOfEnrollmentDescription" name="dateOfEnrollmentDescription" class="{validate:{required:true,minlength:4}}"></td>
 			<td></td>
@@ -109,6 +115,10 @@
 				</table>
 			</div>
 		</td>
+		<td>
+			<a href="javascript:moveUpPropertyList()"><img src="../images/move_up.png"/></a><br/><br/>
+			<a href="javascript:moveDownPropertyList()"><img src="../images/move_down.png"/></a><br/><br/>
+		</td>  
 	</tr>
 	<tr>
 		<td>

@@ -36,9 +36,9 @@
 <form id="addRoleForm" name="addRoleForm" action="addRole.action" method="post" >
 <table>
   	<col style="width: 120px"/>
-    <col style="width: 350px"/>
+    <col style="width: 500px;"/>
     <col/>
-    <col style="width: 350px"/>
+    <col style="width: 500px;"/>
   
 	<tr>
 		<th colspan="4">$i18n.getString( "details" )</th>

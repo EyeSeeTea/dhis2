@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.dataentryform.DataEntryForm;
+import org.hisp.dhis.patient.PatientReminder;
 
 /**
  * @author Abyot Asalefew
@@ -39,17 +40,15 @@ public class ProgramStage
     extends BaseIdentifiableObject
 {
     public static final String TYPE_DEFAULT = "default";
-
     public static final String TYPE_SECTION = "section";
-
     public static final String TYPE_CUSTOM = "custom";
     
-    public static final String TEMPLATE_MESSSAGE_PATIENT_NAME = "patient-name";
-    public static final String TEMPLATE_MESSSAGE_PROGRAM_NAME = "program-name";
-    public static final String TEMPLATE_MESSSAGE_PROGAM_STAGE_NAME = "program-stage-name";
-    public static final String TEMPLATE_MESSSAGE_DUE_DATE = "due-date";
-    public static final String TEMPLATE_MESSSAGE_ORGUNIT_NAME = "orgunit-name";
-    public static final String TEMPLATE_MESSSAGE_DAYS_SINCE_DUE_DATE = "days-since-due-date";
+    public static final String TEMPLATE_MESSSAGE_PATIENT_NAME = "{patient-name}";
+    public static final String TEMPLATE_MESSSAGE_PROGRAM_NAME = "{program-name}";
+    public static final String TEMPLATE_MESSSAGE_PROGAM_STAGE_NAME = "{program-stage-name}";
+    public static final String TEMPLATE_MESSSAGE_DUE_DATE = "{due-date}";
+    public static final String TEMPLATE_MESSSAGE_ORGUNIT_NAME = "{orgunit-name}";
+    public static final String TEMPLATE_MESSSAGE_DAYS_SINCE_DUE_DATE = "{days-since-due-date}";
 
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -76,9 +75,9 @@ public class ProgramStage
 
     private String reportDateDescription;
     
-    private Integer daysAllowedSendMessage;
+    private Set<PatientReminder> patientReminders = new HashSet<PatientReminder>();
     
-    private String templateMessage;
+    private Boolean autoGenerateEvent = true;
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -137,10 +136,20 @@ public class ProgramStage
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
+    
     public DataEntryForm getDataEntryForm()
     {
         return dataEntryForm;
+    }
+
+    public Set<PatientReminder> getPatientReminders()
+    {
+        return patientReminders;
+    }
+
+    public void setPatientReminders( Set<PatientReminder> patientReminders )
+    {
+        this.patientReminders = patientReminders;
     }
 
     public void setDataEntryForm( DataEntryForm dataEntryForm )
@@ -161,26 +170,6 @@ public class ProgramStage
     public void setProgramStageSections( Set<ProgramStageSection> programStageSections )
     {
         this.programStageSections = programStageSections;
-    }
-
-    public Integer getDaysAllowedSendMessage()
-    {
-        return daysAllowedSendMessage;
-    }
-
-    public void setDaysAllowedSendMessage( Integer daysAllowedSendMessage )
-    {
-        this.daysAllowedSendMessage = daysAllowedSendMessage;
-    }
-
-    public String getTemplateMessage()
-    {
-        return templateMessage;
-    }
-
-    public void setTemplateMessage( String templateMessage )
-    {
-        this.templateMessage = templateMessage;
     }
 
     public Integer getStandardInterval()
@@ -256,6 +245,16 @@ public class ProgramStage
     public void setReportDateDescription( String reportDateDescription )
     {
         this.reportDateDescription = reportDateDescription;
+    }
+    
+    public Boolean getAutoGenerateEvent()
+    {
+        return autoGenerateEvent;
+    }
+
+    public void setAutoGenerateEvent( Boolean autoGenerateEvent )
+    {
+        this.autoGenerateEvent = autoGenerateEvent;
     }
 
     public String getDataEntryType()

@@ -146,13 +146,6 @@ public class SetGeneralSettingsAction
         this.feedbackRecipients = feedbackRecipients;
     }
 
-    private Integer completenessRecipients;
-
-    public void setCompletenessRecipients( Integer completenessRecipients )
-    {
-        this.completenessRecipients = completenessRecipients;
-    }
-
     private Integer offlineOrganisationUnitLevel;
 
     public void setOfflineOrganisationUnitLevel( Integer offlineOrganisationUnitLevel )
@@ -167,11 +160,11 @@ public class SetGeneralSettingsAction
         this.completenessOffset = completenessOffset;
     }
 
-    private String timeSendingMessage;
+    private String phoneNumberAreaCode;
     
-    public void setTimeSendingMessage( String timeSendingMessage )
+    public void setPhoneNumberAreaCode( String phoneNumberAreaCode )
     {
-        this.timeSendingMessage = timeSendingMessage;
+        this.phoneNumberAreaCode = phoneNumberAreaCode;
     }
 
     private String message;
@@ -195,11 +188,13 @@ public class SetGeneralSettingsAction
     public String execute()
     {
         systemSettingManager.saveSystemSetting( KEY_CACHE_STRATEGY, cacheStrategy );
-        systemSettingManager.saveSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, omitIndicatorsZeroNumeratorDataMart );
-        systemSettingManager.saveSystemSetting( KEY_DISABLE_DATAENTRYFORM_WHEN_COMPLETED, disableDataEntryWhenCompleted );
+        systemSettingManager.saveSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART,
+            omitIndicatorsZeroNumeratorDataMart );
+        systemSettingManager
+            .saveSystemSetting( KEY_DISABLE_DATAENTRYFORM_WHEN_COMPLETED, disableDataEntryWhenCompleted );
         systemSettingManager.saveSystemSetting( KEY_FACTOR_OF_DEVIATION, factorDeviation );
         systemSettingManager.saveSystemSetting( KEY_COMPLETENESS_OFFSET, completenessOffset );
-        systemSettingManager.saveSystemSetting( KEY_TIME_FOR_SENDING_MESSAGE, timeSendingMessage );
+        systemSettingManager.saveSystemSetting( PHONE_NUMBER_AREA_CODE, phoneNumberAreaCode );
 
         Configuration configuration = configurationService.getConfiguration();
 
@@ -208,16 +203,13 @@ public class SetGeneralSettingsAction
             configuration.setFeedbackRecipients( userGroupService.getUserGroup( feedbackRecipients ) );
         }
 
-        if ( completenessRecipients != null )
-        {
-            configuration.setCompletenessRecipients( userGroupService.getUserGroup( completenessRecipients ) );
-        }
-
         if ( offlineOrganisationUnitLevel != null )
         {
-            configuration.setOfflineOrganisationUnitLevel( organisationUnitService.getOrganisationUnitLevel( offlineOrganisationUnitLevel ) );
+            configuration.setOfflineOrganisationUnitLevel( organisationUnitService
+                .getOrganisationUnitLevel( offlineOrganisationUnitLevel ) );
 
-            // if the level is changed, we need to make sure that the version is also changed.
+            // if the level is changed, we need to make sure that the version is
+            // also changed.
             organisationUnitService.updateVersion();
         }
 
