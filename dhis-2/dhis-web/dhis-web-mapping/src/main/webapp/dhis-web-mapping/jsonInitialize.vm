@@ -32,7 +32,7 @@
     "zoom": "$!{mapView.zoom}"
   },
   "systemSettings": {
-    "infrastructuralDataElements": "$!{infrastructuralDataElements.id}",
+    "infrastructuralDataElementGroup": "$!{infrastructuralDataElementGroup.uid}",
     "infrastructuralPeriodType": "$!{infrastructuralPeriodType.name}"
   },
   "overlays": [

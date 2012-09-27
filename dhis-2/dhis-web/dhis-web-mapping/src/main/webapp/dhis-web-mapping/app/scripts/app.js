@@ -138,7 +138,17 @@ Ext.onReady( function() {
 	
 	GIS.init.onInitialize = function(r) {
 		var init = Ext.decode(r.responseText);
+		
 		GIS.init.rootNodes = init.rootNodes;
+		
+		GIS.init.systemSettings = {
+			infrastructuralDataElementGroup: init.systemSettings.infrastructuralDataElementGroup,
+			infrastructuralPeriodType: init.systemSettings.infrastructuralPeriodType
+		};
+		
+		GIS.init.security = {
+			isAdmin: init.security.isAdmin
+		};
 	};
 	
 	Ext.Ajax.request({
@@ -161,6 +171,31 @@ Ext.onReady( function() {
 		GIS.map.events.register('mousemove', null, function(e) {
 			GIS.map.mouseMove.x = e.clientX;
 			GIS.map.mouseMove.y = e.clientY;
+		});
+                
+		GIS.map.events.register('click', null, function(e) {
+			if (GIS.map.relocate.active) {
+				var el = document.getElementById('mouseposition').childNodes[0],
+					coordinates = '[' + el.childNodes[1].data + ',' + el.childNodes[3].data + ']',
+					center = GIS.cmp.region.center;
+
+				Ext.Ajax.request({
+					url: GIS.conf.url.path_gis + 'updateOrganisationUnitCoordinates.action',
+					method: 'POST',
+					params: {id: GIS.map.relocate.feature.attributes.id, coordinates: coordinates},
+					success: function(r) {
+						GIS.map.relocate.active = false;
+						GIS.map.relocate.widget.cmp.relocateWindow.destroy();
+														
+						GIS.map.relocate.feature.move({x: parseFloat(e.clientX - center.x), y: parseFloat(e.clientY - 28)});
+						GIS.map.getViewport().style.cursor = 'auto';
+						//Ext.message.msg(true, '<span class="x-msg-hl">' + G.vars.relocate.feature.attributes.name + 
+							//' </span>relocated to ' +
+							//'[<span class="x-msg-hl">' + mp.childNodes[1].data + '</span>,' + 
+							//'<span class="x-msg-hl">' + mp.childNodes[3].data + '</span>]');
+					}
+				});
+			}
 		});
 	};
 	
@@ -270,7 +305,8 @@ Ext.onReady( function() {
 				documentDrag: true
 			}),
 			new OpenLayers.Control.MousePosition({
-				prefix: '<span class="el-opacity-1"><span class="text-mouseposition-lonlat">LON </span>',
+				id: 'mouseposition',
+				prefix: '<span class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
 				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
 				suffix: '<div id="google-logo" onclick="javascript:GIS.util.google.openTerms();"></div></span>'
 			}),
@@ -282,6 +318,9 @@ Ext.onReady( function() {
     
     // Track all mouse moves
     GIS.map.mouseMove = {};
+    
+    // Relocate organisation units
+    GIS.map.relocate = {};
     
     // Map tools
     GIS.map.layerController = {};    
@@ -507,6 +546,21 @@ Ext.onReady( function() {
 			}
 		}
 	});
+        
+    GIS.store.infrastructuralPeriodsByType = new Ext.data.JsonStore({
+        url: GIS.conf.url.path_gis + 'getPeriodsByPeriodType.action',
+        root: 'periods',
+        fields: ['id', 'name'],
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+				}
+			}
+        }
+    });
     
     // Objects
     

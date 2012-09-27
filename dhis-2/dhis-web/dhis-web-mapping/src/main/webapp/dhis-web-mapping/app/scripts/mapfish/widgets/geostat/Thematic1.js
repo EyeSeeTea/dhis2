@@ -1002,46 +1002,44 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			};
 			
 			showRelocate = function() {
-				if (that.featureOptions.coordinate) {
-					that.featureOptions.coordinate.destroy();
+				if (that.cmp.relocateWindow) {
+					that.cmp.relocateWindow.destroy();
 				}
 				
-				that.featureOptions.coordinate = new Ext.Window({
+				that.cmp.relocateWindow = Ext.create('Ext.window.Window', {
 					title: '<span class="window-relocate-title">' + feature.attributes.name + '</span>',
 					bodyStyle: 'padding:8px; background-color:#fff',
 					layout: 'fit',
-					width: GIS.conf.window_width,
-					items: [
-						{
-							xtype: 'panel',
-							items: [
-								{html: GIS.i18n.select_new_location_on_map}
-							]
-						}
-					],
+					items: {
+						html: GIS.i18n.select_new_location_on_map,
+						bodyStyle: 'border:0 none'
+					},
 					bbar: [
 						'->',
 						{
 							xtype: 'button',
-							iconCls: 'icon-cancel',
 							hideLabel: true,
 							text: GIS.i18n.cancel,
 							handler: function() {
-								GIS.vars.relocate.active = false;
-								that.featureOptions.coordinate.destroy();
-								document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
+								GIS.map.relocate.active = false;
+								that.cmp.relocateWindow.destroy();
+								GIS.map.getViewport().style.cursor = 'auto';
 							}
 						}
 					],
 					listeners: {
-						'close': function() {
-							GIS.vars.relocate.active = false;
-							document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
+						close: function() {
+							GIS.map.relocate.active = false;
+							GIS.map.getViewport().style.cursor = 'auto';
 						}
 					}
 				});
-				that.featureOptions.coordinate.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.coordinate.width + 15), Ext.getCmp('center').y + 41);
-				that.featureOptions.coordinate.show();                        
+				var east = GIS.cmp.region.east,
+					center = GIS.cmp.region.center,
+					window = that.cmp.relocateWindow;
+					
+				that.cmp.relocateWindow.show();
+				that.cmp.relocateWindow.setPosition((east.x + east.width) - (window.getWidth() + 7), center.y + 8);
 			};
 						
 			drill = function(direction) {
@@ -1093,7 +1091,27 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			};
 			
 			menu = new Ext.menu.Menu({
-				showSeparator: false
+				showSeparator: false,
+				items: [
+					{
+						text: 'Drill down',
+						iconCls: 'menu-featureoptions-drilldown',
+						disabled: !feature.attributes.hcwc,
+						scope: this,
+						handler: function() {
+							drill('down');
+						}
+					},
+					{
+						text: 'Float up',
+						iconCls: 'menu-featureoptions-drilldown',
+						disabled: !that.model.hasCoordinatesUp,
+						scope: this,
+						handler: function() {
+							drill('up');
+						}
+					}
+				]
 			});
 			
 			if (feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class) {
@@ -1102,12 +1120,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						text: GIS.i18n.show_information_sheet,
 						iconCls: 'menu-featureoptions-info',
 						handler: function(item) {
-							if (GIS.stores.infrastructuralPeriodsByType.isLoaded) {
+							if (GIS.store.infrastructuralPeriodsByType.isLoaded) {
 								item.parentMenu.showInfo();
 							}
 							else {
-								GIS.stores.infrastructuralPeriodsByType.setBaseParam('name', GIS.system.infrastructuralPeriodType);
-								GIS.stores.infrastructuralPeriodsByType.load({callback: function() {
+								GIS.store.infrastructuralPeriodsByType.setBaseParam('name', GIS.init.systemSettings.infrastructuralPeriodType);
+								GIS.store.infrastructuralPeriodsByType.load({callback: function() {
 									item.parentMenu.showInfo();
 								}});
 							}
@@ -1116,37 +1134,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					{
 						text: GIS.i18n.relocate,
 						iconCls: 'menu-featureoptions-relocate',
-						disabled: !GIS.user.isAdmin,
+						disabled: !GIS.init.security.isAdmin,
 						handler: function(item) {
-							GIS.vars.relocate.active = true;
-							GIS.vars.relocate.widget = that;
-							GIS.vars.relocate.feature = feature;
-							document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'crosshair';
-							item.parentMenu.showRelocate();
+							GIS.map.relocate.active = true;
+							GIS.map.relocate.widget = that;
+							GIS.map.relocate.feature = feature;
+							GIS.map.getViewport().style.cursor = 'crosshair';
+							showRelocate();
 						}
 					}
 				]);
 			}
-			
-			menu.add({
-				text: 'Drill down',
-				iconCls: 'menu-featureoptions-drilldown',
-				disabled: !feature.attributes.hcwc,
-				scope: this,
-				handler: function() {
-					drill('down');
-				}
-			});
-
-			menu.add({
-				text: 'Float up',
-				iconCls: 'menu-featureoptions-drilldown',
-				disabled: !that.model.hasCoordinatesUp,
-				scope: this,
-				handler: function() {
-					drill('up');
-				}
-			});
             
             menu.showAt([GIS.map.mouseMove.x, GIS.map.mouseMove.y]);
         };

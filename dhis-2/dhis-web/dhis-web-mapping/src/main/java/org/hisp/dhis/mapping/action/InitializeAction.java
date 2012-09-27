@@ -105,11 +105,11 @@ public class InitializeAction
         return overlays;
     }
 
-    private DataElementGroup infrastructuralDataElements;
+    private DataElementGroup infrastructuralDataElementGroup;
 
-    public DataElementGroup getInfrastructuralDataElements()
+    public DataElementGroup getInfrastructuralDataElementGroup()
     {
-        return infrastructuralDataElements;
+        return infrastructuralDataElementGroup;
     }
 
     private PeriodType infrastructuralPeriodType;
@@ -142,7 +142,7 @@ public class InitializeAction
 
         Collections.sort( overlays, new MapLayerNameComparator() );
 
-        infrastructuralDataElements = configurationService.getConfiguration().getInfrastructuralDataElements();
+        infrastructuralDataElementGroup = configurationService.getConfiguration().getInfrastructuralDataElements();
 
         infrastructuralPeriodType = configurationService.getConfiguration().getInfrastructuralPeriodTypeDefaultIfNull();
 
