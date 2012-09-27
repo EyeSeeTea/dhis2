@@ -725,7 +725,16 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			multiSelect: false,
 			width: GIS.conf.layout.widget.item_width,
 			height: 220,
-			bodyStyle: 'border: 1px solid #ccc !important; border-radius: 2px; padding: 3px 0 0px 3px',
+			isRendered: false,
+			path: null,
+			selectTreePath: function(path) {
+				if (this.isRendered) {
+					this.selectPath(path);
+				}
+				else {
+					this.path = path;
+				}
+			},				
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
@@ -752,7 +761,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					}
 				},
 				afterrender: function() {
-					if (!this.getSelectionModel().getSelection().length) {
+					this.isRendered = true;
+					
+					if (this.path) {
+						this.selectPath(this.path);
+					}
+					else {
 						this.getSelectionModel().select(0);
 					}
 				}
@@ -1059,7 +1073,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						that.config.parentName = rootNode.text;
 						that.config.parentLevel = rootNode.level;
 						
-						that.cmp.parent.getSelectionModel().select(0);
+						that.cmp.parent.selectTreePath('/root/' + GIS.init.rootNodes[0].id);
 					}
 					else if (direction === 'down') {
 						that.config.level = that.model.level + 1;
@@ -1068,7 +1082,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						that.config.parentName = feature.attributes.name;
 						that.config.parentLevel = that.model.level;
 						
-						that.cmp.parent.selectPath('/root' + feature.attributes.path);
+						that.cmp.parent.selectTreePath('/root' + feature.attributes.path);
 					}					
 					
 					that.cmp.level.setValue(that.config.level);					

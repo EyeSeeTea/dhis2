@@ -317,6 +317,12 @@ html * {
 	height: 17px;
 }
 
+.x-tree-panel .x-panel-body {
+	border: 1px solid #ccc !important;
+	border-radius: 2px;
+	padding: 3px 0 0px 3px;
+}
+
 /* ColorPicker */
 
 .x-color-picker a { /* Square spacing */

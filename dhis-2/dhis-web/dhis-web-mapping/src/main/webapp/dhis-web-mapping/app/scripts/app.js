@@ -260,9 +260,10 @@ Ext.onReady( function() {
                     id: doc.geojson[i].uid,
                     internalId: doc.geojson[i].iid,
                     name: doc.geojson[i].na,
-                    value: doc.geojson[i].va || null,
                     hcwc: doc.geojson[i].hc,
-                    path: doc.geojson[i].pa
+                    path: doc.geojson[i].path,
+                    parentId: doc.geojson[i].pi,
+                    parentName: doc.geojson[i].pn
                 }
             });
         }
@@ -772,6 +773,7 @@ Ext.onReady( function() {
 						{
 							text: 'test()', //i18n
 							handler: function() {
+								GIS.layer.thematic1.widget.cmp.parent.selectTreePath('/root/' + GIS.init.rootNodes[0].id);
 							}
 						},
 						'->',
