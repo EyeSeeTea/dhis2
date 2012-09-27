@@ -189,10 +189,8 @@ Ext.onReady( function() {
 														
 						GIS.map.relocate.feature.move({x: parseFloat(e.clientX - center.x), y: parseFloat(e.clientY - 28)});
 						GIS.map.getViewport().style.cursor = 'auto';
-						//Ext.message.msg(true, '<span class="x-msg-hl">' + G.vars.relocate.feature.attributes.name + 
-							//' </span>relocated to ' +
-							//'[<span class="x-msg-hl">' + mp.childNodes[1].data + '</span>,' + 
-							//'<span class="x-msg-hl">' + mp.childNodes[3].data + '</span>]');
+						
+						console.log(GIS.map.relocate.feature.attributes.name + ' relocated to ' + coordinates);
 					}
 				});
 			}
@@ -263,7 +261,8 @@ Ext.onReady( function() {
                     internalId: doc.geojson[i].iid,
                     name: doc.geojson[i].na,
                     value: doc.geojson[i].va || null,
-                    hcwc: doc.geojson[i].hc
+                    hcwc: doc.geojson[i].hc,
+                    path: doc.geojson[i].pa
                 }
             });
         }
@@ -771,14 +770,9 @@ Ext.onReady( function() {
 							menu: {}
 						},
 						{
-							text: 'floating', //i18n
+							text: 'expand', //i18n
 							handler: function() {
-								var w = Ext.create('Ext.window.Window', {
-									width: 100,
-									height: 100,
-									preventHeader: true
-								});
-								w.show();
+								GIS.layer.thematic1.widget.cmp.parent.selectPath('/root/ImspTQPwCqd/Vth0fbpFcsO/CF243RPvNY7', 'id');
 							}
 						},
 						'->',
