@@ -232,6 +232,7 @@ html * {
 	/* Menu item */
 	.x-menu-item-link { /* Menu item normal */
 		line-height: 12px;
+		padding-right: 8px;
 		padding-bottom: 6px;
 		padding-left: 30px;
 	}	
@@ -256,7 +257,12 @@ html * {
 	.gis-menu-item-icon-filter,
 	.gis-menu-item-icon-search,
 	.gis-menu-item-icon-opacity,
-	.gis-menu-item-icon-history {
+	.gis-menu-item-icon-history,
+	
+	.gis-menu-item-icon-drill,
+	.gis-menu-item-icon-float,
+	.gis-menu-item-icon-information,
+	.gis-menu-item-icon-relocate {
 		left: 6px;
 	}	
 	.gis-menu-item-icon-edit {
@@ -283,6 +289,19 @@ html * {
 	.gis-menu-item-icon-history {
 		background: url('../images/history16.png') no-repeat;
 	}
+	
+	.gis-menu-item-icon-drill {
+		background: url('../images/drill16.png') no-repeat;
+	}
+	.gis-menu-item-icon-float {
+		background: url('../images/float16.png') no-repeat;
+	}
+	.gis-menu-item-icon-information {
+		background: url('../images/information16.png') no-repeat;
+	}
+	.gis-menu-item-icon-relocate {
+		background: url('../images/relocate16.png') no-repeat;
+	}	
 	
 	.x-menu-item-separator {
 		height: 1px;

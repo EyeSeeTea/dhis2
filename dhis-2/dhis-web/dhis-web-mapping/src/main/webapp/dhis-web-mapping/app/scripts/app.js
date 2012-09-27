@@ -770,9 +770,8 @@ Ext.onReady( function() {
 							menu: {}
 						},
 						{
-							text: 'expand', //i18n
+							text: 'test()', //i18n
 							handler: function() {
-								GIS.layer.thematic1.widget.cmp.parent.selectPath('/root/ImspTQPwCqd/Vth0fbpFcsO/CF243RPvNY7', 'id');
 							}
 						},
 						'->',

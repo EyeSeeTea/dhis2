@@ -1088,11 +1088,16 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			};
 			
 			menu = new Ext.menu.Menu({
+				shadow: false,
 				showSeparator: false,
+				defaults: {
+					bodyStyle: 'padding-right:6px'
+				},
 				items: [
 					{
 						text: 'Drill down',
-						iconCls: 'menu-featureoptions-drilldown',
+						iconCls: 'gis-menu-item-icon-drill',
+						cls: 'gis-menu-item-first',
 						disabled: !feature.attributes.hcwc,
 						scope: this,
 						handler: function() {
@@ -1101,36 +1106,29 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					},
 					{
 						text: 'Float up',
-						iconCls: 'menu-featureoptions-drilldown',
+						iconCls: 'gis-menu-item-icon-float',
 						disabled: !that.model.hasCoordinatesUp,
 						scope: this,
 						handler: function() {
 							drill('up');
 						}
 					}
-				]
+				],
+				listeners: {
+					afterrender: function() {
+						this.getEl().addCls('gis-toolbar-btn-menu');
+					}
+				}
 			});
 			
 			if (feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class) {
 				menu.add([
 					{
-						text: GIS.i18n.show_information_sheet,
-						iconCls: 'menu-featureoptions-info',
-						handler: function(item) {
-							if (GIS.store.infrastructuralPeriodsByType.isLoaded) {
-								item.parentMenu.showInfo();
-							}
-							else {
-								GIS.store.infrastructuralPeriodsByType.setBaseParam('name', GIS.init.systemSettings.infrastructuralPeriodType);
-								GIS.store.infrastructuralPeriodsByType.load({callback: function() {
-									item.parentMenu.showInfo();
-								}});
-							}
-						}
+						xtype: 'menuseparator'
 					},
 					{
 						text: GIS.i18n.relocate,
-						iconCls: 'menu-featureoptions-relocate',
+						iconCls: 'gis-menu-item-icon-relocate',
 						disabled: !GIS.init.security.isAdmin,
 						handler: function(item) {
 							GIS.map.relocate.active = true;
@@ -1139,7 +1137,26 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 							GIS.map.getViewport().style.cursor = 'crosshair';
 							showRelocate();
 						}
-					}
+					},
+					{
+						text: 'Show information', //i18n
+						iconCls: 'gis-menu-item-icon-information',
+						handler: function(item) {
+							if (GIS.store.infrastructuralPeriodsByType.isLoaded) {
+								showInfo();
+							}
+							else {
+								GIS.store.infrastructuralPeriodsByType.load({
+									params: {
+										name: GIS.init.systemSettings.infrastructuralPeriodType
+									},
+									callback: function() {
+										showInfo();
+									}
+								});
+							}
+						}
+					},
 				]);
 			}
             
