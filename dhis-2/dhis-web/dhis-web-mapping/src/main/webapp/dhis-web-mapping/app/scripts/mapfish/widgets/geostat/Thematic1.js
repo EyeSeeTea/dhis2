@@ -1092,7 +1092,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 			};
 			
-			menu = new Ext.menu.Menu({});
+			menu = new Ext.menu.Menu({
+				showSeparator: false
+			});
 			
 			if (feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class) {
 				menu.add([
@@ -1126,27 +1128,25 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				]);
 			}
 			
-			if (feature.attributes.hcwc) {
-				menu.add({
-					text: 'Drill down',
-					iconCls: 'menu-featureoptions-drilldown',
-					scope: this,
-					handler: function() {
-						drill('down');
-					}
-				});
-			}
-			
-			if (that.model.hasCoordinatesUp) { //todo if parent level has coordinates
-				menu.add({
-					text: 'Float up',
-					iconCls: 'menu-featureoptions-drilldown',
-					scope: this,
-					handler: function() {
-						drill('up');
-					}
-				});
-			}
+			menu.add({
+				text: 'Drill down',
+				iconCls: 'menu-featureoptions-drilldown',
+				disabled: !feature.attributes.hcwc,
+				scope: this,
+				handler: function() {
+					drill('down');
+				}
+			});
+
+			menu.add({
+				text: 'Float up',
+				iconCls: 'menu-featureoptions-drilldown',
+				disabled: !that.model.hasCoordinatesUp,
+				scope: this,
+				handler: function() {
+					drill('up');
+				}
+			});
             
             menu.showAt([GIS.map.mouseMove.x, GIS.map.mouseMove.y]);
         };
@@ -1522,9 +1522,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		model.parentId = this.config.parentId || model.parentId;
 		model.parentName = this.config.parentName || model.parentName;
 		model.parentLevel = this.config.parentLevel || model.parentLevel;
-		model.updateOrganisationUnit = this.config.updateOrganisationUnit === 'undefined' ? false : this.config.updateOrganisationUnit;
-		model.updateData = this.config.updateData === 'undefined' ? false : this.config.updateData;
-		model.updateLegend = this.config.updateLegend === 'undefined' ? false : this.config.updateLegend;
+		model.updateOrganisationUnit = this.config.updateOrganisationUnit === undefined ? false : this.config.updateOrganisationUnit;
+		model.updateData = this.config.updateData === undefined ? false : this.config.updateData;
+		model.updateLegend = this.config.updateLegend === undefined ? false : this.config.updateLegend;
 		
 		return model;
 	},
@@ -1702,7 +1702,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	afterLoad: function() {
 		this.model = this.tmpModel;
 		this.config = {};
-console.log(this.model);		
         
         if (this.model.updateOrganisationUnit) {
 			GIS.util.map.zoomToVisibleExtent();
