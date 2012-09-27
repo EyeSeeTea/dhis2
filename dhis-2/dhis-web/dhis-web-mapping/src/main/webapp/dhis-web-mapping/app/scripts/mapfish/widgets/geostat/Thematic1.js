@@ -183,7 +183,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         }
         
         if (doc.length) {
-            doc = GIS.util.geojson.decode(doc);
+            doc = GIS.util.geojson.decode(doc, that);
         }
         else {
 			alert("no coordinates"); //todo
@@ -1137,7 +1137,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				});
 			}
 			
-			if (feature.attributes.hcwc) { //todo if parent level has coordinates
+			if (that.model.hasCoordinatesUp) { //todo if parent level has coordinates
 				menu.add({
 					text: 'Float up',
 					iconCls: 'menu-featureoptions-drilldown',
@@ -1522,9 +1522,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		model.parentId = this.config.parentId || model.parentId;
 		model.parentName = this.config.parentName || model.parentName;
 		model.parentLevel = this.config.parentLevel || model.parentLevel;
-		model.updateOrganisationUnit = this.config.updateOrganisationUnit;
-		model.updateData = this.config.updateData;
-		model.updateLegend = this.config.updateLegend;
+		model.updateOrganisationUnit = this.config.updateOrganisationUnit === 'undefined' ? false : this.config.updateOrganisationUnit;
+		model.updateData = this.config.updateData === 'undefined' ? false : this.config.updateData;
+		model.updateLegend = this.config.updateLegend === 'undefined' ? false : this.config.updateLegend;
 		
 		return model;
 	},
@@ -1702,6 +1702,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	afterLoad: function() {
 		this.model = this.tmpModel;
 		this.config = {};
+console.log(this.model);		
         
         if (this.model.updateOrganisationUnit) {
 			GIS.util.map.zoomToVisibleExtent();

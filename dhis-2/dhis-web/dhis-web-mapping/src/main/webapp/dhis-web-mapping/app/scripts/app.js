@@ -206,7 +206,7 @@ Ext.onReady( function() {
 		}
 	};
 	
-	GIS.util.geojson.decode = function(doc) {
+	GIS.util.geojson.decode = function(doc, widget) {
 		var geojson = {};
         doc = Ext.decode(doc);
         geojson.type = 'FeatureCollection';
@@ -217,21 +217,26 @@ Ext.onReady( function() {
             }
         };
         geojson.features = [];
-        for (var i = 0; i < doc.length; i++) {
+        for (var i = 0; i < doc.geojson.length; i++) {
             geojson.features.push({
                 geometry: {
-                    type: doc[i].ty == 1 ? 'MultiPolygon' : 'Point',
-                    coordinates: doc[i].co
+                    type: doc.geojson[i].ty == 1 ? 'MultiPolygon' : 'Point',
+                    coordinates: doc.geojson[i].co
                 },
                 properties: {
-                    id: doc[i].uid,
-                    internalId: doc[i].iid,
-                    name: doc[i].na,
-                    value: doc[i].va || null,
-                    hcwc: doc[i].hc
+                    id: doc.geojson[i].uid,
+                    internalId: doc.geojson[i].iid,
+                    name: doc.geojson[i].na,
+                    value: doc.geojson[i].va || null,
+                    hcwc: doc.geojson[i].hc
                 }
             });
         }
+        
+        if (widget) {
+			widget.tmpModel.hasCoordinatesUp = doc.properties.hasCoordinatesUp;
+		}
+			
         return geojson;
     };
     
@@ -365,31 +370,31 @@ Ext.onReady( function() {
     
     // Vector layers
     
-    GIS.layer.boundary.layer = new OpenLayers.Layer.Vector(GIS.i18n.boundary_layer, {
-        strategies: [
-			new OpenLayers.Strategy.Refresh({
-				force:true
-			})
-		],
-        styleMap: new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style(
-                OpenLayers.Util.applyDefaults(
-					{
-						fillOpacity: 0,
-						strokeColor: '#000',
-						strokeWidth: 1,
-						pointRadius: 5
-					},
-					OpenLayers.Feature.Vector.style['default']
-				)
-            )
-        }),
-        visibility: false,
-        displayInLayerSwitcher: false,
-        layerType: GIS.conf.finals.layer.type_vector,
-        opacity: 1
-    });
-    GIS.map.addLayer(GIS.layer.boundary.layer);
+    //GIS.layer.boundary.layer = new OpenLayers.Layer.Vector(GIS.i18n.boundary_layer, {
+        //strategies: [
+			//new OpenLayers.Strategy.Refresh({
+				//force:true
+			//})
+		//],
+        //styleMap: new OpenLayers.StyleMap({
+            //'default': new OpenLayers.Style(
+                //OpenLayers.Util.applyDefaults(
+					//{
+						//fillOpacity: 0,
+						//strokeColor: '#000',
+						//strokeWidth: 1,
+						//pointRadius: 5
+					//},
+					//OpenLayers.Feature.Vector.style['default']
+				//)
+            //)
+        //}),
+        //visibility: false,
+        //displayInLayerSwitcher: false,
+        //layerType: GIS.conf.finals.layer.type_vector,
+        //opacity: 1
+    //});
+    //GIS.map.addLayer(GIS.layer.boundary.layer);
     
     GIS.layer.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
         strategies: [

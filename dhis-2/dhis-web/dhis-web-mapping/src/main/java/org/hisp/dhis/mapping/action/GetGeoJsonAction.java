@@ -85,10 +85,19 @@ public class GetGeoJsonAction
     {
         return object;
     }
+    
+    private boolean hasCoordinatesUp;
+
+    public boolean isHasCoordinatesUp()
+    {
+        return hasCoordinatesUp;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
+
+
 
     public String execute()
         throws Exception
@@ -121,6 +130,12 @@ public class GetGeoJsonAction
                 }
             }
         }
+        
+        Collection<OrganisationUnit> organisationUnitsUp = organisationUnitService.getOrganisationUnitsAtLevel( level - 1 );
+        
+        FilterUtils.filter( organisationUnitsUp, new OrganisationUnitWithValidCoordinatesFilter() );
+        
+        hasCoordinatesUp = organisationUnitsUp.size() > 0;
 
         return SUCCESS;
     }
