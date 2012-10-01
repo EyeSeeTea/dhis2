@@ -57,7 +57,7 @@ public class ProgramStageInstanceDeletionHandler
     @Override
     public String getClassName()
     {
-        return ProgramStageDataElement.class.getSimpleName();
+        return ProgramStageInstance.class.getSimpleName();
     }
 
     @Override

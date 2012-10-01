@@ -25,21 +25,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patient.action.programstage;
+package org.hisp.dhis.program;
 
-import org.hisp.dhis.program.ProgramStageSection;
-import org.hisp.dhis.program.ProgramStageSectionService;
-import org.hisp.dhis.program.ProgramStageService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version AddProgramStageSectionAction.java 11:29:40 AM Aug 22, 2012 $
+ * @version ProgramStageSectionDeletionHandler.java 3:14:59 PM Oct 1, 2012 $
  */
-public class RemoveProgramStageSectionAction
-    implements Action
+public class ProgramStageSectionDeletionHandler
+    extends DeletionHandler
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -52,43 +48,20 @@ public class RemoveProgramStageSectionAction
         this.programStageService = programStageService;
     }
 
-    private ProgramStageSectionService programStageSectionService;
-
-    public void setProgramStageSectionService( ProgramStageSectionService programStageSectionService )
-    {
-        this.programStageSectionService = programStageSectionService;
-    }
-
     // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
-
-    private Integer programStageId;
-
-    public void setProgramStageId( Integer programStageId )
-    {
-        this.programStageId = programStageId;
-    }
-
-    private Integer id;
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
+    // DeletionHandler implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public String execute()
-        throws Exception
+    public String getClassName()
     {
-        ProgramStageSection section = programStageSectionService.getProgramStageSection( id );
+        return ProgramStageSection.class.getSimpleName();
+    }
 
-        programStageSectionService.deleteProgramStageSection( section );
-
-        return SUCCESS;
+    @Override
+    public void deleteProgramStage( ProgramStage programStage )
+    {
+        programStage.getProgramStageSections().clear();
+        programStageService.updateProgramStage( programStage );
     }
 }
