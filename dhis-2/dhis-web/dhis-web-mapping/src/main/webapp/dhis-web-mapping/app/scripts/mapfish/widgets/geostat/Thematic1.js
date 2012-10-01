@@ -165,6 +165,28 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			sortStore: function() {
 				this.sort('index', 'ASC');
 			}
+		}),
+		
+		infrastructuralDataElementValues: Ext.create('Ext.data.Store', {
+			fields: ['dataElementName', 'value'],
+			proxy: {
+				type: 'ajax',
+				url: '../getInfrastructuralDataElementMapValues.action',
+				reader: {
+					type: 'json',
+					root: 'mapValues'
+				}
+			},
+			//sortInfo: {field: 'dataElementName', direction: 'ASC'},
+			autoLoad: false,
+			isLoaded: false,
+			listeners: {
+				load: function() {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+				}
+			}
 		})
 	},
     
@@ -186,7 +208,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             doc = GIS.util.geojson.decode(doc, that);
         }
         else {
-			alert("no coordinates"); //todo
+			alert("no coordinates"); //todo //i18n
 		}
         
         that.layer.removeFeatures(that.layer.features);
@@ -912,25 +934,26 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				
 			showInfo = function() {
 				Ext.Ajax.request({
-					url: GIS.conf.path_mapping + 'getFacilityInfo' + GIS.conf.type,
-					params: {id: feature.attributes.id},
+					url: GIS.conf.url.path_gis + 'getFacilityInfo.action',
+					params: {
+						id: feature.attributes.id
+					},
 					success: function(r) {
-						var ou = Ext.util.JSON.decode(r.responseText);
+						var ou = Ext.decode(r.responseText);
+						console.log(ou);
 						
-						if (that.featureOptions.info) {
-							that.featureOptions.info.destroy();
+						if (that.cmp.infrastructuralWindow) {
+							that.cmp.infrastructuralWindow.destroy();
 						}
 						
-						that.featureOptions.info = new Ext.Window({
-							title: '<span class="window-information-title">Facility information sheet</span>',
+						that.cmp.infrastructuralWindow = Ext.create('Ext.window.Window', {
+							title: '<span class="window-information-title">Facility information sheet</span>', //i18n
 							layout: 'table',
 							width: GIS.conf.window_width + 178,
-							height: GIS.util.getMultiSelectHeight() + 100,
+							height: 300, //todo
 							bodyStyle: 'background-color:#fff',
 							defaults: {
-								bodyStyle: 'vertical-align:top',
-								labelSeparator: GIS.conf.labelseparator,
-								emptyText: GIS.conf.emptytext
+								bodyStyle: 'vertical-align:top'
 							},
 							layoutConfig: {
 								columns: 2
@@ -954,8 +977,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 								{
 									xtype: 'form',
 									bodyStyle: 'padding:8px 8px 8px 4px',
-									width: GIS.conf.window_width + 20,
-									labelWidth: GIS.conf.label_width,
+									width: GIS.conf.layout.widget.window_width + 20,
+									labelWidth: GIS.conf.layout.widget.itemlabel_width,
 									items: [
 										{html: '<div class="window-info">' + GIS.i18n.infrastructural_data + '</div>'},
 										{
@@ -970,47 +993,63 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 											forceSelection: true,
 											triggerAction: 'all',
 											selectOnFocus: true,
-											width: GIS.conf.combo_width,
-											store: GIS.stores.infrastructuralPeriodsByType,
+											width: 150, //todo
+											store: GIS.store.infrastructuralPeriodsByType,
 											lockPosition: false,
 											listeners: {
-												'select': function(cb) {
+												select: function(cb) {
 													that.infrastructuralPeriod = cb.getValue();
-													that.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
-													that.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-													that.stores.infrastructuralDataElementMapValue.load();
+													//that.store.infrastructuralDataElementValues.setBaseParam('periodId', cb.getValue());
+													//that.store.infrastructuralDataElementValues.setBaseParam('organisationUnitId', feature.attributes.id);
+													that.store.infrastructuralDataElementValues.load({
+														params: {
+															periodId: this.getValue(),
+															organisationUnitId: feature.attributes.id
+														}
+													});
 												}
 											}
 										},
 										{html: '<div style="padding:4px 0 0 0"></div>'},
 										{
-											xtype: 'grid',
-											height: GIS.util.getMultiSelectHeight(),
+											xtype: 'gridpanel',
+											height: 300, //todo
 											width: 242,
-											cm: new Ext.grid.ColumnModel({
-												columns: [
-													{id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
-													{id: 'value', header: 'Value', dataIndex: 'value', sortable: true, width: 50}
-												]
-											}),
+											scroll: 'vertical',
+											columns: [
+												{
+													id: 'dataElementName',
+													text: 'Data element',
+													dataIndex: 'dataElementName',
+													sortable: true,
+													width: 150
+												},
+												{
+													id: 'value',
+													header: 'Value',
+													dataIndex: 'value',
+													sortable: true,
+													width: 50
+												}
+											],
 											disableSelection: true,
 											viewConfig: {forceFit: true},
-											store: that.stores.infrastructuralDataElementMapValue
+											store: that.store.infrastructuralDataElementValues
 										}
 									]
 								}
 							]
 						});
 	
-						if (that.infrastructuralPeriod) {
-							that.featureOptions.info.find('name', 'period')[0].setValue(that.infrastructuralPeriod);
-							that.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', that.infrastructuralPeriod);
-							that.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-							that.stores.infrastructuralDataElementMapValue.load();
-						}
-						that.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (that.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
-						that.featureOptions.info.show();
-						that.featureOptions.menu.destroy();
+						//if (that.infrastructuralPeriod) {
+							//that.featureOptions.info.find('name', 'period')[0].setValue(that.infrastructuralPeriod);
+							//that.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', that.infrastructuralPeriod);
+							//that.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
+							//that.stores.infrastructuralDataElementMapValue.load();
+						//}
+						that.cmp.infrastructuralWindow.setPosition(GIS.cmp.region.east.x - (that.cmp.infrastructuralWindow.width + 15), GIS.cmp.region.center.y + 41);
+						that.cmp.infrastructuralWindow.show();
+						//that.featureOptions.menu.destroy();
 					}
 				});
 			};

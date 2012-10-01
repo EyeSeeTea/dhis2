@@ -547,10 +547,16 @@ Ext.onReady( function() {
 		}
 	});
         
-    GIS.store.infrastructuralPeriodsByType = new Ext.data.JsonStore({
-        url: GIS.conf.url.path_gis + 'getPeriodsByPeriodType.action',
-        root: 'periods',
-        fields: ['id', 'name'],
+    GIS.store.infrastructuralPeriodsByType = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_gis + 'getPeriodsByPeriodType.action',
+			reader: {
+				type: 'json',
+				root: 'periods'
+			}
+		},
         autoLoad: false,
         isLoaded: false,
         listeners: {
@@ -772,8 +778,8 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'test()', //i18n
-							handler: function() {
-								GIS.layer.thematic1.widget.cmp.parent.selectTreePath('/root/' + GIS.init.rootNodes[0].id);
+							handler: function() {								
+								console.log(GIS.layer.thematic1.widget.cmp);
 							}
 						},
 						'->',
