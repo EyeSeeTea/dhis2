@@ -77,6 +77,9 @@ GIS.util = {
 	json: {},
 	jsonEncodeString: function(str) {
 		return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
+	},
+	gui: {
+		window: {}
 	}
 };
 
@@ -296,6 +299,13 @@ Ext.onReady( function() {
         }
         return features;
     };
+    
+    GIS.util.gui.window.setPositionTopRight = function(window) {		
+		var east = GIS.cmp.region.east,
+			center = GIS.cmp.region.center;
+				
+		window.setPosition((east.x + east.width) - (window.getWidth() + 7), center.y + 8);
+	};
 	
 	/* Map */
 	

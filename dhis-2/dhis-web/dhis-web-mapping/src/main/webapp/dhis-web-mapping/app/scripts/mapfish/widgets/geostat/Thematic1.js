@@ -898,6 +898,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         var that = this,
 			window,
 			menu,
+			infrastructuralPeriod,
 			onHoverSelect,
 			onHoverUnselect,
 			onClickSelect;
@@ -927,10 +928,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         };
         
         onClickSelect = function fn(feature) {
-			var showInfo,
+			var showInfo,				
 				showRelocate,
 				drill,
-				menu;				
+				menu;
 			
 			showRelocate = function() {
 				if (that.cmp.relocateWindow) {
@@ -966,18 +967,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						}
 					}
 				});
-				var east = GIS.cmp.region.east,
-					center = GIS.cmp.region.center,
-					window = that.cmp.relocateWindow;
 					
 				that.cmp.relocateWindow.show();
-				if (window.getWidth() < 220) {
-					window.setWidth(220);
-				}
-				that.cmp.relocateWindow.setPosition((east.x + east.width) - (window.getWidth() + 7), center.y + 8);
+				
+				var minWidth = 220,
+					width = window.getWidth();
+				window.setWidth(width < minWidth ? minWidth : width);
+				
+				GIS.util.gui.window.setPositionTopRight(that.cmp.relocateWindow);
 			};
 			
-			showInfo = function() {
+			showInfo = function() {				
 				Ext.Ajax.request({
 					url: GIS.conf.url.path_gis + 'getFacilityInfo.action',
 					params: {
@@ -998,6 +998,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 							//width: GIS.conf.layout.widget.window_width + 178,
 							width: 460,
 							height: 460, //todo
+							isRendered: false,
+							period: null,
 							items: [
 								{
 									cls: 'gis-container-inner',
@@ -1082,7 +1084,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 								},
 								{
 									xtype: 'form',
-									cls: 'gis-container-inner',
+									cls: 'gis-container-inner gis-form-widget',
 									columnWidth: 0.5,
 									bodyStyle: 'padding-left:4px',
 									items: [
@@ -1105,19 +1107,24 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 											store: GIS.store.infrastructuralPeriodsByType,
 											lockPosition: false,
 											listeners: {
-												select: function(cb) {
+												select: function() {
+													infrastructuralPeriod = this.getValue();
+													
 													that.store.infrastructuralDataElementValues.load({
 														params: {
-															periodId: this.getValue(),
+															periodId: infrastructuralPeriod,
 															organisationUnitId: feature.attributes.internalId
 														}
 													});
 												}
 											}
 										},
-										{html: '<div style="padding:4px 0 0 0"></div>'},
+										{
+											cls: 'gis-panel-html-separator'
+										},
 										{
 											xtype: 'gridpanel',
+											cls: 'gis-grid',
 											height: 300, //todo
 											width: 212,
 											scroll: 'vertical',
@@ -1138,23 +1145,28 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 												}
 											],
 											disableSelection: true,
-											viewConfig: {forceFit: true},
 											store: that.store.infrastructuralDataElementValues
 										}
 									]
 								}
-							]
+							],
+							listeners: {
+								show: function() {									
+									if (infrastructuralPeriod) {
+										this.down('combo').setValue(infrastructuralPeriod);
+										that.store.infrastructuralDataElementValues.load({
+											params: {
+												periodId: infrastructuralPeriod,
+												organisationUnitId: feature.attributes.internalId
+											}
+										});
+									}
+								}
+							}
 						});
-	
-						//if (that.infrastructuralPeriod) {
-							//that.featureOptions.info.find('name', 'period')[0].setValue(that.infrastructuralPeriod);
-							//that.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', that.infrastructuralPeriod);
-							//that.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-							//that.stores.infrastructuralDataElementMapValue.load();
-						//}
-						that.cmp.infrastructuralWindow.setPosition(GIS.cmp.region.east.x - (that.cmp.infrastructuralWindow.width + 15), GIS.cmp.region.center.y + 41);
+						
 						that.cmp.infrastructuralWindow.show();
-						//that.featureOptions.menu.destroy();
+						GIS.util.gui.window.setPositionTopRight(that.cmp.infrastructuralWindow);
 					}
 				});
 			};

@@ -393,3 +393,17 @@ html * {
 .gis-window-title-icon-information {
 	background: url('../images/information_14.png') no-repeat;
 }
+
+/* Grid */
+
+.gis-grid .x-grid-cell-inner {
+	font-size: 10px !important;
+}
+
+.gis-grid .x-column-header-text {
+	color: #444;
+}
+.gis-grid .x-grid-header-ct {
+	border-bottom-width: 1px !important;
+	border-bottom-color: #dbdbdb;	
+}
