@@ -930,8 +930,53 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			var showInfo,
 				showRelocate,
 				drill,
-				menu;
+				menu;				
+			
+			showRelocate = function() {
+				if (that.cmp.relocateWindow) {
+					that.cmp.relocateWindow.destroy();
+				}
 				
+				that.cmp.relocateWindow = Ext.create('Ext.window.Window', {
+					title: 'Relocate facility',
+					layout: 'fit',
+					iconCls: 'gis-window-title-icon-relocate',
+					cls: 'gis-container-default',
+					items: {
+						html: feature.attributes.name,
+						cls: 'gis-container-inner'
+					},
+					bbar: [
+						'->',
+						{
+							xtype: 'button',
+							hideLabel: true,
+							text: GIS.i18n.cancel,
+							handler: function() {
+								GIS.map.relocate.active = false;
+								that.cmp.relocateWindow.destroy();
+								GIS.map.getViewport().style.cursor = 'auto';
+							}
+						}
+					],
+					listeners: {
+						close: function() {
+							GIS.map.relocate.active = false;
+							GIS.map.getViewport().style.cursor = 'auto';
+						}
+					}
+				});
+				var east = GIS.cmp.region.east,
+					center = GIS.cmp.region.center,
+					window = that.cmp.relocateWindow;
+					
+				that.cmp.relocateWindow.show();
+				if (window.getWidth() < 220) {
+					window.setWidth(220);
+				}
+				that.cmp.relocateWindow.setPosition((east.x + east.width) - (window.getWidth() + 7), center.y + 8);
+			};
+			
 			showInfo = function() {
 				Ext.Ajax.request({
 					url: GIS.conf.url.path_gis + 'getFacilityInfo.action',
@@ -951,16 +996,13 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 							iconCls: 'gis-window-title-icon-information',
 							cls: 'gis-container-default',
 							//width: GIS.conf.layout.widget.window_width + 178,
-							width: 500,
-							height: 450, //todo
-							bodyStyle: 'background-color:#fff',
+							width: 460,
+							height: 460, //todo
 							items: [
 								{
-									xtype: 'panel',
 									cls: 'gis-container-inner',
 									columnWidth: 0.5,
 									bodyStyle: 'padding-right:4px',
-									width: 160,
 									items: [
 										{
 											html: GIS.i18n.name,
@@ -1040,36 +1082,34 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 								},
 								{
 									xtype: 'form',
+									cls: 'gis-container-inner',
 									columnWidth: 0.5,
-									bodyStyle: 'padding:8px 8px 8px 4px',
-									width: GIS.conf.layout.widget.window_width + 20,
-									labelWidth: GIS.conf.layout.widget.itemlabel_width,
+									bodyStyle: 'padding-left:4px',
 									items: [
-										{html: '<div class="window-info">' + GIS.i18n.infrastructural_data + '</div>'},
+										{
+											html: GIS.i18n.infrastructural_data,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
 										{
 											xtype: 'combo',
-											name: 'period',
 											fieldLabel: GIS.i18n.period,
-											typeAhead: true,
 											editable: false,
 											valueField: 'id',
 											displayField: 'name',
-											mode: 'remote',
 											forceSelection: true,
-											triggerAction: 'all',
-											selectOnFocus: true,
-											width: 150, //todo
+											width: 212, //todo
+											labelWidth: 70,
 											store: GIS.store.infrastructuralPeriodsByType,
 											lockPosition: false,
 											listeners: {
 												select: function(cb) {
-													that.infrastructuralPeriod = cb.getValue();
-													//that.store.infrastructuralDataElementValues.setBaseParam('periodId', cb.getValue());
-													//that.store.infrastructuralDataElementValues.setBaseParam('organisationUnitId', feature.attributes.id);
 													that.store.infrastructuralDataElementValues.load({
 														params: {
 															periodId: this.getValue(),
-															organisationUnitId: feature.attributes.id
+															organisationUnitId: feature.attributes.internalId
 														}
 													});
 												}
@@ -1079,7 +1119,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 										{
 											xtype: 'gridpanel',
 											height: 300, //todo
-											width: 242,
+											width: 212,
 											scroll: 'vertical',
 											columns: [
 												{
@@ -1087,14 +1127,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 													text: 'Data element',
 													dataIndex: 'dataElementName',
 													sortable: true,
-													width: 150
+													width: 160
 												},
 												{
 													id: 'value',
 													header: 'Value',
 													dataIndex: 'value',
 													sortable: true,
-													width: 50
+													width: 52
 												}
 											],
 											disableSelection: true,
@@ -1117,51 +1157,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						//that.featureOptions.menu.destroy();
 					}
 				});
-			};
-			
-			showRelocate = function() {
-				if (that.cmp.relocateWindow) {
-					that.cmp.relocateWindow.destroy();
-				}
-				
-				that.cmp.relocateWindow = Ext.create('Ext.window.Window', {
-					title: 'Relocate facility',
-					layout: 'fit',
-					iconCls: 'gis-window-title-icon-relocate',
-					cls: 'gis-container-default',
-					items: {
-						html: feature.attributes.name,
-						cls: 'gis-container-inner'
-					},
-					bbar: [
-						'->',
-						{
-							xtype: 'button',
-							hideLabel: true,
-							text: GIS.i18n.cancel,
-							handler: function() {
-								GIS.map.relocate.active = false;
-								that.cmp.relocateWindow.destroy();
-								GIS.map.getViewport().style.cursor = 'auto';
-							}
-						}
-					],
-					listeners: {
-						close: function() {
-							GIS.map.relocate.active = false;
-							GIS.map.getViewport().style.cursor = 'auto';
-						}
-					}
-				});
-				var east = GIS.cmp.region.east,
-					center = GIS.cmp.region.center,
-					window = that.cmp.relocateWindow;
-					
-				that.cmp.relocateWindow.show();
-				if (window.getWidth() < 220) {
-					window.setWidth(220);
-				}
-				that.cmp.relocateWindow.setPosition((east.x + east.width) - (window.getWidth() + 7), center.y + 8);
 			};
 						
 			drill = function(direction) {

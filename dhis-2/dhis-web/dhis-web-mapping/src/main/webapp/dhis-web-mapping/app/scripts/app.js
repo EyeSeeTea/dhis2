@@ -555,6 +555,9 @@ Ext.onReady( function() {
 			reader: {
 				type: 'json',
 				root: 'periods'
+			},
+			extraParams: {
+				name: GIS.init.systemSettings.infrastructuralPeriodType
 			}
 		},
         autoLoad: false,
