@@ -1125,12 +1125,13 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 				
 				that.cmp.relocateWindow = Ext.create('Ext.window.Window', {
-					title: '<span class="window-relocate-title">' + feature.attributes.name + '</span>',
-					bodyStyle: 'padding:8px; background-color:#fff',
+					title: 'Relocate facility',
 					layout: 'fit',
+					iconCls: 'gis-window-title-icon-relocate',
+					cls: 'gis-container-default',
 					items: {
-						html: GIS.i18n.select_new_location_on_map,
-						bodyStyle: 'border:0 none'
+						html: feature.attributes.name,
+						cls: 'gis-container-inner'
 					},
 					bbar: [
 						'->',
@@ -1157,6 +1158,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					window = that.cmp.relocateWindow;
 					
 				that.cmp.relocateWindow.show();
+				if (window.getWidth() < 220) {
+					window.setWidth(220);
+				}
 				that.cmp.relocateWindow.setPosition((east.x + east.width) - (window.getWidth() + 7), center.y + 8);
 			};
 						

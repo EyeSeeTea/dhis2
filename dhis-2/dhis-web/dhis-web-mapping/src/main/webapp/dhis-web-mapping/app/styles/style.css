@@ -203,19 +203,19 @@ html * {
 		height: 24px !important;
 	}
 	.x-toolbar .gis-btn-icon-boundary {
-		background: url('../images/boundary.png') no-repeat;
+		background: url('../images/boundary_20.png') no-repeat;
 	}
 	.x-toolbar .gis-btn-icon-thematic1 {
-		background: url('../images/thematic1.png') no-repeat;
+		background: url('../images/thematic1_20.png') no-repeat;
 	}
 	.x-toolbar .gis-btn-icon-thematic2 {
-		background: url('../images/thematic2.png') no-repeat;
+		background: url('../images/thematic2_20.png') no-repeat;
 	}
 	.x-toolbar .gis-btn-icon-facility {
-		background: url('../images/facility.png') no-repeat;
+		background: url('../images/facility_20.png') no-repeat;
 	}
 	.x-toolbar .gis-btn-icon-symbol {
-		background: url('../images/symbol.png') no-repeat;
+		background: url('../images/symbol_20.png') no-repeat;
 	}
 
 		/* Toolbar btn menu */
@@ -275,41 +275,41 @@ html * {
 		left: 6px;
 	}	
 	.gis-menu-item-icon-edit {
-		background: url('../images/edit16.png') no-repeat;
+		background: url('../images/edit_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-refresh {
-		background: url('../images/refresh16.png') no-repeat;
+		background: url('../images/refresh_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-clear {
-		background: url('../images/clear16.png') no-repeat;
+		background: url('../images/clear_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-labels {
-		background: url('../images/labels16.png') no-repeat;
+		background: url('../images/labels_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-filter {
-		background: url('../images/filter16.png') no-repeat;
+		background: url('../images/filter_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-search {
-		background: url('../images/search16.png') no-repeat;
+		background: url('../images/search_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-opacity {
-		background: url('../images/opacity16.png') no-repeat;
+		background: url('../images/opacity_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-history {
-		background: url('../images/history16.png') no-repeat;
+		background: url('../images/history_16.png') no-repeat;
 	}
 	
 	.gis-menu-item-icon-drill {
-		background: url('../images/drill16.png') no-repeat;
+		background: url('../images/drill_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-float {
-		background: url('../images/float16.png') no-repeat;
+		background: url('../images/float_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-information {
-		background: url('../images/information16.png') no-repeat;
+		background: url('../images/information_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-relocate {
-		background: url('../images/relocate16.png') no-repeat;
+		background: url('../images/relocate_16.png') no-repeat;
 	}	
 	
 	.x-menu-item-separator {
@@ -371,6 +371,25 @@ html * {
 	letter-spacing: 1px;
 }
 
+.gis-window-title-icon-boundary {
+	background: url('../images/boundary_14.png') no-repeat;
+}
+.gis-window-title-icon-thematic1 {
+	background: url('../images/thematic1_14.png') no-repeat;
+}
+.gis-window-title-icon-thematic2 {
+	background: url('../images/thematic2_14.png') no-repeat;
+}
+.gis-window-title-icon-facility {
+	background: url('../images/facility_14.png') no-repeat;
+}
+.gis-window-title-icon-symbol {
+	background: url('../images/symbol_14.png') no-repeat;
+}
+
+.gis-window-title-icon-relocate {
+	background: url('../images/relocate_14.png') no-repeat;
+}
 .gis-window-title-icon-information {
-	background: url('../images/information14.png') no-repeat;
+	background: url('../images/information_14.png') no-repeat;
 }

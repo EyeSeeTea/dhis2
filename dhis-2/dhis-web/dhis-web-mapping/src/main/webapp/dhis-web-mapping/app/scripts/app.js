@@ -162,10 +162,10 @@ Ext.onReady( function() {
 	
 	GIS.init.afterRender = function() {	
 		// Map tools
-		document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin24.png" />';
-		document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout24.png" />';
-		document.getElementsByClassName('zoomVisibleButton')[0].innerHTML = '<img src="images/zoomvisible24.png" />';
-		document.getElementsByClassName('layersButton')[0].innerHTML = '<img src="images/layers24.png" />';
+		document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin_24.png" />';
+		document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout_24.png" />';
+		document.getElementsByClassName('zoomVisibleButton')[0].innerHTML = '<img src="images/zoomvisible_24.png" />';
+		document.getElementsByClassName('layersButton')[0].innerHTML = '<img src="images/layers_24.png" />';
 		
 		// Map events
 		GIS.map.events.register('mousemove', null, function(e) {
@@ -665,8 +665,9 @@ Ext.onReady( function() {
     });
     
     GIS.layer.thematic1.window = Ext.create('Ext.window.Window', {
-		title: '<span id="window-thematic1-title">' + GIS.i18n.thematic_layer + ' 1' + '</span>',
+		title: GIS.i18n.thematic_layer + ' 1',
 		layout: 'fit',
+		iconCls: 'gis-window-title-icon-thematic1',
 		cls: 'gis-container-default',
         closeAction: 'hide',
         width: GIS.conf.layout.widget.window_width,
