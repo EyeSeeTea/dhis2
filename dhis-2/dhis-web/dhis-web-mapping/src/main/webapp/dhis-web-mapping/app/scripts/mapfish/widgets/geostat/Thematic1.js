@@ -931,8 +931,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			var showInfo,				
 				showRelocate,
 				drill,
-				menu;
+				menu,
+				isPoint = feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class;
 			
+			// Relocate
 			showRelocate = function() {
 				if (that.cmp.relocateWindow) {
 					that.cmp.relocateWindow.destroy();
@@ -977,7 +979,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				GIS.util.gui.window.setPositionTopRight(that.cmp.relocateWindow);
 			};
 			
-			showInfo = function() {				
+			// Infrastructural data
+			showInfo = function() {
 				Ext.Ajax.request({
 					url: GIS.conf.url.path_gis + 'getFacilityInfo.action',
 					params: {
@@ -1170,7 +1173,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					}
 				});
 			};
-						
+			
+			// Drill or float
 			drill = function(direction) {
 				//if (GIS.vars.locateFeatureWindow) {
 					//GIS.vars.locateFeatureWindow.destroy();
@@ -1216,78 +1220,83 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 			};
 			
+			// Menu
+			var menuItems = [
+				Ext.create('Ext.menu.Item', {
+					text: 'Drill down',
+					iconCls: 'gis-menu-item-icon-drill',
+					cls: 'gis-menu-item-first',
+					disabled: !feature.attributes.hcwc,
+					scope: this,
+					handler: function() {
+						drill('down');
+					}
+				}),
+				Ext.create('Ext.menu.Item', {
+					text: 'Float up',
+					iconCls: 'gis-menu-item-icon-float',
+					disabled: !that.model.hasCoordinatesUp,
+					scope: this,
+					handler: function() {
+						drill('up');
+					}
+				})
+			];
+			
+			if (isPoint) {
+				menuItems.push({
+					xtype: 'menuseparator'
+				});
+				
+				menuItems.push( Ext.create('Ext.menu.Item', {
+					text: GIS.i18n.relocate,
+					iconCls: 'gis-menu-item-icon-relocate',
+					disabled: !GIS.init.security.isAdmin,
+					handler: function(item) {
+						GIS.map.relocate.active = true;
+						GIS.map.relocate.widget = that;
+						GIS.map.relocate.feature = feature;
+						GIS.map.getViewport().style.cursor = 'crosshair';
+						showRelocate();
+					}
+				}));
+				
+				menuItems.push( Ext.create('Ext.menu.Item', {
+					text: 'Show information', //i18n
+					iconCls: 'gis-menu-item-icon-information',
+					handler: function(item) {
+						if (GIS.store.infrastructuralPeriodsByType.isLoaded) {
+							showInfo();
+						}
+						else {
+							GIS.store.infrastructuralPeriodsByType.load({
+								params: {
+									name: GIS.init.systemSettings.infrastructuralPeriodType
+								},
+								callback: function() {
+									showInfo();
+								}
+							});
+						}
+					}
+				}));
+			}
+			
+			menuItems[menuItems.length - 1].addCls('gis-menu-item-last');
+			
 			menu = new Ext.menu.Menu({
 				shadow: false,
 				showSeparator: false,
 				defaults: {
 					bodyStyle: 'padding-right:6px'
 				},
-				items: [
-					{
-						text: 'Drill down',
-						iconCls: 'gis-menu-item-icon-drill',
-						cls: 'gis-menu-item-first',
-						disabled: !feature.attributes.hcwc,
-						scope: this,
-						handler: function() {
-							drill('down');
-						}
-					},
-					{
-						text: 'Float up',
-						iconCls: 'gis-menu-item-icon-float',
-						disabled: !that.model.hasCoordinatesUp,
-						scope: this,
-						handler: function() {
-							drill('up');
-						}
-					}
-				],
+				items: menuItems,
 				listeners: {
 					afterrender: function() {
 						this.getEl().addCls('gis-toolbar-btn-menu');
 					}
 				}
 			});
-			
-			if (feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class) {
-				menu.add([
-					{
-						xtype: 'menuseparator'
-					},
-					{
-						text: GIS.i18n.relocate,
-						iconCls: 'gis-menu-item-icon-relocate',
-						disabled: !GIS.init.security.isAdmin,
-						handler: function(item) {
-							GIS.map.relocate.active = true;
-							GIS.map.relocate.widget = that;
-							GIS.map.relocate.feature = feature;
-							GIS.map.getViewport().style.cursor = 'crosshair';
-							showRelocate();
-						}
-					},
-					{
-						text: 'Show information', //i18n
-						iconCls: 'gis-menu-item-icon-information',
-						handler: function(item) {
-							if (GIS.store.infrastructuralPeriodsByType.isLoaded) {
-								showInfo();
-							}
-							else {
-								GIS.store.infrastructuralPeriodsByType.load({
-									params: {
-										name: GIS.init.systemSettings.infrastructuralPeriodType
-									},
-									callback: function() {
-										showInfo();
-									}
-								});
-							}
-						}
-					},
-				]);
-			}
             
             menu.showAt([GIS.map.mouseMove.x, GIS.map.mouseMove.y]);
         };
