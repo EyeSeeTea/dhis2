@@ -940,42 +940,107 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					},
 					success: function(r) {
 						var ou = Ext.decode(r.responseText);
-						console.log(ou);
 						
 						if (that.cmp.infrastructuralWindow) {
 							that.cmp.infrastructuralWindow.destroy();
 						}
 						
 						that.cmp.infrastructuralWindow = Ext.create('Ext.window.Window', {
-							title: '<span class="window-information-title">Facility information sheet</span>', //i18n
-							layout: 'table',
-							width: GIS.conf.window_width + 178,
-							height: 300, //todo
+							title: 'Facility information sheet', //i18n
+							layout: 'column',
+							iconCls: 'gis-window-title-icon-information',
+							cls: 'gis-container-default',
+							//width: GIS.conf.layout.widget.window_width + 178,
+							width: 500,
+							height: 450, //todo
 							bodyStyle: 'background-color:#fff',
-							defaults: {
-								bodyStyle: 'vertical-align:top'
-							},
-							layoutConfig: {
-								columns: 2
-							},
 							items: [
 								{
 									xtype: 'panel',
-									layout: 'anchor',
-									bodyStyle: 'padding:8px 4px 8px 8px',
+									cls: 'gis-container-inner',
+									columnWidth: 0.5,
+									bodyStyle: 'padding-right:4px',
 									width: 160,
 									items: [
-										{html: '<div class="window-info">' + GIS.i18n.name + '<p style="font-weight:normal">' + feature.attributes.name + '</p></div>'},
-										{html: '<div class="window-info">' + GIS.i18n.type + '<p style="font-weight:normal">' + ou.ty + '</p></div>'},
-										{html: '<div class="window-info">' + GIS.i18n.code + '<p style="font-weight:normal">' + ou.co + '</p></div>'},
-										{html: '<div class="window-info">' + GIS.i18n.address + '<p style="font-weight:normal">' + ou.ad + '</p></div>'},
-										{html: '<div class="window-info">' + GIS.i18n.contact_person + '<p style="font-weight:normal">' + ou.cp + '</p></div>'},
-										{html: '<div class="window-info">' + GIS.i18n.email + '<p style="font-weight:normal">' + ou.em + '</p></div>'},
-										{html: '<div class="window-info">' + GIS.i18n.phone_number + '<p style="font-weight:normal">' + ou.pn + '</p></div>'}
+										{
+											html: GIS.i18n.name,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: feature.attributes.name,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.type,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.ty,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.code,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.co,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.address,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.ad,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.contact_person,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.cp,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.email,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.em,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.phone_number,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.pn,
+											cls: 'gis-panel-html'
+										}
 									]
 								},
 								{
 									xtype: 'form',
+									columnWidth: 0.5,
 									bodyStyle: 'padding:8px 8px 8px 4px',
 									width: GIS.conf.layout.widget.window_width + 20,
 									labelWidth: GIS.conf.layout.widget.itemlabel_width,

@@ -1,5 +1,4 @@
 /* General
- * Div
  * OpenLayers
  * 
  * Panel
@@ -29,14 +28,21 @@ html * {
 	font-size: 10px !important;
 }
 
-/* Div */
-.text-mouseposition-lonlat { /* Mouse position text */
-	color: #555;
-}
-
-.gis-container-default .x-window-body { /* Default settings for panels */
+.gis-container-default .x-window-body { /* Default settings for window container panels */
 	padding: 8px;
 	background: #fff;
+}
+.gis-container-inner .x-panel-body {
+	border: 0 none;
+}
+.gis-panel-html {
+	border: 0 none;
+}
+.gis-panel-html-title {
+	font-weight: bold;
+}
+.gis-panel-html-separator {
+	padding-top: 5px;
 }
 
 .x-splitter-collapsed .x-layout-split-bottom { /* Hide expand arrow when east panel is collapsed */
@@ -100,6 +106,9 @@ html * {
 }
 .olControlMousePosition * {
 	font-size: 10px !important;
+}
+.text-mouseposition-lonlat { /* Mouse position text */
+	color: #555;
 }
 
 .olLayerGoogleCopyright, .olLayerGoogleV3.olLayerGooglePoweredBy {
@@ -360,4 +369,8 @@ html * {
 	color: #fff;
 	font-weight: bold;
 	letter-spacing: 1px;
+}
+
+.gis-window-title-icon-information {
+	background: url('../images/information14.png') no-repeat;
 }
