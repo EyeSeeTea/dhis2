@@ -104,9 +104,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			isLoaded: false,
 			param: null,
 			listeners: {
-				beforeload: function(store) {
-					if (store.param) {
-						store.proxy.url = GIS.conf.url.path_api +  'indicatorGroups/' + store.param + '.json?links=false&paging=false';
+				beforeload: function() {
+					if (this.param) {
+						this.proxy.url = GIS.conf.url.path_api +  'indicatorGroups/' + this.param + '.json?links=false&paging=false';
 					}
 					else {
 						return false;
@@ -114,7 +114,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				},
 				load: function() {
 					if (!this.isLoaded) {
-						//GIS.init.afterLoad();
 						this.isLoaded = true;
 					}
 					this.sort('name', 'ASC');
@@ -135,9 +134,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			isLoaded: false,
 			param: null,
 			listeners: {
-				beforeload: function(store) {
-					if (store.param) {
-						store.proxy.url = GIS.conf.url.path_api +  'dataElementGroups/' + store.param + '.json?links=false&paging=false';
+				beforeload: function() {
+					if (this.param) {
+						this.proxy.url = GIS.conf.url.path_api +  'dataElementGroups/' + this.param + '.json?links=false&paging=false';
 					}
 					else {
 						return false;
@@ -145,7 +144,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				},
 				load: function() {
 					if (!this.isLoaded) {
-						//GIS.init.afterLoad();
 						this.isLoaded = true;
 					}
 					this.sort('name', 'ASC');
@@ -1628,29 +1626,45 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.config.updateGui = true;
 	},
 	
-    execute: function() {		
-		this.tmpModel = this.getModel();
+	setGui: function() {
+		var model = this.tmpModel;
 		
-		if (!this.validateModel(this.tmpModel)) {
-			//alert("validation failed"); //todo
-			console.log(GIS.logg);
-			return;
-		}
-				
-		GIS.mask.msg = GIS.i18n.loading;
-		GIS.mask.show();
+		// Value type
+		this.cmp.valueType.setValue(model.valueType);
 		
-		if (this.tmpModel.updateOrganisationUnit) {
-			this.loadOrganisationUnits();
-		}
-		else if (this.tmpModel.updateData) {
-			this.loadData();
-		}
-		else if (this.tmpModel.updateLegend) {
-			this.loadLegend();
+		// Indicator and data element
+		this.togglers.valueType(model.valueType);
+		
+		var indeGroupStore = model.valueType === GIS.conf.finals.dimension.indicator.id ? GIS.store.indicatorGroups : GIS.store.dataElementGroups,
+			indeGroupView = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicatorGroup : this.cmp.dataElementGroup,
+			indeGroupValue = model.valueType === GIS.conf.finals.dimension.indicator.id ? model.indicatorGroup : model.dataElementGroup,
+			
+			indeStore = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.store.indicatorsByGroup : this.store.dataElementsByGroup,
+			indeView = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicator : this.cmp.dataElement,
+			indeValue = model.valueType === GIS.conf.finals.dimension.indicator.id ? model.indicator : model.dataElement;
+			
+		indeStore.param = indeGroupValue;
+	
+		if (indeGroupStore.isLoaded) {
+			indeGroupView.setValue(indeGroupValue);
 		}
 		else {
-			GIS.mask.hide();
+			indeGroupStore.load({
+				success: function() {
+					indeGroupView.setValue(indeGroupValue);
+				}
+			});
+		}
+	
+		if (indeStore.isLoaded) {
+			indeView.setValue(indeValue);
+		}
+		else {
+			indeStore.load({
+				success: function() {
+					indeView.setValue(indeValue);
+				}
+			});
 		}
 	},
     	
@@ -1870,7 +1884,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				this.loadLegend();
 			}
 		});
-		
 	},
 	
 	loadLegend: function() {
@@ -1887,6 +1900,32 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.classificationApplied = true;
         
         this.afterLoad();		
+	},
+	
+    execute: function() {
+		this.tmpModel = this.getModel();
+		
+		if (!this.validateModel(this.tmpModel)) {
+			alert("validation failed"); //todo
+			return;
+		}
+				
+		GIS.mask.msg = GIS.i18n.loading;
+		GIS.mask.show();
+		
+		if (this.tmpModel.updateGui) {
+			this.setGui();
+		}
+		
+		if (this.tmpModel.updateOrganisationUnit) {
+			this.loadOrganisationUnits();
+		}
+		else if (this.tmpModel.updateData) {
+			this.loadData();
+		}
+		else if (this.tmpModel.updateLegend) {
+			this.loadLegend();
+		}
 	},
 	
 	afterLoad: function() {		
