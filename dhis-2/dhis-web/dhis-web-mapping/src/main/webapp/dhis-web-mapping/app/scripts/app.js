@@ -206,14 +206,14 @@ Ext.onReady( function() {
 			classes: 5,
 			colorHigh: "00ff00",
 			colorLow: "ff0000",
-			dataElement: null,
-			dataElementGroup: null,
-			indicator: "Uvn6LCg7dVU",
-			indicatorGroup: "AoTB60phSOH",
+			dataElement: "fbfJHSPpUQD",
+			dataElementGroup: "qfxEYY9xAl6",
+			//indicator: "Uvn6LCg7dVU",
+			//indicatorGroup: "AoTB60phSOH",
 			legendSet: null,
 			legendType: "automatic",
-			level: 4,
-			levelName: "PHU",
+			level: 3,
+			levelName: "Chiefdom",
 			method: 2,
 			parentId: "fdc6uOvgoji",
 			parentLevel: 2,
@@ -225,11 +225,12 @@ Ext.onReady( function() {
 			updateData: true,
 			updateLegend: false,
 			updateOrganisationUnit: true,
-			valueType: "indicator"
+			//valueType: "indicator",
+			valueType: "dataElement"
 		};
 		
 		GIS.layer.thematic1.widget.setConfig(config);
-		//GIS.layer.thematic1.widget.execute();
+		GIS.layer.thematic1.widget.execute();
 	};
 	
 	// Mask

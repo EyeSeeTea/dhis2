@@ -131,15 +131,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 			},
 			isLoaded: false,
+			loadFn: function(fn) {
+				if (this.isLoaded) {
+					fn.call();
+				}
+				else {
+					this.load(fn);
+				}
+			},
 			listeners: {
-				beforeload: function() {
-					if (this.param) {
-						this.proxy.url = GIS.conf.url.path_api +  'dataElementGroups/' + this.param + '.json?links=false&paging=false';
-					}
-					else {
-						return false;
-					}
-				},
 				load: function() {
 					if (!this.isLoaded) {
 						this.isLoaded = true;
@@ -351,6 +351,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             valueField: 'id',
             displayField: 'name',
             queryMode: 'local',
+            forceSelection: true,
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             listConfig: {loadMask: false},
@@ -406,14 +407,18 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             editable: false,
             valueField: 'id',
             displayField: 'name',
+            queryMode: 'local',
             forceSelection: true,
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             listConfig: {loadMask: false},
             hidden: true,
             store: this.store.dataElementsByGroup,
+            scope: this,
             selectFirst: function() {
-				this.setValue(this.store.getAt(0).data.id);
+				if (this.store.getCount() > 0) {
+					this.setValue(this.store.getAt(0).data.id);
+				}
 				this.scope.config.updateData = true;
 			},
             listeners: {
