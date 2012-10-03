@@ -103,15 +103,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			},
 			isLoaded: false,
 			param: null,
+			loadFn: function(fn) {
+				if (this.isLoaded) {
+					fn.call();
+				}
+				else {
+					this.load( function() {
+						fn.call();
+					});
+				}
+			},
 			listeners: {
-				beforeload: function() {
-					if (this.param) {
-						this.proxy.url = GIS.conf.url.path_api +  'indicatorGroups/' + this.param + '.json?links=false&paging=false';
-					}
-					else {
-						return false;
-					}
-				},
 				load: function() {
 					if (!this.isLoaded) {
 						this.isLoaded = true;
@@ -326,12 +328,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             store: GIS.store.indicatorGroups,
             listeners: {
+				added: function() {
+					this.store.cmp.push(this);
+				},
                 select: {
                     scope: this,
                     fn: function(cb) {
                         this.cmp.indicator.clearValue();
-                        this.store.indicatorsByGroup.param = cb.getValue();
-                        this.store.indicatorsByGroup.load({
+                        
+                        var store = this.cmp.indicator.store;
+                        store.proxy.url = GIS.conf.url.path_api +  'indicatorGroups/' + cb.getValue() + '.json?links=false&paging=false';
+                        store.load({
 							scope: this,
 							callback: function() {
 								this.cmp.indicator.selectFirst();
@@ -347,48 +354,20 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             editable: false,
             valueField: 'id',
             displayField: 'name',
-            forceSelection: true,
+            queryMode: 'local',
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
-            store: this.store.indicatorsByGroup,
-            scope: this,
+            listConfig: {loadMask: false},
             selectFirst: function() {
 				this.setValue(this.store.getAt(0).data.id);
 				this.scope.config.updateData = true;
 			},
+            store: this.store.indicatorsByGroup,
             listeners: {
                 select: {
                     scope: this,
                     fn: function(cb) {
 						this.config.updateData = true;
-						
-                        //Ext.Ajax.request({
-                            //url: GIS.conf.path_mapping + 'getMapLegendSetByIndicator' + GIS.conf.type,
-                            //params: {indicatorId: cb.getValue()},
-                            //scope: this,
-                            //success: function(r) {
-                                //var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
-                                //if (mapLegendSet.id) {
-                                    //this.legend.value = GIS.conf.map_legendset_type_predefined;
-                                    //this.prepareMapViewLegend();
-                                    
-                                    //if (!GIS.stores.predefinedColorMapLegendSet.isLoaded) {
-                                        //GIS.stores.predefinedColorMapLegendSet.load({scope: this, callback: function() {
-                                            //cb.reloadStore.call(this, mapLegendSet.id);
-                                        //}});
-                                    //}
-                                    //else {
-                                        //cb.reloadStore.call(this, mapLegendSet.id);
-                                    //}
-                                //}
-                                //else {
-                                    //this.legend.value = GIS.conf.map_legendset_type_automatic;
-                                    //this.prepareMapViewLegend();
-                                    //this.classify(false, cb.lockPosition);
-                                    //GIS.util.setLockPosition(cb);
-                                //}
-                            //}
-                        //});
                     }
                 }
             }
@@ -405,12 +384,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             hidden: true,
             store: GIS.store.dataElementGroups,
             listeners: {
+				added: function() {
+					this.store.cmp.push(this);
+				},
                 select: {
                     scope: this,
                     fn: function(cb) {
-                        this.cmp.dataElement.clearValue();
-                        this.store.dataElementsByGroup.param = cb.getValue();
-                        this.store.dataElementsByGroup.load({
+                        this.cmp.indicator.clearValue();
+                        
+                        var store = this.cmp.dataElement.store;
+                        store.proxy.url = GIS.conf.url.path_api +  'dataElementGroups/' + cb.getValue() + '.json?links=false&paging=false';
+                        store.load({
 							scope: this,
 							callback: function() {
 								this.cmp.dataElement.selectFirst();
@@ -429,9 +413,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             forceSelection: true,
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            listConfig: {loadMask: false},
             hidden: true,
             store: this.store.dataElementsByGroup,
-            scope: this,
             selectFirst: function() {
 				this.setValue(this.store.getAt(0).data.id);
 				this.scope.config.updateData = true;
@@ -1635,37 +1619,22 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		// Indicator and data element
 		this.togglers.valueType(model.valueType);
 		
-		var indeGroupStore = model.valueType === GIS.conf.finals.dimension.indicator.id ? GIS.store.indicatorGroups : GIS.store.dataElementGroups,
-			indeGroupView = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicatorGroup : this.cmp.dataElementGroup,
+		var	indeGroupView = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicatorGroup : this.cmp.dataElementGroup,
+			indeGroupStore = indeGroupView.store,
 			indeGroupValue = model.valueType === GIS.conf.finals.dimension.indicator.id ? model.indicatorGroup : model.dataElementGroup,
 			
 			indeStore = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.store.indicatorsByGroup : this.store.dataElementsByGroup,
 			indeView = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicator : this.cmp.dataElement,
 			indeValue = model.valueType === GIS.conf.finals.dimension.indicator.id ? model.indicator : model.dataElement;
 			
-		indeStore.param = indeGroupValue;
-	
-		if (indeGroupStore.isLoaded) {
+		indeGroupStore.loadFn( function() {
 			indeGroupView.setValue(indeGroupValue);
-		}
-		else {
-			indeGroupStore.load({
-				success: function() {
-					indeGroupView.setValue(indeGroupValue);
-				}
-			});
-		}
-	
-		if (indeStore.isLoaded) {
+		});
+		
+		indeStore.param = indeGroupValue;
+		indeStore.loadFn( function() {
 			indeView.setValue(indeValue);
-		}
-		else {
-			indeStore.load({
-				success: function() {
-					indeView.setValue(indeValue);
-				}
-			});
-		}
+		});
 	},
     	
 	getModel: function() {

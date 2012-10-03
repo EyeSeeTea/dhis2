@@ -79,7 +79,8 @@ GIS.util = {
 		return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
 	},
 	gui: {
-		window: {}
+		window: {},
+		combo: {}
 	}
 };
 
@@ -135,6 +136,9 @@ Ext.onReady( function() {
 	]);
 	Ext.Ajax.method = 'GET';
     Ext.QuickTips.init();
+    //Ext.override(Ext.LoadMask, {
+		//onHide: function() { this.callParent(); }
+	//});
 	document.body.oncontextmenu = function(){return false;};
 	
 	// Init
@@ -228,7 +232,7 @@ Ext.onReady( function() {
 		};
 		
 		GIS.layer.thematic1.widget.setConfig(config);
-		GIS.layer.thematic1.widget.execute();
+		//GIS.layer.thematic1.widget.execute();
 	};
 	
 	// Mask
@@ -336,6 +340,12 @@ Ext.onReady( function() {
 			center = GIS.cmp.region.center;
 				
 		window.setPosition((east.x + east.width) - (window.getWidth() + 7), center.y + 8);
+	};
+	
+	GIS.util.gui.combo.setQueryMode = function(cmpArray, mode) {
+		for (var i = 0; i < cmpArray.length; i++) {
+			cmpArray[i].queryMode = mode;
+		}
 	};
 	
 	/* Map */
@@ -527,12 +537,25 @@ Ext.onReady( function() {
 				root: 'indicatorGroups'
 			}
 		},
+		cmp: [],
 		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load({
+					callback: function() {
+						fn.call();
+					}
+				});
+			}
+		},
 		listeners: {
 			load: function() {
 				if (!this.isLoaded) {
-					//GIS.init.afterLoad();
 					this.isLoaded = true;
+					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
 				}
 				this.sort('name', 'ASC');
 			}
@@ -549,12 +572,25 @@ Ext.onReady( function() {
 				root: 'dataElementGroups'
 			}
 		},
+		cmp: [],
 		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load({
+					callback: function() {
+						fn.call();
+					}
+				});
+			}
+		},
 		listeners: {
 			load: function() {
 				if (!this.isLoaded) {
-					//GIS.init.afterLoad();
 					this.isLoaded = true;
+					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
 				}
 				this.sort('name', 'ASC');
 			}
@@ -823,36 +859,41 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'test()', //i18n
-							handler: function() {								
+							handler: function() {
+								var config = {
+									classes: 5,
+									colorHigh: "00ff00",
+									colorLow: "ff0000",
+									dataElement: null,
+									dataElementGroup: null,
+									indicator: "Uvn6LCg7dVU",
+									indicatorGroup: "AoTB60phSOH",
+									legendSet: null,
+									legendType: "automatic",
+									level: 4,
+									levelName: "PHU",
+									method: 2,
+									parentId: "fdc6uOvgoji",
+									parentLevel: 2,
+									parentName: "Bombali",
+									period: "2012",
+									periodType: "Yearly",
+									radiusHigh: 15,
+									radiusLow: 5,
+									updateData: true,
+									updateLegend: false,
+									updateOrganisationUnit: true,
+									valueType: "indicator"
+								};
 								
-		var config = {
-			classes: 5,
-			colorHigh: "00ff00",
-			colorLow: "ff0000",
-			dataElement: null,
-			dataElementGroup: null,
-			indicator: "Uvn6LCg7dVU",
-			indicatorGroup: "AoTB60phSOH",
-			legendSet: null,
-			legendType: "automatic",
-			level: 4,
-			levelName: "PHU",
-			method: 2,
-			parentId: "fdc6uOvgoji",
-			parentLevel: 2,
-			parentName: "Bombali",
-			period: "2012",
-			periodType: "Yearly",
-			radiusHigh: 15,
-			radiusLow: 5,
-			updateData: true,
-			updateLegend: false,
-			updateOrganisationUnit: true,
-			valueType: "indicator"
-		};
-		
-		GIS.layer.thematic1.widget.setConfig(config);
-		GIS.layer.thematic1.widget.execute();
+								GIS.layer.thematic1.widget.setConfig(config);
+								GIS.layer.thematic1.widget.execute();
+							}
+						},
+						{
+							text: 'test2()', //i18n
+							handler: function() {
+								alert(GIS.layer.thematic1.widget.cmp.indicatorGroup.getValue());
 							}
 						},
 						'->',
