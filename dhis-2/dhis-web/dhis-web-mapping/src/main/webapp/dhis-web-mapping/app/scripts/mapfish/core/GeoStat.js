@@ -62,14 +62,14 @@ mapfish.GeoStat = OpenLayers.Class({
         this.legendDiv = Ext.get(options.legendDiv);
     },
  
-    setUrl: function(url, success) {
+    setUrl: function(url) {
         this.url = url;
         if (this.url) {
             OpenLayers.Request.GET({
 				url: this.url,
 				scope: this,
-				success: success,
-				failure: this.onFailure
+				success: this.requestSuccess,
+				failure: this.requestFailure
 			});
         }
     },
@@ -121,10 +121,6 @@ mapfish.GeoStat = OpenLayers.Class({
 			G.vars.mask.hide();
 		}
 		G.vars.activeWidget.classify(false, false, true);
-    },
-
-    onFailure: function(request) {
-        this.requestFailure(request);
     },
 
     addOptions: function(newOptions) {

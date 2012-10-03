@@ -164,6 +164,7 @@ Ext.onReady( function() {
 	};
 	
 	GIS.init.afterRender = function() {	
+		
 		// Map tools
 		document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin_24.png" />';
 		document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout_24.png" />';
@@ -175,7 +176,7 @@ Ext.onReady( function() {
 			GIS.map.mouseMove.x = e.clientX;
 			GIS.map.mouseMove.y = e.clientY;
 		});
-                
+		                
 		GIS.map.events.register('click', null, function(e) {
 			if (GIS.map.relocate.active) {
 				var el = document.getElementById('mouseposition').childNodes[0],
@@ -198,6 +199,36 @@ Ext.onReady( function() {
 				});
 			}
 		});
+		
+		// Load favorite
+		var config = {
+			classes: 5,
+			colorHigh: "00ff00",
+			colorLow: "ff0000",
+			dataElement: null,
+			dataElementGroup: null,
+			indicator: "Uvn6LCg7dVU",
+			indicatorGroup: "AoTB60phSOH",
+			legendSet: null,
+			legendType: "automatic",
+			level: 4,
+			levelName: "PHU",
+			method: 2,
+			parentId: "fdc6uOvgoji",
+			parentLevel: 2,
+			parentName: "Bombali",
+			period: "2012",
+			periodType: "Yearly",
+			radiusHigh: 15,
+			radiusLow: 5,
+			updateData: true,
+			updateLegend: false,
+			updateOrganisationUnit: true,
+			valueType: "indicator"
+		};
+		
+		GIS.layer.thematic1.widget.setConfig(config);
+		GIS.layer.thematic1.widget.execute();
 	};
 	
 	// Mask
@@ -793,7 +824,35 @@ Ext.onReady( function() {
 						{
 							text: 'test()', //i18n
 							handler: function() {								
-								console.log(GIS.layer.thematic1.widget.cmp);
+								
+		var config = {
+			classes: 5,
+			colorHigh: "00ff00",
+			colorLow: "ff0000",
+			dataElement: null,
+			dataElementGroup: null,
+			indicator: "Uvn6LCg7dVU",
+			indicatorGroup: "AoTB60phSOH",
+			legendSet: null,
+			legendType: "automatic",
+			level: 4,
+			levelName: "PHU",
+			method: 2,
+			parentId: "fdc6uOvgoji",
+			parentLevel: 2,
+			parentName: "Bombali",
+			period: "2012",
+			periodType: "Yearly",
+			radiusHigh: 15,
+			radiusLow: 5,
+			updateData: true,
+			updateLegend: false,
+			updateOrganisationUnit: true,
+			valueType: "indicator"
+		};
+		
+		GIS.layer.thematic1.widget.setConfig(config);
+		GIS.layer.thematic1.widget.execute();
 							}
 						},
 						'->',
