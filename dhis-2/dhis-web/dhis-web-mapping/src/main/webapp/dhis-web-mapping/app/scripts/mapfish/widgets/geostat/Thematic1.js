@@ -102,15 +102,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 			},
 			isLoaded: false,
-			param: null,
 			loadFn: function(fn) {
 				if (this.isLoaded) {
 					fn.call();
 				}
 				else {
-					this.load( function() {
-						fn.call();
-					});
+					this.load(fn);
 				}
 			},
 			listeners: {
@@ -134,7 +131,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 			},
 			isLoaded: false,
-			param: null,
 			listeners: {
 				beforeload: function() {
 					if (this.param) {
@@ -1631,7 +1627,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			indeGroupView.setValue(indeGroupValue);
 		});
 		
-		indeStore.param = indeGroupValue;
+		indeStore.proxy.url = GIS.conf.url.path_api + model.valueType + 'Groups/' + indeGroupValue + '.json?links=false&paging=false';
 		indeStore.loadFn( function() {
 			indeView.setValue(indeValue);
 		});

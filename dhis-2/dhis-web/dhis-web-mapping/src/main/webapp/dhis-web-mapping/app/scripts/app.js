@@ -136,9 +136,6 @@ Ext.onReady( function() {
 	]);
 	Ext.Ajax.method = 'GET';
     Ext.QuickTips.init();
-    //Ext.override(Ext.LoadMask, {
-		//onHide: function() { this.callParent(); }
-	//});
 	document.body.oncontextmenu = function(){return false;};
 	
 	// Init
@@ -544,11 +541,7 @@ Ext.onReady( function() {
 				fn.call();
 			}
 			else {
-				this.load({
-					callback: function() {
-						fn.call();
-					}
-				});
+				this.load(fn);
 			}
 		},
 		listeners: {
@@ -579,11 +572,7 @@ Ext.onReady( function() {
 				fn.call();
 			}
 			else {
-				this.load({
-					callback: function() {
-						fn.call();
-					}
-				});
+				this.load(fn);
 			}
 		},
 		listeners: {
