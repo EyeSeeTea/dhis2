@@ -978,7 +978,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 							layout: 'column',
 							iconCls: 'gis-window-title-icon-information',
 							cls: 'gis-container-default',
-							//width: GIS.conf.layout.widget.window_width + 178,
 							width: 460,
 							height: 400, //todo
 							isRendered: false,
@@ -1942,7 +1941,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		}
 	},
 	
-	afterLoad: function() {		
+	afterLoad: function() {
 		this.model = this.tmpModel;
 		this.config = {};
         
@@ -1980,19 +1979,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     //},
     
     onRender: function(ct, position) {
-		
-		//console.log(ct, position);
         mapfish.widgets.geostat.Thematic1.superclass.onRender.apply(this, arguments);
-		
-		//this.coreComp = new mapfish.GeoStat.Thematic1(this.map, {
-            //layer: this.layer,
-            //format: this.format,
-            //url: this.url,
-            //requestSuccess: Ext.Function.bind(this.requestSuccess, this),
-            //requestFailure: Ext.Function.bind(this.requestFailure, this),
-            //legendDiv: this.legendDiv,
-            //labelGenerator: this.labelGenerator,
-            //widget: this
-        //});
     }
 });

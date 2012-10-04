@@ -86,7 +86,7 @@ GIS.util = {
 
 GIS.map;
 
-GIS.layer = {
+GIS.base = {
 	boundary: {
 		name: 'boundary',
 	},
@@ -118,7 +118,6 @@ GIS.store = {};
 GIS.obj = {};
 
 GIS.cmp = {
-	menu: {},
 	region: {}
 };
 
@@ -161,7 +160,7 @@ Ext.onReady( function() {
 			GIS.init.onInitialize(r);	
 	
 	GIS.init.onRender = function() {
-		//GIS.layer.googleStreets.layer.setVisibility(false);
+		//GIS.base.googleStreets.layer.setVisibility(false);
 	};
 	
 	GIS.init.afterRender = function() {	
@@ -229,8 +228,8 @@ Ext.onReady( function() {
 			valueType: "indicator"
 		};
 		
-		//GIS.layer.thematic1.widget.setConfig(config);
-		//GIS.layer.thematic1.widget.execute();
+		//GIS.base.thematic1.widget.setConfig(config);
+		//GIS.base.thematic1.widget.execute();
 	};
 	
 	// Mask
@@ -440,29 +439,29 @@ Ext.onReady( function() {
     // Base layers
     
     if (window.google) {
-        GIS.layer.googleStreets.layer = new OpenLayers.Layer.Google(GIS.layer.googleStreets.name, {
+        GIS.base.googleStreets.layer = new OpenLayers.Layer.Google(GIS.base.googleStreets.name, {
 			numZoomLevels: 20,
 			animationEnabled: true
 		});        
-        GIS.layer.googleStreets.layer.layerType = GIS.conf.finals.layer.type_base;
-        GIS.map.addLayer(GIS.layer.googleStreets.layer);
+        GIS.base.googleStreets.layer.layerType = GIS.conf.finals.layer.type_base;
+        GIS.map.addLayer(GIS.base.googleStreets.layer);
         
-        GIS.layer.googleHybrid.layer = new OpenLayers.Layer.Google(GIS.layer.googleHybrid.name, {
+        GIS.base.googleHybrid.layer = new OpenLayers.Layer.Google(GIS.base.googleHybrid.name, {
 			type: google.maps.MapTypeId.HYBRID,
 			numZoomLevels: 20,
 			animationEnabled: true
 		});        
-        GIS.layer.googleHybrid.layer.layerType = GIS.conf.finals.layer.type_base;
-        GIS.map.addLayer(GIS.layer.googleHybrid.layer);
+        GIS.base.googleHybrid.layer.layerType = GIS.conf.finals.layer.type_base;
+        GIS.map.addLayer(GIS.base.googleHybrid.layer);
     }
     
-    GIS.layer.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.layer.openStreetMap.name);
-    GIS.layer.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
-    GIS.map.addLayer(GIS.layer.openStreetMap.layer);
+    GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.name);
+    GIS.base.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
+    GIS.map.addLayer(GIS.base.openStreetMap.layer);
     
     // Vector layers
     
-    //GIS.layer.boundary.layer = new OpenLayers.Layer.Vector(GIS.i18n.boundary_layer, {
+    //GIS.base.boundary.layer = new OpenLayers.Layer.Vector(GIS.i18n.boundary_layer, {
         //strategies: [
 			//new OpenLayers.Strategy.Refresh({
 				//force:true
@@ -486,9 +485,9 @@ Ext.onReady( function() {
         //layerType: GIS.conf.finals.layer.type_vector,
         //opacity: 1
     //});
-    //GIS.map.addLayer(GIS.layer.boundary.layer);
+    //GIS.map.addLayer(GIS.base.boundary.layer);
     
-    GIS.layer.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
+    GIS.base.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
         strategies: [
 			new OpenLayers.Strategy.Refresh({
 				force:true
@@ -525,7 +524,7 @@ Ext.onReady( function() {
 			this.setOpacity(parseFloat(this.layerOpacity));
 		}
     });
-    GIS.map.addLayer(GIS.layer.thematic1.layer);
+    GIS.map.addLayer(GIS.base.thematic1.layer);
     
     // Stores
     
@@ -651,13 +650,12 @@ Ext.onReady( function() {
     
     // Objects
     
-    GIS.obj.LayerMenu = function(layerName, cls) {
+    GIS.obj.LayerMenu = function(base, cls) {
 		return Ext.create('Ext.menu.Menu', {
 			shadow: false,
 			showSeparator: false,
 			enableItems: function() {
 				Ext.each(this.items.items, function(item) {
-					console.log(item.enable);
 					item.enable();
 				});
 			},
@@ -675,7 +673,7 @@ Ext.onReady( function() {
 					cls: 'gis-menu-item-first',
 					alwaysEnabled: true,
 					handler: function() {
-						GIS.layer[layerName].window.show();
+						GIS.base[base.name].window.show();
 					}
 				},
 				{
@@ -721,16 +719,19 @@ Ext.onReady( function() {
 				}
 			],
 			listeners: {
-				added: function() {
-					GIS.cmp.menu[layerName] = this;
-				},
 				afterrender: function() {
 					this.getEl().addCls('gis-toolbar-btn-menu');
 					if (cls) {
 						this.getEl().addCls(cls);
 					}
-					
-					this.disableItems();
+				},
+				show: function() {
+					if (base.layer.features.length) {
+						this.enableItems();
+					}
+					else {
+						this.disableItems();
+					}
 				}
 			}
 		});
@@ -738,16 +739,16 @@ Ext.onReady( function() {
     
 	// User interface
 	
-	GIS.layer.thematic1.menu = new GIS.obj.LayerMenu(GIS.layer.boundary.name, 'gis-toolbar-btn-menu-first');
+	GIS.base.thematic1.menu = new GIS.obj.LayerMenu(GIS.base.thematic1);
 	
-	GIS.layer.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
+	GIS.base.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
         map: GIS.map,
-        layer: GIS.layer.thematic1.layer,
-        menu: GIS.layer.thematic1.menu,
+        layer: GIS.base.thematic1.layer,
+        menu: GIS.base.thematic1.menu,
         legendDiv: 'thematic1Legend'
     });
     
-    GIS.layer.thematic1.window = Ext.create('Ext.window.Window', {
+    GIS.base.thematic1.window = Ext.create('Ext.window.Window', {
 		title: GIS.i18n.thematic_layer + ' 1',
 		layout: 'fit',
 		iconCls: 'gis-window-title-icon-thematic1',
@@ -757,13 +758,13 @@ Ext.onReady( function() {
         resizable: false,
         isRendered: false,
         isCollapsed: false,
-        items: GIS.layer.thematic1.widget,
+        items: GIS.base.thematic1.widget,
         bbar: [
 			'->',
 			{
 				text: 'Update',
 				handler: function() {
-					GIS.layer.thematic1.widget.execute();
+					GIS.base.thematic1.widget.execute();
 				}
 			}
 		],
@@ -824,28 +825,28 @@ Ext.onReady( function() {
 					},
 					items: [
 						{
-							iconCls: 'gis-btn-icon-' + GIS.layer.boundary.name,
-							menu: new GIS.obj.LayerMenu(GIS.layer.boundary.name, 'gis-toolbar-btn-menu-first'),
+							iconCls: 'gis-btn-icon-' + GIS.base.boundary.name,
+							menu: new GIS.obj.LayerMenu(GIS.base.boundary, 'gis-toolbar-btn-menu-first'),
 							width: 26
 						},
 						{
-							iconCls: 'gis-btn-icon-' + GIS.layer.thematic1.name,
-							menu: new GIS.obj.LayerMenu(GIS.layer.thematic1.name),
+							iconCls: 'gis-btn-icon-' + GIS.base.thematic1.name,
+							menu: GIS.base.thematic1.menu,
 							width: 26
 						},
 						{
-							iconCls: 'gis-btn-icon-' + GIS.layer.thematic2.name,
-							menu: new GIS.obj.LayerMenu(GIS.layer.thematic2.name),
+							iconCls: 'gis-btn-icon-' + GIS.base.thematic2.name,
+							menu: new GIS.obj.LayerMenu(GIS.base.thematic2),
 							width: 26
 						},
 						{
-							iconCls: 'gis-btn-icon-' + GIS.layer.facility.name,
-							menu: new GIS.obj.LayerMenu(GIS.layer.facility.name),
+							iconCls: 'gis-btn-icon-' + GIS.base.facility.name,
+							menu: new GIS.obj.LayerMenu(GIS.base.facility),
 							width: 26
 						},
 						{
-							iconCls: 'gis-btn-icon-' + GIS.layer.symbol.name,
-							menu: new GIS.obj.LayerMenu(GIS.layer.symbol.name),
+							iconCls: 'gis-btn-icon-' + GIS.base.symbol.name,
+							menu: new GIS.obj.LayerMenu(GIS.base.symbol),
 							width: 26
 						},
 						{
@@ -890,8 +891,8 @@ Ext.onReady( function() {
 									valueType: "indicator"
 								};
 								
-								GIS.layer.thematic1.widget.setConfig(config);
-								GIS.layer.thematic1.widget.execute();
+								GIS.base.thematic1.widget.setConfig(config);
+								GIS.base.thematic1.widget.execute();
 							}
 						},
 						'->',
