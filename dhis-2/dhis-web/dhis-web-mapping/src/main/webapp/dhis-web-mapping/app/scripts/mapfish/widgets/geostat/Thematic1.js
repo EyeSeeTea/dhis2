@@ -644,9 +644,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						select: {
 							scope: this,
 							fn: function(cp, color) {
-								this.cmp.colorLow.getEl().dom.style.background = '#' + color;
-								this.cmp.colorLow.value = color;
-								this.cmp.colorLow.menu.hide();
+								this.cmp.colorHigh.getEl().dom.style.background = '#' + color;
+								this.cmp.colorHigh.value = color;
+								this.cmp.colorHigh.menu.hide();
 								
 								this.config.updateLegend = true;
 							}
@@ -925,6 +925,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					layout: 'fit',
 					iconCls: 'gis-window-title-icon-relocate',
 					cls: 'gis-container-default',
+					setMinWidth: function(minWidth) {
+						this.setWidth(this.getWidth() < minWidth ? minWidth : this.getWidth());
+					},
 					items: {
 						html: feature.attributes.name,
 						cls: 'gis-container-inner'
@@ -950,11 +953,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					}
 				});
 					
-				that.cmp.relocateWindow.show();
-				
-				var minWidth = 220,
-					width = window.getWidth();
-				window.setWidth(width < minWidth ? minWidth : width);
+				that.cmp.relocateWindow.show();					
+				that.cmp.relocateWindow.setMinWidth(220);
 				
 				GIS.util.gui.window.setPositionTopRight(that.cmp.relocateWindow);
 			};
@@ -974,19 +974,19 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						}
 						
 						that.cmp.infrastructuralWindow = Ext.create('Ext.window.Window', {
-							title: 'Facility information sheet', //i18n
+							title: 'Facility information', //i18n
 							layout: 'column',
 							iconCls: 'gis-window-title-icon-information',
 							cls: 'gis-container-default',
 							//width: GIS.conf.layout.widget.window_width + 178,
 							width: 460,
-							height: 460, //todo
+							height: 400, //todo
 							isRendered: false,
 							period: null,
 							items: [
 								{
 									cls: 'gis-container-inner',
-									columnWidth: 0.5,
+									columnWidth: 0.4,
 									bodyStyle: 'padding-right:4px',
 									items: [
 										{
@@ -1068,7 +1068,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 								{
 									xtype: 'form',
 									cls: 'gis-container-inner gis-form-widget',
-									columnWidth: 0.5,
+									columnWidth: 0.6,
 									bodyStyle: 'padding-left:4px',
 									items: [
 										{
@@ -1085,7 +1085,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 											valueField: 'id',
 											displayField: 'name',
 											forceSelection: true,
-											width: 212, //todo
+											width: 255, //todo
 											labelWidth: 70,
 											store: GIS.store.infrastructuralPeriodsByType,
 											lockPosition: false,
@@ -1109,7 +1109,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 											xtype: 'gridpanel',
 											cls: 'gis-grid',
 											height: 300, //todo
-											width: 212,
+											width: 255,
 											scroll: 'vertical',
 											columns: [
 												{
@@ -1117,14 +1117,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 													text: 'Data element',
 													dataIndex: 'dataElementName',
 													sortable: true,
-													width: 160
+													width: 195
 												},
 												{
 													id: 'value',
 													header: 'Value',
 													dataIndex: 'value',
 													sortable: true,
-													width: 52
+													width: 60
 												}
 											],
 											disableSelection: true,
@@ -1816,6 +1816,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				//alert("validation failed"); //todo
 			return false;
 		}
+		if (model.parentLevel > model.level) {
+			GIS.logg.push([model.parentLevel, model.level, this.xtype + '.parentLevel: number <= ' + this.xtype + '.level']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		
 		if (!model.parentPath && model.updateGui) {
 			GIS.logg.push([model.parentpath, this.xtype + '.parentpath: string']);
 				//alert("validation failed"); //todo
@@ -1945,6 +1951,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		}
 		
 		this.layer.setLayerOpacity();
+		
+		this.menu.enableItems();
 		
 		GIS.cmp.region.east.doLayout();
 		

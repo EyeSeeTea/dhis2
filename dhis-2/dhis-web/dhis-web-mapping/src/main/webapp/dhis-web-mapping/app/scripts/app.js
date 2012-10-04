@@ -204,29 +204,29 @@ Ext.onReady( function() {
 		// Load favorite
 		var config = {
 			classes: 5,
-			colorHigh: "00ff00",
-			colorLow: "ff0000",
-			dataElement: "fbfJHSPpUQD",
-			dataElementGroup: "qfxEYY9xAl6",
-			//indicator: "Uvn6LCg7dVU",
-			//indicatorGroup: "AoTB60phSOH",
+			colorHigh: "ffff00",
+			colorLow: "0000ff",
+			dataElement: null,
+			dataElementGroup: null,
+			indicator: "Uvn6LCg7dVU",
+			indicatorGroup: "AoTB60phSOH",
 			legendSet: null,
 			legendType: "automatic",
-			level: 3,
-			levelName: "Chiefdom",
+			level: 4,
+			levelName: "PHU",
 			method: 2,
 			parentId: "fdc6uOvgoji",
 			parentLevel: 2,
 			parentName: "Bombali",
-			period: "2011",
+			parentPath: "/ImspTQPwCqd/fdc6uOvgoji",
+			period: "2012",
 			periodType: "Yearly",
 			radiusHigh: 15,
 			radiusLow: 5,
-			updateData: true,
+			updateData: false,
 			updateLegend: false,
 			updateOrganisationUnit: true,
-			//valueType: "indicator",
-			valueType: "dataElement"
+			valueType: "indicator"
 		};
 		
 		//GIS.layer.thematic1.widget.setConfig(config);
@@ -655,23 +655,22 @@ Ext.onReady( function() {
 		return Ext.create('Ext.menu.Menu', {
 			shadow: false,
 			showSeparator: false,
-			itemsXableAlways: function() {
+			enableItems: function() {
+				Ext.each(this.items.items, function(item) {
+					console.log(item.enable);
+					item.enable();
+				});
+			},
+			disableItems: function() {
 				Ext.Array.each(this.items.items, function(item) {
 					if (!item.alwaysEnabled) {
 						item.disable();
 					}
 				});
 			},
-			itemsXableHistory: function() {
-				Ext.each(this.items, function(item) {
-					if (!item.alwaysEnabled && !item.historyEnabled) {
-						item.disable();
-					}
-				});
-			},
 			items: [
 				{
-					text: 'Edit layer..',//i18n
+					text: 'Edit layer..', //i18n
 					iconCls: 'gis-menu-item-icon-edit',
 					cls: 'gis-menu-item-first',
 					alwaysEnabled: true,
@@ -730,8 +729,8 @@ Ext.onReady( function() {
 					if (cls) {
 						this.getEl().addCls(cls);
 					}
-										
-					this.itemsXableAlways();
+					
+					this.disableItems();
 				}
 			}
 		});
@@ -739,9 +738,12 @@ Ext.onReady( function() {
     
 	// User interface
 	
+	GIS.layer.thematic1.menu = new GIS.obj.LayerMenu(GIS.layer.boundary.name, 'gis-toolbar-btn-menu-first');
+	
 	GIS.layer.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
         map: GIS.map,
         layer: GIS.layer.thematic1.layer,
+        menu: GIS.layer.thematic1.menu,
         legendDiv: 'thematic1Legend'
     });
     
@@ -766,11 +768,11 @@ Ext.onReady( function() {
 			}
 		],
 		listeners: {
-			show: function(w) {
-				if (!this.isRendered) {
-					GIS.util.gui.window.setPositionTopLeft(this);
-					this.isRendered = true;
-				}
+			show: function() {
+				GIS.util.gui.window.setPositionTopLeft(this);
+			},
+			render: function() {
+				this.isRendered = true;
 			}
 		}
 	});
