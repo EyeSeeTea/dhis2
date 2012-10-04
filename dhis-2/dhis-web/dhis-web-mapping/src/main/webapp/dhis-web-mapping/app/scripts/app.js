@@ -143,6 +143,7 @@ Ext.onReady( function() {
 		var init = Ext.decode(r.responseText);
 		
 		GIS.init.rootNodes = init.rootNodes;
+		GIS.init.rootNodes[0].path = '/root/' + GIS.init.rootNodes[0].id;
 		
 		GIS.init.systemSettings = {
 			infrastructuralDataElementGroup: init.systemSettings.infrastructuralDataElementGroup,
@@ -211,8 +212,8 @@ Ext.onReady( function() {
 			indicatorGroup: "AoTB60phSOH",
 			legendSet: null,
 			legendType: "automatic",
-			level: 4,
-			levelName: "PHU",
+			level: 3,
+			levelName: "Chiefdom",
 			method: 2,
 			parentId: "fdc6uOvgoji",
 			parentLevel: 2,
@@ -605,6 +606,7 @@ Ext.onReady( function() {
 				root: 'organisationUnitLevels'
 			}
 		},
+		cmp: [],
 		isLoaded: false,
 		loadFn: function(fn) {
 			if (this.isLoaded) {
@@ -618,6 +620,7 @@ Ext.onReady( function() {
 			load: function() {
 				if (!this.isLoaded) {
 					this.isLoaded = true;
+					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
 				}
 				this.sort('level', 'ASC');
 			}
@@ -681,18 +684,6 @@ Ext.onReady( function() {
 					alwaysEnabled: true
 				},
 				{
-					text: 'Refresh',//i18n
-					iconCls: 'gis-menu-item-icon-refresh'
-				},
-				{
-					text: 'Clear',//i18n
-					iconCls: 'gis-menu-item-icon-clear'
-				},
-				{
-					xtype: 'menuseparator',
-					alwaysEnabled: true
-				},
-				{
 					text: 'Labels..',//i18n
 					iconCls: 'gis-menu-item-icon-labels'
 				},
@@ -716,6 +707,17 @@ Ext.onReady( function() {
 						shadow: false,
 						showSeparator: false
 					})
+				},
+				{
+					xtype: 'menuseparator',
+					alwaysEnabled: true
+				},
+				{
+					text: 'Close',//i18n
+					iconCls: 'gis-menu-item-icon-clear',
+					handler: function() {
+						base.widget.reset();
+					}
 				}
 			],
 			listeners: {
@@ -866,16 +868,16 @@ Ext.onReady( function() {
 							handler: function() {
 								var config = {
 									classes: 5,
-									colorHigh: "ffff00",
-									colorLow: "0000ff",
+									colorHigh: "00ff00",
+									colorLow: "ff0000",
 									dataElement: null,
 									dataElementGroup: null,
 									indicator: "Uvn6LCg7dVU",
 									indicatorGroup: "AoTB60phSOH",
 									legendSet: null,
 									legendType: "automatic",
-									level: 4,
-									levelName: "PHU",
+									level: 3,
+									levelName: "Chiefdom",
 									method: 2,
 									parentId: "fdc6uOvgoji",
 									parentLevel: 2,

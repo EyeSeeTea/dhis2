@@ -579,6 +579,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			width: 109,
 			height: 22,
 			style: 'margin-right: 3px',
+			defaultValue: null,
 			value: 'ff0000',
 			getValue: function() {
 				return this.value;
@@ -588,6 +589,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				if (Ext.isDefined(this.getEl())) {
 					this.getEl().dom.style.background = '#' + color;
 				}
+			},
+			reset: function() {
+				this.setValue(this.defaultValue);
 			},
 			menu: {
 				showSeparator: false,
@@ -604,19 +608,16 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 								
 								this.config.updateLegend = true;
 							}
-						},
-						render: {
-							scope: this,
-							fn: function() {
-								this.cmp.colorLow.setValue(this.cmp.colorLow.value);
-							}
 						}
 					}
 				}
 			},
 			listeners: {
+				added: function() {
+					this.defaultValue = this.value;
+				},
 				render: function() {
-					this.getEl().dom.style.background = '#' + this.value;
+					this.setValue(this.value);
 				}
 			}
 		});
@@ -625,6 +626,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			width: 109,
 			height: 22,
 			style: 'margin-right: 3px',
+			defaultValue: null,
 			value: '00ff00',
 			getValue: function() {
 				return this.value;
@@ -634,6 +636,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				if (Ext.isDefined(this.getEl())) {
 					this.getEl().dom.style.background = '#' + color;
 				}
+			},
+			reset: function() {
+				this.setValue(this.defaultValue);
 			},
 			menu: {
 				showSeparator: false,
@@ -650,19 +655,16 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 								
 								this.config.updateLegend = true;
 							}
-						},
-						render: {
-							scope: this,
-							fn: function() {
-								this.cmp.colorHigh.setValue(this.cmp.colorHigh.value);
-							}
 						}
 					}
 				}
 			},
 			listeners: {
+				added: function() {
+					this.defaultValue = this.value;
+				},
 				render: function() {
-					this.getEl().dom.style.background = '#' + this.value;
+					this.setValue(this.value);
 				}
 			}
 		});
@@ -711,6 +713,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             style: 'margin-bottom: 4px',
             store: GIS.store.organisationUnitLevels,
 			listeners: {
+				added: function() {
+					this.store.cmp.push(this);
+				},
 				select: {
 					scope: this,
 					fn: function() {
@@ -729,6 +734,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			height: 220,
 			isRendered: false,
 			path: null,
+			reset: function() {
+				this.collapseAll();
+				this.expandPath(GIS.init.rootNodes[0].path);
+				this.selectPath(GIS.init.rootNodes[0].path);
+			},
 			selectTreePath: function(path) {
 				if (this.isRendered) {
 					this.selectPath(path);
@@ -1191,6 +1201,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			// Menu
 			var menuItems = [
 				Ext.create('Ext.menu.Item', {
+					text: 'Float up',
+					iconCls: 'gis-menu-item-icon-float',
+					disabled: !that.model.hasCoordinatesUp,
+					scope: this,
+					handler: function() {
+						drill('up');
+					}
+				}),
+				Ext.create('Ext.menu.Item', {
 					text: 'Drill down',
 					iconCls: 'gis-menu-item-icon-drill',
 					cls: 'gis-menu-item-first',
@@ -1198,15 +1217,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					scope: this,
 					handler: function() {
 						drill('down');
-					}
-				}),
-				Ext.create('Ext.menu.Item', {
-					text: 'Float up',
-					iconCls: 'gis-menu-item-icon-float',
-					disabled: !that.model.hasCoordinatesUp,
-					scope: this,
-					handler: function() {
-						drill('up');
 					}
 				})
 			];
@@ -1562,6 +1572,34 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 //this.layer.setVisibility(false);
             //}
         //}
+	},
+	
+	reset: function() {
+		this.cmp.valueType.reset();
+		this.cmp.indicatorGroup.clearValue();
+		this.cmp.indicator.clearValue();
+		this.cmp.dataElementGroup.clearValue();
+		this.cmp.dataElement.clearValue();
+		this.cmp.periodType.clearValue();
+		this.cmp.period.clearValue();
+		this.cmp.legendType.reset();
+		this.cmp.legendSet.clearValue();
+		this.cmp.classes.reset();
+		this.cmp.method.reset();
+		this.cmp.colorLow.reset();
+		this.cmp.colorHigh.reset();
+		this.cmp.radiusLow.reset();
+		this.cmp.radiusHigh.reset();
+		this.cmp.level.clearValue();
+		this.cmp.parent.reset();
+		
+		this.config = {};
+		this.tmpModel = {};
+		this.model = {};
+		
+		document.getElementById(this.legendDiv).innerHTML = '';
+		this.layer.destroyFeatures();
+		this.layer.setVisibility(false);
 	},
 	
 	setConfig: function(config) {
