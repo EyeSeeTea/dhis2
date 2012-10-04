@@ -584,8 +584,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				return this.value;
 			},
 			setValue: function(color) {
-				this.getEl().dom.style.background = '#' + color;
 				this.value = color;
+				if (Ext.isDefined(this.getEl())) {
+					this.getEl().dom.style.background = '#' + color;
+				}
 			},
 			menu: {
 				showSeparator: false,
@@ -601,6 +603,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 								this.cmp.colorLow.menu.hide();
 								
 								this.config.updateLegend = true;
+							}
+						},
+						render: {
+							scope: this,
+							fn: function() {
+								this.cmp.colorLow.setValue(this.cmp.colorLow.value);
 							}
 						}
 					}
@@ -622,8 +630,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				return this.value;
 			},
 			setValue: function(color) {
-				this.getEl().dom.style.background = '#' + color;
 				this.value = color;
+				if (Ext.isDefined(this.getEl())) {
+					this.getEl().dom.style.background = '#' + color;
+				}
 			},
 			menu: {
 				showSeparator: false,
@@ -639,6 +649,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 								this.cmp.colorLow.menu.hide();
 								
 								this.config.updateLegend = true;
+							}
+						},
+						render: {
+							scope: this,
+							fn: function() {
+								this.cmp.colorHigh.setValue(this.cmp.colorHigh.value);
 							}
 						}
 					}
@@ -1156,8 +1172,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						that.config.parentName = rootNode.text;
 						that.config.parentLevel = rootNode.level;
 						that.config.parentPath = '/' + GIS.init.rootNodes[0].id;
-						
-						//that.cmp.parent.selectTreePath('/root/' + GIS.init.rootNodes[0].id);
 					}
 					else if (direction === 'down') {
 						that.config.level = that.model.level + 1;
@@ -1166,11 +1180,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						that.config.parentName = feature.attributes.name;
 						that.config.parentLevel = that.model.level;
 						that.config.parentPath = feature.attributes.path;
-						
-						//that.cmp.parent.selectTreePath('/root' + feature.attributes.path);
-					}					
+					}
 					
-					//that.cmp.level.setValue(that.config.level);					
 					that.config.updateOrganisationUnit = true;
 					that.config.updateGui = true;
 					
@@ -1695,10 +1706,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		model.parentName = this.config.parentName || model.parentName;
 		model.parentLevel = this.config.parentLevel || model.parentLevel;
 		model.parentPath = this.config.parentPath || null;
-		model.updateOrganisationUnit = this.config.updateOrganisationUnit === undefined ? false : this.config.updateOrganisationUnit;
-		model.updateData = this.config.updateData === undefined ? false : this.config.updateData;
-		model.updateLegend = this.config.updateLegend === undefined ? false : this.config.updateLegend;
-		model.updateGui = this.config.updateGui === undefined ? false : this.config.updateGui;
+		model.updateOrganisationUnit = Ext.isDefined(this.config.updateOrganisationUnit) ? this.config.updateOrganisationUnit : false;
+		model.updateData = Ext.isDefined(this.config.updateData) ? this.config.updateData : false;
+		model.updateLegend = Ext.isDefined(this.config.updateLegend) ? this.config.updateLegend : false;
+		model.updateGui = Ext.isDefined(this.config.updateGui) ? this.config.updateGui : false;
 		
 		return model;
 	},

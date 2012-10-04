@@ -863,8 +863,8 @@ Ext.onReady( function() {
 							handler: function() {
 								var config = {
 									classes: 5,
-									colorHigh: "00ff00",
-									colorLow: "ff0000",
+									colorHigh: "ffff00",
+									colorLow: "0000ff",
 									dataElement: null,
 									dataElementGroup: null,
 									indicator: "Uvn6LCg7dVU",
@@ -877,11 +877,12 @@ Ext.onReady( function() {
 									parentId: "fdc6uOvgoji",
 									parentLevel: 2,
 									parentName: "Bombali",
+									parentPath: "/ImspTQPwCqd/fdc6uOvgoji",
 									period: "2012",
 									periodType: "Yearly",
 									radiusHigh: 15,
 									radiusLow: 5,
-									updateData: true,
+									updateData: false,
 									updateLegend: false,
 									updateOrganisationUnit: true,
 									valueType: "indicator"
