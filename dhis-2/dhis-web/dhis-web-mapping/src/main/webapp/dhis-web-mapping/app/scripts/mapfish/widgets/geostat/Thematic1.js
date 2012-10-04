@@ -55,40 +55,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     features: [],
     
     selectHandlers: {},
-	
-	//organisationUnitSelection: {
-		//parent: {
-			//id: null,
-			//name: null,
-			//level: null
-		//},
-		//level: {
-			//level: null,
-			//name: null
-		//},
-		//setValues: function(parentId, parentName, parentLevel, levelLevel, levelName) {
-			//this.parent.id = parentId || this.parent.id;
-			//this.parent.name = parentName || this.parent.name;
-			//this.parent.level = parentLevel || this.parent.level;
-			//this.level.level = levelLevel || this.level.level;
-			//this.level.name = levelName || this.level.name;
-		//},
-		//setValuesOnDrillDown: function(parentId, parentName) {
-			//this.parent.id = parentId;
-			//this.parent.name = parentName;
-			//this.parent.level = this.level.level;
-			//this.level.level++;
-			//this.level.name = GIS.store.organisationUnitLevel.getAt(
-				//GIS.store.organisationUnitLevels.find('level', this.level.level)).data.name;
-		//},
-		//reset: function() {
-			//this.parent.id = null;
-			//this.parent.name = null;
-			//this.parent.level = null;
-			//this.level.level = null;
-			//this.level.name = null;
-		//}			
-	//},
     
     store: {
 		indicatorsByGroup: Ext.create('Ext.data.Store', {
@@ -172,7 +138,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					root: 'mapValues'
 				}
 			},
-			//sortInfo: {field: 'dataElementName', direction: 'ASC'},
+			sortInfo: {field: 'dataElementName', direction: 'ASC'},
 			autoLoad: false,
 			isLoaded: false,
 			listeners: {
@@ -218,11 +184,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         console.log(request.status, request.statusText);
     },
     
-    getColors: function() {
+    getColors: function(low, high) {
         var startColor = new mapfish.ColorRgb();
-        startColor.setFromHex(this.cmp.colorLow.getValue());
+        startColor.setFromHex(low || this.cmp.colorLow.getValue());
         var endColor = new mapfish.ColorRgb();
-        endColor.setFromHex(this.cmp.colorHigh.getValue());
+        endColor.setFromHex(high || this.cmp.colorHigh.getValue());
         return [startColor, endColor];
     },
     
@@ -617,19 +583,25 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			getValue: function() {
 				return this.value;
 			},
+			setValue: function(color) {
+				this.getEl().dom.style.background = '#' + color;
+				this.value = color;
+			},
 			menu: {
 				showSeparator: false,
 				items: {
 					xtype: 'colorpicker',
 					closeAction: 'hide',
 					listeners: {
-						scope: this,
-						select: function(cp, color) {
-							this.cmp.colorLow.getEl().dom.style.background = '#' + color;
-							this.cmp.colorLow.value = color;
-							this.cmp.colorLow.menu.hide();
-							
-							this.config.updateLegend = true;
+						select: {
+							scope: this,
+							fn: function(cp, color) {
+								this.cmp.colorLow.getEl().dom.style.background = '#' + color;
+								this.cmp.colorLow.value = color;
+								this.cmp.colorLow.menu.hide();
+								
+								this.config.updateLegend = true;
+							}
 						}
 					}
 				}
@@ -649,20 +621,25 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			getValue: function() {
 				return this.value;
 			},
+			setValue: function(color) {
+				this.getEl().dom.style.background = '#' + color;
+				this.value = color;
+			},
 			menu: {
 				showSeparator: false,
 				items: {
 					xtype: 'colorpicker',
 					closeAction: 'hide',
-					//colors: ['888888', '993300', '333300', '003300'],
 					listeners: {
-						scope: this,
-						select: function(cp, color) {
-							this.cmp.colorHigh.getEl().dom.style.background = '#' + color;
-							this.cmp.colorHigh.value = color;
-							this.cmp.colorHigh.menu.hide();
-							
-							this.config.updateLegend = true;
+						select: {
+							scope: this,
+							fn: function(cp, color) {
+								this.cmp.colorLow.getEl().dom.style.background = '#' + color;
+								this.cmp.colorLow.value = color;
+								this.cmp.colorLow.menu.hide();
+								
+								this.config.updateLegend = true;
+							}
 						}
 					}
 				}
@@ -1163,11 +1140,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			
 			// Drill or float
 			drill = function(direction) {
-				//if (GIS.vars.locateFeatureWindow) {
-					//GIS.vars.locateFeatureWindow.destroy();
-				//}
+					//GIS.vars.locateFeatureWindow.destroy(); //todo
 				
-				var callback = function() {
+				var store = GIS.store.organisationUnitLevels;
+				
+				store.loadFn( function() {
 					var store = GIS.store.organisationUnitLevels;
 					
 					if (direction === 'up') {
@@ -1178,8 +1155,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						that.config.parentId = rootNode.id;
 						that.config.parentName = rootNode.text;
 						that.config.parentLevel = rootNode.level;
+						that.config.parentPath = '/' + GIS.init.rootNodes[0].id;
 						
-						that.cmp.parent.selectTreePath('/root/' + GIS.init.rootNodes[0].id);
+						//that.cmp.parent.selectTreePath('/root/' + GIS.init.rootNodes[0].id);
 					}
 					else if (direction === 'down') {
 						that.config.level = that.model.level + 1;
@@ -1187,24 +1165,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						that.config.parentId = feature.attributes.id;
 						that.config.parentName = feature.attributes.name;
 						that.config.parentLevel = that.model.level;
+						that.config.parentPath = feature.attributes.path;
 						
-						that.cmp.parent.selectTreePath('/root' + feature.attributes.path);
+						//that.cmp.parent.selectTreePath('/root' + feature.attributes.path);
 					}					
 					
-					that.cmp.level.setValue(that.config.level);					
+					//that.cmp.level.setValue(that.config.level);					
 					that.config.updateOrganisationUnit = true;
+					that.config.updateGui = true;
 					
 					that.execute();
-				};
-				
-				if (GIS.store.organisationUnitLevels.isLoaded) {
-					callback();
-				}
-				else {
-					GIS.store.organisationUnitLevels.load({callback: function() {
-						callback();
-					}});
-				}
+				});
 			};
 			
 			// Menu
@@ -1604,6 +1575,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.config.parentId = config.parentId;
 		this.config.parentName = config.parentName;
 		this.config.parentLevel = config.parentLevel;
+		this.config.parentPath = config.parentPath;
 		this.config.updateOrganisationUnit = true;
 		this.config.updateData = false;
 		this.config.updateLegend = false;		
@@ -1643,15 +1615,29 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 		// Legend
 		this.cmp.legendType.setValue(model.legendType);
+		this.togglers.legendType(model.legendType);
 		
 		if (model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
-			this.cmp.legendSet.setValue(model.legendSet);
+			this.cmp.classes.setValue(model.classes);
+			this.cmp.method.setValue(model.method);
+			this.cmp.colorLow.setValue(model.colorLow);
+			this.cmp.colorHigh.setValue(model.colorHigh);
+			this.cmp.radiusLow.setValue(model.radiusLow);
+			this.cmp.radiusHigh.setValue(model.radiusHigh);
 		}
-		else {
-			this.cmp.legendSet.clearValue();
+		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			//store.loadFn( function() {
+				//this.cmp.legendSet.setValue(model.legendSet);
+			//});
 		}
 		
+		// Level and parent
+		var levelView = this.cmp.level;
+		GIS.store.organisationUnitLevels.loadFn( function() {
+			levelView.setValue(model.level);
+		});
 		
+		this.cmp.parent.selectTreePath('/root' + model.parentPath);
 	},
     	
 	getModel: function() {
@@ -1680,6 +1666,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			parentId: parent.length ? parent[0].raw.id : null,
 			parentName: parent.length ? parent[0].raw.text : null,
 			parentLevel: parent.length ? parent[0].raw.level : null,
+			parentPath: null,
 			updateOrganisationUnit: false,
 			updateData: false,
 			updateLegend: false,
@@ -1699,6 +1686,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		model.method = this.config.method || model.method;
 		model.colorLow = this.config.colorLow || model.colorLow;
 		model.colorHigh = this.config.colorHigh || model.colorHigh;
+		model.colors = this.getColors(model.colorLow, model.colorHigh);
 		model.radiusLow = this.config.radiusLow || model.radiusLow;
 		model.radiusHigh = this.config.radiusHigh || model.radiusHigh;
 		model.level = this.config.level || model.level;
@@ -1706,6 +1694,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		model.parentId = this.config.parentId || model.parentId;
 		model.parentName = this.config.parentName || model.parentName;
 		model.parentLevel = this.config.parentLevel || model.parentLevel;
+		model.parentPath = this.config.parentPath || null;
 		model.updateOrganisationUnit = this.config.updateOrganisationUnit === undefined ? false : this.config.updateOrganisationUnit;
 		model.updateData = this.config.updateData === undefined ? false : this.config.updateData;
 		model.updateLegend = this.config.updateLegend === undefined ? false : this.config.updateLegend;
@@ -1813,6 +1802,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		}
 		if (!model.parentLevel || !Ext.isNumber(model.parentLevel)) {
 			GIS.logg.push([model.parentLevel, this.xtype + '.parentLevel: number']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!model.parentPath && model.updateGui) {
+			GIS.logg.push([model.parentpath, this.xtype + '.parentpath: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}

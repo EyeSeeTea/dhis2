@@ -607,10 +607,17 @@ Ext.onReady( function() {
 			}
 		},
 		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
 		listeners: {
 			load: function() {
 				if (!this.isLoaded) {
-					//GIS.init.afterLoad();
 					this.isLoaded = true;
 				}
 				this.sort('level', 'ASC');
@@ -882,12 +889,6 @@ Ext.onReady( function() {
 								
 								GIS.layer.thematic1.widget.setConfig(config);
 								GIS.layer.thematic1.widget.execute();
-							}
-						},
-						{
-							text: 'test2()', //i18n
-							handler: function() {
-								alert(GIS.layer.thematic1.widget.cmp.indicatorGroup.getValue());
 							}
 						},
 						'->',
