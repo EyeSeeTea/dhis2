@@ -1,7 +1,7 @@
-package org.hisp.dhis.web.mobile.controller;
+package org.hisp.dhis.dxf2.metadata.tasks;
 
 /*
- * Copyright (c) 2012, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,20 +27,44 @@ package org.hisp.dhis.web.mobile.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.dxf2.metadata.ImportService;
+import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.scheduling.TaskId;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Controller(value = "mIndexController")
-@RequestMapping( value = "/dhis-web-mobile" )
-public class IndexController
+public class ImportMetaDataTask
+    implements Runnable
 {
-    @RequestMapping
-    public String index( Model model )
+    private static final Log log = LogFactory.getLog( ImportMetaDataTask.class );
+
+    private ImportService importService;
+
+    private ImportOptions importOptions;
+
+    private TaskId taskId;
+
+    private MetaData metaData;
+
+    public ImportMetaDataTask( ImportService importService, ImportOptions importOptions, TaskId taskId, MetaData metaData )
     {
-        return "index";
+        this.importService = importService;
+        this.importOptions = importOptions;
+        this.taskId = taskId;
+        this.metaData = metaData;
+    }
+
+    @Override
+    public void run()
+    {
+        importService.importMetaData( metaData, importOptions, taskId );
     }
 }

@@ -30,12 +30,16 @@
         #end
 	</ul>
 </p>
-<h2>Completed Programs</h2>
+<h2>$i18n.getString("complete_programs")</h2>
 <p>
 	<ul>
 		#if( $listOfCompletedProgram.size() != 0 )
 			#foreach( $programInstance in $listOfCompletedProgram )
-				$programInstance.getProgram().getName()
+				#if( $programInstance.getProgram().getProgramStages().size() > 1)
+					$programInstance.getProgram().getName()
+				#else
+					<a href="showSingleEventForm.action?programId=$programInstance.program.id&patientId=$patient.id&organisationUnitId=$patient.organisationUnit.id&isEditing=true">$programInstance.getProgram().getName()</a>
+				#end	
 			#end
 		#else
 			<li>$i18n.getString("no_completed_programs")</li>

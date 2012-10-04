@@ -218,7 +218,7 @@ Ext.onReady( function() {
 			parentId: "fdc6uOvgoji",
 			parentLevel: 2,
 			parentName: "Bombali",
-			period: "2012",
+			period: "2011",
 			periodType: "Yearly",
 			radiusHigh: 15,
 			radiusLow: 5,
@@ -229,8 +229,8 @@ Ext.onReady( function() {
 			valueType: "dataElement"
 		};
 		
-		GIS.layer.thematic1.widget.setConfig(config);
-		GIS.layer.thematic1.widget.execute();
+		//GIS.layer.thematic1.widget.setConfig(config);
+		//GIS.layer.thematic1.widget.execute();
 	};
 	
 	// Mask
@@ -338,6 +338,10 @@ Ext.onReady( function() {
 			center = GIS.cmp.region.center;
 				
 		window.setPosition((east.x + east.width) - (window.getWidth() + 7), center.y + 8);
+	};
+	
+	GIS.util.gui.window.setPositionTopLeft = function(window) {
+		window.setPosition(4,35);
 	};
 	
 	GIS.util.gui.combo.setQueryMode = function(cmpArray, mode) {
@@ -757,7 +761,7 @@ Ext.onReady( function() {
 		listeners: {
 			show: function(w) {
 				if (!this.isRendered) {
-					this.setPosition(4,35);
+					GIS.util.gui.window.setPositionTopLeft(this);
 					this.isRendered = true;
 				}
 			}

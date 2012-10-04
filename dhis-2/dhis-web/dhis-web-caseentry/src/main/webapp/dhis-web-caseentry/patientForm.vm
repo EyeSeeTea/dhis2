@@ -22,7 +22,7 @@
 </tr>
 
 <tr>
-	<td class='text-column'><label for="fullName">$i18n.getString( "full_name" )</label></td>
+	<td class='text-column'><label for="fullName">$i18n.getString( "full_name" )<em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 	<td class="input-column"><input type="text" id="fullName" name="fullName" value="$!patient.getFullName()" class="{validate:{required:true, rangelength:[3,50]}}"></td>
 </tr>
 
@@ -78,12 +78,22 @@
 
 <!-- UNDERAGE -->
 
-<tr id="underAgeDiv" name="underAgeDiv">
-	<td class='text-column'>$i18n.getString("has_guardian")</td>
-	<td>
-		<input type="checkbox" name="underAge" id="underAge" onclick="toggleUnderAge(this);" value="true" #if($!patient.underAge == "true") checked="checked" #end/>
-	</td>
-</tr>
+#if($!patient.underAge)
+	#set( $representative = $!patient.representative ) 
+	<tr id="representativeFormDiv" name="representativeFormDiv">
+		<td class='text-column'>$i18n.getString("guardian")</td>
+		<td> 
+			$!patient.representative.getFullName() <img src="../images/information.png" alt="$i18n.getString( 'show_details' )" onclick='showRepresentativeInfo()' class='img-button'>
+		</td>
+	</tr>
+#else
+	<tr id="underAgeDiv" name="underAgeDiv">
+		<td class='text-column'>$i18n.getString("has_guardian")</td>
+		<td>
+			<input type="checkbox" name="underAge" id="underAge" onclick="toggleUnderAge(this);" value="true" #if($!patient.underAge == "true") checked="checked" #end/>
+		</td>
+	</tr>
+#end
 
 <!-- DEAD -->
 
@@ -94,6 +104,11 @@
 	</td>
 </tr>
 
+<tr>
+	<td></td>
+	<td><input type="button" class='button' id='checkDuplicateBtn' name='checkDuplicateBtn' value="$i18n.getString('check_duplicate')" /></td>
+</tr>
+
 <tr id='deathDateTR' #if($!patient.isDead) #else class="hidden" #end>
 	<td class='text-column'><label for="deathDate">$i18n.getString("death_date")</label></td>
 	<td class="input-column">
@@ -102,16 +117,6 @@
 </tr>
 
 <tr><td>&nbsp;</td></tr>
-
-#if($!patient.underAge)
-	#set( $representative = $!patient.representative ) 
-	<tr>
-		<td class='text-column'>$i18n.getString("representative")</td>
-		<td> 
-			$!patient.representative.getFullName() <img src="../images/information.png" alt="$i18n.getString( 'show_details' )" onclick='showRepresentativeInfo()' class='img-button'>
-		</td>
-	</tr>
-#end
 
 #if( $identifierTypes.size() > 0)
 	<!--IDENTIFIERS -->

@@ -308,6 +308,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function(cb) {
+						this.config.updateData = true;
 						this.togglers.valueType(cb.getValue());
                     }
                 }
@@ -330,6 +331,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function(cb) {
+						this.config.updateData = true;
                         this.cmp.indicator.clearValue();
                         
                         var store = this.cmp.indicator.store;
@@ -355,17 +357,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             listConfig: {loadMask: false},
+            scope: this,
             selectFirst: function() {
-				this.setValue(this.store.getAt(0).data.id);
+				if (this.store.getCount() > 0) {
+					this.setValue(this.store.getAt(0).data.id);
+				}
 				this.scope.config.updateData = true;
 			},
             store: this.store.indicatorsByGroup,
             listeners: {
-                select: {
-                    scope: this,
-                    fn: function(cb) {
-						this.config.updateData = true;
-                    }
+                select: function() {
+					this.scope.config.updateData = true;
                 }
             }
         });
@@ -413,7 +415,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             listConfig: {loadMask: false},
             hidden: true,
-            store: this.store.dataElementsByGroup,
             scope: this,
             selectFirst: function() {
 				if (this.store.getCount() > 0) {
@@ -421,13 +422,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 				this.scope.config.updateData = true;
 			},
+            store: this.store.dataElementsByGroup,
             listeners: {
-				select: {
-					scope: this,
-					fn: function() {
-						this.config.updateData = true;
-					}
-				}
+                select: function() {
+					this.scope.config.updateData = true;
+                }
 			}
         });
         
@@ -1636,6 +1635,23 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		indeStore.loadFn( function() {
 			indeView.setValue(indeValue);
 		});
+		
+		// Period
+		this.cmp.periodType.setValue(model.periodType);
+		this.cmp.periodType.fireEvent('select');
+		this.cmp.period.setValue(model.period);
+		
+		// Legend
+		this.cmp.legendType.setValue(model.legendType);
+		
+		if (model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			this.cmp.legendSet.setValue(model.legendSet);
+		}
+		else {
+			this.cmp.legendSet.clearValue();
+		}
+		
+		
 	},
     	
 	getModel: function() {
@@ -1702,89 +1718,107 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		if (model.valueType === GIS.conf.finals.dimension.indicator.id) {
 			if (!model.indicatorGroup || !Ext.isString(model.indicatorGroup)) {
 				GIS.logg.push([model.indicatorGroup, this.xtype + '.indicatorGroup: string']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 			if (!model.indicator || !Ext.isString(model.indicator)) {
 				GIS.logg.push([model.indicator, this.xtype + '.indicator: string']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 		}
 		else if (model.valueType === GIS.conf.finals.dimension.dataElement.id) {
 			if (!model.dataElementGroup || !Ext.isString(model.dataElementGroup)) {
 				GIS.logg.push([model.dataElementGroup, this.xtype + '.dataElementGroup: string']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 			if (!model.dataElement || !Ext.isString(model.dataElement)) {
 				GIS.logg.push([model.dataElement, this.xtype + '.dataElement: string']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 		}
 		
 		if (!model.periodType || !Ext.isString(model.periodType)) {
 			GIS.logg.push([model.periodType, this.xtype + '.periodType: string']);
+				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!model.period || !Ext.isString(model.period)) {
 			GIS.logg.push([model.period, this.xtype + '.period: string']);
+				//alert("validation failed"); //todo
 			return false;
 		}
 		
 		if (model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
 			if (!model.classes || !Ext.isNumber(model.classes)) {
 				GIS.logg.push([model.classes, this.xtype + '.classes: number']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 			if (!model.method || !Ext.isNumber(model.method)) {
 				GIS.logg.push([model.method, this.xtype + '.method: number']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 			if (!model.colorLow || !Ext.isString(model.colorLow)) {
 				GIS.logg.push([model.colorLow, this.xtype + '.colorLow: string']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 			if (!model.radiusLow || !Ext.isNumber(model.radiusLow)) {
 				GIS.logg.push([model.radiusLow, this.xtype + '.radiusLow: number']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 			if (!model.colorHigh || !Ext.isString(model.colorHigh)) {
 				GIS.logg.push([model.colorHigh, this.xtype + '.colorHigh: string']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 			if (!model.radiusHigh || !Ext.isNumber(model.radiusHigh)) {
 				GIS.logg.push([model.radiusHigh, this.xtype + '.radiusHigh: number']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 		}
 		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {			
 			if (!model.legendSet || !Ext.isString(model.legendSet)) {
 				GIS.logg.push([model.legendSet, this.xtype + '.legendSet: string']);
+				//alert("validation failed"); //todo
 				return false;
 			}
 		}
 		
 		if (!model.level || !Ext.isNumber(model.level)) {
 			GIS.logg.push([model.level, this.xtype + '.level: number']);
+				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!model.levelName || !Ext.isString(model.levelName)) {
 			GIS.logg.push([model.levelName, this.xtype + '.levelName: string']);
+				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!model.parentId || !Ext.isString(model.parentId)) {
 			GIS.logg.push([model.parentId, this.xtype + '.parentId: string']);
+				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!model.parentName || !Ext.isString(model.parentName)) {
 			GIS.logg.push([model.parentName, this.xtype + '.parentName: string']);
+				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!model.parentLevel || !Ext.isNumber(model.parentLevel)) {
 			GIS.logg.push([model.parentLevel, this.xtype + '.parentLevel: number']);
+				//alert("validation failed"); //todo
 			return false;
 		}
 		
-		if (!model.updateOrganisationUnit && !model.updateData && !model.updateLegend) {			
-			GIS.logg.push([model.updateOrganisationUnit, model.updateData, model.updateLegend, this.xtype + '.update ou/data/legend: true || true || true']);
+		if (!model.updateOrganisationUnit && !model.updateData && !model.updateLegend) {
+			GIS.logg.push([model.updateOrganisationUnit, model.updateData, model.updateLegend, this.xtype + '.update ou/data/legend: true||true||true']);
 			return false;
 		}
 		
@@ -1876,7 +1910,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.tmpModel = this.getModel();
 		
 		if (!this.validateModel(this.tmpModel)) {
-			alert("validation failed"); //todo
 			return;
 		}
 				

@@ -191,15 +191,9 @@ public class TableAlteror
         executeSql( "ALTER TABLE categorycombos_optioncombos DROP CONSTRAINT fk4bae70f697e49675" );
 
         // categoryoptioncombos_categoryoptions
-        // set to 0 temporarily
-        int c3 = executeSql( "update categoryoptioncombos_categoryoptions SET sort_order=0 where sort_order is NULL OR sort_order=0" );
-        if ( c3 > 0 )
-        {
-            updateSortOrder( "categoryoptioncombos_categoryoptions", "categoryoptioncomboid", "categoryoptionid" );
-        }
-        executeSql( "ALTER TABLE categoryoptioncombos_categoryoptions DROP CONSTRAINT categoryoptioncombos_categoryoptions_pkey" );
-        executeSql( "ALTER TABLE categoryoptioncombos_categoryoptions ADD CONSTRAINT categoryoptioncombos_categoryoptions_pkey PRIMARY KEY (categoryoptioncomboid, sort_order)" );
-
+        executeSql( "alter table categoryoptioncombos_categoryoptions drop column sort_order" );
+        executeSql( "alter table categoryoptioncombos_categoryoptions add constraint categoryoptioncombos_categoryoptions_pkey primary key(categoryoptioncomboid, categoryoptionid)" );
+        
         // dataelementcategoryoption
         executeSql( "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT fk_dataelement_categoryid" );        
         executeSql( "ALTER TABLE dataelementcategoryoption DROP CONSTRAINT dataelementcategoryoption_shortname_key" );
@@ -451,8 +445,10 @@ public class TableAlteror
         executeSql( "delete from systemsetting where name='currentStyle' and value like '%blue/blue.css'" );
         
         executeSql( "update dataentryform set style='regular' where style is null" );
-        executeSql( "update dataset set skipaggregation = false where skipaggregation is null" );
-        
+
+        executeSql( "UPDATE dataset SET skipaggregation = false WHERE skipaggregation IS NULL" );
+        executeSql( "UPDATE dataset SET skipoffline = false WHERE skipoffline IS NULL" );
+
         log.info( "Tables updated" );
     }
 

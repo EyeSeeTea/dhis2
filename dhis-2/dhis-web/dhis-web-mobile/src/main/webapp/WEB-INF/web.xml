@@ -14,7 +14,7 @@
     <filter-class>org.hisp.dhis.servlet.filter.HttpRedirectFilter</filter-class>
     <init-param>
       <param-name>redirectPath</param-name>
-      <param-value>dhis-web-mobile/</param-value>
+      <param-value>mobile/index</param-value>
     </init-param>
   </filter>
   <filter>
@@ -44,7 +44,7 @@
   </filter-mapping>
   <filter-mapping>
     <filter-name>OpenSessionInViewFilter</filter-name>
-    <url-pattern>/dhis-web-mobile/*</url-pattern>
+    <url-pattern>/mobile/*</url-pattern>
   </filter-mapping>
   <filter-mapping>
     <filter-name>springSecurityFilterChain</filter-name>
@@ -72,16 +72,26 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
 
+  <servlet>
+    <servlet-name>mobileServlet</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath*:/META-INF/dhis/mobile.xml</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
   <!-- Mobile -->
 
   <servlet-mapping>
-    <servlet-name>webapiServlet</servlet-name>
-    <url-pattern>/dhis-web-mobile</url-pattern>
+    <servlet-name>mobileServlet</servlet-name>
+    <url-pattern>/mobile</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>webapiServlet</servlet-name>
-    <url-pattern>/dhis-web-mobile/*</url-pattern>
+    <servlet-name>mobileServlet</servlet-name>
+    <url-pattern>/mobile/*</url-pattern>
   </servlet-mapping>
 
   <!-- Web API -->

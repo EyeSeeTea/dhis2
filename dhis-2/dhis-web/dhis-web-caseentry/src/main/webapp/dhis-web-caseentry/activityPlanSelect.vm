@@ -9,7 +9,7 @@
 	});	
 </script>
 
-<h3>$i18n.getString( "activity_plan" )</h3>
+<h3>$i18n.getString( "activity_plan" ) #openHelp('visit_schedule')</h3>
 <form id='activityPlanForm' name='activityPlanForm'>
 	<input type='hidden' id='isRegistration' name= 'isRegistration' value='false'>
 	<input type='hidden' id='listAll' name='listAll'>
@@ -67,6 +67,10 @@
 						<option value='-30'>$i18n.getString("one_month")</option>
 						<option value='ALL'>$i18n.getString("all")</option>
 					</select>
+					<input type='text' id='startDueDate' name='startDueDate' class='hidden'>
+				</td>
+				<td>
+					<input type='checkbox' id='useCalendar' name='useCalendar' onchange="displayCadendar();"> $i18n.getString('use_calendar')
 				</td>
 			</tr>
 			<tr>
@@ -79,12 +83,14 @@
 						<option value='30'>$i18n.getString("one_month")</option>
 						<option value='ALL'>$i18n.getString("all")</option>
 					</select>
+					<input type='text' id='endDueDate' name='endDueDate' class='hidden'>
 				</td>
 			</tr>
 			<tr>
 				<td></td>
 				<td>
 					<input type="submit" class='large-button' id='listPatientBtn' value="$i18n.getString( 'show_activity_list' )">
+					<input type="button" class='large-button' value="$i18n.getString( 'export_xls' )" onclick='exportActitityList("xls");'>
 				</td>
 			</tr>
 		</table>
@@ -97,8 +103,6 @@
 #parse( "dhis-web-commons/loader/loader.vm" )
 	
 <div class='hidden'>
-	<input type='text' id='startDueDate' name='startDueDate' >
-	<input type='text' id='endDueDate' name='endDueDate' >
 	<input type='textbox' id='currentDate' name='currentDate'>
 	<script>
 		datePicker( 'currentDate' );

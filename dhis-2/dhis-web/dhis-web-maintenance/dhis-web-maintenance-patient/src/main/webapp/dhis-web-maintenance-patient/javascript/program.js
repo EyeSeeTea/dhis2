@@ -29,7 +29,6 @@ function showProgramDetails( programId )
 		setInnerHTML( 'dateOfEnrollmentDescriptionField', json.program.dateOfEnrollmentDescription );   
 		setInnerHTML( 'dateOfIncidentDescriptionField', json.program.dateOfIncidentDescription );   		
 		setInnerHTML( 'programStageCountField',  json.program.programStageCount );
-		setInnerHTML( 'durationInDaysField',  json.program.maxDay );
 		setInnerHTML( 'noAttributesField', json.program.noAttributes );
 		setInnerHTML( 'noIdentifierTypesField', json.program.noIdentifierTypes );
 		
@@ -56,8 +55,17 @@ function programOnChange()
 		disable('dateOfEnrollmentDescription');
 		disable("displayIncidentDate");
 		disable("dateOfIncidentDescription");
+		disable("generatedByEnrollmentDate");
+		disable("availablePropertyIds");
+		hideById("selectedList");
+		jQuery("[name=displayed]").attr("disabled", true);
+		jQuery("[name=displayed]").removeAttr("checked");
 	}
 	else{
+		jQuery("[name=displayed]").prop("disabled", false);
+		enable("availablePropertyIds");
+		showById("selectedList");
+		enable("generatedByEnrollmentDate");
 		enable('dateOfEnrollmentDescription');
 		enable("displayIncidentDate");
 		if(byId('displayIncidentDate').checked){
@@ -78,7 +86,7 @@ function selectProperties()
 	var selectedList = jQuery("#selectedList");
 	jQuery("#availablePropertyIds").children().each(function(i, item){
 		if( item.selected ){
-			html = "<tr class='selected' id='" + item.value + "' ondblclick='unSelectDataElement( this )'><td onmousedown='select(event,this)'>" + item.text + "</td>";
+			html = "<tr class='selected' id='" + item.value + "' ondblclick='unSelectProperties( this )'><td onmousedown='select(event,this)'>" + item.text + "</td>";
 			html += "<td align='center'><input type='checkbox' name='displayed' value='" + item.value + "'";
 			if( item.value.match("^attr_")=="attr_" )
 			{
@@ -89,6 +97,11 @@ function selectProperties()
 			jQuery( item ).remove();
 		}
 	});
+	
+	if(getFieldValue('type') == "3")
+	{
+		jQuery("[name=displayed]").attr("disabled", true);
+	}
 }
 
 

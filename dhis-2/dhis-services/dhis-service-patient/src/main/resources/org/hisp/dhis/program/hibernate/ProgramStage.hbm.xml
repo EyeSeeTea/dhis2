@@ -15,16 +15,14 @@
 	&identifiableProperties;
 
     <property name="description" />
-
-    <property name="stageInProgram" column="stageinprogram" not-null="true" />
-
+	
     <property name="minDaysFromStart" column="mindaysfromstart" not-null="true" />
 
     <many-to-one name="program" class="org.hisp.dhis.program.Program" column="programid" foreign-key="fk_programstage_program" />
 
 	<property name="irregular" column="irregular" />
 
-    <set name="programStageDataElements" order-by="sort_order" >
+    <set name="programStageDataElements" order-by="sort_order">
       <key column="programstageid" />
       <one-to-many class="org.hisp.dhis.program.ProgramStageDataElement" />
     </set>

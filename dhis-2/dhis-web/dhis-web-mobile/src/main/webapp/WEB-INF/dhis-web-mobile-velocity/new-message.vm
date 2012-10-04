@@ -1,0 +1,261 @@
+<script>
+    var selected = {};
+
+    function displaySelected()
+    {
+        $('#selection-list').children().remove();
+        $('form[role="search"] input:text').val('');
+
+        $('#selection-list').append('<li id="organisation-unit-list" data-role="list-divider">Organisation Units</li>')
+        $('#selection-list').append('<li id="user-list" data-role="list-divider">Users</li>')
+        $('#selection-list').append('<li id="user-group-list" data-role="list-divider">Users Groups</li>')
+
+        var ou_count = 0;
+        var u_count = 0;
+        var ug_count = 0;
+
+        _( _(selected).keys() ).each(function(item)
+        {
+            if( item.indexOf( 'ou:') != -1 )
+            {
+                ou_count++;
+                $('<li data-icon="delete"><a href="#">' + selected[item] + '</a> <span id="message-recipient-counter" class="ui-li-count">Tap to remove</span></li>').insertAfter('#organisation-unit-list');
+            }
+            else if( item.indexOf( 'u:') != -1 )
+            {
+                u_count++;
+                $('<li data-icon="delete"><a href="#">' + selected[item] + '</a> <span id="message-recipient-counter" class="ui-li-count">Tap to remove</span></li>').insertAfter('#user-list');
+            }
+            else if( item.indexOf( 'ug:') != -1 )
+            {
+                ug_count++;
+                $('<li data-icon="delete"><a href="#">' + selected[item] + '</a> <span id="message-recipient-counter" class="ui-li-count">Tap to remove</span></li>').insertAfter('#user-group-list');
+            }
+        });
+
+        if( ou_count == 0)
+        {
+            $('<li>None selected.</li>').insertAfter('#organisation-unit-list');
+        }
+
+        if( u_count == 0)
+        {
+            $('<li>None selected.</li>').insertAfter('#user-list');
+        }
+
+        if( ug_count == 0)
+        {
+            $('<li>None selected.</li>').insertAfter('#user-group-list');
+        }
+
+        $('#selection-list').listview('refresh');
+    }
+
+    function updateRecipientCounter()
+    {
+        $('#message-recipient-counter').html( _(selected).keys().length );
+    }
+
+    function addRecipient(e)
+    {
+        var prefix = $(e).jqmData('prefix');
+        var id = $(e).jqmData('id');
+
+        if( prefix === undefined || id === undefined )
+        {
+            return;
+        }
+
+        selected[prefix + ':' + id] = $(e).find('a').html();
+    }
+
+    function manageRecipientsPage()
+    {
+        var searchField = $('form[role="search"] input:text');
+        var clearSearchButton = $('form[role="search"]').find('a[data-icon="delete"]');
+
+        var clearSearchFn = clearSearchButton.data('events')['click'][0];
+        clearSearchButton.unbind('click');
+        clearSearchButton.bind('click', displaySelected );
+        clearSearchButton.bind('click', clearSearchFn );
+
+        var fn1 = searchField.data('events')['keyup'][1];
+        searchField.unbind('keyup');
+
+        searchField.bind('keyup', function () {
+            var search = $('form[role="search"] input:text').val();
+
+            if( search.length == 0)
+            {
+                displaySelected();
+                return;
+            }
+
+            $('#selection-list').children().remove();
+
+            if ( search.length < 3 )
+            {
+                return;
+            }
+
+            $.ajax({
+                url  : '$baseUrl/../api/currentUser/recipients',
+                type : 'get',
+                async: false,
+                dataType: 'json',
+                data : {
+                    'filter' : search
+                }
+            }).success(function ( data ) {
+                if( data.organisationUnits && data.organisationUnits.length > 0)
+                {
+                    $('#selection-list').append('<li id="organisation-unit-list" data-role="list-divider">Organisation Units</li>')
+
+                    _(data.organisationUnits).each(function(organisationUnit) {
+                        $('#selection-list').append('<li onclick="addRecipient(this);" data-prefix="ou" data-icon="plus" data-id="' + organisationUnit.id + '"><a href="#">' + organisationUnit.name + '</a></li>');
+                    });
+                }
+
+                if( data.users && data.users.length > 0 )
+                {
+                    $('#selection-list').append('<li id="user-list" data-role="list-divider">Users</li>')
+
+                    _(data.users).each(function(user) {
+                        $('#selection-list').append('<li onclick="addRecipient(this);" data-prefix="u" data-icon="plus" data-id="' + user.id + '"><a href="#">' + user.name + '</a></li>');
+                    });
+                }
+
+                if( data.userGroups && data.userGroups.length > 0 )
+                {
+                    $('#selection-list').append('<li id="user-group-list" data-role="list-divider">Users Groups</li>')
+
+                    _(data.userGroups).each(function(userGroup) {
+                        $('#selection-list').append('<li onclick="addRecipient(this);" data-prefix="ug" data-icon="plus" data-id="' + userGroup.id + '"><a href="#">' + userGroup.name + '</a></li>');
+                    });
+                }
+
+                $('#selection-list').listview('refresh');
+
+            });
+
+            $('form[role="search"] input:text').bind('keyup', fn1);
+        });
+
+        displaySelected();
+    }
+
+    function sendMessage(e) {
+        var subject = jQuery('#new-message-subject').val();
+        var text = jQuery('#new-message-text').val();
+
+        var message = {};
+        message.subject = subject;
+        message.text = text;
+        message.organisationUnits = [];
+        message.users = [];
+        message.userGroups = [];
+
+        $.mobile.showPageLoadingMsg();
+
+        _(_(selected).keys()).each(function(key) {
+            if( key.indexOf('ou:') != -1 )
+            {
+                message.organisationUnits.push( { "id": key.substring(3) } );
+            }
+            else if( key.indexOf('u:') != -1 )
+            {
+                message.users.push( { "id": key.substring(2) } );
+            }
+            else if( key.indexOf('ug:') != -1 )
+            {
+                message.userGroups.push( { "id": key.substring(3) } );
+            }
+        });
+
+        $.ajax({
+           url: "$baseUrl/../api/messageConversations",
+           type: 'POST',
+           contentType: 'application/json',
+           data: JSON.stringify(message),
+           async: false
+        }).success(function() {
+            $.mobile.hidePageLoadingMsg();
+            window.location.href = '../messages';
+        }).error(function() {
+            $.mobile.showPageLoadingMsg( $.mobile.pageLoadErrorMessageTheme, "Unable to send message, please try again later", true );
+            setTimeout( $.mobile.hidePageLoadingMsg, 1500 );
+            console.log("failed to send message");
+        });
+
+        e.preventDefault();
+    }
+
+    function newMessagePage()
+    {
+        $('#new-message-form input:submit').unbind('click');
+        $('#new-message-form input:submit').bind('click', sendMessage );
+        updateRecipientCounter();
+    }
+
+    jQuery(document).bind('pagechange', function (event, data) {
+        var pageId = data.toPage.attr('id');
+
+        if( pageId == 'manage-recipients-page')
+        {
+            manageRecipientsPage();
+        }
+        else if( pageId == 'new-message-page')
+        {
+            newMessagePage();
+        }
+    });
+
+</script>
+
+<section data-role="page" id="new-message-page" data-theme="c">
+
+	<header data-role="header" data-theme="b">
+		<div align="center"><img src="$baseUrl/../dhis-web-commons/css/light_blue/logo_banner.png" /></div>
+        <a href="../messages" data-icon="delete" class="ui-btn-right">Discard</a>
+    </header>
+
+	<section data-role='content'>
+        <ul data-role="listview" data-inset="true">
+            <li>
+                <form id="new-message-form">
+                    <label for='new-message-subject'>Subject</label>
+                    <input type="text" id='new-message-subject' />
+                    <label for='new-message-text'>Text</label>
+                    <textarea id='new-message-text'></textarea>
+                    <input type="submit" value="Send message" />
+                </form>
+
+            </li>
+            <li data-icon="gear"><a href="#manage-recipients-page">Manage recipients</a> <span id="message-recipient-counter" class='ui-li-count'>0</span></li>
+        </ul>
+
+	</section>
+
+    <footer data-role="footer" data-theme="b">
+        <h1></h1>
+   	</footer>
+
+</section>
+
+<section data-role="page" id="manage-recipients-page" data-theme="c">
+
+	<header data-role="header" data-theme="b">
+		<div align="center"><img src="$baseUrl/../dhis-web-commons/css/light_blue/logo_banner.png" /></div>
+        <a href="#new-message-page" data-icon="delete" class="ui-btn-right">Finish</a>
+    </header>
+
+	<section data-role="content">
+        <ul id="selection-list" data-role="listview" data-inset="true" data-filter="true" data-filter-placeholder="Enter 3 or more characters to search">
+        </ul>
+	</section>
+
+    <footer data-role="footer" data-theme="b">
+        <h1></h1>
+   	</footer>
+
+</section>

@@ -84,7 +84,7 @@ function searchObjectOnChange( this_ )
 {	
 	var container = jQuery(this_).parent().parent().attr('id');
 	var attributeId = jQuery('#' + container + ' [id=searchObjectId]').val(); 
-	var element = jQuery('#' + container + ' [id=searchText]');
+	var element = jQuery('#' + container + ' [name=searchText]');
 	var valueType = jQuery('#' + container+ ' [id=searchObjectId] option:selected').attr('valueType');
 	
 	jQuery('#searchText_' + container).removeAttr('readonly', false);
@@ -141,15 +141,15 @@ function getGenderSelector()
 
 function getAgeTextBox( container )
 {
-	var ageField = '<select id="dateOperator" style="width:40px;" name="dateOperator" ><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option><option value=">"> > </option><option value=">="> >= </option></select>';
-	ageField += '<input type="text" id="searchText_' + container + '" name="searchText" style="width:200px;">';
+	var ageField = '<select id="dateOperator" style="width:30px;" name="dateOperator" ><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option><option value=">"> > </option><option value=">="> >= </option></select>';
+	ageField += '<input type="text" id="searchText_' + container + '" name="searchText" style="width:230px;">';
 	return ageField;
 }
 
 function getDateField( container )
 {
 	var dateField = '<select id="dateOperator" name="dateOperator" style="width:30px"><option value=">"> > </option><option value=">="> >= </option><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option></select>';
-	dateField += '<input type="text" id="searchText_' + container + '" name="searchText" maxlength="30" style="width:18em" onkeyup="searchPatientsOnKeyUp( event );">';
+	dateField += '<input type="text" id="searchText_' + container + '" name="searchText" maxlength="30" style="width:210px;" onkeyup="searchPatientsOnKeyUp( event );">';
 	return dateField;
 }
 
@@ -209,7 +209,7 @@ function getSearchParams()
 		var startDueDate = getFieldValue('startDueDate');
 		var endDueDate = getFieldValue('endDueDate');
 		params += '&searchTexts=stat_' + getFieldValue('programIdAddPatient') 
-			   + '_' + startDueDate + '_' + endDueDate + '_' + statusEvent;
+			   + '_' + startDueDate + '_' + endDueDate + '_false_' + statusEvent;
 		if( statusEvent != '3' && statusEvent != '4' && statusEvent != '0' )
 		{
 			params += "_" + getFieldValue('orgunitId');
@@ -698,7 +698,7 @@ function DateDueSaver( programStageInstanceId_, dueDate_, resultColor_ )
 		{
 			var box = jQuery('#ps_' + programStageInstanceId );
 			box.attr('dueDate', dueDate );
-			var boxName = box.attr('psname') + getInnerHTML('enterKey') + dueDate;
+			var boxName = box.attr('psname') + "\n" + dueDate;
 			box.val( boxName );
 			if( dueDate < getCurrentDate() )
 			{
@@ -1522,6 +1522,7 @@ function loadActiveProgramStageRecords(programInstanceId, activeProgramStageInst
 			{
 				loadDataEntry( activeProgramStageInstanceId );
 			}
+			jQuery('#completedList').val('');
 			jQuery('#loaderDiv').hide();
 		});
 }
@@ -1575,7 +1576,7 @@ function getEventMessages( programInstanceId )
 	$('#eventMessagesDiv').load("getEventMessages.action", {programInstanceId:programInstanceId});
 }
 
-function dashboardHistoryToggle()
+function dashboardHistoryToggle(evt)
 {
 	jQuery('#dashboardHistoryDiv').toggle();
 }

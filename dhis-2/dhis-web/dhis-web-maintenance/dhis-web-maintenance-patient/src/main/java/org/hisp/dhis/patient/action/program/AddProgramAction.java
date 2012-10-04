@@ -127,13 +127,6 @@ public class AddProgramAction
         this.dateOfIncidentDescription = dateOfIncidentDescription;
     }
 
-    private Integer maxDaysAllowedInputData;
-
-    public void setMaxDaysAllowedInputData( Integer maxDaysAllowedInputData )
-    {
-        this.maxDaysAllowedInputData = maxDaysAllowedInputData;
-    }
-
     private Integer type;
 
     public void setType( Integer type )
@@ -194,7 +187,6 @@ public class AddProgramAction
         program.setVersion( 1 );
         program.setDateOfEnrollmentDescription( dateOfEnrollmentDescription );
         program.setDateOfIncidentDescription( dateOfIncidentDescription );
-        program.setMaxDaysAllowedInputData( maxDaysAllowedInputData );
         program.setType( type );
         program.setDisplayProvidedOtherFacility( displayProvidedOtherFacility );
         program.setDisplayIncidentDate( displayIncidentDate );
@@ -239,7 +231,6 @@ public class AddProgramAction
 
             programStage.setName( SINGLE_EVENT + " " + name );
             programStage.setDescription( description );
-            programStage.setStageInProgram( program.getProgramStages().size() + 1 );
             programStage.setProgram( program );
             programStage.setMinDaysFromStart( 0 );
             programStage.setReportDateDescription( REPORT_DATE_DESCRIPTION );

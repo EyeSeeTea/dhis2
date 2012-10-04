@@ -309,7 +309,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	
 	<bean id="org.hisp.dhis.patient.action.programstage.RemoveProgramStageSectionAction"
 		class="org.hisp.dhis.patient.action.programstage.RemoveProgramStageSectionAction" scope="prototype">
-		<property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
 		<property name="programStageSectionService" ref="org.hisp.dhis.program.ProgramStageSectionService" />
 	</bean>
 	
@@ -895,7 +894,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
  	<bean id="org.hisp.dhis.patient.action.schedule.ExecuteSendMessageAction"
 		class="org.hisp.dhis.patient.action.schedule.ExecuteSendMessageAction"
 		scope="prototype">
-		<property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
 		<property name="programStageInstanceService" ref="org.hisp.dhis.program.ProgramStageInstanceService" />
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 		<property name="outboundSmsService" ref="org.hisp.dhis.sms.outbound.OutboundSmsService" />

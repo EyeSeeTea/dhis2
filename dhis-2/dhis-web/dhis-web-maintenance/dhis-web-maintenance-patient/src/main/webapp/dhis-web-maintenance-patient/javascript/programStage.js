@@ -235,14 +235,14 @@ function insertParams( paramValue, rowId )
 }
 
 // --------------------------------------------------------------------
-// 
+// Generate template message form
 // --------------------------------------------------------------------
 
 function generateTemplateMessageForm()
 {
 	var rowId = jQuery('.daysAllowedSendMessage').length + 1;
 	
-	var contend = '<tr name="tr' + rowId + '">'
+	var contend = '<tr name="tr' + rowId + '" class="listAlternateRow" >'
 				+ 	'<td colspan="2">' + i18n_reminder + ' ' + rowId + '<a href="javascript:removeTemplateMessageForm('+ rowId +')"> ( '+ i18n_remove_reminder + ' )</a></td>'
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
@@ -263,8 +263,8 @@ function generateTemplateMessageForm()
 				+	'</td>'
 				+ '</tr>'
 				+ '<tr name="tr' + rowId + '">'
-				+	'<td><label>' + i18n_template_message + '</label></td>'
-				+	'<td><textarea id="templateMessage' + rowId + '" name="templateMessage' + rowId + '" style="width:320px" class="templateMessage {validate:{required:true}}"></textarea></td>'
+				+	'<td><label>' + i18n_message + '</label></td>'
+				+	'<td><textarea id="templateMessage' + rowId + '" name="templateMessage' + rowId + '" style="width:320px" class="templateMessage {validate:{required:true, rangelength:[3,160]}}"></textarea></td>'
 				+ '</tr>';
 
 	jQuery('#programStageMessage').append( contend );

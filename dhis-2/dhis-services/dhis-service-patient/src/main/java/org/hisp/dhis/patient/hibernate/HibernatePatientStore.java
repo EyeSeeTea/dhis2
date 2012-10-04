@@ -42,6 +42,7 @@ import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -49,8 +50,10 @@ import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientStore;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.system.grid.GridUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -134,6 +137,7 @@ public class HibernatePatientStore
     @SuppressWarnings( "unchecked" )
     @Override
     public Collection<Patient> get( String firstName, String middleName, String lastName, Date birthdate, String gender )
+
     {
         Criteria crit = getCriteria();
         Conjunction con = Restrictions.conjunction();
@@ -149,7 +153,6 @@ public class HibernatePatientStore
 
         con.add( Restrictions.eq( "gender", gender ) );
         con.add( Restrictions.eq( "birthDate", birthdate ) );
-
         crit.add( con );
 
         crit.addOrder( Order.asc( "firstName" ) );
@@ -324,6 +327,22 @@ public class HibernatePatientStore
         return jdbcTemplate.queryForInt( sql );
     }
 
+    @Override
+    public Grid getPatientEventReport( Grid grid, List<String> searchKeys, OrganisationUnit orgunit )
+    {
+        // ---------------------------------------------------------------------
+        // Get SQL and build grid
+        // ---------------------------------------------------------------------
+
+        String sql = searchPatientSql( false, searchKeys, orgunit, null, null );
+
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
+
+        GridUtils.addRows( grid, rowSet );
+
+        return grid;
+    }
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -333,17 +352,17 @@ public class HibernatePatientStore
     {
         String selector = count ? "count(*) " : "* ";
 
-        String sql = "select "
-            + selector
-            + " from ( select distinct p.patientid, p.firstname, p.middlename, p.lastname, p.gender, p.phonenumber, p.birthdate, p.deathdate,";
+        String sql = "select " + selector
+            + " from ( select distinct p.patientid, p.firstname, p.middlename, p.lastname, p.gender, p.phonenumber,";
         String patientWhere = "";
         String patientOperator = " where ";
-        String patientGroupBy = " GROUP BY  p.patientid, p.firstname, p.middlename, p.lastname, p.gender, p.phonenumber, p.birthdate, p.deathdate ";
+        String patientGroupBy = " GROUP BY  p.patientid, p.firstname, p.middlename, p.lastname, p.gender, p.phonenumber ";
         String otherWhere = "";
         String operator = " where ";
         String orderBy = "";
         boolean hasIdentifier = false;
         boolean isSearchEvent = false;
+        boolean isPriorityEvent = false;
 
         for ( String searchKey : searchKeys )
         {
@@ -404,17 +423,17 @@ public class HibernatePatientStore
             }
             else if ( keys[0].equals( Patient.PREFIX_PROGRAM_EVENT_BY_STATUS ) )
             {
-                patientGroupBy += ",pgi.programid ";
                 isSearchEvent = true;
+                isPriorityEvent = Boolean.parseBoolean( keys[5] );
                 patientWhere += patientOperator + "pgi.patientid=p.patientid and ";
-                patientWhere += "programid=" + id + " and ";
+                patientWhere += "pgi.programid=" + id + " and ";
                 patientWhere += "psi.duedate>='" + keys[2] + "' and psi.duedate<='" + keys[3] + "' and ";
                 patientWhere += "pgi.completed = false ";
 
                 String operatorStatus = "";
                 String condition = " and ( ";
 
-                for ( int index = 5; index < keys.length; index++ )
+                for ( int index = 6; index < keys.length; index++ )
                 {
                     int statusEvent = Integer.parseInt( keys[index] );
                     switch ( statusEvent )
@@ -433,16 +452,20 @@ public class HibernatePatientStore
                         condition = "";
                         continue;
                     case ProgramStageInstance.FUTURE_VISIT_STATUS:
-                        patientWhere += condition + operatorStatus + "("
-                            + " psi.status is null and psi.executiondate is null and psi.duedate >= now() and p.organisationunitid=" + keys[4]
-                            + ")";
+                        patientWhere += condition
+                            + operatorStatus
+                            + "("
+                            + " psi.status is null and psi.executiondate is null and psi.duedate >= now() and p.organisationunitid="
+                            + keys[4] + ")";
                         operatorStatus = " OR ";
                         condition = "";
                         continue;
                     case ProgramStageInstance.LATE_VISIT_STATUS:
-                        patientWhere += condition + operatorStatus + "("
-                            + " psi.status is null and psi.executiondate is null and psi.duedate < now() and p.organisationunitid=" + keys[4]
-                            + ")";
+                        patientWhere += condition
+                            + operatorStatus
+                            + "("
+                            + " psi.status is null and psi.executiondate is null and psi.duedate < now() and p.organisationunitid="
+                            + keys[4] + ")";
                         operatorStatus = " OR ";
                         condition = "";
                         continue;
@@ -493,7 +516,7 @@ public class HibernatePatientStore
         {
             sql += "(select organisationunitid from patient where patientid=p.patientid and organisationunitid = "
                 + orgunit.getId() + " ) as orgunitid,";
-            otherWhere += otherWhere + operator + "orgunitid=" + orgunit.getId();
+            otherWhere += operator + "orgunitid=" + orgunit.getId();
         }
 
         sql = sql.substring( 0, sql.length() - 1 ) + " "; // Removing last comma
@@ -501,9 +524,14 @@ public class HibernatePatientStore
         String from = " from patient p ";
         if ( isSearchEvent )
         {
-            String subSQL = " ,MIN( psi.programstageinstanceid ) as programstageinstanceid,min(psi.duedate) as duedate ";
-            sql = sql + subSQL + from + " left join programinstance pgi on " + " (pgi.patientid=p.patientid) "
-                + " left join programstageinstance psi on " + " (psi.programinstanceid=pgi.programinstanceid) ";
+            String subSQL = " ,MIN( psi.programstageinstanceid ) as programstageinstanceid, min(pgs.name) as programstagename, min(psi.duedate) as duedate ";
+            sql = sql + subSQL + from + " inner join programinstance pgi on " + " (pgi.patientid=p.patientid) "
+                + " inner join programstageinstance psi on " + " (psi.programinstanceid=pgi.programinstanceid) "
+                + " inner join programstage pgs on (pgs.programstageid=psi.programstageid) ";
+            if ( isPriorityEvent )
+            {
+                sql += " inner join patientattributevalue pav on p.patientid=pav.patientid ";
+            }
             orderBy = " ORDER BY duedate DESC ";
             from = " ";
         }
@@ -531,4 +559,19 @@ public class HibernatePatientStore
         return sql;
     }
 
+    @SuppressWarnings( "unchecked" )
+    @Override
+    public Collection<Patient> getByPhoneNumber( String phoneNumber, Integer min, Integer max )
+    {
+        String hql = "select p from Patient p where p.phoneNumber like '%" + phoneNumber + "%'";
+        Query query = getQuery( hql );
+        
+        if ( min != null && max != null )
+        {
+            query.setFirstResult( min ).setMaxResults( max );
+        }
+
+        return query.list();
+    }
+    
 }

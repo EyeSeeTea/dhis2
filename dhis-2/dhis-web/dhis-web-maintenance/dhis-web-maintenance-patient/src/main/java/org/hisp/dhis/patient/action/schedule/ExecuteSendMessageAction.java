@@ -33,7 +33,6 @@ import java.util.Collection;
 
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.SchedulingProgramObject;
-import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsService;
@@ -52,13 +51,6 @@ public class ExecuteSendMessageAction
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private SystemSettingManager systemSettingManager;
-
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
-    {
-        this.systemSettingManager = systemSettingManager;
-    }
 
     private ProgramStageInstanceService programStageInstanceService;
 
@@ -88,7 +80,6 @@ public class ExecuteSendMessageAction
     @Override
     public String execute()
     {
-
         Collection<SchedulingProgramObject> schedulingProgramObjects = programStageInstanceService
             .getSendMesssageEvents();
 
@@ -98,25 +89,22 @@ public class ExecuteSendMessageAction
 
             String phoneNumber = schedulingProgramObject.getPhoneNumber();
 
-            if ( phoneNumber != null && !phoneNumber.isEmpty() )
+            try
             {
-                try
-                {
-                    OutboundSms outboundSms = new OutboundSms( message, phoneNumber );
-                    outboundSms.setSender( DHIS_SYSTEM_SENDER );
-                    outboundSmsService.sendMessage( outboundSms, null );
+                OutboundSms outboundSms = new OutboundSms( message, phoneNumber );
+                outboundSms.setSender( DHIS_SYSTEM_SENDER );
+                outboundSmsService.sendMessage( outboundSms, null );
 
-                    String sql = "INSERT INTO programstageinstance_outboundsms"
-                        + "( programstageinstanceid, outboundsmsid, sort_order) VALUES " + "("
-                        + schedulingProgramObject.getProgramStageInstanceId() + ", " + outboundSms.getId() + ","
-                        + (System.currentTimeMillis() / 1000) + ") ";
+                String sql = "INSERT INTO programstageinstance_outboundsms"
+                    + "( programstageinstanceid, outboundsmsid, sort_order) VALUES " + "("
+                    + schedulingProgramObject.getProgramStageInstanceId() + ", " + outboundSms.getId() + ","
+                    + (System.currentTimeMillis() / 1000) + ") ";
 
-                    jdbcTemplate.execute( sql );
-                }
-                catch ( SmsServiceException e )
-                {
-                    message = e.getMessage();
-                }
+                jdbcTemplate.execute( sql );
+            }
+            catch ( SmsServiceException e )
+            {
+                message = e.getMessage();
             }
         }
 

@@ -28,7 +28,6 @@
 			<td><label>$i18n.getString( "type" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td>
 				<select style="width: 336px;" id="type" name="type" onchange='programOnChange();' class="{validate:{required:true}}">
-					<option value=''>[$i18n.getString('please_select')]</option>
 					<option value='1' #if( $program.type=='1' ) selected #end>$i18n.getString('multiple_events_with_registration')</option>
 					<option value='2' #if( $program.type=='2' ) selected #end>$i18n.getString('single_event_with_registration')</option>
 					<option value='3' #if( $program.type=='3' ) selected #end>$i18n.getString('single_event_without_registration')</option>
@@ -36,22 +35,10 @@
 			</td>
 			<td></td>
 		</tr>
-
+		
 		<tr>
-			<td><label>$i18n.getString( "show_provided_provided_elsewhere" )</label></td>
-			<td><input style="margin: 0;" type="checkbox" id="displayProvidedOtherFacility" name="displayProvidedOtherFacility" value='true' #if( $program.displayProvidedOtherFacility=='false' ) checked #end ></td>
-			<td></td>
-		</tr>
-
-		<tr>
-			<td><label>$i18n.getString( "show_incident_date" )</label></td>
-			<td><input style="margin: 0;"type="checkbox" id="displayIncidentDate" name="displayIncidentDate" value='true' onchange='programOnChange();' #if( $program.type=='3' ) disabled #elseif($program.displayIncidentDate=='true') checked #end></td>
-			<td></td>
-		</tr>
-
-		<tr>
-			<td><label>$i18n.getString( "generated_by_enrollment_date" )</label></td>
-			<td><input style="margin: 0;"type="checkbox" id="generatedByEnrollmentDate" name="generatedByEnrollmentDate" value='true' #if($program.generatedByEnrollmentDate=='true') checked #end></td>
+			<td><label>$i18n.getString( "events_generated_by_enrollment_date" )</label></td>
+			<td><input style="margin: 0;"type="checkbox" id="generatedByEnrollmentDate" name="generatedByEnrollmentDate" value='true' #if($program.generatedByEnrollmentDate=='true') checked #end #if( $program.type=='3' ) disabled #end ></td>
 			<td></td>
 		</tr>
 		
@@ -59,7 +46,28 @@
 			<td><label>$i18n.getString( "version" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input style="width: 330px;" type="text" id="version" name="version" value="$program.version" class="{validate:{required:true,number:true}}"></td>
 			<td></td>
-		</tr>		
+		</tr>
+		
+		<tr>
+			<th colspan="2">$i18n.getString( "form_details" )</th>
+		</tr>
+		
+		<tr>
+			<td><label>$i18n.getString( "show_provided_provided_elsewhere" )</label></td>
+			<td><input style="margin: 0;" type="checkbox" id="displayProvidedOtherFacility" name="displayProvidedOtherFacility" value='true' #if( $program.displayProvidedOtherFacility=='false' ) checked #end ></td>
+			<td></td>
+		</tr>
+			
+		<tr>
+			<th colspan="2">$i18n.getString( "enrollment_details" )</th>
+		</tr>
+		
+		<tr>
+			<td><label>$i18n.getString( "show_incident_date" )</label></td>
+			<td><input style="margin: 0;"type="checkbox" id="displayIncidentDate" name="displayIncidentDate" value='true' onchange='programOnChange();' #if( $program.type=='3' ) disabled #elseif($program.displayIncidentDate=='true') checked #end></td>
+			<td></td>
+		</tr>
+				
 		<tr>
 			<td><label>$i18n.getString( "date_of_enrollment_description" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input style="width: 330px;" type="text" id="dateOfEnrollmentDescription" name="dateOfEnrollmentDescription"  value="$!program.dateOfEnrollmentDescription" class="{validate:{required:true,minlength:4}}" #if( $program.type=='3' ) disabled #end></td>
@@ -70,12 +78,9 @@
 			<td><input style="width: 330px;" type="text" id="dateOfIncidentDescription" name="dateOfIncidentDescription" value="$!program.dateOfIncidentDescription" class="{validate:{required:true,minlength:4}}" #if( $program.type=='2' || $program.type=='3') disabled #end ></td>
 			<td></td>
 		</tr>
-
-		<tr>
-			<td><label>$i18n.getString( "duration_in_days" )</label></td>
-			<td><input style="width: 330px;" type="text" id="maxDaysAllowedInputData" name="maxDaysAllowedInputData" value="$!program.maxDaysAllowedInputData" class="{validate:{number:true}}"></td>
-			<td></td>
-		</tr>		 
+		
+		<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+			
 	<tbody>
 	</table>
 
@@ -93,7 +98,7 @@
 	
 		<tr>
 			<td>
-				<select size="15" style="width: 330px;" multiple id="availablePropertyIds" name="availablePropertyIds" ondblclick="selectProperties();">
+				<select size="15" style="width: 330px;" multiple id="availablePropertyIds" name="availablePropertyIds" ondblclick="selectProperties();" #if( $program.type=='3' ) disabled #end>
 					#foreach( $identifier in $availableIdentifierTypes )
 						<option value="iden_$identifier.id">$identifier.name</option>
 					#end
@@ -116,11 +121,11 @@
 								<th>$i18n.getString( "identifiers_and_attributes" )</th>
 								<th width="20px">$i18n.getString( "displayed_in_list" )</th>
 						</thead>
-						<tbody id="selectedList">
+						<tbody id="selectedList" #if($program.type==3) style="display:none;" #end>
 							#foreach( $identifier in $program.patientIdentifierTypes )
 								<tr ondblclick="unSelectProperties( this )" id="iden_$identifier.id">
 									<td onmousedown="select(event, this)">$encoder.htmlEncode( $identifier.name )</td>
-									<td align="center"><input type="checkbox" name="displayed" value="iden_$identifier.id" #if($identifier.personDisplayName == true ) checked #end /></td>
+									<td align="center"><input type="checkbox" name="displayed" value="iden_$identifier.id" #if($identifier.personDisplayName == true ) checked #end #if($program.type==3) disabled #end /></td>
 								</tr>
 							#end
 							#foreach( $attribute in $program.patientAttributes )
