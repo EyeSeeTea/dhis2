@@ -169,7 +169,7 @@ Ext.onReady( function() {
 		//GIS.base.googleStreets.layer.setVisibility(false);
 	};
 	
-	GIS.init.afterRender = function() {	
+	GIS.init.afterRender = function() {
 		
 		// Map tools
 		document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin_24.png" />';
