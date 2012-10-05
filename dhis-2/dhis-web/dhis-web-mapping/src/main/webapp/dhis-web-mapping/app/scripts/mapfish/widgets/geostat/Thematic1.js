@@ -50,7 +50,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     
     cmp: {},
     
-    togglers: {},
+    toggler: {},
     
     features: [],
     
@@ -218,7 +218,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     createUtils: function() {
 		var that = this;
 		
-		this.togglers.valueType = function(valueType) {
+		this.toggler.valueType = function(valueType) {
 			if (valueType === GIS.conf.finals.dimension.indicator.id) {
 				that.cmp.indicatorGroup.show();
 				that.cmp.indicator.show();
@@ -233,7 +233,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			}
 		};
 		
-		this.togglers.legendType = function(legendType) {
+		this.toggler.legendType = function(legendType) {
 			if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
 				that.cmp.methodPanel.show();
 				that.cmp.lowPanel.show();
@@ -275,7 +275,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                     scope: this,
                     fn: function(cb) {
 						this.config.updateData = true;
-						this.togglers.valueType(cb.getValue());
+						this.toggler.valueType(cb.getValue());
                     }
                 }
             }
@@ -502,7 +502,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 select: {
                     scope: this,
                     fn: function(cb) {
-						this.togglers.legendType(cb.getValue());
+						this.toggler.legendType(cb.getValue());
                     }
                 }
             }
@@ -1576,13 +1576,18 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	
 	reset: function() {
 		this.cmp.valueType.reset();
+		this.toggler.valueType(GIS.conf.finals.dimension.indicator.id);
+		
 		this.cmp.indicatorGroup.clearValue();
 		this.cmp.indicator.clearValue();
 		this.cmp.dataElementGroup.clearValue();
 		this.cmp.dataElement.clearValue();
+		
 		this.cmp.periodType.clearValue();
 		this.cmp.period.clearValue();
+		
 		this.cmp.legendType.reset();
+		this.toggler.legendType(GIS.conf.finals.widget.legendtype_automatic);
 		this.cmp.legendSet.clearValue();
 		this.cmp.classes.reset();
 		this.cmp.method.reset();
@@ -1637,7 +1642,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.cmp.valueType.setValue(model.valueType);
 		
 		// Indicator and data element
-		this.togglers.valueType(model.valueType);
+		this.toggler.valueType(model.valueType);
 		
 		var	indeGroupView = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicatorGroup : this.cmp.dataElementGroup,
 			indeGroupStore = indeGroupView.store,
@@ -1663,7 +1668,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 		// Legend
 		this.cmp.legendType.setValue(model.legendType);
-		this.togglers.legendType(model.legendType);
+		this.toggler.legendType(model.legendType);
 		
 		if (model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
 			this.cmp.classes.setValue(model.classes);
