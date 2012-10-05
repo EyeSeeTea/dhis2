@@ -47,6 +47,11 @@ GIS.conf = {
 			item_width: 262,
 			itemlabel_width: 95,
 			window_width: 290
+		},
+		tool: {
+			item_width: 222,
+			itemlabel_width: 95,
+			window_width: 250
 		}
 	},
 	period: {
@@ -684,16 +689,20 @@ Ext.onReady( function() {
 					alwaysEnabled: true
 				},
 				{
-					text: 'Labels..',//i18n
+					text: 'Labels..', //i18n
 					iconCls: 'gis-menu-item-icon-labels'
 				},
 				{
-					text: 'Filter..',//i18n
+					text: 'Filter..', //i18n
 					iconCls: 'gis-menu-item-icon-filter'
 				},
 				{
-					text: 'Search..',//i18n
-					iconCls: 'gis-menu-item-icon-search'
+					text: 'Search..', //i18n
+					iconCls: 'gis-menu-item-icon-search',
+					handler: function() {
+						base.widget.cmp.searchWindow = new GIS.obj.SearchWindow(base);
+						base.widget.cmp.searchWindow.show();
+					}
 				},
 				{
 					xtype: 'menuseparator',
@@ -737,6 +746,175 @@ Ext.onReady( function() {
 				}
 			}
 		});
+	};
+	
+	GIS.obj.SearchWindow = function(base) {
+		var layer = base.layer,
+			data = [],
+			store,
+			button,
+			window;
+			
+		for (var i = 0; i < layer.features.length; i++) {
+			data.push([layer.features[i].data.id, layer.features[i].data.name]);
+		}
+		
+		if (!data.length) {
+			GIS.logg.push([data, base.widget.xtype + '.search.data: feature ids/names']);
+			alert("no features"); //todo
+			return;
+		}
+		
+		store = Ext.create('Ext.data.ArrayStore', {
+			fields: ['id', 'name'],
+			data: data,
+			listeners: {
+				load: function() {
+					this.sort('name', 'ASC');
+				}
+			}
+		});
+		
+		button = Ext.create('Ext.button.Button', {
+			width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
+			height: 22,
+			value: '0000ff',
+			fieldLabel: GIS.i18n.highlight_color,
+			getValue: function() {
+				return this.value;
+			},
+			setValue: function(color) {
+				this.value = color;
+				if (Ext.isDefined(this.getEl())) {
+					this.getEl().dom.style.background = '#' + color;
+				}
+			},
+			menu: {
+				showSeparator: false,
+				items: {
+					xtype: 'colorpicker',
+					closeAction: 'hide',
+					listeners: {
+						select: function(cp, color) {
+							button.setValue(color);
+							button.menu.hide();
+						}
+					}
+				}
+			},
+			listeners: {
+				added: function() {
+					this.defaultValue = this.value;
+				},
+				render: function() {
+					this.setValue(this.value);
+				}
+			}
+		});
+		
+		window = Ext.create('Ext.window.Window', {
+			title: GIS.i18n.organisationunit_search,
+			layout: 'fit',
+			iconCls: 'gis-window-title-icon-search',
+			cls: 'gis-container-default',
+			width: GIS.conf.layout.tool.window_width,
+			//height: G.util.getMultiSelectHeight() + 140, //todo
+			height: 400,
+			items: [
+				{
+					cls: 'gis-container-inner',
+					items: [
+						{
+							layout: 'column',
+							cls: 'gis-container-inner',
+							items: [
+								{
+									cls: 'gis-panel-html-label',
+									html: 'Highlight color:',
+									width: GIS.conf.layout.tool.itemlabel_width
+								},
+								button
+							]
+						},
+						{
+							cls: 'gis-panel-html-separator'
+						},
+						{
+							layout: 'column',
+							cls: 'gis-container-inner',
+							items: [
+								{
+									cls: 'gis-panel-html-label',
+									html: GIS.i18n.text_filter + ':',
+									width: GIS.conf.layout.tool.itemlabel_width
+								},								
+								{
+									xtype: 'textfield',
+									width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
+									enableKeyEvents: true,
+									listeners: {
+										keyup: function() {
+											store.clearFilter();
+											store.filter('name', this.getValue());
+										}
+									}
+								}
+							]
+						},
+						{
+							xtype: 'grid',
+							cls: 'gis-grid',
+							height: 290, //todo
+							width: GIS.conf.layout.tool.item_width,
+							scroll: 'vertical',
+							hideHeaders: true,
+							columns: [{
+								id: 'name',
+								text: 'Organisation units',
+								dataIndex: 'name',
+								sortable: false,
+								width: GIS.conf.layout.tool.item_width
+							}],
+							store: store,
+							listeners: {
+								select: function(grid, record, index, e) {
+									var feature = layer.getFeaturesByAttribute('id', record.data.id)[0],
+										color = button.getValue(),
+										symbolizer;
+									
+									layer.redraw();
+									
+									if (feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class) {
+										symbolizer = new OpenLayers.Symbolizer.Point({
+											'pointRadius': 7,
+											'fillColor': '#' + color
+										});
+									}
+									else {
+										symbolizer = new OpenLayers.Symbolizer.Polygon({
+											'strokeColor': '#' + color,
+											'fillColor': '#' + color
+										});
+									}
+
+									layer.drawFeature(feature,symbolizer);
+								}
+							}
+						}
+					]
+				}
+			],
+			listeners: {
+				render: function() {
+					GIS.util.gui.window.setPositionTopLeft(this);
+				},
+				destroy: function() {
+					layer.redraw();
+				}
+			}
+		});
+		
+		return window;
 	};
     
 	// User interface

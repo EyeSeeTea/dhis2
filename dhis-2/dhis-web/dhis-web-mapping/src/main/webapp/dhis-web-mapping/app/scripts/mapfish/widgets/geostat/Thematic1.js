@@ -602,8 +602,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						select: {
 							scope: this,
 							fn: function(cp, color) {
-								this.cmp.colorLow.getEl().dom.style.background = '#' + color;
-								this.cmp.colorLow.value = color;
+								this.cmp.colorLow.setValue(color);
 								this.cmp.colorLow.menu.hide();
 								
 								this.config.updateLegend = true;
@@ -649,9 +648,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						select: {
 							scope: this,
 							fn: function(cp, color) {
-								this.cmp.colorHigh.getEl().dom.style.background = '#' + color;
-								this.cmp.colorHigh.value = color;
-								this.cmp.colorHigh.menu.hide();
+								this.cmp.colorLow.setValue(color);
+								this.cmp.colorLow.menu.hide();
 								
 								this.config.updateLegend = true;
 							}
@@ -922,7 +920,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				showRelocate,
 				drill,
 				menu,
-				isPoint = feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class;
+				isPoint = feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class;				
 			
 			// Relocate
 			showRelocate = function() {
@@ -1115,7 +1113,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 											cls: 'gis-panel-html-separator'
 										},
 										{
-											xtype: 'gridpanel',
+											xtype: 'grid',
 											cls: 'gis-grid',
 											height: 300, //todo
 											width: 255,
@@ -1604,6 +1602,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 		document.getElementById(this.legendDiv).innerHTML = '';
 		this.layer.destroyFeatures();
+		this.features = [];
 		this.layer.setVisibility(false);
 	},
 	

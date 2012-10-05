@@ -9,6 +9,7 @@
  * Treepanel
  * Colorpicker 
  * Window
+ * TextField
 */
 
 /* General */
@@ -43,6 +44,10 @@ html * {
 }
 .gis-panel-html-separator {
 	padding-top: 5px;
+}
+.gis-panel-html-label .x-panel-body {
+	height: 22px;
+	line-height: 18px;
 }
 
 .x-splitter-collapsed .x-layout-split-bottom { /* Hide expand arrow when east panel is collapsed */
@@ -387,6 +392,16 @@ html * {
 	background: url('../images/symbol_14.png') no-repeat;
 }
 
+.gis-window-title-icon-labels {
+	background: url('../images/labels_14.png') no-repeat;
+}
+.gis-window-title-icon-filter {
+	background: url('../images/filter_14.png') no-repeat;
+}
+.gis-window-title-icon-search {
+	background: url('../images/search_14.png') no-repeat;
+}
+
 .gis-window-title-icon-relocate {
 	background: url('../images/relocate_14.png') no-repeat;
 }
@@ -406,4 +421,10 @@ html * {
 .gis-grid .x-grid-header-ct {
 	border-bottom-width: 1px !important;
 	border-bottom-color: #dbdbdb;	
+}
+
+/* TextField */
+
+input.x-form-text {
+	border-radius: 2px;
 }
