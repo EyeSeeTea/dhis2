@@ -818,7 +818,6 @@ Ext.onReady( function() {
 			iconCls: 'gis-window-title-icon-search',
 			cls: 'gis-container-default',
 			width: GIS.conf.layout.tool.window_width,
-			//height: G.util.getMultiSelectHeight() + 140, //todo
 			height: 400,
 			items: [
 				{
@@ -864,7 +863,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'grid',
 							cls: 'gis-grid',
-							height: 290, //todo
+							height: 290,
 							width: GIS.conf.layout.tool.item_width,
 							scroll: 'vertical',
 							hideHeaders: true,

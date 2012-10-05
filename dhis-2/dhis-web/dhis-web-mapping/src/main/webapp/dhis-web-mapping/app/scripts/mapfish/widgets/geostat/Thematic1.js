@@ -731,20 +731,29 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			width: GIS.conf.layout.widget.item_width,
 			height: 220,
 			isRendered: false,
-			path: null,
+			pathToSelect: null,
+			pathToExpand: null,
 			reset: function() {
 				this.collapseAll();
-				this.expandPath(GIS.init.rootNodes[0].path);
-				this.selectPath(GIS.init.rootNodes[0].path);
+				this.expandTreePath(GIS.init.rootNodes[0].path);
+				this.selectTreePath(GIS.init.rootNodes[0].path);
 			},
 			selectTreePath: function(path) {
 				if (this.isRendered) {
 					this.selectPath(path);
 				}
 				else {
-					this.path = path;
+					this.pathToSelect = path;
 				}
-			},				
+			},
+			expandTreePath: function(path) {
+				if (this.isRendered) {
+					this.expandPath(path);
+				}
+				else {
+					this.pathToExpand = path;
+				}
+			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
@@ -773,11 +782,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				afterrender: function() {
 					this.isRendered = true;
 					
-					if (this.path) {
-						this.selectPath(this.path);
+					if (this.pathToSelect) {
+						this.selectPath(this.pathToSelect);
+						this.pathToSelect = null;
 					}
 					else {
 						this.getSelectionModel().select(0);
+					}
+					
+					if (this.pathToExpand) {
+						this.expandPath(this.pathToExpand);
+						this.pathToExpand = null;
 					}
 				}
 			}
