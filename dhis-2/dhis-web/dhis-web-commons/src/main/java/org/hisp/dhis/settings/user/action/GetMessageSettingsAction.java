@@ -1,7 +1,7 @@
-package org.hisp.dhis.settings.action.user;
+package org.hisp.dhis.settings.user.action;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,6 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Dang Duy Hieu
  * @version $Id$
- * 
  */
 public class GetMessageSettingsAction
     implements Action
