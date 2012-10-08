@@ -244,7 +244,7 @@ G.util = {
                         },
                         OpenLayers.Feature.Vector.style['default'])
                     ),
-                    'select': new OpenLayers.Style({
+                    select: new OpenLayers.Style({
                         'strokeColor': '#000000',
                         'strokeWidth': 2,
                         'cursor': 'pointer'
@@ -261,7 +261,7 @@ G.util = {
                         },
                         OpenLayers.Feature.Vector.style['default'])
                     ),
-                    'select': new OpenLayers.Style({
+                    select: new OpenLayers.Style({
                         'strokeColor': '#000000',
                         'strokeWidth': 2,
                         'cursor': 'pointer'

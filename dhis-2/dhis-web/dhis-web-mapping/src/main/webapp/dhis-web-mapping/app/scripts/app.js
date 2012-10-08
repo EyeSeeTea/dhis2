@@ -1010,6 +1010,8 @@ Ext.onReady( function() {
             
             layer.removeAllFeatures();
             layer.addFeatures(features);
+            
+            base.widget.store.features.loadFeatures(layer.features);
         };
 		
 		window = Ext.create('Ext.window.Window', {
@@ -1076,12 +1078,235 @@ Ext.onReady( function() {
 				destroy: function() {
 					layer.removeAllFeatures();
 					layer.addFeatures(base.widget.features);
+					base.widget.store.features.loadFeatures(layer.features);
 				}
 			}
 		});
 		
 		return window;
 	};
+	
+	//GIS.obj.LabelWindow = function(base) {
+		//var layer = base.layer,
+			//fontSize,
+			//fontWeight,
+			//textDecoration,
+			//color,
+			//window;
+			
+		//fontSize = Ext.create('Ext.form.field.Number', {
+			////fieldLabel: G.i18n.font_size,
+			//labelSeparator: G.conf.labelseparator,
+			//width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
+			//allowDecimals: false,
+			//minValue: 8,
+			//value: 13,
+			//emptyText: 13,
+			//listeners: {
+				//'keyup': {
+					//scope: this,
+					//fn: function(nf) {
+						//var item = this.menu.find('name','labels')[0];
+						
+						//if (this.widget.labels) {
+							//this.widget.labels = false;
+							//G.util.labels.vector.toggleFeatureLabels(this.widget, nf.getValue(), item.cmp.strong.getValue(),
+								//item.cmp.italic.getValue(), item.cmp.color.getValue());
+						//}
+					//}
+				//}
+			//}
+			
+			
+
+
+
+                                //name: 'labels',
+                                //text: G.i18n.labels + '..',
+                                //iconCls: 'menu-layeroptions-labels',
+                                //cmp: {
+                                    //fontSize: new Ext.form.NumberField({
+                                        //name: 'fontsize',
+                                        //fieldLabel: G.i18n.font_size,
+                                        //labelSeparator: G.conf.labelseparator,
+                                        //width: G.conf.combo_number_width_small,
+                                        //enableKeyEvents: true,
+                                        //allowDecimals: false,
+                                        //allowNegative: false,
+                                        //value: 13,
+                                        //emptyText: 13,
+                                        //listeners: {
+                                            //'keyup': {
+                                                //scope: this,
+                                                //fn: function(nf) {  
+                                                    //var item = this.menu.find('name','labels')[0];
+                                                                                                    
+                                                    //if (this.widget.labels) {
+                                                        //this.widget.labels = false;
+                                                        //G.util.labels.vector.toggleFeatureLabels(this.widget, nf.getValue(), item.cmp.strong.getValue(),
+                                                            //item.cmp.italic.getValue(), item.cmp.color.getValue());
+                                                    //}
+                                                //}
+                                            //}
+                                        //}
+                                    //}),
+                                    //strong: new Ext.form.Checkbox({
+                                        //fieldLabel: '<b>' + G.i18n.bold_ + '</b>',
+                                        //labelSeparator: G.conf.labelseparator,
+                                        //listeners: {
+                                            //'check': {
+                                                //scope: this,
+                                                //fn: function(chb, checked) {
+                                                    //var item = this.menu.find('name','labels')[0];
+                                                    
+                                                    //if (this.widget.labels) {
+                                                        //this.widget.labels = false;
+                                                        //G.util.labels.vector.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
+                                                            //checked, item.cmp.italic.getValue(), item.cmp.color.getValue());
+                                                    //}
+                                                //}
+                                            //}
+                                        //}
+                                    //}),
+                                    //italic: new Ext.form.Checkbox({
+                                        //fieldLabel: '<i>' + G.i18n.italic + '</i>',
+                                        //labelSeparator: G.conf.labelseparator,
+                                        //listeners: {
+                                            //'check': {
+                                                //scope: this,
+                                                //fn: function(chb, checked) {
+                                                    //var item = this.menu.find('name','labels')[0];
+                                                    
+                                                    //if (this.widget.labels) {
+                                                        //this.widget.labels = false;
+                                                        //G.util.labels.vector.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
+                                                            //item.cmp.strong.getValue(), checked, item.cmp.color.getValue());
+                                                    //}
+                                                //}
+                                            //}
+                                        //}
+                                    //}),
+                                    //color: new Ext.ux.ColorField({
+                                        //fieldLabel: G.i18n.color,
+                                        //labelSeparator: G.conf.labelseparator,
+                                        //allowBlank: false,
+                                        //width: G.conf.combo_width_fieldset,
+                                        //value: "#000000",
+                                        //listeners: {
+                                            //'select': {
+                                                //scope: this,
+                                                //fn: function(cf) {
+                                                    //var item = this.menu.find('name','labels')[0];
+                                                    
+                                                    //if (this.widget.labels) {
+                                                        //this.widget.labels = false;
+                                                        //G.util.labels.vector.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
+                                                            //item.cmp.strong.getValue(), item.cmp.italic.getValue(), cf.getValue());
+                                                    //}
+                                                //}
+                                            //}
+                                        //}
+                                    //})
+                                //},
+                                //showLabelWindow: function() {
+                                    //var layer = this.parentMenu.parent.widget.layer;
+                                    //if (layer.features.length) {
+                                        //if (this.cmp.labelWindow) {
+                                            //this.cmp.labelWindow.show();
+                                        //}
+                                        //else {
+                                            //this.cmp.labelWindow = new Ext.Window({
+                                                //title: '<span id="window-labels-title">' + G.i18n.labels + '</span>',
+                                                //layout: 'fit',
+                                                //closeAction: 'hide',
+                                                //width: G.conf.window_width,
+                                                //height: 200,
+                                                //items: [
+                                                    //{
+                                                        //xtype: 'form',
+                                                        //bodyStyle: 'padding:8px',
+                                                        //labelWidth: G.conf.label_width,
+                                                        //items: [
+                                                            //{html: '<div class="window-info">' + G.i18n.show_hide_feature_labels + '</div>'},
+                                                            //this.cmp.fontSize,
+                                                            //this.cmp.strong,
+                                                            //this.cmp.italic,
+                                                            //this.cmp.color
+                                                        //]
+                                                    //}
+                                                //],
+                                                //bbar: [
+                                                    //'->',
+                                                    //{
+                                                        //xtype: 'button',
+                                                        //iconCls: 'icon-assign',
+                                                        //hideLabel: true,
+                                                        //text: G.i18n.showhide,
+                                                        //scope: this,
+                                                        //handler: function() {
+                                                            //if (layer.features.length) {
+                                                                //G.util.labels.vector.toggleFeatureLabels(layer.widget, this.cmp.fontSize.getValue(),
+                                                                    //this.cmp.strong.getValue(), this.cmp.italic.getValue(), this.cmp.color.getValue());
+                                                            //}
+                                                            //else {
+                                                                //Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: ' + Gi.i18n.no_features_rednered );
+                                                            //}
+                                                        //}
+                                                    //}
+                                                //]
+                                            //});
+                                            //this.cmp.labelWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
+                                            //this.cmp.labelWindow.show(this.parentMenu.parent.id);
+                                        //}
+                                    //}
+                                    //else {
+                                        //Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: ' + Gi.i18n.no_features_rednered );
+                                    //}
+                                //},
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
 	// User interface
 	
