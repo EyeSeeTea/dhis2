@@ -694,19 +694,36 @@ Ext.onReady( function() {
 				},
 				{
 					text: 'Filter..', //i18n
-					iconCls: 'gis-menu-item-icon-filter'
+					iconCls: 'gis-menu-item-icon-filter',
+					handler: function() {
+						if (base.widget.cmp.filterWindow) {
+							if (base.widget.cmp.filterWindow.isVisible()) {
+								return;
+							}
+							else {
+								base.widget.cmp.filterWindow.destroy();
+							}
+						}
+					
+						base.widget.cmp.filterWindow = new GIS.obj.FilterWindow(base);
+						base.widget.cmp.filterWindow.show();
+					}
 				},
 				{
 					text: 'Search..', //i18n
 					iconCls: 'gis-menu-item-icon-search',
 					handler: function() {
 						if (base.widget.cmp.searchWindow) {
-							base.widget.cmp.searchWindow.show();
+							if (base.widget.cmp.searchWindow.isVisible()) {
+								return;
+							}
+							else {
+								base.widget.cmp.searchWindow.destroy();
+							}
 						}
-						else {
-							base.widget.cmp.searchWindow = new GIS.obj.SearchWindow(base);
-							base.widget.cmp.searchWindow.show();
-						}
+					
+						base.widget.cmp.searchWindow = new GIS.obj.SearchWindow(base);
+						base.widget.cmp.searchWindow.show();
 					}
 				},
 				{
@@ -914,6 +931,145 @@ Ext.onReady( function() {
 		
 		return window;
 	};
+	
+	GIS.obj.FilterWindow = function(base) {
+		var layer = base.layer,
+			lowerNumberField,
+			greaterNumberField,
+			lt,
+			gt,
+			filter,
+			window;
+		
+		greaterNumberField = Ext.create('Ext.form.field.Number', {
+			width: GIS.conf.layout.tool.itemlabel_width,
+			value: parseInt(base.widget.coreComp.minVal),
+			listeners: {
+				change: function() {
+					gt = this.getValue();
+				}
+			}
+		});
+		
+		lowerNumberField = Ext.create('Ext.form.field.Number', {
+			width: GIS.conf.layout.tool.itemlabel_width,
+			value: parseInt(base.widget.coreComp.maxVal) + 1,
+			listeners: {
+				change: function() {
+					lt = this.getValue();
+				}
+			}
+		});
+		
+        filter = function() {
+			var cache = base.widget.features.slice(0),
+				features = [];
+				
+            if (!gt && !lt) {
+                features = cache;
+            }
+            else if (gt && lt) {
+                for (var i = 0; i < cache.length; i++) {
+                    if (gt < lt && (cache[i].attributes.value > gt && cache[i].attributes.value < lt)) {
+                        features.push(cache[i]);
+                    }
+                    else if (gt > lt && (cache[i].attributes.value > gt || cache[i].attributes.value < lt)) {
+                        features.push(cache[i]);
+                    }
+                    else if (gt === lt && cache[i].attributes.value === gt) {
+                        features.push(cache[i]);
+                    }
+                }
+            }
+            else if (gt && !lt) {
+                for (var i = 0; i < cache.length; i++) {
+                    if (cache[i].attributes.value > gt) {
+                        features.push(cache[i]);
+                    }
+                }
+            }
+            else if (!gt && lt) {
+                for (var i = 0; i < cache.length; i++) {
+                    if (cache[i].attributes.value < lt) {
+                        features.push(cache[i]);
+                    }
+                }
+            }
+            
+            layer.removeAllFeatures();
+            layer.addFeatures(features);
+        };
+		
+		window = Ext.create('Ext.window.Window', {
+			title: 'Filter by value',
+			iconCls: 'gis-window-title-icon-search',
+			cls: 'gis-container-default',
+			width: GIS.conf.layout.tool.window_width,
+			filter: filter,
+			items: {
+				layout: 'fit',
+				cls: 'gis-container-inner',
+				items: [
+					{
+						cls: 'gis-container-inner',
+						html: 'Show organisation units with values..'
+					},
+					{
+						cls: 'gis-panel-html-separator'
+					},
+					{
+						cls: 'gis-panel-html-separator'
+					},
+					{
+						layout: 'column',
+						cls: 'gis-container-inner',
+						items: [
+							{
+								cls: 'gis-panel-html-label',
+								html: 'Greater than:',
+								width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width
+							},
+							greaterNumberField
+						]
+					},
+					{
+						layout: 'column',
+						cls: 'gis-container-inner',
+						items: [
+							{
+								cls: 'gis-panel-html-label',
+								html: 'And/or lower than:',
+								width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width
+							},
+							lowerNumberField
+						]
+					}
+				]
+			},
+			bbar: [
+				'->',
+				{
+					xtype: 'button',
+					text: GIS.i18n.update,
+					scope: this,
+					handler: function() {
+						filter();
+					}
+				}
+			],
+			listeners: {
+				render: function() {
+					GIS.util.gui.window.setPositionTopLeft(this);
+				},				
+				destroy: function() {
+					layer.removeAllFeatures();
+					layer.addFeatures(base.widget.features);
+				}
+			}
+		});
+		
+		return window;
+	};
     
 	// User interface
 	
@@ -934,7 +1090,6 @@ Ext.onReady( function() {
         closeAction: 'hide',
         width: GIS.conf.layout.widget.window_width,
         resizable: false,
-        isRendered: false,
         isCollapsed: false,
         items: GIS.base.thematic1.widget,
         bbar: [
@@ -949,9 +1104,6 @@ Ext.onReady( function() {
 		listeners: {
 			show: function() {
 				GIS.util.gui.window.setPositionTopLeft(this);
-			},
-			render: function() {
-				this.isRendered = true;
 			}
 		}
 	});
@@ -1076,7 +1228,7 @@ Ext.onReady( function() {
 						{
 							text: 'log()', //i18n
 							handler: function() {
-								console.log(GIS.base.thematic1.widget.store.features);
+								console.log(GIS.base.thematic1.widget.cmp.searchWindow.isVisible());
 							}
 						},
 						'->',

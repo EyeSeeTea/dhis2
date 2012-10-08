@@ -153,12 +153,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		features: Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
 			loadFeatures: function(features) {
-				var data = [];
-				for (var i = 0; i < features.length; i++) {
-					data.push([features[i].attributes.id, features[i].attributes.name]);
+				if (features && features.length) {
+					var data = [];
+					for (var i = 0; i < features.length; i++) {
+						data.push([features[i].attributes.id, features[i].attributes.name]);
+					}
+					this.loadData(data);
+					this.sortStore();
 				}
-				this.loadData(data);
-				this.sortStore();
+				else {
+					this.removeAll();
+				}
 			},
 			sortStore: function() {
 				this.sort('name', 'ASC');
@@ -745,7 +750,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			multiSelect: false,
 			width: GIS.conf.layout.widget.item_width,
 			height: 220,
-			isRendered: false,
 			pathToSelect: null,
 			pathToExpand: null,
 			reset: function() {
@@ -754,7 +758,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				this.selectTreePath(GIS.init.rootNodes[0].path);
 			},
 			selectTreePath: function(path) {
-				if (this.isRendered) {
+				if (this.rendered) {
 					this.selectPath(path);
 				}
 				else {
@@ -762,7 +766,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 			},
 			expandTreePath: function(path) {
-				if (this.isRendered) {
+				if (this.rendered) {
 					this.expandPath(path);
 				}
 				else {
@@ -794,9 +798,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						this.config.updateOrganisationUnit = true;
 					}
 				},
-				afterrender: function() {
-					this.isRendered = true;
-					
+				afterrender: function() {					
 					if (this.pathToSelect) {
 						this.selectPath(this.pathToSelect);
 						this.pathToSelect = null;
@@ -1018,7 +1020,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 							cls: 'gis-container-default',
 							width: 460,
 							height: 400, //todo
-							isRendered: false,
 							period: null,
 							items: [
 								{
@@ -1626,13 +1627,22 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.cmp.level.clearValue();
 		this.cmp.parent.reset();
 		
+		if (this.cmp.searchWindow) {
+			this.cmp.searchWindow.destroy();
+		}
+		if (this.cmp.filterWindow) {
+			this.cmp.filterWindow.destroy();
+		}
+		
 		this.config = {};
 		this.tmpModel = {};
 		this.model = {};
 		
-		document.getElementById(this.legendDiv).innerHTML = '';
 		this.layer.destroyFeatures();
-		this.features = [];
+		this.features = this.layer.features.slice(0);
+		this.store.features.loadFeatures();
+		
+		document.getElementById(this.legendDiv).innerHTML = '';
 		this.layer.setVisibility(false);
 	},
 	
@@ -2016,16 +2026,20 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	afterLoad: function() {
 		this.model = this.tmpModel;
 		this.config = {};
-        
-        if (this.model.updateOrganisationUnit) {
-			GIS.util.map.zoomToVisibleExtent();
-		}
 		
 		this.layer.setLayerOpacity();
 		
 		this.menu.enableItems();
 		
 		this.store.features.loadFeatures(this.layer.features);
+		
+		if (this.cmp.filterWindow && this.cmp.filterWindow.isVisible()) {
+			this.cmp.filterWindow.filter();
+		}
+        
+        if (this.model.updateOrganisationUnit) {
+			GIS.util.map.zoomToVisibleExtent();
+		}
 		
 		GIS.cmp.region.east.doLayout();
 		
