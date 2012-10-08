@@ -41,7 +41,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     labelGenerator: null,
     
     // Properties
-        
+    
     config: {},
     
     tmpModel: {},
@@ -147,6 +147,21 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						this.isLoaded = true;
 					}
 				}
+			}
+		}),
+		
+		features: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			loadFeatures: function(features) {
+				var data = [];
+				for (var i = 0; i < features.length; i++) {
+					data.push([features[i].attributes.id, features[i].attributes.name]);
+				}
+				this.loadData(data);
+				this.sortStore();
+			},
+			sortStore: function() {
+				this.sort('name', 'ASC');
 			}
 		})
 	},
@@ -648,8 +663,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						select: {
 							scope: this,
 							fn: function(cp, color) {
-								this.cmp.colorLow.setValue(color);
-								this.cmp.colorLow.menu.hide();
+								this.cmp.colorHigh.setValue(color);
+								this.cmp.colorHigh.menu.hide();
 								
 								this.config.updateLegend = true;
 							}
@@ -2009,6 +2024,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.layer.setLayerOpacity();
 		
 		this.menu.enableItems();
+		
+		this.store.features.loadFeatures(this.layer.features);
 		
 		GIS.cmp.region.east.doLayout();
 		

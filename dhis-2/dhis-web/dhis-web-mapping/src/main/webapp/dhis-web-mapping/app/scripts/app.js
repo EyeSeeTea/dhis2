@@ -700,8 +700,13 @@ Ext.onReady( function() {
 					text: 'Search..', //i18n
 					iconCls: 'gis-menu-item-icon-search',
 					handler: function() {
-						base.widget.cmp.searchWindow = new GIS.obj.SearchWindow(base);
-						base.widget.cmp.searchWindow.show();
+						if (base.widget.cmp.searchWindow) {
+							base.widget.cmp.searchWindow.show();
+						}
+						else {
+							base.widget.cmp.searchWindow = new GIS.obj.SearchWindow(base);
+							base.widget.cmp.searchWindow.show();
+						}
 					}
 				},
 				{
@@ -751,7 +756,7 @@ Ext.onReady( function() {
 	GIS.obj.SearchWindow = function(base) {
 		var layer = base.layer,
 			data = [],
-			store,
+			store = base.widget.store.features,
 			button,
 			window;
 			
@@ -764,16 +769,6 @@ Ext.onReady( function() {
 			alert("no features"); //todo
 			return;
 		}
-		
-		store = Ext.create('Ext.data.ArrayStore', {
-			fields: ['id', 'name'],
-			data: data,
-			listeners: {
-				load: function() {
-					this.sort('name', 'ASC');
-				}
-			}
-		});
 		
 		button = Ext.create('Ext.button.Button', {
 			width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
@@ -854,7 +849,10 @@ Ext.onReady( function() {
 									listeners: {
 										keyup: function() {
 											store.clearFilter();
-											store.filter('name', this.getValue());
+											if (this.getValue()) {
+												store.filter('name', this.getValue());
+											}
+											store.sortStore();
 										}
 									}
 								}
@@ -874,7 +872,7 @@ Ext.onReady( function() {
 								sortable: false,
 								width: GIS.conf.layout.tool.item_width
 							}],
-							store: store,
+							store: base.widget.store.features,
 							listeners: {
 								select: function(grid, record, index, e) {
 									var feature = layer.getFeaturesByAttribute('id', record.data.id)[0],
@@ -906,6 +904,7 @@ Ext.onReady( function() {
 			listeners: {
 				render: function() {
 					GIS.util.gui.window.setPositionTopLeft(this);
+					store.sortStore();
 				},
 				destroy: function() {
 					layer.redraw();
@@ -1041,7 +1040,7 @@ Ext.onReady( function() {
 							menu: {}
 						},
 						{
-							text: 'test()', //i18n
+							text: 'fav()', //i18n
 							handler: function() {
 								var config = {
 									classes: 5,
@@ -1072,6 +1071,12 @@ Ext.onReady( function() {
 								
 								GIS.base.thematic1.widget.setConfig(config);
 								GIS.base.thematic1.widget.execute();
+							}
+						},
+						{
+							text: 'log()', //i18n
+							handler: function() {
+								console.log(GIS.base.thematic1.widget.store.features);
 							}
 						},
 						'->',
