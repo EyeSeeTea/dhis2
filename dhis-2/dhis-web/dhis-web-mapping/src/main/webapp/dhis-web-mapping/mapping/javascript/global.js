@@ -235,7 +235,7 @@ G.util = {
                             'fillOpacity': widget == boundary ? 0 : 1,
                             'strokeColor': widget == boundary ? '#000' : '#fff',
                             'strokeWidth': 1,
-                            'label': '${labelString}',
+                            'label': '\${labelString}',
                             'fontFamily': 'arial,sans-serif,ubuntu,consolas',
                             'fontSize': fsize ? fsize : 13,
                             'fontWeight': fweight ? 'bold' : 'normal',

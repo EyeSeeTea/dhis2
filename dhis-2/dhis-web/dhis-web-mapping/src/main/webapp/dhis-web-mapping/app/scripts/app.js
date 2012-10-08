@@ -349,6 +349,50 @@ Ext.onReady( function() {
         return features;
     };
     
+    GIS.util.vector.getDefaultStyleMap = function(base) {
+		var isBoundary = base.name === GIS.base.boundary.name;
+		return new OpenLayers.StyleMap({
+			'default': new OpenLayers.Style(
+				OpenLayers.Util.applyDefaults({
+					fillOpacity: isBoundary ? 0 : 1,
+					strokeColor: isBoundary ? '#000' : '#fff',
+					strokeWidth: 1
+				},
+				OpenLayers.Feature.Vector.style['default'])
+			),
+			select: new OpenLayers.Style({
+				strokeColor: '#000000',
+				strokeWidth: 2,
+				cursor: 'pointer'
+			})
+		});
+	};
+    
+    GIS.util.vector.getLabelStyleMap = function(base, config) {
+		var isBoundary = base.name === GIS.base.boundary.name;
+		return new OpenLayers.StyleMap({
+			'default' : new OpenLayers.Style(
+				OpenLayers.Util.applyDefaults({
+					fillOpacity: isBoundary ? 0 : 1,
+					strokeColor: isBoundary ? '#000' : '#fff',
+					strokeWidth: 1,
+					label: '\${label}',
+					fontFamily: 'arial,sans-serif,ubuntu,consolas',
+					fontSize: config.fontSize ? config.fontSize + 'px' : '13px',
+					fontWeight: config.strong ? 'bold' : 'normal',
+					fontStyle: config.italic ? 'italic' : 'normal',
+					fontColor: config.color ? '#' + config.color : '#000000'
+				},
+				OpenLayers.Feature.Vector.style['default'])
+			),
+			select: new OpenLayers.Style({
+				strokeColor: '#000000',
+				strokeWidth: 2,
+				cursor: 'pointer'
+			})
+		});
+	};
+    
     GIS.util.gui.window.setPositionTopRight = function(window) {		
 		var east = GIS.cmp.region.east,
 			center = GIS.cmp.region.center;
@@ -510,26 +554,7 @@ Ext.onReady( function() {
 				force:true
 			})
 		],
-        styleMap: new OpenLayers.StyleMap({
-            'default': new OpenLayers.Style(
-                OpenLayers.Util.applyDefaults(
-                    {
-						fillOpacity: 1,
-						strokeColor: '#fff',
-						strokeWidth: 1,
-						pointRadius: 5
-					},
-                    OpenLayers.Feature.Vector.style['default']
-                )
-            ),
-            select: new OpenLayers.Style(
-                {
-					strokeColor: '#fff',
-					strokeWidth: 3,
-					cursor: 'pointer'
-				}
-            )
-        }),
+		styleMap: GIS.util.vector.getDefaultStyleMap(GIS.base.thematic1),
         visibility: false,
         displayInLayerSwitcher: false,
         layerType: GIS.conf.finals.layer.type_vector,
@@ -539,7 +564,9 @@ Ext.onReady( function() {
 				this.layerOpacity = parseFloat(number);
 			}
 			this.setOpacity(this.layerOpacity);
-		}
+		},
+		hasLabels: false
+		
     });
     GIS.map.addLayer(GIS.base.thematic1.layer);
     
@@ -701,7 +728,16 @@ Ext.onReady( function() {
 				},
 				{
 					text: 'Labels..', //i18n
-					iconCls: 'gis-menu-item-icon-labels'
+					iconCls: 'gis-menu-item-icon-labels',
+					handler: function() {
+						if (base.widget.cmp.labelWindow) {
+							base.widget.cmp.labelWindow.show();
+						}
+						else {
+							base.widget.cmp.labelWindow = new GIS.obj.LabelWindow(base);
+							base.widget.cmp.labelWindow.show();
+						}
+					}
 				},
 				{
 					text: 'Filter..', //i18n
@@ -1016,7 +1052,7 @@ Ext.onReady( function() {
 		
 		window = Ext.create('Ext.window.Window', {
 			title: 'Filter by value',
-			iconCls: 'gis-window-title-icon-search',
+			iconCls: 'gis-window-title-icon-filter',
 			cls: 'gis-container-default',
 			width: GIS.conf.layout.tool.window_width,
 			filter: filter,
@@ -1065,7 +1101,6 @@ Ext.onReady( function() {
 				{
 					xtype: 'button',
 					text: GIS.i18n.update,
-					scope: this,
 					handler: function() {
 						filter();
 					}
@@ -1086,227 +1121,191 @@ Ext.onReady( function() {
 		return window;
 	};
 	
-	//GIS.obj.LabelWindow = function(base) {
-		//var layer = base.layer,
-			//fontSize,
-			//fontWeight,
-			//textDecoration,
-			//color,
-			//window;
+	GIS.obj.LabelWindow = function(base) {
+		var layer = base.layer,
+			fontSize,
+			strong,
+			italic,
+			color,
+			getValues,
+			updateLabels,
+			window;
 			
-		//fontSize = Ext.create('Ext.form.field.Number', {
-			////fieldLabel: G.i18n.font_size,
-			//labelSeparator: G.conf.labelseparator,
-			//width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
-			//allowDecimals: false,
-			//minValue: 8,
-			//value: 13,
-			//emptyText: 13,
-			//listeners: {
-				//'keyup': {
-					//scope: this,
-					//fn: function(nf) {
-						//var item = this.menu.find('name','labels')[0];
+		fontSize = Ext.create('Ext.form.field.Number', {
+			width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
+			allowDecimals: false,
+			minValue: 8,
+			value: 13,
+			emptyText: 13,
+			disabled: true,
+			listeners: {
+				change: function() {
+					alert(1);
+					updateLabels();
+				}
+			}
+		});
+		
+		strong = Ext.create('Ext.form.field.Checkbox', {
+			listeners: {
+				change: function() {
+					updateLabels();
+				}
+			}
+		});
+		
+		italic = Ext.create('Ext.form.field.Checkbox', {
+			listeners: {
+				change: function() {
+					updateLabels();
+				}
+			}
+		});
+		
+		color = Ext.create('Ext.button.Button', {
+			width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
+			height: 22,
+			value: '000000',
+			fieldLabel: GIS.i18n.highlight_color,
+			getValue: function() {
+				return this.value;
+			},
+			setValue: function(color) {
+				this.value = color;
+				if (Ext.isDefined(this.getEl())) {
+					this.getEl().dom.style.background = '#' + color;
+				}
+				this.fireEvent('change');
+			},
+			menu: {
+				showSeparator: false,
+				items: {
+					xtype: 'colorpicker',
+					closeAction: 'hide',
+					listeners: {
+						select: function(cp, value) {
+							color.setValue(value);
+							color.menu.hide();
+						}
+					}
+				}
+			},
+			listeners: {
+				render: function() {
+					this.setValue(this.value);
+				},
+				change: function() {
+					updateLabels();
+				}
+			}
+		});
+		
+		getValues = function() {
+			return {
+				fontSize: fontSize.getValue(),
+				strong: strong.getValue(),
+				italic: italic.getValue(),
+				color: color.getValue()
+			};
+		};		
+		
+		updateLabels = function() {
+			if (layer.hasLabels) {
+				layer.styleMap = GIS.util.vector.getLabelStyleMap(base, getValues());				
+				base.widget.config.updateLegend = true;
+				base.widget.execute();
+			}
+		};
+		
+		window = Ext.create('Ext.window.Window', {
+			title: GIS.i18n.labels,
+			iconCls: 'gis-window-title-icon-labels',
+			cls: 'gis-container-default',
+			width: GIS.conf.layout.tool.window_width,
+			closeAction: 'hide',
+			items: {
+				layout: 'fit',
+				cls: 'gis-container-inner',
+				items: [
+					{
+						layout: 'column',
+						cls: 'gis-container-inner',
+						items: [
+							{
+								cls: 'gis-panel-html-label',
+								html: GIS.i18n.font_size,
+								width: GIS.conf.layout.tool.itemlabel_width
+							},
+							fontSize
+						]
+					},
+					{
+						layout: 'column',
+						cls: 'gis-container-inner',
+						items: [
+							{
+								cls: 'gis-panel-html-label',
+								html: '<b>' + GIS.i18n.bold_ + '</b>:',
+								width: GIS.conf.layout.tool.itemlabel_width
+							},
+							strong
+						]
+					},
+					{
+						layout: 'column',
+						cls: 'gis-container-inner',
+						items: [
+							{
+								cls: 'gis-panel-html-label',
+								html: '<i>' + GIS.i18n.italic + '</i>:',
+								width: GIS.conf.layout.tool.itemlabel_width
+							},
+							italic
+						]
+					},
+					{
+						layout: 'column',
+						cls: 'gis-container-inner',
+						items: [
+							{
+								cls: 'gis-panel-html-label',
+								html: 'Color:', //i18n
+								width: GIS.conf.layout.tool.itemlabel_width
+							},
+							color
+						]
+					}
+				]
+			},
+			bbar: [
+				'->',
+				{
+					xtype: 'button',
+					text: 'Show / hide', //i18n
+					handler: function() {
+						if (layer.hasLabels) {
+							layer.hasLabels = false;
+							layer.styleMap = GIS.util.vector.getDefaultStyleMap(base);
+						}
+						else {
+							layer.hasLabels = true;
+							layer.styleMap = GIS.util.vector.getLabelStyleMap(base, getValues());
+						}
 						
-						//if (this.widget.labels) {
-							//this.widget.labels = false;
-							//G.util.labels.vector.toggleFeatureLabels(this.widget, nf.getValue(), item.cmp.strong.getValue(),
-								//item.cmp.italic.getValue(), item.cmp.color.getValue());
-						//}
-					//}
-				//}
-			//}
-			
-			
-
-
-
-                                //name: 'labels',
-                                //text: G.i18n.labels + '..',
-                                //iconCls: 'menu-layeroptions-labels',
-                                //cmp: {
-                                    //fontSize: new Ext.form.NumberField({
-                                        //name: 'fontsize',
-                                        //fieldLabel: G.i18n.font_size,
-                                        //labelSeparator: G.conf.labelseparator,
-                                        //width: G.conf.combo_number_width_small,
-                                        //enableKeyEvents: true,
-                                        //allowDecimals: false,
-                                        //allowNegative: false,
-                                        //value: 13,
-                                        //emptyText: 13,
-                                        //listeners: {
-                                            //'keyup': {
-                                                //scope: this,
-                                                //fn: function(nf) {  
-                                                    //var item = this.menu.find('name','labels')[0];
-                                                                                                    
-                                                    //if (this.widget.labels) {
-                                                        //this.widget.labels = false;
-                                                        //G.util.labels.vector.toggleFeatureLabels(this.widget, nf.getValue(), item.cmp.strong.getValue(),
-                                                            //item.cmp.italic.getValue(), item.cmp.color.getValue());
-                                                    //}
-                                                //}
-                                            //}
-                                        //}
-                                    //}),
-                                    //strong: new Ext.form.Checkbox({
-                                        //fieldLabel: '<b>' + G.i18n.bold_ + '</b>',
-                                        //labelSeparator: G.conf.labelseparator,
-                                        //listeners: {
-                                            //'check': {
-                                                //scope: this,
-                                                //fn: function(chb, checked) {
-                                                    //var item = this.menu.find('name','labels')[0];
-                                                    
-                                                    //if (this.widget.labels) {
-                                                        //this.widget.labels = false;
-                                                        //G.util.labels.vector.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
-                                                            //checked, item.cmp.italic.getValue(), item.cmp.color.getValue());
-                                                    //}
-                                                //}
-                                            //}
-                                        //}
-                                    //}),
-                                    //italic: new Ext.form.Checkbox({
-                                        //fieldLabel: '<i>' + G.i18n.italic + '</i>',
-                                        //labelSeparator: G.conf.labelseparator,
-                                        //listeners: {
-                                            //'check': {
-                                                //scope: this,
-                                                //fn: function(chb, checked) {
-                                                    //var item = this.menu.find('name','labels')[0];
-                                                    
-                                                    //if (this.widget.labels) {
-                                                        //this.widget.labels = false;
-                                                        //G.util.labels.vector.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
-                                                            //item.cmp.strong.getValue(), checked, item.cmp.color.getValue());
-                                                    //}
-                                                //}
-                                            //}
-                                        //}
-                                    //}),
-                                    //color: new Ext.ux.ColorField({
-                                        //fieldLabel: G.i18n.color,
-                                        //labelSeparator: G.conf.labelseparator,
-                                        //allowBlank: false,
-                                        //width: G.conf.combo_width_fieldset,
-                                        //value: "#000000",
-                                        //listeners: {
-                                            //'select': {
-                                                //scope: this,
-                                                //fn: function(cf) {
-                                                    //var item = this.menu.find('name','labels')[0];
-                                                    
-                                                    //if (this.widget.labels) {
-                                                        //this.widget.labels = false;
-                                                        //G.util.labels.vector.toggleFeatureLabels(this.widget, item.cmp.fontSize.getValue(),
-                                                            //item.cmp.strong.getValue(), item.cmp.italic.getValue(), cf.getValue());
-                                                    //}
-                                                //}
-                                            //}
-                                        //}
-                                    //})
-                                //},
-                                //showLabelWindow: function() {
-                                    //var layer = this.parentMenu.parent.widget.layer;
-                                    //if (layer.features.length) {
-                                        //if (this.cmp.labelWindow) {
-                                            //this.cmp.labelWindow.show();
-                                        //}
-                                        //else {
-                                            //this.cmp.labelWindow = new Ext.Window({
-                                                //title: '<span id="window-labels-title">' + G.i18n.labels + '</span>',
-                                                //layout: 'fit',
-                                                //closeAction: 'hide',
-                                                //width: G.conf.window_width,
-                                                //height: 200,
-                                                //items: [
-                                                    //{
-                                                        //xtype: 'form',
-                                                        //bodyStyle: 'padding:8px',
-                                                        //labelWidth: G.conf.label_width,
-                                                        //items: [
-                                                            //{html: '<div class="window-info">' + G.i18n.show_hide_feature_labels + '</div>'},
-                                                            //this.cmp.fontSize,
-                                                            //this.cmp.strong,
-                                                            //this.cmp.italic,
-                                                            //this.cmp.color
-                                                        //]
-                                                    //}
-                                                //],
-                                                //bbar: [
-                                                    //'->',
-                                                    //{
-                                                        //xtype: 'button',
-                                                        //iconCls: 'icon-assign',
-                                                        //hideLabel: true,
-                                                        //text: G.i18n.showhide,
-                                                        //scope: this,
-                                                        //handler: function() {
-                                                            //if (layer.features.length) {
-                                                                //G.util.labels.vector.toggleFeatureLabels(layer.widget, this.cmp.fontSize.getValue(),
-                                                                    //this.cmp.strong.getValue(), this.cmp.italic.getValue(), this.cmp.color.getValue());
-                                                            //}
-                                                            //else {
-                                                                //Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: ' + Gi.i18n.no_features_rednered );
-                                                            //}
-                                                        //}
-                                                    //}
-                                                //]
-                                            //});
-                                            //this.cmp.labelWindow.setPagePosition(G.conf.window_x_left,G.conf.window_y_left);
-                                            //this.cmp.labelWindow.show(this.parentMenu.parent.id);
-                                        //}
-                                    //}
-                                    //else {
-                                        //Ext.message.msg(false, '<span class="x-msg-hl">' + layer.name + '</span>: ' + Gi.i18n.no_features_rednered );
-                                    //}
-                                //},
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+						base.widget.config.updateLegend = true;
+						base.widget.execute();
+					}
+				}
+			],
+			listeners: {
+				render: function() {
+					GIS.util.gui.window.setPositionTopLeft(this);
+				}
+			}
+		});
+		
+		return window;
+	};
     
 	// User interface
 	
@@ -1465,7 +1464,7 @@ Ext.onReady( function() {
 						{
 							text: 'log()', //i18n
 							handler: function() {
-								console.log(GIS.base.thematic1.widget.cmp.searchWindow.isVisible());
+								
 							}
 						},
 						'->',

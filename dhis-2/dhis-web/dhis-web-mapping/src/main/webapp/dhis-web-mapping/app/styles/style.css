@@ -10,6 +10,7 @@
  * Colorpicker 
  * Window
  * TextField
+ * Checkbox
 */
 
 /* General */
@@ -429,4 +430,10 @@ html * {
 
 .gis-textfield input.x-form-text {
 	border-radius: 2px;
+}
+
+/* Checkbox */
+
+.x-form-checkbox {
+    background-image: url('../images/checkbox.gif');
 }

@@ -1545,7 +1545,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     	
 	getModel: function() {
 		var level = this.cmp.level,
-			parent = this.cmp.parent.getSelectionModel().getSelection() || [];
+			parent = this.cmp.parent.getSelectionModel().getSelection();
+		parent = parent.length ? parent : [{raw: GIS.init.rootNodes[0]}];
 		
 		var model = {
 			valueType: this.cmp.valueType.getValue(),
@@ -1566,10 +1567,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
 			level: level.getValue(),
 			levelName: level.getRawValue(),
-			parentId: parent.length ? parent[0].raw.id : null,
-			parentName: parent.length ? parent[0].raw.text : null,
-			parentLevel: parent.length ? parent[0].raw.level : null,
-			parentPath: null,
+			parentId: parent[0].raw.id,
+			parentName: parent[0].raw.text,
+			parentLevel: parent[0].raw.level,
+			parentPath: parent[0].raw.path,
 			updateOrganisationUnit: false,
 			updateData: false,
 			updateLegend: false,
