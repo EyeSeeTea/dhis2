@@ -525,9 +525,9 @@ Ext.onReady( function() {
         layerOpacity: 0.8,
         setLayerOpacity: function(number) {
 			if (number) {
-				this.layerOpacity = number;
+				this.layerOpacity = parseFloat(number);
 			}
-			this.setOpacity(parseFloat(this.layerOpacity));
+			this.setOpacity(this.layerOpacity);
 		}
     });
     GIS.map.addLayer(GIS.base.thematic1.layer);
@@ -861,6 +861,7 @@ Ext.onReady( function() {
 								},								
 								{
 									xtype: 'textfield',
+									cls: 'gis-textfield',
 									width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
 									enableKeyEvents: true,
 									listeners: {

@@ -161,6 +161,8 @@ html * {
 .gis-form-widget .x-form-text { /* Combo text */
 	font-size: 10px !important;
 	padding: 3px 1px 1px 4px;
+	border-top-left-radius: 2px;
+	border-bottom-left-radius: 2px;
 }
 .x-boundlist-item { /* Combo list text */
 	font-size: 10px !important;
@@ -425,6 +427,6 @@ html * {
 
 /* TextField */
 
-input.x-form-text {
+.gis-textfield input.x-form-text {
 	border-radius: 2px;
 }
