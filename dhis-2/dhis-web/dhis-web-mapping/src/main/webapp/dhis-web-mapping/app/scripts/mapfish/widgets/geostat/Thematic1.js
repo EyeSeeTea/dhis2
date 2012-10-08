@@ -2031,40 +2031,28 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 		this.menu.enableItems();
 		
-		this.store.features.loadFeatures(this.layer.features);
+		// Update search window
+		this.store.features.loadFeatures(this.layer.features); 
 		
-		if (this.cmp.filterWindow && this.cmp.filterWindow.isVisible()) {
+		// Update filter window
+		if (this.cmp.filterWindow && this.cmp.filterWindow.isVisible()) { 
 			this.cmp.filterWindow.filter();
 		}
         
-        if (this.model.updateOrganisationUnit) {
+        // Set favorite position, else zoom to visible extent
+        if (this.model.longitude && this.model.latitude && this.model.zoom) {
+			var lonLat = GIS.util.map.getLonLatByXY(this.model.longitude, this.model.latitude);
+			GIS.map.setCenter(lonLat, this.model.zoom);
+		}
+		else if (this.model.updateOrganisationUnit) {
 			GIS.util.map.zoomToVisibleExtent();
 		}
 		
+		// Legend
 		GIS.cmp.region.east.doLayout();
 		
         GIS.mask.hide();
 	},
-
-    //classify: function(exception, lockPosition, loaded) {
-        //todo if (this.formValidation.validateForm.apply(this, [exception])) {
-            //if (!this.layer.features.length && !loaded) {
-                //this.loadGeoJson();
-            //}
-            
-            //todo GIS.vars.lockPosition = lockPosition;
-            
-            //todo if (this.mapView) {
-                //if (this.mapView.longitude && this.mapView.latitude && this.mapView.zoom) {
-                    //var point = GIS.util.getTransformedPointByXY(this.mapView.longitude, this.mapView.latitude);
-                    //GIS.vars.map.setCenter(new OpenLayers.LonLat(point.x, point.y), this.mapView.zoom);
-                    //GIS.vars.lockPosition = true;
-                //}
-                //this.mapView = false;
-            //}
-            
-            //if (this.updateValues) {
-    //},
     
     onRender: function(ct, position) {
         mapfish.widgets.geostat.Thematic1.superclass.onRender.apply(this, arguments);

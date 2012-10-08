@@ -77,6 +77,7 @@ GIS.mask;
 GIS.util = {
 	google: {},
 	map: {},
+	store: {},
 	geojson: {},
 	vector: {},
 	json: {},
@@ -279,6 +280,16 @@ Ext.onReady( function() {
 			GIS.map.zoomToExtent(bounds);
 		}
 	};
+	
+	GIS.util.map.getTransformedPointByXY = function(x, y) {
+		var p = new OpenLayers.Geometry.Point(parseFloat(x), parseFloat(y));
+        return p.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+    };
+    
+    GIS.util.map.getLonLatByXY = function(x, y) {
+		var point = GIS.util.map.getTransformedPointByXY(x, y);		
+		return new OpenLayers.LonLat(point.x, point.y);
+	};	
 	
 	GIS.util.geojson.decode = function(doc, widget) {
 		var geojson = {};
