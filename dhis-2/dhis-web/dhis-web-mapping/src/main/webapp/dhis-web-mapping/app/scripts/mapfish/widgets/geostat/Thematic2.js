@@ -25,228 +25,151 @@
 Ext.define('mapfish.widgets.geostat.Thematic2', {
 	extend: 'Ext.panel.Panel',
 	alias: 'widget.thematic2',
-
-    layer: null,
-
-    format: null,
-
-    url: null,
-
-    featureSelection: true,
-
-    nameAttribute: null,
-
-    indicator: null,
-
-    indicatorText: null,
-
-    coreComp: null,
-
-    classificationApplied: false,
-
-    ready: false,
-
+	
+	// Ext panel
+	cls: 'gis-form-widget el-border-0',
     border: false,
 
+	// Mapfish
+    layer: null,
+    format: null,
+    url: null,
+    indicator: null,
+    coreComp: null,
+    classificationApplied: false,
     loadMask: false,
-
     labelGenerator: null,
-
-    colorInterpolation: false,
-
-    legend: false,
-
-	bounds: false,
-
-    mapView: false,
     
-    labels: false,
+    // Properties
     
-    valueType: false,
+    config: {},
     
-    selectFeatures: false,
+    tmpModel: {},
     
-    organisationUnitSelection: false,
-    
-    updateValues: false,
-    
-    isDrillDown: false,
-
-	imageLegend: false,
-    
-    stores: false,
-    
-    infrastructuralPeriod: false,
-    
-    featureOptions: {},
+    model: {},
     
     cmp: {},
     
-    requireUpdate: false,
+    toggler: {},
     
-    featureStorage: [],
+    features: [],
     
-    filtering: {
-        cache: [],
-        options: {
-            gt: null,
-            lt: null
-        },
-        cmp: {
-            gt: null,
-            lt: null,
-            button: null
-        },
-        filter: function() {
-            var gt = this.filtering.options.gt;
-            var lt = this.filtering.options.lt;
-            var add = [];
-            if (!gt && !lt) {
-                add = this.filtering.cache.slice(0);
-            }
-            else if (gt && lt) {
-                for (var i = 0; i < this.filtering.cache.length; i++) {
-                    if (gt < lt && (this.filtering.cache[i].attributes.value > gt && this.filtering.cache[i].attributes.value < lt)) {
-                        add.push(this.filtering.cache[i]);
-                    }
-                    else if (gt > lt && (this.filtering.cache[i].attributes.value > gt || this.filtering.cache[i].attributes.value < lt)) {
-                        add.push(this.filtering.cache[i]);
-                    }
-                    else if (gt == lt && this.filtering.cache[i].attributes.value == gt) {
-                        add.push(this.filtering.cache[i]);
-                    }
-                }
-            }
-            else if (gt && !lt) {
-                for (var i = 0; i < this.filtering.cache.length; i++) {
-                    if (this.filtering.cache[i].attributes.value > gt) {
-                        add.push(this.filtering.cache[i]);
-                    }
-                }
-            }
-            else if (!gt && lt) {
-                for (var i = 0; i < this.filtering.cache.length; i++) {
-                    if (this.filtering.cache[i].attributes.value < lt) {
-                        add.push(this.filtering.cache[i]);
-                    }
-                }
-            }
-            this.layer.removeAllFeatures();
-            this.layer.addFeatures(add);
-        },
-        showFilteringWindow: function() {
-            var window = new Ext.Window({
-                title: '<span class="window-filter-title">Organisation unit filter</span>',
-                layout: 'fit',
-                autoHeight: true,
-                height: 'auto',
-                width: GIS.conf.window_width,
-                items: [
-                    {
-                        xtype: 'form',
-                        bodyStyle:'padding:8px',
-                        autoHeight: true,
-                        height: 'auto',
-                        labelWidth: GIS.conf.label_width,
-                        items: [
-                            { html: 'Show organisation units where <b>value</b> is..' },
-                            { html: '<div class="window-p"></div>' },
-                            {
-                                xtype: 'numberfield',
-                                fieldLabel: 'Greater than',
-                                width: GIS.conf.combo_number_width_small,
-                                listeners: {
-                                    'afterrender': {
-                                        scope: this,
-                                        fn: function(nf) {
-                                            this.filtering.cmp.gt = nf;
-                                        }
-                                    },
-                                    'change': {
-                                        scope: this,
-                                        fn: function(nf) {
-                                            this.filtering.options.gt = nf.getValue();
-                                        }
-                                    }
-                                }
-                            },
-                            {
-                                xtype: 'numberfield',
-                                fieldLabel: 'Lower than',
-                                width: GIS.conf.combo_number_width_small,
-                                listeners: {
-                                    'afterrender': {
-                                        scope: this,
-                                        fn: function(nf) {
-                                            this.filtering.cmp.lt = nf;
-                                        }
-                                    },
-                                    'change': {
-                                        scope: this,
-                                        fn: function(nf) {
-                                            this.filtering.options.lt = nf.getValue();
-                                        }
-                                    }
-                                }
-                            }
-                        ]
-                    }
-                ],
-                bbar: [
-                    '->',
-                    {
-                        xtype: 'button',
-                        text: GIS.i18n.update,
-                        iconCls: 'icon-assign',
-                        scope: this,
-                        handler: function() {
-                            this.filtering.filter.call(this);
-                        },
-                        listeners: {
-                            'afterrender': {
-                                scope: this,
-                                fn: function(b) {
-                                    this.filtering.cmp.button = b;
-                                }
-                            }
-                        }
-                    }
-                ],
-                listeners: {
-                    'afterrender': {
-                        scope: this,
-                        fn: function() {
-                            this.filtering.cache = this.layer.features.slice(0);
-                        }
-                    },
-                    'close': {
-                        scope: this,
-                        fn: function() {
-                            this.layer.removeAllFeatures();
-                            this.layer.addFeatures(this.filtering.cache);
-                            this.filtering.options.gt = null;
-                            this.filtering.options.lt = null;
-                        }
-                    }
-                }
-            });
-            window.setPagePosition(GIS.conf.window_x_left,GIS.conf.window_y_left);
-            window.show();
-        }
-    },
+    selectHandlers: {},
     
-    initComponent: function() {
-    
-        this.initProperties();
-        
-        this.createItems();
-        
-        this.addItems();
-        
-        this.createSelectFeatures();
-        
-		mapfish.widgets.geostat.Thematic2.superclass.initComponent.apply(this);
-    },
+    store: {
+		indicatorsByGroup: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: '',
+				reader: {
+					type: 'json',
+					root: 'indicators'
+				}
+			},
+			isLoaded: false,
+			loadFn: function(fn) {
+				if (this.isLoaded) {
+					fn.call();
+				}
+				else {
+					this.load(fn);
+				}
+			},
+			listeners: {
+				load: function() {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+					this.sort('name', 'ASC');
+				}
+			}
+		}),
+		
+		dataElementsByGroup: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: '',
+				reader: {
+					type: 'json',
+					root: 'dataElements'
+				}
+			},
+			isLoaded: false,
+			loadFn: function(fn) {
+				if (this.isLoaded) {
+					fn.call();
+				}
+				else {
+					this.load(fn);
+				}
+			},
+			listeners: {
+				load: function() {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+					this.sort('name', 'ASC');
+				}
+			}
+		}),
+		
+		periodsByType: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'index'],
+			data: [],
+			setIndex: function(periods) {
+				for (var i = 0; i < periods.length; i++) {
+					periods[i].index = i;
+				}
+			},
+			sortStore: function() {
+				this.sort('index', 'ASC');
+			}
+		}),
+		
+		infrastructuralDataElementValues: Ext.create('Ext.data.Store', {
+			fields: ['dataElementName', 'value'],
+			proxy: {
+				type: 'ajax',
+				url: '../getInfrastructuralDataElementMapValues.action',
+				reader: {
+					type: 'json',
+					root: 'mapValues'
+				}
+			},
+			sortInfo: {field: 'dataElementName', direction: 'ASC'},
+			autoLoad: false,
+			isLoaded: false,
+			listeners: {
+				load: function() {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+				}
+			}
+		}),
+		
+		features: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			loadFeatures: function(features) {
+				if (features && features.length) {
+					var data = [];
+					for (var i = 0; i < features.length; i++) {
+						data.push([features[i].attributes.id, features[i].attributes.name]);
+					}
+					this.loadData(data);
+					this.sortStore();
+				}
+				else {
+					this.removeAll();
+				}
+			},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			}
+		})
+	},
     
     setUrl: function(url) {
         this.url = url;
@@ -254,727 +177,699 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
     },
 
     requestSuccess: function(request) {
-        this.ready = true;
-
-        if (this.loadMask && this.rendered) {
-            this.loadMask.hide();
+        var doc = request.responseXML,
+			format = new OpenLayers.Format.GeoJSON();
+			
+        if (!doc || !doc.documentElement) {
+            doc = request.responseText;
         }
+        
+        if (doc.length) {
+            doc = GIS.util.geojson.decode(doc, this);
+        }
+        else {
+			alert("no coordinates"); //todo //i18n
+		}
+        
+        this.layer.removeFeatures(this.layer.features);
+        this.layer.addFeatures(format.read(doc));
+		this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
+        this.features = this.layer.features.slice(0);
+        
+        this.loadData();
     },
 
     requestFailure: function(request) {
-        OpenLayers.Console.error(GIS.i18n.ajax_request_failed);
+        GIS.logg.push(request.status, request.statusText);        
+        console.log(request.status, request.statusText);
     },
     
-    getColors: function() {
+    getColors: function(low, high) {
         var startColor = new mapfish.ColorRgb();
-        startColor.setFromHex(this.cmp.startColor.getValue());
+        startColor.setFromHex(low || this.cmp.colorLow.getValue());
         var endColor = new mapfish.ColorRgb();
-        endColor.setFromHex(this.cmp.endColor.getValue());
+        endColor.setFromHex(high || this.cmp.colorHigh.getValue());
         return [startColor, endColor];
     },
     
-    initProperties: function() {
-        this.legend = {
-            value: GIS.conf.map_legendset_type_automatic,
-            method: GIS.conf.classify_by_equal_intervals,
-            classes: 5,
-            reset: function() {
-                this.value = GIS.conf.map_legendset_type_automatic;
-                this.method = GIS.conf.classify_by_equal_intervals;
-                this.classes = 5;
-            }
-        };
-        
-        this.organisationUnitSelection = {
-            parent: {
-                id: null,
-                name: null,
-                level: null
-            },
-            level: {
-                level: null,
-                name: null
-            },
-            setValues: function(pid, pn, pl, ll, ln) {
-                this.parent.id = pid || this.parent.id;
-                this.parent.name = pn || this.parent.name;
-                this.parent.level = pl || this.parent.level;
-                this.level.level = ll || this.level.level;
-                this.level.name = ln || this.level.name;
-            },
-            getValues: function() {
-                return {
-                    parent: {
-                        id: this.parent.id,
-                        name: this.parent.name,
-                        level: this.parent.level
-                    },
-                    level: {
-                        level: this.level.level,
-                        name: this.level.name
-                    }                    
-                };
-            },
-            setValuesOnDrillDown: function(pid, pn) {
-                this.parent.id = pid;
-                this.parent.name = pn;
-                this.parent.level = this.level.level;
-                this.level.level++;
-                this.level.name = GIS.stores.organisationUnitLevel.getAt(
-                    GIS.stores.organisationUnitLevel.find('level', this.level.level)).data.name;
-            }                
-        };
-        
-        this.valueType = {
-            value: GIS.conf.map_value_type_indicator,
-            setIndicator: function() {
-                this.value = GIS.conf.map_value_type_indicator;
-            },
-            setDatElement: function() {
-                this.value = GIS.conf.map_value_type_dataelement;
-            },
-            isIndicator: function() {
-                return this.value == GIS.conf.map_value_type_indicator;
-            },
-            isDataElement: function() {
-                return this.value == GIS.conf.map_value_type_dataelement;
-            }
-        };
-        
-        this.stores = {
-            infrastructuralDataElementMapValue: new Ext.data.JsonStore({
-                url: GIS.conf.path_mapping + 'getInfrastructuralDataElementMapValues' + GIS.conf.type,
-                root: 'mapValues',
-                fields: ['dataElementName', 'value'],
-                sortInfo: {field: 'dataElementName', direction: 'ASC'},
-                autoLoad: false,
-                isLoaded: false,
-                listeners: {
-                    'load': GIS.func.storeLoadListener
-                }
-            }),
-            indicatorsByGroup: new Ext.data.JsonStore({
-                url: GIS.conf.path_mapping + 'getIndicatorsByIndicatorGroup' + GIS.conf.type,
-                root: 'indicators',
-                fields: ['id', 'name', 'shortName'],
-                idProperty: 'id',
-                sortInfo: {field: 'name', direction: 'ASC'},
-                autoLoad: false,
-                isLoaded: false,
-                listeners: {
-                    'load': function(store) {
-                        store.isLoaded = true;
-                        store.each(
-                            function fn(record) {
-                                var name = record.get('name');
-                                name = name.replace('&lt;', '<').replace('&gt;', '>');
-                                record.set('name', name);
-                            }
-                        );
-                    }
-                }
-            }),
-            dataElementsByGroup: new Ext.data.JsonStore({
-                url: GIS.conf.path_mapping + 'getDataElementsByDataElementGroup' + GIS.conf.type,
-                root: 'dataElements',
-                fields: ['id', 'name', 'shortName'],
-                sortInfo: {field: 'name', direction: 'ASC'},
-                autoLoad: false,
-                isLoaded: false,
-                listeners: {
-                    'load': function(store) {
-                        store.isLoaded = true;
-                        store.each(
-                            function fn(record) {
-                                var name = record.get('name');
-                                name = name.replace('&lt;', '<').replace('&gt;', '>');
-                                record.set('name', name);
-                            }
-                        );
-                    }
-                }
-            }),
-            periodsByType: new Ext.data.JsonStore({
-                url: GIS.conf.path_mapping + 'getPeriodsByPeriodType' + GIS.conf.type,
-                root: 'periods',
-                fields: ['id', 'name'],
-                autoLoad: false,
-                isLoaded: false,
-                listeners: {
-                    'load': GIS.func.storeLoadListener
-                }
-            })
-        };
+    initComponent: function() {
+		this.createUtils();
+		
+		this.createItems();
+		
+		this.addItems();
+		
+		this.createSelectHandlers();
+		
+		this.coreComp = new mapfish.GeoStat.Thematic2(this.map, {
+            layer: this.layer,
+            format: this.format,
+            url: this.url,
+            requestSuccess: Ext.bind(this.requestSuccess, this),
+            requestFailure: Ext.bind(this.requestFailure, this),
+            legendDiv: this.legendDiv,
+            labelGenerator: this.labelGenerator,
+            widget: this
+        });
+		
+		mapfish.widgets.geostat.Thematic2.superclass.initComponent.apply(this);
     },
     
+    createUtils: function() {
+		var that = this;
+		
+		this.toggler.valueType = function(valueType) {
+			if (valueType === GIS.conf.finals.dimension.indicator.id) {
+				that.cmp.indicatorGroup.show();
+				that.cmp.indicator.show();
+				that.cmp.dataElementGroup.hide();
+				that.cmp.dataElement.hide();
+			}
+			else if (valueType === GIS.conf.finals.dimension.dataElement.id) {
+				that.cmp.indicatorGroup.hide();
+				that.cmp.indicator.hide();
+				that.cmp.dataElementGroup.show();
+				that.cmp.dataElement.show();
+			}
+		};
+		
+		this.toggler.legendType = function(legendType) {
+			if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
+				that.cmp.methodPanel.show();
+				that.cmp.lowPanel.show();
+				that.cmp.highPanel.show();
+				that.cmp.legendSet.hide();
+			}
+			else if (legendType === GIS.conf.finals.widget.legendtype_predefined) {
+				that.cmp.methodPanel.hide();
+				that.cmp.lowPanel.hide();
+				that.cmp.highPanel.hide();
+				that.cmp.legendSet.show();
+			}
+		};
+	},
+    
     createItems: function() {
-        
-        this.cmp.mapview = new Ext.form.ComboBox({
-            fieldLabel: GIS.i18n.favorite,
-            typeAhead: true,
+		
+		// Data options
+		
+        this.cmp.valueType = Ext.create('Ext.form.field.ComboBox', {
+            fieldLabel: 'Value type', //i18n
             editable: false,
             valueField: 'id',
             displayField: 'name',
-            mode: 'remote',
+            queryMode: 'local',
             forceSelection: true,
-            triggerAction: 'all',
-            emptyText: GIS.i18n.optional,
-            selectOnFocus: true,
-            width: GIS.conf.combo_width,
-            store: GIS.stores.mapView,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(cb) {
-                        GIS.util.mapView.mapView.call(this, cb.getValue());
-                    }
-                }
-            }
-        });
-        
-        this.cmp.mapValueType = new Ext.form.ComboBox({
-            fieldLabel: GIS.i18n.mapvaluetype,
-            editable: false,
-            valueField: 'id',
-            displayField: 'name',
-            mode: 'local',
-            triggerAction: 'all',
-            width: GIS.conf.combo_width,
-            value: GIS.conf.map_value_type_indicator,
-            store: new Ext.data.ArrayStore({
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            value: GIS.conf.finals.dimension.indicator.id,
+            store: Ext.create('Ext.data.ArrayStore', {
                 fields: ['id', 'name'],
                 data: [
-                    [GIS.conf.map_value_type_indicator, 'Indicator'],
-                    [GIS.conf.map_value_type_dataelement, 'Data element']
+                    [GIS.conf.finals.dimension.indicator.id, 'Indicator'], //i18n
+                    [GIS.conf.finals.dimension.dataElement.id, 'Data element'] //i18n
                 ]
             }),
             listeners: {
-                'select': {
+                select: {
                     scope: this,
                     fn: function(cb) {
-                        this.valueType.value = cb.getValue();
-                        this.prepareMapViewValueType();
-                        this.classify(false, true);
+						this.config.updateData = true;
+						this.toggler.valueType(cb.getValue());
                     }
                 }
             }
         });
         
-        this.cmp.indicatorGroup = new Ext.form.ComboBox({
+        this.cmp.indicatorGroup = Ext.create('Ext.form.field.ComboBox', {
             fieldLabel: GIS.i18n.indicator_group,
-            typeAhead: true,
             editable: false,
             valueField: 'id',
             displayField: 'name',
-            mode: 'remote',
             forceSelection: true,
-            triggerAction: 'all',
-            selectOnFocus: true,
-            width: GIS.conf.combo_width,
-            store: GIS.stores.indicatorGroup,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            store: GIS.store.indicatorGroups,
             listeners: {
-                'select': {
+				added: function() {
+					this.store.cmp.push(this);
+				},
+                select: {
+                    scope: this,
+                    fn: function(cb) {
+						this.config.updateData = true;
+                        this.cmp.indicator.clearValue();
+                        
+                        var store = this.cmp.indicator.store;
+                        store.proxy.url = GIS.conf.url.path_api +  'indicatorGroups/' + cb.getValue() + '.json?links=false&paging=false';
+                        store.load({
+							scope: this,
+							callback: function() {
+								this.cmp.indicator.selectFirst();
+							}
+						});
+                    }
+                }
+            }
+        });
+        
+        this.cmp.indicator = Ext.create('Ext.form.field.ComboBox', {
+            fieldLabel: GIS.i18n.indicator,
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            queryMode: 'local',
+            forceSelection: true,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            listConfig: {loadMask: false},
+            scope: this,
+            selectFirst: function() {
+				if (this.store.getCount() > 0) {
+					this.setValue(this.store.getAt(0).data.id);
+				}
+				this.scope.config.updateData = true;
+			},
+            store: this.store.indicatorsByGroup,
+            listeners: {
+                select: function() {
+					this.scope.config.updateData = true;
+                }
+            }
+        });
+        
+        this.cmp.dataElementGroup = Ext.create('Ext.form.field.ComboBox', {
+            fieldLabel: GIS.i18n.dataelement_group,
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            forceSelection: true,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            hidden: true,
+            store: GIS.store.dataElementGroups,
+            listeners: {
+				added: function() {
+					this.store.cmp.push(this);
+				},
+                select: {
                     scope: this,
                     fn: function(cb) {
                         this.cmp.indicator.clearValue();
-                        this.stores.indicatorsByGroup.setBaseParam('indicatorGroupId', cb.getValue());
-                        this.stores.indicatorsByGroup.load();
-                    }
-                }
-            }
-        });
-        
-        this.cmp.indicator = new Ext.form.ComboBox({
-            fieldLabel: GIS.i18n.indicator,
-            typeAhead: true,
-            editable: false,
-            valueField: 'id',
-            displayField: 'shortName',
-            mode: 'remote',
-            forceSelection: true,
-            triggerAction: 'all',
-            selectOnFocus: true,
-            width: GIS.conf.combo_width,
-            currentValue: null,
-            lockPosition: false,
-            reloadStore: function(id) {
-                this.cmp.mapLegendSet.setValue(id);
-                this.applyPredefinedLegend();
-            },
-            store: this.stores.indicatorsByGroup,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(cb) {
-                        if (GIS.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
-                            return;
-                        }
                         
-                        this.updateValues = true;
-                        Ext.Ajax.request({
-                            url: GIS.conf.path_mapping + 'getMapLegendSetByIndicator' + GIS.conf.type,
-                            params: {indicatorId: cb.getValue()},
-                            scope: this,
-                            success: function(r) {
-                                var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
-                                if (mapLegendSet.id) {
-                                    this.legend.value = GIS.conf.map_legendset_type_predefined;
-                                    this.prepareMapViewLegend();
-                                    
-                                    if (!GIS.stores.predefinedColorMapLegendSet.isLoaded) {
-                                        GIS.stores.predefinedColorMapLegendSet.load({scope: this, callback: function() {
-                                            cb.reloadStore.call(this, mapLegendSet.id);
-                                        }});
-                                    }
-                                    else {
-                                        cb.reloadStore.call(this, mapLegendSet.id);
-                                    }
-                                }
-                                else {
-                                    this.legend.value = GIS.conf.map_legendset_type_automatic;
-                                    this.prepareMapViewLegend();
-                                    this.classify(false, cb.lockPosition);
-                                    GIS.util.setLockPosition(cb);
-                                }
-                            }
-                        });
+                        var store = this.cmp.dataElement.store;
+                        store.proxy.url = GIS.conf.url.path_api +  'dataElementGroups/' + cb.getValue() + '.json?links=false&paging=false';
+                        store.load({
+							scope: this,
+							callback: function() {
+								this.cmp.dataElement.selectFirst();
+							}
+						});
                     }
                 }
             }
         });
         
-        this.cmp.dataElementGroup = new Ext.form.ComboBox({
-            fieldLabel: GIS.i18n.dataelement_group,
-            typeAhead: true,
-            editable: false,
-            valueField: 'id',
-            displayField: 'name',
-            mode: 'remote',
-            forceSelection: true,
-            triggerAction: 'all',
-            selectOnFocus: true,
-            width: GIS.conf.combo_width,
-            store: GIS.stores.dataElementGroup,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(cb) {
-                        this.cmp.dataElement.clearValue();
-                        this.stores.dataElementsByGroup.setBaseParam('dataElementGroupId', cb.getValue());
-                        this.stores.dataElementsByGroup.load();
-                    }
-                }
-            }
-        });
-        
-        this.cmp.dataElement = new Ext.form.ComboBox({
+        this.cmp.dataElement = Ext.create('Ext.form.field.ComboBox', {
             fieldLabel: GIS.i18n.dataelement,
-            typeAhead: true,
-            editable: false,
-            valueField: 'id',
-            displayField: 'shortName',
-            mode: 'remote',
-            forceSelection: true,
-            triggerAction: 'all',
-            selectOnFocus: true,
-            width: GIS.conf.combo_width,
-            store: this.stores.dataElementsByGroup,
-            lockPosition: false,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(cb) {
-                        if (GIS.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
-                            return;
-                        }
-                        
-                        this.updateValues = true;
-                        Ext.Ajax.request({
-                            url: GIS.conf.path_mapping + 'getMapLegendSetByDataElement' + GIS.conf.type,
-                            params: {dataElementId: cb.getValue()},
-                            scope: this,
-                            success: function(r) {
-                                var mapLegendSet = Ext.util.JSON.decode(r.responseText).mapLegendSet[0];
-                                if (mapLegendSet.id) {
-                                    this.legend.value = GIS.conf.map_legendset_type_predefined;
-                                    this.prepareMapViewLegend();
-                                    
-                                    function load() {
-                                        this.cmp.mapLegendSet.setValue(mapLegendSet.id);
-                                        this.applyPredefinedLegend();
-                                    }
-                                    
-                                    if (!GIS.stores.predefinedMapLegendSet.isLoaded) {
-                                        GIS.stores.predefinedMapLegendSet.load({scope: this, callback: function() {
-                                            load.call(this);
-                                        }});
-                                    }
-                                    else {
-                                        load.call(this);
-                                    }
-                                }
-                                else {
-                                    this.legend.value = GIS.conf.map_legendset_type_automatic;
-                                    this.prepareMapViewLegend();
-                                    this.classify(false, cb.lockPosition);
-                                    GIS.util.setLockPosition(cb);
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-        });
-        
-        this.cmp.periodType = new Ext.form.ComboBox({
-            fieldLabel: GIS.i18n.period_type,
-            typeAhead: true,
-            editable: false,
-            valueField: 'name',
-            displayField: 'displayName',
-            mode: 'remote',
-            forceSelection: true,
-            triggerAction: 'all',
-            selectOnFocus: true,
-            width: GIS.conf.combo_width,
-            store: GIS.stores.periodType,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(cb) {
-                        this.cmp.period.clearValue();
-                        this.stores.periodsByType.setBaseParam('name', cb.getValue());
-                        this.stores.periodsByType.load();
-                    }
-                }
-            }
-        });
-        
-        this.cmp.period = new Ext.form.ComboBox({
-            fieldLabel: GIS.i18n.period,
-            typeAhead: true,
             editable: false,
             valueField: 'id',
             displayField: 'name',
-            mode: 'remote',
+            queryMode: 'local',
             forceSelection: true,
-            triggerAction: 'all',
-            selectOnFocus: true,
-            width: GIS.conf.combo_width,
-            store: this.stores.periodsByType,
-            lockPosition: false,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            listConfig: {loadMask: false},
+            hidden: true,
+            scope: this,
+            selectFirst: function() {
+				if (this.store.getCount() > 0) {
+					this.setValue(this.store.getAt(0).data.id);
+				}
+				this.scope.config.updateData = true;
+			},
+            store: this.store.dataElementsByGroup,
             listeners: {
-                'select': {
+                select: function() {
+					this.scope.config.updateData = true;
+                }
+			}
+        });
+        
+        this.cmp.periodType = Ext.create('Ext.form.field.ComboBox', {
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            forceSelection: true,
+            queryMode: 'local',
+            width: 116,
+            store: GIS.store.periodTypes,
+			periodOffset: 0,
+            listeners: {
+                select: {
                     scope: this,
-                    fn: function(cb) {
-                        if (GIS.util.setCurrentValue.call(this, cb, this.cmp.mapview)) {
-                            return;
-                        }
-                        
-                        this.updateValues = true;
-                        this.classify(false, cb.lockPosition);                        
-                        GIS.util.setLockPosition(cb);
+                    fn: function() {
+						var pt = new PeriodType(),
+							periodType = this.cmp.periodType.getValue();
+						
+						var periods = pt.get(periodType).generatePeriods({
+							offset: this.cmp.periodType.periodOffset,
+							filterFuturePeriods: true,
+							reversePeriods: true
+						});
+						
+						this.store.periodsByType.setIndex(periods);
+						this.store.periodsByType.loadData(periods);
+						
+                        this.cmp.period.selectFirst();
                     }
                 }
             }
         });
         
-        this.cmp.mapLegendType = new Ext.form.ComboBox({
+        this.cmp.period = Ext.create('Ext.form.field.ComboBox', {
+			fieldLabel: GIS.i18n.period,
             editable: false,
-            valueField: 'value',
-            displayField: 'text',
-            mode: 'local',
+            valueField: 'id',
+            displayField: 'name',
+            queryMode: 'local',
+            forceSelection: true,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            store: this.store.periodsByType,
+            scope: this,
+            selectFirst: function() {
+				this.setValue(this.store.getAt(0).data.id);
+				this.scope.config.updateData = true;
+			},
+			listeners: {
+				select: {
+					scope: this,
+					fn: function() {
+						this.config.updateData = true;
+					}
+				}
+			}	
+        });
+        
+        this.cmp.periodPrev = Ext.create('Ext.button.Button', {
+			xtype: 'button',
+			text: '<',
+			width: 20,
+			style: 'margin-left: 3px',
+			scope: this,
+			handler: function() {
+				if (this.cmp.periodType.getValue()) {
+					this.cmp.periodType.periodOffset--;
+					this.cmp.periodType.fireEvent('select');
+				}
+			}
+		});
+        
+        this.cmp.periodNext = Ext.create('Ext.button.Button', {
+			xtype: 'button',
+			text: '>',
+			width: 20,
+			style: 'margin-left: 3px',
+			scope: this,
+			handler: function() {
+				if (this.cmp.periodType.getValue() && this.cmp.periodType.periodOffset < 0) {
+					this.cmp.periodType.periodOffset++;
+					this.cmp.periodType.fireEvent('select');
+				}
+			}
+		});
+		
+		// Legend options
+        
+        this.cmp.legendType = Ext.create('Ext.form.field.ComboBox', {
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
             fieldLabel: GIS.i18n.legend_type,
-            value: this.legend.value,
-            triggerAction: 'all',
-            width: GIS.conf.combo_width,
-            store: new Ext.data.ArrayStore({
-                fields: ['value', 'text'],
+            value: GIS.conf.finals.widget.legendtype_automatic,
+            queryMode: 'local',
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            store: Ext.create('Ext.data.ArrayStore', {
+                fields: ['id', 'name'],
                 data: [
-                    [GIS.conf.map_legendset_type_automatic, GIS.i18n.automatic],
-                    [GIS.conf.map_legendset_type_predefined, GIS.i18n.predefined]
+                    [GIS.conf.finals.widget.legendtype_automatic, GIS.i18n.automatic],
+                    [GIS.conf.finals.widget.legendtype_predefined, GIS.i18n.predefined]
                 ]
             }),
             listeners: {
-                'select': {
+                select: {
                     scope: this,
                     fn: function(cb) {
-                        if (cb.getValue() == GIS.conf.map_legendset_type_predefined && cb.getValue() != this.legend.value) {
-                            this.legend.value = GIS.conf.map_legendset_type_predefined;
-                            this.prepareMapViewLegend();
-                            
-                            if (this.cmp.mapLegendSet.getValue()) {
-                                this.applyPredefinedLegend();
-                            }
-                        }
-                        else if (cb.getValue() == GIS.conf.map_legendset_type_automatic && cb.getValue() != this.legend.value) {
-                            this.legend.value = GIS.conf.map_legendset_type_automatic;
-                            this.prepareMapViewLegend();                            
-                            this.classify(false, true);
-                        }
+						this.toggler.legendType(cb.getValue());
                     }
                 }
             }
         });
         
-        this.cmp.mapLegendSet = new Ext.form.ComboBox({
+        this.cmp.legendSet = Ext.create('Ext.form.field.ComboBox', {
+            fieldLabel: GIS.i18n.legendset,
             editable: false,
             valueField: 'id',
             displayField: 'name',
-            mode: 'remote',
-            fieldLabel: GIS.i18n.legendset,
-            triggerAction: 'all',
-            width: GIS.conf.combo_width,
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
             hidden: true,
-            store: GIS.stores.predefinedColorMapLegendSet,
+            store: GIS.store.predefinedColorMapLegendSet,
             listeners: {
-                'select': {
-                    scope: this,
-                    fn: function() {
-                        this.cmp.mapview.clearValue();
-                        this.applyPredefinedLegend();
-                    }
-                }
-            }
-        });
-                
-        this.cmp.method = new Ext.form.ComboBox({
-            fieldLabel: GIS.i18n.method,
-            editable: false,
-            valueField: 'value',
-            displayField: 'text',
-            mode: 'local',
-            value: this.legend.method,
-            triggerAction: 'all',
-            width: GIS.conf.combo_width,
-            store: new Ext.data.ArrayStore({
-                fields: ['value', 'text'],
-                data: [
-                    [2, GIS.i18n.equal_intervals],
-                    [3, GIS.i18n.equal_group_count],
-                    [1, GIS.i18n.fixed_intervals]
-                ]
-            }),
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(cb) {
-                        this.cmp.mapview.clearValue();
-                        if (cb.getValue() == GIS.conf.classify_with_bounds && cb.getValue() != this.legend.method) {
-                            this.legend.method = GIS.conf.classify_with_bounds;
-                            this.prepareMapViewLegend();
-                        }
-                        else if (cb.getValue() != this.legend.method) {
-                            this.legend.method = cb.getValue();
-                            this.prepareMapViewLegend();
-                            this.classify(false, true);
-                        }
-                    }
-                }
-            }
+				select: {
+					scope: this,
+					fn: function() {
+						this.config.updateLegend = true;
+					}
+				}
+			}
         });
         
-        this.cmp.bounds = new Ext.form.TextField({
-            fieldLabel: GIS.i18n.bounds,
-            width: GIS.conf.combo_width,
-            hidden: true,
-            listeners: {
-                'change': {
-                    scope: this,
-                    fn: function() {
-                        this.classify(false, true);
-                    }
-                }  
-            }
-        });
-        
-        this.cmp.classes = new Ext.form.ComboBox({
-            fieldLabel: GIS.i18n.classes,
+        this.cmp.classes = Ext.create('Ext.form.field.Number', {
             editable: false,
-            valueField: 'value',
-            displayField: 'value',
-            mode: 'local',
-            value: this.legend.classes,
-            triggerAction: 'all',
-            width: GIS.conf.combo_width,
-            store: new Ext.data.ArrayStore({
-                fields: ['value'],
+            valueField: 'id',
+            displayField: 'id',
+            queryMode: 'local',
+            value: 5,
+            minValue: 1,
+            maxValue: 7,
+            width: 50,
+            style: 'margin-right: 3px',
+            store: Ext.create('Ext.data.ArrayStore', {
+                fields: ['id'],
                 data: [[1], [2], [3], [4], [5], [6], [7]]
             }),
             listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(cb) {
-                        this.cmp.mapview.clearValue();
-                        
-                        if (cb.getValue() != this.legend.classes) {
-                            this.legend.classes = cb.getValue();
-                            this.classify(false, true);
-                        }
-                    }
-                }
-            }
-        });
-
-        this.cmp.startColor = new Ext.ux.ColorField({
-            fieldLabel: GIS.i18n.low_color,
-            allowBlank: false,
-            width: 73,
-            value: "#FF0000",
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function() {
-                        this.classify(false, true);
-                    }
-                }
-            }
+				change: {
+					scope: this,
+					fn: function() {
+						this.config.updateLegend = true;
+					}
+				}
+			}
         });
         
-        this.cmp.endColor = new Ext.ux.ColorField({
-            allowBlank: false,
-            width: 73,
-            value: "#FFFF00",
+        this.cmp.method = Ext.create('Ext.form.field.ComboBox', {
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            queryMode: 'local',
+            value: 2,
+            width: 109,
+            store: Ext.create('Ext.data.ArrayStore', {
+                fields: ['id', 'name'],
+                data: [
+                    [2, 'By class range'],
+                    [3, 'By class count'] //i18n
+                ]
+            }),
             listeners: {
-                'select': {
-                    scope: this,
-                    fn: function() {
-                        this.classify(false, true);
-                    }
-                }
-            }
+				select: {
+					scope: this,
+					fn: function() {
+						this.config.updateLegend = true;
+					}
+				}
+			}
         });
         
-        this.cmp.radiusLow = new Ext.form.NumberField({
-            fieldLabel: GIS.i18n.low_point_size,
-            width: 73,
+        this.cmp.colorLow = Ext.create('Ext.button.Button', {
+			width: 109,
+			height: 22,
+			style: 'margin-right: 3px',
+			defaultValue: null,
+			value: 'ff0000',
+			getValue: function() {
+				return this.value;
+			},
+			setValue: function(color) {
+				this.value = color;
+				if (Ext.isDefined(this.getEl())) {
+					this.getEl().dom.style.background = '#' + color;
+				}
+			},
+			reset: function() {
+				this.setValue(this.defaultValue);
+			},
+			menu: {
+				showSeparator: false,
+				items: {
+					xtype: 'colorpicker',
+					closeAction: 'hide',
+					listeners: {
+						select: {
+							scope: this,
+							fn: function(cp, color) {
+								this.cmp.colorLow.setValue(color);
+								this.cmp.colorLow.menu.hide();
+								
+								this.config.updateLegend = true;
+							}
+						}
+					}
+				}
+			},
+			listeners: {
+				added: function() {
+					this.defaultValue = this.value;
+				},
+				render: function() {
+					this.setValue(this.value);
+				}
+			}
+		});
+        
+        this.cmp.colorHigh = Ext.create('Ext.button.Button', {
+			width: 109,
+			height: 22,
+			style: 'margin-right: 3px',
+			defaultValue: null,
+			value: '00ff00',
+			getValue: function() {
+				return this.value;
+			},
+			setValue: function(color) {
+				this.value = color;
+				if (Ext.isDefined(this.getEl())) {
+					this.getEl().dom.style.background = '#' + color;
+				}
+			},
+			reset: function() {
+				this.setValue(this.defaultValue);
+			},
+			menu: {
+				showSeparator: false,
+				items: {
+					xtype: 'colorpicker',
+					closeAction: 'hide',
+					listeners: {
+						select: {
+							scope: this,
+							fn: function(cp, color) {
+								this.cmp.colorHigh.setValue(color);
+								this.cmp.colorHigh.menu.hide();
+								
+								this.config.updateLegend = true;
+							}
+						}
+					}
+				}
+			},
+			listeners: {
+				added: function() {
+					this.defaultValue = this.value;
+				},
+				render: function() {
+					this.setValue(this.value);
+				}
+			}
+		});
+        
+        this.cmp.radiusLow = Ext.create('Ext.form.field.Number', {
+            width: 50,
             allowDecimals: false,
-            allowNegative: false,
             minValue: 1,
             value: 5,
             listeners: {
-                'change': {
-                    scope: this,
-                    fn: function() {
-                        this.classify(false, true);
-                    }
-                }
-            }
+				change: {
+					scope: this,
+					fn: function() {
+						this.config.updateLegend = true;
+					}
+				}
+			}
         });
         
-        this.cmp.radiusHigh = new Ext.form.NumberField({
-            fieldLabel: GIS.i18n.high_point_size,
-            width: 73,
+        this.cmp.radiusHigh = Ext.create('Ext.form.field.Number', {
+            width: 50,
             allowDecimals: false,
-            allowNegative: false,
             minValue: 1,
-            value: 20,
+            value: 15,
             listeners: {
-                'change': {
-                    scope: this,
-                    fn: function() {
-                        this.classify(false, true);
-                    }
-                }
-            }
+				change: {
+					scope: this,
+					fn: function() {
+						this.config.updateLegend = true;
+					}
+				}
+			}
         });
         
-        this.cmp.level = new Ext.form.ComboBox({
+        // Organisation unit options
+        
+        this.cmp.level = Ext.create('Ext.form.field.ComboBox', {
             fieldLabel: GIS.i18n.level,
             editable: false,
             valueField: 'level',
             displayField: 'name',
             mode: 'remote',
             forceSelection: true,
-            triggerAction: 'all',
-            selectOnFocus: true,
-            fieldLabel: GIS.i18n.level,
-            width: GIS.conf.combo_width,
-            store: GIS.stores.organisationUnitLevel,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(c) {
-                        this.requireUpdate = true;
-                        this.formValidation.validateForm.call(this);
-                        this.organisationUnitSelection.setValues(null, null, null, c.getValue(), c.getRawValue());
-                    }
-                }
-            }
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            style: 'margin-bottom: 4px',
+            store: GIS.store.organisationUnitLevels,
+			listeners: {
+				added: function() {
+					this.store.cmp.push(this);
+				},
+				select: {
+					scope: this,
+					fn: function() {
+						this.config.updateOrganisationUnit = true;
+					}
+				}
+			}
         });
         
-        this.cmp.parent = new Ext.tree.TreePanel({
-            cls: 'treepanel-layer-border',
+        this.cmp.parent = Ext.create('Ext.tree.Panel', {
             autoScroll: true,
             lines: false,
-            loader: new Ext.tree.TreeLoader({
-                dataUrl: GIS.conf.path_mapping + 'getOrganisationUnitChildren' + GIS.conf.type
-            }),
-            root: {
-                id: GIS.system.rootNode.id,
-                text: GIS.system.rootNode.name,
-                level: GIS.system.rootNode.level,
-                hasChildrenWithCoordinates: GIS.system.rootNode.hasChildrenWithCoordinates,
-                nodeType: 'async',
-                draggable: false,
-                expanded: true
-            },
-            widget: this,
-            isLoaded: false,
-            reset: function() {
-                if (this.getSelectionModel().getSelectedNode()) {
-                    this.getSelectionModel().getSelectedNode().unselect();
-                }                
-                this.collapseAll();
-                this.getRootNode().expand();
-                this.widget.window.cmp.apply.disable();
-            },
-            listeners: {
-                'click': {
-                    scope: this,
-                    fn: function(n) {
-                        var tree = n.getOwnerTree();
-                        tree.selectedNode = n;
-                        this.requireUpdate = true;
-                        this.formValidation.validateForm.call(this);
-                        this.organisationUnitSelection.setValues(n.attributes.id, n.attributes.text, n.attributes.level);
-                    }
-                }
-            }
+			rootVisible: false,
+			multiSelect: false,
+			width: GIS.conf.layout.widget.item_width,
+			height: 220,
+			pathToSelect: null,
+			pathToExpand: null,
+			reset: function() {
+				this.collapseAll();
+				this.expandTreePath(GIS.init.rootNodes[0].path);
+				this.selectTreePath(GIS.init.rootNodes[0].path);
+			},
+			selectTreePath: function(path) {
+				if (this.rendered) {
+					this.selectPath(path);
+				}
+				else {
+					this.pathToSelect = path;
+				}
+			},
+			expandTreePath: function(path) {
+				if (this.rendered) {
+					this.expandPath(path);
+				}
+				else {
+					this.pathToExpand = path;
+				}
+			},
+			store: Ext.create('Ext.data.TreeStore', {
+				proxy: {
+					type: 'ajax',
+					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+				},
+				root: {
+					id: 'root',
+					expanded: true,
+					children: GIS.init.rootNodes
+				},
+				listeners: {
+					load: function(s, node, r) {
+						for (var i = 0; i < r.length; i++) {
+							r[i].data.text = GIS.util.jsonEncodeString(r[i].data.text);
+						}
+					}
+				}
+			}),
+			listeners: {
+				select: {
+					scope: this,
+					fn: function() {
+						this.config.updateOrganisationUnit = true;
+					}
+				},
+				afterrender: function() {					
+					if (this.pathToSelect) {
+						this.selectPath(this.pathToSelect);
+						this.pathToSelect = null;
+					}
+					else {
+						this.getSelectionModel().select(0);
+					}
+					
+					if (this.pathToExpand) {
+						this.expandPath(this.pathToExpand);
+						this.pathToExpand = null;
+					}
+				}
+			}
         });
         
-        this.cmp.colorPanel = new Ext.Panel({
+        // Custom panels
+        
+        this.cmp.periodTypePanel = Ext.create('Ext.panel.Panel', {
 			layout: 'hbox',
-			style: 'padding-bottom:4px',
 			items: [
 				{
-					html: 'Low / high color:',
-					width: 107,
-					style: 'padding:3px 0 0 4px; color:#444'
+					html: 'Period type:', //i18n
+					width: 100,
+					bodyStyle: 'color: #444',
+					style: 'padding: 3px 0 0 4px'
 				},
-				this.cmp.startColor,
+				this.cmp.periodType,
+				this.cmp.periodPrev,
+				this.cmp.periodNext
+			]
+		});			
+        
+        this.cmp.methodPanel = Ext.create('Ext.panel.Panel', {
+			layout: 'hbox',
+			items: [
 				{
-					style: 'width:4px'
+					html: 'Classes / method:', //i18n
+					width: 100,
+					bodyStyle: 'color: #444',
+					style: 'padding: 3px 0 0 4px'
 				},
-				this.cmp.endColor,
-				{
-					style: 'height:4px'
-				}
+				this.cmp.classes,
+				this.cmp.method
 			]
 		});
-		
-		this.cmp.radiusPanel = new Ext.Panel({
+        
+        this.cmp.lowPanel = Ext.create('Ext.panel.Panel', {
 			layout: 'hbox',
 			items: [
 				{
-					html: 'Low / high radius:',
-					width: 107,
-					style: 'padding:3px 0 0 4px; color:#444'
+					html: 'Low color / size:', //i18n
+					width: 100,
+					bodyStyle: 'color: #444',
+					style: 'padding: 3px 0 0 4px'
 				},
-				this.cmp.radiusLow,
+				this.cmp.colorLow,
+				this.cmp.radiusLow
+			]
+		});
+        
+        this.cmp.highPanel = Ext.create('Ext.panel.Panel', {
+			layout: 'hbox',
+			items: [
 				{
-					style: 'width:4px'
+					html: 'High color / size:', //i18n
+					width: 100,
+					bodyStyle: 'color: #444',
+					style: 'padding: 3px 0 0 4px'
 				},
+				this.cmp.colorHigh,
 				this.cmp.radiusHigh
 			]
 		});
@@ -984,525 +879,446 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
         
         this.items = [
             {
-                xtype: 'panel',
-                layout: 'column',
-                width: 570,
-                style: 'padding-bottom:3px',
+                xtype: 'form',
+				cls: 'el-border-0',
+                width: 270,
                 items: [
-                    {
-                        xtype: 'form',
-                        width: 270,
-                        items: [
-                            { html: '<div class="window-info">' + GIS.i18n.data_options + '</div>' },
-                            this.cmp.mapview,
-                            { html: '<div class="thematic-br">' },
-                            this.cmp.mapValueType,
-                            this.cmp.indicatorGroup,
-                            this.cmp.indicator,
-                            this.cmp.dataElementGroup,
-                            this.cmp.dataElement,
-                            this.cmp.periodType,
-                            this.cmp.period,
-                            { html: '<div class="thematic-br">' },
-                            { html: '<div class="window-info">' + GIS.i18n.legend_options + '</div>' },
-                            this.cmp.mapLegendType,
-                            this.cmp.mapLegendSet,
-                            this.cmp.method,
-                            this.cmp.bounds,
-                            this.cmp.classes,
-                            this.cmp.colorPanel,
-                            this.cmp.radiusPanel
-                        ]
-                    },
-                    {
-                        xtype: 'panel',
-                        width: 270,
-                        bodyStyle: 'padding:0 0 0 8px;',
-                        items: [
-                            { html: '<div class="window-info">' + GIS.i18n.organisation_unit_level + '</div>' },                            
-                            {
-                                xtype: 'panel',
-                                layout: 'form',
-                                items: [
-                                    this.cmp.level
-                                ]
-                            },                            
-                            { html: '<div class="thematic-br"></div>' },                            
-                            { html: '<div class="window-info">' + GIS.i18n.parent_organisation_unit + '</div>' },
-                            this.cmp.parent
-                        ]
-                    }
-                ]
+					{
+						html: GIS.i18n.data_options,
+						cls: 'gis-form-subtitle-first'
+					},
+					this.cmp.valueType,
+					this.cmp.indicatorGroup,
+					this.cmp.indicator,
+					this.cmp.dataElementGroup,
+					this.cmp.dataElement,
+					this.cmp.periodTypePanel,
+					this.cmp.period,
+					{
+						html: GIS.i18n.legend_options,
+						cls: 'gis-form-subtitle'
+					},
+					this.cmp.legendType,
+					this.cmp.legendSet,
+					this.cmp.methodPanel,
+					this.cmp.lowPanel,
+					this.cmp.highPanel,
+					{
+						html: 'Organisation unit level / parent', //i18n
+						cls: 'gis-form-subtitle'
+					},
+					this.cmp.level,
+					this.cmp.parent
+				]
             }
         ];
     },
     
-    createSelectFeatures: function() {
-        var scope = this;
+    createSelectHandlers: function() {
+        var that = this,
+			window,
+			menu,
+			infrastructuralPeriod,
+			onHoverSelect,
+			onHoverUnselect,
+			onClickSelect;
         
-        var onHoverSelect = function onHoverSelect(feature) {
-            if (feature.attributes.fixedName) {
-                document.getElementById('featuredatatext').innerHTML =
-                    '<div style="' + GIS.conf.feature_data_style_name + '">' + feature.attributes.fixedName + '</div>' +
-                    '<div style="' + GIS.conf.feature_data_style_value + '">' + feature.attributes.value + '</div>';
-            }
-            else {
-                document.getElementById('featuredatatext').innerHTML = '';
-            }
+        onHoverSelect = function fn(feature) {
+			if (window) {
+				window.destroy();
+			}
+			window = Ext.create('Ext.window.Window', {
+				cls: 'gis-window-widget-feature',
+				preventHeader: true,
+				shadow: false,
+				resizable: false,
+				items: {
+					html: feature.attributes.label
+				}
+			});
+			
+			window.show();
+			
+			var x = window.getPosition()[0];
+			window.setPosition(x, 32);
         };
         
-        var onHoverUnselect = function onHoverUnselect(feature) {
-            if (feature.attributes.name) {
-                document.getElementById('featuredatatext').innerHTML = 
-                    '<div style="' + GIS.conf.feature_data_style_empty + '">' + GIS.i18n.no_feature_selected + '</div>';
-            }
-            else {
-                document.getElementById('featuredatatext').innerHTML = '';
-            }
+        onHoverUnselect = function fn(feature) {
+			window.destroy();
         };
         
-        var onClickSelect = function onClickSelect(feature) {
+        onClickSelect = function fn(feature) {
+			var showInfo,				
+				showRelocate,
+				drill,
+				menu,
+				isPoint = feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class;				
+			
+			// Relocate
+			showRelocate = function() {
+				if (that.cmp.relocateWindow) {
+					that.cmp.relocateWindow.destroy();
+				}
+				
+				that.cmp.relocateWindow = Ext.create('Ext.window.Window', {
+					title: 'Relocate facility',
+					layout: 'fit',
+					iconCls: 'gis-window-title-icon-relocate',
+					cls: 'gis-container-default',
+					setMinWidth: function(minWidth) {
+						this.setWidth(this.getWidth() < minWidth ? minWidth : this.getWidth());
+					},
+					items: {
+						html: feature.attributes.name,
+						cls: 'gis-container-inner'
+					},
+					bbar: [
+						'->',
+						{
+							xtype: 'button',
+							hideLabel: true,
+							text: GIS.i18n.cancel,
+							handler: function() {
+								GIS.map.relocate.active = false;
+								that.cmp.relocateWindow.destroy();
+								GIS.map.getViewport().style.cursor = 'auto';
+							}
+						}
+					],
+					listeners: {
+						close: function() {
+							GIS.map.relocate.active = false;
+							GIS.map.getViewport().style.cursor = 'auto';
+						}
+					}
+				});
+					
+				that.cmp.relocateWindow.show();					
+				that.cmp.relocateWindow.setMinWidth(220);
+				
+				GIS.util.gui.window.setPositionTopRight(that.cmp.relocateWindow);
+			};
+			
+			// Infrastructural data
+			showInfo = function() {
+				Ext.Ajax.request({
+					url: GIS.conf.url.path_gis + 'getFacilityInfo.action',
+					params: {
+						id: feature.attributes.id
+					},
+					success: function(r) {
+						var ou = Ext.decode(r.responseText);
 						
-			function drill() {
-				if (GIS.vars.locateFeatureWindow) {
-					GIS.vars.locateFeatureWindow.destroy();
-				}
-						 
-				scope.updateValues = true;
-				scope.isDrillDown = true;
+						if (that.cmp.infrastructuralWindow) {
+							that.cmp.infrastructuralWindow.destroy();
+						}
+						
+						that.cmp.infrastructuralWindow = Ext.create('Ext.window.Window', {
+							title: 'Facility information', //i18n
+							layout: 'column',
+							iconCls: 'gis-window-title-icon-information',
+							cls: 'gis-container-default',
+							width: 460,
+							height: 400, //todo
+							period: null,
+							items: [
+								{
+									cls: 'gis-container-inner',
+									columnWidth: 0.4,
+									bodyStyle: 'padding-right:4px',
+									items: [
+										{
+											html: GIS.i18n.name,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: feature.attributes.name,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.type,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.ty,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.code,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.co,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.address,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.ad,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.contact_person,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.cp,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.email,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.em,
+											cls: 'gis-panel-html'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											html: GIS.i18n.phone_number,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											html: ou.pn,
+											cls: 'gis-panel-html'
+										}
+									]
+								},
+								{
+									xtype: 'form',
+									cls: 'gis-container-inner gis-form-widget',
+									columnWidth: 0.6,
+									bodyStyle: 'padding-left:4px',
+									items: [
+										{
+											html: GIS.i18n.infrastructural_data,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											xtype: 'combo',
+											fieldLabel: GIS.i18n.period,
+											editable: false,
+											valueField: 'id',
+											displayField: 'name',
+											forceSelection: true,
+											width: 255, //todo
+											labelWidth: 70,
+											store: GIS.store.infrastructuralPeriodsByType,
+											lockPosition: false,
+											listeners: {
+												select: function() {
+													infrastructuralPeriod = this.getValue();
+													
+													that.store.infrastructuralDataElementValues.load({
+														params: {
+															periodId: infrastructuralPeriod,
+															organisationUnitId: feature.attributes.internalId
+														}
+													});
+												}
+											}
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											xtype: 'grid',
+											cls: 'gis-grid',
+											height: 300, //todo
+											width: 255,
+											scroll: 'vertical',
+											columns: [
+												{
+													id: 'dataElementName',
+													text: 'Data element',
+													dataIndex: 'dataElementName',
+													sortable: true,
+													width: 195
+												},
+												{
+													id: 'value',
+													header: 'Value',
+													dataIndex: 'value',
+													sortable: true,
+													width: 60
+												}
+											],
+											disableSelection: true,
+											store: that.store.infrastructuralDataElementValues
+										}
+									]
+								}
+							],
+							listeners: {
+								show: function() {									
+									if (infrastructuralPeriod) {
+										this.down('combo').setValue(infrastructuralPeriod);
+										that.store.infrastructuralDataElementValues.load({
+											params: {
+												periodId: infrastructuralPeriod,
+												organisationUnitId: feature.attributes.internalId
+											}
+										});
+									}
+								}
+							}
+						});
+						
+						that.cmp.infrastructuralWindow.show();
+						GIS.util.gui.window.setPositionTopRight(that.cmp.infrastructuralWindow);
+					}
+				});
+			};
+			
+			// Drill or float
+			drill = function(direction) {
+				var store = GIS.store.organisationUnitLevels;
 				
-				function organisationUnitLevelCallback() {
-					this.organisationUnitSelection.setValuesOnDrillDown(feature.attributes.id, feature.attributes.name);
+				store.loadFn( function() {
+					var store = GIS.store.organisationUnitLevels;
 					
-					this.cmp.parent.reset();
-					this.cmp.parent.selectedNode = {attributes: {
-						id: this.organisationUnitSelection.parent.id,
-						text: this.organisationUnitSelection.parent.name,
-						level: this.organisationUnitSelection.parent.level
-					}};
+					if (direction === 'up') {
+						var rootNode = GIS.init.rootNodes[0];
+						
+						that.config.level = that.model.level - 1;
+						that.config.levelName = store.getAt(store.find('level', that.config.level)).data.name;
+						that.config.parentId = rootNode.id;
+						that.config.parentName = rootNode.text;
+						that.config.parentLevel = rootNode.level;
+						that.config.parentPath = '/' + GIS.init.rootNodes[0].id;
+					}
+					else if (direction === 'down') {
+						that.config.level = that.model.level + 1;
+						that.config.levelName = store.getAt(store.find('level', that.config.level)).data.name;
+						that.config.parentId = feature.attributes.id;
+						that.config.parentName = feature.attributes.name;
+						that.config.parentLevel = that.model.level;
+						that.config.parentPath = feature.attributes.path;
+					}
 					
-					this.cmp.level.setValue(this.organisationUnitSelection.level.level);
-					this.loadGeoJson();
-				}
+					that.config.updateOrganisationUnit = true;
+					that.config.updateGui = true;
+					
+					that.execute();
+				});
+			};
+			
+			// Menu
+			var menuItems = [
+				Ext.create('Ext.menu.Item', {
+					text: 'Float up',
+					iconCls: 'gis-menu-item-icon-float',
+					disabled: !that.model.hasCoordinatesUp,
+					scope: this,
+					handler: function() {
+						drill('up');
+					}
+				}),
+				Ext.create('Ext.menu.Item', {
+					text: 'Drill down',
+					iconCls: 'gis-menu-item-icon-drill',
+					cls: 'gis-menu-item-first',
+					disabled: !feature.attributes.hcwc,
+					scope: this,
+					handler: function() {
+						drill('down');
+					}
+				})
+			];
+			
+			if (isPoint) {
+				menuItems.push({
+					xtype: 'menuseparator'
+				});
 				
-				if (GIS.stores.organisationUnitLevel.isLoaded) {
-					organisationUnitLevelCallback.call(scope);
-				}
-				else {
-					GIS.stores.organisationUnitLevel.load({scope: scope, callback: function() {
-						organisationUnitLevelCallback.call(this);
-					}});
-				}
+				menuItems.push( Ext.create('Ext.menu.Item', {
+					text: GIS.i18n.relocate,
+					iconCls: 'gis-menu-item-icon-relocate',
+					disabled: !GIS.init.security.isAdmin,
+					handler: function(item) {
+						GIS.map.relocate.active = true;
+						GIS.map.relocate.widget = that;
+						GIS.map.relocate.feature = feature;
+						GIS.map.getViewport().style.cursor = 'crosshair';
+						showRelocate();
+					}
+				}));
+				
+				menuItems.push( Ext.create('Ext.menu.Item', {
+					text: 'Show information', //i18n
+					iconCls: 'gis-menu-item-icon-information',
+					handler: function(item) {
+						if (GIS.store.infrastructuralPeriodsByType.isLoaded) {
+							showInfo();
+						}
+						else {
+							GIS.store.infrastructuralPeriodsByType.load({
+								params: {
+									name: GIS.init.systemSettings.infrastructuralPeriodType
+								},
+								callback: function() {
+									showInfo();
+								}
+							});
+						}
+					}
+				}));
 			}
 			
-            if (feature.geometry.CLASS_NAME == GIS.conf.map_feature_type_point_class_name) {
-                if (scope.featureOptions.menu) {
-                    scope.featureOptions.menu.destroy();
-                }
-                
-                scope.featureOptions.menu = new Ext.menu.Menu({
-                    showInfo: function() {
-                        Ext.Ajax.request({
-                            url: GIS.conf.path_mapping + 'getFacilityInfo' + GIS.conf.type,
-                            params: {id: feature.attributes.id},
-                            success: function(r) {
-                                var ou = Ext.util.JSON.decode(r.responseText);
-                                
-                                if (scope.featureOptions.info) {
-                                    scope.featureOptions.info.destroy();
-                                }
-                                
-                                scope.featureOptions.info = new Ext.Window({
-                                    title: '<span class="window-information-title">Facility information sheet</span>',
-                                    layout: 'table',
-                                    width: GIS.conf.window_width + 178,
-                                    height: GIS.util.getMultiSelectHeight() + 100,
-                                    bodyStyle: 'background-color:#fff',
-                                    defaults: {
-                                        bodyStyle: 'vertical-align:top',
-                                        labelSeparator: GIS.conf.labelseparator,
-                                        emptyText: GIS.conf.emptytext
-                                    },
-                                    layoutConfig: {
-                                        columns: 2
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'panel',
-                                            layout: 'anchor',
-                                            bodyStyle: 'padding:8px 4px 8px 8px',
-                                            width: 160,
-                                            items: [
-                                                {html: '<div class="window-info">' + GIS.i18n.name + '<p style="font-weight:normal">' + feature.attributes.name + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.type + '<p style="font-weight:normal">' + ou.ty + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.code + '<p style="font-weight:normal">' + ou.co + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.address + '<p style="font-weight:normal">' + ou.ad + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.contact_person + '<p style="font-weight:normal">' + ou.cp + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.email + '<p style="font-weight:normal">' + ou.em + '</p></div>'},
-                                                {html: '<div class="window-info">' + GIS.i18n.phone_number + '<p style="font-weight:normal">' + ou.pn + '</p></div>'}
-                                            ]
-                                        },
-                                        {
-                                            xtype: 'form',
-                                            bodyStyle: 'padding:8px 8px 8px 4px',
-                                            width: GIS.conf.window_width + 20,
-                                            labelWidth: GIS.conf.label_width,
-                                            items: [
-                                                {html: '<div class="window-info">' + GIS.i18n.infrastructural_data + '</div>'},
-                                                {
-                                                    xtype: 'combo',
-                                                    name: 'period',
-                                                    fieldLabel: GIS.i18n.period,
-                                                    typeAhead: true,
-                                                    editable: false,
-                                                    valueField: 'id',
-                                                    displayField: 'name',
-                                                    mode: 'remote',
-                                                    forceSelection: true,
-                                                    triggerAction: 'all',
-                                                    selectOnFocus: true,
-                                                    width: GIS.conf.combo_width,
-                                                    store: GIS.stores.infrastructuralPeriodsByType,
-                                                    lockPosition: false,
-                                                    listeners: {
-                                                        'select': function(cb) {
-                                                            scope.infrastructuralPeriod = cb.getValue();
-                                                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', cb.getValue());
-                                                            scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                                                            scope.stores.infrastructuralDataElementMapValue.load();
-                                                        }
-                                                    }
-                                                },
-                                                {html: '<div style="padding:4px 0 0 0"></div>'},
-                                                {
-                                                    xtype: 'grid',
-                                                    height: GIS.util.getMultiSelectHeight(),
-                                                    width: 242,
-                                                    cm: new Ext.grid.ColumnModel({
-                                                        columns: [
-                                                            {id: 'dataElementName', header: 'Data element', dataIndex: 'dataElementName', sortable: true, width: 150},
-                                                            {id: 'value', header: 'Value', dataIndex: 'value', sortable: true, width: 50}
-                                                        ]
-                                                    }),
-                                                    disableSelection: true,
-                                                    viewConfig: {forceFit: true},
-                                                    store: scope.stores.infrastructuralDataElementMapValue
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                });
-            
-                                if (scope.infrastructuralPeriod) {
-                                    scope.featureOptions.info.find('name', 'period')[0].setValue(scope.infrastructuralPeriod);
-                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('periodId', scope.infrastructuralPeriod);
-                                    scope.stores.infrastructuralDataElementMapValue.setBaseParam('organisationUnitId', feature.attributes.id);
-                                    scope.stores.infrastructuralDataElementMapValue.load();
-                                }
-                                scope.featureOptions.info.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.info.width + 15), Ext.getCmp('center').y + 41);
-                                scope.featureOptions.info.show();
-                                scope.featureOptions.menu.destroy();
-                            }
-                        });
-                    },
-                    showRelocate: function() {
-                        if (scope.featureOptions.coordinate) {
-                            scope.featureOptions.coordinate.destroy();
-                        }
-                        
-                        scope.featureOptions.coordinate = new Ext.Window({
-                            title: '<span class="window-relocate-title">' + feature.attributes.name + '</span>',
-							bodyStyle: 'padding:8px; background-color:#fff',
-                            layout: 'fit',
-                            width: GIS.conf.window_width,
-                            items: [
-                                {
-                                    xtype: 'panel',
-                                    items: [
-                                        {html: GIS.i18n.select_new_location_on_map}
-                                    ]
-                                }
-                            ],
-                            bbar: [
-                                '->',
-                                {
-                                    xtype: 'button',
-                                    iconCls: 'icon-cancel',
-                                    hideLabel: true,
-                                    text: GIS.i18n.cancel,
-                                    handler: function() {
-                                        GIS.vars.relocate.active = false;
-                                        scope.featureOptions.coordinate.destroy();
-                                        document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
-                                    }
-                                }
-                            ],
-                            listeners: {
-                                'close': function() {
-                                    GIS.vars.relocate.active = false;
-                                    document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'auto';
-                                }
-                            }
-                        });
-                        scope.featureOptions.coordinate.setPagePosition(Ext.getCmp('east').x - (scope.featureOptions.coordinate.width + 15), Ext.getCmp('center').y + 41);
-                        scope.featureOptions.coordinate.show();                        
-                    },
-                    items: [
-                        {
-                            text: GIS.i18n.show_information_sheet,
-                            iconCls: 'menu-featureoptions-info',
-                            handler: function(item) {
-                                if (GIS.stores.infrastructuralPeriodsByType.isLoaded) {
-                                    item.parentMenu.showInfo();
-                                }
-                                else {
-                                    GIS.stores.infrastructuralPeriodsByType.setBaseParam('name', GIS.system.infrastructuralPeriodType);
-                                    GIS.stores.infrastructuralPeriodsByType.load({callback: function() {
-                                        item.parentMenu.showInfo();
-                                    }});
-                                }
-                            }
-                        },
-                        {
-                            text: GIS.i18n.relocate,
-                            iconCls: 'menu-featureoptions-relocate',
-                            disabled: !GIS.user.isAdmin,
-                            handler: function(item) {
-                                GIS.vars.relocate.active = true;
-                                GIS.vars.relocate.widget = scope;
-                                GIS.vars.relocate.feature = feature;
-                                document.getElementById('OpenLayers.Map_3_OpenLayers_ViewPort').style.cursor = 'crosshair';
-                                item.parentMenu.showRelocate();
-                            }
-                        }
-                    ]
-                });
-                
-                if (feature.attributes.hcwc) {
-					scope.featureOptions.menu.add({
-						text: 'Drill down',
-						iconCls: 'menu-featureoptions-drilldown',
-						scope: this,
-						handler: function() {
-							drill.call(this);
-						}
-					});
+			menuItems[menuItems.length - 1].addCls('gis-menu-item-last');
+			
+			menu = new Ext.menu.Menu({
+				shadow: false,
+				showSeparator: false,
+				defaults: {
+					bodyStyle: 'padding-right:6px'
+				},
+				items: menuItems,
+				listeners: {
+					afterrender: function() {
+						this.getEl().addCls('gis-toolbar-btn-menu');
+					}
 				}
-                
-                scope.featureOptions.menu.showAt([GIS.vars.mouseMove.x, GIS.vars.mouseMove.y]);
-            }
-            else {
-                if (feature.attributes.hcwc) {
-					drill.call(this);
-                }
-                else {
-                    Ext.message.msg(false, GIS.i18n.no_coordinates_found);
-                }
-            }
+			});
+            
+            menu.showAt([GIS.map.mouseMove.x, GIS.map.mouseMove.y]);
         };
         
-        this.selectFeatures = new OpenLayers.Control.newSelectFeature(
-            this.layer, {
-                onHoverSelect: onHoverSelect,
-                onHoverUnselect: onHoverUnselect,
-                onClickSelect: onClickSelect
-            }
-        );
+        this.selectHandlers = new OpenLayers.Control.newSelectFeature(this.layer, {
+			onHoverSelect: onHoverSelect,
+			onHoverUnselect: onHoverUnselect,
+			onClickSelect: onClickSelect
+		});
         
-        GIS.vars.map.addControl(this.selectFeatures);
-        this.selectFeatures.activate();
-    },
-    
-    prepareMapViewValueType: function() {
-        var obj = {};
-        if (this.valueType.isIndicator()) {
-            this.cmp.indicatorGroup.show();
-            this.cmp.indicator.show();
-            this.cmp.dataElementGroup.hide();
-            this.cmp.dataElement.hide();
-            obj.components = {
-                valueTypeGroup: this.cmp.indicatorGroup,
-                valueType: this.cmp.indicator
-            };
-            obj.stores = {
-                valueTypeGroup: GIS.stores.indicatorGroup,
-                valueType: this.stores.indicatorsByGroup
-            };
-            obj.mapView = {
-                valueTypeGroup: 'indicatorGroupId',
-                valueType: 'indicatorId'
-            };
-        }
-        else if (this.valueType.isDataElement()) {
-            this.cmp.indicatorGroup.hide();
-            this.cmp.indicator.hide();
-            this.cmp.dataElementGroup.show();
-            this.cmp.dataElement.show();
-            obj.components = {
-                valueTypeGroup: this.cmp.dataElementGroup,
-                valueType: this.cmp.dataElement
-            };
-            obj.stores = {
-                valueTypeGroup: GIS.stores.dataElementGroup,
-                valueType: this.stores.dataElementsByGroup
-            };
-            obj.mapView = {
-                valueTypeGroup: 'dataElementGroupId',
-                valueType: 'dataElementId'
-            };
-        }
-        return obj;
-    },
-    
-    prepareMapViewPeriod: function() {
-        var obj = {};        
-        this.cmp.periodType.show();
-        this.cmp.period.show();
-        obj.components = {
-            c1: this.cmp.periodType,
-            c2: this.cmp.period
-        };
-        obj.stores = {
-            c1: GIS.stores.periodType,
-            c2: this.stores.periodsByType
-        };
-        obj.mapView = {
-            c1: 'periodTypeId',
-            c2: 'periodId'
-        };
-        return obj;
-    },
-    
-    prepareMapViewLegend: function() {
-        this.cmp.mapLegendType.setValue(this.legend.value);
-        
-        if (this.legend.value == GIS.conf.map_legendset_type_automatic) {
-            this.cmp.method.show();
-            this.cmp.colorPanel.show();
-            this.cmp.mapLegendSet.hide();
-            
-            if (this.legend.method == GIS.conf.classify_with_bounds) {
-                this.cmp.classes.hide();
-                this.cmp.bounds.show();
-            }
-            else {
-                this.cmp.classes.show();
-                this.cmp.bounds.hide();
-            }                
-        }
-        else if (this.legend.value == GIS.conf.map_legendset_type_predefined) {
-            this.cmp.method.hide();
-            this.cmp.classes.hide();
-            this.cmp.bounds.hide();
-            this.cmp.colorPanel.hide();
-            this.cmp.mapLegendSet.show();
-        }
-    },
-    
-    setMapView: function() {
-        var obj = this.prepareMapViewValueType();
-        
-        function valueTypeGroupStoreCallback() {
-            obj.components.valueTypeGroup.setValue(this.mapView[obj.mapView.valueTypeGroup]);
-            obj.stores.valueType.setBaseParam(obj.mapView.valueTypeGroup, obj.components.valueTypeGroup.getValue());
-            obj.stores.valueType.load({scope: this, callback: function() {
-                obj.components.valueType.setValue(this.mapView[obj.mapView.valueType]);
-                obj.components.valueType.currentValue = this.mapView[obj.mapView.valueType];
-                
-                obj = this.prepareMapViewPeriod();
-                if (obj.stores.c1.isLoaded) {
-                    dateTypeGroupStoreCallback.call(this);
-                }
-                else {
-                    obj.stores.c1.load({scope: this, callback: function() {
-                        dateTypeGroupStoreCallback.call(this);
-                    }});
-                }
-            }});
-        }
-        
-        function dateTypeGroupStoreCallback() {
-            obj.components.c1.setValue(this.mapView[obj.mapView.c1]);
-            
-            obj.stores.c2.setBaseParam('name', this.mapView[obj.mapView.c1]);
-            obj.stores.c2.load({scope: this, callback: function() {
-                obj.components.c2.setValue(this.mapView[obj.mapView.c2]);
-                obj.components.c2.currentValue = this.mapView[obj.mapView.c2];
-                obj.components.c2.lockPosition = true;
-                
-                this.setMapViewLegend();
-            }});
-        }
-
-        if (obj.stores.valueTypeGroup.isLoaded) {
-            valueTypeGroupStoreCallback.call(this);
-        }
-        else {
-            obj.stores.valueTypeGroup.load({scope: this, callback: function() {
-                valueTypeGroupStoreCallback.call(this);
-            }});
-        }
-    },
-    
-    setMapViewLegend: function() {
-        this.prepareMapViewLegend();
-
-        function predefinedMapLegendSetStoreCallback() {
-            this.cmp.mapLegendSet.setValue(this.mapView.mapLegendSetId);
-            this.applyPredefinedLegend(true);
-        }
-        
-        this.cmp.radiusLow.setValue(this.mapView.radiusLow || GIS.conf.defaultLowRadius);
-        this.cmp.radiusHigh.setValue(this.mapView.radiusHigh || GIS.conf.defaultHighRadius);
-        
-        if (this.legend.value == GIS.conf.map_legendset_type_automatic) {
-            this.cmp.method.setValue(this.mapView.method);
-            this.cmp.startColor.setValue(this.mapView.colorLow);
-            this.cmp.endColor.setValue(this.mapView.colorHigh);
-
-            if (this.legend.method == GIS.conf.classify_with_bounds) {
-                this.cmp.bounds.setValue(this.mapView.bounds);
-            }
-            else {
-                this.cmp.classes.setValue(this.mapView.classes);
-            }
-
-            this.setMapViewMap();
-        }
-        else if (this.legend.value == GIS.conf.map_legendset_type_predefined) {
-            if (GIS.stores.predefinedColorMapLegendSet.isLoaded) {
-                predefinedMapLegendSetStoreCallback.call(this);
-            }
-            else {
-                GIS.stores.predefinedColorMapLegendSet.load({scope: this, callback: function() {
-                    predefinedMapLegendSetStoreCallback.call(this);
-                }});
-            }
-        }
-    },
-    
-    setMapViewMap: function() {
-        this.organisationUnitSelection.setValues(this.mapView.parentOrganisationUnitId, this.mapView.parentOrganisationUnitName,
-            this.mapView.parentOrganisationUnitLevel, this.mapView.organisationUnitLevel, this.mapView.organisationUnitLevelName);
-            
-        this.cmp.parent.reset();
-        
-        this.cmp.parent.selectedNode = {attributes: {
-            id: this.mapView.parentOrganisationUnitId,
-            text: this.mapView.parentOrganisationUnitName,
-            level: this.mapView.parentOrganisationUnitLevel
-        }};
-            
-        GIS.stores.organisationUnitLevel.load({scope: this, callback: function() {
-            this.cmp.level.setValue(this.mapView.organisationUnitLevel);
-            GIS.vars.activePanel.setThematic2();
-            this.loadGeoJson();
-        }});
+        GIS.map.addControl(this.selectHandlers);
+        this.selectHandlers.activate();
     },
 	
 	applyPredefinedLegend: function(isMapView) {
         this.legend.value = GIS.conf.map_legendset_type_predefined;
-		var mls = this.cmp.mapLegendSet.getValue();
+		var mls = this.cmp.legendSet.getValue();
 		Ext.Ajax.request({
 			url: GIS.conf.path_mapping + 'getMapLegendsByMapLegendSet' + GIS.conf.type,
 			params: {mapLegendSetId: mls},
@@ -1540,288 +1356,520 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		});
 	},
     
-    formValidation: {
-        validateForm: function() {
-            if (this.cmp.mapValueType.getValue() == GIS.conf.map_value_type_indicator) {
-                if (!this.cmp.indicator.getValue()) {
-                    this.window.cmp.apply.disable();
-                    return false;
-                }
-            }
-            else if (this.cmp.mapValueType.getValue() == GIS.conf.map_value_type_dataelement) {
-                if (!this.cmp.dataElement.getValue()) {
-                    this.window.cmp.apply.disable();
-                    return false;
-                }
-            }
-            
-            if (!this.cmp.period.getValue()) {
-                this.window.cmp.apply.disable();
-                return false;
-            }
-
-            if (!this.cmp.parent.selectedNode || !this.cmp.level.getValue()) {
-                this.window.cmp.apply.disable();
-                return false;
-            }
-            
-            if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
-                this.window.cmp.apply.disable();
-                return false;
-            }
-
-            if (this.cmp.mapLegendType.getValue() == GIS.conf.map_legendset_type_automatic) {
-                if (this.cmp.method.getValue() == GIS.conf.classify_with_bounds) {
-                    if (!this.cmp.bounds.getValue()) {
-                        this.window.cmp.apply.disable();
-                        return false;
-                    }
-                }
-            }
-            else if (this.cmp.mapLegendType.getValue() == GIS.conf.map_legendset_type_predefined) {
-                if (!this.cmp.mapLegendSet.getValue()) {
-                    this.window.cmp.apply.disable();
-                    return false;
-                }
-            }
-            
-            if (!this.cmp.radiusLow.getValue() || !this.cmp.radiusHigh.getValue()) {
-                this.window.cmp.apply.disable();
-                return false;
-            }
-            
-            if (this.requireUpdate) {
-                if (this.window.isUpdate) {
-                    this.window.cmp.apply.disable();
-                    this.requireUpdate = false;
-                    this.window.isUpdate = false;
-                }
-                else {
-                    this.window.cmp.apply.enable();
-                }
-            }
-            
-            return true;
-        }
-    },
-    
     formValues: {
-		getAllValues: function() {
-			return {
-                mapValueType: this.cmp.mapValueType.getValue(),
-                indicatorGroupId: this.valueType.isIndicator() ? this.cmp.indicatorGroup.getValue() : null,
-                indicatorId: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : null,
-				indicatorName: this.valueType.isIndicator() ? this.cmp.indicator.getRawValue() : null,
-                dataElementGroupId: this.valueType.isDataElement() ? this.cmp.dataElementGroup.getValue() : null,
-                dataElementId: this.valueType.isDataElement() ? this.cmp.dataElement.getValue() : null,
-				dataElementName: this.valueType.isDataElement() ? this.cmp.dataElement.getRawValue() : null,
-                periodTypeId: this.cmp.periodType.getValue(),
-                periodId: this.cmp.period.getValue(),
-                periodName: this.cmp.period.getRawValue(),
-                parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
-                parentOrganisationUnitLevel: this.organisationUnitSelection.parent.level,
-                parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
-                organisationUnitLevel: this.organisationUnitSelection.level.level,
-                organisationUnitLevelName: this.organisationUnitSelection.level.name,
-                mapLegendType: this.cmp.mapLegendType.getValue(),
-                method: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.method.getValue() : null,
-                classes: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.classes.getValue() : null,
-                bounds: this.legend.value == GIS.conf.map_legendset_type_automatic && this.legend.method == GIS.conf.classify_with_bounds ? this.cmp.bounds.getValue() : null,
-                colorLow: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.startColor.getValue() : null,
-                colorHigh: this.legend.value == GIS.conf.map_legendset_type_automatic ? this.cmp.endColor.getValue() : null,
-                mapLegendSetId: this.legend.value == GIS.conf.map_legendset_type_predefined ? this.cmp.mapLegendSet.getValue() : null,
-				radiusLow: this.cmp.radiusLow.getValue(),
-				radiusHigh: this.cmp.radiusHigh.getValue(),
-                longitude: GIS.vars.map.getCenter().lon,
-                latitude: GIS.vars.map.getCenter().lat,
-                zoom: parseFloat(GIS.vars.map.getZoom())
-			};
-		},
-        
         getLegendInfo: function() {
             return {
-                name: this.valueType.isIndicator() ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+                name: this.tmpModel.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
                 time: this.cmp.period.getRawValue(),
-                map: this.organisationUnitSelection.level.name + ' / ' + this.organisationUnitSelection.parent.name
+                map: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
             };
-        },
-        
-        getImageExportValues: function() {
-			return {
-				mapValueTypeValue: this.cmp.mapValueType.getValue() == GIS.conf.map_value_type_indicator ?
-					this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-				dateValue: this.cmp.period.getRawValue()
-			};
-		},
-        
-        clearForm: function(clearLayer) {
-            this.cmp.mapview.clearValue();
-            
-            this.cmp.mapValueType.setValue(GIS.conf.map_value_type_indicator);
-            this.valueType.setIndicator();
-            this.prepareMapViewValueType();
-            this.cmp.indicatorGroup.clearValue();
-            this.cmp.indicator.clearValue();
-            this.cmp.dataElementGroup.clearValue();
-            this.cmp.dataElement.clearValue();
-            
-            this.prepareMapViewPeriod();
-            this.cmp.periodType.clearValue();
-            this.cmp.period.clearValue();
-            
-            this.cmp.level.clearValue();
-            this.cmp.parent.reset();
-            
-            this.legend.reset();
-            this.prepareMapViewLegend();
-            this.cmp.method.setValue(this.legend.method);
-            this.cmp.classes.setValue(this.legend.classes);
-            this.cmp.bounds.reset();
-            
-            this.cmp.startColor.setValue('#FF0000');
-            this.cmp.endColor.setValue('#FFFF00');
-            
-            this.cmp.radiusLow.reset();
-            this.cmp.radiusHigh.reset();
-            
-            this.window.cmp.apply.disable();
-            
-            if (clearLayer) {            
-                document.getElementById(this.legendDiv).innerHTML = '';                
-                this.layer.destroyFeatures();
-                this.layer.setVisibility(false);
-            }
         }
-	},
-    
-    loadGeoJson: function() {
-        GIS.mask.msg = GIS.i18n.loading;
-        GIS.mask.show();
-        GIS.vars.activeWidget = this;
-        this.updateValues = true;
+        //,
         
-        var url = GIS.conf.path_mapping + 'getGeoJson.action?' +
-            'parentId=' + this.organisationUnitSelection.parent.id +
-            '&level=' + this.organisationUnitSelection.level.level;
+        //getImageExportValues: function() {
+			//return {
+				//mapValueTypeValue: this.cmp.valueType.getValue() == GIS.conf.map_value_type_indicator ?
+					//this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+				//dateValue: this.cmp.period.getRawValue()
+			//};
+		//},
+        
+        //clearForm: function(clearLayer) {
+            //this.cmp.mapview.clearValue();
+            
+            //this.cmp.valueType.setValue(GIS.conf.map_value_type_indicator);
+            //this.valueType.setIndicator();
+            //this.prepareMapViewValueType();
+            //this.cmp.indicatorGroup.clearValue();
+            //this.cmp.indicator.clearValue();
+            //this.cmp.dataElementGroup.clearValue();
+            //this.cmp.dataElement.clearValue();
+            
+            //this.prepareMapViewPeriod();
+            //this.cmp.periodType.clearValue();
+            //this.cmp.period.clearValue();
+            
+            //this.cmp.level.clearValue();
+            //this.cmp.parent.reset();
+            
+            //this.legend.reset();
+            //this.prepareMapViewLegend();
+            //this.cmp.method.setValue(this.legend.method);
+            //this.cmp.classes.setValue(this.legend.classes);
+            //this.cmp.bounds.reset();
+            
+            //this.cmp.startColor.setValue('#FF0000');
+            //this.cmp.endColor.setValue('#FFFF00');
+            
+            //this.cmp.radiusLow.reset();
+            //this.cmp.radiusHigh.reset();
+            
+            //this.window.cmp.apply.disable();
+            
+            //if (clearLayer) {            
+                //document.getElementById(this.legendDiv).innerHTML = '';                
+                //this.layer.destroyFeatures();
+                //this.layer.setVisibility(false);
+            //}
+        //}
+	},
+	
+	reset: function() {
+		this.cmp.valueType.reset();
+		this.toggler.valueType(GIS.conf.finals.dimension.indicator.id);
+		
+		this.cmp.indicatorGroup.clearValue();
+		this.cmp.indicator.clearValue();
+		this.cmp.dataElementGroup.clearValue();
+		this.cmp.dataElement.clearValue();
+		
+		this.cmp.periodType.clearValue();
+		this.cmp.period.clearValue();
+		
+		this.cmp.legendType.reset();
+		this.toggler.legendType(GIS.conf.finals.widget.legendtype_automatic);
+		this.cmp.legendSet.clearValue();
+		this.cmp.classes.reset();
+		this.cmp.method.reset();
+		this.cmp.colorLow.reset();
+		this.cmp.colorHigh.reset();
+		this.cmp.radiusLow.reset();
+		this.cmp.radiusHigh.reset();
+		this.cmp.level.clearValue();
+		this.cmp.parent.reset();
+		
+		if (this.cmp.searchWindow) {
+			this.cmp.searchWindow.destroy();
+		}
+		if (this.cmp.filterWindow) {
+			this.cmp.filterWindow.destroy();
+		}
+		if (this.cmp.labelWindow) {
+			this.cmp.labelWindow.destroy();
+		}
+		
+		this.config = {};
+		this.tmpModel = {};
+		this.model = {};
+		
+		this.layer.destroyFeatures();
+		this.features = this.layer.features.slice(0);
+		this.store.features.loadFeatures();
+		
+		document.getElementById(this.legendDiv).innerHTML = '';
+		this.layer.setVisibility(false);
+	},
+	
+	setConfig: function(config) {
+		this.config.valueType = config.valueType;
+		this.config.indicatorGroup = config.indicatorGroup;
+		this.config.indicator = config.indicator;
+		this.config.dataElementGroup = config.dataElementGroup;
+		this.config.dataElement = config.dataElement;
+		this.config.periodType = config.periodType;
+		this.config.period = config.period;
+		this.config.legendType = config.legendType;
+		this.config.legendSet = config.legendSet;
+		this.config.classes = config.classes;
+		this.config.method = config.method;
+		this.config.colorLow = config.colorLow;
+		this.config.colorHigh = config.colorHigh;
+		this.config.radiusLow = config.radiusLow;
+		this.config.radiusHigh = config.radiusHigh;
+		this.config.level = config.level;
+		this.config.levelName = config.levelName;
+		this.config.parentId = config.parentId;
+		this.config.parentName = config.parentName;
+		this.config.parentLevel = config.parentLevel;
+		this.config.parentPath = config.parentPath;
+		this.config.updateOrganisationUnit = true;
+		this.config.updateData = false;
+		this.config.updateLegend = false;		
+		this.config.updateGui = true;
+	},
+	
+	setGui: function() {
+		var model = this.tmpModel;
+		
+		// Value type
+		this.cmp.valueType.setValue(model.valueType);
+		
+		// Indicator and data element
+		this.toggler.valueType(model.valueType);
+		
+		var	indeGroupView = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicatorGroup : this.cmp.dataElementGroup,
+			indeGroupStore = indeGroupView.store,
+			indeGroupValue = model.valueType === GIS.conf.finals.dimension.indicator.id ? model.indicatorGroup : model.dataElementGroup,
+			
+			indeStore = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.store.indicatorsByGroup : this.store.dataElementsByGroup,
+			indeView = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicator : this.cmp.dataElement,
+			indeValue = model.valueType === GIS.conf.finals.dimension.indicator.id ? model.indicator : model.dataElement;
+			
+		indeGroupStore.loadFn( function() {
+			indeGroupView.setValue(indeGroupValue);
+		});
+		
+		indeStore.proxy.url = GIS.conf.url.path_api + model.valueType + 'Groups/' + indeGroupValue + '.json?links=false&paging=false';
+		indeStore.loadFn( function() {
+			indeView.setValue(indeValue);
+		});
+		
+		// Period
+		this.cmp.periodType.setValue(model.periodType);
+		this.cmp.periodType.fireEvent('select');
+		this.cmp.period.setValue(model.period);
+		
+		// Legend
+		this.cmp.legendType.setValue(model.legendType);
+		this.toggler.legendType(model.legendType);
+		
+		if (model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			this.cmp.classes.setValue(model.classes);
+			this.cmp.method.setValue(model.method);
+			this.cmp.colorLow.setValue(model.colorLow);
+			this.cmp.colorHigh.setValue(model.colorHigh);
+			this.cmp.radiusLow.setValue(model.radiusLow);
+			this.cmp.radiusHigh.setValue(model.radiusHigh);
+		}
+		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			//store.loadFn( function() {
+				//this.cmp.legendSet.setValue(model.legendSet);
+			//});
+		}
+		
+		// Level and parent
+		var levelView = this.cmp.level;
+		GIS.store.organisationUnitLevels.loadFn( function() {
+			levelView.setValue(model.level);
+		});
+		
+		this.cmp.parent.selectTreePath('/root' + model.parentPath);
+	},
+    	
+	getModel: function() {
+		var level = this.cmp.level,
+			parent = this.cmp.parent.getSelectionModel().getSelection();
+		parent = parent.length ? parent : [{raw: GIS.init.rootNodes[0]}];
+		
+		var model = {
+			valueType: this.cmp.valueType.getValue(),
+			indicatorGroup: this.cmp.indicatorGroup.getValue(),
+			indicator: this.cmp.indicator.getValue(),
+			dataElementGroup: this.cmp.dataElementGroup.getValue(),
+			dataElement: this.cmp.dataElement.getValue(),
+			periodType: this.cmp.periodType.getValue(),
+			period: this.cmp.period.getValue(),
+			legendType: this.cmp.legendType.getValue(),
+			legendSet: this.cmp.legendSet.getValue(),
+			classes: this.cmp.classes.getValue(),
+			method: this.cmp.method.getValue(),
+			colorLow: this.cmp.colorLow.getValue(),
+			colorHigh: this.cmp.colorHigh.getValue(),
+			colors: this.getColors(),
+			radiusLow: parseInt(this.cmp.radiusLow.getValue()),
+			radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
+			level: level.getValue(),
+			levelName: level.getRawValue(),
+			parentId: parent[0].raw.id,
+			parentName: parent[0].raw.text,
+			parentLevel: parent[0].raw.level,
+			parentPath: parent[0].raw.path,
+			updateOrganisationUnit: false,
+			updateData: false,
+			updateLegend: false,
+			updateGui: false
+		};
+		
+		model.valueType = this.config.valueType || model.valueType;
+		model.indicatorGroup = this.config.indicatorGroup || model.indicatorGroup;
+		model.indicator = this.config.indicator || model.indicator;
+		model.dataElementGroup = this.config.dataElementGroup || model.dataElementGroup;
+		model.dataElement = this.config.dataElement || model.dataElement;
+		model.periodType = this.config.periodType || model.periodType;
+		model.period = this.config.period || model.period;
+		model.legendType = this.config.legendType || model.legendType;
+		model.legendSet = this.config.legendSet || model.legendSet;
+		model.classes = this.config.classes || model.classes;
+		model.method = this.config.method || model.method;
+		model.colorLow = this.config.colorLow || model.colorLow;
+		model.colorHigh = this.config.colorHigh || model.colorHigh;
+		model.colors = this.getColors(model.colorLow, model.colorHigh);
+		model.radiusLow = this.config.radiusLow || model.radiusLow;
+		model.radiusHigh = this.config.radiusHigh || model.radiusHigh;
+		model.level = this.config.level || model.level;
+		model.levelName = this.config.levelName || model.levelName;
+		model.parentId = this.config.parentId || model.parentId;
+		model.parentName = this.config.parentName || model.parentName;
+		model.parentLevel = this.config.parentLevel || model.parentLevel;
+		model.parentPath = this.config.parentPath || null;
+		model.updateOrganisationUnit = Ext.isDefined(this.config.updateOrganisationUnit) ? this.config.updateOrganisationUnit : false;
+		model.updateData = Ext.isDefined(this.config.updateData) ? this.config.updateData : false;
+		model.updateLegend = Ext.isDefined(this.config.updateLegend) ? this.config.updateLegend : false;
+		model.updateGui = Ext.isDefined(this.config.updateGui) ? this.config.updateGui : false;
+		
+		return model;
+	},
+	
+	validateModel: function(model) {
+		if (model.valueType === GIS.conf.finals.dimension.indicator.id) {
+			if (!model.indicatorGroup || !Ext.isString(model.indicatorGroup)) {
+				GIS.logg.push([model.indicatorGroup, this.xtype + '.indicatorGroup: string']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+			if (!model.indicator || !Ext.isString(model.indicator)) {
+				GIS.logg.push([model.indicator, this.xtype + '.indicator: string']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+		}
+		else if (model.valueType === GIS.conf.finals.dimension.dataElement.id) {
+			if (!model.dataElementGroup || !Ext.isString(model.dataElementGroup)) {
+				GIS.logg.push([model.dataElementGroup, this.xtype + '.dataElementGroup: string']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+			if (!model.dataElement || !Ext.isString(model.dataElement)) {
+				GIS.logg.push([model.dataElement, this.xtype + '.dataElement: string']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+		}
+		
+		if (!model.periodType || !Ext.isString(model.periodType)) {
+			GIS.logg.push([model.periodType, this.xtype + '.periodType: string']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!model.period || !Ext.isString(model.period)) {
+			GIS.logg.push([model.period, this.xtype + '.period: string']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		
+		if (model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			if (!model.classes || !Ext.isNumber(model.classes)) {
+				GIS.logg.push([model.classes, this.xtype + '.classes: number']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+			if (!model.method || !Ext.isNumber(model.method)) {
+				GIS.logg.push([model.method, this.xtype + '.method: number']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+			if (!model.colorLow || !Ext.isString(model.colorLow)) {
+				GIS.logg.push([model.colorLow, this.xtype + '.colorLow: string']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+			if (!model.radiusLow || !Ext.isNumber(model.radiusLow)) {
+				GIS.logg.push([model.radiusLow, this.xtype + '.radiusLow: number']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+			if (!model.colorHigh || !Ext.isString(model.colorHigh)) {
+				GIS.logg.push([model.colorHigh, this.xtype + '.colorHigh: string']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+			if (!model.radiusHigh || !Ext.isNumber(model.radiusHigh)) {
+				GIS.logg.push([model.radiusHigh, this.xtype + '.radiusHigh: number']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+		}
+		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {			
+			if (!model.legendSet || !Ext.isString(model.legendSet)) {
+				GIS.logg.push([model.legendSet, this.xtype + '.legendSet: string']);
+				//alert("validation failed"); //todo
+				return false;
+			}
+		}
+		
+		if (!model.level || !Ext.isNumber(model.level)) {
+			GIS.logg.push([model.level, this.xtype + '.level: number']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!model.levelName || !Ext.isString(model.levelName)) {
+			GIS.logg.push([model.levelName, this.xtype + '.levelName: string']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!model.parentId || !Ext.isString(model.parentId)) {
+			GIS.logg.push([model.parentId, this.xtype + '.parentId: string']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!model.parentName || !Ext.isString(model.parentName)) {
+			GIS.logg.push([model.parentName, this.xtype + '.parentName: string']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!model.parentLevel || !Ext.isNumber(model.parentLevel)) {
+			GIS.logg.push([model.parentLevel, this.xtype + '.parentLevel: number']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (model.parentLevel > model.level) {
+			GIS.logg.push([model.parentLevel, model.level, this.xtype + '.parentLevel: number <= ' + this.xtype + '.level']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		
+		if (!model.parentPath && model.updateGui) {
+			GIS.logg.push([model.parentpath, this.xtype + '.parentpath: string']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		
+		if (!model.updateOrganisationUnit && !model.updateData && !model.updateLegend) {
+			GIS.logg.push([model.updateOrganisationUnit, model.updateData, model.updateLegend, this.xtype + '.update ou/data/legend: true||true||true']);
+			return false;
+		}
+		
+		return true;
+	},
+	
+    loadOrganisationUnits: function() {
+        var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
+            'parentId=' + this.tmpModel.parentId +
+            '&level=' + this.tmpModel.level;
         this.setUrl(url);
     },
-
-    classify: function(exception, lockPosition, loaded) {
-        if (this.formValidation.validateForm.apply(this, [exception])) {
-            if (!this.layer.features.length && !loaded) {
-                this.loadGeoJson();
-            }
-            
-            GIS.mask.msg = GIS.i18n.loading;
-            GIS.mask.show();
-            
-            GIS.vars.lockPosition = lockPosition;
-            
-            if (this.mapView) {
-                if (this.mapView.longitude && this.mapView.latitude && this.mapView.zoom) {
-                    var point = GIS.util.getTransformedPointByXY(this.mapView.longitude, this.mapView.latitude);
-                    GIS.vars.map.setCenter(new OpenLayers.LonLat(point.x, point.y), this.mapView.zoom);
-                    GIS.vars.lockPosition = true;
-                }
-                this.mapView = false;
-            }
-            
-            if (this.updateValues) {
-                var dataUrl = this.valueType.isIndicator() ? 'getIndicatorMapValues' : 'getDataElementMapValues';
-                var params = {
-                    id: this.valueType.isIndicator() ? this.cmp.indicator.getValue() : this.cmp.dataElement.getValue(),
-                    periodId: this.cmp.period.getValue(),
-                    parentId: this.organisationUnitSelection.parent.id,
-                    level: this.organisationUnitSelection.level.level
-                };
-                
-                Ext.Ajax.request({
-                    url: GIS.conf.path_mapping + dataUrl + GIS.conf.type,
-                    params: params,
-                    disableCaching: false,
-                    scope: this,
-                    success: function(r) {
-                        var mapvalues = GIS.util.mapValueDecode(r);
-                        this.layer.features = this.featureStorage.slice(0);
-                        
-                        if (mapvalues.length === 0) {
-                            Ext.message.msg(false, GIS.i18n.current_selection_no_data);
-                            GIS.mask.hide();
-                            return;
-                        }
-                        
-                        for (var i = 0; i < this.layer.features.length; i++) {
-                            this.layer.features[i].attributes.value = 0;
-                            for (var j = 0; j < mapvalues.length; j++) {
-                                if (this.layer.features[i].attributes.id == mapvalues[j].oi) {
-                                    this.layer.features[i].attributes.value = parseFloat(mapvalues[j].v);
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        this.updateValues = false;
-                        this.applyValues();
-                    }
-                });
-            }
-            else {
-                this.applyValues();
-            }
-        }
-    },
     
-    applyValues: function() {
-        for (var i = 0; i < this.layer.features.length; i++) {
-            var f = this.layer.features[i];
-            if (!f.attributes.value) {
-                this.layer.features.splice(i,1);
-                i--;
-            }
-            else {
-                f.attributes.labelString = f.attributes.name + ' (' + f.attributes.value + ')';
-                f.attributes.fixedName = GIS.util.cutString(f.attributes.name, 30);
-            }
-        }
-        if (!this.layer.features.length) {
-            GIS.mask.hide();
-            Ext.message.msg(false, GIS.i18n.no_values_found);
-            return;
-        }
-        
-        this.button.menu.find('name','history')[0].addItem(this);
-        
+    loadData: function() {
+		var type = this.tmpModel.valueType,
+			dataUrl = '../api/mapValues/' + GIS.conf.finals.dimension[type].param + '.json',
+			indicator = GIS.conf.finals.dimension.indicator,
+			dataElement = GIS.conf.finals.dimension.dataElement,
+			period = GIS.conf.finals.dimension.period,
+			organisationUnit = GIS.conf.finals.dimension.organisationUnit,
+			params = {};
+		
+		params[type === indicator.id ? indicator.param : dataElement.param] = this.tmpModel[type];
+		params[period.param] = this.tmpModel.period;
+		params[organisationUnit.param] = this.tmpModel.parentId;
+		params.level = this.tmpModel.level;
+		
+		Ext.Ajax.request({
+			url: GIS.conf.url.path_gis + dataUrl,
+			params: params,
+			disableCaching: false,
+			scope: this,
+			success: function(r) {
+				var values = Ext.decode(r.responseText),
+					featureMap = {},
+					valueMap = {},
+					features = [];
+					
+				if (values.length === 0) {
+					alert("no data"); //todo Ext.message.msg(false, GIS.i18n.current_selection_no_data);
+					GIS.mask.hide();
+					return;
+				}
+				
+				for (var i = 0; i < this.layer.features.length; i++) {
+					var iid = this.layer.features[i].attributes.internalId;
+					featureMap[iid] = true;
+				}
+				for (var i = 0; i < values.length; i++) {
+					var iid = values[i].organisationUnitId,
+						value = values[i].value;						
+					valueMap[iid] = value;
+				}
+				
+				for (var i = 0; i < this.layer.features.length; i++) {
+					var feature = this.layer.features[i],
+						iid = feature.attributes.internalId;						
+					if (featureMap.hasOwnProperty(iid) && valueMap.hasOwnProperty(iid)) {
+						feature.attributes.value = valueMap[iid];
+						feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
+						features.push(feature);
+					}
+				}
+				
+				this.layer.features = features;
+				
+				this.loadLegend();
+			}
+		});
+	},
+	
+	loadLegend: function() {
 		var options = {
-            indicator: 'value',
-            method: this.cmp.method.getValue(),
-            numClasses: this.cmp.classes.getValue(),
-            colors: this.getColors(),
-            minSize: parseInt(this.cmp.radiusLow.getValue()),
-            maxSize: parseInt(this.cmp.radiusHigh.getValue())
+            indicator: GIS.conf.finals.widget.value,
+            method: this.tmpModel.method,
+            numClasses: this.tmpModel.classes,
+            colors: this.tmpModel.colors,
+            minSize: this.tmpModel.radiusLow,
+            maxSize: this.tmpModel.radiusHigh
         };
-        
-        GIS.vars.activeWidget = this;
+
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
+        this.afterLoad();		
+	},
+	
+    execute: function() {
+		this.tmpModel = this.getModel();
+		
+		if (!this.validateModel(this.tmpModel)) {
+			return;
+		}
+				
+		GIS.mask.msg = GIS.i18n.loading;
+		GIS.mask.show();
+		
+		if (this.tmpModel.updateGui) {
+			this.setGui();
+		}
+		
+		if (this.tmpModel.updateOrganisationUnit) {
+			this.loadOrganisationUnits();
+		}
+		else if (this.tmpModel.updateData) {
+			this.loadData();
+		}
+		else if (this.tmpModel.updateLegend) {
+			this.loadLegend();
+		}
+	},
+	
+	afterLoad: function() {
+		this.model = this.tmpModel;
+		this.config = {};
+		
+		this.layer.setLayerOpacity();
+		
+		this.menu.enableItems();
+		
+		// Update search window
+		this.store.features.loadFeatures(this.layer.features); 
+		
+		// Update filter window
+		if (this.cmp.filterWindow && this.cmp.filterWindow.isVisible()) { 
+			this.cmp.filterWindow.filter();
+		}
+        
+        // Set favorite position, else zoom to visible extent
+        if (this.model.longitude && this.model.latitude && this.model.zoom) {
+			var lonLat = GIS.util.map.getLonLatByXY(this.model.longitude, this.model.latitude);
+			GIS.map.setCenter(lonLat, this.model.zoom);
+		}
+		else if (this.model.updateOrganisationUnit) {
+			GIS.util.map.zoomToVisibleExtent();
+		}
+		
+		// Legend
+		GIS.cmp.region.east.doLayout();
+		
         GIS.mask.hide();
-    },
+	},
     
     onRender: function(ct, position) {
         mapfish.widgets.geostat.Thematic2.superclass.onRender.apply(this, arguments);
-
-		var coreOptions = {
-            'layer': this.layer,
-            'format': this.format,
-            'url': this.url,
-            'requestSuccess': this.requestSuccess.createDelegate(this),
-            'requestFailure': this.requestFailure.createDelegate(this),
-            'featureSelection': this.featureSelection,
-            'nameAttribute': this.nameAttribute,
-            'legendDiv': this.legendDiv,
-            'labelGenerator': this.labelGenerator
-        };
-
-        this.coreComp = new mapfish.GeoStat.Thematic2(this.map, coreOptions);
     }
 });

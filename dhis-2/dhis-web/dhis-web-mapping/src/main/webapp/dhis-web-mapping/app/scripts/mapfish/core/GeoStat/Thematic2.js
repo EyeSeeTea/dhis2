@@ -61,12 +61,16 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
     },
     
     createColorInterpolation: function() {
-        var numColors = this.classification.bins.length;
-		var mapLegendType = this.widget.cmp.mapLegendType.getValue();
+        var numColors = this.classification.bins.length,
+			legendType = this.widget.tmpModel.legendType;
         this.widget.imageLegend = [];
         
-        this.colorInterpolation = mapLegendType == GIS.conf.map_legendset_type_automatic ?
-            mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors) : this.widget.colorInterpolation;
+        if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
+		}
+		else if (legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			this.colorInterpolation = this.widget.colorInterpolation;
+		}
             
         for (var i = 0; i < this.classification.bins.length; i++) {
             this.widget.imageLegend.push({
@@ -83,7 +87,7 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
         }
         
         var distOptions = {
-            'labelGenerator': this.options.labelGenerator
+            labelGenerator: this.options.labelGenerator
         };
         var dist = new mapfish.GeoStat.Distribution(values, distOptions);
 
@@ -93,14 +97,14 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
         this.classification = dist.classify(
             this.method,
             this.numClasses,
-            null
+            null,
+            this.widget
         );
 
         this.createColorInterpolation();
     },
 
     applyClassification: function(options, widget) {
-        this.widget = widget;
         this.updateOptions(options);
         
 		var calculateRadius = OpenLayers.Function.bind(
@@ -114,7 +118,7 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
 		this.extendStyle(null, {'pointRadius': '${calculateRadius}'}, {'calculateRadius': calculateRadius});
     
         var boundsArray = this.classification.getBoundsArray();
-        var rules = new Array(boundsArray.length-1);
+        var rules = new Array(boundsArray.length-1);        
         for (var i = 0; i < boundsArray.length-1; i++) {
             var rule = new OpenLayers.Rule({
                 symbolizer: {fillColor: this.colorInterpolation[i].toHexString()},
@@ -137,8 +141,8 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
             return;
         }
         
-        var info = this.widget.formValues.getLegendInfo.call(this.widget);
-        var element;
+        var info = this.widget.formValues.getLegendInfo.call(this.widget),
+			element;
         this.legendDiv.update("");
         
         for (var p in info) {
@@ -157,7 +161,7 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
         element.style.height = "5px";
         this.legendDiv.appendChild(element);
         
-        if (GIS.vars.activeWidget.legend.value == GIS.conf.map_legendset_type_automatic) {        
+        if (this.widget.tmpModel.legendType === GIS.conf.finals.widget.legendtype_automatic) {
             for (var i = 0; i < this.classification.bins.length; i++) {
                 var element = document.createElement("div");
                 element.style.backgroundColor = this.colorInterpolation[i].toHexString();
@@ -176,7 +180,7 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
                 this.legendDiv.appendChild(element);
             }
         }
-        else if (GIS.vars.activeWidget.legend.value == GIS.conf.map_legendset_type_predefined) {        
+        else if (this.widget.tmpModel.legendType === GIS.conf.finals.widget.legendtype_predefined) {
             for (var i = 0; i < this.classification.bins.length; i++) {
                 var element = document.createElement("div");
                 element.style.backgroundColor = this.colorInterpolation[i].toHexString();

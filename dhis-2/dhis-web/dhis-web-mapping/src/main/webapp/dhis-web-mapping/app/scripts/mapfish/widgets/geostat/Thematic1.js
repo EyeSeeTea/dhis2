@@ -1193,7 +1193,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			};
 			
 			// Drill or float
-			drill = function(direction) {				
+			drill = function(direction) {
 				var store = GIS.store.organisationUnitLevels;
 				
 				store.loadFn( function() {
