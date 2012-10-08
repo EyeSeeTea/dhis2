@@ -67,6 +67,20 @@ GIS.conf = {
 			{id: 'FinancialJuly', name: 'FinancialJuly'},
 			{id: 'FinancialApril', name: 'FinancialApril'}
 		]
+	},
+	opacity: {
+		items: [
+			{text: '0.1', iconCls: 'gis-menu-item-icon-opacity10'},
+			{text: '0.2', iconCls: 'gis-menu-item-icon-opacity20'},
+			{text: '0.3', iconCls: 'gis-menu-item-icon-opacity30'},
+			{text: '0.4', iconCls: 'gis-menu-item-icon-opacity40'},
+			{text: '0.5', iconCls: 'gis-menu-item-icon-opacity50'},
+			{text: '0.6', iconCls: 'gis-menu-item-icon-opacity60'},
+			{text: '0.7', iconCls: 'gis-menu-item-icon-opacity70'},
+			{text: '0.8', iconCls: 'gis-menu-item-icon-opacity80'},
+			{text: '0.9', iconCls: 'gis-menu-item-icon-opacity90'},
+			{text: '1.0', iconCls: 'gis-menu-item-icon-opacity100'}
+		]
 	}
 };
 
@@ -289,7 +303,7 @@ Ext.onReady( function() {
     GIS.util.map.getLonLatByXY = function(x, y) {
 		var point = GIS.util.map.getTransformedPointByXY(x, y);		
 		return new OpenLayers.LonLat(point.x, point.y);
-	};	
+	};
 	
 	GIS.util.geojson.decode = function(doc, widget) {
 		var geojson = {};
@@ -697,6 +711,7 @@ Ext.onReady( function() {
     // Objects
     
     GIS.obj.LayerMenu = function(base, cls) {
+		var layer = base.layer;
 		return Ext.create('Ext.menu.Menu', {
 			shadow: false,
 			showSeparator: false,
@@ -783,7 +798,16 @@ Ext.onReady( function() {
 					cls: 'gis-menu-item-last',
 					menu: Ext.create('Ext.menu.Menu', {
 						shadow: false,
-						showSeparator: false
+						showSeparator: false,
+						defaults: {
+							minWidth: 70
+						},
+						items: GIS.conf.opacity.items,
+						listeners: {
+							click: function(menu, item) {
+								layer.setOpacity(item.text);
+							}
+						}
 					})
 				},
 				{

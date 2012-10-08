@@ -1444,6 +1444,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		if (this.cmp.filterWindow) {
 			this.cmp.filterWindow.destroy();
 		}
+		if (this.cmp.labelWindow) {
+			this.cmp.labelWindow.destroy();
+		}
 		
 		this.config = {};
 		this.tmpModel = {};
