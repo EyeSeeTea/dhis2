@@ -141,14 +141,15 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
             return;
         }
         
-        var info = this.widget.formValues.getLegendInfo.call(this.widget),
+        var config = this.widget.getLegendConfig(),
 			element;
+			
         this.legendDiv.update("");
         
-        for (var p in info) {
+        for (var key in config) {
             element = document.createElement("div");
             element.style.height = "14px";
-            element.innerHTML = info[p];
+            element.innerHTML = config[key];
             this.legendDiv.appendChild(element);
             
             element = document.createElement("div");

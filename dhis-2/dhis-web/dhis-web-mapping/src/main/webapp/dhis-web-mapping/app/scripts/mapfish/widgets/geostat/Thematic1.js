@@ -1355,15 +1355,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			}
 		});
 	},
-    
-    formValues: {
-        getLegendInfo: function() {
-            return {
-                name: this.tmpModel.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-                time: this.cmp.period.getRawValue(),
-                map: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
-            };
-        }
+	
+	getLegendConfig: function() {
+		return {
+			what: this.tmpModel.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+			when: this.cmp.period.getRawValue(),
+			where: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
+		};
+	},
         //,
         
         //getImageExportValues: function() {
@@ -1373,8 +1372,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				//dateValue: this.cmp.period.getRawValue()
 			//};
 		//},
-	},
-	
+		
 	reset: function() {
 		// Components
 		this.cmp.valueType.reset();
