@@ -1373,48 +1373,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				//dateValue: this.cmp.period.getRawValue()
 			//};
 		//},
-        
-        //clearForm: function(clearLayer) {
-            //this.cmp.mapview.clearValue();
-            
-            //this.cmp.valueType.setValue(GIS.conf.map_value_type_indicator);
-            //this.valueType.setIndicator();
-            //this.prepareMapViewValueType();
-            //this.cmp.indicatorGroup.clearValue();
-            //this.cmp.indicator.clearValue();
-            //this.cmp.dataElementGroup.clearValue();
-            //this.cmp.dataElement.clearValue();
-            
-            //this.prepareMapViewPeriod();
-            //this.cmp.periodType.clearValue();
-            //this.cmp.period.clearValue();
-            
-            //this.cmp.level.clearValue();
-            //this.cmp.parent.reset();
-            
-            //this.legend.reset();
-            //this.prepareMapViewLegend();
-            //this.cmp.method.setValue(this.legend.method);
-            //this.cmp.classes.setValue(this.legend.classes);
-            //this.cmp.bounds.reset();
-            
-            //this.cmp.startColor.setValue('#FF0000');
-            //this.cmp.endColor.setValue('#FFFF00');
-            
-            //this.cmp.radiusLow.reset();
-            //this.cmp.radiusHigh.reset();
-            
-            //this.window.cmp.apply.disable();
-            
-            //if (clearLayer) {            
-                //document.getElementById(this.legendDiv).innerHTML = '';                
-                //this.layer.destroyFeatures();
-                //this.layer.setVisibility(false);
-            //}
-        //}
 	},
 	
 	reset: function() {
+		// Components
 		this.cmp.valueType.reset();
 		this.toggler.valueType(GIS.conf.finals.dimension.indicator.id);
 		
@@ -1438,6 +1400,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.cmp.level.clearValue();
 		this.cmp.parent.reset();
 		
+		// Layer options
 		if (this.cmp.searchWindow) {
 			this.cmp.searchWindow.destroy();
 		}
@@ -1448,16 +1411,19 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.cmp.labelWindow.destroy();
 		}
 		
+		// Model
 		this.config = {};
 		this.tmpModel = {};
 		this.model = {};
 		
+		// Layer
 		this.layer.destroyFeatures();
 		this.features = this.layer.features.slice(0);
-		this.store.features.loadFeatures();
-		
-		document.getElementById(this.legendDiv).innerHTML = '';
+		this.store.features.loadFeatures();		
 		this.layer.setVisibility(false);
+		
+		// Legend
+		document.getElementById(this.legendDiv).innerHTML = '';
 	},
 	
 	setConfig: function(config) {
