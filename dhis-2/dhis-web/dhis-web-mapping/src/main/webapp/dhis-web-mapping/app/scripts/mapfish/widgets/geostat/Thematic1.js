@@ -1495,7 +1495,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.cmp.radiusLow.setValue(model.radiusLow);
 			this.cmp.radiusHigh.setValue(model.radiusHigh);
 		}
-		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) { //todo
 			//store.loadFn( function() {
 				//this.cmp.legendSet.setValue(model.legendSet);
 			//});

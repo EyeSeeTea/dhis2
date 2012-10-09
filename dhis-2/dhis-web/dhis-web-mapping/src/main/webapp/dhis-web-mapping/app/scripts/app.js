@@ -510,7 +510,8 @@ Ext.onReady( function() {
     GIS.map.layerController.layers = new OpenLayers.Control.Button({
 		displayClass: 'olControlButton',
 		trigger: function() {
-			alert('clicky');
+			GIS.map.layerTreeWindow = GIS.map.layerTreeWindow || new GIS.obj.LayerTreeWindow();
+			GIS.map.layerTreeWindow.show();
 		}
 	});
     GIS.map.layerController.layersPanel = new OpenLayers.Control.Panel({
@@ -520,6 +521,106 @@ Ext.onReady( function() {
     GIS.map.addControl(GIS.map.layerController.layersPanel);
     GIS.map.layerController.layersPanel.div.className += ' layers';
     GIS.map.layerController.layersPanel.div.childNodes[0].className += ' layersButton';
+    
+    // Layer tree    
+
+	GIS.obj.LayerTreeWindow = function() {
+		var tree,
+			defaultMenu,
+			treeClickHandler,
+			window;
+			
+		tree = Ext.create('Ext.tree.Panel', {
+			lines: false,
+			rootVisible: false,
+			multiSelect: false,
+			root: {
+				expanded: true,
+				children: [
+					{
+						nodeType: 'gx_baselayercontainer',
+						expanded: true,
+						text: GIS.i18n.baselayers
+					},
+					//{
+						//nodeType: 'gx_overlaylayercontainer',
+						//text: G.i18n.overlays_
+					//},
+					//{
+						//nodeType: 'gx_layer',
+						//layer: GIS.base.boundary.layer,
+						//iconCls: 'treepanel-node-icon-boundary'
+					//},
+					{
+						nodeType: 'gx_layer',
+						layer: GIS.base.thematic1.layer,
+						iconCls: 'treepanel-node-icon-thematic1'
+					},
+					{
+						nodeType: 'gx_layer',
+						layer: GIS.base.thematic2.layer,
+						iconCls: 'treepanel-node-icon-thematic2'
+					}
+					//{
+						//nodeType: 'gx_layer',
+						//layer: G.conf.symbol_layer,
+						//iconCls: 'treepanel-node-icon-symbol'
+					//},
+					//{
+						//nodeType: 'gx_layer',
+						//layer: G.conf.centroid_layer,
+						//iconCls: 'treepanel-node-icon-centroid'
+					//}
+				]
+			},
+			listeners: {
+				contextmenu: function(node, e) {
+					treeClickHandler(node, e);
+				},
+				select: function(node, e) {
+					treeClickHandler(node, e);
+				}
+			}
+		});
+        
+        treeClickHandler = function(node, e) {
+			defaultMenu.showAt(e.getXY());
+        };
+		
+		defaultMenu = Ext.create('Ext.menu.Menu', {
+            items: [
+                {
+                    text: 'Opacity',
+                    iconCls: 'menu-layeroptions-opacity',
+                    menu: { 
+                        items: GIS.conf.opacity.items,
+                        listeners: {
+                            click: function(item) {
+								console.log(item);
+                                //item.parentMenu.parentMenu.contextNode.layer.setOpacity(item.text);
+                            }
+                        }
+                    }
+                }
+            ]
+        });
+        
+        window = Ext.create('Ext.window.Window', {
+			title: 'Layer overview',
+			layout: 'fit',
+			iconCls: 'gis-window-title-icon-layers',
+			cls: 'gis-container-default',
+			width: GIS.conf.layout.tool.window_width,
+			items: tree,
+			listeners: {
+				render: function() {
+					GIS.util.gui.window.setPositionTopRight(this);
+				}
+			}
+		});
+		
+		return window;
+	};    
     
     // Base layers
     

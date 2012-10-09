@@ -475,6 +475,9 @@ html * {
 .gis-window-title-icon-information {
 	background: url('../images/information_14.png') no-repeat;
 }
+.gis-window-title-icon-layers {
+	background: url('../images/information_14.png') no-repeat;
+}
 
 /* Grid */
 
