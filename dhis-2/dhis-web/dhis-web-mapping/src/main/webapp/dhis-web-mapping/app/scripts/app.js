@@ -433,7 +433,6 @@ Ext.onReady( function() {
 			window;
 		
 		for (var i = 0; i < layers.length; i++) {
-console.log(layers[i].base.id + '_14.png');			
 			items.push( Ext.create('Ext.panel.Panel', {
 				cls: 'gis-container-inner',
 				height: 26,
@@ -441,7 +440,7 @@ console.log(layers[i].base.id + '_14.png');
 					{
 						xtype: 'layeritempanel',
 						layer: layers[i],
-						text: layers[i].name,
+						text: layers[i].base.name,
 						imageUrl: 'images/' + layers[i].base.id + '_14.png'
 					}
 				]
