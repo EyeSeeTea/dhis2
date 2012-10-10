@@ -594,96 +594,22 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				}
 			}
         });
-        
-        this.cmp.colorLow = Ext.create('Ext.button.Button', {
-			width: 109,
-			height: 22,
+		
+		this.cmp.colorLow = Ext.create('Ext.ux.button.ColorButton', {
 			style: 'margin-right: 3px',
-			defaultValue: null,
 			value: 'ff0000',
-			getValue: function() {
-				return this.value;
-			},
-			setValue: function(color) {
-				this.value = color;
-				if (Ext.isDefined(this.getEl())) {
-					this.getEl().dom.style.background = '#' + color;
-				}
-			},
-			reset: function() {
-				this.setValue(this.defaultValue);
-			},
-			menu: {
-				showSeparator: false,
-				items: {
-					xtype: 'colorpicker',
-					closeAction: 'hide',
-					listeners: {
-						select: {
-							scope: this,
-							fn: function(cp, color) {
-								this.cmp.colorLow.setValue(color);
-								this.cmp.colorLow.menu.hide();
-								
-								this.config.updateLegend = true;
-							}
-						}
-					}
-				}
-			},
-			listeners: {
-				added: function() {
-					this.defaultValue = this.value;
-				},
-				render: function() {
-					this.setValue(this.value);
-				}
+			scope: this,
+			menuHandler: function() {
+				this.scope.updateLegend = true;
 			}
 		});
         
-        this.cmp.colorHigh = Ext.create('Ext.button.Button', {
-			width: 109,
-			height: 22,
+        this.cmp.colorHigh = Ext.create('Ext.ux.button.ColorButton', {
 			style: 'margin-right: 3px',
-			defaultValue: null,
 			value: '00ff00',
-			getValue: function() {
-				return this.value;
-			},
-			setValue: function(color) {
-				this.value = color;
-				if (Ext.isDefined(this.getEl())) {
-					this.getEl().dom.style.background = '#' + color;
-				}
-			},
-			reset: function() {
-				this.setValue(this.defaultValue);
-			},
-			menu: {
-				showSeparator: false,
-				items: {
-					xtype: 'colorpicker',
-					closeAction: 'hide',
-					listeners: {
-						select: {
-							scope: this,
-							fn: function(cp, color) {
-								this.cmp.colorHigh.setValue(color);
-								this.cmp.colorHigh.menu.hide();
-								
-								this.config.updateLegend = true;
-							}
-						}
-					}
-				}
-			},
-			listeners: {
-				added: function() {
-					this.defaultValue = this.value;
-				},
-				render: function() {
-					this.setValue(this.value);
-				}
+			scope: this,
+			menuHandler: function() {
+				this.config.updateLegend = true;
 			}
 		});
         
@@ -952,7 +878,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				showRelocate,
 				drill,
 				menu,
-				isPoint = feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class;				
+				isPoint = feature.geometry.CLASS_NAME === OpenLayers.Geometry.Point.CLASS_NAME;				
 			
 			// Relocate
 			showRelocate = function() {

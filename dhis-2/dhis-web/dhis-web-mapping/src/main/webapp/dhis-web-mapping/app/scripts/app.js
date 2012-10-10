@@ -4,9 +4,6 @@ GIS.conf = {
 			type_base: 'base',
 			type_vector: 'vector'
 		},
-		feature: {
-			type_point_class: 'OpenLayers.Geometry.Point'
-		},
 		dimension: {
 			indicator: {
 				id: 'indicator',
@@ -157,12 +154,6 @@ GIS.logg = [];
 
 Ext.onReady( function() {	
 	Ext.removeNode(document.getElementById('slow')); // remove element when ext is loaded
-	
-	Ext.Loader.setConfig({enabled: true, disableCaching: false});
-	Ext.Loader.setPath('GeoExt', 'scripts/geoext/src/GeoExt');
-	Ext.require([
-		'GeoExt.panel.Map'
-	]);
 	Ext.Ajax.method = 'GET';
     Ext.QuickTips.init();
 	document.body.oncontextmenu = function(){return false;};
@@ -418,10 +409,8 @@ Ext.onReady( function() {
 	};
     
     GIS.util.gui.window.setPositionTopRight = function(window) {		
-		var east = GIS.cmp.region.east,
-			center = GIS.cmp.region.center;
-				
-		window.setPosition((east.x + east.width) - (window.getWidth() + 7), center.y + 8);
+		var center = GIS.cmp.region.center;				
+		window.setPosition(GIS.gui.viewport.width - (window.width + 7), center.y + 8);
 	};
 	
 	GIS.util.gui.window.setPositionTopLeft = function(window) {
@@ -432,6 +421,110 @@ Ext.onReady( function() {
 		for (var i = 0; i < cmpArray.length; i++) {
 			cmpArray[i].queryMode = mode;
 		}
+	};
+    
+    // Layer tree    
+
+	GIS.obj.LayerTreeWindow = function() {
+		var tree,
+			defaultMenu,
+			treeClickHandler,
+			window;
+			
+		tree = Ext.create('Ext.tree.Panel', {
+			lines: false,
+			rootVisible: false,
+			multiSelect: false,
+			bodyStyle: 'padding-bottom:5px',
+			root: {
+				expanded: true,
+				children: [
+					{
+						nodeType: 'gx_baselayercontainer',
+						expanded: true,
+						text: GIS.i18n.baselayers
+					},
+					//{
+						//nodeType: 'gx_overlaylayercontainer',
+						//text: G.i18n.overlays_
+					//},
+					//{
+						//nodeType: 'gx_layer',
+						//layer: GIS.base.boundary.layer,
+						//iconCls: 'treepanel-node-icon-boundary'
+					//},
+					{
+						nodeType: 'gx_layer',
+						layer: GIS.base.thematic1.layer,
+						text: GIS.base.thematic1.name,
+						iconCls: 'treepanel-node-icon-thematic1',
+						leaf: true
+					},
+					{
+						nodeType: 'gx_layer',
+						layer: GIS.base.thematic2.layer,
+						iconCls: 'treepanel-node-icon-thematic2',
+						leaf: true
+					}
+					//{
+						//nodeType: 'gx_layer',
+						//layer: G.conf.symbol_layer,
+						//iconCls: 'treepanel-node-icon-symbol'
+					//},
+					//{
+						//nodeType: 'gx_layer',
+						//layer: G.conf.centroid_layer,
+						//iconCls: 'treepanel-node-icon-centroid'
+					//}
+				]
+			},
+			listeners: {
+				contextmenu: function(node, e) {
+					treeClickHandler(node, e);
+				},
+				select: function(node, e) {
+					treeClickHandler(node, e);
+				}
+			}
+		});
+        
+        treeClickHandler = function(node, e) {
+			defaultMenu.showAt(e.getXY());
+        };
+		
+		defaultMenu = Ext.create('Ext.menu.Menu', {
+            items: [
+                {
+                    text: 'Opacity',
+                    iconCls: 'menu-layeroptions-opacity',
+                    menu: { 
+                        items: GIS.conf.opacity.items,
+                        listeners: {
+                            click: function(item) {
+								console.log(item);
+                                //item.parentMenu.parentMenu.contextNode.layer.setOpacity(item.text);
+                            }
+                        }
+                    }
+                }
+            ]
+        });
+        
+        window = Ext.create('Ext.window.Window', {
+			title: 'Layer overview',
+			layout: 'fit',
+			iconCls: 'gis-window-title-icon-layers',
+			cls: 'gis-container-default',
+			width: GIS.conf.layout.tool.window_width,
+			items: tree,
+			listeners: {
+				render: function() {
+					GIS.util.gui.window.setPositionTopRight(this);
+				}
+			}
+		});
+		
+		return window;
 	};
 	
 	/* Map */
@@ -521,106 +614,6 @@ Ext.onReady( function() {
     GIS.map.addControl(GIS.map.layerController.layersPanel);
     GIS.map.layerController.layersPanel.div.className += ' layers';
     GIS.map.layerController.layersPanel.div.childNodes[0].className += ' layersButton';
-    
-    // Layer tree    
-
-	GIS.obj.LayerTreeWindow = function() {
-		var tree,
-			defaultMenu,
-			treeClickHandler,
-			window;
-			
-		tree = Ext.create('Ext.tree.Panel', {
-			lines: false,
-			rootVisible: false,
-			multiSelect: false,
-			root: {
-				expanded: true,
-				children: [
-					{
-						nodeType: 'gx_baselayercontainer',
-						expanded: true,
-						text: GIS.i18n.baselayers
-					},
-					//{
-						//nodeType: 'gx_overlaylayercontainer',
-						//text: G.i18n.overlays_
-					//},
-					//{
-						//nodeType: 'gx_layer',
-						//layer: GIS.base.boundary.layer,
-						//iconCls: 'treepanel-node-icon-boundary'
-					//},
-					{
-						nodeType: 'gx_layer',
-						layer: GIS.base.thematic1.layer,
-						iconCls: 'treepanel-node-icon-thematic1'
-					},
-					{
-						nodeType: 'gx_layer',
-						layer: GIS.base.thematic2.layer,
-						iconCls: 'treepanel-node-icon-thematic2'
-					}
-					//{
-						//nodeType: 'gx_layer',
-						//layer: G.conf.symbol_layer,
-						//iconCls: 'treepanel-node-icon-symbol'
-					//},
-					//{
-						//nodeType: 'gx_layer',
-						//layer: G.conf.centroid_layer,
-						//iconCls: 'treepanel-node-icon-centroid'
-					//}
-				]
-			},
-			listeners: {
-				contextmenu: function(node, e) {
-					treeClickHandler(node, e);
-				},
-				select: function(node, e) {
-					treeClickHandler(node, e);
-				}
-			}
-		});
-        
-        treeClickHandler = function(node, e) {
-			defaultMenu.showAt(e.getXY());
-        };
-		
-		defaultMenu = Ext.create('Ext.menu.Menu', {
-            items: [
-                {
-                    text: 'Opacity',
-                    iconCls: 'menu-layeroptions-opacity',
-                    menu: { 
-                        items: GIS.conf.opacity.items,
-                        listeners: {
-                            click: function(item) {
-								console.log(item);
-                                //item.parentMenu.parentMenu.contextNode.layer.setOpacity(item.text);
-                            }
-                        }
-                    }
-                }
-            ]
-        });
-        
-        window = Ext.create('Ext.window.Window', {
-			title: 'Layer overview',
-			layout: 'fit',
-			iconCls: 'gis-window-title-icon-layers',
-			cls: 'gis-container-default',
-			width: GIS.conf.layout.tool.window_width,
-			items: tree,
-			listeners: {
-				render: function() {
-					GIS.util.gui.window.setPositionTopRight(this);
-				}
-			}
-		});
-		
-		return window;
-	};    
     
     // Base layers
     
@@ -1019,41 +1012,9 @@ Ext.onReady( function() {
 			return;
 		}
 		
-		button = Ext.create('Ext.button.Button', {
+		button = Ext.create('Ext.ux.button.ColorButton', {
 			width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
-			height: 22,
-			value: '0000ff',
-			fieldLabel: GIS.i18n.highlight_color,
-			getValue: function() {
-				return this.value;
-			},
-			setValue: function(color) {
-				this.value = color;
-				if (Ext.isDefined(this.getEl())) {
-					this.getEl().dom.style.background = '#' + color;
-				}
-			},
-			menu: {
-				showSeparator: false,
-				items: {
-					xtype: 'colorpicker',
-					closeAction: 'hide',
-					listeners: {
-						select: function(cp, color) {
-							button.setValue(color);
-							button.menu.hide();
-						}
-					}
-				}
-			},
-			listeners: {
-				added: function() {
-					this.defaultValue = this.value;
-				},
-				render: function() {
-					this.setValue(this.value);
-				}
-			}
+			value: '0000ff'
 		});
 		
 		window = Ext.create('Ext.window.Window', {
@@ -1073,7 +1034,7 @@ Ext.onReady( function() {
 							items: [
 								{
 									cls: 'gis-panel-html-label',
-									html: 'Highlight color:',
+									html: GIS.i18n.highlight_color + ':',
 									width: GIS.conf.layout.tool.itemlabel_width
 								},
 								button
@@ -1131,7 +1092,7 @@ Ext.onReady( function() {
 									
 									layer.redraw();
 									
-									if (feature.geometry.CLASS_NAME === GIS.conf.finals.feature.type_point_class) {
+									if (feature.geometry.CLASS_NAME === OpenLayers.Geometry.Point.CLASS_NAME) {
 										symbolizer = new OpenLayers.Symbolizer.Point({
 											'pointRadius': 7,
 											'fillColor': '#' + color
@@ -1325,7 +1286,6 @@ Ext.onReady( function() {
 			disabled: true,
 			listeners: {
 				change: function() {
-					alert(1);
 					updateLabels();
 				}
 			}
