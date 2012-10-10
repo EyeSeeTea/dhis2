@@ -36,6 +36,7 @@ GIS.conf = {
 	url: {
 		path_api: '../../api/',
 		path_gis: '../',
+		path_scripts: 'scripts/',
 		google_terms: 'http://www.google.com/intl/en-US_US/help/terms_maps.html',
 		target_blank: '_blank'
 	},
@@ -1485,7 +1486,8 @@ Ext.onReady( function() {
                     {
                         title: 'Thematic layer 1 legend', //i18n
                         contentEl: 'thematic1Legend',
-                        bodyStyle: 'padding: 6px; border: 0 none'
+                        bodyStyle: 'padding: 6px; border: 0 none',
+                        collapsible: true
                     },
                     {
                         title: 'Thematic layer 2 legend', //i18n
