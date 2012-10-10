@@ -19,25 +19,26 @@ Ext.define('Ext.ux.button.ColorButton', {
 	},
 	menu: {},
 	menuHandler: function() {},
-	listeners: {
-		added: function() {
-			var that = this;			
-			this.defaultValue = this.value;			
-			this.menu = Ext.create('Ext.menu.Menu', {
-				showSeparator: false,
-				items: {
-					xtype: 'colorpicker',
-					closeAction: 'hide',
-					listeners: {
-						select: function(cp, color) {
-							that.setValue(color);
-							that.menu.hide();
-							that.menuHandler(cp, color);
-						}
+	initComponent: function() {
+		var that = this;			
+		this.defaultValue = this.value;			
+		this.menu = Ext.create('Ext.menu.Menu', {
+			showSeparator: false,
+			items: {
+				xtype: 'colorpicker',
+				closeAction: 'hide',
+				listeners: {
+					select: function(cp, color) {
+						that.setValue(color);
+						that.menu.hide();
+						that.menuHandler(cp, color);
 					}
 				}
-			});						
-		},
+			}
+		});
+		this.callParent();
+	},
+	listeners: {
 		render: function() {
 			this.setValue(this.value);
 		}

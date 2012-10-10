@@ -12,10 +12,7 @@
 </head>
 
 <body>
-	<div id="slow" style="height:200px; width: 200px; padding: 20px"></div>	
-	<script type="text/javascript">	
-		document.getElementById('slow').innerHTML = "<a href=''>SLOW CONNECTION?</a>";
-	</script>
+	<div id="slow" style="height:200px; width: 200px; padding: 20px"></div>
 	
 	<div id="boundaryLegend"></div>
 	<div id="thematic1Legend"></div>
@@ -23,7 +20,13 @@
 	<div id="facilityLegend"></div>
 	<div id="symbolLegend"></div>
 	
-	<script type="text/javascript">var GIS = {}; window.google = null;</script>
+	<script type="text/javascript">
+		var GIS = {};
+		window.google = null;
+		document.body.oncontextmenu = function(){return false;};
+		document.getElementById('slow').innerHTML = "<a href=''>SLOW CONNECTION?</a>";
+	</script>
+    
     <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
 
     <script type="text/javascript" src="scripts/ext/ext-all.js"></script>
@@ -31,7 +34,13 @@
 		Ext.Loader.setConfig({enabled: true, paths: {
 			'Ext.ux': 'scripts/ext-ux'
 		}});
-		Ext.require('Ext.ux.button.ColorButton');    
+		Ext.require([
+			'Ext.ux.button.ColorButton',
+			'Ext.ux.panel.LayerItemPanel'
+		]);
+		Ext.onReady( function() {	
+			Ext.removeNode(document.getElementById('slow'));
+		});
     </script>
     
     <script type="text/javascript" src="scripts/openlayers/OpenLayers.js"></script>

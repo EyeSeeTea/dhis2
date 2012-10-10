@@ -131,13 +131,16 @@ GIS.base = {
 		legendDiv: 'symbolLegend'
 	},
 	openStreetMap: {
-		id: 'OpenStreetMap'
+		id: 'openStreetMap',
+		name: 'OpenStreetMap'
 	},
 	googleStreets: {
-		id: 'Google Streets'
+		id: 'googleStreets',
+		name: 'Google Streets'
 	},
 	googleHybrid: {
-		id: 'Google Hybrid'
+		id: 'googleHybrid',
+		name: 'Google Hybrid'
 	}
 };
 
@@ -153,11 +156,9 @@ GIS.gui = {};
 
 GIS.logg = [];
 
-Ext.onReady( function() {	
-	Ext.removeNode(document.getElementById('slow')); // remove element when ext is loaded
+Ext.onReady( function() {
 	Ext.Ajax.method = 'GET';
     Ext.QuickTips.init();
-	document.body.oncontextmenu = function(){return false;};
 	
 	// Init
 	
@@ -427,97 +428,34 @@ Ext.onReady( function() {
     // Layer tree    
 
 	GIS.obj.LayerTreeWindow = function() {
-		var tree,
-			defaultMenu,
-			treeClickHandler,
+		var layers = GIS.map.layers,
+			items = [],
 			window;
-			
-		tree = Ext.create('Ext.tree.Panel', {
-			lines: false,
-			rootVisible: false,
-			multiSelect: false,
-			bodyStyle: 'padding-bottom:5px',
-			root: {
-				expanded: true,
-				children: [
-					{
-						nodeType: 'gx_baselayercontainer',
-						expanded: true,
-						text: GIS.i18n.baselayers
-					},
-					//{
-						//nodeType: 'gx_overlaylayercontainer',
-						//text: G.i18n.overlays_
-					//},
-					//{
-						//nodeType: 'gx_layer',
-						//layer: GIS.base.boundary.layer,
-						//iconCls: 'treepanel-node-icon-boundary'
-					//},
-					{
-						nodeType: 'gx_layer',
-						layer: GIS.base.thematic1.layer,
-						text: GIS.base.thematic1.name,
-						iconCls: 'treepanel-node-icon-thematic1',
-						leaf: true
-					},
-					{
-						nodeType: 'gx_layer',
-						layer: GIS.base.thematic2.layer,
-						iconCls: 'treepanel-node-icon-thematic2',
-						leaf: true
-					}
-					//{
-						//nodeType: 'gx_layer',
-						//layer: G.conf.symbol_layer,
-						//iconCls: 'treepanel-node-icon-symbol'
-					//},
-					//{
-						//nodeType: 'gx_layer',
-						//layer: G.conf.centroid_layer,
-						//iconCls: 'treepanel-node-icon-centroid'
-					//}
-				]
-			},
-			listeners: {
-				contextmenu: function(node, e) {
-					treeClickHandler(node, e);
-				},
-				select: function(node, e) {
-					treeClickHandler(node, e);
-				}
-			}
-		});
-        
-        treeClickHandler = function(node, e) {
-			defaultMenu.showAt(e.getXY());
-        };
 		
-		defaultMenu = Ext.create('Ext.menu.Menu', {
-            items: [
-                {
-                    text: 'Opacity',
-                    iconCls: 'menu-layeroptions-opacity',
-                    menu: { 
-                        items: GIS.conf.opacity.items,
-                        listeners: {
-                            click: function(item) {
-								console.log(item);
-                                //item.parentMenu.parentMenu.contextNode.layer.setOpacity(item.text);
-                            }
-                        }
-                    }
-                }
-            ]
-        });
+		for (var i = 0; i < layers.length; i++) {
+console.log(layers[i].base.id + '_14.png');			
+			items.push( Ext.create('Ext.panel.Panel', {
+				cls: 'gis-container-inner',
+				height: 26,
+				items: [
+					{
+						xtype: 'layeritempanel',
+						layer: layers[i],
+						text: layers[i].name,
+						imageUrl: 'images/' + layers[i].base.id + '_14.png'
+					}
+				]
+			}));
+		}	
         
         window = Ext.create('Ext.window.Window', {
 			title: 'Layer overview',
 			layout: 'fit',
 			iconCls: 'gis-window-title-icon-layers',
 			cls: 'gis-container-default',
+			closeAction: 'hide',
 			width: GIS.conf.layout.tool.window_width,
-			items: tree,
+			items: items,
 			listeners: {
 				render: function() {
 					GIS.util.gui.window.setPositionTopRight(this);
@@ -619,53 +557,33 @@ Ext.onReady( function() {
     // Base layers
     
     if (window.google) {
-        GIS.base.googleStreets.layer = new OpenLayers.Layer.Google(GIS.base.googleStreets.id, {
+		// Google Streets
+        GIS.base.googleStreets.layer = new OpenLayers.Layer.Google(GIS.base.googleStreets.name, {
 			numZoomLevels: 20,
 			animationEnabled: true
-		});        
+		});
+		GIS.base.googleStreets.layer.base = GIS.base.googleStreets;
         GIS.base.googleStreets.layer.layerType = GIS.conf.finals.layer.type_base;
         GIS.map.addLayer(GIS.base.googleStreets.layer);
         
-        GIS.base.googleHybrid.layer = new OpenLayers.Layer.Google(GIS.base.googleHybrid.id, {
+		// Google Hybrid
+        GIS.base.googleHybrid.layer = new OpenLayers.Layer.Google(GIS.base.googleHybrid.name, {
 			type: google.maps.MapTypeId.HYBRID,
 			numZoomLevels: 20,
 			animationEnabled: true
-		});        
+		});
+		GIS.base.googleHybrid.layer.base = GIS.base.googleHybrid;
         GIS.base.googleHybrid.layer.layerType = GIS.conf.finals.layer.type_base;
         GIS.map.addLayer(GIS.base.googleHybrid.layer);
     }
     
-    GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.id);
+    // OpenStreetMap
+    GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.name);
+    GIS.base.openStreetMap.layer.base = GIS.base.openStreetMap;
     GIS.base.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
     GIS.map.addLayer(GIS.base.openStreetMap.layer);
     
     // Vector layers
-    
-    //GIS.base.boundary.layer = new OpenLayers.Layer.Vector(GIS.i18n.boundary_layer, {
-        //strategies: [
-			//new OpenLayers.Strategy.Refresh({
-				//force:true
-			//})
-		//],
-        //styleMap: new OpenLayers.StyleMap({
-            //'default': new OpenLayers.Style(
-                //OpenLayers.Util.applyDefaults(
-					//{
-						//fillOpacity: 0,
-						//strokeColor: '#000',
-						//strokeWidth: 1,
-						//pointRadius: 5
-					//},
-					//OpenLayers.Feature.Vector.style['default']
-				//)
-            //)
-        //}),
-        //visibility: false,
-        //displayInLayerSwitcher: false,
-        //layerType: GIS.conf.finals.layer.type_vector,
-        //opacity: 1
-    //});
-    //GIS.map.addLayer(GIS.base.boundary.layer);
     
     GIS.base.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
         strategies: [
@@ -687,6 +605,7 @@ Ext.onReady( function() {
 		hasLabels: false
 		
     });
+    GIS.base.thematic1.layer.base = GIS.base.thematic1;
     GIS.map.addLayer(GIS.base.thematic1.layer);
     
     GIS.base.thematic2.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_2, {
@@ -709,6 +628,7 @@ Ext.onReady( function() {
 		hasLabels: false
 		
     });
+    GIS.base.thematic2.layer.base = GIS.base.thematic2;
     GIS.map.addLayer(GIS.base.thematic2.layer);
     
     // Stores
