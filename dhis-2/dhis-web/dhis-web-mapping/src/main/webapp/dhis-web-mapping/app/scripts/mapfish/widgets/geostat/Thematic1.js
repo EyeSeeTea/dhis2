@@ -878,7 +878,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				showRelocate,
 				drill,
 				menu,
-				isPoint = feature.geometry.CLASS_NAME === OpenLayers.Geometry.Point.CLASS_NAME;				
+				isPoint = feature.geometry.CLASS_NAME === GIS.conf.finals.openLayers.point_classname;
 			
 			// Relocate
 			showRelocate = function() {

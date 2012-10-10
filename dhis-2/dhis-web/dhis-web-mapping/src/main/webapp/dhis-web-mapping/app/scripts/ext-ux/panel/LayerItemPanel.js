@@ -40,12 +40,14 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 			listeners: {
 				change: function(chb, value) {
 					that.layer.setVisibility(value);
+					this.setValue(value + ' %');
 				}
 			}
 		});
 		
 		this.numberField = Ext.create('Ext.form.field.Number', {
-			width: 60,
+			width: 50,
+			height: 18,
 			minValue: 0,
 			maxValue: 100,
 			value: this.layer.layerOpacity * 100,
@@ -68,12 +70,12 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 				bodyStyle: 'padding-top: 4px'
 			},
 			{
-				width: 120,
+				width: 130,
 				html: this.text,
 				bodyStyle: 'padding-top: 4px'
 			},
 			{
-				width: 70,
+				width: 60,
 				items: this.numberField
 			}
 		];

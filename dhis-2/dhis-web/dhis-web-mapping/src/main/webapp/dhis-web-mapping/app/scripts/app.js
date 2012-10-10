@@ -27,6 +27,9 @@ GIS.conf = {
 			legendtype_automatic: 'automatic',
 			legendtype_predefined: 'predefined'
 		},
+		openLayers: {
+			point_classname: 'OpenLayers.Geometry.Point'
+		},
 		mapfish: {
 			classify_with_bounds: 1,
 			classify_by_equal_intervals: 2,
@@ -320,9 +323,10 @@ Ext.onReady( function() {
         };
         geojson.features = [];
         for (var i = 0; i < doc.geojson.length; i++) {
+console.log(doc.geojson[i].ty, parseInt(doc.geojson[i].ty), parseInt(doc.geojson[i].ty) === 1);
             geojson.features.push({
                 geometry: {
-                    type: doc.geojson[i].ty == 1 ? 'MultiPolygon' : 'Point',
+                    type: parseInt(doc.geojson[i].ty) === 1 ? 'MultiPolygon' : 'Point',
                     coordinates: doc.geojson[i].co
                 },
                 properties: {
@@ -435,7 +439,7 @@ Ext.onReady( function() {
 		for (var i = 0; i < layers.length; i++) {
 			items.push( Ext.create('Ext.panel.Panel', {
 				cls: 'gis-container-inner',
-				height: 26,
+				height: 24,
 				items: [
 					{
 						xtype: 'layeritempanel',
@@ -453,6 +457,7 @@ Ext.onReady( function() {
 			iconCls: 'gis-window-title-icon-layers',
 			cls: 'gis-container-default',
 			closeAction: 'hide',
+			resizable: false,
 			width: GIS.conf.layout.tool.window_width,
 			items: items,
 			listeners: {
