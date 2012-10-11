@@ -1093,6 +1093,29 @@ Ext.onReady( function() {
 		return window;
 	};
 	
+	GIS.obj.ToogleToolArray = function(panel) {			
+		panel.upTool = Ext.create('Ext.panel.Tool', {
+			type: 'up',
+			handler: function() {
+				panel.collapse();
+				this.setVisible(false);
+				panel.downTool.setVisible(true);
+			}
+		});
+		
+		panel.downTool = Ext.create('Ext.panel.Tool', {
+			type: 'down',
+			hidden: true,
+			handler: function() {
+				panel.expand();
+				this.setVisible(false);
+				panel.upTool.setVisible(true);
+			}
+		});
+		
+		return [panel.upTool, panel.downTool];
+	};
+	
 	/* Map */
 	
 	GIS.map = new OpenLayers.Map({
@@ -1435,41 +1458,33 @@ Ext.onReady( function() {
 						downTool: null,
                         items: new GIS.obj.LayersPanel(),
 						listeners: {
-							beforerender: function(p) {
-								var that = this;
-									
-								this.upTool = Ext.create('Ext.panel.Tool', {
-									type: 'up',
-									handler: function() {
-										that.collapse();
-										this.setVisible(false);
-										that.downTool.setVisible(true);
-									}
-								});
-								
-								this.downTool = Ext.create('Ext.panel.Tool', {
-									type: 'down',
-									hidden: true,
-									handler: function() {
-										that.expand();
-										this.setVisible(false);
-										that.upTool.setVisible(true);
-									}
-								});
-								
-								this.tools = [this.upTool, this.downTool];
+							beforerender: function() {
+								var items = new GIS.obj.ToogleToolArray(this);
+								this.tools = items;
 							}
 						}
                     },
                     {
                         title: 'Thematic layer 1 legend', //i18n
                         contentEl: 'thematic1Legend',
-                        bodyStyle: 'padding: 6px; border: 0 none'
+                        bodyStyle: 'padding: 6px; border: 0 none',
+						listeners: {
+							beforerender: function() {
+								var items = new GIS.obj.ToogleToolArray(this);
+								this.tools = items;
+							}
+						}
                     },
                     {
                         title: 'Thematic layer 2 legend', //i18n
                         contentEl: 'thematic2Legend',
-                        bodyStyle: 'padding: 6px; border: 0 none'
+                        bodyStyle: 'padding: 6px; border: 0 none',
+						listeners: {
+							beforerender: function() {
+								var items = new GIS.obj.ToogleToolArray(this);
+								this.tools = items;
+							}
+						}
                     }
 				],
 				listeners: {
