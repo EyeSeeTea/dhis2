@@ -1091,29 +1091,6 @@ Ext.onReady( function() {
 		
 		return window;
 	};
-	
-	GIS.obj.ToggleToolArray = function(panel) {			
-		panel.upTool = Ext.create('Ext.panel.Tool', {
-			type: 'up',
-			handler: function() {
-				panel.collapse();
-				this.setVisible(false);
-				panel.downTool.setVisible(true);
-			}
-		});
-		
-		panel.downTool = Ext.create('Ext.panel.Tool', {
-			type: 'down',
-			hidden: true,
-			handler: function() {
-				panel.expand();
-				this.setVisible(false);
-				panel.upTool.setVisible(true);
-			}
-		});
-		
-		return [panel.upTool, panel.downTool];
-	};
     
     GIS.obj.MapControlPanel = function(name) {
 		var button,
@@ -1438,34 +1415,22 @@ Ext.onReady( function() {
 						upTool: null,
 						downTool: null,
                         items: new GIS.obj.LayersPanel(),
-						listeners: {
-							beforerender: function() {
-								var items = new GIS.obj.ToggleToolArray(this);
-								this.tools = items;
-							}
-						}
+                        collapsible: true,
+                        animCollapse: false
                     },
                     {
                         title: 'Thematic layer 1 legend', //i18n
                         contentEl: 'thematic1Legend',
                         bodyStyle: 'padding: 6px; border: 0 none',
-						listeners: {
-							beforerender: function() {
-								var items = new GIS.obj.ToggleToolArray(this);
-								this.tools = items;
-							}
-						}
+                        collapsible: true,
+                        animCollapse: false
                     },
                     {
                         title: 'Thematic layer 2 legend', //i18n
                         contentEl: 'thematic2Legend',
                         bodyStyle: 'padding: 6px; border: 0 none',
-						listeners: {
-							beforerender: function() {
-								var items = new GIS.obj.ToggleToolArray(this);
-								this.tools = items;
-							}
-						}
+                        collapsible: true,
+                        animCollapse: false
                     }
 				],
 				listeners: {

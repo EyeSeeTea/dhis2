@@ -67,6 +67,7 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 		});
 		
 		this.numberField = Ext.create('Ext.form.field.Number', {
+			cls: 'gis-numberfield',
 			width: 47,
 			height: 18,
 			minValue: 0,

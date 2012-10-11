@@ -11,6 +11,7 @@
  * Window
  * TextField
  * Checkbox
+ * NumberField
 */
 
 /* General */
@@ -501,4 +502,11 @@ html * {
     background-image: url('../images/checkbox.gif');
     cursor: pointer;
     cursor: hand;
+}
+
+/* TextField */
+
+.gis-numberfield input.x-form-text {
+	border-top-left-radius: 2px;
+	border-bottom-left-radius: 2px;
 }
