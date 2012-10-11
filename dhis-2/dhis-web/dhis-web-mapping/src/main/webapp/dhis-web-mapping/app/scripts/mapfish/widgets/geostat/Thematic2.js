@@ -594,96 +594,22 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 				}
 			}
         });
-        
-        this.cmp.colorLow = Ext.create('Ext.button.Button', {
-			width: 109,
-			height: 22,
+		
+		this.cmp.colorLow = Ext.create('Ext.ux.button.ColorButton', {
 			style: 'margin-right: 3px',
-			defaultValue: null,
 			value: 'ff0000',
-			getValue: function() {
-				return this.value;
-			},
-			setValue: function(color) {
-				this.value = color;
-				if (Ext.isDefined(this.getEl())) {
-					this.getEl().dom.style.background = '#' + color;
-				}
-			},
-			reset: function() {
-				this.setValue(this.defaultValue);
-			},
-			menu: {
-				showSeparator: false,
-				items: {
-					xtype: 'colorpicker',
-					closeAction: 'hide',
-					listeners: {
-						select: {
-							scope: this,
-							fn: function(cp, color) {
-								this.cmp.colorLow.setValue(color);
-								this.cmp.colorLow.menu.hide();
-								
-								this.config.updateLegend = true;
-							}
-						}
-					}
-				}
-			},
-			listeners: {
-				added: function() {
-					this.defaultValue = this.value;
-				},
-				render: function() {
-					this.setValue(this.value);
-				}
+			scope: this,
+			menuHandler: function() {
+				this.scope.config.updateLegend = true;
 			}
 		});
         
-        this.cmp.colorHigh = Ext.create('Ext.button.Button', {
-			width: 109,
-			height: 22,
+        this.cmp.colorHigh = Ext.create('Ext.ux.button.ColorButton', {
 			style: 'margin-right: 3px',
-			defaultValue: null,
 			value: '00ff00',
-			getValue: function() {
-				return this.value;
-			},
-			setValue: function(color) {
-				this.value = color;
-				if (Ext.isDefined(this.getEl())) {
-					this.getEl().dom.style.background = '#' + color;
-				}
-			},
-			reset: function() {
-				this.setValue(this.defaultValue);
-			},
-			menu: {
-				showSeparator: false,
-				items: {
-					xtype: 'colorpicker',
-					closeAction: 'hide',
-					listeners: {
-						select: {
-							scope: this,
-							fn: function(cp, color) {
-								this.cmp.colorHigh.setValue(color);
-								this.cmp.colorHigh.menu.hide();
-								
-								this.config.updateLegend = true;
-							}
-						}
-					}
-				}
-			},
-			listeners: {
-				added: function() {
-					this.defaultValue = this.value;
-				},
-				render: function() {
-					this.setValue(this.value);
-				}
+			scope: this,
+			menuHandler: function() {
+				this.scope.config.updateLegend = true;
 			}
 		});
         
@@ -952,7 +878,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 				showRelocate,
 				drill,
 				menu,
-				isPoint = feature.geometry.CLASS_NAME === OpenLayers.Geometry.Point.CLASS_NAME;				
+				isPoint = feature.geometry.CLASS_NAME === GIS.conf.finals.openLayers.point_classname;
 			
 			// Relocate
 			showRelocate = function() {
@@ -1355,15 +1281,14 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			}
 		});
 	},
-    
-    formValues: {
-        getLegendInfo: function() {
-            return {
-                name: this.tmpModel.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-                time: this.cmp.period.getRawValue(),
-                map: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
-            };
-        }
+	
+	getLegendConfig: function() {
+		return {
+			what: this.tmpModel.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+			when: this.cmp.period.getRawValue(),
+			where: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
+		};
+	},
         //,
         
         //getImageExportValues: function() {
@@ -1373,48 +1298,9 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 				//dateValue: this.cmp.period.getRawValue()
 			//};
 		//},
-        
-        //clearForm: function(clearLayer) {
-            //this.cmp.mapview.clearValue();
-            
-            //this.cmp.valueType.setValue(GIS.conf.map_value_type_indicator);
-            //this.valueType.setIndicator();
-            //this.prepareMapViewValueType();
-            //this.cmp.indicatorGroup.clearValue();
-            //this.cmp.indicator.clearValue();
-            //this.cmp.dataElementGroup.clearValue();
-            //this.cmp.dataElement.clearValue();
-            
-            //this.prepareMapViewPeriod();
-            //this.cmp.periodType.clearValue();
-            //this.cmp.period.clearValue();
-            
-            //this.cmp.level.clearValue();
-            //this.cmp.parent.reset();
-            
-            //this.legend.reset();
-            //this.prepareMapViewLegend();
-            //this.cmp.method.setValue(this.legend.method);
-            //this.cmp.classes.setValue(this.legend.classes);
-            //this.cmp.bounds.reset();
-            
-            //this.cmp.startColor.setValue('#FF0000');
-            //this.cmp.endColor.setValue('#FFFF00');
-            
-            //this.cmp.radiusLow.reset();
-            //this.cmp.radiusHigh.reset();
-            
-            //this.window.cmp.apply.disable();
-            
-            //if (clearLayer) {            
-                //document.getElementById(this.legendDiv).innerHTML = '';                
-                //this.layer.destroyFeatures();
-                //this.layer.setVisibility(false);
-            //}
-        //}
-	},
-	
+		
 	reset: function() {
+		// Components
 		this.cmp.valueType.reset();
 		this.toggler.valueType(GIS.conf.finals.dimension.indicator.id);
 		
@@ -1438,6 +1324,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		this.cmp.level.clearValue();
 		this.cmp.parent.reset();
 		
+		// Layer options
 		if (this.cmp.searchWindow) {
 			this.cmp.searchWindow.destroy();
 		}
@@ -1448,16 +1335,19 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			this.cmp.labelWindow.destroy();
 		}
 		
+		// Model
 		this.config = {};
 		this.tmpModel = {};
 		this.model = {};
 		
+		// Layer
 		this.layer.destroyFeatures();
 		this.features = this.layer.features.slice(0);
-		this.store.features.loadFeatures();
-		
-		document.getElementById(this.legendDiv).innerHTML = '';
+		this.store.features.loadFeatures();		
 		this.layer.setVisibility(false);
+		
+		// Legend
+		document.getElementById(this.legendDiv).innerHTML = '';
 	},
 	
 	setConfig: function(config) {
@@ -1531,7 +1421,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			this.cmp.radiusLow.setValue(model.radiusLow);
 			this.cmp.radiusHigh.setValue(model.radiusHigh);
 		}
-		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) { //todo
 			//store.loadFn( function() {
 				//this.cmp.legendSet.setValue(model.legendSet);
 			//});
@@ -1865,6 +1755,9 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		
 		// Legend
 		GIS.cmp.region.east.doLayout();
+		
+		// Layer item
+		this.layer.item.setValue(true);
 		
         GIS.mask.hide();
 	},

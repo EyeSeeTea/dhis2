@@ -323,7 +323,6 @@ Ext.onReady( function() {
         };
         geojson.features = [];
         for (var i = 0; i < doc.geojson.length; i++) {
-console.log(doc.geojson[i].ty, parseInt(doc.geojson[i].ty), parseInt(doc.geojson[i].ty) === 1);
             geojson.features.push({
                 geometry: {
                     type: parseInt(doc.geojson[i].ty) === 1 ? 'MultiPolygon' : 'Point',
@@ -433,39 +432,60 @@ console.log(doc.geojson[i].ty, parseInt(doc.geojson[i].ty), parseInt(doc.geojson
 
 	GIS.obj.LayerTreeWindow = function() {
 		var layers = GIS.map.layers,
+			layer,
 			items = [],
+			item,
 			window;
 		
 		for (var i = 0; i < layers.length; i++) {
-			items.push( Ext.create('Ext.panel.Panel', {
+			layer = layers[i];
+			item = Ext.create('Ext.ux.panel.LayerItemPanel', {
 				cls: 'gis-container-inner',
-				height: 24,
-				items: [
-					{
-						xtype: 'layeritempanel',
-						layer: layers[i],
-						text: layers[i].base.name,
-						imageUrl: 'images/' + layers[i].base.id + '_14.png'
-					}
-				]
-			}));
-		}	
+				height: 23,
+				layer: layer,
+				text: layer.base.name,
+				imageUrl: 'images/' + layer.base.id + '_14.png',
+				value: layer.base.id === GIS.base.googleStreets.id ? true : false,
+				opacity: layer.layerType === GIS.conf.finals.layer.type_base ? 100 : 80,
+				numberFieldDisabled: layer.base.id !== GIS.base.googleStreets.id
+			});
+			layer.item = item;
+			items.push(layer.item);
+		}
         
-        window = Ext.create('Ext.window.Window', {
-			title: 'Layer overview',
+        window = Ext.create('Ext.panel.Panel', {
+			renderTo: 'layerItems',
 			layout: 'fit',
-			iconCls: 'gis-window-title-icon-layers',
-			cls: 'gis-container-default',
-			closeAction: 'hide',
-			resizable: false,
-			width: GIS.conf.layout.tool.window_width,
-			items: items,
-			listeners: {
-				render: function() {
-					GIS.util.gui.window.setPositionTopRight(this);
-				}
+			cls: 'gis-container-inner',
+			items: {
+				cls: 'gis-container-inner',
+				items: items
 			}
+			//listeners: {
+				//render: function() {
+					//GIS.util.gui.window.setPositionTopRight(this);
+				//}
+			//}
 		});
+        
+        //window = Ext.create('Ext.window.Window', {
+			//title: 'Layer overview',
+			//layout: 'fit',
+			//iconCls: 'gis-window-title-icon-layers',
+			//cls: 'gis-container-default',
+			//closeAction: 'hide',
+			//resizable: false,
+			//width: GIS.conf.layout.tool.window_width,
+			//items: {
+				//cls: 'gis-container-inner',
+				//items: items
+			//},
+			//listeners: {
+				//render: function() {
+					//GIS.util.gui.window.setPositionTopRight(this);
+				//}
+			//}
+		//});
 		
 		return window;
 	};
@@ -566,8 +586,15 @@ console.log(doc.geojson[i].ty, parseInt(doc.geojson[i].ty), parseInt(doc.geojson
 			numZoomLevels: 20,
 			animationEnabled: true
 		});
-		GIS.base.googleStreets.layer.base = GIS.base.googleStreets;
+		GIS.base.googleStreets.layer.layerOpacity = 0.8;
+		GIS.base.googleStreets.layer.setLayerOpacity = function(number) {
+			if (number) {
+				this.layerOpacity = parseFloat(number);
+			}
+			this.setOpacity(this.layerOpacity);
+		};
         GIS.base.googleStreets.layer.layerType = GIS.conf.finals.layer.type_base;
+		GIS.base.googleStreets.layer.base = GIS.base.googleStreets;
         GIS.map.addLayer(GIS.base.googleStreets.layer);
         
 		// Google Hybrid
@@ -576,6 +603,13 @@ console.log(doc.geojson[i].ty, parseInt(doc.geojson[i].ty), parseInt(doc.geojson
 			numZoomLevels: 20,
 			animationEnabled: true
 		});
+		GIS.base.googleHybrid.layer.layerOpacity = 0.8;
+		GIS.base.googleHybrid.layer.setLayerOpacity = function(number) {
+			if (number) {
+				this.layerOpacity = parseFloat(number);
+			}
+			this.setOpacity(this.layerOpacity);
+		};
 		GIS.base.googleHybrid.layer.base = GIS.base.googleHybrid;
         GIS.base.googleHybrid.layer.layerType = GIS.conf.finals.layer.type_base;
         GIS.map.addLayer(GIS.base.googleHybrid.layer);
@@ -583,6 +617,13 @@ console.log(doc.geojson[i].ty, parseInt(doc.geojson[i].ty), parseInt(doc.geojson
     
     // OpenStreetMap
     GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.name);
+	GIS.base.openStreetMap.layer.layerOpacity = 0.8;
+	GIS.base.openStreetMap.layer.setLayerOpacity = function(number) {
+		if (number) {
+			this.layerOpacity = parseFloat(number);
+		}
+		this.setOpacity(this.layerOpacity);
+	};
     GIS.base.openStreetMap.layer.base = GIS.base.openStreetMap;
     GIS.base.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
     GIS.map.addLayer(GIS.base.openStreetMap.layer);
@@ -1407,6 +1448,11 @@ console.log(doc.geojson[i].ty, parseInt(doc.geojson[i].ty), parseInt(doc.geojson
                 collapsible: true,
                 collapseMode: 'mini',
 				items: [
+                    {
+                        title: 'Layer overview and visibility', //i18n
+                        bodyStyle: 'padding:6px',
+                        items: new GIS.obj.LayerTreeWindow()
+                    },
                     {
                         title: 'Thematic layer 1 legend', //i18n
                         contentEl: 'thematic1Legend',

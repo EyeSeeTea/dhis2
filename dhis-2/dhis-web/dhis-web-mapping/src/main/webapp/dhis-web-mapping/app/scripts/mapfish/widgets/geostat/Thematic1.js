@@ -600,7 +600,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			value: 'ff0000',
 			scope: this,
 			menuHandler: function() {
-				this.scope.updateLegend = true;
+				this.scope.config.updateLegend = true;
 			}
 		});
         
@@ -609,7 +609,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			value: '00ff00',
 			scope: this,
 			menuHandler: function() {
-				this.config.updateLegend = true;
+				this.scope.config.updateLegend = true;
 			}
 		});
         
@@ -1755,6 +1755,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 		// Legend
 		GIS.cmp.region.east.doLayout();
+		
+		// Layer item
+		this.layer.item.setValue(true);
 		
         GIS.mask.hide();
 	},

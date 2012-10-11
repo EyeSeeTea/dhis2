@@ -30,7 +30,7 @@ html * {
 	font-size: 10px !important;
 }
 
-.gis-container-default .x-window-body { /* Default settings for window container panels */
+.gis-container-default .x-window-body {
 	padding: 8px;
 	background: #fff;
 }
@@ -503,4 +503,6 @@ html * {
 
 .x-form-checkbox {
     background-image: url('../images/checkbox.gif');
+    cursor: pointer;
+    cursor: hand;
 }

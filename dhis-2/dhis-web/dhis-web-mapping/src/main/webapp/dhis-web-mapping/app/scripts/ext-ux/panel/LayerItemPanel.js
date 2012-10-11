@@ -7,13 +7,16 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 	numberField: null,
 	imageUrl: null,
 	text: null,
-	width: 230,
+	width: 184,
 	height: 22,
+	value: false,
+	opacity: 80,
 	getValue: function() {
 		return this.checkbox.getValue();
 	},
 	setValue: function(value) {
 		this.checkbox.setValue(value);
+		this.numberField.setDisabled(!value);
 	},
 	setNumberFieldValue: function(value) {
 		this.numberField.setValue(value);
@@ -40,18 +43,19 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 			listeners: {
 				change: function(chb, value) {
 					that.layer.setVisibility(value);
-					this.setValue(value + ' %');
+					that.setValue(value);
 				}
 			}
 		});
 		
 		this.numberField = Ext.create('Ext.form.field.Number', {
-			width: 50,
+			width: 47,
 			height: 18,
 			minValue: 0,
 			maxValue: 100,
 			value: this.layer.layerOpacity * 100,
 			allowBlank: false,
+			disabled: this.numberFieldDisabled,
 			listeners: {
 				change: function() {
 					that.setLayerOpacity(this.getValue());
@@ -61,24 +65,27 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 		
 		this.items = [
 			{
-				width: 20,
+				width: this.checkbox.width + 6,
 				items: this.checkbox
 			},
 			{
-				width: 20,
+				width: image.width + 6,
 				items: image,
 				bodyStyle: 'padding-top: 4px'
 			},
 			{
-				width: 130,
+				width: 97,
 				html: this.text,
 				bodyStyle: 'padding-top: 4px'
 			},
 			{
-				width: 60,
+				width: this.numberField.width,
 				items: this.numberField
 			}
-		];
+		];		
+		
+		this.setValue(this.value);
+		this.setOpacity(this.opacity);
 		
 		this.callParent();
 	}
