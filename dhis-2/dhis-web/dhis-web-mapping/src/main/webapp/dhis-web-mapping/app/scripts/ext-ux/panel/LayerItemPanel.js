@@ -90,12 +90,12 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 				items: this.checkbox
 			},
 			{
-				width: image.width + 6,
+				width: image.width + 5,
 				items: image,
 				bodyStyle: 'padding-top: 4px'
 			},
 			{
-				width: 97,
+				width: 98,
 				html: this.text,
 				bodyStyle: 'padding-top: 4px'
 			},

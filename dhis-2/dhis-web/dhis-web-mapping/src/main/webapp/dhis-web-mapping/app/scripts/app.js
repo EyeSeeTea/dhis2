@@ -1429,15 +1429,42 @@ Ext.onReady( function() {
                 collapseMode: 'mini',
 				items: [
                     {
-                        title: 'Layer overview and visibility', //i18n
+                        title: 'Layer overview and visibility %', //i18n
                         bodyStyle: 'padding:6px',
-                        items: new GIS.obj.LayersPanel()
+						upTool: null,
+						downTool: null,
+                        items: new GIS.obj.LayersPanel(),
+						listeners: {
+							beforerender: function(p) {
+								var that = this;
+									
+								this.upTool = Ext.create('Ext.panel.Tool', {
+									type: 'up',
+									handler: function() {
+										that.collapse();
+										this.setVisible(false);
+										that.downTool.setVisible(true);
+									}
+								});
+								
+								this.downTool = Ext.create('Ext.panel.Tool', {
+									type: 'down',
+									hidden: true,
+									handler: function() {
+										that.expand();
+										this.setVisible(false);
+										that.upTool.setVisible(true);
+									}
+								});
+								
+								this.tools = [this.upTool, this.downTool];
+							}
+						}
                     },
                     {
                         title: 'Thematic layer 1 legend', //i18n
                         contentEl: 'thematic1Legend',
-                        bodyStyle: 'padding: 6px; border: 0 none',
-                        collapsible: true
+                        bodyStyle: 'padding: 6px; border: 0 none'
                     },
                     {
                         title: 'Thematic layer 2 legend', //i18n
