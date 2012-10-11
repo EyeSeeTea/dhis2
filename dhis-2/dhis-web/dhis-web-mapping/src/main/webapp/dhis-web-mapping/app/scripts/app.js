@@ -133,10 +133,6 @@ GIS.base = {
 		name: 'Symbol layer', //i18n
 		legendDiv: 'symbolLegend'
 	},
-	openStreetMap: {
-		id: 'openStreetMap',
-		name: 'OpenStreetMap'
-	},
 	googleStreets: {
 		id: 'googleStreets',
 		name: 'Google Streets'
@@ -144,6 +140,10 @@ GIS.base = {
 	googleHybrid: {
 		id: 'googleHybrid',
 		name: 'Google Hybrid'
+	},
+	openStreetMap: {
+		id: 'openStreetMap',
+		name: 'OpenStreetMap'
 	}
 };
 
@@ -187,7 +187,7 @@ Ext.onReady( function() {
 			GIS.init.onInitialize(r);	
 	
 	GIS.init.onRender = function() {
-		//GIS.base.googleStreets.layer.setVisibility(false);
+		//GIS.base.googleStreets.layer.item.setValue(false);
 	};
 	
 	GIS.init.afterRender = function() {
@@ -279,6 +279,17 @@ Ext.onReady( function() {
 			}
 		}
 		return a;
+	};
+	
+    GIS.util.map.getLayersByType = function(layerType) {
+		var layers = [];
+		for (var i = 0; i < GIS.map.layers.length; i++) {
+			var layer = GIS.map.layers[i];
+			if (layer.layerType === layerType) {
+				layers.push(layer);
+			}
+		}
+		return layers;
 	};
 	
 	GIS.util.map.getExtendedBounds = function(layers) {
@@ -428,378 +439,6 @@ Ext.onReady( function() {
 		}
 	};
     
-    // Layer tree    
-
-	GIS.obj.LayerTreeWindow = function() {
-		var layers = GIS.map.layers,
-			layer,
-			items = [],
-			item,
-			window;
-		
-		for (var i = 0; i < layers.length; i++) {
-			layer = layers[i];
-			item = Ext.create('Ext.ux.panel.LayerItemPanel', {
-				cls: 'gis-container-inner',
-				height: 23,
-				layer: layer,
-				text: layer.base.name,
-				imageUrl: 'images/' + layer.base.id + '_14.png',
-				value: layer.base.id === GIS.base.googleStreets.id ? true : false,
-				opacity: layer.layerType === GIS.conf.finals.layer.type_base ? 100 : 80,
-				numberFieldDisabled: layer.base.id !== GIS.base.googleStreets.id
-			});
-			layer.item = item;
-			items.push(layer.item);
-		}
-        
-        window = Ext.create('Ext.panel.Panel', {
-			renderTo: 'layerItems',
-			layout: 'fit',
-			cls: 'gis-container-inner',
-			items: {
-				cls: 'gis-container-inner',
-				items: items
-			}
-			//listeners: {
-				//render: function() {
-					//GIS.util.gui.window.setPositionTopRight(this);
-				//}
-			//}
-		});
-        
-        //window = Ext.create('Ext.window.Window', {
-			//title: 'Layer overview',
-			//layout: 'fit',
-			//iconCls: 'gis-window-title-icon-layers',
-			//cls: 'gis-container-default',
-			//closeAction: 'hide',
-			//resizable: false,
-			//width: GIS.conf.layout.tool.window_width,
-			//items: {
-				//cls: 'gis-container-inner',
-				//items: items
-			//},
-			//listeners: {
-				//render: function() {
-					//GIS.util.gui.window.setPositionTopRight(this);
-				//}
-			//}
-		//});
-		
-		return window;
-	};
-	
-	/* Map */
-	
-	GIS.map = new OpenLayers.Map({
-        controls: [
-			new OpenLayers.Control.Navigation({
-				documentDrag: true
-			}),
-			new OpenLayers.Control.MousePosition({
-				id: 'mouseposition',
-				prefix: '<span class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
-				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
-				suffix: '<div id="google-logo" onclick="javascript:GIS.util.google.openTerms();"></div></span>'
-			}),
-			new OpenLayers.Control.Permalink()
-		],
-        displayProjection: new OpenLayers.Projection('EPSG:4326'),
-        maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508)
-    });
-    
-    // Track all mouse moves
-    GIS.map.mouseMove = {};
-    
-    // Relocate organisation units
-    GIS.map.relocate = {};
-    
-    // Map tools
-    GIS.map.layerController = {};    
-    // Zoom in
-    GIS.map.layerController.zoomIn = new OpenLayers.Control.Button({
-		displayClass: 'olControlButton',
-		trigger: function() {
-			GIS.map.zoomIn();
-		}
-	});
-    GIS.map.layerController.zoomInPanel = new OpenLayers.Control.Panel({
-		defaultControl: GIS.map.layerController.zoomIn
-	});	
-    GIS.map.layerController.zoomInPanel.addControls([GIS.map.layerController.zoomIn]);
-    GIS.map.addControl(GIS.map.layerController.zoomInPanel);
-    GIS.map.layerController.zoomInPanel.div.className += ' zoomIn';
-    GIS.map.layerController.zoomInPanel.div.childNodes[0].className += ' zoomInButton';
-    
-    // Zoom out
-    GIS.map.layerController.zoomOut = new OpenLayers.Control.Button({
-		displayClass: 'olControlButton',
-		trigger: function() {
-			GIS.map.zoomOut();
-		}
-	});
-    GIS.map.layerController.zoomOutPanel = new OpenLayers.Control.Panel({
-		defaultControl: GIS.map.layerController.zoomOut
-	});	
-    GIS.map.layerController.zoomOutPanel.addControls([GIS.map.layerController.zoomOut]);
-    GIS.map.addControl(GIS.map.layerController.zoomOutPanel);
-    GIS.map.layerController.zoomOutPanel.div.className += ' zoomOut';
-    GIS.map.layerController.zoomOutPanel.div.childNodes[0].className += ' zoomOutButton';
-    
-    // Zoom to visible extent
-    GIS.map.layerController.zoomVisible = new OpenLayers.Control.Button({
-		displayClass: 'olControlButton',
-		trigger: function() {
-			GIS.util.map.zoomToVisibleExtent();
-		}
-	});
-    GIS.map.layerController.zoomVisiblePanel = new OpenLayers.Control.Panel({
-		defaultControl: GIS.map.layerController.zoomVisible
-	});	
-    GIS.map.layerController.zoomVisiblePanel.addControls([GIS.map.layerController.zoomVisible]);
-    GIS.map.addControl(GIS.map.layerController.zoomVisiblePanel);
-    GIS.map.layerController.zoomVisiblePanel.div.className += ' zoomVisible';
-    GIS.map.layerController.zoomVisiblePanel.div.childNodes[0].className += ' zoomVisibleButton';
-    
-    // Layers
-    GIS.map.layerController.layers = new OpenLayers.Control.Button({
-		displayClass: 'olControlButton',
-		trigger: function() {
-			GIS.map.layerTreeWindow = GIS.map.layerTreeWindow || new GIS.obj.LayerTreeWindow();
-			GIS.map.layerTreeWindow.show();
-		}
-	});
-    GIS.map.layerController.layersPanel = new OpenLayers.Control.Panel({
-		defaultControl: GIS.map.layerController.layers
-	});	
-    GIS.map.layerController.layersPanel.addControls([GIS.map.layerController.layers]);
-    GIS.map.addControl(GIS.map.layerController.layersPanel);
-    GIS.map.layerController.layersPanel.div.className += ' layers';
-    GIS.map.layerController.layersPanel.div.childNodes[0].className += ' layersButton';
-    
-    // Base layers
-    
-    if (window.google) {
-		// Google Streets
-        GIS.base.googleStreets.layer = new OpenLayers.Layer.Google(GIS.base.googleStreets.name, {
-			numZoomLevels: 20,
-			animationEnabled: true
-		});
-		GIS.base.googleStreets.layer.layerOpacity = 0.8;
-		GIS.base.googleStreets.layer.setLayerOpacity = function(number) {
-			if (number) {
-				this.layerOpacity = parseFloat(number);
-			}
-			this.setOpacity(this.layerOpacity);
-		};
-        GIS.base.googleStreets.layer.layerType = GIS.conf.finals.layer.type_base;
-		GIS.base.googleStreets.layer.base = GIS.base.googleStreets;
-        GIS.map.addLayer(GIS.base.googleStreets.layer);
-        
-		// Google Hybrid
-        GIS.base.googleHybrid.layer = new OpenLayers.Layer.Google(GIS.base.googleHybrid.name, {
-			type: google.maps.MapTypeId.HYBRID,
-			numZoomLevels: 20,
-			animationEnabled: true
-		});
-		GIS.base.googleHybrid.layer.layerOpacity = 0.8;
-		GIS.base.googleHybrid.layer.setLayerOpacity = function(number) {
-			if (number) {
-				this.layerOpacity = parseFloat(number);
-			}
-			this.setOpacity(this.layerOpacity);
-		};
-		GIS.base.googleHybrid.layer.base = GIS.base.googleHybrid;
-        GIS.base.googleHybrid.layer.layerType = GIS.conf.finals.layer.type_base;
-        GIS.map.addLayer(GIS.base.googleHybrid.layer);
-    }
-    
-    // OpenStreetMap
-    GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.name);
-	GIS.base.openStreetMap.layer.layerOpacity = 0.8;
-	GIS.base.openStreetMap.layer.setLayerOpacity = function(number) {
-		if (number) {
-			this.layerOpacity = parseFloat(number);
-		}
-		this.setOpacity(this.layerOpacity);
-	};
-    GIS.base.openStreetMap.layer.base = GIS.base.openStreetMap;
-    GIS.base.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
-    GIS.map.addLayer(GIS.base.openStreetMap.layer);
-    
-    // Vector layers
-    
-    GIS.base.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
-        strategies: [
-			new OpenLayers.Strategy.Refresh({
-				force:true
-			})
-		],
-		styleMap: GIS.util.vector.getDefaultStyleMap(GIS.base.thematic1),
-        visibility: false,
-        displayInLayerSwitcher: false,
-        layerType: GIS.conf.finals.layer.type_vector,
-        layerOpacity: 0.8,
-        setLayerOpacity: function(number) {
-			if (number) {
-				this.layerOpacity = parseFloat(number);
-			}
-			this.setOpacity(this.layerOpacity);
-		},
-		hasLabels: false
-		
-    });
-    GIS.base.thematic1.layer.base = GIS.base.thematic1;
-    GIS.map.addLayer(GIS.base.thematic1.layer);
-    
-    GIS.base.thematic2.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_2, {
-        strategies: [
-			new OpenLayers.Strategy.Refresh({
-				force:true
-			})
-		],
-		styleMap: GIS.util.vector.getDefaultStyleMap(GIS.base.thematic2),
-        visibility: false,
-        displayInLayerSwitcher: false,
-        layerType: GIS.conf.finals.layer.type_vector,
-        layerOpacity: 0.8,
-        setLayerOpacity: function(number) {
-			if (number) {
-				this.layerOpacity = parseFloat(number);
-			}
-			this.setOpacity(this.layerOpacity);
-		},
-		hasLabels: false
-		
-    });
-    GIS.base.thematic2.layer.base = GIS.base.thematic2;
-    GIS.map.addLayer(GIS.base.thematic2.layer);
-    
-    // Stores
-    
-    GIS.store.indicatorGroups = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
-		proxy: {
-			type: 'ajax',
-			url: GIS.conf.url.path_api + 'indicatorGroups.json?links=false&paging=false',
-			reader: {
-				type: 'json',
-				root: 'indicatorGroups'
-			}
-		},
-		cmp: [],
-		isLoaded: false,
-		loadFn: function(fn) {
-			if (this.isLoaded) {
-				fn.call();
-			}
-			else {
-				this.load(fn);
-			}
-		},
-		listeners: {
-			load: function() {
-				if (!this.isLoaded) {
-					this.isLoaded = true;
-					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
-				}
-				this.sort('name', 'ASC');
-			}
-		}
-	});
-    
-    GIS.store.dataElementGroups = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
-		proxy: {
-			type: 'ajax',
-			url: GIS.conf.url.path_api + 'dataElementGroups.json?links=false&paging=false',
-			reader: {
-				type: 'json',
-				root: 'dataElementGroups'
-			}
-		},
-		cmp: [],
-		isLoaded: false,
-		loadFn: function(fn) {
-			if (this.isLoaded) {
-				fn.call();
-			}
-			else {
-				this.load(fn);
-			}
-		},
-		listeners: {
-			load: function() {
-				if (!this.isLoaded) {
-					this.isLoaded = true;
-					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
-				}
-				this.sort('name', 'ASC');
-			}
-		}
-	});
-	
-	GIS.store.periodTypes = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
-		data: GIS.conf.period.periodTypes
-	}),
-    
-    GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name', 'level'],
-		proxy: {
-			type: 'ajax',
-			url: GIS.conf.url.path_api + 'organisationUnitLevels.json?viewClass=detailed&links=false&paging=false',
-			reader: {
-				type: 'json',
-				root: 'organisationUnitLevels'
-			}
-		},
-		cmp: [],
-		isLoaded: false,
-		loadFn: function(fn) {
-			if (this.isLoaded) {
-				fn.call();
-			}
-			else {
-				this.load(fn);
-			}
-		},
-		listeners: {
-			load: function() {
-				if (!this.isLoaded) {
-					this.isLoaded = true;
-					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
-				}
-				this.sort('level', 'ASC');
-			}
-		}
-	});
-        
-    GIS.store.infrastructuralPeriodsByType = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
-		proxy: {
-			type: 'ajax',
-			url: GIS.conf.url.path_gis + 'getPeriodsByPeriodType.action',
-			reader: {
-				type: 'json',
-				root: 'periods'
-			},
-			extraParams: {
-				name: GIS.init.systemSettings.infrastructuralPeriodType
-			}
-		},
-        autoLoad: false,
-        isLoaded: false,
-        listeners: {
-			load: function() {
-				if (!this.isLoaded) {
-					this.isLoaded = true;
-				}
-			}
-        }
-    });
-    
     // Objects
     
     GIS.obj.LayerMenu = function(base, cls) {
@@ -931,6 +570,42 @@ Ext.onReady( function() {
 				}
 			}
 		});
+	};
+	
+	GIS.obj.LayersPanel = function() {
+		var layers = GIS.map.layers,
+			layer,
+			items = [],
+			item,
+			panel;
+		
+		for (var i = 0; i < layers.length; i++) {
+			layer = layers[i];
+			item = Ext.create('Ext.ux.panel.LayerItemPanel', {
+				cls: 'gis-container-inner',
+				height: 23,
+				layer: layer,
+				text: layer.base.name,
+				imageUrl: 'images/' + layer.base.id + '_14.png',
+				value: layer.base.id === GIS.base.googleStreets.id ? true : false,
+				opacity: layer.layerType === GIS.conf.finals.layer.type_base ? 1.0 : 0.8,
+				numberFieldDisabled: layer.base.id !== GIS.base.googleStreets.id
+			});
+			layer.item = item;
+			items.push(layer.item);
+		}
+        
+        panel = Ext.create('Ext.panel.Panel', {
+			renderTo: 'layerItems',
+			layout: 'fit',
+			cls: 'gis-container-inner',
+			items: {
+				cls: 'gis-container-inner',
+				items: items
+			}
+		});
+		
+		return panel;
 	};
 	
 	GIS.obj.WidgetWindow = function(base) {
@@ -1417,6 +1092,311 @@ Ext.onReady( function() {
 		
 		return window;
 	};
+	
+	/* Map */
+	
+	GIS.map = new OpenLayers.Map({
+        controls: [
+			new OpenLayers.Control.Navigation({
+				documentDrag: true
+			}),
+			new OpenLayers.Control.MousePosition({
+				id: 'mouseposition',
+				prefix: '<span class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
+				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
+				suffix: '<div id="google-logo" onclick="javascript:GIS.util.google.openTerms();"></div></span>'
+			}),
+			new OpenLayers.Control.Permalink()
+		],
+        displayProjection: new OpenLayers.Projection('EPSG:4326'),
+        maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+        mouseMove: {}, // Track all mouse moves
+        relocate: {}, // Relocate organisation units
+        layerController: {} // Map tools
+    });
+    
+    // Zoom in
+    GIS.map.layerController.zoomIn = new OpenLayers.Control.Button({
+		displayClass: 'olControlButton',
+		trigger: function() {
+			GIS.map.zoomIn();
+		}
+	});
+    GIS.map.layerController.zoomInPanel = new OpenLayers.Control.Panel({
+		defaultControl: GIS.map.layerController.zoomIn
+	});	
+    GIS.map.layerController.zoomInPanel.addControls([GIS.map.layerController.zoomIn]);
+    GIS.map.addControl(GIS.map.layerController.zoomInPanel);
+    GIS.map.layerController.zoomInPanel.div.className += ' zoomIn';
+    GIS.map.layerController.zoomInPanel.div.childNodes[0].className += ' zoomInButton';
+    
+    // Zoom out
+    GIS.map.layerController.zoomOut = new OpenLayers.Control.Button({
+		displayClass: 'olControlButton',
+		trigger: function() {
+			GIS.map.zoomOut();
+		}
+	});
+    GIS.map.layerController.zoomOutPanel = new OpenLayers.Control.Panel({
+		defaultControl: GIS.map.layerController.zoomOut
+	});	
+    GIS.map.layerController.zoomOutPanel.addControls([GIS.map.layerController.zoomOut]);
+    GIS.map.addControl(GIS.map.layerController.zoomOutPanel);
+    GIS.map.layerController.zoomOutPanel.div.className += ' zoomOut';
+    GIS.map.layerController.zoomOutPanel.div.childNodes[0].className += ' zoomOutButton';
+    
+    // Zoom to visible extent
+    GIS.map.layerController.zoomVisible = new OpenLayers.Control.Button({
+		displayClass: 'olControlButton',
+		trigger: function() {
+			GIS.util.map.zoomToVisibleExtent();
+		}
+	});
+    GIS.map.layerController.zoomVisiblePanel = new OpenLayers.Control.Panel({
+		defaultControl: GIS.map.layerController.zoomVisible
+	});	
+    GIS.map.layerController.zoomVisiblePanel.addControls([GIS.map.layerController.zoomVisible]);
+    GIS.map.addControl(GIS.map.layerController.zoomVisiblePanel);
+    GIS.map.layerController.zoomVisiblePanel.div.className += ' zoomVisible';
+    GIS.map.layerController.zoomVisiblePanel.div.childNodes[0].className += ' zoomVisibleButton';
+    
+    // Layers
+    GIS.map.layerController.layers = new OpenLayers.Control.Button({
+		displayClass: 'olControlButton',
+		trigger: function() {
+			GIS.map.layerTreeWindow = GIS.map.layerTreeWindow || new GIS.obj.LayerTreeWindow();
+			GIS.map.layerTreeWindow.show();
+		}
+	});
+    GIS.map.layerController.layersPanel = new OpenLayers.Control.Panel({
+		defaultControl: GIS.map.layerController.layers
+	});	
+    GIS.map.layerController.layersPanel.addControls([GIS.map.layerController.layers]);
+    GIS.map.addControl(GIS.map.layerController.layersPanel);
+    GIS.map.layerController.layersPanel.div.className += ' layers';
+    GIS.map.layerController.layersPanel.div.childNodes[0].className += ' layersButton';
+    
+    // Base layers
+    
+    if (window.google) {
+		// Google Streets
+        GIS.base.googleStreets.layer = new OpenLayers.Layer.Google(GIS.base.googleStreets.name, {
+			numZoomLevels: 20,
+			animationEnabled: true,
+			layerType: GIS.conf.finals.layer.type_base,
+			base: GIS.base.googleStreets,
+			layerOpacity: 1,
+			setLayerOpacity: function(number) {
+				if (number) {
+					this.layerOpacity = parseFloat(number);
+				}
+				this.setOpacity(this.layerOpacity);
+			}
+		});
+        GIS.map.addLayer(GIS.base.googleStreets.layer);
+        
+		// Google Hybrid
+        GIS.base.googleHybrid.layer = new OpenLayers.Layer.Google(GIS.base.googleHybrid.name, {
+			type: google.maps.MapTypeId.HYBRID,
+			numZoomLevels: 20,
+			animationEnabled: true,
+			layerType: GIS.conf.finals.layer.type_base,
+			base: GIS.base.googleHybrid,
+			layerOpacity: 1,
+			setLayerOpacity: function(number) {
+				if (number) {
+					this.layerOpacity = parseFloat(number);
+				}
+				this.setOpacity(this.layerOpacity);
+			}
+		});
+        GIS.map.addLayer(GIS.base.googleHybrid.layer);
+    }
+    
+    // OpenStreetMap
+    GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.name);
+	GIS.base.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
+	GIS.base.openStreetMap.layer.base = GIS.base.openStreetMap;
+	GIS.base.openStreetMap.layer.layerOpacity = 1;
+	GIS.base.openStreetMap.layer.setLayerOpacity = function(number) {
+		if (number) {
+			this.layerOpacity = parseFloat(number);
+		}
+		this.setOpacity(this.layerOpacity);
+	};
+    GIS.map.addLayer(GIS.base.openStreetMap.layer);
+    
+    // Vector layers
+    
+    GIS.base.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
+        strategies: [
+			new OpenLayers.Strategy.Refresh({
+				force:true
+			})
+		],
+		styleMap: GIS.util.vector.getDefaultStyleMap(GIS.base.thematic1),
+        visibility: false,
+        displayInLayerSwitcher: false,
+        layerType: GIS.conf.finals.layer.type_vector,
+        layerOpacity: 0.8,
+        setLayerOpacity: function(number) {
+			if (number) {
+				this.layerOpacity = parseFloat(number);
+			}
+			this.setOpacity(this.layerOpacity);
+		},
+		hasLabels: false
+		
+    });
+    GIS.base.thematic1.layer.base = GIS.base.thematic1;
+    GIS.map.addLayer(GIS.base.thematic1.layer);
+    
+    GIS.base.thematic2.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_2, {
+        strategies: [
+			new OpenLayers.Strategy.Refresh({
+				force:true
+			})
+		],
+		styleMap: GIS.util.vector.getDefaultStyleMap(GIS.base.thematic2),
+        visibility: false,
+        displayInLayerSwitcher: false,
+        layerType: GIS.conf.finals.layer.type_vector,
+        layerOpacity: 0.8,
+        setLayerOpacity: function(number) {
+			if (number) {
+				this.layerOpacity = parseFloat(number);
+			}
+			this.setOpacity(this.layerOpacity);
+		},
+		hasLabels: false
+		
+    });
+    GIS.base.thematic2.layer.base = GIS.base.thematic2;
+    GIS.map.addLayer(GIS.base.thematic2.layer);
+    
+    // Stores
+    
+    GIS.store.indicatorGroups = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'indicatorGroups.json?links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'indicatorGroups'
+			}
+		},
+		cmp: [],
+		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
+				}
+				this.sort('name', 'ASC');
+			}
+		}
+	});
+    
+    GIS.store.dataElementGroups = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'dataElementGroups.json?links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'dataElementGroups'
+			}
+		},
+		cmp: [],
+		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
+				}
+				this.sort('name', 'ASC');
+			}
+		}
+	});
+	
+	GIS.store.periodTypes = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		data: GIS.conf.period.periodTypes
+	}),
+    
+    GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name', 'level'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'organisationUnitLevels.json?viewClass=detailed&links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'organisationUnitLevels'
+			}
+		},
+		cmp: [],
+		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
+				}
+				this.sort('level', 'ASC');
+			}
+		}
+	});
+        
+    GIS.store.infrastructuralPeriodsByType = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_gis + 'getPeriodsByPeriodType.action',
+			reader: {
+				type: 'json',
+				root: 'periods'
+			},
+			extraParams: {
+				name: GIS.init.systemSettings.infrastructuralPeriodType
+			}
+		},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+				}
+			}
+        }
+    });
     
 	// User interface
 	
@@ -1436,7 +1416,7 @@ Ext.onReady( function() {
         menu: GIS.base.thematic2.menu,
         legendDiv: GIS.base.thematic2.legendDiv
     });    
-    GIS.base.thematic2.window = new GIS.obj.WidgetWindow(GIS.base.thematic2);    
+    GIS.base.thematic2.window = new GIS.obj.WidgetWindow(GIS.base.thematic2);
 	
 	GIS.gui.viewport = Ext.create('Ext.container.Viewport', {
 		layout: 'border',		
@@ -1451,7 +1431,7 @@ Ext.onReady( function() {
                     {
                         title: 'Layer overview and visibility', //i18n
                         bodyStyle: 'padding:6px',
-                        items: new GIS.obj.LayerTreeWindow()
+                        items: new GIS.obj.LayersPanel()
                     },
                     {
                         title: 'Thematic layer 1 legend', //i18n

@@ -10,42 +10,60 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 	width: 184,
 	height: 22,
 	value: false,
-	opacity: 80,
+	opacity: 0.8,
 	getValue: function() {
 		return this.checkbox.getValue();
 	},
-	setValue: function(value) {
+	setValue: function(value, opacity) {
+		opacity = opacity || this.opacity;
 		this.checkbox.setValue(value);
+		this.numberField.setValue(opacity * 100);
 		this.numberField.setDisabled(!value);
+		this.layer.setVisibility(value);
+		this.setOpacity(opacity);
 	},
-	setNumberFieldValue: function(value) {
-		this.numberField.setValue(value);
-	},		
-	setLayerOpacity: function(value) {
-		this.layer.setLayerOpacity(value === 0 ? 0 : value/100);
+	setOpacity: function(opacity) {
+		this.opacity = opacity;
+		this.layer.setLayerOpacity(opacity);
 	},
-	setOpacity: function(value) {
-		this.setNumberFieldValue(value);
-		this.setLayerOpacity(value);
+	disableItem: function() {
+		this.checkbox.setValue(false);
+		this.numberField.disable();
+		this.layer.setVisibility(false);
+	},
+	updateItem: function(value) {
+		this.numberField.setDisabled(!value);
+		this.layer.setVisibility(value);
 	},
 	initComponent: function() {
 		var that = this,
 			image;
-			
+		
+		this.checkbox = Ext.create('Ext.form.field.Checkbox', {
+			width: 14,
+			checked: this.value,
+			listeners: {
+				change: function(chb, value) {
+					if (value && that.layer.layerType === GIS.conf.finals.layer.type_base) {
+						var layers = GIS.util.map.getLayersByType(GIS.conf.finals.layer.type_base),
+							layer;
+						for (var i = 0; i < layers.length; i++) {
+							layer = layers[i];
+							if (layer !== that.layer) {
+								layer.item.checkbox.suppressChange = true;
+								layer.item.disableItem();
+							}
+						}
+					}
+					that.updateItem(value);
+				}
+			}
+		});
+		
 		image = Ext.create('Ext.Img', {
 			width: 14,
 			height: 14,
 			src: this.imageUrl
-		});
-		
-		this.checkbox = Ext.create('Ext.form.field.Checkbox', {
-			width: 14,
-			listeners: {
-				change: function(chb, value) {
-					that.layer.setVisibility(value);
-					that.setValue(value);
-				}
-			}
 		});
 		
 		this.numberField = Ext.create('Ext.form.field.Number', {
@@ -53,12 +71,15 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 			height: 18,
 			minValue: 0,
 			maxValue: 100,
-			value: this.layer.layerOpacity * 100,
+			value: this.opacity * 100,
 			allowBlank: false,
 			disabled: this.numberFieldDisabled,
 			listeners: {
 				change: function() {
-					that.setLayerOpacity(this.getValue());
+					var value = this.getValue(),
+						opacity = value === 0 ? 0 : value/100;
+					
+					that.setOpacity(opacity);
 				}
 			}
 		});
@@ -84,8 +105,7 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 			}
 		];		
 		
-		this.setValue(this.value);
-		this.setOpacity(this.opacity);
+		this.layer.setOpacity(this.opacity);
 		
 		this.callParent();
 	}
