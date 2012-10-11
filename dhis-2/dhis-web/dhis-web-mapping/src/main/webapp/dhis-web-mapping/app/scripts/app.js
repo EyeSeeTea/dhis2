@@ -196,7 +196,6 @@ Ext.onReady( function() {
 		document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin_24.png" />';
 		document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout_24.png" />';
 		document.getElementsByClassName('zoomVisibleButton')[0].innerHTML = '<img src="images/zoomvisible_24.png" />';
-		document.getElementsByClassName('layersButton')[0].innerHTML = '<img src="images/layers_24.png" />';
 		
 		// Map events
 		GIS.map.events.register('mousemove', null, function(e) {
@@ -1093,7 +1092,7 @@ Ext.onReady( function() {
 		return window;
 	};
 	
-	GIS.obj.ToogleToolArray = function(panel) {			
+	GIS.obj.ToggleToolArray = function(panel) {			
 		panel.upTool = Ext.create('Ext.panel.Tool', {
 			type: 'up',
 			handler: function() {
@@ -1114,6 +1113,31 @@ Ext.onReady( function() {
 		});
 		
 		return [panel.upTool, panel.downTool];
+	};
+    
+    GIS.obj.MapControlPanel = function(name) {
+		var button,
+			panel;
+			
+		button = new OpenLayers.Control.Button({
+			displayClass: 'olControlButton',
+			trigger: function() {
+				if (name === 'zoomVisible') {
+					GIS.util.map.zoomToVisibleExtent();
+				}
+				else {
+					GIS.map[name]();
+				}
+			}
+		});
+		
+		panel = new OpenLayers.Control.Panel({
+			defaultControl: button
+		});
+		
+		panel.addControls([button]);
+		
+		return panel;
 	};
 	
 	/* Map */
@@ -1137,67 +1161,24 @@ Ext.onReady( function() {
         relocate: {}, // Relocate organisation units
         layerController: {} // Map tools
     });
-    
-    // Zoom in
-    GIS.map.layerController.zoomIn = new OpenLayers.Control.Button({
-		displayClass: 'olControlButton',
-		trigger: function() {
-			GIS.map.zoomIn();
-		}
-	});
-    GIS.map.layerController.zoomInPanel = new OpenLayers.Control.Panel({
-		defaultControl: GIS.map.layerController.zoomIn
-	});	
-    GIS.map.layerController.zoomInPanel.addControls([GIS.map.layerController.zoomIn]);
-    GIS.map.addControl(GIS.map.layerController.zoomInPanel);
-    GIS.map.layerController.zoomInPanel.div.className += ' zoomIn';
-    GIS.map.layerController.zoomInPanel.div.childNodes[0].className += ' zoomInButton';
-    
+	
+	// Zoom in
+	GIS.map.layerController.zoomIn = new GIS.obj.MapControlPanel('zoomIn');
+	GIS.map.addControl(GIS.map.layerController.zoomIn);
+	GIS.map.layerController.zoomIn.div.className += ' zoomIn';
+	GIS.map.layerController.zoomIn.div.childNodes[0].className += ' zoomInButton';
+	
     // Zoom out
-    GIS.map.layerController.zoomOut = new OpenLayers.Control.Button({
-		displayClass: 'olControlButton',
-		trigger: function() {
-			GIS.map.zoomOut();
-		}
-	});
-    GIS.map.layerController.zoomOutPanel = new OpenLayers.Control.Panel({
-		defaultControl: GIS.map.layerController.zoomOut
-	});	
-    GIS.map.layerController.zoomOutPanel.addControls([GIS.map.layerController.zoomOut]);
-    GIS.map.addControl(GIS.map.layerController.zoomOutPanel);
-    GIS.map.layerController.zoomOutPanel.div.className += ' zoomOut';
-    GIS.map.layerController.zoomOutPanel.div.childNodes[0].className += ' zoomOutButton';
+	GIS.map.layerController.zoomOut = new GIS.obj.MapControlPanel('zoomOut');
+	GIS.map.addControl(GIS.map.layerController.zoomOut);
+	GIS.map.layerController.zoomOut.div.className += ' zoomOut';
+	GIS.map.layerController.zoomOut.div.childNodes[0].className += ' zoomOutButton';
     
     // Zoom to visible extent
-    GIS.map.layerController.zoomVisible = new OpenLayers.Control.Button({
-		displayClass: 'olControlButton',
-		trigger: function() {
-			GIS.util.map.zoomToVisibleExtent();
-		}
-	});
-    GIS.map.layerController.zoomVisiblePanel = new OpenLayers.Control.Panel({
-		defaultControl: GIS.map.layerController.zoomVisible
-	});	
-    GIS.map.layerController.zoomVisiblePanel.addControls([GIS.map.layerController.zoomVisible]);
-    GIS.map.addControl(GIS.map.layerController.zoomVisiblePanel);
-    GIS.map.layerController.zoomVisiblePanel.div.className += ' zoomVisible';
-    GIS.map.layerController.zoomVisiblePanel.div.childNodes[0].className += ' zoomVisibleButton';
-    
-    // Layers
-    GIS.map.layerController.layers = new OpenLayers.Control.Button({
-		displayClass: 'olControlButton',
-		trigger: function() {
-			GIS.map.layerTreeWindow = GIS.map.layerTreeWindow || new GIS.obj.LayerTreeWindow();
-			GIS.map.layerTreeWindow.show();
-		}
-	});
-    GIS.map.layerController.layersPanel = new OpenLayers.Control.Panel({
-		defaultControl: GIS.map.layerController.layers
-	});	
-    GIS.map.layerController.layersPanel.addControls([GIS.map.layerController.layers]);
-    GIS.map.addControl(GIS.map.layerController.layersPanel);
-    GIS.map.layerController.layersPanel.div.className += ' layers';
-    GIS.map.layerController.layersPanel.div.childNodes[0].className += ' layersButton';
+	GIS.map.layerController.zoomToVisibleExtent = new GIS.obj.MapControlPanel('zoomVisible');
+	GIS.map.addControl(GIS.map.layerController.zoomToVisibleExtent);
+	GIS.map.layerController.zoomToVisibleExtent.div.className += ' zoomVisible';
+	GIS.map.layerController.zoomToVisibleExtent.div.childNodes[0].className += ' zoomVisibleButton';
     
     // Base layers
     
@@ -1459,7 +1440,7 @@ Ext.onReady( function() {
                         items: new GIS.obj.LayersPanel(),
 						listeners: {
 							beforerender: function() {
-								var items = new GIS.obj.ToogleToolArray(this);
+								var items = new GIS.obj.ToggleToolArray(this);
 								this.tools = items;
 							}
 						}
@@ -1470,7 +1451,7 @@ Ext.onReady( function() {
                         bodyStyle: 'padding: 6px; border: 0 none',
 						listeners: {
 							beforerender: function() {
-								var items = new GIS.obj.ToogleToolArray(this);
+								var items = new GIS.obj.ToggleToolArray(this);
 								this.tools = items;
 							}
 						}
@@ -1481,7 +1462,7 @@ Ext.onReady( function() {
                         bodyStyle: 'padding: 6px; border: 0 none',
 						listeners: {
 							beforerender: function() {
-								var items = new GIS.obj.ToogleToolArray(this);
+								var items = new GIS.obj.ToggleToolArray(this);
 								this.tools = items;
 							}
 						}

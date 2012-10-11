@@ -79,17 +79,13 @@ html * {
 }
 
 .olControlPanel.zoomIn {
-	right: 72px;
+	right: 48px;
 }
 .olControlPanel.zoomIn .olControlButtonItemActive {
 	border-bottom-left-radius: 2px;
 }
 
 .olControlPanel.zoomOut {
-	right: 48px;
-}
-
-.olControlPanel.zoomVisible {
 	right: 24px;
 }
 
