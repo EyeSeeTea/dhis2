@@ -188,6 +188,9 @@ Ext.onReady( function() {
 	
 	GIS.init.onRender = function() {
 		//GIS.base.googleStreets.layer.item.setValue(false);
+		if (!window.google) {
+			GIS.base.openStreetMap.layer.item.setValue(false);
+		}
 	};
 	
 	GIS.init.afterRender = function() {
@@ -517,28 +520,6 @@ Ext.onReady( function() {
 						base.widget.cmp.searchWindow = new GIS.obj.SearchWindow(base);
 						base.widget.cmp.searchWindow.show();
 					}
-				},
-				{
-					xtype: 'menuseparator',
-					alwaysEnabled: true
-				},
-				{
-					text: 'Opacity',//i18n
-					iconCls: 'gis-menu-item-icon-opacity',
-					cls: 'gis-menu-item-last',
-					menu: Ext.create('Ext.menu.Menu', {
-						shadow: false,
-						showSeparator: false,
-						defaults: {
-							minWidth: 70
-						},
-						items: GIS.conf.opacity.items,
-						listeners: {
-							click: function(menu, item) {
-								layer.setOpacity(item.text);
-							}
-						}
-					})
 				},
 				{
 					xtype: 'menuseparator',
