@@ -540,7 +540,7 @@ Ext.onReady( function() {
 			defaults.strokeColor = '#000';
 			
 			select.fillColor = '#000';
-			select.fillOpacity = 0.3;
+			select.fillOpacity = 0.2;
 			select.strokeWidth = 1;
 		}
 		
@@ -561,7 +561,7 @@ Ext.onReady( function() {
 		});
 	};
     
-    GIS.obj.VectorLayer = function(base, opacity) {
+    GIS.obj.VectorLayer = function(base, config) {
 		var layer = new OpenLayers.Layer.Vector(base.name, {
 			strategies: [
 				new OpenLayers.Strategy.Refresh({
@@ -572,7 +572,7 @@ Ext.onReady( function() {
 			visibility: false,
 			displayInLayerSwitcher: false,
 			layerType: GIS.conf.finals.layer.type_vector,
-			layerOpacity: opacity || 1,
+			layerOpacity: config ? config.opacity || 1 : 1,
 			setLayerOpacity: function(number) {
 				if (number) {
 					this.layerOpacity = parseFloat(number);
@@ -712,7 +712,7 @@ Ext.onReady( function() {
 				text: layer.base.name,
 				imageUrl: 'images/' + layer.base.id + '_14.png',
 				value: layer.base.id === GIS.base.googleStreets.id ? true : false,
-				opacity: layer.layerType === GIS.conf.finals.layer.type_base ? 1.0 : 0.8,
+				opacity: layer.layerOpacity,
 				numberFieldDisabled: layer.base.id !== GIS.base.googleStreets.id
 			});
 			layer.item = item;
@@ -850,27 +850,28 @@ Ext.onReady( function() {
 							}],
 							store: base.widget.store.features,
 							listeners: {
-								select: function(grid, record, index, e) {
+								select: function(grid, record) {
 									var feature = layer.getFeaturesByAttribute('id', record.data.id)[0],
 										color = button.getValue(),
 										symbolizer;
 									
 									layer.redraw();
 									
-									if (feature.geometry.CLASS_NAME === OpenLayers.Geometry.Point.CLASS_NAME) {
+									if (feature.geometry.CLASS_NAME === GIS.conf.finals.openLayers.point_classname) {
 										symbolizer = new OpenLayers.Symbolizer.Point({
-											'pointRadius': 7,
-											'fillColor': '#' + color
+											pointRadius: 6,
+											fillColor: '#' + color,
+											strokeWidth: 1
 										});
 									}
 									else {
 										symbolizer = new OpenLayers.Symbolizer.Polygon({
-											'strokeColor': '#' + color,
-											'fillColor': '#' + color
+											strokeColor: '#' + color,
+											fillColor: '#' + color
 										});
 									}
 
-									layer.drawFeature(feature,symbolizer);
+									layer.drawFeature(feature, symbolizer);
 								}
 							}
 						}
@@ -1337,10 +1338,10 @@ Ext.onReady( function() {
     GIS.base.boundary.layer = new GIS.obj.VectorLayer(GIS.base.boundary);
     GIS.map.addLayer(GIS.base.boundary.layer);
     
-    GIS.base.thematic1.layer = new GIS.obj.VectorLayer(GIS.base.thematic1);
+    GIS.base.thematic1.layer = new GIS.obj.VectorLayer(GIS.base.thematic1, {opacity: 0.8});
     GIS.map.addLayer(GIS.base.thematic1.layer);
     
-    GIS.base.thematic2.layer = new GIS.obj.VectorLayer(GIS.base.thematic2);
+    GIS.base.thematic2.layer = new GIS.obj.VectorLayer(GIS.base.thematic2, {opacity: 0.8});
     GIS.map.addLayer(GIS.base.thematic2.layer);
     
 	// User interface
@@ -1349,8 +1350,7 @@ Ext.onReady( function() {
 	GIS.base.boundary.widget = Ext.create('mapfish.widgets.geostat.Boundary', {
         map: GIS.map,
         layer: GIS.base.boundary.layer,
-        menu: GIS.base.boundary.menu,
-        legendDiv: GIS.base.boundary.legendDiv
+        menu: GIS.base.boundary.menu
     });    
     GIS.base.boundary.window = new GIS.obj.WidgetWindow(GIS.base.boundary);
 	

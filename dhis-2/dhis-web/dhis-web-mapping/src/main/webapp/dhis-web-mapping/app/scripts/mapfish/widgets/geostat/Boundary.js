@@ -109,6 +109,14 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
         console.log(request.status, request.statusText);
     },
     
+    getColors: function(low, high) {
+        var startColor = new mapfish.ColorRgb();
+        startColor.setFromHex(low);
+        var endColor = new mapfish.ColorRgb();
+        endColor.setFromHex(high);
+        return [startColor, endColor];
+    },
+    
     initComponent: function() {		
 		this.createItems();
 		
@@ -590,12 +598,23 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		for (var i = 0; i < this.layer.features.length; i++) {
 			var feature = this.layer.features[i];
 			feature.attributes.label = feature.attributes.name;
+			feature.attributes.value = 0;
 		}
 		
 		this.loadLegend();
 	},
 	
 	loadLegend: function() {
+		var options = {
+            indicator: GIS.conf.finals.widget.value,
+            method: 2,
+            numClasses: 5,
+            colors: this.getColors('000000', '000000'),
+            minSize: 6,
+            maxSize: 6
+        };
+
+        this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
         this.afterLoad();		
