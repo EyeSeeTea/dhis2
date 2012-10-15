@@ -1,3 +1,7 @@
+// -----------------------------------------------------------------------
+// Schedule Messages
+// -----------------------------------------------------------------------
+
 function scheduleTasks()
 {
 	$.post( 'scheduleTasks.action',{
@@ -6,24 +10,84 @@ function scheduleTasks()
 		gateWayId: getFieldValue("gatewayId"),
 		timeSendingMessage: getFieldValue("timeSendingMessage")
 	}, function( json ){
-		setMessage(i18n_scheduling_is + " " + json.scheduleTasks.status);
+		var status = json.scheduleTasks.status;
+		if( status=='not_started' ){
+			status = i18n_not_started;
+		}
+		setInnerHTML('info', i18n_scheduling_is + " " + status);
 		if( json.scheduleTasks.running=="true" ){
-			setFieldValue('scheduledBtn', i18n_stop );
+			setFieldValue('scheduledBtn', i18n_stop);
 		}
 		else{
-			setFieldValue('scheduledBtn', i18n_start );
+			setFieldValue('scheduledBtn', i18n_start);
 		}
 	});
 }
 
 function executeTasks()
 {
-	$.post( 'executeSendMessage.action',{
-		execute:true,
-		schedule: false,
-		gateWayId: getFieldValue("gatewayId"),
-		timeSendingMessage: getFieldValue("timeSendingMessage")
-	}, function( json ){
-		setMessage(i18n_execute_success);
+	var ok = confirm( i18n_execute_tasks_confirmation );
+	setWaitMessage( i18n_executing );	
+	if ( ok )
+	{		
+		$.post( 'executeSendMessage.action',{
+			execute:true,
+			schedule: false,
+			gateWayId: getFieldValue("gatewayId"),
+			timeSendingMessage: getFieldValue("timeSendingMessage")
+		}, function( json ){
+			setMessage(i18n_execute_success);
+		});
+	}
+}
+
+// -----------------------------------------------------------------------
+// Schedule Aggregate Query Builder
+// -----------------------------------------------------------------------
+
+function schedulingAggCondTasks()
+{
+	var scheduledPeriodTypes = "";
+	jQuery("#scheduledPeriodTypes").each(function(){
+		scheduledPeriodTypes+='&scheduledPeriodTypes=' + this.value;
 	});
+	
+	$.post( 'scheduleCaseAggTasks.action?' + scheduledPeriodTypes,{
+		execute:false,
+		orgUnitGroupSetAggLevel:getFieldValue("orgUnitGroupSetAggLevel"),
+		aggQueryBuilderStrategy:getFieldValue("aggQueryBuilderStrategy")
+	}, function( json ){
+		var status = json.scheduleTasks.status;
+		if( status=='not_started' ){
+			status = i18n_not_started;
+		}
+		setInnerHTML('info', i18n_scheduling_is + " " + status);
+		if( json.scheduleTasks.running=="true" ){
+			setFieldValue('scheduledBtn', i18n_stop);
+		}
+		else{
+			setFieldValue('scheduledBtn', i18n_start);
+		}
+	});
+}
+
+function executeAggCondTasks()
+{
+	var ok = confirm( i18n_execute_tasks_confirmation );
+	setWaitMessage( i18n_executing );	
+	if ( ok )
+	{
+		var scheduledPeriodTypes = "";
+		jQuery("#scheduledPeriodTypes").each(function(){
+			scheduledPeriodTypes+='&scheduledPeriodTypes=' + this.value;
+		});
+		
+		$.post( 'scheduleCaseAggTasks.action?' + scheduledPeriodTypes,{
+			execute:true,
+			orgUnitGroupSetAggLevel:getFieldValue("orgUnitGroupSetAggLevel"),
+			aggQueryBuilderStrategy:getFieldValue("aggQueryBuilderStrategy")
+		},function( json ){
+			setMessage(i18n_execute_success);
+		});
+	}
 }

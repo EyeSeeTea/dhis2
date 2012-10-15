@@ -42,6 +42,8 @@ function listAllPatient()
 {
 	setFieldValue('listAll', "true");
 	hideById('listEventDiv');
+	hideById('advanced-search');
+	
 	contentDiv = 'listEventDiv';
 	$('#contentDataRecord').html('');
 	hideById('advanced-search');
@@ -86,6 +88,9 @@ function advancedSearch( params )
 {
 	setFieldValue('listAll', "false");
 	$('#contentDataRecord').html('');
+	$('#listEventDiv').html('');
+	hideById('listEventDiv');
+	showLoader();
 	params += "&programId=" + getFieldValue('programIdAddPatient');
 	$.ajax({
 		url: 'getSMSPatientRecords.action',
@@ -144,15 +149,17 @@ function eventFlowToggle( programInstanceId )
 // Send SMS 
 // --------------------------------------------------------------------
 
-function sendSMS()
+function showSendSmsForm()
 {
-	var sendToList = getFieldValue('sendToList');
-	if( sendToList == 'false'){	
-		sendSmsOnePatient()
-	}
-	else{
-		sendSmsToList();
-	}
+	jQuery('#sendSmsToListForm').dialog({
+			title: i18n_send_message,
+			maximize: true, 
+			closable: true,
+			modal:true,
+			overlay:{background:'#000000', opacity:0.1},
+			width: 350,
+			height: 200
+		});
 }
 
 function sendSmsToList()
@@ -184,27 +191,6 @@ function sendSmsToList()
 // --------------------------------------------------------------------
 // Post Comments
 // --------------------------------------------------------------------
-
-function showCommentList( programStageInstanceId, isSendSMS ) 
-{
-	setFieldValue('sendToList', "false");
-	$('#smsManagementDiv' ).load("programTrackingList.action",
-		{
-			programStageInstanceId: programStageInstanceId
-		}
-		, function(){
-			hideById('smsManagementForm');
-		}).dialog(
-		{
-			title:i18n_sms_message_management,
-			maximize:true, 
-			closable:true,
-			modal:false,
-			overlay:{background:'#000000', opacity:0.1},
-			width:800,
-			height:500
-		});
-}
 
 function keypress(event, field, programStageInstanceId )
 {
@@ -277,8 +263,8 @@ function reloadRecordList()
 	var listAll = getFieldValue('listAll');
 	var startDate = getFieldValue('startDueDate');
 	var endDate = getFieldValue('endDueDate');
-	var status = getFieldValue('statusEvent');
-	if( listAll )
+	var statusEvent = getFieldValue('statusEvent');
+	if( listAll == 'true' )
 	{
 		var date = new Date();
 		var d = date.getDate() - 1;
@@ -293,7 +279,7 @@ function reloadRecordList()
 	jQuery("#patientList .stage-object").each( function(){
 		var id = this.id.split('_')[1];
 		var dueDate = jQuery(this).attr('dueDate');
-		var statusEvent = jQuery(this).attr('status');
+		var status = jQuery(this).attr('status');
 		var programInstanceId = jQuery(this).attr('programInstanceId');
 		if( dueDate >= startDate && dueDate <= endDate && statusEvent == status )
 		{

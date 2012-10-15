@@ -3,17 +3,18 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 {
 	hideById('dataEntryInfor');
 	hideById('listDiv');
+	showById('mainLinkLbl');
 	
 	jQuery.getJSON( "anonymousPrograms.action",{}, 
-		function( json ) 
+		function( json )
 		{   
 			clearListById('searchObjectId');
 			clearListById('compulsoryDE');
 			clearListById('programId');
 			
-			jQuery( '#programId').append( '<option value="" psid="">[' + i18n_please_select + ']</option>' );
+			jQuery( '#programId').append( '<option value="" psid="" reportDateDes="' + i18n_report_date + '">[' + i18n_please_select + ']</option>' );
 			for ( i in json.programs ) {
-				jQuery( '#programId').append( '<option value="' + json.programs[i].id +'" psid="' + json.programs[i].programStageId + '">' + json.programs[i].name + '</option>' );
+				jQuery( '#programId').append( '<option value="' + json.programs[i].id +'" psid="' + json.programs[i].programStageId + '" reportDateDes="' + json.programs[i].reportDateDescription + '">' + json.programs[i].name + '</option>' );
 			}
 			
 			disableCriteriaDiv();
@@ -76,6 +77,8 @@ function getDataElements()
 		}, 
 		function( json ) 
 		{   
+			jQuery('.stage-object-selected').attr('psid', jQuery('#programId option:selected').attr("psid"));
+	
 			clearListById('searchObjectId');
 			clearListById('compulsoryDE');
 			
@@ -165,7 +168,7 @@ function validateSearchEvents( listAll )
 	var flag = true;
 	if( !listAll )
 	{
-		jQuery( '#advancedSearchTB tbody tr' ).each( function( i, row ){
+		jQuery( '#advancedSearchTB tr' ).each( function( i, row ){
 			jQuery( this ).find(':input').each( function( idx, item ){
 				var input = jQuery( item );
 				if( input.attr('type') != 'button' && idx==0 && input.val()=='' ){
@@ -195,13 +198,14 @@ function searchEvents( listAll )
 			var input = jQuery( item );
 			params += '&searchingValues=de_' + input.val() + '_false_';
 		});
+		hideById('advanced-search');
 	}
 	else{
 		params += '&startDate=' + getFieldValue('startDate');
 		params += '&endDate=' + getFieldValue('endDate');
 		var value = '';
 		var searchingValue = '';
-		jQuery( '#advancedSearchTB tbody tr' ).each( function(){
+		jQuery( '#advancedSearchTB tr' ).each( function(){
 			jQuery( this ).find(':input').each( function( idx, item ){
 				var input = jQuery( item );
 				if( input.attr('type') != 'button' ){
@@ -209,7 +213,7 @@ function searchEvents( listAll )
 						searchingValue = 'de_' + input.val() + '_false_';
 					}
 					else if( input.val()!='' ){
-						value += input.val().toLowerCase();
+						value += jQuery.trim(input.val()).toLowerCase();
 					}
 				}
 			});
@@ -223,8 +227,8 @@ function searchEvents( listAll )
 		})
 	}
 	
-	params += '&facilityLB=' + $('input[name=facilityLB]:checked').val();
-	params += '&level=' + $('select[id=level]').val();
+	params += '&facilityLB=selected';
+	params += '&level=0';
 	params += '&orgunitIds=' + getFieldValue('orgunitId');
 	params += '&programStageId=' + jQuery('#programId option:selected').attr('psid');
 	params += '&orderByOrgunitAsc=false';
@@ -237,14 +241,14 @@ function searchEvents( listAll )
 		url: 'searchProgramStageInstances.action',
 		data: params,
 		success: function( html ){
-			hideById('loaderDiv');
 			hideById('dataEntryInfor');
 			setInnerHTML( 'listDiv', html );
 			
 			var searchInfor = (listAll) ? i18n_list_all_events : i18n_search_events_by_dataelements;
 			setInnerHTML( 'searchInforTD', searchInfor);
-				
+			
 			showById('listDiv');
+			hideById('loaderDiv');
 		}
     });
 }
@@ -301,10 +305,12 @@ function showUpdateEvent( programStageInstanceId )
 	$( '#dataEntryFormDiv' ).load( "dataentryform.action", 
 		{ 
 			programStageInstanceId: programStageInstanceId
-		},function( )
+		},function()
 		{
-			var programName  = jQuery('#programId option:selected').text();
-				programName += ' - ' + i18n_report_date + ' : ' + jQuery('#incidentDate').val();
+			jQuery('#inputCriteriaDiv').remove();
+			hideById('mainLinkLbl');
+			showById('actionDiv');
+			var programName = jQuery('#programId option:selected').text();
 			var programStageId = jQuery('#programId option:selected').attr('psid');
 			jQuery('.stage-object-selected').attr('psid',programStageId);
 			setInnerHTML('programName', programName );
@@ -315,7 +321,6 @@ function showUpdateEvent( programStageInstanceId )
 			else{
 				disableCompletedButton( false );
 			}
-				
 			hideById('loaderDiv');
 			showById('dataEntryInfor');
 			showById('entryFormContainer');
@@ -324,7 +329,8 @@ function showUpdateEvent( programStageInstanceId )
 
 function backEventList()
 {
-	hideById('dataEntryInfor'); 
+	hideById('dataEntryInfor');
+	showById('mainLinkLbl');
 	showById('selectDiv');
 	showById('searchDiv');
 	showById('listDiv');
@@ -338,7 +344,10 @@ function showAddEventForm()
 	hideById('selectDiv');
 	hideById('searchDiv');
 	hideById('listDiv');
+	hideById('mainLinkLbl');
+	hideById('actionDiv');
 	showById('dataEntryInfor');
+	setInnerHTML('programName', jQuery('#programId option:selected').text());
 }
 
 function addNewEvent()
@@ -353,7 +362,7 @@ function addNewEvent()
 			if(json.response=='success')
 			{
 				setFieldValue('programStageInstanceId',json.message);
-				showUpdateEvent( json.message )
+				showUpdateEvent( json.message );
 			}
 			else
 			{

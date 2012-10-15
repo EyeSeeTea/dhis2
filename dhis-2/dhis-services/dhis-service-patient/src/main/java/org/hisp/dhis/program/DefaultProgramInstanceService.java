@@ -183,9 +183,9 @@ public class DefaultProgramInstanceService
         return programInstanceStore.count( program, organisationUnit );
     }
 
-    public int countProgramInstances( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate )
+    public int countProgramInstances( Program program, Collection<Integer> orgunitIds, Date startDate, Date endDate )
     {
-        return programInstanceStore.count( program, organisationUnit, startDate, endDate );
+        return programInstanceStore.count( program, orgunitIds, startDate, endDate );
     }
 
     public List<Grid> getProgramInstanceReport( Patient patient, I18n i18n, I18nFormat format )
@@ -211,6 +211,10 @@ public class DefaultProgramInstanceService
         // Add fixed attribues
         // ---------------------------------------------------------------------
 
+        attrGrid.addRow();
+        attrGrid.addValue( i18n.getString( "gender" ) );
+        attrGrid.addValue( i18n.getString( patient.getGender() ));
+        
         attrGrid.addRow();
         attrGrid.addValue( i18n.getString( "date_of_birth" ) );
         attrGrid.addValue( format.formatDate( patient.getBirthDate() ) );
@@ -330,10 +334,14 @@ public class DefaultProgramInstanceService
         grid.addRow();
         grid.addValue( programInstance.getProgram().getDateOfEnrollmentDescription() );
         grid.addValue( format.formatDate( programInstance.getEnrollmentDate() ) );
-        
-        grid.addRow();
-        grid.addValue( programInstance.getProgram().getDateOfIncidentDescription() );
-        grid.addValue( format.formatDate( programInstance.getDateOfIncident() ) );
+
+        if ( programInstance.getProgram().getDisplayIncidentDate() != null
+            && programInstance.getProgram().getDisplayIncidentDate() )
+        {
+            grid.addRow();
+            grid.addValue( programInstance.getProgram().getDateOfIncidentDescription() );
+            grid.addValue( format.formatDate( programInstance.getDateOfIncident() ) );
+        }
 
         getProgramStageInstancesReport( grid, programInstance, format, i18n );
 
@@ -356,24 +364,23 @@ public class DefaultProgramInstanceService
             grid.addValue( "" );
 
             grid.addRow();
-            grid.addValue( ">> " + i18n.getString( "program_stage" ) );
-            grid.addValue( programStageInstance.getProgramStage().getName() );
+            grid.addValue( ">> " + programStageInstance.getProgramStage().getName() );
+            grid.addValue( "" );
 
             // -----------------------------------------------------------------
             // due-date && report-date
             // -----------------------------------------------------------------
 
-            Date executionDate = programStageInstance.getExecutionDate();
-            String executionDateValue = (executionDate != null) ? format.formatDate( programStageInstance
-                .getExecutionDate() ) : "[" + i18n.getString( "none" ) + "]";
-
             grid.addRow();
             grid.addValue( i18n.getString( "due_date" ) );
             grid.addValue( format.formatDate( programStageInstance.getDueDate() ) );
 
-            grid.addRow();
-            grid.addValue( programStageInstance.getProgramStage().getReportDateDescription() );
-            grid.addValue( executionDateValue );
+            if ( programStageInstance.getExecutionDate() != null )
+            {
+                grid.addRow();
+                grid.addValue( programStageInstance.getProgramStage().getReportDateDescription() );
+                grid.addValue( format.formatDate( programStageInstance.getExecutionDate() ) );
+            }
 
             // -----------------------------------------------------------------
             // Values

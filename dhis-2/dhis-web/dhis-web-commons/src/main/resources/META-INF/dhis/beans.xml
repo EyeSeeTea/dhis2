@@ -8,15 +8,10 @@
   <!-- Web Portal -->
 
   <bean id="org.hisp.dhis.webportal.module.ModuleManager" class="org.hisp.dhis.webportal.module.DefaultModuleManager">
-    <property name="moduleComparator">
-      <ref local="org.hisp.dhis.webportal.module.ConfigurableModuleComparator" />
-    </property>
-    <property name="defaultActionName">
-      <value>index</value>
-    </property>
-    <property name="maintenanceModuleIdentifier">
-      <value>maintenance</value>
-    </property>
+    <property name="actionAccessResolver" ref="org.hisp.dhis.security.ActionAccessResolver" />
+    <property name="moduleComparator" ref="org.hisp.dhis.webportal.module.ConfigurableModuleComparator" />
+    <property name="defaultActionName" value="index" />
+    <property name="maintenanceModuleIdentifier" value="maintenance" />
   </bean>
 
   <bean id="org.hisp.dhis.webportal.module.ConfigurableModuleComparator" class="org.hisp.dhis.webportal.module.ConfigurableModuleComparator">
@@ -569,13 +564,12 @@
     <property name="styleManager" ref="org.hisp.dhis.setting.StyleManager" />
   </bean>
 
+  <!-- User Account -->
+  
   <bean id="org.hisp.dhis.useraccount.action.GetCurrentUserAction" class="org.hisp.dhis.useraccount.action.GetCurrentUserAction"
     scope="prototype">
     <property name="currentUserService">
       <ref bean="org.hisp.dhis.user.CurrentUserService" />
-    </property>
-    <property name="userService">
-      <ref bean="org.hisp.dhis.user.UserService" />
     </property>
   </bean>
 
@@ -586,6 +580,61 @@
     </property>
     <property name="passwordManager">
       <ref bean="org.hisp.dhis.security.PasswordManager" />
+    </property>
+  </bean>
+
+  <bean id="org.hisp.dhis.useraccount.action.UpdateUserProfileAction" class="org.hisp.dhis.useraccount.action.UpdateUserProfileAction"
+    scope="prototype"/>
+
+  <!-- User settings -->
+
+  <bean id="org.hisp.dhis.settings.user.action.GetGeneralSettingsAction"
+      class="org.hisp.dhis.settings.user.action.GetGeneralSettingsAction"
+      scope="prototype">
+    <property name="resourceBundleManager">
+      <ref bean="org.hisp.dhis.i18n.resourcebundle.ResourceBundleManager" />
+    </property>
+    <property name="i18nService">
+      <ref bean="org.hisp.dhis.i18n.I18nService" />
+    </property>
+    <property name="localeManager">
+      <ref bean="org.hisp.dhis.i18n.locale.LocaleManager" />
+    </property>
+    <property name="userSettingService">
+      <ref bean="org.hisp.dhis.user.UserSettingService" />
+    </property>
+    <property name="styleManager">
+      <ref bean="org.hisp.dhis.setting.StyleManager" />
+    </property>
+  </bean>
+
+  <bean id="org.hisp.dhis.settings.user.action.SetGeneralSettingsAction"
+      class="org.hisp.dhis.settings.user.action.SetGeneralSettingsAction"
+      scope="prototype">
+    <property name="localeManager">
+      <ref bean="org.hisp.dhis.i18n.locale.LocaleManager" />
+    </property>
+    <property name="userSettingService">
+      <ref bean="org.hisp.dhis.user.UserSettingService" />
+    </property>
+    <property name="styleManager">
+      <ref bean="org.hisp.dhis.setting.StyleManager" />
+    </property>
+  </bean>
+
+  <bean id="org.hisp.dhis.settings.user.action.GetMessageSettingsAction"
+      class="org.hisp.dhis.settings.user.action.GetMessageSettingsAction"
+      scope="prototype">
+    <property name="userSettingService">
+      <ref bean="org.hisp.dhis.user.UserSettingService" />
+    </property>
+  </bean>
+
+  <bean id="org.hisp.dhis.settings.user.action.SetMessageSettingsAction"
+      class="org.hisp.dhis.settings.user.action.SetMessageSettingsAction"
+      scope="prototype">
+    <property name="userSettingService">
+      <ref bean="org.hisp.dhis.user.UserSettingService" />
     </property>
   </bean>
 

@@ -37,7 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.mobile.ActivityReportingService;
@@ -59,6 +58,7 @@ import org.hisp.dhis.patient.PatientIdentifier;
 import org.hisp.dhis.patient.PatientIdentifierService;
 import org.hisp.dhis.patient.PatientIdentifierType;
 import org.hisp.dhis.patient.PatientMobileSetting;
+import org.hisp.dhis.patient.PatientService;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValue;
 import org.hisp.dhis.patientattributevalue.PatientAttributeValueService;
 import org.hisp.dhis.patientdatavalue.PatientDataValue;
@@ -67,6 +67,8 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.program.ProgramStageSection;
+import org.hisp.dhis.program.ProgramStageSectionService;
 import org.hisp.dhis.system.util.DateUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -88,7 +90,9 @@ public class ActivityReportingServiceImpl
 
     private ProgramStageInstanceService programStageInstanceService;
 
-//    private ActivityPlanService activityPlanService;
+    // private ActivityPlanService activityPlanService;
+
+    private PatientService patientService;
 
     private PatientAttributeValueService patientAttValueService;
 
@@ -99,6 +103,13 @@ public class ActivityReportingServiceImpl
     private PatientMobileSettingService patientMobileSettingService;
 
     private PatientIdentifierService patientIdentifierService;
+    
+    private ProgramStageSectionService programStageSectionService;
+    
+    public void setProgramStageSectionService( ProgramStageSectionService programStageSectionService )
+    {
+        this.programStageSectionService = programStageSectionService;
+    }
 
     // -------------------------------------------------------------------------
     // MobileDataSetService
@@ -111,53 +122,31 @@ public class ActivityReportingServiceImpl
     @Override
     public ActivityPlan getCurrentActivityPlan( OrganisationUnit unit, String localeString )
     {
-        long time = System.currentTimeMillis();
+        Calendar cal = Calendar.getInstance();
+        cal.add( Calendar.DATE, 30 );
+
+        long upperBound = cal.getTime().getTime();
+
+        cal.add( Calendar.DATE, -60 );
+        long lowerBound = cal.getTime().getTime();
 
         List<Activity> items = new ArrayList<Activity>();
+        Collection<Patient> patients = patientService.getPatients( unit, null, null );
+
+        for ( Patient patient : patients )
+        {
+            for ( ProgramStageInstance programStageInstance : programStageInstanceService.getProgramStageInstances(
+                patient, false ) )
+            {
+                if ( programStageInstance.getDueDate().getTime() >= lowerBound
+                    && programStageInstance.getDueDate().getTime() <= upperBound )
+                {
+                    items.add( getActivity( programStageInstance, false ) );
+                }
+            }
+        }
 
         this.setGroupByAttribute( patientAttService.getPatientAttributeByGroupBy( true ) );
-
-//        Collection<org.hisp.dhis.activityplan.Activity> activities = activityPlanService
-//            .getCurrentActivitiesByProvider( unit );
-//
-//        for ( org.hisp.dhis.activityplan.Activity activity : activities )
-//        {
-//            items.add( getActivity( activity.getTask(), activity.getDueDate().getTime() < time ) );
-//        }
-//
-//        if ( items.isEmpty() )
-//        {
-//            return null;
-//        }
-//
-//        Collections.sort( items, activityComparator );
-
-        if ( DEBUG )
-            log.debug( "Found " + items.size() + " current activities in " + (System.currentTimeMillis() - time)
-                + " ms." );
-
-        return new ActivityPlan( items );
-    }
-
-    @Override
-    public ActivityPlan getAllActivityPlan( OrganisationUnit unit, String localeString )
-    {
-//        long time = System.currentTimeMillis();
-
-        List<Activity> items = new ArrayList<Activity>();
-
-        this.setGroupByAttribute( patientAttService.getPatientAttributeByGroupBy( true ) );
-
-//        Collection<org.hisp.dhis.activityplan.Activity> activities = activityPlanService.getActivitiesByProvider( unit );
-//
-//        for ( org.hisp.dhis.activityplan.Activity activity : activities )
-//        {
-//            if ( activity.getDueDate() != null )
-//            {
-//                items.add( getActivity( activity.getTask(), activity.getDueDate().getTime() < time ) );
-//            }
-//
-//        }
 
         if ( items.isEmpty() )
         {
@@ -166,6 +155,33 @@ public class ActivityReportingServiceImpl
 
         Collections.sort( items, activityComparator );
 
+        return new ActivityPlan( items );
+    }
+
+    @Override
+    public ActivityPlan getAllActivityPlan( OrganisationUnit unit, String localeString )
+    {
+
+        List<Activity> items = new ArrayList<Activity>();
+        Collection<Patient> patients = patientService.getPatients( unit, null, null );
+
+        for ( Patient patient : patients )
+        {
+            for ( ProgramStageInstance programStageInstance : programStageInstanceService.getProgramStageInstances(
+                patient, false ) )
+            {
+                items.add( getActivity( programStageInstance, false ) );
+            }
+        }
+
+        this.setGroupByAttribute( patientAttService.getPatientAttributeByGroupBy( true ) );
+
+        if ( items.isEmpty() )
+        {
+            return null;
+        }
+
+        Collections.sort( items, activityComparator );
         return new ActivityPlan( items );
     }
 
@@ -231,7 +247,7 @@ public class ActivityReportingServiceImpl
     // -------------------------------------------------------------------------
 
     @Override
-    public void saveActivityReport( OrganisationUnit unit, ActivityValue activityValue )
+    public void saveActivityReport( OrganisationUnit unit, ActivityValue activityValue, Integer programStageSectionId )
         throws NotAllowedException
     {
 
@@ -244,10 +260,22 @@ public class ActivityReportingServiceImpl
 
         programStageInstance.getProgramStage();
         Collection<org.hisp.dhis.dataelement.DataElement> dataElements = new ArrayList<org.hisp.dhis.dataelement.DataElement>();
-
-        for ( ProgramStageDataElement de : programStageInstance.getProgramStage().getProgramStageDataElements() )
+        
+        ProgramStageSection programStageSection = programStageSectionService.getProgramStageSection( programStageSectionId );
+        
+        if ( programStageSectionId != null && programStageSectionId != 0 )
         {
-            dataElements.add( de.getDataElement() );
+            for ( ProgramStageDataElement de : programStageSection.getProgramStageDataElements() )
+            {
+                dataElements.add( de.getDataElement() );
+            }
+        }
+        else
+        {
+            for ( ProgramStageDataElement de : programStageInstance.getProgramStage().getProgramStageDataElements() )
+            {
+                dataElements.add( de.getDataElement() );
+            }
         }
 
         programStageInstance.getProgramStage().getProgramStageDataElements();
@@ -259,7 +287,7 @@ public class ActivityReportingServiceImpl
         }
 
         if ( dataElements.size() != dataElementIds.size() )
-        {
+        {;
             throw NotAllowedException.INVALID_PROGRAM_STAGE;
         }
 
@@ -274,8 +302,12 @@ public class ActivityReportingServiceImpl
         }
 
         // Set ProgramStageInstance to completed
-        programStageInstance.setCompleted( true );
-        programStageInstanceService.updateProgramStageInstance( programStageInstance );
+        if ( programStageSectionId == 0 )
+        {
+            programStageInstance.setCompleted( true );
+            programStageInstanceService.updateProgramStageInstance( programStageInstance );
+        }
+            
         // Everything is fine, hence save
         saveDataValues( activityValue, programStageInstance, dataElementMap );
 
@@ -294,7 +326,7 @@ public class ActivityReportingServiceImpl
         activity.setDueDate( instance.getDueDate() );
         activity.setTask( getTask( instance ) );
         activity.setLate( late );
-        activity.setExpireDate( DateUtils.getDateAfterAddition( instance.getDueDate(), 0) );
+        activity.setExpireDate( DateUtils.getDateAfterAddition( instance.getDueDate(), 0 ) );
 
         return activity;
     }
@@ -434,7 +466,6 @@ public class ActivityReportingServiceImpl
 
             dataElement = dataElementMap.get( dv.getId() );
             PatientDataValue dataValue = dataValueService.getPatientDataValue( programStageInstance, dataElement );
-
             if ( dataValue == null )
             {
                 if ( value != null )
@@ -499,10 +530,11 @@ public class ActivityReportingServiceImpl
         this.patientMobileSettingService = patientMobileSettingService;
     }
 
-//    public void setActivityPlanService( org.hisp.dhis.activityplan.ActivityPlanService activityPlanService )
-//    {
-//        this.activityPlanService = activityPlanService;
-//    }
+    // public void setActivityPlanService(
+    // org.hisp.dhis.activityplan.ActivityPlanService activityPlanService )
+    // {
+    // this.activityPlanService = activityPlanService;
+    // }
 
     public PatientMobileSetting getSetting()
     {
@@ -533,6 +565,12 @@ public class ActivityReportingServiceImpl
     public void setPatientIdentifierService( PatientIdentifierService patientIdentifierService )
     {
         this.patientIdentifierService = patientIdentifierService;
+    }
+
+    @Required
+    public void setPatientService( PatientService patientService )
+    {
+        this.patientService = patientService;
     }
 
 }

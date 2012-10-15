@@ -507,7 +507,7 @@ div.paging span, div.paging a
 {
 	font-family: LiberationSansBold, arial;
 	padding: 0 5px;
-	font-size: 11px;
+	font-size: 12px;
 }
 
 div.paging a
@@ -584,6 +584,15 @@ ul.pageSizeSelection input
 
 .cde-none
 {
+}
+
+.dashboardMenuFlag
+{
+  margin-top: 16px; 
+  margin-left: 16px; 
+  border: 1px solid #D0D0D0; 
+  border-radius: 2px; cursor: pointer;
+  width: 160px;
 }
 
 /*----------------------------------------------------------------------------*/

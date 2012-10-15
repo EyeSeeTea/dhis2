@@ -29,11 +29,6 @@ function loadDataEntry( programStageInstanceId )
 	disableCompletedButton(true);
 	disable('uncompleteBtn');
 	
-	jQuery(".stage-object-selected").removeClass('stage-object-selected');
-	var selectedProgramStageInstance = jQuery( '#' + prefixId + programStageInstanceId );
-	selectedProgramStageInstance.addClass('stage-object-selected');
-	setFieldValue( 'programStageId', selectedProgramStageInstance.attr('psid') );
-	
 	showLoader();	
 	$( '#dataEntryFormDiv' ).load( "dataentryform.action", 
 		{ 
@@ -57,7 +52,6 @@ function loadDataEntry( programStageInstanceId )
 			{
 				disableCompletedButton(true);
 			}
-			
 			hideLoader();
 			hideById('contentDiv'); 
 		} );
@@ -71,9 +65,10 @@ function showSearchForm()
 {
 	hideById('dataRecordingSelectDiv');
 	hideById('dataEntryFormDiv');
+	hideById('addNewDiv');
 	showById('searchDiv');
 	showById('contentDiv');
-	hideById('addNewDiv');
+	showById('mainLinkLbl');
 	jQuery('#createNewEncounterDiv').dialog('close');
 	jQuery('#resultSearchDiv').dialog('close');
 }
@@ -85,6 +80,7 @@ function showSearchForm()
 isAjax = true;
 function listAllPatient()
 {
+	hideById('advanced-search');
 	showLoader();
 	jQuery('#contentDiv').load( 'listAllPatients.action',{
 			listAll:false,
@@ -128,7 +124,7 @@ function getKeyCode(e)
 // Show selected data-recording
 //--------------------------------------------------------------------------------------------
 
-function showSelectedDataRecoding( patientId )
+function showSelectedDataRecoding( patientId, programId )
 {
 	showLoader();
 	hideById('searchDiv');
@@ -142,21 +138,10 @@ function showSelectedDataRecoding( patientId )
 			showById('dataRecordingSelectDiv');
 			hideLoader();
 			hideById('contentDiv');
-			jQuery("#dataRecordingSelectDiv [id=inputCriteria]").show();
-			if( getFieldValue('isRegistration') == 'true' )
-			{
-				jQuery("#dataRecordingSelectDiv [id=inputCriteria]").hide();
-				var singleProgramId = getFieldValue('programIdAddPatient');
-				jQuery("#dataRecordingSelectDiv select[id='programId'] option").each(function(){
-					if( jQuery(this).val()==singleProgramId){
-						jQuery(this).attr('selected', 'selected');
-						if( jQuery("#dataRecordingSelectDiv select[id='programId'] option").length > 2)
-						{
-							loadProgramStages();
-						}
-					}
-				});
-			}
+			hideById('contentDiv');
+			hideById('mainLinkLbl');
+			setInnerHTML('singleProgramName',jQuery('#programIdAddPatient option:selected').text());
+			loadProgramStages( programId );
 		});
 }
 
@@ -174,5 +159,22 @@ function advancedSearch( params )
 				setFieldValue('listAll',false);
 				jQuery( "#loaderDiv" ).hide();
 			}
+		});
+}
+
+//--------------------------------------------------------------------------------------------
+// Load program-stages by the selected program
+//--------------------------------------------------------------------------------------------
+
+function loadProgramStages( programId )
+{
+	jQuery.getJSON( "loadProgramStageInstances.action",
+		{
+			programId: programId
+		},  
+		function( json ) 
+		{   
+			jQuery("#selectForm [id=programStageId]").attr('psid', json.programStageInstances[0].programStageId);	
+			loadDataEntry( json.programStageInstances[0].id );
 		});
 }

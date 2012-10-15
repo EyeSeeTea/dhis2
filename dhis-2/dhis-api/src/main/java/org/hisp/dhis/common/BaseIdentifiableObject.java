@@ -194,20 +194,9 @@ public class BaseIdentifiableObject
         this.displayName = displayName;
     }
 
-    @Override
-    public boolean equals( Object o )
-    {
-        if ( this == o ) return true;
-        if ( o == null || getClass() != o.getClass() ) return false;
-
-        BaseIdentifiableObject that = (BaseIdentifiableObject) o;
-
-        if ( code != null ? !code.equals( that.code ) : that.code != null ) return false;
-        if ( name != null ? !name.equals( that.name ) : that.name != null ) return false;
-        if ( uid != null ? !uid.equals( that.uid ) : that.uid != null ) return false;
-
-        return true;
-    }
+    // -------------------------------------------------------------------------
+    // hashCode and equals
+    // -------------------------------------------------------------------------
 
     @Override
     public int hashCode()
@@ -218,6 +207,36 @@ public class BaseIdentifiableObject
         result = 31 * result + (lastUpdated != null ? lastUpdated.hashCode() : 0);
 
         return result;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o )
+        {
+            return true;
+        }
+        
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        BaseIdentifiableObject that = (BaseIdentifiableObject) o;
+
+        if ( uid != null ? !uid.equals( that.uid ) : that.uid != null )
+        {
+            return false;
+        }
+
+        if ( code != null ? !code.equals( that.code ) : that.code != null )
+        {
+            return false;
+        }
+        
+        if ( name != null ? !name.equals( that.name ) : that.name != null )
+        {
+            return false;
+        }
+        
+        return true;
     }
 
     // -------------------------------------------------------------------------
@@ -299,18 +318,14 @@ public class BaseIdentifiableObject
     @Override
     public String toString()
     {
-        return "{" + "id=" + id + ", uid='" + uid + '\'' + ", code='" +
-            code + '\'' + ", name='" + name + '\'' + ", lastUpdated=" + lastUpdated + "}";
+        return "{" + "id=" + getId() + ", uid='" + getUid() + '\'' + ", code='" +
+            getCode() + '\'' + ", name='" + getName() + '\'' + ", lastUpdated=" + getLastUpdated() + "}";
     }
 
     @Override
     public void mergeWith( IdentifiableObject other )
     {
         Validate.notNull( other );
-
-        // since we are using these objects as db objects, i don't really think we want to "merge"
-        // with other.id, since .id is used by the underlying db.
-        // this.id = other.getId() == 0 ? this.id : other.getId();
 
         this.uid = other.getUid() == null ? this.uid : other.getUid();
         this.name = other.getName() == null ? this.name : other.getName();

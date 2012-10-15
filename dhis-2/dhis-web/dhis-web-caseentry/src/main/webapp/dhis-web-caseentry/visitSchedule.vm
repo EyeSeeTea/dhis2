@@ -13,7 +13,7 @@
 			<td></td>
 			<td>
 				<input type="button" class='button' value="$i18n.getString( 'update' )" onclick='updateEnrollment($programInstance.patient.id, $programInstance.program.id, $programInstance.id, "$programInstance.program.name")'/>
-				<input type="button" class='button' value="$i18n.getString( 'unenroll' )" onclick='unenrollmentForm($programInstance.id)'/>
+				<input type="button" class='button' value="$i18n.getString( 'complete' )" onclick='unenrollmentForm($programInstance.id)'/>
 			</td>
 		</tr>
 	</table>
@@ -21,7 +21,7 @@
 <br>
 #set($programStageInstances = $programInstance.programStageInstances)
 #if( $programStageInstances.size() > 0 )
-	<table class='mainPageTable' id='progarmStageListDiv' name='progarmStageListDiv' >
+	<table class='mainPageTable listTable' id='progarmStageListDiv' name='progarmStageListDiv' >
 		<col width="10px">
 		<col width="200px">
 		<col width="200px">
@@ -38,7 +38,7 @@
 			<th>$i18n.getString( "remove" )</th>
 			#end
 		</tr>
-		
+		<tbody>
 	#set( $rowCount = 0 )
 	#set( $mark = false )
 	#foreach( $programStageInstance in $programStageInstances )
@@ -86,7 +86,7 @@
 			<td>
 				<input type='text' id='message_$programStageInstance.id' name='message_$programStageInstance.id' style="width:300px;" class="{validate:{required:true,maxlength:160}}">
 				<input type='button' value="+" class='tiny-button' title='$i18n.getString("post_comment")' onclick="addComment(byId('message_$programStageInstance.id'),'$programStageInstance.id')">
-				<input type="button" value="&raquo;" class='tiny-button' title="$i18n.getString( 'send_sms' )" onclick="setFieldValue( 'programStageInstanceId',$programStageInstance.id);sendSmsOnePatient(byId('message_$programStageInstance.id'),'$programStageInstance.id');"/>
+				<input type="button" value="&raquo;" class='tiny-button' title="$i18n.getString( 'send_message' )" onclick="setFieldValue( 'programStageInstanceId',$programStageInstance.id);sendSmsOnePatient(byId('message_$programStageInstance.id'),'$programStageInstance.id');"/>
 			</td>
 			#if( $auth.hasAccess( "dhis-web-caseentry", "removeCurrentEncounter" ) )
 			<td>
@@ -96,6 +96,7 @@
 		</tr>
 		#set( $mark = !$mark  )
 	#end
+	</tbody>
 	</table>
 #end
 

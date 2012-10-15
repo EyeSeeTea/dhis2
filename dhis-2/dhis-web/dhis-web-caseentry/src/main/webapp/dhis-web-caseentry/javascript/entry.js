@@ -1,87 +1,3 @@
-//--------------------------------------------------------------------------------------------
-// Load program-stages by the selected program
-//--------------------------------------------------------------------------------------------
-
-function loadProgramStages()
-{
-	jQuery('#createNewEncounterDiv').dialog('close');
-	hideById('dataEntryFormDiv');
-	setFieldValue('executionDate','');
-	setFieldValue('dueDate','');
-	disableCompletedButton(true);
-	disable('uncompleteBtn');
-	disable('validationBtn');
-	hideById('inputCriteriaDiv');
-	$('#programStageIdTR').html('');
-	hideById('colorHelpLink');
-	
-	var programId = jQuery('#dataRecordingSelectDiv [name=programId]').val();
-	if ( programId == 0 )
-	{
-		return;
-	}
-	
-	jQuery.getJSON( "loadProgramStageInstances.action",
-		{
-			programId: programId
-		},  
-		function( json ) 
-		{    
-			hideById('executionDateTB');
-			if(byId('repeatableProgramStageId').options.length == 0)
-			{
-				hideById("newEncounterBtn");
-			}
-			
-			var type = jQuery('#dataRecordingSelectDiv [name=programId] option:selected').attr('type');
-			if( type == 1 )
-			{
-				showById('colorHelpLink');
-				for ( i in json.programStageInstances ) 
-				{
-					if( i!= 0 )
-					{
-						$('#programStageIdTR').append('<td><img src="images/rightarrow.png"></td>');
-					}
-
-					var status =json.programStageInstances[i].status;
-					var programStageInstanceId = json.programStageInstances[i].id;
-					var programStageId = json.programStageInstances[i].programStageId;
-					var programStageName= json.programStageInstances[i].programStageName;
-					var elementId = prefixId + programStageInstanceId;
-					
-					$('#programStageIdTR').append('<td><input name="programStageBtn" '
-						+ 'id="' + elementId + '"' 
-						+ 'type="button" class="stage-object" '
-						+ 'psid="' + programStageId + '"' 
-						+ 'psname="' + programStageName + '" '
-						+ 'dueDate="' + json.programStageInstances[i].dueDate + '"'
-						+ 'value="'+ programStageName + ' ' + json.programStageInstances[i].dueDate + '" '
-						+ 'onclick="javascript:loadDataEntry(' + programStageInstanceId + ')"></td>');
-					setEventColorStatus( programStageInstanceId, status );
-				}
-				
-				disableCompletedButton(true);
-				disable('validationBtn');
-				showById('programStageIdTB');
-				showById('programInstanceFlowDiv');
-			}
-			// Load entry form for Single-event program or normal program with only one program-stage
-			else 
-			{
-				jQuery('#dueDateTR').attr('class','hidden');
-				disableCompletedButton(false);
-				hideById('programStageIdTB');
-				hideById('programInstanceFlowDiv');
-				var programStageInstanceId = '';
-				if( json.programStageInstances.length == 1 )
-				{
-					programStageInstanceId = json.programStageInstances[0].id;
-				}
-				loadDataEntry( programStageInstanceId );
-			}
-	});
-}
 
 //------------------------------------------------------------------------------
 // Save value
@@ -578,22 +494,14 @@ function doComplete( isCreateEvent )
 					var selectedProgram = jQuery('.stage-object-selected');
 					if( selectedProgram.attr('programType')=='2' || json.response == 'programcompleted' )
 					{
-						selectedProgram.remove();
-						hideById('programInstanceDiv');
-						hideById('entryFormContainer');
 						var completedRow = jQuery('#td_' + programInstanceId).html();
 						jQuery('#completedList' ).append('<option value="' +  programInstanceId + '">' + getInnerHTML('infor_' + programInstanceId ) + '</option>');
-						hideById('tr1_' + programInstanceId );
-						hideById('tr2_' + programInstanceId );
 					}
 					
-					selection.enable();
 					hideLoader();
 					hideById('contentDiv');
 					
-					
-					if( isCreateEvent )
-					{
+					if( isCreateEvent ){
 						showAddEventForm();
 					}
 				});

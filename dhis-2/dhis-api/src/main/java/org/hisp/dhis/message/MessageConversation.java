@@ -50,9 +50,9 @@ import java.util.*;
 public class MessageConversation
     extends BaseIdentifiableObject
 {
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // Persistent fields
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     private String subject;
 
@@ -66,9 +66,9 @@ public class MessageConversation
     @Scanned
     private List<Message> messages = new ArrayList<Message>();
 
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // Transient fields
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     private transient boolean read;
 
@@ -77,6 +77,12 @@ public class MessageConversation
     private transient String lastSenderSurname;
 
     private transient String lastSenderFirstname;
+
+    private transient int messageCount;
+
+    //--------------------------------------------------------------------------
+    // Constructors
+    //--------------------------------------------------------------------------
 
     public MessageConversation()
     {
@@ -89,9 +95,9 @@ public class MessageConversation
         this.lastMessage = new Date();
     }
 
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // Logic
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     @Override
     public int hashCode()
@@ -376,6 +382,16 @@ public class MessageConversation
     public void setLastSenderFirstname( String lastSenderFirstname )
     {
         this.lastSenderFirstname = lastSenderFirstname;
+    }
+
+    public int getMessageCount()
+    {
+        return messageCount;
+    }
+
+    public void setMessageCount( int messageCount )
+    {
+        this.messageCount = messageCount;
     }
 
     @Override

@@ -43,9 +43,6 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStageInstance;
-import org.hisp.dhis.program.ProgramStageInstanceService;
-import org.hisp.dhis.system.util.ConversionUtils;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -78,14 +75,7 @@ public class GenerateReportAction
     {
         this.programInstanceService = programInstanceService;
     }
-
-    private ProgramStageInstanceService programStageInstanceService;
-
-    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
-    {
-        this.programStageInstanceService = programStageInstanceService;
-    }
-
+    
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -160,6 +150,13 @@ public class GenerateReportAction
         return program;
     }
 
+    private int total;
+
+    public int getTotal()
+    {
+        return total;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -187,35 +184,30 @@ public class GenerateReportAction
         }
         else if ( facilityLB.equals( "childrenOnly" ) )
         {
-            orgunitIds = new HashSet<Integer>( ConversionUtils.getIdentifiers( OrganisationUnit.class,
-                organisationUnit.getChildren() ) );
+            orgunitIds.addAll( organisationUnitService.getOrganisationUnitHierarchy().getChildren(
+                organisationUnit.getId() ) );
+            orgunitIds.remove( organisationUnit.getId() );
         }
         else
         {
-            orgunitIds.add( organisationUnit.getId() );
-            orgunitIds.addAll( organisationUnitService.getOrganisationUnitHierarchy().getChildren( organisationUnit.getId() ) );
+            orgunitIds.addAll( organisationUnitService.getOrganisationUnitHierarchy().getChildren(
+                organisationUnit.getId() ) );
         }
 
-        // ---------------------------------------------------------------------
-        // Program instances for the selected program
-        // ---------------------------------------------------------------------
-
-        int total = programInstanceService.countProgramInstances( program, organisationUnit, sDate, eDate );
-
-        this.paging = createPaging( total );
-
-        programInstances = programInstanceService.getProgramInstances( program, orgunitIds, sDate, eDate,
-            paging.getStartPos(), paging.getPageSize() );
-
-        Collection<ProgramStageInstance> programStageInstances = new ArrayList<ProgramStageInstance>();
-
-        for ( ProgramInstance programInstance : programInstances )
+        if ( orgunitIds.size() > 0 )
         {
-            programStageInstances.addAll( programInstance.getProgramStageInstances() );
+            // ---------------------------------------------------------------------
+            // Program instances for the selected program
+            // ---------------------------------------------------------------------
+
+            total = programInstanceService.countProgramInstances( program, orgunitIds, sDate, eDate );
+
+            this.paging = createPaging( total );
+
+            programInstances = programInstanceService.getProgramInstances( program, orgunitIds, sDate, eDate,
+                paging.getStartPos(), paging.getPageSize() );
         }
-
-        statusMap = programStageInstanceService.statusProgramStageInstances( programStageInstances );
-
+        
         return SUCCESS;
     }
 }

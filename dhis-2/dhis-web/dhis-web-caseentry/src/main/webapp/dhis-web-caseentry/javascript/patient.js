@@ -3,6 +3,7 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 {	
 	showById('selectDiv');
 	showById('searchDiv');
+	showById('mainLinkLbl');
 	hideById('listPatientDiv');
 	hideById('editPatientDiv');
 	hideById('enrollmentDiv');
@@ -13,6 +14,7 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 	enable('listPatientBtn');
 	enable('addPatientBtn');
 	enable('advancedSearchBtn');
+	enable('searchObjectId');
 	setFieldValue("orgunitName", orgUnitNames[0]);
 }
 
@@ -27,6 +29,7 @@ function listAllPatient()
 	hideById('listPatientDiv');
 	hideById('editPatientDiv');
 	hideById('migrationPatientDiv');
+	hideById('advanced-search');
 	
 	jQuery('#loaderDiv').show();
 	contentDiv = 'listPatientDiv';

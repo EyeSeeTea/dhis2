@@ -47,6 +47,12 @@ a:visited
   color:#3b73b8;
 }
 
+input[type=text],textarea
+{
+  border: 1px solid #aaa;
+  padding: 4px 1px;
+}
+
 /*----------------------------------------------------------------------------*/
 /* Header                                                                     */
 /*----------------------------------------------------------------------------*/
@@ -197,6 +203,13 @@ div#menuDropDown3
 {
   position: absolute;
   top: 46px;
+  left: 780px;
+}
+
+div#menuDropDown4
+{
+  position: absolute;
+  top: 44px;
   left: 780px;
 }
 
@@ -425,7 +438,12 @@ div#menuDropDown3
 
 .bold, .bold td
 {
-  font-family: LiberationSansBold, arial;
+  font-family: LiberationSansBold, arial, sans-serif;
+}
+
+.normal
+{
+  font-family: LiberationSansRegular, arial, sans-serif;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -453,6 +471,11 @@ div#menuDropDown3
   border: 1px solid #d5efd5;
   min-height: 44px;
   border-radius: 3px;
+}
+
+.introItem:hover
+{
+  background-color: #a4d2a3;
 }
 
 .introItemHeader

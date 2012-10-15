@@ -2,19 +2,32 @@
 <script>
     $(document).bind('pagebeforecreate',function(){
         $.ajax({
-            url: '../api/currentUser/dashboard.json',
+            url: '../api/currentUser/dashboard',
+            dataType: 'json',
             async: false
         }).success(function(data) {
             if( data.unreadMessageConversation > 0 ) {
                 $('#messages a').append("<span class='ui-li-count'>" + data.unreadMessageConversation + "</span>");
             }
-
-            if( data.unreadInterpretations > 0 ) {
-                $('#interpretations a').append("<span class='ui-li-count'>" + data.unreadInterpretations + "</span>");
-            }
         }).error(function() {
             $('#messages a').append("<span class='ui-li-count'>Offline</span>")
-            $('#interpretations a').append("<span class='ui-li-count'>Offline</span>")
+        });
+
+        $.mobile.showPageLoadingMsg();
+
+        $.ajax({
+            url: '../api/currentUser/forms',
+            dataType: 'json'
+        }).success(function(data) {
+            localStorage['organisationUnits'] = JSON.stringify(data.organisationUnits);
+
+            _.each(data.forms, function(v, k) {
+                localStorage['form_' + k] = JSON.stringify(v);
+            });
+
+            $.mobile.hidePageLoadingMsg();
+        }).error(function() {
+            // offline ? reuse meta-data already present
         });
     });
 </script>
@@ -22,13 +35,13 @@
 <section data-role="page" id="index-page" data-theme="c">
 
 	<header data-role="header" data-theme="b">
-		<div align="center"><img src="$baseUrl/../dhis-web-commons/css/light_blue/logo_banner.png" /></div>
+        <h1 align="center"><img src="$baseUrl/../dhis-web-commons/css/light_blue/logo_banner.png" /></h1>
 	</header>
 
 	<section data-role="content">
         <ul data-role="listview" data-inset="true">
+            <li id="data-entry"><a href="data-entry">Data Entry</a></li>
             <li id="messages"><a href="messages">Messages</a></li>
-            <li id="interpretations"><a href="interpretations">Interpretations</a></li>
             <li id="settings"><a href="settings">Settings</a></li>
         </ul>
 	</section>

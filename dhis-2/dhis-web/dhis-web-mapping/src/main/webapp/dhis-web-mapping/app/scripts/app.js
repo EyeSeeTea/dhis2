@@ -441,7 +441,157 @@ Ext.onReady( function() {
 		}
 	};
     
+    // Stores
+    
+    GIS.store.indicatorGroups = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'indicatorGroups.json?links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'indicatorGroups'
+			}
+		},
+		cmp: [],
+		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
+				}
+				this.sort('name', 'ASC');
+			}
+		}
+	});
+    
+    GIS.store.dataElementGroups = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'dataElementGroups.json?links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'dataElementGroups'
+			}
+		},
+		cmp: [],
+		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
+				}
+				this.sort('name', 'ASC');
+			}
+		}
+	});
+	
+	GIS.store.periodTypes = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		data: GIS.conf.period.periodTypes
+	}),
+    
+    GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name', 'level'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'organisationUnitLevels.json?viewClass=detailed&links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'organisationUnitLevels'
+			}
+		},
+		cmp: [],
+		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
+				}
+				this.sort('level', 'ASC');
+			}
+		}
+	});
+        
+    GIS.store.infrastructuralPeriodsByType = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_gis + 'getPeriodsByPeriodType.action',
+			reader: {
+				type: 'json',
+				root: 'periods'
+			},
+			extraParams: {
+				name: GIS.init.systemSettings.infrastructuralPeriodType
+			}
+		},
+        autoLoad: false,
+        isLoaded: false,
+        listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+				}
+			}
+        }
+    });
+    
     // Objects
+    
+    GIS.obj.VectorLayer = function(base, opacity) {
+		var layer = new OpenLayers.Layer.Vector(base.name, {
+			strategies: [
+				new OpenLayers.Strategy.Refresh({
+					force:true
+				})
+			],
+			styleMap: GIS.util.vector.getDefaultStyleMap(base),
+			visibility: false,
+			displayInLayerSwitcher: false,
+			layerType: GIS.conf.finals.layer.type_vector,
+			layerOpacity: opacity || 1,
+			setLayerOpacity: function(number) {
+				if (number) {
+					this.layerOpacity = parseFloat(number);
+				}
+				this.setOpacity(this.layerOpacity);
+			},
+			hasLabels: false
+			
+		});
+		layer.base = base;
+		
+		return layer;
+	};
     
     GIS.obj.LayerMenu = function(base, cls) {
 		var layer = base.layer;
@@ -1190,177 +1340,25 @@ Ext.onReady( function() {
     
     // Vector layers
     
-    GIS.base.thematic1.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_1, {
-        strategies: [
-			new OpenLayers.Strategy.Refresh({
-				force:true
-			})
-		],
-		styleMap: GIS.util.vector.getDefaultStyleMap(GIS.base.thematic1),
-        visibility: false,
-        displayInLayerSwitcher: false,
-        layerType: GIS.conf.finals.layer.type_vector,
-        layerOpacity: 0.8,
-        setLayerOpacity: function(number) {
-			if (number) {
-				this.layerOpacity = parseFloat(number);
-			}
-			this.setOpacity(this.layerOpacity);
-		},
-		hasLabels: false
-		
-    });
-    GIS.base.thematic1.layer.base = GIS.base.thematic1;
+    GIS.base.boundary.layer = new GIS.obj.VectorLayer(GIS.base.boundary);
+    GIS.map.addLayer(GIS.base.boundary.layer);
+    
+    GIS.base.thematic1.layer = new GIS.obj.VectorLayer(GIS.base.thematic1);
     GIS.map.addLayer(GIS.base.thematic1.layer);
     
-    GIS.base.thematic2.layer = new OpenLayers.Layer.Vector(GIS.i18n.thematic_layer_2, {
-        strategies: [
-			new OpenLayers.Strategy.Refresh({
-				force:true
-			})
-		],
-		styleMap: GIS.util.vector.getDefaultStyleMap(GIS.base.thematic2),
-        visibility: false,
-        displayInLayerSwitcher: false,
-        layerType: GIS.conf.finals.layer.type_vector,
-        layerOpacity: 0.8,
-        setLayerOpacity: function(number) {
-			if (number) {
-				this.layerOpacity = parseFloat(number);
-			}
-			this.setOpacity(this.layerOpacity);
-		},
-		hasLabels: false
-		
-    });
-    GIS.base.thematic2.layer.base = GIS.base.thematic2;
+    GIS.base.thematic2.layer = new GIS.obj.VectorLayer(GIS.base.thematic2);
     GIS.map.addLayer(GIS.base.thematic2.layer);
     
-    // Stores
-    
-    GIS.store.indicatorGroups = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
-		proxy: {
-			type: 'ajax',
-			url: GIS.conf.url.path_api + 'indicatorGroups.json?links=false&paging=false',
-			reader: {
-				type: 'json',
-				root: 'indicatorGroups'
-			}
-		},
-		cmp: [],
-		isLoaded: false,
-		loadFn: function(fn) {
-			if (this.isLoaded) {
-				fn.call();
-			}
-			else {
-				this.load(fn);
-			}
-		},
-		listeners: {
-			load: function() {
-				if (!this.isLoaded) {
-					this.isLoaded = true;
-					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
-				}
-				this.sort('name', 'ASC');
-			}
-		}
-	});
-    
-    GIS.store.dataElementGroups = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
-		proxy: {
-			type: 'ajax',
-			url: GIS.conf.url.path_api + 'dataElementGroups.json?links=false&paging=false',
-			reader: {
-				type: 'json',
-				root: 'dataElementGroups'
-			}
-		},
-		cmp: [],
-		isLoaded: false,
-		loadFn: function(fn) {
-			if (this.isLoaded) {
-				fn.call();
-			}
-			else {
-				this.load(fn);
-			}
-		},
-		listeners: {
-			load: function() {
-				if (!this.isLoaded) {
-					this.isLoaded = true;
-					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
-				}
-				this.sort('name', 'ASC');
-			}
-		}
-	});
-	
-	GIS.store.periodTypes = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
-		data: GIS.conf.period.periodTypes
-	}),
-    
-    GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name', 'level'],
-		proxy: {
-			type: 'ajax',
-			url: GIS.conf.url.path_api + 'organisationUnitLevels.json?viewClass=detailed&links=false&paging=false',
-			reader: {
-				type: 'json',
-				root: 'organisationUnitLevels'
-			}
-		},
-		cmp: [],
-		isLoaded: false,
-		loadFn: function(fn) {
-			if (this.isLoaded) {
-				fn.call();
-			}
-			else {
-				this.load(fn);
-			}
-		},
-		listeners: {
-			load: function() {
-				if (!this.isLoaded) {
-					this.isLoaded = true;
-					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
-				}
-				this.sort('level', 'ASC');
-			}
-		}
-	});
-        
-    GIS.store.infrastructuralPeriodsByType = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
-		proxy: {
-			type: 'ajax',
-			url: GIS.conf.url.path_gis + 'getPeriodsByPeriodType.action',
-			reader: {
-				type: 'json',
-				root: 'periods'
-			},
-			extraParams: {
-				name: GIS.init.systemSettings.infrastructuralPeriodType
-			}
-		},
-        autoLoad: false,
-        isLoaded: false,
-        listeners: {
-			load: function() {
-				if (!this.isLoaded) {
-					this.isLoaded = true;
-				}
-			}
-        }
-    });
-    
 	// User interface
+	
+	GIS.base.boundary.menu = new GIS.obj.LayerMenu(GIS.base.boundary);	
+	GIS.base.boundary.widget = Ext.create('mapfish.widgets.geostat.Boundary', {
+        map: GIS.map,
+        layer: GIS.base.boundary.layer,
+        menu: GIS.base.boundary.menu,
+        legendDiv: GIS.base.boundary.legendDiv
+    });    
+    GIS.base.boundary.window = new GIS.obj.WidgetWindow(GIS.base.boundary);
 	
 	GIS.base.thematic1.menu = new GIS.obj.LayerMenu(GIS.base.thematic1);	
 	GIS.base.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {

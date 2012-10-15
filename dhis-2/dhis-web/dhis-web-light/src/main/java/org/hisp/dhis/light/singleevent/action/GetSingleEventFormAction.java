@@ -34,8 +34,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
@@ -242,7 +240,6 @@ public class GetSingleEventFormAction
         if ( searchResult != null )
         {
             this.prevDataValues.put( "DE" + this.dataElementIdForSearching, searchResult );
-            System.out.println("ko co null");
         }
         else
         {

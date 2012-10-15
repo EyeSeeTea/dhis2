@@ -31,7 +31,7 @@
 <div id='entryForm' #if($!programStageInstance.executionDate) class='visible' #else class='hidden' #end>					
 	#if( $customDataEntryFormCode )
 		#parse( "/dhis-web-caseentry/customDataEntryForm.vm" )
-	#elseif( $sections.size() > 0 )
+	#elseif( $sections && $sections.size() > 0 )
 		#parse( "/dhis-web-caseentry/sectionDataEntryForm.vm" )
 	#else
 		#parse( "/dhis-web-caseentry/defaultDataEntryForm.vm" )
@@ -50,7 +50,8 @@
 
 <script>
 	var i18n_create_new_event = '$encoder.jsEscape( $i18n.getString( "create_new_event" ) , "'" )';
-	#if( $programStageInstance.programInstance.completed=="true")
+	#if( $programStageInstance.programInstance.program.type=='1' && 
+		$programStageInstance.programInstance.completed=="true")
 		jQuery("[id=entryFormContainer] :input").prop('disabled', true);
 		jQuery("[id=entryFormContainer] :input").datepicker("destroy");
 		jQuery("[id=executionDate]").prop('disabled', true);

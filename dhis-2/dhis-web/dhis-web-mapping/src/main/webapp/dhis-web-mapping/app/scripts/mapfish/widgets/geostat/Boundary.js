@@ -25,77 +25,56 @@
 Ext.define('mapfish.widgets.geostat.Boundary', {
 	extend: 'Ext.panel.Panel',
 	alias: 'widget.boundary',
-
-    layer: null,
-
-    format: null,
-
-    url: null,
-
-    featureSelection: true,
-
-    nameAttribute: null,
-
-    indicator: null,
-
-    indicatorText: null,
-
-    coreComp: null,
-
-    classificationApplied: false,
-
-    ready: false,
-
+	
+	// Ext panel
+	cls: 'gis-form-widget el-border-0',
     border: false,
 
+	// Mapfish
+    layer: null,
+    format: null,
+    url: null,
+    indicator: null,
+    coreComp: null,
+    classificationApplied: false,
     loadMask: false,
-
     labelGenerator: null,
-
-    colorInterpolation: false,
-
-    legend: false,
-
-	bounds: false,
-
-    mapView: false,
     
-    labels: false,
+    // Properties
     
-    valueType: false,
+    config: {},
     
-    selectFeatures: false,
+    tmpModel: {},
     
-    organisationUnitSelection: false,
-    
-    updateValues: false,
-    
-    isDrillDown: false,
-
-	imageLegend: false,
-    
-    stores: false,
-    
-    infrastructuralPeriod: false,
-    
-    featureOptions: {},
+    model: {},
     
     cmp: {},
     
-    requireUpdate: false,
+    features: [],
     
-    featureStorage: [],
+    selectHandlers: {},
     
-    initComponent: function() {
-    
-        this.initProperties();
-        
-        this.createItems();
-        
-        this.addItems();
-        
-		mapfish.widgets.geostat.Boundary.superclass.initComponent.apply(this);
-    },
+    store: {		
+		features: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			loadFeatures: function(features) {
+				if (features && features.length) {
+					var data = [];
+					for (var i = 0; i < features.length; i++) {
+						data.push([features[i].attributes.id, features[i].attributes.name]);
+					}
+					this.loadData(data);
+					this.sortStore();
+				}
+				else {
+					this.removeAll();
+				}
+			},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			}
+		})
+	},
     
     setUrl: function(url) {
         this.url = url;
@@ -103,355 +82,586 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
     },
 
     requestSuccess: function(request) {
-        this.ready = true;
-
-        if (this.loadMask && this.rendered) {
-            this.loadMask.hide();
+        var doc = request.responseXML,
+			format = new OpenLayers.Format.GeoJSON();
+			
+        if (!doc || !doc.documentElement) {
+            doc = request.responseText;
         }
+        
+        if (doc.length) {
+            doc = GIS.util.geojson.decode(doc, this);
+        }
+        else {
+			alert("no coordinates"); //todo //i18n
+		}
+        
+        this.layer.removeFeatures(this.layer.features);
+        this.layer.addFeatures(format.read(doc));
+		this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
+        this.features = this.layer.features.slice(0);
+        
+        this.loadData();
     },
 
     requestFailure: function(request) {
-        OpenLayers.Console.error(GIS.i18n.ajax_request_failed);
+        GIS.logg.push(request.status, request.statusText);        
+        console.log(request.status, request.statusText);
     },
     
-    getColors: function() {
-        var startColor = new mapfish.ColorRgb();
-        startColor.setFromHex(this.cmp.startColor.getValue());
-        var endColor = new mapfish.ColorRgb();
-        endColor.setFromHex(this.cmp.endColor.getValue());
-        return [startColor, endColor];
-    },
-    
-    initProperties: function() {
-        this.legend = {
-            value: GIS.conf.map_legendset_type_automatic,
-            method: GIS.conf.classify_by_equal_intervals,
-            classes: 5,
-            reset: function() {
-                this.value = GIS.conf.map_legendset_type_automatic;
-                this.method = GIS.conf.classify_by_equal_intervals;
-                this.classes = 5;
-            }
-        };
-        
-        this.organisationUnitSelection = {
-            parent: {
-                id: null,
-                name: null,
-                level: null
-            },
-            level: {
-                level: null,
-                name: null
-            },
-            setValues: function(pid, pn, pl, ll, ln) {
-                this.parent.id = pid || this.parent.id;
-                this.parent.name = pn || this.parent.name;
-                this.parent.level = pl || this.parent.level;
-                this.level.level = ll || this.level.level;
-                this.level.name = ln || this.level.name;
-            },
-            getValues: function() {
-                return {
-                    parent: {
-                        id: this.parent.id,
-                        name: this.parent.name,
-                        level: this.parent.level
-                    },
-                    level: {
-                        level: this.level.level,
-                        name: this.level.name
-                    }                    
-                };
-            },
-            setValuesOnDrillDown: function(pid, pn) {
-                this.parent.id = pid;
-                this.parent.name = pn;
-                this.parent.level = this.level.level;
-                this.level.level++;
-                this.level.name = GIS.stores.organisationUnitLevel.getAt(
-                    GIS.stores.organisationUnitLevel.find('level', this.level.level)).data.name;
-            }                
-        };
-        
-        this.valueType = {
-            value: GIS.conf.map_value_type_indicator,
-            setIndicator: function() {
-                this.value = GIS.conf.map_value_type_indicator;
-            },
-            setDatElement: function() {
-                this.value = GIS.conf.map_value_type_dataelement;
-            },
-            isIndicator: function() {
-                return this.value == GIS.conf.map_value_type_indicator;
-            },
-            isDataElement: function() {
-                return this.value == GIS.conf.map_value_type_dataelement;
-            }
-        };
-        
-        this.stores = {
-            infrastructuralDataElementMapValue: new Ext.data.JsonStore({
-                url: GIS.conf.path_mapping + 'getInfrastructuralDataElementMapValues' + GIS.conf.type,
-                root: 'mapValues',
-                fields: ['dataElementName', 'value'],
-                sortInfo: {field: 'dataElementName', direction: 'ASC'},
-                autoLoad: false,
-                isLoaded: false,
-                listeners: {
-                    'load': GIS.func.storeLoadListener
-                }
-            }),
-            indicatorsByGroup: new Ext.data.JsonStore({
-                url: GIS.conf.path_mapping + 'getIndicatorsByIndicatorGroup' + GIS.conf.type,
-                root: 'indicators',
-                fields: ['id', 'name', 'shortName'],
-                idProperty: 'id',
-                sortInfo: {field: 'name', direction: 'ASC'},
-                autoLoad: false,
-                isLoaded: false,
-                listeners: {
-                    'load': function(store) {
-                        store.isLoaded = true;
-                        store.each(
-                            function fn(record) {
-                                var name = record.get('name');
-                                name = name.replace('&lt;', '<').replace('&gt;', '>');
-                                record.set('name', name);
-                            }
-                        );
-                    }
-                }
-            }),
-            dataElementsByGroup: new Ext.data.JsonStore({
-                url: GIS.conf.path_mapping + 'getDataElementsByDataElementGroup' + GIS.conf.type,
-                root: 'dataElements',
-                fields: ['id', 'name', 'shortName'],
-                sortInfo: {field: 'name', direction: 'ASC'},
-                autoLoad: false,
-                isLoaded: false,
-                listeners: {
-                    'load': function(store) {
-                        store.isLoaded = true;
-                        store.each(
-                            function fn(record) {
-                                var name = record.get('name');
-                                name = name.replace('&lt;', '<').replace('&gt;', '>');
-                                record.set('name', name);
-                            }
-                        );
-                    }
-                }
-            }),
-            periodsByType: new Ext.data.JsonStore({
-                url: GIS.conf.path_mapping + 'getPeriodsByPeriodType' + GIS.conf.type,
-                root: 'periods',
-                fields: ['id', 'name'],
-                autoLoad: false,
-                isLoaded: false,
-                listeners: {
-                    'load': GIS.func.storeLoadListener
-                }
-            })
-        };
+    initComponent: function() {		
+		this.createItems();
+		
+		this.addItems();
+		
+		this.createSelectHandlers();
+		
+		this.coreComp = new mapfish.GeoStat.Boundary(this.map, {
+            layer: this.layer,
+            format: this.format,
+            url: this.url,
+            requestSuccess: Ext.bind(this.requestSuccess, this),
+            requestFailure: Ext.bind(this.requestFailure, this),
+            legendDiv: this.legendDiv,
+            labelGenerator: this.labelGenerator,
+            widget: this
+        });
+		
+		mapfish.widgets.geostat.Boundary.superclass.initComponent.apply(this);
     },
     
     createItems: function() {
+		        
+        // Organisation unit options
         
-        this.cmp.level = new Ext.form.ComboBox({
+        this.cmp.level = Ext.create('Ext.form.field.ComboBox', {
             fieldLabel: GIS.i18n.level,
             editable: false,
             valueField: 'level',
             displayField: 'name',
             mode: 'remote',
             forceSelection: true,
-            triggerAction: 'all',
-            selectOnFocus: true,
-            fieldLabel: GIS.i18n.level,
-            width: GIS.conf.combo_width,
-            store: GIS.stores.organisationUnitLevel,
-            listeners: {
-                'select': {
-                    scope: this,
-                    fn: function(c) {
-                        this.requireUpdate = true;
-                        this.formValidation.validateForm.call(this);
-                        this.organisationUnitSelection.setValues(null, null, null, c.getValue(), c.getRawValue());
-                    }
-                }
-            }
+            width: GIS.conf.layout.widget.item_width,
+            labelWidth: GIS.conf.layout.widget.itemlabel_width,
+            style: 'margin-bottom: 4px',
+            store: GIS.store.organisationUnitLevels,
+			listeners: {
+				added: function() {
+					this.store.cmp.push(this);
+				},
+				select: {
+					scope: this,
+					fn: function() {
+						this.config.updateOrganisationUnit = true;
+					}
+				}
+			}
         });
         
-        this.cmp.parent = new Ext.tree.TreePanel({
-            cls: 'treepanel-layer-border',
+        this.cmp.parent = Ext.create('Ext.tree.Panel', {
             autoScroll: true,
             lines: false,
-            loader: new Ext.tree.TreeLoader({
-                dataUrl: GIS.conf.path_mapping + 'getOrganisationUnitChildren' + GIS.conf.type
-            }),
-            root: {
-                id: GIS.system.rootNode.id,
-                text: GIS.system.rootNode.name,
-                level: GIS.system.rootNode.level,
-                hasChildrenWithCoordinates: GIS.system.rootNode.hasChildrenWithCoordinates,
-                nodeType: 'async',
-                draggable: false,
-                expanded: true
-            },
-            widget: this,
-            isLoaded: false,
-            reset: function() {
-                if (this.getSelectionModel().getSelectedNode()) {
-                    this.getSelectionModel().getSelectedNode().unselect();
-                }                
-                this.collapseAll();
-                this.getRootNode().expand();
-                this.widget.window.cmp.apply.disable();
-            },
-            listeners: {
-                'click': {
-                    scope: this,
-                    fn: function(n) {
-                        var tree = n.getOwnerTree();
-                        tree.selectedNode = n;
-                        this.requireUpdate = true;
-                        this.formValidation.validateForm.call(this);
-                        this.organisationUnitSelection.setValues(n.attributes.id, n.attributes.text, n.attributes.level);
-                    }
-                }
-            }
+			rootVisible: false,
+			multiSelect: false,
+			width: GIS.conf.layout.widget.item_width,
+			height: 220,
+			pathToSelect: null,
+			pathToExpand: null,
+			reset: function() {
+				this.collapseAll();
+				this.expandTreePath(GIS.init.rootNodes[0].path);
+				this.selectTreePath(GIS.init.rootNodes[0].path);
+			},
+			selectTreePath: function(path) {
+				if (this.rendered) {
+					this.selectPath(path);
+				}
+				else {
+					this.pathToSelect = path;
+				}
+			},
+			expandTreePath: function(path) {
+				if (this.rendered) {
+					this.expandPath(path);
+				}
+				else {
+					this.pathToExpand = path;
+				}
+			},
+			store: Ext.create('Ext.data.TreeStore', {
+				proxy: {
+					type: 'ajax',
+					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+				},
+				root: {
+					id: 'root',
+					expanded: true,
+					children: GIS.init.rootNodes
+				},
+				listeners: {
+					load: function(s, node, r) {
+						for (var i = 0; i < r.length; i++) {
+							r[i].data.text = GIS.util.jsonEncodeString(r[i].data.text);
+						}
+					}
+				}
+			}),
+			listeners: {
+				select: {
+					scope: this,
+					fn: function() {
+						this.config.updateOrganisationUnit = true;
+					}
+				},
+				afterrender: function() {					
+					if (this.pathToSelect) {
+						this.selectPath(this.pathToSelect);
+						this.pathToSelect = null;
+					}
+					else {
+						this.getSelectionModel().select(0);
+					}
+					
+					if (this.pathToExpand) {
+						this.expandPath(this.pathToExpand);
+						this.pathToExpand = null;
+					}
+				}
+			}
         });
     },
     
     addItems: function() {
         
         this.items = [
-			{
-				xtype: 'panel',
-				width: 270,
-				items: [
-					{ html: '<div class="window-info">' + GIS.i18n.organisation_unit_level + '</div>' },                            
+            {
+                xtype: 'form',
+				cls: 'el-border-0',
+                width: 270,
+                items: [
 					{
-						xtype: 'panel',
-						layout: 'form',
-						items: [
-							this.cmp.level
-						]
-					},                            
-					{ html: '<div class="thematic-br"></div>' },                            
-					{ html: '<div class="window-info">' + GIS.i18n.parent_organisation_unit + '</div>' },
+						html: 'Organisation unit level / parent', //i18n
+						cls: 'gis-form-subtitle-first'
+					},
+					this.cmp.level,
 					this.cmp.parent
 				]
-			}
+            }
         ];
     },
     
-    formValidation: {
-        validateForm: function() {
-            if (!this.cmp.parent.selectedNode || !this.cmp.level.getValue()) {
-                this.window.cmp.apply.disable();
-                return false;
-            }
-            
-            if (this.cmp.parent.selectedNode.attributes.level > this.cmp.level.getValue()) {
-                this.window.cmp.apply.disable();
-                return false;
-            }
-            
-            if (this.requireUpdate) {
-                if (this.window.isUpdate) {
-                    this.window.cmp.apply.disable();
-                    this.requireUpdate = false;
-                    this.window.isUpdate = false;
-                }
-                else {
-                    this.window.cmp.apply.enable();
-                }
-            }
-            
-            return true;
-        }
-    },
-    
-    formValues: {
-		getAllValues: function() {
-			return {
-                parentOrganisationUnitId: this.organisationUnitSelection.parent.id,
-                parentOrganisationUnitLevel: this.organisationUnitSelection.parent.level,
-                parentOrganisationUnitName: this.organisationUnitSelection.parent.name,
-                organisationUnitLevel: this.organisationUnitSelection.level.level,
-                organisationUnitLevelName: this.organisationUnitSelection.level.name,
-                longitude: GIS.vars.map.getCenter().lon,
-                latitude: GIS.vars.map.getCenter().lat,
-                zoom: parseFloat(GIS.vars.map.getZoom())
+    createSelectHandlers: function() {
+        var that = this,
+			window,
+			menu,
+			infrastructuralPeriod,
+			onHoverSelect,
+			onHoverUnselect,
+			onClickSelect;
+        
+        onHoverSelect = function fn(feature) {
+			if (window) {
+				window.destroy();
+			}
+			window = Ext.create('Ext.window.Window', {
+				cls: 'gis-window-widget-feature',
+				preventHeader: true,
+				shadow: false,
+				resizable: false,
+				items: {
+					html: feature.attributes.label
+				}
+			});
+			
+			window.show();
+			
+			var x = window.getPosition()[0];
+			window.setPosition(x, 32);
+        };
+        
+        onHoverUnselect = function fn(feature) {
+			window.destroy();
+        };
+        
+        onClickSelect = function fn(feature) {
+			var showInfo,				
+				showRelocate,
+				drill,
+				menu,
+				isPoint = feature.geometry.CLASS_NAME === GIS.conf.finals.openLayers.point_classname;
+			
+			// Relocate
+			showRelocate = function() {
+				if (that.cmp.relocateWindow) {
+					that.cmp.relocateWindow.destroy();
+				}
+				
+				that.cmp.relocateWindow = Ext.create('Ext.window.Window', {
+					title: 'Relocate facility',
+					layout: 'fit',
+					iconCls: 'gis-window-title-icon-relocate',
+					cls: 'gis-container-default',
+					setMinWidth: function(minWidth) {
+						this.setWidth(this.getWidth() < minWidth ? minWidth : this.getWidth());
+					},
+					items: {
+						html: feature.attributes.name,
+						cls: 'gis-container-inner'
+					},
+					bbar: [
+						'->',
+						{
+							xtype: 'button',
+							hideLabel: true,
+							text: GIS.i18n.cancel,
+							handler: function() {
+								GIS.map.relocate.active = false;
+								that.cmp.relocateWindow.destroy();
+								GIS.map.getViewport().style.cursor = 'auto';
+							}
+						}
+					],
+					listeners: {
+						close: function() {
+							GIS.map.relocate.active = false;
+							GIS.map.getViewport().style.cursor = 'auto';
+						}
+					}
+				});
+					
+				that.cmp.relocateWindow.show();					
+				that.cmp.relocateWindow.setMinWidth(220);
+				
+				GIS.util.gui.window.setPositionTopRight(that.cmp.relocateWindow);
 			};
-		},
+			
+			// Drill or float
+			drill = function(direction) {
+				var store = GIS.store.organisationUnitLevels;
+				
+				store.loadFn( function() {
+					var store = GIS.store.organisationUnitLevels;
+					
+					if (direction === 'up') {
+						var rootNode = GIS.init.rootNodes[0];
+						
+						that.config.level = that.model.level - 1;
+						that.config.levelName = store.getAt(store.find('level', that.config.level)).data.name;
+						that.config.parentId = rootNode.id;
+						that.config.parentName = rootNode.text;
+						that.config.parentLevel = rootNode.level;
+						that.config.parentPath = '/' + GIS.init.rootNodes[0].id;
+					}
+					else if (direction === 'down') {
+						that.config.level = that.model.level + 1;
+						that.config.levelName = store.getAt(store.find('level', that.config.level)).data.name;
+						that.config.parentId = feature.attributes.id;
+						that.config.parentName = feature.attributes.name;
+						that.config.parentLevel = that.model.level;
+						that.config.parentPath = feature.attributes.path;
+					}
+					
+					that.config.updateOrganisationUnit = true;
+					that.config.updateGui = true;
+					
+					that.execute();
+				});
+			};
+			
+			// Menu
+			var menuItems = [
+				Ext.create('Ext.menu.Item', {
+					text: 'Float up',
+					iconCls: 'gis-menu-item-icon-float',
+					disabled: !that.model.hasCoordinatesUp,
+					scope: this,
+					handler: function() {
+						drill('up');
+					}
+				}),
+				Ext.create('Ext.menu.Item', {
+					text: 'Drill down',
+					iconCls: 'gis-menu-item-icon-drill',
+					cls: 'gis-menu-item-first',
+					disabled: !feature.attributes.hcwc,
+					scope: this,
+					handler: function() {
+						drill('down');
+					}
+				})
+			];
+			
+			if (isPoint) {
+				menuItems.push({
+					xtype: 'menuseparator'
+				});
+				
+				menuItems.push( Ext.create('Ext.menu.Item', {
+					text: GIS.i18n.relocate,
+					iconCls: 'gis-menu-item-icon-relocate',
+					disabled: !GIS.init.security.isAdmin,
+					handler: function(item) {
+						GIS.map.relocate.active = true;
+						GIS.map.relocate.widget = that;
+						GIS.map.relocate.feature = feature;
+						GIS.map.getViewport().style.cursor = 'crosshair';
+						showRelocate();
+					}
+				}));
+			}
+			
+			menuItems[menuItems.length - 1].addCls('gis-menu-item-last');
+			
+			menu = new Ext.menu.Menu({
+				shadow: false,
+				showSeparator: false,
+				defaults: {
+					bodyStyle: 'padding-right:6px'
+				},
+				items: menuItems,
+				listeners: {
+					afterrender: function() {
+						this.getEl().addCls('gis-toolbar-btn-menu');
+					}
+				}
+			});
+            
+            menu.showAt([GIS.map.mouseMove.x, GIS.map.mouseMove.y]);
+        };
         
-        clearForm: function(clearLayer) {            
-            this.cmp.level.clearValue();
-            this.cmp.parent.reset();
-            
-            this.window.cmp.apply.disable();
-            
-            if (clearLayer) {
-                this.layer.destroyFeatures();
-                this.layer.setVisibility(false);
-            }
-        }
+        this.selectHandlers = new OpenLayers.Control.newSelectFeature(this.layer, {
+			onHoverSelect: onHoverSelect,
+			onHoverUnselect: onHoverUnselect,
+			onClickSelect: onClickSelect
+		});
+        
+        GIS.map.addControl(this.selectHandlers);
+        this.selectHandlers.activate();
+    },
+	
+	getLegendConfig: function() {
+		return {
+			where: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
+		};
 	},
-    
-    loadGeoJson: function() {
-        GIS.mask.msg = GIS.i18n.loading;
-        GIS.mask.show();
-        GIS.vars.activeWidget = this;
-        this.updateValues = false;
+        //,
         
-        var url = GIS.conf.path_mapping + 'getGeoJson.action?' + 
-            '&parentId=' + this.organisationUnitSelection.parent.id +
-            '&level=' + this.organisationUnitSelection.level.level;
-        this.setUrl(url);
-    },
-
-    classify: function(exception, lockPosition, loaded) {
-        if (this.formValidation.validateForm.apply(this, [exception])) {
-            if (!this.layer.features.length && !loaded) {
-                this.loadGeoJson();
-            }
-            
-            this.applyValues();			
-        }
-    },
-    
-    applyValues: function() {            
-		for (var i = 0; i < this.layer.features.length; i++) {
-			var f = this.layer.features[i];
-			f.attributes.labelString = f.attributes.name;
-			f.attributes.fixedName = GIS.util.cutString(f.attributes.name, 30);
+        //getImageExportValues: function() {
+			//return {
+				//mapValueTypeValue: this.cmp.valueType.getValue() == GIS.conf.map_value_type_indicator ?
+					//this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+				//dateValue: this.cmp.period.getRawValue()
+			//};
+		//},
+		
+	reset: function() {
+		// Components
+		this.cmp.level.clearValue();
+		this.cmp.parent.reset();
+		
+		// Layer options
+		if (this.cmp.searchWindow) {
+			this.cmp.searchWindow.destroy();
+		}
+		if (this.cmp.labelWindow) {
+			this.cmp.labelWindow.destroy();
 		}
 		
-		this.layer.renderer.clear();
-		this.layer.redraw();
-		this.layer.setVisibility(true);
+		// Model
+		this.config = {};
+		this.tmpModel = {};
+		this.model = {};
 		
-		GIS.util.zoomToVisibleExtent();
-		GIS.mask.hide();
+		// Layer
+		this.layer.destroyFeatures();
+		this.features = this.layer.features.slice(0);
+		this.store.features.loadFeatures();		
+		this.layer.item.setValue(false);
+		
+		// Legend
+		//document.getElementById(this.legendDiv).innerHTML = '';
+	},
+	
+	setConfig: function(config) {
+		this.config.level = config.level;
+		this.config.levelName = config.levelName;
+		this.config.parentId = config.parentId;
+		this.config.parentName = config.parentName;
+		this.config.parentLevel = config.parentLevel;
+		this.config.parentPath = config.parentPath;
+		this.config.updateOrganisationUnit = true;
+		this.config.updateGui = true;
+	},
+	
+	setGui: function() {
+		var model = this.tmpModel;
+		
+		// Level and parent
+		var levelView = this.cmp.level;
+		GIS.store.organisationUnitLevels.loadFn( function() {
+			levelView.setValue(model.level);
+		});
+		
+		this.cmp.parent.selectTreePath('/root' + model.parentPath);
+	},
+    	
+	getModel: function() {
+		var level = this.cmp.level,
+			parent = this.cmp.parent.getSelectionModel().getSelection();
+		parent = parent.length ? parent : [{raw: GIS.init.rootNodes[0]}];
+		
+		var model = {
+			level: level.getValue(),
+			levelName: level.getRawValue(),
+			parentId: parent[0].raw.id,
+			parentName: parent[0].raw.text,
+			parentLevel: parent[0].raw.level,
+			parentPath: parent[0].raw.path,
+			updateOrganisationUnit: false,
+			updateGui: false
+		};
+		
+		model.level = this.config.level || model.level;
+		model.levelName = this.config.levelName || model.levelName;
+		model.parentId = this.config.parentId || model.parentId;
+		model.parentName = this.config.parentName || model.parentName;
+		model.parentLevel = this.config.parentLevel || model.parentLevel;
+		model.parentPath = this.config.parentPath || null;
+		model.updateOrganisationUnit = Ext.isDefined(this.config.updateOrganisationUnit) ? this.config.updateOrganisationUnit : false;
+		model.updateGui = Ext.isDefined(this.config.updateGui) ? this.config.updateGui : false;
+		
+		return model;
+	},
+	
+	validateModel: function(model) {		
+		if (!model.level || !Ext.isNumber(model.level)) {
+			GIS.logg.push([model.level, this.xtype + '.level: number']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!model.levelName || !Ext.isString(model.levelName)) {
+			GIS.logg.push([model.levelName, this.xtype + '.levelName: string']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!model.parentId || !Ext.isString(model.parentId)) {
+			GIS.logg.push([model.parentId, this.xtype + '.parentId: string']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!model.parentName || !Ext.isString(model.parentName)) {
+			GIS.logg.push([model.parentName, this.xtype + '.parentName: string']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!model.parentLevel || !Ext.isNumber(model.parentLevel)) {
+			GIS.logg.push([model.parentLevel, this.xtype + '.parentLevel: number']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (model.parentLevel > model.level) {
+			GIS.logg.push([model.parentLevel, model.level, this.xtype + '.parentLevel: number <= ' + this.xtype + '.level']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		
+		if (!model.parentPath && model.updateGui) {
+			GIS.logg.push([model.parentpath, this.xtype + '.parentpath: string']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		
+		if (!model.updateOrganisationUnit) {
+			GIS.logg.push([model.updateOrganisationUnit, this.xtype + '.updateOrganisationUnit: true']);
+			return false;
+		}
+		
+		return true;
+	},
+	
+    loadOrganisationUnits: function() {
+        var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
+            'parentId=' + this.tmpModel.parentId +
+            '&level=' + this.tmpModel.level;
+        this.setUrl(url);
+    },
+    
+    loadData: function() {
+		this.layer.features = features;
+		
+		this.loadLegend();
+	},
+	
+	loadLegend: function() {
+		//var options = {
+            //indicator: GIS.conf.finals.widget.value,
+            //method: this.tmpModel.method,
+            //numClasses: this.tmpModel.classes,
+            //colors: this.tmpModel.colors,
+            //minSize: this.tmpModel.radiusLow,
+            //maxSize: this.tmpModel.radiusHigh
+        //};
+
+        this.coreComp.applyClassification(null, this);
+        this.classificationApplied = true;
+        
+        this.afterLoad();		
+	},
+	
+    execute: function() {
+		this.tmpModel = this.getModel();
+		
+		if (!this.validateModel(this.tmpModel)) {
+			return;
+		}
+				
+		GIS.mask.msg = GIS.i18n.loading;
+		GIS.mask.show();
+		
+		if (this.tmpModel.updateGui) {
+			this.setGui();
+		}
+		
+		if (this.tmpModel.updateOrganisationUnit) {
+			this.loadOrganisationUnits();
+		}
+	},
+	
+	afterLoad: function() {
+		this.model = this.tmpModel;
+		this.config = {};
+		
+		this.layer.setLayerOpacity();
+		
+		this.menu.enableItems();
+		
+		// Update search window
+		this.store.features.loadFeatures(this.layer.features); 
+		
+		// Update filter window
+		if (this.cmp.filterWindow && this.cmp.filterWindow.isVisible()) { 
+			this.cmp.filterWindow.filter();
+		}
+        
+        // Set favorite position, else zoom to visible extent
+        if (this.model.longitude && this.model.latitude && this.model.zoom) {
+			var lonLat = GIS.util.map.getLonLatByXY(this.model.longitude, this.model.latitude);
+			GIS.map.setCenter(lonLat, this.model.zoom);
+		}
+		else if (this.model.updateOrganisationUnit) {
+			GIS.util.map.zoomToVisibleExtent();
+		}
+		
+		// Legend
+		GIS.cmp.region.east.doLayout();
+		
+		// Layer item
+		this.layer.item.setValue(true);
+		
+        GIS.mask.hide();
 	},
     
     onRender: function(ct, position) {
         mapfish.widgets.geostat.Boundary.superclass.onRender.apply(this, arguments);
-
-		var coreOptions = {
-            'layer': this.layer,
-            'format': this.format,
-            'url': this.url,
-            'requestSuccess': this.requestSuccess.createDelegate(this),
-            'requestFailure': this.requestFailure.createDelegate(this),
-            'featureSelection': this.featureSelection,
-            'nameAttribute': this.nameAttribute,
-            'legendDiv': this.legendDiv,
-            'labelGenerator': this.labelGenerator
-        };
-
-        this.coreComp = new mapfish.GeoStat.Boundary(this.map, coreOptions);
     }
 });

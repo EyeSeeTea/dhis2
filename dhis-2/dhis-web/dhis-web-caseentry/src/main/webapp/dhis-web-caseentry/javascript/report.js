@@ -1,37 +1,7 @@
 isAjax = true;
 function organisationUnitSelected( orgUnits, orgUnitNames )
 {
-    showLoader();
-	setInnerHTML( 'contentDiv','' );
-	jQuery.getJSON( "getReportPrograms.action",{}, 
-		function( json ) 
-		{    
-			setFieldValue( 'orgunitname', orgUnitNames[0] );
-			
-			clearListById('programId');
-			if( json.programs.length == 0)
-			{
-				disable('programId');
-				disable('startDate');
-				disable('endDate');
-				disable('generateBtn');
-			}
-			else
-			{
-				addOptionById( 'programId', "", i18n_please_select_a_program );
-				
-				for ( var i in json.programs ) 
-				{
-					addOptionById( 'programId', json.programs[i].id, json.programs[i].name );
-				} 
-				enable('programId');
-				enable('startDate');
-				enable('endDate');
-				enable('generateBtn');
-			}
-			
-			hideLoader();
-		});
+    setFieldValue( 'orgunitname', orgUnitNames[0] );
 }
 
 selection.setListenerFunction( organisationUnitSelected );
@@ -72,7 +42,7 @@ function loadDataEntry( programStageInstanceId )
 			hideById('inputCriteriaDiv');
 			
 			var programStageInstance = jQuery("#ps_" + programStageInstanceId);
-			var header = "<h4>" + i18n_records_for + " " + programStageInstance.attr("orgunit")
+			var header = "<h4>" + i18n_records_for + " " + getInnerHTML( 'org_' + programStageInstanceId )
 					+ " " + i18n_at + " " + programStageInstance.attr("psname")
 					+ " " + i18n_on_date + " " + programStageInstance.attr("reportDate") + "</h4><hr>";
 			setInnerHTML('patientInforTB', header );
