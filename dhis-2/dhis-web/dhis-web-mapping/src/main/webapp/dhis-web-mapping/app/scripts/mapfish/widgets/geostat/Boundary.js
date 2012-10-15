@@ -587,22 +587,15 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
     },
     
     loadData: function() {
-		this.layer.features = features;
+		for (var i = 0; i < this.layer.features.length; i++) {
+			var feature = this.layer.features[i];
+			feature.attributes.label = feature.attributes.name;
+		}
 		
 		this.loadLegend();
 	},
 	
 	loadLegend: function() {
-		//var options = {
-            //indicator: GIS.conf.finals.widget.value,
-            //method: this.tmpModel.method,
-            //numClasses: this.tmpModel.classes,
-            //colors: this.tmpModel.colors,
-            //minSize: this.tmpModel.radiusLow,
-            //maxSize: this.tmpModel.radiusHigh
-        //};
-
-        this.coreComp.applyClassification(null, this);
         this.classificationApplied = true;
         
         this.afterLoad();		
@@ -631,15 +624,17 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		this.model = this.tmpModel;
 		this.config = {};
 		
-		this.layer.setLayerOpacity();
+		// Layer item
+		this.layer.item.setValue(true);
 		
+		// Layer menu
 		this.menu.enableItems();
 		
 		// Update search window
 		this.store.features.loadFeatures(this.layer.features); 
 		
 		// Update filter window
-		if (this.cmp.filterWindow && this.cmp.filterWindow.isVisible()) { 
+		if (this.cmp.filterWindow && this.cmp.filterWindow.isVisible()) {
 			this.cmp.filterWindow.filter();
 		}
         
@@ -654,9 +649,6 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		
 		// Legend
 		GIS.cmp.region.east.doLayout();
-		
-		// Layer item
-		this.layer.item.setValue(true);
 		
         GIS.mask.hide();
 	},

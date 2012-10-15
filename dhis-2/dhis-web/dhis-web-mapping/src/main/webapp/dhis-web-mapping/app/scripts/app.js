@@ -382,50 +382,6 @@ Ext.onReady( function() {
         return features;
     };
     
-    GIS.util.vector.getDefaultStyleMap = function(base) {
-		var isBoundary = base.id === GIS.base.boundary.id;
-		return new OpenLayers.StyleMap({
-			'default': new OpenLayers.Style(
-				OpenLayers.Util.applyDefaults({
-					fillOpacity: isBoundary ? 0 : 1,
-					strokeColor: isBoundary ? '#000' : '#fff',
-					strokeWidth: 1
-				},
-				OpenLayers.Feature.Vector.style['default'])
-			),
-			select: new OpenLayers.Style({
-				strokeColor: '#000000',
-				strokeWidth: 2,
-				cursor: 'pointer'
-			})
-		});
-	};
-    
-    GIS.util.vector.getLabelStyleMap = function(base, config) {
-		var isBoundary = base.id === GIS.base.boundary.id;
-		return new OpenLayers.StyleMap({
-			'default' : new OpenLayers.Style(
-				OpenLayers.Util.applyDefaults({
-					fillOpacity: isBoundary ? 0 : 1,
-					strokeColor: isBoundary ? '#000' : '#fff',
-					strokeWidth: 1,
-					label: '\${label}',
-					fontFamily: 'arial,sans-serif,ubuntu,consolas',
-					fontSize: config.fontSize ? config.fontSize + 'px' : '13px',
-					fontWeight: config.strong ? 'bold' : 'normal',
-					fontStyle: config.italic ? 'italic' : 'normal',
-					fontColor: config.color ? '#' + config.color : '#000000'
-				},
-				OpenLayers.Feature.Vector.style['default'])
-			),
-			select: new OpenLayers.Style({
-				strokeColor: '#000000',
-				strokeWidth: 2,
-				cursor: 'pointer'
-			})
-		});
-	};
-    
     GIS.util.gui.window.setPositionTopRight = function(window) {		
 		var center = GIS.cmp.region.center;				
 		window.setPosition(GIS.gui.viewport.width - (window.width + 7), center.y + 8);
@@ -567,6 +523,44 @@ Ext.onReady( function() {
     
     // Objects
     
+    GIS.obj.StyleMap = function(base, labelConfig) {
+		var defaults = {
+				fillOpacity: 1,
+				strokeColor: '#fff',
+				strokeWidth: 1
+			},
+			select = {
+				strokeColor: '#000000',
+				strokeWidth: 2,
+				cursor: 'pointer'
+			};
+			
+		if (base.id === GIS.base.boundary.id) {
+			defaults.fillOpacity = 0;
+			defaults.strokeColor = '#000';
+			
+			select.fillColor = '#000';
+			select.fillOpacity = 0.3;
+			select.strokeWidth = 1;
+		}
+		
+		if (labelConfig) {
+			defaults.label = '\${label}';
+			defaults.fontFamily = 'arial,sans-serif,ubuntu,consolas';
+			defaults.fontSize = labelConfig.fontSize ? labelConfig.fontSize + 'px' : '13px';
+			defaults.fontWeight = labelConfig.strong ? 'bold' : 'normal';
+			defaults.fontStyle = labelConfig.italic ? 'italic' : 'normal';
+			defaults.fontColor = labelConfig.color ? '#' + labelConfig.color : '#000000';
+		}
+		
+		return new OpenLayers.StyleMap({
+			'default': new OpenLayers.Style(
+				OpenLayers.Util.applyDefaults(defaults),
+				OpenLayers.Feature.Vector.style['default']),
+			select: new OpenLayers.Style(select)
+		});
+	};
+    
     GIS.obj.VectorLayer = function(base, opacity) {
 		var layer = new OpenLayers.Layer.Vector(base.name, {
 			strategies: [
@@ -574,7 +568,7 @@ Ext.onReady( function() {
 					force:true
 				})
 			],
-			styleMap: GIS.util.vector.getDefaultStyleMap(base),
+			styleMap: GIS.obj.StyleMap(base),
 			visibility: false,
 			displayInLayerSwitcher: false,
 			layerType: GIS.conf.finals.layer.type_vector,
@@ -1116,7 +1110,7 @@ Ext.onReady( function() {
 			}
 		});
 		
-		getValues = function() {
+		getLabelConfig = function() {
 			return {
 				fontSize: fontSize.getValue(),
 				strong: strong.getValue(),
@@ -1127,7 +1121,7 @@ Ext.onReady( function() {
 		
 		updateLabels = function() {
 			if (layer.hasLabels) {
-				layer.styleMap = GIS.util.vector.getLabelStyleMap(base, getValues());				
+				layer.styleMap = GIS.obj.StyleMap(base, getLabelConfig());				
 				base.widget.config.updateLegend = true;
 				base.widget.execute();
 			}
@@ -1201,11 +1195,11 @@ Ext.onReady( function() {
 					handler: function() {
 						if (layer.hasLabels) {
 							layer.hasLabels = false;
-							layer.styleMap = GIS.util.vector.getDefaultStyleMap(base);
+							layer.styleMap = GIS.obj.StyleMap(base);
 						}
 						else {
 							layer.hasLabels = true;
-							layer.styleMap = GIS.util.vector.getLabelStyleMap(base, getValues());
+							layer.styleMap = GIS.obj.StyleMap(base, getLabelConfig());
 						}
 						
 						base.widget.config.updateLegend = true;
