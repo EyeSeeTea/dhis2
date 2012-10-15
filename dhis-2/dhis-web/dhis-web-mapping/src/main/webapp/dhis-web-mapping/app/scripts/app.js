@@ -588,7 +588,95 @@ Ext.onReady( function() {
 	};
     
     GIS.obj.LayerMenu = function(base, cls) {
-		var layer = base.layer;
+		var layer = base.layer,
+			items = [],
+			item;
+		
+		item = {
+			text: 'Edit layer..', //i18n
+			iconCls: 'gis-menu-item-icon-edit',
+			cls: 'gis-menu-item-first',
+			alwaysEnabled: true,
+			handler: function() {
+				GIS.base[base.id].window.show();
+			}
+		};
+		items.push(item);
+		
+		items.push({
+			xtype: 'menuseparator',
+			alwaysEnabled: true
+		});
+		
+		item = {
+			text: 'Labels..', //i18n
+			iconCls: 'gis-menu-item-icon-labels',
+			handler: function() {
+				if (base.widget.cmp.labelWindow) {
+					base.widget.cmp.labelWindow.show();
+				}
+				else {
+					base.widget.cmp.labelWindow = new GIS.obj.LabelWindow(base);
+					base.widget.cmp.labelWindow.show();
+				}
+			}
+		};
+		items.push(item);
+		
+		if (base.id !== GIS.base.boundary.id) {
+			item = {
+				text: 'Filter..', //i18n
+				iconCls: 'gis-menu-item-icon-filter',
+				handler: function() {
+					if (base.widget.cmp.filterWindow) {
+						if (base.widget.cmp.filterWindow.isVisible()) {
+							return;
+						}
+						else {
+							base.widget.cmp.filterWindow.destroy();
+						}
+					}
+				
+					base.widget.cmp.filterWindow = new GIS.obj.FilterWindow(base);
+					base.widget.cmp.filterWindow.show();
+				}
+			};
+			items.push(item);
+		}
+		
+		item = {
+			text: 'Search..', //i18n
+			iconCls: 'gis-menu-item-icon-search',
+			handler: function() {
+				if (base.widget.cmp.searchWindow) {
+					if (base.widget.cmp.searchWindow.isVisible()) {
+						return;
+					}
+					else {
+						base.widget.cmp.searchWindow.destroy();
+					}
+				}
+			
+				base.widget.cmp.searchWindow = new GIS.obj.SearchWindow(base);
+				base.widget.cmp.searchWindow.show();
+			}
+		};
+		items.push(item);
+		
+		items.push({
+			xtype: 'menuseparator',
+			alwaysEnabled: true
+		});
+		
+		item = {
+			text: 'Close',//i18n
+			iconCls: 'gis-menu-item-icon-clear',
+			handler: function() {
+				base.widget.reset();
+			}
+		};
+		items.push(item);		
+			
 		return Ext.create('Ext.menu.Menu', {
 			shadow: false,
 			showSeparator: false,
@@ -604,79 +692,7 @@ Ext.onReady( function() {
 					}
 				});
 			},
-			items: [
-				{
-					text: 'Edit layer..', //i18n
-					iconCls: 'gis-menu-item-icon-edit',
-					cls: 'gis-menu-item-first',
-					alwaysEnabled: true,
-					handler: function() {
-						GIS.base[base.id].window.show();
-					}
-				},
-				{
-					xtype: 'menuseparator',
-					alwaysEnabled: true
-				},
-				{
-					text: 'Labels..', //i18n
-					iconCls: 'gis-menu-item-icon-labels',
-					handler: function() {
-						if (base.widget.cmp.labelWindow) {
-							base.widget.cmp.labelWindow.show();
-						}
-						else {
-							base.widget.cmp.labelWindow = new GIS.obj.LabelWindow(base);
-							base.widget.cmp.labelWindow.show();
-						}
-					}
-				},
-				{
-					text: 'Filter..', //i18n
-					iconCls: 'gis-menu-item-icon-filter',
-					handler: function() {
-						if (base.widget.cmp.filterWindow) {
-							if (base.widget.cmp.filterWindow.isVisible()) {
-								return;
-							}
-							else {
-								base.widget.cmp.filterWindow.destroy();
-							}
-						}
-					
-						base.widget.cmp.filterWindow = new GIS.obj.FilterWindow(base);
-						base.widget.cmp.filterWindow.show();
-					}
-				},
-				{
-					text: 'Search..', //i18n
-					iconCls: 'gis-menu-item-icon-search',
-					handler: function() {
-						if (base.widget.cmp.searchWindow) {
-							if (base.widget.cmp.searchWindow.isVisible()) {
-								return;
-							}
-							else {
-								base.widget.cmp.searchWindow.destroy();
-							}
-						}
-					
-						base.widget.cmp.searchWindow = new GIS.obj.SearchWindow(base);
-						base.widget.cmp.searchWindow.show();
-					}
-				},
-				{
-					xtype: 'menuseparator',
-					alwaysEnabled: true
-				},
-				{
-					text: 'Close',//i18n
-					iconCls: 'gis-menu-item-icon-clear',
-					handler: function() {
-						base.widget.reset();
-					}
-				}
-			],
+			items: items,
 			listeners: {
 				afterrender: function() {
 					this.getEl().addCls('gis-toolbar-btn-menu');
@@ -691,6 +707,8 @@ Ext.onReady( function() {
 					else {
 						this.disableItems();
 					}
+					
+					this.doLayout(); // show menu bug workaround
 				}
 			}
 		});
@@ -1333,27 +1351,20 @@ Ext.onReady( function() {
 	};
     GIS.map.addLayer(GIS.base.openStreetMap.layer);
     
-    // Vector layers
+    // Base
     
     GIS.base.boundary.layer = new GIS.obj.VectorLayer(GIS.base.boundary);
     GIS.map.addLayer(GIS.base.boundary.layer);
-    
-    GIS.base.thematic1.layer = new GIS.obj.VectorLayer(GIS.base.thematic1, {opacity: 0.8});
-    GIS.map.addLayer(GIS.base.thematic1.layer);
-    
-    GIS.base.thematic2.layer = new GIS.obj.VectorLayer(GIS.base.thematic2, {opacity: 0.8});
-    GIS.map.addLayer(GIS.base.thematic2.layer);
-    
-	// User interface
-	
-	GIS.base.boundary.menu = new GIS.obj.LayerMenu(GIS.base.boundary);	
+	GIS.base.boundary.menu = new GIS.obj.LayerMenu(GIS.base.boundary, 'gis-toolbar-btn-menu-first');	
 	GIS.base.boundary.widget = Ext.create('mapfish.widgets.geostat.Boundary', {
         map: GIS.map,
         layer: GIS.base.boundary.layer,
         menu: GIS.base.boundary.menu
     });    
     GIS.base.boundary.window = new GIS.obj.WidgetWindow(GIS.base.boundary);
-	
+    
+    GIS.base.thematic1.layer = new GIS.obj.VectorLayer(GIS.base.thematic1, {opacity: 0.8});
+    GIS.map.addLayer(GIS.base.thematic1.layer);
 	GIS.base.thematic1.menu = new GIS.obj.LayerMenu(GIS.base.thematic1);	
 	GIS.base.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
         map: GIS.map,
@@ -1362,7 +1373,9 @@ Ext.onReady( function() {
         legendDiv: GIS.base.thematic1.legendDiv
     });    
     GIS.base.thematic1.window = new GIS.obj.WidgetWindow(GIS.base.thematic1);
-	
+    
+    GIS.base.thematic2.layer = new GIS.obj.VectorLayer(GIS.base.thematic2, {opacity: 0.8});
+    GIS.map.addLayer(GIS.base.thematic2.layer);
 	GIS.base.thematic2.menu = new GIS.obj.LayerMenu(GIS.base.thematic2);	
 	GIS.base.thematic2.widget = Ext.create('mapfish.widgets.geostat.Thematic2', {
         map: GIS.map,
@@ -1371,6 +1384,8 @@ Ext.onReady( function() {
         legendDiv: GIS.base.thematic2.legendDiv
     });    
     GIS.base.thematic2.window = new GIS.obj.WidgetWindow(GIS.base.thematic2);
+    
+	// User interface
 	
 	GIS.gui.viewport = Ext.create('Ext.container.Viewport', {
 		layout: 'border',		
@@ -1433,7 +1448,7 @@ Ext.onReady( function() {
 					items: [
 						{
 							iconCls: 'gis-btn-icon-' + GIS.base.boundary.id,
-							menu: new GIS.obj.LayerMenu(GIS.base.boundary, 'gis-toolbar-btn-menu-first'),
+							menu: GIS.base.boundary.menu,
 							width: 26
 						},
 						{
