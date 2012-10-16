@@ -1374,7 +1374,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		this.config.parentPath = config.parentPath;
 		this.config.updateOrganisationUnit = true;
 		this.config.updateData = false;
-		this.config.updateLegend = false;		
+		this.config.updateLegend = false;
 		this.config.updateGui = true;
 	},
 	
@@ -1700,7 +1700,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
-        this.afterLoad();		
+        this.afterLoad();
 	},
 	
     execute: function() {
@@ -1732,8 +1732,10 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		this.model = this.tmpModel;
 		this.config = {};
 		
-		this.layer.setLayerOpacity();
+		// Layer item
+		this.layer.item.setValue(true);
 		
+		// Layer menu
 		this.menu.enableItems();
 		
 		// Update search window
@@ -1755,9 +1757,6 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		
 		// Legend
 		GIS.cmp.region.east.doLayout();
-		
-		// Layer item
-		this.layer.item.setValue(true);
 		
         GIS.mask.hide();
 	},
