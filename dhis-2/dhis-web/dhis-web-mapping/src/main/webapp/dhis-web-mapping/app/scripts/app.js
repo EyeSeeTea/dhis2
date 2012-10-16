@@ -669,7 +669,7 @@ Ext.onReady( function() {
 		});
 		
 		item = {
-			text: 'Close',//i18n
+			text: 'Close', //i18n
 			iconCls: 'gis-menu-item-icon-clear',
 			handler: function() {
 				base.widget.reset();

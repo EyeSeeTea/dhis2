@@ -1343,8 +1343,8 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		// Layer
 		this.layer.destroyFeatures();
 		this.features = this.layer.features.slice(0);
-		this.store.features.loadFeatures();		
-		this.layer.setVisibility(false);
+		this.store.features.loadFeatures();
+		this.layer.item.setValue(false);
 		
 		// Legend
 		document.getElementById(this.legendDiv).innerHTML = '';
