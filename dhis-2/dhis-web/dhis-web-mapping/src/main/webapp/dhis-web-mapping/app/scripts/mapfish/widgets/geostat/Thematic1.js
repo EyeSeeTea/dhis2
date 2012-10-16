@@ -1374,7 +1374,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.config.parentPath = config.parentPath;
 		this.config.updateOrganisationUnit = true;
 		this.config.updateData = false;
-		this.config.updateLegend = false;		
+		this.config.updateLegend = false;
 		this.config.updateGui = true;
 	},
 	
@@ -1699,6 +1699,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
+        
+        alert(2);
         
         this.afterLoad();
 	},

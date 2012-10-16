@@ -498,6 +498,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		this.config.parentLevel = config.parentLevel;
 		this.config.parentPath = config.parentPath;
 		this.config.updateOrganisationUnit = true;
+		this.config.updateLegend = true;
 		this.config.updateGui = true;
 	},
 	
@@ -526,6 +527,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 			parentLevel: parent[0].raw.level,
 			parentPath: parent[0].raw.path,
 			updateOrganisationUnit: false,
+			updateLegend: false,
 			updateGui: false
 		};
 		
@@ -536,6 +538,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		model.parentLevel = this.config.parentLevel || model.parentLevel;
 		model.parentPath = this.config.parentPath || null;
 		model.updateOrganisationUnit = Ext.isDefined(this.config.updateOrganisationUnit) ? this.config.updateOrganisationUnit : false;
+		model.updateLegend = Ext.isDefined(this.config.updateLegend) ? this.config.updateLegend : false;
 		model.updateGui = Ext.isDefined(this.config.updateGui) ? this.config.updateGui : false;
 		
 		return model;
@@ -579,8 +582,8 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 			return false;
 		}
 		
-		if (!model.updateOrganisationUnit) {
-			GIS.logg.push([model.updateOrganisationUnit, this.xtype + '.updateOrganisationUnit: true']);
+		if (!model.updateOrganisationUnit && !model.updateLegend) {
+			GIS.logg.push([model.updateOrganisationUnit, model.updateLegend, this.xtype + '.update ou/legend: true||true']);
 			return false;
 		}
 		
@@ -636,6 +639,9 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		
 		if (this.tmpModel.updateOrganisationUnit) {
 			this.loadOrganisationUnits();
+		}
+		else {
+			this.loadLegend();
 		}
 	},
 	
