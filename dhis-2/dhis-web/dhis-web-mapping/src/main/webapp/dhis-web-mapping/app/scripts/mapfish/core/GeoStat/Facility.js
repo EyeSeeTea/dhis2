@@ -33,8 +33,8 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
         this.addOptions(newOptions);
     },
 
-    applyClassification: function(form, widget) {
-        this.widget = widget;
+    applyClassification: function() {
+        this.updateOptions(options);
         
         var panel = widget.cmp.group;
         GIS.stores.groupsByGroupSet.img = [];
@@ -42,7 +42,7 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
             GIS.stores.groupsByGroupSet.img.push(items[i].getRawValue());
         }
         
-        var boundsArray = GIS.stores.groupsByGroupSet.data.items;
+        var boundsArray = GIS.stores.groupsByGroupSet.data.items;        
         var rules = new Array(boundsArray.length);
         for (var i = 0; i < boundsArray.length; i++) {
             var rule = new OpenLayers.Rule({                
