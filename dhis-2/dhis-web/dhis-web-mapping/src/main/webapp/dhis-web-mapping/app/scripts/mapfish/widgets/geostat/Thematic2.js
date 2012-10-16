@@ -1723,7 +1723,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		else if (this.tmpModel.updateData) {
 			this.loadData();
 		}
-		else if (this.tmpModel.updateLegend) {
+		else {
 			this.loadLegend();
 		}
 	},

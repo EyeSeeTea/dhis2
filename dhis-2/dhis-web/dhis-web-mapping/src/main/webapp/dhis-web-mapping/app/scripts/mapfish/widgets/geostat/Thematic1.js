@@ -1700,8 +1700,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.coreComp.applyClassification(options, this);
         this.classificationApplied = true;
         
-        alert(2);
-        
         this.afterLoad();
 	},
 	
@@ -1725,7 +1723,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		else if (this.tmpModel.updateData) {
 			this.loadData();
 		}
-		else if (this.tmpModel.updateLegend) {
+		else {
 			this.loadLegend();
 		}
 	},
