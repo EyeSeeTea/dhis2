@@ -1542,11 +1542,11 @@ Ext.onReady( function() {
 							menu: new GIS.obj.LayerMenu(GIS.base.facility),
 							width: 26
 						},
-						{
-							iconCls: 'gis-btn-icon-' + GIS.base.symbol.id,
-							menu: new GIS.obj.LayerMenu(GIS.base.symbol),
-							width: 26
-						},
+						//{
+							//iconCls: 'gis-btn-icon-' + GIS.base.symbol.id,
+							//menu: new GIS.obj.LayerMenu(GIS.base.symbol),
+							//width: 26
+						//},
 						{
 							text: 'Favorites', //i18n
 							menu: {}
