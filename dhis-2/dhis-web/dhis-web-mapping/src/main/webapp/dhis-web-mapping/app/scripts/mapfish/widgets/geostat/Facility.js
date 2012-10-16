@@ -184,7 +184,14 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                         store.load({
 							scope: this,
 							callback: function() {
-								// populate
+								if (this.tmpModel.updateGui) { // When favorite, load store and continue execution
+									if (this.tmpModel.updateOrganisationUnit) {
+										this.loadOrganisationUnits();
+									}
+									else {
+										this.loadLegend();
+									}
+								}	
 							}
 						});
                     }
@@ -719,8 +726,6 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 	
 	getLegendConfig: function() {
 		return {
-			what: this.tmpModel.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-			when: this.cmp.period.getRawValue(),
 			where: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
 		};
 	},
@@ -784,6 +789,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		
 		// Group set		
 		this.cmp.groupSet.setValue(model.groupSet);
+		this.cmp.groupSet.fireEvent('select');
 		
 		// Level and parent
 		var levelView = this.cmp.level;
@@ -827,7 +833,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		return model;
 	},
 	
-	validateModel: function(model) {		
+	validateModel: function(model) {
 		if (!model.groupSet || !Ext.isString(model.groupSet)) {
 			GIS.logg.push([model.groupSet, this.xtype + '.parentId: string']);
 				//alert("validation failed"); //todo
@@ -917,15 +923,16 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
 		
-		if (this.tmpModel.updateGui) {
+		if (this.tmpModel.updateGui) { // If favorite, wait for groups store callback
 			this.setGui();
 		}
-		
-		if (this.tmpModel.updateOrganisationUnit) {
-			this.loadOrganisationUnits();
-		}
 		else {
-			this.loadLegend();
+			if (this.tmpModel.updateOrganisationUnit) {
+				this.loadOrganisationUnits();
+			}
+			else {
+				this.loadLegend();
+			}
 		}
 	},
 	

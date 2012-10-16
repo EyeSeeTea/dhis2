@@ -33,27 +33,23 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
         this.addOptions(newOptions);
     },
 
-    applyClassification: function() {
+    applyClassification: function(options) {
         this.updateOptions(options);
         
-        var panel = widget.cmp.group;
-        GIS.stores.groupsByGroupSet.img = [];
-        for (var i = 0, items = panel.items.items; i < items.length; i++) {
-            GIS.stores.groupsByGroupSet.img.push(items[i].getRawValue());
-        }
-        
-        var boundsArray = GIS.stores.groupsByGroupSet.data.items;        
-        var rules = new Array(boundsArray.length);
-        for (var i = 0; i < boundsArray.length; i++) {
+        var store = GIS.store.groupsByGroupSet,
+			groupRecords = store.data.items;
+			
+        var rules = new Array(groupRecords.length);
+        for (var i = 0; i < groupRecords.length; i++) {
             var rule = new OpenLayers.Rule({                
                 symbolizer: {
                     'pointRadius': 8,
-                    'externalGraphic': '../resources/ext-ux/iconcombo/' + GIS.store.groupsByGroupSet.img[i] + '.png'
+                    'externalGraphic': '../../images/' + groupRecords[i].data.image
                 },                
                 filter: new OpenLayers.Filter.Comparison({
                     type: OpenLayers.Filter.Comparison.EQUAL_TO,
                     property: this.indicator,
-                    value: GIS.stores.groupsByGroupSet.data.items[i].data.name
+                    value: groupRecords[i].data.name
                 })
             });
             rules[i] = rule;
@@ -68,12 +64,15 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
             return;
         }
         
-        var info = this.widget.formValues.getLegendInfo.call(this.widget);
+        var config = this.widget.getLegendConfig(),
+			storeRecords = GIS.store.groupsByGroupSet.data.items,
+			element;
+			
         this.legendDiv.update("");
         
         var element = document.createElement("div");
         element.style.height = "14px";
-        element.innerHTML = info.map;
+        element.innerHTML = config.where;
         this.legendDiv.appendChild(element);
         
         element = document.createElement("div");
@@ -85,9 +84,9 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
         element.style.height = "5px";
         this.legendDiv.appendChild(element);
 
-        for (var i = 0; i < GIS.stores.groupsByGroupSet.data.items.length; i++) {
+        for (var i = 0; i < storeRecords.length; i++) {
             var element = document.createElement("div");
-            element.style.backgroundImage = 'url(../resources/ext-ux/iconcombo/' + GIS.stores.groupsByGroupSet.img[i] + '.png)';
+            element.style.backgroundImage = 'url(../../images/' + storeRecords[i].data.image + ')';
             element.style.backgroundRepeat = 'no-repeat';
             element.style.width = "25px";
             element.style.height = "18px";
@@ -96,7 +95,7 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
             this.legendDiv.appendChild(element);
 
             element = document.createElement("div");
-            element.innerHTML = GIS.stores.groupsByGroupSet.data.items[i].data.name;
+            element.innerHTML = storeRecords[i].data.name;
             this.legendDiv.appendChild(element);
 
             element = document.createElement("div");

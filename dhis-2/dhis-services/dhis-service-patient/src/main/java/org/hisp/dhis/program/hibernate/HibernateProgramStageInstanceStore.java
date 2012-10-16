@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hibernate.Query;
 import org.hibernate.criterion.Order;
@@ -206,13 +207,21 @@ public class HibernateProgramStageInstanceStore
         for ( int i = level; i <= maxLevel; i++ )
         {
             String name = orgUnitLevelMap.containsKey( i ) ? orgUnitLevelMap.get( i ).getName() : "Level " + i;
-
             grid.addHeader( new GridHeader( name, false, true ) );
         }
 
+        Collection<String> deKeys = new HashSet<String>();
         for ( TabularReportColumn column : columns )
         {
-            grid.addHeader( new GridHeader( column.getName(), column.isHidden(), true ) );
+            if ( !column.isMeta() )
+            {
+                String deKey = "element_" + column.getIdentifier();
+                if ( !deKeys.contains( deKey ) )
+                {
+                    grid.addHeader( new GridHeader( column.getName(), column.isHidden(), true ) );
+                    deKeys.add( deKey );
+                }
+            }
         }
 
         // ---------------------------------------------------------------------
@@ -339,6 +348,7 @@ public class HibernateProgramStageInstanceStore
         Collection<Integer> orgUnits, int level, int maxLevel, Date startDate, Date endDate, boolean descOrder,
         Integer min, Integer max )
     {
+        Set<String> deKeys = new HashSet<String>();
         String selector = count ? "count(*) " : "* ";
 
         String sql = "select " + selector + "from ( select DISTINCT psi.programstageinstanceid, psi.executiondate,";
@@ -385,10 +395,33 @@ public class HibernateProgramStageInstanceStore
                     operator = "and ";
                 }
             }
+            if ( column.isNumberDataElement() )
+            {
+                String deKey = "element_" + column.getIdentifier();
+                if ( !deKeys.contains( deKey ) )
+                {
+                    sql += "(select cast( value as "
+                        + statementBuilder.getDoubleColumnType()
+                        + " ) from patientdatavalue where programstageinstanceid=psi.programstageinstanceid and dataelementid="
+                        + column.getIdentifier() + ") as element_" + column.getIdentifier() + ",";
+                    deKeys.add( deKey );
+                }
+
+                if ( column.hasQuery() )
+                {
+                    where += operator + "element_" + column.getIdentifier() + " " + column.getQuery() + " ";
+                    operator = "and ";
+                }
+            }
             else if ( column.isDataElement() )
             {
-                sql += "(select value from patientdatavalue where programstageinstanceid=psi.programstageinstanceid and dataelementid="
-                    + column.getIdentifier() + ") as element_" + column.getIdentifier() + ",";
+                String deKey = "element_" + column.getIdentifier();
+                if ( !deKeys.contains( deKey ) )
+                {
+                    sql += "(select value from patientdatavalue where programstageinstanceid=psi.programstageinstanceid and dataelementid="
+                        + column.getIdentifier() + ") as element_" + column.getIdentifier() + ",";
+                    deKeys.add( deKey );
+                }
 
                 if ( column.hasQuery() )
                 {
@@ -431,12 +464,10 @@ public class HibernateProgramStageInstanceStore
 
         sql += "psi.executiondate ";
         sql += descOrder ? "desc " : "";
-        sql += (min != null && max != null) ? statementBuilder.limitRecord( min, max ) : "";
         sql += ") as tabular ";// TODO page size
-
         sql += where; // filters
-
         sql = sql.substring( 0, sql.length() - 1 ) + " "; // Remove last comma
+        sql += (min != null && max != null) ? statementBuilder.limitRecord( min, max ) : "";
 
         return sql;
     }

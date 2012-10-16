@@ -375,8 +375,7 @@ Ext.onReady( function() {
                 return text.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'');
             }
         },
-        getValueFormula: function( value )
-		{
+        getValueFormula: function( value ){
 			if( value.indexOf('"') != value.lastIndexOf('"') )
 			{
 				value = value.replace(/"/g,"'");
@@ -406,7 +405,6 @@ Ext.onReady( function() {
 					value = "="+ value;
 				}
 			}
-			
 			return value;
 		},
         crud: {
@@ -754,14 +752,11 @@ Ext.onReady( function() {
 							// Get fields
 							var fields = [];
 							fields[0] = 'id';
-							var record = new Array();
 							for( var index=1; index < TR.value.columns.length; index++ )
 							{
 								fields[index] = 'col' + index;
-								record.push('');
 							}
 							TR.value.fields = fields;
-							TR.value.values.unshift(record);
 							
 							// Set data for grid
 							TR.store.getDataTableStore();
@@ -792,7 +787,6 @@ Ext.onReady( function() {
 			TR.util.notification.ok();
 		},
 		filterReport: function() {
-			TR.state.getFilterValues();
 			TR.util.mask.showMask(TR.cmp.region.center, TR.i18n.loading);
 			var url = TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.generatetabularreport_get;
 			Ext.Ajax.request({
@@ -803,12 +797,6 @@ Ext.onReady( function() {
 				success: function(r) {
 					var json = Ext.JSON.decode(r.responseText);
 					TR.value.values = json.items;
-					var record = new Array();
-					for( var index=1; index < TR.value.columns.length; index++ ){
-						record.push('');
-					}
-					TR.value.values.unshift(record);
-					
 					TR.store.datatable.loadData(TR.value.values,false);
 					if ( json.items.length > 1 )
 					{
@@ -832,27 +820,6 @@ Ext.onReady( function() {
 				}
 			})
 		},
-		getFilterValues: function()
-		{
-			var grid = TR.datatable.datatable;
-			
-			var filters = grid.filters.getFilterData();
-			for( var i=0; i<filters.length; i++ )
-			{
-				var filter = filters[i];
-				
-				var compare = '=';
-				if( filter.data.comparison == 'lt')
-					compare = '<' ;
-				else if( filter.data.comparison == 'gt' )
-					compare = '>' ;
-					
-				var value = compare + "'"+ filter.data.value + "'";
-				
-				var record = grid.getView().getRecord( grid.getView().getNode(0) );
-				record.set(filter.field, value.toLowerCase());
-			}
-		},
 		getParams: function() {
 			var p = {};
             p.startDate = TR.cmp.settings.startDate.rawValue;
@@ -875,24 +842,17 @@ Ext.onReady( function() {
 			if( !TR.state.paramChanged() )
 			{
 				var cols = TR.datatable.datatable.columns;
-				for( var i=0; i<cols.length; i++ )
+				for( var k in cols )
 				{
-					var col = cols[i];
-					if( col.name && col.name.indexOf('meta_')!=-1 )
+					var col = cols[k];
+					if( col.name )
 					{
-						var param = TR.state.getFilterValueByColumn(col.name);
-						p.searchingValues.push(param);
+						var params = TR.state.getFilterValueByColumn(col.name);
+						for(var i in params){
+							p.searchingValues.push(params[i]);
+						}
 					}
 				}
-				var colNames = new Array();
-				TR.cmp.params.patientProperty.selected.store.each( function(r) {
-					var param = TR.state.getFilterValueByColumn(r.data.id);
-					p.searchingValues.push(param);
-				});
-				TR.cmp.params.dataelement.selected.store.each( function(r) {
-					var param = TR.state.getFilterValueByColumn(r.data.id);
-					p.searchingValues.push(param);
-				});
 			}
 			else
 			{
@@ -925,23 +885,16 @@ Ext.onReady( function() {
 			
 			if( !TR.state.paramChanged() )
 			{
-				var colNames = new Array();
-				TR.cmp.params.patientProperty.selected.store.each( function(r) {
-					var param = TR.state.getFilterValueByColumn(r.data.id);
-					p += "&searchingValues=" + param;
-				});
-				TR.cmp.params.dataelement.selected.store.each( function(r) {
-					var param = TR.state.getFilterValueByColumn(r.data.id);
-					p += "&searchingValues=" + param;
-				});
 				var cols = TR.datatable.datatable.columns;
-				for( var i=0; i<cols.length; i++ )
+				for( var k in cols )
 				{
-					var col = cols[i];
-					if( col.name && col.name.indexOf('meta_')!=-1 )
+					var col = cols[k];
+					if( col.name )
 					{
-						var param = TR.state.getFilterValueByColumn(col.name);
-						p += "&searchingValues=" + param;
+						var params = TR.state.getFilterValueByColumn(col.name);
+						for(var i in params){
+							p += "&searchingValues=" + params[i];
+						}
 					}
 				}
 			}
@@ -963,30 +916,44 @@ Ext.onReady( function() {
 			var grid = TR.datatable.datatable;
 			var cols = grid.columns;
 			var editor = grid.getStore().getAt(0);
-			var p = "";
+			var params = [];
 			for( var i=0; i<cols.length; i++ )
 			{
 				var col = cols[i];
+				var p = "";
 				if( col.name && col.name == colname )
 				{
-					var value = '';
-					if(editor.data[col.dataIndex]!=undefined){
-						value = editor.data[col.dataIndex].toLowerCase();
-					}
-					var hidden = (col.hidden==undefined)? false : col.hidden;
-					if( value!=null && value!= '')
+					var filters = grid.filters.getFilterData();
+					var value = "";
+					for( var i=0; i<filters.length; i++ )
 					{
-						value = TR.util.getValueFormula(value);
-						p = colname + '_' + hidden + "_" + value ;
+						var filter = filters[i];
+						if(col.dataIndex == filter.field)
+						{
+							var compare = '=';
+							if( filter.data.comparison == 'lt')
+								compare = '<' ;
+							else if( filter.data.comparison == 'gt' )
+								compare = '>' ;
+							value = compare + "'"+ filter.data.value + "'";
+							var hidden = (col.hidden==undefined)? false : col.hidden;
+							if( value!=null && value!= ''){	
+								var value = TR.util.getValueFormula(value);
+								p = colname + '_' + hidden + "_" + value;
+							}
+							params.push(p);
+						}
 					}
-					else 
+					if (value=='')
 					{
 						p = colname + '_' + col.hidden + "_";
+						params.push(p);
 					}
-					return p;
+					return params;
 				}
 			}		
-			return colname + "_false_";
+			params.push(colname + "_false_");
+			return params
 		},
 		paramChanged: function() {
 			if( TR.store.datatable && TR.store.datatable.data.length > 0 )
@@ -1300,15 +1267,6 @@ Ext.onReady( function() {
 					},
 					filters: []
 				}],
-				viewConfig: {
-					getRowClass: function(record, rowIndex, rp, ds){ 
-						if(rowIndex == 0){
-							return 'filter-row hidden';
-						} else {
-						   return '';
-						}
-					}
-				},
 				bbar: [
 					{
 						xtype: 'button',
@@ -1892,7 +1850,6 @@ Ext.onReady( function() {
 												TR.cmp.params.organisationunit.panel = this;
 											},
 											expand: function() {
-												alert(TR.cmp.params.organisationunit.panel.getHeight() - TR.conf.layout.west_fill_accordion_organisationunit);
 												TR.cmp.params.organisationunit.treepanel.setHeight(TR.cmp.params.organisationunit.panel.getHeight() - TR.conf.layout.west_fill_accordion_organisationunit);
 											}
 										}

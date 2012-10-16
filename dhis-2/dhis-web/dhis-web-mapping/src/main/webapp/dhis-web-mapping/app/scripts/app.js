@@ -1488,6 +1488,13 @@ Ext.onReady( function() {
                         bodyStyle: 'padding: 6px; border: 0 none',
                         collapsible: true,
                         animCollapse: false
+                    },
+                    {
+                        title: 'Facility layer legend', //i18n
+                        contentEl: 'facilityLegend',
+                        bodyStyle: 'padding: 6px; border: 0 none',
+                        collapsible: true,
+                        animCollapse: false
                     }
 				],
 				listeners: {
