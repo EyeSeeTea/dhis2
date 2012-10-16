@@ -48,7 +48,7 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
             var rule = new OpenLayers.Rule({                
                 symbolizer: {
                     'pointRadius': 8,
-                    'externalGraphic': '../resources/ext-ux/iconcombo/' + GIS.stores.groupsByGroupSet.img[i] + '.png'
+                    'externalGraphic': '../resources/ext-ux/iconcombo/' + GIS.store.groupsByGroupSet.img[i] + '.png'
                 },                
                 filter: new OpenLayers.Filter.Comparison({
                     type: OpenLayers.Filter.Comparison.EQUAL_TO,

@@ -104,7 +104,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
         this.createColorInterpolation();
     },
 
-    applyClassification: function(options, widget) {
+    applyClassification: function(options) {
         this.updateOptions(options);
         
 		var calculateRadius = OpenLayers.Function.bind(

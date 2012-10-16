@@ -519,8 +519,66 @@ Ext.onReady( function() {
 				}
 			}
         }
+    });    
+    
+    GIS.store.groupSets = Ext.create('Ext.data.Store', {
+        fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'organisationUnitGroupSets.json?paging=false&links=false',
+			reader: {
+				type: 'json',
+				root: 'organisationUnitGroupSets'
+			}
+		},
+        isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+        listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+				}
+				this.sort('name', 'ASC');				
+			}
+        }
     });
     
+	GIS.store.groupsByGroupSet = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: '',
+			reader: {
+				type: 'json',
+				root: 'organisationUnitGroups'
+			}
+		},
+		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+				}
+				this.sort('name', 'ASC');
+			}
+		}
+	});
+	
     // Objects
     
     GIS.obj.StyleMap = function(base, labelConfig) {
@@ -1384,6 +1442,17 @@ Ext.onReady( function() {
         legendDiv: GIS.base.thematic2.legendDiv
     });    
     GIS.base.thematic2.window = new GIS.obj.WidgetWindow(GIS.base.thematic2);
+    
+    GIS.base.facility.layer = new GIS.obj.VectorLayer(GIS.base.facility, {opacity: 1});
+    GIS.map.addLayer(GIS.base.facility.layer);
+	GIS.base.facility.menu = new GIS.obj.LayerMenu(GIS.base.facility);	
+	GIS.base.facility.widget = Ext.create('mapfish.widgets.geostat.Facility', {
+        map: GIS.map,
+        layer: GIS.base.facility.layer,
+        menu: GIS.base.facility.menu,
+        legendDiv: GIS.base.facility.legendDiv
+    });    
+    GIS.base.facility.window = new GIS.obj.WidgetWindow(GIS.base.facility);
     
 	// User interface
 	

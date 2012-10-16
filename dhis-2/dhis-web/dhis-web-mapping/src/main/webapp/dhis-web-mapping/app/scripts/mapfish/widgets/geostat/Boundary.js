@@ -617,7 +617,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
             maxSize: 6
         };
 
-        this.coreComp.applyClassification(options, this);
+        this.coreComp.applyClassification(options);
         this.classificationApplied = true;
         
         this.afterLoad();		

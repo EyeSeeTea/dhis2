@@ -1697,7 +1697,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             maxSize: this.tmpModel.radiusHigh
         };
 
-        this.coreComp.applyClassification(options, this);
+        this.coreComp.applyClassification(options);
         this.classificationApplied = true;
         
         this.afterLoad();
