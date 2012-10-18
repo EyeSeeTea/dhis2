@@ -586,6 +586,64 @@ Ext.onReady( function() {
 		}
 	});
 	
+	GIS.store.legendSets = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_api + 'mapLegendSets.json?links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'mapLegendSets'
+			}
+		},
+		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+				}
+				this.sort('name', 'ASC');
+			}
+		}
+	});
+    
+	GIS.store.legendsByLegendSet = Ext.create('Ext.data.Store', {
+		fields: ['id', 'name', 'startValue', 'endValue', 'color'],
+		proxy: {
+			type: 'ajax',
+			url: '',
+			reader: {
+				type: 'json',
+				root: 'mapLegends'
+			}
+		},
+		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+		listeners: {
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+				}
+				this.sort('name', 'ASC');
+			}
+		}
+	});
+	
     // Objects
     
     GIS.obj.StyleMap = function(base, labelConfig) {
@@ -824,7 +882,6 @@ Ext.onReady( function() {
 			closeAction: 'hide',
 			width: GIS.conf.layout.widget.window_width,
 			resizable: false,
-			isCollapsed: false,
 			items: base.widget,
 			bbar: [
 				'->',
@@ -1322,26 +1379,56 @@ Ext.onReady( function() {
 	};
 	
 	GIS.obj.LegendSetWindow = function() {
-		//var window;
+		var window,
+			grid,
+			toolbar,
+			store = GIS.store.legendSets;
+			
+		toolbar = {
+			items: [
+				'->',
+				{
+					text: 'Add new',
+					handler: function() {
+						alert("new");
+					}
+				}
+			]
+		};
+		
+		grid = Ext.create('Ext.grid.Panel', {
+			cls: 'gis-grid',
+			bodyStyle: 'border-top: 0 none',
+			width: GIS.conf.layout.widget.item_width,
+			height: 390,
+			scroll: 'vertical',
+			hideHeaders: true,
+			columns: [{
+				id: 'name',
+				dataIndex: 'name',
+				sortable: false,
+				width: GIS.conf.layout.widget.item_width - 2
+			}],
+			store: store,
+			tbar: toolbar
+		});
 				
-		//window = Ext.create('Ext.window.Window', {
-			//title: 'Legend sets', //i18n
-			//iconCls: 'gis-window-title-icon-legendset', //todo
-			//cls: 'gis-container-default',
-			//width: GIS.conf.layout.widget.window_width,
-			//resizable: false,
-			//modal: true,
-			//resetForm: function() {
-				//DV.cmp.favorite.name.setValue('');
-				//DV.cmp.favorite.system.setValue(false);
-			//},
-			//items: [
-
-
-
+		window = Ext.create('Ext.window.Window', {
+			title: 'Legend sets', //i18n
+			layout: 'fit',
+			iconCls: 'gis-window-title-icon-legendset', //todo
+			cls: 'gis-container-default',
+			width: GIS.conf.layout.widget.window_width,
+			resizable: false,
+			modal: true,
+			items: grid
+		});
 		
+		if (!store.isLoaded) {
+			store.load();
+		}
 		
-		
+		return window;
 	};
 	
 	// OpenLayers map
@@ -1481,7 +1568,7 @@ Ext.onReady( function() {
 				items: [
                     {
                         title: 'Layer overview and visibility %', //i18n
-                        bodyStyle: 'padding:6px',
+                        bodyStyle: 'padding: 6px',
                         items: new GIS.obj.LayersPanel(),
                         collapsible: true,
                         animCollapse: false
@@ -1564,11 +1651,17 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Legend', //i18n
-							menu: {}
+							handler: function() {
+								if (GIS.cmp.legendSetWindow && GIS.cmp.legendSetWindow.destroy) {
+									GIS.cmp.legendSetWindow.destroy();
+								}
+								
+								GIS.cmp.legendSetWindow = new GIS.obj.LegendSetWindow();
+								GIS.cmp.legendSetWindow.show();
+							}
 						},
 						{
-							text: 'Download', //i18n
-							menu: {}
+							text: 'Download' //i18n
 						},
 						{
 							text: 'fav()', //i18n

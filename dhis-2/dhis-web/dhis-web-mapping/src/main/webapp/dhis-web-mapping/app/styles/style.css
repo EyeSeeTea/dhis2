@@ -419,8 +419,13 @@ html * {
 .gis-window-title-icon-information {
 	background: url('../images/information_14.png') no-repeat;
 }
-.gis-window-title-icon-layers {
-	background: url('../images/layers_14.png') no-repeat;
+
+
+.gis-window-title-icon-favorite {
+	background: url('../images/favorite_14.png') no-repeat;
+}
+.gis-window-title-icon-legendset {
+	background: url('../images/legendset_14.png') no-repeat;
 }
 
 /* Grid */
