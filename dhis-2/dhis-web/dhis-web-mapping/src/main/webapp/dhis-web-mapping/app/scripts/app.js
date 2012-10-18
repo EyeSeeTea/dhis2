@@ -1322,10 +1322,23 @@ Ext.onReady( function() {
 	};
 	
 	GIS.obj.LegendSetWindow = function() {
-		
-		
-		
-		
+		//var window;
+				
+		//window = Ext.create('Ext.window.Window', {
+			//title: 'Legend sets', //i18n
+			//iconCls: 'gis-window-title-icon-legendset', //todo
+			//cls: 'gis-container-default',
+			//width: GIS.conf.layout.widget.window_width,
+			//resizable: false,
+			//modal: true,
+			//resetForm: function() {
+				//DV.cmp.favorite.name.setValue('');
+				//DV.cmp.favorite.system.setValue(false);
+			//},
+			//items: [
+
+
+
 		
 		
 		
@@ -1444,22 +1457,23 @@ Ext.onReady( function() {
     
     GIS.base.facility.layer = new GIS.obj.VectorLayer(GIS.base.facility);
     GIS.map.addLayer(GIS.base.facility.layer);
-	GIS.base.facility.menu = new GIS.obj.LayerMenu(GIS.base.facility);	
+	GIS.base.facility.menu = new GIS.obj.LayerMenu(GIS.base.facility);
 	GIS.base.facility.widget = Ext.create('mapfish.widgets.geostat.Facility', {
         map: GIS.map,
         layer: GIS.base.facility.layer,
         menu: GIS.base.facility.menu,
         legendDiv: GIS.base.facility.legendDiv
-    });    
+    });
     GIS.base.facility.window = new GIS.obj.WidgetWindow(GIS.base.facility);
     
 	// User interface
 	
 	GIS.gui.viewport = Ext.create('Ext.container.Viewport', {
-		layout: 'border',		
+		layout: 'border',
 		items: [
 			{
 				region: 'east',
+				layout: 'anchor',
 				width: 200,
                 preventHeader: true,
                 collapsible: true,
@@ -1468,8 +1482,6 @@ Ext.onReady( function() {
                     {
                         title: 'Layer overview and visibility %', //i18n
                         bodyStyle: 'padding:6px',
-						upTool: null,
-						downTool: null,
                         items: new GIS.obj.LayersPanel(),
                         collapsible: true,
                         animCollapse: false
@@ -1593,9 +1605,13 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							text: 'log()', //i18n
+							text: 'layout()', //i18n
 							handler: function() {
-								
+								//GIS.cmp.region.eastlayer.setTitle('nissa');
+								//GIS.cmp.region.eastlayer.doLayout();
+								//console.log(GIS.cmp.region.eastlayer);
+								//GIS.cmp.region.eastlayer.expand();
+								//GIS.cmp.region.eastlayer.show();
 							}
 						},
 						'->',
