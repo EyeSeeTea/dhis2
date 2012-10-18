@@ -314,6 +314,13 @@ Ext.onReady( function() {
 		}
 	};
 	
+	GIS.util.map.addMapControl = function(name, fn) {
+		var panel = new GIS.obj.MapControlPanel(name, fn);		
+		GIS.map.addControl(panel);
+		panel.div.className += ' ' + name;
+		panel.div.childNodes[0].className += ' ' + name + 'Button';
+	};
+	
 	GIS.util.map.getTransformedPointByXY = function(x, y) {
 		var p = new OpenLayers.Geometry.Point(parseFloat(x), parseFloat(y));
         return p.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
@@ -1294,19 +1301,14 @@ Ext.onReady( function() {
 		return window;
 	};
     
-    GIS.obj.MapControlPanel = function(name) {
+    GIS.obj.MapControlPanel = function(name, fn) {
 		var button,
 			panel;
 			
 		button = new OpenLayers.Control.Button({
 			displayClass: 'olControlButton',
 			trigger: function() {
-				if (name === 'zoomVisible') {
-					GIS.util.map.zoomToVisibleExtent();
-				}
-				else {
-					GIS.map[name]();
-				}
+				fn.call(GIS.map);
 			}
 		});
 		
@@ -1319,7 +1321,17 @@ Ext.onReady( function() {
 		return panel;
 	};
 	
-	/* Map */
+	GIS.obj.LegendSetWindow = function() {
+		
+		
+		
+		
+		
+		
+		
+	};
+	
+	// OpenLayers map
 	
 	GIS.map = new OpenLayers.Map({
         controls: [
@@ -1337,31 +1349,18 @@ Ext.onReady( function() {
         displayProjection: new OpenLayers.Projection('EPSG:4326'),
         maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
         mouseMove: {}, // Track all mouse moves
-        relocate: {}, // Relocate organisation units
-        layerController: {} // Map tools
+        relocate: {} // Relocate organisation units
     });
 	
-	// Zoom in
-	GIS.map.layerController.zoomIn = new GIS.obj.MapControlPanel('zoomIn');
-	GIS.map.addControl(GIS.map.layerController.zoomIn);
-	GIS.map.layerController.zoomIn.div.className += ' zoomIn';
-	GIS.map.layerController.zoomIn.div.childNodes[0].className += ' zoomInButton';
-	
-    // Zoom out
-	GIS.map.layerController.zoomOut = new GIS.obj.MapControlPanel('zoomOut');
-	GIS.map.addControl(GIS.map.layerController.zoomOut);
-	GIS.map.layerController.zoomOut.div.className += ' zoomOut';
-	GIS.map.layerController.zoomOut.div.childNodes[0].className += ' zoomOutButton';
-    
-    // Zoom to visible extent
-	GIS.map.layerController.zoomToVisibleExtent = new GIS.obj.MapControlPanel('zoomVisible');
-	GIS.map.addControl(GIS.map.layerController.zoomToVisibleExtent);
-	GIS.map.layerController.zoomToVisibleExtent.div.className += ' zoomVisible';
-	GIS.map.layerController.zoomToVisibleExtent.div.childNodes[0].className += ' zoomVisibleButton';
+	// Map controls
+	GIS.util.map.addMapControl('zoomIn', GIS.map.zoomIn);
+	GIS.util.map.addMapControl('zoomOut', GIS.map.zoomOut);
+	GIS.util.map.addMapControl('zoomVisible', GIS.util.map.zoomToVisibleExtent);
     
     // Base layers
     
     if (window.google) {
+		
 		// Google Streets
         GIS.base.googleStreets.layer = new OpenLayers.Layer.Google(GIS.base.googleStreets.name, {
 			numZoomLevels: 20,
@@ -1409,7 +1408,7 @@ Ext.onReady( function() {
 	};
     GIS.map.addLayer(GIS.base.openStreetMap.layer);
     
-    // Base
+    // Base objects
     
     GIS.base.boundary.layer = new GIS.obj.VectorLayer(GIS.base.boundary);
     GIS.map.addLayer(GIS.base.boundary.layer);
@@ -1429,7 +1428,7 @@ Ext.onReady( function() {
         layer: GIS.base.thematic1.layer,
         menu: GIS.base.thematic1.menu,
         legendDiv: GIS.base.thematic1.legendDiv
-    });    
+    });
     GIS.base.thematic1.window = new GIS.obj.WidgetWindow(GIS.base.thematic1);
     
     GIS.base.thematic2.layer = new GIS.obj.VectorLayer(GIS.base.thematic2, {opacity: 0.8});
@@ -1443,7 +1442,7 @@ Ext.onReady( function() {
     });    
     GIS.base.thematic2.window = new GIS.obj.WidgetWindow(GIS.base.thematic2);
     
-    GIS.base.facility.layer = new GIS.obj.VectorLayer(GIS.base.facility, {opacity: 1});
+    GIS.base.facility.layer = new GIS.obj.VectorLayer(GIS.base.facility);
     GIS.map.addLayer(GIS.base.facility.layer);
 	GIS.base.facility.menu = new GIS.obj.LayerMenu(GIS.base.facility);	
 	GIS.base.facility.widget = Ext.create('mapfish.widgets.geostat.Facility', {
