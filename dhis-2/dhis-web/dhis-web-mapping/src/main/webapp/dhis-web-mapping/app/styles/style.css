@@ -462,3 +462,13 @@ html * {
 	border-top-left-radius: 2px;
 	border-bottom-left-radius: 2px;
 }
+
+/* Label */
+
+.gis-label-info {
+	font-size: 10px !important;
+	color: #666;
+	padding-left: 3px;
+	height: 22px;
+	line-height: 21px;
+}

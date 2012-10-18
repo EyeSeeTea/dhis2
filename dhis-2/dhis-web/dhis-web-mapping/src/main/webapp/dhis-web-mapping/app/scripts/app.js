@@ -1378,23 +1378,58 @@ Ext.onReady( function() {
 		return panel;
 	};
 	
-	GIS.obj.LegendSetWindow = function() {
-		var window,
-			grid,
-			toolbar,
-			store = GIS.store.legendSets;
-			
-		toolbar = {
-			items: [
-				'->',
-				{
-					text: 'Add new',
-					handler: function() {
-						alert("new");
-					}
+	GIS.obj.LegendPanel = function(record) {
+		var store = GIS.store.legendsByLegendSet,
+			panel,
+			legendSetName,
+			legendName,
+			startValue,
+			endValue,
+			color,
+			addLegend,
+			grid;
+		
+		legendSetName = Ext.create('Ext.form.field.Text', {
+			cls: 'gis-textfield',
+			width: GIS.conf.layout.widget.item_width,
+			fieldLabel: 'Legend set name' //i18m
+		});
+		
+		legendName = Ext.create('Ext.form.field.Text', {
+			cls: 'gis-textfield',
+			width: GIS.conf.layout.widget.item_width - 12,
+			fieldLabel: 'Legend name' //i18m
+		});
+		
+        startValue = Ext.create('Ext.form.field.Number', {
+			width: 180 - 12,
+			fieldLabel: 'Start value', //i18m
+            allowDecimals: false,
+            value: 0
+        });
+		
+        endValue = Ext.create('Ext.form.field.Number', {
+            width: 180 - 12,
+			fieldLabel: 'End value', //i18m
+            allowDecimals: false,
+            value: 0
+        });
+        
+        color = Ext.create('Ext.ux.button.ColorButton', {
+			width: GIS.conf.layout.widget.item_width - GIS.conf.layout.widget.itemlabel_width - 10 - 12,
+			fieldLabel: 'Symbolizer', //i18m
+			value: 'e1e1e1'
+		});
+		
+		addLegend = Ext.create('Ext.button.Button', {
+			text: 'Add legend', //i18n
+			handler: function() {
+				if (legendName.getValue() && startValue.getValue() && endValue.getValue() && color.getValue()) {
+					console.log('add legend, load+reset on callback,');
+					store.load();
 				}
-			]
-		};
+			}
+		});
 		
 		grid = Ext.create('Ext.grid.Panel', {
 			cls: 'gis-grid',
@@ -1412,21 +1447,298 @@ Ext.onReady( function() {
 			store: store,
 			tbar: toolbar
 		});
+		
+		panel = Ext.create('Ext.panel.Panel', {
+			cls: 'gis-container-inner',
+			items: [
+				legendSetName,
+				{
+					cls: 'gis-panel-html-separator'
+				},
+				{
+					html: 'Add legend', //i18n
+					cls: 'gis-panel-html-title'
+				},
+				{
+					cls: 'gis-panel-html-separator'
+				},
+				{
+					bodyStyle: 'background-color: #f1f1f1; border: 1px solid #ccc; border-radius: 2px; padding: 5px',
+					items: [
+						legendName,
+						startValue,
+						endValue,
+						{
+							layout: 'column',
+							cls: 'gis-container-inner',
+							bodyStyle: 'background: transparent',
+							items: [
+								{
+									cls: 'gis-panel-html-label',
+									html: 'Symbolizer:', //i18n
+									bodyStyle: 'background: transparent',
+									width: GIS.conf.layout.widget.itemlabel_width + 10
+								},
+								color
+							]
+						},
+					]
+				},
+				{
+					cls: 'gis-panel-html-separator'
+				},
+				{
+					cls: 'gis-container-inner',
+					bodyStyle: 'text-align: right',
+					width: GIS.conf.layout.widget.item_width,
+					items: addLegend
+				},
+				{
+					html: 'Current legends', //i18n
+					cls: 'gis-panel-html-title'
+				},
+				{
+					cls: 'gis-panel-html-separator'
+				},
+				grid
+			]
+		});
+		
+		return panel;
+	};
+	
+	GIS.obj.LegendSetWindow = function() {
+		
+		var LegendSetGrid,
+			legendSetStore = GIS.store.legendSets,
+			
+			LegendPanel,			
+			legendSetName,
+			legendName,
+			startValue,
+			endValue,
+			color,			
+			legendStore = GIS.store.legendsByLegendSet,
+			
+			window,
+			create,
+			update,
+			cancel,
+			count;
+			
+		LegendSetGrid = function() {
+			var tbar,
+				grid;
 				
+			tbar = Ext.create('Ext.toolbar.Toolbar', {
+				items: [
+					'->',
+					{
+						text: 'Add new..',
+						handler: function() {						
+							GIS.cmp.legendSetWindow.removeAll();
+							GIS.cmp.legendSetWindow.add(new LegendPanel());
+						}
+					}
+				]
+			});
+			
+			grid = Ext.create('Ext.grid.Panel', {
+				cls: 'gis-grid',
+				bodyStyle: 'border-top: 0 none',
+				width: GIS.conf.layout.widget.item_width,
+				scroll: 'vertical',
+				hideHeaders: true,
+				columns: [{
+					id: 'name',
+					dataIndex: 'name',
+					sortable: false,
+					width: GIS.conf.layout.widget.item_width - 2
+				}],
+				store: legendSetStore,
+				tbar: tbar
+			});
+			
+			return grid;
+		};
+		
+		LegendPanel = function(record) {
+			var panel,
+				addLegend,
+				grid;
+		
+			legendSetName = Ext.create('Ext.form.field.Text', {
+				cls: 'gis-textfield',
+				width: GIS.conf.layout.widget.item_width,
+				fieldLabel: 'Legend set name' //i18m
+			});
+			
+			legendName = Ext.create('Ext.form.field.Text', {
+				cls: 'gis-textfield',
+				width: GIS.conf.layout.widget.item_width - 12,
+				fieldLabel: 'Legend name' //i18m
+			});
+			
+			startValue = Ext.create('Ext.form.field.Number', {
+				width: 180 - 12,
+				fieldLabel: 'Start value', //i18m
+				allowDecimals: false,
+				value: 0
+			});
+			
+			endValue = Ext.create('Ext.form.field.Number', {
+				width: 180 - 12,
+				fieldLabel: 'End value', //i18m
+				allowDecimals: false,
+				value: 0
+			});
+			
+			color = Ext.create('Ext.ux.button.ColorButton', {
+				width: GIS.conf.layout.widget.item_width - GIS.conf.layout.widget.itemlabel_width - 10 - 12,
+				fieldLabel: 'Symbolizer', //i18m
+				value: 'e1e1e1'
+			});
+			
+			addLegend = Ext.create('Ext.button.Button', {
+				text: 'Add legend', //i18n
+				handler: function() {
+					if (legendName.getValue() && startValue.getValue() && endValue.getValue() && color.getValue()) {
+						console.log('add legend, load+reset on callback,');
+						store.load();
+					}
+				}
+			});
+			
+			grid = Ext.create('Ext.grid.Panel', {
+				cls: 'gis-grid',
+				bodyStyle: 'border-top: 0 none',
+				width: GIS.conf.layout.widget.item_width,
+				height: 390,
+				scroll: 'vertical',
+				hideHeaders: true,
+				columns: [{
+					id: 'name',
+					dataIndex: 'name',
+					sortable: false,
+					width: GIS.conf.layout.widget.item_width - 2
+				}],
+				store: legendStore
+			});
+			
+			panel = Ext.create('Ext.panel.Panel', {
+				cls: 'gis-container-inner',
+				items: [
+					legendSetName,
+					{
+						cls: 'gis-panel-html-separator'
+					},
+					{
+						html: 'Add legend', //i18n
+						cls: 'gis-panel-html-title'
+					},
+					{
+						cls: 'gis-panel-html-separator'
+					},
+					{
+						bodyStyle: 'background-color: #f1f1f1; border: 1px solid #ccc; border-radius: 2px; padding: 5px',
+						items: [
+							legendName,
+							startValue,
+							endValue,
+							{
+								layout: 'column',
+								cls: 'gis-container-inner',
+								bodyStyle: 'background: transparent',
+								items: [
+									{
+										cls: 'gis-panel-html-label',
+										html: 'Symbolizer:', //i18n
+										bodyStyle: 'background: transparent',
+										width: GIS.conf.layout.widget.itemlabel_width + 10
+									},
+									color
+								]
+							},
+						]
+					},
+					{
+						cls: 'gis-panel-html-separator'
+					},
+					{
+						cls: 'gis-container-inner',
+						bodyStyle: 'text-align: right',
+						width: GIS.conf.layout.widget.item_width,
+						items: addLegend
+					},
+					{
+						html: 'Current legends', //i18n
+						cls: 'gis-panel-html-title'
+					},
+					{
+						cls: 'gis-panel-html-separator'
+					},
+					grid
+				]
+			});
+			
+			return panel;
+		};
+		
+		create = Ext.create('Ext.button.Button', {
+			text: 'Create', //i18n
+			hidden: true,
+			handler: function() {
+			}
+		});
+		
+		update = Ext.create('Ext.button.Button', {
+			text: 'Update', //i18n
+			hidden: true,
+			handler: function() {
+			}
+		});
+		
+		cancel = Ext.create('Ext.button.Button', {
+			text: 'Cancel', //i18n
+			hidden: true,
+			handler: function() {
+			}
+		});
+		
+		info = Ext.create('Ext.form.Label', {
+			cls: 'gis-label-info',
+			width: GIS.conf.layout.widget.item_width,
+			height: 22
+		});
+		
 		window = Ext.create('Ext.window.Window', {
 			title: 'Legend sets', //i18n
 			layout: 'fit',
 			iconCls: 'gis-window-title-icon-legendset', //todo
 			cls: 'gis-container-default',
 			width: GIS.conf.layout.widget.window_width,
+			height: 500,
 			resizable: false,
 			modal: true,
-			items: grid
+			items: new LegendSetGrid(),
+			bbar: {
+				height: 27,
+				items: [
+					info,
+					cancel,
+					'->',
+					create,
+					update
+				]
+			}
 		});
 		
-		if (!store.isLoaded) {
-			store.load();
-		}
+		legendSetStore.load({
+			callback: function(records) {
+				console.log(records);
+				info.setText(records.length + ' legend sets available');
+			}
+		});
 		
 		return window;
 	};
