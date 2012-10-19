@@ -1675,6 +1675,8 @@ Ext.onReady( function() {
 			if (id) {
 				legendStore.proxy.url = GIS.conf.url.path_api +  'mapLegendSets/' + id + '.json?links=false&paging=false';
 				legendStore.load();
+				
+				legendSetName.setValue(legendSetStore.getById(id).data.name);
 			}
 			
 			return panel;
