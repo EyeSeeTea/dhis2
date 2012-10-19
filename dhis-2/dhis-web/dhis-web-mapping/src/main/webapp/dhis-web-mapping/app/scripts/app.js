@@ -1380,41 +1380,98 @@ Ext.onReady( function() {
 	
 	GIS.obj.LegendSetWindow = function() {
 		
-		var LegendSetGrid,
-			legendSetGrid,
-			legendSetStore = GIS.store.legendSets,
-			updateLegendSet = function(id) {
-				legendPanel = new LegendPanel(id);
-				window.removeAll();
-				window.add(legendPanel);
-				info.hide();
-				cancel.show();
-				
-				if (id) {
-					update.show();
-				}
-				else {
-					create.show();
-				}
-			},
+		// Stores
+		var legendSetStore,
+			legendStore,
+			tmpStore,
 			
+		// Objects
+			LegendSetGrid,
 			LegendPanel,
+			
+		// Instances
+			legendSetGrid,
 			legendPanel,
+			
+		// Components
+			window,	
 			legendSetName,
 			legendName,
 			startValue,
 			endValue,
 			color,			
-			legendStore = GIS.store.legendsByLegendSet,
-			tmpStore,
-			
-			reset,
-			window,
 			create,
 			update,
 			cancel,
-			count;
+			info,
 			
+		// Functions
+			updateLegendSet,
+			deleteLegendSet,
+			reset;
+				
+		legendSetStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'edit', 'del'],
+			proxy: {
+				type: 'ajax',
+				url: GIS.conf.url.path_api + 'mapLegendSets.json?links=false&paging=false',
+				reader: {
+					type: 'json',
+					root: 'mapLegendSets'
+				}
+			},
+			listeners: {
+				load: function(store, records) {
+					this.sort('name', 'ASC');
+					
+					this.each( function(record) {									
+						record.set({
+							edit: '<img id="' + record.getId() + '" class="gis-grid-icon-link" src="images/grid-edit_16.png"' +
+									'name="legendSetGrid" onclick="Ext.getCmp(this.name).updateLegendSet(this.id);" />',
+							del: '<img id="' + record.getId() + '" class="gis-grid-icon-link" src="images/grid-delete_16.png"' +
+									'name="legendSetGrid" onclick="Ext.getCmp(this.name).deleteLegendSet(this.id);" />',
+						});
+					});
+					
+					info.setText(records.length + ' legend sets available');
+				}
+			}
+		});
+		
+		legendStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'startValue', 'endValue', 'color'],
+			proxy: {
+				type: 'ajax',
+				url: '',
+				reader: {
+					type: 'json',
+					root: 'mapLegends'
+				}
+			},
+			isLoaded: false,
+			listeners: {
+				load: function(store, records) {
+					var data = [],
+						record;						
+					
+					for (var i = 0; i < records.length; i++) {
+						record = records[i];
+						data.push({
+							id: record.data.id,
+							name: record.data.name,
+							startValue: record.data.startValue,
+							endValue: record.data.endValue,
+							color: record.data.color
+						});
+					}
+					
+					tmpStore.add(data);
+					
+					this.sort('name', 'ASC');
+				}
+			}
+		});
+		
 		LegendSetGrid = function() {
 			var tbar = Ext.create('Ext.toolbar.Toolbar', {
 				items: [
@@ -1431,6 +1488,7 @@ Ext.onReady( function() {
 			legendSetGrid = Ext.create('Ext.grid.Panel', {
 				id: 'legendSetGrid',
 				updateLegendSet: updateLegendSet,
+				deleteLegendSet: deleteLegendSet,
 				cls: 'gis-grid',
 				bodyStyle: 'border-top: 0 none',
 				width: GIS.conf.layout.widget.item_width,
@@ -1456,7 +1514,7 @@ Ext.onReady( function() {
 						width: 20
 					},
 					{
-						id: 'scroll',
+						id: 'scrollbar',
 						sortable: false,
 						width: 20
 					}
@@ -1465,28 +1523,7 @@ Ext.onReady( function() {
 				tbar: tbar,
 				listeners: {
 					render: function() {
-						
-						//var el = Ext.create('Ext.Element', {
-							//className: "gis-grid-icon-link",
-							//src: "images/grid-edit_16.png"
-						//});
-						
-						//console.log(el);
-						
-						var n = 'nissa';
-						var store = this.store;
-						store.load({
-							callback: function() {
-								store.each( function(record) {									
-									record.set({
-										//edit: '<span id="' + record.getId() + '"></span>',
-										edit: '<img id="' + record.getId() + '" class="gis-grid-icon-link" src="images/grid-edit_16.png"' +
-												'name="legendSetGrid" onclick="Ext.getCmp(this.name).updateLegendSet(this.id);" />',
-										del: '<img src="images/grid-delete_16.png" />'
-									});
-								});
-							}
-						});
+						this.store.load();
 					},
 					itemmouseenter: function(grid, record, item) {
 						Ext.get(item).removeCls('x-grid-row-over');
@@ -1502,7 +1539,7 @@ Ext.onReady( function() {
 				addLegend,
 				grid,				
 				data = [];
-			
+				
 			tmpStore = Ext.create('Ext.data.Store', {
 				fields: ['id', 'name', 'startValue', 'endValue', 'color']
 			});
@@ -1552,16 +1589,20 @@ Ext.onReady( function() {
 				cls: 'gis-grid',
 				bodyStyle: 'border-top: 0 none',
 				width: GIS.conf.layout.widget.item_width,
-				height: 390,
+				height: 235,
 				scroll: 'vertical',
 				hideHeaders: true,
 				columns: [{
-					id: 'name',
 					dataIndex: 'name',
 					sortable: false,
 					width: GIS.conf.layout.widget.item_width - 2
 				}],
-				store: tmpStore
+				store: tmpStore,
+				listeners: {
+					itemmouseenter: function(grid, record, item) {
+						Ext.get(item).removeCls('x-grid-row-over');
+					}
+				}
 			});
 			
 			panel = Ext.create('Ext.panel.Panel', {
@@ -1633,29 +1674,43 @@ Ext.onReady( function() {
 			
 			if (id) {
 				legendStore.proxy.url = GIS.conf.url.path_api +  'mapLegendSets/' + id + '.json?links=false&paging=false';
-				legendStore.load({
-					callback: function(records) {
-						for (var i = 0; i < records.length; i++) {
-							var record = records[i];
-							data.push({
-								id: record.data.id,
-								name: record.data.name,
-								startValue: record.data.startValue,
-								endValue: record.data.endValue,
-								color: record.data.color
-							});
-						}
-						tmpStore.add(data);
-					}
-				});
+				legendStore.load();
 			}
 			
 			return panel;
 		};
 		
+		updateLegendSet = function(id) {
+			legendPanel = new LegendPanel(id);
+			window.removeAll();
+			window.add(legendPanel);
+			info.hide();
+			cancel.show();
+			
+			if (id) {
+				update.show();
+			}
+			else {
+				create.show();
+			}
+		};
+			
+		deleteLegendSet = function(id) {
+			if (id) {
+				Ext.Ajax.request({
+					url: GIS.conf.url.path_gis + 'deleteMapLegendSet.action',
+					params: {
+						id: id
+					},
+					success: legendSetStore.load
+				});
+			}
+		};
+		
 		reset = function() {
 			legendPanel.destroy();
 			legendSetGrid = new LegendSetGrid();
+			window.removeAll();
 			window.add(legendSetGrid);
 			
 			info.show();
