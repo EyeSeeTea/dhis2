@@ -1399,7 +1399,8 @@ Ext.onReady( function() {
 			legendName,
 			startValue,
 			endValue,
-			color,			
+			color,
+			legendGrid,
 			create,
 			update,
 			cancel,
@@ -1408,6 +1409,7 @@ Ext.onReady( function() {
 		// Functions
 			updateLegendSet,
 			deleteLegendSet,
+			deleteLegend,
 			reset;
 				
 		legendSetStore = Ext.create('Ext.data.Store', {
@@ -1429,7 +1431,7 @@ Ext.onReady( function() {
 							edit: '<img id="' + record.getId() + '" class="gis-grid-icon-link" src="images/grid-edit_16.png"' +
 									'name="legendSetGrid" onclick="Ext.getCmp(this.name).updateLegendSet(this.id);" />',
 							del: '<img id="' + record.getId() + '" class="gis-grid-icon-link" src="images/grid-delete_16.png"' +
-									'name="legendSetGrid" onclick="Ext.getCmp(this.name).deleteLegendSet(this.id);" />',
+									'name="legendSetGrid" onclick="Ext.getCmp(this.name).deleteLegendSet(this.id);" />'
 						});
 					});
 					
@@ -1439,7 +1441,7 @@ Ext.onReady( function() {
 		});
 		
 		legendStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'startValue', 'endValue', 'color'],
+			fields: ['id', 'name', 'startValue', 'endValue', 'color', 'del'],
 			proxy: {
 				type: 'ajax',
 				url: '',
@@ -1448,7 +1450,7 @@ Ext.onReady( function() {
 					root: 'mapLegends'
 				}
 			},
-			isLoaded: false,
+			deleteLegend: deleteLegend,
 			listeners: {
 				load: function(store, records) {
 					var data = [],
@@ -1466,6 +1468,8 @@ Ext.onReady( function() {
 					}
 					
 					tmpStore.add(data);
+					
+					info.setText(records.length + ' legend sets available');
 					
 					this.sort('name', 'ASC');
 				}
@@ -1487,34 +1491,30 @@ Ext.onReady( function() {
 			
 			legendSetGrid = Ext.create('Ext.grid.Panel', {
 				id: 'legendSetGrid',
-				updateLegendSet: updateLegendSet,
-				deleteLegendSet: deleteLegendSet,
 				cls: 'gis-grid',
 				bodyStyle: 'border-top: 0 none',
 				width: GIS.conf.layout.widget.item_width,
 				scroll: 'vertical',
 				hideHeaders: true,
+				updateLegendSet: updateLegendSet,
+				deleteLegendSet: deleteLegendSet,
 				columns: [
 					{
-						id: 'name',
 						dataIndex: 'name',
 						sortable: false,
 						width: GIS.conf.layout.widget.item_width - 62
 					},
 					{
-						id: 'edit',
 						dataIndex: 'edit',
 						sortable: false,
 						width: 20
 					},
 					{
-						id: 'del',
 						dataIndex: 'del',
 						sortable: false,
 						width: 20
 					},
 					{
-						id: 'scrollbar',
 						sortable: false,
 						width: 20
 					}
@@ -1537,12 +1537,24 @@ Ext.onReady( function() {
 		LegendPanel = function(id) {
 			var panel,
 				addLegend,
-				grid,
 				reset,
 				data = [];
 				
 			tmpStore = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name', 'startValue', 'endValue', 'color']
+				fields: ['id', 'name', 'startValue', 'endValue', 'color'],
+				listeners: {
+					add: function() {
+						this.each( function(record) {									
+							record.set({
+								del: '<img id="' + record.getId() + '" class="gis-grid-icon-link" src="images/grid-delete_16.png"' +
+										'name="legendGrid" onclick="Ext.getCmp(this.name).deleteLegend(this.id);" />',
+								startValue: 30,
+								endValue: 70,
+								color: '<span style="color: #008800">#008800</span>'
+							});
+						});
+					}
+				}
 			});
 		
 			legendSetName = Ext.create('Ext.form.field.Text', {
@@ -1600,18 +1612,48 @@ Ext.onReady( function() {
 				}
 			});
 			
-			grid = Ext.create('Ext.grid.Panel', {
+			legendGrid = Ext.create('Ext.grid.Panel', {
+				id: 'legendGrid',
 				cls: 'gis-grid',
 				bodyStyle: 'border-top: 0 none',
 				width: GIS.conf.layout.widget.item_width,
 				height: 235,
 				scroll: 'vertical',
 				hideHeaders: true,
-				columns: [{
-					dataIndex: 'name',
-					sortable: false,
-					width: GIS.conf.layout.widget.item_width - 2
-				}],
+				deleteLegend: deleteLegend,
+				columns: [
+					{
+						dataIndex: 'name',
+						sortable: false,
+						width: GIS.conf.layout.widget.item_width - 162
+					},
+					{
+						dataIndex: 'color',
+						sortable: false,
+						width: 60
+					},
+					{
+						dataIndex: 'startValue',
+						sortable: false,
+						width: 30
+					},
+					{
+						dataIndex: 'endValue',
+						sortable: false,
+						width: 30
+					},
+					{
+						id: 'del',
+						dataIndex: 'del',
+						sortable: false,
+						width: 20
+					},
+					{
+						id: 'scrollbar',
+						sortable: false,
+						width: 20
+					}
+				],
 				store: tmpStore,
 				listeners: {
 					itemmouseenter: function(grid, record, item) {
@@ -1683,7 +1725,7 @@ Ext.onReady( function() {
 					{
 						cls: 'gis-panel-html-separator'
 					},
-					grid
+					legendGrid
 				]
 			});
 			
@@ -1724,6 +1766,10 @@ Ext.onReady( function() {
 					}
 				});
 			}
+		};
+		
+		deleteLegend = function(id) {
+			tmpStore.remove(tmpStore.getById(id));
 		};
 		
 		reset = function() {
