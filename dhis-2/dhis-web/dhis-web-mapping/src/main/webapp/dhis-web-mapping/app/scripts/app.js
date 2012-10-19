@@ -1537,7 +1537,8 @@ Ext.onReady( function() {
 		LegendPanel = function(id) {
 			var panel,
 				addLegend,
-				grid,				
+				grid,
+				reset,
 				data = [];
 				
 			tmpStore = Ext.create('Ext.data.Store', {
@@ -1578,9 +1579,23 @@ Ext.onReady( function() {
 			addLegend = Ext.create('Ext.button.Button', {
 				text: 'Add legend', //i18n
 				handler: function() {
-					if (legendName.getValue() && startValue.getValue() && endValue.getValue() && color.getValue()) {
-						console.log('add legend, load+reset on callback,');
-						store.load();
+					var ln = legendName.getValue(),
+						sv = startValue.getValue(),
+						ev = endValue.getValue(),
+						co = color.getValue();
+					
+					if (ln && (ev > sv)) {
+						tmpStore.add({
+							name: ln,
+							startValue: sv,
+							endValue: ev,
+							color: co
+						});
+						
+						legendName.reset();
+						startValue.reset();
+						endValue.reset();
+						color.reset();						
 					}
 				}
 			});
@@ -1704,7 +1719,9 @@ Ext.onReady( function() {
 					params: {
 						id: id
 					},
-					success: legendSetStore.load
+					success: function() {
+						legendSetStore.load();
+					}
 				});
 			}
 		};
