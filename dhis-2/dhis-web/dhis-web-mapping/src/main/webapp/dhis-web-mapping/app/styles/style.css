@@ -9,6 +9,7 @@
  * Treepanel
  * Colorpicker 
  * Window
+ * Grid
  * TextField
  * Checkbox
  * NumberField
@@ -440,6 +441,18 @@ html * {
 .gis-grid .x-grid-header-ct {
 	border-bottom-width: 1px !important;
 	border-bottom-color: #dbdbdb;	
+}
+
+.gis-grid .x-grid-dirty-cell { /* hide red cell icon */
+	background-image: none;
+}
+.gis-grid .x-grid-row { /* middle align text in row with image */
+	vertical-align: middle;
+}
+
+.gis-grid-icon-link {
+	cursor: pointer;
+	cursor: hand;
 }
 
 /* TextField */

@@ -587,7 +587,7 @@ Ext.onReady( function() {
 	});
 	
 	GIS.store.legendSets = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
+		fields: ['id', 'name', 'edit', 'del'],
 		proxy: {
 			type: 'ajax',
 			url: GIS.conf.url.path_api + 'mapLegendSets.json?links=false&paging=false',
@@ -1383,6 +1383,20 @@ Ext.onReady( function() {
 		var LegendSetGrid,
 			legendSetGrid,
 			legendSetStore = GIS.store.legendSets,
+			updateLegendSet = function(id) {
+				legendPanel = new LegendPanel(id);
+				window.removeAll();
+				window.add(legendPanel);
+				info.hide();
+				cancel.show();
+				
+				if (id) {
+					update.show();
+				}
+				else {
+					create.show();
+				}
+			},
 			
 			LegendPanel,
 			legendPanel,
@@ -1392,6 +1406,7 @@ Ext.onReady( function() {
 			endValue,
 			color,			
 			legendStore = GIS.store.legendsByLegendSet,
+			tmpStore,
 			
 			reset,
 			window,
@@ -1401,49 +1416,96 @@ Ext.onReady( function() {
 			count;
 			
 		LegendSetGrid = function() {
-			var tbar;
-				
-			tbar = Ext.create('Ext.toolbar.Toolbar', {
+			var tbar = Ext.create('Ext.toolbar.Toolbar', {
 				items: [
 					'->',
 					{
 						text: 'Add new..',
 						handler: function() {
-							legendPanel = new LegendPanel();
-							window.removeAll();
-							window.add(legendPanel);
-							
-							info.hide();
-							cancel.show();
-							create.show();
+							updateLegendSet();
 						}
 					}
 				]
 			});
 			
 			legendSetGrid = Ext.create('Ext.grid.Panel', {
+				id: 'legendSetGrid',
+				updateLegendSet: updateLegendSet,
 				cls: 'gis-grid',
 				bodyStyle: 'border-top: 0 none',
 				width: GIS.conf.layout.widget.item_width,
 				scroll: 'vertical',
 				hideHeaders: true,
-				columns: [{
-					id: 'name',
-					dataIndex: 'name',
-					sortable: false,
-					width: GIS.conf.layout.widget.item_width - 2
-				}],
+				columns: [
+					{
+						id: 'name',
+						dataIndex: 'name',
+						sortable: false,
+						width: GIS.conf.layout.widget.item_width - 62
+					},
+					{
+						id: 'edit',
+						dataIndex: 'edit',
+						sortable: false,
+						width: 20
+					},
+					{
+						id: 'del',
+						dataIndex: 'del',
+						sortable: false,
+						width: 20
+					},
+					{
+						id: 'scroll',
+						sortable: false,
+						width: 20
+					}
+				],
 				store: legendSetStore,
-				tbar: tbar
+				tbar: tbar,
+				listeners: {
+					render: function() {
+						
+						//var el = Ext.create('Ext.Element', {
+							//className: "gis-grid-icon-link",
+							//src: "images/grid-edit_16.png"
+						//});
+						
+						//console.log(el);
+						
+						var n = 'nissa';
+						var store = this.store;
+						store.load({
+							callback: function() {
+								store.each( function(record) {									
+									record.set({
+										//edit: '<span id="' + record.getId() + '"></span>',
+										edit: '<img id="' + record.getId() + '" class="gis-grid-icon-link" src="images/grid-edit_16.png"' +
+												'name="legendSetGrid" onclick="Ext.getCmp(this.name).updateLegendSet(this.id);" />',
+										del: '<img src="images/grid-delete_16.png" />'
+									});
+								});
+							}
+						});
+					},
+					itemmouseenter: function(grid, record, item) {
+						Ext.get(item).removeCls('x-grid-row-over');
+					}
+				}
 			});
 			
 			return legendSetGrid;
 		};
 		
-		LegendPanel = function(record) {
+		LegendPanel = function(id) {
 			var panel,
 				addLegend,
-				grid;
+				grid,				
+				data = [];
+			
+			tmpStore = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name', 'startValue', 'endValue', 'color']
+			});
 		
 			legendSetName = Ext.create('Ext.form.field.Text', {
 				cls: 'gis-textfield',
@@ -1458,17 +1520,16 @@ Ext.onReady( function() {
 			});
 			
 			startValue = Ext.create('Ext.form.field.Number', {
-				width: 180 - 12,
-				fieldLabel: 'Start value', //i18m
+				width: 71,
 				allowDecimals: false,
 				value: 0
 			});
 			
 			endValue = Ext.create('Ext.form.field.Number', {
-				width: 180 - 12,
-				fieldLabel: 'End value', //i18m
+				width: 71,
 				allowDecimals: false,
-				value: 0
+				value: 0,
+				style: 'padding-left: 2px'
 			});
 			
 			color = Ext.create('Ext.ux.button.ColorButton', {
@@ -1500,7 +1561,7 @@ Ext.onReady( function() {
 					sortable: false,
 					width: GIS.conf.layout.widget.item_width - 2
 				}],
-				store: legendStore
+				store: tmpStore
 			});
 			
 			panel = Ext.create('Ext.panel.Panel', {
@@ -1521,8 +1582,19 @@ Ext.onReady( function() {
 						bodyStyle: 'background-color: #f1f1f1; border: 1px solid #ccc; border-radius: 2px; padding: 5px',
 						items: [
 							legendName,
-							startValue,
-							endValue,
+							{
+								layout: 'hbox',
+								bodyStyle: 'background: transparent',
+								items: [
+									{
+										html: 'Start / end value:', //i18n
+										width: 105,
+										bodyStyle: 'background: transparent; padding-top: 3px'
+									},
+									startValue,
+									endValue
+								]
+							},
 							{
 								layout: 'column',
 								cls: 'gis-container-inner',
@@ -1558,6 +1630,25 @@ Ext.onReady( function() {
 					grid
 				]
 			});
+			
+			if (id) {
+				legendStore.proxy.url = GIS.conf.url.path_api +  'mapLegendSets/' + id + '.json?links=false&paging=false';
+				legendStore.load({
+					callback: function(records) {
+						for (var i = 0; i < records.length; i++) {
+							var record = records[i];
+							data.push({
+								id: record.data.id,
+								name: record.data.name,
+								startValue: record.data.startValue,
+								endValue: record.data.endValue,
+								color: record.data.color
+							});
+						}
+						tmpStore.add(data);
+					}
+				});
+			}
 			
 			return panel;
 		};
@@ -1622,12 +1713,6 @@ Ext.onReady( function() {
 					create,
 					update
 				]
-			}
-		});
-		
-		legendSetStore.load({
-			callback: function(records) {
-				info.setText(records.length + ' legend sets available');
 			}
 		});
 		
@@ -1866,6 +1951,7 @@ Ext.onReady( function() {
 						{
 							text: 'Download' //i18n
 						},
+						'->',
 						{
 							text: 'fav()', //i18n
 							handler: function() {
@@ -1900,17 +1986,6 @@ Ext.onReady( function() {
 								GIS.base.thematic1.widget.execute();
 							}
 						},
-						{
-							text: 'layout()', //i18n
-							handler: function() {
-								//GIS.cmp.region.eastlayer.setTitle('nissa');
-								//GIS.cmp.region.eastlayer.doLayout();
-								//console.log(GIS.cmp.region.eastlayer);
-								//GIS.cmp.region.eastlayer.expand();
-								//GIS.cmp.region.eastlayer.show();
-							}
-						},
-						'->',
 						{
 							text: 'Exit', //i18n
 							handler: function() {
