@@ -1452,21 +1452,12 @@ Ext.onReady( function() {
 			},
 			deleteLegend: deleteLegend,
 			listeners: {
-				load: function(store, records) {
+				load: function(store, records) {						
 					var data = [],
-						record;
-						
-					this.sort('startValue', 'DESC');
+						record;						
 					
 					for (var i = 0; i < records.length; i++) {
-						record = records[i];
-						data.push({
-							id: record.data.id,
-							name: record.data.name,
-							startValue: record.data.startValue,
-							endValue: record.data.endValue,
-							color: record.data.color
-						});
+						data.push(records[i].data);
 					}
 					
 					tmpStore.add(data);
@@ -1540,13 +1531,13 @@ Ext.onReady( function() {
 				reset,
 				data = [];
 				
-			tmpStore = Ext.create('Ext.data.Store', {
+			tmpStore = Ext.create('Ext.data.ArrayStore', {
 				fields: ['id', 'name', 'startValue', 'endValue', 'color', 'colorString', 'del'],
 				listeners: {
-					add: function() {
+					add: function() {						
 						this.each( function(record) {
 							record.set({
-								colorString: '<span style="color:' + record.data.color + '"># </span>' + record.data.color.substr(1),
+								colorString: '<span style="color:' + record.data.color + '">Color</span>',
 								del: '<img id="' + record.data.id + '" class="gis-grid-icon-link" src="images/grid-delete_16.png"' +
 									 ' name="legendGrid" onclick="Ext.getCmp(this.name).deleteLegend(this.id);" />'
 							});
@@ -1634,31 +1625,29 @@ Ext.onReady( function() {
 					{
 						dataIndex: 'name',
 						sortable: false,
-						width: GIS.conf.layout.widget.item_width - 162
+						width: GIS.conf.layout.widget.item_width - 156
 					},
 					{
 						dataIndex: 'colorString',
 						sortable: false,
-						width: 60
+						width: 40
 					},
 					{
 						dataIndex: 'startValue',
 						sortable: false,
-						width: 30
+						width: 37
 					},
 					{
 						dataIndex: 'endValue',
 						sortable: false,
-						width: 30
+						width: 37
 					},
 					{
-						id: 'del',
 						dataIndex: 'del',
 						sortable: false,
 						width: 20
 					},
 					{
-						id: 'scrollbar',
 						sortable: false,
 						width: 20
 					}
