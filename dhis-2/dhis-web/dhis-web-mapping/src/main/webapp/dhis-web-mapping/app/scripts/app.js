@@ -1590,23 +1590,28 @@ Ext.onReady( function() {
 						sv = startValue.getValue(),
 						ev = endValue.getValue(),
 						co = color.getValue().toUpperCase(),
-						i;
+						items = tmpStore.data.items,
+						data = [];
 					
 					if (ln && (ev > sv)) {
-						tmpStore.each( function(record, index) {
-							if (record.data.startValue > sv) {
-								i = index;
-								return false;
-							}
-						});
+						for (var i = 0; i < items.length; i++) {
+							data.push(items[i].data);
+						}
 						
-						tmpStore.insert(i, {
+						data.push({
 							id: id,
 							name: ln,
 							startValue: sv,
 							endValue: ev,
 							color: '#' + co
 						});
+					
+						Ext.Array.sort(data, function (a, b) {  
+							return a.startValue - b.startValue;  
+						});
+						
+						tmpStore.removeAll();
+						tmpStore.add(data);
 						
 						legendName.reset();
 						startValue.reset();
