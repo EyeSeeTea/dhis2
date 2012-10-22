@@ -1383,7 +1383,7 @@ Ext.onReady( function() {
 		// Stores
 		var legendSetStore,
 			legendStore,
-			tmpStore,
+			tmpLegendStore,
 			
 		// Objects
 			LegendSetGrid,
@@ -1405,12 +1405,15 @@ Ext.onReady( function() {
 			update,
 			cancel,
 			info,
+			error1Window,
+			error2Window,
 			
 		// Functions
-			updateLegendSet,
+			showUpdateLegendSet,
 			deleteLegendSet,
 			deleteLegend,
-			reset;
+			reset,
+			validateLegends;
 				
 		legendSetStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name', 'edit', 'del'],
@@ -1429,7 +1432,7 @@ Ext.onReady( function() {
 					this.each( function(record) {									
 						record.set({
 							edit: '<img id="' + record.getId() + '" class="gis-grid-icon-link" src="images/grid-edit_16.png"' +
-									'name="legendSetGrid" onclick="Ext.getCmp(this.name).updateLegendSet(this.id);" />',
+									'name="legendSetGrid" onclick="Ext.getCmp(this.name).showUpdateLegendSet(this.id);" />',
 							del: '<img id="' + record.getId() + '" class="gis-grid-icon-link" src="images/grid-delete_16.png"' +
 									'name="legendSetGrid" onclick="Ext.getCmp(this.name).deleteLegendSet(this.id);" />'
 						});
@@ -1464,7 +1467,7 @@ Ext.onReady( function() {
 						return a.startValue - b.startValue;  
 					});
 					
-					tmpStore.add(data);
+					tmpLegendStore.add(data);
 					
 					info.setText(records.length + ' legend sets available');
 				}
@@ -1478,7 +1481,7 @@ Ext.onReady( function() {
 					{
 						text: 'Add new..',
 						handler: function() {
-							updateLegendSet();
+							showUpdateLegendSet();
 						}
 					}
 				]
@@ -1491,8 +1494,9 @@ Ext.onReady( function() {
 				width: GIS.conf.layout.widget.item_width,
 				scroll: 'vertical',
 				hideHeaders: true,
-				updateLegendSet: updateLegendSet,
+				showUpdateLegendSet: showUpdateLegendSet,
 				deleteLegendSet: deleteLegendSet,
+				currentItem: null,
 				columns: [
 					{
 						dataIndex: 'name',
@@ -1521,7 +1525,14 @@ Ext.onReady( function() {
 						this.store.load();
 					},
 					itemmouseenter: function(grid, record, item) {
-						Ext.get(item).removeCls('x-grid-row-over');
+						this.currentItem = Ext.get(item);
+						this.currentItem.removeCls('x-grid-row-over');
+					},
+					select: function() {
+						this.currentItem.removeCls('x-grid-row-selected');
+					},
+					selectionchange: function() {
+						this.currentItem.removeCls('x-grid-row-focused');
 					}
 				}
 			});
@@ -1535,7 +1546,7 @@ Ext.onReady( function() {
 				reset,
 				data = [];
 				
-			tmpStore = Ext.create('Ext.data.ArrayStore', {
+			tmpLegendStore = Ext.create('Ext.data.ArrayStore', {
 				fields: ['id', 'name', 'startValue', 'endValue', 'color', 'colorString', 'del'],
 				listeners: {
 					add: function() {						
@@ -1590,7 +1601,7 @@ Ext.onReady( function() {
 						sv = startValue.getValue(),
 						ev = endValue.getValue(),
 						co = color.getValue().toUpperCase(),
-						items = tmpStore.data.items,
+						items = tmpLegendStore.data.items,
 						data = [];
 					
 					if (ln && (ev > sv)) {
@@ -1610,8 +1621,8 @@ Ext.onReady( function() {
 							return a.startValue - b.startValue;  
 						});
 						
-						tmpStore.removeAll();
-						tmpStore.add(data);
+						tmpLegendStore.removeAll();
+						tmpLegendStore.add(data);
 						
 						legendName.reset();
 						startValue.reset();
@@ -1661,7 +1672,7 @@ Ext.onReady( function() {
 						width: 20
 					}
 				],
-				store: tmpStore,
+				store: tmpLegendStore,
 				listeners: {
 					itemmouseenter: function(grid, record, item) {
 						Ext.get(item).removeCls('x-grid-row-over');
@@ -1746,7 +1757,7 @@ Ext.onReady( function() {
 			return panel;
 		};
 		
-		updateLegendSet = function(id) {
+		showUpdateLegendSet = function(id) {
 			legendPanel = new LegendPanel(id);
 			window.removeAll();
 			window.add(legendPanel);
@@ -1776,7 +1787,7 @@ Ext.onReady( function() {
 		};
 		
 		deleteLegend = function(id) {
-			tmpStore.remove(tmpStore.getById(id));
+			tmpLegendStore.remove(tmpLegendStore.getById(id));
 		};
 		
 		reset = function() {
@@ -1789,13 +1800,42 @@ Ext.onReady( function() {
 			cancel.hide();
 			create.hide();
 			update.hide();
-		};			
+		};
+		
+		validateLegends = function() {
+			var items = tmpLegendStore.data.items,
+				item,
+				prevItem;
+				
+			if (items.length === 0) {
+				alert('No legend set name');
+				return false;
+			}
+				
+			for (var i = 1; i < items.length; i++) {
+				item = items[i].data;
+				prevItem = items[i - 1].data;
+				
+				if (item.startValue < prevItem.endValue) {
+					alert('Overlapping legends');
+					return false;
+				}
+				
+				if (prevItem.endValue < item.startValue) {
+					alert('Legend gaps');
+				}
+			}
+			
+			return true;
+		};
 		
 		create = Ext.create('Ext.button.Button', {
 			text: 'Create', //i18n
 			hidden: true,
 			handler: function() {
-				reset();
+				if (legendSetName.getValue() && validateLegends()) {
+					reset();
+				}
 			}
 		});
 		
