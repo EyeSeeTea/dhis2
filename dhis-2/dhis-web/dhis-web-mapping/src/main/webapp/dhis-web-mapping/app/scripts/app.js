@@ -1454,11 +1454,15 @@ Ext.onReady( function() {
 			listeners: {
 				load: function(store, records) {						
 					var data = [],
-						record;						
+						record;
 					
 					for (var i = 0; i < records.length; i++) {
 						data.push(records[i].data);
 					}
+					
+					Ext.Array.sort(data, function (a, b) {  
+						return a.startValue - b.startValue;  
+					});
 					
 					tmpStore.add(data);
 					
