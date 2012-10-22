@@ -471,7 +471,26 @@ Ext.onReady( function() {
 	GIS.store.periodTypes = Ext.create('Ext.data.Store', {
 		fields: ['id', 'name'],
 		data: GIS.conf.period.periodTypes
-	}),
+	});
+	
+	GIS.store.organisationUnitHierarchy = Ext.create('Ext.data.TreeStore', {
+		proxy: {
+			type: 'ajax',
+			url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+		},
+		root: {
+			id: 'root',
+			expanded: true,
+			children: GIS.init.rootNodes
+		},
+		listeners: {
+			load: function(s, node, r) {
+				for (var i = 0; i < r.length; i++) {
+					r[i].data.text = GIS.util.jsonEncodeString(r[i].data.text);
+				}
+			}
+		}
+	});
     
     GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
 		fields: ['id', 'name', 'level'],
@@ -594,35 +613,6 @@ Ext.onReady( function() {
 			reader: {
 				type: 'json',
 				root: 'mapLegendSets'
-			}
-		},
-		isLoaded: false,
-		loadFn: function(fn) {
-			if (this.isLoaded) {
-				fn.call();
-			}
-			else {
-				this.load(fn);
-			}
-		},
-		listeners: {
-			load: function() {
-				if (!this.isLoaded) {
-					this.isLoaded = true;
-				}
-				this.sort('name', 'ASC');
-			}
-		}
-	});
-    
-	GIS.store.legendsByLegendSet = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name', 'startValue', 'endValue', 'color'],
-		proxy: {
-			type: 'ajax',
-			url: '',
-			reader: {
-				type: 'json',
-				root: 'mapLegends'
 			}
 		},
 		isLoaded: false,
@@ -1641,6 +1631,7 @@ Ext.onReady( function() {
 				scroll: 'vertical',
 				hideHeaders: true,
 				deleteLegend: deleteLegend,
+				currentItem: null,
 				columns: [
 					{
 						dataIndex: 'name',
@@ -1675,7 +1666,14 @@ Ext.onReady( function() {
 				store: tmpLegendStore,
 				listeners: {
 					itemmouseenter: function(grid, record, item) {
-						Ext.get(item).removeCls('x-grid-row-over');
+						this.currentItem = Ext.get(item);
+						this.currentItem.removeCls('x-grid-row-over');
+					},
+					select: function() {
+						this.currentItem.removeCls('x-grid-row-selected');
+					},
+					selectionchange: function() {
+						this.currentItem.removeCls('x-grid-row-focused');
 					}
 				}
 			});

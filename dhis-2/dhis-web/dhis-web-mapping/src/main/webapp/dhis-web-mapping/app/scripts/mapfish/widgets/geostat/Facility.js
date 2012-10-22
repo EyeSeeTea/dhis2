@@ -255,24 +255,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 					this.pathToExpand = path;
 				}
 			},
-			store: Ext.create('Ext.data.TreeStore', {
-				proxy: {
-					type: 'ajax',
-					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
-				},
-				root: {
-					id: 'root',
-					expanded: true,
-					children: GIS.init.rootNodes
-				},
-				listeners: {
-					load: function(s, node, r) {
-						for (var i = 0; i < r.length; i++) {
-							r[i].data.text = GIS.util.jsonEncodeString(r[i].data.text);
-						}
-					}
-				}
-			}),
+			store: GIS.store.organisationUnitHierarchy,
 			listeners: {
 				select: {
 					scope: this,

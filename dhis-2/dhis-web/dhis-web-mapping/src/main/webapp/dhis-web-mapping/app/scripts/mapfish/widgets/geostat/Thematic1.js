@@ -168,6 +168,35 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			sortStore: function() {
 				this.sort('name', 'ASC');
 			}
+		}),
+
+		legendsByLegendSet: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'startValue', 'endValue', 'color'],
+			proxy: {
+				type: 'ajax',
+				url: '',
+				reader: {
+					type: 'json',
+					root: 'mapLegends'
+				}
+			},
+			isLoaded: false,
+			loadFn: function(fn) {
+				if (this.isLoaded) {
+					fn.call();
+				}
+				else {
+					this.load(fn);
+				}
+			},
+			listeners: {
+				load: function() {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+					this.sort('name', 'ASC');
+				}
+			}
 		})
 	},
     
@@ -523,6 +552,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                     scope: this,
                     fn: function(cb) {
 						this.toggler.legendType(cb.getValue());
+						
+						this.config.updateLegend = true;
                     }
                 }
             }
@@ -536,7 +567,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             hidden: true,
-            store: GIS.store.predefinedColorMapLegendSet,
+            store: GIS.store.legendSets,
             listeners: {
 				select: {
 					scope: this,
@@ -699,24 +730,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					this.pathToExpand = path;
 				}
 			},
-			store: Ext.create('Ext.data.TreeStore', {
-				proxy: {
-					type: 'ajax',
-					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
-				},
-				root: {
-					id: 'root',
-					expanded: true,
-					children: GIS.init.rootNodes
-				},
-				listeners: {
-					load: function(s, node, r) {
-						for (var i = 0; i < r.length; i++) {
-							r[i].data.text = GIS.util.jsonEncodeString(r[i].data.text);
-						}
-					}
-				}
-			}),
+			store: GIS.store.organisationUnitHierarchy,
 			listeners: {
 				select: {
 					scope: this,
@@ -1242,42 +1256,40 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.selectHandlers.activate();
     },
 	
-	applyPredefinedLegend: function(isMapView) {
-        this.legend.value = GIS.conf.map_legendset_type_predefined;
-		var mls = this.cmp.legendSet.getValue();
+	setPredefinedLegend: function(fn) {
+		var store = this.store.legendsByLegendSet,
+			colors = [],
+			bounds = [],
+			names = [],
+			legends;
+		
 		Ext.Ajax.request({
-			url: GIS.conf.path_mapping + 'getMapLegendsByMapLegendSet' + GIS.conf.type,
-			params: {mapLegendSetId: mls},
-            scope: this,
+			url: GIS.conf.url.path_api + 'mapLegendSets/' + this.tmpModel.legendSet + '.json?links=false&paging=false',
+			scope: this,
 			success: function(r) {
-				var mapLegends = Ext.util.JSON.decode(r.responseText).mapLegends,
-                    colors = [],
-                    bounds = [],
-                    names = [];
-				for (var i = 0; i < mapLegends.length; i++) {
-					if (bounds[bounds.length-1] != mapLegends[i].startValue) {
+				legends = Ext.decode(r.responseText).mapLegends;
+				
+				for (var i = 0; i < legends.length; i++) {
+					if (bounds[bounds.length-1] !== legends[i].startValue) {
 						if (bounds.length !== 0) {
 							colors.push(new mapfish.ColorRgb(240,240,240));
                             names.push('');
 						}
-						bounds.push(mapLegends[i].startValue);
+						bounds.push(legends[i].startValue);
 					}
 					colors.push(new mapfish.ColorRgb());
-					colors[colors.length-1].setFromHex(mapLegends[i].color);
-                    names.push(mapLegends[i].name);
-					bounds.push(mapLegends[i].endValue);
+					colors[colors.length - 1].setFromHex(legends[i].color);
+                    names.push(legends[i].name);
+					bounds.push(legends[i].endValue);
 				}
 
-				this.colorInterpolation = colors;
-				this.bounds = bounds;
-                this.legendNames = names;
-                
-                if (isMapView) {
-                    this.setMapViewMap();
-                }
-                else {
-                    this.classify(false, true);
-                }
+				this.tmpModel.colorInterpolation = colors;
+				this.tmpModel.bounds = bounds;
+                this.tmpModel.legendNames = names;
+
+				if (fn) {
+					fn.call(this);
+				}
 			}
 		});
 	},
@@ -1300,6 +1312,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		//},
 		
 	reset: function() {
+		
 		// Components
 		this.cmp.valueType.reset();
 		this.toggler.valueType(GIS.conf.finals.dimension.indicator.id);
@@ -1421,16 +1434,15 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.cmp.radiusLow.setValue(model.radiusLow);
 			this.cmp.radiusHigh.setValue(model.radiusHigh);
 		}
-		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) { //todo
-			//store.loadFn( function() {
-				//this.cmp.legendSet.setValue(model.legendSet);
-			//});
+		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			GIS.store.legendSet.loadFn( function() {
+				this.cmp.legendSet.setValue(model.legendSet);
+			});
 		}
 		
 		// Level and parent
-		var levelView = this.cmp.level;
 		GIS.store.organisationUnitLevels.loadFn( function() {
-			levelView.setValue(model.level);
+			this.cmp.level.setValue(model.level);
 		});
 		
 		this.cmp.parent.selectTreePath('/root' + model.parentPath);
@@ -1688,19 +1700,31 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	},
 	
 	loadLegend: function() {
-		var options = {
-            indicator: GIS.conf.finals.widget.value,
-            method: this.tmpModel.method,
-            numClasses: this.tmpModel.classes,
-            colors: this.tmpModel.colors,
-            minSize: this.tmpModel.radiusLow,
-            maxSize: this.tmpModel.radiusHigh
-        };
+		var options,
+			that = this,
+			
+			fn = function() {
+				options = {
+					indicator: GIS.conf.finals.widget.value,
+					method: that.tmpModel.method,
+					numClasses: that.tmpModel.classes,
+					colors: that.tmpModel.colors,
+					minSize: that.tmpModel.radiusLow,
+					maxSize: that.tmpModel.radiusHigh
+				};
 
-        this.coreComp.applyClassification(options);
-        this.classificationApplied = true;
-        
-        this.afterLoad();
+				that.coreComp.applyClassification(options);
+				that.classificationApplied = true;
+				
+				that.afterLoad();
+			};
+		
+		if (this.tmpModel.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			this.setPredefinedLegend(fn);
+		}
+		else {
+			fn();
+		}
 	},
 	
     execute: function() {

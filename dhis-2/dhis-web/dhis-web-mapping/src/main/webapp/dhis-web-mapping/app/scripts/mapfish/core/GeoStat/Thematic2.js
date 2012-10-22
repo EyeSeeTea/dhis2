@@ -63,17 +63,18 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
     createColorInterpolation: function() {
         var numColors = this.classification.bins.length,
 			legendType = this.widget.tmpModel.legendType;
-        this.widget.imageLegend = [];
+        
+        this.widget.tmpModel.imageLegend = [];
         
         if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
 		}
-		else if (legendType === GIS.conf.finals.widget.legendtype_predefined) {
-			this.colorInterpolation = this.widget.colorInterpolation;
+		else {
+			this.colorInterpolation = this.widget.tmpModel.colorInterpolation;
 		}
             
         for (var i = 0; i < this.classification.bins.length; i++) {
-            this.widget.imageLegend.push({
+            this.widget.tmpModel.imageLegend.push({
                 label: this.classification.bins[i].label.replace('&nbsp;&nbsp;', ' '),
                 color: this.colorInterpolation[i].toHexString()
             });
@@ -142,7 +143,11 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
         }
         
         var config = this.widget.getLegendConfig(),
-			element;
+			element,
+			legendType = this.widget.tmpModel.legendType,
+			automatic = GIS.conf.finals.widget.legendtype_automatic,
+			predefined = GIS.conf.finals.widget.legendtype_predefined,
+			legendNames = this.widget.tmpModel.legendNames;
 			
         this.legendDiv.update("");
         
@@ -164,7 +169,7 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
         element.style.height = "5px";
         this.legendDiv.appendChild(element);
         
-        if (this.widget.tmpModel.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+        if (legendType === automatic) {
             for (var i = 0; i < this.classification.bins.length; i++) {
                 var element = document.createElement("div");
                 element.style.backgroundColor = this.colorInterpolation[i].toHexString();
@@ -183,25 +188,25 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
                 this.legendDiv.appendChild(element);
             }
         }
-        else if (this.widget.tmpModel.legendType === GIS.conf.finals.widget.legendtype_predefined) {
-            //for (var i = 0; i < this.classification.bins.length; i++) {
-                //var element = document.createElement("div");
-                //element.style.backgroundColor = this.colorInterpolation[i].toHexString();
-                //element.style.width = "30px";
-                //element.style.height = this.widget.legendNames[i] ? "25px" : "20px";
-                //element.style.cssFloat = "left";
-                //element.style.marginRight = "8px";
-                //this.legendDiv.appendChild(element);
+        else if (legendType === predefined) {
+            for (var i = 0; i < this.classification.bins.length; i++) {
+                var element = document.createElement("div");
+                element.style.backgroundColor = this.colorInterpolation[i].toHexString();
+                element.style.width = "30px";
+                element.style.height = legendNames[i] ? "25px" : "20px";
+                element.style.cssFloat = "left";
+                element.style.marginRight = "8px";
+                this.legendDiv.appendChild(element);
 
-                //element = document.createElement("div");
-                //element.style.lineHeight = this.widget.legendNames[i] ? "12px" : "7px";
-                //element.innerHTML = '<b style="color:#222">' + (this.widget.legendNames[i] || '') + '</b><br/>' + this.classification.bins[i].label;
-                //this.legendDiv.appendChild(element);
+                element = document.createElement("div");
+                element.style.lineHeight = legendNames[i] ? "12px" : "7px";
+                element.innerHTML = '<b style="color:#222; font-size:10px !important">' + (legendNames[i] || '') + '</b><br/>' + this.classification.bins[i].label;
+                this.legendDiv.appendChild(element);
 
-                //element = document.createElement("div");
-                //element.style.clear = "left";
-                //this.legendDiv.appendChild(element);
-            //}
+                element = document.createElement("div");
+                element.style.clear = "left";
+                this.legendDiv.appendChild(element);
+            }
         }
     },
 

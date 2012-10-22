@@ -42,8 +42,6 @@ mapfish.GeoStat = OpenLayers.Class({
 
     defaultSymbolizer: {},
 
-    selectSymbolizer: {'strokeColor': '#000000'},
-
     legendDiv: null,
 
     initialize: function(map, options) {
@@ -253,63 +251,19 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
     },
 	
     classify: function(method, nbBins, bounds, that) {
-		//if (this.widget.model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
-			//if (method === mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS) {
-				//var str = this.widget.model.boundsG.vars.activeWidget.cmp.bounds.getValue();
-                				
-				//for (var i = 0; i < str.length; i++) {
-					//str = str.replace(' ','');
-				//}				
-				//if (str.charAt(str.length-1) == ',') {
-					//str = str.substring(0, str.length-1);
-				//}
-				
-				//bounds = [];
-				//bounds = str.split(',');
-				
-				//for (var j = 0; j < bounds.length; j++) {
-					//if (!Ext.num(parseFloat(bounds[j]), false)) {
-						//bounds.remove(bounds[j]);
-						//j--;
-					//}
-				//}
-				
-				//var newInput = bounds.join(',');                
-                //G.vars.activeWidget.cmp.bounds.setValue(newInput);
-				
-				//for (var k = 0; k < bounds.length; k++) {
-					//bounds[k] = parseFloat(bounds[k]);
-					//if (bounds[k] < this.minVal || bounds[k] > this.maxVal) {
-						//Ext.message.msg(false, 'Class breaks must be higher than <span class="x-msg-hl">' + this.minVal + '</span> and lower than <span class="x-msg-hl">' + this.maxVal + '</span>.');
-					//}
-				//}
-				
-				//bounds.unshift(this.minVal);
-				//bounds.push(this.maxVal);
-			//}
-		//}
-		
-		if (that.model.legendType === GIS.conf.finals.widget.legendtype_predefined) {
-			bounds = that.bounds;
+		if (that.tmpModel.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			bounds = that.tmpModel.bounds;
 
 			if (bounds[0] > this.minVal) {
 				bounds.unshift(this.minVal);        
-                //if (this.widget == centroid) {
-                    //this.widget.symbolizerInterpolation.unshift('blank');
-                //}
-                //else {
-                    that.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
-                //}
+                //if (this.widget == centroid) { this.widget.symbolizerInterpolation.unshift('blank');
+				that.tmpModel.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
 			}
 
 			if (bounds[bounds.length-1] < this.maxVal) {
-				bounds.push(this.maxVal); 
-                //todo if (G.vars.activeWidget == centroid) {
-                    //G.vars.activeWidget.symbolizerInterpolation.push('blank');
-                //}
-                //else {
-                    that.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
-                //}
+				bounds.push(this.maxVal);
+                //todo if (this.widget == centroid) { G.vars.activeWidget.symbolizerInterpolation.push('blank');
+				that.tmpModel.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
 			}
 			
 			method = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS;
