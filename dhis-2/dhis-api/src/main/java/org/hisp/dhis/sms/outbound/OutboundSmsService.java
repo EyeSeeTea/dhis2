@@ -57,5 +57,7 @@ public interface OutboundSmsService
 
     void updateOutboundSms( OutboundSms sms);
     
+    void deleteById( Integer outboundSmsId );
+    
     List<OutboundSms> getOutboundSms( OutboundSmsStatus status );
 }
