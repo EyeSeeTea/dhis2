@@ -14,7 +14,7 @@
 				
 <h3 id='mainLinkLbl'>$i18n.getString( "anonymous_events" ) #openHelp('single_event_without_registration')</h3>
 <input type='hidden' id='orgunitId' name='orgunitId' value='$orgunit.id'>
-<input type='hidden' id='programStageInstanceId' name='programStageInstanceId'>
+<input type='hidden' id='programStageInstanceId' name='programStageInstanceId' value='0'>
 <input type='hidden' id='programStageId' name='programStageId' class='stage-object-selected'>
 <input type='hidden' id='isShowEventList' name='isShowEventList'>
 
@@ -43,10 +43,10 @@
 					<input type='hidden' class='stage-object-selected hidden'>
 				</td>
 				<td>
-					<input type="button" class='large-button' id='listBtn' value="$i18n.getString( 'list_all_events' )" onclick='validateSearchEvents( true );'>
-					<input type="button" class='large-button' id='addBtn' value='$i18n.getString( "add_new" )' onclick="setFieldValue('isShowEventList', true);showAddEventForm();">
-					<input type="button" class='large-button' id='advancedBtn' value='$i18n.getString( "search" )' onclick="jQuery('#advanced-search').toggle();">
-					<input type="button" id='removeBtn' value='$i18n.getString( "remove_empty_events" )' onclick="removeEmptyEvents();">
+					<input type="button" class='large-button' id='listBtn' value="$i18n.getString( 'list_all_events' )" onclick='validateSearchEvents( true );' style="width:140px;">
+					<input type="button" class='large-button' id='addBtn' value='$i18n.getString( "add_new" )' onclick="setFieldValue('isShowEventList', true);showAddEventForm();" style="width:140px;">
+					<input type="button" class='large-button' id='advancedBtn' value='$i18n.getString( "search" )' onclick="jQuery('#advanced-search').toggle();" style="width:140px;">
+					<input type="button" id='removeBtn' value='$i18n.getString( "remove_empty_events" )' onclick="removeEmptyEvents();" style="width:140px;">
 				</td>
 			</tr>
 		</table>
@@ -107,7 +107,7 @@
 		<input type="button" onclick="doComplete()" value="$i18n.getString('complete')" id="completeBtn">
 		<input type="button" onclick="doUnComplete()" value="$i18n.getString('incomplete')" id="uncompleteBtn" >
 		<input type="button" value="$i18n.getString('run_validation')" onClick="javascript: runValidation();">
-		<input type="button" onclick="completedAndAddNewEvent()" value="$i18n.getString('complete_and_add_new_event')" id="completeAndAddNewBtn">
+		<input type="button" onclick="completedAndAddNewEvent()" value="$i18n.getString('complete_and_add_new_event')" id="completeAndAddNewBtn" style="width:150px;">
 	</div>
 </div>
 

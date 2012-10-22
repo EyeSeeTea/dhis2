@@ -3,7 +3,7 @@ var _continue = false;
 
 function orgunitSelected( orgUnits, orgUnitNames )
 {	
-	hideById('mainLinkLbl');
+	showById('mainLinkLbl');
 	organisationUnitSelected( orgUnits, orgUnitNames );
 	clearListById('programIdAddPatient');
 	$.postJSON( 'singleEventPrograms.action', {}, function( json )
@@ -95,9 +95,46 @@ function addPatient()
 		data: getParamsForDiv('patientForm'),
 		success: function(json) {
 			var patientId = json.message.split('_')[0];
-			addData( getFieldValue('programIdAddPatient'), patientId )
+			validateSingleProgramEnrollment( getFieldValue('programIdAddPatient'), patientId )
 		}
      });
+}
+
+function validateSingleProgramEnrollment( programId, patientId )
+{	
+	jQuery('#loaderDiv').show();
+	jQuery.getJSON( "validatePatientProgramEnrollment.action",
+		{
+			patientId: patientId,
+			programId: programId
+		}, 
+		function( json ) 
+		{    
+			hideById('message');
+			var type = json.response;
+			if ( type == 'success' ){
+				addData( programId, patientId );
+			}
+			else if ( type == 'error' ){
+				setMessage( i18n_program_enrollment_failed + ':' + '\n' + message );
+				removePatientInSingleProgram(patientId);
+			}
+			else if ( type == 'input' ){
+				setMessage( json.message );
+				removePatientInSingleProgram(patientId);
+			}
+			jQuery('#loaderDiv').hide();
+		});
+}
+
+
+function removePatientInSingleProgram( patientId )
+{
+	$("#patientForm :input").attr("disabled",false);
+	jQuery.postJSON( "removePatient.action",
+		{
+			id: patientId
+		}, function(){});
 }
 
 function addData( programId, patientId )
@@ -239,4 +276,29 @@ function backMainPage()
 		listAllPatient();
 	}
 	hideById('backBtnFromEntry');
+}
+
+// --------------------------------------------------------
+// Check an available person allowed to enroll a program
+// --------------------------------------------------------
+
+function validateAllowEnrollment( patientId, programId  )
+{	
+	jQuery.getJSON( "validatePatientProgramEnrollment.action",
+		{
+			patientId: patientId,
+			programId: programId
+		}, 
+		function( json ) 
+		{    
+			jQuery('#loaderDiv').hide();
+			hideById('message');
+			var type = json.response;
+			if ( type == 'success' ){
+				showSelectedDataRecoding(patientId, programId );
+			}
+			else if ( type == 'input' ){
+				setMessage( json.message );
+			}
+		});
 }

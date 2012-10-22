@@ -418,16 +418,7 @@ div.growlUI h2
 
 span.error 
 {
-	background: url('../../images/invalid.png') no-repeat;
-	padding-left: 16px;
-	margin-left: .3em;
-}
-
-span.valid 
-{
-	background: url('../../images/valid.png') no-repeat;	
-	padding-left: 16px;
-	margin-left: .3em;
+	color: red;
 }
 
 #cluetip-inner
@@ -615,6 +606,21 @@ ul.pageSizeSelection input
   border: 1px solid #D0D0D0; 
   border-radius: 2px; cursor: pointer;
   width: 160px;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Forms                                                                      */
+/*----------------------------------------------------------------------------*/
+
+.inputForm input[type=text],select
+{
+  width: 25em;
+}
+
+.inputForm textarea
+{
+  width: 25em;
+  height: 8em;
 }
 
 /*----------------------------------------------------------------------------*/

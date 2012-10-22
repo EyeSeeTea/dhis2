@@ -1,20 +1,40 @@
 
 <script>
-    $(document).bind('pagebeforecreate',function(){
-        $.ajax({
-            url: '../api/currentUser/dashboard',
-            dataType: 'json',
+    redirectToLoginIfRequired();
+
+    function redirectToLoginIfRequired() {
+        return $.ajax({
+            url: '../mobile',
             async: false
+        }).complete(function(e) {
+            if( e.getResponseHeader('Login-Page') ) {
+                document.location = '../mobile';
+            }
+        });
+    }
+
+    function getDashboard() {
+        return $.ajax({
+            url: '../api/currentUser/dashboard',
+            dataType: 'json'
         }).success(function(data) {
             if( data.unreadMessageConversation > 0 ) {
-                $('#messages a').append("<span class='ui-li-count'>" + data.unreadMessageConversation + "</span>");
+                $( '#messages a' ).append("<span class='ui-li-count'>" + data.unreadMessageConversation + "</span>");
             }
         }).error(function() {
-            $('#messages a').append("<span class='ui-li-count'>Offline</span>")
+            $( '#messages').addClass('ui-disabled');
+            $( '#settings').addClass('ui-disabled');
+            $.mobile.hidePageLoadingMsg();
         });
+    }
 
-        fm.initialize();
-    });
+    $(document).bind('pagebeforecreate',function(){
+        $.mobile.showPageLoadingMsg();
+
+        getDashboard().always(function() {
+            $('section[data-role="content"] ul').listview('refresh');
+        }).then( fm.getMetaData().then( fm.uploadDataValueSets()).always( $.mobile.hidePageLoadingMsg ));
+    })
 </script>
 
 <section data-role="page" id="index-page" data-theme="c">
@@ -27,7 +47,7 @@
         <ul data-role="listview" data-inset="true">
             <li id="data-entry"><a href="data-entry">Aggregate Reporting</a></li>
             <li id="messages"><a href="messages">Messages</a></li>
-            <li id="settings"><a href="settings">Settings</a></li>
+            <li id="settings"><a href="settings">User Account</a></li>
         </ul>
 	</section>
 

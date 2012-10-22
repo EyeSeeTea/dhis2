@@ -1441,7 +1441,7 @@ Ext.onReady( function() {
 		});
 		
 		legendStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'startValue', 'endValue', 'color', 'del'],
+			fields: ['id', 'name', 'startValue', 'endValue', 'color'],
 			proxy: {
 				type: 'ajax',
 				url: '',
@@ -1454,7 +1454,9 @@ Ext.onReady( function() {
 			listeners: {
 				load: function(store, records) {
 					var data = [],
-						record;						
+						record;
+						
+					this.sort('startValue', 'DESC');
 					
 					for (var i = 0; i < records.length; i++) {
 						record = records[i];
@@ -1470,8 +1472,6 @@ Ext.onReady( function() {
 					tmpStore.add(data);
 					
 					info.setText(records.length + ' legend sets available');
-					
-					this.sort('name', 'ASC');
 				}
 			}
 		});
@@ -1541,16 +1541,14 @@ Ext.onReady( function() {
 				data = [];
 				
 			tmpStore = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name', 'startValue', 'endValue', 'color'],
+				fields: ['id', 'name', 'startValue', 'endValue', 'color', 'colorString', 'del'],
 				listeners: {
 					add: function() {
-						this.each( function(record) {									
+						this.each( function(record) {
 							record.set({
-								del: '<img id="' + record.getId() + '" class="gis-grid-icon-link" src="images/grid-delete_16.png"' +
-										'name="legendGrid" onclick="Ext.getCmp(this.name).deleteLegend(this.id);" />',
-								startValue: 30,
-								endValue: 70,
-								color: '<span style="color: #008800">#008800</span>'
+								colorString: '<span style="color:' + record.data.color + '"># </span>' + record.data.color.substr(1),
+								del: '<img id="' + record.data.id + '" class="gis-grid-icon-link" src="images/grid-delete_16.png"' +
+									 ' name="legendGrid" onclick="Ext.getCmp(this.name).deleteLegend(this.id);" />'
 							});
 						});
 					}
@@ -1591,17 +1589,28 @@ Ext.onReady( function() {
 			addLegend = Ext.create('Ext.button.Button', {
 				text: 'Add legend', //i18n
 				handler: function() {
-					var ln = legendName.getValue(),
+					var date = new Date(),
+						id = date.toISOString(),
+						ln = legendName.getValue(),
 						sv = startValue.getValue(),
 						ev = endValue.getValue(),
-						co = color.getValue();
+						co = color.getValue().toUpperCase(),
+						i;
 					
 					if (ln && (ev > sv)) {
-						tmpStore.add({
+						tmpStore.each( function(record, index) {
+							if (record.data.startValue > sv) {
+								i = index;
+								return false;
+							}
+						});
+						
+						tmpStore.insert(i, {
+							id: id,
 							name: ln,
 							startValue: sv,
 							endValue: ev,
-							color: co
+							color: '#' + co
 						});
 						
 						legendName.reset();
@@ -1628,7 +1637,7 @@ Ext.onReady( function() {
 						width: GIS.conf.layout.widget.item_width - 162
 					},
 					{
-						dataIndex: 'color',
+						dataIndex: 'colorString',
 						sortable: false,
 						width: 60
 					},

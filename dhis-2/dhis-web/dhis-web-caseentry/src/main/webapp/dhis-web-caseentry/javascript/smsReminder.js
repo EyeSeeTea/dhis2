@@ -189,14 +189,22 @@ function sendSmsToList()
 }
 
 // --------------------------------------------------------------------
-// Post Comments
+// Post Comments/Send Message
 // --------------------------------------------------------------------
 
-function keypress(event, field, programStageInstanceId )
+function keypressOnComent(event, field, programStageInstanceId )
 {
 	var key = getKeyCode( event );
 	if ( key==13 ){ // Enter
 		addComment( field, programStageInstanceId );
+	}
+}
+
+function keypressOnMessage(event, field, programStageInstanceId )
+{
+	var key = getKeyCode( event );
+	if ( key==13 ){ // Enter
+		sendSmsOnePatient( field, programStageInstanceId );
 	}
 }
 
@@ -209,12 +217,16 @@ function loadDataEntry( programStageInstanceId )
 	setInnerHTML('dataEntryFormDiv', '');
 	showById('dataEntryFormDiv');
 	showById('executionDateTB');
-	showById('inputCriteriaDiv');
 	setFieldValue( 'dueDate', '' );
 	setFieldValue( 'executionDate', '' );
 	disable('validationBtn');
 	disableCompletedButton(true);
 	disable('uncompleteBtn');
+	
+	$('#executionDate').unbind("change");
+	$('#executionDate').change(function() {
+		saveExecutionDate( getFieldValue('programId'), programStageInstanceId, byId('executionDate') );
+	});
 	
 	jQuery(".stage-object-selected").removeClass('stage-object-selected');
 	var selectedProgramStageInstance = jQuery( '#' + prefixId + programStageInstanceId );

@@ -141,7 +141,7 @@ function showSelectedDataRecoding( patientId, programId )
 			hideById('contentDiv');
 			hideById('mainLinkLbl');
 			setInnerHTML('singleProgramName',jQuery('#programIdAddPatient option:selected').text());
-			loadProgramStages( programId );
+			loadProgramStages( patientId, programId )
 		});
 }
 
@@ -155,7 +155,7 @@ function advancedSearch( params )
 				statusSearching = 1;
 				setInnerHTML( 'contentDiv', html );
 				showById('contentDiv');
-				setInnerHTML('searchInforTD', i18n_advanced_search_patients );
+				setInnerHTML('searchInforTD', i18n_search_patients );
 				setFieldValue('listAll',false);
 				jQuery( "#loaderDiv" ).hide();
 			}
@@ -166,7 +166,7 @@ function advancedSearch( params )
 // Load program-stages by the selected program
 //--------------------------------------------------------------------------------------------
 
-function loadProgramStages( programId )
+function loadProgramStages( patientId, programId )
 {
 	jQuery.getJSON( "loadProgramStageInstances.action",
 		{
@@ -174,7 +174,30 @@ function loadProgramStages( programId )
 		},  
 		function( json ) 
 		{   
-			jQuery("#selectForm [id=programStageId]").attr('psid', json.programStageInstances[0].programStageId);	
-			loadDataEntry( json.programStageInstances[0].id );
+			if( json.programStageInstances == 0)
+			{
+				createProgramInstance( patientId, programId );
+			}
+			else
+			{
+				jQuery("#selectForm [id=programStageId]").attr('psid', json.programStageInstances[0].programStageId);	
+				loadDataEntry( json.programStageInstances[0].id );
+			}
 		});
 }
+
+function createProgramInstance( patientId, programId )
+{
+	jQuery.postJSON( "saveProgramEnrollment.action",
+		{
+			patientId: patientId,
+			programId: programId,
+			dateOfIncident: getCurrentDate(),
+			enrollmentDate: getCurrentDate()
+		}, 
+		function( json ) 
+		{
+			jQuery("#selectForm [id=programStageId]").attr('psid', json.programStageId);	
+			loadDataEntry( json.activeProgramStageInstanceId );
+		});
+};		

@@ -9,7 +9,7 @@ var COLOR_LIGHT_YELLOW = "#ffff99";
 var COLOR_LIGHT_GREEN = "#ccffcc";
 var COLOR_LIGHT_LIGHTRED = "#ff99ff";
 var COLOR_LIGHT_GREY = "#ddd";
-var MARKED_VISIT_COLOR = '#000000';
+var MARKED_VISIT_COLOR = '#AAAAAA';
 var SUCCESS_COLOR = '#ccffcc';
 var ERROR_COLOR = '#ccccff';
 var SAVING_COLOR = '#ffffcc';
@@ -141,7 +141,7 @@ function getGenderSelector()
 
 function getAgeTextBox( container )
 {
-	var ageField = '<select id="dateOperator" style="width:40px;" name="dateOperator" ><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option><option value=">"> > </option><option value=">="> >= </option></select>';
+	var ageField = '<select id="dateOperator" name="dateOperator" style="width:40px"><option value=">"> > </option><option value=">="> >= </option><option value="="> = </option><option value="<"> < </option><option value="<="> <= </option></select>';
 	ageField += '<input type="text" id="searchText_' + container + '" name="searchText" style="width:220px;">';
 	return ageField;
 }
@@ -275,7 +275,7 @@ function getSearchParams()
 }
 
 // ----------------------------------------------------------------------------
-// Show patients
+// Show death field in person re form
 // ----------------------------------------------------------------------------
 
 function isDeathOnChange()
@@ -501,7 +501,7 @@ function showColorHelp()
 		closable: true,
 		modal:false,
 		width: 380,
-		height: 250
+		height: 270
 	}).show('fast');
 }
 
@@ -784,19 +784,22 @@ function setEventStatus( field, programStageInstanceId )
 	jQuery.postUTF8( 'setEventStatus.action',
 		{
 			programStageInstanceId:programStageInstanceId,
-			status:field.value
+			status:status
 		}, function ( json )
 		{
+			enable('ps_' + programStageInstanceId);
 			var eventBox = jQuery('#ps_' + programStageInstanceId);
-			eventBox.attr('status',field.value);
-			setEventColorStatus( programStageInstanceId, field.value );
+			eventBox.attr('status',status);
+			setEventColorStatus( programStageInstanceId, status );
 			resetActiveEvent( eventBox.attr("pi") );
-			if( status==1){
+			
+			if( status==1 || status==2 ){
 				hideById('del_' + programStageInstanceId);
 			}
 			else{
 				showById('del_' + programStageInstanceId);
 				if( status==5){
+					disable('ps_' + programStageInstanceId);
 					var id = 'ps_' + programStageInstanceId;
 					if( jQuery(".stage-object-selected").attr('id')==id )
 					{
@@ -885,9 +888,7 @@ function removeEvent( programStageInstanceId, isEvent )
 					jQuery('#arrow_' + programStageInstanceId).remove();
 					jQuery('#org_' + programStageInstanceId).remove();
 					resetActiveEvent( programInstanceId );
-					reloadOneRecord( programInstanceId );
 					showSuccessMessage( i18n_delete_success );
-					resize();
     	    	}
     	    	else if ( json.response == "error" )
     	    	{ 
@@ -1210,50 +1211,6 @@ function programOnchange( programId )
 	}
 }
 
-function saveEnrollment()
-{
-	var patientId = jQuery('#enrollmentDiv [id=patientId]').val();
-	var programId = jQuery('#enrollmentDiv [id=programId] option:selected').val();
-	var programName = jQuery('#enrollmentDiv [id=programId] option:selected').text();
-	var dateOfIncident = jQuery('#enrollmentDiv [id=dateOfIncidentField]').val();
-	var enrollmentDate = jQuery('#enrollmentDiv [id=enrollmentDateField]').val();
-	
-	jQuery.postJSON( "saveProgramEnrollment.action",
-		{
-			patientId: patientId,
-			programId: programId,
-			dateOfIncident: dateOfIncident,
-			enrollmentDate: enrollmentDate
-		}, 
-		function( json ) 
-		{    
-			var programInstanceId = json.programInstanceId;
-			var programStageInstanceId = json.activeProgramStageInstanceId;
-			var programStageName = json.activeProgramStageName;
-			var dueDate = json.dueDate;
-			var type = jQuery('#enrollmentDiv [id=programId] option:selected').attr('programType');
-			
-			var activedRow = "<tr id='tr1_" + programInstanceId 
-							+ "' type='" + type +"'"
-							+ " programStageInstanceId='" + programStageInstanceId + "'>"
-							+ " <td id='td_" + programInstanceId + "'>"
-							+ " <a href='javascript:loadActiveProgramStageRecords(" + programInstanceId + "," + programStageInstanceId + ")'>"
-							+ "<span id='infor_" + programInstanceId + "' class='selected bold'>" 
-							+ programName + "(" + enrollmentDate + ")</span></a></td>"
-							+ "</tr>";
-			
-			activedRow += "<tr id='tr2_" + programInstanceId +"'"+
-						+ " onclick='javascript:loadActiveProgramStageRecords(" + programInstanceId + "," + programStageInstanceId + ")' style='cursor:pointer;'>"
-						+ "<td colspan='2'><a>&#8226; " + programStageName + "(" + dueDate + ")</a></td></tr>";
-
-			jQuery('#activeTB' ).prepend(activedRow);
-			jQuery('#enrollmentDiv').dialog("close");
-			saveIdentifierAndAttribute( patientId, programId,'identifierAndAttributeDiv' );
-			loadActiveProgramStageRecords( programInstanceId );
-			showSuccessMessage(i18n_enrol_success);
-		});
-}
-
 function saveSingleEnrollment(patientId, programId)
 {
 	jQuery.postJSON( "saveProgramEnrollment.action",
@@ -1306,7 +1263,7 @@ function validateProgramEnrollment()
 			hideById('message');
 			var type = json.response;
 			if ( type == 'success' ){
-				saveProgramEnrollment();
+				saveEnrollment();
 			}
 			else if ( type == 'error' ){
 				setMessage( i18n_program_enrollment_failed + ':' + '\n' + message );
@@ -1319,19 +1276,48 @@ function validateProgramEnrollment()
     });
 }
 
-function saveProgramEnrollment()
+function saveEnrollment()
 {
-	$.ajax({
-		type: "POST",
-		url: 'saveProgramEnrollment.action',
-		data: getParamsForDiv('programEnrollmentSelectDiv'),
-		success: function( html ) {
-				setInnerHTML('programEnrollmentDiv', html );
-				jQuery('#enrollBtn').attr('value',i18n_update);
-				showSuccessMessage( i18n_enrol_success );
-			}
+	var patientId = jQuery('#enrollmentDiv [id=patientId]').val();
+	var programId = jQuery('#enrollmentDiv [id=programId] option:selected').val();
+	var programName = jQuery('#enrollmentDiv [id=programId] option:selected').text();
+	var dateOfIncident = jQuery('#enrollmentDiv [id=dateOfIncidentField]').val();
+	var enrollmentDate = jQuery('#enrollmentDiv [id=enrollmentDateField]').val();
+	
+	jQuery.postJSON( "saveProgramEnrollment.action",
+		{
+			patientId: patientId,
+			programId: programId,
+			dateOfIncident: dateOfIncident,
+			enrollmentDate: enrollmentDate
+		}, 
+		function( json ) 
+		{    
+			var programInstanceId = json.programInstanceId;
+			var programStageInstanceId = json.activeProgramStageInstanceId;
+			var programStageName = json.activeProgramStageName;
+			var dueDate = json.dueDate;
+			var type = jQuery('#enrollmentDiv [id=programId] option:selected').attr('programType');
+			
+			var activedRow = "<tr id='tr1_" + programInstanceId 
+							+ "' type='" + type +"'"
+							+ " programStageInstanceId='" + programStageInstanceId + "'>"
+							+ " <td id='td_" + programInstanceId + "'>"
+							+ " <a href='javascript:loadActiveProgramStageRecords(" + programInstanceId + "," + programStageInstanceId + ")'>"
+							+ "<span id='infor_" + programInstanceId + "' class='selected bold'>" 
+							+ programName + " (" + enrollmentDate + ")</span></a></td>"
+							+ "</tr>";
+			
+			activedRow += "<tr id='tr2_" + programInstanceId +"'"+
+						+ " onclick='javascript:loadActiveProgramStageRecords(" + programInstanceId + "," + programStageInstanceId + ")' style='cursor:pointer;'>"
+						+ "<td colspan='2'><a>&#8226; " + programStageName + " (" + dueDate + ")</a></td></tr>";
+
+			jQuery('#activeTB' ).prepend(activedRow);
+			jQuery('#enrollmentDiv').dialog("close");
+			saveIdentifierAndAttribute( patientId, programId,'identifierAndAttributeDiv' );
+			loadActiveProgramStageRecords( programInstanceId );
+			showSuccessMessage(i18n_enrol_success);
 		});
-    return false;
 }
 
 function unenrollmentForm( programInstanceId )
@@ -1342,10 +1328,18 @@ function unenrollmentForm( programInstanceId )
 		data: "programInstanceId=" + programInstanceId,
 		success: function( json ) 
 		{
-			jQuery('#completedList' ).append('<option value="' +  programInstanceId + '">' + getInnerHTML('infor_' + programInstanceId ) + '</option>');
-			hideById('tr1_' + programInstanceId );
-			hideById('tr2_' + programInstanceId );
-			setInnerHTML('programEnrollmentDiv','');
+			var completed  = "<tr onclick='javascript:loadActiveProgramStageRecords(" + programInstanceId + ");' >";
+				completed += "<td><a><span id='infor_" + programInstanceId + "'>" + jQuery('#tr1_' + programInstanceId + " span" ).html() + "</span></a></td></tr>";
+			jQuery('#completedTB' ).prepend( completed );
+			jQuery('#tr1_' + programInstanceId ).remove();
+			jQuery('#tr2_' + programInstanceId ).remove();
+			
+			jQuery("[id=tab-2] :input").prop('disabled', true);
+			jQuery("[id=tab-3] :input").prop('disabled', true);
+			jQuery("[id=tab-4] :input").prop('disabled', true);
+			jQuery("[id=tab-5] :input").prop('disabled', true);
+			jQuery("[id=tab-3] :input").datepicker("destroy");
+			
 			showSuccessMessage( i18n_unenrol_success );
 		}
     });
@@ -1590,6 +1584,12 @@ function dashboardHistoryToggle(evt)
 	jQuery('#dashboardHistoryDiv').toggle();
 }
 
+function viewPersonProgram ( displayedDiv, hidedDiv )
+{
+	showById(displayedDiv);
+	hideById(hidedDiv);
+}
+
 // --------------------------------------------------------------------
 // Comment && Message
 // --------------------------------------------------------------------
@@ -1599,8 +1599,7 @@ function sendSmsOnePatient( field, programStageInstanceId )
 	setInnerHTML('smsError', '');
 	if(field.value==""){
 		field.style.backgroundColor = ERROR_COLOR;
-		jQuery('#smsError').css("color", "red");
-		setInnerHTML('smsError', i18n_this_field_is_required);
+		jQuery('#' + field.id).attr("placeholder", i18n_this_field_is_required);
 		return;
 	}
 	
@@ -1645,6 +1644,7 @@ function addComment( field, programStageInstanceId )
 	var commentText = field.value;
 	if( commentText == ''){
 		field.style.backgroundColor = ERROR_COLOR;
+		jQuery('#' + field.id).attr("placeholder", i18n_this_field_is_required);
 		return;
 	}
 	
@@ -1665,7 +1665,7 @@ function addComment( field, programStageInstanceId )
 			showSuccessMessage( i18n_comment_added );
 			field.style.backgroundColor = SUCCESS_COLOR;
 			
-			if( jQuery("#commentTB tr.hidden").length > 0 ){
+			if( jQuery("#commentTB tr").length > 5 ){
 				commentDivToggle(true);
 			}
 			else{
@@ -1689,10 +1689,9 @@ function removeComment( programStageInstanceId, commentId )
 
 function commentDivToggle(isHide)
 {
-	var index = 1;
 	jQuery("#commentTB tr").removeClass("hidden");
-	jQuery("#commentTB tr").each( function(){
-		if(isHide && index > 5){
+	jQuery("#commentTB tr").each( function(index, item){
+		if(isHide && index > 4){
 			jQuery(this).addClass("hidden");
 		}
 		else if(!isHide){		
@@ -1701,7 +1700,12 @@ function commentDivToggle(isHide)
 		index++;
 	});
 	
-	if( isHide ){
+	if(jQuery("#commentTB tr").length <= 5 )
+	{
+		hideById('showCommentBtn');
+		hideById('hideCommentBtn');
+	}
+	else if( isHide ){
 		showById('showCommentBtn');
 		hideById('hideCommentBtn');
 	}

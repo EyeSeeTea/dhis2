@@ -115,6 +115,16 @@
     </action>
 
   </package>
+  
+  <!-- Public -->
+
+  <package name="dhis-web-commons-public" extends="dhis-web-commons" namespace="/dhis-web-commons/public">
+  
+    <action name="account" class="org.hisp.dhis.commons.action.NoAction">
+      <result name="success" type="velocity">/dhis-web-commons/useraccount/account.vm</result>
+    </action>
+  
+  </package>
 
   <!-- Organisation Unit Selection Tree -->
   
@@ -302,11 +312,6 @@
 
     <action name="i18nJavaScript" class="org.hisp.dhis.commons.action.NoAction">
       <result name="success" type="velocity-javascript">/dhis-web-commons/i18n/i18n.vm</result>
-	  <interceptor-ref name="cacheStack"/>
-    </action>
-
-    <action name="messagesJavaScript" class="org.hisp.dhis.commons.action.NoAction">
-      <result name="success" type="velocity-javascript">/dhis-web-commons/i18n/messages.vm</result>
 	  <interceptor-ref name="cacheStack"/>
     </action>
 
@@ -896,6 +901,6 @@
 		/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
 	  <param name="onExceptionReturn">plainTextError</param>
     </action>
-		
+	
   </package>
 </struts>

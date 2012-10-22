@@ -34,17 +34,13 @@ dhis2.storage.FormManager = function ( args ) {
     this._id = _.uniqueId('formManager');
 };
 
-dhis2.storage.FormManager.prototype.initialize = function ( args ) {
-    $.ajax({
+dhis2.storage.FormManager.prototype.getMetaData = function () {
+    return $.ajax({
         url      : '../api/currentUser/forms',
         dataType : 'json'
     }).success(function ( data ) {
         localStorage['organisationUnits'] = JSON.stringify(data.organisationUnits);
         localStorage['forms'] = JSON.stringify(data.forms);
-    }).error(function () {
-        // offline ? reuse meta-data already present
-        console.log("unable to load meta-data");
-    }).complete(function() {
     });
 };
 
@@ -75,6 +71,63 @@ dhis2.storage.FormManager.prototype.forms = function () {
 
 dhis2.storage.FormManager.prototype.form = function ( id ) {
     return this.forms()[id]
+};
+
+dhis2.storage.FormManager.prototype.dataValueSets = function() {
+    var dataValueSets = localStorage['dataValueSets'];
+
+    if(dataValueSets !== undefined )
+    {
+        dataValueSets = JSON.parse( dataValueSets );
+    } else {
+        dataValueSets = [];
+    }
+
+    return dataValueSets;
+};
+
+dhis2.storage.FormManager.prototype.saveDataValueSet = function( dataValueSet ) {
+    var dataValueSets = this.dataValueSets();
+
+    return $.ajax({
+        url: '../api/dataValueSets',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(dataValueSet),
+    }).success(function() {
+        // nop, successfully uploaded
+    }).error(function() {
+        // add to local dataValueSets
+        dataValueSets.push(dataValueSet);
+        localStorage['dataValueSets'] = JSON.stringify(dataValueSets);
+    });
+};
+
+dhis2.storage.makeUploadDataValueSetRequest = function( dataValueSet ) {
+    return $.ajax({
+        url: '../api/dataValueSets',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify( dataValueSet )
+    });
+};
+
+dhis2.storage.FormManager.prototype.uploadDataValueSets = function() {
+    var dataValueSets = this.dataValueSets();
+    var deferreds = [];
+
+    _.each(dataValueSets, function( dataValueSet, idx ) {
+        deferreds.push(dhis2.storage.makeUploadDataValueSetRequest( dataValueSet).success(function() {
+                delete dataValueSets[idx];
+            })
+        );
+    });
+
+    return $.when.apply( null, deferreds ).always(function() {
+        // filter out undefined dataValues (successfully uploaded);
+        dataValueSets = _.filter(dataValueSets, function(dv) { return dv !== undefined; });
+        localStorage['dataValueSets'] = JSON.stringify( dataValueSets );
+    });
 };
 
 // global storage manager instance

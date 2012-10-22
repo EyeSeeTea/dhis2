@@ -28,7 +28,7 @@ function displayCadendar()
 		hideById('showEventUpTo');
 		showById('startDueDate');
 		showById('endDueDate');
-		datePickerInRangeValid( 'startDueDate' , 'endDueDate' );
+		datePickerInRange( 'startDueDate' , 'endDueDate' );
 	}
 	else
 	{
@@ -91,31 +91,6 @@ function exportActitityList( type )
 	window.location.href = url;
 }
 
-
-function eventFlowToggle( programInstanceId )
-{
-	jQuery("#tb_" + programInstanceId + " .stage-object").each( function(){
-			var programStageInstance = this.id.split('_')[1];
-			jQuery('#arrow_' + programStageInstance ).toggle();
-			jQuery('#ps_' + programStageInstance ).toggle();
-			jQuery(this).removeClass("stage-object-selected");
-		});
-	
-	if( jQuery("#tb_" + programInstanceId + " .searched").length>0)
-	{	
-		var id = jQuery("#tb_" + programInstanceId + " .searched").attr('id').split('_')[1];
-		showById("arrow_" + id);
-		showById("ps_" + id );
-	}
-	
-	jQuery(".table-flow").each( function(){
-		var scheduledEvent = jQuery(this).find("[status='3']:first");
-		scheduledEvent.focus();
-	});
-	
-	resize();
-}
-
 // --------------------------------------------------------------------
 // Patient program tracking
 // --------------------------------------------------------------------
@@ -138,7 +113,7 @@ function loadDataEntry( programStageInstanceId )
 			closable:true,
 			modal:false,
 			overlay:{background:'#000000', opacity:0.1},
-			width:1000,
+			width:850,
 			height:500
 		});
 }
@@ -259,6 +234,10 @@ function setDateRangeAll()
 	var y= date.getFullYear();
 }
 
+// --------------------------------------------------------------------
+// Cosmetic UI
+// --------------------------------------------------------------------
+
 function reloadRecordList()
 {
 	var startDate = getFieldValue('startDueDate');
@@ -275,17 +254,42 @@ function reloadRecordList()
 		{
 			jQuery("#ps_" + id ).addClass("stage-object-selected searched");
 		}
-		else
-		{
-			hideById('arrow_' + id );
-			hideById('ps_' + id );
-		}
+		hideById('arrow_' + id );
+		hideById('ps_' + id );
 	});
 	
 	jQuery(".table-flow").each( function(){
 		var scheduledEvent = jQuery(this).find("[status='3']:first");
 		scheduledEvent.addClass("stage-scheduled");
 		scheduledEvent.css('border-color', MARKED_VISIT_COLOR);
+		scheduledEvent.focus();
+		
+		jQuery(this).find(".searched:first").show();
+	});
+	
+	resize();
+}
+
+
+
+function eventFlowToggle( programInstanceId )
+{
+	jQuery("#tb_" + programInstanceId + " .stage-object").each( function(){
+			var programStageInstance = this.id.split('_')[1];
+			jQuery('#arrow_' + programStageInstance ).toggle();
+			jQuery('#ps_' + programStageInstance ).toggle();
+			jQuery(this).removeClass("stage-object-selected");
+		});
+	
+	if( jQuery("#tb_" + programInstanceId + " .searched").length>0)
+	{	
+		var id = jQuery("#tb_" + programInstanceId + " .searched").attr('id').split('_')[1];
+		showById("arrow_" + id);
+		showById("ps_" + id );
+	}
+	
+	jQuery("#tb_" + programInstanceId + " .table-flow").each( function(){
+		var scheduledEvent = jQuery(this).find("[status='3']:first");
 		scheduledEvent.focus();
 	});
 	

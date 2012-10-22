@@ -354,8 +354,8 @@ function ExecutionDateSaver( programId_, programStageInstanceId_, executionDate_
 			   type: "POST",
 			   url: "saveExecutionDate.action",
 			   data: params,
-			   dataType: "xml",
-			   success: function( result ){	
+			   dataType: "json",
+			   success: function( json ){	
 					var selectedProgramStageInstance = jQuery( '#' + prefixId + getFieldValue('programStageInstanceId') );
 					var box = jQuery(".stage-object-selected");
 					var boxName = box.attr('psname') + "\n" + executionDate;
@@ -367,12 +367,13 @@ function ExecutionDateSaver( programId_, programStageInstanceId_, executionDate_
 					setFieldValue( 'programStageId', selectedProgramStageInstance.attr('psid') );
 					
 					var fieldId = "value_" + programStageInstanceId + "_date";
+					jQuery("#" + fieldId).val(executionDate);
 					jQuery("#" + fieldId).css('background-color', SUCCESS_COLOR);
 					jQuery('#executionDate').val(executionDate);
 					jQuery("#org_" + programStageInstanceId ).html(getFieldValue("orgunitName"));
 					showById('inputCriteriaDiv');
 					
-					handleResponse (result);
+					handleResponse (json);
 			   },
 			   error: function(request,status,errorThrown) {
 					handleHttpError (request);
@@ -380,16 +381,14 @@ function ExecutionDateSaver( programId_, programStageInstanceId_, executionDate_
 			});
     };
 
-    function handleResponse( rootElement )
+    function handleResponse( json )
     {
-		rootElement = rootElement.getElementsByTagName( 'message' )[0];
-        var codeElement = rootElement.getAttribute( 'type' );
-        if ( codeElement == 'success' )
-        {
+		if(json.response=='success')
+		{
             markValue( resultColor );
 			if( getFieldValue('programStageInstanceId' )=='' )
 			{
-				var programStageInstanceId = rootElement.firstChild.nodeValue;
+				var programStageInstanceId = json.message;
 				setFieldValue('programStageInstanceId', programStageInstanceId);
 				loadDataEntry( programStageInstanceId );
 			}

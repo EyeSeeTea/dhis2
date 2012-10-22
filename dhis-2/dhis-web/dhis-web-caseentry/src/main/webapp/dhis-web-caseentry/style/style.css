@@ -198,7 +198,24 @@ div.provided-elsewhere
 // Dashboard
 // -------------------------------------------------------------- */
 
-td.link-area
+div.dashboard-area {
+  list-style: none inside;
+  margin: 50px 50px;
+  margin: 0;
+  padding: 0;
+}
+
+p.header{
+  background-color:#CBDDEB;
+  background-repeat:repeat-x;
+  border:1px solid #C8DBEA;
+  color:#39547D;
+  padding:6px;
+  margin:0px;
+  font-family: LiberationSansBold,arial;
+}
+
+table.link-area
 {
   border:1px solid #d0d0d0;
   padding-top:1px;
@@ -206,30 +223,33 @@ td.link-area
   padding-left:1px;
   padding-bottom:0px;
   height:120px;
-  width:100%;
+  width:33%;
   overflow:hidden;
-  position:relative;
 }
 
 div.link-area
 {
+  display:inline-block;
   border:1px solid #d0d0d0;
   padding-top:1px;
   padding-right:1px;
   padding-left:1px;
   padding-bottom:0px;
   height:172px;
-  width:100%;
+  width:32%;
   overflow:hidden;
-  position:relative;
 }
 
 .contentProviderTable
 {
-  height: 100px;
-  width: 100%;
+  height: 140px;
   overflow-y: auto;
   overflow-x:hidden;
+}
+
+.contentProviderTable table
+{
+	width:100%;
 }
 
 .contentProviderTable td
@@ -237,6 +257,7 @@ div.link-area
   padding-top:3px;
   padding-bottom:3px;
   border-bottom:1px solid #cad5e5;
+  cursor:pointer;
 }
 
 div.event-dashboard
@@ -379,9 +400,7 @@ div.event-flow-dashboard
 
 div.orgunit-object
 {
-	border-bottom: 5px double #D0D0D0;
-    height: 15px;
-    margin-left: 5px;
+	margin-left: 5px;
     width: 120px;
 }
 
@@ -425,40 +444,32 @@ input.patient-object[type="button"]
 div.dashboard-history
 {
 	z-index:100; 
-	width:400px; 
+	width:300px; 
 	height:200px; 
 	position:absolute; 
 	left:650px; 
 	top:95px; 
 	background-color:#ffffff;
-	border:4px solid #d0d0d0;
+	border:1px solid #d0d0d0;
 	padding-top:1px;
 	padding-right:1px;
 	padding-left:1px;
 	padding-bottom:1px;
 }
 
+/*----------------------------------------------------------------------------*/
+/* Program tracking
+/*----------------------------------------------------------------------------*/
 
-
-
-
-div.event-tracking-area
+div.link-area-tracking
 {
+  display:inline-block;
   border:1px solid #d0d0d0;
   padding-top:1px;
   padding-right:1px;
   padding-left:1px;
   padding-bottom:0px;
-  height: 270px;
-  width: 450px;
+  height:200px;
+  width:60%;
   overflow:hidden;
-  position:relative;
-}
-
-.content-event-tracking-area
-{
-  height: 270px;
-  width: 450px;
-  overflow-y: auto;
-  overflow-x:hidden;
 }

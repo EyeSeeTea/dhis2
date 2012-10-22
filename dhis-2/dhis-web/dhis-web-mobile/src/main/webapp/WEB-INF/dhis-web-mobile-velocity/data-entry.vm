@@ -1,3 +1,5 @@
+<script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.validate.js"></script>
+<script type="text/javascript" src="../dhis-web-commons/javascripts/commons.js"></script>
 <script type="text/javascript" src="../dhis-web-commons/i18nJavaScript.action"></script>
 <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.glob.js"></script>
 <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.date.js"></script>
@@ -9,6 +11,7 @@
     var periodTypeFactory = new PeriodType();
     var periodType;
     var periodOffset = 0;
+    var allowFuturePeriods = false;
 
     function selectOrganisationUnit( e ) {
         var $this = $(this);
@@ -29,73 +32,95 @@
         $.mobile.showPageLoadingMsg();
 
         var organisationUnits = fm.organisationUnits();
+        var tmpl = $( '#organisation-units-template' ).html();
 
-        var tmpl = jQuery('#organisation-units-template').html();
-
-        jQuery('#organisation-units-page section[data-role="content"]').html(
+        $('#organisation-units-page section[data-role="content"]').html(
             _.template( tmpl, { 'organisationUnits': organisationUnits } )
         );
 
-        jQuery('#organisation-unit-list').listview()
-        jQuery('#organisation-unit-list li a').bind('click', selectOrganisationUnit);
+        $('#organisation-unit-list').listview();
+        $('#organisation-unit-list li a').bind('click', selectOrganisationUnit);
 
         $.mobile.hidePageLoadingMsg();
     }
 
     function loadDataSetsPage() {
-        if(Selected.orgUnit === undefined)
+        if( Selected.orgUnit === undefined )
         {
-            $.mobile.changePage('#organisation-units-page');
+            $.mobile.changePage( '#organisation-units-page' );
             return;
         }
 
         $.mobile.showPageLoadingMsg();
 
-        var organisationUnit = fm.organisationUnit(Selected.orgUnit);
+        var organisationUnit = fm.organisationUnit( Selected.orgUnit );
+        var tmpl = $( '#data-sets-template' ).html();
 
-        var tmpl = jQuery('#data-sets-template').html();
-
-        jQuery('#data-sets-page section[data-role="content"]').html(
+        $('#data-sets-page section[data-role="content"]').html(
             _.template( tmpl, { 'dataSets': organisationUnit.dataSets } )
         );
 
-        jQuery('#data-set-list').listview();
-        jQuery('#data-set-list li a').bind('click', selectDataSet);
+        $('#data-set-list').listview();
+        $('#data-set-list li a').bind( 'click', selectDataSet );
+
         $.mobile.hidePageLoadingMsg();
     }
 
     function refreshPeriods() {
-        var tmpl = jQuery('#period-template').html();
+        var tmpl = $('#period-template').html();
 
-        var periods = periodTypeFactory.get(periodType).generatePeriods(periodOffset);
-        periods = periodTypeFactory.filterFuturePeriodsExceptCurrent(periods)
-        periods = periodTypeFactory.reverse(periods);
-        jQuery('#period-page section[data-role="content"]').html(
-                _.template(tmpl, { 'periods' : periods })
+        var periods = periodTypeFactory.get( periodType ).generatePeriods( periodOffset );
+
+        if( !allowFuturePeriods ) {
+            periods = periodTypeFactory.filterFuturePeriods( periods );
+            $('#next_year').button('disable');
+        }
+
+        periods = periodTypeFactory.reverse( periods );
+
+        $( '#period-page section[data-role="content"]' ).html(
+            _.template(tmpl, { 'periods' : periods })
         );
-        jQuery('#period-page').trigger('pagecreate')
-        jQuery('#period-list').listview('refresh');
 
-        jQuery('#previous_year').bind('click', function() {
+        $( '#period-page' ).trigger( 'pagecreate' );
+        $( '#period-list' ).listview( 'refresh' );
+
+        if( !allowFuturePeriods ) {
+            $('#next_year').button('disable');
+        }
+
+        $( '#previous_year' ).bind( 'click', function() {
             periodOffset--;
             refreshPeriods();
+
+            if( periodOffset < 0) {
+                $('#next_year').button('enable');
+            } else {
+                $('#next_year').button('disable');
+            }
         });
 
-        jQuery('#next_year').bind('click', function() {
+        $( '#next_year' ).bind( 'click', function() {
             periodOffset++;
             refreshPeriods();
+
+            if( !allowFuturePeriods && periodOffset == 0) {
+                $('#next_year').button('disable');
+            } else {
+                $('#next_year').button('enable');
+            }
         });
 
-        jQuery('#period-list li a').bind('click', selectPeriod);
+        $( '#period-list li a' ).bind( 'click', selectPeriod );
     }
 
     function loadPeriodPage() {
-        if(Selected.dataSet === undefined)
+        if( Selected.dataSet === undefined )
         {
-            if(Selected.orgUnit === undefined) {
-                $.mobile.changePage('#organisation-units-page');
+            if( Selected.orgUnit === undefined ) {
+                $.mobile.changePage( '#organisation-units-page' );
             } else {
-                $.mobile.changePage('#data-sets-page');
+                $.mobile.changePage( '#data-sets-page' );
             }
 
             return;
@@ -103,52 +128,99 @@
 
         $.mobile.showPageLoadingMsg();
 
-        var form = fm.form(Selected.dataSet);
+        var form = fm.form( Selected.dataSet );
         periodType = form.periodType;
+        allowFuturePeriods = form.allowFuturePeriods;
         refreshPeriods();
 
         $.mobile.hidePageLoadingMsg();
     }
 
     function loadDataEntryPage() {
-        if(Selected.period === undefined && Selected.dataSet === undefined && Selected.orgUnit === undefined )
+        if( Selected.period === undefined && Selected.dataSet === undefined && Selected.orgUnit === undefined )
         {
-            $.mobile.changePage('#organisation-units-page');
+            $.mobile.changePage( '#organisation-units-page' );
             return;
         }
 
-        if(Selected.period === undefined && Selected.dataSet === undefined && Selected.orgUnit !== undefined )
+        if( Selected.period === undefined && Selected.dataSet === undefined && Selected.orgUnit !== undefined )
         {
-            $.mobile.changePage('#data-sets-page');
+            $.mobile.changePage( '#data-sets-page' );
             return;
         }
 
-        if(Selected.period === undefined && Selected.dataSet !== undefined && Selected.orgUnit !== undefined )
+        if( Selected.period === undefined && Selected.dataSet !== undefined && Selected.orgUnit !== undefined )
         {
-            $.mobile.changePage('#periods-page');
+            $.mobile.changePage( '#periods-page' );
             return;
         }
-
-        console.log(Selected);
 
         $.mobile.showPageLoadingMsg();
 
-        var form = fm.form(Selected.dataSet);
+        function renderFormTemplate(form) {
+            var tmpl = $( '#data-entry-template' ).html();
 
-        var tmpl = jQuery('#data-entry-template').html();
+            $( '#data-entry-page section[data-role="content"]' ).html(
+                _.template( tmpl, form )
+            );
 
-        jQuery('#data-entry-page section[data-role="content"]').html(
-            _.template( tmpl, form )
-        );
+            $( '#data-entry-page' ).trigger( 'pagecreate' );
+            $( '#data-entry-list' ).listview( 'refresh' );
+            $( '#send_button' ).bind( 'click', saveValues );
+        }
 
-        jQuery('#data-entry-page').trigger('pagecreate')
-        jQuery('#data-entry-list').listview('refresh');
-        $.mobile.hidePageLoadingMsg();
+        $.ajax({
+            url: '../api/dataSets/' + Selected.dataSet + '/form',
+            data: {
+                ou: Selected.orgUnit,
+                pe: Selected.period
+            },
+            dataType: 'json'
+        }).success(function(form) {
+            renderFormTemplate(form);
+        }).error(function() {
+            var form = fm.form(Selected.dataSet);
+            renderFormTemplate(form);
+        }).complete(function() {
+            $.mobile.hidePageLoadingMsg();
+        });
     }
 
-    jQuery(document).bind('pagechange', function (event, data) {
+    function saveValues() {
+        $.mobile.showPageLoadingMsg();
+
+        var fields = $('#data-entry-form :input[name]');
+
+        var dataValueSet = {
+          dataSet: Selected.dataSet,
+          orgUnit: Selected.orgUnit,
+          period: Selected.period.toString()
+        };
+
+        var dataValues = [];
+
+        _.each(fields, function(field) {
+           var field = $(field);
+
+           var dataValue = {
+            dataElement: field.data('dataelement'),
+            categoryOptionCombo: field.data('categoryoptioncombo'),
+            value: field.val()
+           };
+
+           dataValues.push( dataValue );
+        });
+
+        dataValueSet.dataValues = dataValues;
+
+        fm.saveDataValueSet( dataValueSet ).always(function() {
+            $.mobile.hidePageLoadingMsg();
+            $.mobile.changePage('index');
+        });
+    }
+
+    $(document).bind( 'pagechange', function (event, data) {
         var pageId = data.toPage.attr('id');
-        console.log(pageId);
 
         if( pageId == 'organisation-units-page' ) {
             loadOrganisationUnitsPage();
@@ -185,7 +257,7 @@
     </div>
     <ul id="period-list" data-role="listview" data-inset="true">
         <% _( periods ).each( function(period, idx) { %>
-        <li><a href="#data-entry-page" data-id="<%= period.id %>"><%= period.name %></a></li>
+        <li><a href="#data-entry-page" data-id="<%= period.iso %>"><%= period.name %></a></li>
         <% }); %>
     </ul>
 </script>
@@ -198,27 +270,29 @@
             <li data-role="list-divider"><%= group.label %></li>
 
             <% _( group.fields ).each( function(field, idx) { %>
+            <% var fieldId = _.uniqueId('field'); %>
+            <% var value = field.value === undefined ? '' : field.value; %>
                 <li>
-                    <label for='<%= field.dataElement %>-<%= field.categoryOptionCombo %>'><%= field.label %></label>
+                    <label for='<%= fieldId %>'><%= field.label %></label>
 
                     <% if( field.type == 'TEXT' ) { %>
-                        <input type="text" id='<%= field.dataElement %>-<%= field.categoryOptionCombo %>' maxlength="255" />
+                        <input type="text" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255" value="<%= value %>" />
                     <% } else if( field.type == 'DATE' ) { %>
-                        <input type="date" id='<%= field.dataElement %>-<%= field.categoryOptionCombo %>' maxlength="255" />
+                        <input type="date" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255" value="<%= value %>" />
                     <% } else if( field.type == 'BOOLEAN' ) { %>
-                        <select type="" id='<%= field.dataElement %>-<%= field.categoryOptionCombo %>' maxlength="255">
-                            <option value="">None selected</option>
-                            <option value="yes">Yes</option>
-                            <option value="no">No</option>
+                        <select type="" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255">
+                            <option value="">[ None selected ]</option>
+                            <option value="true" <% if( value == "true" ) { %> selected="selected" <% } %>>Yes</option>
+                            <option value="false" <% if( value == "false" ) { %> selected="selected" <% } %>>No</option>
                         </select>
                     <% } else if( field.type == 'INTEGER' ) { %>
-                        <input type="number" id='<%= field.dataElement %>-<%= field.categoryOptionCombo %>' maxlength="255" />
+                        <input type="number" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255" value="<%= value %>" />
                     <% } else if( field.type == 'INTEGER_POSITIVE' ) { %>
-                        <input type="number" id='<%= field.dataElement %>-<%= field.categoryOptionCombo %>' maxlength="255" />
+                        <input type="number" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255" value="<%= value %>" />
                     <% } else if( field.type == 'INTEGER_NEGATIVE' ) { %>
-                        <input type="number" id='<%= field.dataElement %>-<%= field.categoryOptionCombo %>' maxlength="255" />
+                        <input type="number" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255" value="<%= value %>" />
                     <% } else if( field.type == 'NUMBER' ) { %>
-                        <input type="number" id='<%= field.dataElement %>-<%= field.categoryOptionCombo %>' maxlength="255" />
+                        <input type="number" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255" value="<%= value %>" />
                     <% } %>
                 </li>
             <% }); %>
