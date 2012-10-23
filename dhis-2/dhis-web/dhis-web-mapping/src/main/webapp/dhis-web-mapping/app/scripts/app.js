@@ -2296,7 +2296,17 @@ console.log(svg);
 						{
 							text: 'log()', //i18n
 							handler: function() {
-								GIS.util.svg.getString('My map title', GIS.util.map.getVisibleVectorLayers());
+								var title = 'My map title',
+									svg = GIS.util.svg.getString(title, GIS.util.map.getVisibleVectorLayers());
+								
+								var exportForm = document.getElementById('exportForm');
+								exportForm.action = '../exportImage.action';
+								exportForm.method = 'post';
+								
+								document.getElementById('svgField').value = svg;
+								document.getElementById('titleField').value = title;
+
+								exportForm.submit();
 							}
 						},
 						{
