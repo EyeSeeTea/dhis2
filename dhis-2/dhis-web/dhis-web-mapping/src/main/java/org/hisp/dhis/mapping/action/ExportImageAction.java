@@ -27,18 +27,22 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.awt.Color;
+import java.io.IOException;
 import java.io.OutputStream;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.mapping.export.SVGDocument;
-import org.hisp.dhis.mapping.export.SVGUtils;
-import org.hisp.dhis.system.util.CodecUtils;
-import org.hisp.dhis.util.ContextUtils;
-import org.hisp.dhis.util.SessionUtils;
-import org.hisp.dhis.util.StreamActionSupport;
+import java.io.StringReader;
 
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.batik.transcoder.TranscoderException;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.system.util.CodecUtils;
+import org.hisp.dhis.util.ContextUtils;
+import org.hisp.dhis.util.StreamActionSupport;
 
 /**
  * @author Tran Thanh Tri
@@ -59,8 +63,8 @@ public class ExportImageAction
     public void setSvg( String svg )
     {
         this.svg = svg;
-    }    
-    
+    }
+
     private String title;
 
     public void setTitle( String title )
@@ -72,18 +76,12 @@ public class ExportImageAction
     protected String execute( HttpServletResponse response, OutputStream out )
         throws Exception
     {
-System.out.println(svg);
-System.out.println(title);
         if ( svg == null )
         {
-            log.info( "Export map from session" );
+            log.info( "Error: SVG is empty" );
         }
-        else
-        {
-            log.info( "Export map from request" );
-        }
-        
-        SVGUtils.convertToPNG( new StringBuffer( this.svg ), out );
+
+        convertToPNG( new StringBuffer( this.svg ), out );
 
         return SUCCESS;
     }
@@ -99,7 +97,21 @@ System.out.println(title);
     {
         return "dhis2-gis_" + CodecUtils.filenameEncode( this.title ) + ".png";
     }
-    
+
+    public void convertToPNG( StringBuffer buffer, OutputStream out )
+        throws TranscoderException, IOException
+    {
+        PNGTranscoder t = new PNGTranscoder();
+
+        t.addTranscodingHint( PNGTranscoder.KEY_BACKGROUND_COLOR, Color.WHITE );
+
+        TranscoderInput input = new TranscoderInput( new StringReader( buffer.toString() ) );
+
+        TranscoderOutput output = new TranscoderOutput( out );
+
+        t.transcode( input, output );
+    }
+
     @Override
     protected boolean disallowCache()
     {

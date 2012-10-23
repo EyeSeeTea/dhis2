@@ -355,14 +355,14 @@ Ext.onReady( function() {
 			center = GIS.cmp.region.center;
 					
 		namespace = 'xmlns="http://www.w3.org/2000/svg"';
+					
+		svg = '<svg ' + namespace + ' width="' + center.getWidth() + '" height="' + center.getHeight() + '"></svg>';
 		
 		titleSVG = '<g id="title" style="display: block; visibility: visible;">' +
 				   '<text id="title" x="' + x + '" y="' + y + '" font-size="18" font-weight="bold">' +
 				   '<tspan>' + title + '</tspan></text></g>';
-				   
+		
 		y += 35;
-					
-		svg = doctype + '<svg ' + namespace + ' width="' + center.getWidth() + '" height="' + center.getHeight() + '"></svg>';
 		
 		if (!layers.length) {
 			alert('No visible data layers'); //todo //i18n
@@ -384,39 +384,39 @@ Ext.onReady( function() {
 			
 			// Legend
 			if (id !== GIS.base.boundary.id) {
-				what = "<g id=\"indicator\" style=\"display: block; visibility: visible;\">" +
-					   "<text id=\"indicator\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"12\">" +
-					   "<tspan>" + legendConfig.what + "</tspan></text></g>";
-					   
+				what = '<g id="indicator" style="display: block; visibility: visible;">' +
+					   '<text id="indicator" x="' + x + '" y="' + y + '" font-size="12">' +
+					   '<tspan>' + legendConfig.what + '</tspan></text></g>';
+				
 				y += 15;
 				
-				when = "<g id=\"period\" style=\"display: block; visibility: visible;\">" +
-					   "<text id=\"period\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"12\">" +
-					   "<tspan>" + legendConfig.when + "</tspan></text></g>";
-					   
+				when = '<g id="period" style="display: block; visibility: visible;">' +
+					   '<text id="period" x="' + x + '" y="' + y + '" font-size="12">' +
+					   '<tspan>' + legendConfig.when + '</tspan></text></g>';
+				
 				y += 15;
 				
-				where = "<g id=\"period\" style=\"display: block; visibility: visible;\">" +
-					   "<text id=\"period\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"12\">" +
-					   "<tspan>" + legendConfig.where + "</tspan></text></g>";
-					   
+				where = '<g id="period" style="display: block; visibility: visible;">' +
+					   '<text id="period" x="' + x + '" y="' + y + '" font-size="12">' +
+					   '<tspan>' + legendConfig.where + '</tspan></text></g>';
+				
 				y += 8;
 				
-				legend = "<g>";
+				legend = '<g>';
 				
 				for (var j = 0; j < legendData.length; j++) {
 					if (j !== 0) {
 						y += 15;
 					}
 					
-					legend += "<rect x='" + x + "' y='" + y + "' height='15' width='30' " +
-							  "fill='" + legendData[j].color + "' stroke='#000000' stroke-width='1'/>";
+					legend += '<rect x="' + x + '" y="' + y + '" height="15" width="30" ' +
+							  'fill="' + legendData[j].color + '" stroke="#000000" stroke-width="1"/>';
 							  
-					legend += "<text id=\"label\" x='" + (x + 40) + "' y='" + (y + 12) + "' font-size=\"12\">" +
-							  "<tspan>" + legendData[j].label + "</tspan></text>";
+					legend += '<text id="label" x="' + (x + 40) + '" y="' + (y + 12) + '" font-size="12">' +
+							  '<tspan>' + legendData[j].label + '</tspan></text>';
 				}
 				
-				legend += "</g>";
+				legend += '</g>';
 				
 				legendSVG += (what + when + where + legend);
 				
@@ -2290,7 +2290,7 @@ Ext.onReady( function() {
 						{
 							text: 'log()', //i18n
 							handler: function() {
-								var title = 'My map title',
+								var title = 'This is the map title',
 									svg = GIS.util.svg.getString(title, GIS.util.map.getVisibleVectorLayers());
 console.log(svg);									
 								
