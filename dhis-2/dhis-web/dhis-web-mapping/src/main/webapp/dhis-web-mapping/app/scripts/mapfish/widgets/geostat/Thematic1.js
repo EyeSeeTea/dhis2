@@ -1392,7 +1392,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	},
 	
 	setGui: function() {
-		var model = this.tmpModel;
+		var model = this.tmpModel,
+			that = this;
 		
 		// Value type
 		this.cmp.valueType.setValue(model.valueType);
@@ -1435,14 +1436,14 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.cmp.radiusHigh.setValue(model.radiusHigh);
 		}
 		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {
-			GIS.store.legendSet.loadFn( function() {
-				this.cmp.legendSet.setValue(model.legendSet);
+			GIS.store.legendSets.loadFn( function() {
+				that.cmp.legendSet.setValue(model.legendSet);
 			});
 		}
 		
 		// Level and parent
 		GIS.store.organisationUnitLevels.loadFn( function() {
-			this.cmp.level.setValue(model.level);
+			that.cmp.level.setValue(model.level);
 		});
 		
 		this.cmp.parent.selectTreePath('/root' + model.parentPath);
