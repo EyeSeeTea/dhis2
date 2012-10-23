@@ -344,18 +344,26 @@ Ext.onReady( function() {
         return str;
     };
     
-	GIS.util.svg.getString = function() {
+	GIS.util.svg.getString = function(title, layers) {
 		var svgArray = [],
 			svg = '',
-			layers = GIS.util.map.getVisibleVectorLayers(),
 			doctype,
-			namespace;
+			namespace,
+			titleSVG,
+			legendSVG = '',
+			x = 30,
+			y = 20;
 			
 		doctype = "<?xml version='1.0' encoding='UTF-8'?>" +
 				  "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\" " +
 				   "[<!ATTLIST svg xmlns:attrib CDATA #IMPLIED> <!ATTLIST path attrib:divname CDATA #IMPLIED>]>";
 				  
-		namespace = "xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:attrib=\"http://www.carto.net/attrib/\"";
+		namespace = "xmlns=\"http://www.w3.org/2000/svg\"" +
+					"xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:attrib=\"http://www.carto.net/attrib/\"";
+		
+		titleSVG = "<g id=\"title\" style=\"display: block; visibility: visible;\">" +
+				   "<text id=\"title\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"18\" font-weight=\"bold\">" +
+				   "<tspan>" + title + "</tspan></text></g>";
 		
 		if (!layers.length) {
 			alert('No visible data layers'); //todo //i18n
@@ -363,7 +371,56 @@ Ext.onReady( function() {
 		}
 		
 		for (var i = 0; i < layers.length; i++) {
-			svgArray.push(layers[i].div.innerHTML);
+			var layer = layers[i],
+				id = layer.base.id,
+				legendConfig = layer.widget.getLegendConfig(),
+				legendData = layer.widget.model.imageLegend,
+				what,
+				when,
+				where,
+				legend;
+			
+			y += 20;
+				
+			// SVG
+			svgArray.push(layer.div.innerHTML);
+			
+			// Legend
+			if (id !== GIS.base.boundary.id) {
+				what = "<g id=\"indicator\" style=\"display: block; visibility: visible;\">" +
+					   "<text id=\"indicator\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"12\">" +
+					   "<tspan>" + legendConfig.what + "</tspan></text></g>";
+					   
+				y += 15;
+				
+				when = "<g id=\"period\" style=\"display: block; visibility: visible;\">" +
+					   "<text id=\"period\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"12\">" +
+					   "<tspan>" + legendConfig.when + "</tspan></text></g>";
+					   
+				y += 15;
+				
+				where = "<g id=\"period\" style=\"display: block; visibility: visible;\">" +
+					   "<text id=\"period\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"12\">" +
+					   "<tspan>" + legendConfig.where + "</tspan></text></g>";
+			
+				y += 5;
+				
+				legend = "<g id='legend'>";
+				
+				for (var j = 0; j < legendData.length; j++) {
+					y += 15;
+					
+					legend += "<rect x='" + x + "' y='" + y + "' height='15' width='30' " +
+							  "fill='" + legendData.color + "' stroke='#000000' stroke-width='1'/>";
+							  
+					legend += "<text id=\"label\" x='" + (x + 40) + "' y='" + (y + 12) + "' font-size=\"12\">" +
+							  "<tspan>" + legendData.label + "</tspan></text>";
+				}
+				
+				legend += "</g>";
+				
+				legendSVG += (what + when + where + legend);
+			}
 		}
 		
 		svg = svgArray.shift();
@@ -371,7 +428,11 @@ Ext.onReady( function() {
 		if (svgArray.length) {
 			svg = GIS.util.svg.merge(svg, svgArray);
 		}
-console.log(svg);		
+		
+		svg = svg.replace('</svg>', '');
+		
+		svg += (titleSVG + legendSVG) + '</svg>';
+		
 		return svg;
 	};
 	
