@@ -59,7 +59,7 @@ public class ExportImageAction
     public void setSvg( String svg )
     {
         this.svg = svg;
-    }
+    }    
     
     private String title;
 
@@ -72,6 +72,8 @@ public class ExportImageAction
     protected String execute( HttpServletResponse response, OutputStream out )
         throws Exception
     {
+System.out.println(svg);
+System.out.println(title);
         if ( svg == null )
         {
             log.info( "Export map from session" );

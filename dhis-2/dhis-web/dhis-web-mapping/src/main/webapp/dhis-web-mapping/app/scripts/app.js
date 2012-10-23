@@ -347,24 +347,18 @@ Ext.onReady( function() {
 	GIS.util.svg.getString = function(title, layers) {
 		var svgArray = [],
 			svg = '',
-			doctype,
 			namespace,
 			titleSVG,
 			legendSVG = '',
 			x = 20,
 			y = 35,
 			center = GIS.cmp.region.center;
-			
-		doctype = "<?xml version='1.0' encoding='UTF-8'?>" +
-				  "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\" " +
-				   "[<!ATTLIST svg xmlns:attrib CDATA #IMPLIED> <!ATTLIST path attrib:divname CDATA #IMPLIED>]>";
-				  
-		namespace = "xmlns=\"http://www.w3.org/2000/svg\"" +
-					"xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:attrib=\"http://www.carto.net/attrib/\"";					
+					
+		namespace = 'xmlns="http://www.w3.org/2000/svg"';
 		
-		titleSVG = "<g id=\"title\" style=\"display: block; visibility: visible;\">" +
-				   "<text id=\"title\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"18\" font-weight=\"bold\">" +
-				   "<tspan>" + title + "</tspan></text></g>";
+		titleSVG = '<g id="title" style="display: block; visibility: visible;">' +
+				   '<text id="title" x="' + x + '" y="' + y + '" font-size="18" font-weight="bold">' +
+				   '<tspan>' + title + '</tspan></text></g>';
 				   
 		y += 35;
 					
@@ -435,7 +429,7 @@ Ext.onReady( function() {
 		}
 		
 		svg = svg.replace('</svg>', (titleSVG + legendSVG) + '</svg>');
-console.log(svg);		
+		
 		return svg;
 	};
 	
@@ -2298,6 +2292,7 @@ console.log(svg);
 							handler: function() {
 								var title = 'My map title',
 									svg = GIS.util.svg.getString(title, GIS.util.map.getVisibleVectorLayers());
+console.log(svg);									
 								
 								var exportForm = document.getElementById('exportForm');
 								exportForm.action = '../exportImage.action';
