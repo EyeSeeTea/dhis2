@@ -351,19 +351,24 @@ Ext.onReady( function() {
 			namespace,
 			titleSVG,
 			legendSVG = '',
-			x = 30,
-			y = 20;
+			x = 20,
+			y = 35,
+			center = GIS.cmp.region.center;
 			
 		doctype = "<?xml version='1.0' encoding='UTF-8'?>" +
 				  "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\" " +
 				   "[<!ATTLIST svg xmlns:attrib CDATA #IMPLIED> <!ATTLIST path attrib:divname CDATA #IMPLIED>]>";
 				  
 		namespace = "xmlns=\"http://www.w3.org/2000/svg\"" +
-					"xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:attrib=\"http://www.carto.net/attrib/\"";
+					"xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:attrib=\"http://www.carto.net/attrib/\"";					
 		
 		titleSVG = "<g id=\"title\" style=\"display: block; visibility: visible;\">" +
 				   "<text id=\"title\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"18\" font-weight=\"bold\">" +
 				   "<tspan>" + title + "</tspan></text></g>";
+				   
+		y += 35;
+					
+		svg = doctype + '<svg ' + namespace + ' width="' + center.getWidth() + '" height="' + center.getHeight() + '"></svg>';
 		
 		if (!layers.length) {
 			alert('No visible data layers'); //todo //i18n
@@ -373,14 +378,12 @@ Ext.onReady( function() {
 		for (var i = 0; i < layers.length; i++) {
 			var layer = layers[i],
 				id = layer.base.id,
-				legendConfig = layer.widget.getLegendConfig(),
-				legendData = layer.widget.model.imageLegend,
+				legendConfig = layer.base.widget.getLegendConfig(),
+				legendData = layer.base.widget.model.imageLegend,
 				what,
 				when,
 				where,
 				legend;
-			
-			y += 20;
 				
 			// SVG
 			svgArray.push(layer.div.innerHTML);
@@ -402,37 +405,37 @@ Ext.onReady( function() {
 				where = "<g id=\"period\" style=\"display: block; visibility: visible;\">" +
 					   "<text id=\"period\" x=\"" + x + "\" y=\"" + y + "\" font-size=\"12\">" +
 					   "<tspan>" + legendConfig.where + "</tspan></text></g>";
-			
-				y += 5;
+					   
+				y += 8;
 				
-				legend = "<g id='legend'>";
+				legend = "<g>";
 				
 				for (var j = 0; j < legendData.length; j++) {
-					y += 15;
+					if (j !== 0) {
+						y += 15;
+					}
 					
 					legend += "<rect x='" + x + "' y='" + y + "' height='15' width='30' " +
-							  "fill='" + legendData.color + "' stroke='#000000' stroke-width='1'/>";
+							  "fill='" + legendData[j].color + "' stroke='#000000' stroke-width='1'/>";
 							  
 					legend += "<text id=\"label\" x='" + (x + 40) + "' y='" + (y + 12) + "' font-size=\"12\">" +
-							  "<tspan>" + legendData.label + "</tspan></text>";
+							  "<tspan>" + legendData[j].label + "</tspan></text>";
 				}
 				
 				legend += "</g>";
 				
 				legendSVG += (what + when + where + legend);
+				
+				y += 50;
 			}
 		}
-		
-		svg = svgArray.shift();
 		
 		if (svgArray.length) {
 			svg = GIS.util.svg.merge(svg, svgArray);
 		}
 		
-		svg = svg.replace('</svg>', '');
-		
-		svg += (titleSVG + legendSVG) + '</svg>';
-		
+		svg = svg.replace('</svg>', (titleSVG + legendSVG) + '</svg>');
+console.log(svg);		
 		return svg;
 	};
 	
@@ -2223,7 +2226,7 @@ Ext.onReady( function() {
 						},
 						'->',
 						{
-							text: 'fav()', //i18n
+							text: 'fav1()', //i18n
 							handler: function() {
 								var config = {
 									classes: 5,
@@ -2257,9 +2260,43 @@ Ext.onReady( function() {
 							}
 						},
 						{
+							text: 'fav2()', //i18n
+							handler: function() {
+								var config = {
+									classes: 5,
+									colorHigh: "ffff00",
+									colorLow: "0000ff",
+									dataElement: null,
+									dataElementGroup: null,
+									indicator: "Uvn6LCg7dVU",
+									indicatorGroup: "AoTB60phSOH",
+									legendSet: null,
+									legendType: "automatic",
+									level: 3,
+									levelName: "Chiefdom",
+									method: 2,
+									parentId: "Vth0fbpFcsO",
+									parentLevel: 2,
+									parentName: "Kono",
+									parentPath: "/ImspTQPwCqd/Vth0fbpFcsO",
+									period: "2012",
+									periodType: "Yearly",
+									radiusHigh: 15,
+									radiusLow: 5,
+									updateData: false,
+									updateLegend: false,
+									updateOrganisationUnit: true,
+									valueType: "indicator"
+								};
+								
+								GIS.base.thematic2.widget.setConfig(config);
+								GIS.base.thematic2.widget.execute();
+							}
+						},
+						{
 							text: 'log()', //i18n
 							handler: function() {
-								GIS.util.svg.getString();
+								GIS.util.svg.getString('My map title', GIS.util.map.getVisibleVectorLayers());
 							}
 						},
 						{
