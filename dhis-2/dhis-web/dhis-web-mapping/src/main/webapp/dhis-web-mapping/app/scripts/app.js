@@ -1995,7 +1995,7 @@ Ext.onReady( function() {
 		textfield = Ext.create('Ext.form.field.Text', {
 			cls: 'gis-textfield',
 			height: 30,
-			emptyText: 'Map title', //i18n
+			emptyText: 'Enter map title..', //i18n
 			bodyStyle: 'margin-right: 3px'
 		});
 		
@@ -2032,6 +2032,7 @@ Ext.onReady( function() {
 		menu = Ext.create('Ext.menu.Menu', {
 			shadow: false,
 			showSeparator: false,
+            enableKeyNav: false,
 			width: 185,
 			height: 30,
 			items: item,
