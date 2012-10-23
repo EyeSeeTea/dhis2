@@ -92,6 +92,7 @@ GIS.mask;
 GIS.util = {
 	google: {},
 	map: {},
+	svg: {},
 	store: {},
 	geojson: {},
 	vector: {},
@@ -329,6 +330,49 @@ Ext.onReady( function() {
     GIS.util.map.getLonLatByXY = function(x, y) {
 		var point = GIS.util.map.getTransformedPointByXY(x, y);		
 		return new OpenLayers.LonLat(point.x, point.y);
+	};
+	
+    GIS.util.svg.merge = function(str, strArray) {
+        if (strArray.length) {
+            str = str || '<svg></svg>';
+            for (var i = 0; i < strArray.length; i++) {
+                str = str.replace('</svg>', '');
+                strArray[i] = strArray[i].substring(strArray[i].indexOf('>') + 1);
+                str += strArray[i];
+            }
+        }
+        return str;
+    };
+    
+	GIS.util.svg.getString = function() {
+		var svgArray = [],
+			svg = '',
+			layers = GIS.util.map.getVisibleVectorLayers(),
+			doctype,
+			namespace;
+			
+		doctype = "<?xml version='1.0' encoding='UTF-8'?>" +
+				  "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\" " +
+				   "[<!ATTLIST svg xmlns:attrib CDATA #IMPLIED> <!ATTLIST path attrib:divname CDATA #IMPLIED>]>";
+				  
+		namespace = "xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:attrib=\"http://www.carto.net/attrib/\"";
+		
+		if (!layers.length) {
+			alert('No visible data layers'); //todo //i18n
+			return;
+		}
+		
+		for (var i = 0; i < layers.length; i++) {
+			svgArray.push(layers[i].div.innerHTML);
+		}
+		
+		svg = svgArray.shift();
+		
+		if (svgArray.length) {
+			svg = GIS.util.svg.merge(svg, svgArray);
+		}
+console.log(svg);		
+		return svg;
 	};
 	
 	GIS.util.geojson.decode = function(doc, widget) {
@@ -2149,6 +2193,12 @@ Ext.onReady( function() {
 								
 								GIS.base.thematic1.widget.setConfig(config);
 								GIS.base.thematic1.widget.execute();
+							}
+						},
+						{
+							text: 'log()', //i18n
+							handler: function() {
+								GIS.util.svg.getString();
 							}
 						},
 						{
