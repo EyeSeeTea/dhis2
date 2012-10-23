@@ -1986,6 +1986,65 @@ Ext.onReady( function() {
 		return window;
 	};
 	
+	GIS.obj.getDownloadMenu = function() {
+		var menu,
+			item,
+			textfield,
+			button;
+			
+		textfield = Ext.create('Ext.form.field.Text', {
+			cls: 'gis-textfield',
+			height: 30,
+			emptyText: 'Map title', //i18n
+			bodyStyle: 'margin-right: 3px'
+		});
+		
+		button = Ext.create('Ext.button.Button', {
+			text: 'D',
+			height: 30,
+			width: 30,
+			handler: function() {
+				var title = textfield.getValue(),
+					svg = GIS.util.svg.getString(title, GIS.util.map.getVisibleVectorLayers()),
+					exportForm = document.getElementById('exportForm');
+				
+				document.getElementById('svgField').value = svg;
+				document.getElementById('titleField').value = title;
+				exportForm.action = '../exportImage.action';
+				exportForm.method = 'post';
+				exportForm.submit();
+				
+				textfield.reset();
+				menu.hide();
+			}
+		});
+			
+		item = Ext.create('Ext.panel.Panel', {
+			layout: 'hbox',
+			width: 185,
+			height: 30,
+			items: [
+				textfield,
+				button
+			]
+		});
+			
+		menu = Ext.create('Ext.menu.Menu', {
+			shadow: false,
+			showSeparator: false,
+			width: 185,
+			height: 30,
+			items: item,
+			listeners: {
+				afterrender: function() {
+					this.getEl().addCls('gis-toolbar-btn-menu gis-toolbar-btn-menu-download');
+				}
+			}
+		});
+		
+		return menu;
+	};
+	
 	// OpenLayers map
 	
 	GIS.map = new OpenLayers.Map({
@@ -2216,7 +2275,8 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							text: 'Download' //i18n
+							text: 'Download', //i18n
+							menu: GIS.obj.getDownloadMenu()
 						},
 						'->',
 						{
@@ -2290,18 +2350,6 @@ Ext.onReady( function() {
 						{
 							text: 'log()', //i18n
 							handler: function() {
-								var title = 'This is the map title',
-									svg = GIS.util.svg.getString(title, GIS.util.map.getVisibleVectorLayers());
-console.log(svg);									
-								
-								var exportForm = document.getElementById('exportForm');
-								exportForm.action = '../exportImage.action';
-								exportForm.method = 'post';
-								
-								document.getElementById('svgField').value = svg;
-								document.getElementById('titleField').value = title;
-
-								exportForm.submit();
 							}
 						},
 						{

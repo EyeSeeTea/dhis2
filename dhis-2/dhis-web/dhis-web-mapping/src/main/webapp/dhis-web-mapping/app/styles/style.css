@@ -336,6 +336,19 @@ html * {
 		font-size: 10px !important;
 	}
 	
+.gis-toolbar-btn-menu-download .x-panel-body-default { /* Specific for download menu */
+	border: 0 none;
+}
+.gis-toolbar-btn-menu-download .x-menu-body {
+	background: transparent !important;
+}
+.gis-toolbar-btn-menu-download .x-panel-body-default {
+	background: transparent;
+}
+.gis-toolbar-btn-menu-download .x-form-text {
+	padding-left: 6px;
+}
+	
 /* Treepanel */
 
 .x-tree-panel .x-grid-row .x-grid-cell-inner { /* Tree font */
@@ -469,7 +482,7 @@ html * {
     cursor: hand;
 }
 
-/* TextField */
+/* NumberField */
 
 .gis-numberfield input.x-form-text {
 	border-top-left-radius: 2px;
