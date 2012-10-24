@@ -1940,7 +1940,7 @@ Ext.onReady( function() {
 					var body = Ext.encode(getRequestBody());
 					
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'mapLegendSet/',
+						url: GIS.conf.url.path_api + 'mapLegendSets/',
 						method: 'POST',
 						headers: {'Content-Type': 'application/json'},
 						params: body,
@@ -1963,7 +1963,7 @@ Ext.onReady( function() {
 					body = Ext.encode(getRequestBody());
 					
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'mapLegendSet/' + id,
+						url: GIS.conf.url.path_api + 'mapLegendSets/' + id,
 						method: 'PUT',
 						headers: {'Content-Type': 'application/json'},
 						params: body,
