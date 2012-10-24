@@ -185,6 +185,16 @@ html * {
 	border-radius: 2px;
 }
 
+.gis-toolbar-btn-menu-download .x-btn-icon,
+.gis-toolbar-btn-menu-download .x-btn-default-small-icon button {
+	width: 28px !important;
+	height: 28px !important;
+}
+	
+.gis-btn-icon-download {
+	background: url('../images/download_22.png') no-repeat;
+}
+
 /* Toolbar */
 
 .x-toolbar-default {

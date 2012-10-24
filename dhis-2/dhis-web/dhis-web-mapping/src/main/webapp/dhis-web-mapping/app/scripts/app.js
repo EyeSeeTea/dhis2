@@ -2032,15 +2032,15 @@ Ext.onReady( function() {
 			
 		textfield = Ext.create('Ext.form.field.Text', {
 			cls: 'gis-textfield',
-			height: 30,
+			height: 28,
 			emptyText: 'Enter map title..', //i18n
-			bodyStyle: 'margin-right: 3px'
+			style: 'margin-right: 2px'
 		});
 		
 		button = Ext.create('Ext.button.Button', {
-			text: 'D',
-			height: 30,
-			width: 30,
+			width: 28,
+			height: 28,
+			iconCls: 'gis-btn-icon-download',
 			handler: function() {
 				var title = textfield.getValue(),
 					svg = GIS.util.svg.getString(title, GIS.util.map.getVisibleVectorLayers()),
@@ -2073,6 +2073,7 @@ Ext.onReady( function() {
             enableKeyNav: false,
 			width: 185,
 			height: 30,
+			cls: 'gis-menu',
 			items: item,
 			listeners: {
 				afterrender: function() {
