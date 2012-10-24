@@ -1920,12 +1920,22 @@ Ext.onReady( function() {
 				prevItem = items[i - 1].data;
 				
 				if (item.startValue < prevItem.endValue) {
-					alert('Overlapping legends');
+					var msg = 'Overlapping legends not allowed!\n\n' +
+							  prevItem.name + ' (' + prevItem.startValue + ' - ' + prevItem.endValue + ')\n' +
+							  item.name + ' (' + item.startValue + ' - ' + item.endValue + ')';
+					alert(msg);
 					return false;
 				}
 				
 				if (prevItem.endValue < item.startValue) {
-					alert('Legend gaps');
+					var msg = 'Legend gaps detected!\n\n' +
+							  prevItem.name + ' (' + prevItem.startValue + ' - ' + prevItem.endValue + ')\n' +
+							  item.name + ' (' + item.startValue + ' - ' + item.endValue + ')\n\n' +
+							  'Proceed anyway?';
+					
+					if (!confirm(msg)) {
+						return false;
+					}
 				}
 			}
 			
