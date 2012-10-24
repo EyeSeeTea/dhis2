@@ -25,7 +25,9 @@ GIS.conf = {
 		widget: {
 			value: 'value',
 			legendtype_automatic: 'automatic',
-			legendtype_predefined: 'predefined'
+			legendtype_predefined: 'predefined',
+			symbolizer_color: 'color',
+			symbolizer_image: 'image'
 		},
 		openLayers: {
 			point_classname: 'OpenLayers.Geometry.Point'
@@ -1504,6 +1506,7 @@ Ext.onReady( function() {
 			showUpdateLegendSet,
 			deleteLegendSet,
 			deleteLegend,
+			getRequestBody,
 			reset,
 			validateLegends;
 				
@@ -1748,7 +1751,8 @@ Ext.onReady( function() {
 					{
 						dataIndex: 'startValue',
 						sortable: false,
-						width: 37
+						width: 37,
+						cls: 'NISSA'
 					},
 					{
 						dataIndex: 'endValue',
@@ -1782,6 +1786,7 @@ Ext.onReady( function() {
 			
 			panel = Ext.create('Ext.panel.Panel', {
 				cls: 'gis-container-inner',
+				legendSetId: id,
 				items: [
 					legendSetName,
 					{
@@ -1890,6 +1895,30 @@ Ext.onReady( function() {
 			tmpLegendStore.remove(tmpLegendStore.getById(id));
 		};
 		
+		getRequestBody = function() {
+			var items = tmpLegendStore.data.items,
+				body;
+				
+			body = {
+				name: legendSetName.getValue(),
+				type: GIS.conf.finals.widget.legendtype_predefined,
+				symbolizer: GIS.conf.finals.widget.symbolizer_color,
+				mapLegends: []
+			};
+			
+			for (var i = 0; i < items.length; i++) {
+				var item = items[i];
+				body.mapLegends.push({
+					name: item.data.name,
+					startValue: item.data.startValue,
+					endValue: item.data.endValue,
+					color: item.data.color
+				});
+			}
+			
+			return body;
+		};			
+		
 		reset = function() {
 			legendPanel.destroy();
 			legendSetGrid = new LegendSetGrid();
@@ -1934,7 +1963,17 @@ Ext.onReady( function() {
 			hidden: true,
 			handler: function() {
 				if (legendSetName.getValue() && validateLegends()) {
-					reset();
+					var body = Ext.encode(getRequestBody());
+					
+					Ext.Ajax.request({
+						url: GIS.conf.url.path_api + 'mapLegendSet/',
+						method: 'POST',
+						headers: {'Content-Type': 'application/json'},
+						params: body,
+						success: function() {
+							reset();
+						}
+					});
 				}
 			}
 		});
@@ -1943,7 +1982,22 @@ Ext.onReady( function() {
 			text: 'Update', //i18n
 			hidden: true,
 			handler: function() {
-				reset();
+				if (legendSetName.getValue() && validateLegends()) {
+					var body = getRequestBody(),
+						id = legendPanel.legendSetId;
+					body.id = id;
+					body = Ext.encode(getRequestBody());
+					
+					Ext.Ajax.request({
+						url: GIS.conf.url.path_api + 'mapLegendSet/' + id,
+						method: 'PUT',
+						headers: {'Content-Type': 'application/json'},
+						params: body,
+						success: function() {
+							reset();
+						}
+					});
+				}
 			}
 		});
 		
