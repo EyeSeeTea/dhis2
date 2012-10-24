@@ -1283,7 +1283,6 @@ Ext.onReady( function() {
 			minValue: 8,
 			value: 13,
 			emptyText: 13,
-			disabled: true,
 			listeners: {
 				change: function() {
 					updateLabels();
@@ -1307,41 +1306,16 @@ Ext.onReady( function() {
 			}
 		});
 		
-		color = Ext.create('Ext.button.Button', {
+		button = Ext.create('Ext.ux.button.ColorButton', {
 			width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
-			height: 22,
+			value: '0000ff'
+		});
+		
+		color = Ext.create('Ext.ux.button.ColorButton', {
+			width: GIS.conf.layout.tool.item_width - GIS.conf.layout.tool.itemlabel_width,
 			value: '000000',
-			fieldLabel: GIS.i18n.highlight_color,
-			getValue: function() {
-				return this.value;
-			},
-			setValue: function(color) {
-				this.value = color;
-				if (Ext.isDefined(this.getEl())) {
-					this.getEl().dom.style.background = '#' + color;
-				}
-				this.fireEvent('change');
-			},
-			menu: {
-				showSeparator: false,
-				items: {
-					xtype: 'colorpicker',
-					closeAction: 'hide',
-					listeners: {
-						select: function(cp, value) {
-							color.setValue(value);
-							color.menu.hide();
-						}
-					}
-				}
-			},
-			listeners: {
-				render: function() {
-					this.setValue(this.value);
-				},
-				change: function() {
-					updateLabels();
-				}
+			menuHandler: function() {
+				updateLabels();
 			}
 		});
 		
@@ -1372,18 +1346,18 @@ Ext.onReady( function() {
 				layout: 'fit',
 				cls: 'gis-container-inner',
 				items: [
-					{
-						layout: 'column',
-						cls: 'gis-container-inner',
-						items: [
-							{
-								cls: 'gis-panel-html-label',
-								html: GIS.i18n.font_size,
-								width: GIS.conf.layout.tool.itemlabel_width
-							},
-							fontSize
-						]
-					},
+					//{
+						//layout: 'column',
+						//cls: 'gis-container-inner',
+						//items: [
+							//{
+								//cls: 'gis-panel-html-label',
+								//html: GIS.i18n.font_size,
+								//width: GIS.conf.layout.tool.itemlabel_width
+							//},
+							//fontSize
+						//]
+					//},
 					{
 						layout: 'column',
 						cls: 'gis-container-inner',
