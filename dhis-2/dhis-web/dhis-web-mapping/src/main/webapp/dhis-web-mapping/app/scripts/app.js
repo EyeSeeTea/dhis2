@@ -2067,6 +2067,13 @@ Ext.onReady( function() {
 			listeners: {
 				afterrender: function() {
 					this.getEl().addCls('gis-toolbar-btn-menu gis-toolbar-btn-menu-download');
+				},
+				show: function() {
+					this.keyNav.disable();
+					textfield.focus();
+				},
+				hide: function() {
+					this.keyNav.enable();
 				}
 			}
 		});
