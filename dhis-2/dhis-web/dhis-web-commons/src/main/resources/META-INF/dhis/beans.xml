@@ -303,11 +303,14 @@
     <property name="helpManager" ref="org.hisp.dhis.help.HelpManager" />
   </bean>
 
+  <bean id="org.hisp.dhis.about.action.RedirectAction" class="org.hisp.dhis.about.action.RedirectAction"
+    scope="prototype"/>
+
   <bean id="org.hisp.dhis.help.action.GetHelpItemsAction" class="org.hisp.dhis.help.action.GetHelpItemsAction"
     scope="prototype">
     <property name="helpManager" ref="org.hisp.dhis.help.HelpManager" />
   </bean>
-
+  
   <!-- Common actions -->
 
   <bean id="org.hisp.dhis.commons.action.GetNotificationsAction" class="org.hisp.dhis.commons.action.GetNotificationsAction" scope="prototype"/>
@@ -551,7 +554,8 @@
   </bean>
 
   <bean id="org.hisp.dhis.interceptor.SystemSettingInterceptor" class="org.hisp.dhis.interceptor.SystemSettingInterceptor">
-    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
+    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />    
+    <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />
   </bean>
 
   <bean id="org.hisp.dhis.interceptor.ContextInterceptor" class="org.hisp.dhis.interceptor.ContextInterceptor">
@@ -584,6 +588,9 @@
   </bean>
 
   <bean id="org.hisp.dhis.useraccount.action.UpdateUserProfileAction" class="org.hisp.dhis.useraccount.action.UpdateUserProfileAction"
+    scope="prototype"/>
+    
+  <bean id="org.hisp.dhis.useraccount.action.IsSelfRegistrationAllowedAction" class="org.hisp.dhis.useraccount.action.IsSelfRegistrationAllowedAction"
     scope="prototype"/>
 
   <!-- User settings -->

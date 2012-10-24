@@ -2,50 +2,77 @@ var validationRules = {
 	rules: {
 		firstName: {
 			required: true,
-			rangelength: [ 1, 80 ]
+			rangelength: [ 2, 80 ]
 		},
 		surname: {
 			required: true,
-			rangelength: [ 1, 80 ]
+			rangelength: [ 2, 80 ]
 		},
 		username: {
 			required: true,
-			rangelength: [ 1, 80 ]
+			rangelength: [ 4, 80 ],
+			remote: "../../api/account/username"
 		},
 		password: {
 			required: true,
-			rangelength: [ 1, 80 ],
+			rangelength: [ 8, 80 ],
+			password: true,
 			notequalto : "#username",
 		},
-		retypePassword : {
+		retypePassword: {
 			required: true,
-			equalTo: "#password"
+			equalTo: "#password",
 		},
 		email: {
 			required: true,
 			email: true,
-			rangelength: [ 1, 80 ]
-		}
-	},
-	messages: {
-		username: {
-			remote: "Username is already taken"
+			rangelength: [ 4, 80 ]
 		}
 	}
 };
 
 $( document ).ready( function() {
-	jQuery( "#accountForm" ).validate( {
+	
+	Recaptcha.create( "6LcM6tcSAAAAANwYsFp--0SYtcnze_WdYn8XwMMk", "recaptchaDiv", {
+		theme: "white"
+	} );
+	
+	$( "#accountForm" ).validate( {
 		rules: validationRules.rules,
-		messages: validationRules.messages,
+		submitHandler: accountSubmitHandler,
 		errorPlacement: function( error, element ) {
 			element.parent( "td" ).append( "<br>" ).append( error );
 		}
 	} );
-	
-	jQuery.extend( jQuery.validator.messages, {
-	    required: "This field is required",
-	    rangelength: "Please enter a value between 1 and 80 characters long",
-	    email: "Please enter a valid email address"
-	} );
 } );
+
+function accountSubmitHandler()
+{	
+	if ( $.trim( $( "#recaptcha_challenge_field" ).val() ).length == 0 ||
+		$.trim( $( "#recaptcha_response_field" ).val() ).length == 0 )
+	{
+		$( "#messageSpan" ).show().text( "Please enter a value for the word verification above" );		
+		return false;
+	}
+	
+	$( "#submitButton" ).attr( "disabled", "disabled" );
+	
+	$.ajax( {
+		url: "../../api/account",
+		data: $( "#accountForm" ).serialize(),
+		type: "post",
+		success: function( data ) {
+			window.location.href = "../../dhis-web-commons-about/redirect.action";
+		},
+		error: function( jqXHR, textStatus, errorThrown ) {
+			$( "#messageSpan" ).show().text( jqXHR.responseText );			
+			Recaptcha.reload();
+			$( "#submitButton" ).removeAttr( "disabled" );
+		}
+	} );
+}
+
+function reloadRecaptcha()
+{
+	Recaptcha.reload();
+}

@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.outbound;
+package org.hisp.dhis.useraccount.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,37 +27,26 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import org.hisp.dhis.configuration.ConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import org.hisp.dhis.sms.SmsServiceException;
-import org.hisp.dhis.sms.config.SmsConfigurable;
+import com.opensymphony.xwork2.Action;
 
 /**
- * OutboundSmsService provides support for sending SMSes.
+ * @author Lars Helge Overland
  */
-public interface OutboundSmsService
-    extends SmsConfigurable
+public class IsSelfRegistrationAllowedAction
+    implements Action
 {
-    String ID = OutboundSmsService.class.getName();
-
-    boolean isEnabled();
-
-    /**
-     * Send an SMS message.
-     * 
-     * @param sms the message to be sent
-     * @throws SmsServiceException if unable to sent Message
-     */
-    String sendMessage( OutboundSms sms, String gatewayId )
-        throws SmsServiceException;
-
-    List<OutboundSms> getAllOutboundSms();
+    @Autowired
+    private ConfigurationService configurationService;
     
-    int saveOutboundSms( OutboundSms sms);
-
-    void updateOutboundSms( OutboundSms sms);
-    
-    void deleteById( Integer outboundSmsId );
-    
-    List<OutboundSms> getOutboundSms( OutboundSmsStatus status );
+    @Override
+    public String execute()
+        throws Exception
+    {
+        boolean allowed = configurationService.getConfiguration().selfRegistrationAllowed();
+        
+        return allowed ? SUCCESS : ERROR;
+    }
 }

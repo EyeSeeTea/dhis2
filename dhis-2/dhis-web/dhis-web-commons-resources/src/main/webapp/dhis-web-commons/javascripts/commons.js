@@ -1178,7 +1178,13 @@ function insertTextCommon( inputAreaName, inputText )
  */
 function validation2( formId, submitHandler, kwargs )
 {
-	var beforeValidateHandler = kwargs["beforeValidateHandler"];
+	var beforeValidateHandler = null;
+	
+	if ( isDefined( kwargs ) )
+	{
+		beforeValidateHandler = kwargs["beforeValidateHandler"];
+	}
+
 	var rules = kwargs["rules"];
 	var validator = jQuery( "#" + formId ).validate( {
 		meta: "validate",
@@ -1328,17 +1334,6 @@ function listValidator( validatorId, selectedListId )
 		item.selected = 'selected';
 		memberValidator.append( '<option value="' + item.value + '" selected="selected">' + item.value + '</option>');
 	});
-}
-
-/**
- * Formats validation messages. Used by messages.vm.
- * 
- * @param text the text to format.
- * @returns the formatted text.
- */
-function validatorFormat( text )
-{
-    return $.validator.format( text );
 }
 
 // -----------------------------------------------------------------------------

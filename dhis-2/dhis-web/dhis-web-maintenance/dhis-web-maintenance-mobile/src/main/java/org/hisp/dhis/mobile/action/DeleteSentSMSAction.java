@@ -1,5 +1,3 @@
-package org.hisp.dhis.wp.action;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,17 +25,66 @@ package org.hisp.dhis.wp.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.mobile.action;
+
+import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.sms.outbound.OutboundSmsService;
+
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Nguyen Kim Lai
+ *
+ * @version $ DeleteSentSMSAction.java Oct 16, 2012 $
  */
-public class NoAction
-    implements Action
+public class DeleteSentSMSAction implements Action
 {
-    public String execute()
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+    
+    private OutboundSmsService outboundSmsService;
+    
+    public void setOutboundSmsService( OutboundSmsService outboundSmsService )
     {
-        return SUCCESS;
+        this.outboundSmsService = outboundSmsService;
+    }    
+    
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
+    
+    private Integer[] ids;
+
+    public void setIds( Integer[] ids )
+    {
+        this.ids = ids;
     }
+    
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+    
+    @Override
+    public String execute()
+        throws Exception
+    {
+        if ( ids != null && ids.length > 0 )
+        {
+            for ( Integer each : ids )
+            {
+                outboundSmsService.deleteById( each );
+            }
+        }
+        if ( id != null )
+        {
+            outboundSmsService.deleteById( id );
+        }
+        return SUCCESS;
+
+    }
+
 }

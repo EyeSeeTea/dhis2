@@ -27,17 +27,31 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.configuration.ConfigurationService;
+import org.hisp.dhis.security.PasswordManager;
+import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -56,10 +70,10 @@ public class AccountController
 {
     private static final Log log = LogFactory.getLog( AccountController.class );
     
-    private static final String RECAPTCHA_VERIFY_URL = "http://www.google.com/recaptcha/api/verify";
+    private static final String RECAPTCHA_VERIFY_URL = "https://www.google.com/recaptcha/api/verify";
+    protected static final String PUB_KEY = "6LcM6tcSAAAAANwYsFp--0SYtcnze_WdYn8XwMMk";
     private static final String KEY = "6LcM6tcSAAAAAFnHo1f3lLstk3rZv3EVinNROfRq";
     private static final String TRUE = "true";
-    private static final String FALSE = "false";
     private static final String SPLIT = "\n";
     private static final int MAX_LENGTH = 80;
     
@@ -68,6 +82,15 @@ public class AccountController
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    
+    @Autowired
+    private ConfigurationService configurationService;
+    
+    @Autowired
+    private PasswordManager passwordManager;
     
     @RequestMapping( method = RequestMethod.POST, produces = ContextUtils.CONTENT_TYPE_TEXT )
     public @ResponseBody String createAccount( 
@@ -82,6 +105,14 @@ public class AccountController
         HttpServletRequest request,
         HttpServletResponse response )
     {
+        boolean allowed = configurationService.getConfiguration().selfRegistrationAllowed();
+        
+        if ( !allowed )
+        {
+            response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
+            return "User self registration is not allowed";
+        }
+        
         // ---------------------------------------------------------------------
         // Trim input
         // ---------------------------------------------------------------------
@@ -125,7 +156,7 @@ public class AccountController
             return "Last name is not specified or invalid";
         }
 
-        if ( password == null || password.trim().length() > MAX_LENGTH )
+        if ( password == null || !ValidationUtils.passwordIsValid( password ) )
         {
             response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
             return "Password is not specified or invalid";
@@ -135,7 +166,13 @@ public class AccountController
         {
             response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
             return "Password cannot be equal to username";
-        }            
+        }
+        
+        if ( email == null || !ValidationUtils.emailIsValid( email ) )
+        {
+            response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
+            return "Email is not specified or invalid";
+        }
 
         if ( recapChallenge == null )
         {
@@ -166,14 +203,18 @@ public class AccountController
         // ---------------------------------------------------------------------
         
         if ( !TRUE.equalsIgnoreCase( results[0] ) )
-        {
+        {            
+            log.info( "Recaptcha failed with code: " + ( results.length > 0 ? results[1] : "" ) );
+
             response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
-            return results.length > 0 ? results[1] : FALSE;
+            return "The characters you entered did not match the word verification, try again";
         }
 
         // ---------------------------------------------------------------------
         // Create and save user, return 201
         // ---------------------------------------------------------------------
+        
+        UserAuthorityGroup userRole = configurationService.getConfiguration().getSelfRegistrationRole();
         
         User user = new User();
         user.setFirstName( firstName );
@@ -183,54 +224,36 @@ public class AccountController
         
         credentials = new UserCredentials();
         credentials.setUsername( username );
-        credentials.setPassword( password );
+        credentials.setPassword( passwordManager.encodePassword( username, password ) );
         credentials.setUser( user );
+        credentials.getUserAuthorityGroups().add( userRole );
         
         user.setUserCredentials( credentials );
-        
-        // TODO user role and org unit
+                
+        // TODO org unit
         
         userService.addUser( user );
         userService.addUserCredentials( credentials );
+
+        authenticate( username, password, userRole, request );
         
-        log.info( "Created user successfully with username: " + username );
+        log.info( "Created user with username: " + username );
         
         response.setStatus( HttpServletResponse.SC_CREATED );
         return "Account created";
     }
     
     @RequestMapping( value = "/username", method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
-    public @ResponseBody Boolean validateUserName( @RequestParam String username )
+    public @ResponseBody String validateUserName( @RequestParam String username )
     {
-        if ( StringUtils.trimToNull( username ) == null )
-        {
-            return Boolean.FALSE;
-        }
+        boolean valid = username != null && userService.getUserCredentialsByUsername( username ) == null;
         
-        return userService.getUserCredentialsByUsername( username ) == null;
+        // Custom code required because of our hacked jQuery validation
+        
+        return valid ? "{ \"response\": \"success\", \"message\": \"\" }" :
+            "{ \"response\": \"error\", \"message\": \"Username is already taken\" }";
     }
     
-    @RequestMapping( value = "/recaptcha", method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_TEXT )
-    public @ResponseBody String validateRecaptcha( 
-        @RequestParam( value = "recaptcha_challenge_field" ) String recapChallenge,
-        @RequestParam( value = "recaptcha_response_field" ) String recapResponse,
-        HttpServletRequest request )
-    {
-        if ( StringUtils.trimToNull( recapChallenge ) == null || StringUtils.trimToNull( recapResponse ) == null )
-        {
-            return FALSE;
-        }
-        
-        String[] results = checkRecaptcha( KEY, request.getRemoteAddr(), recapChallenge, recapResponse );
-        
-        if ( results == null || results.length == 0 )
-        {
-            return FALSE;
-        }
-        
-        return TRUE.equalsIgnoreCase( results[0] ) ? results[0] : ( results.length > 0 ? results[1] : FALSE );
-    }
-
     // ---------------------------------------------------------------------
     // Supportive methods
     // ---------------------------------------------------------------------
@@ -249,5 +272,31 @@ public class AccountController
         log.info( "Recaptcha result: " + result );
         
         return result != null ? result.split( SPLIT ) : null;
-    }    
+    }
+    
+    private void authenticate( String username, String rawPassword, UserAuthorityGroup userRole, HttpServletRequest request )
+    {
+        UsernamePasswordAuthenticationToken token = 
+            new UsernamePasswordAuthenticationToken( username, rawPassword, getAuthorities( userRole ) );
+
+        Authentication auth = authenticationManager.authenticate( token );
+        
+        SecurityContextHolder.getContext().setAuthentication( auth );
+
+        HttpSession session = request.getSession();
+        
+        session.setAttribute( "SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext() );
+    }
+    
+    private Collection<GrantedAuthority> getAuthorities( UserAuthorityGroup userRole )
+    {
+        Collection<GrantedAuthority> auths = new HashSet<GrantedAuthority>();
+        
+        for ( String auth : userRole.getAuthorities() )
+        {
+            auths.add( new SimpleGrantedAuthority( auth ) );
+        }
+        
+        return auths;
+    }
 }

@@ -34,9 +34,12 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 public class HibernateOutboundSmsStore
     implements OutboundSmsStore
 {
@@ -86,7 +89,7 @@ public class HibernateOutboundSmsStore
     public List<OutboundSms> getAll()
     {
         Session session = sessionFactory.getCurrentSession();
-        return (List<OutboundSms>) session.createCriteria( OutboundSms.class ).list();
+        return (List<OutboundSms>) session.createCriteria( OutboundSms.class ).addOrder( Order.asc( "date" ) ).list();
     }
     
     @Override
@@ -134,5 +137,11 @@ public class HibernateOutboundSmsStore
     public void update( OutboundSms sms )
     {
         sessionFactory.getCurrentSession().update( sms );
+    }
+
+    @Override
+    public void delete( OutboundSms sms )
+    {
+        sessionFactory.getCurrentSession().delete( sms );
     }
 }

@@ -88,18 +88,6 @@ function pageInit()
 	// Intro fade in
 	
 	$( ".introList" ).fadeIn();
-	
-	// Validation
-	
-	if ( typeof( validationMessage ) !== "undefined"  ) // From messages.vm
-	{
-		$.validator.setMessages( validationMessage );
-	}
-	
-	$.validator.setDefaults( {
-		debug: false,
-		success: "valid"
-	} );
 }
 
 function setTableStyles()

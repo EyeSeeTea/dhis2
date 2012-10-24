@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.outbound;
+package org.hisp.dhis.about.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,37 +27,44 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_START_MODULE;
 
-import org.hisp.dhis.sms.SmsServiceException;
-import org.hisp.dhis.sms.config.SmsConfigurable;
+import org.hisp.dhis.setting.SystemSettingManager;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.Action;
 
 /**
- * OutboundSmsService provides support for sending SMSes.
+ * @author Lars Helge Overland
  */
-public interface OutboundSmsService
-    extends SmsConfigurable
+public class RedirectAction
+    implements Action
 {
-    String ID = OutboundSmsService.class.getName();
+    @Autowired
+    private SystemSettingManager systemSettingManager;
 
-    boolean isEnabled();
-
-    /**
-     * Send an SMS message.
-     * 
-     * @param sms the message to be sent
-     * @throws SmsServiceException if unable to sent Message
-     */
-    String sendMessage( OutboundSms sms, String gatewayId )
-        throws SmsServiceException;
-
-    List<OutboundSms> getAllOutboundSms();
+    private String redirectUrl;
     
-    int saveOutboundSms( OutboundSms sms);
+    public String getRedirectUrl()
+    {
+        return redirectUrl;
+    }
 
-    void updateOutboundSms( OutboundSms sms);
-    
-    void deleteById( Integer outboundSmsId );
-    
-    List<OutboundSms> getOutboundSms( OutboundSmsStatus status );
+    @Override
+    public String execute()
+        throws Exception
+    {
+        String startModule = (String) systemSettingManager.getSystemSetting( KEY_START_MODULE );
+        
+        if ( startModule != null )
+        {
+            redirectUrl = "../" + startModule + "/index.action";
+        }
+        else
+        {
+            redirectUrl = "../dhis-web-dashboard-integration/index.action";
+        }
+        
+        return SUCCESS;
+    }  
 }

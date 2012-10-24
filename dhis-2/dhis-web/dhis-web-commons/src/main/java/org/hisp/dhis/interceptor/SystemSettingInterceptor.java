@@ -39,12 +39,13 @@ import static org.hisp.dhis.setting.SystemSettingManager.KEY_FLAG;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_FLAG_IMAGE;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_START_MODULE;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_SYSTEM_IDENTIFIER;
-import static org.hisp.dhis.setting.SystemSettingManager.PHONE_NUMBER_AREA_CODE;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_CONFIGURATION;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.setting.SystemSettingManager;
 
 import com.opensymphony.xwork2.ActionInvocation;
@@ -52,7 +53,6 @@ import com.opensymphony.xwork2.interceptor.Interceptor;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class SystemSettingInterceptor
     implements Interceptor
@@ -68,6 +68,13 @@ public class SystemSettingInterceptor
         this.systemSettingManager = systemSettingManager;
     }
     
+    private ConfigurationService configurationService;
+
+    public void setConfigurationService( ConfigurationService configurationService )
+    {
+        this.configurationService = configurationService;
+    }
+
     // -------------------------------------------------------------------------
     // AroundInterceptor implementation
     // -------------------------------------------------------------------------
@@ -85,7 +92,6 @@ public class SystemSettingInterceptor
     {
         Map<String, Object> map = new HashMap<String, Object>();
         
-        map.put( KEY_SYSTEM_IDENTIFIER, systemSettingManager.getSystemIdentifier() ); //TODO remove
         map.put( KEY_CACHE_STRATEGY, systemSettingManager.getSystemSetting( KEY_CACHE_STRATEGY ) );
         map.put( KEY_APPLICATION_TITLE, systemSettingManager.getSystemSetting( KEY_APPLICATION_TITLE ) );
         map.put( KEY_APPLICATION_INTRO, systemSettingManager.getSystemSetting( KEY_APPLICATION_INTRO ) );
@@ -95,7 +101,9 @@ public class SystemSettingInterceptor
         map.put( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, systemSettingManager.getSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, false ) );
         map.put( KEY_FACTOR_OF_DEVIATION, systemSettingManager.getSystemSetting( KEY_FACTOR_OF_DEVIATION, DEFAULT_FACTOR_OF_DEVIATION ) );
         map.put( KEY_COMPLETENESS_OFFSET, systemSettingManager.getSystemSetting( KEY_COMPLETENESS_OFFSET, DEFAULT_COMPLETENESS_OFFSET ) );
-        map.put( PHONE_NUMBER_AREA_CODE, systemSettingManager.getSystemSetting( PHONE_NUMBER_AREA_CODE, "" ) );
+        map.put( KEY_PHONE_NUMBER_AREA_CODE, systemSettingManager.getSystemSetting( KEY_PHONE_NUMBER_AREA_CODE, "" ) );
+        map.put( KEY_CONFIGURATION, configurationService.getConfiguration() );
+        
         invocation.getStack().push( map );
         
         return invocation.invoke();
