@@ -1558,7 +1558,7 @@ Ext.onReady( function() {
 				iconCls: 'gis-menu-item-icon-edit',
 				cls: 'gis-menu-item-first',
 				handler: function() {
-					alert('window');
+					
 				}
 			},
 			{
