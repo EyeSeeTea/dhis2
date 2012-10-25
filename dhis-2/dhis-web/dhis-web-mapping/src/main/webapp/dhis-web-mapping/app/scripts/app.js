@@ -232,33 +232,33 @@ Ext.onReady( function() {
 			}
 		});
 		
-		// Load favorite
-		var config = {
-			classes: 5,
-			colorHigh: "ffff00",
-			colorLow: "0000ff",
-			dataElement: null,
-			dataElementGroup: null,
-			indicator: "Uvn6LCg7dVU",
-			indicatorGroup: "AoTB60phSOH",
-			legendSet: null,
-			legendType: "automatic",
-			level: 3,
-			levelName: "Chiefdom",
-			method: 2,
-			parentId: "fdc6uOvgoji",
-			parentLevel: 2,
-			parentName: "Bombali",
-			parentPath: "/ImspTQPwCqd/fdc6uOvgoji",
-			period: "2012",
-			periodType: "Yearly",
-			radiusHigh: 15,
-			radiusLow: 5,
-			updateData: false,
-			updateLegend: false,
-			updateOrganisationUnit: true,
-			valueType: "indicator"
-		};
+		// Load favorite //todo
+		//var config = {
+			//classes: 5,
+			//colorHigh: "ffff00",
+			//colorLow: "0000ff",
+			//dataElement: null,
+			//dataElementGroup: null,
+			//indicator: "Uvn6LCg7dVU",
+			//indicatorGroup: "AoTB60phSOH",
+			//legendSet: null,
+			//legendType: "automatic",
+			//level: 3,
+			//levelName: "Chiefdom",
+			//method: 2,
+			//parentId: "fdc6uOvgoji",
+			//parentLevel: 2,
+			//parentName: "Bombali",
+			//parentPath: "/ImspTQPwCqd/fdc6uOvgoji",
+			//period: "2012",
+			//periodType: "Yearly",
+			//radiusHigh: 15,
+			//radiusLow: 5,
+			//updateData: false,
+			//updateLegend: false,
+			//updateOrganisationUnit: true,
+			//valueType: "indicator"
+		//};
 		
 		//GIS.base.thematic1.widget.setConfig(config);
 		//GIS.base.thematic1.widget.execute();
@@ -681,7 +681,7 @@ Ext.onReady( function() {
     });
     
 	GIS.store.groupsByGroupSet = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name'],
+		fields: ['id', 'name', 'symbol'],
 		proxy: {
 			type: 'ajax',
 			url: '',

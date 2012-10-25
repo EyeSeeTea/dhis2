@@ -217,7 +217,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
             doc = GIS.util.geojson.decode(doc, this);
         }
         else {
-			alert("no coordinates"); //todo //i18n
+			alert('No valid coordinates found'); //todo //i18n
 		}
         
         this.layer.removeFeatures(this.layer.features);
@@ -1668,7 +1668,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 					features = [];
 					
 				if (values.length === 0) {
-					alert("no data"); //todo Ext.message.msg(false, GIS.i18n.current_selection_no_data);
+					alert('No aggregated data values found'); //todo Ext.message.msg(false, GIS.i18n.current_selection_no_data);
 					GIS.mask.hide();
 					return;
 				}
