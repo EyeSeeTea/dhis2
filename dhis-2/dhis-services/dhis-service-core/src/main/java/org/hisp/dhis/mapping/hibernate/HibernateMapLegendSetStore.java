@@ -1,4 +1,4 @@
-package org.hisp.dhis.mapping;
+package org.hisp.dhis.mapping.hibernate;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,22 +27,15 @@ package org.hisp.dhis.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.user.User;
-
-import java.util.Collection;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.mapping.MapLegendSet;
+import org.hisp.dhis.mapping.MapLegendSetStore;
 
 /**
  * @author Jan Henrik Overland
  */
-public interface MapViewStore
-    extends GenericIdentifiableObjectStore<MapView>
+public class HibernateMapLegendSetStore
+    extends HibernateIdentifiableObjectStore<MapLegendSet>
+    implements MapLegendSetStore
 {
-    String ID = MapViewStore.class.getName();
-
-    Collection<MapView> getSystemAndUserMapViews( User user );
-    
-    Collection<MapView> getMapViewsByMapSourceType( String mapSourceType );
-
-    Collection<MapView> getMapViewsByFeatureType( String featureType, User user );
 }

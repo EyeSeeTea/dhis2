@@ -1,4 +1,4 @@
-package org.hisp.dhis.mapping.hibernate;
+package org.hisp.dhis.mapping;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,54 +27,45 @@ package org.hisp.dhis.mapping.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.mapping.MapView;
-import org.hisp.dhis.mapping.MapViewStore;
-import org.hisp.dhis.user.User;
-
-import java.util.Collection;
+import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
- * @author Jan Henrik Overland
+ * @author Lars Helge Overland
+ * @version $Id$
  */
-public class HibernateMapViewStore
-    extends HibernateIdentifiableObjectStore<MapView>
-    implements MapViewStore
+public class MapLegendSetDeletionHandler
+    extends DeletionHandler
 {
-    @SuppressWarnings( "unchecked" )
-    public Collection<MapView> getSystemAndUserMapViews( User user )
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private MappingService mappingService;
+
+    public void setMappingService( MappingService mappingService )
     {
-        return getCriteria( 
-            Restrictions.or( Restrictions.isNull( "user" ), 
-            Restrictions.eq( "user", user ) ) ).list();
+        this.mappingService = mappingService;
+    }
+
+    // -------------------------------------------------------------------------
+    // DeletionHandler implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected String getClassName()
+    {
+        return MapLegendSet.class.getSimpleName();
     }
     
-    @SuppressWarnings( "unchecked" )
-    public Collection<MapView> getMapViewsByMapSourceType( String mapSourceType )
+    @Override
+    public void deleteMapLegend( MapLegend mapLegend )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( MapView.class );
-
-        criteria.add( Restrictions.eq( "mapSourceType", mapSourceType ) );
-
-        return criteria.list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<MapView> getMapViewsByFeatureType( String featureType, User user )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( MapView.class );
-
-        criteria.add( Restrictions.eq( "featureType", featureType ) );
-
-        criteria.add( Restrictions.or( Restrictions.eq( "user", user ), Restrictions.isNull( "user" ) ) );
-
-        return criteria.list();
+        for ( MapLegendSet legendSet : mappingService.getAllMapLegendSets() )
+        {
+            if ( legendSet.getMapLegends().remove( mapLegend ) )
+            {
+                mappingService.updateMapLegendSet( legendSet );
+            }
+        }
     }
 }

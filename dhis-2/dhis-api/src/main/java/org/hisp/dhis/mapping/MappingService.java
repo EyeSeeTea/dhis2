@@ -44,14 +44,8 @@ public interface MappingService
 
     final String GEOJSON_DIR = "geojson";
 
-    final String MAP_VALUE_TYPE_INDICATOR = "indicator";
-    final String MAP_VALUE_TYPE_DATAELEMENT = "dataelement";
-
     final String MAP_LEGEND_SYMBOLIZER_COLOR = "color";
     final String MAP_LEGEND_SYMBOLIZER_IMAGE = "image";
-
-    final String MAPLEGENDSET_TYPE_AUTOMATIC = "automatic";
-    final String MAPLEGENDSET_TYPE_PREDEFINED = "predefined";
 
     final String KEY_MAP_DATE_TYPE = "dateType";
 
@@ -63,7 +57,7 @@ public interface MappingService
 
     final String MAP_LAYER_TYPE_BASELAYER = "baselayer";
     final String MAP_LAYER_TYPE_OVERLAY = "overlay";
-
+    
     // -------------------------------------------------------------------------
     // IndicatorMapValue
     // -------------------------------------------------------------------------
@@ -120,16 +114,24 @@ public interface MappingService
 
     MapLegendSet getMapLegendSetByName( String name );
 
-    Collection<MapLegendSet> getMapLegendSetsByType( String type );
-
-    MapLegendSet getMapLegendSetByIndicator( int indicatorId );
-
-    MapLegendSet getMapLegendSetByDataElement( int dataElementId );
-
     Collection<MapLegendSet> getAllMapLegendSets();
 
-    boolean indicatorHasMapLegendSet( int indicatorId );
+    // -------------------------------------------------------------------------
+    // Map
+    // -------------------------------------------------------------------------
 
+    int addMap( Map map );
+    
+    void updateMap( Map map );
+    
+    Map getMap( int id );
+    
+    Map getMap( String uid );
+    
+    void deleteMap( Map map );
+    
+    Collection<Map> getSystemAndUserMaps();
+    
     // -------------------------------------------------------------------------
     // MapView
     // -------------------------------------------------------------------------
@@ -155,11 +157,7 @@ public interface MappingService
     MapView getIndicatorLastYearMapView( String indicatorUid, String organisationUnitUid, int level );
 
     Collection<MapView> getAllMapViews();
-    
-    Collection<MapView> getSystemAndUserMapViews();
-
-    Collection<MapView> getMapViewsByFeatureType( String featureType );
-    
+        
     Collection<MapView> getMapViewsByUser( User user );
     
     Collection<MapView> getMapViewsBetweenByName( String name, int first, int max );

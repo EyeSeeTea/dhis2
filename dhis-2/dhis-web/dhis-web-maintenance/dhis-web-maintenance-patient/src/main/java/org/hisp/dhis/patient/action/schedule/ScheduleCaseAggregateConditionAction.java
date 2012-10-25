@@ -28,12 +28,9 @@
 package org.hisp.dhis.patient.action.schedule;
 
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_AGGREGATE_QUERY_BUILDER_ORGUNITGROUPSET_AGG_LEVEL;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_SCHEDULED_AGGREGATE_QUERY_BUILDER_PERIOD_TYPES;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.hisp.dhis.patient.scheduling.CaseAggregateConditionSchedulingManager;
 import org.hisp.dhis.setting.SystemSettingManager;
@@ -82,13 +79,6 @@ public class ScheduleCaseAggregateConditionAction
         this.execute = execute;
     }
 
-    private Set<String> scheduledPeriodTypes = new HashSet<String>();
-
-    public void setScheduledPeriodTypes( Set<String> scheduledPeriodTypes )
-    {
-        this.scheduledPeriodTypes = scheduledPeriodTypes;
-    }
-
     private Integer orgUnitGroupSetAggLevel;
 
     public void setOrgUnitGroupSetAggLevel( Integer orgUnitGroupSetAggLevel )
@@ -120,7 +110,7 @@ public class ScheduleCaseAggregateConditionAction
     {
         return running;
     }
-    
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -135,8 +125,6 @@ public class ScheduleCaseAggregateConditionAction
         }
         else
         {
-            systemSettingManager.saveSystemSetting( KEY_SCHEDULED_AGGREGATE_QUERY_BUILDER_PERIOD_TYPES,
-                (HashSet<String>) scheduledPeriodTypes );
             systemSettingManager.saveSystemSetting( KEY_AGGREGATE_QUERY_BUILDER_ORGUNITGROUPSET_AGG_LEVEL,
                 orgUnitGroupSetAggLevel );
 
@@ -166,7 +154,7 @@ public class ScheduleCaseAggregateConditionAction
                 schedulingManager.scheduleTasks( keyCronMap );
             }
         }
-        
+
         status = schedulingManager.getTaskStatus();
 
         running = Scheduler.STATUS_RUNNING.equals( status );

@@ -27,26 +27,38 @@ package org.hisp.dhis.api.controller.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.period.PeriodType.getPeriodFromIsoString;
+
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.api.controller.AbstractCrudController;
 import org.hisp.dhis.api.utils.ContextUtils;
+import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.mapgeneration.MapGenerationService;
+import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletResponse;
-import java.awt.image.BufferedImage;
-
-import static org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -64,12 +76,101 @@ public class MapController
 
     @Autowired
     private OrganisationUnitService organisationUnitService;
-
+    
+    @Autowired
+    private OrganisationUnitGroupService organisationUnitGroupService;
+    
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private IndicatorService indicatorService;
+    
+    @Autowired
+    private DataElementService dataElementService;
+    
+    @Autowired
+    private PeriodService periodService;
+        
     @Autowired
     private MapGenerationService mapGenerationService;
 
     @Autowired
     private ContextUtils contextUtils;
+
+    //--------------------------------------------------------------------------
+    // CRUD
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
+    @PreAuthorize( "hasRole('F_GIS_ADMIN') or hasRole('ALL')" )
+    public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    {
+        Map map = JacksonUtils.fromJson( input, Map.class );
+        
+        if ( map.getUser() != null )
+        {
+            map.setUser( userService.getUser( map.getUser().getUid() ) );
+        }
+        
+        for ( MapView view : map.getViews() )
+        {
+            if ( view.getIndicatorGroup() != null )
+            {
+                view.setIndicatorGroup( indicatorService.getIndicatorGroup( view.getIndicatorGroup().getUid() ) );
+            }
+            
+            if ( view.getIndicator() != null )
+            {
+                view.setIndicator( indicatorService.getIndicator( view.getIndicator().getUid() ) );
+            }
+            
+            if ( view.getDataElementGroup() != null )
+            {
+                view.setDataElementGroup( dataElementService.getDataElementGroup( view.getDataElementGroup().getUid() ) );
+            }
+            
+            if ( view.getDataElement() != null )
+            {
+                view.setDataElement( dataElementService.getDataElement( view.getDataElement().getUid() ) );
+            }
+            
+            if ( view.getPeriod() != null )
+            {
+                view.setPeriod( periodService.reloadPeriod( getPeriodFromIsoString( view.getPeriod().getUid() ) ) );
+            }
+            
+            if ( view.getParentOrganisationUnit() != null )
+            {
+                view.setParentOrganisationUnit( organisationUnitService.getOrganisationUnit( view.getParentOrganisationUnit().getUid() ) );
+            }
+            
+            if ( view.getOrganisationUnitLevel() != null )
+            {
+                view.setOrganisationUnitLevel( organisationUnitService.getOrganisationUnitLevel( view.getOrganisationUnitLevel().getUid() ) );
+            }
+            
+            if ( view.getLegendSet() != null )
+            {
+                view.setLegendSet( mappingService.getMapLegendSet( view.getLegendSet().getUid() ) );
+            }
+            
+            if ( view.getOrganisationUnitGroupSet() != null )
+            {
+                view.setOrganisationUnitGroupSet( organisationUnitGroupService.getOrganisationUnitGroupSet( view.getOrganisationUnitGroupSet().getUid() ) );
+            }
+            
+            mappingService.addMapView( view );
+        }
+        
+        mappingService.addMap( map );
+        
+        ContextUtils.createdResponse( response, "Map created", RESOURCE_PATH + "/" + map.getUid() );
+    }
+
+    //--------------------------------------------------------------------------
+    // Data
+    //--------------------------------------------------------------------------
 
     @RequestMapping( value = { "/{uid}/data", "/{uid}/data.png" }, method = RequestMethod.GET )
     public void getMap( @PathVariable String uid, HttpServletResponse response ) throws Exception
@@ -99,9 +200,9 @@ public class MapController
         renderMapViewPng( mapView, response );
     }
 
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // Supportive methods
-    //-------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
     private void renderMapViewPng( MapView mapView, HttpServletResponse response )
         throws Exception

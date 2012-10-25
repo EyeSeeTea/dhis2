@@ -43,12 +43,7 @@ function executeTasks()
 
 function schedulingAggCondTasks()
 {
-	var scheduledPeriodTypes = "";
-	jQuery("#scheduledPeriodTypes").each(function(){
-		scheduledPeriodTypes+='&scheduledPeriodTypes=' + this.value;
-	});
-	
-	$.post( 'scheduleCaseAggTasks.action?' + scheduledPeriodTypes,{
+	$.post( 'scheduleCaseAggTasks.action',{
 		execute:false,
 		orgUnitGroupSetAggLevel:getFieldValue("orgUnitGroupSetAggLevel"),
 		aggQueryBuilderStrategy:getFieldValue("aggQueryBuilderStrategy")
@@ -73,12 +68,7 @@ function executeAggCondTasks()
 	setWaitMessage( i18n_executing );	
 	if ( ok )
 	{
-		var scheduledPeriodTypes = "";
-		jQuery("#scheduledPeriodTypes").each(function(){
-			scheduledPeriodTypes+='&scheduledPeriodTypes=' + this.value;
-		});
-		
-		$.post( 'scheduleCaseAggTasks.action?' + scheduledPeriodTypes,{
+		$.post( 'scheduleCaseAggTasks.action',{
 			execute:true,
 			orgUnitGroupSetAggLevel:getFieldValue("orgUnitGroupSetAggLevel"),
 			aggQueryBuilderStrategy:getFieldValue("aggQueryBuilderStrategy")

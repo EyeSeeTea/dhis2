@@ -27,12 +27,6 @@ package org.hisp.dhis.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -47,10 +41,17 @@ import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.user.User;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Jan Henrik Overland
@@ -59,11 +60,23 @@ import org.hisp.dhis.user.User;
 public class MapView
     extends BaseIdentifiableObject
 {
+    public static final String LAYER_BOUNDARY = "boundary";
+    public static final String LAYER_THEMATIC1 = "thematic1";
+    public static final String LAYER_THEMATIC2 = "thematic2";
+    public static final String LAYER_FACILITY = "facility";
+    public static final String LAYER_SYMBOL = "symbol";
+
+    public static final String VALUE_TYPE_INDICATOR = "indicator";
+    public static final String VALUE_TYPE_DATAELEMENT = "dataelement";
+
+    public static final String LEGEND_TYPE_AUTOMATIC = "automatic";
+    public static final String LEGEND_TYPE_PREDEFINED = "predefined";
+    
     private static final long serialVersionUID = 1866358818802275436L;
 
-    private User user;
-
-    private String mapValueType;
+    private String layer;
+    
+    private String valueType;
 
     private IndicatorGroup indicatorGroup;
 
@@ -73,111 +86,61 @@ public class MapView
 
     private DataElement dataElement;
 
-    private PeriodType periodType;
-
     private Period period;
 
     private OrganisationUnit parentOrganisationUnit;
 
     private OrganisationUnitLevel organisationUnitLevel;
-
-    private String mapLegendType;
+    
+    private String legendType;
 
     private Integer method;
 
     private Integer classes;
 
-    private String bounds;
-
     private String colorLow;
 
     private String colorHigh;
 
-    private MapLegendSet mapLegendSet;
+    private MapLegendSet legendSet;
 
     private Integer radiusLow;
 
     private Integer radiusHigh;
 
-    private String longitude;
-
-    private String latitude;
-
-    private Integer zoom;
+    private Integer opacity;
+    
+    private OrganisationUnitGroupSet organisationUnitGroupSet;
 
     public MapView()
     {
     }
 
-    public MapView( String name, User user, String mapValueType, IndicatorGroup indicatorGroup, Indicator indicator,
-                    DataElementGroup dataElementGroup, DataElement dataElement, PeriodType periodType,
+    public MapView( String layer, String name, String valueType, IndicatorGroup indicatorGroup, Indicator indicator,
+                    DataElementGroup dataElementGroup, DataElement dataElement,
                     Period period, OrganisationUnit parentOrganisationUnit, OrganisationUnitLevel organisationUnitLevel,
-                    String mapLegendType, Integer method, Integer classes, String bounds, String colorLow, String colorHigh,
-                    MapLegendSet mapLegendSet, Integer radiusLow, Integer radiusHigh, String longitude, String latitude, int zoom )
+                    String legendType, Integer method, Integer classes, String colorLow, String colorHigh,
+                    MapLegendSet legendSet, Integer radiusLow, Integer radiusHigh, int opacity )
     {
+        this.layer = layer;
         this.name = name;
-        this.user = user;
-        this.mapValueType = mapValueType;
+        this.valueType = valueType;
         this.indicatorGroup = indicatorGroup;
         this.indicator = indicator;
         this.dataElementGroup = dataElementGroup;
         this.dataElement = dataElement;
-        this.periodType = periodType;
         this.period = period;
         this.parentOrganisationUnit = parentOrganisationUnit;
         this.organisationUnitLevel = organisationUnitLevel;
-        this.mapLegendType = mapLegendType;
+        this.legendType = legendType;
         this.method = method;
         this.classes = classes;
-        this.bounds = bounds;
         this.colorLow = colorLow;
         this.colorHigh = colorHigh;
-        this.mapLegendSet = mapLegendSet;
+        this.legendSet = legendSet;
         this.radiusLow = radiusLow;
         this.radiusHigh = radiusHigh;
-        this.longitude = longitude;
-        this.latitude = latitude;
-        this.zoom = zoom;
-    }
-
-    // -------------------------------------------------------------------------
-    // hashCode, equals and toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        return name.hashCode();
-    }
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        final MapView other = (MapView) object;
-
-        return name.equals( other.name );
-    }
-
-    @Override
-    public String toString()
-    {
-        return "[Name: " + name + ", indicator: " + indicator + ", org unit: " +
-            parentOrganisationUnit + ", period: " + period + ", value type: " + mapValueType + "]";
+        this.opacity = opacity;
     }
 
     // -------------------------------------------------------------------------
@@ -185,30 +148,29 @@ public class MapView
     // -------------------------------------------------------------------------
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
-    public User getUser()
+    public String getLayer()
     {
-        return user;
+        return layer;
     }
 
-    public void setUser( User user )
+    public void setLayer( String layer )
     {
-        this.user = user;
+        this.layer = layer;
     }
 
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
-    public String getMapValueType()
+    public String getValueType()
     {
-        return mapValueType;
+        return valueType;
     }
 
-    public void setMapValueType( String mapValueType )
+    public void setValueType( String valueType )
     {
-        this.mapValueType = mapValueType;
+        this.valueType = valueType;
     }
 
     @JsonProperty
@@ -274,12 +236,7 @@ public class MapView
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public PeriodType getPeriodType()
     {
-        return periodType;
-    }
-
-    public void setPeriodType( PeriodType periodType )
-    {
-        this.periodType = periodType;
+        return period.getPeriodType();
     }
 
     @JsonProperty
@@ -328,14 +285,14 @@ public class MapView
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
-    public String getMapLegendType()
+    public String getLegendType()
     {
-        return mapLegendType;
+        return legendType;
     }
 
-    public void setMapLegendType( String mapLegendType )
+    public void setLegendType( String legendType )
     {
-        this.mapLegendType = mapLegendType;
+        this.legendType = legendType;
     }
 
     @JsonProperty
@@ -362,19 +319,6 @@ public class MapView
     public void setClasses( Integer classes )
     {
         this.classes = classes;
-    }
-
-    @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
-    public String getBounds()
-    {
-        return bounds;
-    }
-
-    public void setBounds( String bounds )
-    {
-        this.bounds = bounds;
     }
 
     @JsonProperty
@@ -407,14 +351,14 @@ public class MapView
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
-    public MapLegendSet getMapLegendSet()
+    public MapLegendSet getLegendSet()
     {
-        return mapLegendSet;
+        return legendSet;
     }
 
-    public void setMapLegendSet( MapLegendSet mapLegendSet )
+    public void setLegendSet( MapLegendSet legendSet )
     {
-        this.mapLegendSet = mapLegendSet;
+        this.legendSet = legendSet;
     }
 
     @JsonProperty
@@ -446,40 +390,35 @@ public class MapView
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
-    public String getLongitude()
+    public Integer getOpacity()
     {
-        return longitude;
+        return opacity;
     }
 
-    public void setLongitude( String longitude )
+    public void setOpacity( Integer opacity )
     {
-        this.longitude = longitude;
-    }
-
-    @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
-    public String getLatitude()
-    {
-        return latitude;
-    }
-
-    public void setLatitude( String latitude )
-    {
-        this.latitude = latitude;
+        this.opacity = opacity;
     }
 
     @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
-    public Integer getZoom()
+    public OrganisationUnitGroupSet getOrganisationUnitGroupSet()
     {
-        return zoom;
+        return organisationUnitGroupSet;
     }
 
-    public void setZoom( Integer zoom )
+    public void setOrganisationUnitGroupSet( OrganisationUnitGroupSet organisationUnitGroupSet )
     {
-        this.zoom = zoom;
+        this.organisationUnitGroupSet = organisationUnitGroupSet;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "[Indicator: " + indicator + ", org unit: " +
+            parentOrganisationUnit + ", period: " + period + ", value type: " + valueType + "]";
     }
 
     @Override
@@ -491,28 +430,22 @@ public class MapView
         {
             MapView mapView = (MapView) other;
 
-            user = mapView.getUser() == null ? user : mapView.getUser();
-            mapValueType = mapView.getMapValueType() == null ? mapValueType : mapView.getMapValueType();
+            valueType = mapView.getValueType() == null ? valueType : mapView.getValueType();
             indicatorGroup = mapView.getIndicatorGroup() == null ? indicatorGroup : mapView.getIndicatorGroup();
             indicator = mapView.getIndicator() == null ? indicator : mapView.getIndicator();
             dataElementGroup = mapView.getDataElementGroup() == null ? dataElementGroup : mapView.getDataElementGroup();
             dataElement = mapView.getDataElement() == null ? dataElement : mapView.getDataElement();
-            periodType = mapView.getPeriodType() == null ? periodType : mapView.getPeriodType();
             period = mapView.getPeriod() == null ? period : mapView.getPeriod();
             parentOrganisationUnit = mapView.getParentOrganisationUnit() == null ? parentOrganisationUnit : mapView.getParentOrganisationUnit();
             organisationUnitLevel = mapView.getOrganisationUnitLevel() == null ? organisationUnitLevel : mapView.getOrganisationUnitLevel();
-            mapLegendType = mapView.getMapLegendType() == null ? mapLegendType : mapView.getMapLegendType();
+            legendType = mapView.getLegendType() == null ? legendType : mapView.getLegendType();
             method = mapView.getMethod() == null ? method : mapView.getMethod();
             classes = mapView.getClasses() == null ? classes : mapView.getClasses();
-            bounds = mapView.getBounds() == null ? bounds : mapView.getBounds();
             colorLow = mapView.getColorLow() == null ? colorLow : mapView.getColorLow();
             colorHigh = mapView.getColorHigh() == null ? colorHigh : mapView.getColorHigh();
-            mapLegendSet = mapView.getMapLegendSet() == null ? mapLegendSet : mapView.getMapLegendSet();
+            legendSet = mapView.getLegendSet() == null ? legendSet : mapView.getLegendSet();
             radiusLow = mapView.getRadiusLow() == null ? radiusLow : mapView.getRadiusLow();
             radiusHigh = mapView.getRadiusHigh() == null ? radiusHigh : mapView.getRadiusHigh();
-            longitude = mapView.getLongitude() == null ? longitude : mapView.getLongitude();
-            latitude = mapView.getLatitude() == null ? latitude : mapView.getLatitude();
-            zoom = mapView.getZoom() == null ? zoom : mapView.getZoom();
         }
     }
 }
