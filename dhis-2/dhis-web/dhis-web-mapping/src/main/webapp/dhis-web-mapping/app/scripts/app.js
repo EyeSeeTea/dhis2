@@ -2026,6 +2026,12 @@ Ext.onReady( function() {
 					create,
 					update
 				]
+			},
+			listeners: {
+				show: function() {
+					var x = this.getPosition()[0];
+					this.setPosition(x, 50);
+				}
 			}
 		});
 		
@@ -2331,6 +2337,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Legend', //i18n
+							menu: {},
 							handler: function() {
 								if (GIS.cmp.legendSetWindow && GIS.cmp.legendSetWindow.destroy) {
 									GIS.cmp.legendSetWindow.destroy();
