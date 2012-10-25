@@ -772,7 +772,11 @@ Ext.onReady( function() {
 				}
 				this.sort('name', 'ASC');
 				
-				GIS.cmp.mapMenu.updateItems();				
+				this.each( function(record) {
+					var lastUpdated = record.get('lastUpdated');
+					lastUpdated = lastUpdated.substring(0, 10);
+					record.set('lastUpdated', lastUpdated);
+				});
 			}
 		}
 	});
@@ -1483,6 +1487,77 @@ Ext.onReady( function() {
 		panel.addControls([button]);
 		
 		return panel;
+	};
+	
+	GIS.obj.MapMenu = function() {
+		var items,
+			menu,
+			grid;
+			
+		grid = Ext.create('Ext.grid.Panel', {
+			cls: 'gis-grid gis-menugrid',
+			bodyStyle: 'border: 0 none',
+			width: 350,
+			scroll: 'vertical',
+			hideHeaders: true,
+			columns: [
+				{
+					dataIndex: 'icon',
+					sortable: false,
+					width: 30
+				},
+				{
+					dataIndex: 'name',
+					sortable: false,
+					width: 230
+				},
+				{
+					dataIndex: 'lastUpdated',
+					sortable: false,
+					width: 70
+				},
+				{
+					sortable: false,
+					width: 20
+				}
+			],
+			store: GIS.store.maps,
+			listeners: {
+				render: function() {
+					if (!this.store.isLoaded) {
+						this.store.load();
+					}
+				}
+			}
+		});
+		
+		items = [
+			{
+				text: 'Manage favorites', //i18n
+				iconCls: 'gis-menu-item-icon-edit',
+				cls: 'gis-menu-item-first',
+				handler: function() {
+					alert('window');
+				}
+			},
+			{
+				xtype: 'menuseparator'
+			},
+			grid
+		];
+		
+		menu = Ext.create('Ext.menu.Menu', {
+			shadow: false,
+			showSeparator: false,
+			items: items,
+			listeners: {
+				afterrender: function() {
+					this.getEl().addCls('gis-toolbar-btn-menu');
+				}
+			}
+		});
+		
+		return menu;
 	};
 	
 	GIS.obj.LegendSetWindow = function() {
@@ -2359,62 +2434,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Favorites', //i18n
-							menu: Ext.create('Ext.menu.Menu', {
-								shadow: false,
-								showSeparator: false,
-								staticItems: [
-									{
-										text: 'Manage favorites', //i18n
-										iconCls: 'gis-menu-item-icon-edit',
-										cls: 'gis-menu-item-first',
-										handler: function() {
-											alert('window');
-										}
-									},
-									{
-										xtype: 'menuseparator'
-									}
-								],
-								updateItems: function() {
-									var records = GIS.store.maps.data.items,
-										items = [],
-										record;
-										
-									this.removeAll();
-									
-									this.add(this.staticItems);
-							
-									for (var i = 0; i < records.length; i++) {
-										record = records[i];
-										items.push({
-											text: record.data.name,
-											iconCls: 'gis-menu-item-icon-favorite',
-											handler: function() {
-												alert('request map + load');
-											}
-										});
-									}
-									
-									this.add(items);
-								},
-								listeners: {
-									afterrender: function() {
-										this.getEl().addCls('gis-toolbar-btn-menu');
-									}
-								}
-							}),
-							handler: function() {
-								if (!GIS.store.maps.isLoaded) {
-									GIS.store.maps.load();
-								}
-							},
-							listeners: {
-								added: function() {
-									GIS.cmp.mapMenu = this.menu;
-									
-									this.menu.add(this.menu.staticItems);
-								}
-							}
+							menu: new GIS.obj.MapMenu()
 						},
 						{
 							text: 'Legend', //i18n
