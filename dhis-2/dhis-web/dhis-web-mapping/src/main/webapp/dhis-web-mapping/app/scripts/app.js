@@ -747,13 +747,13 @@ Ext.onReady( function() {
 	});
 	
 	GIS.store.maps = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name', 'lastUpdated'],
+		fields: ['id', 'name', 'lastUpdated', 'icon'],
 		proxy: {
 			type: 'ajax',
-			url: GIS.conf.url.path_api + 'charts.json?links=false&paging=false',
+			url: GIS.conf.url.path_api + 'indicators.json?links=false&paging=false',
 			reader: {
 				type: 'json',
-				root: 'charts'
+				root: 'indicators'
 			}
 		},
 		isLoaded: false,
@@ -772,10 +772,18 @@ Ext.onReady( function() {
 				}
 				this.sort('name', 'ASC');
 				
-				this.each( function(record) {
-					var lastUpdated = record.get('lastUpdated');
+				this.each( function(record) {					
+					var lastUpdated,
+						icon;
+						
+					lastUpdated= record.get('lastUpdated');
 					lastUpdated = lastUpdated.substring(0, 10);
-					record.set('lastUpdated', lastUpdated);
+					icon = '<img src="images/favorite_16.png" style="vertical-align: text-top" />';
+					
+					record.set({
+						lastUpdated: lastUpdated,
+						icon: icon
+					});
 				});
 			}
 		}
@@ -1492,24 +1500,25 @@ Ext.onReady( function() {
 	GIS.obj.MapMenu = function() {
 		var items,
 			menu,
+			panel,
 			grid;
 			
 		grid = Ext.create('Ext.grid.Panel', {
 			cls: 'gis-grid gis-menugrid',
 			bodyStyle: 'border: 0 none',
-			width: 350,
+			width: 370,
 			scroll: 'vertical',
 			hideHeaders: true,
 			columns: [
 				{
 					dataIndex: 'icon',
 					sortable: false,
-					width: 30
+					width: 24
 				},
 				{
 					dataIndex: 'name',
 					sortable: false,
-					width: 230
+					width: 258
 				},
 				{
 					dataIndex: 'lastUpdated',
@@ -1518,19 +1527,31 @@ Ext.onReady( function() {
 				},
 				{
 					sortable: false,
-					width: 20
+					width: 18
 				}
 			],
 			store: GIS.store.maps,
 			listeners: {
+				added: function() {
+					GIS.cmp.mapGrid = this;
+				},
 				render: function() {
 					if (!this.store.isLoaded) {
 						this.store.load();
 					}
+				},
+				itemclick: function(grid, record, item) {
+					alert(record.data.id);
 				}
 			}
 		});
 		
+		panel = Ext.create('Ext.panel.Panel', {
+			layout: 'fit',
+			bodyStyle: 'border: 0 none',
+			items: grid
+		});
+				
 		items = [
 			{
 				text: 'Manage favorites', //i18n
@@ -1543,7 +1564,7 @@ Ext.onReady( function() {
 			{
 				xtype: 'menuseparator'
 			},
-			grid
+			panel
 		];
 		
 		menu = Ext.create('Ext.menu.Menu', {
@@ -1553,6 +1574,9 @@ Ext.onReady( function() {
 			listeners: {
 				afterrender: function() {
 					this.getEl().addCls('gis-toolbar-btn-menu');
+				},
+				show: function() {
+					panel.setHeight(GIS.cmp.region.center.getHeight() - 150);
 				}
 			}
 		});
@@ -2144,7 +2168,7 @@ Ext.onReady( function() {
 		return window;
 	};
 	
-	GIS.obj.getDownloadMenu = function() {
+	GIS.obj.DownloadMenu = function() {
 		var menu,
 			item,
 			textfield,
@@ -2165,20 +2189,20 @@ Ext.onReady( function() {
 				var title = textfield.getValue(),
 					svg = GIS.util.svg.getString(title, GIS.util.map.getVisibleVectorLayers()),
 					exportForm = document.getElementById('exportForm');
-					
+				
 				if (svg) {
 					document.getElementById('svgField').value = svg;
 					document.getElementById('titleField').value = title;
 					exportForm.action = '../exportImage.action';
 					exportForm.method = 'post';
 					exportForm.submit();
-				
-					textfield.reset();
-					menu.hide();
 				}
-				else {					
-					alert('No map data to export'); //todo //i18n
-				}					
+				else {
+					alert('Please create a map first'); //todo //i18n
+				}
+				
+				textfield.reset();
+				menu.hide();
 			}
 		});
 			
@@ -2200,13 +2224,7 @@ Ext.onReady( function() {
 			height: 30,
 			cls: 'gis-menu',
 			items: item,
-			listeners: {
-				beforeshow: function() {
-					if (!GIS.util.map.getVisibleVectorLayers()) {
-						alert('No map data to export'); //todo //i18n
-						return false;
-					}
-				},						
+			listeners: {				
 				afterrender: function() {
 					this.getEl().addCls('gis-toolbar-btn-menu gis-toolbar-btn-menu-download');
 				},
@@ -2450,7 +2468,7 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Download', //i18n
-							menu: GIS.obj.getDownloadMenu()
+							menu: new GIS.obj.DownloadMenu()
 						},
 						'->',
 						{

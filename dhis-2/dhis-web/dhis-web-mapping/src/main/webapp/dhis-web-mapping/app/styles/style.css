@@ -463,19 +463,22 @@ html * {
 }
 
 .gis-menugrid .x-grid-cell { /* grid in menu, regular cell */
-	border-color: transparent !important;
+	border: 0 none !important;
 	background-color: #fff !important;
-	padding-top: 2px;
-	padding-bottom: 2px;
 }
 .gis-menugrid .x-grid-row-over .x-grid-cell { /* cell hover */
-	border-color: #ddd !important;
+	border: 0 none !important;
 	background-color: #ddd !important;
+}
+.gis-menugrid .x-grid-cell-inner {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	color: #222;
 }
 .gis-menugrid .x-grid-row-over .x-grid-cell-inner {
 	cursor: hand;
 	cursor: pointer;
-}	
+}
 .gis-menugrid .x-grid-header-ct { /* hide vertical line above grid */
 	border-bottom: 0 none !important;
 }
