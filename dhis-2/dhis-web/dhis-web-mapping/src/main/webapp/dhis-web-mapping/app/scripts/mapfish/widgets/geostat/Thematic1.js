@@ -444,7 +444,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                 }
 			}
         });
-        
+                
         this.cmp.periodType = Ext.create('Ext.form.field.ComboBox', {
             editable: false,
             valueField: 'id',

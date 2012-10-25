@@ -279,11 +279,13 @@ Ext.onReady( function() {
 	GIS.util.map.getVisibleVectorLayers = function() {
 		var a = [];
 		for (var i = 0; i < GIS.map.layers.length; i++) {
-			if (GIS.map.layers[i].layerType === GIS.conf.finals.layer.type_vector && GIS.map.layers[i].visibility) {
+			if (GIS.map.layers[i].layerType === GIS.conf.finals.layer.type_vector &&
+				GIS.map.layers[i].visibility &&
+				GIS.map.layers[i].features.length) {
 				a.push(GIS.map.layers[i]);
 			}
 		}
-		return a;
+		return a.length ? a : false;
 	};
 	
     GIS.util.map.getLayersByType = function(layerType) {
@@ -367,8 +369,14 @@ Ext.onReady( function() {
 		y += 35;
 		
 		if (!layers.length) {
-			alert('No visible data layers'); //todo //i18n
-			return;
+			return false;
+		}
+		
+		for (var i = layers.length - 1; i > 0; i--) {
+			if (layers[i].base.id === GIS.base.facility.id) {
+				layers.splice(i, 1);
+				console.log('Facility layer export currently not supported');
+			}
 		}
 		
 		for (var i = 0; i < layers.length; i++) {
@@ -385,7 +393,7 @@ Ext.onReady( function() {
 			svgArray.push(layer.div.innerHTML);
 			
 			// Legend
-			if (id !== GIS.base.boundary.id) {
+			if (id !== GIS.base.boundary.id && id !== GIS.base.facility.id) {
 				what = '<g id="indicator" style="display: block; visibility: visible;">' +
 					   '<text id="indicator" x="' + x + '" y="' + y + '" font-size="12">' +
 					   '<tspan>' + legendConfig.what + '</tspan></text></g>';
@@ -2045,15 +2053,20 @@ Ext.onReady( function() {
 				var title = textfield.getValue(),
 					svg = GIS.util.svg.getString(title, GIS.util.map.getVisibleVectorLayers()),
 					exportForm = document.getElementById('exportForm');
+					
+				if (svg) {
+					document.getElementById('svgField').value = svg;
+					document.getElementById('titleField').value = title;
+					exportForm.action = '../exportImage.action';
+					exportForm.method = 'post';
+					exportForm.submit();
 				
-				document.getElementById('svgField').value = svg;
-				document.getElementById('titleField').value = title;
-				exportForm.action = '../exportImage.action';
-				exportForm.method = 'post';
-				exportForm.submit();
-				
-				textfield.reset();
-				menu.hide();
+					textfield.reset();
+					menu.hide();
+				}
+				else {					
+					alert('No map data to export'); //todo //i18n
+				}					
 			}
 		});
 			
@@ -2076,6 +2089,12 @@ Ext.onReady( function() {
 			cls: 'gis-menu',
 			items: item,
 			listeners: {
+				beforeshow: function() {
+					if (!GIS.util.map.getVisibleVectorLayers()) {
+						alert('No map data to export'); //todo //i18n
+						return false;
+					}
+				},						
 				afterrender: function() {
 					this.getEl().addCls('gis-toolbar-btn-menu gis-toolbar-btn-menu-download');
 				},
