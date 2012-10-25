@@ -527,7 +527,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		return model;
 	},
 	
-	validateModel: function(model) {		
+	validateModel: function(model) {
 		if (!model.level || !Ext.isNumber(model.level)) {
 			GIS.logg.push([model.level, this.xtype + '.level: number']);
 				alert('No level selected'); //todo

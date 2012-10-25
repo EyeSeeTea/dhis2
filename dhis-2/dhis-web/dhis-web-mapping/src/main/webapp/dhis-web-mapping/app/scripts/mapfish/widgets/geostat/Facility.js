@@ -803,13 +803,13 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 	validateModel: function(model) {
 		if (!model.groupSet || !Ext.isString(model.groupSet)) {
 			GIS.logg.push([model.groupSet, this.xtype + '.parentId: string']);
-				//alert("validation failed"); //todo
+				alert('No group set selected'); //todo //i18n
 			return false;
 		}
 		
 		if (!model.level || !Ext.isNumber(model.level)) {
 			GIS.logg.push([model.level, this.xtype + '.level: number']);
-				//alert("validation failed"); //todo
+				alert('No level selected'); //todo
 			return false;
 		}
 		if (!model.levelName || !Ext.isString(model.levelName)) {
@@ -819,7 +819,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		}
 		if (!model.parentId || !Ext.isString(model.parentId)) {
 			GIS.logg.push([model.parentId, this.xtype + '.parentId: string']);
-				//alert("validation failed"); //todo
+				alert('No parent organisation unit selected'); //todo
 			return false;
 		}
 		if (!model.parentName || !Ext.isString(model.parentName)) {
@@ -834,7 +834,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		}
 		if (model.parentLevel > model.level) {
 			GIS.logg.push([model.parentLevel, model.level, this.xtype + '.parentLevel: number <= ' + this.xtype + '.level']);
-				//alert("validation failed"); //todo
+				alert('Level cannot be higher than parent level'); //todo
 			return false;
 		}
 		
