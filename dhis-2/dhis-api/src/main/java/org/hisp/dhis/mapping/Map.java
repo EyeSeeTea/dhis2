@@ -1,4 +1,4 @@
-package org.hisp.dhis.mapping.action;
+package org.hisp.dhis.mapping;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,60 +27,96 @@ package org.hisp.dhis.mapping.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.apache.commons.lang.NotImplementedException;
-import org.hisp.dhis.mapping.MapView;
-import org.hisp.dhis.mapping.MappingService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.user.User;
 
 /**
- * @author Jan Henrik Overland
- * @version $Id$
+ * @author Lars Helge Overland
  */
-public class GetMapViewsByFeatureTypeAction
-    implements Action
+public class Map
+    extends BaseIdentifiableObject
 {
+    private User user;
+
+    private String longitude;
+
+    private String latitude;
+
+    private Integer zoom;
+    
+    private Set<MapView> views = new HashSet<MapView>();
+
     // -------------------------------------------------------------------------
-    // Dependencies
+    // Constructors
     // -------------------------------------------------------------------------
 
-    private MappingService mappingService;
-
-    public void setMappingService( MappingService mappingService )
+    public Map()
     {
-        this.mappingService = mappingService;
+    }
+    
+    public Map( String name, User user, String longitude, String latitude, Integer zoom )
+    {
+        this.name = name;
+        this.user = user;
+        this.longitude = longitude;
+        this.latitude = latitude;
+        this.zoom = zoom;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Getters and setters
     // -------------------------------------------------------------------------
 
-    private String featureType;
-
-    public void setFeatureType( String featureType )
+    public User getUser()
     {
-        this.featureType = featureType;
+        return user;
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private List<MapView> object;
-
-    public List<MapView> getObject()
+    public void setUser( User user )
     {
-        return object;
+        this.user = user;
     }
 
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
+    public String getLongitude()
     {
-        throw new NotImplementedException();
+        return longitude;
+    }
+
+    public void setLongitude( String longitude )
+    {
+        this.longitude = longitude;
+    }
+
+    public String getLatitude()
+    {
+        return latitude;
+    }
+
+    public void setLatitude( String latitude )
+    {
+        this.latitude = latitude;
+    }
+
+    public Integer getZoom()
+    {
+        return zoom;
+    }
+
+    public void setZoom( Integer zoom )
+    {
+        this.zoom = zoom;
+    }
+
+    public Set<MapView> getViews()
+    {
+        return views;
+    }
+
+    public void setViews( Set<MapView> views )
+    {
+        this.views = views;
     }
 }
