@@ -276,36 +276,21 @@ html * {
 	}
 	
 	.gis-menu-item-icon-edit,
-	.gis-menu-item-icon-refresh,
 	.gis-menu-item-icon-clear,
 	.gis-menu-item-icon-labels,
 	.gis-menu-item-icon-filter,
 	.gis-menu-item-icon-search,
-	.gis-menu-item-icon-opacity,
-	.gis-menu-item-icon-history,
 	
 	.gis-menu-item-icon-drill,
 	.gis-menu-item-icon-float,
 	.gis-menu-item-icon-information,
 	.gis-menu-item-icon-relocate,
 	
-	.gis-menu-item-icon-opacity10,
-	.gis-menu-item-icon-opacity20,
-	.gis-menu-item-icon-opacity30,
-	.gis-menu-item-icon-opacity40,
-	.gis-menu-item-icon-opacity50,
-	.gis-menu-item-icon-opacity60,
-	.gis-menu-item-icon-opacity70,
-	.gis-menu-item-icon-opacity80,
-	.gis-menu-item-icon-opacity90,
-	.gis-menu-item-icon-opacity100 {
+	.gis-menu-item-icon-favorite {
 		left: 6px;
 	}	
 	.gis-menu-item-icon-edit {
 		background: url('../images/edit_16.png') no-repeat;
-	}
-	.gis-menu-item-icon-refresh {
-		background: url('../images/refresh_16.png') no-repeat;
 	}
 	.gis-menu-item-icon-clear {
 		background: url('../images/clear_16.png') no-repeat;
@@ -319,12 +304,6 @@ html * {
 	.gis-menu-item-icon-search {
 		background: url('../images/search_16.png') no-repeat;
 	}
-	.gis-menu-item-icon-opacity {
-		background: url('../images/opacity_16.png') no-repeat;
-	}
-	.gis-menu-item-icon-history {
-		background: url('../images/history_16.png') no-repeat;
-	}
 	
 	.gis-menu-item-icon-drill {
 		background: url('../images/drill_16.png') no-repeat;
@@ -337,6 +316,10 @@ html * {
 	}
 	.gis-menu-item-icon-relocate {
 		background: url('../images/relocate_16.png') no-repeat;
+	}
+	
+	.gis-menu-item-icon-favorite {
+		background: url('../images/favorite_16.png') no-repeat;
 	}
 	
 	.x-menu-item-separator {
