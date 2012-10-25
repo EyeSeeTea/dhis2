@@ -623,11 +623,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 			// Menu
 			var menuItems = [];
 			
-			if (isPoint) {
-				menuItems.push({
-					xtype: 'menuseparator'
-				});
-				
+			if (isPoint) {				
 				menuItems.push( Ext.create('Ext.menu.Item', {
 					text: GIS.i18n.relocate,
 					iconCls: 'gis-menu-item-icon-relocate',
