@@ -771,20 +771,6 @@ Ext.onReady( function() {
 					this.isLoaded = true;
 				}
 				this.sort('name', 'ASC');
-				
-				this.each( function(record) {					
-					var lastUpdated,
-						icon;
-						
-					lastUpdated= record.get('lastUpdated');
-					lastUpdated = lastUpdated.substring(0, 10);
-					icon = '<img src="images/favorite_16.png" style="vertical-align: text-top" />';
-					
-					record.set({
-						lastUpdated: lastUpdated,
-						icon: icon
-					});
-				});
 			}
 		}
 	});
@@ -1497,94 +1483,6 @@ Ext.onReady( function() {
 		return panel;
 	};
 	
-	GIS.obj.MapMenu = function() {
-		var items,
-			menu,
-			panel,
-			grid;
-			
-		grid = Ext.create('Ext.grid.Panel', {
-			cls: 'gis-grid gis-menugrid',
-			bodyStyle: 'border: 0 none',
-			width: 370,
-			scroll: 'vertical',
-			hideHeaders: true,
-			columns: [
-				{
-					dataIndex: 'icon',
-					sortable: false,
-					width: 24
-				},
-				{
-					dataIndex: 'name',
-					sortable: false,
-					width: 258
-				},
-				{
-					dataIndex: 'lastUpdated',
-					sortable: false,
-					width: 70
-				},
-				{
-					sortable: false,
-					width: 18
-				}
-			],
-			store: GIS.store.maps,
-			listeners: {
-				added: function() {
-					GIS.cmp.mapGrid = this;
-				},
-				render: function() {
-					if (!this.store.isLoaded) {
-						this.store.load();
-					}
-				},
-				itemclick: function(a,b,c,d,e) {
-					console.log(a,b,c,d,e);
-					//alert(record.data.id);
-				}
-			}
-		});
-		
-		panel = Ext.create('Ext.panel.Panel', {
-			layout: 'fit',
-			bodyStyle: 'border: 0 none',
-			items: grid
-		});
-				
-		items = [
-			{
-				text: 'Manage favorites', //i18n
-				iconCls: 'gis-menu-item-icon-edit',
-				cls: 'gis-menu-item-first',
-				handler: function() {
-					
-				}
-			},
-			{
-				xtype: 'menuseparator'
-			},
-			panel
-		];
-		
-		menu = Ext.create('Ext.menu.Menu', {
-			shadow: false,
-			showSeparator: false,
-			items: items,
-			listeners: {
-				afterrender: function() {
-					this.getEl().addCls('gis-toolbar-btn-menu');
-				},
-				show: function() {
-					panel.setHeight(GIS.cmp.region.center.getHeight() - 150);
-				}
-			}
-		});
-		
-		return menu;
-	};
-	
 	GIS.obj.MapWindow = function() {
 		
 		// Objects
@@ -1599,6 +1497,8 @@ Ext.onReady( function() {
 			grid,
 			prevButton,
 			nextButton,
+			tbar,
+			bbar,
 			
 			nameTextfied,
 			systemCheckbox,
@@ -1608,44 +1508,76 @@ Ext.onReady( function() {
 			window;
 			
 		searchTextfield = Ext.create('Ext.form.field.Text', {
-			cls: 'gis-textfield',
+			width: 300,
+			height: 28,
+			bodyStyle: 'padding-left: 10px',
 			emptyText: 'Search for favorites..', //i18n
+			enableKeyEvents: true,
+			currentValue: '',
 			listeners: {
 				keyup: function() {
-					console.log('Request ' + this.getValue());
+					if (this.getValue() !== this.currentValue) {
+						console.log('Request ' + this.getValue());
+						this.currentValue = this.getValue();
+					}
 				}
+			}
+		});
+		
+		addButton = Ext.create('Ext.button.Button', {
+			text: 'Add new..', //i18n
+			handler: function() {
+			}
+		});
+		
+		prevButton = Ext.create('Ext.button.Button', {
+			text: 'Prev', //i18n
+			handler: function() {
+			}
+		});
+		
+		nextButton = Ext.create('Ext.button.Button', {
+			text: 'Next', //i18n
+			handler: function() {
 			}
 		});
 		
 		grid = Ext.create('Ext.grid.Panel', {
 			cls: 'gis-grid',
-			bodyStyle: 'border-top: 0 none',
-			width: 580,
+			bodyStyle: 'border-top: 0 none, border-bottom: 0 none',
+			height: 380,
 			scroll: false,
 			hideHeaders: true,
 			columns: [						
 				{
 					dataIndex: 'name',
 					sortable: false,
-					width: GIS.conf.layout.widget.item_width - 62
+					width: 250,
+					renderer: function(value, metaData, record) {
+						return '<a href="javascript: alert(' + record.data.name + ');">' + value + '</a>';
+					}
 				},
 				{
 					xtype: 'actioncolumn',
 					sortable: false,
-					width: 40,
+					width: 100,
 					items: [
 						{
 							iconCls: 'gis-grid-row-icon-edit',
 							handler: function(grid, rowIndex, colIndex, col, event) {
-								var id = this.up('grid').store.getAt(rowIndex).data.id;
-								showUpdateLegendSet(id);
+								//var id = this.up('grid').store.getAt(rowIndex).data.id;
+							}
+						},
+						{
+							iconCls: 'gis-grid-row-icon-overwrite',
+							handler: function(grid, rowIndex, colIndex, col, event) {
+								//var id = this.up('grid').store.getAt(rowIndex).data.id;
 							}
 						},
 						{
 							iconCls: 'gis-grid-row-icon-delete',
 							handler: function(grid, rowIndex, colIndex, col, event) {
-								var id = this.up('grid').store.getAt(rowIndex).data.id;
-								deleteLegendSet(id);
+								//var id = this.up('grid').store.getAt(rowIndex).data.id;
 							}
 						}
 					]
@@ -1655,8 +1587,16 @@ Ext.onReady( function() {
 					width: 20
 				}
 			],
-			store: legendSetStore,
-			tbar: tbar,
+			store: GIS.store.maps,
+			tbar: [
+				'->',
+				addButton
+			],
+			bbar: [
+				'->',
+				prevButton,
+				nextButton
+			],
 			listeners: {
 				render: function() {
 					this.store.load();
@@ -1673,33 +1613,26 @@ Ext.onReady( function() {
 				}
 			}
 		});
-			
 		
-		//window = Ext.create('Ext.window.Window', {
-			//title: 'Manage favorites',
-			//iconCls: 'gis-window-title-icon-favorite',
-			//cls: 'gis-container-default',
-			//width: 600,
-			//height: 600,
-			//items: [
-				//searchTextfield,
-				//grid
-			//],
-			//tbar: [
-				//'->',
-				//addButton
-			//],
-			//bbar: [
-				//'->',
-				//prevButton,
-				//nextButton
-			//],
-			//listeners: {
-				//show: function() {
-					//this.setPosition(this.getPosition()[0], 40);
-				//}
-			//}
-		//});
+		window = Ext.create('Ext.window.Window', {
+			title: 'Manage favorites',
+			iconCls: 'gis-window-title-icon-favorite',
+			cls: 'gis-container-default',
+			width: 500,
+			height: 500,
+			items: [
+				{html:'nissa'}
+			],
+			items: [
+				searchTextfield,
+				grid
+			],
+			listeners: {
+				show: function() {
+					this.setPosition(this.getPosition()[0], 40);
+				}
+			}
+		});
 		
 		return window;
 	};
@@ -1879,13 +1812,13 @@ Ext.onReady( function() {
 			legendSetName = Ext.create('Ext.form.field.Text', {
 				cls: 'gis-textfield',
 				width: GIS.conf.layout.widget.item_width,
-				fieldLabel: 'Legend set name' //i18m
+				fieldLabel: 'Legend set name' //i18n
 			});
 			
 			legendName = Ext.create('Ext.form.field.Text', {
 				cls: 'gis-textfield',
 				width: GIS.conf.layout.widget.item_width - 12,
-				fieldLabel: 'Legend name' //i18m
+				fieldLabel: 'Legend name' //i18n
 			});
 			
 			startValue = Ext.create('Ext.form.field.Number', {
@@ -1903,7 +1836,7 @@ Ext.onReady( function() {
 			
 			color = Ext.create('Ext.ux.button.ColorButton', {
 				width: GIS.conf.layout.widget.item_width - GIS.conf.layout.widget.itemlabel_width - 10 - 12,
-				fieldLabel: 'Symbolizer', //i18m
+				fieldLabel: 'Symbolizer', //i18n
 				value: 'e1e1e1'
 			});
 			
@@ -2565,7 +2498,15 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Favorites', //i18n
-							menu: new GIS.obj.MapMenu()
+							menu: {},
+							handler: function() {
+								if (GIS.cmp.mapWindow && GIS.cmp.mapWindow.destroy) {
+									GIS.cmp.mapWindow.destroy();
+								}
+								
+								GIS.cmp.mapWindow = new GIS.obj.MapWindow();
+								GIS.cmp.mapWindow.show();
+							}
 						},
 						{
 							text: 'Legend', //i18n
