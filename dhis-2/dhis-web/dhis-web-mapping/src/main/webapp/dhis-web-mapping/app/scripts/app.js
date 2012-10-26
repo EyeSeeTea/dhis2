@@ -1738,11 +1738,7 @@ Ext.onReady( function() {
 					{
 						dataIndex: 'name',
 						sortable: false,
-						width: GIS.conf.layout.widget.item_width - 62,
-						renderer: function(value, metaData) {
-							metaData.tdCls = 'minklasse';
-							return value;
-						}
+						width: GIS.conf.layout.widget.item_width - 62
 					},
 					{
 						xtype: 'actioncolumn',
@@ -1778,7 +1774,7 @@ Ext.onReady( function() {
 					},
 					itemmouseenter: function(grid, record, item) {
 						this.currentItem = Ext.get(item);
-						//this.currentItem.removeCls('x-grid-row-over');
+						this.currentItem.removeCls('x-grid-row-over');
 					},
 					select: function() {
 						this.currentItem.removeCls('x-grid-row-selected');

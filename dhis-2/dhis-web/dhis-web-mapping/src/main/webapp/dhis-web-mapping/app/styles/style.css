@@ -466,6 +466,10 @@ html * {
 .gis-grid .x-grid-cell-inner * {
 	font-size: 10px !important;
 }
+.gis-grid .x-grid-cell-inner {
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
 
 .gis-grid .x-column-header-text {
 	color: #333;
