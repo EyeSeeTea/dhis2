@@ -147,6 +147,12 @@ public class MapView
     // Getters and setters
     // -------------------------------------------------------------------------
 
+    @Override
+    public String getName()
+    {
+        return uid;
+    }
+    
     @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
@@ -236,7 +242,7 @@ public class MapView
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public PeriodType getPeriodType()
     {
-        return period.getPeriodType();
+        return period != null ? period.getPeriodType() : null;
     }
 
     @JsonProperty

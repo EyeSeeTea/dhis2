@@ -421,7 +421,7 @@ public class DefaultMappingService
     
     public Map getMap( String uid )
     {
-        return mapStore.getByCode( uid );
+        return mapStore.getByUid( uid );
     }
     
     public void deleteMap( Map map )
@@ -433,7 +433,7 @@ public class DefaultMappingService
     {
         User user = currentUserService.getCurrentUser();
         
-        return mapStore.getSystemAndUserMaps( user );
+        return mapStore.getAccessibleByUser( user );
     }
         
     // -------------------------------------------------------------------------

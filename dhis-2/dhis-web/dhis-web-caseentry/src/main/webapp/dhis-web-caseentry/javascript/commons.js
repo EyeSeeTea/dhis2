@@ -16,6 +16,8 @@ var SAVING_COLOR = '#ffffcc';
 var SUCCESS = 'success';
 var ERROR = 'error';
 
+var isDashboard = false;
+
 // Disable caching for ajax requests in general 
 
 $( document ).ready( function() {
@@ -1713,5 +1715,15 @@ function commentDivToggle(isHide)
 	{
 		hideById('showCommentBtn');
 		showById('hideCommentBtn');
+	}
+}
+
+function backPreviousPage( patientId )
+{
+	if(isDashboard){
+		showPatientDashboardForm( patientId )
+	}
+	else{
+		loadPatientList();
 	}
 }

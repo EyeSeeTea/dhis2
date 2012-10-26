@@ -51,7 +51,6 @@ import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -141,7 +140,7 @@ public class CaseAggregateConditionTask
         {
             String periodType = dataSet.getPeriodType().getName();
             List<Period> periods = getPeriods( periodType );
-            
+
             String sql = "select caseaggregationconditionid, aggregationdataelementid, optioncomboid "
                 + "from caseaggregationcondition cagg inner join datasetmembers dm "
                 + "on cagg.aggregationdataelementid=dm.dataelementid " + "inner join dataset ds "
@@ -174,12 +173,15 @@ public class CaseAggregateConditionTask
                 {
                     for ( Period period : periods )
                     {
-                        Double resultValue = aggregationConditionService.parseConditition( aggCondition, orgUnit,
-                            period );
-
                         DataValue dataValue = dataValueService.getDataValue( orgUnit, dElement, period, optionCombo );
 
-                        if ( resultValue != null && resultValue != 0.0 )
+                        if ( dataValue != null && dataValue.getStoredBy().equals( STORED_BY_DHIS_SYSTEM ) )
+                            continue;
+
+                        Integer resultValue = aggregationConditionService.parseConditition( aggCondition, orgUnit,
+                            period );
+
+                        if ( resultValue != null && resultValue != 0 )
                         {
                             // -----------------------------------------------------
                             // Add dataValue
@@ -193,7 +195,7 @@ public class CaseAggregateConditionTask
                             // -----------------------------------------------------
                             // Update dataValue
                             // -----------------------------------------------------
-                            else
+                            else if ( (double)resultValue != Double.parseDouble( dataValue.getValue() ) )
                             {
                                 dataValue.setValue( "" + resultValue );
                                 dataValue.setTimestamp( new Date() );
@@ -242,9 +244,9 @@ public class CaseAggregateConditionTask
 
         Iterator<Period> iter = relatives.iterator();
         Date currentDate = new Date();
-        while(iter.hasNext())
+        while ( iter.hasNext() )
         {
-            if(currentDate.before( iter.next().getEndDate() ))
+            if ( currentDate.before( iter.next().getEndDate() ) )
             {
                 iter.remove();
             }
