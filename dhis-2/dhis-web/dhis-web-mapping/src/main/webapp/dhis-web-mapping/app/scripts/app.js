@@ -1584,6 +1584,16 @@ Ext.onReady( function() {
 		return menu;
 	};
 	
+	//GIS.obj.MapWindow = function() {
+		//var favoriteName,
+			//system,
+			//grid,
+			
+			
+		
+		
+	//};
+	
 	GIS.obj.LegendSetWindow = function() {
 		
 		// Stores

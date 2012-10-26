@@ -92,7 +92,7 @@ DV.conf = {
             path_lib: '../../dhis-web-commons/javascripts/',
             path_images: 'images/',
             initialize: 'initialize.action',
-            redirect: 'redirect.action',
+            redirect: 'dhis-web-commons-about/redirect.action',
             data_get: 'chartValues.json',
             indicator_get: 'indicatorGroups/',
             indicator_getall: 'indicators.json?paging=false&links=false',
