@@ -18,6 +18,16 @@
 
 /* General */
 
+a:link, a:visited {
+	color: #222;
+	text-decoration: none;
+	font-size: 10px;
+}
+a:hover {
+	color: blue;
+	text-decoration: underline;
+}
+
 html * {
 	font-family: arial, sans-serif, liberation sans, consolas !important;
 	font-size: 11px !important;
@@ -438,7 +448,22 @@ html * {
 
 /* Grid */
 
-.gis-grid .x-grid-cell-inner {
+.gis-grid-row-icon-edit,
+.gis-grid-row-icon-delete {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+}
+.gis-grid-row-icon-edit {
+	background: url('../images/grid-edit_16.png') no-repeat;
+}
+.gis-grid-row-icon-delete {
+	background: url('../images/grid-delete_16.png') no-repeat;
+	margin-left: 4px;
+}
+
+.gis-grid .x-grid-cell-inner,
+.gis-grid .x-grid-cell-inner * {
 	font-size: 10px !important;
 }
 
@@ -450,7 +475,7 @@ html * {
 	border-bottom-color: #dbdbdb;	
 }
 
-.gis-grid .x-grid-dirty-cell { /* hide red cell icon */
+.gis-grid .x-grid-dirty-cell { /* hide red "dirty" icon */
 	background-image: none;
 }
 .gis-grid .x-grid-row { /* middle align text in row with image */
@@ -460,27 +485,6 @@ html * {
 .gis-grid-icon-link {
 	cursor: pointer;
 	cursor: hand;
-}
-
-.gis-menugrid .x-grid-cell { /* grid in menu, regular cell */
-	border: 0 none !important;
-	background-color: #fff !important;
-}
-.gis-menugrid .x-grid-row-over .x-grid-cell { /* cell hover */
-	border: 0 none !important;
-	background-color: #ddd !important;
-}
-.gis-menugrid .x-grid-cell-inner {
-	padding-top: 5px;
-	padding-bottom: 5px;
-	color: #222;
-}
-.gis-menugrid .x-grid-row-over .x-grid-cell-inner {
-	cursor: hand;
-	cursor: pointer;
-}
-.gis-menugrid .x-grid-header-ct { /* hide vertical line above grid */
-	border-bottom: 0 none !important;
 }
 
 /* TextField */
@@ -513,3 +517,4 @@ html * {
 	height: 22px;
 	line-height: 21px;
 }
+
