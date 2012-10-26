@@ -467,8 +467,8 @@ html * {
 	font-size: 10px !important;
 }
 .gis-grid .x-grid-cell-inner {
-	padding-top: 4px;
-	padding-bottom: 4px;
+	padding-top: 3px;
+	padding-bottom: 3px;
 }
 
 .gis-grid .x-column-header-text {

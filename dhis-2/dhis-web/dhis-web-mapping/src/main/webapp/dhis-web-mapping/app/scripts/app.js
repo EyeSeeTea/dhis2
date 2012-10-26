@@ -1725,14 +1725,11 @@ Ext.onReady( function() {
 			});
 			
 			legendSetGrid = Ext.create('Ext.grid.Panel', {
-				id: 'legendSetGrid',
 				cls: 'gis-grid',
 				bodyStyle: 'border-top: 0 none',
 				width: GIS.conf.layout.widget.item_width,
 				scroll: 'vertical',
 				hideHeaders: true,
-				showUpdateLegendSet: showUpdateLegendSet,
-				deleteLegendSet: deleteLegendSet,
 				currentItem: null,
 				columns: [						
 					{
@@ -1875,14 +1872,12 @@ Ext.onReady( function() {
 			});
 			
 			legendGrid = Ext.create('Ext.grid.Panel', {
-				id: 'legendGrid',
 				cls: 'gis-grid',
 				bodyStyle: 'border-top: 0 none',
 				width: GIS.conf.layout.widget.item_width,
 				height: 235,
 				scroll: 'vertical',
 				hideHeaders: true,
-				deleteLegend: deleteLegend,
 				currentItem: null,
 				columns: [
 					{
@@ -2037,7 +2032,8 @@ Ext.onReady( function() {
 		deleteLegendSet = function(id) {
 			if (id) {
 				Ext.Ajax.request({
-					url: GIS.conf.url.path_gis + 'deleteMapLegendSet.action',
+					url: GIS.conf.url.path_api + 'mapLegendSet/' + id,
+					method: 'DELETE',
 					params: {
 						id: id
 					},
