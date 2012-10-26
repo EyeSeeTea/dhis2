@@ -1808,7 +1808,7 @@ Ext.onReady( function() {
 			tmpLegendStore = Ext.create('Ext.data.ArrayStore', {
 				fields: ['id', 'name', 'startValue', 'endValue', 'color']
 			});
-		
+			
 			legendSetName = Ext.create('Ext.form.field.Text', {
 				cls: 'gis-textfield',
 				width: GIS.conf.layout.widget.item_width,
