@@ -193,7 +193,7 @@ html * {
 
 .x-btn-default-toolbar-small-over {
 	border-color: #bbb;
-	border-radius: 2px;
+	border-radius: 1px;
 }
 
 .gis-toolbar-btn-menu-download .x-btn-icon,
@@ -481,7 +481,10 @@ html * {
 }
 .gis-grid .x-grid-header-ct {
 	border-bottom-width: 1px !important;
-	border-bottom-color: #dbdbdb;	
+	border-bottom-color: #d0d0d0;	
+}
+.gis-grid .x-grid-body {
+	border-top: 0 none !important;
 }
 
 .gis-grid .x-grid-dirty-cell { /* hide red "dirty" icon */

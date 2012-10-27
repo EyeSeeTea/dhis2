@@ -747,7 +747,7 @@ Ext.onReady( function() {
 	});
 	
 	GIS.store.maps = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name', 'lastUpdated', 'icon'],
+		fields: ['id', 'name', 'lastUpdated'],
 		proxy: {
 			type: 'ajax',
 			url: GIS.conf.url.path_api + 'indicators.json?links=false&paging=false',
@@ -766,6 +766,9 @@ Ext.onReady( function() {
 			}
 		},
 		listeners: {
+			beforeload: function() {
+				this.getProxy().setExtraParam('pageSize', GIS.cmp.region.center.getHeight() - 155);
+			},
 			load: function() {
 				if (!this.isLoaded) {
 					this.isLoaded = true;
@@ -1508,9 +1511,10 @@ Ext.onReady( function() {
 			window;
 			
 		searchTextfield = Ext.create('Ext.form.field.Text', {
-			width: 300,
-			height: 28,
-			bodyStyle: 'padding-left: 10px',
+			width: 354,
+			height: 26,
+			style: 'margin-right: 4px',
+			fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
 			emptyText: 'Search for favorites..', //i18n
 			enableKeyEvents: true,
 			currentValue: '',
@@ -1525,7 +1529,10 @@ Ext.onReady( function() {
 		});
 		
 		addButton = Ext.create('Ext.button.Button', {
-			text: 'Add new..', //i18n
+			text: 'Add new', //i18n
+			height: 26,
+			style: 'border-radius: 1px',
+			menu: {},
 			handler: function() {
 			}
 		});
@@ -1544,15 +1551,15 @@ Ext.onReady( function() {
 		
 		grid = Ext.create('Ext.grid.Panel', {
 			cls: 'gis-grid',
-			bodyStyle: 'border-top: 0 none, border-bottom: 0 none',
-			height: 380,
+			bodyStyle: 'border-top-color: red !important, border-bottom: 0 none',
+			height: 82,
 			scroll: false,
 			hideHeaders: true,
 			columns: [						
 				{
 					dataIndex: 'name',
 					sortable: false,
-					width: 250,
+					width: 355,
 					renderer: function(value, metaData, record) {
 						return '<a href="javascript: alert(' + record.data.name + ');">' + value + '</a>';
 					}
@@ -1560,7 +1567,7 @@ Ext.onReady( function() {
 				{
 					xtype: 'actioncolumn',
 					sortable: false,
-					width: 100,
+					width: 65,
 					items: [
 						{
 							iconCls: 'gis-grid-row-icon-edit',
@@ -1581,17 +1588,9 @@ Ext.onReady( function() {
 							}
 						}
 					]
-				},
-				{
-					sortable: false,
-					width: 20
 				}
 			],
 			store: GIS.store.maps,
-			tbar: [
-				'->',
-				addButton
-			],
 			bbar: [
 				'->',
 				prevButton,
@@ -1618,13 +1617,17 @@ Ext.onReady( function() {
 			title: 'Manage favorites',
 			iconCls: 'gis-window-title-icon-favorite',
 			cls: 'gis-container-default',
-			width: 500,
-			height: 500,
+			width: 450,
 			items: [
-				{html:'nissa'}
-			],
-			items: [
-				searchTextfield,
+				{
+					xtype: 'panel',
+					layout: 'hbox',
+					cls: 'gis-container-inner',
+					items: [
+						searchTextfield,
+						addButton
+					]
+				},
 				grid
 			],
 			listeners: {
