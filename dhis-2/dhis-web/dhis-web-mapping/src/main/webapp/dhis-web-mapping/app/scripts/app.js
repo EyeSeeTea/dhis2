@@ -1554,6 +1554,7 @@ Ext.onReady( function() {
 		});
 		
 		grid = Ext.create('Ext.grid.Panel', {
+			id: 'nissa',
 			cls: 'gis-grid',
 			bodyStyle: 'border-top-color: red !important, border-bottom: 0 none',
 			scroll: false,
@@ -1565,22 +1566,14 @@ Ext.onReady( function() {
 					width: 355,
 					renderer: function(value, metaData, record) {
 						var fn = function() {
-							var span = Ext.get(record.data.id),
-								div = span.parent('div'),
-								td = span.parent('td'),
-								currentElement,
-								clickHandler = function(id) {
-									alert(id);
-									console.log(record.data.id);
-								};
-								
-							td.addClsOnOver('text-link');
-							td.addListener('click', clickHandler(td.id));
+							var el = Ext.get(record.data.id).parent('td');
+							el.addClsOnOver('link');
+							el.dom.setAttribute('onclick', 'alert("' + record.data.id + '")');
 						};
 						
 						Ext.defer(fn, 100);
 						
-						return '<span id="' + record.data.id + '">' + value + '</span>';
+						return '<div id="' + record.data.id + '">' + value + '</div>';
 					}
 				},
 				{
@@ -1645,15 +1638,6 @@ Ext.onReady( function() {
 			iconCls: 'gis-window-title-icon-favorite',
 			cls: 'gis-container-default',
 			width: 450,
-			onmouseover: function(id) { // mapgrid
-				//Ext.get(id).addCls('gis-grid-icon-link');
-			},
-			onmouseout: function(id) {
-				//Ext.get(id).removeCls('gis-grid-icon-link');
-			},
-			onclick: function(id) {
-				//alert(id);
-			},
 			items: [
 				{
 					xtype: 'panel',
@@ -2178,6 +2162,7 @@ Ext.onReady( function() {
 						headers: {'Content-Type': 'application/json'},
 						params: body,
 						success: function() {
+							GIS.store.legendSets.load();
 							reset();
 						}
 					});
