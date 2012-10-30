@@ -786,7 +786,7 @@ Ext.onReady( function() {
 	});
 	
 	GIS.store.maps = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name', 'lastUpdated'],
+		fields: ['id', 'name', 'lastUpdated', 'system'],
 		proxy: {
 			type: 'ajax',
 			url: GIS.conf.url.path_api + 'indicators.json?links=false',
@@ -805,10 +805,6 @@ Ext.onReady( function() {
 			}
 		},
 		listeners: {
-			beforeload: function() {
-				//console.log(this.getProxy());
-				//this.getProxy().setExtraParam('pageSize', GIS.cmp.region.center.getHeight() - 155);
-			},
 			load: function() {
 				if (!this.isLoaded) {
 					this.isLoaded = true;
@@ -1529,10 +1525,10 @@ Ext.onReady( function() {
 	GIS.obj.MapWindow = function() {
 		
 		// Objects
-		var UpdateWindow,
+		var NameWindow,
 		
 		// Instances
-			updateWindow,
+			nameWindow,
 			
 		// Components
 			addButton,
@@ -1543,12 +1539,71 @@ Ext.onReady( function() {
 			tbar,
 			bbar,
 			
-			nameTextfied,
+			nameTextfield,
 			systemCheckbox,
 			createButton,
 			updateButton,
+			cancelButton,
 			
-			window;
+			mapWindow;
+			
+		NameWindow = function(id) {
+			var window;
+			
+			nameTextfield = Ext.create('Ext.form.field.Text', {
+				height: 26,
+				width: 300,
+				labelWidth: 70,
+				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
+				fieldLabel: 'Name', //i18n
+				value: id ? GIS.store.maps.getById(id).data.name : ''
+			});
+			
+			systemCheckbox = Ext.create('Ext.form.field.Checkbox', {
+				labelWidth: 70,
+				fieldLabel: 'System', //i18n
+				value: id ? GIS.store.maps.getById(id).data.system : false
+			});
+			
+			createButton = Ext.create('Ext.button.Button', {
+				text: 'Create', //i18n
+				handler: function() {
+					console.log('create + hide + load');
+				}
+			});
+			
+			updateButton = Ext.create('Ext.button.Button', {
+				text: 'Save', //i18n
+				handler: function() {
+					console.log('update ' + id + ' + hide + load');
+				}
+			});
+			
+			cancelButton = Ext.create('Ext.button.Button', {
+				text: 'Cancel', //i18n
+				handler: function() {
+					console.log('hide + load');
+				}
+			});
+			
+			window = Ext.create('Ext.window.Window', {
+				title: id ? 'Edit favorite' : 'Create new favorite',
+				iconCls: 'gis-window-title-icon-favorite',
+				cls: 'gis-container-default',
+				modal: true,
+				items: [
+					nameTextfield,
+					systemCheckbox
+				],
+				bbar: [
+					cancelButton,
+					'->',
+					id ? updateButton : createButton
+				]
+			});
+			
+			return window;
+		};
 			
 		searchTextfield = Ext.create('Ext.form.field.Text', {
 			width: 354,
@@ -1574,6 +1629,8 @@ Ext.onReady( function() {
 			style: 'border-radius: 1px',
 			menu: {},
 			handler: function() {
+				nameWindow = new NameWindow();
+				nameWindow.show();
 			}
 		});
 		
@@ -1620,7 +1677,9 @@ Ext.onReady( function() {
 						{
 							iconCls: 'gis-grid-row-icon-edit',
 							handler: function(grid, rowIndex, colIndex, col, event) {
-								//var id = this.up('grid').store.getAt(rowIndex).data.id;
+								var id = this.up('grid').store.getAt(rowIndex).data.id;
+								nameWindow = new NameWindow(id);
+								nameWindow.show();
 							}
 						},
 						{
@@ -1669,7 +1728,7 @@ Ext.onReady( function() {
 			}
 		});
 		
-		window = Ext.create('Ext.window.Window', {
+		mapWindow = Ext.create('Ext.window.Window', {
 			title: 'Manage favorites',
 			iconCls: 'gis-window-title-icon-favorite',
 			cls: 'gis-container-default',
@@ -1693,7 +1752,7 @@ Ext.onReady( function() {
 			}
 		});
 		
-		return window;
+		return mapWindow;
 	};
 	
 	GIS.obj.LegendSetWindow = function() {

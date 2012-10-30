@@ -172,7 +172,7 @@ html * {
 }
 
 .gis-form-widget .x-btn-default-small { /* Button */
-	border-radius: 2px;
+	border-radius: 1px;
 }
 
 /* Button */
@@ -495,7 +495,7 @@ html * {
 /* TextField */
 
 .gis-textfield input.x-form-text {
-	border-radius: 2px;
+	border-radius: 1px;
 }
 
 /* Checkbox */

@@ -1635,6 +1635,45 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		return true;
 	},
 	
+	getView: function() {
+		return {
+			layer: this.layer.base.id,
+			valueType: this.model.valueType,
+			indicatorGroup: {
+				id: this.model.indicatorGroup
+			},
+			indicator: {
+				id: this.model.indicator
+			},
+			dataElementGroup: {
+				id: this.model.dataElementGroup
+			},
+			dataElement: {
+				id: this.model.dataElement
+			},
+			period: {
+				id: this.model.period
+			},
+			parentOrganisationUnit: {
+				id: this.model.parentId
+			},
+			organisationUnitLevel: {
+				id: this.model.level
+			},
+			legendType: this.model.legendType,
+			method: this.model.method,
+			classes: this.model.classes,
+			colorLow: this.model.colorLow,
+			colorHigh: this.model.colorHigh,
+			legendSet: {
+				id: this.model.legendSet
+			},
+			radiusLow: this.model.radiusLow,
+			radiusHigh: this.model.radiusHigh,
+			opacity: this.layer.base.item.getValue()
+		};
+	},
+	
     loadOrganisationUnits: function() {
         var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
             'parentId=' + this.tmpModel.parentId +
