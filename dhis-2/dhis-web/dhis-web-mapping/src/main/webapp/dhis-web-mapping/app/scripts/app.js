@@ -663,6 +663,9 @@ Ext.onReady( function() {
 				this.load(fn);
 			}
 		},
+		getRecordByLevel: function(level) {
+			return this.getAt(this.findExact('level', level));
+		},
 		listeners: {
 			load: function() {
 				if (!this.isLoaded) {
@@ -789,13 +792,23 @@ Ext.onReady( function() {
 		fields: ['id', 'name', 'lastUpdated', 'system'],
 		proxy: {
 			type: 'ajax',
-			url: GIS.conf.url.path_api + 'indicators.json?links=false',
+			url: GIS.conf.url.path_api + 'maps.json?links=false',
 			reader: {
 				type: 'json',
-				root: 'indicators'
+				root: 'maps'
 			}
 		},
 		isLoaded: false,
+		pageSize: 10,
+		page: 1,
+		loadStore: function() {
+			this.load({
+				params: {
+					pageSize: this.pageSize,
+					page: this.page
+				}
+			});
+		},
 		loadFn: function(fn) {
 			if (this.isLoaded) {
 				fn.call();
@@ -1569,6 +1582,42 @@ Ext.onReady( function() {
 				text: 'Create', //i18n
 				handler: function() {
 					console.log('create + hide + load');
+					
+					var name = nameTextfield.getValue(),
+						system = systemCheckbox.getValue(),
+						layers = GIS.util.map.getVisibleVectorLayers(),
+						layer,
+						lonlat = GIS.map.getCenter(),
+						views = [],
+						map;
+						
+					if (name && layers.length) {
+						alert("true");
+						for (var i = 0; i < layers.length; i++) {
+							layer = layers[i];
+							views.push(layer.base.widget.getView());
+						}
+						
+						map = {
+							name: name,
+							longitude: lonlat.lon,
+							latitude: lonlat.lat,
+							zoom: GIS.map.getZoom(),
+							mapViews: views
+						};
+						//alert(1);
+						//console.log(map);return;
+					
+						Ext.Ajax.request({
+							url: GIS.conf.url.path_api + 'maps/',
+							method: 'POST',
+							headers: {'Content-Type': 'application/json'},
+							params: Ext.encode(map),
+							success: function() {
+								GIS.store.maps.loadStore();
+							}
+						});
+					}
 				}
 			});
 			
@@ -1647,9 +1696,7 @@ Ext.onReady( function() {
 		});
 		
 		grid = Ext.create('Ext.grid.Panel', {
-			id: 'nissa',
 			cls: 'gis-grid',
-			bodyStyle: 'border-top-color: red !important, border-bottom: 0 none',
 			scroll: false,
 			hideHeaders: true,
 			columns: [						
@@ -1709,11 +1756,9 @@ Ext.onReady( function() {
 				},
 				render: function() {
 					var size = Math.floor((GIS.cmp.region.center.getHeight() - 155) / GIS.conf.layout.grid.row_height);
-					this.store.load({
-						params: {
-							pageSize: size
-						}
-					});
+					this.store.pageSize = size;
+					this.store.page = 1;
+					this.store.loadStore();
 				},
 				itemmouseenter: function(grid, record, item) {
 					this.currentItem = Ext.get(item);

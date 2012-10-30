@@ -1636,6 +1636,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	},
 	
 	getView: function() {
+		console.log(this);
 		return {
 			layer: this.layer.base.id,
 			valueType: this.model.valueType,
@@ -1658,7 +1659,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				id: this.model.parentId
 			},
 			organisationUnitLevel: {
-				id: this.model.level
+				id: GIS.store.organisationUnitLevels.getRecordByLevel(this.model.level).data.id
 			},
 			legendType: this.model.legendType,
 			method: this.model.method,
@@ -1670,7 +1671,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			},
 			radiusLow: this.model.radiusLow,
 			radiusHigh: this.model.radiusHigh,
-			opacity: this.layer.base.item.getValue()
+			opacity: this.layer.item.getValue()
 		};
 	},
 	
