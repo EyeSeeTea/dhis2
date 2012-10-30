@@ -27,11 +27,7 @@ package org.hisp.dhis.jdbc.statementbuilder;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.DateUtils.getSqlDateString;
-
 import java.util.List;
-
-import org.hisp.dhis.period.Period;
 
 /**
  * @author Lars Helge Overland
@@ -39,24 +35,19 @@ import org.hisp.dhis.period.Period;
 public class PostgreSQLStatementBuilder
     extends AbstractStatementBuilder
 {    
+    @Override
     public String getDoubleColumnType()
     {
         return "DOUBLE PRECISION";
     }
 
+    @Override
     public String getVacuum( String table )
     {
         return "vacuum analyze " + table + ";";
     }
-    
-    public String getPeriodIdentifierStatement( Period period )
-    {
-        return
-            "SELECT periodid FROM period WHERE periodtypeid=" + period.getPeriodType().getId() + " " + 
-            "AND startdate='" + getSqlDateString( period.getStartDate() ) + "' " +
-            "AND enddate='" + getSqlDateString( period.getEndDate() ) + "'";
-    }
 
+    @Override
     public String getDeleteZeroDataValues()
     {
         return
@@ -65,16 +56,6 @@ public class PostgreSQLStatementBuilder
             "WHERE datavalue.dataelementid = dataelement.dataelementid " +
             "AND dataelement.aggregationtype = 'sum' " +
             "AND datavalue.value = '0'";
-    }
-
-    public int getMaximumNumberOfColumns()
-    {
-        return 1580; // TODO verify
-    }
-
-    public String getDropDatasetForeignKeyForDataEntryFormTable()
-    {
-        return "ALTER TABLE dataentryform DROP CONSTRAINT fk_dataentryform_datasetid;" ;
     }
 
     @Override
@@ -125,7 +106,8 @@ public class PostgreSQLStatementBuilder
             + "AND d2.dataelementid="
             + sourceDataElementId + " AND d2.categoryoptioncomboid=" + sourceCategoryOptionComboId + ";";
     }
-    
+
+    @Override
     public String getStandardDeviation( int dataElementId, int categoryOptionComboId, int organisationUnitId )
     {
     	return "SELECT STDDEV( CAST( value AS " + getDoubleColumnType() + " ) ) FROM datavalue " +
@@ -133,7 +115,8 @@ public class PostgreSQLStatementBuilder
 	    "AND categoryoptioncomboid='" + categoryOptionComboId + "' " +
 	    "AND sourceid='" + organisationUnitId + "'";
     }
-    
+
+    @Override
     public String getAverage( int dataElementId, int categoryOptionComboId, int organisationUnitId )
     {
        	 return "SELECT AVG( CAST( value AS " + getDoubleColumnType() + " ) ) FROM datavalue " +
@@ -141,7 +124,8 @@ public class PostgreSQLStatementBuilder
              "AND categoryoptioncomboid='" + categoryOptionComboId + "' " +
              "AND sourceid='" + organisationUnitId + "'";
     }
-   
+
+    @Override
     public String getDeflatedDataValues( int dataElementId, String dataElementName, int categoryOptionComboId,
         String periodIds, int organisationUnitId, String organisationUnitName, int lowerBound, int upperBound )
     {
@@ -160,68 +144,92 @@ public class PostgreSQLStatementBuilder
             "AND ( CAST( dv.value AS " + getDoubleColumnType() + " ) < '" + lowerBound + "' " +
             "OR CAST( dv.value AS " + getDoubleColumnType() + " ) > '" + upperBound + "' )";
     }
-    
+
+    @Override
+    public String limitRecord( int min, int max )
+    {
+        return " LIMIT " + max + " OFFSET " + min;
+    }
+
+    @Override
+    public String getAddDate( String dateField, int days )
+    {
+        return "(" + dateField + "+" + days + ")";
+    }
+
+    @Override
+    public String getPatientFullName()
+    {
+        return  "firstname || ' ' || middleName || ' ' || lastname";
+    }
+
+    @Override
     public String archiveData( String startDate, String endDate )
     {
-      return "DELETE FROM datavaluearchive AS a " +
-          "USING period AS p " +
-          "WHERE a.periodid=p.periodid " +
-          "AND p.startdate>='" + startDate + "' " +
-          "AND p.enddate<='" + endDate + "'";
-    }
-  
+        return "DELETE FROM datavaluearchive AS a " +
+            "USING period AS p " +
+            "WHERE a.periodid=p.periodid " +
+            "AND p.startdate>='" + startDate + "' " +
+            "AND p.enddate<='" + endDate + "'";
+    }  
 
+    @Override
     public String unArchiveData( String startDate, String endDate )
     {
-      return "DELETE FROM datavaluearchive AS a " +
-          "USING period AS p " +
-          "WHERE a.periodid=p.periodid " +
-          "AND p.startdate>='" + startDate + "' " +
-          "AND p.enddate<='" + endDate + "'";
+        return "DELETE FROM datavaluearchive AS a " +
+            "USING period AS p " +
+            "WHERE a.periodid=p.periodid " +
+            "AND p.startdate>='" + startDate + "' " +
+            "AND p.enddate<='" + endDate + "'";
     }
-  
+
+    @Override
     public String deleteRegularOverlappingData()
     {
-      return "DELETE FROM datavalue AS d " +
-          "USING datavaluearchive AS a " +
-          "WHERE d.dataelementid=a.dataelementid " +
-          "AND d.periodid=a.periodid " +
-          "AND d.sourceid=a.sourceid " +
-          "AND d.categoryoptioncomboid=a.categoryoptioncomboid";
+        return "DELETE FROM datavalue AS d " +
+            "USING datavaluearchive AS a " +
+            "WHERE d.dataelementid=a.dataelementid " +
+            "AND d.periodid=a.periodid " +
+            "AND d.sourceid=a.sourceid " +
+            "AND d.categoryoptioncomboid=a.categoryoptioncomboid";
     }
-  
+
+    @Override
     public String deleteArchivedOverlappingData()
     {
-      return "DELETE FROM datavaluearchive AS a " +
-          "USING datavalue AS d " +
-          "WHERE a.dataelementid=d.dataelementid " +
-          "AND a.periodid=d.periodid " +
-          "AND a.sourceid=d.sourceid " +
-          "AND a.categoryoptioncomboid=d.categoryoptioncomboid";
+        return "DELETE FROM datavaluearchive AS a " +
+            "USING datavalue AS d " +
+            "WHERE a.dataelementid=d.dataelementid " +
+            "AND a.periodid=d.periodid " +
+            "AND a.sourceid=d.sourceid " +
+            "AND a.categoryoptioncomboid=d.categoryoptioncomboid";
     }
-  
+
+    @Override
     public String deleteOldestOverlappingDataValue()
     {      
-      return "DELETE FROM datavalue AS d " +
-          "USING datavaluearchive AS a " +
-          "WHERE d.dataelementid=a.dataelementid " +
-          "AND d.periodid=a.periodid " +
-          "AND d.sourceid=a.sourceid " +
-          "AND d.categoryoptioncomboid=a.categoryoptioncomboid " +
-          "AND d.lastupdated<a.lastupdated";
+        return "DELETE FROM datavalue AS d " +
+            "USING datavaluearchive AS a " +
+            "WHERE d.dataelementid=a.dataelementid " +
+            "AND d.periodid=a.periodid " +
+            "AND d.sourceid=a.sourceid " +
+            "AND d.categoryoptioncomboid=a.categoryoptioncomboid " +
+            "AND d.lastupdated<a.lastupdated";
     }
-  
+
+    @Override
     public String deleteOldestOverlappingArchiveData()
     {      
-      return "DELETE FROM datavaluearchive AS a " +
-          "USING datavalue AS d " +
-          "WHERE a.dataelementid=d.dataelementid " +
-          "AND a.periodid=d.periodid " +
-          "AND a.sourceid=d.sourceid " +
-          "AND a.categoryoptioncomboid=d.categoryoptioncomboid " +
-          "AND a.lastupdated<=d.lastupdated";
+        return "DELETE FROM datavaluearchive AS a " +
+            "USING datavalue AS d " +
+            "WHERE a.dataelementid=d.dataelementid " +
+            "AND a.periodid=d.periodid " +
+            "AND a.sourceid=d.sourceid " +
+            "AND a.categoryoptioncomboid=d.categoryoptioncomboid " +
+            "AND a.lastupdated<=d.lastupdated";
     }
-    
+
+    @Override
     public String archivePatientData ( String startDate, String endDate )
     {
         return "DELETE FROM patientdatavalue AS pdv " 
@@ -231,7 +239,8 @@ public class PostgreSQLStatementBuilder
             + "AND pi.enddate >= '" + startDate + "' "
             + "AND pi.enddate <= '" +  endDate + "';";
     }
-    
+
+    @Override
     public String unArchivePatientData ( String startDate, String endDate )
     {
         return "DELETE FROM patientdatavaluearchive AS pdv " 
@@ -241,7 +250,8 @@ public class PostgreSQLStatementBuilder
             + "AND pi.enddate >= '" + startDate + "' "
             + "AND pi.enddate <= '" +  endDate + "';";
     }
-    
+
+    @Override
     public String deleteRegularOverlappingPatientData()
     {
         return "DELETE FROM patientdatavalue AS d " +
@@ -249,7 +259,8 @@ public class PostgreSQLStatementBuilder
             "WHERE d.programstageinstanceid=a.programstageinstanceid " +
             "AND d.dataelementid=a.dataelementid; ";
     }
-    
+
+    @Override
     public String deleteArchivedOverlappingPatientData()
     {
         return "DELETE FROM patientdatavaluearchive AS a " +
@@ -257,7 +268,8 @@ public class PostgreSQLStatementBuilder
             "WHERE d.programstageinstanceid=a.programstageinstanceid " +
             "AND d.dataelementid=a.dataelementid ";
     }
-    
+
+    @Override
     public String deleteOldestOverlappingPatientDataValue()
     {
         return "DELETE FROM patientdatavalue AS d " +
@@ -266,7 +278,8 @@ public class PostgreSQLStatementBuilder
             "AND d.dataelementid=a.dataelementid " +
             "AND d.timestamp<a.timestamp;";
     }
-    
+
+    @Override
     public String deleteOldestOverlappingPatientArchiveData()
     {
         return "DELETE FROM patientdatavalue AS d " +
@@ -275,7 +288,8 @@ public class PostgreSQLStatementBuilder
             "AND d.dataelementid=a.dataelementid " +
             "AND a.timestamp<=d.timestamp;";
     }
-    
+
+    @Override
     public String queryDataElementStructureForOrgUnit()
     {
         StringBuffer sqlsb = new StringBuffer();
@@ -287,6 +301,7 @@ public class PostgreSQLStatementBuilder
         return sqlsb.toString();           
     }
 
+    @Override
     public String queryRawDataElementsForOrgUnitBetweenPeriods(Integer orgUnitId, List<Integer> betweenPeriodIds)
     {
         StringBuffer sqlsb = new StringBuffer();
@@ -310,20 +325,5 @@ public class PostgreSQLStatementBuilder
         }
         
         return sqlsb.toString();
-    }
-    
-    public String limitRecord( int min, int max )
-    {
-        return " LIMIT " + max + " OFFSET " + min;
-    }
-    
-    public String getAddDate( String dateField, int days )
-    {
-        return "(" + dateField + "+" + days + ")";
-    }
-    
-    public String getPatientFullName()
-    {
-        return  "firstname || ' ' || middleName || ' ' || lastname";
     }
 }

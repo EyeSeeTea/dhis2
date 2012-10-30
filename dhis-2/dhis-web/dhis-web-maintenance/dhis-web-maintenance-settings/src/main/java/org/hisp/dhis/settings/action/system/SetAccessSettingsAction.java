@@ -30,11 +30,14 @@ package org.hisp.dhis.settings.action.system;
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
+
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCOUNT_RECOVERY;
 
 /**
  * @author Lars Helge Overland
@@ -44,6 +47,9 @@ public class SetAccessSettingsAction
 {
     @Autowired
     private ConfigurationService configurationService;
+    
+    @Autowired
+    private SystemSettingManager systemSettingManager;
     
     @Autowired
     private UserService userService;
@@ -57,6 +63,13 @@ public class SetAccessSettingsAction
     public void setSelfRegistrationRole( Integer selfRegistrationRole )
     {
         this.selfRegistrationRole = selfRegistrationRole;
+    }
+    
+    private Boolean accountRecovery;
+
+    public void setAccountRecovery( Boolean accountRecovery )
+    {
+        this.accountRecovery = accountRecovery;
     }
 
     // -------------------------------------------------------------------------
@@ -94,6 +107,8 @@ public class SetAccessSettingsAction
         config.setSelfRegistrationRole( group );
         configurationService.setConfiguration( config );
 
+        systemSettingManager.saveSystemSetting( KEY_ACCOUNT_RECOVERY, accountRecovery );
+        
         message = i18n.getString( "settings_updated" );
 
         return SUCCESS;

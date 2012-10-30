@@ -27,11 +27,7 @@ package org.hisp.dhis.jdbc.statementbuilder;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.DateUtils.getSqlDateString;
-
 import java.util.List;
-
-import org.hisp.dhis.period.Period;
 
 /**
  * @author Lars Helge Overland
@@ -39,24 +35,19 @@ import org.hisp.dhis.period.Period;
 public class MySQLStatementBuilder
     extends AbstractStatementBuilder
 {
+    @Override
     public String getDoubleColumnType()
     {
         return "DECIMAL";
     }
 
+    @Override
     public String getVacuum( String table )
     {
         return null;
     }
-    
-    public String getPeriodIdentifierStatement( Period period )
-    {
-        return
-            "SELECT periodid FROM period WHERE periodtypeid=" + period.getPeriodType().getId() + " " + 
-            "AND startdate='" + getSqlDateString( period.getStartDate() ) + "' " +
-            "AND enddate='" + getSqlDateString( period.getEndDate() ) + "'";
-    }    
 
+    @Override
     public String getDeleteZeroDataValues()
     {
         return
@@ -65,16 +56,6 @@ public class MySQLStatementBuilder
             "WHERE datavalue.dataelementid = dataelement.dataelementid " +
             "AND dataelement.aggregationtype = 'sum' " +
             "AND datavalue.value = '0'";
-    }
-    
-    public int getMaximumNumberOfColumns()
-    {
-        return 720;
-    }
-
-    public String getDropDatasetForeignKeyForDataEntryFormTable()
-    {
-        return  "ALTER TABLE dataentryform DROP FOREIGN KEY fk_dataentryform_datasetid;" ;
     }
 
     @Override
@@ -126,7 +107,8 @@ public class MySQLStatementBuilder
             + sourceDataElementId
             + " AND d2.categoryoptioncomboid=" + sourceCategoryOptionComboId + ";";
     }
-    
+
+    @Override
     public String getStandardDeviation( int dataElementId, int categoryOptionComboId, int organisationUnitId ){
     	
     	return "SELECT STDDEV( value ) FROM datavalue " +
@@ -134,14 +116,16 @@ public class MySQLStatementBuilder
             "AND categoryoptioncomboid='" + categoryOptionComboId + "' " +
             "AND sourceid='" + organisationUnitId + "'";        
     }
-    
+
+    @Override
     public String getAverage( int dataElementId, int categoryOptionComboId, int organisationUnitId ){
     	 return "SELECT AVG( value ) FROM datavalue " +
             "WHERE dataelementid='" + dataElementId + "' " +
             "AND categoryoptioncomboid='" + categoryOptionComboId + "' " +
             "AND sourceid='" + organisationUnitId + "'";
     }
-    
+
+    @Override
     public String getDeflatedDataValues( int dataElementId, String dataElementName, int categoryOptionComboId,
     		String periodIds, int organisationUnitId, String organisationUnitName, int lowerBound, int upperBound )
     {    	
@@ -159,8 +143,9 @@ public class MySQLStatementBuilder
             "AND dv.sourceid='" + organisationUnitId + "' " +
             "AND ( dv.value < '" + lowerBound + "' " +
             "OR  dv.value > '" + upperBound + "' )";
-   }
-   
+    }
+
+    @Override
     public String archiveData( String startDate, String endDate )
     {
         return "DELETE d FROM datavalue AS d " +
@@ -169,7 +154,8 @@ public class MySQLStatementBuilder
             "AND p.startdate>='" + startDate + "' " +
             "AND p.enddate<='" + endDate + "'";
     }
-    
+
+    @Override
     public String unArchiveData( String startDate, String endDate )
     {    
         return "DELETE a FROM datavaluearchive AS a " +
@@ -178,7 +164,8 @@ public class MySQLStatementBuilder
             "AND p.startdate>='" + startDate + "' " +
             "AND p.enddate<='" + endDate + "'";
     }
-    
+
+    @Override
     public String deleteRegularOverlappingData()
     {    
         return "DELETE d FROM datavalue AS d " +
@@ -188,7 +175,8 @@ public class MySQLStatementBuilder
             "AND d.sourceid=a.sourceid " +
             "AND d.categoryoptioncomboid=a.categoryoptioncomboid";
     }
-    
+
+    @Override
     public String deleteArchivedOverlappingData()
     {
         return "DELETE a FROM datavaluearchive AS a " +
@@ -198,7 +186,8 @@ public class MySQLStatementBuilder
             "AND a.sourceid=d.sourceid " +
             "AND a.categoryoptioncomboid=d.categoryoptioncomboid";
     }
-    
+
+    @Override
     public String deleteOldestOverlappingDataValue()
     {    
         return "DELETE d FROM datavalue AS d " +
@@ -209,7 +198,8 @@ public class MySQLStatementBuilder
             "AND d.categoryoptioncomboid=a.categoryoptioncomboid " +
             "AND d.lastupdated<a.lastupdated";
     }
-    
+
+    @Override
     public String deleteOldestOverlappingArchiveData()
     {       
         return "DELETE a FROM datavaluearchive AS a " +
@@ -220,7 +210,26 @@ public class MySQLStatementBuilder
             "AND a.categoryoptioncomboid=d.categoryoptioncomboid " +
             "AND a.lastupdated<=d.lastupdated";
     }
-    
+
+    @Override
+    public String limitRecord( int min, int max )
+    {
+        return " LIMIT " + min + " ," + max;
+    }
+
+    @Override
+    public String getAddDate( String dateField, int days )
+    {
+        return "ADDDATE(" + dateField + "," + days + ")";
+    }
+
+    @Override
+    public String getPatientFullName()
+    {
+        return  "concat( firstname, \" \",middleName , \" \" , lastname)";
+    }
+
+    @Override
     public String archivePatientData ( String startDate, String endDate )
     {
         return "DELETE pdv FROM patientdatavalue AS pdv "
@@ -231,7 +240,8 @@ public class MySQLStatementBuilder
             + "WHERE pi.enddate >= '" + startDate + "' "
             +    "AND pi.enddate <= '" +  endDate + "';";
     }
-   
+
+    @Override
     public String unArchivePatientData ( String startDate, String endDate )
     {
         return "DELETE pdv FROM patientdatavaluearchive AS pdv "
@@ -242,7 +252,8 @@ public class MySQLStatementBuilder
             + "WHERE pi.enddate >= '" + startDate + "' "
             +    "AND pi.enddate <= '" +  endDate + "';";
     }
-   
+
+    @Override
     public String deleteRegularOverlappingPatientData()
     {
         return "DELETE d FROM patientdatavalue AS d " +
@@ -250,7 +261,8 @@ public class MySQLStatementBuilder
             "WHERE d.programstageinstanceid=a.programstageinstanceid " +
             "AND d.dataelementid=a.dataelementid; " ;
     }
-   
+
+    @Override
     public String deleteArchivedOverlappingPatientData()
     {
         return "DELETE a FROM patientdatavaluearchive AS a " +
@@ -258,7 +270,8 @@ public class MySQLStatementBuilder
             "WHERE d.programstageinstanceid=a.programstageinstanceid " +
             "AND d.dataelementid=a.dataelementid ";
     }
-   
+
+    @Override
     public String deleteOldestOverlappingPatientDataValue()
     {
         return "DELETE d FROM patientdatavalue AS d " +
@@ -267,7 +280,8 @@ public class MySQLStatementBuilder
             "AND d.dataelementid=a.dataelementid " +
             "AND d.timestamp<a.timestamp;";
     }
-   
+
+    @Override
     public String deleteOldestOverlappingPatientArchiveData()
     {
         return "DELETE a FROM patientdatavaluearchive AS a " +
@@ -277,6 +291,7 @@ public class MySQLStatementBuilder
             "AND a.timestamp<=d.timestamp;";
     }
 
+    @Override
     public String queryDataElementStructureForOrgUnit()
     {
         StringBuffer sqlsb = new StringBuffer();
@@ -288,6 +303,7 @@ public class MySQLStatementBuilder
         return sqlsb.toString();
     }
 
+    @Override
     public String queryRawDataElementsForOrgUnitBetweenPeriods(Integer orgUnitId, List<Integer> betweenPeriodIds)
     {
         StringBuffer sqlsb = new StringBuffer();
@@ -311,21 +327,5 @@ public class MySQLStatementBuilder
         }
         
         return sqlsb.toString();
-    }
-    
-    public String limitRecord( int min, int max )
-    {
-        return " LIMIT " + min + " ," + max;
-    }
-
-    public String getAddDate( String dateField, int days )
-    {
-        return "ADDDATE(" + dateField + "," + days + ")";
-    }
-    
-    public String getPatientFullName()
-    {
-        return  "concat( firstname, \" \",middleName , \" \" , lastname)";
-    }
-    
+    }    
 }
