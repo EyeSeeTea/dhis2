@@ -339,7 +339,43 @@ Ext.onReady( function() {
 		return new OpenLayers.LonLat(point.x, point.y);
 	};
 	
-    GIS.util.svg.merge = function(str, strArray) {
+	GIS.util.map.getMap = function(id, setMap) {
+		if (!id) {
+			alert('No favorite id provided');
+			return;
+		}
+		if (!Ext.isString(id)) {
+			alert('Favorite id must be a string');
+			return;
+		}
+		
+		Ext.Ajax.request({
+			url: GIS.conf.url.path_api + 'maps/' + id + '.json?links=false',
+			success: function(r) {
+				var map = Ext.decode(r.responseText);
+				
+				if (setMap) {
+					GIS.util.map.setMap(map);
+				}
+			}
+		});
+	};
+	
+	GIS.util.map.setMap = function(map) {
+		console.log(map);
+		//var views = map.mapViews,
+			//view;
+		
+		//for (var i = 0; i < views.length; i++) {
+			//view = views[i];
+			
+			//GIS.base[view.id].widget.setMap(view);
+		//}
+		
+		//GIS.map.setPos.. setZoom
+	};
+	
+	GIS.util.svg.merge = function(str, strArray) {
         if (strArray.length) {
             str = str || '<svg></svg>';
             for (var i = 0; i < strArray.length; i++) {
@@ -1568,7 +1604,7 @@ Ext.onReady( function() {
 						var fn = function() {
 							var el = Ext.get(record.data.id).parent('td');
 							el.addClsOnOver('link');
-							el.dom.setAttribute('onclick', 'alert("' + record.data.id + '")');
+							el.dom.setAttribute('onclick', 'GIS.util.map.getMap("' + record.data.id + '", true)');
 						};
 						
 						Ext.defer(fn, 100);
