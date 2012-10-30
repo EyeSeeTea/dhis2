@@ -55,6 +55,9 @@ GIS.conf = {
 			item_width: 222,
 			itemlabel_width: 95,
 			window_width: 250
+		},
+		grid: {
+			row_height: 27
 		}
 	},
 	period: {
@@ -750,7 +753,7 @@ Ext.onReady( function() {
 		fields: ['id', 'name', 'lastUpdated'],
 		proxy: {
 			type: 'ajax',
-			url: GIS.conf.url.path_api + 'indicators.json?links=false&paging=false',
+			url: GIS.conf.url.path_api + 'indicators.json?links=false',
 			reader: {
 				type: 'json',
 				root: 'indicators'
@@ -767,7 +770,8 @@ Ext.onReady( function() {
 		},
 		listeners: {
 			beforeload: function() {
-				this.getProxy().setExtraParam('pageSize', GIS.cmp.region.center.getHeight() - 155);
+				//console.log(this.getProxy());
+				//this.getProxy().setExtraParam('pageSize', GIS.cmp.region.center.getHeight() - 155);
 			},
 			load: function() {
 				if (!this.isLoaded) {
@@ -1552,7 +1556,6 @@ Ext.onReady( function() {
 		grid = Ext.create('Ext.grid.Panel', {
 			cls: 'gis-grid',
 			bodyStyle: 'border-top-color: red !important, border-bottom: 0 none',
-			height: 82,
 			scroll: false,
 			hideHeaders: true,
 			columns: [						
@@ -1561,7 +1564,23 @@ Ext.onReady( function() {
 					sortable: false,
 					width: 355,
 					renderer: function(value, metaData, record) {
-						return '<a href="javascript: alert(' + record.data.name + ');">' + value + '</a>';
+						var fn = function() {
+							var span = Ext.get(record.data.id),
+								div = span.parent('div'),
+								td = span.parent('td'),
+								currentElement,
+								clickHandler = function(id) {
+									alert(id);
+									console.log(record.data.id);
+								};
+								
+							td.addClsOnOver('text-link');
+							td.addListener('click', clickHandler(td.id));
+						};
+						
+						Ext.defer(fn, 100);
+						
+						return '<span id="' + record.data.id + '">' + value + '</span>';
 					}
 				},
 				{
@@ -1597,8 +1616,16 @@ Ext.onReady( function() {
 				nextButton
 			],
 			listeners: {
+				added: function() {
+					GIS.cmp.mapGrid = this;
+				},
 				render: function() {
-					this.store.load();
+					var size = Math.floor((GIS.cmp.region.center.getHeight() - 155) / GIS.conf.layout.grid.row_height);
+					this.store.load({
+						params: {
+							pageSize: size
+						}
+					});
 				},
 				itemmouseenter: function(grid, record, item) {
 					this.currentItem = Ext.get(item);
@@ -1618,6 +1645,15 @@ Ext.onReady( function() {
 			iconCls: 'gis-window-title-icon-favorite',
 			cls: 'gis-container-default',
 			width: 450,
+			onmouseover: function(id) { // mapgrid
+				//Ext.get(id).addCls('gis-grid-icon-link');
+			},
+			onmouseout: function(id) {
+				//Ext.get(id).removeCls('gis-grid-icon-link');
+			},
+			onclick: function(id) {
+				//alert(id);
+			},
 			items: [
 				{
 					xtype: 'panel',

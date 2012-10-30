@@ -18,16 +18,6 @@
 
 /* General */
 
-a:link, a:visited {
-	color: #222;
-	text-decoration: none;
-	font-size: 10px;
-}
-a:hover {
-	color: blue;
-	text-decoration: underline;
-}
-
 html * {
 	font-family: arial, sans-serif, liberation sans, consolas !important;
 	font-size: 11px !important;
@@ -494,9 +484,15 @@ html * {
 	vertical-align: middle;
 }
 
-.gis-grid-icon-link {
+.gis-grid td.text-link,
+.gis-grid td.text-link div,
+.gis-grid td.text-link span  {
 	cursor: pointer;
 	cursor: hand;
+}
+.gis-grid td.text-link span {
+	color: blue;
+	text-decoration: underline;
 }
 
 /* TextField */
