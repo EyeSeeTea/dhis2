@@ -44,9 +44,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     
     config: {},
     
-    tmpModel: {},
+    tmpView: {},
     
-    model: {},
+    view: {},
     
     cmp: {},
     
@@ -744,7 +744,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						this.pathToSelect = null;
 					}
 					else {
-						this.getSelectionModel().select(0);
+						this.getSelectionView().select(0);
 					}
 					
 					if (this.pathToExpand) {
@@ -1142,7 +1142,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					if (direction === 'up') {
 						var rootNode = GIS.init.rootNodes[0];
 						
-						that.config.level = that.model.level - 1;
+						that.config.level = that.view.level - 1;
 						that.config.levelName = store.getAt(store.find('level', that.config.level)).data.name;
 						that.config.parentId = rootNode.id;
 						that.config.parentName = rootNode.text;
@@ -1150,11 +1150,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						that.config.parentPath = '/' + GIS.init.rootNodes[0].id;
 					}
 					else if (direction === 'down') {
-						that.config.level = that.model.level + 1;
+						that.config.level = that.view.level + 1;
 						that.config.levelName = store.getAt(store.find('level', that.config.level)).data.name;
 						that.config.parentId = feature.attributes.id;
 						that.config.parentName = feature.attributes.name;
-						that.config.parentLevel = that.model.level;
+						that.config.parentLevel = that.view.level;
 						that.config.parentPath = feature.attributes.path;
 					}
 					
@@ -1170,7 +1170,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				Ext.create('Ext.menu.Item', {
 					text: 'Float up',
 					iconCls: 'gis-menu-item-icon-float',
-					disabled: !that.model.hasCoordinatesUp,
+					disabled: !that.view.hasCoordinatesUp,
 					scope: this,
 					handler: function() {
 						drill('up');
@@ -1264,7 +1264,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			legends;
 		
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_api + 'mapLegendSets/' + this.tmpModel.legendSet + '.json?links=false&paging=false',
+			url: GIS.conf.url.path_api + 'mapLegendSets/' + this.tmpView.legendSet + '.json?links=false&paging=false',
 			scope: this,
 			success: function(r) {
 				legends = Ext.decode(r.responseText).mapLegends;
@@ -1283,9 +1283,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					bounds.push(legends[i].endValue);
 				}
 
-				this.tmpModel.colorInterpolation = colors;
-				this.tmpModel.bounds = bounds;
-                this.tmpModel.legendNames = names;
+				this.tmpView.colorInterpolation = colors;
+				this.tmpView.bounds = bounds;
+                this.tmpView.legendNames = names;
 
 				if (fn) {
 					fn.call(this);
@@ -1296,20 +1296,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	
 	getLegendConfig: function() {
 		return {
-			what: this.tmpModel.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+			what: this.tmpView.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
 			when: this.cmp.period.getRawValue(),
-			where: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
+			where: this.tmpView.levelName + ' / ' + this.tmpView.parentName
 		};
 	},
-        //,
-        
-        //getImageExportValues: function() {
-			//return {
-				//mapValueTypeValue: this.cmp.valueType.getValue() == GIS.conf.map_value_type_indicator ?
-					//this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-				//dateValue: this.cmp.period.getRawValue()
-			//};
-		//},
 		
 	reset: function() {
 		
@@ -1348,10 +1339,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.cmp.labelWindow.destroy();
 		}
 		
-		// Model
+		// View
 		this.config = {};
-		this.tmpModel = {};
-		this.model = {};
+		this.tmpView = {};
+		this.view = {};
 		
 		// Layer
 		this.layer.destroyFeatures();
@@ -1363,341 +1354,314 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		document.getElementById(this.legendDiv).innerHTML = '';
 	},
 	
-	setConfig: function(config) {
-		this.config.valueType = config.valueType;
-		this.config.indicatorGroup = config.indicatorGroup;
-		this.config.indicator = config.indicator;
-		this.config.dataElementGroup = config.dataElementGroup;
-		this.config.dataElement = config.dataElement;
-		this.config.periodType = config.periodType;
-		this.config.period = config.period;
-		this.config.legendType = config.legendType;
-		this.config.legendSet = config.legendSet;
-		this.config.classes = config.classes;
-		this.config.method = config.method;
-		this.config.colorLow = config.colorLow;
-		this.config.colorHigh = config.colorHigh;
-		this.config.radiusLow = config.radiusLow;
-		this.config.radiusHigh = config.radiusHigh;
-		this.config.level = config.level;
-		this.config.levelName = config.levelName;
-		this.config.parentId = config.parentId;
-		this.config.parentName = config.parentName;
-		this.config.parentLevel = config.parentLevel;
-		this.config.parentPath = config.parentPath;
+	setConfig: function(view) {
+		this.config = view;
 		this.config.updateOrganisationUnit = true;
-		this.config.updateData = false;
-		this.config.updateLegend = false;
 		this.config.updateGui = true;
 	},
 	
 	setGui: function() {
-		var model = this.tmpModel,
+		var view = this.tmpView,
 			that = this;
 		
 		// Value type
-		this.cmp.valueType.setValue(model.valueType);
+		this.cmp.valueType.setValue(view.valueType);
 		
 		// Indicator and data element
-		this.toggler.valueType(model.valueType);
+		this.toggler.valueType(view.valueType);
 		
-		var	indeGroupView = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicatorGroup : this.cmp.dataElementGroup,
+		var	indeGroupView = view.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicatorGroup : this.cmp.dataElementGroup,
 			indeGroupStore = indeGroupView.store,
-			indeGroupValue = model.valueType === GIS.conf.finals.dimension.indicator.id ? model.indicatorGroup : model.dataElementGroup,
+			indeGroupValue = view.valueType === GIS.conf.finals.dimension.indicator.id ? view.indicatorGroup : view.dataElementGroup,
 			
-			indeStore = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.store.indicatorsByGroup : this.store.dataElementsByGroup,
-			indeView = model.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicator : this.cmp.dataElement,
-			indeValue = model.valueType === GIS.conf.finals.dimension.indicator.id ? model.indicator : model.dataElement;
+			indeStore = view.valueType === GIS.conf.finals.dimension.indicator.id ? this.store.indicatorsByGroup : this.store.dataElementsByGroup,
+			indeView = view.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicator : this.cmp.dataElement,
+			indeValue = view.valueType === GIS.conf.finals.dimension.indicator.id ? view.indicator : view.dataElement;
 			
 		indeGroupStore.loadFn( function() {
 			indeGroupView.setValue(indeGroupValue);
 		});
 		
-		indeStore.proxy.url = GIS.conf.url.path_api + model.valueType + 'Groups/' + indeGroupValue + '.json?links=false&paging=false';
+		indeStore.proxy.url = GIS.conf.url.path_api + view.valueType + 'Groups/' + indeGroupValue + '.json?links=false&paging=false';
 		indeStore.loadFn( function() {
 			indeView.setValue(indeValue);
 		});
 		
 		// Period
-		this.cmp.periodType.setValue(model.periodType);
+		this.cmp.periodType.setValue(view.periodType);
 		this.cmp.periodType.fireEvent('select');
-		this.cmp.period.setValue(model.period);
+		this.cmp.period.setValue(view.period);
 		
 		// Legend
-		this.cmp.legendType.setValue(model.legendType);
-		this.toggler.legendType(model.legendType);
+		this.cmp.legendType.setValue(view.legendType);
+		this.toggler.legendType(view.legendType);
 		
-		if (model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
-			this.cmp.classes.setValue(model.classes);
-			this.cmp.method.setValue(model.method);
-			this.cmp.colorLow.setValue(model.colorLow);
-			this.cmp.colorHigh.setValue(model.colorHigh);
-			this.cmp.radiusLow.setValue(model.radiusLow);
-			this.cmp.radiusHigh.setValue(model.radiusHigh);
+		if (view.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			this.cmp.classes.setValue(view.classes);
+			this.cmp.method.setValue(view.method);
+			this.cmp.colorLow.setValue(view.colorLow);
+			this.cmp.colorHigh.setValue(view.colorHigh);
+			this.cmp.radiusLow.setValue(view.radiusLow);
+			this.cmp.radiusHigh.setValue(view.radiusHigh);
 		}
-		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+		else if (view.legendType === GIS.conf.finals.widget.legendtype_predefined) {
 			GIS.store.legendSets.loadFn( function() {
-				that.cmp.legendSet.setValue(model.legendSet);
+				that.cmp.legendSet.setValue(view.legendSet);
 			});
 		}
 		
 		// Level and parent
 		GIS.store.organisationUnitLevels.loadFn( function() {
-			that.cmp.level.setValue(model.level);
+			that.cmp.level.setValue(view.level);
 		});
 		
-		this.cmp.parent.selectTreePath('/root' + model.parentPath);
+		this.cmp.parent.selectTreePath('/root' + view.parentPath);
 	},
     	
-	getModel: function() {
+	getView: function(extend) {
 		var level = this.cmp.level,
-			parent = this.cmp.parent.getSelectionModel().getSelection();
+			parent = this.cmp.parent.getSelectionView().getSelection();
 		parent = parent.length ? parent : [{raw: GIS.init.rootNodes[0]}];
 		
-		var model = {
+		var view = {
 			valueType: this.cmp.valueType.getValue(),
-			indicatorGroup: this.cmp.indicatorGroup.getValue(),
-			indicator: this.cmp.indicator.getValue(),
-			dataElementGroup: this.cmp.dataElementGroup.getValue(),
-			dataElement: this.cmp.dataElement.getValue(),
+			indicatorGroup: {
+				id: this.cmp.indicatorGroup.getValue(),
+				name: this.cmp.indicatorGroup.getRawValue()
+			},
+			indicator: {
+				id: this.cmp.indicator.getValue(),
+				name: this.cmp.indicator.getRawValue()
+			},
+			dataElementGroup: {
+				id: this.cmp.dataElementGroup.getValue(),
+				name: this.cmp.dataElementGroup.getRawValue()
+			},
+			dataElement: {
+				id: this.cmp.dataElement.getValue(),
+				name: this.cmp.dataElement.getRawValue()
+			},
 			periodType: this.cmp.periodType.getValue(),
 			period: this.cmp.period.getValue(),
 			legendType: this.cmp.legendType.getValue(),
-			legendSet: this.cmp.legendSet.getValue(),
-			classes: this.cmp.classes.getValue(),
-			method: this.cmp.method.getValue(),
+			legendSet: {
+				id: this.cmp.legendSet.getValue(),
+				name: this.cmp.legendSet.getRawValue()
+			},
+			classes: parseInt(this.cmp.classes.getValue()),
+			method: parseInt(this.cmp.method.getValue()),
 			colorLow: this.cmp.colorLow.getValue(),
 			colorHigh: this.cmp.colorHigh.getValue(),
-			colors: this.getColors(),
 			radiusLow: parseInt(this.cmp.radiusLow.getValue()),
 			radiusHigh: parseInt(this.cmp.radiusHigh.getValue()),
-			level: level.getValue(),
-			levelName: level.getRawValue(),
-			parentId: parent[0].raw.id,
-			parentName: parent[0].raw.text,
-			parentLevel: parent[0].raw.level,
-			parentPath: parent[0].raw.path,
+			organisationUnitLevel: {
+				id: GIS.store.organisationUnitLevels.getRecordByLevel(level.getValue()).data.id,
+				name: level.getRawValue(),
+				level: level.getValue()
+			},
+			parentOrganisationUnit: {
+				id: parent[0].raw.id,
+				name: parent[0].raw.text,
+				level: parent[0].raw.level,
+				parentGraph: parent[0].raw.path
+			},
+			opacity: this.layer.item.getOpacity()
+		};
+		
+		if (extend) {
+			this.extendView(view);
+		}
+		else {
+			return view;
+		}
+	},
+	
+	extendView: function(view) {
+		
 			updateOrganisationUnit: false,
 			updateData: false,
 			updateLegend: false,
 			updateGui: false
-		};
+			colors: this.getColors(),
 		
-		model.valueType = this.config.valueType || model.valueType;
-		model.indicatorGroup = this.config.indicatorGroup || model.indicatorGroup;
-		model.indicator = this.config.indicator || model.indicator;
-		model.dataElementGroup = this.config.dataElementGroup || model.dataElementGroup;
-		model.dataElement = this.config.dataElement || model.dataElement;
-		model.periodType = this.config.periodType || model.periodType;
-		model.period = this.config.period || model.period;
-		model.legendType = this.config.legendType || model.legendType;
-		model.legendSet = this.config.legendSet || model.legendSet;
-		model.classes = this.config.classes || model.classes;
-		model.method = this.config.method || model.method;
-		model.colorLow = this.config.colorLow || model.colorLow;
-		model.colorHigh = this.config.colorHigh || model.colorHigh;
-		model.colors = this.getColors(model.colorLow, model.colorHigh);
-		model.radiusLow = this.config.radiusLow || model.radiusLow;
-		model.radiusHigh = this.config.radiusHigh || model.radiusHigh;
-		model.level = this.config.level || model.level;
-		model.levelName = this.config.levelName || model.levelName;
-		model.parentId = this.config.parentId || model.parentId;
-		model.parentName = this.config.parentName || model.parentName;
-		model.parentLevel = this.config.parentLevel || model.parentLevel;
-		model.parentPath = this.config.parentPath || null;
-		model.updateOrganisationUnit = Ext.isDefined(this.config.updateOrganisationUnit) ? this.config.updateOrganisationUnit : false;
-		model.updateData = Ext.isDefined(this.config.updateData) ? this.config.updateData : false;
-		model.updateLegend = Ext.isDefined(this.config.updateLegend) ? this.config.updateLegend : false;
-		model.updateGui = Ext.isDefined(this.config.updateGui) ? this.config.updateGui : false;
+		view.valueType = this.config.valueType || view.valueType;
+		view.indicatorGroup = this.config.indicatorGroup || view.indicatorGroup;
+		view.indicator = this.config.indicator || view.indicator;
+		view.dataElementGroup = this.config.dataElementGroup || view.dataElementGroup;
+		view.dataElement = this.config.dataElement || view.dataElement;
+		view.periodType = this.config.periodType || view.periodType;
+		view.period = this.config.period || view.period;
+		view.legendType = this.config.legendType || view.legendType;
+		view.legendSet = this.config.legendSet || view.legendSet;
+		view.classes = this.config.classes || view.classes;
+		view.method = this.config.method || view.method;
+		view.colorLow = this.config.colorLow || view.colorLow;
+		view.colorHigh = this.config.colorHigh || view.colorHigh;
+		view.radiusLow = this.config.radiusLow || view.radiusLow;
+		view.radiusHigh = this.config.radiusHigh || view.radiusHigh;
+		view.organisationUnitLevel = this.config.organisationUnitLevel || view.organisationUnitLevel;
+		view.parentOrganisationUnit = this.config.parentOrganisationUnit || view.parentOrganisationUnit;
+		view.opacity = this.config.opacity || view.opacity;
 		
-		return model;
-	},
+		view.colors = this.getColors(view.colorLow, view.colorHigh);
+		view.updateOrganisationUnit = Ext.isDefined(this.config.updateOrganisationUnit) ? this.config.updateOrganisationUnit : false;
+		view.updateData = Ext.isDefined(this.config.updateData) ? this.config.updateData : false;
+		view.updateLegend = Ext.isDefined(this.config.updateLegend) ? this.config.updateLegend : false;
+		view.updateGui = Ext.isDefined(this.config.updateGui) ? this.config.updateGui : false;
+		
+		return view;
+	},		
 	
-	validateModel: function(model) {
-		if (model.valueType === GIS.conf.finals.dimension.indicator.id) {
-			if (!model.indicatorGroup || !Ext.isString(model.indicatorGroup)) {
-				GIS.logg.push([model.indicatorGroup, this.xtype + '.indicatorGroup: string']);
+	validateView: function(view) {
+		if (view.valueType === GIS.conf.finals.dimension.indicator.id) {
+			if (!view.indicatorGroup.id || !Ext.isString(view.indicatorGroup.id)) {
+				GIS.logg.push([view.indicatorGroup.id, this.xtype + '.indicatorGroup.id: string']);
 				//alert("validation failed"); //todo
 				return false;
 			}
-			if (!model.indicator || !Ext.isString(model.indicator)) {
-				GIS.logg.push([model.indicator, this.xtype + '.indicator: string']);
+			if (!view.indicator.id || !Ext.isString(view.indicator.id)) {
+				GIS.logg.push([view.indicator.id, this.xtype + '.indicator.id: string']);
 				alert('No indicator selected'); //todo //i18n
 				return false;
 			}
 		}
-		else if (model.valueType === GIS.conf.finals.dimension.dataElement.id) {
-			if (!model.dataElementGroup || !Ext.isString(model.dataElementGroup)) {
-				GIS.logg.push([model.dataElementGroup, this.xtype + '.dataElementGroup: string']);
+		else if (view.valueType === GIS.conf.finals.dimension.dataElement.id) {
+			if (!view.dataElementGroup.id || !Ext.isString(view.dataElementGroup.id)) {
+				GIS.logg.push([view.dataElementGroup.id, this.xtype + '.dataElementGroup.id: string']);
 				//alert("validation failed"); //todo
 				return false;
 			}
-			if (!model.dataElement || !Ext.isString(model.dataElement)) {
-				GIS.logg.push([model.dataElement, this.xtype + '.dataElement: string']);
+			if (!view.dataElement.id || !Ext.isString(view.dataElement.id)) {
+				GIS.logg.push([view.dataElement.id, this.xtype + '.dataElement.id: string']);
 				alert('No data element selected'); //todo //i18n
 				return false;
 			}
 		}
 		
-		if (!model.periodType || !Ext.isString(model.periodType)) {
-			GIS.logg.push([model.periodType, this.xtype + '.periodType: string']);
+		if (!view.periodType || !Ext.isString(view.periodType)) {
+			GIS.logg.push([view.periodType, this.xtype + '.periodType: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
-		if (!model.period || !Ext.isString(model.period)) {
-			GIS.logg.push([model.period, this.xtype + '.period: string']);
+		if (!view.period || !Ext.isString(view.period)) {
+			GIS.logg.push([view.period, this.xtype + '.period: string']);
 				alert('No period selected'); //todo //i18n
 			return false;
 		}
 		
-		if (model.legendType === GIS.conf.finals.widget.legendtype_automatic) {
-			if (!model.classes || !Ext.isNumber(model.classes)) {
-				GIS.logg.push([model.classes, this.xtype + '.classes: number']);
+		if (view.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			if (!view.classes || !Ext.isNumber(view.classes)) {
+				GIS.logg.push([view.classes, this.xtype + '.classes: number']);
 				//alert("validation failed"); //todo
 				return false;
 			}
-			if (!model.method || !Ext.isNumber(model.method)) {
-				GIS.logg.push([model.method, this.xtype + '.method: number']);
+			if (!view.method || !Ext.isNumber(view.method)) {
+				GIS.logg.push([view.method, this.xtype + '.method: number']);
 				//alert("validation failed"); //todo
 				return false;
 			}
-			if (!model.colorLow || !Ext.isString(model.colorLow)) {
-				GIS.logg.push([model.colorLow, this.xtype + '.colorLow: string']);
+			if (!view.colorLow || !Ext.isString(view.colorLow)) {
+				GIS.logg.push([view.colorLow, this.xtype + '.colorLow: string']);
 				//alert("validation failed"); //todo
 				return false;
 			}
-			if (!model.radiusLow || !Ext.isNumber(model.radiusLow)) {
-				GIS.logg.push([model.radiusLow, this.xtype + '.radiusLow: number']);
+			if (!view.radiusLow || !Ext.isNumber(view.radiusLow)) {
+				GIS.logg.push([view.radiusLow, this.xtype + '.radiusLow: number']);
 				//alert("validation failed"); //todo
 				return false;
 			}
-			if (!model.colorHigh || !Ext.isString(model.colorHigh)) {
-				GIS.logg.push([model.colorHigh, this.xtype + '.colorHigh: string']);
+			if (!view.colorHigh || !Ext.isString(view.colorHigh)) {
+				GIS.logg.push([view.colorHigh, this.xtype + '.colorHigh: string']);
 				//alert("validation failed"); //todo
 				return false;
 			}
-			if (!model.radiusHigh || !Ext.isNumber(model.radiusHigh)) {
-				GIS.logg.push([model.radiusHigh, this.xtype + '.radiusHigh: number']);
+			if (!view.radiusHigh || !Ext.isNumber(view.radiusHigh)) {
+				GIS.logg.push([view.radiusHigh, this.xtype + '.radiusHigh: number']);
 				//alert("validation failed"); //todo
 				return false;
 			}
 		}
-		else if (model.legendType === GIS.conf.finals.widget.legendtype_predefined) {			
-			if (!model.legendSet || !Ext.isString(model.legendSet)) {
-				GIS.logg.push([model.legendSet, this.xtype + '.legendSet: string']);
+		else if (view.legendType === GIS.conf.finals.widget.legendtype_predefined) {			
+			if (!view.legendSet.id || !Ext.isString(view.legendSet.id)) {
+				GIS.logg.push([view.legendSet.id, this.xtype + '.legendSet.id: string']);
 				alert('No legend set selected'); //todo //i18n
 				return false;
 			}
 		}
 		
-		if (!model.level || !Ext.isNumber(model.level)) {
-			GIS.logg.push([model.level, this.xtype + '.level: number']);
+		if (!view.organisationUnitLevel.id || !Ext.isNumber(view.organisationUnitLevel.id)) {
+			GIS.logg.push([view.organisationUnitLevel.id, this.xtype + '.organisationUnitLevel.id: number']);
 				alert('No level selected'); //todo
 			return false;
 		}
-		if (!model.levelName || !Ext.isString(model.levelName)) {
-			GIS.logg.push([model.levelName, this.xtype + '.levelName: string']);
+		if (!view.organisationUnitLevel.name || !Ext.isString(view.organisationUnitLevel.name)) {
+			GIS.logg.push([view.organisationUnitLevel.name, this.xtype + '.organisationUnitLevel.name: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
-		if (!model.parentId || !Ext.isString(model.parentId)) {
-			GIS.logg.push([model.parentId, this.xtype + '.parentId: string']);
+		if (!view.organisationUnitLevel.level || !Ext.isNumber(view.organisationUnitLevel.level)) {
+			GIS.logg.push([view.organisationUnitLevel.level, this.xtype + '.organisationUnitLevel.level: number']);
+				//alert("validation failed"); //todo
+			return false;
+		}
+		if (!view.parentOrganisationUnit.id || !Ext.isString(view.parentOrganisationUnit.id)) {
+			GIS.logg.push([view.parentOrganisationUnit.id, this.xtype + '.parentOrganisationUnit.id: string']);
 				alert('No parent organisation unit selected'); //todo
 			return false;
 		}
-		if (!model.parentName || !Ext.isString(model.parentName)) {
-			GIS.logg.push([model.parentName, this.xtype + '.parentName: string']);
+		if (!view.parentOrganisationUnit.name || !Ext.isString(view.parentOrganisationUnit.name)) {
+			GIS.logg.push([view.parentOrganisationUnit.name, this.xtype + '.parentOrganisationUnit.name: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
-		if (!model.parentLevel || !Ext.isNumber(model.parentLevel)) {
-			GIS.logg.push([model.parentLevel, this.xtype + '.parentLevel: number']);
+		if (!view.parentOrganisationUnit.level || !Ext.isNumber(view.parentOrganisationUnit.level)) {
+			GIS.logg.push([view.parentOrganisationUnit.level, this.xtype + '.parentOrganisationUnit.level: number']);
 				//alert("validation failed"); //todo
 			return false;
 		}
-		if (model.parentLevel > model.level) {
-			GIS.logg.push([model.parentLevel, model.level, this.xtype + '.parentLevel: number <= ' + this.xtype + '.level']);
-				alert('Level cannot be higher than parent level'); //todo
+		if (view.parentOrganisationUnit.level > view.organisationUnitLevel.level) {
+			GIS.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, this.xtype + '.parentOrganisationUnit.level: number <= ' + this.xtype + '.organisationUnitLevel.level']);
+				alert('Orgunit level cannot be higher than parent level'); //todo
 			return false;
 		}
 		
-		if (!model.parentPath && model.updateGui) {
-			GIS.logg.push([model.parentpath, this.xtype + '.parentpath: string']);
+		if (!view.parentGraph && view.updateGui) {
+			GIS.logg.push([view.parentGraph, this.xtype + '.parentGraph: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 		
-		if (!model.updateOrganisationUnit && !model.updateData && !model.updateLegend) {
-			GIS.logg.push([model.updateOrganisationUnit, model.updateData, model.updateLegend, this.xtype + '.update ou/data/legend: true||true||true']);
+		if (!view.updateOrganisationUnit && !view.updateData && !view.updateLegend) {
+			GIS.logg.push([view.updateOrganisationUnit, view.updateData, view.updateLegend, this.xtype + '.update ou/data/legend: true||true||true']);
 			return false;
 		}
 		
 		return true;
 	},
 	
-	getView: function() {
-		console.log(this);
-		return {
-			layer: this.layer.base.id,
-			valueType: this.model.valueType,
-			indicatorGroup: {
-				id: this.model.indicatorGroup
-			},
-			indicator: {
-				id: this.model.indicator
-			},
-			dataElementGroup: {
-				id: this.model.dataElementGroup
-			},
-			dataElement: {
-				id: this.model.dataElement
-			},
-			period: {
-				id: this.model.period
-			},
-			parentOrganisationUnit: {
-				id: this.model.parentId
-			},
-			organisationUnitLevel: {
-				id: GIS.store.organisationUnitLevels.getRecordByLevel(this.model.level).data.id
-			},
-			legendType: this.model.legendType,
-			method: this.model.method,
-			classes: this.model.classes,
-			colorLow: this.model.colorLow,
-			colorHigh: this.model.colorHigh,
-			legendSet: {
-				id: this.model.legendSet
-			},
-			radiusLow: this.model.radiusLow,
-			radiusHigh: this.model.radiusHigh,
-			opacity: this.layer.item.getValue()
-		};
-	},
-	
     loadOrganisationUnits: function() {
         var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
-            'parentId=' + this.tmpModel.parentId +
-            '&level=' + this.tmpModel.level;
+            'parentId=' + this.tmpView.parentId +
+            '&level=' + this.tmpView.level;
         this.setUrl(url);
     },
     
     loadData: function() {
-		var type = this.tmpModel.valueType,
-			dataUrl = '../api/mapValues/' + GIS.conf.finals.dimension[type].param + '.json',
+		var type = this.tmpView.valueType,
+			dataUrl = 'mapValues/' + GIS.conf.finals.dimension[type].param + '.json',
 			indicator = GIS.conf.finals.dimension.indicator,
 			dataElement = GIS.conf.finals.dimension.dataElement,
 			period = GIS.conf.finals.dimension.period,
 			organisationUnit = GIS.conf.finals.dimension.organisationUnit,
 			params = {};
 		
-		params[type === indicator.id ? indicator.param : dataElement.param] = this.tmpModel[type];
-		params[period.param] = this.tmpModel.period;
-		params[organisationUnit.param] = this.tmpModel.parentId;
-		params.level = this.tmpModel.level;
+		params[type === indicator.id ? indicator.param : dataElement.param] = this.tmpView[type];
+		params[period.param] = this.tmpView.period;
+		params[organisationUnit.param] = this.tmpView.parentId;
+		params.level = this.tmpView.level;
 		
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_gis + dataUrl,
+			url: GIS.conf.url.path_api + dataUrl,
 			params: params,
 			disableCaching: false,
 			scope: this,
@@ -1747,11 +1711,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			fn = function() {
 				options = {
 					indicator: GIS.conf.finals.widget.value,
-					method: that.tmpModel.method,
-					numClasses: that.tmpModel.classes,
-					colors: that.tmpModel.colors,
-					minSize: that.tmpModel.radiusLow,
-					maxSize: that.tmpModel.radiusHigh
+					method: that.tmpView.method,
+					numClasses: that.tmpView.classes,
+					colors: that.tmpView.colors,
+					minSize: that.tmpView.radiusLow,
+					maxSize: that.tmpView.radiusHigh
 				};
 
 				that.coreComp.applyClassification(options);
@@ -1760,7 +1724,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				that.afterLoad();
 			};
 		
-		if (this.tmpModel.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+		if (this.tmpView.legendType === GIS.conf.finals.widget.legendtype_predefined) {
 			this.setPredefinedLegend(fn);
 		}
 		else {
@@ -1769,23 +1733,23 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	},
 	
     execute: function() {
-		this.tmpModel = this.getModel();
+		this.tmpView = this.getView();
 		
-		if (!this.validateModel(this.tmpModel)) {
+		if (!this.validateView(this.tmpView)) {
 			return;
 		}
 				
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
 		
-		if (this.tmpModel.updateGui) {
+		if (this.tmpView.updateGui) {
 			this.setGui();
 		}
 		
-		if (this.tmpModel.updateOrganisationUnit) {
+		if (this.tmpView.updateOrganisationUnit) {
 			this.loadOrganisationUnits();
 		}
-		else if (this.tmpModel.updateData) {
+		else if (this.tmpView.updateData) {
 			this.loadData();
 		}
 		else {
@@ -1794,7 +1758,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	},
 	
 	afterLoad: function() {
-		this.model = this.tmpModel;
+		this.view = this.tmpView;
 		this.config = {};
 		
 		// Layer item
@@ -1812,11 +1776,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		}
         
         // Set favorite position, else zoom to visible extent
-        if (this.model.longitude && this.model.latitude && this.model.zoom) {
-			var lonLat = GIS.util.map.getLonLatByXY(this.model.longitude, this.model.latitude);
-			GIS.map.setCenter(lonLat, this.model.zoom);
+        if (this.view.longitude && this.view.latitude && this.view.zoom) {
+			var lonLat = GIS.util.map.getLonLatByXY(this.view.longitude, this.view.latitude);
+			GIS.map.setCenter(lonLat, this.view.zoom);
 		}
-		else if (this.model.updateOrganisationUnit) {
+		else if (this.view.updateOrganisationUnit) {
 			GIS.util.map.zoomToVisibleExtent();
 		}
 		

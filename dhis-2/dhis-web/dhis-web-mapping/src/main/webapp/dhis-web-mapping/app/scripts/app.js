@@ -362,17 +362,47 @@ Ext.onReady( function() {
 	};
 	
 	GIS.util.map.setMap = function(map) {
-		console.log(map);
-		//var views = map.mapViews,
-			//view;
+		var views = map.mapViews,
+			view;
 		
-		//for (var i = 0; i < views.length; i++) {
-			//view = views[i];
+		for (var i = 0; i < views.length; i++) {
+			view = views[i];
 			
-			//GIS.base[view.id].widget.setMap(view);
-		//}
+			GIS.base[view.id].widget.setMap(view);
+		}
 		
-		//GIS.map.setPos.. setZoom
+		GIS.map.setPos.. setZoom
+		
+		
+		var config = {
+			classes: 5,
+			colorHigh: "ffff00",
+			colorLow: "0000ff",
+			dataElement: null,
+			dataElementGroup: null,
+			indicator: "Uvn6LCg7dVU",
+			indicatorGroup: "AoTB60phSOH",
+			legendSet: null,
+			legendType: "automatic",
+			level: 3,
+			levelName: "Chiefdom",
+			method: 2,
+			parentId: "Vth0fbpFcsO",
+			parentLevel: 2,
+			parentName: "Kono",
+			parentPath: "/ImspTQPwCqd/Vth0fbpFcsO",
+			period: "2012",
+			periodType: "Yearly",
+			radiusHigh: 15,
+			radiusLow: 5,
+			updateData: false,
+			updateLegend: false,
+			updateOrganisationUnit: true,
+			valueType: "indicator"
+		};
+		
+		
+		
 	};
 	
 	GIS.util.svg.merge = function(str, strArray) {
@@ -1608,15 +1638,15 @@ Ext.onReady( function() {
 						//alert(1);
 						console.log(map);//return;
 					
-						//Ext.Ajax.request({
-							//url: GIS.conf.url.path_api + 'maps/',
-							//method: 'POST',
-							//headers: {'Content-Type': 'application/json'},
-							//params: Ext.encode(map),
-							//success: function() {
-								//GIS.store.maps.loadStore();
-							//}
-						//});
+						Ext.Ajax.request({
+							url: GIS.conf.url.path_api + 'maps/',
+							method: 'POST',
+							headers: {'Content-Type': 'application/json'},
+							params: Ext.encode(map),
+							success: function() {
+								GIS.store.maps.loadStore();
+							}
+						});
 					}
 				}
 			});
@@ -2395,6 +2425,7 @@ Ext.onReady( function() {
 			width: 28,
 			height: 28,
 			iconCls: 'gis-btn-icon-download',
+			style: 'border-radius: 1px',
 			handler: function() {
 				var title = textfield.getValue(),
 					svg = GIS.util.svg.getString(title, GIS.util.map.getVisibleVectorLayers()),
@@ -2686,8 +2717,8 @@ Ext.onReady( function() {
 						},
 						{
 							xtype: 'tbseparator',
-							height: 20,
-							style: 'border-color: transparent #d1d1d1 transparent transparent'
+							height: 18,
+							style: 'border-color: transparent #d1d1d1 transparent transparent; padding-right: 1px'
 						},
 						{
 							text: 'Download', //i18n

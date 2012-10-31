@@ -22,6 +22,9 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 		this.layer.setVisibility(value);
 		this.setOpacity(opacity);
 	},
+	getOpacity: function() {
+		return this.opacity;
+	},
 	setOpacity: function(opacity) {
 		this.opacity = opacity;
 		this.layer.setLayerOpacity(opacity);

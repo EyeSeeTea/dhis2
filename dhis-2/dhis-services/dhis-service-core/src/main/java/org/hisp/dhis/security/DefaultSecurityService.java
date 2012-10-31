@@ -27,6 +27,7 @@ package org.hisp.dhis.security;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,12 +35,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.period.Cal;
+import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.system.velocity.VelocityManager;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
 
@@ -49,6 +54,8 @@ import org.hisp.dhis.user.UserService;
 public class DefaultSecurityService
     implements SecurityService
 {
+    private static final Log log = LogFactory.getLog( DefaultSecurityService.class );
+    
     private static final String RESTORE_PATH = "/dhis-web-commons/security/restore.action";
 
     private static final int TOKEN_LENGTH = 50;
@@ -78,6 +85,13 @@ public class DefaultSecurityService
     {
         this.userService = userService;
     }
+    
+    private SystemSettingManager systemSettingManager;
+
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    {
+        this.systemSettingManager = systemSettingManager;
+    }
 
     // -------------------------------------------------------------------------
     // SecurityService implementation
@@ -94,17 +108,27 @@ public class DefaultSecurityService
         
         if ( credentials == null || credentials.getUser() == null || credentials.getUser().getEmail() == null )
         {
+            log.info( "Could not send message as user does not exist or has no email: " + username );
             return false;
         }
         
         if ( !ValidationUtils.emailIsValid( credentials.getUser().getEmail() ) )
         {
+            log.info( "Could not send message as email is invalid" );
             return false;
         }
         
-        // TODO check if email is configured
-        // TODO check if restore is allowed
-        // TODO deny restore if credentials contain certain authorities
+        if ( !systemSettingManager.emailEnabled() )
+        {
+            log.info( "Could not send message as email is not configured" );
+            return false;
+        }
+        
+        if ( credentials.hasAnyAuthority( Arrays.asList( UserAuthorityGroup.CRITICAL_AUTHS ) ) )
+        {
+            log.info( "Not allowed to recover credentials with critical authorities" );
+            return false;
+        }
         
         String[] result = initRestore( credentials );
         
@@ -158,6 +182,7 @@ public class DefaultSecurityService
         
         if ( credentials == null )
         {
+            log.info( "Could not restore as user does not exist: " + username );
             return false;
         }
         
@@ -195,6 +220,7 @@ public class DefaultSecurityService
         
         if ( credentials == null || credentials.getRestoreToken() == null )
         {
+            log.info( "Could not verify token as user does not exist or has no token: " + username );
             return false;
         }
         
