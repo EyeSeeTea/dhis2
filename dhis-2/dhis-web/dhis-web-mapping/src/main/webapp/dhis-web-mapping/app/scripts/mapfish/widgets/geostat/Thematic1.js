@@ -1298,9 +1298,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					bounds.push(legends[i].endValue);
 				}
 
-				this.tmpView.colorInterpolation = colors;
-				this.tmpView.bounds = bounds;
-                this.tmpView.legendNames = names;
+				this.tmpView.extended.colorInterpolation = colors;
+				this.tmpView.extended.bounds = bounds;
+                this.tmpView.extended.legendNames = names;
 
 				if (fn) {
 					fn.call(this);
@@ -1733,6 +1733,12 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				
 				that.afterLoad();
 			};
+			
+		this.tmpView.extended.legendConfig = {
+			what: this.tmpView.valueType === 'indicator' ? this.tmpView.indicator.name : this.tmpView.dataElement.name,
+			when: this.tmpView.period.id, //todo name
+			where: this.tmpView.organisationUnitLevel.name + ' / ' + this.tmpView.parentOrganisationUnit.name
+		};
 		
 		if (this.tmpView.legendType === GIS.conf.finals.widget.legendtype_predefined) {
 			this.setPredefinedLegend(fn);
@@ -1783,7 +1789,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		};
 		
 		// Layer item
-		this.layer.item.setValue(true, 0.5);
+		this.layer.item.setValue(true, this.view.opacity);
 		
 		// Layer menu
 		this.menu.enableItems();

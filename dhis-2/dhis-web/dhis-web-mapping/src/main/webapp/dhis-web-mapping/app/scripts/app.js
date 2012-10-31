@@ -420,7 +420,7 @@ Ext.onReady( function() {
 			var layer = layers[i],
 				id = layer.base.id,
 				legendConfig = layer.base.widget.getLegendConfig(),
-				legendData = layer.base.widget.model.imageLegend,
+				imageLegendConfig = layer.base.widget.view.extended.imageLegendConfig,
 				what,
 				when,
 				where,
@@ -451,16 +451,16 @@ Ext.onReady( function() {
 				
 				legend = '<g>';
 				
-				for (var j = 0; j < legendData.length; j++) {
+				for (var j = 0; j < imageLegendConfig.length; j++) {
 					if (j !== 0) {
 						y += 15;
 					}
 					
 					legend += '<rect x="' + x + '" y="' + y + '" height="15" width="30" ' +
-							  'fill="' + legendData[j].color + '" stroke="#000000" stroke-width="1"/>';
+							  'fill="' + imageLegendConfig[j].color + '" stroke="#000000" stroke-width="1"/>';
 							  
 					legend += '<text id="label" x="' + (x + 40) + '" y="' + (y + 12) + '" font-size="12">' +
-							  '<tspan>' + legendData[j].label + '</tspan></text>';
+							  '<tspan>' + imageLegendConfig[j].label + '</tspan></text>';
 				}
 				
 				legend += '</g>';
