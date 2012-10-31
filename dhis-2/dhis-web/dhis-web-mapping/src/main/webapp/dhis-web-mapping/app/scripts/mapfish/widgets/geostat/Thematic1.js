@@ -1296,9 +1296,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	
 	getLegendConfig: function() {
 		return {
-			what: this.tmpView.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
-			when: this.cmp.period.getRawValue(),
-			where: this.tmpView.levelName + ' / ' + this.tmpView.parentName
+			what: this.tmpView.valueType === 'indicator' ? this.tmpView.indicator.name : this.tmpView.dataElement.name,
+			when: this.cmp.period.getRawValue(), //todo
+			where: this.tmpView.organisationUnitLevel.name + ' / ' + this.tmpView.parentOrganisationUnit.name
 		};
 	},
 		
@@ -1372,11 +1372,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 		var	indeGroupView = view.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicatorGroup : this.cmp.dataElementGroup,
 			indeGroupStore = indeGroupView.store,
-			indeGroupValue = view.valueType === GIS.conf.finals.dimension.indicator.id ? view.indicatorGroup : view.dataElementGroup,
+			indeGroupValue = view.valueType === GIS.conf.finals.dimension.indicator.id ? view.indicatorGroup.id : view.dataElementGroup.id,
 			
 			indeStore = view.valueType === GIS.conf.finals.dimension.indicator.id ? this.store.indicatorsByGroup : this.store.dataElementsByGroup,
 			indeView = view.valueType === GIS.conf.finals.dimension.indicator.id ? this.cmp.indicator : this.cmp.dataElement,
-			indeValue = view.valueType === GIS.conf.finals.dimension.indicator.id ? view.indicator : view.dataElement;
+			indeValue = view.valueType === GIS.conf.finals.dimension.indicator.id ? view.indicator.id : view.dataElement.id;
 			
 		indeGroupStore.loadFn( function() {
 			indeGroupView.setValue(indeGroupValue);
@@ -1406,16 +1406,16 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		}
 		else if (view.legendType === GIS.conf.finals.widget.legendtype_predefined) {
 			GIS.store.legendSets.loadFn( function() {
-				that.cmp.legendSet.setValue(view.legendSet);
+				that.cmp.legendSet.setValue(view.legendSet.id);
 			});
 		}
 		
 		// Level and parent
 		GIS.store.organisationUnitLevels.loadFn( function() {
-			that.cmp.level.setValue(view.level);
+			that.cmp.level.setValue(view.organisationUnitLevel.level);
 		});
 		
-		this.cmp.parent.selectTreePath('/root' + view.parentPath);
+		this.cmp.parent.selectTreePath('/root' + view.parentGraph);
 	},
     	
 	getView: function(extend) {
@@ -1476,14 +1476,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		}
 	},
 	
-	extendView: function(view) {
-		
-			updateOrganisationUnit: false,
-			updateData: false,
-			updateLegend: false,
-			updateGui: false
-			colors: this.getColors(),
-		
+	extendView: function(view) {		
 		view.valueType = this.config.valueType || view.valueType;
 		view.indicatorGroup = this.config.indicatorGroup || view.indicatorGroup;
 		view.indicator = this.config.indicator || view.indicator;
@@ -1641,8 +1634,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	
     loadOrganisationUnits: function() {
         var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
-            'parentId=' + this.tmpView.parentId +
-            '&level=' + this.tmpView.level;
+            'parentId=' + this.tmpView.parentOrganisationUnit.id +
+            '&level=' + this.tmpView.organisationUnitLevel.level;
         this.setUrl(url);
     },
     
@@ -1657,8 +1650,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		
 		params[type === indicator.id ? indicator.param : dataElement.param] = this.tmpView[type];
 		params[period.param] = this.tmpView.period;
-		params[organisationUnit.param] = this.tmpView.parentId;
-		params.level = this.tmpView.level;
+		params[organisationUnit.param] = this.tmpView.parentOrganisationUnit.id;
+		params.level = this.tmpView.organisationUnitLevel.level;
 		
 		Ext.Ajax.request({
 			url: GIS.conf.url.path_api + dataUrl,
@@ -1672,7 +1665,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					features = [];
 					
 				if (values.length === 0) {
-					alert('No aggregated data values found'); //todo Ext.message.msg(false, GIS.i18n.current_selection_no_data);
+					alert('No aggregated data values found'); //todo
 					GIS.mask.hide();
 					return;
 				}
@@ -1733,7 +1726,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	},
 	
     execute: function() {
-		this.tmpView = this.getView();
+		this.tmpView = this.getView(true);
 		
 		if (!this.validateView(this.tmpView)) {
 			return;
