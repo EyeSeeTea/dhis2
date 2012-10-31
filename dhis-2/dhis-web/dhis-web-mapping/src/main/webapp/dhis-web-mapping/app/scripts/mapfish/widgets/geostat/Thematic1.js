@@ -1163,7 +1163,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						that.config.organisationUnitLevel = {
 							id: level.data.id,
 							name: level.data.name,
-							level: level.data.name
+							level: level.data.level
 						};
 						that.config.parentOrganisationUnit = {
 							id: feature.attributes.id,
@@ -1172,7 +1172,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						};
 						that.config.parentGraph = feature.attributes.path;
 					}
-console.log(that);					
 					
 					that.config.extended.updateOrganisationUnit = true;
 					that.config.extended.updateGui = true;
@@ -1473,15 +1472,15 @@ console.log(that);
 			organisationUnitLevel: {
 				id: level.getValue(),
 				name: level.getRawValue(),
-				//level: GIS.store.organisationUnitLevels.getById(level.getValue()).data.level
+				level: GIS.store.organisationUnitLevels.getById(level.getValue()).data.level
 			},
 			parentOrganisationUnit: {
 				id: parent[0].raw.id,
-				name: parent[0].raw.text,
-				level: parent[0].raw.level
+				name: parent[0].raw.text
 			},
-			opacity: this.layer.item.getOpacity(),
-			parentGraph: parent[0].raw.path
+			parentLevel: parent[0].raw.level,
+			parentGraph: parent[0].raw.path,
+			opacity: this.layer.item.getOpacity()
 		};
 		
 		return view;
@@ -1490,7 +1489,7 @@ console.log(that);
 	extendView: function(view) {
 		var conf = this.config;
 		view = view || {};
-		
+
 		view.valueType = conf.valueType || view.valueType;
 		view.indicatorGroup = conf.indicatorGroup || view.indicatorGroup;
 		view.indicator = conf.indicator || view.indicator;
@@ -1508,8 +1507,9 @@ console.log(that);
 		view.radiusHigh = conf.radiusHigh || view.radiusHigh;
 		view.organisationUnitLevel = conf.organisationUnitLevel || view.organisationUnitLevel;
 		view.parentOrganisationUnit = conf.parentOrganisationUnit || view.parentOrganisationUnit;
-		view.opacity = conf.opacity || view.opacity;
+		view.parentLevel = conf.parentLevel || view.parentLevel;
 		view.parentGraph = conf.parentGraph || view.parentGraph;
+		view.opacity = conf.opacity || view.opacity;
 		
 		view.extended = {
 			colors: this.getColors(view.colorLow, view.colorHigh),
@@ -1624,23 +1624,23 @@ console.log(that);
 				//alert("validation failed"); //todo
 			return false;
 		}
-		if (!view.parentOrganisationUnit.level || !Ext.isNumber(view.parentOrganisationUnit.level)) {
-			GIS.logg.push([view.parentOrganisationUnit.level, this.xtype + '.parentOrganisationUnit.level: number']);
+		if (!view.parentLevel || !Ext.isNumber(view.parentLevel)) {
+			GIS.logg.push([view.parentLevel, this.xtype + '.parentLevel: number']);
 				//alert("validation failed"); //todo
-			//return false;
-		}
-		if (view.parentOrganisationUnit.level > view.organisationUnitLevel.level) {
-			GIS.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, this.xtype + '.parentOrganisationUnit.level: number <= ' + this.xtype + '.organisationUnitLevel.level']);
-				alert('Orgunit level cannot be higher than parent level'); //todo
 			return false;
 		}
-		
-		if (!view.parentGraph && view.updateGui) {
+		if (!view.parentGraph || !Ext.isString(view.parentGraph)) {
 			GIS.logg.push([view.parentGraph, this.xtype + '.parentGraph: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 		
+		if (view.parentOrganisationUnit.level > view.organisationUnitLevel.level) {
+			GIS.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, this.xtype + '.parentOrganisationUnit.level: number <= ' + this.xtype + '.organisationUnitLevel.level']);
+				alert('Orgunit level cannot be higher than parent level'); //todo
+			return false;
+		}
+				
 		if (!view.extended.updateOrganisationUnit && !view.extended.updateData && !view.extended.updateLegend) {
 			GIS.logg.push([view.extended.updateOrganisationUnit, view.extended.updateData, view.extended.updateLegend, this.xtype + '.extended.update ou/data/legend: true||true||true']);
 			return false;
@@ -1723,7 +1723,7 @@ console.log(that);
 					indicator: GIS.conf.finals.widget.value,
 					method: that.tmpView.method,
 					numClasses: that.tmpView.classes,
-					colors: that.tmpView.colors,
+					colors: that.tmpView.extended.colors,
 					minSize: that.tmpView.radiusLow,
 					maxSize: that.tmpView.radiusHigh
 				};
@@ -1756,7 +1756,8 @@ console.log(that);
 		if (!this.validateView(this.tmpView)) {
 			return;
 		}
-				
+alert("valid");		
+		
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
 		
@@ -1796,13 +1797,13 @@ console.log(that);
 		}
         
         // Set favorite position, else zoom to visible extent
-        if (this.view.longitude && this.view.latitude && this.view.zoom) {
-			var lonLat = GIS.util.map.getLonLatByXY(this.view.longitude, this.view.latitude);
-			GIS.map.setCenter(lonLat, this.view.zoom);
-		}
-		else if (this.view.updateOrganisationUnit) {
+        //if (this.view.longitude && this.view.latitude && this.view.zoom) {
+			//var lonLat = GIS.util.map.getLonLatByXY(this.view.longitude, this.view.latitude);
+			//GIS.map.setCenter(lonLat, this.view.zoom);
+		//}
+		//else if (this.view.updateOrganisationUnit) {
 			GIS.util.map.zoomToVisibleExtent();
-		}
+		//}
 		
 		// Legend
 		GIS.cmp.region.east.doLayout();
