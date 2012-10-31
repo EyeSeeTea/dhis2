@@ -252,18 +252,18 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
 	
     classify: function(method, nbBins, bounds, that) {
 		if (that.tmpView.legendType === GIS.conf.finals.widget.legendtype_predefined) {
-			bounds = that.tmpView.bounds;
+			bounds = that.tmpView.extended.bounds;
 
 			if (bounds[0] > this.minVal) {
 				bounds.unshift(this.minVal);        
                 //if (this.widget == centroid) { this.widget.symbolizerInterpolation.unshift('blank');
-				that.tmpView.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
+				that.tmpView.extended.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
 			}
 
 			if (bounds[bounds.length-1] < this.maxVal) {
 				bounds.push(this.maxVal);
                 //todo if (this.widget == centroid) { G.vars.activeWidget.symbolizerInterpolation.push('blank');
-				that.tmpView.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
+				that.tmpView.extended.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
 			}
 			
 			method = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS;

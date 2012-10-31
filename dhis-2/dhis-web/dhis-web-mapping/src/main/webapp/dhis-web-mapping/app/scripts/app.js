@@ -95,6 +95,7 @@ GIS.init = {};
 GIS.mask;
 
 GIS.util = {
+	url: {},
 	google: {},
 	map: {},
 	svg: {},
@@ -234,36 +235,12 @@ Ext.onReady( function() {
 			}
 		});
 		
-		// Load favorite //todo
-		//var config = {
-			//classes: 5,
-			//colorHigh: "ffff00",
-			//colorLow: "0000ff",
-			//dataElement: null,
-			//dataElementGroup: null,
-			//indicator: "Uvn6LCg7dVU",
-			//indicatorGroup: "AoTB60phSOH",
-			//legendSet: null,
-			//legendType: "automatic",
-			//level: 3,
-			//levelName: "Chiefdom",
-			//method: 2,
-			//parentId: "fdc6uOvgoji",
-			//parentLevel: 2,
-			//parentName: "Bombali",
-			//parentPath: "/ImspTQPwCqd/fdc6uOvgoji",
-			//period: "2012",
-			//periodType: "Yearly",
-			//radiusHigh: 15,
-			//radiusLow: 5,
-			//updateData: false,
-			//updateLegend: false,
-			//updateOrganisationUnit: true,
-			//valueType: "indicator"
-		//};
+		// Favorite
 		
-		//GIS.base.thematic1.widget.setConfig(config);
-		//GIS.base.thematic1.widget.execute();
+		var id = GIS.util.url.getUrlParam('id');
+		if (id) {
+			GIS.util.map.getMap(id, true);
+		}
 	};
 	
 	// Mask
@@ -276,6 +253,25 @@ Ext.onReady( function() {
 	
 	GIS.util.google.openTerms = function() {
 		window.open('http://www.google.com/intl/en-US_US/help/terms_maps.html', '_blank');
+	};
+	
+	GIS.util.url.getUrlParam = function(s) {
+		var output = '';
+		var href = window.location.href;
+		if (href.indexOf('?') > -1 ) {
+			var query = href.substr(href.indexOf('?') + 1);
+			var query = query.split('&');
+			for (var i = 0; i < query.length; i++) {
+				if (query[i].indexOf('=') > -1) {
+					var a = query[i].split('=');
+					if (a[0].toLowerCase() === s) {
+						output = a[1];
+						break;
+					}
+				}
+			}
+		}
+		return unescape(output);
 	};
 	
 	GIS.util.map.getVisibleVectorLayers = function() {
@@ -790,7 +786,6 @@ Ext.onReady( function() {
 		fields: ['id', 'name', 'lastUpdated', 'system'],
 		proxy: {
 			type: 'ajax',
-			url: GIS.conf.url.path_api + 'maps.json?links=false',
 			reader: {
 				type: 'json',
 				root: 'maps'
@@ -799,7 +794,10 @@ Ext.onReady( function() {
 		isLoaded: false,
 		pageSize: 10,
 		page: 1,
-		loadStore: function() {
+		defaultUrl: GIS.conf.url.path_api + 'maps.json?links=false',
+		loadStore: function(url) {
+			this.proxy.url = url || this.defaultUrl;
+			
 			this.load({
 				params: {
 					pageSize: this.pageSize,
@@ -1626,7 +1624,7 @@ Ext.onReady( function() {
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(map),
-							success: function() {
+							success: function() {								
 								GIS.store.maps.loadStore();
 								
 								window.close();
@@ -1637,7 +1635,7 @@ Ext.onReady( function() {
 			});
 			
 			updateButton = Ext.create('Ext.button.Button', {
-				text: 'Save', //i18n
+				text: 'Update', //i18n
 				handler: function() {
 					console.log('update ' + id + ' + hide + load');
 				}
@@ -1673,7 +1671,6 @@ Ext.onReady( function() {
 		searchTextfield = Ext.create('Ext.form.field.Text', {
 			width: 354,
 			height: 26,
-			style: 'margin-right: 4px',
 			fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
 			emptyText: 'Search for favorites..', //i18n
 			enableKeyEvents: true,
@@ -1681,8 +1678,14 @@ Ext.onReady( function() {
 			listeners: {
 				keyup: function() {
 					if (this.getValue() !== this.currentValue) {
-						console.log('Request ' + this.getValue());
 						this.currentValue = this.getValue();
+						
+						var value = this.getValue(),
+							url = value ? GIS.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+							store = GIS.store.maps;
+							
+						store.page = 1;
+						store.loadStore(url);
 					}
 				}
 			}
@@ -1691,7 +1694,7 @@ Ext.onReady( function() {
 		addButton = Ext.create('Ext.button.Button', {
 			text: 'Add new', //i18n
 			height: 26,
-			style: 'border-radius: 1px',
+			style: 'border-radius: 1px; margin-right: 4px',
 			menu: {},
 			handler: function() {
 				nameWindow = new NameWindow();
@@ -1702,12 +1705,24 @@ Ext.onReady( function() {
 		prevButton = Ext.create('Ext.button.Button', {
 			text: 'Prev', //i18n
 			handler: function() {
+				var value = searchTextfield.getValue(),
+					url = value ? GIS.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+					store = GIS.store.maps;
+					
+				store.page = store.page <= 1 ? 1 : store.page - 1;
+				store.loadStore(url);
 			}
 		});
 		
 		nextButton = Ext.create('Ext.button.Button', {
 			text: 'Next', //i18n
 			handler: function() {
+				var value = searchTextfield.getValue(),
+					url = value ? GIS.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+					store = GIS.store.maps;
+					
+				store.page = store.page + 1;
+				store.loadStore(url);
 			}
 		});
 		
@@ -1809,8 +1824,8 @@ Ext.onReady( function() {
 					layout: 'hbox',
 					cls: 'gis-container-inner',
 					items: [
-						searchTextfield,
-						addButton
+						addButton,
+						searchTextfield
 					]
 				},
 				grid

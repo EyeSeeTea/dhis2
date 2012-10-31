@@ -148,7 +148,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 			legendType = this.widget.tmpView.legendType,
 			automatic = GIS.conf.finals.widget.legendtype_automatic,
 			predefined = GIS.conf.finals.widget.legendtype_predefined,
-			legendNames = this.widget.tmpView.legendNames;
+			legendNames = this.widget.tmpView.extended.legendNames;
 			
         this.legendDiv.update("");
         

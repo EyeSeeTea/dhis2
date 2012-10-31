@@ -1760,7 +1760,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.tmpView = this.extendView(view);
 		
 		if (!this.validateView(this.tmpView)) {
-			alert("invalid");
 			return;
 		}
 		
