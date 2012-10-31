@@ -2685,7 +2685,16 @@ Ext.onReady( function() {
 							}
 						},
 						{
+							xtype: 'tbseparator',
+							height: 20,
+							style: 'border-color: transparent #d1d1d1 transparent transparent'
+						},
+						{
 							text: 'Download', //i18n
+							menu: new GIS.obj.DownloadMenu()
+						},
+						{
+							text: 'Share', //i18n
 							menu: new GIS.obj.DownloadMenu()
 						},
 						'->',
