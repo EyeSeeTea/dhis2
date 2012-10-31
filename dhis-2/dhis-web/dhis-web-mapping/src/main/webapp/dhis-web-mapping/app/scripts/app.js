@@ -193,9 +193,8 @@ Ext.onReady( function() {
 			GIS.init.onInitialize(r);	
 	
 	GIS.init.onRender = function() {
-		//GIS.base.googleStreets.layer.item.setValue(false);
 		if (!window.google) {
-			GIS.base.openStreetMap.layer.item.setValue(false);
+			GIS.base.openStreetMap.layer.item.setValue(true);
 		}
 	};
 	
@@ -371,10 +370,7 @@ Ext.onReady( function() {
 			GIS.base[view.layer].widget.execute(view);
 		}
 		
-		
-		
-		//GIS.map.setPos.. setZoom
-		
+		//GIS.map.setPos.. setZoom		
 	};
 	
 	GIS.util.svg.merge = function(str, strArray) {
@@ -1027,19 +1023,23 @@ Ext.onReady( function() {
 			layer,
 			items = [],
 			item,
-			panel;
+			panel,
+			visibleLayer;
+			
+		visibleLayerId = window.google ? GIS.base.googleStreets.id : GIS.base.openStreetMap.id;
 		
 		for (var i = 0; i < layers.length; i++) {
 			layer = layers[i];
+			
 			item = Ext.create('Ext.ux.panel.LayerItemPanel', {
 				cls: 'gis-container-inner',
 				height: 23,
 				layer: layer,
 				text: layer.base.name,
 				imageUrl: 'images/' + layer.base.id + '_14.png',
-				value: layer.base.id === GIS.base.googleStreets.id ? true : false,
+				value: layer.base.id === visibleLayerId ? true : false,
 				opacity: layer.layerOpacity,
-				numberFieldDisabled: layer.base.id !== GIS.base.googleStreets.id
+				numberFieldDisabled: layer.base.id !== visibleLayerId
 			});
 			layer.item = item;
 			items.push(layer.item);
@@ -1574,7 +1574,12 @@ Ext.onReady( function() {
 				labelWidth: 70,
 				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
 				fieldLabel: 'Name', //i18n
-				value: id ? GIS.store.maps.getById(id).data.name : ''
+				value: id ? GIS.store.maps.getById(id).data.name : '',
+				listeners: {
+					afterrender: function() {
+						this.focus();
+					}
+				}
 			});
 			
 			systemCheckbox = Ext.create('Ext.form.field.Checkbox', {

@@ -15,19 +15,38 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 		return this.checkbox.getValue();
 	},
 	setValue: function(value, opacity) {
-		opacity = opacity || this.opacity;
 		this.checkbox.setValue(value);
-		this.numberField.setValue(opacity * 100);
 		this.numberField.setDisabled(!value);
 		this.layer.setVisibility(value);
-		this.setOpacity(opacity);
+		
+		if (opacity === 0) {
+			this.numberField.setValue(0);
+			this.setOpacity(0.01);
+		}
+		else if (opacity > 0) {
+			this.numberField.setValue(opacity * 100);
+			this.setOpacity(opacity);
+		}
+		else {
+			this.numberField.setValue(this.opacity * 100);
+			this.setOpacity(this.opacity);
+		}
+			
+		
+		
+		//opacity = opacity === 0 ? 0.01 : (opacity || this.opacity);
+		//this.checkbox.setValue(value);
+		//this.numberField.setValue(opacity * 100);
+		//this.numberField.setDisabled(!value);
+		//this.layer.setVisibility(value);
+		//this.setOpacity(opacity);
 	},
 	getOpacity: function() {
 		return this.opacity;
 	},
 	setOpacity: function(opacity) {
-		this.opacity = opacity;
-		this.layer.setLayerOpacity(opacity);
+		this.opacity = opacity === 0 ? 0.01 : opacity;
+		this.layer.setLayerOpacity(this.opacity);
 	},
 	disableItem: function() {
 		this.checkbox.setValue(false);

@@ -1435,7 +1435,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			view;
 				
 		parent = parent.length ? parent : [{raw: GIS.init.rootNodes[0]}];
-			
+		
 		view = {
 			valueType: this.cmp.valueType.getValue(),
 			indicatorGroup: {
@@ -1783,7 +1783,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		};
 		
 		// Layer item
-		this.layer.item.setValue(true);
+		this.layer.item.setValue(true, 0.5);
 		
 		// Layer menu
 		this.menu.enableItems();
