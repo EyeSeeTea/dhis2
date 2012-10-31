@@ -1606,17 +1606,17 @@ Ext.onReady( function() {
 							mapViews: views
 						};
 						//alert(1);
-						//console.log(map);return;
+						console.log(map);//return;
 					
-						Ext.Ajax.request({
-							url: GIS.conf.url.path_api + 'maps/',
-							method: 'POST',
-							headers: {'Content-Type': 'application/json'},
-							params: Ext.encode(map),
-							success: function() {
-								GIS.store.maps.loadStore();
-							}
-						});
+						//Ext.Ajax.request({
+							//url: GIS.conf.url.path_api + 'maps/',
+							//method: 'POST',
+							//headers: {'Content-Type': 'application/json'},
+							//params: Ext.encode(map),
+							//success: function() {
+								//GIS.store.maps.loadStore();
+							//}
+						//});
 					}
 				}
 			});

@@ -78,7 +78,7 @@ Ext.define('Ext.ux.panel.LayerItemPanel', {
 			listeners: {
 				change: function() {
 					var value = this.getValue(),
-						opacity = value === 0 ? 0 : value/100;
+						opacity = value === 0 ? 0.01 : value/100;
 					
 					that.setOpacity(opacity);
 				}
