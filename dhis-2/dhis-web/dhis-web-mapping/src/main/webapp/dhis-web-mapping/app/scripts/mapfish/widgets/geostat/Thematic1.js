@@ -1148,7 +1148,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						that.config.organisationUnitLevel = {
 							id: level.data.id,
 							name: level.data.name,
-							level: level.data.name
+							level: level.data.level
 						};
 						that.config.parentOrganisationUnit = {
 							id: rootNode.id,
@@ -1185,7 +1185,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 				Ext.create('Ext.menu.Item', {
 					text: 'Float up',
 					iconCls: 'gis-menu-item-icon-float',
-					disabled: !that.view.hasCoordinatesUp,
+					disabled: !that.view.extended.hasCoordinatesUp,
 					scope: this,
 					handler: function() {
 						drill('up');
