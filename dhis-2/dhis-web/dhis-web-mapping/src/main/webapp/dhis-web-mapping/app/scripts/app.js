@@ -1113,6 +1113,7 @@ Ext.onReady( function() {
 			iconCls: 'gis-window-title-icon-search',
 			cls: 'gis-container-default',
 			width: GIS.conf.layout.tool.window_width,
+			resizable: false,
 			height: 400,
 			items: [
 				{
@@ -1292,6 +1293,7 @@ Ext.onReady( function() {
 			iconCls: 'gis-window-title-icon-filter',
 			cls: 'gis-container-default',
 			width: GIS.conf.layout.tool.window_width,
+			resizable: false,
 			filter: filter,
 			items: {
 				layout: 'fit',
@@ -1432,6 +1434,7 @@ Ext.onReady( function() {
 			iconCls: 'gis-window-title-icon-labels',
 			cls: 'gis-container-default',
 			width: GIS.conf.layout.tool.window_width,
+			resizable: false,
 			closeAction: 'hide',
 			items: {
 				layout: 'fit',
@@ -1583,21 +1586,26 @@ Ext.onReady( function() {
 			createButton = Ext.create('Ext.button.Button', {
 				text: 'Create', //i18n
 				handler: function() {
-					console.log('create + hide + load');
-					
 					var name = nameTextfield.getValue(),
 						system = systemCheckbox.getValue(),
 						layers = GIS.util.map.getVisibleVectorLayers(),
 						layer,
 						lonlat = GIS.map.getCenter(),
 						views = [],
+						view,
 						map;
 						
 					if (name && layers.length) {
-						alert("true");
 						for (var i = 0; i < layers.length; i++) {
 							layer = layers[i];
-							views.push(layer.base.widget.getView());
+							view = layer.base.widget.getView();
+							
+							// add
+							view.layer = layer.base.id;
+							
+							// remove
+							delete view.periodType;
+							views.push(view);
 						}
 						
 						map = {
@@ -1607,8 +1615,6 @@ Ext.onReady( function() {
 							zoom: GIS.map.getZoom(),
 							mapViews: views
 						};
-						//alert(1);
-						console.log(map);//return;
 					
 						Ext.Ajax.request({
 							url: GIS.conf.url.path_api + 'maps/',
@@ -1617,6 +1623,8 @@ Ext.onReady( function() {
 							params: Ext.encode(map),
 							success: function() {
 								GIS.store.maps.loadStore();
+								
+								window.close();
 							}
 						});
 					}
@@ -1641,6 +1649,7 @@ Ext.onReady( function() {
 				title: id ? 'Edit favorite' : 'Create new favorite',
 				iconCls: 'gis-window-title-icon-favorite',
 				cls: 'gis-container-default',
+				resizable: false,
 				modal: true,
 				items: [
 					nameTextfield,
@@ -1740,7 +1749,15 @@ Ext.onReady( function() {
 						{
 							iconCls: 'gis-grid-row-icon-delete',
 							handler: function(grid, rowIndex, colIndex, col, event) {
-								//var id = this.up('grid').store.getAt(rowIndex).data.id;
+								var id = this.up('grid').store.getAt(rowIndex).data.id;
+								
+								Ext.Ajax.request({
+									url: GIS.conf.url.path_api + 'maps/' + id,
+									method: 'DELETE',
+									success: function() {
+										GIS.store.maps.loadStore();
+									}
+								});
 							}
 						}
 					]
@@ -1779,6 +1796,7 @@ Ext.onReady( function() {
 			title: 'Manage favorites',
 			iconCls: 'gis-window-title-icon-favorite',
 			cls: 'gis-container-default',
+			resizable: false,
 			width: 450,
 			items: [
 				{
@@ -2701,79 +2719,6 @@ Ext.onReady( function() {
 							menu: {}
 						},
 						'->',
-						{
-							text: 'fav1()', //i18n
-							handler: function() {
-								//var view = {
-									//classes: 5,
-									//colorHigh: "00ff00",
-									//colorLow: "ff0000",
-									//dataElement: null,
-									//dataElementGroup: null,
-									//indicator: "Uvn6LCg7dVU",
-									//indicatorGroup: "AoTB60phSOH",
-									//legendSet: null,
-									//legendType: "automatic",
-									//level: 3,
-									//levelName: "Chiefdom",
-									//method: 2,
-									//parentId: "fdc6uOvgoji",
-									//parentLevel: 2,
-									//parentName: "Bombali",
-									//parentPath: "/ImspTQPwCqd/fdc6uOvgoji",
-									//period: "2012",
-									//periodType: "Yearly",
-									//radiusHigh: 15,
-									//radiusLow: 5,
-									//updateData: false,
-									//updateLegend: false,
-									//updateOrganisationUnit: true,
-									//valueType: "indicator"
-								//};
-								
-								//GIS.base.thematic1.widget.setConfig(config);
-								//GIS.base.thematic1.widget.execute();
-							}
-						},
-						{
-							text: 'fav2()', //i18n
-							handler: function() {
-								//var config = {
-									//classes: 5,
-									//colorHigh: "ffff00",
-									//colorLow: "0000ff",
-									//dataElement: null,
-									//dataElementGroup: null,
-									//indicator: "Uvn6LCg7dVU",
-									//indicatorGroup: "AoTB60phSOH",
-									//legendSet: null,
-									//legendType: "automatic",
-									//level: 3,
-									//levelName: "Chiefdom",
-									//method: 2,
-									//parentId: "Vth0fbpFcsO",
-									//parentLevel: 2,
-									//parentName: "Kono",
-									//parentPath: "/ImspTQPwCqd/Vth0fbpFcsO",
-									//period: "2012",
-									//periodType: "Yearly",
-									//radiusHigh: 15,
-									//radiusLow: 5,
-									//updateData: false,
-									//updateLegend: false,
-									//updateOrganisationUnit: true,
-									//valueType: "indicator"
-								//};
-								
-								//GIS.base.thematic2.widget.setConfig(config);
-								//GIS.base.thematic2.widget.execute();
-							}
-						},
-						{
-							text: 'log()', //i18n
-							handler: function() {
-							}
-						},
 						{
 							text: 'Exit', //i18n
 							handler: function() {

@@ -1754,9 +1754,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		this.tmpView = this.extendView(view);
 		
 		if (!this.validateView(this.tmpView)) {
+			alert("invalid");
 			return;
 		}
-alert("valid");		
 		
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
