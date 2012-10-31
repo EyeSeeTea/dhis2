@@ -44,7 +44,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
     
     config: {},
     
-    tmpModel: {},
+    tmpView: {},
     
     model: {},
     
@@ -1264,7 +1264,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			legends;
 		
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_api + 'mapLegendSets/' + this.tmpModel.legendSet + '.json?links=false&paging=false',
+			url: GIS.conf.url.path_api + 'mapLegendSets/' + this.tmpView.legendSet + '.json?links=false&paging=false',
 			scope: this,
 			success: function(r) {
 				legends = Ext.decode(r.responseText).mapLegends;
@@ -1283,9 +1283,9 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 					bounds.push(legends[i].endValue);
 				}
 
-				this.tmpModel.colorInterpolation = colors;
-				this.tmpModel.bounds = bounds;
-                this.tmpModel.legendNames = names;
+				this.tmpView.colorInterpolation = colors;
+				this.tmpView.bounds = bounds;
+                this.tmpView.legendNames = names;
 
 				if (fn) {
 					fn.call(this);
@@ -1296,9 +1296,9 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 	
 	getLegendConfig: function() {
 		return {
-			what: this.tmpModel.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
+			what: this.tmpView.valueType === 'indicator' ? this.cmp.indicator.getRawValue() : this.cmp.dataElement.getRawValue(),
 			when: this.cmp.period.getRawValue(),
-			where: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
+			where: this.tmpView.levelName + ' / ' + this.tmpView.parentName
 		};
 	},
         //,
@@ -1350,7 +1350,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		
 		// Model
 		this.config = {};
-		this.tmpModel = {};
+		this.tmpView = {};
 		this.model = {};
 		
 		// Layer
@@ -1392,7 +1392,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 	},
 	
 	setGui: function() {
-		var model = this.tmpModel,
+		var model = this.tmpView,
 			that = this;
 		
 		// Value type
@@ -1637,13 +1637,13 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 	
     loadOrganisationUnits: function() {
         var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
-            'parentId=' + this.tmpModel.parentId +
-            '&level=' + this.tmpModel.level;
+            'parentId=' + this.tmpView.parentId +
+            '&level=' + this.tmpView.level;
         this.setUrl(url);
     },
     
     loadData: function() {
-		var type = this.tmpModel.valueType,
+		var type = this.tmpView.valueType,
 			dataUrl = '../api/mapValues/' + GIS.conf.finals.dimension[type].param + '.json',
 			indicator = GIS.conf.finals.dimension.indicator,
 			dataElement = GIS.conf.finals.dimension.dataElement,
@@ -1651,10 +1651,10 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			organisationUnit = GIS.conf.finals.dimension.organisationUnit,
 			params = {};
 		
-		params[type === indicator.id ? indicator.param : dataElement.param] = this.tmpModel[type];
-		params[period.param] = this.tmpModel.period;
-		params[organisationUnit.param] = this.tmpModel.parentId;
-		params.level = this.tmpModel.level;
+		params[type === indicator.id ? indicator.param : dataElement.param] = this.tmpView[type];
+		params[period.param] = this.tmpView.period;
+		params[organisationUnit.param] = this.tmpView.parentId;
+		params.level = this.tmpView.level;
 		
 		Ext.Ajax.request({
 			url: GIS.conf.url.path_gis + dataUrl,
@@ -1707,11 +1707,11 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			fn = function() {
 				options = {
 					indicator: GIS.conf.finals.widget.value,
-					method: that.tmpModel.method,
-					numClasses: that.tmpModel.classes,
-					colors: that.tmpModel.colors,
-					minSize: that.tmpModel.radiusLow,
-					maxSize: that.tmpModel.radiusHigh
+					method: that.tmpView.method,
+					numClasses: that.tmpView.classes,
+					colors: that.tmpView.colors,
+					minSize: that.tmpView.radiusLow,
+					maxSize: that.tmpView.radiusHigh
 				};
 
 				that.coreComp.applyClassification(options);
@@ -1720,7 +1720,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 				that.afterLoad();
 			};
 		
-		if (this.tmpModel.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+		if (this.tmpView.legendType === GIS.conf.finals.widget.legendtype_predefined) {
 			this.setPredefinedLegend(fn);
 		}
 		else {
@@ -1729,23 +1729,23 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 	},
 	
     execute: function() {
-		this.tmpModel = this.getModel();
+		this.tmpView = this.getModel();
 		
-		if (!this.validateModel(this.tmpModel)) {
+		if (!this.validateModel(this.tmpView)) {
 			return;
 		}
 				
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
 		
-		if (this.tmpModel.updateGui) {
+		if (this.tmpView.updateGui) {
 			this.setGui();
 		}
 		
-		if (this.tmpModel.updateOrganisationUnit) {
+		if (this.tmpView.updateOrganisationUnit) {
 			this.loadOrganisationUnits();
 		}
-		else if (this.tmpModel.updateData) {
+		else if (this.tmpView.updateData) {
 			this.loadData();
 		}
 		else {
@@ -1754,7 +1754,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 	},
 	
 	afterLoad: function() {
-		this.model = this.tmpModel;
+		this.model = this.tmpView;
 		this.config = {};
 		
 		// Layer item

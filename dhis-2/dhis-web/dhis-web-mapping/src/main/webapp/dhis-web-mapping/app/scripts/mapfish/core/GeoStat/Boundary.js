@@ -158,7 +158,7 @@ mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
         element.style.height = "5px";
         this.legendDiv.appendChild(element);
         
-        if (this.widget.tmpModel.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+        if (this.widget.tmpView.legendType === GIS.conf.finals.widget.legendtype_automatic) {
             for (var i = 0; i < this.classification.bins.length; i++) {
                 var element = document.createElement("div");
                 element.style.backgroundColor = this.colorInterpolation[i].toHexString();
@@ -177,7 +177,7 @@ mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
                 this.legendDiv.appendChild(element);
             }
         }
-        else if (this.widget.tmpModel.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+        else if (this.widget.tmpView.legendType === GIS.conf.finals.widget.legendtype_predefined) {
             //for (var i = 0; i < this.classification.bins.length; i++) {
                 //var element = document.createElement("div");
                 //element.style.backgroundColor = this.colorInterpolation[i].toHexString();

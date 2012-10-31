@@ -44,7 +44,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
     
     config: {},
     
-    tmpModel: {},
+    tmpView: {},
     
     model: {},
     
@@ -222,8 +222,8 @@ Ext.define('mapfish.widgets.geostat.Facility', {
                         store.load({
 							scope: this,
 							callback: function() {
-								if (this.tmpModel.updateGui) { // If favorite, load store and continue execution
-									if (this.tmpModel.updateOrganisationUnit) {
+								if (this.tmpView.updateGui) { // If favorite, load store and continue execution
+									if (this.tmpView.updateOrganisationUnit) {
 										this.loadOrganisationUnits();
 									}
 									else {
@@ -689,7 +689,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 	
 	getLegendConfig: function() {
 		return {
-			where: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
+			where: this.tmpView.levelName + ' / ' + this.tmpView.parentName
 		};
 	},
         //,
@@ -721,7 +721,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		
 		// Model
 		this.config = {};
-		this.tmpModel = {};
+		this.tmpView = {};
 		this.model = {};
 		
 		// Layer
@@ -748,7 +748,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 	},
 	
 	setGui: function() {
-		var model = this.tmpModel;
+		var model = this.tmpView;
 		
 		// Group set		
 		this.cmp.groupSet.setValue(model.groupSet);
@@ -850,8 +850,8 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 	
     loadOrganisationUnits: function() {
         var url = GIS.conf.url.path_gis + 'getGeoJsonFacilities.action?' +
-            'parentId=' + this.tmpModel.parentId +
-            '&level=' + this.tmpModel.level;
+            'parentId=' + this.tmpView.parentId +
+            '&level=' + this.tmpView.level;
         this.setUrl(url);
     },
     
@@ -876,20 +876,20 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 	},
 	
     execute: function() {
-		this.tmpModel = this.getModel();
+		this.tmpView = this.getModel();
 		
-		if (!this.validateModel(this.tmpModel)) {
+		if (!this.validateModel(this.tmpView)) {
 			return;
 		}
 				
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
 		
-		if (this.tmpModel.updateGui) { // If favorite, wait for groups store callback
+		if (this.tmpView.updateGui) { // If favorite, wait for groups store callback
 			this.setGui();
 		}
 		else {
-			if (this.tmpModel.updateOrganisationUnit) {
+			if (this.tmpView.updateOrganisationUnit) {
 				this.loadOrganisationUnits();
 			}
 			else {
@@ -899,7 +899,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 	},
 	
 	afterLoad: function() {
-		this.model = this.tmpModel;
+		this.model = this.tmpView;
 		this.config = {};
 		
 		// Layer item

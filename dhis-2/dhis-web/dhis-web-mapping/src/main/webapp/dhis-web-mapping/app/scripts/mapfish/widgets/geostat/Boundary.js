@@ -44,7 +44,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
     
     config: {},
     
-    tmpModel: {},
+    tmpView: {},
     
     model: {},
     
@@ -432,7 +432,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 	
 	getLegendConfig: function() {
 		return {
-			where: this.tmpModel.levelName + ' / ' + this.tmpModel.parentName
+			where: this.tmpView.levelName + ' / ' + this.tmpView.parentName
 		};
 	},
         //,
@@ -460,7 +460,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		
 		// Model
 		this.config = {};
-		this.tmpModel = {};
+		this.tmpView = {};
 		this.model = {};
 		
 		// Layer
@@ -486,7 +486,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 	},
 	
 	setGui: function() {
-		var model = this.tmpModel;
+		var model = this.tmpView;
 		
 		// Level and parent
 		var levelView = this.cmp.level;
@@ -575,8 +575,8 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 	
     loadOrganisationUnits: function() {
         var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
-            'parentId=' + this.tmpModel.parentId +
-            '&level=' + this.tmpModel.level;
+            'parentId=' + this.tmpView.parentId +
+            '&level=' + this.tmpView.level;
         this.setUrl(url);
     },
     
@@ -607,20 +607,20 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 	},
 	
     execute: function() {
-		this.tmpModel = this.getModel();
+		this.tmpView = this.getModel();
 		
-		if (!this.validateModel(this.tmpModel)) {
+		if (!this.validateModel(this.tmpView)) {
 			return;
 		}
 				
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
 		
-		if (this.tmpModel.updateGui) {
+		if (this.tmpView.updateGui) {
 			this.setGui();
 		}
 		
-		if (this.tmpModel.updateOrganisationUnit) {
+		if (this.tmpView.updateOrganisationUnit) {
 			this.loadOrganisationUnits();
 		}
 		else {
@@ -629,7 +629,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 	},
 	
 	afterLoad: function() {
-		this.model = this.tmpModel;
+		this.model = this.tmpView;
 		this.config = {};
 		
 		// Layer item
