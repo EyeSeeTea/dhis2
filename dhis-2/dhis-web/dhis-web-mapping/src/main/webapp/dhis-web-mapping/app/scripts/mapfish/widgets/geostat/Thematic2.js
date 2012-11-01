@@ -708,7 +708,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			rootVisible: false,
 			multiSelect: false,
 			width: GIS.conf.layout.widget.item_width,
-			height: 220,
+			height: 210,
 			pathToSelect: null,
 			pathToExpand: null,
 			reset: function() {

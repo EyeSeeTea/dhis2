@@ -174,7 +174,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 			rootVisible: false,
 			multiSelect: false,
 			width: GIS.conf.layout.widget.item_width,
-			height: 220,
+			height: 300,
 			pathToSelect: null,
 			pathToExpand: null,
 			reset: function() {
