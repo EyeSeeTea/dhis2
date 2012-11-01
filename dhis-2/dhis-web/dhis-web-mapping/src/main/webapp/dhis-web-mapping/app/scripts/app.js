@@ -1812,7 +1812,51 @@ Ext.onReady( function() {
 						{
 							iconCls: 'gis-grid-row-icon-overwrite',
 							handler: function(grid, rowIndex, colIndex, col, event) {
-								//var id = this.up('grid').store.getAt(rowIndex).data.id;
+								var record = this.up('grid').store.getAt(rowIndex),
+									id = record.data.id,
+									name = record.data.name,
+									layers = GIS.util.map.getVisibleVectorLayers(),
+									layer,
+									lonlat = GIS.map.getCenter(),
+									views = [],
+									view,
+									map,
+									message = 'Overwrite the following favorite?\n\n' + name;
+								
+								if (confirm(message)) {
+									if (layers.length) {
+										for (var i = 0; i < layers.length; i++) {
+											layer = layers[i];
+											view = layer.base.widget.getView();
+											
+											// add
+											view.layer = layer.base.id;
+											
+											// remove
+											delete view.periodType;
+											views.push(view);
+										}
+										
+										map = {
+											longitude: lonlat.lon,
+											latitude: lonlat.lat,
+											zoom: GIS.map.getZoom(),
+											mapViews: views
+										};
+									
+										Ext.Ajax.request({
+											url: GIS.conf.url.path_api + 'maps/' + id,
+											method: 'PUT',
+											headers: {'Content-Type': 'application/json'},
+											params: Ext.encode(map),
+											success: function() {								
+												GIS.store.maps.loadStore();
+												
+												window.close();
+											}
+										});
+									}
+								}
 							}
 						},
 						{
@@ -2094,11 +2138,13 @@ Ext.onReady( function() {
 				cls: 'gis-textfield',
 				fieldStyle: 'padding-left: 6px',
 				width: 404,
+				height: 23,
 				fieldLabel: 'Legend name' //i18n
 			});
 			
 			startValue = Ext.create('Ext.form.field.Number', {
 				width: 148,
+				height: 23,
 				allowDecimals: false,
 				fieldStyle: 'padding-left: 6px; border-radius: 1px',
 				value: 0
@@ -2106,6 +2152,7 @@ Ext.onReady( function() {
 			
 			endValue = Ext.create('Ext.form.field.Number', {
 				width: 148,
+				height: 23,
 				allowDecimals: false,
 				fieldStyle: 'padding-left: 6px; border-radius: 1px',
 				value: 0,
@@ -2114,6 +2161,7 @@ Ext.onReady( function() {
 			
 			color = Ext.create('Ext.ux.button.ColorButton', {
 				width: 299,
+				height: 23,
 				fieldLabel: 'Symbolizer', //i18n
 				style: 'border-radius: 1px',
 				value: 'e1e1e1'
@@ -2471,7 +2519,6 @@ Ext.onReady( function() {
 			cls: 'gis-container-default',
 			resizable: false,
 			width: 450,
-			//height: 450,
 			modal: true,
 			items: new LegendSetPanel(),
 			bbar: {
@@ -2487,13 +2534,6 @@ Ext.onReady( function() {
 			listeners: {					
 				show: function() {
 					this.setPosition(this.getPosition()[0], 40);
-				},
-				resize: function() {
-					//var maxHeight = GIS.cmp.region.center.getHeight() - 55;
-					//if (this.getHeight() > maxHeight) {
-						//alert("set to max: " + maxHeight);
-						//this.setHeight(maxHeight);
-					//}
 				}
 			}
 		});

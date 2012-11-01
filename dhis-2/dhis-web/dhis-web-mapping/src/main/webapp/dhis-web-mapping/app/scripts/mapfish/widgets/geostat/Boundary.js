@@ -498,6 +498,8 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		var level = this.cmp.level,
 			parent = this.cmp.parent.getSelectionModel().getSelection(),
 			view;
+				
+		parent = parent.length ? parent : [{raw: GIS.init.rootNodes[0]}];
 		
 		view = {
 			organisationUnitLevel: {
