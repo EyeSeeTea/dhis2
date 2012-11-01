@@ -1800,18 +1800,14 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		if (this.cmp.filterWindow && this.cmp.filterWindow.isVisible()) { 
 			this.cmp.filterWindow.filter();
 		}
-        
-        // Set favorite position, else zoom to visible extent
-        //if (this.view.longitude && this.view.latitude && this.view.zoom) {
-			//var lonLat = GIS.util.map.getLonLatByXY(this.view.longitude, this.view.latitude);
-			//GIS.map.setCenter(lonLat, this.view.zoom);
-		//}
-		//else if (this.view.updateOrganisationUnit) {
-			GIS.util.map.zoomToVisibleExtent();
-		//}
 		
 		// Legend
 		GIS.cmp.region.east.doLayout();
+        
+        // Zoom to visible extent if not loading a favorite
+        if (!GIS.map.map) {
+			GIS.util.map.zoomToVisibleExtent();
+		}
 		
         GIS.mask.hide();
 	},

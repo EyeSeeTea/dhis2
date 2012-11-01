@@ -362,6 +362,8 @@ Ext.onReady( function() {
 			center,
 			lonLat;
 			
+		GIS.map.map = map;
+			
 		GIS.util.map.closeAllLayers();
 		
 		for (var i = 0; i < views.length; i++) {
@@ -1083,6 +1085,7 @@ Ext.onReady( function() {
 				{
 					text: 'Update', //i18n
 					handler: function() {
+						GIS.map.map = null;
 						base.widget.execute();
 					}
 				}
