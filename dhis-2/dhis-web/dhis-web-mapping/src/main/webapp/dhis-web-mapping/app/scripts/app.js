@@ -2687,21 +2687,39 @@ Ext.onReady( function() {
                         contentEl: 'thematic1Legend',
                         bodyStyle: 'padding: 6px; border: 0 none',
                         collapsible: true,
-                        animCollapse: false
+                        collapsed: true,
+                        animCollapse: false,
+                        listeners: {
+							added: function() {
+								GIS.base.thematic1.layer.legend = this;
+							}
+						}
                     },
                     {
                         title: 'Thematic layer 2 legend', //i18n
                         contentEl: 'thematic2Legend',
                         bodyStyle: 'padding: 6px; border: 0 none',
                         collapsible: true,
-                        animCollapse: false
+                        collapsed: true,
+                        animCollapse: false,
+                        listeners: {
+							added: function() {
+								GIS.base.thematic2.layer.legend = this;
+							}
+						}
                     },
                     {
                         title: 'Facility layer legend', //i18n
                         contentEl: 'facilityLegend',
                         bodyStyle: 'padding: 6px; border: 0 none',
                         collapsible: true,
-                        animCollapse: false
+                        collapsed: true,
+                        animCollapse: false,
+                        listeners: {
+							added: function() {
+								GIS.base.facility.layer.legend = this;
+							}
+						}
                     }
 				],
 				listeners: {

@@ -1369,6 +1369,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		
 		// Legend
 		document.getElementById(this.legendDiv).innerHTML = '';
+		this.layer.legend.collapse();
 	},
 	
 	setGui: function() {
@@ -1803,6 +1804,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		
 		// Legend
 		GIS.cmp.region.east.doLayout();
+		this.layer.legend.expand();
         
         // Zoom to visible extent if not loading a favorite
         if (!GIS.map.map) {
