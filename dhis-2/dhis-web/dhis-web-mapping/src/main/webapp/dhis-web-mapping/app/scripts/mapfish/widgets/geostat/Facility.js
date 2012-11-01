@@ -214,27 +214,27 @@ Ext.define('mapfish.widgets.geostat.Facility', {
             width: GIS.conf.layout.widget.item_width,
             labelWidth: GIS.conf.layout.widget.itemlabel_width,
             currentValue: false,
+            scope: this,
             store: GIS.store.groupSets, //todo
             listeners: {
-                select: {
-                    scope: this,
-                    fn: function(cb) {
-                        var store = GIS.store.groupsByGroupSet;
-                        store.proxy.url = GIS.conf.url.path_api +  'organisationUnitGroupSets/' + cb.getValue() + '.json?links=false&paging=false';
-                        store.load({
-							scope: this,
-							callback: function() {
-								if (this.config.extended.updateGui) { // If favorite, load store and continue execution
-									if (this.config.extended.updateOrganisationUnit) {
-										this.loadOrganisationUnits();
-									}
-									else {
-										this.loadLegend();
-									}
-								}	
-							}
-						});
-                    }
+                select: function() {
+					var store = GIS.store.groupsByGroupSet,
+						value = this.getValue();
+					
+					store.proxy.url = GIS.conf.url.path_api +  'organisationUnitGroupSets/' + value + '.json?links=false&paging=false';
+					store.load({
+						scope: this.scope,
+						callback: function() {
+							if (this.config.extended.updateGui) { // If favorite, load store and continue execution
+								if (this.config.extended.updateOrganisationUnit) {
+									this.loadOrganisationUnits();
+								}
+								else {
+									this.loadLegend();
+								}
+							}	
+						}
+					});
                 }
             }
         });
@@ -736,7 +736,14 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		var view = this.tmpView,
 			that = this;
 		
-		// Group set		
+		// Group set
+		GIS.store.groupSets.load({
+			callback: function() {
+				that.cmp.groupSet.setValue(view.organisationUnitGroupSet.id);
+				that.cmp.groupSet.fireEvent('select');
+			}
+		});
+
 		this.cmp.groupSet.setValue(view.organisationUnitGroupSet.id);
 		this.cmp.groupSet.fireEvent('select');
 		

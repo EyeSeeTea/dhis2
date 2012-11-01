@@ -1832,6 +1832,7 @@ Ext.onReady( function() {
 			iconCls: 'gis-window-title-icon-favorite',
 			cls: 'gis-container-default',
 			resizable: false,
+			modal: true,
 			width: 450,
 			items: [
 				{
