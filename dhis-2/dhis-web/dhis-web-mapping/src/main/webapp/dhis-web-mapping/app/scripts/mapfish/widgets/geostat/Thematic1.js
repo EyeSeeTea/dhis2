@@ -1807,7 +1807,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			//GIS.map.setCenter(lonLat, this.view.zoom);
 		//}
 		//else if (this.view.updateOrganisationUnit) {
-			GIS.util.map.zoomToVisibleExtent();
+			//GIS.util.map.zoomToVisibleExtent();
 		//}
 		
 		// Legend

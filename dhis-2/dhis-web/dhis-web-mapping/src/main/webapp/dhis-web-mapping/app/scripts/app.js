@@ -358,7 +358,11 @@ Ext.onReady( function() {
 	
 	GIS.util.map.setMap = function(map) {
 		var views = map.mapViews,
-			view;
+			view,
+			center,
+			lonLat;
+			
+		GIS.util.map.closeAllLayers();
 		
 		for (var i = 0; i < views.length; i++) {
 			view = views[i];
@@ -366,7 +370,15 @@ Ext.onReady( function() {
 			GIS.base[view.layer].widget.execute(view);
 		}
 		
-		//GIS.map.setPos.. setZoom		
+		lonLat = new OpenLayers.LonLat(map.longitude, map.latitude);
+        GIS.map.setCenter(lonLat, map.zoom);
+	};
+	
+	GIS.util.map.closeAllLayers = function() {
+		GIS.base.boundary.widget.reset();
+		GIS.base.thematic1.widget.reset();
+		GIS.base.thematic2.widget.reset();
+		GIS.base.facility.widget.reset();
 	};
 	
 	GIS.util.svg.merge = function(str, strArray) {
