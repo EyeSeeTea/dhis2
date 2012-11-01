@@ -1806,8 +1806,11 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		GIS.cmp.region.east.doLayout();
 		this.layer.legend.expand();
         
-        // Zoom to visible extent if not loading a favorite
-        if (!GIS.map.map) {
+        // Zoom to visible extent if not set by a favorite
+        if (GIS.map.mapLoader) {
+			GIS.map.mapLoader.callBack(this);
+		}
+		else {
 			GIS.util.map.zoomToVisibleExtent();
 		}
 		

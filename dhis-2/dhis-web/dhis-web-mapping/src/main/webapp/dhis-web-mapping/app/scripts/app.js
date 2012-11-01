@@ -1655,7 +1655,7 @@ Ext.onReady( function() {
 							success: function() {								
 								GIS.store.maps.loadStore();
 								
-								window.close();
+								window.destroy();
 							}
 						});
 					}
@@ -1685,7 +1685,7 @@ Ext.onReady( function() {
 						success: function() {								
 							GIS.store.maps.loadStore();
 							
-							window.close();
+							window.destroy();
 						}
 					});
 				}
@@ -1800,7 +1800,7 @@ Ext.onReady( function() {
 						var fn = function() {
 							var el = Ext.get(record.data.id).parent('td');
 							el.addClsOnOver('link');
-							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.util.map.getMap("' + record.data.id + '", true)');
+							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader(); GIS.map.mapLoader.load("' + record.data.id + '");');// GIS.util.map.getMap("' + record.data.id + '", true)');
 						};
 						
 						Ext.defer(fn, 100);
@@ -1864,7 +1864,7 @@ Ext.onReady( function() {
 											success: function() {								
 												GIS.store.maps.loadStore();
 												
-												window.close();
+												window.destroy();
 											}
 										});
 									}
@@ -1948,6 +1948,70 @@ Ext.onReady( function() {
 		});
 		
 		return mapWindow;
+	};
+	
+	GIS.obj.MapLoader = function() {
+		var getMap,
+			setMap,
+			map,
+			callbackRegister = [],
+			loader;
+		
+		getMap = function(id) {
+			if (!id) {
+				alert('No favorite id provided');
+				return;
+			}
+			if (!Ext.isString(id)) {
+				alert('Favorite id must be a string');
+				return;
+			}
+			
+			Ext.Ajax.request({
+				url: GIS.conf.url.path_api + 'maps/' + id + '.json?links=false',
+				success: function(r) {
+					map = Ext.decode(r.responseText);
+					setMap(map);
+				}
+			});
+		};
+		
+		setMap = function(map) {
+			var views = map.mapViews,
+				view,
+				center,
+				lonLat;
+				
+			if (!views.length) {
+				alert('Favorite has no layers'); //i18n
+				return;
+			}
+				
+			GIS.util.map.closeAllLayers();
+			
+			for (var i = 0; i < views.length; i++) {
+				view = views[i];
+				GIS.base[view.layer].widget.execute(view);
+			}
+			
+			lonLat = new OpenLayers.LonLat(map.longitude, map.latitude);
+			GIS.map.setCenter(lonLat, map.zoom);
+		};
+		
+		loader = {
+			load: function(id) {
+				getMap(id);
+			},
+			callBack: function(widget) {
+				callbackRegister.push(widget);
+				
+				if (callbackRegister.length === map.mapViews.length) {
+					GIS.map.mapLoader = null;
+				}
+			}
+		};
+		
+		return loader;
 	};
 	
 	GIS.obj.LegendSetWindow = function() {
