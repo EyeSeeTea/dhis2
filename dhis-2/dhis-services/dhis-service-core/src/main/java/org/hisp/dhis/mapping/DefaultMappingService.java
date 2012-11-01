@@ -444,7 +444,7 @@ public class DefaultMappingService
     {
         return mapViewStore.save( mapView );
     }
-
+    
     public void updateMapView( MapView mapView )
     {
         mapViewStore.update( mapView );

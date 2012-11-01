@@ -1739,7 +1739,7 @@ Ext.onReady( function() {
 						var fn = function() {
 							var el = Ext.get(record.data.id).parent('td');
 							el.addClsOnOver('link');
-							el.dom.setAttribute('onclick', 'GIS.util.map.getMap("' + record.data.id + '", true)');
+							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.util.map.getMap("' + record.data.id + '", true)');
 						};
 						
 						Ext.defer(fn, 100);
@@ -1848,11 +1848,11 @@ Ext.onReady( function() {
 			tmpLegendStore,
 			
 		// Objects
-			LegendSetGrid,
+			LegendSetPanel,
 			LegendPanel,
 			
 		// Instances
-			legendSetGrid,
+			legendSetPanel,
 			legendPanel,
 			
 		// Components
@@ -1893,6 +1893,8 @@ Ext.onReady( function() {
 					this.sort('name', 'ASC');
 					
 					info.setText(records.length + ' legend sets available');
+					
+					//window.setHeight(110 + (this.getCount() * GIS.conf.layout.grid.row_height));
 				}
 			}
 		});
@@ -1928,23 +1930,22 @@ Ext.onReady( function() {
 			}
 		});
 		
-		LegendSetGrid = function() {
-			var tbar = Ext.create('Ext.toolbar.Toolbar', {
-				items: [
-					'->',
-					{
-						text: 'Add new..',
-						handler: function() {
-							showUpdateLegendSet();
-						}
-					}
-				]
+		LegendSetPanel = function() {
+			var items,
+				addButton;
+				
+			addButton = Ext.create('Ext.button.Button', {
+				text: 'Add new', //i18n
+				height: 26,
+				style: 'border-radius: 1px',
+				menu: {},
+				handler: function() {
+					showUpdateLegendSet();
+				}
 			});
 			
 			legendSetGrid = Ext.create('Ext.grid.Panel', {
 				cls: 'gis-grid',
-				bodyStyle: 'border-top: 0 none',
-				width: GIS.conf.layout.widget.item_width,
 				scroll: 'vertical',
 				hideHeaders: true,
 				currentItem: null,
@@ -1952,12 +1953,12 @@ Ext.onReady( function() {
 					{
 						dataIndex: 'name',
 						sortable: false,
-						width: GIS.conf.layout.widget.item_width - 62
+						width: 355
 					},
 					{
 						xtype: 'actioncolumn',
 						sortable: false,
-						width: 40,
+						width: 45,
 						items: [
 							{
 								iconCls: 'gis-grid-row-icon-edit',
@@ -1981,10 +1982,16 @@ Ext.onReady( function() {
 					}
 				],
 				store: legendSetStore,
-				tbar: tbar,
 				listeners: {
 					render: function() {
 						this.store.load();
+					},
+					resize: function() {
+						var maxHeight = GIS.cmp.region.center.getHeight() - 155;
+												
+						if (this.getHeight() > maxHeight) {
+							this.setHeight(maxHeight);
+						}
 					},
 					itemmouseenter: function(grid, record, item) {
 						this.currentItem = Ext.get(item);
@@ -1999,7 +2006,20 @@ Ext.onReady( function() {
 				}
 			});
 			
-			return legendSetGrid;
+			items = [
+				{
+					xtype: 'panel',
+					layout: 'hbox',
+					cls: 'gis-container-inner',
+					style: 'margin-bottom: 5px',
+					items: [
+						addButton
+					]
+				},
+				legendSetGrid
+			];
+			
+			return items;
 		};
 		
 		LegendPanel = function(id) {
@@ -2014,7 +2034,9 @@ Ext.onReady( function() {
 			
 			legendSetName = Ext.create('Ext.form.field.Text', {
 				cls: 'gis-textfield',
-				width: GIS.conf.layout.widget.item_width,
+				width: 422,
+				height: 25,
+				fieldStyle: 'padding-left: 6px; border-color: #bbb',
 				fieldLabel: 'Legend set name' //i18n
 			});
 			
@@ -2282,9 +2304,9 @@ Ext.onReady( function() {
 		
 		reset = function() {
 			legendPanel.destroy();
-			legendSetGrid = new LegendSetGrid();
+			legendSetPanel = new LegendSetPanel();
 			window.removeAll();
-			window.add(legendSetGrid);
+			window.add(legendSetPanel);
 			
 			info.show();
 			cancel.hide();
@@ -2389,14 +2411,13 @@ Ext.onReady( function() {
 		
 		window = Ext.create('Ext.window.Window', {
 			title: 'Legend sets', //i18n
-			layout: 'fit',
 			iconCls: 'gis-window-title-icon-legendset', //todo
 			cls: 'gis-container-default',
-			width: GIS.conf.layout.widget.window_width,
-			height: 500,
 			resizable: false,
+			width: 450,
+			//height: 450,
 			modal: true,
-			items: new LegendSetGrid(),
+			items: new LegendSetPanel(),
 			bbar: {
 				height: 27,
 				items: [
@@ -2407,10 +2428,16 @@ Ext.onReady( function() {
 					update
 				]
 			},
-			listeners: {
+			listeners: {					
 				show: function() {
-					var x = this.getPosition()[0];
-					this.setPosition(x, 50);
+					this.setPosition(this.getPosition()[0], 40);
+				},
+				resize: function() {
+					//var maxHeight = GIS.cmp.region.center.getHeight() - 55;
+					//if (this.getHeight() > maxHeight) {
+						//alert("set to max: " + maxHeight);
+						//this.setHeight(maxHeight);
+					//}
 				}
 			}
 		});
