@@ -832,6 +832,7 @@ Ext.onReady( function() {
 				if (!this.isLoaded) {
 					this.isLoaded = true;
 				}
+				
 				this.sort('name', 'ASC');
 			}
 		}
@@ -1569,6 +1570,7 @@ Ext.onReady( function() {
 			nextButton,
 			tbar,
 			bbar,
+			info,
 			
 			nameTextfield,
 			systemCheckbox,
@@ -1577,6 +1579,10 @@ Ext.onReady( function() {
 			cancelButton,
 			
 			mapWindow;
+		
+		GIS.store.maps.on('load', function(store, records) {
+			info.setText(records.length + ' favorite' + (records.length !== 1 ? 's' : '') + ' available');
+		});
 			
 		NameWindow = function(id) {
 			var window;
@@ -1775,11 +1781,17 @@ Ext.onReady( function() {
 			}
 		});
 		
+		info = Ext.create('Ext.form.Label', {
+			cls: 'gis-label-info',
+			width: 300,
+			height: 22
+		});
+		
 		grid = Ext.create('Ext.grid.Panel', {
 			cls: 'gis-grid',
 			scroll: false,
 			hideHeaders: true,
-			columns: [						
+			columns: [
 				{
 					dataIndex: 'name',
 					sortable: false,
@@ -1881,6 +1893,7 @@ Ext.onReady( function() {
 			],
 			store: GIS.store.maps,
 			bbar: [
+				info,
 				'->',
 				prevButton,
 				nextButton
@@ -1990,8 +2003,6 @@ Ext.onReady( function() {
 					this.sort('name', 'ASC');
 					
 					info.setText(records.length + ' legend sets available');
-					
-					//window.setHeight(110 + (this.getCount() * GIS.conf.layout.grid.row_height));
 				}
 			}
 		});
@@ -2512,7 +2523,7 @@ Ext.onReady( function() {
 		
 		info = Ext.create('Ext.form.Label', {
 			cls: 'gis-label-info',
-			width: GIS.conf.layout.widget.item_width,
+			width: 400,
 			height: 22
 		});
 		
