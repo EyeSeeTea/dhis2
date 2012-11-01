@@ -174,9 +174,13 @@ Ext.onReady( function() {
 	
 	GIS.init.onInitialize = function(r) {
 		var init = Ext.decode(r.responseText);
+			nodes = init.rootNodes;
 		
+		for (var i = 0; i < nodes.length; i++) {
+			var node = init.rootNodes[i];
+			node.path = '/root/' + node.id;
+		}
 		GIS.init.rootNodes = init.rootNodes;
-		GIS.init.rootNodes[0].path = '/root/' + GIS.init.rootNodes[0].id;
 		
 		GIS.init.systemSettings = {
 			infrastructuralDataElementGroup: init.systemSettings.infrastructuralDataElementGroup,
@@ -1092,7 +1096,7 @@ Ext.onReady( function() {
 				}
 			],
 			listeners: {
-				show: function() {
+				show: function() {					
 					GIS.util.gui.window.setPositionTopLeft(this);
 				}
 			}
@@ -1666,19 +1670,10 @@ Ext.onReady( function() {
 				text: 'Update', //i18n
 				handler: function() {
 					var name = nameTextfield.getValue(),
-						system = systemCheckbox.getValue(),
-						map = {};
-						
-					map.name = name;
-					
-					if (!system) {
-						map.user = {
-							id: 'currentUser'
-						};
-					}
+						system = systemCheckbox.getValue();
 					
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'maps/' + id,
+						url: GIS.conf.url.path_gis + 'renameMap.action?id=' + id + '&name=' + name + '&user=' + !system,
 						method: 'PUT',
 						headers: {'Content-Type': 'application/json'},
 						params: Ext.encode(map),
@@ -1694,7 +1689,7 @@ Ext.onReady( function() {
 			cancelButton = Ext.create('Ext.button.Button', {
 				text: 'Cancel', //i18n
 				handler: function() {
-					console.log('hide + load');
+					window.destroy();
 				}
 			});
 			
@@ -1833,7 +1828,7 @@ Ext.onReady( function() {
 									views = [],
 									view,
 									map,
-									message = 'Overwrite the following favorite?\n\n' + name;
+									message = 'Overwrite favorite?\n\n' + name;
 								
 								if (confirm(message)) {
 									if (layers.length) {
@@ -1863,8 +1858,6 @@ Ext.onReady( function() {
 											params: Ext.encode(map),
 											success: function() {								
 												GIS.store.maps.loadStore();
-												
-												window.destroy();
 											}
 										});
 									}
@@ -1874,8 +1867,10 @@ Ext.onReady( function() {
 						{
 							iconCls: 'gis-grid-row-icon-delete',
 							handler: function(grid, rowIndex, colIndex, col, event) {
-								var id = this.up('grid').store.getAt(rowIndex).data.id,
-									message = 'Delete the following favorite?\n\n' + name;
+								var record = this.up('grid').store.getAt(rowIndex),
+									id = record.data.id,
+									name = record.data.name,
+									message = 'Delete favorite?\n\n' + name;
 									
 								if (confirm(message)) {								
 									Ext.Ajax.request({
@@ -2066,7 +2061,7 @@ Ext.onReady( function() {
 				load: function(store, records) {
 					this.sort('name', 'ASC');
 					
-					info.setText(records.length + ' legend sets available');
+					info.setText(records.length + ' legend set' + (records.length !== 1 ? 's' : '') + ' available');
 				}
 			}
 		});
