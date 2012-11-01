@@ -2042,31 +2042,37 @@ Ext.onReady( function() {
 			
 			legendName = Ext.create('Ext.form.field.Text', {
 				cls: 'gis-textfield',
-				width: GIS.conf.layout.widget.item_width - 12,
+				fieldStyle: 'padding-left: 6px',
+				width: 404,
 				fieldLabel: 'Legend name' //i18n
 			});
 			
 			startValue = Ext.create('Ext.form.field.Number', {
-				width: 71,
+				width: 148,
 				allowDecimals: false,
+				fieldStyle: 'padding-left: 6px; border-radius: 1px',
 				value: 0
 			});
 			
 			endValue = Ext.create('Ext.form.field.Number', {
-				width: 71,
+				width: 148,
 				allowDecimals: false,
+				fieldStyle: 'padding-left: 6px; border-radius: 1px',
 				value: 0,
-				style: 'padding-left: 2px'
+				style: 'padding-left: 3px'
 			});
 			
 			color = Ext.create('Ext.ux.button.ColorButton', {
-				width: GIS.conf.layout.widget.item_width - GIS.conf.layout.widget.itemlabel_width - 10 - 12,
+				width: 299,
 				fieldLabel: 'Symbolizer', //i18n
+				style: 'border-radius: 1px',
 				value: 'e1e1e1'
 			});
 			
 			addLegend = Ext.create('Ext.button.Button', {
 				text: 'Add legend', //i18n
+				height: 26,
+				style: 'border-radius: 1px',
 				handler: function() {
 					var date = new Date(),
 						id = date.toISOString(),
@@ -2108,7 +2114,7 @@ Ext.onReady( function() {
 			legendGrid = Ext.create('Ext.grid.Panel', {
 				cls: 'gis-grid',
 				bodyStyle: 'border-top: 0 none',
-				width: GIS.conf.layout.widget.item_width,
+				width: 422,
 				height: 235,
 				scroll: 'vertical',
 				hideHeaders: true,
@@ -2117,11 +2123,11 @@ Ext.onReady( function() {
 					{
 						dataIndex: 'name',
 						sortable: false,
-						width: GIS.conf.layout.widget.item_width - 156
+						width: 247
 					},
 					{
 						sortable: false,
-						width: 40,
+						width: 45,
 						renderer: function(value, metaData, record) {
 							return '<span style="color:' + record.data.color + '">Color</span>';
 						}
@@ -2129,12 +2135,12 @@ Ext.onReady( function() {
 					{
 						dataIndex: 'startValue',
 						sortable: false,
-						width: 37
+						width: 45
 					},
 					{
 						dataIndex: 'endValue',
 						sortable: false,
-						width: 37
+						width: 45
 					},
 					{
 						xtype: 'actioncolumn',
@@ -2186,7 +2192,7 @@ Ext.onReady( function() {
 						cls: 'gis-panel-html-separator'
 					},
 					{
-						bodyStyle: 'background-color: #f1f1f1; border: 1px solid #ccc; border-radius: 2px; padding: 5px',
+						bodyStyle: 'background-color: #f1f1f1; border: 1px solid #ccc; border-radius: 1px; padding: 8px',
 						items: [
 							legendName,
 							{
@@ -2224,7 +2230,7 @@ Ext.onReady( function() {
 					{
 						cls: 'gis-container-inner',
 						bodyStyle: 'text-align: right',
-						width: GIS.conf.layout.widget.item_width,
+						width: 422,
 						items: addLegend
 					},
 					{
@@ -2763,7 +2769,8 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Share', //i18n
-							menu: {}
+							menu: {},
+							disabled: true
 						},
 						'->',
 						{

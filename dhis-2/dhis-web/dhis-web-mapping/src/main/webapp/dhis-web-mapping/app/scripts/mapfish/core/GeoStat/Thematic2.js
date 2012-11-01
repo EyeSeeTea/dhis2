@@ -62,19 +62,20 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
     
     createColorInterpolation: function() {
         var numColors = this.classification.bins.length,
-			legendType = this.widget.tmpView.legendType;
+			tmpView = this.widget.tmpView,
+			legendType = tmpView.legendType;
         
-        this.widget.tmpView.imageLegend = [];
+        tmpView.extended.imageLegendConfig = [];
         
         if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
 		}
 		else {
-			this.colorInterpolation = this.widget.tmpView.colorInterpolation;
+			this.colorInterpolation = tmpView.extended.colorInterpolation;
 		}
             
         for (var i = 0; i < this.classification.bins.length; i++) {
-            this.widget.tmpView.imageLegend.push({
+            tmpView.extended.imageLegendConfig.push({
                 label: this.classification.bins[i].label.replace('&nbsp;&nbsp;', ' '),
                 color: this.colorInterpolation[i].toHexString()
             });
@@ -147,7 +148,7 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
 			legendType = this.widget.tmpView.legendType,
 			automatic = GIS.conf.finals.widget.legendtype_automatic,
 			predefined = GIS.conf.finals.widget.legendtype_predefined,
-			legendNames = this.widget.tmpView.legendNames;
+			legendNames = this.widget.tmpView.extended.legendNames;
 			
         this.legendDiv.update("");
         
