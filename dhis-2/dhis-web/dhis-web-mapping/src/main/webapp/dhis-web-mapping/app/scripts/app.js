@@ -1598,6 +1598,7 @@ Ext.onReady( function() {
 			systemCheckbox = Ext.create('Ext.form.field.Checkbox', {
 				labelWidth: 70,
 				fieldLabel: 'System', //i18n
+				style: 'margin-bottom: 0',
 				value: id ? GIS.store.maps.getById(id).data.system : false
 			});
 			
@@ -1633,6 +1634,12 @@ Ext.onReady( function() {
 							zoom: GIS.map.getZoom(),
 							mapViews: views
 						};
+						
+						if (!system) {
+							map.user = {
+								id: 'currentUser'
+							};
+						}
 					
 						Ext.Ajax.request({
 							url: GIS.conf.url.path_api + 'maps/',
@@ -1652,7 +1659,29 @@ Ext.onReady( function() {
 			updateButton = Ext.create('Ext.button.Button', {
 				text: 'Update', //i18n
 				handler: function() {
-					console.log('update ' + id + ' + hide + load');
+					var name = nameTextfield.getValue(),
+						system = systemCheckbox.getValue(),
+						map = {};
+						
+					map.name = name;
+					
+					if (!system) {
+						map.user = {
+							id: 'currentUser'
+						};
+					}
+					
+					Ext.Ajax.request({
+						url: GIS.conf.url.path_api + 'maps/' + id,
+						method: 'PUT',
+						headers: {'Content-Type': 'application/json'},
+						params: Ext.encode(map),
+						success: function() {								
+							GIS.store.maps.loadStore();
+							
+							window.close();
+						}
+					});
 				}
 			});
 			
@@ -1677,14 +1706,19 @@ Ext.onReady( function() {
 					cancelButton,
 					'->',
 					id ? updateButton : createButton
-				]
+				],
+				listeners: {
+					show: function() {
+						this.setPosition(this.getPosition()[0], 100);
+					}
+				}
 			});
 			
 			return window;
 		};
 			
 		searchTextfield = Ext.create('Ext.form.field.Text', {
-			width: 354,
+			width: 353,
 			height: 26,
 			fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
 			emptyText: 'Search for favorites..', //i18n
@@ -1709,7 +1743,7 @@ Ext.onReady( function() {
 		addButton = Ext.create('Ext.button.Button', {
 			text: 'Add new', //i18n
 			height: 26,
-			style: 'border-radius: 1px; margin-right: 4px',
+			style: 'border-radius: 1px; margin-right: 5px',
 			menu: {},
 			handler: function() {
 				nameWindow = new NameWindow();
