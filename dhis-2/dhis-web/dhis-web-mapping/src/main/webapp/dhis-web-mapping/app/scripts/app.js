@@ -1674,9 +1674,6 @@ Ext.onReady( function() {
 					
 					Ext.Ajax.request({
 						url: GIS.conf.url.path_gis + 'renameMap.action?id=' + id + '&name=' + name + '&user=' + !system,
-						method: 'PUT',
-						headers: {'Content-Type': 'application/json'},
-						params: Ext.encode(map),
 						success: function() {								
 							GIS.store.maps.loadStore();
 							
