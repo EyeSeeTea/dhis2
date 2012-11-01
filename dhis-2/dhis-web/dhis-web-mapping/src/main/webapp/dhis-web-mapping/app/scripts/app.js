@@ -1862,15 +1862,18 @@ Ext.onReady( function() {
 						{
 							iconCls: 'gis-grid-row-icon-delete',
 							handler: function(grid, rowIndex, colIndex, col, event) {
-								var id = this.up('grid').store.getAt(rowIndex).data.id;
-								
-								Ext.Ajax.request({
-									url: GIS.conf.url.path_api + 'maps/' + id,
-									method: 'DELETE',
-									success: function() {
-										GIS.store.maps.loadStore();
-									}
-								});
+								var id = this.up('grid').store.getAt(rowIndex).data.id,
+									message = 'Delete the following favorite?\n\n' + name;
+									
+								if (confirm(message)) {								
+									Ext.Ajax.request({
+										url: GIS.conf.url.path_api + 'maps/' + id,
+										method: 'DELETE',
+										success: function() {
+											GIS.store.maps.loadStore();
+										}
+									});
+								}
 							}
 						}
 					]
