@@ -2971,8 +2971,8 @@ Ext.onReady( function() {
 						'->',
 						{
 							text: 'Exit', //i18n
-							handler: function() {
-								alert('Exit');
+							handler: function() {								
+                                window.location.href = '../../dhis-web-commons-about/redirect.action';
 							}
 						},
 						{
