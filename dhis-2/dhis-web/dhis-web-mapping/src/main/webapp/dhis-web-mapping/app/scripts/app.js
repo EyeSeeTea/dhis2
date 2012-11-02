@@ -1629,44 +1629,52 @@ Ext.onReady( function() {
 						view,
 						map;
 						
-					if (name && layers.length) {
-						for (var i = 0; i < layers.length; i++) {
-							layer = layers[i];
-							view = layer.base.widget.getView();
-							
-							// add
-							view.layer = layer.base.id;
-							
-							// remove
-							delete view.periodType;
-							views.push(view);
-						}
-						
-						map = {
-							name: name,
-							longitude: lonlat.lon,
-							latitude: lonlat.lat,
-							zoom: GIS.map.getZoom(),
-							mapViews: views
-						};
-						
-						if (!system) {
-							map.user = {
-								id: 'currentUser'
-							};
-						}
-					
-						Ext.Ajax.request({
-							url: GIS.conf.url.path_api + 'maps/',
-							method: 'POST',
-							headers: {'Content-Type': 'application/json'},
-							params: Ext.encode(map),
-							success: function() {								
-								GIS.store.maps.loadStore();
+					if (layers.length) {
+						if (name) {
+							for (var i = 0; i < layers.length; i++) {
+								layer = layers[i];
+								view = layer.base.widget.getView();
 								
-								window.destroy();
+								// add
+								view.layer = layer.base.id;
+								
+								// remove
+								delete view.periodType;
+								views.push(view);
 							}
-						});
+							
+							map = {
+								name: name,
+								longitude: lonlat.lon,
+								latitude: lonlat.lat,
+								zoom: GIS.map.getZoom(),
+								mapViews: views
+							};
+							
+							if (!system) {
+								map.user = {
+									id: 'currentUser'
+								};
+							}
+						
+							Ext.Ajax.request({
+								url: GIS.conf.url.path_api + 'maps/',
+								method: 'POST',
+								headers: {'Content-Type': 'application/json'},
+								params: Ext.encode(map),
+								success: function() {								
+									GIS.store.maps.loadStore();
+									
+									window.destroy();
+								}
+							});
+						}
+						else {
+							alert('Please enter a name');
+						}
+					}
+					else {
+						alert('No layers to save');
 					}
 				}
 			});
@@ -1797,7 +1805,7 @@ Ext.onReady( function() {
 						var fn = function() {
 							var el = Ext.get(record.data.id).parent('td');
 							el.addClsOnOver('link');
-							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader(); GIS.map.mapLoader.load("' + record.data.id + '");');// GIS.util.map.getMap("' + record.data.id + '", true)');
+							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader(); GIS.map.mapLoader.load("' + record.data.id + '");');
 						};
 						
 						Ext.defer(fn, 100);
@@ -1832,8 +1840,8 @@ Ext.onReady( function() {
 									map,
 									message = 'Overwrite favorite?\n\n' + name;
 								
-								if (confirm(message)) {
-									if (layers.length) {
+								if (layers.length) {
+									if (confirm(message)) {
 										for (var i = 0; i < layers.length; i++) {
 											layer = layers[i];
 											view = layer.base.widget.getView();
@@ -1863,6 +1871,9 @@ Ext.onReady( function() {
 											}
 										});
 									}
+								}
+								else {
+									alert('No layers to save'); //i18n
 								}
 							}
 						},
