@@ -275,7 +275,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 			pathToSelect: null,
 			pathToExpand: null,
 			reset: function() {
-				this.collapseAll();
+				//this.collapseAll();
 				this.expandTreePath(GIS.init.rootNodes[0].path);
 				this.selectTreePath(GIS.init.rootNodes[0].path);
 			},
@@ -295,7 +295,24 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 					this.pathToExpand = path;
 				}
 			},
-			store: GIS.store.organisationUnitHierarchy,
+			store: Ext.create('Ext.data.TreeStore', {
+				proxy: {
+					type: 'ajax',
+					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+				},
+				root: {
+					id: 'root',
+					expanded: true,
+					children: GIS.init.rootNodes
+				},
+				listeners: {
+					load: function(s, node, r) {
+						for (var i = 0; i < r.length; i++) {
+							r[i].data.text = GIS.util.jsonEncodeString(r[i].data.text);
+						}
+					}
+				}
+			}),
 			listeners: {
 				select: {
 					scope: this,

@@ -169,19 +169,26 @@ GIS.logg = [];
 Ext.onReady( function() {
 	Ext.Ajax.method = 'GET';
     Ext.QuickTips.init();
-    Ext.override(Ext.form.field.ComboBox, {
-		afterRender: function() {
-			var me = this;
-			if(me.getStore()) {
-				me.getStore().on('load',function(store, recs, success){
-					if(success && Ext.typeOf(this.getPicker().loadMask) != "boolean") {
-						this.getPicker().loadMask.hide();
-					}					
-				},me);
-			}
-			me.callOverridden(arguments);
+    
+    Ext.override( Ext.form.ComboBox, {
+		onBeforeLoad: function() {
+			this.selectedIndex = -1;
 		}
-	});
+    });
+    
+    //Ext.override(Ext.form.field.ComboBox, {
+		//afterRender: function() {
+			//var me = this;
+			//if(me.getStore()) {
+				//me.getStore().on('load',function(store, recs, success){
+					//if(success && Ext.typeOf(this.getPicker().loadMask) != "boolean") {
+						//this.getPicker().loadMask.hide();
+					//}					
+				//},me);
+			//}
+			//me.callOverridden(arguments);
+		//}
+	//});
 	
 	// Init
 	
@@ -649,24 +656,24 @@ Ext.onReady( function() {
 		data: GIS.conf.period.periodTypes
 	});
 	
-	GIS.store.organisationUnitHierarchy = Ext.create('Ext.data.TreeStore', {
-		proxy: {
-			type: 'ajax',
-			url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
-		},
-		root: {
-			id: 'root',
-			expanded: true,
-			children: GIS.init.rootNodes
-		},
-		listeners: {
-			load: function(s, node, r) {
-				for (var i = 0; i < r.length; i++) {
-					r[i].data.text = GIS.util.jsonEncodeString(r[i].data.text);
-				}
-			}
-		}
-	});
+	//GIS.store.organisationUnitHierarchy = Ext.create('Ext.data.TreeStore', {
+		//proxy: {
+			//type: 'ajax',
+			//url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+		//},
+		//root: {
+			//id: 'root',
+			//expanded: true,
+			//children: GIS.init.rootNodes
+		//},
+		//listeners: {
+			//load: function(s, node, r) {
+				//for (var i = 0; i < r.length; i++) {
+					//r[i].data.text = GIS.util.jsonEncodeString(r[i].data.text);
+				//}
+			//}
+		//}
+	//});
     
     GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
 		fields: ['id', 'name', 'level'],
