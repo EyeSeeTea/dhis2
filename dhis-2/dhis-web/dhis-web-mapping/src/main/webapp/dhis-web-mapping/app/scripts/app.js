@@ -2116,6 +2116,7 @@ Ext.onReady( function() {
 			legendSetGrid = Ext.create('Ext.grid.Panel', {
 				cls: 'gis-grid',
 				scroll: 'vertical',
+				height: true,
 				hideHeaders: true,
 				currentItem: null,
 				columns: [						
@@ -2139,8 +2140,14 @@ Ext.onReady( function() {
 							{
 								iconCls: 'gis-grid-row-icon-delete',
 								handler: function(grid, rowIndex, colIndex, col, event) {
-									var id = this.up('grid').store.getAt(rowIndex).data.id;
-									deleteLegendSet(id);
+									var record = this.up('grid').store.getAt(rowIndex),
+										id = record.data.id,
+										name = record.data.name,
+										message = 'Delete legend set?\n\n' + name;
+								
+									if (confirm(message)) {
+										deleteLegendSet(id);
+									}
 								}
 							}
 						]
@@ -2153,14 +2160,19 @@ Ext.onReady( function() {
 				store: legendSetStore,
 				listeners: {
 					render: function() {
+						var that = this,
+							maxHeight = GIS.cmp.region.center.getHeight() - 155,
+							height;// = this.store.getCount() * GIS.conf.layout.grid.row_height;
+							
+						this.store.on('load', function() {
+							if (Ext.isDefined(that.setHeight)) {
+								height = 1 + that.store.getCount() * GIS.conf.layout.grid.row_height;
+								that.setHeight(height > maxHeight ? maxHeight : height);
+								window.doLayout();
+							}
+						});
+								
 						this.store.load();
-					},
-					resize: function() {
-						var maxHeight = GIS.cmp.region.center.getHeight() - 155;
-												
-						if (this.getHeight() > maxHeight) {
-							this.setHeight(maxHeight);
-						}
 					},
 					itemmouseenter: function(grid, record, item) {
 						this.currentItem = Ext.get(item);
