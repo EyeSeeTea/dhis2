@@ -170,25 +170,11 @@ Ext.onReady( function() {
 	Ext.Ajax.method = 'GET';
     Ext.QuickTips.init();
     
-    Ext.override( Ext.form.ComboBox, {
-		onBeforeLoad: function() {
-			this.selectedIndex = -1;
+    Ext.override(Ext.LoadMask, {
+		onHide: function() {
+			this.callParent();
 		}
-    });
-    
-    //Ext.override(Ext.form.field.ComboBox, {
-		//afterRender: function() {
-			//var me = this;
-			//if(me.getStore()) {
-				//me.getStore().on('load',function(store, recs, success){
-					//if(success && Ext.typeOf(this.getPicker().loadMask) != "boolean") {
-						//this.getPicker().loadMask.hide();
-					//}					
-				//},me);
-			//}
-			//me.callOverridden(arguments);
-		//}
-	//});
+	});
 	
 	// Init
 	
