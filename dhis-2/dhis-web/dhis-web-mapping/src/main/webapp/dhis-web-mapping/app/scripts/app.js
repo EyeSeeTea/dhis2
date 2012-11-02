@@ -169,6 +169,19 @@ GIS.logg = [];
 Ext.onReady( function() {
 	Ext.Ajax.method = 'GET';
     Ext.QuickTips.init();
+    Ext.override(Ext.form.field.ComboBox, {
+		afterRender: function() {
+			var me = this;
+			if(me.getStore()) {
+				me.getStore().on('load',function(store, recs, success){
+					if(success && Ext.typeOf(this.getPicker().loadMask) != "boolean") {
+						this.getPicker().loadMask.hide();
+					}					
+				},me);
+			}
+			me.callOverridden(arguments);
+		}
+	});
 	
 	// Init
 	
@@ -1090,7 +1103,6 @@ Ext.onReady( function() {
 				{
 					text: 'Update', //i18n
 					handler: function() {
-						GIS.map.map = null;
 						base.widget.execute();
 					}
 				}
@@ -1442,7 +1454,7 @@ Ext.onReady( function() {
 		updateLabels = function() {
 			if (layer.hasLabels) {
 				layer.styleMap = GIS.obj.StyleMap(base, getLabelConfig());				
-				base.widget.config.updateLegend = true;
+				base.widget.config.extended.updateLegend = true;
 				base.widget.execute();
 			}
 		};
@@ -1523,7 +1535,7 @@ Ext.onReady( function() {
 							layer.styleMap = GIS.obj.StyleMap(base, getLabelConfig());
 						}
 						
-						base.widget.config.updateLegend = true;
+						base.widget.config.extended.updateLegend = true;
 						base.widget.execute();
 					}
 				}
@@ -2444,6 +2456,7 @@ Ext.onReady( function() {
 					method: 'DELETE',
 					success: function() {
 						legendSetStore.load();
+						GIS.store.legendSets.load();
 					}
 				});
 			}

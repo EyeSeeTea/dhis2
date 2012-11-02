@@ -162,7 +162,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 				select: {
 					scope: this,
 					fn: function() {
-						this.config.updateOrganisationUnit = true;
+						this.config.extended.updateOrganisationUnit = true;
 					}
 				}
 			}
