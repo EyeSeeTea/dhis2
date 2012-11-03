@@ -980,6 +980,8 @@ Ext.onReady( function() {
 			text: 'Close', //i18n
 			iconCls: 'gis-menu-item-icon-clear',
 			handler: function() {
+				GIS.cmp.interpretationButton.disable();
+				
 				base.widget.reset();
 			}
 		};
@@ -1077,7 +1079,10 @@ Ext.onReady( function() {
 				{
 					text: 'Update', //i18n
 					handler: function() {
-						base.widget.execute();
+						GIS.map.mapLoader = null;
+						GIS.cmp.interpretationButton.disable();
+						
+						base.widget.execute();						
 					}
 				}
 			],
@@ -1647,6 +1652,8 @@ Ext.onReady( function() {
 								success: function() {								
 									GIS.store.maps.loadStore();
 									
+									GIS.cmp.interpretationButton.enable();
+									
 									window.destroy();
 								}
 							});
@@ -2064,7 +2071,7 @@ Ext.onReady( function() {
 				callbackRegister.push(widget);
 				
 				if (callbackRegister.length === map.mapViews.length) {
-					GIS.map.mapLoader = null;
+					GIS.cmp.interpretationButton.enable();
 				}
 			}
 		};
@@ -2826,23 +2833,22 @@ Ext.onReady( function() {
 	GIS.obj.InterpretationWindow = function() {
 		var window,
 			textarea,
-			item,
 			button;
 			
-		textarea = {
+		textarea = Ext.create('Ext.form.field.TextArea', {
 			xtype: 'textarea',
 			cls: 'gis-textarea',
-			//height: 250,
-			emptyText: 'Write your interpretation...', //i18n
-			enableKeyEvents: true
-		};
+			height: 170,
+			emptyText: 'Write your interpretation...' //i18n
+		});
 		
-		button = {
+		button = Ext.create('Ext.button.Button', {
 			text: 'Share', //i18n
 			handler: function() {
-				if (DV.cmp.share.textarea.getValue() && GIS.map.mapLoader) {
+console.log(textarea.getValue(), GIS.map.mapLoader, textarea.getValue() && GIS.map.mapLoader);
+				if (textarea.getValue() && GIS.map.mapLoader) {
 					Ext.Ajax.request({
-						url: DV.conf.finals.ajax.path_api + 'interpretations/map/' + GIS.map.mapLoader.id,
+						url: GIS.conf.url.path_api + 'interpretations/map/' + GIS.map.mapLoader.id,
 						method: 'POST',
 						params: textarea.getValue(),
 						headers: {'Content-Type': 'text/html'},
@@ -2854,7 +2860,7 @@ Ext.onReady( function() {
 					});
 				}
 			}
-		};
+		});
 		
 		window = Ext.create('Ext.window.Window', {
 			title: 'Share interpretation', //i18n
@@ -2862,7 +2868,6 @@ Ext.onReady( function() {
 			iconCls: 'gis-window-title-icon-interpretation',
 			cls: 'gis-container-default',
 			width: 450,
-			height: 200,
 			resizable: true,
 			modal: true,
 			items: textarea,
@@ -3143,7 +3148,7 @@ Ext.onReady( function() {
 						{
 							text: 'Share', //i18n
 							menu: {},
-							//disabled: true
+							disabled: true,
 							handler: function() {
 								if (GIS.cmp.interpretationWindow && GIS.cmp.interpretationWindow.destroy) {
 									GIS.cmp.interpretationWindow.destroy();
@@ -3151,6 +3156,11 @@ Ext.onReady( function() {
 								
 								GIS.cmp.interpretationWindow = new GIS.obj.InterpretationWindow();
 								GIS.cmp.interpretationWindow.show();
+							},
+							listeners: {
+								added: function() {
+									GIS.cmp.interpretationButton = this;
+								}
 							}
 						},
 						'->',
