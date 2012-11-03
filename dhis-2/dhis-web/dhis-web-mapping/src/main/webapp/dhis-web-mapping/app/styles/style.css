@@ -457,6 +457,13 @@ html * {
 	background: url('../images/grid-delete_16.png') no-repeat;
 	margin-left: 4px;
 }
+.gis-grid-row-icon-disabled img {
+	opacity: 0;
+	filter:Alpha(opacity=0);
+}
+.gis-grid-row-icon-disabled * {
+	cursor: default !important;
+}
 
 .gis-grid .x-grid-cell-inner,
 .gis-grid .x-grid-cell-inner * {
