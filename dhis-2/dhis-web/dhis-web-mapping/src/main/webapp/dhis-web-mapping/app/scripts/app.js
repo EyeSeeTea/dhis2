@@ -1998,7 +1998,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function() {
-					this.setPosition(this.getPosition()[0], 40);
+					this.setPosition(115, 37);
 				}
 			}
 		});
@@ -2741,7 +2741,7 @@ Ext.onReady( function() {
 			},
 			listeners: {					
 				show: function() {
-					this.setPosition(this.getPosition()[0], 40);
+					this.setPosition(185, 37);
 				}
 			}
 		});
@@ -2821,6 +2821,63 @@ Ext.onReady( function() {
 		});
 		
 		return menu;
+	};
+	
+	GIS.obj.InterpretationWindow = function() {
+		var window,
+			textarea,
+			item,
+			button;
+			
+		textarea = {
+			xtype: 'textarea',
+			cls: 'gis-textarea',
+			//height: 250,
+			emptyText: 'Write your interpretation...', //i18n
+			enableKeyEvents: true
+		};
+		
+		button = {
+			text: 'Share', //i18n
+			handler: function() {
+				if (DV.cmp.share.textarea.getValue() && GIS.map.mapLoader) {
+					Ext.Ajax.request({
+						url: DV.conf.finals.ajax.path_api + 'interpretations/map/' + GIS.map.mapLoader.id,
+						method: 'POST',
+						params: textarea.getValue(),
+						headers: {'Content-Type': 'text/html'},
+						success: function() {
+							window.destroy();
+							
+							alert('Interpretation was shared!');
+						}
+					});
+				}
+			}
+		};
+		
+		window = Ext.create('Ext.window.Window', {
+			title: 'Share interpretation', //i18n
+			layout: 'fit',
+			iconCls: 'gis-window-title-icon-interpretation',
+			cls: 'gis-container-default',
+			width: 450,
+			height: 200,
+			resizable: true,
+			modal: true,
+			items: textarea,
+			bbar: [
+				'->',
+				button
+			],
+			listeners: {
+				show: function() {
+					this.setPosition(325, 37);
+				}
+			}
+		});
+		
+		return window;
 	};
 	
 	// OpenLayers map
@@ -3086,7 +3143,15 @@ Ext.onReady( function() {
 						{
 							text: 'Share', //i18n
 							menu: {},
-							disabled: true
+							//disabled: true
+							handler: function() {
+								if (GIS.cmp.interpretationWindow && GIS.cmp.interpretationWindow.destroy) {
+									GIS.cmp.interpretationWindow.destroy();
+								}
+								
+								GIS.cmp.interpretationWindow = new GIS.obj.InterpretationWindow();
+								GIS.cmp.interpretationWindow.show();
+							}
 						},
 						'->',
 						{

@@ -11,6 +11,7 @@
  * Window
  * Grid
  * TextField
+ * TextArea
  * Checkbox
  * NumberField
  * Label
@@ -436,6 +437,9 @@ html * {
 .gis-window-title-icon-legendset {
 	background: url('../images/legendset_14.png') no-repeat;
 }
+.gis-window-title-icon-interpretation {
+	background: url('../images/interpretation_14.png') no-repeat;
+}
 
 /* Grid */
 
@@ -504,6 +508,11 @@ html * {
 
 .gis-textfield input.x-form-text {
 	border-radius: 1px;
+}
+
+/* Textarea */
+.gis-textarea .x-form-field {
+	font-size: 11px;
 }
 
 /* Checkbox */
