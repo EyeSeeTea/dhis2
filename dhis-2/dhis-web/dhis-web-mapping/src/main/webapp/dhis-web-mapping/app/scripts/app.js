@@ -641,25 +641,6 @@ Ext.onReady( function() {
 		fields: ['id', 'name'],
 		data: GIS.conf.period.periodTypes
 	});
-	
-	//GIS.store.organisationUnitHierarchy = Ext.create('Ext.data.TreeStore', {
-		//proxy: {
-			//type: 'ajax',
-			//url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
-		//},
-		//root: {
-			//id: 'root',
-			//expanded: true,
-			//children: GIS.init.rootNodes
-		//},
-		//listeners: {
-			//load: function(s, node, r) {
-				//for (var i = 0; i < r.length; i++) {
-					//r[i].data.text = GIS.util.jsonEncodeString(r[i].data.text);
-				//}
-			//}
-		//}
-	//});
     
     GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
 		fields: ['id', 'name', 'level'],
@@ -807,7 +788,7 @@ Ext.onReady( function() {
 	});
 	
 	GIS.store.maps = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name', 'lastUpdated', 'system'],
+		fields: ['id', 'name', 'lastUpdated', 'user'],
 		proxy: {
 			type: 'ajax',
 			reader: {
@@ -818,7 +799,7 @@ Ext.onReady( function() {
 		isLoaded: false,
 		pageSize: 10,
 		page: 1,
-		defaultUrl: GIS.conf.url.path_api + 'maps.json?links=false',
+		defaultUrl: GIS.conf.url.path_api + 'maps.json?viewClass=detailed&links=false',
 		loadStore: function(url) {
 			this.proxy.url = url || this.defaultUrl;
 			
@@ -1614,6 +1595,7 @@ Ext.onReady( function() {
 				labelWidth: 70,
 				fieldLabel: 'System', //i18n
 				style: 'margin-bottom: 0',
+				disabled: !GIS.init.security.isAdmin,
 				value: id ? GIS.store.maps.getById(id).data.system : false
 			});
 			
@@ -1919,11 +1901,9 @@ Ext.onReady( function() {
 						}
 					],
 					renderer: function(value, metaData, record) {
-						//todo set disabled if system + !admin
-						
-						//if (record.data.name === 'boundary thematic1') { //todo
-							//metaData.tdCls += ' gis-grid-row-icon-disabled';
-						//}
+						if (!GIS.init.security.isAdmin && !record.data.user) {
+							metaData.tdCls += ' gis-grid-row-icon-disabled';
+						}
 					}
 				}
 			],
