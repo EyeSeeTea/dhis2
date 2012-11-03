@@ -1805,7 +1805,7 @@ Ext.onReady( function() {
 						var fn = function() {
 							var el = Ext.get(record.data.id).parent('td');
 							el.addClsOnOver('link');
-							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader(); GIS.map.mapLoader.load("' + record.data.id + '");');
+							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader("' + record.data.id + '"); GIS.map.mapLoader.load();');
 						};
 						
 						Ext.defer(fn, 100);
@@ -2026,7 +2026,7 @@ Ext.onReady( function() {
 		return mapWindow;
 	};
 	
-	GIS.obj.MapLoader = function() {
+	GIS.obj.MapLoader = function(id) {
 		var getMap,
 			setMap,
 			map,
@@ -2075,8 +2075,10 @@ Ext.onReady( function() {
 		};
 		
 		loader = {
+			id: id,
 			load: function(id) {
-				getMap(id);
+				this.id = id || this.id;
+				getMap(this.id);
 			},
 			callBack: function(widget) {
 				callbackRegister.push(widget);
@@ -2260,7 +2262,6 @@ Ext.onReady( function() {
 						this.store.load();
 					},
 					afterrender: function() {
-alert(1);						
 						var fn = function() {
 							var editArray = document.getElementsByClassName('tooltip-legendset-edit'),
 								deleteArray = document.getElementsByClassName('tooltip-legendset-delete'),
