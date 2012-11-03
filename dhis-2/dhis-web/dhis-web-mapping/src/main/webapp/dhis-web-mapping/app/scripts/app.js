@@ -1820,7 +1820,7 @@ Ext.onReady( function() {
 					items: [
 						{
 							iconCls: 'gis-grid-row-icon-edit',
-							getClass: function() {															
+							getClass: function() {
 								return 'tooltip-map-edit';
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
@@ -1831,7 +1831,7 @@ Ext.onReady( function() {
 						},
 						{
 							iconCls: 'gis-grid-row-icon-overwrite',
-							getClass: function() {															
+							getClass: function() {
 								return 'tooltip-map-overwrite';
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
@@ -1885,7 +1885,7 @@ Ext.onReady( function() {
 						},
 						{
 							iconCls: 'gis-grid-row-icon-delete',
-							getClass: function() {															
+							getClass: function() {
 								return 'tooltip-map-delete';
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
@@ -1926,7 +1926,7 @@ Ext.onReady( function() {
 					this.store.loadStore();
 				},
 				afterrender: function() {
-					Ext.defer( function() {
+					var fn = function() {
 						var editArray = document.getElementsByClassName('tooltip-map-edit'),
 							overwriteArray = document.getElementsByClassName('tooltip-map-overwrite'),
 							deleteArray = document.getElementsByClassName('tooltip-map-delete'),
@@ -1961,7 +1961,9 @@ Ext.onReady( function() {
 								showDelay: 1000
 							});
 						}
-					}, 100);
+					};
+					
+					Ext.defer(fn, 100);
 				},
 				itemmouseenter: function(grid, record, item) {
 					this.currentItem = Ext.get(item);
@@ -2190,6 +2192,9 @@ Ext.onReady( function() {
 						items: [
 							{
 								iconCls: 'gis-grid-row-icon-edit',
+								getClass: function() {
+									return 'tooltip-legendset-edit';
+								},
 								handler: function(grid, rowIndex, colIndex, col, event) {
 									var id = this.up('grid').store.getAt(rowIndex).data.id;
 									showUpdateLegendSet(id);
@@ -2197,6 +2202,9 @@ Ext.onReady( function() {
 							},
 							{
 								iconCls: 'gis-grid-row-icon-delete',
+								getClass: function() {
+									return 'tooltip-legendset-delete';
+								},
 								handler: function(grid, rowIndex, colIndex, col, event) {
 									var record = this.up('grid').store.getAt(rowIndex),
 										id = record.data.id,
@@ -2220,7 +2228,7 @@ Ext.onReady( function() {
 					render: function() {
 						var that = this,
 							maxHeight = GIS.cmp.region.center.getHeight() - 155,
-							height;// = this.store.getCount() * GIS.conf.layout.grid.row_height;
+							height;
 							
 						this.store.on('load', function() {
 							if (Ext.isDefined(that.setHeight)) {
@@ -2231,6 +2239,36 @@ Ext.onReady( function() {
 						});
 								
 						this.store.load();
+					},
+					afterrender: function() {
+						var fn = function() {
+							var editArray = document.getElementsByClassName('tooltip-legendset-edit'),
+								deleteArray = document.getElementsByClassName('tooltip-legendset-delete'),
+								len = editArray.length,
+								el;
+							
+							for (var i = 0; i < len; i++) {
+								el = editArray[i];
+								Ext.create('Ext.tip.ToolTip', {
+									target: el,
+									html: 'Rename',
+									'anchor': 'bottom',
+									anchorOffset: -14,
+									showDelay: 1000
+								});
+								
+								el = deleteArray[i];
+								Ext.create('Ext.tip.ToolTip', {
+									target: el,
+									html: 'Delete',
+									'anchor': 'bottom',
+									anchorOffset: -14,
+									showDelay: 1000
+								});
+							}
+						};
+						
+						Ext.defer(fn, 100);
 					},
 					itemmouseenter: function(grid, record, item) {
 						this.currentItem = Ext.get(item);
@@ -2392,6 +2430,9 @@ Ext.onReady( function() {
 						items: [
 							{
 								iconCls: 'gis-grid-row-icon-delete',
+								getClass: function() {
+									return 'tooltip-legend-delete';
+								},
 								handler: function(grid, rowIndex, colIndex, col, event) {
 									var id = this.up('grid').store.getAt(rowIndex).data.id;
 									deleteLegend(id);
@@ -2415,6 +2456,26 @@ Ext.onReady( function() {
 					},
 					selectionchange: function() {
 						this.currentItem.removeCls('x-grid-row-focused');
+					},
+					afterrender: function() {
+						var fn = function() {
+							var deleteArray = document.getElementsByClassName('tooltip-legend-delete'),
+								len = deleteArray.length,
+								el;
+							
+							for (var i = 0; i < len; i++) {
+								el = deleteArray[i];
+								Ext.create('Ext.tip.ToolTip', {
+									target: el,
+									html: 'Delete',
+									'anchor': 'bottom',
+									anchorOffset: -14,
+									showDelay: 1000
+								});
+							}
+						};
+						
+						Ext.defer(fn, 100);
 					}
 				}
 			});
