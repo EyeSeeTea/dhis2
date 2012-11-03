@@ -1820,6 +1820,9 @@ Ext.onReady( function() {
 					items: [
 						{
 							iconCls: 'gis-grid-row-icon-edit',
+							getClass: function() {															
+								return 'tooltip-map-edit';
+							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var id = this.up('grid').store.getAt(rowIndex).data.id;
 								nameWindow = new NameWindow(id);
@@ -1828,6 +1831,9 @@ Ext.onReady( function() {
 						},
 						{
 							iconCls: 'gis-grid-row-icon-overwrite',
+							getClass: function() {															
+								return 'tooltip-map-overwrite';
+							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
@@ -1879,6 +1885,9 @@ Ext.onReady( function() {
 						},
 						{
 							iconCls: 'gis-grid-row-icon-delete',
+							getClass: function() {															
+								return 'tooltip-map-delete';
+							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
@@ -1915,6 +1924,44 @@ Ext.onReady( function() {
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
+				},
+				afterrender: function() {
+					Ext.defer( function() {
+						var editArray = document.getElementsByClassName('tooltip-map-edit'),
+							overwriteArray = document.getElementsByClassName('tooltip-map-overwrite'),
+							deleteArray = document.getElementsByClassName('tooltip-map-delete'),
+							len = editArray.length,
+							el;
+						
+						for (var i = 0; i < len; i++) {
+							el = editArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Rename',
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+							
+							el = overwriteArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Overwrite',
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+							
+							el = deleteArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Delete',
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+						}
+					}, 100);
 				},
 				itemmouseenter: function(grid, record, item) {
 					this.currentItem = Ext.get(item);
@@ -2980,6 +3027,12 @@ Ext.onReady( function() {
 							disabled: true
 						},
 						'->',
+						{
+							text: 'log', //i18n
+							handler: function() {
+								//console.log(Ext.getCmp('minid'));
+							}
+						},
 						{
 							text: 'Exit', //i18n
 							handler: function() {								
