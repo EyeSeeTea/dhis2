@@ -2845,7 +2845,6 @@ Ext.onReady( function() {
 		button = Ext.create('Ext.button.Button', {
 			text: 'Share', //i18n
 			handler: function() {
-console.log(textarea.getValue(), GIS.map.mapLoader, textarea.getValue() && GIS.map.mapLoader);
 				if (textarea.getValue() && GIS.map.mapLoader) {
 					Ext.Ajax.request({
 						url: GIS.conf.url.path_api + 'interpretations/map/' + GIS.map.mapLoader.id,
