@@ -109,7 +109,8 @@ GIS.util = {
 	gui: {
 		window: {},
 		combo: {}
-	}
+	},
+	measure: {}
 };
 
 GIS.map;
@@ -215,6 +216,7 @@ Ext.onReady( function() {
 		document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin_24.png" />';
 		document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout_24.png" />';
 		document.getElementsByClassName('zoomVisibleButton')[0].innerHTML = '<img src="images/zoomvisible_24.png" />';
+		document.getElementsByClassName('measureButton')[0].innerHTML = '<img src="images/measure_24.png" />';
 		
 		// Map events
 		GIS.map.events.register('mousemove', null, function(e) {
@@ -2884,6 +2886,73 @@ Ext.onReady( function() {
 		return window;
 	};
 	
+	GIS.obj.MeasureWindow = function() {
+		var window,
+			label,
+			handleMeasurements,
+			control,
+			styleMap;
+			
+		styleMap = new OpenLayers.StyleMap({
+			'default': new OpenLayers.Style()
+		});
+			
+		control = new OpenLayers.Control.Measure( OpenLayers.Handler.Path, {
+			persist: true,
+			immediate: true,
+			handlerOption: {
+				layerOptions: {
+					styleMap: styleMap
+				}
+			}
+		});
+		
+		handleMeasurements = function(e) {
+			if (e.measure) {				
+				label.setText(e.measure.toFixed(2) + ' ' + e.units);
+			}
+		};
+		
+		GIS.map.addControl(control);
+		
+		control.events.on({
+			measurepartial: handleMeasurements,
+			measure: handleMeasurements
+		});
+		
+		control.geodesic = true;
+		control.activate();
+		
+		label = Ext.create('Ext.form.Label', {
+			style: 'height: 20px',
+			text: '0 km'
+		});
+		
+		window = Ext.create('Ext.window.Window', {
+			title: 'Measure distance', //i18n
+			layout: 'fit',
+			cls: 'gis-container-default',
+			bodyStyle: 'text-align: center',
+			width: 130,
+			minWidth: 130,
+			resizable: false,
+			items: label,
+			listeners: {
+				show: function() {
+					var x = GIS.cmp.region.east.x - this.getWidth() - 5,
+						y = 60;
+					this.setPosition(x, y);
+				},
+				destroy: function() {
+					control.deactivate();
+					GIS.map.removeControl(control);
+				}
+			}
+		});
+		
+		return window;
+	};
+	
 	// OpenLayers map
 	
 	GIS.map = new OpenLayers.Map({
@@ -2909,6 +2978,13 @@ Ext.onReady( function() {
 	GIS.util.map.addMapControl('zoomIn', GIS.map.zoomIn);
 	GIS.util.map.addMapControl('zoomOut', GIS.map.zoomOut);
 	GIS.util.map.addMapControl('zoomVisible', GIS.util.map.zoomToVisibleExtent);
+	GIS.util.map.addMapControl('measure', function() {
+		if (GIS.cmp.measureWindow && GIS.cmp.measureWindow.destroy) {
+			GIS.cmp.measureWindow.destroy();
+		}		
+		GIS.cmp.measureWindow = new GIS.obj.MeasureWindow();
+		GIS.cmp.measureWindow.show();
+	});
     
     // Base layers
     
