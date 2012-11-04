@@ -41,9 +41,7 @@ GIS.conf = {
 	url: {
 		path_api: '../../api/',
 		path_gis: '../',
-		path_scripts: 'scripts/',
-		google_terms: 'http://www.google.com/intl/en-US_US/help/terms_maps.html',
-		target_blank: '_blank'
+		path_scripts: 'scripts/'
 	},
 	layout: {
 		widget: {
@@ -197,6 +195,8 @@ Ext.onReady( function() {
 		GIS.init.security = {
 			isAdmin: init.security.isAdmin
 		};
+		
+		GIS.init.contextPath = init.contextPath;
 	};
 	
 	Ext.Ajax.request({
@@ -2844,12 +2844,20 @@ Ext.onReady( function() {
 	GIS.obj.InterpretationWindow = function() {
 		var window,
 			textarea,
+			panel,
 			button;
 			
 		textarea = Ext.create('Ext.form.field.TextArea', {
 			cls: 'gis-textarea',
-			height: 170,
+			height: 130,
+			fieldStyle: 'padding-left: 4px; padding-top: 3px',
 			emptyText: 'Write your interpretation...' //i18n
+		});
+		
+		panel = Ext.create('Ext.panel.Panel', {
+			cls: 'gis-container-inner',
+			html: '<b>Direct link: </b>' + GIS.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + GIS.map.mapLoader.id,
+			style: 'padding-top: 9px; padding-bottom: 2px'
 		});
 		
 		button = Ext.create('Ext.button.Button', {
@@ -2876,10 +2884,13 @@ Ext.onReady( function() {
 			layout: 'fit',
 			iconCls: 'gis-window-title-icon-interpretation',
 			cls: 'gis-container-default',
-			width: 450,
+			width: 500,
 			resizable: true,
 			modal: true,
-			items: textarea,
+			items: [
+				textarea,
+				panel
+			],
 			bbar: [
 				'->',
 				button
@@ -2887,9 +2898,17 @@ Ext.onReady( function() {
 			listeners: {
 				show: function() {
 					this.setPosition(325, 37);
+				},
+				destroy: function() {
+					document.body.oncontextmenu = function(){
+						return false;
+					};
 				}
+					
 			}
 		});
+		
+		document.body.oncontextmenu = true; // right click to copy url
 		
 		return window;
 	};

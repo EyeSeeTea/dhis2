@@ -41,7 +41,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     labelGenerator: null,
     
     // Properties
-    
     config: {
 		extended: {}
 	},
