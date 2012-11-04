@@ -39,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.configuration.ConfigurationService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.security.PasswordManager;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.setting.SystemSettingManager;
@@ -300,6 +301,7 @@ public class AccountController
         // ---------------------------------------------------------------------
         
         UserAuthorityGroup userRole = configurationService.getConfiguration().getSelfRegistrationRole();
+        OrganisationUnit orgUnit = configurationService.getConfiguration().getSelfRegistrationOrgUnit();
         
         User user = new User();
         user.setFirstName( firstName );
@@ -307,16 +309,16 @@ public class AccountController
         user.setEmail( email );
         user.setPhoneNumber( phoneNumber );
         user.setEmployer( employer );
+        user.getOrganisationUnits().add( orgUnit );
         
         credentials = new UserCredentials();
         credentials.setUsername( username );
         credentials.setPassword( passwordManager.encodePassword( username, password ) );
+        credentials.setSelfRegistered( true );
         credentials.setUser( user );
         credentials.getUserAuthorityGroups().add( userRole );
         
         user.setUserCredentials( credentials );
-                
-        // TODO org unit
         
         userService.addUser( user );
         userService.addUserCredentials( credentials );
