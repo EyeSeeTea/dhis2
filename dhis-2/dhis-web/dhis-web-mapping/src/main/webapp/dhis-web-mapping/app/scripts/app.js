@@ -2777,78 +2777,61 @@ Ext.onReady( function() {
 		return window;
 	};
 	
-	GIS.obj.DownloadMenu = function() {
-		var menu,
-			item,
+	GIS.obj.DownloadWindow = function() {			
+		var window,
 			textfield,
 			button;
 			
 		textfield = Ext.create('Ext.form.field.Text', {
 			cls: 'gis-textfield',
-			height: 28,
-			emptyText: 'Enter map title..', //i18n
-			style: 'margin-right: 2px'
+			height: 26,
+			width: 230,
+			fieldStyle: 'padding-left: 5px',
+			emptyText: 'Enter map title...' //i18n
 		});
 		
 		button = Ext.create('Ext.button.Button', {
-			width: 28,
-			height: 28,
-			iconCls: 'gis-btn-icon-download',
-			style: 'border-radius: 1px',
+			text: 'Download', //i18n
 			handler: function() {
 				var title = textfield.getValue(),
 					svg = GIS.util.svg.getString(title, GIS.util.map.getVisibleVectorLayers()),
 					exportForm = document.getElementById('exportForm');
-				
-				if (svg) {
-					document.getElementById('svgField').value = svg;
-					document.getElementById('titleField').value = title;
-					exportForm.action = '../exportImage.action';
-					exportForm.method = 'post';
-					exportForm.submit();
-				}
-				else {
+					
+				if (!svg) {
 					alert('Please create a map first'); //todo //i18n
+					return;
 				}
 				
-				textfield.reset();
-				menu.hide();
+				document.getElementById('svgField').value = svg;
+				document.getElementById('titleField').value = title;
+				exportForm.action = '../exportImage.action';
+				exportForm.method = 'post';
+				exportForm.submit();
+				
+				window.destroy();
 			}
 		});
-			
-		item = Ext.create('Ext.panel.Panel', {
-			layout: 'hbox',
-			width: 185,
-			height: 30,
-			items: [
-				textfield,
+		
+		window = Ext.create('Ext.window.Window', {
+			title: 'Download map as PNG', //i18n
+			layout: 'fit',
+			iconCls: 'gis-window-title-icon-download',
+			cls: 'gis-container-default',
+			resizable: true,
+			modal: true,
+			items: textfield,
+			bbar: [
+				'->',
 				button
-			]
-		});
-			
-		menu = Ext.create('Ext.menu.Menu', {
-			shadow: false,
-			showSeparator: false,
-            enableKeyNav: false,
-			width: 185,
-			height: 30,
-			cls: 'gis-menu',
-			items: item,
-			listeners: {				
-				afterrender: function() {
-					this.getEl().addCls('gis-toolbar-btn-menu gis-toolbar-btn-menu-download');
-				},
+			],
+			listeners: {
 				show: function() {
-					this.keyNav.disable();
-					textfield.focus();
-				},
-				hide: function() {
-					this.keyNav.enable();
+					this.setPosition(253, 37);
 				}
 			}
 		});
 		
-		return menu;
+		return window;
 	};
 	
 	GIS.obj.InterpretationWindow = function() {
@@ -2857,7 +2840,6 @@ Ext.onReady( function() {
 			button;
 			
 		textarea = Ext.create('Ext.form.field.TextArea', {
-			xtype: 'textarea',
 			cls: 'gis-textarea',
 			height: 170,
 			emptyText: 'Write your interpretation...' //i18n
@@ -3237,8 +3219,16 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Download', //i18n
+							menu: {},
 							disabled: true,
-							menu: new GIS.obj.DownloadMenu(),
+							handler: function() {
+								if (GIS.cmp.downloadWindow && GIS.cmp.downloadWindow.destroy) {
+									GIS.cmp.downloadWindow.destroy();
+								}
+								
+								GIS.cmp.downloadWindow = new GIS.obj.DownloadWindow();
+								GIS.cmp.downloadWindow.show();
+							},								
 							xable: function() {
 								if (GIS.util.map.hasVisibleFeatures()) {
 									this.enable();
