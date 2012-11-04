@@ -232,7 +232,10 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 								else {
 									this.loadLegend();
 								}
-							}	
+							}
+							else {
+								this.config.extended.updateLegend = true;
+							}
 						}
 					});
                 }
@@ -272,28 +275,10 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 			multiSelect: false,
 			width: GIS.conf.layout.widget.item_width,
 			height: 248,
-			pathToSelect: null,
-			pathToExpand: null,
 			reset: function() {
-				//this.collapseAll();
-				this.expandTreePath(GIS.init.rootNodes[0].path);
-				this.selectTreePath(GIS.init.rootNodes[0].path);
-			},
-			selectTreePath: function(path) {
-				if (this.rendered) {
-					this.selectPath(path);
-				}
-				else {
-					this.pathToSelect = path;
-				}
-			},
-			expandTreePath: function(path) {
-				if (this.rendered) {
-					this.expandPath(path);
-				}
-				else {
-					this.pathToExpand = path;
-				}
+				this.collapseAll();
+				this.expandPath(GIS.init.rootNodes[0].path);
+				this.selectPath(GIS.init.rootNodes[0].path);
 			},
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
@@ -320,19 +305,8 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 						this.config.extended.updateOrganisationUnit = true;
 					}
 				},
-				afterrender: function() {					
-					if (this.pathToSelect) {
-						this.selectPath(this.pathToSelect);
-						this.pathToSelect = null;
-					}
-					else {
-						this.getSelectionModel().select(0);
-					}
-					
-					if (this.pathToExpand) {
-						this.expandPath(this.pathToExpand);
-						this.pathToExpand = null;
-					}
+				afterrender: function() {
+					this.getSelectionModel().select(0);
 				}
 			}
         });
@@ -769,7 +743,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 			that.cmp.level.setValue(view.organisationUnitLevel.id);
 		});
 		
-		this.cmp.parent.selectTreePath('/root' + view.parentGraph);
+		this.cmp.parent.selectPath('/root' + view.parentGraph);
 	},
     	
 	getView: function() {
@@ -899,6 +873,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		var options = {
             indicator: this.tmpView.organisationUnitGroupSet.name
 		};
+console.log(options.indicator);		
 
         this.coreComp.applyClassification(options);
         this.classificationApplied = true;

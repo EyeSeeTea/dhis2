@@ -343,7 +343,7 @@ Ext.onReady( function() {
 	
 	GIS.util.map.zoomToVisibleExtent = function() {
 		var bounds = GIS.util.map.getExtendedBounds(GIS.util.map.getVisibleVectorLayers());
-		if (bounds.length) {
+		if (bounds) {
 			GIS.map.zoomToExtent(bounds);
 		}
 	};
@@ -1087,6 +1087,7 @@ Ext.onReady( function() {
 	
 	GIS.obj.WidgetWindow = function(base) {
 		return Ext.create('Ext.window.Window', {
+			autoShow: true,
 			title: base.name,
 			layout: 'fit',
 			iconCls: 'gis-window-title-icon-' + base.id,
@@ -1094,6 +1095,7 @@ Ext.onReady( function() {
 			closeAction: 'hide',
 			width: GIS.conf.layout.widget.window_width,
 			resizable: false,
+			isRendered: false,
 			items: base.widget,
 			bbar: [
 				'->',
@@ -1108,8 +1110,14 @@ Ext.onReady( function() {
 				}
 			],
 			listeners: {
-				show: function() {					
-					GIS.util.gui.window.setPositionTopLeft(this);
+				show: function() {
+					if (!this.isRendered) {
+						this.isRendered = true;
+						this.hide();
+					}
+					else {
+						GIS.util.gui.window.setPositionTopLeft(this);
+					}
 				}
 			}
 		});
@@ -2070,7 +2078,6 @@ Ext.onReady( function() {
 				alert('Favorite has no layers'); //i18n
 				return;
 			}
-				
 			GIS.util.map.closeAllLayers();
 			
 			for (var i = 0; i < views.length; i++) {
