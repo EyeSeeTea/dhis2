@@ -78,39 +78,6 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		})
 	},
     
-    setUrl: function(url) {
-        this.url = url;
-        this.coreComp.setUrl(this.url);
-    },
-
-    requestSuccess: function(request) {
-        var doc = request.responseXML,
-			format = new OpenLayers.Format.GeoJSON();
-			
-        if (!doc || !doc.documentElement) {
-            doc = request.responseText;
-        }
-        
-        if (doc.length) {
-            doc = GIS.util.geojson.decode(doc, this);
-        }
-        else {
-			alert('No valid coordinates found'); //todo //i18n
-		}
-        
-        this.layer.removeFeatures(this.layer.features);
-        this.layer.addFeatures(format.read(doc));
-		this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
-        this.features = this.layer.features.slice(0);
-        
-        this.loadData();
-    },
-
-    requestFailure: function(request) {
-        GIS.logg.push(request.status, request.statusText);        
-        console.log(request.status, request.statusText);
-    },
-    
     getColors: function(low, high) {
         var startColor = new mapfish.ColorRgb();
         startColor.setFromHex(low);
@@ -579,18 +546,46 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 	},
 	
     loadOrganisationUnits: function() {
-        var url = GIS.conf.url.path_gis + 'getGeoJson.action?' +
-            'parentId=' + this.tmpView.parentOrganisationUnit.id +
-            '&level=' + this.tmpView.organisationUnitLevel.id;
-        this.setUrl(url);
+		Ext.Ajax.request({
+			url: GIS.conf.url.path_gis + 'getGeoJson.action',
+			params: {
+				parentId: this.tmpView.parentOrganisationUnit.id,
+				level: this.tmpView.organisationUnitLevel.id
+			},
+			scope: this,
+			success: function(r) {
+				var geojson = GIS.util.geojson.decode(r.responseText, this),
+					format = new OpenLayers.Format.GeoJSON(),
+					features = format.read(geojson);
+					
+				if (!features.length) {
+					alert('No valid coordinates found'); //todo //i18n
+					GIS.mask.hide();
+					
+					this.config = {
+						extended: {}
+					};
+					return;
+				}
+				
+				this.loadData(features);
+			}
+		});				
     },
     
-    loadData: function() {
-		for (var i = 0; i < this.layer.features.length; i++) {
-			var feature = this.layer.features[i];
+    loadData: function(features) {
+		features = features || this.layer.features;
+		
+		for (var i = 0; i < features.length; i++) {
+			var feature = features[i];
 			feature.attributes.label = feature.attributes.name;
 			feature.attributes.value = 0;
 		}
+				
+		this.layer.removeFeatures(this.layer.features);
+		this.layer.addFeatures(features);
+		this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
+		this.features = this.layer.features.slice(0);
 		
 		this.loadLegend();
 	},
@@ -635,10 +630,6 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
 		
-		if (this.tmpView.extended.updateGui) {
-			this.setGui();
-		}
-		
 		if (this.tmpView.extended.updateOrganisationUnit) {
 			this.loadOrganisationUnits();
 		}
@@ -650,7 +641,11 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 		}
 	},
 	
-	afterLoad: function() {
+	afterLoad: function() {		
+		if (this.tmpView.extended.updateGui) {
+			this.setGui();
+		}
+		
 		this.view = this.tmpView;
 		this.config = {
 			extended: {}
