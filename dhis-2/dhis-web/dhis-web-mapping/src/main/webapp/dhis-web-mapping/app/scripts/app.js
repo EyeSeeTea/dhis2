@@ -287,15 +287,34 @@ Ext.onReady( function() {
 	};
 	
 	GIS.util.map.getVisibleVectorLayers = function() {
-		var a = [];
+		var layers = [],
+			layer;
+			
 		for (var i = 0; i < GIS.map.layers.length; i++) {
-			if (GIS.map.layers[i].layerType === GIS.conf.finals.layer.type_vector &&
-				GIS.map.layers[i].visibility &&
-				GIS.map.layers[i].features.length) {
-				a.push(GIS.map.layers[i]);
+			layer = GIS.map.layers[i];
+			if (layer.layerType === GIS.conf.finals.layer.type_vector &&
+				layer.visibility &&
+				layer.features.length) {
+				layers.push(layer);
 			}
 		}
-		return a.length ? a : false;
+		return layers;
+	};
+	
+	GIS.util.map.hasVisibleFeatures = function() {
+		var layers = GIS.util.map.getVisibleVectorLayers(),
+			layer;
+		
+		if (layers.length) {
+			for (var i = 0; i < layers.length; i++) {
+				layer = layers[i];
+				if (layer.features.length) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	};
 	
     GIS.util.map.getLayersByType = function(layerType) {
@@ -324,7 +343,7 @@ Ext.onReady( function() {
 	
 	GIS.util.map.zoomToVisibleExtent = function() {
 		var bounds = GIS.util.map.getExtendedBounds(GIS.util.map.getVisibleVectorLayers());
-		if (bounds) {
+		if (bounds.length) {
 			GIS.map.zoomToExtent(bounds);
 		}
 	};
@@ -416,6 +435,10 @@ Ext.onReady( function() {
 			x = 20,
 			y = 35,
 			center = GIS.cmp.region.center;
+		
+		if (!layers.length) {
+			return false;
+		}
 					
 		namespace = 'xmlns="http://www.w3.org/2000/svg"';
 					
@@ -426,10 +449,6 @@ Ext.onReady( function() {
 				   '<tspan>' + title + '</tspan></text></g>';
 		
 		y += 35;
-		
-		if (!layers.length) {
-			return false;
-		}
 		
 		for (var i = layers.length - 1; i > 0; i--) {
 			if (layers[i].base.id === GIS.base.facility.id) {
@@ -3218,7 +3237,21 @@ Ext.onReady( function() {
 						},
 						{
 							text: 'Download', //i18n
-							menu: new GIS.obj.DownloadMenu()
+							disabled: true,
+							menu: new GIS.obj.DownloadMenu(),
+							xable: function() {
+								if (GIS.util.map.hasVisibleFeatures()) {
+									this.enable();
+								}
+								else {
+									this.disable();
+								}
+							},
+							listeners: {
+								added: function() {
+									GIS.cmp.downloadButton = this;
+								}
+							}
 						},
 						{
 							text: 'Share', //i18n
