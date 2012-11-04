@@ -221,7 +221,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 					var store = GIS.store.groupsByGroupSet,
 						value = this.getValue();
 					
-					store.proxy.url = GIS.conf.url.path_api +  'organisationUnitGroupSets/' + value + '.json?links=false&paging=false';
+					store.proxy.url = GIS.conf.url.path_gis + 'getOrganisationUnitGroupsByGroupSet.action?id=' + value;
 					store.load({
 						scope: this.scope,
 						callback: function() {
@@ -873,7 +873,6 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		var options = {
             indicator: this.tmpView.organisationUnitGroupSet.name
 		};
-console.log(options.indicator);		
 
         this.coreComp.applyClassification(options);
         this.classificationApplied = true;
