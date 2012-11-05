@@ -189,6 +189,7 @@
         } else {
             $.ajax({
                 url: '../api/dataSets/' + Selected.dataSet + '/form',
+                cache: false,
                 data: {
                     ou: Selected.orgUnit,
                     pe: Selected.period
@@ -232,7 +233,7 @@
 
         dataValueSet.dataValues = dataValues;
 
-        fm.saveDataValueSet( dataValueSet ).always(function() {
+        fm.saveDataValueSet( dataValueSet ).complete(function() {
             $.mobile.loading( 'hide' );
             location.href = 'index';
         });

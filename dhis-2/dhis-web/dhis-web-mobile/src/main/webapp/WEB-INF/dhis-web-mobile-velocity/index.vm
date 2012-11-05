@@ -88,7 +88,6 @@
 
     function renderOfflineStatus() {
         var dataValueSets = fm.dataValueSets();
-
         var tmpl = jQuery('#offline-status-template').html();
 
         $('#offline-status').html(

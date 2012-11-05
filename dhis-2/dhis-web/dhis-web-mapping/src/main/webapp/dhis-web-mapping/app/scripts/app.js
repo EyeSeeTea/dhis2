@@ -2704,6 +2704,11 @@ Ext.onReady( function() {
 			hidden: true,
 			handler: function() {
 				if (legendSetName.getValue() && validateLegends()) {
+					if (legendSetStore.findExact('name', legendSetName.getValue()) !== -1) {
+						alert('Name already in use');
+						return;
+					}
+					
 					var body = Ext.encode(getRequestBody());
 					
 					Ext.Ajax.request({
@@ -2725,6 +2730,10 @@ Ext.onReady( function() {
 			hidden: true,
 			handler: function() {
 				if (legendSetName.getValue() && validateLegends()) {
+					if (legendSetStore.findExact('name', legendSetName.getValue()) !== -1) {
+						alert('Name already in use');
+						return;
+					}
 					var body = getRequestBody(),
 						id = legendPanel.legendSetId;
 					body.id = id;

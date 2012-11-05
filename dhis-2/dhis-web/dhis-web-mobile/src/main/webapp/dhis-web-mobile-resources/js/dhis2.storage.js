@@ -31,24 +31,29 @@ dhis2['storage'] = dhis2['storage'] || {};
 dhis2.storage.FormManager = function ( args ) {
     this._organisationUnits = undefined;
     this._forms = undefined;
-    this._id = _.uniqueId('formManager');
+    this._id = _.uniqueId('form-manager');
 };
 
 dhis2.storage.FormManager.prototype.getMetaData = function () {
     return $.ajax({
-        url      : '../api/currentUser/forms',
-        dataType : 'json'
+        url         : '../api/currentUser/forms',
+        dataType    : 'json',
+        cache       : false
     }).success(function ( data ) {
+        // clear out old localStorage, some phones doesn't like it when you overwrite old keys
+        localStorage.removeItem('organisationUnits');
+        localStorage.removeItem('forms');
+
         if( data.organisationUnits ) {
-            localStorage['organisationUnits'] = JSON.stringify(data.organisationUnits);
+            localStorage.setItem('organisationUnits', JSON.stringify(data.organisationUnits));
         } else {
-            localStorage['organisationUnits'] = JSON.stringify({});
+            localStorage.setItem('organisationUnits', JSON.stringify({}));
         }
 
         if( data.forms ) {
-            localStorage['forms'] = JSON.stringify(data.forms);
+            localStorage.setItem('forms', JSON.stringify(data.forms));
         } else {
-            localStorage['forms'] = JSON.stringify({});
+            localStorage.setItem('forms', JSON.stringify({}));
         }
     });
 };
@@ -59,8 +64,10 @@ dhis2.storage.FormManager.prototype.needMetaData = function () {
 
 dhis2.storage.FormManager.prototype.organisationUnits = function () {
     if ( this._organisationUnits === undefined ) {
-        if( localStorage['organisationUnits'] ) {
-            this._organisationUnits = JSON.parse(localStorage['organisationUnits']);
+        var organisationUnits = localStorage.getItem('organisationUnits');
+
+        if( organisationUnits != null && organisationUnits != "null" ) {
+            this._organisationUnits = JSON.parse(organisationUnits);
         }
     }
 
@@ -72,14 +79,15 @@ dhis2.storage.FormManager.prototype.organisationUnit = function (id) {
 };
 
 dhis2.storage.FormManager.prototype.dataSets = function (id) {
-    var ou = this.organisationUnits()[id];
-    return ou.dataSets;
+    return this.organisationUnit(id).dataSets;
 };
 
 dhis2.storage.FormManager.prototype.forms = function () {
     if( this._forms === undefined ) {
-        if( localStorage['forms'] ) {
-            this._forms = JSON.parse( localStorage['forms'] );
+        var form = localStorage.getItem('forms');
+
+        if( form != null && form != "null") {
+            this._forms = JSON.parse( form );
         }
     }
 
@@ -91,9 +99,9 @@ dhis2.storage.FormManager.prototype.form = function ( id ) {
 };
 
 dhis2.storage.FormManager.prototype.dataValueSets = function() {
-    var dataValueSets = localStorage['dataValueSets'];
+    var dataValueSets = localStorage.getItem('dataValueSets');
 
-    if(dataValueSets !== undefined )
+    if( dataValueSets != null && dataValueSets != "null" && dataValueSets != "[]" )
     {
         dataValueSets = JSON.parse( dataValueSets );
     } else {
@@ -105,10 +113,11 @@ dhis2.storage.FormManager.prototype.dataValueSets = function() {
 
 dhis2.storage.makeUploadDataValueSetRequest = function( dataValueSet ) {
     return $.ajax({
-        url: '../api/dataValueSets',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify( dataValueSet )
+        url         : '../api/dataValueSets',
+        type        : 'POST',
+        cache       : false,
+        contentType : 'application/json',
+        data        : JSON.stringify( dataValueSet )
     });
 };
 
@@ -127,7 +136,10 @@ dhis2.storage.FormManager.prototype.saveDataValueSet = function( dataValueSet ) 
     return dhis2.storage.makeUploadDataValueSetRequest( dataValueSet ).error(function() {
         // add to local dataValueSets
         dataValueSets[dhis2.storage.getUniqueKey(dataValueSet)] = dataValueSet;
-        localStorage['dataValueSets'] = JSON.stringify( dataValueSets );
+
+        // delete old values
+        localStorage.removeItem('dataValueSets');
+        localStorage.setItem('dataValueSets', JSON.stringify( dataValueSets ));
     });
 };
 
@@ -143,7 +155,9 @@ dhis2.storage.FormManager.prototype.uploadDataValueSets = function() {
     });
 
     return $.when.apply( null, deferreds ).always(function() {
-        localStorage['dataValueSets'] = JSON.stringify( dataValueSets );
+        // delete old values
+        localStorage.removeItem('dataValueSets');
+        localStorage.setItem('dataValueSets', JSON.stringify( dataValueSets ));
     });
 };
 
