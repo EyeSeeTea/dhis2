@@ -1738,7 +1738,7 @@ Ext.onReady( function() {
 				],
 				listeners: {
 					show: function() {
-						this.setPosition(this.getPosition()[0], 100);
+						this.setPosition(mapWindow.x + 14, mapWindow.y + 67);
 					}
 				}
 			});
