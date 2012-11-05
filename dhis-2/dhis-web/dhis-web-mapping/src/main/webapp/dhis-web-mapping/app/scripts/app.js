@@ -2069,7 +2069,7 @@ Ext.onReady( function() {
 		};
 		
 		setMap = function(map) {
-			var views = map.mapViews,
+			var views = Ext.isDefined(map.mapViews) ? map.mapViews : [],
 				view,
 				center,
 				lonLat;
