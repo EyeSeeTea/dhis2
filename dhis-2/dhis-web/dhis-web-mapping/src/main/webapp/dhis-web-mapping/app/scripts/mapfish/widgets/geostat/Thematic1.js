@@ -1427,7 +1427,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			organisationUnitLevel: {
 				id: level.getValue(),
 				name: level.getRawValue(),
-				level: GIS.store.organisationUnitLevels.getById(level.getValue()).data.level
+				level: store.data.items.length ? store.getById(level.getValue()).data.level : null
 			},
 			parentOrganisationUnit: {
 				id: parent[0].raw.id,
