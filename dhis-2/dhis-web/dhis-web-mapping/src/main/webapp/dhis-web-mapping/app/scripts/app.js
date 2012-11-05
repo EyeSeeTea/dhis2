@@ -2024,6 +2024,7 @@ Ext.onReady( function() {
 				{
 					xtype: 'panel',
 					layout: 'hbox',
+					width: 422,
 					cls: 'gis-container-inner',
 					items: [
 						addButton,
