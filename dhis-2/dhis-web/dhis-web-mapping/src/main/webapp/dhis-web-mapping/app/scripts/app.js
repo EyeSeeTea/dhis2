@@ -1609,7 +1609,8 @@ Ext.onReady( function() {
 		});
 			
 		NameWindow = function(id) {
-			var window;
+			var window,
+				record = GIS.store.maps.getById(id);
 			
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
@@ -1617,7 +1618,7 @@ Ext.onReady( function() {
 				labelWidth: 70,
 				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
 				fieldLabel: 'Name', //i18n
-				value: id ? GIS.store.maps.getById(id).data.name : '',
+				value: id ? record.data.name : '',
 				listeners: {
 					afterrender: function() {
 						this.focus();
@@ -1630,7 +1631,7 @@ Ext.onReady( function() {
 				fieldLabel: 'System', //i18n
 				style: 'margin-bottom: 0',
 				disabled: !GIS.init.security.isAdmin,
-				value: id ? GIS.store.maps.getById(id).data.system : false
+				checked: !(id && record.data.user)
 			});
 			
 			createButton = Ext.create('Ext.button.Button', {
