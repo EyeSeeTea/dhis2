@@ -1631,7 +1631,7 @@ Ext.onReady( function() {
 				fieldLabel: 'System', //i18n
 				style: 'margin-bottom: 0',
 				disabled: !GIS.init.security.isAdmin,
-				checked: !(id && record.data.user)
+				checked: !id ? false : (record.data.user ? false : true)
 			});
 			
 			createButton = Ext.create('Ext.button.Button', {
@@ -1757,7 +1757,7 @@ Ext.onReady( function() {
 			style: 'border-radius: 1px; margin-right: 7px',
 			menu: {},
 			handler: function() {
-				nameWindow = new NameWindow();
+				nameWindow = new NameWindow(null, 'create');
 				nameWindow.show();
 			}
 		});
@@ -1832,7 +1832,7 @@ Ext.onReady( function() {
 							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader("' + record.data.id + '"); GIS.map.mapLoader.load();');
 						};
 						
-						Ext.defer(fn, 100);
+						Ext.defer(fn, 500);
 						
 						return '<div id="' + record.data.id + '">' + value + '</div>';
 					}
@@ -3101,19 +3101,21 @@ Ext.onReady( function() {
 		});
         GIS.map.addLayer(GIS.base.googleHybrid.layer);
     }
+    else {
     
-    // OpenStreetMap
-    GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.name);
-	GIS.base.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
-	GIS.base.openStreetMap.layer.base = GIS.base.openStreetMap;
-	GIS.base.openStreetMap.layer.layerOpacity = 1;
-	GIS.base.openStreetMap.layer.setLayerOpacity = function(number) {
-		if (number) {
-			this.layerOpacity = parseFloat(number);
-		}
-		this.setOpacity(this.layerOpacity);
-	};
-    GIS.map.addLayer(GIS.base.openStreetMap.layer);
+		// OpenStreetMap
+		GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.name);
+		GIS.base.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
+		GIS.base.openStreetMap.layer.base = GIS.base.openStreetMap;
+		GIS.base.openStreetMap.layer.layerOpacity = 1;
+		GIS.base.openStreetMap.layer.setLayerOpacity = function(number) {
+			if (number) {
+				this.layerOpacity = parseFloat(number);
+			}
+			this.setOpacity(this.layerOpacity);
+		};
+		GIS.map.addLayer(GIS.base.openStreetMap.layer);
+	}
     
     // Base objects
     
