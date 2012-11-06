@@ -952,7 +952,7 @@ Ext.onReady( function() {
 		};
 		items.push(item);
 		
-		if (base.id !== GIS.base.boundary.id) {
+		if (base.id !== GIS.base.boundary.id && base.id !== GIS.base.facility.id) {
 			item = {
 				text: 'Filter..', //i18n
 				iconCls: 'gis-menu-item-icon-filter',
@@ -1750,9 +1750,20 @@ Ext.onReady( function() {
 			
 			return window;
 		};
+		
+		addButton = Ext.create('Ext.button.Button', {
+			text: 'Add new', //i18n
+			height: 26,
+			style: 'border-radius: 1px; margin-right: 7px',
+			menu: {},
+			handler: function() {
+				nameWindow = new NameWindow();
+				nameWindow.show();
+			}
+		});
 			
 		searchTextfield = Ext.create('Ext.form.field.Text', {
-			width: 353,
+			width: 343,
 			height: 26,
 			fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
 			emptyText: 'Search for favorites..', //i18n
@@ -1771,17 +1782,6 @@ Ext.onReady( function() {
 						store.loadStore(url);
 					}
 				}
-			}
-		});
-		
-		addButton = Ext.create('Ext.button.Button', {
-			text: 'Add new', //i18n
-			height: 26,
-			style: 'border-radius: 1px; margin-right: 5px',
-			menu: {},
-			handler: function() {
-				nameWindow = new NameWindow();
-				nameWindow.show();
 			}
 		});
 		
@@ -2066,6 +2066,11 @@ Ext.onReady( function() {
 					cls: 'gis-container-inner',
 					items: [
 						addButton,
+						{
+							height: 24,
+							style: 'width: 1px; margin-right: 7px; margin-top: 1px',
+							bodyStyle: 'border-left: 1px solid #aaa'
+						},
 						searchTextfield
 					]
 				},
