@@ -1681,9 +1681,7 @@ console.log(view);
 			organisationUnit = GIS.conf.finals.dimension.organisationUnit,
 			params = {};
 			
-		features = features || this.features;
-			
-		//features = Ext.isDefined(features) && features.length ? features : this.layer.features;
+		features = features || this.layer.features;
 		
 		params[type === indicator.id ? indicator.param : dataElement.param] = this.tmpView[type].id;
 		params[period.param] = this.tmpView.period.id;
@@ -1730,18 +1728,13 @@ console.log(view);
 						newFeatures.push(feature);
 					}
 				}
-				this.layer.removeFeatures(this.layer.features);
-				alert(1);
-				if (this.tmpView.extended.updateOrganisationUnit) {
-					this.layer.addFeatures(newFeatures);
-				}
-				else {
-					this.layer.features = newFeatures;
-				}
-				alert(2);
-				this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
 				
-				this.features = this.layer.features.slice(0);
+				this.layer.removeFeatures(this.layer.features);
+				this.layer.addFeatures(newFeatures);
+				
+				if (this.tmpView.extended.updateOrganisationUnit) {
+					this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
+				}
 				
 				this.loadLegend();
 			}
