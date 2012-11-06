@@ -1821,7 +1821,7 @@ Ext.onReady( function() {
 					width: 335,
 					renderer: function(value, metaData, record) {
 						var fn = function() {
-console.log(record.data.id, record.data.name, Ext.get(record.data.id).parent);
+console.log(record.data.id, record.data.name, Ext.get(record.data.id));
 							var el = Ext.get(record.data.id).parent('td');
 							el.addClsOnOver('link');
 							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader("' + record.data.id + '"); GIS.map.mapLoader.load();');

@@ -87,9 +87,9 @@
 #searchDiv
 {
   position: absolute;
-  left: 330px;
+  left: 331px;
   height: 24px;
-  width: 350px;
+  width: 335px;
   border: 1px solid #ccc;
   padding: 3px 6px 0 6px;
 }
@@ -109,8 +109,8 @@
 {
   position: absolute;
   margin-top: 29px;
-  left: 330px;
-  width: 362px;
+  left: 331px;
+  width: 347px;
   border-right: 1px solid #bbb;
   border-bottom: 1px solid #bbb;
   border-left: 1px solid #bbb;
@@ -189,6 +189,11 @@
   width: 120px;
   height: 24px;
   margin: 0 0 6px 4px;
+}
+
+a.alert, .alert
+{
+  color: #E92B2B;
 }
 
 /*----------------------------------------------------------------------------*/
