@@ -1722,7 +1722,7 @@ Ext.onReady( function() {
 			});
 			
 			window = Ext.create('Ext.window.Window', {
-				title: id ? 'Edit favorite' : 'Create new favorite',
+				title: id ? 'Rename favorite' : 'Create new favorite',
 				iconCls: 'gis-window-title-icon-favorite',
 				cls: 'gis-container-default',
 				resizable: false,
