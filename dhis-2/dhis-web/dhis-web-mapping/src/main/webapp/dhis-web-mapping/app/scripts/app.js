@@ -1818,7 +1818,7 @@ Ext.onReady( function() {
 				{
 					dataIndex: 'name',
 					sortable: false,
-					width: 355,
+					width: 335,
 					renderer: function(value, metaData, record) {
 						var fn = function() {
 							var el = Ext.get(record.data.id).parent('td');
@@ -1834,7 +1834,7 @@ Ext.onReady( function() {
 				{
 					xtype: 'actioncolumn',
 					sortable: false,
-					width: 65,
+					width: 85,
 					items: [
 						{
 							iconCls: 'gis-grid-row-icon-edit',
@@ -1905,6 +1905,24 @@ Ext.onReady( function() {
 								}
 								else {
 									alert('No layers to save'); //i18n
+								}
+							}
+						},
+						{
+							iconCls: 'gis-grid-row-icon-dashboard',
+							handler: function(grid, rowIndex) {
+								var record = this.up('grid').store.getAt(rowIndex),
+									id = record.data.id,
+									name = record.data.name,
+									message = 'Add to dashboard?\n\n' + name;
+									
+								if (confirm(message)) {
+									Ext.Ajax.request({
+										url: GIS.conf.url.path_gis + 'addMapViewToDashboard.action',
+										params: {
+											id: id
+										}
+									});
 								}
 							}
 						},
