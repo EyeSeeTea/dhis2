@@ -1678,7 +1678,11 @@ Ext.onReady( function() {
 								method: 'POST',
 								headers: {'Content-Type': 'application/json'},
 								params: Ext.encode(map),
-								success: function() {								
+								success: function(r) {
+									var id = r.getAllResponseHeaders().location.split('/').pop();
+									
+									GIS.map.mapLoader = new GIS.obj.MapLoader(id);
+									
 									GIS.store.maps.loadStore();
 									
 									GIS.cmp.interpretationButton.enable();
@@ -1821,7 +1825,7 @@ Ext.onReady( function() {
 					width: 335,
 					renderer: function(value, metaData, record) {
 						var fn = function() {
-console.log(record.data.id, record.data.name, Ext.get(record.data.id));
+//console.log(record.data.id, record.data.name, Ext.get(record.data.id));
 							var el = Ext.get(record.data.id).parent('td');
 							el.addClsOnOver('link');
 							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader("' + record.data.id + '"); GIS.map.mapLoader.load();');
@@ -2914,8 +2918,6 @@ console.log(record.data.id, record.data.name, Ext.get(record.data.id));
 						headers: {'Content-Type': 'text/html'},
 						success: function() {
 							window.destroy();
-							
-							alert('Interpretation was shared!');
 						}
 					});
 				}
