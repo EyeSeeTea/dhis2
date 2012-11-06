@@ -2866,7 +2866,7 @@ Ext.onReady( function() {
 		
 		panel = Ext.create('Ext.panel.Panel', {
 			cls: 'gis-container-inner',
-			html: '<b>Direct link: </b>' + GIS.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + GIS.map.mapLoader.id,
+			html: '<b>Link: </b>' + GIS.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + GIS.map.mapLoader.id,
 			style: 'padding-top: 9px; padding-bottom: 2px'
 		});
 		

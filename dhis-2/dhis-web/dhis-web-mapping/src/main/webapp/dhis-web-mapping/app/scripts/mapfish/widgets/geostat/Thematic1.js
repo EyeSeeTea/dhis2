@@ -359,6 +359,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 									});
 								}
 							}
+							else {
+								that.cmp.legendType.setValue(GIS.conf.finals.widget.legendtype_automatic);
+								that.toggler.legendType(GIS.conf.finals.widget.legendtype_automatic);
+							}
 						}
 					});
                 }
@@ -431,6 +435,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 										that.cmp.legendSet.setValue(r.legendSet.id);
 									});
 								}
+							}
+							else {
+								that.cmp.legendType.setValue(GIS.conf.finals.widget.legendtype_automatic);
+								that.toggler.legendType(GIS.conf.finals.widget.legendtype_automatic);
 							}
 						}
 					});
@@ -1263,6 +1271,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			success: function(r) {
 				legends = Ext.decode(r.responseText).mapLegends;
 				
+				Ext.Array.sort(legends, function (a, b) {
+					return a.startValue - b.startValue;  
+				});
+				
 				for (var i = 0; i < legends.length; i++) {
 					if (bounds[bounds.length-1] !== legends[i].startValue) {
 						if (bounds.length !== 0) {
@@ -1499,7 +1511,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			updateLegend: Ext.isDefined(conf.extended.updateLegend) ? conf.extended.updateLegend : false,
 			updateGui: Ext.isDefined(conf.extended.updateGui) ? conf.extended.updateGui : false
 		};
-		
+console.log(view);		
 		return view;
 	},
 	
@@ -1653,6 +1665,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					return;
 				}
 				
+				this.features = this.layer.features.slice(0);
+				
 				this.loadData(features);
 			}
 		});				
@@ -1667,7 +1681,9 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			organisationUnit = GIS.conf.finals.dimension.organisationUnit,
 			params = {};
 			
-		features = features || this.layer.features;
+		features = features || this.features;
+			
+		//features = Ext.isDefined(features) && features.length ? features : this.layer.features;
 		
 		params[type === indicator.id ? indicator.param : dataElement.param] = this.tmpView[type].id;
 		params[period.param] = this.tmpView.period.id;
@@ -1714,10 +1730,17 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 						newFeatures.push(feature);
 					}
 				}
-				
 				this.layer.removeFeatures(this.layer.features);
-				this.layer.addFeatures(newFeatures);
+				alert(1);
+				if (this.tmpView.extended.updateOrganisationUnit) {
+					this.layer.addFeatures(newFeatures);
+				}
+				else {
+					this.layer.features = newFeatures;
+				}
+				alert(2);
 				this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
+				
 				this.features = this.layer.features.slice(0);
 				
 				this.loadLegend();
