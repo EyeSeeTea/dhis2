@@ -1839,7 +1839,7 @@ Ext.onReady( function() {
 						{
 							iconCls: 'gis-grid-row-icon-edit',
 							getClass: function() {
-								return 'tooltip-map-edit'; // tooltips removed if deleteArray is empty
+								return 'tooltip-map-edit';
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
@@ -1857,7 +1857,7 @@ Ext.onReady( function() {
 						{
 							iconCls: 'gis-grid-row-icon-overwrite',
 							getClass: function() {
-								return 'tooltip-map-overwrite'; // tooltips removed if deleteArray is empty
+								return 'tooltip-map-overwrite';
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
@@ -1910,6 +1910,9 @@ Ext.onReady( function() {
 						},
 						{
 							iconCls: 'gis-grid-row-icon-dashboard',
+							getClass: function() {
+								return 'tooltip-map-dashboard';
+							},
 							handler: function(grid, rowIndex) {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
@@ -1928,7 +1931,7 @@ Ext.onReady( function() {
 						},
 						{
 							iconCls: 'gis-grid-row-icon-delete',
-							getClass: function(value, metaData, record) { // all tooltips removed if deleteArray is empty
+							getClass: function(value, metaData, record) {
 								var system = !record.data.user,
 									isAdmin = GIS.init.security.isAdmin;
 								
@@ -1982,11 +1985,11 @@ Ext.onReady( function() {
 					var fn = function() {
 						var editArray = document.getElementsByClassName('tooltip-map-edit'),
 							overwriteArray = document.getElementsByClassName('tooltip-map-overwrite'),
+							dashboardArray = document.getElementsByClassName('tooltip-map-dashboard'),
 							deleteArray = document.getElementsByClassName('tooltip-map-delete'),
-							len = deleteArray.length,
 							el;
 						
-						for (var i = 0; i < len; i++) {
+						for (var i = 0; i < deleteArray.length; i++) {
 							el = editArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
@@ -2009,6 +2012,17 @@ Ext.onReady( function() {
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
 								html: 'Delete',
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+						}						
+						
+						for (var i = 0; i < dashboardArray.length; i++) {							
+							el = dashboardArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Add to dashboard',
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
