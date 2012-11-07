@@ -150,6 +150,10 @@ GIS.base = {
 	openStreetMap: {
 		id: 'openStreetMap',
 		name: 'OpenStreetMap'
+	},
+	circle: {
+		id: 'circle',
+		name: 'Circle'
 	}
 };
 
@@ -299,6 +303,36 @@ Ext.onReady( function() {
 			}
 		}
 		return layers;
+	};
+	
+	GIS.util.map.getFeaturesByLayers = function(layers) {
+		var a = [];			
+		for (var i = 0; i < layers.length; i++) {
+			a = a.concat(layers[i].features);
+		}
+		return a;
+	};
+	
+	GIS.util.map.getPointsByFeatures = function(features) {
+		var a = [];
+		for (var i = 0; i < features.length; i++) {
+			if (features[i].geometry.CLASS_NAME === GIS.conf.finals.openLayers.point_classname) {
+				a.push(features[i]);
+			}
+		}
+		return a;
+	};
+	
+	GIS.util.map.getLonLatsByPoints = function(points) {
+		var lonLat,
+			point,
+			a = [];
+		for (var i = 0; i < points.length; i++) {
+			point = points[i];
+			lonLat = new OpenLayers.LonLat(point.geometry.x, point.geometry.y);
+			a.push(lonLat);
+		}
+		return a;
 	};
 	
 	GIS.util.map.hasVisibleFeatures = function() {
@@ -908,8 +942,7 @@ Ext.onReady( function() {
 				}
 				this.setOpacity(this.layerOpacity);
 			},
-			hasLabels: false
-			
+			hasLabels: false			
 		});
 		layer.base = base;
 		
@@ -3114,6 +3147,42 @@ Ext.onReady( function() {
 		return window;
 	};
 	
+	GIS.obj.ToolsWindow = function() {
+		var layers = GIS.util.map.getVisibleVectorLayers(),
+			features = GIS.util.map.getFeaturesByLayers(layers),
+			points = GIS.util.map.getPointsByFeatures(features),
+			lonLats = GIS.util.map.getLonLatsByPoints(points),
+			lonLatCache = [],
+			circles = [],
+			circle,
+			fn = function(lonLats) {
+				for (var i = 0; i < lonLats.length; i++) {
+					//circle = new OpenLayers.Control.Circle({
+						//layer: GIS.base.circle.layer
+					//});
+					circle = new OpenLayers.Control.Circle();
+					circle.lonLat = lonLats[i];
+					circles.push(circle);
+				}
+				
+				GIS.map.addControls(circles);
+					
+				for (var i = 0; i < circles.length; i++) {
+					circle = circles[i];
+					circle.activate();
+					circle.updateCircle(circle.lonLat, 5);
+				}
+			};
+			
+		if  (lonLats.length) {
+			lonLatCache = lonLats;
+			fn(lonLats);
+		}
+		else if (lonLatsCache.length) {
+			fn(lonLatsCache);
+		}
+	};
+	
 	// OpenLayers map
 	
 	GIS.map = new OpenLayers.Map({
@@ -3244,6 +3313,8 @@ Ext.onReady( function() {
         legendDiv: GIS.base.facility.legendDiv
     });
     GIS.base.facility.window = new GIS.obj.WidgetWindow(GIS.base.facility);
+    
+    GIS.base.circle.layer = new OpenLayers.Layer.Vector(GIS.base.circle.name);
     
 	// User interface
 	
@@ -3421,6 +3492,18 @@ Ext.onReady( function() {
 								added: function() {
 									GIS.cmp.interpretationButton = this;
 								}
+							}
+						},
+						{
+							xtype: 'tbseparator',
+							height: 18,
+							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
+						},
+						{
+							text: 'Tools',
+							menu: {},
+							handler: function() {
+								GIS.obj.ToolsWindow();
 							}
 						},
 						'->',
