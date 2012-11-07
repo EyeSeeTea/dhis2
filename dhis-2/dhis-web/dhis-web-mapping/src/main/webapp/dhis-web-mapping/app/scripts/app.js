@@ -966,7 +966,8 @@ Ext.onReady( function() {
 						}
 					}
 				
-					base.widget.cmp.filterWindow = new GIS.obj.FilterWindow(base);
+					base.widget.cmp.filterWindow = base.id === GIS.base.facility.id ?
+						new GIS.obj.FilterFacilityWindow(base) : new GIS.obj.FilterWindow(base);
 					base.widget.cmp.filterWindow.show();
 				}
 			};
@@ -1398,6 +1399,78 @@ Ext.onReady( function() {
 		return window;
 	};
 	
+	GIS.obj.FilterFacilityWindow = function(base) {
+		var that = base.widget,
+			window,
+			multiSelect,
+			button,
+			filter,
+			selection,
+			features = [],
+			groupSetName = that.view.organisationUnitGroupSet.name,
+			store = GIS.store.groupsByGroupSet;
+			
+		filter = function() {
+			features = [];
+			
+			if (!selection.length || !selection[0]) {
+				features = that.features;
+			}
+			else {
+				for (var i = 0; i < that.features.length; i++) {
+					for (var j = 0; j < selection.length; j++) {
+						if (that.features[i].attributes[groupSetName] === selection[j]) {
+							features.push(that.features[i]);
+						}
+					}
+				}
+			}
+			
+			that.layer.removeAllFeatures();
+			that.layer.addFeatures(features);
+		};
+		
+		multiSelect = Ext.create('Ext.ux.form.MultiSelect', {
+			hideLabel: true,
+			dataFields: ['id', 'name'],
+			valueField: 'name',
+			displayField: 'name',
+			width: 200,
+			height: 300,
+			store: store
+		});
+		
+		button = Ext.create('Ext.button.Button', {
+			text: 'Filter',
+			handler: function() {
+				selection = multiSelect.getValue();
+				filter();
+			}
+		});
+		
+		window = Ext.create('Ext.window.Window', {
+			title: 'Filter by value',
+			iconCls: 'gis-window-title-icon-filter',
+			cls: 'gis-container-default',
+			//width: GIS.conf.layout.tool.window_width,
+			resizable: false,
+			filter: filter,
+			items: multiSelect,
+			bbar: [
+				'->',
+				button
+			],
+			listeners: {
+				destroy: function() {
+					that.layer.removeAllFeatures();
+					that.layer.addFeatures(that.features);
+				}
+			}					
+		});
+		
+		return window;
+	};
+	
 	GIS.obj.LabelWindow = function(base) {
 		var layer = base.layer,
 			fontSize,
@@ -1609,7 +1682,8 @@ Ext.onReady( function() {
 		});
 			
 		NameWindow = function(id) {
-			var window;
+			var window,
+				record = GIS.store.maps.getById(id);
 			
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
@@ -1617,7 +1691,7 @@ Ext.onReady( function() {
 				labelWidth: 70,
 				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
 				fieldLabel: 'Name', //i18n
-				value: id ? GIS.store.maps.getById(id).data.name : '',
+				value: id ? record.data.name : '',
 				listeners: {
 					afterrender: function() {
 						this.focus();
@@ -1630,7 +1704,7 @@ Ext.onReady( function() {
 				fieldLabel: 'System', //i18n
 				style: 'margin-bottom: 0',
 				disabled: !GIS.init.security.isAdmin,
-				value: id ? GIS.store.maps.getById(id).data.system : false
+				checked: !id ? false : (record.data.user ? false : true)
 			});
 			
 			createButton = Ext.create('Ext.button.Button', {
@@ -1678,7 +1752,11 @@ Ext.onReady( function() {
 								method: 'POST',
 								headers: {'Content-Type': 'application/json'},
 								params: Ext.encode(map),
-								success: function() {								
+								success: function(r) {
+									var id = r.getAllResponseHeaders().location.split('/').pop();
+									
+									GIS.map.mapLoader = new GIS.obj.MapLoader(id);
+									
 									GIS.store.maps.loadStore();
 									
 									GIS.cmp.interpretationButton.enable();
@@ -1722,7 +1800,7 @@ Ext.onReady( function() {
 			});
 			
 			window = Ext.create('Ext.window.Window', {
-				title: id ? 'Edit favorite' : 'Create new favorite',
+				title: id ? 'Rename favorite' : 'Create new favorite',
 				iconCls: 'gis-window-title-icon-favorite',
 				cls: 'gis-container-default',
 				resizable: false,
@@ -1745,9 +1823,20 @@ Ext.onReady( function() {
 			
 			return window;
 		};
+		
+		addButton = Ext.create('Ext.button.Button', {
+			text: 'Add new', //i18n
+			height: 26,
+			style: 'border-radius: 1px; margin-right: 7px',
+			menu: {},
+			handler: function() {
+				nameWindow = new NameWindow(null, 'create');
+				nameWindow.show();
+			}
+		});
 			
 		searchTextfield = Ext.create('Ext.form.field.Text', {
-			width: 353,
+			width: 343,
 			height: 26,
 			fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
 			emptyText: 'Search for favorites..', //i18n
@@ -1766,17 +1855,6 @@ Ext.onReady( function() {
 						store.loadStore(url);
 					}
 				}
-			}
-		});
-		
-		addButton = Ext.create('Ext.button.Button', {
-			text: 'Add new', //i18n
-			height: 26,
-			style: 'border-radius: 1px; margin-right: 5px',
-			menu: {},
-			handler: function() {
-				nameWindow = new NameWindow();
-				nameWindow.show();
 			}
 		});
 		
@@ -1818,12 +1896,16 @@ Ext.onReady( function() {
 				{
 					dataIndex: 'name',
 					sortable: false,
-					width: 355,
+					width: 335,
 					renderer: function(value, metaData, record) {
 						var fn = function() {
-							var el = Ext.get(record.data.id).parent('td');
-							el.addClsOnOver('link');
-							el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader("' + record.data.id + '"); GIS.map.mapLoader.load();');
+							var el = Ext.get(record.data.id);
+							
+							if (el) {
+								el = el.parent('td');
+								el.addClsOnOver('link');
+								el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader("' + record.data.id + '"); GIS.map.mapLoader.load();');
+							}
 						};
 						
 						Ext.defer(fn, 100);
@@ -1834,12 +1916,12 @@ Ext.onReady( function() {
 				{
 					xtype: 'actioncolumn',
 					sortable: false,
-					width: 65,
+					width: 85,
 					items: [
 						{
 							iconCls: 'gis-grid-row-icon-edit',
 							getClass: function() {
-								return 'tooltip-map-edit'; // tooltips removed if deleteArray is empty
+								return 'tooltip-map-edit';
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
@@ -1857,7 +1939,7 @@ Ext.onReady( function() {
 						{
 							iconCls: 'gis-grid-row-icon-overwrite',
 							getClass: function() {
-								return 'tooltip-map-overwrite'; // tooltips removed if deleteArray is empty
+								return 'tooltip-map-overwrite';
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
@@ -1909,8 +1991,29 @@ Ext.onReady( function() {
 							}
 						},
 						{
+							iconCls: 'gis-grid-row-icon-dashboard',
+							getClass: function() {
+								return 'tooltip-map-dashboard';
+							},
+							handler: function(grid, rowIndex) {
+								var record = this.up('grid').store.getAt(rowIndex),
+									id = record.data.id,
+									name = record.data.name,
+									message = 'Add to dashboard?\n\n' + name;
+									
+								if (confirm(message)) {
+									Ext.Ajax.request({
+										url: GIS.conf.url.path_gis + 'addMapViewToDashboard.action',
+										params: {
+											id: id
+										}
+									});
+								}
+							}
+						},
+						{
 							iconCls: 'gis-grid-row-icon-delete',
-							getClass: function(value, metaData, record) { // all tooltips removed if deleteArray is empty
+							getClass: function(value, metaData, record) {
 								var system = !record.data.user,
 									isAdmin = GIS.init.security.isAdmin;
 								
@@ -1959,16 +2062,23 @@ Ext.onReady( function() {
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
+					
+					GIS.store.maps.on('load', function() {
+						if (this.isVisible()) {
+							this.fireEvent('afterrender');
+						}
+					}, this);
 				},
+					
 				afterrender: function() {
 					var fn = function() {
 						var editArray = document.getElementsByClassName('tooltip-map-edit'),
 							overwriteArray = document.getElementsByClassName('tooltip-map-overwrite'),
+							dashboardArray = document.getElementsByClassName('tooltip-map-dashboard'),
 							deleteArray = document.getElementsByClassName('tooltip-map-delete'),
-							len = deleteArray.length,
 							el;
 						
-						for (var i = 0; i < len; i++) {
+						for (var i = 0; i < deleteArray.length; i++) {
 							el = editArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
@@ -1991,6 +2101,17 @@ Ext.onReady( function() {
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
 								html: 'Delete',
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+						}						
+						
+						for (var i = 0; i < dashboardArray.length; i++) {							
+							el = dashboardArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Add to dashboard',
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -2028,6 +2149,11 @@ Ext.onReady( function() {
 					cls: 'gis-container-inner',
 					items: [
 						addButton,
+						{
+							height: 24,
+							style: 'width: 1px; margin-right: 7px; margin-top: 1px',
+							bodyStyle: 'border-left: 1px solid #aaa'
+						},
 						searchTextfield
 					]
 				},
@@ -2881,8 +3007,6 @@ Ext.onReady( function() {
 						headers: {'Content-Type': 'text/html'},
 						success: function() {
 							window.destroy();
-							
-							alert('Interpretation was shared!');
 						}
 					});
 				}
@@ -3060,19 +3184,21 @@ Ext.onReady( function() {
 		});
         GIS.map.addLayer(GIS.base.googleHybrid.layer);
     }
+    else {
     
-    // OpenStreetMap
-    GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.name);
-	GIS.base.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
-	GIS.base.openStreetMap.layer.base = GIS.base.openStreetMap;
-	GIS.base.openStreetMap.layer.layerOpacity = 1;
-	GIS.base.openStreetMap.layer.setLayerOpacity = function(number) {
-		if (number) {
-			this.layerOpacity = parseFloat(number);
-		}
-		this.setOpacity(this.layerOpacity);
-	};
-    GIS.map.addLayer(GIS.base.openStreetMap.layer);
+		// OpenStreetMap
+		GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.name);
+		GIS.base.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
+		GIS.base.openStreetMap.layer.base = GIS.base.openStreetMap;
+		GIS.base.openStreetMap.layer.layerOpacity = 1;
+		GIS.base.openStreetMap.layer.setLayerOpacity = function(number) {
+			if (number) {
+				this.layerOpacity = parseFloat(number);
+			}
+			this.setOpacity(this.layerOpacity);
+		};
+		GIS.map.addLayer(GIS.base.openStreetMap.layer);
+	}
     
     // Base objects
     

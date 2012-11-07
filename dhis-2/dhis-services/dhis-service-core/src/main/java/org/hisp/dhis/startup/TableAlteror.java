@@ -82,7 +82,9 @@ public class TableAlteror
         executeSql( "DROP TABLE roworder" );
         executeSql( "DROP TABLE sectionmembers" );
         executeSql( "DROP TABLE reporttable_categoryoptioncombos" );
+        executeSql( "DROP TABLE reporttable_dataelementgroupsets" );
         executeSql( "DROP TABLE dashboardcontent_datamartexports" );
+        executeSql( "DROP TABLE dashboardcontent_mapviews" );
         executeSql( "DROP TABLE customvalue" );
         executeSql( "DROP TABLE reporttable_displaycolumns" );
         executeSql( "DROP TABLE reportreporttables" );
@@ -107,6 +109,7 @@ public class TableAlteror
         executeSql( "DROP TABLE maplegendsetindicator" );
         executeSql( "DROP TABLE maplegendsetdataelement" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
+        executeSql( "ALTER TABLE reporttable DROP column paramleafparentorganisationunit" );
         executeSql( "ALTER TABLE reporttable DROP column dimension_type" );
         executeSql( "ALTER TABLE reporttable DROP column dimensiontype" );
         executeSql( "ALTER TABLE reporttable DROP column tablename" );
@@ -147,6 +150,8 @@ public class TableAlteror
         executeSql( "ALTER TABLE mapview RENAME COLUMN maplegendtype TO legendtype" );
         executeSql( "ALTER TABLE mapview RENAME COLUMN maplegendsetid TO legendsetid" );
         executeSql( "ALTER TABLE mapview ALTER COLUMN opacity TYPE double precision" );
+        
+        executeSql( "ALTER TABLE datavalue ALTER COLUMN storedby TYPE character varying(100)" );
 
         executeSql( "ALTER TABLE maplegend DROP CONSTRAINT maplegend_name_key" );
         
@@ -461,6 +466,15 @@ public class TableAlteror
         executeSql( "UPDATE dataset SET skipaggregation = false WHERE skipaggregation IS NULL" );
         executeSql( "UPDATE dataset SET skipoffline = false WHERE skipoffline IS NULL" );
 
+        executeSql( "UPDATE categorycombo SET skiptotal = false WHERE skiptotal IS NULL" );
+        
+        // short names
+        
+        executeSql( "ALTER TABLE dataelement ALTER COLUMN shortname TYPE character varying(50)" );
+        executeSql( "ALTER TABLE indicator ALTER COLUMN shortname TYPE character varying(50)" );
+        executeSql( "ALTER TABLE dataset ALTER COLUMN shortname TYPE character varying(50)" );
+        executeSql( "ALTER TABLE organisationunit ALTER COLUMN shortname TYPE character varying(50)" );
+        
         log.info( "Tables updated" );
     }
 

@@ -1,9 +1,10 @@
+#set( $maxComments = 4 )
 #foreach( $ip in $interpretations )
 <div class="interpretationContainer">
     <div class="interpretationSymbol">
 	#if( $ip.chartInterpretation )
 	   <img src="../images/chart.png">
-    #elseif( $ip.mapViewInterpretation )
+    #elseif( $ip.mapInterpretation )
         <img src="../images/map.png">
     #elseif( $ip.reportTableInterpretation )
         <img src="../images/table.png">
@@ -28,7 +29,7 @@
 	    #elseif( $ip.mapInterpretation )
 	        <a class="bold" 
 	           title="$i18n.getString( 'click_to_view_in_gis' )" 
-	           href="../dhis-web-mapping/mapping/app/index.html?id=${ip.map.uid}">
+	           href="../dhis-web-mapping/app/index.html?id=${ip.map.uid}">
 	           $encoder.htmlEncode( $ip.map.name )</a>
 	    #elseif( $ip.reportTableInterpretation )
 	        #if( $ip.organisationUnit )#set( $ou = "&ou=" + $ip.organisationUnit.uid )#else#set( $ou = "" )#end
@@ -45,18 +46,22 @@
 	    </div>
 	    
 	    #set( $comments = $ip.comments )
-	    <div class="interpretationCommentArea">
-	        <div id="comments${ip.uid}">
+	    #set( $commentStartPos = ( $comments.size() - $maxComments ) )
+	    <div class="interpretationCommentArea">	        
+	        #if( $comments.size() > $maxComments )
+	        <div id="commentHeader${ip.uid}" class="interpretationCommentHeader"><a href="javascript:expandComments( '${ip.uid}' )">View all $comments.size() comments</a></div>	        	
+        	#end
+        	<div id="comments${ip.uid}">
 	        #foreach( $comment in $comments )
-	        <div>
+	        <div #if( $velocityCount <= $commentStartPos ) style="display:none"#end>
 	            <div class="interpretationName">
 	                <span class="bold pointer" onclick="showUserInfo( '${comment.user.id}' )">${comment.user.name}</span>&nbsp;
 	                <span class="grey">${format.formatDate( $comment.created )}</span>
 	            </div>
-	        </div>
-	        <div class="interpretationText">
-	            ${comment.text}
-	        </div>
+		        <div class="interpretationText">
+		            ${comment.text}
+		        </div>
+            </div>
 	        #end
 	        </div>
 	        <textarea id="commentArea${ip.uid}" class="commentArea" placeholder="$i18n.getString( 'add_a_comment' )..."></textarea>
