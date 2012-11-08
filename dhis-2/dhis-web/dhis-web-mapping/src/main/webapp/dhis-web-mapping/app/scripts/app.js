@@ -3146,14 +3146,17 @@ Ext.onReady( function() {
 		return window;
 	};
 	
-	GIS.obj.CircleLayer = function(features) {
+	GIS.obj.CircleLayer = function(features, radius) {
 		var points = GIS.util.map.getPointsByFeatures(features),
 			lonLats = GIS.util.map.getLonLatsByPoints(points),
 			controls = [],
 			control,
 			layer = new OpenLayers.Layer.Vector(),
 			deactivateControls,
-			createCircles;
+			createCircles,
+			params = {};
+		
+		radius = radius && Ext.isNumber(parseInt(radius)) ? parseInt(radius) : 5;
 			
 		deactivateControls = function() {
 			for (var i = 0; i < controls.length; i++) {
@@ -3161,7 +3164,7 @@ Ext.onReady( function() {
 			}
 		};
 		
-		createCircles = function() {		
+		createCircles = function() {
 			if (lonLats.length) {
 				for (var i = 0; i < lonLats.length; i++) {
 					control = new OpenLayers.Control.Circle({
@@ -3176,10 +3179,8 @@ Ext.onReady( function() {
 				for (var i = 0; i < controls.length; i++) {
 					control = controls[i];
 					control.activate();
-					control.updateCircle(control.lonLat, 5);
+					control.updateCircle(control.lonLat, radius);
 				}
-				
-				//GIS.map.setLayerZIndex(layer, 1);
 			}
 			else {
 				alert('no lonlats');
@@ -3500,18 +3501,6 @@ Ext.onReady( function() {
 								added: function() {
 									GIS.cmp.interpretationButton = this;
 								}
-							}
-						},
-						{
-							xtype: 'tbseparator',
-							height: 18,
-							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
-						},
-						{
-							text: 'Tools',
-							menu: {},
-							handler: function() {
-								GIS.obj.ToolsWindow();
 							}
 						},
 						'->',

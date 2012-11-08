@@ -1,7 +1,7 @@
 OpenLayers.Control.Circle = OpenLayers.Class(OpenLayers.Control, {	
     feature: null,
     layer: null,
-    radius: null,
+    radius: 5,
     origin: null,
     sides: 40,
     angle: null,

@@ -267,6 +267,22 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 				}
 			}
         });
+        
+        this.cmp.circleRadius = Ext.create('Ext.ux.panel.CheckTextNumber', {
+			width: 262,
+			text: 'Circular area with radius (km):',
+			listeners: {
+				added: function() {
+					var that = this;
+					this.checkbox.on('change', function() {
+						GIS.base.facility.widget.config.extended.updateLegend = true;
+					});
+					this.numberField.on('change', function() {
+						GIS.base.facility.widget.config.extended.updateLegend = true;
+					});
+				}
+			}
+		});
     },
     
     addItems: function() {
@@ -275,7 +291,6 @@ Ext.define('mapfish.widgets.geostat.Facility', {
             {
                 xtype: 'form',
 				cls: 'el-border-0',
-                width: 270,
                 items: [
 					{
 						html: 'Organisation unit group set', //i18n
@@ -288,7 +303,13 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 						bodyStyle: 'padding-top: 4px'
 					},
 					this.cmp.level,
-					this.cmp.parent
+					this.cmp.parent,
+					{
+						html: 'Show surrounding areas', //i18n
+						cls: 'gis-form-subtitle',
+						bodyStyle: 'padding-top: 4px'
+					},					
+					this.cmp.circleRadius
 				]
             }
         ];
@@ -879,11 +900,17 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		});
 	},
 	
-	addCircles: function() {			
+	addCircles: function() {
+		var value = this.cmp.circleRadius.getValue(),
+			number = this.cmp.circleRadius.getNumber();
+			
 		if (this.layer.circleLayer) {
 			this.layer.circleLayer.deactivateControls();
-		}				
-		this.layer.circleLayer = new GIS.obj.CircleLayer(this.layer.features);
+		}
+			
+		if (value) {
+			this.layer.circleLayer = new GIS.obj.CircleLayer(this.layer.features, number);
+		}
 	},		
 	
     execute: function(view) {
