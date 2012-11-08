@@ -46,7 +46,7 @@
 				<tr>
 					<th>$i18n.getString( "username" )</th>
 					<th>$i18n.getString( "name" )</th>
-					<th class="{sorter: false}" style="width:80px;">$i18n.getString( "operations" )</th>
+					<th class="{sorter: false}" style="width:120px;">$i18n.getString( "operations" )</th>
 				</tr>
 				</thead>
 				<tbody id="list">
@@ -56,9 +56,20 @@
 					<td>$encoder.htmlEncode( $userCredentials.username )</td>
 					<td>$encoder.htmlEncode( $userCredentials.user.surname ), $encoder.htmlEncode( $userCredentials.user.firstName )</td>
 					<td style="text-align:right">
-					<a href="showUpdateUserForm.action?id=$userCredentials.id" title="$i18n.getString( 'edit' )"><img src="../images/edit.png" alt="$i18n.getString( 'edit' )"/></a>					
-					#if($currentUserName != $userCredentials.username)
-						<a href="javascript:removeUser( $userCredentials.id, '$encoder.jsEncode( $userCredentials.username )' )" title="$i18n.getString( 'remove' )"><img src="../images/delete.png" alt="$i18n.getString( 'remove' )"/></a>
+					<a href="showUpdateUserForm.action?id=$userCredentials.id" title="$i18n.getString( 'edit' )"><img src="../images/edit.png" alt="$i18n.getString( 'edit' )"/></a>
+					
+					#if( $currentUserName != $userCredentials.username && !$userCredentials.disabled )					   
+					<img id="disableImg${userCredentials.id}" src="../images/disable.png" 
+					   onclick="disableUser( $userCredentials.id, '$encoder.jsEncode( $userCredentials.username )' )" style="cursor:pointer" title="$i18n.getString( 'disable' )">
+					#elseif( $currentUserName != $userCredentials.username && $userCredentials.disabled )
+					<img id="disableImg${userCredentials.id}" src="../images/add.png" 
+					   onclick="enableUser( $userCredentials.id, '$encoder.jsEncode( $userCredentials.username )' )" style="cursor:pointer" title="$i18n.getString( 'enable' )">
+					#else
+					<img src="../images/disable_denied.png">
+					#end
+					
+					#if( $currentUserName != $userCredentials.username )
+						<a href="javascript:removeUser( $userCredentials.id, '$encoder.jsEncode( $userCredentials.username )' )" title="$i18n.getString( 'remove' )"><img src="../images/delete.png"></a>
 					#else
 						<img src="../images/delete-denied.png" alt="$i18n.getString( 'remove' )"/>
 					#end

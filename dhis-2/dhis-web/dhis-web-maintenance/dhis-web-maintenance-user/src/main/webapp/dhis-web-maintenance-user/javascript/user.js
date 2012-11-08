@@ -80,7 +80,52 @@ function showUserDetails( userId )
 
 function removeUser( userId, username )
 {
-	removeItem( userId, username, i18n_confirm_delete, 'removeUser.action' );
+	removeItem( userId, username, i18n_confirm_delete, "removeUser.action" );
+}
+
+function disableUser( userId, username )
+{
+	var confirmation = confirm( "Are you sure you want to disable this user?\n\n" + username );
+	
+	if ( confirmation )
+	{
+		$.post( "disableUser.action", 
+			{
+				userId: userId
+			},
+			function( json ) 
+			{
+				if ( json.response == "success" ) {
+					$( "#disableImg" + userId ).attr( "src", "../images/add.png" );
+					$( "#disableImg" + userId ).removeAttr( "onclick" ).off( "click" ).click( function() {
+						enableUser( userId, username )
+					} );
+				}
+			} );
+	}
+}
+
+function enableUser( userId, username )
+{
+	var confirmation = confirm( "Are you sure you want to enable this user?\n\n" + username );
+	
+	if ( confirmation )
+	{
+		$.post( "disableUser.action", 
+			{
+				userId: userId,
+				enable: true
+			},
+			function( json ) 
+			{
+				if ( json.response == "success" ) {
+					$( "#disableImg" + userId ).attr( "src", "../images/disable.png" );
+					$( "#disableImg" + userId ).removeAttr( "onclick" ).off( "click" ).click( function() {
+						disableUser( userId, username )
+					} );
+				}
+			} );
+	}
 }
 
 // -----------------------------------------------------------------------------
