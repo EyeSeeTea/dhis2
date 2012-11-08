@@ -37,6 +37,7 @@ function Selection()
     var rootUnselectAllowed = false;
     var autoSelectRoot = true;
     var realRoot = true;
+    var includeChildren = false;
 
     this.setListenerFunction = function ( listenerFunction_, skipInitialCall )
     {
@@ -69,6 +70,11 @@ function Selection()
     this.setAutoSelectRoot = function ( autoSelect )
     {
         autoSelectRoot = autoSelect;
+    };
+
+    this.setIncludeChildren = function( children )
+    {
+        includeChildren = children;
     };
 
     this.load = function ()
@@ -398,6 +404,7 @@ function Selection()
         }
 
         var selected = [];
+        var children = [];
 
         if ( sessionStorage[getTagId( "Selected" )] != null )
         {
@@ -418,12 +425,18 @@ function Selection()
         }
         else
         {
+            // we only support includeChildren for single selects
+            if( includeChildren )
+            {
+                children = organisationUnits[selected].c;
+            }
+
             var name = organisationUnits[selected].n;
             ids.push( +selected );
             names.push( name );
         }
 
-        listenerFunction( ids, names );
+        listenerFunction( ids, names, children );
     };
 
     function getTagId( unitId )

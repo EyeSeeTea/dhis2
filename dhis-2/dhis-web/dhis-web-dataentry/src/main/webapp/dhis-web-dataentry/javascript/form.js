@@ -450,6 +450,12 @@ function loadForm( dataSetId )
     }
 }
 
+function loadMultiOrgForm( dataSetId )
+{
+    $('#contentDiv').html('MultiOrg form!');
+    hideLoader();
+}
+
 //------------------------------------------------------------------------------
 // Dynamic input
 //------------------------------------------------------------------------------
@@ -643,9 +649,9 @@ function getOptionComboName( optionComboId )
  * Returns an array containing associative array elements with id and name
  * properties. The array is sorted on the element name property.
  */
-function getSortedDataSetList()
+function getSortedDataSetList( orgUnit )
 {
-    var associationSet = organisationUnitAssociationSetMap[currentOrganisationUnitId];
+    var associationSet = orgUnit !== undefined ? organisationUnitAssociationSetMap[orgUnit] : organisationUnitAssociationSetMap[currentOrganisationUnitId];
     var orgUnitDataSets = dataSetAssociationSets[associationSet];
 
     var dataSetList = [];
@@ -669,7 +675,34 @@ function getSortedDataSetList()
     return dataSetList;
 }
 
-function organisationUnitSelected( orgUnits, orgUnitNames )
+function getSortedDataSetListForOrgUnits( orgUnits )
+{
+    var dataSetList = [];
+
+    $.each(orgUnits, function(idx, item) {
+        dataSetList.push.apply( dataSetList, getSortedDataSetList(item) )
+    });
+
+    var filteredDataSetList = [];
+
+    $.each(dataSetList, function(idx, item) {
+        var found = false;
+
+        $.each(filteredDataSetList, function(i, el) {
+            if(item.name == el.name)
+                found = true;
+        });
+
+        if(!found)
+        {
+            filteredDataSetList.push(item);
+        }
+    })
+
+    return filteredDataSetList;
+}
+
+function organisationUnitSelected( orgUnits, orgUnitNames, children )
 {
 	if ( metaDataIsLoaded == false )
 	{
@@ -678,6 +711,9 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 
     currentOrganisationUnitId = orgUnits[0];
     var organisationUnitName = orgUnitNames[0];
+
+    console.log('selected orgUnit = ', organisationUnitName);
+    console.log('children: ', children);
 
     $( '#selectedOrganisationUnit' ).val( organisationUnitName );
     $( '#currentOrganisationUnit' ).html( organisationUnitName );
@@ -701,6 +737,24 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
         if ( dataSetId == dataSetList[i].id )
         {
             dataSetValid = true;
+        }
+    }
+
+    if ( children )
+    {
+        var childrenDataSets = getSortedDataSetListForOrgUnits(children);
+
+        console.log( childrenDataSets );
+
+        if( childrenDataSets )
+        {
+            $('#selectedDataSetId').append('<optgroup label="Childrens DataSets">')
+
+            $.each(childrenDataSets, function(idx, item) {
+                $('<option />').attr('data-multiorg', true).attr('value', item.id).html(item.name).appendTo('#selectedDataSetId');
+            });
+
+            $('#selectDataSetId').append('</optgroup>')
         }
     }
 
@@ -801,7 +855,12 @@ function dataSetSelected()
         {
             showLoader();
             $( '#selectedPeriodId' ).val( periodId );
-            loadForm( dataSetId );
+
+            if( $('#selectedDataSetId :selected').data('multiorg') ) {
+                loadMultiOrgForm( dataSetId );
+            } else {
+                loadForm( dataSetId );
+            }
         }
         else
         {
@@ -828,14 +887,17 @@ function periodSelected()
     if ( periodId && periodId != -1 )
     {
         showLoader();
-
         if ( dataEntryFormIsLoaded )
         {
             loadDataValues();
         }
         else
         {
-            loadForm( dataSetId );
+            if( $('#selectedDataSetId :selected').data('multiorg') ) {
+                loadMultiOrgForm( dataSetId );
+            } else {
+                loadForm( dataSetId );
+            }
         }
     }
 }
