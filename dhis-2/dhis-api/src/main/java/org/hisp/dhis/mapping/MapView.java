@@ -111,6 +111,8 @@ public class MapView
     private Double opacity;
     
     private OrganisationUnitGroupSet organisationUnitGroupSet;
+    
+    private Double areaRadius;
 
     private transient String parentGraph;
     
@@ -424,6 +426,20 @@ public class MapView
     }
 
     @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    public Double getAreaRadius()
+    {
+        return areaRadius;
+    }
+
+    public void setAreaRadius( Double areaRadius )
+    {
+        this.areaRadius = areaRadius;
+    }
+
+    @JsonProperty
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
     public String getParentGraph()
@@ -484,6 +500,7 @@ public class MapView
             radiusHigh = mapView.getRadiusHigh() == null ? radiusHigh : mapView.getRadiusHigh();
             opacity = mapView.getOpacity() == null ? opacity : mapView.getOpacity();
             organisationUnitGroupSet = mapView.getOrganisationUnitGroupSet() == null ? organisationUnitGroupSet : mapView.getOrganisationUnitGroupSet();
+            areaRadius = mapView.getAreaRadius() == null ? areaRadius : mapView.getAreaRadius();
         }
     }
 }
