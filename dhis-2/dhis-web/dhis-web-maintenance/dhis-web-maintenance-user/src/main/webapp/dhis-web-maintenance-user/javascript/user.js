@@ -58,6 +58,12 @@ function showUserDetails( userId )
 		var lastLogin = json.user.lastLogin;
 		setInnerHTML( 'lastLoginField', lastLogin ? lastLogin : '[' + i18n_none + ']' );
 		
+		var created = json.user.created;
+		setInnerHTML( 'createdField', created ? created : '[' + i18n_none + ']' );
+		
+		var disabled = json.user.disabled;
+		setInnerHTML( 'disabledField', disabled ? i18n_yes : i18n_no );
+		
 		var organisationUnits = joinNameableObjects( json.user.organisationUnits );
 		setInnerHTML( 'assignedOrgunitField', organisationUnits ? organisationUnits : '[' + i18n_none + ']' );
 		

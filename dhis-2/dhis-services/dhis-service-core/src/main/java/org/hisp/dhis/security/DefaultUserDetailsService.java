@@ -78,7 +78,7 @@ public class DefaultUserDetailsService
         }
 
         User user = new User( credentials.getUsername(), credentials.getPassword(), 
-            !credentials.isDisabled(), false, true, true, getGrantedAuthorities( credentials ) );
+            !credentials.isDisabled(), true, true, true, getGrantedAuthorities( credentials ) );
         
         return user;
     }

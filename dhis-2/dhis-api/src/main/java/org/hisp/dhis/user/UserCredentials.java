@@ -111,7 +111,22 @@ public class UserCredentials
      * be authenticated.
      */
     private boolean disabled;
+    
+    /**
+     * The date this credentials was created.
+     */
+    private Date created;
 
+    // -------------------------------------------------------------------------
+    // Constructor
+    // -------------------------------------------------------------------------
+
+    public UserCredentials()
+    {
+        this.lastLogin = new Date();
+        this.created = new Date();
+    }
+    
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
@@ -441,5 +456,15 @@ public class UserCredentials
     public void setDisabled( boolean disabled )
     {
         this.disabled = disabled;
+    }
+
+    public Date getCreated()
+    {
+        return created;
+    }
+
+    public void setCreated( Date created )
+    {
+        this.created = created;
     }
 }
