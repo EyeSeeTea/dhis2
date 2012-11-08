@@ -105,6 +105,12 @@ public class UserCredentials
      * Indicates whether this user was originally self registered.
      */
     private boolean selfRegistered;
+    
+    /**
+     * Indicates whether this is user is disabled, which means the user cannot
+     * be authenticated.
+     */
+    private boolean disabled;
 
     // -------------------------------------------------------------------------
     // Logic
@@ -425,5 +431,15 @@ public class UserCredentials
     public void setSelfRegistered( boolean selfRegistered )
     {
         this.selfRegistered = selfRegistered;
+    }
+
+    public boolean isDisabled()
+    {
+        return disabled;
+    }
+
+    public void setDisabled( boolean disabled )
+    {
+        this.disabled = disabled;
     }
 }
