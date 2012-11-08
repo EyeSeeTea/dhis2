@@ -19,12 +19,11 @@ OpenLayers.Control.Circle = OpenLayers.Class(OpenLayers.Control, {
                 displayInLayerSwitcher: false,
                 calculateInRange: function() { return true; }
             };
-            this.layer = new OpenLayers.Layer.Vector(this.CLASS_NAME, options);
-            this.dragControl = new OpenLayers.Control.DragFeature(this.layer);
-            this.map.addControl(this.dragControl);
-            this.dragControl.activate();
+            //this.layer = new OpenLayers.Layer.Vector(this.CLASS_NAME, options);
+            //this.dragControl = new OpenLayers.Control.DragFeature(this.layer);
+            //this.map.addControl(this.dragControl);
+            //this.dragControl.activate();
             this.map.addLayer(this.layer);
-           
         }
         return activated;
     },
@@ -41,8 +40,8 @@ OpenLayers.Control.Circle = OpenLayers.Class(OpenLayers.Control, {
             this.layer = null;
             this.feature = null;
 
-            this.dragControl.destroy();
-            this.dragControl = null;
+            //this.dragControl.destroy();
+            //this.dragControl = null;
         }
         return deactivated;
     },

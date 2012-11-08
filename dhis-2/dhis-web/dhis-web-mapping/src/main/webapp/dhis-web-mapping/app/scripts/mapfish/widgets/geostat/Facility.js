@@ -231,7 +231,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 			rootVisible: false,
 			multiSelect: false,
 			width: GIS.conf.layout.widget.item_width,
-			height: 248,
+			height: 210,
 			reset: function() {
 				this.collapseAll();
 				this.expandPath(GIS.init.rootNodes[0].path);
@@ -871,10 +871,20 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 				this.coreComp.applyClassification(options);
 				this.classificationApplied = true;
 				
+				// Circles
+				this.addCircles();
+				
 				this.afterLoad();
 			}
 		});
-	},	
+	},
+	
+	addCircles: function() {			
+		if (this.layer.circleLayer) {
+			this.layer.circleLayer.deactivateControls();
+		}				
+		this.layer.circleLayer = new GIS.obj.CircleLayer(this.layer.features);
+	},		
 	
     execute: function(view) {
 		if (view) {
@@ -894,17 +904,12 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		GIS.mask.msg = GIS.i18n.loading;
 		GIS.mask.show();
 		
-		//if (this.tmpView.extended.updateGui) { // If favorite, wait for groups store callback 
-			//this.setGui();
-		//}
-		//else {
-			if (this.tmpView.extended.updateOrganisationUnit) {
-				this.loadOrganisationUnits();
-			}
-			else {
-				this.loadLegend();
-			}
-		//}
+		if (this.tmpView.extended.updateOrganisationUnit) {
+			this.loadOrganisationUnits();
+		}
+		else {
+			this.loadLegend();
+		}
 	},
 	
 	afterLoad: function() {

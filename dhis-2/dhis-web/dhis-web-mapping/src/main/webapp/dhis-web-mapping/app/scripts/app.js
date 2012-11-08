@@ -1088,8 +1088,7 @@ Ext.onReady( function() {
 			visibleLayer;
 			
 		visibleLayerId = window.google ? GIS.base.googleStreets.id : GIS.base.openStreetMap.id;
-		
-		for (var i = 0; i < layers.length; i++) {
+		for (var i = 0; i < layers.length; i++) { //todo important
 			layer = layers[i];
 			
 			item = Ext.create('Ext.ux.panel.LayerItemPanel', {
@@ -3147,40 +3146,51 @@ Ext.onReady( function() {
 		return window;
 	};
 	
-	GIS.obj.ToolsWindow = function() {
-		var layers = GIS.util.map.getVisibleVectorLayers(),
-			features = GIS.util.map.getFeaturesByLayers(layers),
-			points = GIS.util.map.getPointsByFeatures(features),
+	GIS.obj.CircleLayer = function(features) {
+		var points = GIS.util.map.getPointsByFeatures(features),
 			lonLats = GIS.util.map.getLonLatsByPoints(points),
-			lonLatCache = [],
-			circles = [],
-			circle,
-			fn = function(lonLats) {
+			controls = [],
+			control,
+			layer = new OpenLayers.Layer.Vector(),
+			deactivateControls,
+			createCircles;
+			
+		deactivateControls = function() {
+			for (var i = 0; i < controls.length; i++) {
+				controls[i].deactivate();
+			}
+		};
+		
+		createCircles = function() {		
+			if (lonLats.length) {
 				for (var i = 0; i < lonLats.length; i++) {
-					//circle = new OpenLayers.Control.Circle({
-						//layer: GIS.base.circle.layer
-					//});
-					circle = new OpenLayers.Control.Circle();
-					circle.lonLat = lonLats[i];
-					circles.push(circle);
+					control = new OpenLayers.Control.Circle({
+						layer: layer
+					});
+					control.lonLat = lonLats[i];
+					controls.push(control);
 				}
 				
-				GIS.map.addControls(circles);
+				GIS.map.addControls(controls);
 					
-				for (var i = 0; i < circles.length; i++) {
-					circle = circles[i];
-					circle.activate();
-					circle.updateCircle(circle.lonLat, 5);
+				for (var i = 0; i < controls.length; i++) {
+					control = controls[i];
+					control.activate();
+					control.updateCircle(control.lonLat, 5);
 				}
-			};
-			
-		if  (lonLats.length) {
-			lonLatCache = lonLats;
-			fn(lonLats);
-		}
-		else if (lonLatsCache.length) {
-			fn(lonLatsCache);
-		}
+				
+				//GIS.map.setLayerZIndex(layer, 1);
+			}
+			else {
+				alert('no lonlats');
+			}
+		};
+		
+		createCircles();
+		
+		layer.deactivateControls = deactivateControls;
+		
+		return layer;
 	};
 	
 	// OpenLayers map
@@ -3313,8 +3323,6 @@ Ext.onReady( function() {
         legendDiv: GIS.base.facility.legendDiv
     });
     GIS.base.facility.window = new GIS.obj.WidgetWindow(GIS.base.facility);
-    
-    GIS.base.circle.layer = new OpenLayers.Layer.Vector(GIS.base.circle.name);
     
 	// User interface
 	
