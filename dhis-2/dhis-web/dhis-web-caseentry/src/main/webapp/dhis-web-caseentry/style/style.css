@@ -105,14 +105,9 @@ table.information, td.information
 {
   position: relative;
   border: 1px solid #a4d2a3;
-  background-color: #d5efd5;
-  padding-top: 10px;
-  padding-right: 20px;
-  padding-bottom: 5px;
-  padding-left: 20px;
-  margin-bottom: 15px;
+  padding: 5px;
+  margin-bottom: 10px;
   border-radius: 3px;
-  width:750px;
 }
 
 /*----------------------------------------------------------------------------*/

@@ -107,9 +107,10 @@ public class TabularInitializeAction
     public String execute()
         throws Exception
     {
-        orgunitGroups = new ArrayList<OrganisationUnitGroup>( organisationUnitGroupService.getAllOrganisationUnitGroups() );
+        orgunitGroups = new ArrayList<OrganisationUnitGroup>(
+            organisationUnitGroupService.getAllOrganisationUnitGroups() );
         Collections.sort( orgunitGroups, IdentifiableObjectNameComparator.INSTANCE );
-
+        
         programs = programService.getAllPrograms();
 
         levels = organisationUnitService.getOrganisationUnitLevels();

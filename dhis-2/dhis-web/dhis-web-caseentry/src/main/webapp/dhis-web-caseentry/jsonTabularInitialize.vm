@@ -5,11 +5,11 @@
 		"isAdmin":$!currentUser.userCredentials.isSuper(),
 		"ous":[
 			#foreach( $orgunit in $currentUser.organisationUnits )
-			  {
-				"id":  "${orgunit.id}" ,
-				"name": "$!encoder.jsonEncode( ${orgunit.name} )",
-				"leaf": !$orgunit.hasChild()
-			  }#if( $velocityCount < $programs.size() ),#end
+			   {
+					 "id":  "${orgunit.id}" ,
+					 "name": "$!encoder.jsonEncode( ${orgunit.name} )",
+					 "leaf": !$orgunit.hasChild()
+			   }#if( $velocityCount < $programs.size() ),#end
 			#end
 		]
 	},

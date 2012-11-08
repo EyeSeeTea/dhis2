@@ -109,6 +109,7 @@ public class TableAlteror
         executeSql( "DROP TABLE maplegendsetindicator" );
         executeSql( "DROP TABLE maplegendsetdataelement" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
+        executeSql( "ALTER TABLE reporttable DROP column paramleafparentorganisationunit" );
         executeSql( "ALTER TABLE reporttable DROP column dimension_type" );
         executeSql( "ALTER TABLE reporttable DROP column dimensiontype" );
         executeSql( "ALTER TABLE reporttable DROP column tablename" );
@@ -129,7 +130,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE indicator DROP COLUMN alternativename" );
         executeSql( "ALTER TABLE orgunitgroup DROP COLUMN image" );
         
-        executeSql( "DROP INDEX crosstab" );
+        executeSql( "DROP INDEX datamart_crosstab" );
         
         // remove relative period type
         executeSql( "DELETE FROM period WHERE periodtypeid=(select periodtypeid from periodtype where name in ( 'Survey', 'OnChange', 'Relative' ))" );
@@ -446,6 +447,7 @@ public class TableAlteror
         executeSql( "update chart set userorganisationunit = false where userorganisationunit is null" );
 
         executeSql( "update users set selfregistered = false where selfregistered is null" );
+        executeSql( "update users set disabled = false where disabled is null" );
         
         // report, reporttable, chart groups
         
@@ -465,6 +467,8 @@ public class TableAlteror
         executeSql( "UPDATE dataset SET skipaggregation = false WHERE skipaggregation IS NULL" );
         executeSql( "UPDATE dataset SET skipoffline = false WHERE skipoffline IS NULL" );
 
+        executeSql( "UPDATE categorycombo SET skiptotal = false WHERE skiptotal IS NULL" );
+        
         // short names
         
         executeSql( "ALTER TABLE dataelement ALTER COLUMN shortname TYPE character varying(50)" );

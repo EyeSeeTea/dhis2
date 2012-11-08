@@ -370,6 +370,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
 		<property name="programStageInstanceService"
 			ref="org.hisp.dhis.program.ProgramStageInstanceService" />
+		<property name="selectionManager"
+            ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
 	</bean>
 
 	<!-- Patient -->
@@ -841,10 +843,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="organisationUnitService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
 		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-		<property name="patientAttributeService"
-			ref="org.hisp.dhis.patient.PatientAttributeService" />
-		<property name="patientIdentifierTypeService"
-			ref="org.hisp.dhis.patient.PatientIdentifierTypeService" />
 	</bean>
 
 	<bean

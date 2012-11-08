@@ -8,7 +8,7 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 		function( json )
 		{   
 			clearListById('searchObjectId');
-			clearListById('compulsoryDE');
+			clearListById('displayInReports');
 			clearListById('programId');
 			
 			jQuery( '#programId').append( '<option value="" psid="" reportDateDes="' + i18n_report_date + '">[' + i18n_please_select + ']</option>' );
@@ -29,21 +29,21 @@ selection.setListenerFunction( organisationUnitSelected );
 
 function disableCriteriaDiv()
 {
-	jQuery('#selectDiv :input').each( function( idx, item ){
-		disable(this.id);
-	});
+	disable('listBtn');
+	disable('addBtn');
+	disable('advancedBtn');
+	disable('removeBtn');
 	jQuery('#criteriaDiv :input').each( function( idx, item ){
 		disable(this.id);
 	});
-	enable('orgunitName');
-	enable('programId');
 }
 
 function enableCriteriaDiv()
 {
-	jQuery('#selectDiv :input').each( function( idx, item ){
-		enable(this.id);
-	});
+	enable('listBtn');
+	enable('addBtn');
+	enable('advancedBtn');
+	enable('removeBtn');
 	jQuery('#criteriaDiv :input').each( function( idx, item ){
 		enable(this.id);
 	});
@@ -79,14 +79,14 @@ function getDataElements()
 			jQuery('.stage-object-selected').attr('psid', jQuery('#programId option:selected').attr("psid"));
 	
 			clearListById('searchObjectId');
-			clearListById('compulsoryDE');
+			clearListById('displayInReports');
 			
 			jQuery( '#searchObjectId').append( '<option value="" >[' + i18n_please_select + ']</option>' );
 			for ( i in json.programStageDataElements ) {
 				jQuery( '#searchObjectId').append( '<option value="' + json.programStageDataElements[i].id + '" type="' + json.programStageDataElements[i].type +'">' + json.programStageDataElements[i].name + '</option>' );
 				
-				if( json.programStageDataElements[i].compulsory=='true' ){
-					jQuery( '#compulsoryDE').append( '<option value="' + json.programStageDataElements[i].id + '"></option>');
+				if( json.programStageDataElements[i].displayInReports=='true' ){
+					jQuery( '#displayInReports').append( '<option value="' + json.programStageDataElements[i].id + '"></option>');
 				}
 			}
 			
@@ -190,18 +190,16 @@ function searchEvents( listAll )
 	setFieldValue('isShowEventList', listAll );
 	
 	var params = '';
+	params += '&startDate=' + getFieldValue('startDate');
+	params += '&endDate=' + getFieldValue('endDate');
+		
 	if(listAll){	
-		params += '&startDate=';
-		params += '&endDate=';
-		jQuery( '#compulsoryDE option' ).each( function( i, item ){
+		jQuery( '#displayInReports option' ).each( function( i, item ){
 			var input = jQuery( item );
 			params += '&searchingValues=de_' + input.val() + '_false_';
 		});
-		hideById('advanced-search');
 	}
 	else{
-		params += '&startDate=' + getFieldValue('startDate');
-		params += '&endDate=' + getFieldValue('endDate');
 		var value = '';
 		var searchingValue = '';
 		jQuery( '#advancedSearchTB tr' ).each( function(){
@@ -295,12 +293,12 @@ function removeEvent( programStageId )
 function showUpdateEvent( programStageInstanceId )
 {
 	hideById('selectDiv');
-	hideById('searchDiv');
-	hideById('listDiv');
+    hideById('searchDiv');
+    hideById('listDiv');
 	setFieldValue('programStageInstanceId', programStageInstanceId);
 	setInnerHTML('dataEntryFormDiv','');
-	showLoader();
-	
+    showLoader();
+
 	$( '#dataEntryFormDiv' ).load( "dataentryform.action", 
 		{ 
 			programStageInstanceId: programStageInstanceId
@@ -313,17 +311,18 @@ function showUpdateEvent( programStageInstanceId )
 			var programStageId = jQuery('#programId option:selected').attr('psid');
 			jQuery('.stage-object-selected').attr('psid',programStageId);
 			setInnerHTML('programName', programName );
-			
 			if( getFieldValue('completed')=='true' ){
-				disableCompletedButton( true );
+				disable("completeBtn");
+				enable("uncompleteBtn");
 			}
 			else{
-				disableCompletedButton( false );
+				enable("completeBtn");
+				disable("uncompleteBtn");
 			}
 			hideById('loaderDiv');
 			showById('dataEntryInfor');
 			showById('entryFormContainer');
-		} );
+		});
 }
 
 function backEventList()
@@ -347,6 +346,7 @@ function showAddEventForm()
 	hideById('actionDiv');
 	showById('dataEntryInfor');
 	setFieldValue('programStageInstanceId','0');
+	byId('executionDate').style.backgroundColor = "#ffffff";
 	setInnerHTML('programName', jQuery('#programId option:selected').text());
 }
 
@@ -403,5 +403,45 @@ function removeEmptyEvents()
 					validateSearchEvents( true )
 				}
 			});
+	}
+}
+
+function removeCurrentEvent()
+{	
+    var result = window.confirm( i18n_comfirm_delete_event );
+    if ( result )
+    {
+    	$.postJSON(
+    	    "removeCurrentEncounter.action",
+    	    {
+    	        "id": getFieldValue('programStageInstanceId')   
+    	    },
+    	    function( json )
+    	    { 
+    	    	if ( json.response == "success" )
+    	    	{
+					backEventList();
+				}
+				else if ( json.response == "error" )
+    	    	{ 
+					showWarningMessage( json.message );
+    	    	}
+			});
+	}
+}
+
+function filterDivToogle()
+{
+	jQuery('#advanced-search').toggle();
+	var isShown = jQuery('#advancedBtn').attr("isShown");
+	if( isShown=="false" ){
+		jQuery('#advancedBtn').val(i18n_clear_filter);
+		jQuery('#advancedBtn').attr("isShown", true );
+	}
+	else
+	{
+		jQuery('#advancedBtn').val(i18n_add_filter);
+		jQuery('#advancedBtn').attr("isShown", false);
+		searchEvents( true );
 	}
 }
