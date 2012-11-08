@@ -91,7 +91,7 @@ function disableUser( userId, username )
 	{
 		$.post( "disableUser.action", 
 			{
-				userId: userId
+				username: username
 			},
 			function( json ) 
 			{
@@ -113,7 +113,7 @@ function enableUser( userId, username )
 	{
 		$.post( "disableUser.action", 
 			{
-				userId: userId,
+				username: username,
 				enable: true
 			},
 			function( json ) 

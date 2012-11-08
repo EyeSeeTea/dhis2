@@ -229,6 +229,30 @@ public class UserCredentials
 
         return !userAuthorityGroups.contains( group ) && authorities.containsAll( group.getAuthorities() );
     }
+    
+    /**
+     * Indicates whether this user credentials can modify the given user 
+     * credentials. This user credentials must have the ALL authority or possess
+     * all user authorities of the other user credentials to do so.
+     * 
+     * @param other the user credentials to modify.
+     */
+    public boolean canModify( UserCredentials other )
+    {
+        if ( other == null )
+        {
+            return false;
+        }
+        
+        final Set<String> authorities = getAllAuthorities();
+
+        if ( authorities.contains( UserAuthorityGroup.AUTHORITY_ALL ) )
+        {
+            return true;
+        }      
+        
+        return authorities.containsAll( other.getAllAuthorities() );
+    }
 
     /**
      * Indicates whether this user credentials can issue all of the user authority

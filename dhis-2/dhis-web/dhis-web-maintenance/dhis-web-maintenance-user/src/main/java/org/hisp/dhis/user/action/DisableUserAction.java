@@ -27,6 +27,8 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +44,16 @@ public class DisableUserAction
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CurrentUserService currentUserService;
+    
     private String username;
     
     public void setUsername( String username )
     {
         this.username = username;
     }
-
+    
     private boolean enable = false;
 
     public void setEnable( boolean enable )
@@ -60,12 +65,26 @@ public class DisableUserAction
     {
         UserCredentials credentials = userService.getUserCredentialsByUsername( username );
         
-        if ( credentials != null )
+        if ( credentials == null )
         {
-            credentials.setDisabled( !enable );
-            
-            userService.updateUserCredentials( credentials );
+            return ERROR;
         }
+        
+        User currentUser = currentUserService.getCurrentUser();
+        
+        if ( currentUser == null || currentUser.getUserCredentials() == null )
+        {
+            return ERROR;
+        }
+        
+        if ( !currentUser.getUserCredentials().canModify( credentials ) )
+        {
+            return ERROR;
+        }
+        
+        credentials.setDisabled( !enable );
+        
+        userService.updateUserCredentials( credentials );
         
         return SUCCESS;
     }    
