@@ -22,14 +22,18 @@
     <table cellspacing="0">
     #set( $categoryComboId = $sectionCombos.get( $section.id ) )
     #set( $colCount = $numberOfTotalColumns.get( $categoryComboId ) )
+    #set( $colSpan = $colCount / 2 )
     #set( $categories = $orderedCategories.get( $categoryComboId ) )
     #set( $optionsMap = $orderedOptionsMap.get( $categoryComboId ) )
     #set( $colRepeat = $catColRepeat.get( $categoryComboId ) )
 
+
+    #set( $rowSpan = $optionsMap.size() + 1)
+
     <tr>
-        <th>Organisation Unit</th>
+        <td rowspan="$rowSpan"></td>
     #foreach( $dataElement in $section.dataElements )
-            <th>$dataElement.name</th>
+            <th colspan="$colSpan">$dataElement.name</th>
     #end
     </tr>
 
@@ -37,11 +41,10 @@
     #set( $categoryOptions = $optionsMap.get( $category.id ) )
     #set( $colCount = $colCount / $categoryOptions.size() )
     <tr colspan="$colCount">
-    <td></td>
     #set( $cols = $colRepeat.get( $category.id ) )
     #foreach( $col in $cols )
     #foreach( $categoryOption in $categoryOptions )
-    #*<th colspan="$colCount"><span align="center">#if( $categoryOption.isDefault() )${i18n.getString( "value" )}#else ${encoder.htmlEncode( $categoryOption.name )}#end</span></th>*#
+        <th colspan="$colCount"><span align="center">${encoder.htmlEncode( $categoryOption.name )}</span></th>
     #end
     #end
     </tr>
@@ -63,8 +66,10 @@
         <tr>
             <td #if( $mark == 1 )class="alt"#else class="reg"#end>${encoder.htmlEncode( $organisationUnit.name )}</td>
 
-            #foreach( $dataElement in $section.dataElements )
-                <td><input class="entryfield" style="width: 100%; text-align: right;" type="text"/></td>
+            #foreach( $category in $categories )
+                #foreach( $categoryOption in $categoryOptions )
+                    <td><input class="entryfield" style="width: 100%; text-align: right;" type="text"/></td>
+                #end
             #end
         </tr>
     #end
