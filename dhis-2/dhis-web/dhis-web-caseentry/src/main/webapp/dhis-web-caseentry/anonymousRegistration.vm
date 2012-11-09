@@ -56,32 +56,43 @@
 					<input type="button" class='large-button' id='listBtn' value="$i18n.getString( 'update' )" onclick='setFieldValue("isShowEventList", false);updateEvents();'>
 				</td>
 			</tr>
-		</table>	
-		
-		<table id='minimized-advanced-search' class="hidden">
-			<tr><td align='right'>
-				<input type="button" class='large-button' value="$i18n.getString('show_all')" onclick='showFilterForm()'>
-				<input type="button" class='large-button' value="$i18n.getString('clear_all')" onclick='removeAllOption()'>
-			</td></tr>
+			<tr id='minimized-advanced-search' class="hidden">
+				<td align='right' colspan='5'>
+					$i18n.getString('you_have_active_filters')&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<input type="button" class='large-button' value="$i18n.getString('show_all')" onclick='showFilterForm()'>
+					<input type="button" class='large-button' value="$i18n.getString('clear_all')" onclick='removeAllOption()'>
+				</td>
+			</tr>
 		</table>
 		<table id='advanced-search' class='hidden'>
 			<col/>
 			<col/>
 			<col/>
 			<col width="180"/>
+			<tr class="hidden">
+				<td id='searchingAttributeIdTD'>
+					<select id="searchObjectId" name="searchObjectId" onchange='dataElementOnChange(this);'></select>
+				</td>
+			</tr>
 			<tbody id='advancedSearchTB'>
+				<tr><td></td></tr>
+				<tr>
+					<td></td>
+					<td></td>
+					<td rowspan='30' valign='bottom'>
+						<input type="button" class='large-button' id='addSearchOptionBtn' name='addSearchOptionBtn' value="$i18n.getString('add')" onclick='addAttributeOption()'>
+					</td>
+					<td rowspan='30' valign='bottom' align='right'>
+						<input type="button" class='large-button' id='addSearchOptionBtn' name='addSearchOptionBtn' value="$i18n.getString('clear_all')" onclick='removeAllOption()'>
+					</td>
+				</tr>
 				<tr id='advSearchBox0'>	
-					<td id='searchingAttributeIdTD'>
+					<td>
 						<select id="searchObjectId" name="searchObjectId" onchange='dataElementOnChange(this);'></select>
 					</td>		
-					<td style="padding-right:5px;">
+					<td>
 						<input type="text" id="searchText" name="searchText" value="$!searchText">
-					</td>
-					<td rowspan='30' valign='bottom' style="padding-bottom:5px">
-						<input type="button" class='tiny-button' id='addSearchOptionBtn' name='addSearchOptionBtn' value="+" onclick='addAttributeOption()'>
-					</td>
-					<td rowspan='30' valign='bottom' align='right' style="padding-bottom:5px">
-						<input type="button" class='large-button' id='addSearchOptionBtn' name='addSearchOptionBtn' value="$i18n.getString('clear_all')" onclick='removeAllOption()'>
+						<input type="button" class='large-button' name="clearSearchBtn" value='$i18n.getString( "clear" )' onclick="removeAttributeOption('advSearchBox0');" disabled>
 					</td>
 				</tr>
 			</tbody>
@@ -107,11 +118,12 @@
 	</table> 
 	<div id='dataEntryFormDiv'></div>
 	
-	<div id='actionDiv' class="page inputCriteria" style="width:680px;height:29px;">	
+	<div id='actionDiv' class="page inputCriteria" style="width:800px;height:29px;">	
 		<input type="button" onclick="doComplete()" value="$i18n.getString('complete')" id="completeBtn">
 		<input type="button" onclick="doUnComplete()" value="$i18n.getString('incomplete')" id="uncompleteBtn" >
 		<input type="button" value="$i18n.getString('run_validation')" onclick="javascript: runValidation();">
 		<input type="button" onclick="completedAndAddNewEvent()" value="$i18n.getString('complete_and_add_new_event')" id="completeAndAddNewBtn" style="width:150px;">
+		<input type="button" class='large-button' onclick="javascript:backEventList();" value="$i18n.getString('save')">
 		<input type="button" class='large-button' onclick="javascript:removeCurrentEvent();" value="$i18n.getString('remove')">
 	</div>
 </div>

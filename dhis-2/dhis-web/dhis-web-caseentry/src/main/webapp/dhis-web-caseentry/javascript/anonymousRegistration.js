@@ -2,12 +2,18 @@
 function organisationUnitSelected( orgUnits, orgUnitNames )
 {
 	hideById('dataEntryInfor');
+	hideById('advanced-search');
 	hideById('listDiv');
 	showById('mainLinkLbl');
+	setFieldValue("filter", false);
+	setFieldValue("startDate", '');
+	setFieldValue("endDate", '');
+	jQuery('#advancedSearchTB [name=searchText]').val('');
 	jQuery.getJSON( "anonymousPrograms.action",{}, 
 		function( json )
 		{   
-			clearListById('searchObjectId');
+			jQuery('#searchingAttributeIdTD [id=searchObjectId] option').remove();
+			jQuery('#advancedSearchTB [id=searchObjectId] option').remove();
 			clearListById('displayInReports');
 			clearListById('programId');
 			
@@ -53,7 +59,8 @@ function getDataElements()
 {
 	hideById('dataEntryInfor');
 	hideById('listDiv');
-	clearListById('searchObjectId');
+	jQuery('#searchingAttributeIdTD [id=searchObjectId] option').remove();
+	jQuery('#advancedSearchTB [id=searchObjectId] option').remove();
 	programStageId = jQuery('#programId option:selected').attr('psid');
 	setFieldValue('programStageId', programStageId );
 	setInnerHTML('reportDateDescriptionField', jQuery('#programId option:selected').attr('reportDateDes'));
@@ -76,6 +83,7 @@ function getDataElements()
 		}, 
 		function( json ) 
 		{   
+			jQuery('#advancedSearchTB [name=searchText]').val('');
 			jQuery('.stage-object-selected').attr('psid', jQuery('#programId option:selected').attr("psid"));
 	
 			clearListById('searchObjectId');
@@ -83,7 +91,7 @@ function getDataElements()
 			
 			jQuery( '#searchObjectId').append( '<option value="" >[' + i18n_please_select + ']</option>' );
 			for ( i in json.programStageDataElements ) {
-				jQuery( '#searchObjectId').append( '<option value="' + json.programStageDataElements[i].id + '" type="' + json.programStageDataElements[i].type +'">' + json.programStageDataElements[i].name + '</option>' );
+				jQuery( '[id=searchObjectId]').append( '<option value="' + json.programStageDataElements[i].id + '" type="' + json.programStageDataElements[i].type +'">' + json.programStageDataElements[i].name + '</option>' );
 				
 				if( json.programStageDataElements[i].displayInReports=='true' ){
 					jQuery( '#displayInReports').append( '<option value="' + json.programStageDataElements[i].id + '"></option>');
@@ -146,13 +154,44 @@ function autocompletedFilterField( idField, searchObjectId )
 				}
 			});
 		},
-		minLength: 2,
 		select: function( event, ui ) {
 			input.val(ui.item.value);
 			input.autocomplete( "close" );
 		}
 	})
 	.addClass( "ui-widget" );
+	
+	input.data( "autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li></li>" )
+			.data( "item.autocomplete", item )
+			.append( "<a>" + item.label + "</a>" )
+			.appendTo( ul );
+	};
+		
+	var wrapper = this.wrapper = $( "<span style='width:200px'>" )
+			.addClass( "ui-combobox" )
+			.insertAfter( input );
+						
+	var button = $( "<a style='width:20px; margin-bottom:-5px;height:20px;'>" )
+		.attr( "tabIndex", -1 )
+		.attr( "title", i18n_show_all_items )
+		.appendTo( wrapper )
+		.button({
+			icons: {
+				primary: "ui-icon-triangle-1-s"
+			},
+			text: false
+		})
+		.addClass('small-button')
+		.click(function() {
+			if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
+				input.autocomplete( "close" );
+				return;
+			}
+			$( this ).blur();
+			input.autocomplete( "search", "" );
+			input.focus();
+		});
 }
 
 function removeAllAttributeOption()
@@ -256,7 +295,13 @@ function searchEvents( listAll )
 			
 			var searchInfor = (listAll) ? i18n_list_all_events : i18n_search_events_by_dataelements;
 			setInnerHTML( 'searchInforTD', searchInfor);
-			
+	
+			if(getFieldValue('filter')=='true')
+			{
+				showById('minimized-advanced-search');
+				hideById('advanced-search');
+			}
+	
 			showById('listDiv');
 			hideById('loaderDiv');
 		}
@@ -265,11 +310,6 @@ function searchEvents( listAll )
 
 function updateEvents()
 {
-	if(getFieldValue('filter')=='true')
-	{
-		showById('minimized-advanced-search');
-		hideById('advanced-search');
-	}
 	validateSearchEvents( false );
 }
 
@@ -455,7 +495,7 @@ function removeCurrentEvent()
 
 function showFilterForm()
 {
-	jQuery('#advanced-search').toggle();
+	showById('advanced-search');
 	hideById('minimized-advanced-search');
 	disable('advancedBtn');
 	setFieldValue('filter', true);
