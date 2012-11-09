@@ -412,6 +412,21 @@ function addEventListeners()
     } );
 }
 
+function resetSectionFilters()
+{
+    $( '#selectionBox' ).css( 'height', '93px' );
+    $( '#filterDataSetSectionTr' ).hide();
+    $( '.formSection' ).show();
+}
+
+function clearSectionFilters()
+{
+    $( '#filterDataSetSection' ).children().remove();
+    $( '#selectionBox' ).css( 'height', '93px' );
+    $( '#filterDataSetSectionTr' ).hide();
+    $( '.formSection' ).show();
+}
+
 function clearPeriod()
 {
     clearListById( 'selectedPeriodId' );
@@ -798,18 +813,22 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
         }
     }
 
-    if ( dataSetValid && dataSetId != null )
+    if ( !multiOrganisationUnit && dataSetValid && dataSetId != null )
     {
         $( '#selectedDataSetId' ).val( dataSetId );
 
         if ( periodId && periodId != -1 && dataEntryFormIsLoaded )
         {
+            resetSectionFilters();
             showLoader();
             loadDataValues();
         }
     }
     else
     {
+        multiOrganisationUnit = false;
+
+        clearSectionFilters();
         clearPeriod();
     }
 }
