@@ -419,9 +419,9 @@ function clearEntryForm()
     $( '#infoDiv' ).hide();
 }
 
-function loadForm( dataSetId )
+function loadForm( dataSetId, multiOrganisationUnit )
 {
-    if ( storageManager.formExists( dataSetId ) )
+    if ( !multiOrganisationUnit && storageManager.formExists( dataSetId ) )
     {
         log( 'Loading form locally: ' + dataSetId );
 
@@ -439,7 +439,8 @@ function loadForm( dataSetId )
 
         $( '#contentDiv' ).load( 'loadForm.action', 
         {
-            dataSetId : dataSetId
+            dataSetId : dataSetId,
+            multiOrganisationUnit: multiOrganisationUnit
         }, 
         function() 
         {
@@ -448,12 +449,6 @@ function loadForm( dataSetId )
             loadDataValues()
         } );
     }
-}
-
-function loadMultiOrgForm( dataSetId )
-{
-    $('#contentDiv').html('MultiOrg form!');
-    hideLoader();
 }
 
 //------------------------------------------------------------------------------
@@ -712,9 +707,6 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
     currentOrganisationUnitId = orgUnits[0];
     var organisationUnitName = orgUnitNames[0];
 
-    console.log('selected orgUnit = ', organisationUnitName);
-    console.log('children: ', children);
-
     $( '#selectedOrganisationUnit' ).val( organisationUnitName );
     $( '#currentOrganisationUnit' ).html( organisationUnitName );
 
@@ -743,8 +735,6 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
     if ( children )
     {
         var childrenDataSets = getSortedDataSetListForOrgUnits(children);
-
-        console.log( childrenDataSets );
 
         if( childrenDataSets )
         {
@@ -856,8 +846,10 @@ function dataSetSelected()
             showLoader();
             $( '#selectedPeriodId' ).val( periodId );
 
-            if( $('#selectedDataSetId :selected').data('multiorg') ) {
-                loadMultiOrgForm( dataSetId );
+            var multiOrg = $('#selectedDataSetId :selected').data('multiorg');
+
+            if(multiOrg) {
+                loadForm( dataSetId, currentOrganisationUnitId );
             } else {
                 loadForm( dataSetId );
             }
@@ -893,8 +885,10 @@ function periodSelected()
         }
         else
         {
-            if( $('#selectedDataSetId :selected').data('multiorg') ) {
-                loadMultiOrgForm( dataSetId );
+            var multiOrg = $('#selectedDataSetId :selected').data('multiorg');
+
+            if(multiOrg) {
+                loadForm( dataSetId, currentOrganisationUnitId );
             } else {
                 loadForm( dataSetId );
             }
