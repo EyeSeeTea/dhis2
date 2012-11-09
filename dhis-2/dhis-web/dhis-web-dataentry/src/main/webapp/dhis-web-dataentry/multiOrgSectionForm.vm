@@ -10,7 +10,7 @@
   #set( $marker = 1 )
 #end
 
-<table class="formSection">
+<table class="formSection" data-multiorg="true">
 <tr>
   <td>
     <div class="cent"><h3>$encoder.htmlEncode( $section.name )</h3></div>
@@ -72,7 +72,7 @@
 
             #foreach( $dataElement in $section.dataElements )
                 #foreach( $optionCombo in $optionCombos )
-                #set( $dataEntryId = "${dataElement.id}-${optionCombo.id}-val" )
+                #set( $dataEntryId = "${organisationUnit.id}-${dataElement.id}-${optionCombo.id}-val" )
                 #set( $greyedField = false )
                 #set( $greyedField = $greyedFields.get( "$dataElement.id:$optionCombo.id" ) )
                 #if( $dataElement.type == "bool" )

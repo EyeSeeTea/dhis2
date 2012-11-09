@@ -47,6 +47,12 @@ var periodTypeFactory = new PeriodType();
 // Instance of the StorageManager
 var storageManager = new StorageManager();
 
+// Is this form a multiOrg form?
+var multiOrganisationUnit = false;
+
+// local cache of organisationUnits (used for name lookup)
+var organisationUnits = [];
+
 var COLOR_GREEN = '#b9ffb9';
 var COLOR_YELLOW = '#fffe8c';
 var COLOR_RED = '#ff8a8a';
@@ -82,6 +88,7 @@ $( document ).ready( function()
     $( '#orgUnitTree' ).one( 'ouwtLoaded', function()
     {
         log( 'Ouwt loaded' );
+        organisationUnits = JSON.parse( localStorage['organisationUnits'] );
         loadMetaData();
     } );
 
@@ -285,8 +292,7 @@ function uploadLocalData()
             error: function( jqXHR, textStatus, errorThrown )
             {
                 var message = i18n_sync_failed
-                    + ' <button id="sync_button" type="button">' + i18n_sync_now
-                    + '</button>';
+                    + ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>';
 
                 setHeaderMessage( message );
 
@@ -304,8 +310,12 @@ function addEventListeners()
     $( '[name="entryfield"]' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
-        var dataElementId = id.split( '-' )[0];
-        var optionComboId = id.split( '-' )[1];
+
+        var split = splitFieldId( id );
+        var dataElementId = split.dataElementId;
+        var optionComboId = split.optionComboId;
+        currentOrganisationUnitId = split.organisationUnitId;
+
         var type = getDataElementType( dataElementId );
 
         $( this ).unbind( 'focus' );
@@ -349,8 +359,10 @@ function addEventListeners()
     $( '[name="entryselect"]' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
-        var dataElementId = id.split( '-' )[0];
-        var optionComboId = id.split( '-' )[1];
+        var split = splitFieldId( id );
+
+        var dataElementId = split.dataElementId;
+        var optionComboId = split.optionComboId;
 
         $( this ).unbind( 'focus' );
         $( this ).unbind( 'change' );
@@ -419,9 +431,9 @@ function clearEntryForm()
     $( '#infoDiv' ).hide();
 }
 
-function loadForm( dataSetId, multiOrganisationUnit )
+function loadForm( dataSetId, multiOrg )
 {
-    if ( !multiOrganisationUnit && storageManager.formExists( dataSetId ) )
+    if ( !multiOrg && storageManager.formExists( dataSetId ) )
     {
         log( 'Loading form locally: ' + dataSetId );
 
@@ -429,8 +441,14 @@ function loadForm( dataSetId, multiOrganisationUnit )
 
         $( '#contentDiv' ).html( html );
 
-        enableSectionFilter();
-        insertDynamicOptions();
+        multiOrganisationUnit = !!$('.formSection').data('multiorg');
+
+        if(!multiOrganisationUnit)
+        {
+            enableSectionFilter();
+            insertDynamicOptions();
+        }
+
         loadDataValues();
     }
     else
@@ -440,12 +458,22 @@ function loadForm( dataSetId, multiOrganisationUnit )
         $( '#contentDiv' ).load( 'loadForm.action', 
         {
             dataSetId : dataSetId,
-            multiOrganisationUnit: multiOrganisationUnit
+            multiOrganisationUnit: multiOrg
         }, 
         function() 
         {
-            enableSectionFilter();
-            insertDynamicOptions();
+            multiOrganisationUnit = !!$('.formSection').data('multiorg');
+
+            if(!multiOrganisationUnit)
+            {
+                enableSectionFilter();
+                insertDynamicOptions();
+            }
+            else
+            {
+                $( '#currentOrganisationUnit' ).html( i18n_no_organisationunit_selected );
+            }
+
             loadDataValues()
         } );
     }
@@ -592,6 +620,27 @@ function filterInSection( $this )
 //------------------------------------------------------------------------------
 // Supportive methods
 //------------------------------------------------------------------------------
+
+// splits a id based on the multiOrgUnit var
+function splitFieldId( id )
+{
+    var split = {};
+
+    if( multiOrganisationUnit )
+    {
+        split.organisationUnitId = id.split( '-' )[0];
+        split.dataElementId = id.split( '-' )[1];
+        split.optionComboId = id.split( '-' )[2];
+    }
+    else
+    {
+        split.organisationUnitId = currentOrganisationUnitId;
+        split.dataElementId = id.split( '-' )[1];
+        split.optionComboId = id.split( '-' )[0];
+    }
+
+    return split;
+}
 
 function refreshZebraStripes( $tbody )
 {
@@ -848,9 +897,12 @@ function dataSetSelected()
 
             var multiOrg = $('#selectedDataSetId :selected').data('multiorg');
 
-            if(multiOrg) {
+            if(multiOrg)
+            {
                 loadForm( dataSetId, currentOrganisationUnitId );
-            } else {
+            }
+            else
+            {
                 loadForm( dataSetId );
             }
         }
@@ -887,9 +939,12 @@ function periodSelected()
         {
             var multiOrg = $('#selectedDataSetId :selected').data('multiorg');
 
-            if(multiOrg) {
+            if(multiOrg)
+            {
                 loadForm( dataSetId, currentOrganisationUnitId );
-            } else {
+            }
+            else
+            {
                 loadForm( dataSetId );
             }
         }
@@ -906,7 +961,12 @@ function loadDataValues()
     $( '#undoButton' ).attr( 'disabled', 'disabled' );
     $( '#infoDiv' ).css( 'display', 'none' );
 
-    insertDataValues();
+    // skip multiOrg for now
+    if( !multiOrganisationUnit )
+    {
+        insertDataValues();
+    }
+
     displayEntryFormCompleted();
 }
 
@@ -981,8 +1041,9 @@ function insertDataValues()
 	            }
 	            else // Insert for potential dynamic input fields
 	            {
-	                var dataElementId = value.id.split( '-' )[0];
-	                var optionComboId = value.id.split( '-' )[1];
+                    var split = splitFieldId( value.id );
+	                var dataElementId = split.dataElementId;
+	                var optionComboId = split.optionComboId;
 	                
 	                var selectElementId = '#' + getDynamicSelectElementId( dataElementId );
 	                
@@ -1091,12 +1152,16 @@ function valueFocus( e )
 {
     var id = e.target.id;
 
-    var dataElementId = id.split( '-' )[0];
-    var optionComboId = id.split( '-' )[1];
+    var split = splitFieldId( id );
+    var dataElementId = split.dataElementId;
+    var optionComboId = split.optionComboId;
+    currentOrganisationUnitId = split.organisationUnitId;
 
     var dataElementName = getDataElementName( dataElementId );
     var optionComboName = getOptionComboName( optionComboId );
+    var organisationUnitName = organisationUnits[currentOrganisationUnitId].n;
 
+    $( '#currentOrganisationUnit' ).html( organisationUnitName );
     $( '#currentDataElement' ).html( dataElementName + ' ' + optionComboName );
 
     $( '#' + dataElementId + '-cell' ).addClass( 'currentRow' );
@@ -1106,7 +1171,16 @@ function valueBlur( e )
 {
     var id = e.target.id;
 
-    var dataElementId = id.split( '-' )[0];
+    var dataElementId;
+
+    if(multiOrganisationUnit)
+    {
+        dataElementId = id.split( '-' )[1];
+    }
+    else
+    {
+        dataElementId = id.split( '-' )[0];
+    }
 
     $( '#' + dataElementId + '-cell' ).removeClass( 'currentRow' );
 }
@@ -1361,7 +1435,18 @@ function validateCompulsoryCombinations()
         $( '[name="entryfield"]' ).add( '[name="entryselect"]' ).each( function( i )
         {
             var id = $( this ).attr( 'id' );
-            var dataElementId = id.split( '-' )[0];		
+
+            var dataElementId;
+
+            if(multiOrganisationUnit)
+            {
+                dataElementId = id.split( '-' )[1];
+            }
+            else
+            {
+                dataElementId = id.split( '-' )[0];
+            }
+
             var hasValue = $.trim( $( this ).val() ).length > 0;
             
             if ( hasValue )
