@@ -1191,16 +1191,8 @@ function valueBlur( e )
 {
     var id = e.target.id;
 
-    var dataElementId;
-
-    if(multiOrganisationUnit)
-    {
-        dataElementId = id.split( '-' )[1];
-    }
-    else
-    {
-        dataElementId = id.split( '-' )[0];
-    }
+    var split = splitFieldId( id );
+    var dataElementId = split.dataElementId;
 
     $( '#' + dataElementId + '-cell' ).removeClass( 'currentRow' );
 }
