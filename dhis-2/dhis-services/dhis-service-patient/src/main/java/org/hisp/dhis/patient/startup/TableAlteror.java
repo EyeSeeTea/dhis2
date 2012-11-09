@@ -145,6 +145,12 @@ public class TableAlteror
         executeSql( "ALTER TABLE period modify periodid int AUTO_INCREMENT");
         executeSql( "CREATE SEQUENCE period_periodid_seq");
         executeSql( "ALTER TABLE period ALTER COLUMN periodid SET DEFAULT NEXTVAL('period_periodid_seq')");
+        
+        executeSql( "UPDATE program SET programstage_dataelements=false WHERE displayInReports is null" );
+        
+        executeSql( "ALTER TABLE programvalidation DROP COLUMN leftside" );
+        executeSql( "ALTER TABLE programvalidation DROP COLUMN rightside" );
+
     }
 
     // -------------------------------------------------------------------------

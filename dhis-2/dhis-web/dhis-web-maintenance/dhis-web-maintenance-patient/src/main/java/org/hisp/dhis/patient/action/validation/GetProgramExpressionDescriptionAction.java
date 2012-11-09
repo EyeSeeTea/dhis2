@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -24,51 +24,48 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.hisp.dhis.patient.action.validation;
 
-import org.hisp.dhis.program.ProgramValidationService;
+import org.hisp.dhis.program.ProgramExpressionService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $ID : GetAggConditionDescriptionAction.java Jan 11, 2011 9:14:19 PM
- *          $
+ * 
+ * @version GetProgramExpressionDescriptionAction.java 4:24:45 PM Nov 8, 2012 $
  */
-public class GetProgramValidationDescriptionAction
+public class GetProgramExpressionDescriptionAction
     implements Action
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private ProgramValidationService programValidationService;
+    private ProgramExpressionService programExpressionService;
+
+    public void setProgramExpressionService( ProgramExpressionService programExpressionService )
+    {
+        this.programExpressionService = programExpressionService;
+    }
 
     // -------------------------------------------------------------------------
-    // Input && Output
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private String condition;
+    private String programExpression;
+
+    public void setProgramExpression( String programExpression )
+    {
+        this.programExpression = programExpression;
+    }
 
     private String description;
-
-    // -------------------------------------------------------------------------
-    // Getters && Setters
-    // -------------------------------------------------------------------------
-
-    public void setProgramValidationService( ProgramValidationService programValidationService )
-    {
-        this.programValidationService = programValidationService;
-    }
 
     public String getDescription()
     {
         return description;
-    }
-
-    public void setCondition( String condition )
-    {
-        this.condition = condition;
     }
 
     // -------------------------------------------------------------------------
@@ -79,8 +76,9 @@ public class GetProgramValidationDescriptionAction
     public String execute()
         throws Exception
     {
-        description = programValidationService.getValidationDescription( condition );
+        description = programExpressionService.getExpressionDescription( programExpression );
 
         return SUCCESS;
     }
+
 }

@@ -42,54 +42,13 @@ function removeProgramValidation( programValidationId, name )
 	removeItem( programValidationId, name, i18n_confirm_delete, 'removeProgramValidation.action' );	
 }
 
-//-----------------------------------------------------------------
-// Insert items data-element
-//-----------------------------------------------------------------
-
-function insertDataElement( element, target, decriptionDiv )
-{
-	if( element.selectedIndex == -1)
-		return;
-	
-	var value = " " + element.options[element.selectedIndex].value + " ";
-	
-	insertTextCommon( target, value );
-	
-	getValidationDescription( decriptionDiv, target );
-}
-
-function insertOperator( decriptionDiv, target, value )
-{
-	insertTextCommon( target, ' ' + value + ' ' );
-	
-	getValidationDescription( decriptionDiv, target );
-}
-
-function getValidationDescription( decriptionDiv, sideDiv )
-{
-	$.postUTF8("getProgramValidationDescription.action",
-		{
-			condition: getFieldValue( sideDiv )
-		},
-		function (data)
-		{
-			setInnerHTML( decriptionDiv, data );
-		},'html');
-}
-
-function clearValidation( target, decriptionDiv )
-{
-	setFieldValue( target,'' );
-	setInnerHTML( decriptionDiv, '' );
-}
-
 //------------------------------------------------------------------------------
 // Get DataElements of Program-Stage into left-side
 //------------------------------------------------------------------------------
 
 function getLeftPrgramStageDataElements()
 {
-	clearListById( 'leftSideDE' );
+	clearListById( 'dataElementId' );
 	
 	var programStage = document.getElementById( 'leftStage' );
 	var programStageId = programStage.options[ programStage.selectedIndex ].value;
@@ -100,7 +59,7 @@ function getLeftPrgramStageDataElements()
 	}, function(json){
 		for ( i in json.dataElements ) {
 			var id = '[DE:' + programStageId + '.' + json.dataElements[i].id + ']';
-			jQuery( '#leftSideDE').append( '<option value="' + id + '">' + json.dataElements[i].name + '</option>' );
+			jQuery( '#dataElementId').append( '<option value="' + id + '">' + json.dataElements[i].name + '</option>' );
 		}
 	});   
 }
@@ -243,4 +202,109 @@ function parseRightSide( dataElementId, rightSide )
 		$('#days' + dataElementId ).val(daysValue);
 		showById('div' + dataElementId );
 	}
+}
+
+//------------------------------------------------------------------------------
+// Show Left side form for designing
+//------------------------------------------------------------------------------
+
+function editLeftExpression()
+{		
+	left = true;
+	
+	$( '#expression' ).val( $( '#leftSideExpression' ).val() );
+	$( '#expression-container [id=description]' ).val( $( '#leftSideDescription' ).val() );
+	$( '#formulaText' ).text( $( '#leftSideTextualExpression' ).val() );
+	$( '#nullIfBlank' ).attr( 'checked', ( $( '#leftSideNullIfBlank' ).val() == 'true' || $( '#leftSideNullIfBlank' ).val() == '' ) );
+	setInnerHTML( "exp-descriptionInfo", "" );
+	setInnerHTML( "exp-expressionInfo", "" );
+	$("#expression-container [id=description]" ).css( "background-color", "#ffffff" );
+	$("#expression-container [id=expression]" ).css( "background-color", "#ffffff" );
+	
+	dialog.dialog("open");
+}
+
+function editRightExpression()
+{
+	left = false;
+	
+	$( '#expression' ).val( $( '#rightSideExpression' ).val() );
+	$( '#expression-container [id=description]' ).val( $( '#rightSideDescription' ).val() );
+	$( '#formulaText' ).text( $( '#rightSideTextualExpression' ).val() );
+	$( '#nullIfBlank' ).attr( 'checked', ( $( '#rightSideNullIfBlank' ).val() == 'true' || $( '#rightSideNullIfBlank' ).val() == '' ) );
+	
+	dialog.dialog("open");
+}
+
+//------------------------------------------------------------------------------
+// Insert formulas
+//------------------------------------------------------------------------------
+
+function insertText( inputAreaName, inputText )
+{
+	insertTextCommon( inputAreaName, inputText );
+	
+	getExpressionText();
+}
+
+
+function getExpressionText()
+{
+	$.postUTF8("getProgramExpressionDescription.action",
+		{
+			programExpression: $( '#expression' ).val()
+		},
+		function (data)
+		{
+			setInnerHTML( "formulaText", data );
+		},'html');
+}
+
+var left = true;
+function insertExpression()
+{
+	var expression = $( '#expression' ).val();
+	var description = $( '#expression-container [id=description]' ).val();
+							
+	if ( left )
+	{
+		$( '#leftSideExpression' ).val( expression );
+		$( '#leftSideDescription' ).val( description );					
+		$( '#leftSideTextualExpression' ).val( $( '#formulaText' ).text() );
+		$( '#leftSideNullIfBlank' ).val( $( '#nullIfBlank' ).is( ':checked' ) );
+	}
+	else
+	{
+		$( '#rightSideExpression' ).val( expression );
+		$( '#rightSideDescription' ).val( description );					
+		$( '#rightSideTextualExpression' ).val( $( '#formulaText' ).text() );
+		$( '#rightSideNullIfBlank' ).val( $( '#nullIfBlank' ).is( ':checked' ) );								
+	}
+	
+	dialog.dialog( "close" );
+}
+
+function validateExpression()
+{
+    if ( checkNotEmpty( jQuery( "#expression-container [id=description]" ), i18n_description_not_null ) == false )
+        return;
+    if ( checkNotEmpty( jQuery( "#expression-container [id=expression]" ), i18n_expression_not_null ) == false )
+        return;
+	insertExpression();
+}
+
+function checkNotEmpty( field, message )
+{
+    if ( field.val().length == 0 )
+    {
+        setInnerHTML( "exp-" + field.attr("name") + "Info", message );
+        $('#expression-container [id=' + field.attr("name") + "]" ).css( "background-color", "#ffc5c5" );
+        return false;
+    } else
+    {
+        setInnerHTML( "exp-" + field.attr("name") + "Info", '' );
+        $('#expression-container [id=' + field.attr("name") + "]" ).css( "background-color", "#ffffff" );
+    }
+
+    return true;
 }
