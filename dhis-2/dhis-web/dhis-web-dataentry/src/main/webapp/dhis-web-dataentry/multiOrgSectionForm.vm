@@ -40,14 +40,12 @@
         #set( $colCount = $colCount / $categoryOptions.size() )
         <tr colspan="$colCount">
         #set( $cols = $colRepeat.get( $category.id ) )
-        #foreach( $col in $cols )
-            #foreach( $categoryOption in $categoryOptions )
-                <th colspan="$colCount"><span align="center">${encoder.htmlEncode( $categoryOption.name )}</span></th>
-            #end
-        #end
-        #foreach( $col in $cols )
-            #foreach( $categoryOption in $categoryOptions )
-                <th colspan="$colCount"><span align="center">${encoder.htmlEncode( $categoryOption.name )}</span></th>
+
+        #foreach( $dataElement in $section.dataElements )
+            #foreach( $col in $cols )
+                #foreach( $categoryOption in $categoryOptions )
+                    <th colspan="$colCount"><span align="center">${encoder.htmlEncode( $categoryOption.name )}</span></th>
+                #end
             #end
         #end
         </tr>
