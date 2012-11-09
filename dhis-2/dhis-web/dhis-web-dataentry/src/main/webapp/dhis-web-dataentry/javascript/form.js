@@ -99,8 +99,7 @@ $( document ).ready( function()
 	        if ( storageManager.hasLocalData() )
 	        {
 	            var message = i18n_need_to_sync_notification
-	            	+ ' <button id="sync_button" type="button">' + i18n_sync_now
-	            	+ '</button>';
+	            	+ ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>';
 
 	            setHeaderMessage( message );
 
@@ -730,14 +729,16 @@ function getSortedDataSetListForOrgUnits( orgUnits )
     var filteredDataSetList = [];
 
     $.each(dataSetList, function(idx, item) {
+        var formType = dataSets[item.id].type;
         var found = false;
 
         $.each(filteredDataSetList, function(i, el) {
+
             if(item.name == el.name)
                 found = true;
         });
 
-        if(!found)
+        if( !found && formType == 'section' )
         {
             filteredDataSetList.push(item);
         }
@@ -783,10 +784,12 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
 
     if ( children )
     {
-        var childrenDataSets = getSortedDataSetListForOrgUnits(children);
+        var childrenDataSets = getSortedDataSetListForOrgUnits( children );
 
-        if( childrenDataSets )
+        if( childrenDataSets && childrenDataSets.length > 0 )
         {
+            console.log("SHOULD NOT BE HERE!");
+
             $('#selectedDataSetId').append('<optgroup label="Childrens DataSets">')
 
             $.each(childrenDataSets, function(idx, item) {
