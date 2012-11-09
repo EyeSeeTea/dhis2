@@ -1448,17 +1448,8 @@ function validateCompulsoryCombinations()
         {
             var id = $( this ).attr( 'id' );
 
-            var dataElementId;
-
-            if(multiOrganisationUnit)
-            {
-                dataElementId = id.split( '-' )[1];
-            }
-            else
-            {
-                dataElementId = id.split( '-' )[0];
-            }
-
+            var split = splitFieldId( id );
+            var dataElementId = split.dataElementId;
             var hasValue = $.trim( $( this ).val() ).length > 0;
             
             if ( hasValue )
