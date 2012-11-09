@@ -788,8 +788,6 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
 
         if( childrenDataSets && childrenDataSets.length > 0 )
         {
-            console.log("SHOULD NOT BE HERE!");
-
             $('#selectedDataSetId').append('<optgroup label="Childrens DataSets">')
 
             $.each(childrenDataSets, function(idx, item) {
