@@ -649,8 +649,8 @@ function splitFieldId( id )
     else
     {
         split.organisationUnitId = currentOrganisationUnitId;
-        split.dataElementId = id.split( '-' )[1];
-        split.optionComboId = id.split( '-' )[0];
+        split.dataElementId = id.split( '-' )[0];
+        split.optionComboId = id.split( '-' )[1];
     }
 
     return split;
