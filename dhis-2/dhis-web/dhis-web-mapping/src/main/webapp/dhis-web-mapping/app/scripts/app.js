@@ -383,7 +383,7 @@ Ext.onReady( function() {
 	};
 	
 	GIS.util.map.addMapControl = function(name, fn) {
-		var panel = new GIS.obj.MapControlPanel(name, fn);		
+		var panel = GIS.obj.MapControlPanel(name, fn);		
 		GIS.map.addControl(panel);
 		panel.div.className += ' ' + name;
 		panel.div.childNodes[0].className += ' ' + name + 'Button';
@@ -978,7 +978,7 @@ Ext.onReady( function() {
 					base.widget.cmp.labelWindow.show();
 				}
 				else {
-					base.widget.cmp.labelWindow = new GIS.obj.LabelWindow(base);
+					base.widget.cmp.labelWindow = GIS.obj.LabelWindow(base);
 					base.widget.cmp.labelWindow.show();
 				}
 			}
@@ -1000,7 +1000,7 @@ Ext.onReady( function() {
 					}
 				
 					base.widget.cmp.filterWindow = base.id === GIS.base.facility.id ?
-						new GIS.obj.FilterFacilityWindow(base) : new GIS.obj.FilterWindow(base);
+						GIS.obj.FilterFacilityWindow(base) : GIS.obj.FilterWindow(base);
 					base.widget.cmp.filterWindow.show();
 				}
 			};
@@ -1020,7 +1020,7 @@ Ext.onReady( function() {
 					}
 				}
 			
-				base.widget.cmp.searchWindow = new GIS.obj.SearchWindow(base);
+				base.widget.cmp.searchWindow = GIS.obj.SearchWindow(base);
 				base.widget.cmp.searchWindow.show();
 			}
 		};
@@ -1639,17 +1639,14 @@ Ext.onReady( function() {
 					xtype: 'button',
 					text: 'Show / hide', //i18n
 					handler: function() {
-						console.log(base);
-alert(layer.hasLabels);						
 						if (layer.hasLabels) {
 							layer.hasLabels = false;
 							layer.styleMap = GIS.obj.StyleMap(base);
 						}
 						else {
 							layer.hasLabels = true;
-							layer.styleMap = GIS.obj.StyleMap(base, getLabelConfig());
+							layer.styleMap = GIS.obj.StyleMap(base, getLabelConfig());							
 						}
-console.log(base.widget.config.extended);						
 						base.widget.config.extended.updateLegend = true;
 						base.widget.execute();
 					}
@@ -1789,7 +1786,7 @@ console.log(base.widget.config.extended);
 								success: function(r) {
 									var id = r.getAllResponseHeaders().location.split('/').pop();
 									
-									GIS.map.mapLoader = new GIS.obj.MapLoader(id);
+									GIS.map.mapLoader = GIS.obj.MapLoader(id);
 									
 									GIS.store.maps.loadStore();
 									
@@ -1938,7 +1935,7 @@ console.log(base.widget.config.extended);
 							if (el) {
 								el = el.parent('td');
 								el.addClsOnOver('link');
-								el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = new GIS.obj.MapLoader("' + record.data.id + '"); GIS.map.mapLoader.load();');
+								el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = GIS.obj.MapLoader("' + record.data.id + '"); GIS.map.mapLoader.load();');
 							}
 						};
 						
@@ -3221,7 +3218,7 @@ console.log(base.widget.config.extended);
 		if (GIS.cmp.measureWindow && GIS.cmp.measureWindow.destroy) {
 			GIS.cmp.measureWindow.destroy();
 		}		
-		GIS.cmp.measureWindow = new GIS.obj.MeasureWindow();
+		GIS.cmp.measureWindow = GIS.obj.MeasureWindow();
 		GIS.cmp.measureWindow.show();
 	});
     
@@ -3280,48 +3277,48 @@ console.log(base.widget.config.extended);
     
     // Base objects
     
-    GIS.base.boundary.layer = new GIS.obj.VectorLayer(GIS.base.boundary);
+    GIS.base.boundary.layer = GIS.obj.VectorLayer(GIS.base.boundary);
     GIS.map.addLayer(GIS.base.boundary.layer);
-	GIS.base.boundary.menu = new GIS.obj.LayerMenu(GIS.base.boundary, 'gis-toolbar-btn-menu-first');	
+	GIS.base.boundary.menu = GIS.obj.LayerMenu(GIS.base.boundary, 'gis-toolbar-btn-menu-first');	
 	GIS.base.boundary.widget = Ext.create('mapfish.widgets.geostat.Boundary', {
         map: GIS.map,
         layer: GIS.base.boundary.layer,
         menu: GIS.base.boundary.menu
     });    
-    GIS.base.boundary.window = new GIS.obj.WidgetWindow(GIS.base.boundary);
+    GIS.base.boundary.window = GIS.obj.WidgetWindow(GIS.base.boundary);
     
-    GIS.base.thematic1.layer = new GIS.obj.VectorLayer(GIS.base.thematic1, {opacity: 0.8});
+    GIS.base.thematic1.layer = GIS.obj.VectorLayer(GIS.base.thematic1, {opacity: 0.8});
     GIS.map.addLayer(GIS.base.thematic1.layer);
-	GIS.base.thematic1.menu = new GIS.obj.LayerMenu(GIS.base.thematic1);	
+	GIS.base.thematic1.menu = GIS.obj.LayerMenu(GIS.base.thematic1);	
 	GIS.base.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
         map: GIS.map,
         layer: GIS.base.thematic1.layer,
         menu: GIS.base.thematic1.menu,
         legendDiv: GIS.base.thematic1.legendDiv
     });
-    GIS.base.thematic1.window = new GIS.obj.WidgetWindow(GIS.base.thematic1);
+    GIS.base.thematic1.window = GIS.obj.WidgetWindow(GIS.base.thematic1);
     
-    GIS.base.thematic2.layer = new GIS.obj.VectorLayer(GIS.base.thematic2, {opacity: 0.8});
+    GIS.base.thematic2.layer = GIS.obj.VectorLayer(GIS.base.thematic2, {opacity: 0.8});
     GIS.map.addLayer(GIS.base.thematic2.layer);
-	GIS.base.thematic2.menu = new GIS.obj.LayerMenu(GIS.base.thematic2);	
+	GIS.base.thematic2.menu = GIS.obj.LayerMenu(GIS.base.thematic2);	
 	GIS.base.thematic2.widget = Ext.create('mapfish.widgets.geostat.Thematic2', {
         map: GIS.map,
         layer: GIS.base.thematic2.layer,
         menu: GIS.base.thematic2.menu,
         legendDiv: GIS.base.thematic2.legendDiv
     });    
-    GIS.base.thematic2.window = new GIS.obj.WidgetWindow(GIS.base.thematic2);
+    GIS.base.thematic2.window = GIS.obj.WidgetWindow(GIS.base.thematic2);
     
-    GIS.base.facility.layer = new GIS.obj.VectorLayer(GIS.base.facility);
+    GIS.base.facility.layer = GIS.obj.VectorLayer(GIS.base.facility);
     GIS.map.addLayer(GIS.base.facility.layer);
-	GIS.base.facility.menu = new GIS.obj.LayerMenu(GIS.base.facility);
+	GIS.base.facility.menu = GIS.obj.LayerMenu(GIS.base.facility);
 	GIS.base.facility.widget = Ext.create('mapfish.widgets.geostat.Facility', {
         map: GIS.map,
         layer: GIS.base.facility.layer,
         menu: GIS.base.facility.menu,
         legendDiv: GIS.base.facility.legendDiv
     });
-    GIS.base.facility.window = new GIS.obj.WidgetWindow(GIS.base.facility);
+    GIS.base.facility.window = GIS.obj.WidgetWindow(GIS.base.facility);
     
 	// User interface
 	
@@ -3339,7 +3336,7 @@ console.log(base.widget.config.extended);
                     {
                         title: 'Layer overview and visibility %', //i18n
                         bodyStyle: 'padding: 6px',
-                        items: new GIS.obj.LayersPanel(),
+                        items: GIS.obj.LayersPanel(),
                         collapsible: true,
                         animCollapse: false
                     },
@@ -3420,12 +3417,12 @@ console.log(base.widget.config.extended);
 						},
 						{
 							iconCls: 'gis-btn-icon-' + GIS.base.thematic2.id,
-							menu: new GIS.obj.LayerMenu(GIS.base.thematic2),
+							menu: GIS.obj.LayerMenu(GIS.base.thematic2),
 							width: 26
 						},
 						{
 							iconCls: 'gis-btn-icon-' + GIS.base.facility.id,
-							menu: new GIS.obj.LayerMenu(GIS.base.facility),
+							menu: GIS.obj.LayerMenu(GIS.base.facility),
 							width: 26
 						},
 						{
@@ -3436,7 +3433,7 @@ console.log(base.widget.config.extended);
 									GIS.cmp.mapWindow.destroy();
 								}
 								
-								GIS.cmp.mapWindow = new GIS.obj.MapWindow();
+								GIS.cmp.mapWindow = GIS.obj.MapWindow();
 								GIS.cmp.mapWindow.show();
 							}
 						},
@@ -3448,7 +3445,7 @@ console.log(base.widget.config.extended);
 									GIS.cmp.legendSetWindow.destroy();
 								}
 								
-								GIS.cmp.legendSetWindow = new GIS.obj.LegendSetWindow();
+								GIS.cmp.legendSetWindow = GIS.obj.LegendSetWindow();
 								GIS.cmp.legendSetWindow.show();
 							}
 						},
@@ -3466,7 +3463,7 @@ console.log(base.widget.config.extended);
 									GIS.cmp.downloadWindow.destroy();
 								}
 								
-								GIS.cmp.downloadWindow = new GIS.obj.DownloadWindow();
+								GIS.cmp.downloadWindow = GIS.obj.DownloadWindow();
 								GIS.cmp.downloadWindow.show();
 							},								
 							xable: function() {
@@ -3492,7 +3489,7 @@ console.log(base.widget.config.extended);
 									GIS.cmp.interpretationWindow.destroy();
 								}
 								
-								GIS.cmp.interpretationWindow = new GIS.obj.InterpretationWindow();
+								GIS.cmp.interpretationWindow = GIS.obj.InterpretationWindow();
 								GIS.cmp.interpretationWindow.show();
 							},
 							listeners: {
