@@ -1639,6 +1639,8 @@ Ext.onReady( function() {
 					xtype: 'button',
 					text: 'Show / hide', //i18n
 					handler: function() {
+						console.log(base);
+alert(layer.hasLabels);						
 						if (layer.hasLabels) {
 							layer.hasLabels = false;
 							layer.styleMap = GIS.obj.StyleMap(base);
@@ -1647,7 +1649,7 @@ Ext.onReady( function() {
 							layer.hasLabels = true;
 							layer.styleMap = GIS.obj.StyleMap(base, getLabelConfig());
 						}
-						
+console.log(base.widget.config.extended);						
 						base.widget.config.extended.updateLegend = true;
 						base.widget.execute();
 					}
@@ -2888,10 +2890,6 @@ Ext.onReady( function() {
 			hidden: true,
 			handler: function() {
 				if (legendSetName.getValue() && validateLegends()) {
-					if (legendSetStore.findExact('name', legendSetName.getValue()) !== -1) {
-						alert('Name already in use');
-						return;
-					}
 					var body = getRequestBody(),
 						id = legendPanel.legendSetId;
 					body.id = id;

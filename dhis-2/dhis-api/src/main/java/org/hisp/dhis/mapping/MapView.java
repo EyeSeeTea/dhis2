@@ -112,7 +112,7 @@ public class MapView
     
     private OrganisationUnitGroupSet organisationUnitGroupSet;
     
-    private Double areaRadius;
+    private Integer areaRadius;
 
     private transient String parentGraph;
     
@@ -426,15 +426,14 @@ public class MapView
     }
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
-    public Double getAreaRadius()
+    public Integer getAreaRadius()
     {
         return areaRadius;
     }
 
-    public void setAreaRadius( Double areaRadius )
+    public void setAreaRadius( Integer areaRadius )
     {
         this.areaRadius = areaRadius;
     }

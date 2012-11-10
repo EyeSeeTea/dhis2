@@ -2,12 +2,18 @@
 function organisationUnitSelected( orgUnits, orgUnitNames )
 {
 	hideById('dataEntryInfor');
+	hideById('advanced-search');
 	hideById('listDiv');
 	showById('mainLinkLbl');
+	setFieldValue("filter", false);
+	setFieldValue("startDate", '');
+	setFieldValue("endDate", '');
+	jQuery('#advancedSearchTB [name=searchText]').val('');
 	jQuery.getJSON( "anonymousPrograms.action",{}, 
 		function( json )
 		{   
-			clearListById('searchObjectId');
+			jQuery('#searchingAttributeIdTD [id=searchObjectId] option').remove();
+			jQuery('#advancedSearchTB [id=searchObjectId] option').remove();
 			clearListById('displayInReports');
 			clearListById('programId');
 			
@@ -53,7 +59,8 @@ function getDataElements()
 {
 	hideById('dataEntryInfor');
 	hideById('listDiv');
-	clearListById('searchObjectId');
+	jQuery('#searchingAttributeIdTD [id=searchObjectId] option').remove();
+	jQuery('#advancedSearchTB [id=searchObjectId] option').remove();
 	programStageId = jQuery('#programId option:selected').attr('psid');
 	setFieldValue('programStageId', programStageId );
 	setInnerHTML('reportDateDescriptionField', jQuery('#programId option:selected').attr('reportDateDes'));
@@ -76,6 +83,7 @@ function getDataElements()
 		}, 
 		function( json ) 
 		{   
+			jQuery('#advancedSearchTB [name=searchText]').val('');
 			jQuery('.stage-object-selected').attr('psid', jQuery('#programId option:selected').attr("psid"));
 	
 			clearListById('searchObjectId');
@@ -83,7 +91,7 @@ function getDataElements()
 			
 			jQuery( '#searchObjectId').append( '<option value="" >[' + i18n_please_select + ']</option>' );
 			for ( i in json.programStageDataElements ) {
-				jQuery( '#searchObjectId').append( '<option value="' + json.programStageDataElements[i].id + '" type="' + json.programStageDataElements[i].type +'">' + json.programStageDataElements[i].name + '</option>' );
+				jQuery( '[id=searchObjectId]').append( '<option value="' + json.programStageDataElements[i].id + '" type="' + json.programStageDataElements[i].type +'">' + json.programStageDataElements[i].name + '</option>' );
 				
 				if( json.programStageDataElements[i].displayInReports=='true' ){
 					jQuery( '#displayInReports').append( '<option value="' + json.programStageDataElements[i].id + '"></option>');
@@ -91,6 +99,9 @@ function getDataElements()
 			}
 			
 			enableCriteriaDiv();
+			
+			validateSearchEvents( true );
+			setFieldValue('isShowEventList', true);
 		});
 }
 
@@ -143,13 +154,44 @@ function autocompletedFilterField( idField, searchObjectId )
 				}
 			});
 		},
-		minLength: 2,
 		select: function( event, ui ) {
 			input.val(ui.item.value);
 			input.autocomplete( "close" );
 		}
 	})
 	.addClass( "ui-widget" );
+	
+	input.data( "autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li></li>" )
+			.data( "item.autocomplete", item )
+			.append( "<a>" + item.label + "</a>" )
+			.appendTo( ul );
+	};
+		
+	var wrapper = this.wrapper = $( "<span style='width:200px'>" )
+			.addClass( "ui-combobox" )
+			.insertAfter( input );
+						
+	var button = $( "<a style='width:20px; margin-bottom:-5px;height:20px;'>" )
+		.attr( "tabIndex", -1 )
+		.attr( "title", i18n_show_all_items )
+		.appendTo( wrapper )
+		.button({
+			icons: {
+				primary: "ui-icon-triangle-1-s"
+			},
+			text: false
+		})
+		.addClass('small-button')
+		.click(function() {
+			if ( input.autocomplete( "widget" ).is( ":visible" ) ) {
+				input.autocomplete( "close" );
+				return;
+			}
+			$( this ).blur();
+			input.autocomplete( "search", "" );
+			input.focus();
+		});
 }
 
 function removeAllAttributeOption()
@@ -167,15 +209,23 @@ function validateSearchEvents( listAll )
 	var flag = true;
 	if( !listAll )
 	{
-		jQuery( '#advancedSearchTB tr' ).each( function( i, row ){
-			jQuery( this ).find(':input').each( function( idx, item ){
-				var input = jQuery( item );
-				if( input.attr('type') != 'button' && idx==0 && input.val()=='' ){
-					showWarningMessage( i18n_specify_data_element );
-					flag = false;
-				}
-			})
-		});
+		if( getFieldValue('startDate')=="" || getFieldValue('endDate')=="" ){
+			showWarningMessage( i18n_specify_a_date );
+			flag = false;
+		}
+		
+		if(flag && getFieldValue('filter') == "true" )
+		{
+			jQuery( '#advancedSearchTB tr' ).each( function( i, row ){
+				jQuery( this ).find(':input').each( function( idx, item ){
+					var input = jQuery( item );
+					if( input.attr('type') != 'button' && idx==0 && input.val()=='' ){
+						showWarningMessage( i18n_specify_data_element );
+						flag = false;
+					}
+				})
+			});
+		}
 	}
 	
 	if(flag){
@@ -190,18 +240,20 @@ function searchEvents( listAll )
 	setFieldValue('isShowEventList', listAll );
 	
 	var params = '';
-	params += '&startDate=' + getFieldValue('startDate');
-	params += '&endDate=' + getFieldValue('endDate');
-		
+	jQuery( '#displayInReports option' ).each( function( i, item ){
+		var input = jQuery( item );
+		params += '&searchingValues=de_' + input.val() + '_false_';
+	});
+	
 	if(listAll){	
-		jQuery( '#displayInReports option' ).each( function( i, item ){
-			var input = jQuery( item );
-			params += '&searchingValues=de_' + input.val() + '_false_';
-		});
+		params += '&startDate=';
+		params += '&endDate=';
 	}
 	else{
 		var value = '';
 		var searchingValue = '';
+		params += '&startDate=' + getFieldValue('startDate');
+		params += '&endDate=' + getFieldValue('endDate');
 		jQuery( '#advancedSearchTB tr' ).each( function(){
 			jQuery( this ).find(':input').each( function( idx, item ){
 				var input = jQuery( item );
@@ -243,11 +295,22 @@ function searchEvents( listAll )
 			
 			var searchInfor = (listAll) ? i18n_list_all_events : i18n_search_events_by_dataelements;
 			setInnerHTML( 'searchInforTD', searchInfor);
-			
+	
+			if(getFieldValue('filter')=='true')
+			{
+				showById('minimized-advanced-search');
+				hideById('advanced-search');
+			}
+	
 			showById('listDiv');
 			hideById('loaderDiv');
 		}
     });
+}
+
+function updateEvents()
+{
+	validateSearchEvents( false );
 }
 
 function getValueFormula( value )
@@ -430,18 +493,34 @@ function removeCurrentEvent()
 	}
 }
 
-function filterDivToogle()
+function showFilterForm()
 {
-	jQuery('#advanced-search').toggle();
-	var isShown = jQuery('#advancedBtn').attr("isShown");
-	if( isShown=="false" ){
-		jQuery('#advancedBtn').val(i18n_clear_filter);
-		jQuery('#advancedBtn').attr("isShown", true );
-	}
-	else
-	{
-		jQuery('#advancedBtn').val(i18n_add_filter);
-		jQuery('#advancedBtn').attr("isShown", false);
-		searchEvents( true );
-	}
+	showById('advanced-search');
+	hideById('minimized-advanced-search');
+	disable('advancedBtn');
+	setFieldValue('filter', true);
+}
+
+function removeAllOption()
+{
+	enable('advancedBtn');
+	setFieldValue('filter', false);
+	jQuery('#advancedBtn').val(i18n_add_filter);
+	jQuery('#advancedBtn').attr("isShown", false);
+	jQuery( '#advancedSearchTB tr' ).each( function( i, row ){
+		if(i==0){
+			jQuery( this ).find(':input').each( function( idx, item ){
+				var input = jQuery( item );
+				if( input.attr('type') != 'button'){
+					input.val('');
+				}
+			});
+		}
+		else{
+			jQuery(this).remove();
+		}
+	});
+	hideById('advanced-search');
+	hideById('minimized-advanced-search');
+	searchEvents( false );
 }

@@ -212,6 +212,11 @@ Ext.define('Ext.ux.panel.CheckTextNumber', {
 	disable: function() {
 		this.numberField.disable();
 	},
+	reset: function() {
+		this.checkbox.setValue(false);
+		this.numberField.setValue(this.number);
+		this.numberField.disable();
+	},
 	initComponent: function() {
 		var that = this;
 		

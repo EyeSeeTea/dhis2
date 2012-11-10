@@ -268,9 +268,9 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 			}
         });
         
-        this.cmp.circleRadius = Ext.create('Ext.ux.panel.CheckTextNumber', {
+        this.cmp.areaRadius = Ext.create('Ext.ux.panel.CheckTextNumber', {
 			width: 262,
-			text: 'Circular area with radius (km):',
+			text: 'Show circular area with radius (km):', //i18n
 			listeners: {
 				added: function() {
 					var that = this;
@@ -305,11 +305,11 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 					this.cmp.level,
 					this.cmp.parent,
 					{
-						html: 'Show surrounding areas', //i18n
+						html: 'Surrounding areas', //i18n
 						cls: 'gis-form-subtitle',
 						bodyStyle: 'padding-top: 4px'
 					},					
-					this.cmp.circleRadius
+					this.cmp.areaRadius
 				]
             }
         ];
@@ -673,6 +673,8 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		this.cmp.level.clearValue();
 		this.cmp.parent.reset();
 		
+		this.cmp.areaRadius.reset();
+		
 		// Layer options
 		if (this.cmp.searchWindow) {
 			this.cmp.searchWindow.destroy();
@@ -697,6 +699,11 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		this.store.features.loadFeatures();
 		this.layer.item.setValue(false);
 		
+		if (this.layer.circleLayer) {
+			this.layer.circleLayer.deactivateControls();
+			this.layer.circleLayer = null;
+		}		
+		
 		// Legend
 		document.getElementById(this.legendDiv).innerHTML = '';
 	},
@@ -718,6 +725,13 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		});
 		
 		this.cmp.parent.selectPath('/root' + view.parentGraph);
+		
+		if (Ext.isDefined(view.areaRadius)) {
+			this.cmp.areaRadius.setValue(true, view.areaRadius);
+		}
+		else {
+			this.cmp.areaRadius.reset();
+		}
 	},
     	
 	getView: function() {
@@ -742,6 +756,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 				id: parent[0].raw.id,
 				name: parent[0].raw.text
 			},
+			areaRadius: this.cmp.areaRadius.getValue() ? this.cmp.areaRadius.getNumber() : null,
 			parentLevel: parent[0].raw.level,
 			parentGraph: parent[0].raw.path,
 			opacity: this.layer.item.getOpacity()
@@ -888,11 +903,9 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 				options = {
 					indicator: this.tmpView.organisationUnitGroupSet.name
 				};
-
 				this.coreComp.applyClassification(options);
 				this.classificationApplied = true;
 				
-				// Circles
 				this.addCircles();
 				
 				this.afterLoad();
@@ -901,15 +914,14 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 	},
 	
 	addCircles: function() {
-		var value = this.cmp.circleRadius.getValue(),
-			number = this.cmp.circleRadius.getNumber();
-			
+		var radius = this.tmpView.areaRadius;
+		
 		if (this.layer.circleLayer) {
 			this.layer.circleLayer.deactivateControls();
+			this.layer.circleLayer = null;
 		}
-			
-		if (value) {
-			this.layer.circleLayer = new GIS.obj.CircleLayer(this.layer.features, number);
+		if (Ext.isDefined(radius) && radius) {
+			this.layer.circleLayer = new GIS.obj.CircleLayer(this.layer.features, radius);
 		}
 	},		
 	
