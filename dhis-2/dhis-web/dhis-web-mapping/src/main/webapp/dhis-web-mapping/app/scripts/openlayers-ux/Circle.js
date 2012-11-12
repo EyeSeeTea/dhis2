@@ -92,23 +92,23 @@ OpenLayers.Control.Circle = OpenLayers.Class(OpenLayers.Control, {
     CLASS_NAME: "Meteorage.Circle"
 });
 
-OpenLayers.Geometry.Polygon.prototype.getCentroid = function() {
-    var centroid = this.components[0].getCentroid();
-    return centroid;
-};
+//OpenLayers.Geometry.Polygon.prototype.getCentroid = function() {
+    //var centroid = this.components[0].getCentroid();
+    //return centroid;
+//};
 
-OpenLayers.Geometry.LinearRing.prototype.getCentroid = function() {
-    if (this.components && (this.components.length > 2)) {
-        var sumX = 0.0;
-        var sumY = 0.0;
-        for (var i = 0; i < this.components.length - 1; i++) {
-            var b = this.components[i];
-            var c = this.components[i+1];
-            sumX += (b.x + c.x) * (b.x * c.y - c.x * b.y);
-            sumY += (b.y + c.y) * (b.x * c.y - c.x * b.y);
-        }
-        var x = sumX / (6 * Math.abs(this.getArea()));
-        var y = sumY / (6 * Math.abs(this.getArea()));
-    }
-    return new OpenLayers.Geometry.Point(x, y);
-};
+//OpenLayers.Geometry.LinearRing.prototype.getCentroid = function() {
+    //if (this.components && (this.components.length > 2)) {
+        //var sumX = 0.0;
+        //var sumY = 0.0;
+        //for (var i = 0; i < this.components.length - 1; i++) {
+            //var b = this.components[i];
+            //var c = this.components[i+1];
+            //sumX += (b.x + c.x) * (b.x * c.y - c.x * b.y);
+            //sumY += (b.y + c.y) * (b.x * c.y - c.x * b.y);
+        //}
+        //var x = sumX / (6 * Math.abs(this.getArea()));
+        //var y = sumY / (6 * Math.abs(this.getArea()));
+    //}
+    //return new OpenLayers.Geometry.Point(x, y);
+//};

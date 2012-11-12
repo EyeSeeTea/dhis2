@@ -3178,7 +3178,7 @@ Ext.onReady( function() {
 				}
 			}
 			else {
-				alert('no lonlats');
+				alert('No facilities');
 			}
 		};
 		
