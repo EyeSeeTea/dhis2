@@ -1144,7 +1144,16 @@ function displayEntryFormCompleted()
 {
     addEventListeners();
 
-    $( '#validationButton' ).removeAttr( 'disabled' );
+    if(!multiOrganisationUnit)
+    {
+        $( '#validationButton' ).removeAttr( 'disabled' );
+        $( '#validateButton' ).removeAttr( 'disabled' );
+    }
+    else
+    {
+        $( '#validationButton' ).attr( 'disabled', true );
+        $( '#validateButton' ).attr( 'disabled', true );
+    }
 
     dataEntryFormIsLoaded = true;
     hideLoader();
