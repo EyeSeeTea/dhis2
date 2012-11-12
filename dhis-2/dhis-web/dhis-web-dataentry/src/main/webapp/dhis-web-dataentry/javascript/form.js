@@ -917,16 +917,8 @@ function dataSetSelected()
             showLoader();
             $( '#selectedPeriodId' ).val( periodId );
 
-            var multiOrg = $('#selectedDataSetId :selected').data('multiorg');
-
-            if( multiOrg )
-            {
-                loadForm( dataSetId, currentOrganisationUnitId );
-            }
-            else
-            {
-                loadForm( dataSetId );
-            }
+            var isMultiOrganisationUnitForm = !!$('#selectedDataSetId :selected').data('multiorg');
+            loadForm( dataSetId, isMultiOrganisationUnitForm );
         }
         else
         {
@@ -960,16 +952,8 @@ function periodSelected()
         }
         else
         {
-            var multiOrg = $('#selectedDataSetId :selected').data('multiorg');
-
-            if(multiOrg)
-            {
-                loadForm( dataSetId, currentOrganisationUnitId );
-            }
-            else
-            {
-                loadForm( dataSetId );
-            }
+            var isMultiOrganisationUnitForm = !!$('#selectedDataSetId :selected').data('multiorg');
+            loadForm( dataSetId, isMultiOrganisationUnitForm );
         }
     }
 }
@@ -984,6 +968,7 @@ function loadDataValues()
     $( '#undoButton' ).attr( 'disabled', 'disabled' );
     $( '#infoDiv' ).css( 'display', 'none' );
 
+    currentOrganisationUnitId = selection.getSelected();
     insertDataValues();
     displayEntryFormCompleted();
 }

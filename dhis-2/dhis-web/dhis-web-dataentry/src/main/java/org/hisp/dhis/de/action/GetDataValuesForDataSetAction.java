@@ -187,7 +187,7 @@ public class GetDataValuesForDataSetAction
         Period period = PeriodType.createPeriodExternalId( periodId );
 
         // ---------------------------------------------------------------------
-        // Data values
+        // Data values & Min-max data elements
         // ---------------------------------------------------------------------
 
         if ( !multiOrganisationUnit )
@@ -199,15 +199,14 @@ public class GetDataValuesForDataSetAction
         {
             for ( OrganisationUnit ou : children )
             {
-                dataValues.addAll( dataValueService.getDataValues( ou, period, dataSet.getDataElements() ) );
-                minMaxDataElements.addAll( minMaxDataElementService.getMinMaxDataElements( ou, dataSet.getDataElements() ) );
+                // make sure that the orgUnit have this dataSet (the same data elements can be contained in another dataSet)
+                if ( ou.getDataSets().contains( dataSet ) )
+                {
+                    dataValues.addAll( dataValueService.getDataValues( ou, period, dataSet.getDataElements() ) );
+                    minMaxDataElements.addAll( minMaxDataElementService.getMinMaxDataElements( ou, dataSet.getDataElements() ) );
+                }
             }
         }
-
-        // ---------------------------------------------------------------------
-        // Min-max data elements
-        // ---------------------------------------------------------------------
-
 
         // ---------------------------------------------------------------------
         // Data set completeness info
