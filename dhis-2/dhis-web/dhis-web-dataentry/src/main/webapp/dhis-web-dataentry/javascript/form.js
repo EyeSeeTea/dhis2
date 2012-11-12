@@ -447,6 +447,9 @@ function clearEntryForm()
 
 function loadForm( dataSetId, multiOrg )
 {
+    console.log("multiOrg: ", multiOrg);
+    currentOrganisationUnitId = selection.getSelected();
+
     if ( !multiOrg && storageManager.formExists( dataSetId ) )
     {
         log( 'Loading form locally: ' + dataSetId );
@@ -472,13 +475,13 @@ function loadForm( dataSetId, multiOrg )
         $( '#contentDiv' ).load( 'loadForm.action', 
         {
             dataSetId : dataSetId,
-            multiOrganisationUnit: multiOrg
+            multiOrganisationUnit: multiOrg ? currentOrganisationUnitId : 0
         }, 
         function() 
         {
             multiOrganisationUnit = !!$('.formSection').data('multiorg');
 
-            if(!multiOrganisationUnit)
+            if( !multiOrganisationUnit )
             {
                 enableSectionFilter();
                 insertDynamicOptions();
@@ -917,7 +920,7 @@ function dataSetSelected()
 
             var multiOrg = $('#selectedDataSetId :selected').data('multiorg');
 
-            if(multiOrg)
+            if( multiOrg )
             {
                 loadForm( dataSetId, currentOrganisationUnitId );
             }
@@ -951,6 +954,7 @@ function periodSelected()
     if ( periodId && periodId != -1 )
     {
         showLoader();
+
         if ( dataEntryFormIsLoaded )
         {
             loadDataValues();

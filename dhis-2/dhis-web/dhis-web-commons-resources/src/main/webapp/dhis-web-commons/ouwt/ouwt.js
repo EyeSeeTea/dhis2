@@ -289,6 +289,18 @@ function Selection()
         $.post( organisationUnitTreePath + "clearselected.action" ).complete( this.responseReceived );
     };
 
+    this.getSelected = function()
+    {
+        var selected = [];
+
+        if( sessionStorage[getTagId( "Selected" )] )
+        {
+            selected = JSON.parse( sessionStorage[getTagId( "Selected" )] );
+        }
+
+        return selected;
+    };
+
     this.select = function ( unitId )
     {
         var $linkTag = $( "#" + getTagId( unitId ) ).find( "a" ).eq( 0 );
