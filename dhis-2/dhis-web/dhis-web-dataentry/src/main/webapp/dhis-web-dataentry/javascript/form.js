@@ -447,7 +447,6 @@ function clearEntryForm()
 
 function loadForm( dataSetId, multiOrg )
 {
-    console.log("multiOrg: ", multiOrg);
     currentOrganisationUnitId = selection.getSelected();
 
     if ( !multiOrg && storageManager.formExists( dataSetId ) )
@@ -985,12 +984,7 @@ function loadDataValues()
     $( '#undoButton' ).attr( 'disabled', 'disabled' );
     $( '#infoDiv' ).css( 'display', 'none' );
 
-    // skip multiOrg for now
-    if( !multiOrganisationUnit )
-    {
-        insertDataValues();
-    }
-
+    insertDataValues();
     displayEntryFormCompleted();
 }
 
@@ -1029,7 +1023,8 @@ function insertDataValues()
 	    {
 	        periodId : periodId,
 	        dataSetId : dataSetId,
-	        organisationUnitId : currentOrganisationUnitId
+	        organisationUnitId : currentOrganisationUnitId,
+            multiOrganisationUnit: multiOrganisationUnit
 	    },
 	    dataType: 'json',
 	    error: function() // offline

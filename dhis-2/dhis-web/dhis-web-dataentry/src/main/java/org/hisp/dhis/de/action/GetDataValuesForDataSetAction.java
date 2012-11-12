@@ -41,8 +41,10 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * @author Lars Helge Overland
@@ -114,18 +116,30 @@ public class GetDataValuesForDataSetAction
         this.organisationUnitId = organisationUnitId;
     }
 
+    private boolean multiOrganisationUnit;
+
+    public void setMultiOrganisationUnit( boolean multiOrganisationUnit )
+    {
+        this.multiOrganisationUnit = multiOrganisationUnit;
+    }
+
+    public boolean isMultiOrganisationUnit()
+    {
+        return multiOrganisationUnit;
+    }
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    private Collection<DataValue> dataValues;
+    private Collection<DataValue> dataValues = new ArrayList<DataValue>();
 
     public Collection<DataValue> getDataValues()
     {
         return dataValues;
     }
 
-    private Collection<MinMaxDataElement> minMaxDataElements;
+    private Collection<MinMaxDataElement> minMaxDataElements = new ArrayList<MinMaxDataElement>();
 
     public Collection<MinMaxDataElement> getMinMaxDataElements()
     {
@@ -167,6 +181,8 @@ public class GetDataValuesForDataSetAction
     public String execute()
     {
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
+        Set<OrganisationUnit> children = organisationUnit.getChildren();
+
         DataSet dataSet = dataSetService.getDataSet( dataSetId );
         Period period = PeriodType.createPeriodExternalId( periodId );
 
@@ -174,13 +190,24 @@ public class GetDataValuesForDataSetAction
         // Data values
         // ---------------------------------------------------------------------
 
-        dataValues = dataValueService.getDataValues( organisationUnit, period, dataSet.getDataElements() );
+        if ( !multiOrganisationUnit )
+        {
+            dataValues = dataValueService.getDataValues( organisationUnit, period, dataSet.getDataElements() );
+            minMaxDataElements = minMaxDataElementService.getMinMaxDataElements( organisationUnit, dataSet.getDataElements() );
+        }
+        else
+        {
+            for ( OrganisationUnit ou : children )
+            {
+                dataValues.addAll( dataValueService.getDataValues( ou, period, dataSet.getDataElements() ) );
+                minMaxDataElements.addAll( minMaxDataElementService.getMinMaxDataElements( ou, dataSet.getDataElements() ) );
+            }
+        }
 
         // ---------------------------------------------------------------------
         // Min-max data elements
         // ---------------------------------------------------------------------
 
-        minMaxDataElements = minMaxDataElementService.getMinMaxDataElements( organisationUnit, dataSet.getDataElements() );
 
         // ---------------------------------------------------------------------
         // Data set completeness info
@@ -195,9 +222,25 @@ public class GetDataValuesForDataSetAction
                 complete = true;
                 date = registration.getDate();
                 storedBy = registration.getStoredBy();
-            }            
+            }
 
-            locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
+            if ( !multiOrganisationUnit )
+            {
+                locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
+            }
+            else
+            {
+                // if this is multiOrg, and one of the children is locked. Then just lock everything down.
+                for ( OrganisationUnit ou : children )
+                {
+                    locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
+
+                    if ( locked )
+                    {
+                        break;
+                    }
+                }
+            }
         }
 
         return SUCCESS;

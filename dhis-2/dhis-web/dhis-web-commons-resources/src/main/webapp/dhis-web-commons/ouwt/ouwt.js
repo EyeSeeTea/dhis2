@@ -291,14 +291,7 @@ function Selection()
 
     this.getSelected = function()
     {
-        var selected = [];
-
-        if( sessionStorage[getTagId( "Selected" )] )
-        {
-            selected = JSON.parse( sessionStorage[getTagId( "Selected" )] );
-        }
-
-        return selected;
+        return JSON.parse( sessionStorage[getTagId( "Selected" )] );
     };
 
     this.select = function ( unitId )
