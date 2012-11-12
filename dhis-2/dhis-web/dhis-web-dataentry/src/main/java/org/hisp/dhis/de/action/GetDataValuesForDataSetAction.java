@@ -214,29 +214,41 @@ public class GetDataValuesForDataSetAction
 
         if ( dataSet != null && period != null && organisationUnit != null )
         {
-            CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit );
-
-            if ( registration != null )
-            {
-                complete = true;
-                date = registration.getDate();
-                storedBy = registration.getStoredBy();
-            }
-
             if ( !multiOrganisationUnit )
             {
+                CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit );
+
+                if ( registration != null )
+                {
+                    complete = true;
+                    date = registration.getDate();
+                    storedBy = registration.getStoredBy();
+                }
+
                 locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
             }
             else
             {
+                complete = true;
+
                 // if this is multiOrg, and one of the children is locked. Then just lock everything down.
                 for ( OrganisationUnit ou : children )
                 {
-                    locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
-
-                    if ( locked )
+                    if ( ou.getDataSets().contains( dataSet ) )
                     {
-                        break;
+                        locked = dataSetService.isLocked( dataSet, period, organisationUnit, null );
+
+                        if ( locked )
+                        {
+                            break;
+                        }
+
+                        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period, ou );
+
+                        if ( complete && registration == null )
+                        {
+                            complete = false;
+                        }
                     }
                 }
             }

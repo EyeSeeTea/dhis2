@@ -1256,7 +1256,9 @@ function registerCompleteDataSet()
 	
 	validate( true, function() {	
 	    var params = storageManager.getCurrentCompleteDataSetParams();
-	
+        params['organisationUnitId'] = selection.getSelected();
+        params['multiOrganisationUnit'] = multiOrganisationUnit;
+
 		storageManager.saveCompleteDataSet( params );
 	
 	    $.ajax( {
@@ -1289,6 +1291,8 @@ function undoCompleteDataSet()
 {
     var confirmed = confirm( i18n_confirm_undo );
     var params = storageManager.getCurrentCompleteDataSetParams();
+    params['organisationUnitId'] = selection.getSelected();
+    params['multiOrganisationUnit'] = multiOrganisationUnit;
 
     if ( confirmed )
     {
