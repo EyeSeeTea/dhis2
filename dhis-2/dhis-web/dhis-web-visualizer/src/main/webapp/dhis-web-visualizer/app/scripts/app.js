@@ -4882,7 +4882,7 @@ Ext.onReady( function() {
 											},
 											{
 												xtype: 'panel',
-												html: '<b>Direct link: </b>' + DV.init.contextPath + '/dhis-web-visualizer/app/index.html?id=' + DV.c.currentFavorite.id,
+												html: '<b>Link: </b>' + DV.init.contextPath + '/dhis-web-visualizer/app/index.html?id=' + DV.c.currentFavorite.id,
 												style: 'padding-top: 9px; padding-bottom: 6px',
 												bodyStyle: 'border: 0 none'
 											}
