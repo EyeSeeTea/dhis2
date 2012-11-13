@@ -25,8 +25,13 @@
     #set( $categories = $orderedCategories.get( $categoryComboId ) )
     #set( $optionsMap = $orderedOptionsMap.get( $categoryComboId ) )
     #set( $colRepeat = $catColRepeat.get( $categoryComboId ) )
+    #set( $isDefaultCategory = $categories.get( 0 ).name == "default" )
 
-    #set( $rowSpan = $optionsMap.size() + 1)
+    #if( $isDefaultCategory )
+        #set( $rowSpan = $optionsMap.size() )
+    #else
+        #set( $rowSpan = $optionsMap.size() + 1)
+    #end
 
     <tr>
         <td rowspan="$rowSpan"></td>
@@ -35,20 +40,22 @@
         #end
     </tr>
 
-    #foreach( $category in $categories )
-        #set( $categoryOptions = $optionsMap.get( $category.id ) )
-        #set( $colCount = $colCount / $categoryOptions.size() )
-        <tr colspan="$colCount">
-        #set( $cols = $colRepeat.get( $category.id ) )
+    #if( !$isDefaultCategory )
+        #foreach( $category in $categories )
+            #set( $categoryOptions = $optionsMap.get( $category.id ) )
+            #set( $colCount = $colCount / $categoryOptions.size() )
+            <tr colspan="$colCount">
+            #set( $cols = $colRepeat.get( $category.id ) )
 
-        #foreach( $dataElement in $section.dataElements )
-            #foreach( $col in $cols )
-                #foreach( $categoryOption in $categoryOptions )
-                    <th colspan="$colCount"><span align="center">${encoder.htmlEncode( $categoryOption.name )}</span></th>
+            #foreach( $dataElement in $section.dataElements )
+                #foreach( $col in $cols )
+                    #foreach( $categoryOption in $categoryOptions )
+                        <th colspan="$colCount"><span align="center">${encoder.htmlEncode( $categoryOption.name )}</span></th>
+                    #end
                 #end
             #end
+            </tr>
         #end
-        </tr>
     #end
 
     #set( $count = 0 )
