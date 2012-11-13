@@ -846,7 +846,7 @@ Ext.onReady( function() {
 							trackMouse: true,
 							cls: 'dv-chart-tips',
 							renderer: function(si, item) {
-								this.update('<b>' + item.value[1] + '</b> (' + si.data[DV.conf.finals.data.domain] + ')');
+								this.update('<span style="font-size:11px">' + si.data[DV.conf.finals.data.domain] + '</span>' + '<br/>' + '<b>' + item.value[1] + '</b>');
 							}
 						};
 					},
@@ -957,7 +957,7 @@ Ext.onReady( function() {
 							trackMouse: true,
 							cls: 'dv-chart-tips',
 							renderer: function(si, item) {
-								this.update('' + item.value[0]);
+								this.update('<span style="font-size:11px">' + si.data[DV.conf.finals.data.domain] + '</span>' + '<br/>' + '<b>' + item.value[1] + '</b>');
 							}
 						};
 					},
@@ -1076,7 +1076,7 @@ Ext.onReady( function() {
 							trackMouse: true,
 							cls: 'dv-chart-tips-pie',
 							renderer: function(item) {
-								this.update(item.data[DV.conf.finals.data.domain] + '<br/><b>' + item.data[DV.c.series.names[0]] + '</b>');
+								this.update('<span style="font-size:11px">' + item.data[DV.conf.finals.data.domain] + '</span>' + '<br/>' + '<b>' + item.data[DV.c.series.names[0]] + '</b>');
 							}
 						};
 					},
