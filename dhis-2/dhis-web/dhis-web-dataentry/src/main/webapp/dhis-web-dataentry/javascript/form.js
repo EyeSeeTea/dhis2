@@ -106,7 +106,17 @@ $( document ).ready( function()
 	    }
 	    else
 	    {
-	        setHeaderMessage( '<form style="display:inline;"><label for="username">Username</label><input name="username" id="username" type="text" size="10"/><label for="password">Password</label><input name="password" id="password" type="password" size="10"/><button id="login_button" type="button">Login</button></form>' );
+            var form = [
+                '<form style="display:inline;">',
+                    '<label for="username">Username</label>',
+                    '<input name="username" id="username" type="text" style="width: 70px; margin-left: 10px; margin-right: 10px" size="10"/>',
+                    '<label for="password">Password</label>',
+                    '<input name="password" id="password" type="password" style="width: 70px; margin-left: 10px; margin-right: 10px" size="10"/>',
+                    '<button id="login_button" type="button">Login</button>',
+                '</form>'
+            ].join('');
+
+            setHeaderMessage( form );
 	        ajax_login();
 	    }
 	} );
@@ -519,7 +529,7 @@ function getDynamicSelectElementId( dataElementId )
 function enableSectionFilter()
 {
     var $sectionsHeaders = $( '.formSection .cent h3' );
-    $( '#filterDataSetSection' ).children().remove();
+    clearSectionFilters();
 
     if ( $sectionsHeaders.size() > 1)
     {
@@ -538,6 +548,21 @@ function enableSectionFilter()
         $( '#selectionBox' ).css( 'height', '93px' );
         $( '#filterDataSetSectionTr' ).hide();
     }
+}
+
+function resetSectionFilters()
+{
+    $( '#selectionBox' ).css( 'height', '93px' );
+    $( '#filterDataSetSectionTr' ).hide();
+    $( '.formSection' ).show();
+}
+
+function clearSectionFilters()
+{
+    $( '#filterDataSetSection' ).children().remove();
+    $( '#selectionBox' ).css( 'height', '93px' );
+    $( '#filterDataSetSectionTr' ).hide();
+    $( '.formSection' ).show();
 }
 
 function filterOnSection()
@@ -694,7 +719,7 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 
     var dataSetValid = false;
 
-    for ( i in dataSetList )
+    for ( var i in dataSetList )
     {
         addOptionById( 'selectedDataSetId', dataSetList[i].id, dataSetList[i].name );
 
@@ -710,12 +735,14 @@ function organisationUnitSelected( orgUnits, orgUnitNames )
 
         if ( periodId && periodId != -1 && dataEntryFormIsLoaded )
         {
+            resetSectionFilters();
             showLoader();
             loadDataValues();
         }
     }
     else
     {
+        clearSectionFilters();
         clearPeriod();
     }
 }
@@ -787,6 +814,7 @@ function dataSetSelected()
     if ( dataSetId && dataSetId != -1 )
     {
         clearListById( 'selectedPeriodId' );
+        clearSectionFilters();
 
         addOptionById( 'selectedPeriodId', '-1', '[ ' + i18n_select_period + ' ]' );
 
@@ -1341,10 +1369,10 @@ function validateCompulsoryCombinations()
 function displayHistoryDialog( operandName )
 {
     $( '#historyDiv' ).dialog( {
-        modal : true,
-        title : operandName,
-        width : 580,
-        height : 710
+        modal: true,
+        title: operandName,
+        width: 580,
+        height: 660
     } );
 }
 
