@@ -221,7 +221,8 @@ Ext.define('Ext.ux.panel.CheckTextNumber', {
 		var that = this;
 		
 		this.checkbox = Ext.create('Ext.form.field.Checkbox', {
-			width: 14,
+			width: 196,
+			boxLabel: this.text,
 			checked: this.value,
 			disabled: this.disabled,
 			listeners: {
@@ -253,11 +254,6 @@ Ext.define('Ext.ux.panel.CheckTextNumber', {
 			{
 				width: this.checkbox.width + 6,
 				items: this.checkbox
-			},
-			{
-				width: this.width - this.checkbox.width - 6 - this.numberField.width,
-				html: this.text,
-				bodyStyle: 'padding-top: 4px'
 			},
 			{
 				width: this.numberField.width,

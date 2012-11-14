@@ -1,11 +1,14 @@
 
 function organisationUnitSelected( orgUnits, orgUnitNames )
 {
+	showById('dataEntryMenu');
+	hideById('eventActionMenu');
 	hideById('dataEntryInfor');
 	hideById('advanced-search');
+	hideById('minimized-advanced-search');
 	hideById('listDiv');
-	showById('mainLinkLbl');
-	setFieldValue("filter", false);
+	hideById('programName');
+	setFieldValue("listAll", true);
 	setFieldValue("startDate", '');
 	setFieldValue("endDate", '');
 	jQuery('#advancedSearchTB [name=searchText]').val('');
@@ -37,7 +40,7 @@ function disableCriteriaDiv()
 {
 	disable('listBtn');
 	disable('addBtn');
-	disable('advancedBtn');
+	disable('filterBtn');
 	disable('removeBtn');
 	jQuery('#criteriaDiv :input').each( function( idx, item ){
 		disable(this.id);
@@ -48,7 +51,7 @@ function enableCriteriaDiv()
 {
 	enable('listBtn');
 	enable('addBtn');
-	enable('advancedBtn');
+	enable('filterBtn');
 	enable('removeBtn');
 	jQuery('#criteriaDiv :input').each( function( idx, item ){
 		enable(this.id);
@@ -89,19 +92,16 @@ function getDataElements()
 			clearListById('searchObjectId');
 			clearListById('displayInReports');
 			
-			jQuery( '#searchObjectId').append( '<option value="" >[' + i18n_please_select + ']</option>' );
+			jQuery( '[name=searchObjectId]').append( '<option value="" >[' + i18n_please_select + ']</option>' );
 			for ( i in json.programStageDataElements ) {
-				jQuery( '[id=searchObjectId]').append( '<option value="' + json.programStageDataElements[i].id + '" type="' + json.programStageDataElements[i].type +'">' + json.programStageDataElements[i].name + '</option>' );
-				
+				jQuery( '[name=searchObjectId]').append( '<option value="' + json.programStageDataElements[i].id + '" type="' + json.programStageDataElements[i].type +'">' + json.programStageDataElements[i].name + '</option>' );
 				if( json.programStageDataElements[i].displayInReports=='true' ){
 					jQuery( '#displayInReports').append( '<option value="' + json.programStageDataElements[i].id + '"></option>');
 				}
 			}
 			
 			enableCriteriaDiv();
-			
 			validateSearchEvents( true );
-			setFieldValue('isShowEventList', true);
 		});
 }
 
@@ -137,6 +137,7 @@ function dataElementOnChange( this_ )
 function autocompletedFilterField( idField, searchObjectId )
 {
 	var input = jQuery( "#" +  idField );
+	input.css("width","237px");
 	input.autocomplete({
 		delay: 0,
 		minLength: 0,
@@ -206,6 +207,9 @@ function removeAllAttributeOption()
 
 function validateSearchEvents( listAll )
 {	
+	listAll = eval(listAll);
+	setFieldValue('listAll', listAll );
+	
 	var flag = true;
 	if( !listAll )
 	{
@@ -214,16 +218,19 @@ function validateSearchEvents( listAll )
 			flag = false;
 		}
 		
-		if(flag && getFieldValue('filter') == "true" )
+		if(flag && !listAll && jQuery('#filterBtn').attr("disabled")=="disabled" )
 		{
-			jQuery( '#advancedSearchTB tr' ).each( function( i, row ){
-				jQuery( this ).find(':input').each( function( idx, item ){
-					var input = jQuery( item );
-					if( input.attr('type') != 'button' && idx==0 && input.val()=='' ){
-						showWarningMessage( i18n_specify_data_element );
-						flag = false;
-					}
-				})
+			jQuery( '#advancedSearchTB tr' ).each( function( index, row ){
+				if( index>1 )
+				{
+					jQuery( row ).find(':input').each( function( idx, item ){
+						var input = jQuery( item );
+						if( input.attr('type') != 'button' && idx==0 && input.val()=='' ){
+							showWarningMessage( i18n_specify_data_element );
+							flag = false;
+						}
+					})
+				}
 			});
 		}
 	}
@@ -237,7 +244,6 @@ function searchEvents( listAll )
 {
 	hideById('dataEntryInfor');
 	hideById('listDiv');
-	setFieldValue('isShowEventList', listAll );
 	
 	var params = '';
 	jQuery( '#displayInReports option' ).each( function( i, item ){
@@ -254,25 +260,32 @@ function searchEvents( listAll )
 		var searchingValue = '';
 		params += '&startDate=' + getFieldValue('startDate');
 		params += '&endDate=' + getFieldValue('endDate');
-		jQuery( '#advancedSearchTB tr' ).each( function(){
-			jQuery( this ).find(':input').each( function( idx, item ){
-				var input = jQuery( item );
-				if( input.attr('type') != 'button' ){
-					if( idx==0 && input.val()!=''){
-						searchingValue = 'de_' + input.val() + '_false_';
+		if(byId("incompleted").checked)
+		{
+			params += '&completed=false';
+		}
+		jQuery( '#advancedSearchTB tr' ).each( function(index, row){
+			if( index>1 )
+			{
+				jQuery( row ).find(':input').each( function( idx, item ){
+					var input = jQuery( item );
+					if( input.attr('type') != 'button' ){
+						if( idx==0 && input.val()!=''){
+							searchingValue = 'de_' + input.val() + '_false_';
+						}
+						else if( input.val()!='' ){
+							value += jQuery.trim(input.val()).toLowerCase();
+						}
 					}
-					else if( input.val()!='' ){
-						value += jQuery.trim(input.val()).toLowerCase();
-					}
+				});
+				
+				if( value !=''){
+					searchingValue += getValueFormula(value);
 				}
-			});
-			
-			if( value !=''){
-				searchingValue += getValueFormula(value);
+				params += '&searchingValues=' + searchingValue;
+				searchingValue = '';
+				value = '';
 			}
-			params += '&searchingValues=' + searchingValue;
-			searchingValue = '';
-			value = '';
 		})
 	}
 	
@@ -295,22 +308,23 @@ function searchEvents( listAll )
 			
 			var searchInfor = (listAll) ? i18n_list_all_events : i18n_search_events_by_dataelements;
 			setInnerHTML( 'searchInforTD', searchInfor);
-	
-			if(getFieldValue('filter')=='true')
+			
+			if(!listAll && jQuery('#filterBtn').attr("disabled")=="disabled")
 			{
 				showById('minimized-advanced-search');
 				hideById('advanced-search');
+			}
+			else
+			{
+				hideById('minimized-advanced-search');
+				hideById('advanced-search');
+				showById('filterBtn');
 			}
 	
 			showById('listDiv');
 			hideById('loaderDiv');
 		}
     });
-}
-
-function updateEvents()
-{
-	validateSearchEvents( false );
 }
 
 function getValueFormula( value )
@@ -355,6 +369,9 @@ function removeEvent( programStageId )
 
 function showUpdateEvent( programStageInstanceId )
 {
+	hideById('dataEntryMenu');
+	showById('eventActionMenu');
+	jQuery("[name=eventActionLink]").show();
 	hideById('selectDiv');
     hideById('searchDiv');
     hideById('listDiv');
@@ -368,7 +385,7 @@ function showUpdateEvent( programStageInstanceId )
 		},function()
 		{
 			jQuery('#inputCriteriaDiv').remove();
-			hideById('mainLinkLbl');
+			showById('programName');
 			showById('actionDiv');
 			var programName = jQuery('#programId option:selected').text();
 			var programStageId = jQuery('#programId option:selected').attr('psid');
@@ -390,22 +407,27 @@ function showUpdateEvent( programStageInstanceId )
 
 function backEventList()
 {
+	showById('dataEntryMenu');
+	hideById('eventActionMenu');
 	hideById('dataEntryInfor');
-	showById('mainLinkLbl');
+	hideById('programName');
 	showById('selectDiv');
 	showById('searchDiv');
 	showById('listDiv');
-	searchEvents( getFieldValue('isShowEventList') );
+	searchEvents( eval(getFieldValue('listAll')) );
 }
 
 function showAddEventForm()
 {
+	showById('eventActionMenu');
+	jQuery("[name=eventActionLink]").hide();
+	hideById('dataEntryMenu');
 	setInnerHTML('dataEntryFormDiv','');
 	setFieldValue('executionDate','');
 	hideById('selectDiv');
 	hideById('searchDiv');
 	hideById('listDiv');
-	hideById('mainLinkLbl');
+	showById('programName');
 	hideById('actionDiv');
 	showById('dataEntryInfor');
 	setFieldValue('programStageInstanceId','0');
@@ -497,18 +519,18 @@ function showFilterForm()
 {
 	showById('advanced-search');
 	hideById('minimized-advanced-search');
-	disable('advancedBtn');
-	setFieldValue('filter', true);
+	disable('filterBtn');
+	setFieldValue('listAll', false);
 }
 
 function removeAllOption()
 {
-	enable('advancedBtn');
-	setFieldValue('filter', false);
-	jQuery('#advancedBtn').val(i18n_add_filter);
-	jQuery('#advancedBtn').attr("isShown", false);
+	enable('filterBtn');
 	jQuery( '#advancedSearchTB tr' ).each( function( i, row ){
-		if(i==0){
+		if(i>2){
+			jQuery(this).remove();
+		}
+		else if(i==2){
 			jQuery( this ).find(':input').each( function( idx, item ){
 				var input = jQuery( item );
 				if( input.attr('type') != 'button'){
@@ -516,11 +538,8 @@ function removeAllOption()
 				}
 			});
 		}
-		else{
-			jQuery(this).remove();
-		}
 	});
-	hideById('advanced-search');
-	hideById('minimized-advanced-search');
-	searchEvents( false );
+	jQuery('#searchObjectId').val("");
+	jQuery('#searchText').val("");
+	searchEvents( eval(getFieldValue("listAll")) );
 }

@@ -846,7 +846,7 @@ Ext.onReady( function() {
 							trackMouse: true,
 							cls: 'dv-chart-tips',
 							renderer: function(si, item) {
-								this.update('' + item.value[1]);
+								this.update('<span style="font-size:11px">' + si.data[DV.conf.finals.data.domain] + '</span>' + '<br/>' + '<b>' + item.value[1] + '</b>');
 							}
 						};
 					},
@@ -957,7 +957,7 @@ Ext.onReady( function() {
 							trackMouse: true,
 							cls: 'dv-chart-tips',
 							renderer: function(si, item) {
-								this.update('' + item.value[0]);
+								this.update('<span style="font-size:11px">' + si.data[DV.conf.finals.data.domain] + '</span>' + '<br/>' + '<b>' + item.value[1] + '</b>');
 							}
 						};
 					},
@@ -1076,7 +1076,7 @@ Ext.onReady( function() {
 							trackMouse: true,
 							cls: 'dv-chart-tips-pie',
 							renderer: function(item) {
-								this.update(item.data[DV.conf.finals.data.domain] + '<br/><b>' + item.data[DV.c.series.names[0]] + '</b>');
+								this.update('<span style="font-size:11px">' + item.data[DV.conf.finals.data.domain] + '</span>' + '<br/>' + '<b>' + item.data[DV.c.series.names[0]] + '</b>');
 							}
 						};
 					},
@@ -3789,7 +3789,6 @@ Ext.onReady( function() {
 													},
 													listeners: {
 														load: function(s, node, r) {
-															console.log(r);
 															for (var i = 0; i < r.length; i++) {
 																r[i].data.text = DV.conf.util.jsonEncodeString(r[i].data.text);
 															}
@@ -4178,10 +4177,16 @@ Ext.onReady( function() {
                                 DV.exe.execute();
                             }
                         },
+						{
+							xtype: 'tbseparator',
+							height: 18,
+							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
+						},
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
-                            text: DV.i18n.favorites + '..',
+                            text: DV.i18n.favorites,
+                            menu: {},
                             listeners: {
                                 afterrender: function(b) {
                                     this.menu = Ext.create('Ext.menu.Menu', {
@@ -4753,10 +4758,71 @@ Ext.onReady( function() {
                                 }
                             }
                         },
+						{
+							xtype: 'tbseparator',
+							height: 18,
+							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
+						},
+                        {
+                            xtype: 'button',
+							cls: 'dv-toolbar-btn-2',
+                            text: DV.i18n.download,
+                            menu: {},
+                            execute: function(type) {
+                                var svg = document.getElementsByTagName('svg');
+                                
+                                if (svg.length < 1) {
+									DV.util.notification.error(DV.i18n.et_svg_browser, DV.i18n.em_svg_browser);
+                                    return;
+                                }
+                                
+                                document.getElementById('titleField').value = DV.c.filter.names[0] || 'Example chart';
+                                document.getElementById('svgField').value = svg[0].parentNode.innerHTML;
+                                document.getElementById('typeField').value = type;
+                                
+                                var exportForm = document.getElementById('exportForm');
+                                exportForm.action = '../exportImage.action';
+                                
+                                if (svg[0].parentNode.innerHTML && type) {
+                                    exportForm.submit();
+                                }
+                                else {
+                                    alert(DV.i18n.no_svg_format);
+                                }
+                            },
+                            listeners: {
+                                afterrender: function(b) {
+                                    this.menu = Ext.create('Ext.menu.Menu', {
+										cls: 'dv-menu',
+                                        shadow: false,
+                                        showSeparator: false,
+                                        items: [
+                                            {
+                                                text: DV.i18n.image_png,
+                                                iconCls: 'dv-menu-item-png',
+                                                minWidth: 105,
+                                                handler: function() {
+                                                    b.execute(DV.conf.finals.image.png);
+                                                }
+                                            },
+                                            {
+                                                text: 'PDF',
+                                                iconCls: 'dv-menu-item-pdf',
+                                                minWidth: 105,
+                                                handler: function() {
+                                                    b.execute(DV.conf.finals.image.pdf);
+                                                }
+                                            }
+                                        ]                                            
+                                    });
+                                }
+                            }
+                        },
                         {
 							xtype: 'button',
 							cls: 'dv-toolbar-btn-2',
-							text: DV.i18n.share + '..',
+							text: DV.i18n.share,
+							menu: {},
 							disabled: true,
 							xable: function() {
 								if (DV.c.currentFavorite) {
@@ -4816,7 +4882,7 @@ Ext.onReady( function() {
 											},
 											{
 												xtype: 'panel',
-												html: '<b>Direct link: </b>' + DV.init.contextPath + '/dhis-web-visualizer/app/index.html?id=' + DV.c.currentFavorite.id,
+												html: '<b>Link: </b>' + DV.init.contextPath + '/dhis-web-visualizer/app/index.html?id=' + DV.c.currentFavorite.id,
 												style: 'padding-top: 9px; padding-bottom: 6px',
 												bodyStyle: 'border: 0 none'
 											}
@@ -4882,60 +4948,6 @@ Ext.onReady( function() {
 								}
                             }
 						},
-                        {
-                            xtype: 'button',
-							cls: 'dv-toolbar-btn-2',
-                            text: DV.i18n.download + '..',
-                            execute: function(type) {
-                                var svg = document.getElementsByTagName('svg');
-                                
-                                if (svg.length < 1) {
-									DV.util.notification.error(DV.i18n.et_svg_browser, DV.i18n.em_svg_browser);
-                                    return;
-                                }
-                                
-                                document.getElementById('titleField').value = DV.c.filter.names[0] || 'Example chart';
-                                document.getElementById('svgField').value = svg[0].parentNode.innerHTML;
-                                document.getElementById('typeField').value = type;
-                                
-                                var exportForm = document.getElementById('exportForm');
-                                exportForm.action = '../exportImage.action';
-                                
-                                if (svg[0].parentNode.innerHTML && type) {
-                                    exportForm.submit();
-                                }
-                                else {
-                                    alert(DV.i18n.no_svg_format);
-                                }
-                            },
-                            listeners: {
-                                afterrender: function(b) {
-                                    this.menu = Ext.create('Ext.menu.Menu', {
-										cls: 'dv-menu',
-                                        shadow: false,
-                                        showSeparator: false,
-                                        items: [
-                                            {
-                                                text: DV.i18n.image_png,
-                                                iconCls: 'dv-menu-item-png',
-                                                minWidth: 105,
-                                                handler: function() {
-                                                    b.execute(DV.conf.finals.image.png);
-                                                }
-                                            },
-                                            {
-                                                text: 'PDF',
-                                                iconCls: 'dv-menu-item-pdf',
-                                                minWidth: 105,
-                                                handler: function() {
-                                                    b.execute(DV.conf.finals.image.pdf);
-                                                }
-                                            }
-                                        ]                                            
-                                    });
-                                }
-                            }
-                        },
                         {
                             xtype: 'button',
 							cls: 'dv-toolbar-btn-2',

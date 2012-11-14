@@ -789,6 +789,7 @@ Ext.onReady( function() {
 		proxy: {
 			type: 'ajax',
 			url: '',
+			noCache: false,
 			reader: {
 				type: 'json',
 				root: 'organisationUnitGroups'
@@ -1857,8 +1858,9 @@ Ext.onReady( function() {
 		
 		addButton = Ext.create('Ext.button.Button', {
 			text: 'Add new', //i18n
+			width: 67,
 			height: 26,
-			style: 'border-radius: 1px; margin-right: 7px',
+			style: 'border-radius: 1px;',
 			menu: {},
 			handler: function() {
 				nameWindow = new NameWindow(null, 'create');
@@ -1867,10 +1869,10 @@ Ext.onReady( function() {
 		});
 			
 		searchTextfield = Ext.create('Ext.form.field.Text', {
-			width: 343,
+			width: 340,
 			height: 26,
-			fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
-			emptyText: 'Search for favorites..', //i18n
+			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb',
+			emptyText: 'Search for favorites', //i18n
 			enableKeyEvents: true,
 			currentValue: '',
 			listeners: {
@@ -1927,7 +1929,7 @@ Ext.onReady( function() {
 				{
 					dataIndex: 'name',
 					sortable: false,
-					width: 335,
+					width: 334,
 					renderer: function(value, metaData, record) {
 						var fn = function() {
 							var el = Ext.get(record.data.id);
@@ -1947,12 +1949,17 @@ Ext.onReady( function() {
 				{
 					xtype: 'actioncolumn',
 					sortable: false,
-					width: 85,
+					width: 80,
 					items: [
 						{
 							iconCls: 'gis-grid-row-icon-edit',
-							getClass: function() {
-								return 'tooltip-map-edit';
+							getClass: function(value, metaData, record) {
+								var system = !record.data.user,
+									isAdmin = GIS.init.security.isAdmin;
+								
+								if (isAdmin || (!isAdmin && !system)) {
+									return 'tooltip-map-edit';
+								}
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
@@ -1969,8 +1976,13 @@ Ext.onReady( function() {
 						},
 						{
 							iconCls: 'gis-grid-row-icon-overwrite',
-							getClass: function() {
-								return 'tooltip-map-overwrite';
+							getClass: function(value, metaData, record) {
+								var system = !record.data.user,
+									isAdmin = GIS.init.security.isAdmin;
+								
+								if (isAdmin || (!isAdmin && !system)) {
+									return 'tooltip-map-overwrite';
+								}
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
@@ -2072,9 +2084,13 @@ Ext.onReady( function() {
 					],
 					renderer: function(value, metaData, record) {
 						if (!GIS.init.security.isAdmin && !record.data.user) {
-							metaData.tdCls += ' gis-grid-row-icon-disabled';
+							metaData.tdCls = 'gis-grid-row-icon-disabled';
 						}
 					}
+				},
+				{
+					sortable: false,
+					width: 6
 				}
 			],
 			store: GIS.store.maps,
@@ -2182,7 +2198,8 @@ Ext.onReady( function() {
 						addButton,
 						{
 							height: 24,
-							style: 'width: 1px; margin-right: 7px; margin-top: 1px',
+							width: 1,
+							style: 'width: 1px; margin-left: 7px; margin-right: 7px; margin-top: 1px',
 							bodyStyle: 'border-left: 1px solid #aaa'
 						},
 						searchTextfield
@@ -2377,12 +2394,12 @@ Ext.onReady( function() {
 					{
 						dataIndex: 'name',
 						sortable: false,
-						width: 355
+						width: 363
 					},
 					{
 						xtype: 'actioncolumn',
 						sortable: false,
-						width: 45,
+						width: 40,
 						items: [
 							{
 								iconCls: 'gis-grid-row-icon-edit',
@@ -2414,7 +2431,7 @@ Ext.onReady( function() {
 					},
 					{
 						sortable: false,
-						width: 20
+						width: 17
 					}
 				],
 				store: legendSetStore,
@@ -2598,7 +2615,7 @@ Ext.onReady( function() {
 					{
 						dataIndex: 'name',
 						sortable: false,
-						width: 247
+						width: 250
 					},
 					{
 						sortable: false,
@@ -2636,7 +2653,7 @@ Ext.onReady( function() {
 					},
 					{
 						sortable: false,
-						width: 20
+						width: 17
 					}
 				],
 				store: tmpLegendStore,
@@ -2957,7 +2974,7 @@ Ext.onReady( function() {
 			height: 26,
 			width: 230,
 			fieldStyle: 'padding-left: 5px',
-			emptyText: 'Enter map title...' //i18n
+			emptyText: 'Enter map title' //i18n
 		});
 		
 		button = Ext.create('Ext.button.Button', {
@@ -3014,7 +3031,7 @@ Ext.onReady( function() {
 			cls: 'gis-textarea',
 			height: 130,
 			fieldStyle: 'padding-left: 4px; padding-top: 3px',
-			emptyText: 'Write your interpretation...' //i18n
+			emptyText: 'Write your interpretation' //i18n
 		});
 		
 		panel = Ext.create('Ext.panel.Panel', {

@@ -234,9 +234,9 @@ html * {
 		/* Toolbar btn menu */
 		.gis-toolbar-btn-menu { /* Align menu */
 			margin-top: 5px;
-		}		
+		}
 		.gis-toolbar-btn-menu .x-panel-body-default { /* Menu border */
-			border-radius: 3px;
+			border-radius: 2px;
 			border-color: #999;
 		}		
 		
@@ -455,13 +455,16 @@ html * {
 	margin-left: 4px;
 }
 .gis-grid-row-icon-disabled img.gis-grid-row-icon-edit,
-.gis-grid-row-icon-disabled img.gis-grid-row-icon-overwrite
+.gis-grid-row-icon-disabled img.gis-grid-row-icon-overwrite,
 .gis-grid-row-icon-disabled img.gis-grid-row-icon-delete {
 	opacity: 0;
 	filter:Alpha(opacity=0);
 }
 .gis-grid-row-icon-disabled * {
 	cursor: default !important;
+}
+.gis-grid-row-icon-disabled img.gis-grid-row-icon-dashboard {
+	cursor: pointer !important;
 }
 
 .gis-grid .x-grid-cell-inner,
@@ -514,6 +517,10 @@ html * {
 
 .x-form-checkbox {
     background-image: url('../images/checkbox.gif');
+    cursor: pointer;
+    cursor: hand;
+}
+label.x-form-cb-label {
     cursor: pointer;
     cursor: hand;
 }
