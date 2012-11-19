@@ -90,72 +90,7 @@ GIS.conf = {
 
 GIS.init = {};
 
-GIS.mask;
-
-GIS.util = {
-	url: {},
-	google: {},
-	map: {},
-	svg: {},
-	store: {},
-	geojson: {},
-	vector: {},
-	json: {},
-	jsonEncodeString: function(str) {
-		return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
-	},
-	gui: {
-		window: {},
-		combo: {}
-	},
-	measure: {}
-};
-
-GIS.map;
-
-GIS.base = {
-	boundary: {
-		id: 'boundary',
-		name: 'Boundary layer', //i18n
-		legendDiv: 'boundaryLegend'
-	},
-	thematic1: {
-		id: 'thematic1',
-		name: 'Thematic 1 layer', //i18n
-		legendDiv: 'thematic1Legend'
-	},
-	thematic2: {
-		id: 'thematic2',
-		name: 'Thematic 2 layer', //i18n
-		legendDiv: 'thematic2Legend'
-	},
-	facility: {
-		id: 'facility',
-		name: 'Facility layer', //i18n
-		legendDiv: 'facilityLegend'
-	},
-	symbol: {
-		id: 'symbol',
-		name: 'Symbol layer', //i18n
-		legendDiv: 'symbolLegend'
-	},
-	googleStreets: {
-		id: 'googleStreets',
-		name: 'Google Streets'
-	},
-	googleHybrid: {
-		id: 'googleHybrid',
-		name: 'Google Hybrid'
-	},
-	openStreetMap: {
-		id: 'openStreetMap',
-		name: 'OpenStreetMap'
-	},
-	circle: {
-		id: 'circle',
-		name: 'Circle'
-	}
-};
+GIS.mask = {};
 
 GIS.store = {};
 
@@ -251,44 +186,22 @@ Ext.onReady( function() {
 			}
 		});
 
+		// Mask
+
+		GIS.mask = new Ext.LoadMask(this.getEl(), {
+			msg: GIS.i18n.loading
+		});
+
 		// Favorite
 
 		var id = GIS.util.url.getUrlParam('id');
+
 		if (id) {
 			GIS.util.map.getMap(id, true);
 		}
 	};
 
-	// Mask
-
-	GIS.mask = new Ext.LoadMask(Ext.getBody(), {
-		msg: GIS.i18n.loading
-	});
-
 	// Util
-
-	GIS.util.google.openTerms = function() {
-		window.open('http://www.google.com/intl/en-US_US/help/terms_maps.html', '_blank');
-	};
-
-	GIS.util.url.getUrlParam = function(s) {
-		var output = '';
-		var href = window.location.href;
-		if (href.indexOf('?') > -1 ) {
-			var query = href.substr(href.indexOf('?') + 1);
-			var query = query.split('&');
-			for (var i = 0; i < query.length; i++) {
-				if (query[i].indexOf('=') > -1) {
-					var a = query[i].split('=');
-					if (a[0].toLowerCase() === s) {
-						output = a[1];
-						break;
-					}
-				}
-			}
-		}
-		return unescape(output);
-	};
 
 	GIS.util.map.getVisibleVectorLayers = function() {
 		var layers = [],
@@ -448,6 +361,35 @@ Ext.onReady( function() {
 		GIS.base.facility.widget.reset();
 	};
 
+	GIS.util.google = {};
+
+	GIS.util.google.openTerms = function() {
+		window.open('http://www.google.com/intl/en-US_US/help/terms_maps.html', '_blank');
+	};
+
+	GIS.util.url = {};
+
+	GIS.util.url.getUrlParam = function(s) {
+		var output = '';
+		var href = window.location.href;
+		if (href.indexOf('?') > -1 ) {
+			var query = href.substr(href.indexOf('?') + 1);
+			var query = query.split('&');
+			for (var i = 0; i < query.length; i++) {
+				if (query[i].indexOf('=') > -1) {
+					var a = query[i].split('=');
+					if (a[0].toLowerCase() === s) {
+						output = a[1];
+						break;
+					}
+				}
+			}
+		}
+		return unescape(output);
+	};
+
+	GIS.util.svg = {};
+
 	GIS.util.svg.merge = function(str, strArray) {
         if (strArray.length) {
             str = str || '<svg></svg>';
@@ -555,6 +497,27 @@ Ext.onReady( function() {
 		return svg;
 	};
 
+	GIS.util.json = {};
+
+	GIS.util.json.encodeString = function(str) {
+		return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
+	};
+
+    GIS.util.json.decodeAggregatedValues = function(responseText) {
+		responseText = Ext.decode(responseText);
+		var values = [];
+
+        for (var i = 0; i < responseText.length; i++) {
+            values.push({
+                oi: responseText[i][0],
+                v: responseText[i][1]
+            });
+        }
+        return values;
+    };
+
+	GIS.util.geojson = {};
+
 	GIS.util.geojson.decode = function(doc, widget) {
 		var geojson = {};
         doc = Ext.decode(doc);
@@ -591,18 +554,7 @@ Ext.onReady( function() {
         return geojson;
     };
 
-    GIS.util.json.decodeAggregatedValues = function(responseText) {
-		responseText = Ext.decode(responseText);
-		var values = [];
-
-        for (var i = 0; i < responseText.length; i++) {
-            values.push({
-                oi: responseText[i][0],
-                v: responseText[i][1]
-            });
-        }
-        return values;
-    };
+	GIS.util.vector = {};
 
     GIS.util.vector.getTransformedFeatureArray = function(features) {
         var sourceProjection = new OpenLayers.Projection("EPSG:4326"),
@@ -612,6 +564,10 @@ Ext.onReady( function() {
         }
         return features;
     };
+
+	GIS.util.gui = {};
+	GIS.util.gui.window = {};
+	GIS.util.gui.combo = {};
 
     GIS.util.gui.window.setPositionTopRight = function(window) {
 		var center = GIS.cmp.region.center;
@@ -1136,7 +1092,7 @@ Ext.onReady( function() {
 				{
 					text: 'Update', //i18n
 					handler: function() {
-						GIS.map.mapLoader = null;
+						GIS.map.mapViewLoader = null;
 						GIS.cmp.interpretationButton.disable();
 
 						base.widget.execute();
@@ -1787,7 +1743,7 @@ Ext.onReady( function() {
 								success: function(r) {
 									var id = r.getAllResponseHeaders().location.split('/').pop();
 
-									GIS.map.mapLoader = GIS.obj.MapLoader(id);
+									GIS.map.mapViewLoader = GIS.obj.MapViewLoader(id);
 
 									GIS.store.maps.loadStore();
 
@@ -1937,7 +1893,7 @@ Ext.onReady( function() {
 							if (el) {
 								el = el.parent('td');
 								el.addClsOnOver('link');
-								el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapLoader = GIS.obj.MapLoader("' + record.data.id + '"); GIS.map.mapLoader.load();');
+								el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); GIS.map.mapViewLoader = GIS.obj.MapViewLoader("' + record.data.id + '"); GIS.map.mapViewLoader.load();');
 							}
 						};
 
@@ -2217,7 +2173,7 @@ Ext.onReady( function() {
 		return mapWindow;
 	};
 
-	GIS.obj.MapLoader = function(id) {
+	GIS.obj.MapViewLoader = function(id) {
 		var getMap,
 			setMap,
 			map,
@@ -2250,7 +2206,7 @@ Ext.onReady( function() {
 				lonLat;
 
 			if (!views.length) {
-				alert('Favorite has no layers (probably outdated)'); //i18n
+				alert('Favorite has no layers and is probably outdated'); //i18n
 				return;
 			}
 			GIS.util.map.closeAllLayers();
@@ -3036,16 +2992,16 @@ Ext.onReady( function() {
 
 		panel = Ext.create('Ext.panel.Panel', {
 			cls: 'gis-container-inner',
-			html: '<b>Link: </b>' + GIS.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + GIS.map.mapLoader.id,
+			html: '<b>Link: </b>' + GIS.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + GIS.map.mapViewLoader.id,
 			style: 'padding-top: 9px; padding-bottom: 2px'
 		});
 
 		button = Ext.create('Ext.button.Button', {
 			text: 'Share', //i18n
 			handler: function() {
-				if (textarea.getValue() && GIS.map.mapLoader) {
+				if (textarea.getValue() && GIS.map.mapViewLoader) {
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'interpretations/map/' + GIS.map.mapLoader.id,
+						url: GIS.conf.url.path_api + 'interpretations/map/' + GIS.map.mapViewLoader.id,
 						method: 'POST',
 						params: textarea.getValue(),
 						headers: {'Content-Type': 'text/html'},
@@ -3206,96 +3162,16 @@ Ext.onReady( function() {
 		return layer;
 	};
 
-	// OpenLayers map
+	// Base
+	GIS.base = GIS.core.BaseCollection();
 
-	GIS.map = new OpenLayers.Map({
-        controls: [
-			new OpenLayers.Control.Navigation({
-				documentDrag: true
-			}),
-			new OpenLayers.Control.MousePosition({
-				id: 'mouseposition',
-				prefix: '<span class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
-				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
-				suffix: '<div id="google-logo" onclick="javascript:GIS.util.google.openTerms();"></div></span>'
-			}),
-			new OpenLayers.Control.Permalink()
-		],
-        displayProjection: new OpenLayers.Projection('EPSG:4326'),
-        maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
-        mouseMove: {}, // Track all mouse moves
-        relocate: {} // Relocate organisation units
-    });
+	// Map
+	GIS.map = GIS.core.OpenLayersMap();
 
-	// Map controls
-	GIS.util.map.addMapControl('zoomIn', GIS.map.zoomIn);
-	GIS.util.map.addMapControl('zoomOut', GIS.map.zoomOut);
-	GIS.util.map.addMapControl('zoomVisible', GIS.util.map.zoomToVisibleExtent);
-	GIS.util.map.addMapControl('measure', function() {
-		if (GIS.cmp.measureWindow && GIS.cmp.measureWindow.destroy) {
-			GIS.cmp.measureWindow.destroy();
-		}
-		GIS.cmp.measureWindow = GIS.obj.MeasureWindow();
-		GIS.cmp.measureWindow.show();
-	});
+	// Layers
+	GIS.core.addLayers(GIS.map, GIS.base);
 
-    // Base layers
-
-    if (window.google) {
-
-		// Google Streets
-        GIS.base.googleStreets.layer = new OpenLayers.Layer.Google(GIS.base.googleStreets.name, {
-			numZoomLevels: 20,
-			animationEnabled: true,
-			layerType: GIS.conf.finals.layer.type_base,
-			base: GIS.base.googleStreets,
-			layerOpacity: 1,
-			setLayerOpacity: function(number) {
-				if (number) {
-					this.layerOpacity = parseFloat(number);
-				}
-				this.setOpacity(this.layerOpacity);
-			}
-		});
-        GIS.map.addLayer(GIS.base.googleStreets.layer);
-
-		// Google Hybrid
-        GIS.base.googleHybrid.layer = new OpenLayers.Layer.Google(GIS.base.googleHybrid.name, {
-			type: google.maps.MapTypeId.HYBRID,
-			numZoomLevels: 20,
-			animationEnabled: true,
-			layerType: GIS.conf.finals.layer.type_base,
-			base: GIS.base.googleHybrid,
-			layerOpacity: 1,
-			setLayerOpacity: function(number) {
-				if (number) {
-					this.layerOpacity = parseFloat(number);
-				}
-				this.setOpacity(this.layerOpacity);
-			}
-		});
-        GIS.map.addLayer(GIS.base.googleHybrid.layer);
-    }
-    else {
-
-		// OpenStreetMap
-		GIS.base.openStreetMap.layer = new OpenLayers.Layer.OSM(GIS.base.openStreetMap.name);
-		GIS.base.openStreetMap.layer.layerType = GIS.conf.finals.layer.type_base;
-		GIS.base.openStreetMap.layer.base = GIS.base.openStreetMap;
-		GIS.base.openStreetMap.layer.layerOpacity = 1;
-		GIS.base.openStreetMap.layer.setLayerOpacity = function(number) {
-			if (number) {
-				this.layerOpacity = parseFloat(number);
-			}
-			this.setOpacity(this.layerOpacity);
-		};
-		GIS.map.addLayer(GIS.base.openStreetMap.layer);
-	}
-
-    // Base objects
-
-    GIS.base.boundary.layer = GIS.obj.VectorLayer(GIS.base.boundary);
-    GIS.map.addLayer(GIS.base.boundary.layer);
+	// Base extensions
 	GIS.base.boundary.menu = GIS.obj.LayerMenu(GIS.base.boundary, 'gis-toolbar-btn-menu-first');
 	GIS.base.boundary.widget = Ext.create('mapfish.widgets.geostat.Boundary', {
         map: GIS.map,
@@ -3304,8 +3180,6 @@ Ext.onReady( function() {
     });
     GIS.base.boundary.window = GIS.obj.WidgetWindow(GIS.base.boundary);
 
-    GIS.base.thematic1.layer = GIS.obj.VectorLayer(GIS.base.thematic1, {opacity: 0.8});
-    GIS.map.addLayer(GIS.base.thematic1.layer);
 	GIS.base.thematic1.menu = GIS.obj.LayerMenu(GIS.base.thematic1);
 	GIS.base.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
         map: GIS.map,
@@ -3315,8 +3189,6 @@ Ext.onReady( function() {
     });
     GIS.base.thematic1.window = GIS.obj.WidgetWindow(GIS.base.thematic1);
 
-    GIS.base.thematic2.layer = GIS.obj.VectorLayer(GIS.base.thematic2, {opacity: 0.8});
-    GIS.map.addLayer(GIS.base.thematic2.layer);
 	GIS.base.thematic2.menu = GIS.obj.LayerMenu(GIS.base.thematic2);
 	GIS.base.thematic2.widget = Ext.create('mapfish.widgets.geostat.Thematic2', {
         map: GIS.map,
@@ -3326,8 +3198,6 @@ Ext.onReady( function() {
     });
     GIS.base.thematic2.window = GIS.obj.WidgetWindow(GIS.base.thematic2);
 
-    GIS.base.facility.layer = GIS.obj.VectorLayer(GIS.base.facility);
-    GIS.map.addLayer(GIS.base.facility.layer);
 	GIS.base.facility.menu = GIS.obj.LayerMenu(GIS.base.facility);
 	GIS.base.facility.widget = Ext.create('mapfish.widgets.geostat.Facility', {
         map: GIS.map,

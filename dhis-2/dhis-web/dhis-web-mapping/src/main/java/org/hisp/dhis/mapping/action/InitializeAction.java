@@ -37,7 +37,6 @@ import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.mapping.MapLayer;
-import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.mapping.MappingService;
 import org.hisp.dhis.mapping.comparator.MapLayerNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -100,13 +99,6 @@ public class InitializeAction
         return contextPath;
     }
 
-    private MapView mapView;
-
-    public MapView getMapView()
-    {
-        return mapView;
-    }
-
     private List<MapLayer> overlays;
 
     public List<MapLayer> getOverlays()
@@ -142,11 +134,6 @@ public class InitializeAction
     public String execute()
         throws Exception
     {
-        if ( id != null )
-        {
-            mapView = mappingService.getMapView( id );
-        }
-
         contextPath = ContextUtils.getContextPath( ServletActionContext.getRequest() );
         
         overlays = new ArrayList<MapLayer>( mappingService.getMapLayersByType( MappingService.MAP_LAYER_TYPE_OVERLAY ) );
