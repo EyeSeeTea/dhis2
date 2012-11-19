@@ -4712,7 +4712,7 @@ Ext.onReady( function() {
                                                     }
                                                 ],
                                                 setHeightInMenu: function(store) {
-                                                    var h = store.getCount() * 24,
+                                                    var h = store.getCount() * 23,
                                                         sh = DV.util.viewport.getSize().y * 0.6;
                                                     this.setHeight(h > sh ? sh : h);
                                                     this.doLayout();
