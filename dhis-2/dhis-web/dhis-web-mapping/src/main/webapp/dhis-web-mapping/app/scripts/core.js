@@ -332,7 +332,7 @@ GIS.core.addLayers = function(olmap, baseCollection) {
 	olmap.addLayer(base.layer);
 	base.olmap = olmap;
 	base.core = new mapfish.GeoStat.Boundary(olmap, {
-		layer: base.layer,
+		layer: base.layer
 	});
 
 	base = baseCollection.thematic1;
@@ -341,6 +341,7 @@ GIS.core.addLayers = function(olmap, baseCollection) {
 	base.olmap = olmap;
 	base.core = new mapfish.GeoStat.Thematic1(olmap, {
 		layer: base.layer,
+		legendDiv: base.legendDiv
 	});
 
 	base = baseCollection.thematic2;
@@ -349,6 +350,7 @@ GIS.core.addLayers = function(olmap, baseCollection) {
 	base.olmap = olmap;
 	base.core = new mapfish.GeoStat.Thematic1(olmap, {
 		layer: base.layer,
+		legendDiv: base.legendDiv
 	});
 
 	base = baseCollection.facility;
@@ -357,5 +359,6 @@ GIS.core.addLayers = function(olmap, baseCollection) {
 	base.olmap = olmap;
 	base.core = new mapfish.GeoStat.Facility(olmap, {
 		layer: base.layer,
+		legendDiv: base.legendDiv
 	});
 };

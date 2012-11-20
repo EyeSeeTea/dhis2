@@ -218,16 +218,8 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 
 		this.createSelectHandlers();
 
-		this.coreComp = new mapfish.GeoStat.Thematic1(this.map, {
-            layer: this.layer,
-            format: this.format,
-            url: this.url,
-            requestSuccess: Ext.bind(this.requestSuccess, this),
-            requestFailure: Ext.bind(this.requestFailure, this),
-            legendDiv: this.legendDiv,
-            labelGenerator: this.labelGenerator,
-            widget: this
-        });
+		this.coreComp = this.layer.base.core;
+		this.coreComp.widget = this;
 
 		mapfish.widgets.geostat.Thematic1.superclass.initComponent.apply(this);
     },
@@ -855,9 +847,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			});
 
 			window.show();
-
-			var x = window.getPosition()[0];
-			window.setPosition(x, 32);
+			window.setPosition(window.getPosition()[0], 32);
         };
 
         onHoverUnselect = function fn(feature) {

@@ -31,13 +31,13 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     method: mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS,
 
     numClasses: 5,
-	
+
 	minSize: 3,
-	
+
 	maxSize: 20,
-	
+
 	minVal: null,
-	
+
 	maxVal: null,
 
     defaultSymbolizer: {'fillOpacity': 1},
@@ -45,11 +45,40 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     classification: null,
 
     colorInterpolation: null,
-    
+
     widget: null,
 
     initialize: function(map, options) {
         mapfish.GeoStat.prototype.initialize.apply(this, arguments);
+    },
+
+    loadOrganisationUnits: function(view) {
+		Ext.Ajax.request({
+			url: GIS.conf.url.path_gis + 'getGeoJson.action',
+			params: {
+				parentId: view.parentOrganisationUnit.id,
+				level: view.organisationUnitLevel.id
+			},
+			scope: this,
+			disableCaching: false,
+			success: function(r) {
+				var geojson = GIS.util.geojson.decode(r.responseText, this),
+					format = new OpenLayers.Format.GeoJSON(),
+					features = format.read(geojson);
+
+				if (!features.length) {
+					alert('No valid coordinates found'); //todo //i18n
+					GIS.mask.hide();
+
+					this.config = {
+						extended: {}
+					};
+					return;
+				}
+
+				this.loadData(features);
+			}
+		});
     },
 
     updateOptions: function(newOptions) {
@@ -59,21 +88,21 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
             this.setClassification();
         }
     },
-    
+
     createColorInterpolation: function() {
         var numColors = this.classification.bins.length,
 			tmpView = this.widget.tmpView,
 			legendType = tmpView.legendType;
-        
+
         tmpView.extended.imageLegendConfig = [];
-        
+
         if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
 		}
 		else {
 			this.colorInterpolation = tmpView.extended.colorInterpolation;
 		}
-            
+
         for (var i = 0; i < this.classification.bins.length; i++) {
             tmpView.extended.imageLegendConfig.push({
                 label: this.classification.bins[i].label.replace('&nbsp;&nbsp;', ' '),
@@ -87,7 +116,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
         for (var i = 0; i < this.layer.features.length; i++) {
             values.push(this.layer.features[i].attributes[this.indicator]);
         }
-        
+
         var distOptions = {
             labelGenerator: this.options.labelGenerator
         };
@@ -108,7 +137,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 
     applyClassification: function(options) {
         this.updateOptions(options);
-        
+
 		var calculateRadius = OpenLayers.Function.bind(
 			function(feature) {
 				var value = feature.attributes[this.indicator];
@@ -118,9 +147,9 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
             },	this
 		);
 		this.extendStyle(null, {'pointRadius': '${calculateRadius}'}, {'calculateRadius': calculateRadius});
-    
+
         var boundsArray = this.classification.getBoundsArray();
-        var rules = new Array(boundsArray.length-1);        
+        var rules = new Array(boundsArray.length-1);
         for (var i = 0; i < boundsArray.length-1; i++) {
             var rule = new OpenLayers.Rule({
                 symbolizer: {fillColor: this.colorInterpolation[i].toHexString()},
@@ -142,16 +171,16 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
         if (!this.legendDiv) {
             return;
         }
-        
+
         var config = this.widget.getLegendConfig(),
 			element,
 			legendType = this.widget.tmpView.legendType,
 			automatic = GIS.conf.finals.widget.legendtype_automatic,
 			predefined = GIS.conf.finals.widget.legendtype_predefined,
 			legendNames = this.widget.tmpView.extended.legendNames;
-			
+
         this.legendDiv.update("");
-        
+
         for (var key in config) {
 			if (config.hasOwnProperty(key)) {
 				element = document.createElement("div");
@@ -160,18 +189,18 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 				element.title = config[key];
 				element.innerHTML = config[key];
 				this.legendDiv.appendChild(element);
-				
+
 				element = document.createElement("div");
 				element.style.clear = "left";
 				this.legendDiv.appendChild(element);
 			}
         }
-        
+
         element = document.createElement("div");
         element.style.width = "1px";
         element.style.height = "5px";
         this.legendDiv.appendChild(element);
-        
+
         if (legendType === automatic) {
             for (var i = 0; i < this.classification.bins.length; i++) {
                 var element = document.createElement("div");
