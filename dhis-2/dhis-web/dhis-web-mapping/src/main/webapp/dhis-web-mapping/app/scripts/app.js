@@ -3166,7 +3166,7 @@ Ext.onReady( function() {
 	GIS.base = GIS.core.BaseCollection();
 
 	// Map
-	GIS.map = GIS.core.OpenLayersMap();
+	GIS.map = GIS.core.OLMap();
 
 	// Layers
 	GIS.core.addLayers(GIS.map, GIS.base);

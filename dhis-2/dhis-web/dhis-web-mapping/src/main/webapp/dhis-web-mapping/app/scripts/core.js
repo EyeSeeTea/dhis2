@@ -3,12 +3,12 @@ GIS.util.map = {};
 
 GIS.core = {};
 
-GIS.util.map.getVisibleVectorLayers = function(openLayersMap) {
+GIS.util.map.getVisibleVectorLayers = function(olmap) {
 	var layers = [],
 		layer;
 
-	for (var i = 0; i < openLayersMap.layers.length; i++) {
-		layer = openLayersMap.layers[i];
+	for (var i = 0; i < olmap.layers.length; i++) {
+		layer = olmap.layers[i];
 		if (layer.layerType === GIS.conf.finals.layer.type_vector &&
 			layer.visibility &&
 			layer.features.length) {
@@ -31,8 +31,8 @@ GIS.util.map.getExtendedBounds = function(layers) {
 	return bounds;
 };
 
-GIS.util.map.zoomToVisibleExtent = function(openLayersMap) {
-	var bounds = GIS.util.map.getExtendedBounds(GIS.util.map.getVisibleVectorLayers(openLayersMap));
+GIS.util.map.zoomToVisibleExtent = function(olmap) {
+	var bounds = GIS.util.map.getExtendedBounds(GIS.util.map.getVisibleVectorLayers(olmap));
 	if (bounds) {
 		GIS.map.zoomToExtent(bounds);
 	}
@@ -214,7 +214,7 @@ GIS.core.MeasureWindow = function() {
 	return window;
 };
 
-GIS.core.OpenLayersMap = function() {
+GIS.core.OLMap = function() {
 	var map,
 		addMapControl;
 
@@ -275,7 +275,7 @@ GIS.core.OpenLayersMap = function() {
 	return map;
 };
 
-GIS.core.addLayers = function(openLayersMap, baseCollection) {
+GIS.core.addLayers = function(olmap, baseCollection) {
 	var base;
 
 	if (window.google) {
@@ -293,7 +293,7 @@ GIS.core.addLayers = function(openLayersMap, baseCollection) {
 				this.setOpacity(this.layerOpacity);
 			}
 		});
-		openLayersMap.addLayer(base.layer);
+		olmap.addLayer(base.layer);
 
 		base = baseCollection.googleHybrid;
 		base.layer = new OpenLayers.Layer.Google(base.name, {
@@ -310,7 +310,7 @@ GIS.core.addLayers = function(openLayersMap, baseCollection) {
 				this.setOpacity(this.layerOpacity);
 			}
 		});
-		openLayersMap.addLayer(base.layer);
+		olmap.addLayer(base.layer);
 	}
 	else {
 		base = baseCollection.openStreetMap;
@@ -324,34 +324,38 @@ GIS.core.addLayers = function(openLayersMap, baseCollection) {
 			}
 			this.setOpacity(this.layerOpacity);
 		};
-		openLayersMap.addLayer(base.layer);
+		olmap.addLayer(base.layer);
 	}
 
 	base = baseCollection.boundary;
 	base.layer = GIS.core.VectorLayer(base);
-	openLayersMap.addLayer(base.layer);
-	base.core = new mapfish.GeoStat.Boundary(openLayersMap, {
+	olmap.addLayer(base.layer);
+	base.olmap = olmap;
+	base.core = new mapfish.GeoStat.Boundary(olmap, {
 		layer: base.layer,
 	});
 
 	base = baseCollection.thematic1;
 	base.layer = GIS.core.VectorLayer(base, {opacity: 0.8});
-	openLayersMap.addLayer(base.layer);
-	base.core = new mapfish.GeoStat.Thematic1(openLayersMap, {
+	olmap.addLayer(base.layer);
+	base.olmap = olmap;
+	base.core = new mapfish.GeoStat.Thematic1(olmap, {
 		layer: base.layer,
 	});
 
 	base = baseCollection.thematic2;
 	base.layer = GIS.core.VectorLayer(base, {opacity: 0.8});
-	openLayersMap.addLayer(base.layer);
-	base.core = new mapfish.GeoStat.Thematic1(openLayersMap, {
+	olmap.addLayer(base.layer);
+	base.olmap = olmap;
+	base.core = new mapfish.GeoStat.Thematic1(olmap, {
 		layer: base.layer,
 	});
 
 	base = baseCollection.facility;
 	base.layer = GIS.core.VectorLayer(base);
-	openLayersMap.addLayer(base.layer);
-	base.core = new mapfish.GeoStat.Facility(openLayersMap, {
+	olmap.addLayer(base.layer);
+	base.olmap = olmap;
+	base.core = new mapfish.GeoStat.Facility(olmap, {
 		layer: base.layer,
 	});
 };
