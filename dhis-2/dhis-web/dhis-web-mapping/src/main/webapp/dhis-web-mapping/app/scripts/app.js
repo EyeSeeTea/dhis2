@@ -446,12 +446,6 @@ Ext.onReady( function() {
 		window.setPosition(4,35);
 	};
 
-	//GIS.util.gui.combo.setQueryMode = function(cmpArray, mode) {
-		//for (var i = 0; i < cmpArray.length; i++) {
-			//cmpArray[i].queryMode = mode;
-		//}
-	//};
-
     // Stores
 
     GIS.store.indicatorGroups = Ext.create('Ext.data.Store', {
@@ -520,40 +514,6 @@ Ext.onReady( function() {
 		fields: ['id', 'name'],
 		data: GIS.conf.period.periodTypes
 	});
-
-    //GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
-		//fields: ['id', 'name', 'level'],
-		//proxy: {
-			//type: 'ajax',
-			//url: GIS.conf.url.path_api + 'organisationUnitLevels.json?viewClass=detailed&links=false&paging=false',
-			//reader: {
-				//type: 'json',
-				//root: 'organisationUnitLevels'
-			//}
-		//},
-		//cmp: [],
-		//isLoaded: false,
-		//loadFn: function(fn) {
-			//if (this.isLoaded) {
-				//fn.call();
-			//}
-			//else {
-				//this.load(fn);
-			//}
-		//},
-		//getRecordByLevel: function(level) {
-			//return this.getAt(this.findExact('level', level));
-		//},
-		//listeners: {
-			//load: function() {
-				//if (!this.isLoaded) {
-					//this.isLoaded = true;
-					//GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
-				//}
-				//this.sort('level', 'ASC');
-			//}
-		//}
-	//});
 
     GIS.store.infrastructuralPeriodsByType = Ext.create('Ext.data.Store', {
 		fields: ['id', 'name'],
@@ -1392,8 +1352,7 @@ Ext.onReady( function() {
 		updateLabels = function() {
 			if (layer.hasLabels) {
 				layer.styleMap = GIS.obj.StyleMap(base, getLabelConfig());
-				base.widget.config.extended.updateLegend = true;
-				base.widget.execute();
+				base.core.loadLegend(base.widget.getView());
 			}
 		};
 
@@ -1472,8 +1431,7 @@ Ext.onReady( function() {
 							layer.hasLabels = true;
 							layer.styleMap = GIS.obj.StyleMap(base, getLabelConfig());
 						}
-						base.widget.config.extended.updateLegend = true;
-						base.widget.execute();
+						base.core.loadLegend(base.widget.getView());
 					}
 				}
 			],
