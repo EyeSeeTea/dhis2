@@ -74,8 +74,10 @@ mapfish.GeoStat = OpenLayers.Class({
 
     getColors: function(low, high) {
         var startColor = new mapfish.ColorRgb(),
-			endColor = new mapfish.ColorRgb();
-        return [startColor.setFromHex(low), endColor.setFromHex(high)];
+			endColor = new mapfish.ColorRgb()
+		startColor.setFromHex(low);
+		endColor.setFromHex(high);
+        return [startColor, endColor];
     },
 
     addOptions: function(newOptions) {

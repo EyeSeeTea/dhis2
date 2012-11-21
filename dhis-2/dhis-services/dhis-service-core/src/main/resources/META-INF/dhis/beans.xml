@@ -285,6 +285,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
   <bean id="org.hisp.dhis.option.OptionStore" class="org.hisp.dhis.option.hibernate.HibernateOptionStore">
     <property name="clazz" value="org.hisp.dhis.option.OptionSet" />
     <property name="sessionFactory" ref="sessionFactory" />
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
   </bean>
 
   <bean id="org.hisp.dhis.mapping.MapStore" class="org.hisp.dhis.mapping.hibernate.HibernateMapStore">
@@ -662,6 +663,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 	<list>
 	  <value>af</value>
 	  <value>ar</value>
+	  <value>bi</value>
 	  <value>am</value>
 	  <value>de</value>
 	  <value>en</value>
@@ -672,7 +674,7 @@ http://www.springframework.org/schema/security http://www.springframework.org/sc
 	  <value>hi</value>
 	  <value>id</value>
 	  <value>it</value>
-	  <value>mm</value>
+	  <value>my</value>
 	  <value>nl</value>
 	  <value>no</value>
 	  <value>ps</value>

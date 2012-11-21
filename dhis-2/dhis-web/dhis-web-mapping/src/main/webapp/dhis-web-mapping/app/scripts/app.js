@@ -424,44 +424,6 @@ Ext.onReady( function() {
         return values;
     };
 
-	GIS.util.geojson = {};
-
-	GIS.util.geojson.decode = function(doc, widget) {
-		var geojson = {};
-        doc = Ext.decode(doc);
-        geojson.type = 'FeatureCollection';
-        geojson.crs = {
-            type: 'EPSG',
-            properties: {
-                code: '4326'
-            }
-        };
-        geojson.features = [];
-        for (var i = 0; i < doc.geojson.length; i++) {
-            geojson.features.push({
-                geometry: {
-                    type: parseInt(doc.geojson[i].ty) === 1 ? 'MultiPolygon' : 'Point',
-                    coordinates: doc.geojson[i].co
-                },
-                properties: {
-                    id: doc.geojson[i].uid,
-                    internalId: doc.geojson[i].iid,
-                    name: doc.geojson[i].na,
-                    hcwc: doc.geojson[i].hc,
-                    path: doc.geojson[i].path,
-                    parentId: doc.geojson[i].pi,
-                    parentName: doc.geojson[i].pn
-                }
-            });
-        }
-
-        if (widget) {
-			widget.tmpView.extended.hasCoordinatesUp = doc.properties.hasCoordinatesUp;
-		}
-
-        return geojson;
-    };
-
 	GIS.util.vector = {};
 
     GIS.util.vector.getTransformedFeatureArray = function(features) {

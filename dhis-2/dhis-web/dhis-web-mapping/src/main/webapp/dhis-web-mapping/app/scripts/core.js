@@ -1,3 +1,5 @@
+Ext.onReady( function() {
+
 if (!Ext.isObject(GIS)) {
 	GIS = {};
 }
@@ -117,6 +119,41 @@ GIS.util.map.zoomToVisibleExtent = function(olmap) {
 	if (bounds) {
 		GIS.map.zoomToExtent(bounds);
 	}
+};
+
+GIS.util.geojson = {};
+
+GIS.util.geojson.decode = function(doc, widget) {
+	var geojson = {};
+	doc = Ext.decode(doc);
+	geojson.type = 'FeatureCollection';
+	geojson.crs = {
+		type: 'EPSG',
+		properties: {
+			code: '4326'
+		}
+	};
+	geojson.features = [];
+	for (var i = 0; i < doc.geojson.length; i++) {
+		geojson.features.push({
+			geometry: {
+				type: parseInt(doc.geojson[i].ty) === 1 ? 'MultiPolygon' : 'Point',
+				coordinates: doc.geojson[i].co
+			},
+			properties: {
+				id: doc.geojson[i].uid,
+				internalId: doc.geojson[i].iid,
+				name: doc.geojson[i].na,
+				hcwc: doc.geojson[i].hc,
+				path: doc.geojson[i].path,
+				parentId: doc.geojson[i].pi,
+				parentName: doc.geojson[i].pn,
+				hasCoordinatesUp: doc.properties.hasCoordinatesUp
+			}
+		});
+	}
+
+	return geojson;
 };
 
 GIS.util.gui = {};
@@ -461,7 +498,8 @@ GIS.core.addLayers = function(olmap, baseCollection) {
 	olmap.addLayer(base.layer);
 	base.olmap = olmap;
 	base.core = new mapfish.GeoStat.Boundary(olmap, {
-		layer: base.layer
+		layer: base.layer,
+		base: base,
 	});
 
 	base = baseCollection.thematic1;
@@ -470,6 +508,7 @@ GIS.core.addLayers = function(olmap, baseCollection) {
 	base.olmap = olmap;
 	base.core = new mapfish.GeoStat.Thematic1(olmap, {
 		layer: base.layer,
+		base: base,
 		legendDiv: base.legendDiv
 	});
 
@@ -479,6 +518,7 @@ GIS.core.addLayers = function(olmap, baseCollection) {
 	base.olmap = olmap;
 	base.core = new mapfish.GeoStat.Thematic1(olmap, {
 		layer: base.layer,
+		base: base,
 		legendDiv: base.legendDiv
 	});
 
@@ -488,6 +528,9 @@ GIS.core.addLayers = function(olmap, baseCollection) {
 	base.olmap = olmap;
 	base.core = new mapfish.GeoStat.Facility(olmap, {
 		layer: base.layer,
+		base: base,
 		legendDiv: base.legendDiv
 	});
 };
+
+});

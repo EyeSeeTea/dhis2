@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,75 +25,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.option.hibernate;
+package org.hisp.dhis.dataset.action.dataentryform;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import org.hisp.dhis.user.UserSettingService;
 
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.option.OptionStore;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
  * 
- * @version $HibernateOptionStore.java Jun 15, 2012 9:45:48 AM$
+ * @version SetAutoSaveSettingAction.java 2:23:02 PM Nov 20, 2012 $
  */
-public class HibernateOptionStore
-    extends HibernateIdentifiableObjectStore<OptionSet>
-    implements OptionStore
+public class SetAutoSaveSettingAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private JdbcTemplate jdbcTemplate;
+    private UserSettingService userSettingService;
 
-    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
+    public void setUserSettingService( UserSettingService userSettingService )
     {
-        this.jdbcTemplate = jdbcTemplate;
+        this.userSettingService = userSettingService;
     }
 
     // -------------------------------------------------------------------------
-    // Implementation methods
+    // Input / Output
     // -------------------------------------------------------------------------
 
-    @Override
-    public List<String> getOptions( int optionSetId, String key, Integer max )
-    {
-        //TODO Should ideally be cached and go through Hibernate
-        
-        String sql = 
-            "select optionvalue from optionset os " +
-            "inner join optionsetmembers as om on os.optionsetid=om.optionsetid " +
-            "where os.optionsetid=" + optionSetId;
-        
-        if ( key != null )
-        {
-            sql += " and lower(om.optionvalue) like lower('%" + key + "%')";
-        }
-        
-        sql += " order by sort_order";
+    private boolean autoSave;
 
-        if ( max != null )
-        {
-            sql += " limit " + max;
-        }
-        
-        List<String> optionValues = new ArrayList<String>();
-        
-        optionValues = jdbcTemplate.query( sql, new RowMapper<String>()
-        {
-            public String mapRow( ResultSet rs, int rowNum ) throws SQLException
-            {
-                return rs.getString( 1 );
-            }
-        } );
-        
-        return optionValues;
+    public void setAutoSave( boolean autoSave )
+    {
+        this.autoSave = autoSave;
     }
+
+    // -------------------------------------------------------------------------
+    // Implementation Action
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        userSettingService.saveUserSetting( UserSettingService.AUTO_SAVE_DATA_ENTRY_FORM, autoSave );
+
+        return SUCCESS;
+    }
+
 }

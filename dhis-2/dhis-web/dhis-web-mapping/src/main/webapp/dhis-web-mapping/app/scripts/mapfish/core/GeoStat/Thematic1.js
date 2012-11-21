@@ -159,7 +159,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 			fn = function() {
 				options = {
 					indicator: GIS.conf.finals.widget.value,
-					method: view.legendType === GIS.conf.finals.widget.legendtype_predefined ?.view.method,
+					method: view.legendType === predefined ? mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS : view.method,
 					numClasses: view.classes,
 					bounds: bounds,
 					colors: that.getColors(view.colorLow, view.colorHigh),
@@ -231,6 +231,24 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		});
 	},
 
+	afterLoad: function() {
+		this.widget.setGui(this.view);
+
+		// Legend
+		GIS.cmp.region.east.doLayout();
+		this.layer.legend.expand();
+
+        // Zoom to visible extent if not set by a favorite
+        //if (GIS.map.mapViewLoader) {
+			//GIS.map.mapViewLoader.callBack(this);
+		//}
+		//else {
+			GIS.util.map.zoomToVisibleExtent();
+		//}
+
+        GIS.mask.hide();
+	},
+
     updateOptions: function(newOptions) {
         var oldOptions = OpenLayers.Util.extend({}, this.options);
         this.addOptions(newOptions);
@@ -242,9 +260,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     createColorInterpolation: function() {
         var numColors = this.classification.bins.length;
 
-        //tmpView.extended.imageLegendConfig = [];
-
-        if (view.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+        if (this.view.legendType === GIS.conf.finals.widget.legendtype_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
 		}
 
