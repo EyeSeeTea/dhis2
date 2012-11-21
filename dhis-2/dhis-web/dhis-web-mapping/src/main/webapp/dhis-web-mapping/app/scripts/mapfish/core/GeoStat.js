@@ -72,6 +72,12 @@ mapfish.GeoStat = OpenLayers.Class({
         }
     },
 
+    getColors: function(low, high) {
+        var startColor = new mapfish.ColorRgb(),
+			endColor = new mapfish.ColorRgb();
+        return [startColor.setFromHex(low), endColor.setFromHex(high)];
+    },
+
     addOptions: function(newOptions) {
         if (newOptions) {
             if (!this.options) {
@@ -216,24 +222,24 @@ mapfish.GeoStat.Distribution = OpenLayers.Class({
         return Math.floor(1 + 3.3 * Math.log(this.nbVal, 10));
     },
 
-    classify: function(method, nbBins, bounds, that) {
-		if (that.tmpView.legendType === GIS.conf.finals.widget.legendtype_predefined) {
-			bounds = that.tmpView.extended.bounds;
+    classify: function(method, nbBins, bounds) {
+		//if (this.view.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			//bounds = that.tmpView.extended.bounds;
 
-			if (bounds[0] > this.minVal) {
-				bounds.unshift(this.minVal);
-                //if (this.widget == centroid) { this.widget.symbolizerInterpolation.unshift('blank');
-				that.tmpView.extended.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
-			}
+			//if (bounds[0] > this.minVal) {
+				//bounds.unshift(this.minVal);
+                ////if (this.widget == centroid) { this.widget.symbolizerInterpolation.unshift('blank');
+				//that.tmpView.extended.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
+			//}
 
-			if (bounds[bounds.length-1] < this.maxVal) {
-				bounds.push(this.maxVal);
-                //todo if (this.widget == centroid) { G.vars.activeWidget.symbolizerInterpolation.push('blank');
-				that.tmpView.extended.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
-			}
+			//if (bounds[bounds.length-1] < this.maxVal) {
+				//bounds.push(this.maxVal);
+                ////todo if (this.widget == centroid) { G.vars.activeWidget.symbolizerInterpolation.push('blank');
+				//that.tmpView.extended.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
+			//}
 
-			method = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS;
-		}
+			//method = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS;
+		//}
 
         var classification = null;
         if (!nbBins) {

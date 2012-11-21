@@ -1,7 +1,88 @@
+if (!Ext.isObject(GIS)) {
+	GIS = {};
+}
+
+GIS.conf = {
+	finals: {
+		layer: {
+			type_base: 'base',
+			type_vector: 'vector'
+		},
+		dimension: {
+			indicator: {
+				id: 'indicator',
+				param: 'in'
+			},
+			dataElement: {
+				id: 'dataElement',
+				param: 'de'
+			},
+			period: {
+				id: 'period',
+				param: 'pe'
+			},
+			organisationUnit: {
+				id: 'organisationUnit',
+				param: 'ou'
+			}
+		},
+		widget: {
+			value: 'value',
+			legendtype_automatic: 'automatic',
+			legendtype_predefined: 'predefined',
+			symbolizer_color: 'color',
+			symbolizer_image: 'image',
+			loadtype_organisationunit: 'organisationUnit',
+			loadtype_data: 'data',
+			loadtype_legend: 'legend'
+		},
+		openLayers: {
+			point_classname: 'OpenLayers.Geometry.Point'
+		},
+		mapfish: {
+			classify_with_bounds: 1,
+			classify_by_equal_intervals: 2,
+			classify_by_quantils: 3
+		}
+	},
+	url: {
+		path_api: '../../api/',
+		path_gis: '../',
+		path_scripts: 'scripts/'
+	},
+	layout: {
+		widget: {
+			item_width: 262,
+			itemlabel_width: 95,
+			window_width: 290
+		},
+		tool: {
+			item_width: 222,
+			itemlabel_width: 95,
+			window_width: 250
+		},
+		grid: {
+			row_height: 27
+		}
+	},
+	period: {
+		periodTypes: [
+			{id: 'Daily', name: 'Daily'},
+			{id: 'Weekly', name: 'Weekly'},
+			{id: 'Monthly', name: 'Monthly'},
+			{id: 'BiMonthly', name: 'BiMonthly'},
+			{id: 'Quarterly', name: 'Quarterly'},
+			{id: 'SixMonthly', name: 'SixMonthly'},
+			{id: 'Yearly', name: 'Yearly'},
+			{id: 'FinancialOct', name: 'FinancialOct'},
+			{id: 'FinancialJuly', name: 'FinancialJuly'},
+			{id: 'FinancialApril', name: 'FinancialApril'}
+		]
+	}
+};
+
 GIS.util = {};
 GIS.util.map = {};
-
-GIS.core = {};
 
 GIS.util.map.getVisibleVectorLayers = function(olmap) {
 	var layers = [],
@@ -37,6 +118,54 @@ GIS.util.map.zoomToVisibleExtent = function(olmap) {
 		GIS.map.zoomToExtent(bounds);
 	}
 };
+
+GIS.util.gui = {};
+GIS.util.gui.combo = {};
+
+GIS.util.gui.combo.setQueryMode = function(cmpArray, mode) {
+	for (var i = 0; i < cmpArray.length; i++) {
+		cmpArray[i].queryMode = mode;
+	}
+};
+
+GIS.store = {};
+
+GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
+	fields: ['id', 'name', 'level'],
+	proxy: {
+		type: 'ajax',
+		url: GIS.conf.url.path_api + 'organisationUnitLevels.json?viewClass=detailed&links=false&paging=false',
+		reader: {
+			type: 'json',
+			root: 'organisationUnitLevels'
+		}
+	},
+	autoLoad: true,
+	cmp: [],
+	isLoaded: false,
+	loadFn: function(fn) {
+		if (this.isLoaded) {
+			fn.call();
+		}
+		else {
+			this.load(fn);
+		}
+	},
+	getRecordByLevel: function(level) {
+		return this.getAt(this.findExact('level', level));
+	},
+	listeners: {
+		load: function() {
+			if (!this.isLoaded) {
+				this.isLoaded = true;
+				GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
+			}
+			this.sort('level', 'ASC');
+		}
+	}
+});
+
+GIS.core = {};
 
 GIS.core.BaseCollection = function() {
 	return {

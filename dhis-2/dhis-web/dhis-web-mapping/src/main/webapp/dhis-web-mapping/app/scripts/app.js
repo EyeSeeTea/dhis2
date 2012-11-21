@@ -1,98 +1,6 @@
-GIS.conf = {
-	finals: {
-		layer: {
-			type_base: 'base',
-			type_vector: 'vector'
-		},
-		dimension: {
-			indicator: {
-				id: 'indicator',
-				param: 'in'
-			},
-			dataElement: {
-				id: 'dataElement',
-				param: 'de'
-			},
-			period: {
-				id: 'period',
-				param: 'pe'
-			},
-			organisationUnit: {
-				id: 'organisationUnit',
-				param: 'ou'
-			}
-		},
-		widget: {
-			value: 'value',
-			legendtype_automatic: 'automatic',
-			legendtype_predefined: 'predefined',
-			symbolizer_color: 'color',
-			symbolizer_image: 'image'
-		},
-		openLayers: {
-			point_classname: 'OpenLayers.Geometry.Point'
-		},
-		mapfish: {
-			classify_with_bounds: 1,
-			classify_by_equal_intervals: 2,
-			classify_by_quantils: 3
-		}
-	},
-	url: {
-		path_api: '../../api/',
-		path_gis: '../',
-		path_scripts: 'scripts/'
-	},
-	layout: {
-		widget: {
-			item_width: 262,
-			itemlabel_width: 95,
-			window_width: 290
-		},
-		tool: {
-			item_width: 222,
-			itemlabel_width: 95,
-			window_width: 250
-		},
-		grid: {
-			row_height: 27
-		}
-	},
-	period: {
-		periodTypes: [
-			{id: 'Daily', name: 'Daily'},
-			{id: 'Weekly', name: 'Weekly'},
-			{id: 'Monthly', name: 'Monthly'},
-			{id: 'BiMonthly', name: 'BiMonthly'},
-			{id: 'Quarterly', name: 'Quarterly'},
-			{id: 'SixMonthly', name: 'SixMonthly'},
-			{id: 'Yearly', name: 'Yearly'},
-			{id: 'FinancialOct', name: 'FinancialOct'},
-			{id: 'FinancialJuly', name: 'FinancialJuly'},
-			{id: 'FinancialApril', name: 'FinancialApril'}
-		]
-	},
-	opacity: {
-		items: [
-			{text: '0.1', iconCls: 'gis-menu-item-icon-opacity10'},
-			{text: '0.2', iconCls: 'gis-menu-item-icon-opacity20'},
-			{text: '0.3', iconCls: 'gis-menu-item-icon-opacity30'},
-			{text: '0.4', iconCls: 'gis-menu-item-icon-opacity40'},
-			{text: '0.5', iconCls: 'gis-menu-item-icon-opacity50'},
-			{text: '0.6', iconCls: 'gis-menu-item-icon-opacity60'},
-			{text: '0.7', iconCls: 'gis-menu-item-icon-opacity70'},
-			{text: '0.8', iconCls: 'gis-menu-item-icon-opacity80'},
-			{text: '0.9', iconCls: 'gis-menu-item-icon-opacity90'},
-			{text: '1.0', iconCls: 'gis-menu-item-icon-opacity100'}
-		]
-	}
-};
-
 GIS.init = {};
 
 GIS.mask = {};
-
-GIS.store = {};
 
 GIS.obj = {};
 
@@ -565,9 +473,7 @@ Ext.onReady( function() {
         return features;
     };
 
-	GIS.util.gui = {};
 	GIS.util.gui.window = {};
-	GIS.util.gui.combo = {};
 
     GIS.util.gui.window.setPositionTopRight = function(window) {
 		var center = GIS.cmp.region.center;
@@ -578,11 +484,11 @@ Ext.onReady( function() {
 		window.setPosition(4,35);
 	};
 
-	GIS.util.gui.combo.setQueryMode = function(cmpArray, mode) {
-		for (var i = 0; i < cmpArray.length; i++) {
-			cmpArray[i].queryMode = mode;
-		}
-	};
+	//GIS.util.gui.combo.setQueryMode = function(cmpArray, mode) {
+		//for (var i = 0; i < cmpArray.length; i++) {
+			//cmpArray[i].queryMode = mode;
+		//}
+	//};
 
     // Stores
 
@@ -653,39 +559,39 @@ Ext.onReady( function() {
 		data: GIS.conf.period.periodTypes
 	});
 
-    GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
-		fields: ['id', 'name', 'level'],
-		proxy: {
-			type: 'ajax',
-			url: GIS.conf.url.path_api + 'organisationUnitLevels.json?viewClass=detailed&links=false&paging=false',
-			reader: {
-				type: 'json',
-				root: 'organisationUnitLevels'
-			}
-		},
-		cmp: [],
-		isLoaded: false,
-		loadFn: function(fn) {
-			if (this.isLoaded) {
-				fn.call();
-			}
-			else {
-				this.load(fn);
-			}
-		},
-		getRecordByLevel: function(level) {
-			return this.getAt(this.findExact('level', level));
-		},
-		listeners: {
-			load: function() {
-				if (!this.isLoaded) {
-					this.isLoaded = true;
-					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
-				}
-				this.sort('level', 'ASC');
-			}
-		}
-	});
+    //GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
+		//fields: ['id', 'name', 'level'],
+		//proxy: {
+			//type: 'ajax',
+			//url: GIS.conf.url.path_api + 'organisationUnitLevels.json?viewClass=detailed&links=false&paging=false',
+			//reader: {
+				//type: 'json',
+				//root: 'organisationUnitLevels'
+			//}
+		//},
+		//cmp: [],
+		//isLoaded: false,
+		//loadFn: function(fn) {
+			//if (this.isLoaded) {
+				//fn.call();
+			//}
+			//else {
+				//this.load(fn);
+			//}
+		//},
+		//getRecordByLevel: function(level) {
+			//return this.getAt(this.findExact('level', level));
+		//},
+		//listeners: {
+			//load: function() {
+				//if (!this.isLoaded) {
+					//this.isLoaded = true;
+					//GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
+				//}
+				//this.sort('level', 'ASC');
+			//}
+		//}
+	//});
 
     GIS.store.infrastructuralPeriodsByType = Ext.create('Ext.data.Store', {
 		fields: ['id', 'name'],

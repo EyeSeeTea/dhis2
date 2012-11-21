@@ -32,6 +32,8 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 
     numClasses: 5,
 
+    bounds: null,
+
 	minSize: 3,
 
 	maxSize: 20,
@@ -45,6 +47,8 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     classification: null,
 
     colorInterpolation: null,
+
+    view: null,
 
     widget: null,
 
@@ -64,22 +68,168 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 			success: function(r) {
 				var geojson = GIS.util.geojson.decode(r.responseText, this),
 					format = new OpenLayers.Format.GeoJSON(),
-					features = format.read(geojson);
+					features = GIS.util.vector.getTransformedFeatureArray(format.read(geojson));
 
 				if (!features.length) {
 					alert('No valid coordinates found'); //todo //i18n
 					GIS.mask.hide();
-
-					this.config = {
-						extended: {}
-					};
 					return;
 				}
 
-				this.loadData(features);
+				this.loadData(view, features);
 			}
 		});
     },
+
+    loadData: function(view, features) {
+		var type = view.valueType,
+			dataUrl = 'mapValues/' + GIS.conf.finals.dimension[type].param + '.json',
+			indicator = GIS.conf.finals.dimension.indicator,
+			dataElement = GIS.conf.finals.dimension.dataElement,
+			period = GIS.conf.finals.dimension.period,
+			organisationUnit = GIS.conf.finals.dimension.organisationUnit,
+			params = {};
+
+		features = features || this.layer.features;
+
+		params[type === indicator.id ? indicator.param : dataElement.param] = view[type].id;
+		params[period.param] = view.period.id;
+		params[organisationUnit.param] = view.parentOrganisationUnit.id;
+		params.le = view.organisationUnitLevel.id;
+
+		Ext.Ajax.request({
+			url: GIS.conf.url.path_api + dataUrl,
+			params: params,
+			disableCaching: false,
+			scope: this,
+			success: function(r) {
+				var values = Ext.decode(r.responseText),
+					featureMap = {},
+					valueMap = {},
+					newFeatures = [];
+
+				if (values.length === 0) {
+					alert('No aggregated data values found'); //todo //i18n
+					GIS.mask.hide();
+					return;
+				}
+
+				for (var i = 0; i < features.length; i++) {
+					var iid = features[i].attributes.internalId;
+					featureMap[iid] = true;
+				}
+				for (var i = 0; i < values.length; i++) {
+					var iid = values[i].organisationUnitId,
+						value = values[i].value;
+					valueMap[iid] = value;
+				}
+
+				for (var i = 0; i < features.length; i++) {
+					var feature = features[i],
+						iid = feature.attributes.internalId;
+					if (featureMap.hasOwnProperty(iid) && valueMap.hasOwnProperty(iid)) {
+						feature.attributes.value = valueMap[iid];
+						feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
+						newFeatures.push(feature);
+					}
+				}
+
+				this.layer.removeFeatures(this.layer.features);
+				this.layer.addFeatures(newFeatures);
+
+				//if (this.tmpView.extended.updateOrganisationUnit) {
+					//this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
+				//}
+
+				this.features = this.layer.features.slice(0);
+
+				this.loadLegend(view);
+			}
+		});
+	},
+
+	loadLegend: function(view) {
+		var options,
+			that = this,
+			predefined = GIS.conf.finals.widget.legendtype_predefined,
+			classificationType = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS,
+			method = view.legendType === predefined ? classificationType : view.method,
+			bounds,
+			legend,
+			fn = function() {
+				options = {
+					indicator: GIS.conf.finals.widget.value,
+					method: view.legendType === GIS.conf.finals.widget.legendtype_predefined ?.view.method,
+					numClasses: view.classes,
+					bounds: bounds,
+					colors: that.getColors(view.colorLow, view.colorHigh),
+					minSize: view.radiusLow,
+					maxSize: view.radiusHigh
+				};
+
+				that.applyClassification(options);
+				that.widget.classificationApplied = true;
+
+				that.afterLoad();
+			};
+
+		//this.tmpView.extended.legendConfig = {
+			//what: this.tmpView.valueType === 'indicator' ? this.tmpView.indicator.name : this.tmpView.dataElement.name,
+			//when: this.tmpView.period.id, //todo name
+			//where: this.tmpView.organisationUnitLevel.name + ' / ' + this.tmpView.parentOrganisationUnit.name
+		//};
+
+		if (view.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			legend = this.getPredefinedLegend(view);
+
+			bounds = legend.bounds;
+			this.colorInterpolation = legend.interpolation;
+			view.legendSet.names = legend.names;
+		}
+
+		this.view = view;
+
+		fn();
+	},
+
+	getPredefinedLegend: function(view) {
+		var colors = [],
+			bounds = [],
+			names = [],
+			legends;
+
+		Ext.Ajax.request({
+			url: GIS.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
+			scope: this,
+			success: function(r) {
+				legends = Ext.decode(r.responseText).mapLegends;
+
+				Ext.Array.sort(legends, function (a, b) {
+					return a.startValue - b.startValue;
+				});
+
+				for (var i = 0; i < legends.length; i++) {
+					if (bounds[bounds.length-1] !== legends[i].startValue) {
+						if (bounds.length !== 0) {
+							colors.push(new mapfish.ColorRgb(240,240,240));
+                            names.push('');
+						}
+						bounds.push(legends[i].startValue);
+					}
+					colors.push(new mapfish.ColorRgb());
+					colors[colors.length - 1].setFromHex(legends[i].color);
+                    names.push(legends[i].name);
+					bounds.push(legends[i].endValue);
+				}
+
+				return {
+					interpolation: colors,
+					bounds: bounds,
+					names: names
+				};
+			}
+		});
+	},
 
     updateOptions: function(newOptions) {
         var oldOptions = OpenLayers.Util.extend({}, this.options);
@@ -90,21 +240,18 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     },
 
     createColorInterpolation: function() {
-        var numColors = this.classification.bins.length,
-			tmpView = this.widget.tmpView,
-			legendType = tmpView.legendType;
+        var numColors = this.classification.bins.length;
 
-        tmpView.extended.imageLegendConfig = [];
+        //tmpView.extended.imageLegendConfig = [];
 
-        if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
+        if (view.legendType === GIS.conf.finals.widget.legendtype_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
 		}
-		else {
-			this.colorInterpolation = tmpView.extended.colorInterpolation;
-		}
+
+		this.view.imageLegend = [];
 
         for (var i = 0; i < this.classification.bins.length; i++) {
-            tmpView.extended.imageLegendConfig.push({
+			this.view.imageLegend.push({
                 label: this.classification.bins[i].label.replace('&nbsp;&nbsp;', ' '),
                 color: this.colorInterpolation[i].toHexString()
             });
@@ -125,18 +272,31 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		this.minVal = dist.minVal;
         this.maxVal = dist.maxVal;
 
+        if (this.view.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			if (this.bounds[0] > this.minVal) {
+				this.bounds.unshift(this.minVal);
+                //if (this.widget == centroid) { this.widget.symbolizerInterpolation.unshift('blank');
+				this.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
+			}
+
+			if (this.bounds[this.bounds.length-1] < this.maxVal) {
+				this.bounds.push(this.maxVal);
+                //todo if (this.widget == centroid) { G.vars.activeWidget.symbolizerInterpolation.push('blank');
+				this.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
+			}
+		}
+
         this.classification = dist.classify(
             this.method,
             this.numClasses,
-            null,
-            this.widget
+            this.bounds
         );
 
         this.createColorInterpolation();
     },
 
-    applyClassification: function(options) {
-        this.updateOptions(options);
+    applyClassification: function(options, legend) {
+        this.updateOptions(options, legend);
 
 		var calculateRadius = OpenLayers.Function.bind(
 			function(feature) {
@@ -149,8 +309,8 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		this.extendStyle(null, {'pointRadius': '${calculateRadius}'}, {'calculateRadius': calculateRadius});
 
         var boundsArray = this.classification.getBoundsArray();
-        var rules = new Array(boundsArray.length-1);
-        for (var i = 0; i < boundsArray.length-1; i++) {
+        var rules = new Array(boundsArray.length - 1);
+        for (var i = 0; i < boundsArray.length - 1; i++) {
             var rule = new OpenLayers.Rule({
                 symbolizer: {fillColor: this.colorInterpolation[i].toHexString()},
                 filter: new OpenLayers.Filter.Comparison({
@@ -172,29 +332,31 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
             return;
         }
 
-        var config = this.widget.getLegendConfig(),
-			element,
-			legendType = this.widget.tmpView.legendType,
+		var	element,
+			legendType = this.view.legendType,
 			automatic = GIS.conf.finals.widget.legendtype_automatic,
 			predefined = GIS.conf.finals.widget.legendtype_predefined,
-			legendNames = this.widget.tmpView.extended.legendNames;
+			legendNames = this.view.legendSet.names,
+			config = [
+				this.view.valueType === GIS.conf.finals.dimension.indicator.id ? this.view.indicator.name : this.view.dataElement.name,
+				this.view.period.id, //todo name
+				this.view.organisationUnitLevel.name + ' / ' + this.view.parentOrganisationUnit.name
+			];
 
         this.legendDiv.update("");
 
-        for (var key in config) {
-			if (config.hasOwnProperty(key)) {
-				element = document.createElement("div");
-				element.style.height = "14px";
-				element.style.overflow = "hidden";
-				element.title = config[key];
-				element.innerHTML = config[key];
-				this.legendDiv.appendChild(element);
+        for (var i = 0; i < config.length; i++) {
+			element = document.createElement("div");
+			element.style.height = "14px";
+			element.style.overflow = "hidden";
+			element.title = config[i];
+			element.innerHTML = config[i];
+			this.legendDiv.appendChild(element);
 
-				element = document.createElement("div");
-				element.style.clear = "left";
-				this.legendDiv.appendChild(element);
-			}
-        }
+			element = document.createElement("div");
+			element.style.clear = "left";
+			this.legendDiv.appendChild(element);
+		}
 
         element = document.createElement("div");
         element.style.width = "1px";
