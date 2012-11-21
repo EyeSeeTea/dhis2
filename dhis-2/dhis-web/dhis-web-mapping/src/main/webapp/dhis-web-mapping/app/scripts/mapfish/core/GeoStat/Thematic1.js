@@ -154,14 +154,16 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 			predefined = GIS.conf.finals.widget.legendtype_predefined,
 			classificationType = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS,
 			method = view.legendType === predefined ? classificationType : view.method,
-			bounds,
+			predefinedBounds,
 			legend,
 			fn = function() {
+				that.view = view;
+
 				options = {
 					indicator: GIS.conf.finals.widget.value,
-					method: view.legendType === predefined ? mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS : view.method,
+					method: method,
 					numClasses: view.classes,
-					bounds: bounds,
+					bounds: predefinedBounds,
 					colors: that.getColors(view.colorLow, view.colorHigh),
 					minSize: view.radiusLow,
 					maxSize: view.radiusHigh
@@ -173,36 +175,59 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 				that.afterLoad();
 			};
 
-		//this.tmpView.extended.legendConfig = {
-			//what: this.tmpView.valueType === 'indicator' ? this.tmpView.indicator.name : this.tmpView.dataElement.name,
-			//when: this.tmpView.period.id, //todo name
-			//where: this.tmpView.organisationUnitLevel.name + ' / ' + this.tmpView.parentOrganisationUnit.name
-		//};
-
 		if (view.legendType === GIS.conf.finals.widget.legendtype_predefined) {
-			legend = this.getPredefinedLegend(view);
+			var colors = [],
+				bounds = [],
+				names = [],
+				legends;
 
-			bounds = legend.bounds;
-			this.colorInterpolation = legend.interpolation;
-			view.legendSet.names = legend.names;
+			Ext.Ajax.request({
+				url: GIS.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
+				scope: this,
+				success: function(r) {
+					legends = Ext.decode(r.responseText).mapLegends;
+
+					Ext.Array.sort(legends, function (a, b) {
+						return a.startValue - b.startValue;
+					});
+
+					for (var i = 0; i < legends.length; i++) {
+						if (bounds[bounds.length-1] !== legends[i].startValue) {
+							if (bounds.length !== 0) {
+								colors.push(new mapfish.ColorRgb(240,240,240));
+								names.push('');
+							}
+							bounds.push(legends[i].startValue);
+						}
+						colors.push(new mapfish.ColorRgb());
+						colors[colors.length - 1].setFromHex(legends[i].color);
+						names.push(legends[i].name);
+						bounds.push(legends[i].endValue);
+					}
+
+					that.colorInterpolation = colors;
+					predefinedBounds = bounds;
+					view.legendSet.names = names;
+
+					fn();
+				}
+			});
 		}
-
-		this.view = view;
-
-		fn();
+		else {
+			fn();
+		}
 	},
 
 	getPredefinedLegend: function(view) {
 		var colors = [],
 			bounds = [],
-			names = [],
-			legends;
+			names = [];
 
 		Ext.Ajax.request({
 			url: GIS.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
 			scope: this,
 			success: function(r) {
-				legends = Ext.decode(r.responseText).mapLegends;
+				var legends = Ext.decode(r.responseText).mapLegends;
 
 				Ext.Array.sort(legends, function (a, b) {
 					return a.startValue - b.startValue;

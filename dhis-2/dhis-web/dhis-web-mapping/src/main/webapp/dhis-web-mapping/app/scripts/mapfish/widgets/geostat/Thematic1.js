@@ -1626,36 +1626,13 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 	},
 
     execute: function(config) {
-		//if (view) {
-			//this.config.extended.updateOrganisationUnit = true;
-			//this.config.extended.updateGui = true;
-		//}
-		//else {
-			//view = this.getView();
-		//}
-
 		var view = this.getView(config);
-
-		//this.tmpView = this.extendView(view);
 
 		if (!this.validateView(view)) {
 			return;
 		}
 
 		this.compareView(view, true);
-
-		//GIS.mask.msg = GIS.i18n.loading;
-		//GIS.mask.show();
-
-		//if (this.tmpView.extended.updateOrganisationUnit) {
-			//this.loadOrganisationUnits();
-		//}
-		//else if (this.tmpView.extended.updateData) {
-			//this.loadData();
-		//}
-		//else {
-			//this.loadLegend();
-		//}
 	},
 
     onRender: function(ct, position) {
