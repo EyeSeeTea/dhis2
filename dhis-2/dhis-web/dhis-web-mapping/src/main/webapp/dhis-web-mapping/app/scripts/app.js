@@ -1085,7 +1085,7 @@ Ext.onReady( function() {
 
 		greaterNumberField = Ext.create('Ext.form.field.Number', {
 			width: GIS.conf.layout.tool.itemlabel_width,
-			value: parseInt(base.widget.coreComp.minVal),
+			value: parseInt(base.core.minVal),
 			listeners: {
 				change: function() {
 					gt = this.getValue();
@@ -1095,7 +1095,7 @@ Ext.onReady( function() {
 
 		lowerNumberField = Ext.create('Ext.form.field.Number', {
 			width: GIS.conf.layout.tool.itemlabel_width,
-			value: parseInt(base.widget.coreComp.maxVal) + 1,
+			value: parseInt(base.core.maxVal) + 1,
 			listeners: {
 				change: function() {
 					lt = this.getValue();
@@ -1104,7 +1104,7 @@ Ext.onReady( function() {
 		});
 
         filter = function() {
-			var cache = base.widget.features.slice(0),
+			var cache = base.core.features.slice(0),
 				features = [];
 
             if (!gt && !lt) {
