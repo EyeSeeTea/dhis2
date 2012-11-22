@@ -3,12 +3,28 @@ Ext.onReady( function() {
 	/*
 	CONFIG              			TYPE            DEFAULT             DESCRIPTION
 
-	uid                 			string                              (Optional) A chart uid. If provided, only 'el' and 'url' are required.
+	url                 			string                              (Required) The base url of the DHIS instance.
+	el                  			string                              (Required) The element id to render the map.
+	id								string                              (Optional) A map uid. If provided, only 'el' and 'url' are required.
+	longitude						number			<zoom visible>		(Optional) Initial map center longitude.
+	latitude						number			<zoom visible>		(Optional) Initial map center latitude.
+	zoom							number			<zoom visible>		(Optional) Initial zoom level.
+	mapViews						[object]							(Required*) Array of mapViews. *Required if no map id is provided.
 
+	layer							string			'thematic1'			(Optional) 'boundary', 'thematic1', 'thematic2' or 'facility'.
 	indicator          				string								(Required*) Indicator uid. *Required if no data element is provided.
 	dataelement	        			string								(Required*) Data element uid. *Required if no indicator is provided.
 	period							string								(Required) Fixed period ISO.
-	organisationunit				string								(Required) Organisation unit uid.
+	level							number			2					(Optional) Organisation unit level.
+	parent							string								(Required) Parent organisation unit uid.
+	legendSet						string								(Optional) Legend set uid.
+	classes							number			5					(Optional) Automatic legend set, number of classes.
+	method							number			2					(Optional) Automatic legend set, method. 2 = by class range. 3 = by class count.
+	colorLow						string			'ff0000' (red)		(Optional) Automatic legend set, low color.
+	colorHigh						string			'00ff00' (green)	(Optional) Automatic legend set, high color.
+	radiusLow						number			5					(Optional) Automatic legend set, low radius for points.
+	radiusHigh						number			15					(Optional) Automatic legend set, high radius for points.
+
 	series              			string          'data'              (Optional) Series: 'data', 'period' or 'organisationunit'.
 	category            			string          'period'            (Optional) Category: 'indicator', 'dataelement', 'period' or 'organisationunit'.
 	filter              			string          'organisationunit'  (Optional) Filter: 'indicator', 'dataelement', 'period' or 'organisationunit'.
@@ -19,58 +35,125 @@ Ext.onReady( function() {
 	hideSubtitle					boolean			false				(Optional) If true, the subtitle is not visible.
 	userOrganisationUnit			boolean			false				(Optional) If true, the provided orgunits are replaced by the user orgunit.
 	userOrganisationUnitChildren	boolean			false				(Optional) If true, the provided orgunits are replaced by the user orgunit children.
-	targetLineValue					integer								(Optional) The value of the target line.
-	targetLineLabel					string								(Optional) The legend name of the target line. Requires targetLineValue, otherwise ignored.
-	baseLineValue					integer								(Optional) The value of the base line.
-	baseLineLabel					string								(Optional) The legend name of the base line. Requires baseLineValue, otherwise ignored.
-	domainAxisLabel					string								(Optional) Domain axis (usually the x axis) label.
-	rangeAxisLabel					string								(Optional) Range axis (usually the y axis) label.
-	legendPosition      			string          'top'               (Optional) Positions: 'top', 'right', 'bottom' or 'left'.
-	el                  			string                              (Required) The element id to render the chart.
-	width               			integer         <el width>          (Optional) Chart width. Default is the element width.
-	height              			integer         <el height>         (Optional) Chart height. Default is the element height.
-	url                 			string                              (Required) The base url of the DHIS instance.
+
 	*/
 
 	GIS.getMap = function(config) {
-		var getView;
+		var validateConfig,
+			getViews,
+			map;
 
-		getView = function(config) {
-			var indicator = GIS.conf.finals.dimension.indicator.id,
+		validateConfig = function(config) {
+			if !(config.url && Ext.isString(config.url)) {
+				alert('Invalid url (' + config.el + ')');
+				return false;
+			}
+
+			if !(config.el && Ext.isString(config.el)) {
+				alert('Invalid html element id (' + config.el + ')');
+				return false;
+			}
+
+			if (config.id) {
+				if (Ext.isString(config.id)) {
+					return true;
+				}
+				else {
+					alert('Invalid map id (' + config.el + ')');
+					return false;
+				}
+			}
+			else {
+				if (!config.indicator && !config.dataelement) {
+					alert('No indicator or data element (' + config.el + ')');
+					return false;
+				}
+				else {
+					if (config.indicator && !Ext.isString(config.indicator)) {
+						alert('Invalid indicator id (' + config.el + ')');
+						return false;
+					}
+					if (config.dataelement && !Ext.isString(config.dataelement)) {
+						alert('Invalid dataelement id (' + config.el + ')');
+						return false;
+					}
+				}
+
+				if (!config.period) {
+					alert('No period (' + config.el + ')');
+					return false;
+				}
+
+				if !(config.level && Ext.isNumber(config.level)) {
+					alert('Invalid organisation unit level (' + config.el + ')');
+					return false;
+				}
+
+				if !(config.parent && Ext.isNumber(config.parent)) {
+					alert('Invalid parent organisation unit (' + config.el + ')');
+					return false;
+				}
+			}
+		};
+
+		if (!validateConfig(config)) {
+			return;
+		}
+
+		getViews = function(config) {
+			var view,
+				views = [],
+				indicator = GIS.conf.finals.dimension.indicator.id,
 				dataElement = GIS.conf.finals.dimension.dataElement.id,
 				automatic = GIS.conf.finals.widget.legendtype_automatic,
-				predefined = GIS.conf.finals.widget.legendtype_predefined,
+				predefined = GIS.conf.finals.widget.legendtype_predefined;
+
+			for (var i = 0; i < config.mapViews.length; i++) {
+				view = config.mapViews[i];
+
 				view = {
-					layer: config.layer || 'thematic1',
-					valueType: config.indicator ? indicator : dataElement,
+					layer: view.layer || 'thematic1',
+					valueType: view.indicator ? indicator : dataElement,
 					indicator: {
-						id: config.indicator
+						id: view.indicator
 					},
 					dataElement: {
-						id: config.dataelement
+						id: view.dataelement
 					},
 					period: {
-						id: config.period
+						id: view.period
 					},
-					legendType: config.legendSet ? predefined : automatic,
-					legendSet: config.legendSet,
-					classes: parseInt(config.classes) || 5,
-					method: parseInt(config.method) || 2,
-					colorLow: config.colorLow || 'ff0000',
-					colorHigh: config.colorHigh || '00ff00',
-					radiusLow: parseInt(config.radiusLow) || 5,
-					radiusHigh: parseInt(config.radiusHigh) || 15,
+					legendType: view.legendSet ? predefined : automatic,
+					legendSet: view.legendSet,
+					classes: parseInt(view.classes) || 5,
+					method: parseInt(view.method) || 2,
+					colorLow: view.colorLow || 'ff0000',
+					colorHigh: view.colorHigh || '00ff00',
+					radiusLow: parseInt(view.radiusLow) || 5,
+					radiusHigh: parseInt(view.radiusHigh) || 15,
 					organisationUnitLevel: {
-						level: parseInt(config.level) || 2
+						level: parseInt(view.level) || 2
 					},
 					parentOrganisationUnit: {
-						id: config.parent
+						id: view.parent
 					},
-					opacity: parseFloat(config.opacity) || 0.8
+					opacity: parseFloat(view.opacity) || 0.8
 				};
+			}
 
 			return view;
 		};
+
+		config = {
+			url: config.url,
+			el: config.el,
+			longitude: config.longitude,
+			latitude: config.latitude,
+			zoom: config.zoom,
+			mapViews: getViews(config)
+		};
+
+
 	};
 
 
