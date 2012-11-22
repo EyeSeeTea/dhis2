@@ -45,6 +45,49 @@ GIS.conf = {
 			classify_with_bounds: 1,
 			classify_by_equal_intervals: 2,
 			classify_by_quantils: 3
+		},
+		base: {
+			boundary: {
+				id: 'boundary',
+				name: 'Boundary layer', //i18n
+				legendDiv: 'boundaryLegend'
+			},
+			thematic1: {
+				id: 'thematic1',
+				name: 'Thematic 1 layer', //i18n
+				legendDiv: 'thematic1Legend'
+			},
+			thematic2: {
+				id: 'thematic2',
+				name: 'Thematic 2 layer', //i18n
+				legendDiv: 'thematic2Legend'
+			},
+			facility: {
+				id: 'facility',
+				name: 'Facility layer', //i18n
+				legendDiv: 'facilityLegend'
+			},
+			symbol: {
+				id: 'symbol',
+				name: 'Symbol layer', //i18n
+				legendDiv: 'symbolLegend'
+			},
+			googleStreets: {
+				id: 'googleStreets',
+				name: 'Google Streets'
+			},
+			googleHybrid: {
+				id: 'googleHybrid',
+				name: 'Google Hybrid'
+			},
+			openStreetMap: {
+				id: 'openStreetMap',
+				name: 'OpenStreetMap'
+			},
+			circle: {
+				id: 'circle',
+				name: 'Circle'
+			}
 		}
 	},
 	url: {
@@ -204,51 +247,9 @@ GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
 
 GIS.core = {};
 
-GIS.core.BaseCollection = function() {
-	return {
-		boundary: {
-			id: 'boundary',
-			name: 'Boundary layer', //i18n
-			legendDiv: 'boundaryLegend'
-		},
-		thematic1: {
-			id: 'thematic1',
-			name: 'Thematic 1 layer', //i18n
-			legendDiv: 'thematic1Legend'
-		},
-		thematic2: {
-			id: 'thematic2',
-			name: 'Thematic 2 layer', //i18n
-			legendDiv: 'thematic2Legend'
-		},
-		facility: {
-			id: 'facility',
-			name: 'Facility layer', //i18n
-			legendDiv: 'facilityLegend'
-		},
-		symbol: {
-			id: 'symbol',
-			name: 'Symbol layer', //i18n
-			legendDiv: 'symbolLegend'
-		},
-		googleStreets: {
-			id: 'googleStreets',
-			name: 'Google Streets'
-		},
-		googleHybrid: {
-			id: 'googleHybrid',
-			name: 'Google Hybrid'
-		},
-		openStreetMap: {
-			id: 'openStreetMap',
-			name: 'OpenStreetMap'
-		},
-		circle: {
-			id: 'circle',
-			name: 'Circle'
-		}
-	};
-};
+//GIS.core.BaseCollection = function() {
+	//return
+//};
 
 GIS.core.StyleMap = function(base, labelConfig) {
 	var defaults = {
@@ -262,7 +263,7 @@ GIS.core.StyleMap = function(base, labelConfig) {
 			cursor: 'pointer'
 		};
 
-	if (base.id === GIS.base.boundary.id) {
+	if (base.id === GIS.conf.finals.base.boundary.id) {
 		defaults.fillOpacity = 0;
 		defaults.strokeColor = '#000';
 
@@ -380,11 +381,189 @@ GIS.core.MeasureWindow = function() {
 	return window;
 };
 
-GIS.core.OLMap = function() {
-	var map,
-		addMapControl;
+GIS.obj.MapViewLoader = function() {
+	var getMap,
+		setMap,
+		map,
+		callbackRegister = [],
+		loader;
 
-	map = new OpenLayers.Map({
+	getMap = function(id) {
+		if (!id) {
+			alert('No favorite id provided');
+			return;
+		}
+		if (!Ext.isString(id)) {
+			alert('Favorite id must be a string');
+			return;
+		}
+
+		Ext.Ajax.request({
+			url: GIS.conf.url.path_api + 'maps/' + id + '.json?links=false',
+			success: function(r) {
+				map = Ext.decode(r.responseText);
+				setMap(map);
+			}
+		});
+	};
+
+	setMap = function(map) {
+		var views = Ext.isDefined(map.mapViews) ? map.mapViews : [],
+			view,
+			center,
+			lonLat;
+
+		if (!views.length) {
+			alert('Favorite has no layers and is probably outdated'); //i18n
+			return;
+		}
+		GIS.util.map.closeAllLayers();
+
+		for (var i = 0; i < views.length; i++) {
+			view = views[i];
+			GIS.base[view.layer].widget.execute(view);
+		}
+
+		lonLat = new OpenLayers.LonLat(map.longitude, map.latitude);
+		GIS.map.setCenter(lonLat, map.zoom);
+	};
+
+	loader = {
+		id: id,
+		load: function(id) {
+			this.id = id || this.id;
+			getMap(this.id);
+		},
+		callBack: function(widget) {
+			callbackRegister.push(widget);
+
+			if (callbackRegister.length === map.mapViews.length) {
+				GIS.cmp.interpretationButton.enable();
+			}
+		}
+	};
+
+	return loader;
+};
+//GIS.core.MapLoader = function() {
+
+GIS.core.OLMap = function() {
+	var olmap,
+		addControl,
+		addLayers;
+
+	addControl = function(name, fn) {
+		var button,
+			panel;
+
+		button = new OpenLayers.Control.Button({
+			displayClass: 'olControlButton',
+			trigger: function() {
+				fn.call(map);
+			}
+		});
+
+		panel = new OpenLayers.Control.Panel({
+			defaultControl: button
+		});
+
+		panel.addControls([button]);
+
+		olmap.addControl(panel);
+
+		panel.div.className += ' ' + name;
+		panel.div.childNodes[0].className += ' ' + name + 'Button';
+	};
+
+	addLayers = function(olmap) {
+		var base;
+
+		if (window.google) {
+			base = olmap.base.googleStreets;
+			base.layer = new OpenLayers.Layer.Google(base.name, {
+				numZoomLevels: 20,
+				animationEnabled: true,
+				layerType: GIS.conf.finals.layer.type_base,
+				base: base,
+				layerOpacity: 1,
+				setLayerOpacity: function(number) {
+					if (number) {
+						this.layerOpacity = parseFloat(number);
+					}
+					this.setOpacity(this.layerOpacity);
+				}
+			});
+			olmap.addLayer(base.layer);
+
+			base = olmap.base.googleHybrid;
+			base.layer = new OpenLayers.Layer.Google(base.name, {
+				type: google.maps.MapTypeId.HYBRID,
+				numZoomLevels: 20,
+				animationEnabled: true,
+				layerType: GIS.conf.finals.layer.type_base,
+				base: base,
+				layerOpacity: 1,
+				setLayerOpacity: function(number) {
+					if (number) {
+						this.layerOpacity = parseFloat(number);
+					}
+					this.setOpacity(this.layerOpacity);
+				}
+			});
+			olmap.addLayer(base.layer);
+		}
+		else {
+			base = olmap.base.openStreetMap;
+			base.layer = new OpenLayers.Layer.OSM(base.name);
+			base.layer.layerType = GIS.conf.finals.layer.type_base;
+			base.layer.base = base;
+			base.layer.layerOpacity = 1;
+			base.layer.setLayerOpacity = function(number) {
+				if (number) {
+					this.layerOpacity = parseFloat(number);
+				}
+				this.setOpacity(this.layerOpacity);
+			};
+			olmap.addLayer(base.layer);
+		}
+
+		base = olmap.base.boundary;
+		base.layer = GIS.core.VectorLayer(base);
+		olmap.addLayer(base.layer);
+		base.core = new mapfish.GeoStat.Boundary(olmap, {
+			layer: base.layer,
+			base: base
+		});
+
+		base = olmap.base.thematic1;
+		base.layer = GIS.core.VectorLayer(base, {opacity: 0.8});
+		olmap.addLayer(base.layer);
+		base.core = new mapfish.GeoStat.Thematic1(olmap, {
+			layer: base.layer,
+			base: base,
+			legendDiv: base.legendDiv
+		});
+
+		base = olmap.base.thematic2;
+		base.layer = GIS.core.VectorLayer(base, {opacity: 0.8});
+		olmap.addLayer(base.layer);
+		base.core = new mapfish.GeoStat.Thematic1(olmap, {
+			layer: base.layer,
+			base: base,
+			legendDiv: base.legendDiv
+		});
+
+		base = olmap.base.facility;
+		base.layer = GIS.core.VectorLayer(base);
+		olmap.addLayer(base.layer);
+		base.core = new mapfish.GeoStat.Facility(olmap, {
+			layer: base.layer,
+			base: base,
+			legendDiv: base.legendDiv
+		});
+	};
+
+	olmap = new OpenLayers.Map({
 		controls: [
 			new OpenLayers.Control.Navigation({
 				documentDrag: true
@@ -403,134 +582,23 @@ GIS.core.OLMap = function() {
 		relocate: {} // Relocate organisation units
 	});
 
-	map.zoomToVisibleExtent = function() {
-		GIS.util.map.zoomToVisibleExtent(this);
-	};
-
-	addMapControl = function(name, fn) {
-		var button,
-			panel;
-
-		button = new OpenLayers.Control.Button({
-			displayClass: 'olControlButton',
-			trigger: function() {
-				fn.call(map);
-			}
-		});
-
-		panel = new OpenLayers.Control.Panel({
-			defaultControl: button
-		});
-
-		panel.addControls([button]);
-
-		map.addControl(panel);
-
-		panel.div.className += ' ' + name;
-		panel.div.childNodes[0].className += ' ' + name + 'Button';
-	};
-
-	addMapControl('zoomIn', map.zoomIn);
-	addMapControl('zoomOut', map.zoomOut);
-	addMapControl('zoomVisible', map.zoomToVisibleExtent);
-	addMapControl('measure', function() {
+	addControl('zoomIn', olmap.zoomIn);
+	addControl('zoomOut', olmap.zoomOut);
+	addControl('zoomVisible', olmap.zoomToVisibleExtent);
+	addControl('measure', function() {
 		var measureWindow = GIS.core.MeasureWindow();
 		measureWindow.show();
 	});
 
-	return map;
-};
+	olmap.base = GIS.conf.finals.base;
 
-GIS.core.addLayers = function(olmap, baseCollection) {
-	var base;
+	addLayers(olmap);
 
-	if (window.google) {
-		base = baseCollection.googleStreets;
-		base.layer = new OpenLayers.Layer.Google(base.name, {
-			numZoomLevels: 20,
-			animationEnabled: true,
-			layerType: GIS.conf.finals.layer.type_base,
-			base: base,
-			layerOpacity: 1,
-			setLayerOpacity: function(number) {
-				if (number) {
-					this.layerOpacity = parseFloat(number);
-				}
-				this.setOpacity(this.layerOpacity);
-			}
-		});
-		olmap.addLayer(base.layer);
+	olmap.zoomToVisibleExtent = function() {
+		GIS.util.map.zoomToVisibleExtent(this);
+	};
 
-		base = baseCollection.googleHybrid;
-		base.layer = new OpenLayers.Layer.Google(base.name, {
-			type: google.maps.MapTypeId.HYBRID,
-			numZoomLevels: 20,
-			animationEnabled: true,
-			layerType: GIS.conf.finals.layer.type_base,
-			base: base,
-			layerOpacity: 1,
-			setLayerOpacity: function(number) {
-				if (number) {
-					this.layerOpacity = parseFloat(number);
-				}
-				this.setOpacity(this.layerOpacity);
-			}
-		});
-		olmap.addLayer(base.layer);
-	}
-	else {
-		base = baseCollection.openStreetMap;
-		base.layer = new OpenLayers.Layer.OSM(base.name);
-		base.layer.layerType = GIS.conf.finals.layer.type_base;
-		base.layer.base = base;
-		base.layer.layerOpacity = 1;
-		base.layer.setLayerOpacity = function(number) {
-			if (number) {
-				this.layerOpacity = parseFloat(number);
-			}
-			this.setOpacity(this.layerOpacity);
-		};
-		olmap.addLayer(base.layer);
-	}
-
-	base = baseCollection.boundary;
-	base.layer = GIS.core.VectorLayer(base);
-	olmap.addLayer(base.layer);
-	base.olmap = olmap;
-	base.core = new mapfish.GeoStat.Boundary(olmap, {
-		layer: base.layer,
-		base: base,
-	});
-
-	base = baseCollection.thematic1;
-	base.layer = GIS.core.VectorLayer(base, {opacity: 0.8});
-	olmap.addLayer(base.layer);
-	base.olmap = olmap;
-	base.core = new mapfish.GeoStat.Thematic1(olmap, {
-		layer: base.layer,
-		base: base,
-		legendDiv: base.legendDiv
-	});
-
-	base = baseCollection.thematic2;
-	base.layer = GIS.core.VectorLayer(base, {opacity: 0.8});
-	olmap.addLayer(base.layer);
-	base.olmap = olmap;
-	base.core = new mapfish.GeoStat.Thematic1(olmap, {
-		layer: base.layer,
-		base: base,
-		legendDiv: base.legendDiv
-	});
-
-	base = baseCollection.facility;
-	base.layer = GIS.core.VectorLayer(base);
-	olmap.addLayer(base.layer);
-	base.olmap = olmap;
-	base.core = new mapfish.GeoStat.Facility(olmap, {
-		layer: base.layer,
-		base: base,
-		legendDiv: base.legendDiv
-	});
+	return olmap;
 };
 
 });

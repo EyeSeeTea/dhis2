@@ -109,6 +109,10 @@ Ext.onReady( function() {
 		}
 	};
 
+	// Map
+
+	GIS.map = GIS.core.OLMap();
+
 	// Util
 
 	GIS.util.map.getVisibleVectorLayers = function() {
@@ -770,7 +774,7 @@ Ext.onReady( function() {
 		};
 		items.push(item);
 
-		if (base.id !== GIS.base.boundary.id) {
+		if (base.id !== GIS.conf.finals.base.boundary.id) {
 			item = {
 				text: 'Filter..', //i18n
 				iconCls: 'gis-menu-item-icon-filter',
@@ -872,7 +876,7 @@ Ext.onReady( function() {
 			panel,
 			visibleLayer;
 
-		visibleLayerId = window.google ? GIS.base.googleStreets.id : GIS.base.openStreetMap.id;
+		visibleLayerId = window.google ? GIS.map.base.googleStreets.id : GIS.map.base.openStreetMap.id;
 		for (var i = 0; i < layers.length; i++) { //todo important
 			layer = layers[i];
 
@@ -2988,50 +2992,41 @@ Ext.onReady( function() {
 		return layer;
 	};
 
-	// Base
-	GIS.base = GIS.core.BaseCollection();
-
-	// Map
-	GIS.map = GIS.core.OLMap();
-
-	// Layers
-	GIS.core.addLayers(GIS.map, GIS.base);
-
 	// Base extensions
-	GIS.base.boundary.menu = GIS.obj.LayerMenu(GIS.base.boundary, 'gis-toolbar-btn-menu-first');
-	GIS.base.boundary.widget = Ext.create('mapfish.widgets.geostat.Boundary', {
+	GIS.map.base.boundary.menu = GIS.obj.LayerMenu(GIS.map.base.boundary, 'gis-toolbar-btn-menu-first');
+	GIS.map.base.boundary.widget = Ext.create('mapfish.widgets.geostat.Boundary', {
         map: GIS.map,
-        layer: GIS.base.boundary.layer,
-        menu: GIS.base.boundary.menu
+        layer: GIS.map.base.boundary.layer,
+        menu: GIS.map.base.boundary.menu
     });
-    GIS.base.boundary.window = GIS.obj.WidgetWindow(GIS.base.boundary);
+    GIS.map.base.boundary.window = GIS.obj.WidgetWindow(GIS.map.base.boundary);
 
-	GIS.base.thematic1.menu = GIS.obj.LayerMenu(GIS.base.thematic1);
-	GIS.base.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
+	GIS.map.base.thematic1.menu = GIS.obj.LayerMenu(GIS.map.base.thematic1);
+	GIS.map.base.thematic1.widget = Ext.create('mapfish.widgets.geostat.Thematic1', {
         map: GIS.map,
-        layer: GIS.base.thematic1.layer,
-        menu: GIS.base.thematic1.menu,
-        legendDiv: GIS.base.thematic1.legendDiv
+        layer: GIS.map.base.thematic1.layer,
+        menu: GIS.map.base.thematic1.menu,
+        legendDiv: GIS.map.base.thematic1.legendDiv
     });
-    GIS.base.thematic1.window = GIS.obj.WidgetWindow(GIS.base.thematic1);
+    GIS.map.base.thematic1.window = GIS.obj.WidgetWindow(GIS.map.base.thematic1);
 
-	GIS.base.thematic2.menu = GIS.obj.LayerMenu(GIS.base.thematic2);
-	GIS.base.thematic2.widget = Ext.create('mapfish.widgets.geostat.Thematic2', {
+	GIS.map.base.thematic2.menu = GIS.obj.LayerMenu(GIS.map.base.thematic2);
+	GIS.map.base.thematic2.widget = Ext.create('mapfish.widgets.geostat.Thematic2', {
         map: GIS.map,
-        layer: GIS.base.thematic2.layer,
-        menu: GIS.base.thematic2.menu,
-        legendDiv: GIS.base.thematic2.legendDiv
+        layer: GIS.map.base.thematic2.layer,
+        menu: GIS.map.base.thematic2.menu,
+        legendDiv: GIS.map.base.thematic2.legendDiv
     });
-    GIS.base.thematic2.window = GIS.obj.WidgetWindow(GIS.base.thematic2);
+    GIS.map.base.thematic2.window = GIS.obj.WidgetWindow(GIS.map.base.thematic2);
 
-	GIS.base.facility.menu = GIS.obj.LayerMenu(GIS.base.facility);
-	GIS.base.facility.widget = Ext.create('mapfish.widgets.geostat.Facility', {
+	GIS.map.base.facility.menu = GIS.obj.LayerMenu(GIS.map.base.facility);
+	GIS.map.base.facility.widget = Ext.create('mapfish.widgets.geostat.Facility', {
         map: GIS.map,
-        layer: GIS.base.facility.layer,
-        menu: GIS.base.facility.menu,
-        legendDiv: GIS.base.facility.legendDiv
+        layer: GIS.map.base.facility.layer,
+        menu: GIS.map.base.facility.menu,
+        legendDiv: GIS.map.base.facility.legendDiv
     });
-    GIS.base.facility.window = GIS.obj.WidgetWindow(GIS.base.facility);
+    GIS.map.base.facility.window = GIS.obj.WidgetWindow(GIS.map.base.facility);
 
 	// User interface
 
@@ -3062,7 +3057,7 @@ Ext.onReady( function() {
                         animCollapse: false,
                         listeners: {
 							added: function() {
-								GIS.base.thematic1.layer.legend = this;
+								GIS.map.base.thematic1.layer.legend = this;
 							}
 						}
                     },
@@ -3075,7 +3070,7 @@ Ext.onReady( function() {
                         animCollapse: false,
                         listeners: {
 							added: function() {
-								GIS.base.thematic2.layer.legend = this;
+								GIS.map.base.thematic2.layer.legend = this;
 							}
 						}
                     },
@@ -3088,7 +3083,7 @@ Ext.onReady( function() {
                         animCollapse: false,
                         listeners: {
 							added: function() {
-								GIS.base.facility.layer.legend = this;
+								GIS.map.base.facility.layer.legend = this;
 							}
 						}
                     }
@@ -3119,23 +3114,23 @@ Ext.onReady( function() {
 					items: function() {
 						var a = [];
 						a.push({
-							iconCls: 'gis-btn-icon-' + GIS.base.boundary.id,
-							menu: GIS.base.boundary.menu,
+							iconCls: 'gis-btn-icon-' + GIS.map.base.boundary.id,
+							menu: GIS.map.base.boundary.menu,
 							width: 26
 						});
 						a.push({
-							iconCls: 'gis-btn-icon-' + GIS.base.thematic1.id,
-							menu: GIS.base.thematic1.menu,
+							iconCls: 'gis-btn-icon-' + GIS.map.base.thematic1.id,
+							menu: GIS.map.base.thematic1.menu,
 							width: 26
 						});
 						a.push({
-							iconCls: 'gis-btn-icon-' + GIS.base.thematic2.id,
-							menu: GIS.base.thematic2.menu,
+							iconCls: 'gis-btn-icon-' + GIS.map.base.thematic2.id,
+							menu: GIS.map.base.thematic2.menu,
 							width: 26
 						});
 						a.push({
-							iconCls: 'gis-btn-icon-' + GIS.base.facility.id,
-							menu: GIS.base.facility.menu,
+							iconCls: 'gis-btn-icon-' + GIS.map.base.facility.id,
+							menu: GIS.map.base.facility.menu,
 							width: 26
 						});
 						a.push({

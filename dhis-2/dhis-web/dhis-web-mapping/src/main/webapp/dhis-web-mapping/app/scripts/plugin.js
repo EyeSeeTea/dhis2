@@ -1,5 +1,4 @@
 Ext.onReady( function() {
-
 	/*
 	CONFIG              			TYPE            DEFAULT             DESCRIPTION
 
@@ -24,24 +23,14 @@ Ext.onReady( function() {
 	colorHigh						string			'00ff00' (green)	(Optional) Automatic legend set, high color.
 	radiusLow						number			5					(Optional) Automatic legend set, low radius for points.
 	radiusHigh						number			15					(Optional) Automatic legend set, high radius for points.
-
-	series              			string          'data'              (Optional) Series: 'data', 'period' or 'organisationunit'.
-	category            			string          'period'            (Optional) Category: 'indicator', 'dataelement', 'period' or 'organisationunit'.
-	filter              			string          'organisationunit'  (Optional) Filter: 'indicator', 'dataelement', 'period' or 'organisationunit'.
-	orgUnitIsParent					boolean			false				(Optional) If true, the children of the provided orgunit are displayed.
-	showData						boolean			false				(Optional) If true, the exact data are displayed on the chart.
-	trendLine						boolean			false				(Optional) If true, trend line(s) are added.
-	hideLegend						boolean			false				(Optional) If true, the legend is not visible.
-	hideSubtitle					boolean			false				(Optional) If true, the subtitle is not visible.
-	userOrganisationUnit			boolean			false				(Optional) If true, the provided orgunits are replaced by the user orgunit.
-	userOrganisationUnitChildren	boolean			false				(Optional) If true, the provided orgunits are replaced by the user orgunit children.
-
 	*/
 
 	GIS.getMap = function(config) {
 		var validateConfig,
 			getViews,
-			map;
+			getViewport,
+			map,
+			olmap;
 
 		validateConfig = function(config) {
 			if !(config.url && Ext.isString(config.url)) {
@@ -144,7 +133,31 @@ Ext.onReady( function() {
 			return view;
 		};
 
-		config = {
+		getViewport = function(el, olmap) {
+			var panel;
+
+			el = Ext.get(el);
+
+			panel = Ext.create('Ext.panel.Panel', {
+				renderTo: el,
+				style: 'padding:0, margin:0',
+				bodyStyle: 'padding:0, margin:0',
+				layout: {
+					type: 'hbox',
+					align: 'stretch'
+				},
+				items: [
+					{
+						xtype: 'gx_mappanel',
+						map: olmap
+					}
+				]
+			});
+
+			return panel;
+		};
+
+		map = {
 			url: config.url,
 			el: config.el,
 			longitude: config.longitude,
@@ -153,7 +166,11 @@ Ext.onReady( function() {
 			mapViews: getViews(config)
 		};
 
+		olmap = GIS.core.OLMap();
 
+		getViewport(map.el, olmap);
+
+		olmap.loader.loadMap(map);
 	};
 
-
+});
