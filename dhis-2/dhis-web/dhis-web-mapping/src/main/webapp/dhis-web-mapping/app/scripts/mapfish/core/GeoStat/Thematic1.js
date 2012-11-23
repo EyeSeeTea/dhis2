@@ -47,6 +47,18 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		return GIS.core.ThematicLoader();
 	},
 
+	reset: function() {
+		this.layer.destroyFeatures();
+
+		// Legend
+		document.getElementById(this.legendDiv).innerHTML = '';
+		this.layer.legendPanel.collapse();
+
+		if (this.widget) {
+			this.widget.reset();
+		}
+	},
+
     updateOptions: function(newOptions) {
         var oldOptions = OpenLayers.Util.extend({}, this.options);
         this.addOptions(newOptions);

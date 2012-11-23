@@ -382,27 +382,35 @@ GIS.core.MeasureWindow = function() {
 	return window;
 };
 
-GIS.obj.MapLoader = function() {
-	var getMap,
+GIS.core.MapLoader = function(olmap) {
+	var getLoaderById,
+		getMap,
 		setMap,
 		map,
 		callbackRegister = [],
 		loader;
 
-	getMap = function(id) {
-		if (!id) {
-			alert('No favorite id provided');
-			return;
+	getLoaderById = function(id) {
+		if (id === GIS.conf.finals.base.boundary.id) {
+			return GIS.core.BoundaryLoader();
 		}
-		if (!Ext.isString(id)) {
-			alert('Favorite id must be a string');
-			return;
+		if (id === GIS.conf.finals.base.thematic1.id || id === GIS.conf.finals.base.thematic2.id) {
+			return GIS.core.ThematicLoader();
 		}
+		if (id === GIS.conf.finals.base.facility.id) {
+			return GIS.core.FacilityLoader();
+		}
+	};
 
-		Ext.Ajax.request({
-			url: GIS.conf.url.path_api + 'maps/' + id + '.json?links=false',
+	getMap = function(map) {
+		Ext.data.JsonP.request({
+			url: GIS.conf.url.path_api + 'maps/' + map.id + '.json?links=false',
 			success: function(r) {
-				map = Ext.decode(r.responseText);
+				if (!r) {
+					alert('Uid not recognized' + (map.el ? ' (' + map.el + ')' : ''));
+					return;
+				}
+
 				setMap(map);
 			}
 		});
@@ -412,17 +420,31 @@ GIS.obj.MapLoader = function() {
 		var views = Ext.isDefined(map.mapViews) ? map.mapViews : [],
 			view,
 			center,
-			lonLat;
+			lonLat,
+			loader;
 
 		if (!views.length) {
 			alert('Favorite has no layers and is probably outdated'); //i18n
 			return;
 		}
-		GIS.util.map.closeAllLayers();
+
+		olmap.closeAllLayers();
 
 		for (var i = 0; i < views.length; i++) {
 			view = views[i];
-			GIS.base[view.layer].widget.execute(view);
+			loader = getLoaderById(view.layer);
+
+
+
+
+
+
+
+
+
+
+
+			//GIS.base[view.layer].widget.execute(view);
 		}
 
 		lonLat = new OpenLayers.LonLat(map.longitude, map.latitude);
@@ -430,10 +452,15 @@ GIS.obj.MapLoader = function() {
 	};
 
 	loader = {
-		id: id,
-		load: function(id) {
-			this.id = id || this.id;
-			getMap(this.id);
+		load: function(map) {
+			if (map.id) {
+				getMap(map);
+			}
+			else {
+				setMap(map);
+			}
+
+
 		},
 		callBack: function(widget) {
 			callbackRegister.push(widget);
@@ -447,7 +474,7 @@ GIS.obj.MapLoader = function() {
 	return loader;
 };
 
-GIS.obj.ThematicLoader = function(base) {
+GIS.core.ThematicLoader = function(base) {
 	var layer = base.layer,
 		core = base.core,
 		widget = base.widget,
@@ -717,7 +744,7 @@ GIS.obj.ThematicLoader = function(base) {
 		compare: false,
 		zoomToVisibleExtent: false,
 		updateGui: false,
-		execute: function(view) {
+		load: function(view) {
 			if (this.compare) {
 				compareView(view, true);
 			}
@@ -729,7 +756,6 @@ GIS.obj.ThematicLoader = function(base) {
 
 	return loader;
 };
-//GIS.core.MapLoader = function() {
 
 GIS.core.OLMap = function() {
 	var olmap,
@@ -880,6 +906,13 @@ GIS.core.OLMap = function() {
 
 	olmap.zoomToVisibleExtent = function() {
 		GIS.util.map.zoomToVisibleExtent(this);
+	};
+
+	olmap.closeAllLayers = function() {
+		olmap.base.boundary.core.reset();
+		olmap.base.thematic1.core.reset();
+		olmap.base.thematic2.core.reset();
+		olmap.base.facility.core.reset();
 	};
 
 	return olmap;

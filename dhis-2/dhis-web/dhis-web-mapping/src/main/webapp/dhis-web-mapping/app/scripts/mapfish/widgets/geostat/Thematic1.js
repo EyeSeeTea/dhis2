@@ -1154,48 +1154,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
         this.selectHandlers.activate();
     },
 
-	//setPredefinedLegend: function(fn) {
-		//var store = this.store.legendsByLegendSet,
-			//colors = [],
-			//bounds = [],
-			//names = [],
-			//legends;
-
-		//Ext.Ajax.request({
-			//url: GIS.conf.url.path_api + 'mapLegendSets/' + this.tmpView.legendSet.id + '.json?links=false&paging=false',
-			//scope: this,
-			//success: function(r) {
-				//legends = Ext.decode(r.responseText).mapLegends;
-
-				//Ext.Array.sort(legends, function (a, b) {
-					//return a.startValue - b.startValue;
-				//});
-
-				//for (var i = 0; i < legends.length; i++) {
-					//if (bounds[bounds.length-1] !== legends[i].startValue) {
-						//if (bounds.length !== 0) {
-							//colors.push(new mapfish.ColorRgb(240,240,240));
-                            //names.push('');
-						//}
-						//bounds.push(legends[i].startValue);
-					//}
-					//colors.push(new mapfish.ColorRgb());
-					//colors[colors.length - 1].setFromHex(legends[i].color);
-                    //names.push(legends[i].name);
-					//bounds.push(legends[i].endValue);
-				//}
-
-				//this.tmpView.extended.colorInterpolation = colors;
-				//this.tmpView.extended.bounds = bounds;
-                //this.tmpView.extended.legendNames = names;
-
-				//if (fn) {
-					//fn.call(this);
-				//}
-			//}
-		//});
-	//},
-
 	reset: function() {
 
 		// Components
@@ -1233,22 +1191,10 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			this.cmp.labelWindow.destroy();
 		}
 
-		// View
-		this.config = {
-			extended: {}
-		};
-		this.tmpView = {};
-		this.view = {};
-
-		// Layer
-		this.layer.destroyFeatures();
+		// Layer and features
 		this.features = this.layer.features.slice(0);
 		this.store.features.loadFeatures();
 		this.layer.item.setValue(false);
-
-		// Legend
-		document.getElementById(this.legendDiv).innerHTML = '';
-		this.layer.legend.collapse();
 	},
 
 	setGui: function(view) {

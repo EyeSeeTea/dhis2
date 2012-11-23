@@ -94,12 +94,6 @@ Ext.onReady( function() {
 			}
 		});
 
-		// Mask
-
-		GIS.mask = new Ext.LoadMask(this.getEl(), {
-			msg: GIS.i18n.loading
-		});
-
 		// Favorite
 
 		var id = GIS.util.url.getUrlParam('id');
@@ -112,6 +106,12 @@ Ext.onReady( function() {
 	// Map
 
 	GIS.map = GIS.core.OLMap();
+
+	// Mask
+
+	GIS.map.mask = new Ext.LoadMask(GIS.cmp.region.center.getEl(), {
+		msg: GIS.i18n.loading
+	});
 
 	// Util
 
@@ -267,10 +267,10 @@ Ext.onReady( function() {
 	};
 
 	GIS.util.map.closeAllLayers = function() {
-		GIS.base.boundary.widget.reset();
-		GIS.base.thematic1.widget.reset();
-		GIS.base.thematic2.widget.reset();
-		GIS.base.facility.widget.reset();
+		GIS.base.boundary.core.reset();
+		GIS.base.thematic1.core.reset();
+		GIS.base.thematic2.core.reset();
+		GIS.base.facility.core.reset();
 	};
 
 	GIS.util.google = {};
@@ -675,69 +675,6 @@ Ext.onReady( function() {
 
     // Objects
 
-    GIS.obj.StyleMap = function(base, labelConfig) {
-		var defaults = {
-				fillOpacity: 1,
-				strokeColor: '#fff',
-				strokeWidth: 1
-			},
-			select = {
-				strokeColor: '#000000',
-				strokeWidth: 2,
-				cursor: 'pointer'
-			};
-
-		if (base.id === GIS.base.boundary.id) {
-			defaults.fillOpacity = 0;
-			defaults.strokeColor = '#000';
-
-			select.fillColor = '#000';
-			select.fillOpacity = 0.2;
-			select.strokeWidth = 1;
-		}
-
-		if (labelConfig) {
-			defaults.label = '\${label}';
-			defaults.fontFamily = 'arial,sans-serif,ubuntu,consolas';
-			defaults.fontSize = labelConfig.fontSize ? labelConfig.fontSize + 'px' : '13px';
-			defaults.fontWeight = labelConfig.strong ? 'bold' : 'normal';
-			defaults.fontStyle = labelConfig.italic ? 'italic' : 'normal';
-			defaults.fontColor = labelConfig.color ? '#' + labelConfig.color : '#000000';
-		}
-
-		return new OpenLayers.StyleMap({
-			'default': new OpenLayers.Style(
-				OpenLayers.Util.applyDefaults(defaults),
-				OpenLayers.Feature.Vector.style['default']),
-			select: new OpenLayers.Style(select)
-		});
-	};
-
-    GIS.obj.VectorLayer = function(base, config) {
-		var layer = new OpenLayers.Layer.Vector(base.name, {
-			strategies: [
-				new OpenLayers.Strategy.Refresh({
-					force:true
-				})
-			],
-			styleMap: GIS.obj.StyleMap(base),
-			visibility: false,
-			displayInLayerSwitcher: false,
-			layerType: GIS.conf.finals.layer.type_vector,
-			layerOpacity: config ? config.opacity || 1 : 1,
-			setLayerOpacity: function(number) {
-				if (number) {
-					this.layerOpacity = parseFloat(number);
-				}
-				this.setOpacity(this.layerOpacity);
-			},
-			hasLabels: false
-		});
-		layer.base = base;
-
-		return layer;
-	};
-
     GIS.obj.LayerMenu = function(base, cls) {
 		var layer = base.layer,
 			items = [],
@@ -934,7 +871,7 @@ Ext.onReady( function() {
 							var loader = base.core.getLoader(base);
 							loader.compare = true;
 							loader.zoomToVisibleExtent = true;
-							loader.execute(view);
+							loader.load(view);
 						}
 					}
 				}
@@ -2011,71 +1948,6 @@ Ext.onReady( function() {
 		return mapWindow;
 	};
 
-	GIS.obj.MapViewLoader = function(id) {
-		var getMap,
-			setMap,
-			map,
-			callbackRegister = [],
-			loader;
-
-		getMap = function(id) {
-			if (!id) {
-				alert('No favorite id provided');
-				return;
-			}
-			if (!Ext.isString(id)) {
-				alert('Favorite id must be a string');
-				return;
-			}
-
-			Ext.Ajax.request({
-				url: GIS.conf.url.path_api + 'maps/' + id + '.json?links=false',
-				success: function(r) {
-					map = Ext.decode(r.responseText);
-					setMap(map);
-				}
-			});
-		};
-
-		setMap = function(map) {
-			var views = Ext.isDefined(map.mapViews) ? map.mapViews : [],
-				view,
-				center,
-				lonLat;
-
-			if (!views.length) {
-				alert('Favorite has no layers and is probably outdated'); //i18n
-				return;
-			}
-			GIS.util.map.closeAllLayers();
-
-			for (var i = 0; i < views.length; i++) {
-				view = views[i];
-				GIS.base[view.layer].widget.execute(view);
-			}
-
-			lonLat = new OpenLayers.LonLat(map.longitude, map.latitude);
-			GIS.map.setCenter(lonLat, map.zoom);
-		};
-
-		loader = {
-			id: id,
-			load: function(id) {
-				this.id = id || this.id;
-				getMap(this.id);
-			},
-			callBack: function(widget) {
-				callbackRegister.push(widget);
-
-				if (callbackRegister.length === map.mapViews.length) {
-					GIS.cmp.interpretationButton.enable();
-				}
-			}
-		};
-
-		return loader;
-	};
-
 	GIS.obj.LegendSetWindow = function() {
 
 		// Stores
@@ -2881,73 +2753,6 @@ Ext.onReady( function() {
 		});
 
 		document.body.oncontextmenu = true; // right click to copy url
-
-		return window;
-	};
-
-	GIS.obj.MeasureWindow = function() {
-		var window,
-			label,
-			handleMeasurements,
-			control,
-			styleMap;
-
-		styleMap = new OpenLayers.StyleMap({
-			'default': new OpenLayers.Style()
-		});
-
-		control = new OpenLayers.Control.Measure( OpenLayers.Handler.Path, {
-			persist: true,
-			immediate: true,
-			handlerOption: {
-				layerOptions: {
-					styleMap: styleMap
-				}
-			}
-		});
-
-		handleMeasurements = function(e) {
-			if (e.measure) {
-				label.setText(e.measure.toFixed(2) + ' ' + e.units);
-			}
-		};
-
-		GIS.map.addControl(control);
-
-		control.events.on({
-			measurepartial: handleMeasurements,
-			measure: handleMeasurements
-		});
-
-		control.geodesic = true;
-		control.activate();
-
-		label = Ext.create('Ext.form.Label', {
-			style: 'height: 20px',
-			text: '0 km'
-		});
-
-		window = Ext.create('Ext.window.Window', {
-			title: 'Measure distance', //i18n
-			layout: 'fit',
-			cls: 'gis-container-default',
-			bodyStyle: 'text-align: center',
-			width: 130,
-			minWidth: 130,
-			resizable: false,
-			items: label,
-			listeners: {
-				show: function() {
-					var x = GIS.cmp.region.east.x - this.getWidth() - 5,
-						y = 60;
-					this.setPosition(x, y);
-				},
-				destroy: function() {
-					control.deactivate();
-					GIS.map.removeControl(control);
-				}
-			}
-		});
 
 		return window;
 	};

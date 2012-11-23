@@ -30,7 +30,8 @@ Ext.onReady( function() {
 			getViews,
 			createViewport,
 			map,
-			olmap = GIS.core.OLMap();
+			olmap = GIS.core.OLMap(),
+			loader;
 
 		validateConfig = function(config) {
 			if !(config.url && Ext.isString(config.url)) {
@@ -212,7 +213,10 @@ Ext.onReady( function() {
 
 		olmap = GIS.core.OLMap();
 
-		olmap.legendRegion = createViewport(map.el, olmap);
+		createViewport(map.el, olmap);
+
+		loader = GIS.core.MapLoader();
+
 
 		//olmap.loader.loadMap(map);
 	};
