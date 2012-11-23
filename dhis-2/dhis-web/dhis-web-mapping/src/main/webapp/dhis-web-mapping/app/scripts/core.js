@@ -707,8 +707,8 @@ GIS.obj.ThematicLoader = function(base) {
 		}
 
 		// Legend
-		GIS.cmp.region.east.doLayout();
-		layer.legend.expand();
+		olmap.legendRegion.doLayout();
+		layer.legendPanel.expand();
 
         GIS.mask.hide();
 	};
