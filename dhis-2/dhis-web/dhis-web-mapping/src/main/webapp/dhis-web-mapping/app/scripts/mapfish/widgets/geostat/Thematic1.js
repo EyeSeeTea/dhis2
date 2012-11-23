@@ -40,15 +40,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
     loadMask: false,
     labelGenerator: null,
 
-    // Properties
-    //config: {
-		//extended: {}
-	//},
-
-    //tmpView: {},
-
-    //view: {},
-
     cmp: {},
 
     toggler: {},
@@ -1390,7 +1381,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			view = this.extendView(view, config);
 		}
 
-		return view;
+		return this.validateView(view);
 	},
 
 	extendView: function(view, config) {
@@ -1414,14 +1405,6 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		view.parentLevel = config.parentLevel || view.parentLevel;
 		view.parentGraph = config.parentGraph || view.parentGraph;
 		view.opacity = config.opacity || view.opacity;
-
-		//view.extended = {
-			//colors: this.getColors(view.colorLow, view.colorHigh),
-			//updateOrganisationUnit: Ext.isDefined(conf.extended.updateOrganisationUnit) ? conf.extended.updateOrganisationUnit : false,
-			//updateData: Ext.isDefined(conf.extended.updateData) ? conf.extended.updateData : false,
-			//updateLegend: Ext.isDefined(conf.extended.updateLegend) ? conf.extended.updateLegend : false,
-			//updateGui: Ext.isDefined(conf.extended.updateGui) ? conf.extended.updateGui : false
-		//};
 
 		return view;
 	},
@@ -1545,84 +1528,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			return false;
 		}
 
-		return true;
-	},
-
-	compareView: function(view, doExecute) {
-		var src = this.core.view;
-
-		if (!src) {
-			if (doExecute) {
-				this.core.loadOrganisationUnits(view);
-			}
-			return GIS.conf.finals.widget.loadtype_organisationunit;
-		}
-
-		if (view.organisationUnitLevel.id !== src.organisationUnitLevel.id) {
-			if (doExecute) {
-				this.core.loadOrganisationUnits(view);
-			}
-			return GIS.conf.finals.widget.loadtype_organisationunit;
-		}
-
-		if (view.parentOrganisationUnit.id !== src.parentOrganisationUnit.id) {
-			if (doExecute) {
-				this.core.loadOrganisationUnits(view);
-			}
-			return GIS.conf.finals.widget.loadtype_organisationunit;
-		}
-
-		if (view.valueType !== src.valueType) {
-			if (doExecute) {
-				this.core.loadData(view);
-			}
-			return GIS.conf.finals.widget.loadtype_organisationunit;
-		}
-		else {
-			if (view.valueType === GIS.conf.finals.dimension.indicator.id && view.indicator.id !== src.indicator.id) {
-				if (doExecute) {
-					this.core.loadData(view);
-				}
-				return GIS.conf.finals.widget.loadtype_data;
-			}
-			if (view.valueType === GIS.conf.finals.dimension.dataElement.id && view.dataElement.id !== src.dataElement.id) {
-				if (doExecute) {
-					this.core.loadData(view);
-				}
-				return GIS.conf.finals.widget.loadtype_data;
-			}
-		}
-
-		if (view.period.id !== src.period.id) {
-			if (doExecute) {
-				this.core.loadData(view);
-			}
-			return GIS.conf.finals.widget.loadtype_data;
-		}
-
-		if (view.legendType !== src.legendType) {
-			if (doExecute) {
-				this.core.loadLegend(view);
-			}
-			return GIS.conf.finals.widget.loadtype_legend;
-		}
-		else {
-			if (view.legendType === GIS.conf.finals.widget.legendtype_automatic) {
-				if (view.classes !== src.classes || view.method !== src.method || view.colorLow !== src.colorLow || view.radiusLow !== src.radiusLow ||	view.colorHigh !== src.colorHigh || view.radiusHigh !== src.radiusHigh) {
-					if (doExecute) {
-						this.core.loadLegend(view);
-					}
-					return GIS.conf.finals.widget.loadtype_legend;
-				}
-			}
-
-			if (view.legendType === GIS.conf.finals.widget.legendtype_predefined && view.legendSet.id !== src.legendSet.id) {
-				if (doExecute) {
-					this.core.loadLegend(view);
-				}
-				return GIS.conf.finals.widget.loadtype_legend;
-			}
-		}
+		return view;
 	},
 
     execute: function(config) {
@@ -1632,7 +1538,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			return;
 		}
 
-		this.compareView(view, true);
+		this.core.execute(view);
 	},
 
     onRender: function(ct, position) {

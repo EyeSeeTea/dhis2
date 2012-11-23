@@ -28,9 +28,9 @@ Ext.onReady( function() {
 	GIS.getMap = function(config) {
 		var validateConfig,
 			getViews,
-			getViewport,
+			createViewport,
 			map,
-			olmap;
+			olmap = GIS.core.OLMap();
 
 		validateConfig = function(config) {
 			if !(config.url && Ext.isString(config.url)) {
@@ -133,7 +133,7 @@ Ext.onReady( function() {
 			return view;
 		};
 
-		getViewport = function(el, olmap) {
+		createViewport = function(el, olmap) {
 			var panel;
 
 			el = Ext.get(el);
@@ -150,6 +150,50 @@ Ext.onReady( function() {
 					{
 						xtype: 'gx_mappanel',
 						map: olmap
+					},
+					{
+						xtype: 'panel',
+						layout: 'anchor',
+						width: 200,
+						preventHeader: true,
+						defaults: {
+							bodyStyle: 'padding: 6px; border: 0 none',
+							collapsible: true,
+							collapsed: true,
+							animCollapse: false
+						},
+						items: [
+							{
+								title: 'Thematic layer 1 legend', //i18n
+								contentEl: olmap.base.thematic1.core.legendDiv,
+								listeners: {
+									added: function() {
+										olmap.base.thematic1.layer.legendPanel = this;
+									}
+								}
+							},
+							{
+								title: 'Thematic layer 2 legend', //i18n
+								contentEl: olmap.base.thematic2.core.legendDiv,
+								listeners: {
+									added: function() {
+										olmap.base.thematic2.layer.legendPanel = this;
+									}
+								}
+							},
+							{
+								title: 'Facility layer legend', //i18n
+								contentEl: olmap.base.facility.core.legendDiv,
+								listeners: {
+									added: function() {
+										olmap.base.facility.layer.legendPanel = this;
+									}
+								}
+							}
+						],
+						listeners: {
+							olmap.legendRegion = this;
+						}
 					}
 				]
 			});
@@ -168,9 +212,9 @@ Ext.onReady( function() {
 
 		olmap = GIS.core.OLMap();
 
-		getViewport(map.el, olmap);
+		olmap.legendRegion = createViewport(map.el, olmap);
 
-		olmap.loader.loadMap(map);
+		//olmap.loader.loadMap(map);
 	};
 
 });

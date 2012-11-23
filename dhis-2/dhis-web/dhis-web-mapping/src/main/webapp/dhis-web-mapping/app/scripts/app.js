@@ -749,7 +749,7 @@ Ext.onReady( function() {
 			cls: 'gis-menu-item-first',
 			alwaysEnabled: true,
 			handler: function() {
-				GIS.base[base.id].window.show();
+				GIS.map.base[base.id].window.show();
 			}
 		};
 		items.push(item);
@@ -924,10 +924,18 @@ Ext.onReady( function() {
 				{
 					text: 'Update', //i18n
 					handler: function() {
-						GIS.map.mapViewLoader = null;
-						GIS.cmp.interpretationButton.disable();
+						//GIS.map.mapViewLoader = null;
+						//GIS.cmp.interpretationButton.disable();
+						//base.widget.execute();
 
-						base.widget.execute();
+						var view = base.widget.getView();
+
+						if (view) {
+							var loader = base.core.getLoader(base);
+							loader.compare = true;
+							loader.zoomToVisibleExtent = true;
+							loader.execute(view);
+						}
 					}
 				}
 			],
@@ -3238,7 +3246,10 @@ Ext.onReady( function() {
 		],
 		listeners: {
 			render: GIS.init.onRender,
-			afterrender: GIS.init.afterRender
+			afterrender: GIS.init.afterRender,
+			added: function() {
+				GIS.map.viewport = this;
+			}
 		}
 	});
 

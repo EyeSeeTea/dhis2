@@ -23,255 +23,28 @@
 
 mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 
-    colors: [
-        new mapfish.ColorRgb(120, 120, 0),
-        new mapfish.ColorRgb(255, 0, 0)
-    ],
-
+    colors: [new mapfish.ColorRgb(120, 120, 0), new mapfish.ColorRgb(255, 0, 0)],
     method: mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS,
-
     numClasses: 5,
-
     bounds: null,
-
 	minSize: 3,
-
 	maxSize: 20,
-
 	minVal: null,
-
 	maxVal: null,
-
     defaultSymbolizer: {'fillOpacity': 1},
-
     classification: null,
-
     colorInterpolation: null,
 
     view: null,
-
+    base: null,
     widget: null,
 
     initialize: function(map, options) {
         mapfish.GeoStat.prototype.initialize.apply(this, arguments);
     },
 
-    loadOrganisationUnits: function(view) {
-		Ext.Ajax.request({
-			url: GIS.conf.url.path_gis + 'getGeoJson.action',
-			params: {
-				parentId: view.parentOrganisationUnit.id,
-				level: view.organisationUnitLevel.id
-			},
-			scope: this,
-			disableCaching: false,
-			success: function(r) {
-				var geojson = GIS.util.geojson.decode(r.responseText, this),
-					format = new OpenLayers.Format.GeoJSON(),
-					features = GIS.util.vector.getTransformedFeatureArray(format.read(geojson));
-
-				if (!features.length) {
-					alert('No valid coordinates found'); //todo //i18n
-					GIS.mask.hide();
-					return;
-				}
-
-				this.loadData(view, features);
-			}
-		});
-    },
-
-    loadData: function(view, features) {
-		var type = view.valueType,
-			dataUrl = 'mapValues/' + GIS.conf.finals.dimension[type].param + '.json',
-			indicator = GIS.conf.finals.dimension.indicator,
-			dataElement = GIS.conf.finals.dimension.dataElement,
-			period = GIS.conf.finals.dimension.period,
-			organisationUnit = GIS.conf.finals.dimension.organisationUnit,
-			params = {};
-
-		features = features || this.layer.features;
-
-		params[type === indicator.id ? indicator.param : dataElement.param] = view[type].id;
-		params[period.param] = view.period.id;
-		params[organisationUnit.param] = view.parentOrganisationUnit.id;
-		params.le = view.organisationUnitLevel.id;
-
-		Ext.Ajax.request({
-			url: GIS.conf.url.path_api + dataUrl,
-			params: params,
-			disableCaching: false,
-			scope: this,
-			success: function(r) {
-				var values = Ext.decode(r.responseText),
-					featureMap = {},
-					valueMap = {},
-					newFeatures = [];
-
-				if (values.length === 0) {
-					alert('No aggregated data values found'); //todo //i18n
-					GIS.mask.hide();
-					return;
-				}
-
-				for (var i = 0; i < features.length; i++) {
-					var iid = features[i].attributes.internalId;
-					featureMap[iid] = true;
-				}
-				for (var i = 0; i < values.length; i++) {
-					var iid = values[i].organisationUnitId,
-						value = values[i].value;
-					valueMap[iid] = value;
-				}
-
-				for (var i = 0; i < features.length; i++) {
-					var feature = features[i],
-						iid = feature.attributes.internalId;
-					if (featureMap.hasOwnProperty(iid) && valueMap.hasOwnProperty(iid)) {
-						feature.attributes.value = valueMap[iid];
-						feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
-						newFeatures.push(feature);
-					}
-				}
-
-				this.layer.removeFeatures(this.layer.features);
-				this.layer.addFeatures(newFeatures);
-
-				//if (this.tmpView.extended.updateOrganisationUnit) {
-					//this.layer.features = GIS.util.vector.getTransformedFeatureArray(this.layer.features);
-				//}
-
-				this.features = this.layer.features.slice(0);
-
-				this.loadLegend(view);
-			}
-		});
-	},
-
-	loadLegend: function(view) {
-		var options,
-			that = this,
-			predefined = GIS.conf.finals.widget.legendtype_predefined,
-			classificationType = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS,
-			method = view.legendType === predefined ? classificationType : view.method,
-			predefinedBounds,
-			legend,
-			fn = function() {
-				that.view = view;
-
-				options = {
-					indicator: GIS.conf.finals.widget.value,
-					method: method,
-					numClasses: view.classes,
-					bounds: predefinedBounds,
-					colors: that.getColors(view.colorLow, view.colorHigh),
-					minSize: view.radiusLow,
-					maxSize: view.radiusHigh
-				};
-
-				that.applyClassification(options);
-				that.widget.classificationApplied = true;
-
-				that.afterLoad();
-			};
-
-		if (view.legendType === GIS.conf.finals.widget.legendtype_predefined) {
-			var colors = [],
-				bounds = [],
-				names = [],
-				legends;
-
-			Ext.Ajax.request({
-				url: GIS.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
-				scope: this,
-				success: function(r) {
-					legends = Ext.decode(r.responseText).mapLegends;
-
-					Ext.Array.sort(legends, function (a, b) {
-						return a.startValue - b.startValue;
-					});
-
-					for (var i = 0; i < legends.length; i++) {
-						if (bounds[bounds.length-1] !== legends[i].startValue) {
-							if (bounds.length !== 0) {
-								colors.push(new mapfish.ColorRgb(240,240,240));
-								names.push('');
-							}
-							bounds.push(legends[i].startValue);
-						}
-						colors.push(new mapfish.ColorRgb());
-						colors[colors.length - 1].setFromHex(legends[i].color);
-						names.push(legends[i].name);
-						bounds.push(legends[i].endValue);
-					}
-
-					that.colorInterpolation = colors;
-					predefinedBounds = bounds;
-					view.legendSet.names = names;
-
-					fn();
-				}
-			});
-		}
-		else {
-			fn();
-		}
-	},
-
-	getPredefinedLegend: function(view) {
-		var colors = [],
-			bounds = [],
-			names = [];
-
-		Ext.Ajax.request({
-			url: GIS.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
-			scope: this,
-			success: function(r) {
-				var legends = Ext.decode(r.responseText).mapLegends;
-
-				Ext.Array.sort(legends, function (a, b) {
-					return a.startValue - b.startValue;
-				});
-
-				for (var i = 0; i < legends.length; i++) {
-					if (bounds[bounds.length-1] !== legends[i].startValue) {
-						if (bounds.length !== 0) {
-							colors.push(new mapfish.ColorRgb(240,240,240));
-                            names.push('');
-						}
-						bounds.push(legends[i].startValue);
-					}
-					colors.push(new mapfish.ColorRgb());
-					colors[colors.length - 1].setFromHex(legends[i].color);
-                    names.push(legends[i].name);
-					bounds.push(legends[i].endValue);
-				}
-
-				return {
-					interpolation: colors,
-					bounds: bounds,
-					names: names
-				};
-			}
-		});
-	},
-
-	afterLoad: function() {
-		this.widget.setGui(this.view);
-
-		// Legend
-		GIS.cmp.region.east.doLayout();
-		this.layer.legend.expand();
-
-        // Zoom to visible extent if not set by a favorite
-        //if (GIS.map.mapViewLoader) {
-			//GIS.map.mapViewLoader.callBack(this);
-		//}
-		//else {
-			GIS.util.map.zoomToVisibleExtent();
-		//}
-
-        GIS.mask.hide();
+    getLoader: function() {
+		return GIS.core.ThematicLoader();
 	},
 
     updateOptions: function(newOptions) {
