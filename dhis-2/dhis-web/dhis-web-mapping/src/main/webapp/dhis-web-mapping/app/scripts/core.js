@@ -127,6 +127,13 @@ GIS.conf = {
 };
 
 GIS.util = {};
+
+GIS.util.google = {};
+
+GIS.util.google.openTerms = function() {
+	window.open('http://www.google.com/intl/en-US_US/help/terms_maps.html', '_blank');
+};
+
 GIS.util.map = {};
 
 GIS.util.map.getVisibleVectorLayers = function(olmap) {
@@ -247,10 +254,6 @@ GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
 });
 
 GIS.core = {};
-
-//GIS.core.BaseCollection = function() {
-	//return
-//};
 
 GIS.core.StyleMap = function(base, labelConfig) {
 	var defaults = {
@@ -395,7 +398,7 @@ GIS.core.MapLoader = function(olmap) {
 
 	getMap = function(config) {
 		Ext.data.JsonP.request({
-			url: GIS.conf.url.path_api + 'maps/' + config.id + '.json?links=false',
+			url: config + 'maps/' + config.id + '.json?links=false',
 			success: function(r) {
 				if (!r) {
 					alert('Uid not recognized' + (config.el ? ' (' + config.el + ')' : ''));

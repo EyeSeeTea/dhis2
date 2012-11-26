@@ -272,12 +272,6 @@ Ext.onReady( function() {
 		GIS.base.facility.core.reset();
 	};
 
-	GIS.util.google = {};
-
-	GIS.util.google.openTerms = function() {
-		window.open('http://www.google.com/intl/en-US_US/help/terms_maps.html', '_blank');
-	};
-
 	GIS.util.url = {};
 
 	GIS.util.url.getUrlParam = function(s) {
@@ -1514,7 +1508,7 @@ Ext.onReady( function() {
 								success: function(r) {
 									var id = r.getAllResponseHeaders().location.split('/').pop();
 
-									GIS.map.mapViewLoader = GIS.obj.MapViewLoader(id);
+									//GIS.map.mapViewLoader = GIS.obj.MapViewLoader(id);
 
 									GIS.store.maps.loadStore();
 

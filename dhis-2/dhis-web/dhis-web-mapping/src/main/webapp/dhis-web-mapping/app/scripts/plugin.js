@@ -34,12 +34,12 @@ Ext.onReady( function() {
 			loader;
 
 		validateConfig = function(config) {
-			if !(config.url && Ext.isString(config.url)) {
+			if (!config.url || !Ext.isString(config.url)) {
 				alert('Invalid url (' + config.el + ')');
 				return false;
 			}
 
-			if !(config.el && Ext.isString(config.el)) {
+			if (!config.el || !Ext.isString(config.el)) {
 				alert('Invalid html element id (' + config.el + ')');
 				return false;
 			}
@@ -74,12 +74,12 @@ Ext.onReady( function() {
 					return false;
 				}
 
-				if !(config.level && Ext.isNumber(config.level)) {
+				if (!config.level || !Ext.isNumber(config.level)) {
 					alert('Invalid organisation unit level (' + config.el + ')');
 					return false;
 				}
 
-				if !(config.parent && Ext.isNumber(config.parent)) {
+				if (!config.parent || !Ext.isNumber(config.parent)) {
 					alert('Invalid parent organisation unit (' + config.el + ')');
 					return false;
 				}
@@ -97,6 +97,8 @@ Ext.onReady( function() {
 				dataElement = GIS.conf.finals.dimension.dataElement.id,
 				automatic = GIS.conf.finals.widget.legendtype_automatic,
 				predefined = GIS.conf.finals.widget.legendtype_predefined;
+
+			config.mapViews = config.mapViews || [];
 
 			for (var i = 0; i < config.mapViews.length; i++) {
 				view = config.mapViews[i];
@@ -143,6 +145,8 @@ Ext.onReady( function() {
 				renderTo: el,
 				style: 'padding:0, margin:0',
 				bodyStyle: 'padding:0, margin:0',
+				width: 1000,
+				height: 600,
 				layout: {
 					type: 'hbox',
 					align: 'stretch'
@@ -151,6 +155,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'gx_mappanel',
 						map: olmap,
+						bodyStyle: 'border:0 none',
 						width: 800,
 						height: 600
 					},
@@ -195,7 +200,9 @@ Ext.onReady( function() {
 							}
 						],
 						listeners: {
-							olmap.legendRegion = this;
+							added: function() {
+								olmap.legendRegion = this;
+							}
 						}
 					}
 				]
@@ -207,6 +214,7 @@ Ext.onReady( function() {
 		map = {
 			url: config.url,
 			el: config.el,
+			id: config.id,
 			longitude: config.longitude,
 			latitude: config.latitude,
 			zoom: config.zoom,
