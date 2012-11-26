@@ -468,6 +468,7 @@ GIS.core.MapLoader = function(olmap) {
 
 	loader = {
 		load: function(config) {
+			console.log(config);
 			if (config.id) {
 				getMap(config);
 			}

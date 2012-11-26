@@ -31,7 +31,6 @@ Ext.onReady( function() {
 			createViewport,
 			map,
 			olmap = GIS.core.OLMap(),
-			loader,
 			initialize;
 
 		validateConfig = function() {
@@ -211,9 +210,9 @@ Ext.onReady( function() {
 			return panel;
 		};
 
-		initialize = function() {			
+		initialize = function() {
 			GIS.conf.url.base = config.url;
-			GIS.store.organisationUnitLevels.load();
+			GIS.store.organisationUnitLevels.load();				
 
 			map = {
 				url: config.url,
@@ -222,15 +221,14 @@ Ext.onReady( function() {
 				longitude: config.longitude,
 				latitude: config.latitude,
 				zoom: config.zoom,
-				mapViews: getViews(config)
+				mapViews: getViews()
 			};
 
 			olmap = GIS.core.OLMap();
 
-			createViewport(map.el, olmap);
+			createViewport();
 
-			loader = GIS.core.MapLoader(olmap);
-			loader.load(config);
+			GIS.core.MapLoader(olmap).load(config);
 		}();
 	};
 });
