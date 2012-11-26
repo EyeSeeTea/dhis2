@@ -167,7 +167,7 @@ GIS.util.map.getExtendedBounds = function(layers) {
 GIS.util.map.zoomToVisibleExtent = function(olmap) {
 	var bounds = GIS.util.map.getExtendedBounds(GIS.util.map.getVisibleVectorLayers(olmap));
 	if (bounds) {
-		GIS.map.zoomToExtent(bounds);
+		olmap.zoomToExtent(bounds);
 	}
 };
 
@@ -184,7 +184,6 @@ GIS.util.geojson = {};
 
 GIS.util.geojson.decode = function(doc) {
 	var geojson = {};
-	doc = Ext.decode(doc);
 	geojson.type = 'FeatureCollection';
 	geojson.crs = {
 		type: 'EPSG',
@@ -395,7 +394,7 @@ GIS.core.MeasureWindow = function() {
 	return window;
 };
 
-GIS.core.MapLoader = function(olmap) {
+GIS.core.MapLoader = function(olmap) {	
 	var getMap,
 		setMap,
 		afterLoad,
@@ -403,12 +402,11 @@ GIS.core.MapLoader = function(olmap) {
 		mapViews,
 		callBack,
 		register = [],
-		loader,
-		base;
+		loader;
 
 	getMap = function(config) {
 		Ext.data.JsonP.request({
-			url: config.url + 'api/maps/' + config.id + '.jsonp?links=false',
+			url: GIS.conf.url.base + GIS.conf.url.path_api + 'maps/' + config.id + '.jsonp?links=false',
 			success: function(r) {
 				if (!r) {
 					alert('Uid not recognized' + (config.el ? ' (' + config.el + ')' : ''));
@@ -416,6 +414,7 @@ GIS.core.MapLoader = function(olmap) {
 				}
 
 				map = r;
+				map.el = config.el;
 				setMap(map);
 			}
 		});
@@ -438,11 +437,10 @@ GIS.core.MapLoader = function(olmap) {
 
 		for (var i = 0; i < mapViews.length; i++) {
 			mapView = mapViews[i];
-			base = olmap.base[mapView.layer];
-			loader = base.core.getLoader();
-			loader.updateGui = true;
+			loader = olmap.base[mapView.layer].core.getLoader();
+			loader.updateGui = !map.el;
 			loader.callBack = callBack;
-			loader.load(mapView, loader);
+			loader.load(mapView);
 		}
 	};
 
@@ -455,20 +453,24 @@ GIS.core.MapLoader = function(olmap) {
 	};
 
 	afterLoad = function() {
-		if (map.longtitude && Ext.isNumber(map.longitude) && map.latitude && Ext.isNumber(map.latitude) && map.zoom && Ext.isNumber(map.zoom)) {
-			olmap.setCenter(new OpenLayers.LonLat(map.longitude, map.latitude), map.zoom);
-		}
-		else {
+		if (map.el) {
 			olmap.zoomToVisibleExtent();
 		}
+		else {
+			if (map.longitude && map.latitude && map.zoom) {
+				olmap.setCenter(new OpenLayers.LonLat(map.longitude, map.latitude), map.zoom);
+			}
+			else {
+				olmap.zoomToVisibleExtent();
+			}
+		}
 
-		olmap.mask.hide();
+		//olmap.mask.hide();
 		//interpretation
 	};
 
 	loader = {
 		load: function(config) {
-			console.log(config);
 			if (config.id) {
 				getMap(config);
 			}
@@ -580,7 +582,7 @@ GIS.core.ThematicLoader = function(base) {
 			scope: this,
 			disableCaching: false,
 			success: function(r) {
-				var geojson = GIS.util.geojson.decode(r.responseText),
+				var geojson = GIS.util.geojson.decode(r),
 					format = new OpenLayers.Format.GeoJSON(),
 					features = GIS.util.map.getTransformedFeatureArray(format.read(geojson));
 
@@ -603,7 +605,7 @@ GIS.core.ThematicLoader = function(base) {
 
     loadData = function(view, features) {
 		var type = view.valueType,
-			dataUrl = 'mapValues/' + GIS.conf.finals.dimension[type].param + '.json',
+			dataUrl = 'mapValues/' + GIS.conf.finals.dimension[type].param + '.jsonp',
 			indicator = GIS.conf.finals.dimension.indicator,
 			dataElement = GIS.conf.finals.dimension.dataElement,
 			period = GIS.conf.finals.dimension.period,
@@ -617,20 +619,20 @@ GIS.core.ThematicLoader = function(base) {
 		params[organisationUnit.param] = view.parentOrganisationUnit.id;
 		params.le = view.organisationUnitLevel.id;
 
-		Ext.Ajax.request({
+		Ext.data.JsonP.request({
 			url: GIS.conf.url.base + GIS.conf.url.path_api + dataUrl,
 			params: params,
 			disableCaching: false,
 			scope: this,
 			success: function(r) {
-				var values = Ext.decode(r.responseText),
+				var values = r,
 					featureMap = {},
 					valueMap = {},
 					newFeatures = [];
 
 				if (values.length === 0) {
 					alert('No aggregated data values found'); //todo //i18n
-					GIS.mask.hide();
+					olmap.mask.hide();
 					return;
 				}
 
@@ -670,8 +672,11 @@ GIS.core.ThematicLoader = function(base) {
 			predefined = GIS.conf.finals.widget.legendtype_predefined,
 			classificationType = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS,
 			method = view.legendType === predefined ? classificationType : view.method,
-			predefinedBounds,
+			bounds,
+			colors,
+			names,
 			legend,
+			legends,
 			fn;
 
 		fn = function() {
@@ -679,23 +684,24 @@ GIS.core.ThematicLoader = function(base) {
 				indicator: GIS.conf.finals.widget.value,
 				method: method,
 				numClasses: view.classes,
-				bounds: predefinedBounds,
+				bounds: bounds,
 				colors: core.getColors(view.colorLow, view.colorHigh),
 				minSize: view.radiusLow,
 				maxSize: view.radiusHigh
 			};
 
+			view.legendSet.names = names;
 			core.view = view;
+			core.colorInterpolation = colors;
 			core.applyClassification(options);
 
 			afterLoad(view);
 		};
 
 		if (view.legendType === GIS.conf.finals.widget.legendtype_predefined) {
-			var colors = [],
-				bounds = [],
-				names = [],
-				legends;
+				bounds = [];
+				colors = [];
+				names = [];
 
 			Ext.Ajax.request({
 				url: GIS.conf.url.base + GIS.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
@@ -721,10 +727,6 @@ GIS.core.ThematicLoader = function(base) {
 						bounds.push(legends[i].endValue);
 					}
 
-					core.colorInterpolation = colors; //todo improve
-					predefinedBounds = bounds;
-					view.legendSet.names = names;
-
 					fn();
 				}
 			});
@@ -738,7 +740,7 @@ GIS.core.ThematicLoader = function(base) {
 		olmap.legendRegion.doLayout();
 		layer.legendPanel.expand();
 
-		if (loader.updateGui) {
+		if (loader.updateGui && Ext.isObject(widget)) {
 			widget.setGui(view);
 		}
 
@@ -774,7 +776,7 @@ GIS.core.ThematicLoader = function(base) {
 	return loader;
 };
 
-GIS.core.OLMap = function() {
+GIS.core.OLMap = function(el) {
 	var olmap,
 		addControl,
 		addLayers;
@@ -868,7 +870,7 @@ GIS.core.OLMap = function() {
 		base.core = new mapfish.GeoStat.Thematic1(olmap, {
 			layer: base.layer,
 			base: base,
-			legendDiv: base.legendDiv
+			legendDiv: base.legendDiv + el
 		});
 
 		base = olmap.base.thematic2;
@@ -877,7 +879,7 @@ GIS.core.OLMap = function() {
 		base.core = new mapfish.GeoStat.Thematic1(olmap, {
 			layer: base.layer,
 			base: base,
-			legendDiv: base.legendDiv
+			legendDiv: base.legendDiv + el
 		});
 
 		base = olmap.base.facility;
@@ -886,7 +888,7 @@ GIS.core.OLMap = function() {
 		base.core = new mapfish.GeoStat.Facility(olmap, {
 			layer: base.layer,
 			base: base,
-			legendDiv: base.legendDiv
+			legendDiv: base.legendDiv + el
 		});
 	};
 
@@ -922,12 +924,12 @@ GIS.core.OLMap = function() {
 
 	olmap.base = GIS.conf.finals.base;
 
-	addControl('zoomIn', olmap.zoomIn);
-	addControl('zoomOut', olmap.zoomOut);
-	addControl('zoomVisible', olmap.zoomToVisibleExtent);
-	addControl('measure', function() {
-		GIS.core.MeasureWindow().show();
-	});
+	//addControl('zoomIn', olmap.zoomIn);
+	//addControl('zoomOut', olmap.zoomOut);
+	//addControl('zoomVisible', olmap.zoomToVisibleExtent);
+	//addControl('measure', function() {
+		//GIS.core.MeasureWindow().show();
+	//});
 
 	addLayers(olmap);
 

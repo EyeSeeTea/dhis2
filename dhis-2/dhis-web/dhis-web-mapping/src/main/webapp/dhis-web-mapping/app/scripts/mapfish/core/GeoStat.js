@@ -130,8 +130,8 @@ mapfish.GeoStat = OpenLayers.Class({
 mapfish.GeoStat.Distribution = OpenLayers.Class({
 
     labelGenerator: function(bin, binIndex, nbBins) {
-        lower = parseFloat(bin.lowerBound).toFixed(1);
-        upper = parseFloat(bin.upperBound).toFixed(1);
+        var lower = parseFloat(bin.lowerBound).toFixed(1),
+			upper = parseFloat(bin.upperBound).toFixed(1);
         return lower + ' - ' + upper + '&nbsp;&nbsp;' + '(' + bin.nbVal + ')';
     },
 

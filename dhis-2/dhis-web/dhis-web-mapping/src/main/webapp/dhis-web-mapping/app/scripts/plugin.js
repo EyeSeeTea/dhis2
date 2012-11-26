@@ -30,7 +30,7 @@ Ext.onReady( function() {
 			getViews,
 			createViewport,
 			map,
-			olmap = GIS.core.OLMap(),
+			olmap,
 			initialize;
 
 		validateConfig = function() {
@@ -144,8 +144,8 @@ Ext.onReady( function() {
 				renderTo: el,
 				style: 'padding:0, margin:0',
 				bodyStyle: 'padding:0, margin:0',
-				width: 1000,
-				height: 600,
+				width: el.getWidth(),
+				height: el.getHeight(),
 				layout: {
 					type: 'hbox',
 					align: 'stretch'
@@ -155,8 +155,8 @@ Ext.onReady( function() {
 						xtype: 'gx_mappanel',
 						map: olmap,
 						bodyStyle: 'border:0 none',
-						width: 800,
-						height: 600
+						width: el.getWidth() - 200,
+						height: el.getHeight()
 					},
 					{
 						xtype: 'panel',
@@ -204,7 +204,13 @@ Ext.onReady( function() {
 							}
 						}
 					}
-				]
+				],
+				afterrender: function() {					
+					//document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin_24.png" />';
+					//document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout_24.png" />';
+					//document.getElementsByClassName('zoomVisibleButton')[0].innerHTML = '<img src="images/zoomvisible_24.png" />';
+					//document.getElementsByClassName('measureButton')[0].innerHTML = '<img src="images/measure_24.png" />';
+				}
 			});
 
 			return panel;
@@ -224,11 +230,12 @@ Ext.onReady( function() {
 				mapViews: getViews()
 			};
 
-			olmap = GIS.core.OLMap();
+			olmap = GIS.core.OLMap(config.el);
 
 			createViewport();
 
-			GIS.core.MapLoader(olmap).load(config);
+			var loader = GIS.core.MapLoader(olmap);
+			loader.load(config);
 		}();
 	};
 });

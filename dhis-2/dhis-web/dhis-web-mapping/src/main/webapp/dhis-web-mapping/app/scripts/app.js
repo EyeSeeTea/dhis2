@@ -1,7 +1,5 @@
 GIS.init = {};
 
-GIS.mask = {};
-
 GIS.obj = {};
 
 GIS.cmp = {
