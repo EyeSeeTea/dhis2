@@ -150,7 +150,9 @@ Ext.onReady( function() {
 				items: [
 					{
 						xtype: 'gx_mappanel',
-						map: olmap
+						map: olmap,
+						width: 800,
+						height: 600
 					},
 					{
 						xtype: 'panel',

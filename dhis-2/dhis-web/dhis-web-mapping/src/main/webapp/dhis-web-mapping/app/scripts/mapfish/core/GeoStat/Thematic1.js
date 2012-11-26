@@ -44,7 +44,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     },
 
     getLoader: function() {
-		return GIS.core.ThematicLoader();
+		return GIS.core.ThematicLoader(this.base);
 	},
 
 	reset: function() {

@@ -59,6 +59,11 @@ Ext.onReady( function() {
 
 	GIS.init.afterRender = function() {
 
+		// Mask
+		GIS.map.mask = new Ext.LoadMask(GIS.cmp.region.center.getEl(), {
+			msg: GIS.i18n.loading
+		});
+
 		// Map tools
 		document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin_24.png" />';
 		document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout_24.png" />';
@@ -106,12 +111,6 @@ Ext.onReady( function() {
 	// Map
 
 	GIS.map = GIS.core.OLMap();
-
-	// Mask
-
-	GIS.map.mask = new Ext.LoadMask(GIS.cmp.region.center.getEl(), {
-		msg: GIS.i18n.loading
-	});
 
 	// Util
 
@@ -861,16 +860,13 @@ Ext.onReady( function() {
 				{
 					text: 'Update', //i18n
 					handler: function() {
-						//GIS.map.mapViewLoader = null;
-						//GIS.cmp.interpretationButton.disable();
-						//base.widget.execute();
-
 						var view = base.widget.getView();
 
 						if (view) {
 							var loader = base.core.getLoader(base);
 							loader.compare = true;
 							loader.zoomToVisibleExtent = true;
+							loader.hideMask = true;
 							loader.load(view);
 						}
 					}
@@ -2870,7 +2866,7 @@ Ext.onReady( function() {
                         animCollapse: false,
                         listeners: {
 							added: function() {
-								GIS.map.base.thematic1.layer.legend = this;
+								GIS.map.base.thematic1.layer.legendPanel = this;
 							}
 						}
                     },
@@ -2883,7 +2879,7 @@ Ext.onReady( function() {
                         animCollapse: false,
                         listeners: {
 							added: function() {
-								GIS.map.base.thematic2.layer.legend = this;
+								GIS.map.base.thematic2.layer.legendPanel = this;
 							}
 						}
                     },
@@ -2896,7 +2892,7 @@ Ext.onReady( function() {
                         animCollapse: false,
                         listeners: {
 							added: function() {
-								GIS.map.base.facility.layer.legend = this;
+								GIS.map.base.facility.layer.legendPanel = this;
 							}
 						}
                     }
