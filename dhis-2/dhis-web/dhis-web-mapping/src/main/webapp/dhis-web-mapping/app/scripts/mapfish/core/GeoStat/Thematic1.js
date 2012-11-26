@@ -51,7 +51,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		this.layer.destroyFeatures();
 
 		// Legend
-		document.getElementById(this.legendDiv).innerHTML = '';
+		this.legendDiv.innerHTML = '';
 		this.layer.legendPanel.collapse();
 
 		if (this.widget) {

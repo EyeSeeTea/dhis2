@@ -150,7 +150,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+					url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
 				},
 				root: {
 					id: 'root',
@@ -548,7 +548,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 
     loadOrganisationUnits: function() {
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_gis + 'getGeoJson.action',
+			url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getGeoJson.action',
 			params: {
 				parentId: this.tmpView.parentOrganisationUnit.id,
 				level: this.tmpView.organisationUnitLevel.id

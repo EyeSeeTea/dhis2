@@ -91,9 +91,9 @@ GIS.conf = {
 		}
 	},
 	url: {
-		path_api: '../../api/',
-		path_gis: '../',
-		path_scripts: 'scripts/'
+		base: '../../',
+		path_api: 'api/',
+		path_gis: 'dhis-web-mapping/'
 	},
 	layout: {
 		widget: {
@@ -171,6 +171,15 @@ GIS.util.map.zoomToVisibleExtent = function(olmap) {
 	}
 };
 
+GIS.util.map.getTransformedFeatureArray = function(features) {
+	var sourceProjection = new OpenLayers.Projection("EPSG:4326"),
+		destinationProjection = new OpenLayers.Projection("EPSG:900913");
+	for (var i = 0; i < features.length; i++) {
+		features[i].geometry.transform(sourceProjection, destinationProjection);
+	}
+	return features;
+};
+
 GIS.util.geojson = {};
 
 GIS.util.geojson.decode = function(doc) {
@@ -221,14 +230,12 @@ GIS.store = {};
 GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
 	fields: ['id', 'name', 'level'],
 	proxy: {
-		type: 'ajax',
-		url: GIS.conf.url.path_api + 'organisationUnitLevels.json?viewClass=detailed&links=false&paging=false',
+		type: 'jsonp',
 		reader: {
 			type: 'json',
 			root: 'organisationUnitLevels'
 		}
 	},
-	autoLoad: true,
 	cmp: [],
 	isLoaded: false,
 	loadFn: function(fn) {
@@ -243,6 +250,9 @@ GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
 		return this.getAt(this.findExact('level', level));
 	},
 	listeners: {
+		beforeload: function() {
+			this.proxy.url = GIS.conf.url.base + GIS.conf.url.path_api + 'organisationUnitLevels.jsonp?viewClass=detailed&links=false&paging=false';
+		},
 		load: function() {
 			if (!this.isLoaded) {
 				this.isLoaded = true;
@@ -398,7 +408,7 @@ GIS.core.MapLoader = function(olmap) {
 
 	getMap = function(config) {
 		Ext.data.JsonP.request({
-			url: config + 'maps/' + config.id + '.json?links=false',
+			url: config.url + 'api/maps/' + config.id + '.jsonp?links=false',
 			success: function(r) {
 				if (!r) {
 					alert('Uid not recognized' + (config.el ? ' (' + config.el + ')' : ''));
@@ -417,7 +427,7 @@ GIS.core.MapLoader = function(olmap) {
 			lonLat,
 			loader;
 
-		mapViews = Ext.isDefined(map.mapViews) ? map.mapViews : [];
+		mapViews = map.mapViews || [];
 
 		if (!mapViews.length) {
 			alert('Favorite is outdated - please create a new one'); //i18n
@@ -560,8 +570,8 @@ GIS.core.ThematicLoader = function(base) {
 	};
 
     loadOrganisationUnits = function(view) {
-		Ext.Ajax.request({
-			url: GIS.conf.url.path_gis + 'getGeoJson.action',
+		Ext.data.JsonP.request({
+			url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getGeoJson.action',
 			params: {
 				parentId: view.parentOrganisationUnit.id,
 				level: view.organisationUnitLevel.id
@@ -571,7 +581,7 @@ GIS.core.ThematicLoader = function(base) {
 			success: function(r) {
 				var geojson = GIS.util.geojson.decode(r.responseText),
 					format = new OpenLayers.Format.GeoJSON(),
-					features = GIS.util.vector.getTransformedFeatureArray(format.read(geojson));
+					features = GIS.util.map.getTransformedFeatureArray(format.read(geojson));
 
 				if (!Ext.isArray(features)) {
 					alert('Invalid coordinates');
@@ -607,7 +617,7 @@ GIS.core.ThematicLoader = function(base) {
 		params.le = view.organisationUnitLevel.id;
 
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_api + dataUrl,
+			url: GIS.conf.url.base + GIS.conf.url.path_api + dataUrl,
 			params: params,
 			disableCaching: false,
 			scope: this,
@@ -687,7 +697,7 @@ GIS.core.ThematicLoader = function(base) {
 				legends;
 
 			Ext.Ajax.request({
-				url: GIS.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
+				url: GIS.conf.url.base + GIS.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
 				scope: this,
 				success: function(r) {
 					legends = Ext.decode(r.responseText).mapLegends;
@@ -898,28 +908,27 @@ GIS.core.OLMap = function() {
 		relocate: {} // Relocate organisation units
 	});
 
-	addControl('zoomIn', olmap.zoomIn);
-	addControl('zoomOut', olmap.zoomOut);
-	addControl('zoomVisible', olmap.zoomToVisibleExtent);
-	addControl('measure', function() {
-		var measureWindow = GIS.core.MeasureWindow();
-		measureWindow.show();
-	});
-
-	olmap.base = GIS.conf.finals.base;
-
-	addLayers(olmap);
-
 	olmap.zoomToVisibleExtent = function() {
 		GIS.util.map.zoomToVisibleExtent(this);
 	};
 
 	olmap.closeAllLayers = function() {
-		olmap.base.boundary.core.reset();
+		//olmap.base.boundary.core.reset();
 		olmap.base.thematic1.core.reset();
-		olmap.base.thematic2.core.reset();
-		olmap.base.facility.core.reset();
+		//olmap.base.thematic2.core.reset();
+		//olmap.base.facility.core.reset();
 	};
+
+	olmap.base = GIS.conf.finals.base;
+
+	addControl('zoomIn', olmap.zoomIn);
+	addControl('zoomOut', olmap.zoomOut);
+	addControl('zoomVisible', olmap.zoomToVisibleExtent);
+	addControl('measure', function() {
+		GIS.core.MeasureWindow().show();
+	});
+
+	addLayers(olmap);
 
 	return olmap;
 };

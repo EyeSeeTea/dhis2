@@ -44,10 +44,12 @@ Ext.onReady( function() {
 		};
 
 		GIS.init.contextPath = init.contextPath;
+
+		GIS.store.organisationUnitLevels.load();
 	};
 
 	Ext.Ajax.request({
-		url: GIS.conf.url.path_gis + 'initialize.action',
+		url: GIS.conf.url.base + GIS.conf.url.path_gis + 'initialize.action',
 		success: function(r) {
 			GIS.init.onInitialize(r);
 
@@ -83,7 +85,7 @@ Ext.onReady( function() {
 					center = GIS.cmp.region.center;
 
 				Ext.Ajax.request({
-					url: GIS.conf.url.path_gis + 'updateOrganisationUnitCoordinates.action',
+					url: GIS.conf.url.base + GIS.conf.url.path_gis + 'updateOrganisationUnitCoordinates.action',
 					method: 'POST',
 					params: {id: GIS.map.relocate.feature.attributes.id, coordinates: coordinates},
 					success: function(r) {
@@ -234,7 +236,7 @@ Ext.onReady( function() {
 		}
 
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_api + 'maps/' + id + '.json?links=false',
+			url: GIS.conf.url.base + GIS.conf.url.path_api + 'maps/' + id + '.json?links=false',
 			success: function(r) {
 				var map = Ext.decode(r.responseText);
 
@@ -449,7 +451,7 @@ Ext.onReady( function() {
 		fields: ['id', 'name'],
 		proxy: {
 			type: 'ajax',
-			url: GIS.conf.url.path_api + 'indicatorGroups.json?links=false&paging=false',
+			url: GIS.conf.url.base + GIS.conf.url.path_api + 'indicatorGroups.json?links=false&paging=false',
 			reader: {
 				type: 'json',
 				root: 'indicatorGroups'
@@ -480,7 +482,7 @@ Ext.onReady( function() {
 		fields: ['id', 'name'],
 		proxy: {
 			type: 'ajax',
-			url: GIS.conf.url.path_api + 'dataElementGroups.json?links=false&paging=false',
+			url: GIS.conf.url.base + GIS.conf.url.path_api + 'dataElementGroups.json?links=false&paging=false',
 			reader: {
 				type: 'json',
 				root: 'dataElementGroups'
@@ -516,7 +518,7 @@ Ext.onReady( function() {
 		fields: ['id', 'name'],
 		proxy: {
 			type: 'ajax',
-			url: GIS.conf.url.path_gis + 'getPeriodsByPeriodType.action',
+			url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getPeriodsByPeriodType.action',
 			reader: {
 				type: 'json',
 				root: 'periods'
@@ -540,7 +542,7 @@ Ext.onReady( function() {
         fields: ['id', 'name'],
 		proxy: {
 			type: 'ajax',
-			url: GIS.conf.url.path_api + 'organisationUnitGroupSets.json?paging=false&links=false',
+			url: GIS.conf.url.base + GIS.conf.url.path_api + 'organisationUnitGroupSets.json?paging=false&links=false',
 			reader: {
 				type: 'json',
 				root: 'organisationUnitGroupSets'
@@ -599,7 +601,7 @@ Ext.onReady( function() {
 		fields: ['id', 'name'],
 		proxy: {
 			type: 'ajax',
-			url: GIS.conf.url.path_api + 'mapLegendSets.json?links=false&paging=false',
+			url: GIS.conf.url.base + GIS.conf.url.path_api + 'mapLegendSets.json?links=false&paging=false',
 			reader: {
 				type: 'json',
 				root: 'mapLegendSets'
@@ -636,7 +638,7 @@ Ext.onReady( function() {
 		isLoaded: false,
 		pageSize: 10,
 		page: 1,
-		defaultUrl: GIS.conf.url.path_api + 'maps.json?viewClass=detailed&links=false',
+		defaultUrl: GIS.conf.url.base + GIS.conf.url.path_api + 'maps.json?viewClass=detailed&links=false',
 		loadStore: function(url) {
 			this.proxy.url = url || this.defaultUrl;
 
@@ -1501,7 +1503,7 @@ Ext.onReady( function() {
 							}
 
 							Ext.Ajax.request({
-								url: GIS.conf.url.path_api + 'maps/',
+								url: GIS.conf.url.base + GIS.conf.url.path_api + 'maps/',
 								method: 'POST',
 								headers: {'Content-Type': 'application/json'},
 								params: Ext.encode(map),
@@ -1535,7 +1537,7 @@ Ext.onReady( function() {
 						system = systemCheckbox.getValue();
 
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_gis + 'renameMap.action?id=' + id + '&name=' + name + '&user=' + !system,
+						url: GIS.conf.url.base + GIS.conf.url.path_gis + 'renameMap.action?id=' + id + '&name=' + name + '&user=' + !system,
 						success: function() {
 							GIS.store.maps.loadStore();
 
@@ -1602,7 +1604,7 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? GIS.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+							url = value ? GIS.conf.url.base + GIS.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
 							store = GIS.store.maps;
 
 						store.page = 1;
@@ -1616,7 +1618,7 @@ Ext.onReady( function() {
 			text: 'Prev', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? GIS.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+					url = value ? GIS.conf.url.base + GIS.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
 					store = GIS.store.maps;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1628,7 +1630,7 @@ Ext.onReady( function() {
 			text: 'Next', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? GIS.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+					url = value ? GIS.conf.url.base + GIS.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
 					store = GIS.store.maps;
 
 				store.page = store.page + 1;
@@ -1739,7 +1741,7 @@ Ext.onReady( function() {
 										};
 
 										Ext.Ajax.request({
-											url: GIS.conf.url.path_api + 'maps/' + id,
+											url: GIS.conf.url.base + GIS.conf.url.path_api + 'maps/' + id,
 											method: 'PUT',
 											headers: {'Content-Type': 'application/json'},
 											params: Ext.encode(map),
@@ -1767,7 +1769,7 @@ Ext.onReady( function() {
 
 								if (confirm(message)) {
 									Ext.Ajax.request({
-										url: GIS.conf.url.path_gis + 'addMapViewToDashboard.action',
+										url: GIS.conf.url.base + GIS.conf.url.path_gis + 'addMapViewToDashboard.action',
 										params: {
 											id: id
 										}
@@ -1793,7 +1795,7 @@ Ext.onReady( function() {
 
 								if (confirm(message)) {
 									Ext.Ajax.request({
-										url: GIS.conf.url.path_api + 'maps/' + id,
+										url: GIS.conf.url.base + GIS.conf.url.path_api + 'maps/' + id,
 										method: 'DELETE',
 										success: function() {
 											GIS.store.maps.loadStore();
@@ -1980,7 +1982,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: GIS.conf.url.path_api + 'mapLegendSets.json?links=false&paging=false',
+				url: GIS.conf.url.base + GIS.conf.url.path_api + 'mapLegendSets.json?links=false&paging=false',
 				reader: {
 					type: 'json',
 					root: 'mapLegendSets'
@@ -2416,7 +2418,7 @@ Ext.onReady( function() {
 			});
 
 			if (id) {
-				legendStore.proxy.url = GIS.conf.url.path_api +  'mapLegendSets/' + id + '.json?links=false&paging=false';
+				legendStore.proxy.url = GIS.conf.url.base + GIS.conf.url.path_api +  'mapLegendSets/' + id + '.json?links=false&paging=false';
 				legendStore.load();
 
 				legendSetName.setValue(legendSetStore.getById(id).data.name);
@@ -2443,7 +2445,7 @@ Ext.onReady( function() {
 		deleteLegendSet = function(id) {
 			if (id) {
 				Ext.Ajax.request({
-					url: GIS.conf.url.path_api + 'mapLegendSets/' + id,
+					url: GIS.conf.url.base + GIS.conf.url.path_api + 'mapLegendSets/' + id,
 					method: 'DELETE',
 					success: function() {
 						legendSetStore.load();
@@ -2542,7 +2544,7 @@ Ext.onReady( function() {
 					var body = Ext.encode(getRequestBody());
 
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'mapLegendSets/',
+						url: GIS.conf.url.base + GIS.conf.url.path_api + 'mapLegendSets/',
 						method: 'POST',
 						headers: {'Content-Type': 'application/json'},
 						params: body,
@@ -2566,7 +2568,7 @@ Ext.onReady( function() {
 					body = Ext.encode(getRequestBody());
 
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'mapLegendSets/' + id,
+						url: GIS.conf.url.base + GIS.conf.url.path_api + 'mapLegendSets/' + id,
 						method: 'PUT',
 						headers: {'Content-Type': 'application/json'},
 						params: body,
@@ -2701,7 +2703,7 @@ Ext.onReady( function() {
 			handler: function() {
 				if (textarea.getValue() && GIS.map.mapViewLoader) {
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'interpretations/map/' + GIS.map.mapViewLoader.id,
+						url: GIS.conf.url.base + GIS.conf.url.path_api + 'interpretations/map/' + GIS.map.mapViewLoader.id,
 						method: 'POST',
 						params: textarea.getValue(),
 						headers: {'Content-Type': 'text/html'},

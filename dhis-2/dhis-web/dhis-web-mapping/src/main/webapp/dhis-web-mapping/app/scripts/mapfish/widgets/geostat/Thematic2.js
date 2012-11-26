@@ -318,7 +318,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
                         this.cmp.indicator.clearValue();
 
                         var store = this.cmp.indicator.store;
-                        store.proxy.url = GIS.conf.url.path_api +  'indicatorGroups/' + cb.getValue() + '.json?links=false&paging=false';
+                        store.proxy.url = GIS.conf.url.base + GIS.conf.url.path_api +  'indicatorGroups/' + cb.getValue() + '.json?links=false&paging=false';
                         store.load();
                     }
                 }
@@ -343,7 +343,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 					that.config.extended.updateData = true;
 
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'indicators/' + this.getValue() + '.json?links=false',
+						url: GIS.conf.url.base + GIS.conf.url.path_api + 'indicators/' + this.getValue() + '.json?links=false',
 						scope: this,
 						success: function(r) {
 							r = Ext.decode(r.responseText);
@@ -389,7 +389,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
                         this.cmp.dataElement.clearValue();
 
                         var store = this.cmp.dataElement.store;
-                        store.proxy.url = GIS.conf.url.path_api +  'dataElementGroups/' + cb.getValue() + '.json?links=false&paging=false';
+                        store.proxy.url = GIS.conf.url.base + GIS.conf.url.path_api +  'dataElementGroups/' + cb.getValue() + '.json?links=false&paging=false';
                         store.load();
                     }
                 }
@@ -415,7 +415,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 					that.config.extended.updateData = true;
 
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'dataElements/' + this.getValue() + '.json?links=false',
+						url: GIS.conf.url.base + GIS.conf.url.path_api + 'dataElements/' + this.getValue() + '.json?links=false',
 						scope: this,
 						success: function(r) {
 							r = Ext.decode(r.responseText);
@@ -704,7 +704,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+					url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
 				},
 				root: {
 					id: 'root',
@@ -919,7 +919,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			// Infrastructural data
 			showInfo = function() {
 				Ext.Ajax.request({
-					url: GIS.conf.url.path_gis + 'getFacilityInfo.action',
+					url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getFacilityInfo.action',
 					params: {
 						id: feature.attributes.id
 					},
@@ -1254,7 +1254,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			legends;
 
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_api + 'mapLegendSets/' + this.tmpView.legendSet.id + '.json?links=false&paging=false',
+			url: GIS.conf.url.base + GIS.conf.url.path_api + 'mapLegendSets/' + this.tmpView.legendSet.id + '.json?links=false&paging=false',
 			scope: this,
 			success: function(r) {
 				legends = Ext.decode(r.responseText).mapLegends;
@@ -1373,7 +1373,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 			indeGroupView.setValue(indeGroupValue);
 		});
 
-		indeStore.proxy.url = GIS.conf.url.path_api + view.valueType + 'Groups/' + indeGroupValue + '.json?links=false&paging=false';
+		indeStore.proxy.url = GIS.conf.url.base + GIS.conf.url.path_api + view.valueType + 'Groups/' + indeGroupValue + '.json?links=false&paging=false';
 		indeStore.loadFn( function() {
 			indeView.setValue(indeValue);
 		});
@@ -1632,7 +1632,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 
     loadOrganisationUnits: function() {
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_gis + 'getGeoJson.action',
+			url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getGeoJson.action',
 			params: {
 				parentId: this.tmpView.parentOrganisationUnit.id,
 				level: this.tmpView.organisationUnitLevel.id
@@ -1676,7 +1676,7 @@ Ext.define('mapfish.widgets.geostat.Thematic2', {
 		params.le = this.tmpView.organisationUnitLevel.id;
 
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_api + dataUrl,
+			url: GIS.conf.url.base + GIS.conf.url.path_api + dataUrl,
 			params: params,
 			disableCaching: false,
 			scope: this,

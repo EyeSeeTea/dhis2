@@ -211,6 +211,10 @@ Ext.onReady( function() {
 			return panel;
 		};
 
+		GIS.conf.url.base = config.url;
+
+		GIS.store.organisationUnitLevels.load();
+
 		map = {
 			url: config.url,
 			el: config.el,
@@ -225,10 +229,9 @@ Ext.onReady( function() {
 
 		createViewport(map.el, olmap);
 
-		loader = GIS.core.MapLoader();
+		loader = GIS.core.MapLoader(olmap);
 
-
-		//olmap.loader.loadMap(map);
+		loader.load(config);
 	};
 
 });

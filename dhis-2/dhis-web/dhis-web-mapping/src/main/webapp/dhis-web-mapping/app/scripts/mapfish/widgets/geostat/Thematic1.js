@@ -291,7 +291,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                         this.cmp.indicator.clearValue();
 
                         var store = this.cmp.indicator.store;
-                        store.proxy.url = GIS.conf.url.path_api +  'indicatorGroups/' + cb.getValue() + '.json?links=false&paging=false';
+                        store.proxy.url = GIS.conf.url.base + GIS.conf.url.path_api +  'indicatorGroups/' + cb.getValue() + '.json?links=false&paging=false';
                         store.load();
                     }
                 }
@@ -315,7 +315,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					var that = this.scope;
 
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'indicators/' + this.getValue() + '.json?links=false',
+						url: GIS.conf.url.base + GIS.conf.url.path_api + 'indicators/' + this.getValue() + '.json?links=false',
 						scope: this,
 						success: function(r) {
 							r = Ext.decode(r.responseText);
@@ -361,7 +361,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
                         this.cmp.dataElement.clearValue();
 
                         var store = this.cmp.dataElement.store;
-                        store.proxy.url = GIS.conf.url.path_api +  'dataElementGroups/' + cb.getValue() + '.json?links=false&paging=false';
+                        store.proxy.url = GIS.conf.url.base + GIS.conf.url.path_api +  'dataElementGroups/' + cb.getValue() + '.json?links=false&paging=false';
                         store.load();
                     }
                 }
@@ -386,7 +386,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 					var that = this.scope;
 
 					Ext.Ajax.request({
-						url: GIS.conf.url.path_api + 'dataElements/' + this.getValue() + '.json?links=false',
+						url: GIS.conf.url.base + GIS.conf.url.path_api + 'dataElements/' + this.getValue() + '.json?links=false',
 						scope: this,
 						success: function(r) {
 							r = Ext.decode(r.responseText);
@@ -613,7 +613,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+					url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
 				},
 				root: {
 					id: 'root',
@@ -820,7 +820,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			// Infrastructural data
 			showInfo = function() {
 				Ext.Ajax.request({
-					url: GIS.conf.url.path_gis + 'getFacilityInfo.action',
+					url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getFacilityInfo.action',
 					params: {
 						id: feature.attributes.id
 					},
@@ -1218,7 +1218,7 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 			indeGroupView.setValue(indeGroupValue);
 		});
 
-		indeStore.proxy.url = GIS.conf.url.path_api + view.valueType + 'Groups/' + indeGroupValue + '.json?links=false&paging=false';
+		indeStore.proxy.url = GIS.conf.url.base + GIS.conf.url.path_api + view.valueType + 'Groups/' + indeGroupValue + '.json?links=false&paging=false';
 		indeStore.loadFn( function() {
 			indeView.setValue(indeValue);
 		});

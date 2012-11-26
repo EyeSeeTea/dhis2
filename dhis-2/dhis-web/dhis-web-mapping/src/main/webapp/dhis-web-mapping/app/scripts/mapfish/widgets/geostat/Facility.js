@@ -237,7 +237,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 			store: Ext.create('Ext.data.TreeStore', {
 				proxy: {
 					type: 'ajax',
-					url: GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
+					url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getOrganisationUnitChildren.action'
 				},
 				root: {
 					id: 'root',
@@ -399,7 +399,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 			// Infrastructural data
 			showInfo = function() {
 				Ext.Ajax.request({
-					url: GIS.conf.url.path_gis + 'getFacilityInfo.action',
+					url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getFacilityInfo.action',
 					params: {
 						id: feature.attributes.id
 					},
@@ -842,7 +842,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 
     loadOrganisationUnits: function() {
 		Ext.Ajax.request({
-			url: GIS.conf.url.path_gis + 'getGeoJsonFacilities.action',
+			url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getGeoJsonFacilities.action',
 			params: {
 				parentId: this.tmpView.parentOrganisationUnit.id,
 				level: this.tmpView.organisationUnitLevel.id
@@ -893,7 +893,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		var store = GIS.store.groupsByGroupSet,
 			options;
 
-		store.proxy.url = GIS.conf.url.path_gis + 'getOrganisationUnitGroupsByGroupSet.action?id=' + this.tmpView.organisationUnitGroupSet.id;
+		store.proxy.url = GIS.conf.url.base + GIS.conf.url.path_gis + 'getOrganisationUnitGroupsByGroupSet.action?id=' + this.tmpView.organisationUnitGroupSet.id;
 		store.load({
 			scope: this,
 			callback: function() {
