@@ -31,9 +31,10 @@ Ext.onReady( function() {
 			createViewport,
 			map,
 			olmap = GIS.core.OLMap(),
-			loader;
+			loader,
+			initialize;
 
-		validateConfig = function(config) {
+		validateConfig = function() {
 			if (!config.url || !Ext.isString(config.url)) {
 				alert('Invalid url (' + config.el + ')');
 				return false;
@@ -86,11 +87,11 @@ Ext.onReady( function() {
 			}
 		};
 
-		if (!validateConfig(config)) {
+		if (!validateConfig()) {
 			return;
 		}
 
-		getViews = function(config) {
+		getViews = function() {
 			var view,
 				views = [],
 				indicator = GIS.conf.finals.dimension.indicator.id,
@@ -136,10 +137,9 @@ Ext.onReady( function() {
 			return view;
 		};
 
-		createViewport = function(el, olmap) {
-			var panel;
-
-			el = Ext.get(el);
+		createViewport = function() {
+			var panel,
+				el = Ext.get(map.el);
 
 			panel = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
@@ -211,27 +211,26 @@ Ext.onReady( function() {
 			return panel;
 		};
 
-		GIS.conf.url.base = config.url;
+		initialize = function() {			
+			GIS.conf.url.base = config.url;
+			GIS.store.organisationUnitLevels.load();
 
-		GIS.store.organisationUnitLevels.load();
+			map = {
+				url: config.url,
+				el: config.el,
+				id: config.id,
+				longitude: config.longitude,
+				latitude: config.latitude,
+				zoom: config.zoom,
+				mapViews: getViews(config)
+			};
 
-		map = {
-			url: config.url,
-			el: config.el,
-			id: config.id,
-			longitude: config.longitude,
-			latitude: config.latitude,
-			zoom: config.zoom,
-			mapViews: getViews(config)
-		};
+			olmap = GIS.core.OLMap();
 
-		olmap = GIS.core.OLMap();
+			createViewport(map.el, olmap);
 
-		createViewport(map.el, olmap);
-
-		loader = GIS.core.MapLoader(olmap);
-
-		loader.load(config);
+			loader = GIS.core.MapLoader(olmap);
+			loader.load(config);
+		}();
 	};
-
 });
