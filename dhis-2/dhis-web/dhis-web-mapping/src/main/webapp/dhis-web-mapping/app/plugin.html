@@ -13,12 +13,10 @@
 <body style="margin:10px 0 0 30px">
 	<div id="layerItems"></div>
 	<div id="boundaryLegendmap1"></div>
-	<div id="thematic1Legendmap1"></div>
 	<div id="thematic2Legendmap1"></div>
 	<div id="facilityLegendmap1"></div>
 	<div id="symbolLegendmap1"></div>
 	<div id="boundaryLegendmap2"></div>
-	<div id="thematic1Legendmap2"></div>
 	<div id="thematic2Legendmap2"></div>
 	<div id="facilityLegendmap2"></div>
 	<div id="symbolLegendmap2"></div>
@@ -27,7 +25,7 @@
 	<div id="map1" style="width:700px; height:400px"></div>
 
 	<br/>
-	
+
 	<div style="font-size:20px !important; padding:10px">My map 2</div>
 	<div id="map2" style="width:700px; height:400px"></div>
 
@@ -60,16 +58,14 @@
 			GIS.getMap({
 				url: url,
 				el: "map1",
-				id: "RGhCpZeTl11"
+				id: "HUXnoavGsKo"
 			});
 
-			Ext.defer( function() {
-				GIS.getMap({
-					url: url,
-					el: "map2",
-					id: "e5NnSjSx6su"
-				});
-			}, 100);
+			GIS.getMap({
+				url: url,
+				el: "map2",
+				id: "Jv6AyAR3fPh"
+			});
 
 		});
 

@@ -394,7 +394,7 @@ GIS.core.MeasureWindow = function() {
 	return window;
 };
 
-GIS.core.MapLoader = function(olmap) {	
+GIS.core.MapLoader = function(olmap) {
 	var getMap,
 		setMap,
 		afterLoad,
@@ -690,6 +690,7 @@ GIS.core.ThematicLoader = function(base) {
 				maxSize: view.radiusHigh
 			};
 
+			view.legendSet = view.legendSet || {};
 			view.legendSet.names = names;
 			core.view = view;
 			core.colorInterpolation = colors;
@@ -924,12 +925,12 @@ GIS.core.OLMap = function(el) {
 
 	olmap.base = GIS.conf.finals.base;
 
-	//addControl('zoomIn', olmap.zoomIn);
-	//addControl('zoomOut', olmap.zoomOut);
-	//addControl('zoomVisible', olmap.zoomToVisibleExtent);
-	//addControl('measure', function() {
-		//GIS.core.MeasureWindow().show();
-	//});
+	addControl('zoomIn', olmap.zoomIn);
+	addControl('zoomOut', olmap.zoomOut);
+	addControl('zoomVisible', olmap.zoomToVisibleExtent);
+	addControl('measure', function() {
+		GIS.core.MeasureWindow().show();
+	});
 
 	addLayers(olmap);
 

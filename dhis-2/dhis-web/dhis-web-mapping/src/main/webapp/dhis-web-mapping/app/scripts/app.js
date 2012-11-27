@@ -2853,7 +2853,6 @@ Ext.onReady( function() {
                     },
                     {
                         title: 'Thematic layer 1 legend', //i18n
-                        contentEl: 'thematic1Legend',
                         bodyStyle: 'padding: 6px; border: 0 none',
                         collapsible: true,
                         collapsed: true,

@@ -26,12 +26,33 @@ Ext.onReady( function() {
 	*/
 
 	GIS.getMap = function(config) {
+
+		//fifo = {
+			//queue: [],
+			//ready: true,
+			//load: function() {
+
+			//callBack: function() {
+
+			//kickAndRun: function(map) {
+				//this.queue.push(map);
+
+				//if (this.ready) {
+					//var loader = GIS.core.MapLoader(olmap);
+					//loader.load(config);
+
+
+	//};
+
+
+
 		var validateConfig,
 			getViews,
 			createViewport,
 			map,
 			olmap,
 			initialize;
+
 
 		validateConfig = function() {
 			if (!config.url || !Ext.isString(config.url)) {
@@ -172,7 +193,6 @@ Ext.onReady( function() {
 						items: [
 							{
 								title: 'Thematic layer 1 legend', //i18n
-								contentEl: olmap.base.thematic1.core.legendDiv,
 								listeners: {
 									added: function() {
 										olmap.base.thematic1.layer.legendPanel = this;
@@ -205,7 +225,7 @@ Ext.onReady( function() {
 						}
 					}
 				],
-				afterrender: function() {					
+				afterrender: function() {
 					//document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin_24.png" />';
 					//document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout_24.png" />';
 					//document.getElementsByClassName('zoomVisibleButton')[0].innerHTML = '<img src="images/zoomvisible_24.png" />';
@@ -218,7 +238,7 @@ Ext.onReady( function() {
 
 		initialize = function() {
 			GIS.conf.url.base = config.url;
-			GIS.store.organisationUnitLevels.load();				
+			GIS.store.organisationUnitLevels.load();
 
 			map = {
 				url: config.url,
@@ -233,9 +253,8 @@ Ext.onReady( function() {
 			olmap = GIS.core.OLMap(config.el);
 
 			createViewport();
-
-			var loader = GIS.core.MapLoader(olmap);
-			loader.load(config);
+					var loader = GIS.core.MapLoader(olmap);
+					loader.load(config);
 		}();
 	};
 });

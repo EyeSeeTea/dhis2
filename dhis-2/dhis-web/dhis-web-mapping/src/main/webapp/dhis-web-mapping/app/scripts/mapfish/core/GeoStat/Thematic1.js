@@ -51,7 +51,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		this.layer.destroyFeatures();
 
 		// Legend
-		this.legendDiv.innerHTML = '';
+		this.layer.legendPanel.update('');
 		this.layer.legendPanel.collapse();
 
 		if (this.widget) {
@@ -154,11 +154,8 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     },
 
     updateLegend: function() {
-        if (!this.legendDiv) {
-            return;
-        }
-
-		var	element,
+		var	element = document.createElement("div"),
+			child,
 			legendType = this.view.legendType,
 			automatic = GIS.conf.finals.widget.legendtype_automatic,
 			predefined = GIS.conf.finals.widget.legendtype_predefined,
@@ -169,65 +166,65 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 				this.view.organisationUnitLevel.name + ' / ' + this.view.parentOrganisationUnit.name
 			];
 
-        this.legendDiv.update("");
-
         for (var i = 0; i < config.length; i++) {
-			element = document.createElement("div");
-			element.style.height = "14px";
-			element.style.overflow = "hidden";
-			element.title = config[i];
-			element.innerHTML = config[i];
-			this.legendDiv.appendChild(element);
+			child = document.createElement("div");
+			child.style.height = "14px";
+			child.style.overflow = "hidden";
+			child.title = config[i];
+			child.innerHTML = config[i];
+			element.appendChild(child);
 
-			element = document.createElement("div");
-			element.style.clear = "left";
-			this.legendDiv.appendChild(element);
+			child = document.createElement("div");
+			child.style.clear = "left";
+			element.appendChild(child);
 		}
 
-        element = document.createElement("div");
-        element.style.width = "1px";
-        element.style.height = "5px";
-        this.legendDiv.appendChild(element);
+        child = document.createElement("div");
+        child.style.width = "1px";
+        child.style.height = "5px";
+		element.appendChild(child);
 
         if (legendType === automatic) {
             for (var i = 0; i < this.classification.bins.length; i++) {
-                var element = document.createElement("div");
-                element.style.backgroundColor = this.colorInterpolation[i].toHexString();
-                element.style.width = "30px";
-                element.style.height = "15px";
-                element.style.cssFloat = "left";
-                element.style.marginRight = "8px";
-                this.legendDiv.appendChild(element);
+                child = document.createElement("div");
+                child.style.backgroundColor = this.colorInterpolation[i].toHexString();
+                child.style.width = "30px";
+                child.style.height = "15px";
+                child.style.cssFloat = "left";
+                child.style.marginRight = "8px";
+				element.appendChild(child);
 
-                element = document.createElement("div");
-                element.innerHTML = this.classification.bins[i].label;
-                this.legendDiv.appendChild(element);
+                child = document.createElement("div");
+                child.innerHTML = this.classification.bins[i].label;
+				element.appendChild(child);
 
-                element = document.createElement("div");
-                element.style.clear = "left";
-                this.legendDiv.appendChild(element);
+                child = document.createElement("div");
+                child.style.clear = "left";
+				element.appendChild(child);
             }
         }
         else if (legendType === predefined) {
             for (var i = 0; i < this.classification.bins.length; i++) {
-                var element = document.createElement("div");
-                element.style.backgroundColor = this.colorInterpolation[i].toHexString();
-                element.style.width = "30px";
-                element.style.height = legendNames[i] ? "25px" : "20px";
-                element.style.cssFloat = "left";
-                element.style.marginRight = "8px";
-                this.legendDiv.appendChild(element);
+                child = document.createElement("div");
+                child.style.backgroundColor = this.colorInterpolation[i].toHexString();
+                child.style.width = "30px";
+                child.style.height = legendNames[i] ? "25px" : "20px";
+                child.style.cssFloat = "left";
+                child.style.marginRight = "8px";
+				element.appendChild(child);
 
-                element = document.createElement("div");
-                element.style.lineHeight = legendNames[i] ? "12px" : "7px";
-                element.innerHTML = '<b style="color:#222; font-size:10px !important">' + (legendNames[i] || '') + '</b><br/>' + this.classification.bins[i].label;
-                this.legendDiv.appendChild(element);
+                child = document.createElement("div");
+                child.style.lineHeight = legendNames[i] ? "12px" : "7px";
+                child.innerHTML = '<b style="color:#222; font-size:10px !important">' + (legendNames[i] || '') + '</b><br/>' + this.classification.bins[i].label;
+				element.appendChild(child);
 
-                element = document.createElement("div");
-                element.style.clear = "left";
-                this.legendDiv.appendChild(element);
+                child = document.createElement("div");
+                child.style.clear = "left";
+				element.appendChild(child);
             }
         }
+
+        this.layer.legendPanel.update(element.outerHTML);
     },
 
     CLASS_NAME: "mapfish.GeoStat.Thematic1"
