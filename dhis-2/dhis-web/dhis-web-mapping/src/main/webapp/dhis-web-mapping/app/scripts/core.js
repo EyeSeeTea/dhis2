@@ -4,265 +4,280 @@ if (!Ext.isObject(GIS)) {
 	GIS = {};
 }
 
-GIS.conf = {
-	finals: {
-		layer: {
-			type_base: 'base',
-			type_vector: 'vector'
-		},
-		dimension: {
-			indicator: {
-				id: 'indicator',
-				param: 'in'
+GIS.core = {};
+
+GIS.core.getConfigs = function() {
+	return {
+		finals: {
+			layer: {
+				type_base: 'base',
+				type_vector: 'vector'
 			},
-			dataElement: {
-				id: 'dataElement',
-				param: 'de'
+			dimension: {
+				indicator: {
+					id: 'indicator',
+					param: 'in'
+				},
+				dataElement: {
+					id: 'dataElement',
+					param: 'de'
+				},
+				period: {
+					id: 'period',
+					param: 'pe'
+				},
+				organisationUnit: {
+					id: 'organisationUnit',
+					param: 'ou'
+				}
 			},
-			period: {
-				id: 'period',
-				param: 'pe'
+			widget: {
+				value: 'value',
+				legendtype_automatic: 'automatic',
+				legendtype_predefined: 'predefined',
+				symbolizer_color: 'color',
+				symbolizer_image: 'image',
+				loadtype_organisationunit: 'organisationUnit',
+				loadtype_data: 'data',
+				loadtype_legend: 'legend'
 			},
-			organisationUnit: {
-				id: 'organisationUnit',
-				param: 'ou'
+			openLayers: {
+				point_classname: 'OpenLayers.Geometry.Point'
+			},
+			mapfish: {
+				classify_with_bounds: 1,
+				classify_by_equal_intervals: 2,
+				classify_by_quantils: 3
 			}
 		},
-		widget: {
-			value: 'value',
-			legendtype_automatic: 'automatic',
-			legendtype_predefined: 'predefined',
-			symbolizer_color: 'color',
-			symbolizer_image: 'image',
-			loadtype_organisationunit: 'organisationUnit',
-			loadtype_data: 'data',
-			loadtype_legend: 'legend'
+		url: {
+			base: '../../',
+			path_api: 'api/',
+			path_gis: 'dhis-web-mapping/'
 		},
-		openLayers: {
-			point_classname: 'OpenLayers.Geometry.Point'
-		},
-		mapfish: {
-			classify_with_bounds: 1,
-			classify_by_equal_intervals: 2,
-			classify_by_quantils: 3
-		},
-		base: {
-			boundary: {
-				id: 'boundary',
-				name: 'Boundary layer', //i18n
-				legendDiv: 'boundaryLegend'
+		layout: {
+			widget: {
+				item_width: 262,
+				itemlabel_width: 95,
+				window_width: 290
 			},
-			thematic1: {
-				id: 'thematic1',
-				name: 'Thematic 1 layer', //i18n
-				legendDiv: 'thematic1Legend'
+			tool: {
+				item_width: 222,
+				itemlabel_width: 95,
+				window_width: 250
 			},
-			thematic2: {
-				id: 'thematic2',
-				name: 'Thematic 2 layer', //i18n
-				legendDiv: 'thematic2Legend'
-			},
-			facility: {
-				id: 'facility',
-				name: 'Facility layer', //i18n
-				legendDiv: 'facilityLegend'
-			},
-			symbol: {
-				id: 'symbol',
-				name: 'Symbol layer', //i18n
-				legendDiv: 'symbolLegend'
-			},
-			googleStreets: {
-				id: 'googleStreets',
-				name: 'Google Streets'
-			},
-			googleHybrid: {
-				id: 'googleHybrid',
-				name: 'Google Hybrid'
-			},
-			openStreetMap: {
-				id: 'openStreetMap',
-				name: 'OpenStreetMap'
-			},
-			circle: {
-				id: 'circle',
-				name: 'Circle'
+			grid: {
+				row_height: 27
 			}
-		}
-	},
-	url: {
-		base: '../../',
-		path_api: 'api/',
-		path_gis: 'dhis-web-mapping/'
-	},
-	layout: {
-		widget: {
-			item_width: 262,
-			itemlabel_width: 95,
-			window_width: 290
 		},
-		tool: {
-			item_width: 222,
-			itemlabel_width: 95,
-			window_width: 250
-		},
-		grid: {
-			row_height: 27
-		}
-	},
-	period: {
-		periodTypes: [
-			{id: 'Daily', name: 'Daily'},
-			{id: 'Weekly', name: 'Weekly'},
-			{id: 'Monthly', name: 'Monthly'},
-			{id: 'BiMonthly', name: 'BiMonthly'},
-			{id: 'Quarterly', name: 'Quarterly'},
-			{id: 'SixMonthly', name: 'SixMonthly'},
-			{id: 'Yearly', name: 'Yearly'},
-			{id: 'FinancialOct', name: 'FinancialOct'},
-			{id: 'FinancialJuly', name: 'FinancialJuly'},
-			{id: 'FinancialApril', name: 'FinancialApril'}
-		]
-	}
-};
-
-GIS.util = {};
-
-GIS.util.google = {};
-
-GIS.util.google.openTerms = function() {
-	window.open('http://www.google.com/intl/en-US_US/help/terms_maps.html', '_blank');
-};
-
-GIS.util.map = {};
-
-GIS.util.map.getVisibleVectorLayers = function(olmap) {
-	var layers = [],
-		layer;
-
-	for (var i = 0; i < olmap.layers.length; i++) {
-		layer = olmap.layers[i];
-		if (layer.layerType === GIS.conf.finals.layer.type_vector &&
-			layer.visibility &&
-			layer.features.length) {
-			layers.push(layer);
-		}
-	}
-	return layers;
-};
-
-GIS.util.map.getExtendedBounds = function(layers) {
-	var bounds = null;
-	if (layers.length) {
-		bounds = layers[0].getDataExtent();
-		if (layers.length > 1) {
-			for (var i = 1; i < layers.length; i++) {
-				bounds.extend(layers[i].getDataExtent());
-			}
-		}
-	}
-	return bounds;
-};
-
-GIS.util.map.zoomToVisibleExtent = function(olmap) {
-	var bounds = GIS.util.map.getExtendedBounds(GIS.util.map.getVisibleVectorLayers(olmap));
-	if (bounds) {
-		olmap.zoomToExtent(bounds);
-	}
-};
-
-GIS.util.map.getTransformedFeatureArray = function(features) {
-	var sourceProjection = new OpenLayers.Projection("EPSG:4326"),
-		destinationProjection = new OpenLayers.Projection("EPSG:900913");
-	for (var i = 0; i < features.length; i++) {
-		features[i].geometry.transform(sourceProjection, destinationProjection);
-	}
-	return features;
-};
-
-GIS.util.geojson = {};
-
-GIS.util.geojson.decode = function(doc) {
-	var geojson = {};
-	geojson.type = 'FeatureCollection';
-	geojson.crs = {
-		type: 'EPSG',
-		properties: {
-			code: '4326'
+		period: {
+			periodTypes: [
+				{id: 'Daily', name: 'Daily'},
+				{id: 'Weekly', name: 'Weekly'},
+				{id: 'Monthly', name: 'Monthly'},
+				{id: 'BiMonthly', name: 'BiMonthly'},
+				{id: 'Quarterly', name: 'Quarterly'},
+				{id: 'SixMonthly', name: 'SixMonthly'},
+				{id: 'Yearly', name: 'Yearly'},
+				{id: 'FinancialOct', name: 'FinancialOct'},
+				{id: 'FinancialJuly', name: 'FinancialJuly'},
+				{id: 'FinancialApril', name: 'FinancialApril'}
+			]
 		}
 	};
-	geojson.features = [];
+};
 
-	for (var i = 0; i < doc.geojson.length; i++) {
-		geojson.features.push({
-			geometry: {
-				type: parseInt(doc.geojson[i].ty) === 1 ? 'MultiPolygon' : 'Point',
-				coordinates: doc.geojson[i].co
-			},
+GIS.core.getUtils = function() {
+	var util = {};
+
+	util.google = {};
+
+	util.google.openTerms = function() {
+		window.open('http://www.google.com/intl/en-US_US/help/terms_maps.html', '_blank');
+	};
+
+	util.map = {};
+
+	util.map.getVisibleVectorLayers = function(olmap) {
+		var layers = [],
+			layer;
+
+		for (var i = 0; i < olmap.layers.length; i++) {
+			layer = olmap.layers[i];
+			if (layer.layerType === GIS.conf.finals.layer.type_vector &&
+				layer.visibility &&
+				layer.features.length) {
+				layers.push(layer);
+			}
+		}
+		return layers;
+	};
+
+	util.map.getExtendedBounds = function(layers) {
+		var bounds = null;
+		if (layers.length) {
+			bounds = layers[0].getDataExtent();
+			if (layers.length > 1) {
+				for (var i = 1; i < layers.length; i++) {
+					bounds.extend(layers[i].getDataExtent());
+				}
+			}
+		}
+		return bounds;
+	};
+
+	util.map.zoomToVisibleExtent = function(olmap) {
+		var bounds = GIS.util.map.getExtendedBounds(GIS.util.map.getVisibleVectorLayers(olmap));
+		if (bounds) {
+			olmap.zoomToExtent(bounds);
+		}
+	};
+
+	util.map.getTransformedFeatureArray = function(features) {
+		var sourceProjection = new OpenLayers.Projection("EPSG:4326"),
+			destinationProjection = new OpenLayers.Projection("EPSG:900913");
+		for (var i = 0; i < features.length; i++) {
+			features[i].geometry.transform(sourceProjection, destinationProjection);
+		}
+		return features;
+	};
+
+	util.geojson = {};
+
+	util.geojson.decode = function(doc) {
+		var geojson = {};
+		geojson.type = 'FeatureCollection';
+		geojson.crs = {
+			type: 'EPSG',
 			properties: {
-				id: doc.geojson[i].uid,
-				internalId: doc.geojson[i].iid,
-				name: doc.geojson[i].na,
-				hcwc: doc.geojson[i].hc,
-				path: doc.geojson[i].path,
-				parentId: doc.geojson[i].pi,
-				parentName: doc.geojson[i].pn,
-				hasCoordinatesUp: doc.properties.hasCoordinatesUp
+				code: '4326'
 			}
-		});
-	}
+		};
+		geojson.features = [];
 
-	return geojson;
+		for (var i = 0; i < doc.geojson.length; i++) {
+			geojson.features.push({
+				geometry: {
+					type: parseInt(doc.geojson[i].ty) === 1 ? 'MultiPolygon' : 'Point',
+					coordinates: doc.geojson[i].co
+				},
+				properties: {
+					id: doc.geojson[i].uid,
+					internalId: doc.geojson[i].iid,
+					name: doc.geojson[i].na,
+					hcwc: doc.geojson[i].hc,
+					path: doc.geojson[i].path,
+					parentId: doc.geojson[i].pi,
+					parentName: doc.geojson[i].pn,
+					hasCoordinatesUp: doc.properties.hasCoordinatesUp
+				}
+			});
+		}
+
+		return geojson;
+	};
+
+	util.gui = {};
+	util.gui.combo = {};
+
+	util.gui.combo.setQueryMode = function(cmpArray, mode) {
+		for (var i = 0; i < cmpArray.length; i++) {
+			cmpArray[i].queryMode = mode;
+		}
+	};
+
+	return util;
 };
 
-GIS.util.gui = {};
-GIS.util.gui.combo = {};
-
-GIS.util.gui.combo.setQueryMode = function(cmpArray, mode) {
-	for (var i = 0; i < cmpArray.length; i++) {
-		cmpArray[i].queryMode = mode;
-	}
+GIS.core.getStores = function() {
+	return {};
 };
 
-GIS.store = {};
-
-GIS.store.organisationUnitLevels = Ext.create('Ext.data.Store', {
-	fields: ['id', 'name', 'level'],
-	proxy: {
-		type: 'jsonp',
-		reader: {
-			type: 'json',
-			root: 'organisationUnitLevels'
-		}
-	},
-	cmp: [],
-	isLoaded: false,
-	loadFn: function(fn) {
-		if (this.isLoaded) {
-			fn.call();
-		}
-		else {
-			this.load(fn);
-		}
-	},
-	getRecordByLevel: function(level) {
-		return this.getAt(this.findExact('level', level));
-	},
-	listeners: {
-		beforeload: function() {
-			this.proxy.url = GIS.conf.url.base + GIS.conf.url.path_api + 'organisationUnitLevels.jsonp?viewClass=detailed&links=false&paging=false';
+GIS.core.getBases = function() {
+	return {
+		boundary: {
+			id: 'boundary',
+			name: 'Boundary layer', //i18n
+			legendDiv: 'boundaryLegend'
 		},
-		load: function() {
-			if (!this.isLoaded) {
-				this.isLoaded = true;
-				GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
-			}
-			this.sort('level', 'ASC');
+		thematic1: {
+			id: 'thematic1',
+			name: 'Thematic 1 layer', //i18n
+			legendDiv: 'thematic1Legend'
+		},
+		thematic2: {
+			id: 'thematic2',
+			name: 'Thematic 2 layer', //i18n
+			legendDiv: 'thematic2Legend'
+		},
+		facility: {
+			id: 'facility',
+			name: 'Facility layer', //i18n
+			legendDiv: 'facilityLegend'
+		},
+		symbol: {
+			id: 'symbol',
+			name: 'Symbol layer', //i18n
+			legendDiv: 'symbolLegend'
+		},
+		googleStreets: {
+			id: 'googleStreets',
+			name: 'Google Streets'
+		},
+		googleHybrid: {
+			id: 'googleHybrid',
+			name: 'Google Hybrid'
+		},
+		openStreetMap: {
+			id: 'openStreetMap',
+			name: 'OpenStreetMap'
+		},
+		circle: {
+			id: 'circle',
+			name: 'Circle'
 		}
-	}
-});
+	};
+};
 
-GIS.core = {};
+//cmps
+GIS.core.OrganisationUnitLevelStore = function(baseUrl) {
+	return Ext.create('Ext.data.Store', {
+		fields: ['id', 'name', 'level'],
+		proxy: {
+			type: 'jsonp',
+			url: baseUrl + GIS.conf.url.path_api + 'organisationUnitLevels.jsonp?viewClass=detailed&links=false&paging=false',
+			reader: {
+				type: 'json',
+				root: 'organisationUnitLevels'
+			}
+		},
+		cmp: [],
+		isLoaded: false,
+		loadFn: function(fn) {
+			if (this.isLoaded) {
+				fn.call();
+			}
+			else {
+				this.load(fn);
+			}
+		},
+		getRecordByLevel: function(level) {
+			return this.getAt(this.findExact('level', level));
+		},
+		listeners: {
+			beforeload: function() {
+				this.proxy.url =
+			},
+			load: function() {
+				if (!this.isLoaded) {
+					this.isLoaded = true;
+					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
+				}
+				this.sort('level', 'ASC');
+			}
+		}
+	};
+};
 
 GIS.core.StyleMap = function(base, labelConfig) {
 	var defaults = {
@@ -777,7 +792,7 @@ GIS.core.ThematicLoader = function(base) {
 	return loader;
 };
 
-GIS.core.OLMap = function(el) {
+GIS.core.getOLMap = function() {
 	var olmap,
 		addControl,
 		addLayers;
@@ -870,8 +885,7 @@ GIS.core.OLMap = function(el) {
 		olmap.addLayer(base.layer);
 		base.core = new mapfish.GeoStat.Thematic1(olmap, {
 			layer: base.layer,
-			base: base,
-			legendDiv: base.legendDiv + el
+			base: base
 		});
 
 		base = olmap.base.thematic2;
@@ -879,8 +893,7 @@ GIS.core.OLMap = function(el) {
 		olmap.addLayer(base.layer);
 		base.core = new mapfish.GeoStat.Thematic1(olmap, {
 			layer: base.layer,
-			base: base,
-			legendDiv: base.legendDiv + el
+			base: base
 		});
 
 		base = olmap.base.facility;
@@ -888,8 +901,7 @@ GIS.core.OLMap = function(el) {
 		olmap.addLayer(base.layer);
 		base.core = new mapfish.GeoStat.Facility(olmap, {
 			layer: base.layer,
-			base: base,
-			legendDiv: base.legendDiv + el
+			base: base
 		});
 	};
 
@@ -936,5 +948,14 @@ GIS.core.OLMap = function(el) {
 
 	return olmap;
 };
+
+GIS.getInstance = function() {
+	var gis = {
+		conf: GIS.core.getConfigs(),
+		util: GIS.core.getUtils(),
+		store: GIS.core.getStores(),
+		base: GIS.core.getBases(),
+		olmap: GIS.core.getOLMap()
+
 
 });

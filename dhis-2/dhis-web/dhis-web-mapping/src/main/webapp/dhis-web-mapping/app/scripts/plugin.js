@@ -27,19 +27,6 @@ Ext.onReady( function() {
 
 	GIS.getMap = function(config) {
 
-		//fifo = {
-			//queue: [],
-			//ready: true,
-			//load: function() {
-
-			//callBack: function() {
-
-			//kickAndRun: function(map) {
-				//this.queue.push(map);
-
-				//if (this.ready) {
-					//var loader = GIS.core.MapLoader(olmap);
-					//loader.load(config);
 
 
 	//};
@@ -47,6 +34,7 @@ Ext.onReady( function() {
 
 
 		var validateConfig,
+			fifo,
 			getViews,
 			createViewport,
 			map,
@@ -106,10 +94,6 @@ Ext.onReady( function() {
 				}
 			}
 		};
-
-		if (!validateConfig()) {
-			return;
-		}
 
 		getViews = function() {
 			var view,
@@ -236,7 +220,29 @@ Ext.onReady( function() {
 			return panel;
 		};
 
+		fifo = {
+			//queue: [],
+			//ready: true,
+			//load: function() {
+
+			//callBack: function() {
+
+			//kickAndRun: function(map) {
+				//this.queue.push(map);
+
+				//if (this.ready) {
+					//var loader = GIS.core.MapLoader(olmap);
+					//loader.load(config);
+				//}
+
+			//}
+		};
+
 		initialize = function() {
+			if (!validateConfig()) {
+				return;
+			}
+
 			GIS.conf.url.base = config.url;
 			GIS.store.organisationUnitLevels.load();
 
@@ -250,11 +256,12 @@ Ext.onReady( function() {
 				mapViews: getViews()
 			};
 
-			olmap = GIS.core.OLMap(config.el);
+			olmap = GIS.core.OLMap();
 
 			createViewport();
-					var loader = GIS.core.MapLoader(olmap);
-					loader.load(config);
+
+			var loader = GIS.core.MapLoader(olmap);
+			loader.load(config);
 		}();
 	};
 });
