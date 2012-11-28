@@ -2893,7 +2893,7 @@ Ext.onReady( function() {
 				listeners: {
 					added: function() {
 						GIS.cmp.region.east = this;
-						GIS.map.legendRegion = this;
+						GIS.map.legendPanel = this;
 					},
                     collapse: function() {
                         GIS.cmp.region.center.cmp.tbar.resize.setText('<<<');

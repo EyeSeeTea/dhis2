@@ -35,16 +35,15 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     classification: null,
     colorInterpolation: null,
 
+	gis: null,
     view: null,
-    base: null,
-    widget: null,
 
     initialize: function(map, options) {
         mapfish.GeoStat.prototype.initialize.apply(this, arguments);
     },
 
     getLoader: function() {
-		return GIS.core.ThematicLoader(this.base);
+		return GIS.core.ThematicLoader(this.gis, this.layer);
 	},
 
 	reset: function() {

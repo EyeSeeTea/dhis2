@@ -87,8 +87,9 @@ GIS.core.getConfigs = function() {
 	};
 };
 
-GIS.core.getUtils = function() {
-	var util = {};
+GIS.core.getUtils = function(gis) {
+	var conf = gis.conf,
+		util = {};
 
 	util.google = {};
 
@@ -104,7 +105,7 @@ GIS.core.getUtils = function() {
 
 		for (var i = 0; i < olmap.layers.length; i++) {
 			layer = olmap.layers[i];
-			if (layer.layerType === GIS.conf.finals.layer.type_vector &&
+			if (layer.layerType === conf.finals.layer.type_vector &&
 				layer.visibility &&
 				layer.features.length) {
 				layers.push(layer);
@@ -127,7 +128,7 @@ GIS.core.getUtils = function() {
 	};
 
 	util.map.zoomToVisibleExtent = function(olmap) {
-		var bounds = GIS.util.map.getExtendedBounds(GIS.util.map.getVisibleVectorLayers(olmap));
+		var bounds = util.map.getExtendedBounds(util.map.getVisibleVectorLayers(olmap));
 		if (bounds) {
 			olmap.zoomToExtent(bounds);
 		}
@@ -193,59 +194,154 @@ GIS.core.getStores = function() {
 	return {};
 };
 
-GIS.core.getBases = function() {
-	return {
-		boundary: {
-			id: 'boundary',
-			name: 'Boundary layer', //i18n
-			legendDiv: 'boundaryLegend'
-		},
-		thematic1: {
-			id: 'thematic1',
-			name: 'Thematic 1 layer', //i18n
-			legendDiv: 'thematic1Legend'
-		},
-		thematic2: {
-			id: 'thematic2',
-			name: 'Thematic 2 layer', //i18n
-			legendDiv: 'thematic2Legend'
-		},
-		facility: {
-			id: 'facility',
-			name: 'Facility layer', //i18n
-			legendDiv: 'facilityLegend'
-		},
-		symbol: {
-			id: 'symbol',
-			name: 'Symbol layer', //i18n
-			legendDiv: 'symbolLegend'
-		},
-		googleStreets: {
-			id: 'googleStreets',
-			name: 'Google Streets'
-		},
-		googleHybrid: {
-			id: 'googleHybrid',
-			name: 'Google Hybrid'
-		},
-		openStreetMap: {
-			id: 'openStreetMap',
-			name: 'OpenStreetMap'
-		},
-		circle: {
-			id: 'circle',
-			name: 'Circle'
-		}
+GIS.core.getOLMap = function(gis) {
+	var olmap,
+		addControl;
+
+	addControl = function(name, fn) {
+		var button,
+			panel;
+
+		button = new OpenLayers.Control.Button({
+			displayClass: 'olControlButton',
+			trigger: function() {
+				fn.call(map);
+			}
+		});
+
+		panel = new OpenLayers.Control.Panel({
+			defaultControl: button
+		});
+
+		panel.addControls([button]);
+
+		olmap.addControl(panel);
+
+		panel.div.className += ' ' + name;
+		panel.div.childNodes[0].className += ' ' + name + 'Button';
 	};
+
+	olmap = new OpenLayers.Map({
+		controls: [
+			new OpenLayers.Control.Navigation({
+				documentDrag: true
+			}),
+			new OpenLayers.Control.MousePosition({
+				id: 'mouseposition',
+				prefix: '<span class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
+				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
+				suffix: '<div id="google-logo" onclick="javascript:GIS.util.google.openTerms();"></div></span>'
+			}),
+			new OpenLayers.Control.Permalink()
+		],
+		displayProjection: new OpenLayers.Projection('EPSG:4326'),
+		maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+		mouseMove: {}, // Track all mouse moves
+		relocate: {} // Relocate organisation units
+	});
+
+	olmap.zoomToVisibleExtent = function() {
+		gis.util.map.zoomToVisibleExtent(this);
+	};
+
+	olmap.closeAllLayers = function() {
+		//olmap.base.boundary.core.reset();
+		gis.layer.thematic1.core.reset();
+		//olmap.base.thematic2.core.reset();
+		//olmap.base.facility.core.reset();
+	};
+
+	addControl('zoomIn', olmap.zoomIn);
+	addControl('zoomOut', olmap.zoomOut);
+	addControl('zoomVisible', olmap.zoomToVisibleExtent);
+	addControl('measure', function() {
+		GIS.core.MeasureWindow(gis).show();
+	});
+
+	return olmap;
 };
 
-//cmps
-GIS.core.OrganisationUnitLevelStore = function(baseUrl) {
+GIS.core.getLayers = function(gis) {
+	var layers = {
+		boundary: GIS.core.VectorLayer(gis, 'boundary', 'Boundary layer', {opacity: 0.8}),
+		thematic1: GIS.core.VectorLayer(gis, 'thematic1', 'Thematic layer 1', {opacity: 0.8}),
+		thematic2: GIS.core.VectorLayer(gis, 'thematic2', 'Thematic layer 2', {opacity: 0.8}),
+		facility: GIS.core.VectorLayer(gis, 'facility', 'Facility layer', {opacity: 0.8})
+	};
+
+	layers.boundary.core = new mapfish.GeoStat.Boundary(gis.olmap, {
+		layer: layers.boundary,
+		gis: gis
+	});
+
+	layers.thematic1.core = new mapfish.GeoStat.Thematic1(gis.olmap, {
+		layer: layers.thematic1,
+		gis: gis
+	});
+
+	layers.thematic2.core = new mapfish.GeoStat.Thematic2(gis.olmap, {
+		layer: layers.thematic2,
+		gis: gis
+	});
+
+	layers.facility.core = new mapfish.GeoStat.Facility(gis.olmap, {
+		layer: layers.facility,
+		gis: gis
+	});
+
+	if (window.google) {
+		layers.googleStreets = new OpenLayers.Layer.Google('Google Streets', {
+			numZoomLevels: 20,
+			animationEnabled: true,
+			layerType: gis.conf.finals.layer.type_base,
+			layerOpacity: 1,
+			setLayerOpacity: function(number) {
+				if (number) {
+					this.layerOpacity = parseFloat(number);
+				}
+				this.setOpacity(this.layerOpacity);
+			}
+		});
+		layers.googleStreets.id = 'googleStreets';
+
+		layers.googleHybrid = new OpenLayers.Layer.Google('Google Hybrid', {
+			type: google.maps.MapTypeId.HYBRID,
+			numZoomLevels: 20,
+			animationEnabled: true,
+			layerType: gis.conf.finals.layer.type_base,
+			layerOpacity: 1,
+			setLayerOpacity: function(number) {
+				if (number) {
+					this.layerOpacity = parseFloat(number);
+				}
+				this.setOpacity(this.layerOpacity);
+			}
+		});
+		layers.googleHybrid.id = 'googleHybrid';
+	}
+	else {
+		layers.openStreetMap = new OpenLayers.Layer.OSM('OpenStreetMap', {
+			layerType: gis.conf.finals.layer.type_base,
+			layerOpacity: 1,
+			setLayerOpacity: function(number) {
+				if (number) {
+					this.layerOpacity = parseFloat(number);
+				}
+				this.setOpacity(this.layerOpacity);
+			}
+		});
+		layers.openStreetMap.id = 'openStreetMap';
+	}
+
+	return layers;
+};
+
+GIS.core.OrganisationUnitLevelStore = function(gis) {
 	return Ext.create('Ext.data.Store', {
 		fields: ['id', 'name', 'level'],
 		proxy: {
 			type: 'jsonp',
-			url: baseUrl + GIS.conf.url.path_api + 'organisationUnitLevels.jsonp?viewClass=detailed&links=false&paging=false',
+			url: gis.baseUrl + gis.conf.url.path_api + 'organisationUnitLevels.jsonp?viewClass=detailed&links=false&paging=false',
 			reader: {
 				type: 'json',
 				root: 'organisationUnitLevels'
@@ -265,9 +361,6 @@ GIS.core.OrganisationUnitLevelStore = function(baseUrl) {
 			return this.getAt(this.findExact('level', level));
 		},
 		listeners: {
-			beforeload: function() {
-				this.proxy.url =
-			},
 			load: function() {
 				if (!this.isLoaded) {
 					this.isLoaded = true;
@@ -276,10 +369,10 @@ GIS.core.OrganisationUnitLevelStore = function(baseUrl) {
 				this.sort('level', 'ASC');
 			}
 		}
-	};
+	});
 };
 
-GIS.core.StyleMap = function(base, labelConfig) {
+GIS.core.StyleMap = function(gis, id, labelConfig) {
 	var defaults = {
 			fillOpacity: 1,
 			strokeColor: '#fff',
@@ -290,8 +383,8 @@ GIS.core.StyleMap = function(base, labelConfig) {
 			strokeWidth: 2,
 			cursor: 'pointer'
 		};
-
-	if (base.id === GIS.conf.finals.base.boundary.id) {
+		
+	if (id === 'boundary') {
 		defaults.fillOpacity = 0;
 		defaults.strokeColor = '#000';
 
@@ -317,17 +410,17 @@ GIS.core.StyleMap = function(base, labelConfig) {
 	});
 };
 
-GIS.core.VectorLayer = function(base, config) {
-	var layer = new OpenLayers.Layer.Vector(base.name, {
+GIS.core.VectorLayer = function(gis, id, name, config) {			
+	return new OpenLayers.Layer.Vector(name, {
 		strategies: [
 			new OpenLayers.Strategy.Refresh({
 				force:true
 			})
 		],
-		styleMap: GIS.core.StyleMap(base),
+		styleMap: GIS.core.StyleMap(gis, id),
 		visibility: false,
 		displayInLayerSwitcher: false,
-		layerType: GIS.conf.finals.layer.type_vector,
+		layerType: gis.conf.finals.layer.type_vector,
 		layerOpacity: config ? config.opacity || 1 : 1,
 		setLayerOpacity: function(number) {
 			if (number) {
@@ -337,12 +430,11 @@ GIS.core.VectorLayer = function(base, config) {
 		},
 		hasLabels: false
 	});
-	layer.base = base;
 
 	return layer;
 };
 
-GIS.core.MeasureWindow = function() {
+GIS.core.MeasureWindow = function(gis) {
 	var window,
 		label,
 		handleMeasurements,
@@ -353,7 +445,7 @@ GIS.core.MeasureWindow = function() {
 		'default': new OpenLayers.Style()
 	});
 
-	control = new OpenLayers.Control.Measure( OpenLayers.Handler.Path, {
+	control = new OpenLayers.Control.Measure(OpenLayers.Handler.Path, {
 		persist: true,
 		immediate: true,
 		handlerOption: {
@@ -369,7 +461,7 @@ GIS.core.MeasureWindow = function() {
 		}
 	};
 
-	GIS.map.addControl(control);
+	gis.olmap.addControl(control);
 
 	control.events.on({
 		measurepartial: handleMeasurements,
@@ -395,13 +487,13 @@ GIS.core.MeasureWindow = function() {
 		items: label,
 		listeners: {
 			show: function() {
-				var x = GIS.cmp.region.east.x - this.getWidth() - 5,
-					y = 60;
-				this.setPosition(x, y);
+				//var x = GIS.cmp.region.east.x - this.getWidth() - 5,
+					//y = 60;
+				//this.setPosition(x, y);
 			},
 			destroy: function() {
 				control.deactivate();
-				GIS.map.removeControl(control);
+				gis.olmap.removeControl(control);
 			}
 		}
 	});
@@ -409,51 +501,47 @@ GIS.core.MeasureWindow = function() {
 	return window;
 };
 
-GIS.core.MapLoader = function(olmap) {
+GIS.core.MapLoader = function(gis) {
 	var getMap,
 		setMap,
 		afterLoad,
 		map,
-		mapViews,
 		callBack,
 		register = [],
 		loader;
 
 	getMap = function(config) {
 		Ext.data.JsonP.request({
-			url: GIS.conf.url.base + GIS.conf.url.path_api + 'maps/' + config.id + '.jsonp?links=false',
+			url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + config.id + '.jsonp?links=false',
 			success: function(r) {
 				if (!r) {
-					alert('Uid not recognized' + (config.el ? ' (' + config.el + ')' : ''));
+					alert('Uid not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
 					return;
 				}
-
-				map = r;
-				map.el = config.el;
-				setMap(map);
+				
+				gis.map = r;
+				setMap(gis.map);
 			}
 		});
 	};
 
 	setMap = function(map) {
 		var mapView,
-			center,
-			lonLat,
 			loader;
 
-		mapViews = map.mapViews || [];
+		map.mapViews = map.mapViews || [];
 
 		if (!mapViews.length) {
 			alert('Favorite is outdated - please create a new one'); //i18n
 			return;
 		}
 
-		olmap.closeAllLayers();
+		gis.olmap.closeAllLayers();
 
-		for (var i = 0; i < mapViews.length; i++) {
-			mapView = mapViews[i];
-			loader = olmap.base[mapView.layer].core.getLoader();
-			loader.updateGui = !map.el;
+		for (var i = 0; i < map.mapViews.length; i++) {
+			mapView = map.mapViews[i];
+			loader = gis.layer[mapView.layer].core.getLoader();
+			loader.updateGui = !gis.el;
 			loader.callBack = callBack;
 			loader.load(mapView);
 		}
@@ -468,15 +556,15 @@ GIS.core.MapLoader = function(olmap) {
 	};
 
 	afterLoad = function() {
-		if (map.el) {
+		if (gis.el) {
 			olmap.zoomToVisibleExtent();
 		}
-		else {
+		else {
 			if (map.longitude && map.latitude && map.zoom) {
-				olmap.setCenter(new OpenLayers.LonLat(map.longitude, map.latitude), map.zoom);
+				gis.olmap.setCenter(new OpenLayers.LonLat(map.longitude, map.latitude), map.zoom);
 			}
 			else {
-				olmap.zoomToVisibleExtent();
+				gis.olmap.zoomToVisibleExtent();
 			}
 		}
 
@@ -498,11 +586,8 @@ GIS.core.MapLoader = function(olmap) {
 	return loader;
 };
 
-GIS.core.ThematicLoader = function(base) {
-	var layer = base.layer,
-		core = base.core,
-		widget = base.widget,
-		olmap = layer.map,
+GIS.core.ThematicLoader = function(gis, layer) {
+	var olmap = layer.map,
 		compareView,
 		loadOrganisationUnits,
 		loadData,
@@ -511,47 +596,47 @@ GIS.core.ThematicLoader = function(base) {
 		loader;
 
 	compareView = function(view, doExecute) {
-		var src = base.core.view;
+		var src = layer.core.view;
 
 		if (!src) {
 			if (doExecute) {
 				loadOrganisationUnits(view);
 			}
-			return GIS.conf.finals.widget.loadtype_organisationunit;
+			return gis.conf.finals.widget.loadtype_organisationunit;
 		}
 
 		if (view.organisationUnitLevel.id !== src.organisationUnitLevel.id) {
 			if (doExecute) {
 				loadOrganisationUnits(view);
 			}
-			return GIS.conf.finals.widget.loadtype_organisationunit;
+			return gis.conf.finals.widget.loadtype_organisationunit;
 		}
 
 		if (view.parentOrganisationUnit.id !== src.parentOrganisationUnit.id) {
 			if (doExecute) {
 				loadOrganisationUnits(view);
 			}
-			return GIS.conf.finals.widget.loadtype_organisationunit;
+			return gis.conf.finals.widget.loadtype_organisationunit;
 		}
 
 		if (view.valueType !== src.valueType) {
 			if (doExecute) {
 				loadData(view);
 			}
-			return GIS.conf.finals.widget.loadtype_organisationunit;
+			return gis.conf.finals.widget.loadtype_organisationunit;
 		}
 		else {
-			if (view.valueType === GIS.conf.finals.dimension.indicator.id && view.indicator.id !== src.indicator.id) {
+			if (view.valueType === gis.conf.finals.dimension.indicator.id && view.indicator.id !== src.indicator.id) {
 				if (doExecute) {
 					loadData(view);
 				}
-				return GIS.conf.finals.widget.loadtype_data;
+				return gis.conf.finals.widget.loadtype_data;
 			}
-			if (view.valueType === GIS.conf.finals.dimension.dataElement.id && view.dataElement.id !== src.dataElement.id) {
+			if (view.valueType === gis.conf.finals.dimension.dataElement.id && view.dataElement.id !== src.dataElement.id) {
 				if (doExecute) {
 					loadData(view);
 				}
-				return GIS.conf.finals.widget.loadtype_data;
+				return gis.conf.finals.widget.loadtype_data;
 			}
 		}
 
@@ -559,30 +644,30 @@ GIS.core.ThematicLoader = function(base) {
 			if (doExecute) {
 				loadData(view);
 			}
-			return GIS.conf.finals.widget.loadtype_data;
+			return gis.conf.finals.widget.loadtype_data;
 		}
 
 		if (view.legendType !== src.legendType) {
 			if (doExecute) {
 				loadLegend(view);
 			}
-			return GIS.conf.finals.widget.loadtype_legend;
+			return gis.conf.finals.widget.loadtype_legend;
 		}
 		else {
-			if (view.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			if (view.legendType === gis.conf.finals.widget.legendtype_automatic) {
 				if (view.classes !== src.classes || view.method !== src.method || view.colorLow !== src.colorLow || view.radiusLow !== src.radiusLow ||	view.colorHigh !== src.colorHigh || view.radiusHigh !== src.radiusHigh) {
 					if (doExecute) {
 						loadLegend(view);
 					}
-					return GIS.conf.finals.widget.loadtype_legend;
+					return gis.conf.finals.widget.loadtype_legend;
 				}
 			}
 
-			if (view.legendType === GIS.conf.finals.widget.legendtype_predefined && view.legendSet.id !== src.legendSet.id) {
+			if (view.legendType === gis.conf.finals.widget.legendtype_predefined && view.legendSet.id !== src.legendSet.id) {
 				if (doExecute) {
 					loadLegend(view);
 				}
-				return GIS.conf.finals.widget.loadtype_legend;
+				return gis.conf.finals.widget.loadtype_legend;
 			}
 		}
 	};
@@ -753,7 +838,7 @@ GIS.core.ThematicLoader = function(base) {
 	};
 
 	afterLoad = function(view) {
-		olmap.legendRegion.doLayout();
+		olmap.legendPanel.doLayout();
 		layer.legendPanel.expand();
 
 		if (loader.updateGui && Ext.isObject(widget)) {
@@ -792,170 +877,25 @@ GIS.core.ThematicLoader = function(base) {
 	return loader;
 };
 
-GIS.core.getOLMap = function() {
-	var olmap,
-		addControl,
-		addLayers;
+GIS.getInstance = function(baseUrl, el) {
+	var gis = {};
 
-	addControl = function(name, fn) {
-		var button,
-			panel;
+	gis.baseUrl = baseUrl;
+	gis.el = el;
 
-		button = new OpenLayers.Control.Button({
-			displayClass: 'olControlButton',
-			trigger: function() {
-				fn.call(map);
-			}
-		});
+	gis.conf = GIS.core.getConfigs();
+	gis.util = GIS.core.getUtils(gis);
+	gis.store = GIS.core.getStores();
+	gis.olmap = GIS.core.getOLMap(gis);
+	gis.layer = GIS.core.getLayers(gis);
 
-		panel = new OpenLayers.Control.Panel({
-			defaultControl: button
-		});
-
-		panel.addControls([button]);
-
-		olmap.addControl(panel);
-
-		panel.div.className += ' ' + name;
-		panel.div.childNodes[0].className += ' ' + name + 'Button';
-	};
-
-	addLayers = function(olmap) {
-		var base;
-
-		if (window.google) {
-			base = olmap.base.googleStreets;
-			base.layer = new OpenLayers.Layer.Google(base.name, {
-				numZoomLevels: 20,
-				animationEnabled: true,
-				layerType: GIS.conf.finals.layer.type_base,
-				base: base,
-				layerOpacity: 1,
-				setLayerOpacity: function(number) {
-					if (number) {
-						this.layerOpacity = parseFloat(number);
-					}
-					this.setOpacity(this.layerOpacity);
-				}
-			});
-			olmap.addLayer(base.layer);
-
-			base = olmap.base.googleHybrid;
-			base.layer = new OpenLayers.Layer.Google(base.name, {
-				type: google.maps.MapTypeId.HYBRID,
-				numZoomLevels: 20,
-				animationEnabled: true,
-				layerType: GIS.conf.finals.layer.type_base,
-				base: base,
-				layerOpacity: 1,
-				setLayerOpacity: function(number) {
-					if (number) {
-						this.layerOpacity = parseFloat(number);
-					}
-					this.setOpacity(this.layerOpacity);
-				}
-			});
-			olmap.addLayer(base.layer);
+	for (var property in gis.layer) {
+		if (gis.layer.hasOwnProperty(property)) {
+			gis.olmap.addLayer(gis.layer[property]);
 		}
-		else {
-			base = olmap.base.openStreetMap;
-			base.layer = new OpenLayers.Layer.OSM(base.name);
-			base.layer.layerType = GIS.conf.finals.layer.type_base;
-			base.layer.base = base;
-			base.layer.layerOpacity = 1;
-			base.layer.setLayerOpacity = function(number) {
-				if (number) {
-					this.layerOpacity = parseFloat(number);
-				}
-				this.setOpacity(this.layerOpacity);
-			};
-			olmap.addLayer(base.layer);
-		}
+	}
 
-		base = olmap.base.boundary;
-		base.layer = GIS.core.VectorLayer(base);
-		olmap.addLayer(base.layer);
-		base.core = new mapfish.GeoStat.Boundary(olmap, {
-			layer: base.layer,
-			base: base
-		});
-
-		base = olmap.base.thematic1;
-		base.layer = GIS.core.VectorLayer(base, {opacity: 0.8});
-		olmap.addLayer(base.layer);
-		base.core = new mapfish.GeoStat.Thematic1(olmap, {
-			layer: base.layer,
-			base: base
-		});
-
-		base = olmap.base.thematic2;
-		base.layer = GIS.core.VectorLayer(base, {opacity: 0.8});
-		olmap.addLayer(base.layer);
-		base.core = new mapfish.GeoStat.Thematic1(olmap, {
-			layer: base.layer,
-			base: base
-		});
-
-		base = olmap.base.facility;
-		base.layer = GIS.core.VectorLayer(base);
-		olmap.addLayer(base.layer);
-		base.core = new mapfish.GeoStat.Facility(olmap, {
-			layer: base.layer,
-			base: base
-		});
-	};
-
-	olmap = new OpenLayers.Map({
-		controls: [
-			new OpenLayers.Control.Navigation({
-				documentDrag: true
-			}),
-			new OpenLayers.Control.MousePosition({
-				id: 'mouseposition',
-				prefix: '<span class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
-				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
-				suffix: '<div id="google-logo" onclick="javascript:GIS.util.google.openTerms();"></div></span>'
-			}),
-			new OpenLayers.Control.Permalink()
-		],
-		displayProjection: new OpenLayers.Projection('EPSG:4326'),
-		maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
-		mouseMove: {}, // Track all mouse moves
-		relocate: {} // Relocate organisation units
-	});
-
-	olmap.zoomToVisibleExtent = function() {
-		GIS.util.map.zoomToVisibleExtent(this);
-	};
-
-	olmap.closeAllLayers = function() {
-		//olmap.base.boundary.core.reset();
-		olmap.base.thematic1.core.reset();
-		//olmap.base.thematic2.core.reset();
-		//olmap.base.facility.core.reset();
-	};
-
-	olmap.base = GIS.conf.finals.base;
-
-	addControl('zoomIn', olmap.zoomIn);
-	addControl('zoomOut', olmap.zoomOut);
-	addControl('zoomVisible', olmap.zoomToVisibleExtent);
-	addControl('measure', function() {
-		GIS.core.MeasureWindow().show();
-	});
-
-	addLayers(olmap);
-
-	return olmap;
+	return gis;
 };
-
-GIS.getInstance = function() {
-	var gis = {
-		conf: GIS.core.getConfigs(),
-		util: GIS.core.getUtils(),
-		store: GIS.core.getStores(),
-		base: GIS.core.getBases(),
-		olmap: GIS.core.getOLMap()
-
 
 });
