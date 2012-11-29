@@ -211,24 +211,6 @@ Ext.onReady( function() {
 			return panel;
 		};
 
-		fifo = {
-			//queue: [],
-			//ready: true,
-			//load: function() {
-
-			//callBack: function() {
-
-			//kickAndRun: function(map) {
-				//this.queue.push(map);
-
-				//if (this.ready) {
-					//var loader = GIS.core.MapLoader(olmap);
-					//loader.load(config);
-				//}
-
-			//}
-		};
-
 		initialize = function() {
 			if (!validateConfig()) {
 				return;

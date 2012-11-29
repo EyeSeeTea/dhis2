@@ -505,7 +505,6 @@ GIS.core.MapLoader = function(gis) {
 	var getMap,
 		setMap,
 		afterLoad,
-		map,
 		callBack,
 		register = [],
 		loader;
@@ -531,7 +530,7 @@ GIS.core.MapLoader = function(gis) {
 
 		map.mapViews = map.mapViews || [];
 
-		if (!mapViews.length) {
+		if (!map.mapViews.length) {
 			alert('Favorite is outdated - please create a new one'); //i18n
 			return;
 		}
@@ -550,18 +549,18 @@ GIS.core.MapLoader = function(gis) {
 	callBack = function(layer) {
 		register.push(layer);
 
-		if (register.length === mapViews.length) {
+		if (register.length === gis.map.mapViews.length) {
 			afterLoad();
 		}
 	};
 
 	afterLoad = function() {
 		if (gis.el) {
-			olmap.zoomToVisibleExtent();
+			gis.olmap.zoomToVisibleExtent();
 		}
 		else {
 			if (map.longitude && map.latitude && map.zoom) {
-				gis.olmap.setCenter(new OpenLayers.LonLat(map.longitude, map.latitude), map.zoom);
+				gis.olmap.setCenter(new OpenLayers.LonLat(gis.map.longitude, gis.map.latitude), gis.map.zoom);
 			}
 			else {
 				gis.olmap.zoomToVisibleExtent();
@@ -674,7 +673,7 @@ GIS.core.ThematicLoader = function(gis, layer) {
 
     loadOrganisationUnits = function(view) {
 		Ext.data.JsonP.request({
-			url: GIS.conf.url.base + GIS.conf.url.path_gis + 'getGeoJson.action',
+			url: gis.baseUrl + gis.conf.url.path_gis + 'getGeoJson.action',
 			params: {
 				parentId: view.parentOrganisationUnit.id,
 				level: view.organisationUnitLevel.id
@@ -682,9 +681,9 @@ GIS.core.ThematicLoader = function(gis, layer) {
 			scope: this,
 			disableCaching: false,
 			success: function(r) {
-				var geojson = GIS.util.geojson.decode(r),
+				var geojson = gis.util.geojson.decode(r),
 					format = new OpenLayers.Format.GeoJSON(),
-					features = GIS.util.map.getTransformedFeatureArray(format.read(geojson));
+					features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
 
 				if (!Ext.isArray(features)) {
 					alert('Invalid coordinates');
@@ -705,11 +704,11 @@ GIS.core.ThematicLoader = function(gis, layer) {
 
     loadData = function(view, features) {
 		var type = view.valueType,
-			dataUrl = 'mapValues/' + GIS.conf.finals.dimension[type].param + '.jsonp',
-			indicator = GIS.conf.finals.dimension.indicator,
-			dataElement = GIS.conf.finals.dimension.dataElement,
-			period = GIS.conf.finals.dimension.period,
-			organisationUnit = GIS.conf.finals.dimension.organisationUnit,
+			dataUrl = 'mapValues/' + gis.conf.finals.dimension[type].param + '.jsonp',
+			indicator = gis.conf.finals.dimension.indicator,
+			dataElement = gis.conf.finals.dimension.dataElement,
+			period = gis.conf.finals.dimension.period,
+			organisationUnit = gis.conf.finals.dimension.organisationUnit,
 			params = {};
 
 		features = features || layer.features;
@@ -720,7 +719,7 @@ GIS.core.ThematicLoader = function(gis, layer) {
 		params.le = view.organisationUnitLevel.id;
 
 		Ext.data.JsonP.request({
-			url: GIS.conf.url.base + GIS.conf.url.path_api + dataUrl,
+			url: gis.baseUrl + gis.conf.url.path_api + dataUrl,
 			params: params,
 			disableCaching: false,
 			scope: this,
@@ -759,7 +758,7 @@ GIS.core.ThematicLoader = function(gis, layer) {
 				layer.removeFeatures(layer.features);
 				layer.addFeatures(newFeatures);
 
-				core.features = layer.features.slice(0);
+				layer.core.features = layer.features.slice(0);
 
 				loadLegend(view);
 			}
@@ -768,8 +767,7 @@ GIS.core.ThematicLoader = function(gis, layer) {
 
 	loadLegend = function(view) {
 		var options,
-			that = this,
-			predefined = GIS.conf.finals.widget.legendtype_predefined,
+			predefined = gis.conf.finals.widget.legendtype_predefined,
 			classificationType = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS,
 			method = view.legendType === predefined ? classificationType : view.method,
 			bounds,
@@ -781,31 +779,31 @@ GIS.core.ThematicLoader = function(gis, layer) {
 
 		fn = function() {
 			options = {
-				indicator: GIS.conf.finals.widget.value,
+				indicator: gis.conf.finals.widget.value,
 				method: method,
 				numClasses: view.classes,
 				bounds: bounds,
-				colors: core.getColors(view.colorLow, view.colorHigh),
+				colors: layer.core.getColors(view.colorLow, view.colorHigh),
 				minSize: view.radiusLow,
 				maxSize: view.radiusHigh
 			};
 
 			view.legendSet = view.legendSet || {};
 			view.legendSet.names = names;
-			core.view = view;
-			core.colorInterpolation = colors;
-			core.applyClassification(options);
+			layer.core.view = view;
+			layer.core.colorInterpolation = colors;
+			layer.core.applyClassification(options);
 
 			afterLoad(view);
 		};
 
-		if (view.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+		if (view.legendType === gis.conf.finals.widget.legendtype_predefined) {
 				bounds = [];
 				colors = [];
 				names = [];
 
 			Ext.Ajax.request({
-				url: GIS.conf.url.base + GIS.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
+				url: gis.baseUrl + gis.conf.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
 				scope: this,
 				success: function(r) {
 					legends = Ext.decode(r.responseText).mapLegends;

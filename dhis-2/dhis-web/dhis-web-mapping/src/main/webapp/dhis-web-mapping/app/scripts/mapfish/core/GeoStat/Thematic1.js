@@ -69,7 +69,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     createColorInterpolation: function() {
         var numColors = this.classification.bins.length;
 
-        if (this.view.legendType === GIS.conf.finals.widget.legendtype_automatic) {
+        if (this.view.legendType === this.gis.conf.finals.widget.legendtype_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
 		}
 
@@ -97,7 +97,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		this.minVal = dist.minVal;
         this.maxVal = dist.maxVal;
 
-        if (this.view.legendType === GIS.conf.finals.widget.legendtype_predefined) {
+        if (this.view.legendType === this.gis.conf.finals.widget.legendtype_predefined) {
 			if (this.bounds[0] > this.minVal) {
 				this.bounds.unshift(this.minVal);
                 //if (this.widget == centroid) { this.widget.symbolizerInterpolation.unshift('blank');
@@ -156,11 +156,11 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		var	element = document.createElement("div"),
 			child,
 			legendType = this.view.legendType,
-			automatic = GIS.conf.finals.widget.legendtype_automatic,
-			predefined = GIS.conf.finals.widget.legendtype_predefined,
+			automatic = this.gis.conf.finals.widget.legendtype_automatic,
+			predefined = this.gis.conf.finals.widget.legendtype_predefined,
 			legendNames = this.view.legendSet.names,
 			config = [
-				this.view.valueType === GIS.conf.finals.dimension.indicator.id ? this.view.indicator.name : this.view.dataElement.name,
+				this.view.valueType === this.gis.conf.finals.dimension.indicator.id ? this.view.indicator.name : this.view.dataElement.name,
 				this.view.period.id, //todo name
 				this.view.organisationUnitLevel.name + ' / ' + this.view.parentOrganisationUnit.name
 			];
