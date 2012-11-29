@@ -347,6 +347,7 @@ GIS.core.OrganisationUnitLevelStore = function(gis) {
 				root: 'organisationUnitLevels'
 			}
 		},
+		autoLoad: true,
 		cmp: [],
 		isLoaded: false,
 		loadFn: function(fn) {
@@ -880,8 +881,11 @@ GIS.core.ThematicLoader = function(gis, layer) {
 	return loader;
 };
 
-GIS.getInstance = function(baseUrl, el) {
+GIS.getInstance = function(config) {
 	var gis = {};
+
+	gis.baseUrl = config && config.baseUrl ? config.baseUrl : '../../';
+	gis.el = config && config.el ? config.el : 
 
 	gis.baseUrl = baseUrl;
 	gis.el = el;

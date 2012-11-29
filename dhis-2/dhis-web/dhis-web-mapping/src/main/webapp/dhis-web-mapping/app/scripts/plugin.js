@@ -226,10 +226,10 @@ Ext.onReady( function() {
 				return;
 			}
 
-			gis = GIS.getInstance(config.url, config.el);
-
-			gis.baseUrl = config.url;
-			gis.el = config.el;
+			gis = GIS.getInstance({
+				baseUrl: config.url,
+				el: config.el
+			});
 
 			gis.map = {
 				id: config.id,

@@ -22,34 +22,37 @@ Ext.onReady( function() {
 		}
 	});
 
+	var gis = GIS.getInstance();
+
 	// Init
 
 	GIS.init.onInitialize = function(r) {
-		var init = Ext.decode(r.responseText);
+		var gis = GIS.getInstance(),
+			init = Ext.decode(r.responseText);
 			nodes = init.rootNodes;
 
 		for (var i = 0; i < nodes.length; i++) {
 			var node = init.rootNodes[i];
 			node.path = '/root/' + node.id;
 		}
-		GIS.init.rootNodes = init.rootNodes;
+		gis.init.rootNodes = init.rootNodes;
 
-		GIS.init.systemSettings = {
+		gis.init.systemSettings = {
 			infrastructuralDataElementGroup: init.systemSettings.infrastructuralDataElementGroup,
 			infrastructuralPeriodType: init.systemSettings.infrastructuralPeriodType
 		};
 
-		GIS.init.security = {
+		gis.init.security = {
 			isAdmin: init.security.isAdmin
 		};
 
-		GIS.init.contextPath = init.contextPath;
+		gis.init.contextPath = init.contextPath;
 
-		GIS.store.organisationUnitLevels.load();
+		gis.store.organisationUnitLevels = GIS.core.OrganisationUnitLevelStore(gis);
 	};
 
 	Ext.Ajax.request({
-		url: GIS.conf.url.base + GIS.conf.url.path_gis + 'initialize.action',
+		url: gis.baseUrl + gis.conf.url.path_gis + 'initialize.action',
 		success: function(r) {
 			GIS.init.onInitialize(r);
 
