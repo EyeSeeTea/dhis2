@@ -73,9 +73,9 @@ html * {
     color: #fff;
     width: 24px;
     height: 24px;
-    opacity: 0.85;
-    filter: alpha(opacity=85);
-	-ms-filter: "alpha(opacity=85)";
+    opacity: 0.75;
+    filter: alpha(opacity=75);
+	-ms-filter: "alpha(opacity=75)";
     cursor: pointer;
     cursor: hand;
     text-align: center;

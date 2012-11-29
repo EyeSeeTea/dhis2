@@ -140,8 +140,6 @@ Ext.onReady( function() {
 
 			panel = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
-				style: 'padding:0, margin:0',
-				bodyStyle: 'padding:0, margin:0',
 				width: el.getWidth(),
 				height: el.getHeight(),
 				layout: {
@@ -159,6 +157,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'panel',
 						layout: 'anchor',
+						bodyStyle: 'border-top:0 none; border-bottom:0 none',
 						width: 200,
 						preventHeader: true,
 						defaults: {
@@ -200,11 +199,22 @@ Ext.onReady( function() {
 						}
 					}
 				],
-				afterrender: function() {
-					//document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin_24.png" />';
-					//document.getElementsByClassName('zoomOutButton')[0].innerHTML = '<img src="images/zoomout_24.png" />';
-					//document.getElementsByClassName('zoomVisibleButton')[0].innerHTML = '<img src="images/zoomvisible_24.png" />';
-					//document.getElementsByClassName('measureButton')[0].innerHTML = '<img src="images/measure_24.png" />';
+				listeners: {
+					render: function() {
+						gis.olmap.mask = new Ext.LoadMask(this.getEl(), {
+							msg: 'Loading'
+						});
+					},
+					afterrender: function() {
+						var count = document.getElementsByClassName('zoomInButton').length;
+
+						for (var i = 0; i < count; i++) {
+							document.getElementsByClassName('zoomInButton')[i].innerHTML = '<img src="images/zoomin_24.png" />';
+							document.getElementsByClassName('zoomOutButton')[i].innerHTML = '<img src="images/zoomout_24.png" />';
+							document.getElementsByClassName('zoomVisibleButton')[i].innerHTML = '<img src="images/zoomvisible_24.png" />';
+							document.getElementsByClassName('measureButton')[i].innerHTML = '<img src="images/measure_24.png" />';
+						}
+					}
 				}
 			});
 

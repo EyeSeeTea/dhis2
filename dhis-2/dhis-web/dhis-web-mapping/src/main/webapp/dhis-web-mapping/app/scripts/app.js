@@ -1,3 +1,5 @@
+GIS.app = {};
+
 GIS.init = {};
 
 GIS.obj = {};

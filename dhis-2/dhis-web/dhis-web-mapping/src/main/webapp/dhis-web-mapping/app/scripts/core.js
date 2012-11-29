@@ -205,7 +205,7 @@ GIS.core.getOLMap = function(gis) {
 		button = new OpenLayers.Control.Button({
 			displayClass: 'olControlButton',
 			trigger: function() {
-				fn.call(map);
+				fn.call(gis.olmap);
 			}
 		});
 
@@ -514,6 +514,7 @@ GIS.core.MapLoader = function(gis) {
 			url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
 			success: function(r) {
 				if (!r) {
+					gis.olmap.mask.hide();
 					alert('Uid not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
 					return;
 				}
@@ -528,8 +529,9 @@ GIS.core.MapLoader = function(gis) {
 		var view,
 			views = gis.map.mapViews,
 			loader;
-			
+
 		if (!(Ext.isArray(views) && views.length)) {
+			gis.olmap.mask.hide();
 			alert('Favorite is outdated - please create a new one'); //i18n
 			return;
 		}
@@ -566,12 +568,14 @@ GIS.core.MapLoader = function(gis) {
 			}
 		}
 
-		//olmap.mask.hide();
+		gis.olmap.mask.hide();
 		//interpretation
 	};
 
 	loader = {
 		load: function() {
+			gis.olmap.mask.show();
+			
 			if (gis.map.id) {
 				getMap();
 			}
