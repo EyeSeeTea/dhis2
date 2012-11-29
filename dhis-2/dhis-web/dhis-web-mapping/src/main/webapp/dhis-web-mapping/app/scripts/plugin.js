@@ -180,7 +180,7 @@ Ext.onReady( function() {
 								title: 'Thematic layer 2 legend', //i18n
 								listeners: {
 									added: function() {
-										gis.layer.thematic1.legendPanel = this;
+										gis.layer.thematic2.legendPanel = this;
 									}
 								}
 							},
@@ -188,7 +188,7 @@ Ext.onReady( function() {
 								title: 'Facility layer legend', //i18n
 								listeners: {
 									added: function() {
-										gis.layer.thematic1.legendPanel = this;
+										gis.layer.facility.legendPanel = this;
 									}
 								}
 							}
@@ -232,7 +232,7 @@ Ext.onReady( function() {
 			createViewport();
 
 			var loader = GIS.core.MapLoader(gis);
-			loader.load(config);
+			loader.load();
 		}();
 	};
 });

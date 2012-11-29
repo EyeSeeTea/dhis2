@@ -410,7 +410,7 @@ GIS.core.StyleMap = function(gis, id, labelConfig) {
 	});
 };
 
-GIS.core.VectorLayer = function(gis, id, name, config) {			
+GIS.core.VectorLayer = function(gis, id, name, config) {
 	return new OpenLayers.Layer.Vector(name, {
 		strategies: [
 			new OpenLayers.Strategy.Refresh({
@@ -509,9 +509,9 @@ GIS.core.MapLoader = function(gis) {
 		register = [],
 		loader;
 
-	getMap = function(config) {
+	getMap = function() {
 		Ext.data.JsonP.request({
-			url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + config.id + '.jsonp?links=false',
+			url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
 			success: function(r) {
 				if (!r) {
 					alert('Uid not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
@@ -519,30 +519,29 @@ GIS.core.MapLoader = function(gis) {
 				}
 				
 				gis.map = r;
-				setMap(gis.map);
+				setMap();
 			}
 		});
 	};
 
-	setMap = function(map) {
-		var mapView,
+	setMap = function() {
+		var view,
+			views = gis.map.mapViews,
 			loader;
-
-		map.mapViews = map.mapViews || [];
-
-		if (!map.mapViews.length) {
+			
+		if (!(Ext.isArray(views) && views.length)) {
 			alert('Favorite is outdated - please create a new one'); //i18n
 			return;
 		}
 
 		gis.olmap.closeAllLayers();
 
-		for (var i = 0; i < map.mapViews.length; i++) {
-			mapView = map.mapViews[i];
-			loader = gis.layer[mapView.layer].core.getLoader();
+		for (var i = 0; i < views.length; i++) {
+			view = views[i];
+			loader = gis.layer[view.layer].core.getLoader();
 			loader.updateGui = !gis.el;
 			loader.callBack = callBack;
-			loader.load(mapView);
+			loader.load(view);
 		}
 	};
 
@@ -572,12 +571,12 @@ GIS.core.MapLoader = function(gis) {
 	};
 
 	loader = {
-		load: function(config) {
-			if (config.id) {
-				getMap(config);
+		load: function() {
+			if (gis.map.id) {
+				getMap();
 			}
 			else {
-				setMap(config);
+				setMap();
 			}
 		}
 	};
@@ -839,6 +838,8 @@ GIS.core.ThematicLoader = function(gis, layer) {
 		olmap.legendPanel.doLayout();
 		layer.legendPanel.expand();
 
+		layer.setOpacity(view.opacity);
+
 		if (loader.updateGui && Ext.isObject(widget)) {
 			widget.setGui(view);
 		}
@@ -887,9 +888,9 @@ GIS.getInstance = function(baseUrl, el) {
 	gis.olmap = GIS.core.getOLMap(gis);
 	gis.layer = GIS.core.getLayers(gis);
 
-	for (var property in gis.layer) {
-		if (gis.layer.hasOwnProperty(property)) {
-			gis.olmap.addLayer(gis.layer[property]);
+	for (var layerId in gis.layer) {
+		if (gis.layer.hasOwnProperty(layerId)) {
+			gis.olmap.addLayer(gis.layer[layerId]);
 		}
 	}
 
