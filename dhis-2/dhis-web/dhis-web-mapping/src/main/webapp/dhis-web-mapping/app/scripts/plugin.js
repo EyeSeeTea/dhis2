@@ -231,8 +231,7 @@ Ext.onReady( function() {
 
 			createViewport();
 
-			var loader = GIS.core.MapLoader(gis);
-			loader.load();
+			GIS.core.MapLoader(gis).load();
 		}();
 	};
 });
