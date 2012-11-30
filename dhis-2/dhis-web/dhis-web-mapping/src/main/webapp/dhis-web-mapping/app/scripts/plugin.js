@@ -219,7 +219,7 @@ Ext.onReady( function() {
 				],
 				listeners: {
 					render: function() {
-						onRender(this.getEl());
+						onRender(this);
 					},
 					afterrender: function() {
 						afterRender();
@@ -248,7 +248,7 @@ Ext.onReady( function() {
 				mapViews: getViews()
 			};
 
-			createViewport();
+			gis.viewport = createViewport();
 
 			GIS.core.MapLoader(gis).load();
 		}();
