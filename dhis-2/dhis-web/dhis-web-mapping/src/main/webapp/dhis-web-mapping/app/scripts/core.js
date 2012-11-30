@@ -885,10 +885,7 @@ GIS.getInstance = function(config) {
 	var gis = {};
 
 	gis.baseUrl = config && config.baseUrl ? config.baseUrl : '../../';
-	gis.el = config && config.el ? config.el : 
-
-	gis.baseUrl = baseUrl;
-	gis.el = el;
+	gis.el = config && config.el ? config.el : null;
 
 	gis.conf = GIS.core.getConfigs();
 	gis.util = GIS.core.getUtils(gis);

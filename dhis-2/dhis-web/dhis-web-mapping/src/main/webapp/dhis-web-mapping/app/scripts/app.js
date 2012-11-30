@@ -1,4 +1,5 @@
 GIS.app = {};
+GIS.app.init = {};
 
 GIS.init = {};
 
@@ -22,31 +23,16 @@ Ext.onReady( function() {
 		}
 	});
 
-	var gis = GIS.getInstance();
-
 	// Init
 
-	GIS.init.onInitialize = function(r) {
-		var gis = GIS.getInstance(),
-			init = Ext.decode(r.responseText);
-			nodes = init.rootNodes;
+	var gis = GIS.getInstance();
 
-		for (var i = 0; i < nodes.length; i++) {
-			var node = init.rootNodes[i];
-			node.path = '/root/' + node.id;
+	GIS.app.init.onInitialize = function(r) {
+		gis.init = Ext.decode(r.responseText);
+
+		for (var i = 0, nodes = gis.init.rootNodes; i < nodes.length; i++) {
+			nodes[i].path = '/root/' + nodes[i].id;
 		}
-		gis.init.rootNodes = init.rootNodes;
-
-		gis.init.systemSettings = {
-			infrastructuralDataElementGroup: init.systemSettings.infrastructuralDataElementGroup,
-			infrastructuralPeriodType: init.systemSettings.infrastructuralPeriodType
-		};
-
-		gis.init.security = {
-			isAdmin: init.security.isAdmin
-		};
-
-		gis.init.contextPath = init.contextPath;
 
 		gis.store.organisationUnitLevels = GIS.core.OrganisationUnitLevelStore(gis);
 	};
@@ -54,20 +40,20 @@ Ext.onReady( function() {
 	Ext.Ajax.request({
 		url: gis.baseUrl + gis.conf.url.path_gis + 'initialize.action',
 		success: function(r) {
-			GIS.init.onInitialize(r);
+			GIS.app.init.onInitialize(r);
 
-	GIS.init.onRender = function() {
+	GIS.app.init.onRender = function() {
 		if (!window.google) {
-			GIS.base.openStreetMap.layer.item.setValue(true);
+			gis.layer.openStreetMap.item.setValue(true);
 		}
 	};
 
-	GIS.init.afterRender = function() {
-
+	GIS.app.init.afterRender = function() {
+		
 		// Mask
-		GIS.map.mask = new Ext.LoadMask(GIS.cmp.region.center.getEl(), {
-			msg: GIS.i18n.loading
-		});
+		//gis.olmap.mask = new Ext.LoadMask(GIS.cmp.region.center.getEl(), {
+			//msg: GIS.i18n.loading
+		//});
 
 		// Map tools
 		document.getElementsByClassName('zoomInButton')[0].innerHTML = '<img src="images/zoomin_24.png" />';

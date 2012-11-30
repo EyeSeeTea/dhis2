@@ -27,7 +27,8 @@ Ext.onReady( function() {
 
 	GIS.getMap = function(config) {
 		var validateConfig,
-			fifo,
+			onRender,
+			afterRender,
 			getViews,
 			createViewport,
 			gis,
@@ -86,6 +87,23 @@ Ext.onReady( function() {
 			}
 		};
 
+		onRender = function(vp) {
+			gis.olmap.mask = new Ext.LoadMask(vp.getEl(), {
+				msg: 'Loading'
+			});
+		};
+
+		afterRender = function(vp) {
+			var count = document.getElementsByClassName('zoomInButton').length;
+
+			for (var i = 0; i < count; i++) {
+				document.getElementsByClassName('zoomInButton')[i].innerHTML = '<img src="images/zoomin_24.png" />';
+				document.getElementsByClassName('zoomOutButton')[i].innerHTML = '<img src="images/zoomout_24.png" />';
+				document.getElementsByClassName('zoomVisibleButton')[i].innerHTML = '<img src="images/zoomvisible_24.png" />';
+				document.getElementsByClassName('measureButton')[i].innerHTML = '<img src="images/measure_24.png" />';
+			}
+		};			
+		
 		getViews = function() {
 			var view,
 				views = [],
@@ -201,19 +219,10 @@ Ext.onReady( function() {
 				],
 				listeners: {
 					render: function() {
-						gis.olmap.mask = new Ext.LoadMask(this.getEl(), {
-							msg: 'Loading'
-						});
+						onRender(this.getEl());
 					},
 					afterrender: function() {
-						var count = document.getElementsByClassName('zoomInButton').length;
-
-						for (var i = 0; i < count; i++) {
-							document.getElementsByClassName('zoomInButton')[i].innerHTML = '<img src="images/zoomin_24.png" />';
-							document.getElementsByClassName('zoomOutButton')[i].innerHTML = '<img src="images/zoomout_24.png" />';
-							document.getElementsByClassName('zoomVisibleButton')[i].innerHTML = '<img src="images/zoomvisible_24.png" />';
-							document.getElementsByClassName('measureButton')[i].innerHTML = '<img src="images/measure_24.png" />';
-						}
+						afterRender();
 					}
 				}
 			});
