@@ -2635,7 +2635,11 @@ Ext.onReady( function() {
 	// GUI
 
 	GIS.app.createViewport = function() {
-		return Ext.create('Ext.container.Viewport', {
+		var eastRegion,
+			centerRegion,
+			viewport;
+
+		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
 			items: [
 				{
@@ -2694,14 +2698,13 @@ Ext.onReady( function() {
 					],
 					listeners: {
 						added: function() {
-							GIS.cmp.region.east = this;
-							gis.olmap.legendPanel = this;
+							eastRegion = this;
 						},
 						collapse: function() {
-							GIS.cmp.region.center.cmp.tbar.resize.setText('<<<');
+							gis.viewport.centerRegion.cmp.tbar.resize.setText('<<<');
 						},
 						expand: function() {
-							GIS.cmp.region.center.cmp.tbar.resize.setText('>>>');
+							gis.viewport.centerRegion.cmp.tbar.resize.setText('>>>');
 						}
 					}
 				},
@@ -2719,35 +2722,35 @@ Ext.onReady( function() {
 						items: function() {
 							var a = [];
 							a.push({
-								iconCls: 'gis-btn-icon-' + gis.olmap.base.boundary.id,
-								menu: gis.olmap.base.boundary.menu,
+								iconCls: 'gis-btn-icon-' + gis.layer.boundary.id,
+								menu: gis.layer.boundary.menu,
 								width: 26
 							});
 							a.push({
-								iconCls: 'gis-btn-icon-' + gis.olmap.base.thematic1.id,
-								menu: gis.olmap.base.thematic1.menu,
+								iconCls: 'gis-btn-icon-' + gis.layer.thematic1.id,
+								menu: gis.layer.thematic1.menu,
 								width: 26
 							});
 							a.push({
-								iconCls: 'gis-btn-icon-' + gis.olmap.base.thematic2.id,
-								menu: gis.olmap.base.thematic2.menu,
+								iconCls: 'gis-btn-icon-' + gis.layer.thematic2.id,
+								menu: gis.layer.thematic2.menu,
 								width: 26
 							});
 							a.push({
-								iconCls: 'gis-btn-icon-' + gis.olmap.base.facility.id,
-								menu: gis.olmap.base.facility.menu,
+								iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
+								menu: gis.layer.facility.menu,
 								width: 26
 							});
 							a.push({
 								text: 'Favorites', //i18n
 								menu: {},
 								handler: function() {
-									if (GIS.cmp.mapWindow && GIS.cmp.mapWindow.destroy) {
-										GIS.cmp.mapWindow.destroy();
+									if (gis.viewport.mapWindow && gis.viewport.mapWindow.destroy) {
+										gis.viewport.mapWindow.destroy();
 									}
 
-									GIS.cmp.mapWindow = GIS.app.MapWindow();
-									GIS.cmp.mapWindow.show();
+									gis.viewport.mapWindow = GIS.app.MapWindow();
+									gis.viewport.mapWindow.show();
 								}
 							});
 							if (gis.init.security.isAdmin) {
@@ -2755,12 +2758,12 @@ Ext.onReady( function() {
 									text: 'Legend', //i18n
 									menu: {},
 									handler: function() {
-										if (GIS.cmp.legendSetWindow && GIS.cmp.legendSetWindow.destroy) {
-											GIS.cmp.legendSetWindow.destroy();
+										if (gis.viewport.legendSetWindow && gis.viewport.legendSetWindow.destroy) {
+											gis.viewport.legendSetWindow.destroy();
 										}
 
-										GIS.cmp.legendSetWindow = GIS.app.LegendSetWindow();
-										GIS.cmp.legendSetWindow.show();
+										gis.viewport.legendSetWindow = GIS.app.LegendSetWindow();
+										gis.viewport.legendSetWindow.show();
 									}
 								});
 							}
@@ -2774,12 +2777,12 @@ Ext.onReady( function() {
 								menu: {},
 								disabled: true,
 								handler: function() {
-									if (GIS.cmp.downloadWindow && GIS.cmp.downloadWindow.destroy) {
-										GIS.cmp.downloadWindow.destroy();
+									if (gis.viewport.downloadWindow && gis.viewport.downloadWindow.destroy) {
+										gis.viewport.downloadWindow.destroy();
 									}
 
-									GIS.cmp.downloadWindow = GIS.app.DownloadWindow();
-									GIS.cmp.downloadWindow.show();
+									gis.viewport.downloadWindow = GIS.app.DownloadWindow();
+									gis.viewport.downloadWindow.show();
 								},
 								xable: function() {
 									if (util.map.hasVisibleFeatures()) {
@@ -2791,7 +2794,7 @@ Ext.onReady( function() {
 								},
 								listeners: {
 									added: function() {
-										GIS.cmp.downloadButton = this;
+										gis.viewport.downloadButton = this;
 									}
 								}
 							});
@@ -2800,16 +2803,16 @@ Ext.onReady( function() {
 								menu: {},
 								disabled: true,
 								handler: function() {
-									if (GIS.cmp.interpretationWindow && GIS.cmp.interpretationWindow.destroy) {
-										GIS.cmp.interpretationWindow.destroy();
+									if (gis.viewport.interpretationWindow && gis.viewport.interpretationWindow.destroy) {
+										gis.viewport.interpretationWindow.destroy();
 									}
 
-									GIS.cmp.interpretationWindow = GIS.app.InterpretationWindow();
-									GIS.cmp.interpretationWindow.show();
+									gis.viewport.interpretationWindow = GIS.app.InterpretationWindow();
+									gis.viewport.interpretationWindow.show();
 								},
 								listeners: {
 									added: function() {
-										GIS.cmp.interpretationButton = this;
+										gis.viewport.interpretationButton = this;
 									}
 								}
 							});
@@ -2823,11 +2826,11 @@ Ext.onReady( function() {
 							a.push({
 								text: '>>>', //i18n
 								handler: function() {
-									GIS.cmp.region.east.toggleCollapse();
+									gis.viewport.eastRegion.toggleCollapse();
 								},
 								listeners: {
 									render: function() {
-										GIS.cmp.region.center.cmp.tbar.resize = this;
+										gis.viewport.centerRegion.cmp.tbar.resize = this;
 									}
 								}
 							});
@@ -2836,16 +2839,21 @@ Ext.onReady( function() {
 					},
 					listeners: {
 						added: function() {
-							GIS.cmp.region.center = this;
+							centerRegion = this;
 						}
 					}
 				}
 			],
 			listeners: {
-				render: gis.init.onRender,
-				afterrender: gis.init.afterRender
+				render: GIS.app.init.onRender,
+				afterrender: GIS.app.init.afterRender
 			}
 		});
+
+		viewport.centerRegion = centerRegion;
+		viewport.eastRegion = eastRegion;
+
+		return viewport;
 	};
 
 	GIS.app.init.onInitialize = function(r) {

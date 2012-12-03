@@ -384,7 +384,7 @@ GIS.core.StyleMap = function(gis, id, labelConfig) {
 			strokeWidth: 2,
 			cursor: 'pointer'
 		};
-		
+
 	if (id === 'boundary') {
 		defaults.fillOpacity = 0;
 		defaults.strokeColor = '#000';
@@ -519,7 +519,7 @@ GIS.core.MapLoader = function(gis) {
 					alert('Uid not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
 					return;
 				}
-				
+
 				gis.map = r;
 				setMap();
 			}
@@ -576,7 +576,7 @@ GIS.core.MapLoader = function(gis) {
 	loader = {
 		load: function() {
 			gis.olmap.mask.show();
-			
+
 			if (gis.map.id) {
 				getMap();
 			}
@@ -840,7 +840,7 @@ GIS.core.ThematicLoader = function(gis, layer) {
 	};
 
 	afterLoad = function(view) {
-		olmap.legendPanel.doLayout();
+		gis.viewport.legendPanel.doLayout();
 		layer.legendPanel.expand();
 
 		layer.setOpacity(view.opacity);
