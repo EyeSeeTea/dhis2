@@ -1,4 +1,4 @@
-package org.hisp.dhis.message;
+package org.hisp.dhis.light.messaging.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,52 +27,47 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-import java.util.Set;
+import com.opensymphony.xwork2.Action;
 
-import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * @author Lars Helge Overland
+ * @author Le Hong Em <em.hispvietnam@gmail.com>
  */
-public interface MessageService
+public class GetMessageRecipientsAction
+    implements Action
 {
-    final String ID = MessageService.class.getName();
 
-    final String META_USER_AGENT = "User-agent: ";
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    int sendMessage( String subject, String text, String metaData, Set<User> users );
+    @Autowired
+    private UserService userService;
 
-    int sendMessage( String subject, String text, String metaData, Set<User> users, boolean includeFeedbackRecipients );
+    private Integer userId;
 
-    int sendFeedback( String subject, String text, String metaData );
+    public void setUserId( Integer userId )
+    {
+        this.userId = userId;
+    }
 
-    void sendReply( MessageConversation conversation, String text, String metaData );
+    private User user;
 
-    int saveMessageConversation( MessageConversation conversation );
+    public User getUser()
+    {
+        return user;
+    }
 
-    void updateMessageConversation( MessageConversation conversation );
+    @Override
+    public String execute()
+        throws Exception
+    {
+        user = userService.getUser( userId );
 
-    int sendCompletenessMessage( CompleteDataSetRegistration registration );
+        return SUCCESS;
+    }
 
-    MessageConversation getMessageConversation( int id );
-
-    MessageConversation getMessageConversation( String uid );
-
-    long getUnreadMessageConversationCount();
-
-    long getUnreadMessageConversationCount( User user );
-
-    List<MessageConversation> getMessageConversations( int first, int max );
-
-    List<MessageConversation> getMessageConversations( boolean followUpOnly, boolean unreadOnly, int first, int max );
-
-    int getMessageConversationCount();
-
-    int getMessageConversationCount( boolean followUpOnly, boolean unreadOnly );
-
-    List<MessageConversation> getAllMessageConversations();
-
-    void deleteMessages( User sender );
 }
