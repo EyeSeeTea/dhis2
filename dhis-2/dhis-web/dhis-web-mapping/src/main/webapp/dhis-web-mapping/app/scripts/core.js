@@ -190,8 +190,11 @@ GIS.core.getUtils = function(gis) {
 	return util;
 };
 
-GIS.core.getStores = function() {
-	return {};
+GIS.core.getStores = function(gis) {
+	var stores = {};
+	stores.organisationUnitLevels = GIS.core.OrganisationUnitLevelStore(gis);
+
+	return stores;
 };
 
 GIS.core.getOLMap = function(gis) {
@@ -364,7 +367,7 @@ GIS.core.OrganisationUnitLevelStore = function(gis) {
 			load: function() {
 				if (!this.isLoaded) {
 					this.isLoaded = true;
-					GIS.util.gui.combo.setQueryMode(this.cmp, 'local');
+					gis.util.gui.combo.setQueryMode(this.cmp, 'local');
 				}
 				this.sort('level', 'ASC');
 			}
@@ -372,7 +375,7 @@ GIS.core.OrganisationUnitLevelStore = function(gis) {
 	});
 };
 
-GIS.core.StyleMap = function(gis, id, labelConfig) {
+GIS.core.StyleMap = function(id, labelConfig) {
 	var defaults = {
 			fillOpacity: 1,
 			strokeColor: '#fff',
@@ -417,7 +420,7 @@ GIS.core.VectorLayer = function(gis, id, name, config) {
 				force:true
 			})
 		],
-		styleMap: GIS.core.StyleMap(gis, id),
+		styleMap: GIS.core.StyleMap(id),
 		visibility: false,
 		displayInLayerSwitcher: false,
 		layerType: gis.conf.finals.layer.type_vector,
@@ -888,7 +891,7 @@ GIS.getInstance = function(config) {
 
 	gis.conf = GIS.core.getConfigs();
 	gis.util = GIS.core.getUtils(gis);
-	gis.store = GIS.core.getStores();
+	gis.store = GIS.core.getStores(gis);
 	gis.olmap = GIS.core.getOLMap(gis);
 	gis.layer = GIS.core.getLayers(gis);
 
