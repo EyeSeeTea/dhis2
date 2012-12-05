@@ -102,8 +102,8 @@ Ext.onReady( function() {
 				document.getElementsByClassName('zoomVisibleButton')[i].innerHTML = '<img src="images/zoomvisible_24.png" />';
 				document.getElementsByClassName('measureButton')[i].innerHTML = '<img src="images/measure_24.png" />';
 			}
-		};			
-		
+		};
+
 		getViews = function() {
 			var view,
 				views = [],
@@ -153,10 +153,12 @@ Ext.onReady( function() {
 		};
 
 		createViewport = function() {
-			var panel,
+			var viewport,
+				eastRegion,
+				centerRegion,
 				el = Ext.get(gis.el);
 
-			panel = Ext.create('Ext.panel.Panel', {
+			viewport = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
 				width: el.getWidth(),
 				height: el.getHeight(),
@@ -170,7 +172,12 @@ Ext.onReady( function() {
 						map: gis.olmap,
 						bodyStyle: 'border:0 none',
 						width: el.getWidth() - 200,
-						height: el.getHeight()
+						height: el.getHeight(),
+						listeners: {
+							added: function() {
+								centerRegion = this;
+							}
+						}
 					},
 					{
 						xtype: 'panel',
@@ -212,7 +219,7 @@ Ext.onReady( function() {
 						],
 						listeners: {
 							added: function() {
-								gis.olmap.legendPanel = this;
+								eastRegion = this;
 							}
 						}
 					}
@@ -227,7 +234,10 @@ Ext.onReady( function() {
 				}
 			});
 
-			return panel;
+			viewport.centerRegion = centerRegion;
+			viewport.eastRegion = eastRegion;
+
+			return viewport;
 		};
 
 		initialize = function() {

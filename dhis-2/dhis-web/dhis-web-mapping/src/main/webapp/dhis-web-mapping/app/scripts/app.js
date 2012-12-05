@@ -2863,14 +2863,14 @@ Ext.onReady( function() {
 		gis.util = GIS.app.getUtils();
 		gis.store = GIS.app.getStores();
 
-		layer = gis.layer.boundary;
-		layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
-		layer.window = GIS.app.WidgetWindow(layer);
-		layer.widget = Ext.create('mapfish.widgets.geostat.Boundary', {
-			map: gis.olmap,
-			layer: layer,
-			menu: layer.menu
-		});
+		//layer = gis.layer.boundary;
+		//layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
+		//layer.window = GIS.app.WidgetWindow(layer);
+		//layer.widget = Ext.create('mapfish.widgets.geostat.Boundary', {
+			//map: gis.olmap,
+			//layer: layer,
+			//menu: layer.menu
+		//});
 
 		layer = gis.layer.thematic1;
 		layer.menu = GIS.app.LayerMenu(layer);

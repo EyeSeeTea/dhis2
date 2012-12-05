@@ -211,13 +211,13 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		var that = this;
 
 		this.toggler.valueType = function(valueType) {
-			if (valueType === GIS.conf.finals.dimension.indicator.id) {
+			if (valueType === 'indicator') {
 				that.cmp.indicatorGroup.show();
 				that.cmp.indicator.show();
 				that.cmp.dataElementGroup.hide();
 				that.cmp.dataElement.hide();
 			}
-			else if (valueType === GIS.conf.finals.dimension.dataElement.id) {
+			else if (valueType === 'dataElement') {
 				that.cmp.indicatorGroup.hide();
 				that.cmp.indicator.hide();
 				that.cmp.dataElementGroup.show();
@@ -226,13 +226,13 @@ Ext.define('mapfish.widgets.geostat.Thematic1', {
 		};
 
 		this.toggler.legendType = function(legendType) {
-			if (legendType === GIS.conf.finals.widget.legendtype_automatic) {
+			if (legendType === 'automatic') {
 				that.cmp.methodPanel.show();
 				that.cmp.lowPanel.show();
 				that.cmp.highPanel.show();
 				that.cmp.legendSet.hide();
 			}
-			else if (legendType === GIS.conf.finals.widget.legendtype_predefined) {
+			else if (legendType === 'predefined') {
 				that.cmp.methodPanel.hide();
 				that.cmp.lowPanel.hide();
 				that.cmp.highPanel.hide();

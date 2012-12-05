@@ -840,7 +840,7 @@ GIS.core.ThematicLoader = function(gis, layer) {
 	};
 
 	afterLoad = function(view) {
-		gis.viewport.legendPanel.doLayout();
+		gis.viewport.eastRegion.doLayout();
 		layer.legendPanel.expand();
 
 		layer.setOpacity(view.opacity);
