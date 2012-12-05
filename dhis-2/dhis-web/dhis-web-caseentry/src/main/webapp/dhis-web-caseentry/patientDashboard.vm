@@ -18,11 +18,11 @@
 			<table>
 				<tr>
 					<td>$i18n.getString("full_name")</td>
-					<td>$!patient.getFullName()</td>
+					<td>$encoder.htmlEncode($!patient.getFullName())</td>
 				</tr>
 				<tr>
 					<td>$i18n.getString("location")</td>
-					<td>$!patient.organisationUnit.name</td>
+					<td>$encoder.htmlEncode($!patient.organisationUnit.name)</td>
 				</tr>
 				<tr>
 					<td>$i18n.getString("gender")</td>
@@ -30,7 +30,7 @@
 				</tr>
 				<tr>
 					<td>$i18n.getString("date_of_birth")</td>
-					<td>$format.formatDate( $!patient.birthDate) $!patient.getAge()</td>
+					<td>$format.formatDate( $!patient.birthDate) ($!patient.getAge())</td>
 				</tr>
 				<tr>
 					<td>$i18n.getString("phone_number")</td>
@@ -46,7 +46,7 @@
 					<td>$i18n.getString("health_worker")</td>
 					<td>
 						#if($!patient.healthWorker )
-							$!patient.healthWorker.name
+							$encoder.htmlEncode($!patient.healthWorker.name)
 						#else
 							[$i18n.getString('none')]
 						#end
@@ -75,7 +75,7 @@
 						#elseif($attributeValue.patientAttribute.valueType=='DATE')
 							$format.formatDate( $attributeValue.value )
 						#else
-							$attributeValue.value
+							$encoder.htmlEncode($attributeValue.value)
 						#end	
 					</td>
 				</tr>
@@ -130,21 +130,6 @@
 						</td>
 					</tr>
 					#end
-				#end
-				#foreach($program in $singlePrograms)
-					<tr id='tr_$program.id' name='tr_$program.id' style='cursor:pointer;'
-						onclick='javascript:saveSingleEnrollment("$patient.id","$program.id")' >
-						<td>
-							<a><span id='infor_$program.id'></span></a>
-							<script>
-								var infor = "$program.name" + " (" + getCurrentDate() + ")";
-								setInnerHTML("infor_$program.id", infor);
-							</script>
-						</td>
-					</tr>
-					<tr style='cursor:pointer;'>
-						<td id='tr2_$programInstance.id'></td>
-					</tr>
 				#end
 			</table>
 		</div>
@@ -213,7 +198,7 @@
 		#set( $mark = false )
 		#foreach( $patientAudit in $patientAudits )
 		<tr #alternate( $mark )>
-			<td>$patientAudit.visitor</td>
+			<td>$encoder.htmlEncode($patientAudit.visitor)</td>
 			<td>$format.formatDate($patientAudit.date)</td>
 		</tr>
 		#set( $mark = !$mark )

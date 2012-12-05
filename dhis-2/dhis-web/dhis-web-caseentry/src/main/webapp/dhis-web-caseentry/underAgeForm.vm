@@ -40,6 +40,9 @@
 				}
 		});
 		datePickerValid( 'addRepresentativeForm [id=birthDate]' );
+		hideById('addRepresentativeForm [id=deathCheckboxTR]');
+		hideById('addRepresentativeForm [id=representativeFormDiv]');
+		hideById('addRepresentativeForm [id=underAgeDiv]');
 	}); 
 	
 	jQuery("#addRepresentativeTabs").tabs();

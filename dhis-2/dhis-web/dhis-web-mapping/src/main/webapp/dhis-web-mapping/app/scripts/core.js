@@ -262,28 +262,27 @@ GIS.core.getOLMap = function(gis) {
 };
 
 GIS.core.getLayers = function(gis) {
-	var layers = {
-		boundary: GIS.core.VectorLayer(gis, 'boundary', 'Boundary layer', {opacity: 0.8}),
-		thematic1: GIS.core.VectorLayer(gis, 'thematic1', 'Thematic layer 1', {opacity: 0.8}),
-		thematic2: GIS.core.VectorLayer(gis, 'thematic2', 'Thematic layer 2', {opacity: 0.8}),
-		facility: GIS.core.VectorLayer(gis, 'facility', 'Facility layer', {opacity: 0.8})
-	};
+	var layers = {};
 
+	layers.boundary = GIS.core.VectorLayer(gis, 'boundary', 'Boundary layer', {opacity: 0.8});
 	layers.boundary.core = new mapfish.GeoStat.Boundary(gis.olmap, {
 		layer: layers.boundary,
 		gis: gis
 	});
 
+	layers.thematic1 = GIS.core.VectorLayer(gis, 'thematic1', 'Thematic layer 1', {opacity: 0.8});
 	layers.thematic1.core = new mapfish.GeoStat.Thematic1(gis.olmap, {
 		layer: layers.thematic1,
 		gis: gis
 	});
 
+	layers.thematic2 = GIS.core.VectorLayer(gis, 'thematic2', 'Thematic layer 2', {opacity: 0.8});
 	layers.thematic2.core = new mapfish.GeoStat.Thematic2(gis.olmap, {
 		layer: layers.thematic2,
 		gis: gis
 	});
 
+	layers.facility = GIS.core.VectorLayer(gis, 'facility', 'Facility layer', {opacity: 0.8});
 	layers.facility.core = new mapfish.GeoStat.Facility(gis.olmap, {
 		layer: layers.facility,
 		gis: gis

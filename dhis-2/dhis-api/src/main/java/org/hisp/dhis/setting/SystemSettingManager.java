@@ -53,8 +53,6 @@ public interface SystemSettingManager
     final String KEY_FORUM_INTEGRATION = "forumIntegration";
     final String KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART = "omitIndicatorsZeroNumeratorDataMart";
     final String KEY_REPORT_TEMPLATE_DIRECTORY = "reportTemplateDirectory";
-    final String KEY_MAX_NUMBER_OF_ATTEMPTS = "maxAttempts";
-    final String KEY_TIMEFRAME_MINUTES = "lockoutTimeframe";
     final String KEY_GOOGLE_MAPS_API_KEY = "googleMapsAPIKey";
     final String KEY_FACTOR_OF_DEVIATION = "factorDeviation";
     final String KEY_COMPLETENESS_OFFSET = "completenessOffset";
@@ -84,6 +82,7 @@ public interface SystemSettingManager
     final int DEFAULT_ORGUNITGROUPSET_AGG_LEVEL = 3;    
     final String DEFAULT_GOOGLE_MAPS_API_KEY = "ABQIAAAAut6AhySExnYIXm5s2OFIkxRKNzJ-_9njnryRTbvC6CtrS4sRvRREWnxwlZUa630pLuPf3nD9i4fq9w";
     final String DEFAULT_START_MODULE = "dhis-web-dashboard-integration";
+    final String DEFAULT_APPLICATION_TITLE = "District Health Information Software 2";
     
     final int DEFAULT_COMPLETENESS_OFFSET = 15;
     final String DEFAULT_TIME_FOR_SENDING_MESSAGE = "08:00";

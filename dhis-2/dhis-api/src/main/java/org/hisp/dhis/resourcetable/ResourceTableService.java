@@ -71,4 +71,12 @@ public interface ResourceTableService
      * Generates a resource table for all data elements.
      */
     void generateDataElementTable();
+    
+    /**
+     * Generates a resource table for all periods.
+     * 
+     * @param noDisaggregation whether to include period types with higher
+     *        frequency order than the period itself.
+     */
+    void generatePeriodTable( boolean noDisaggregation );
 }

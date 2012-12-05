@@ -113,6 +113,13 @@ public class GenerateResourceTableAction
     {
         this.dataElementStructure = dataElementStructure;
     }
+    
+    private boolean periodStructure;
+
+    public void setPeriodStructure( boolean periodStructure )
+    {
+        this.periodStructure = periodStructure;
+    }
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -158,6 +165,12 @@ public class GenerateResourceTableAction
         if ( dataElementStructure )
         {
             resourceTableService.generateDataElementTable();
+        }
+        
+        if ( periodStructure )
+        {
+            resourceTableService.generatePeriodTable( false );
+            resourceTableService.generatePeriodTable( true );
         }
         
         log.info( "Generated resource tables" );

@@ -39,8 +39,6 @@ import org.hisp.dhis.dataset.comparator.SectionOrderComparator;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.setting.SystemSetting;
-import org.hisp.dhis.setting.SystemSettingManager;
 
 import java.util.*;
 
@@ -311,14 +309,24 @@ public class LoadFormAction
         if ( multiOrganisationUnit != null && multiOrganisationUnit != 0 ) // for multiOrg, we only support section forms
         {
             OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( multiOrganisationUnit );
+            List<OrganisationUnit> organisationUnitChildren = new ArrayList<OrganisationUnit>();
 
             for ( OrganisationUnit child : organisationUnit.getChildren() )
             {
                 if ( child.getDataSets().contains( dataSet ) )
                 {
-                    organisationUnits.add( child );
+                    organisationUnitChildren.add( child );
                 }
             }
+
+            Collections.sort( organisationUnitChildren, IdentifiableObjectNameComparator.INSTANCE );
+
+            if ( organisationUnit.getDataSets().contains( dataSet ) )
+            {
+                organisationUnits.add( organisationUnit );
+            }
+
+            organisationUnits.addAll( organisationUnitChildren );
 
             getSectionForm( dataElements, dataSet );
             displayMode = "multiorg_section";

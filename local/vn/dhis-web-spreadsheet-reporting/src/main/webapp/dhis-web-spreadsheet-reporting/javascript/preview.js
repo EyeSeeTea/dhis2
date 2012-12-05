@@ -2,7 +2,10 @@
  * Global variables
  */
 
+spreadsheetTreePath = '../dhis-web-spreadsheet-reporting/';
+ 
 isImport = false;
+generateByDataSet = false;
 idTemp = null;
 importlist = null;
 importItemIds = new Array();
@@ -16,8 +19,7 @@ htmlStyle.push( "</style>" );
 
 htmlPrintDownloadFunc = [ "<div align='right'>" ];
 htmlPrintDownloadFunc.push(	"<a href='javascript:printExportReport();' title='Print'>" );
-htmlPrintDownloadFunc.push( "<img src='../images/printer.png'/></a>&nbsp;&nbsp;" );
-htmlPrintDownloadFunc.push( "<a href='downloadFile.action' title='Download'><img src='images/download.png'/></a></div>" );
+htmlPrintDownloadFunc.push( "<img src='../images/printer.png'/></a>" );
 
 // ----------------------------------------------------------------------
 // Methods
@@ -42,7 +44,7 @@ function validatePreviewReport( isAdvanced )
 		return;
 	}
 	
-	var url = 'validateGenerateReport.action?';
+	var url = spreadsheetTreePath + 'validateGenerateReport.action?';
 	
 	jQuery.each( exportReports, function ( i, item )
 	{
@@ -83,12 +85,21 @@ function validatePreviewReport( isAdvanced )
 
 function previewExportReport()
 {
-	jQuery.get( "previewExportReport.action", { showSubItem: !isChecked( 'showSubItem' ) }, previewExportReportReceived );
+	$.ajax({
+		cache: false,
+		url: spreadsheetTreePath + "previewExportReport.action",
+		dataType: 'xml',
+		data: 'showSubItem=' + !isChecked( 'showSubItem' ) + '&generateByDataSet=' + generateByDataSet + '&_=[TIMESTAMP]',
+		success: previewExportReportReceived
+	});
 }
 
 function previewAdvandReport() 
 {	
-	jQuery.get( "previewAdvancedExportReport.action", { organisationGroupId: getFieldValue( 'availableOrgunitGroups' ) }, previewExportReportReceived );
+	jQuery.get( spreadsheetTreePath + "previewAdvancedExportReport.action",
+	{
+		organisationGroupId: getFieldValue( 'availableOrgunitGroups' )
+	}, previewExportReportReceived );
 }
 
 function previewExportReportReceived( parentElement ) 
@@ -110,7 +121,17 @@ function previewExportReportReceived( parentElement )
 	var _cols 		= "";
 	var _sheets		= parentElement.getElementsByTagName( 'sheet' );
 	var _sHTML		= [];
-	var tabsHTML 	= [ htmlPrintDownloadFunc.join('') + '<div id="tabs"><ul>' ];
+	var _sHTMLBUTTONS = htmlPrintDownloadFunc.slice(0);
+
+	if ( isImport )
+	{
+		_sHTMLBUTTONS.push( "</div>" );
+	}
+	else {
+		_sHTMLBUTTONS.push( "&nbsp;&nbsp;<a href='../dhis-web-spreadsheet-reporting/downloadFile.action' title='Download'><img src='../dhis-web-spreadsheet-reporting/images/download.png'/></a></div>" );
+	}
+	
+	var tabsHTML 	= [ _sHTMLBUTTONS.join('') + '<div id="tabs"><ul>' ];
 
 	for (var s = 0 ; s < _sheets.length ; s ++)
 	{
@@ -192,12 +213,12 @@ function previewExportReportReceived( parentElement )
 	}
 
 	tabsHTML.push( '</ul>', _sHTML.join(''), '</div>' );
-	tabsHTML.push( htmlPrintDownloadFunc.join('') );
+	tabsHTML.push( _sHTMLBUTTONS.join('') );
 
 	jQuery( '#previewDiv' ).html( tabsHTML.join('') );
 	jQuery( '#tabs' ).tabs({ collapsible : true });
-	enable( 'printExcelReportButton' );
 	applyStyleIntoPreview();
+	showById( "previewDiv" );
 	unLockScreen();
 }
 

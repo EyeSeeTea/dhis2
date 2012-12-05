@@ -68,16 +68,28 @@ public class GenerateExcelReportFlowAction
         return organisationGroupId;
     }
 
-    private boolean showSubItem;
+    private Boolean showSubItem;
 
     public boolean isShowSubItem()
     {
-        return showSubItem;
+        return (showSubItem == null) ? false : showSubItem;
     }
 
     public void setShowSubItem( boolean showSubItem )
     {
         this.showSubItem = showSubItem;
+    }
+
+    private Boolean generateByDataSet;
+
+    public boolean isGenerateByDataSet()
+    {
+        return (generateByDataSet == null) ? false : generateByDataSet;
+    }
+
+    public void setGenerateByDataSet( Boolean generateByDataSet )
+    {
+        this.generateByDataSet = generateByDataSet;
     }
 
     // -------------------------------------------------------------------------

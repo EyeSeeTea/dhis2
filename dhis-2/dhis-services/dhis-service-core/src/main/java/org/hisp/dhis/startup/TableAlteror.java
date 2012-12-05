@@ -43,7 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class TableAlteror
     extends AbstractStartupRoutine
@@ -108,6 +107,7 @@ public class TableAlteror
         executeSql( "DROP TABLE indicator_indicatorgroupsetmembers" );
         executeSql( "DROP TABLE maplegendsetindicator" );
         executeSql( "DROP TABLE maplegendsetdataelement" );
+        executeSql( "DROP TABLE loginfailure" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
         executeSql( "ALTER TABLE reporttable DROP column paramleafparentorganisationunit" );
         executeSql( "ALTER TABLE reporttable DROP column dimension_type" );
@@ -398,6 +398,7 @@ public class TableAlteror
         executeSql( "update dataset set mobile = false where mobile is null" );
         executeSql( "update dataset set allowfutureperiods = false where allowfutureperiods is null" );
         executeSql( "update dataset set validcompleteonly = false where validcompleteonly is null" );
+        executeSql( "update dataset set notifycompletinguser = false where notifycompletinguser is null" );
         executeSql( "update dataelement set zeroissignificant = false where zeroissignificant is null" );
         executeSql( "update organisationunit set haspatients = false where haspatients is null" );
         executeSql( "update dataset set expirydays = 0 where expirydays is null" );

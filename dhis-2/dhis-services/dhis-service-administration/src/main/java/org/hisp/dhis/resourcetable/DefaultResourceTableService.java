@@ -30,6 +30,7 @@ package org.hisp.dhis.resourcetable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,16 +56,18 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.resourcetable.statement.CreateCategoryTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateDataElementGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateIndicatorGroupSetTableStatement;
 import org.hisp.dhis.resourcetable.statement.CreateOrganisationUnitGroupSetTableStatement;
 
+import static org.hisp.dhis.resourcetable.ResourceTableStore.*;
+
 /**
  * @author Lars Helge Overland
- * @version $Id: DefaultResourceTableService.java 5459 2008-06-26 01:12:03Z
- *          larshelg $
  */
 public class DefaultResourceTableService
     implements ResourceTableService
@@ -113,6 +116,13 @@ public class DefaultResourceTableService
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
+    }
+    
+    private PeriodService periodService;
+
+    public void setPeriodService( PeriodService periodService )
+    {
+        this.periodService = periodService;
     }
 
     private BatchHandlerFactory batchHandlerFactory;
@@ -423,6 +433,56 @@ public class DefaultResourceTableService
             batchHandler.addObject( values );
         }
         
+        batchHandler.flush();
+    }
+
+    // -------------------------------------------------------------------------
+    // PeriodTable
+    // -------------------------------------------------------------------------
+
+    public void generatePeriodTable( boolean noDisaggregation )
+    {
+        // ---------------------------------------------------------------------
+        // Create table
+        // ---------------------------------------------------------------------
+
+        Collection<Period> periods = periodService.getAllPeriods();
+        
+        resourceTableStore.createPeriodStructure( noDisaggregation );
+        
+        // ---------------------------------------------------------------------
+        // Populate table
+        // ---------------------------------------------------------------------
+
+        String tableName = noDisaggregation ? TABLE_NAME_PERIOD_NO_DISAGGREGATION_STRUCTURE : TABLE_NAME_PERIOD_STRUCTURE;
+        
+        BatchHandler<Object> batchHandler = batchHandlerFactory.createBatchHandler( GenericBatchHandler.class ).
+            setTableName( tableName ).init();
+        
+        for ( Period period : periods )
+        {
+            final Date startDate = period.getStartDate();
+            final PeriodType rowType = period.getPeriodType();
+            
+            final List<String> values = new ArrayList<String>();
+            
+            values.add( String.valueOf( period.getId() ) );
+            
+            for ( PeriodType periodType : PeriodType.PERIOD_TYPES )
+            {
+                if ( rowType.getFrequencyOrder() <= periodType.getFrequencyOrder() || !noDisaggregation )
+                {
+                    values.add( periodType.createPeriod( startDate ).getIsoDate() );
+                }
+                else
+                {
+                    values.add( null );
+                }
+            }
+            
+            batchHandler.addObject( values );
+        }
+
         batchHandler.flush();
     }
 }

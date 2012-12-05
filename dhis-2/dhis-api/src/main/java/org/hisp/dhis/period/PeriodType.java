@@ -53,7 +53,7 @@ public abstract class PeriodType
     // Available PeriodTypes
     // -------------------------------------------------------------------------
 
-    private static final List<PeriodType> PERIOD_TYPES = new ArrayList<PeriodType>()
+    public static final List<PeriodType> PERIOD_TYPES = new ArrayList<PeriodType>()
     {
         {
             add( new DailyPeriodType() );
@@ -80,7 +80,7 @@ public abstract class PeriodType
     };
 
     /**
-     * Returns all available PeriodTypes in their natural order.
+     * Returns an immutable list of all available PeriodTypes in their natural order.
      *
      * @return all available PeriodTypes in their natural order.
      */

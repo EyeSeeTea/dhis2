@@ -18,6 +18,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
+    <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     <property name="batchHandlerFactory" ref="batchHandlerFactory" />
   </bean>
   
@@ -93,14 +94,7 @@ http://www.springframework.org/schema/aop http://www.springframework.org/schema/
   
   <!-- User audit -->
 
-  <bean id="org.hisp.dhis.useraudit.UserAuditService" class="org.hisp.dhis.useraudit.DefaultUserAuditService">
-    <property name="userAuditStore" ref="org.hisp.dhis.useraudit.UserAuditStore" />
-    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
-  </bean>
-
-  <bean id="org.hisp.dhis.useraudit.UserAuditStore" class="org.hisp.dhis.useraudit.hibernate.HibernateUserAuditStore">
-    <property name="sessionFactory" ref="sessionFactory" />
-  </bean>
+  <bean id="org.hisp.dhis.useraudit.UserAuditService" class="org.hisp.dhis.useraudit.DefaultUserAuditService"/>
   
   <!--DeletionHandler -->
 
