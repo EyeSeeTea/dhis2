@@ -764,7 +764,7 @@ GIS.core.ThematicLoader = function(gis, layer) {
 				layer.removeFeatures(layer.features);
 				layer.addFeatures(newFeatures);
 
-				layer.core.features = layer.features.slice(0);
+				layer.core.featureStore.loadFeatures(layer.features.slice(0));
 
 				loadLegend(view);
 			}

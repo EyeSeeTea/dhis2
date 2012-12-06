@@ -718,7 +718,7 @@ Ext.onReady( function() {
 
 	GIS.app.SearchWindow = function(layer) {
 		var data = [],
-			store = layer.widget.store.features,
+			store = layer.core.featureStore,
 			button,
 			window;
 
@@ -727,7 +727,7 @@ Ext.onReady( function() {
 		}
 
 		if (!data.length) {
-			GIS.logg.push([data, base.widget.xtype + '.search.data: feature ids/names']);
+			GIS.logg.push([data, layer.id + '.search.data: feature ids/names']);
 			alert('Layer has no organisation units'); //todo
 			return;
 		}
@@ -804,7 +804,7 @@ Ext.onReady( function() {
 								sortable: false,
 								width: gis.conf.layout.tool.item_width
 							}],
-							store: base.widget.store.features,
+							store: layer.core.featureStore,
 							listeners: {
 								select: function(grid, record) {
 									var feature = layer.getFeaturesByAttribute('id', record.data.id)[0],
@@ -836,7 +836,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				render: function() {
-					util.gui.window.setPositionTopLeft(this);
+					gis.util.gui.window.setPositionTopLeft(this);
 					store.sortStore();
 				},
 				destroy: function() {
@@ -848,9 +848,8 @@ Ext.onReady( function() {
 		return window;
 	};
 
-	GIS.app.FilterWindow = function(base) {
-		var layer = base.layer,
-			lowerNumberField,
+	GIS.app.FilterWindow = function(layer) {
+		var lowerNumberField,
 			greaterNumberField,
 			lt,
 			gt,
@@ -859,7 +858,7 @@ Ext.onReady( function() {
 
 		greaterNumberField = Ext.create('Ext.form.field.Number', {
 			width: gis.conf.layout.tool.itemlabel_width,
-			value: parseInt(base.core.minVal),
+			value: parseInt(layer.core.minVal),
 			listeners: {
 				change: function() {
 					gt = this.getValue();
@@ -869,7 +868,7 @@ Ext.onReady( function() {
 
 		lowerNumberField = Ext.create('Ext.form.field.Number', {
 			width: gis.conf.layout.tool.itemlabel_width,
-			value: parseInt(base.core.maxVal) + 1,
+			value: parseInt(layer.core.maxVal) + 1,
 			listeners: {
 				change: function() {
 					lt = this.getValue();
@@ -878,7 +877,7 @@ Ext.onReady( function() {
 		});
 
         filter = function() {
-			var cache = base.core.features.slice(0),
+			var cache = layer.core.featureStore.features.slice(0),
 				features = [];
 
             if (!gt && !lt) {
@@ -915,7 +914,7 @@ Ext.onReady( function() {
             layer.removeAllFeatures();
             layer.addFeatures(features);
 
-            base.widget.store.features.loadFeatures(layer.features);
+            layer.core.featureStore.loadFeatures(layer.features.slice(0));
         };
 
 		window = Ext.create('Ext.window.Window', {
@@ -977,12 +976,12 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				render: function() {
-					util.gui.window.setPositionTopLeft(this);
+					gis.util.gui.window.setPositionTopLeft(this);
 				},
 				destroy: function() {
 					layer.removeAllFeatures();
 					layer.addFeatures(base.widget.features);
-					base.widget.store.features.loadFeatures(layer.features);
+					layer.core.featureStore.loadFeatures(layer.features.slice(0));
 				}
 			}
 		});
@@ -990,35 +989,35 @@ Ext.onReady( function() {
 		return window;
 	};
 
-	GIS.app.FilterFacilityWindow = function(base) {
-		var that = base.widget,
-			window,
+	GIS.app.FilterFacilityWindow = function(layer) {
+		var window,
 			multiSelect,
 			button,
 			filter,
 			selection,
 			features = [],
-			groupSetName = that.view.organisationUnitGroupSet.name,
+			coreFeatures = layer.core.featureStore.features.slice(0),
+			groupSetName = layer.core.view.organisationUnitGroupSet.name,
 			store = gis.store.groupsByGroupSet;
 
 		filter = function() {
 			features = [];
 
 			if (!selection.length || !selection[0]) {
-				features = that.features;
+				features = coreFeatures;
 			}
 			else {
-				for (var i = 0; i < that.features.length; i++) {
+				for (var i = 0; i < coreFeatures.length; i++) {
 					for (var j = 0; j < selection.length; j++) {
-						if (that.features[i].attributes[groupSetName] === selection[j]) {
-							features.push(that.features[i]);
+						if (coreFeatures[i].attributes[groupSetName] === selection[j]) {
+							features.push(coreFeatures[i]);
 						}
 					}
 				}
 			}
 
-			that.layer.removeAllFeatures();
-			that.layer.addFeatures(features);
+			layer.removeAllFeatures();
+			layer.addFeatures(features);
 		};
 
 		multiSelect = Ext.create('Ext.ux.form.MultiSelect', {
@@ -1043,7 +1042,6 @@ Ext.onReady( function() {
 			title: 'Filter by value',
 			iconCls: 'gis-window-title-icon-filter',
 			cls: 'gis-container-default',
-			//width: gis.conf.layout.tool.window_width,
 			resizable: false,
 			filter: filter,
 			items: multiSelect,
@@ -1053,8 +1051,8 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				destroy: function() {
-					that.layer.removeAllFeatures();
-					that.layer.addFeatures(that.features);
+					layer.removeAllFeatures();
+					layer.addFeatures(coreFeatures);
 				}
 			}
 		});

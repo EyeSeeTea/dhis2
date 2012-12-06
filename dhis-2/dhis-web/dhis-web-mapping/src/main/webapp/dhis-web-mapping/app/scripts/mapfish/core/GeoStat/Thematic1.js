@@ -37,6 +37,28 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 
 	gis: null,
     view: null,
+    featureStore: Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		features: [],
+		loadFeatures: function(features) {
+			if (features && features.length) {
+				var data = [];
+				for (var i = 0; i < features.length; i++) {
+					data.push([features[i].attributes.id, features[i].attributes.name]);
+				}
+				this.loadData(data);
+				this.sortStore();
+
+				this.features = features;
+			}
+			else {
+				this.removeAll();
+			}
+		},
+		sortStore: function() {
+			this.sort('name', 'ASC');
+		}
+	}),
 
     initialize: function(map, options) {
         mapfish.GeoStat.prototype.initialize.apply(this, arguments);
