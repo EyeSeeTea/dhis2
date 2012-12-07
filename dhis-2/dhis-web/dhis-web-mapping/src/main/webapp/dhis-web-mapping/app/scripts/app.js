@@ -266,8 +266,8 @@ Ext.onReady( function() {
 		util.gui.window = {};
 
 		util.gui.window.setPositionTopRight = function(window) {
-			var center = GIS.cmp.region.center;
-			window.setPosition(GIS.gui.viewport.width - (window.width + 7), center.y + 8);
+			var center = gis.viewport.centerRegion;
+			window.setPosition(gis.viewport.width - (window.width + 7), center.y + 8);
 		};
 
 		util.gui.window.setPositionTopLeft = function(window) {
@@ -1924,7 +1924,7 @@ Ext.onReady( function() {
 				listeners: {
 					render: function() {
 						var that = this,
-							maxHeight = GIS.cmp.region.center.getHeight() - 155,
+							maxHeight = gis.viewport.centerRegion.getHeight() - 155,
 							height;
 
 						this.store.on('load', function() {
@@ -2467,7 +2467,7 @@ Ext.onReady( function() {
 			text: 'Download', //i18n
 			handler: function() {
 				var title = textfield.getValue(),
-					svg = util.svg.getString(title, util.map.getVisibleVectorLayers()),
+					svg = gis.util.svg.getString(title, gis.util.map.getVisibleVectorLayers()),
 					exportForm = document.getElementById('exportForm');
 
 				if (!svg) {
@@ -2522,7 +2522,7 @@ Ext.onReady( function() {
 
 		panel = Ext.create('Ext.panel.Panel', {
 			cls: 'gis-container-inner',
-			html: '<b>Link: </b>' + gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.olmap.mapViewLoader.id,
+			html: '<b>Link: </b>' + gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.olmap.mapViewLoader.id, //todo
 			style: 'padding-top: 9px; padding-bottom: 2px'
 		});
 
@@ -2578,8 +2578,8 @@ Ext.onReady( function() {
 	};
 
 	GIS.app.CircleLayer = function(features, radius) {
-		var points = util.map.getPointsByFeatures(features),
-			lonLats = util.map.getLonLatsByPoints(points),
+		var points = gis.util.map.getPointsByFeatures(features),
+			lonLats = gis.util.map.getLonLatsByPoints(points),
 			controls = [],
 			control,
 			layer = new OpenLayers.Layer.Vector(),

@@ -233,7 +233,7 @@ GIS.core.getOLMap = function(gis) {
 				id: 'mouseposition',
 				prefix: '<span class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
 				separator: '<span class="text-mouseposition-lonlat">&nbsp;&nbsp;LAT </span>',
-				suffix: '<div id="google-logo" onclick="javascript:GIS.util.google.openTerms();"></div></span>'
+				suffix: '<div id="google-logo" onclick="javascript:gis.util.google.openTerms();"></div></span>'
 			}),
 			new OpenLayers.Control.Permalink()
 		],
@@ -490,9 +490,9 @@ GIS.core.MeasureWindow = function(gis) {
 		items: label,
 		listeners: {
 			show: function() {
-				//var x = GIS.cmp.region.east.x - this.getWidth() - 5,
-					//y = 60;
-				//this.setPosition(x, y);
+				var x = gis.viewport.eastRegion.x - this.getWidth() - 5,
+					y = 60;
+				this.setPosition(x, y);
 			},
 			destroy: function() {
 				control.deactivate();
