@@ -4141,26 +4141,26 @@ Ext.onReady( function() {
 				},
 				items: function() {
 					var a = [];
-					a.push({
-						iconCls: 'gis-btn-icon-' + gis.layer.boundary.id,
-						menu: gis.layer.boundary.menu,
-						width: 26
-					});
+					//a.push({
+						//iconCls: 'gis-btn-icon-' + gis.layer.boundary.id,
+						//menu: gis.layer.boundary.menu,
+						//width: 26
+					//});
 					a.push({
 						iconCls: 'gis-btn-icon-' + gis.layer.thematic1.id,
 						menu: gis.layer.thematic1.menu,
 						width: 26
 					});
-					a.push({
-						iconCls: 'gis-btn-icon-' + gis.layer.thematic2.id,
-						menu: gis.layer.thematic2.menu,
-						width: 26
-					});
-					a.push({
-						iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
-						menu: gis.layer.facility.menu,
-						width: 26
-					});
+					//a.push({
+						//iconCls: 'gis-btn-icon-' + gis.layer.thematic2.id,
+						//menu: gis.layer.thematic2.menu,
+						//width: 26
+					//});
+					//a.push({
+						//iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
+						//menu: gis.layer.facility.menu,
+						//width: 26
+					//});
 					a.push({
 						text: 'Favorites', //i18n
 						menu: {},
@@ -4205,7 +4205,7 @@ Ext.onReady( function() {
 							gis.viewport.downloadWindow.show();
 						},
 						xable: function() {
-							if (util.map.hasVisibleFeatures()) {
+							if (gis.util.map.hasVisibleFeatures()) {
 								this.enable();
 							}
 							else {
