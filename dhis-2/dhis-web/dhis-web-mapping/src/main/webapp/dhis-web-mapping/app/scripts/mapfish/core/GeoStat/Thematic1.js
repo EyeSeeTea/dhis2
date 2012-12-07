@@ -80,6 +80,29 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		}
 	},
 
+	getLegendConfig: function() {		
+		return {
+			what: view.indicator.name || view.dataElement.name,
+			when: view.period.id,
+			where: view.parentOrganisationUnit.name + ' / ' + view.organisationUnitLevel.name
+		};
+	},
+
+	getImageLegendConfig: function() {
+		var bins = this.classification.bins,
+			rgb = this.colorInterpolation,
+			config = [];
+
+		for (var i = 0; i < bins.length; i++) {
+			config.push({
+				color: rgb[i].toHexString(),
+				label: bins[i].lowerBound.toFixed(1) + ' - ' + bins[i].upperBound.toFixed(1) + ' (' + bins[i].nbVal + ')'
+			});
+		}
+
+		return config;
+	},
+
     updateOptions: function(newOptions) {
         var oldOptions = OpenLayers.Util.extend({}, this.options);
         this.addOptions(newOptions);

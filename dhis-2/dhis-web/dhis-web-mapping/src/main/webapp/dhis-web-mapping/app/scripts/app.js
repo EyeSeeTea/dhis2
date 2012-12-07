@@ -157,7 +157,7 @@ Ext.onReady( function() {
 				legendSVG = '',
 				x = 20,
 				y = 35,
-				center = GIS.cmp.region.center;
+				center = gis.viewport.centerRegion;
 
 			if (!layers.length) {
 				return false;
@@ -174,7 +174,7 @@ Ext.onReady( function() {
 			y += 35;
 
 			for (var i = layers.length - 1; i > 0; i--) {
-				if (layers[i].base.id === gis.layer.facility.id) {
+				if (layers[i].id === gis.layer.facility.id) {
 					layers.splice(i, 1);
 					console.log('Facility layer export currently not supported');
 				}
@@ -182,9 +182,9 @@ Ext.onReady( function() {
 
 			for (var i = 0; i < layers.length; i++) {
 				var layer = layers[i],
-					id = layer.base.id,
-					legendConfig = layer.base.widget.getLegendConfig(),
-					imageLegendConfig = layer.base.widget.view.extended.imageLegendConfig,
+					id = layer.id,
+					legendConfig = layer.core.getLegendConfig(),
+					imageLegendConfig = layer.core.getImageLegendConfig(),
 					what,
 					when,
 					where,
@@ -980,8 +980,8 @@ Ext.onReady( function() {
 				},
 				destroy: function() {
 					layer.removeAllFeatures();
-					layer.addFeatures(base.widget.features);
-					layer.core.featureStore.loadFeatures(layer.features.slice(0));
+					layer.addFeatures(layer.core.featureStore.features);
+					layer.core.featureStore.loadFeatures(layer.featureStore.features.slice(0));
 				}
 			}
 		});
@@ -1297,7 +1297,7 @@ Ext.onReady( function() {
 				handler: function() {
 					var name = nameTextfield.getValue(),
 						system = systemCheckbox.getValue(),
-						layers = util.map.getVisibleVectorLayers(),
+						layers = gis.util.map.getVisibleVectorLayers(),
 						layer,
 						lonlat = gis.olmap.getCenter(),
 						views = [],
@@ -1308,10 +1308,10 @@ Ext.onReady( function() {
 						if (name) {
 							for (var i = 0; i < layers.length; i++) {
 								layer = layers[i];
-								view = layer.base.widget.getView();
+								view = layer.widget.getView();
 
 								// add
-								view.layer = layer.base.id;
+								view.layer = layer.id;
 
 								// remove
 								delete view.periodType;
@@ -1340,11 +1340,9 @@ Ext.onReady( function() {
 								success: function(r) {
 									var id = r.getAllResponseHeaders().location.split('/').pop();
 
-									//gis.olmap.mapViewLoader = GIS.app.MapViewLoader(id);
-
 									gis.store.maps.loadStore();
 
-									GIS.cmp.interpretationButton.enable();
+									gis.viewport.interpretationButton.enable();
 
 									window.destroy();
 								}
@@ -1541,7 +1539,7 @@ Ext.onReady( function() {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
 									name = record.data.name,
-									layers = util.map.getVisibleVectorLayers(),
+									layers = gis.util.map.getVisibleVectorLayers(),
 									layer,
 									lonlat = gis.olmap.getCenter(),
 									views = [],
@@ -1553,10 +1551,10 @@ Ext.onReady( function() {
 									if (confirm(message)) {
 										for (var i = 0; i < layers.length; i++) {
 											layer = layers[i];
-											view = layer.base.widget.getView();
+											view = layer.widget.getView();
 
 											// add
-											view.layer = layer.base.id;
+											view.layer = layer.id;
 
 											// remove
 											delete view.periodType;
@@ -1658,7 +1656,7 @@ Ext.onReady( function() {
 					GIS.cmp.mapGrid = this;
 				},
 				render: function() {
-					var size = Math.floor((GIS.cmp.region.center.getHeight() - 155) / gis.conf.layout.grid.row_height);
+					var size = Math.floor((gis.viewport.centerRegion.getHeight() - 155) / gis.conf.layout.grid.row_height);
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
