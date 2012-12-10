@@ -2659,6 +2659,11 @@ Ext.onReady( function() {
 			level,
 			parent,
 
+			periodTypePanel,
+			methodPanel,
+			lowPanel,
+			highPanel,
+
 		// Functions
 			createSelectHandlers,
 			reset,
@@ -2761,26 +2766,6 @@ Ext.onReady( function() {
 						this.isLoaded = true;
 					}
 				}
-			}
-		});
-
-		featureStore = Ext.create('Ext.data.Store', {
-			fields: ['id', 'name'],
-			loadFeatures: function(features) {
-				if (features && features.length) {
-					var data = [];
-					for (var i = 0; i < features.length; i++) {
-						data.push([features[i].attributes.id, features[i].attributes.name]);
-					}
-					this.loadData(data);
-					this.sortStore();
-				}
-				else {
-					this.removeAll();
-				}
-			},
-			sortStore: function() {
-				this.sort('name', 'ASC');
 			}
 		});
 
@@ -3011,16 +2996,17 @@ Ext.onReady( function() {
 			listeners: {
 				select: function() {
 					var pt = new PeriodType(),
-						periodType = periodType.getValue(),
+						type = this.getValue(),
+						offset = this.periodOffset,
 
-						periods = pt.get(periodType).generatePeriods({
-							offset: periodType.periodOffset,
+						periods = pt.get(type).generatePeriods({
+							offset: offset,
 							filterFuturePeriods: true,
 							reversePeriods: true
 						});
 
-					this.store.setIndex(periods);
-					this.store.loadData(periods);
+					periodsByTypeStore.setIndex(periods);
+					periodsByTypeStore.loadData(periods);
 				}
 			}
 		});
@@ -3209,6 +3195,63 @@ Ext.onReady( function() {
 					this.getSelectionModel().select(0);
 				}
 			}
+		});
+
+		periodTypePanel = Ext.create('Ext.panel.Panel', {
+			layout: 'hbox',
+			items: [
+				{
+					html: 'Period type:', //i18n
+					width: 100,
+					bodyStyle: 'color: #444',
+					style: 'padding: 3px 0 0 4px'
+				},
+				periodType,
+				periodPrev,
+				periodNext
+			]
+		});
+
+		methodPanel = Ext.create('Ext.panel.Panel', {
+			layout: 'hbox',
+			items: [
+				{
+					html: 'Classes / method:', //i18n
+					width: 100,
+					bodyStyle: 'color: #444',
+					style: 'padding: 3px 0 0 4px'
+				},
+				classes,
+				method
+			]
+		});
+
+		lowPanel = Ext.create('Ext.panel.Panel', {
+			layout: 'hbox',
+			items: [
+				{
+					html: 'Low color / size:', //i18n
+					width: 100,
+					bodyStyle: 'color: #444',
+					style: 'padding: 3px 0 0 4px'
+				},
+				colorLow,
+				radiusLow
+			]
+		});
+
+		highPanel = Ext.create('Ext.panel.Panel', {
+			layout: 'hbox',
+			items: [
+				{
+					html: 'High color / size:', //i18n
+					width: 100,
+					bodyStyle: 'color: #444',
+					style: 'padding: 3px 0 0 4px'
+				},
+				colorHigh,
+				radiusHigh
+			]
 		});
 
 		// Functions
@@ -3983,20 +4026,7 @@ Ext.onReady( function() {
 						indicator,
 						dataElementGroup,
 						dataElement,
-						{
-							layout: 'hbox',
-							items: [
-								{
-									html: 'Period type:', //i18n
-									width: 100,
-									bodyStyle: 'color: #444',
-									style: 'padding: 3px 0 0 4px'
-								},
-								periodType,
-								periodPrev,
-								periodNext
-							]
-						},
+						periodTypePanel,
 						period,
 						{
 							html: GIS.i18n.legend_options,
@@ -4004,45 +4034,9 @@ Ext.onReady( function() {
 						},
 						legendType,
 						legendSet,
-						{
-							layout: 'hbox',
-							items: [
-								{
-									html: 'Classes / method:', //i18n
-									width: 100,
-									bodyStyle: 'color: #444',
-									style: 'padding: 3px 0 0 4px'
-								},
-								classes,
-								method
-							]
-						},
-						{
-							layout: 'hbox',
-							items: [
-								{
-									html: 'Low color / size:', //i18n
-									width: 100,
-									bodyStyle: 'color: #444',
-									style: 'padding: 3px 0 0 4px'
-								},
-								colorLow,
-								radiusLow
-							]
-						},
-						{
-							layout: 'hbox',
-							items: [
-								{
-									html: 'High color / size:', //i18n
-									width: 100,
-									bodyStyle: 'color: #444',
-									style: 'padding: 3px 0 0 4px'
-								},
-								colorHigh,
-								radiusHigh
-							]
-						},
+						methodPanel,
+						lowPanel,
+						highPanel,
 						{
 							html: 'Organisation unit level / parent', //i18n
 							cls: 'gis-form-subtitle'
@@ -4296,8 +4290,8 @@ Ext.onReady( function() {
 
 		layer = gis.layer.thematic1;
 		layer.menu = GIS.app.LayerMenu(layer);
-		layer.window = GIS.app.WidgetWindow(layer);
 		layer.widget = GIS.app.LayerWidgetThematic(layer);
+		layer.window = GIS.app.WidgetWindow(layer);
 
 		 //Ext.create('mapfish.widgets.geostat.Thematic1', {
 			//map: gis.olmap,
