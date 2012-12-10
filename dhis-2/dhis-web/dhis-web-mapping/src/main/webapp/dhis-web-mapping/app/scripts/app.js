@@ -4049,6 +4049,8 @@ Ext.onReady( function() {
 			]
 		});
 
+		createSelectHandlers();
+
 		return panel;
 	};
 
