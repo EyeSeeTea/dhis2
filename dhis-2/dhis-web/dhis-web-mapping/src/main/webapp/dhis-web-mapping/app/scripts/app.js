@@ -2522,16 +2522,16 @@ Ext.onReady( function() {
 
 		panel = Ext.create('Ext.panel.Panel', {
 			cls: 'gis-container-inner',
-			html: '<b>Link: </b>' + gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.olmap.mapViewLoader.id, //todo
+			html: '<b>Link: </b>' + gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.mapLoader.id, //todo
 			style: 'padding-top: 9px; padding-bottom: 2px'
 		});
 
 		button = Ext.create('Ext.button.Button', {
 			text: 'Share', //i18n
 			handler: function() {
-				if (textarea.getValue() && gis.olmap.mapViewLoader) {
+				if (textarea.getValue() && gis.mapLoader) {
 					Ext.Ajax.request({
-						url: gis.baseUrl + gis.conf.url.path_api + 'interpretations/map/' + gis.olmap.mapViewLoader.id,
+						url: gis.baseUrl + gis.conf.url.path_api + 'interpretations/map/' + gis.mapLoader.id,
 						method: 'POST',
 						params: textarea.getValue(),
 						headers: {'Content-Type': 'text/html'},
@@ -4062,7 +4062,17 @@ Ext.onReady( function() {
 	GIS.app.createViewport = function() {
 		var eastRegion,
 			centerRegion,
+			downloadButton,
+			interpretationButton,
+			resizeButton,
 			viewport;
+
+		resizeButton = Ext.create('Ext.button.Button', {
+			text: '>>>', //i18n
+			handler: function() {
+				eastRegion.toggleCollapse();
+			}
+		});
 
 		eastRegion = Ext.create('Ext.panel.Panel', {
 			region: 'east',
@@ -4120,16 +4130,15 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				collapse: function() {
-					gis.viewport.centerRegion.cmp.tbar.resize.setText('<<<');
+					resizeButton.setText('<<<');
 				},
 				expand: function() {
-					gis.viewport.centerRegion.cmp.tbar.resize.setText('>>>');
+					resizeButton.setText('>>>');
 				}
 			}
 		});
 
-		centerRegion = {
-			xtype: 'gx_mappanel',
+		centerRegion = new GeoExt.panel.Map({
 			region: 'center',
 			map: gis.olmap,
 			cmp: {
@@ -4165,12 +4174,12 @@ Ext.onReady( function() {
 						text: 'Favorites', //i18n
 						menu: {},
 						handler: function() {
-							if (gis.viewport.mapWindow && gis.viewport.mapWindow.destroy) {
-								gis.viewport.mapWindow.destroy();
+							if (viewport.mapWindow && viewport.mapWindow.destroy) {
+								viewport.mapWindow.destroy();
 							}
 
-							gis.viewport.mapWindow = GIS.app.MapWindow();
-							gis.viewport.mapWindow.show();
+							viewport.mapWindow = GIS.app.MapWindow();
+							viewport.mapWindow.show();
 						}
 					});
 					if (gis.init.security.isAdmin) {
@@ -4178,12 +4187,12 @@ Ext.onReady( function() {
 							text: 'Legend', //i18n
 							menu: {},
 							handler: function() {
-								if (gis.viewport.legendSetWindow && gis.viewport.legendSetWindow.destroy) {
-									gis.viewport.legendSetWindow.destroy();
+								if (viewport.legendSetWindow && viewport.legendSetWindow.destroy) {
+									viewport.legendSetWindow.destroy();
 								}
 
-								gis.viewport.legendSetWindow = GIS.app.LegendSetWindow();
-								gis.viewport.legendSetWindow.show();
+								viewport.legendSetWindow = GIS.app.LegendSetWindow();
+								viewport.legendSetWindow.show();
 							}
 						});
 					}
@@ -4197,12 +4206,12 @@ Ext.onReady( function() {
 						menu: {},
 						disabled: true,
 						handler: function() {
-							if (gis.viewport.downloadWindow && gis.viewport.downloadWindow.destroy) {
-								gis.viewport.downloadWindow.destroy();
+							if (viewport.downloadWindow && viewport.downloadWindow.destroy) {
+								viewport.downloadWindow.destroy();
 							}
 
-							gis.viewport.downloadWindow = GIS.app.DownloadWindow();
-							gis.viewport.downloadWindow.show();
+							viewport.downloadWindow = GIS.app.DownloadWindow();
+							viewport.downloadWindow.show();
 						},
 						xable: function() {
 							if (gis.util.map.hasVisibleFeatures()) {
@@ -4214,7 +4223,7 @@ Ext.onReady( function() {
 						},
 						listeners: {
 							added: function() {
-								gis.viewport.downloadButton = this;
+								downloadButton = this;
 							}
 						}
 					});
@@ -4223,16 +4232,16 @@ Ext.onReady( function() {
 						menu: {},
 						disabled: true,
 						handler: function() {
-							if (gis.viewport.interpretationWindow && gis.viewport.interpretationWindow.destroy) {
-								gis.viewport.interpretationWindow.destroy();
+							if (viewport.interpretationWindow && viewport.interpretationWindow.destroy) {
+								viewport.interpretationWindow.destroy();
 							}
 
-							gis.viewport.interpretationWindow = GIS.app.InterpretationWindow();
-							gis.viewport.interpretationWindow.show();
+							viewport.interpretationWindow = GIS.app.InterpretationWindow();
+							viewport.interpretationWindow.show();
 						},
 						listeners: {
 							added: function() {
-								gis.viewport.interpretationButton = this;
+								interpretationButton = this;
 							}
 						}
 					});
@@ -4243,26 +4252,19 @@ Ext.onReady( function() {
 							window.location.href = '../../dhis-web-commons-about/redirect.action';
 						}
 					});
-					a.push({
-						text: '>>>', //i18n
-						handler: function() {
-							gis.viewport.eastRegion.toggleCollapse();
-						},
-						listeners: {
-							render: function() {
-								gis.viewport.centerRegion.cmp.tbar.resize = this;
-							}
-						}
-					});
+					a.push(resizeButton);
+
 					return a;
 				}()
 			}
-		};
+		});
 
 		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
 			eastRegion: eastRegion,
 			centerRegion: centerRegion,
+			downloadButton: downloadButton,
+			interpretationButton: interpretationButton,
 			items: [
 				centerRegion,
 				eastRegion
@@ -4324,13 +4326,7 @@ Ext.onReady( function() {
 		gis.viewport = GIS.app.createViewport();
 	};
 
-	Ext.Ajax.request({
-		url: gis.baseUrl + gis.conf.url.path_gis + 'initialize.action',
-		success: function(r) {
-			GIS.app.init.onInitialize(r);
-
 	GIS.app.init.onRender = function() {
-		console.log(window.google);
 		if (!window.google) {
 			gis.layer.openStreetMap.item.setValue(true);
 		}
@@ -4385,6 +4381,9 @@ Ext.onReady( function() {
 		}
 	};
 
-
+	Ext.Ajax.request({
+		url: gis.baseUrl + gis.conf.url.path_gis + 'initialize.action',
+		success: function(r) {
+			GIS.app.init.onInitialize(r);
 	}});
 });

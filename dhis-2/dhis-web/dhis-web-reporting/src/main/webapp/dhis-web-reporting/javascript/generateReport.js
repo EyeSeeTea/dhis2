@@ -85,7 +85,7 @@ function viewShareForm()
 	} );
 }
 
-function shareInterpretation( uid, ou )
+function shareInterpretation( uid, pe, ou )
 {
     var text = $( "#interpretationArea" ).val();
     
@@ -93,16 +93,16 @@ function shareInterpretation( uid, ou )
     {
     	text = $.trim( text );
     	
-	    var url = "../api/interpretations/reportTable/" + uid;
+	    var url = "../api/interpretations/reportTable/" + uid + "?";
 	    
-	    url += ( ou && ou.length ) ? "?ou=" + ou : "";
+	    url += ( pe && pe.length ) ? "pe=" + pe + "&": "";
+	    url += ( ou && ou.length ) ? "ou=" + ou : "";
 	    
 	    $.ajax( url, {
 	    	type: "POST",
 	    	contentType: "text/html",
 	    	data: text,
 	    	success: function() {
-	    		$( "#shareForm" ).dialog( "close" );
 	    		$( "#interpretationArea" ).val( "" );
 	    		setHeaderDelayMessage( i18n_interpretation_was_shared );
 	    	}    	

@@ -571,8 +571,9 @@ GIS.core.MapLoader = function(gis) {
 			}
 		}
 
+		gis.viewport.interpretationButton.enable();
+
 		gis.olmap.mask.hide();
-		//interpretation
 	};
 
 	loader = {
