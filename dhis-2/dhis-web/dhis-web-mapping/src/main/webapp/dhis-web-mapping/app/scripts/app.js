@@ -9,8 +9,6 @@ GIS.app.init = {};
 	//region: {}
 //};
 
-GIS.gui = {};
-
 GIS.logg = [];
 
 Ext.onReady( function() {
@@ -643,21 +641,24 @@ Ext.onReady( function() {
 			panel,
 			visibleLayerId = window.google ? layers.googleStreets.id : layers.openStreetMap.id;
 
-		for (var i = 0; i < layers.length; i++) { //todo important
-			layer = layers[i];
+		for (var key in gis.layer) {
+			if (gis.layer.hasOwnProperty(key)) {
+				layer = gis.layer[key];
 
-			item = Ext.create('Ext.ux.panel.LayerItemPanel', {
-				cls: 'gis-container-inner',
-				height: 23,
-				layer: layer,
-				text: layer.name,
-				imageUrl: 'images/' + layer.id + '_14.png',
-				value: layer.id === visibleLayerId ? true : false,
-				opacity: layer.layerOpacity,
-				numberFieldDisabled: layer.id !== visibleLayerId
-			});
-			layer.item = item;
-			items.push(layer.item);
+				item = Ext.create('Ext.ux.panel.LayerItemPanel', {
+					cls: 'gis-container-inner',
+					height: 23,
+					layer: layer,
+					text: layer.name,
+					imageUrl: 'images/' + layer.id + '_14.png',
+					value: layer.id === visibleLayerId ? true : false,
+					opacity: layer.layerOpacity,
+					numberFieldDisabled: layer.id !== visibleLayerId
+				});
+
+				layer.item = item;
+				items.push(layer.item);
+			}
 		}
 
         panel = Ext.create('Ext.panel.Panel', {
@@ -3793,11 +3794,11 @@ Ext.onReady( function() {
 		};
 
 		getView = function(config) {
-			var parent = parent.getSelectionModel().getSelection(),
+			var parentArray = parent.getSelectionModel().getSelection(),
 				store = gis.store.organisationUnitLevels,
 				view;
 
-			parent = parent.length ? parent : [{raw: gis.init.rootNodes[0]}];
+			parentArray = parentArray.length ? parentArray : [{raw: gis.init.rootNodes[0]}];
 
 			view = {
 				valueType: valueType.getValue(),
@@ -3838,11 +3839,11 @@ Ext.onReady( function() {
 					level: store.data.items.length && level.getValue() ? store.getById(level.getValue()).data.level : null
 				},
 				parentOrganisationUnit: {
-					id: parent[0].raw.id,
-					name: parent[0].raw.text
+					id: parentArray[0].raw.id,
+					name: parentArray[0].raw.text
 				},
-				parentLevel: parent[0].raw.level,
-				parentGraph: parent[0].raw.path,
+				parentLevel: parentArray[0].raw.level,
+				parentGraph: parentArray[0].raw.path,
 				opacity: layer.item.getOpacity()
 			};
 
@@ -4054,8 +4055,8 @@ Ext.onReady( function() {
 	// GUI
 
 	GIS.app.createViewport = function() {
-		var eastRegion,
-			centerRegion,
+		var centerRegion,
+			eastRegion,
 			downloadButton,
 			interpretationButton,
 			resizeButton,
@@ -4065,70 +4066,6 @@ Ext.onReady( function() {
 			text: '>>>', //i18n
 			handler: function() {
 				eastRegion.toggleCollapse();
-			}
-		});
-
-		eastRegion = Ext.create('Ext.panel.Panel', {
-			region: 'east',
-			layout: 'anchor',
-			width: 200,
-			preventHeader: true,
-			collapsible: true,
-			collapseMode: 'mini',
-			items: [
-				{
-					title: 'Layer overview and visibility %', //i18n
-					bodyStyle: 'padding: 6px',
-					items: GIS.app.LayersPanel(),
-					collapsible: true,
-					animCollapse: false
-				},
-				{
-					title: 'Thematic layer 1 legend', //i18n
-					bodyStyle: 'padding: 6px; border: 0 none',
-					collapsible: true,
-					collapsed: true,
-					animCollapse: false,
-					listeners: {
-						added: function() {
-							gis.layer.thematic1.legendPanel = this;
-						}
-					}
-				},
-				{
-					title: 'Thematic layer 2 legend', //i18n
-					contentEl: 'thematic2Legend',
-					bodyStyle: 'padding: 6px; border: 0 none',
-					collapsible: true,
-					collapsed: true,
-					animCollapse: false,
-					listeners: {
-						added: function() {
-							gis.layer.thematic2.legendPanel = this;
-						}
-					}
-				},
-				{
-					title: 'Facility layer legend', //i18n
-					contentEl: 'facilityLegend',
-					bodyStyle: 'padding: 6px; border: 0 none',
-					collapsible: true,
-					collapsed: true,
-					animCollapse: false,
-					listeners: {
-						added: function() {
-							gis.layer.facility.legendPanel = this;
-						}
-					}
-				}
-			],
-			listeners: {
-				collapse: function() {
-					resizeButton.setText('<<<');
-				},
-				expand: function() {
-					resizeButton.setText('>>>');
-				}
 			}
 		});
 
@@ -4250,6 +4187,70 @@ Ext.onReady( function() {
 
 					return a;
 				}()
+			}
+		});
+
+		eastRegion = Ext.create('Ext.panel.Panel', {
+			region: 'east',
+			layout: 'anchor',
+			width: 200,
+			preventHeader: true,
+			collapsible: true,
+			collapseMode: 'mini',
+			items: [
+				{
+					title: 'Layer overview and visibility %', //i18n
+					bodyStyle: 'padding: 6px',
+					items: GIS.app.LayersPanel(),
+					collapsible: true,
+					animCollapse: false
+				},
+				{
+					title: 'Thematic layer 1 legend', //i18n
+					bodyStyle: 'padding: 6px; border: 0 none',
+					collapsible: true,
+					collapsed: true,
+					animCollapse: false,
+					listeners: {
+						added: function() {
+							gis.layer.thematic1.legendPanel = this;
+						}
+					}
+				},
+				{
+					title: 'Thematic layer 2 legend', //i18n
+					contentEl: 'thematic2Legend',
+					bodyStyle: 'padding: 6px; border: 0 none',
+					collapsible: true,
+					collapsed: true,
+					animCollapse: false,
+					listeners: {
+						added: function() {
+							gis.layer.thematic2.legendPanel = this;
+						}
+					}
+				},
+				{
+					title: 'Facility layer legend', //i18n
+					contentEl: 'facilityLegend',
+					bodyStyle: 'padding: 6px; border: 0 none',
+					collapsible: true,
+					collapsed: true,
+					animCollapse: false,
+					listeners: {
+						added: function() {
+							gis.layer.facility.legendPanel = this;
+						}
+					}
+				}
+			],
+			listeners: {
+				collapse: function() {
+					resizeButton.setText('<<<');
+				},
+				expand: function() {
+					resizeButton.setText('>>>');
+				}
 			}
 		});
 

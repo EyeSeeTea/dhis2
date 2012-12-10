@@ -849,6 +849,7 @@ GIS.core.ThematicLoader = function(gis, layer) {
 		layer.legendPanel.expand();
 
 		layer.setOpacity(view.opacity);
+console.log(gis);
 
 		if (loader.updateGui && Ext.isObject(widget)) {
 			widget.setGui(view);
