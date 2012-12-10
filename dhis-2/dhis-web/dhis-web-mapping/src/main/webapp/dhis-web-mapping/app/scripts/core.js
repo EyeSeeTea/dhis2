@@ -414,7 +414,7 @@ GIS.core.StyleMap = function(id, labelConfig) {
 };
 
 GIS.core.VectorLayer = function(gis, id, name, config) {
-	return new OpenLayers.Layer.Vector(name, {
+	var layer = new OpenLayers.Layer.Vector(name, {
 		strategies: [
 			new OpenLayers.Strategy.Refresh({
 				force:true
@@ -433,6 +433,8 @@ GIS.core.VectorLayer = function(gis, id, name, config) {
 		},
 		hasLabels: false
 	});
+
+	layer.id = id;
 
 	return layer;
 };
