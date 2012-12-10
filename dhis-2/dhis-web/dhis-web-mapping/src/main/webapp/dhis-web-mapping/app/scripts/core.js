@@ -250,7 +250,7 @@ GIS.core.getOLMap = function(gis) {
 	olmap.closeAllLayers = function() {
 		//olmap.base.boundary.core.reset();
 		gis.layer.thematic1.core.reset();
-		//olmap.base.thematic2.core.reset();
+		gis.layer.thematic2.core.reset();
 		//olmap.base.facility.core.reset();
 	};
 
@@ -573,7 +573,9 @@ GIS.core.MapLoader = function(gis) {
 			}
 		}
 
-		gis.viewport.interpretationButton.enable();
+		if (gis.viewport.interpretationButton) {
+			gis.viewport.interpretationButton.enable();
+		}
 
 		gis.olmap.mask.hide();
 	};
@@ -850,8 +852,8 @@ GIS.core.ThematicLoader = function(gis, layer) {
 
 		layer.setOpacity(view.opacity);
 
-		if (loader.updateGui && Ext.isObject(widget)) {
-			widget.setGui(view);
+		if (loader.updateGui && Ext.isObject(layer.widget)) {
+			layer.widget.setGui(view);
 		}
 
 		if (loader.zoomToVisibleExtent) {
