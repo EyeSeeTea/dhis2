@@ -267,30 +267,6 @@ GIS.core.getOLMap = function(gis) {
 GIS.core.getLayers = function(gis) {
 	var layers = {};
 
-	layers.boundary = GIS.core.VectorLayer(gis, 'boundary', 'Boundary layer', {opacity: 0.8});
-	layers.boundary.core = new mapfish.GeoStat.Boundary(gis.olmap, {
-		layer: layers.boundary,
-		gis: gis
-	});
-
-	layers.thematic1 = GIS.core.VectorLayer(gis, 'thematic1', 'Thematic layer 1', {opacity: 0.8});
-	layers.thematic1.core = new mapfish.GeoStat.Thematic1(gis.olmap, {
-		layer: layers.thematic1,
-		gis: gis
-	});
-
-	layers.thematic2 = GIS.core.VectorLayer(gis, 'thematic2', 'Thematic layer 2', {opacity: 0.8});
-	layers.thematic2.core = new mapfish.GeoStat.Thematic2(gis.olmap, {
-		layer: layers.thematic2,
-		gis: gis
-	});
-
-	layers.facility = GIS.core.VectorLayer(gis, 'facility', 'Facility layer', {opacity: 0.8});
-	layers.facility.core = new mapfish.GeoStat.Facility(gis.olmap, {
-		layer: layers.facility,
-		gis: gis
-	});
-
 	if (window.google) {
 		layers.googleStreets = new OpenLayers.Layer.Google('Google Streets', {
 			numZoomLevels: 20,
@@ -334,6 +310,30 @@ GIS.core.getLayers = function(gis) {
 		});
 		layers.openStreetMap.id = 'openStreetMap';
 	}
+
+	layers.boundary = GIS.core.VectorLayer(gis, 'boundary', 'Boundary layer', {opacity: 0.8});
+	layers.boundary.core = new mapfish.GeoStat.Boundary(gis.olmap, {
+		layer: layers.boundary,
+		gis: gis
+	});
+
+	layers.thematic1 = GIS.core.VectorLayer(gis, 'thematic1', 'Thematic layer 1', {opacity: 0.8});
+	layers.thematic1.core = new mapfish.GeoStat.Thematic1(gis.olmap, {
+		layer: layers.thematic1,
+		gis: gis
+	});
+
+	layers.thematic2 = GIS.core.VectorLayer(gis, 'thematic2', 'Thematic layer 2', {opacity: 0.8});
+	layers.thematic2.core = new mapfish.GeoStat.Thematic2(gis.olmap, {
+		layer: layers.thematic2,
+		gis: gis
+	});
+
+	layers.facility = GIS.core.VectorLayer(gis, 'facility', 'Facility layer', {opacity: 0.8});
+	layers.facility.core = new mapfish.GeoStat.Facility(gis.olmap, {
+		layer: layers.facility,
+		gis: gis
+	});
 
 	return layers;
 };
@@ -849,7 +849,6 @@ GIS.core.ThematicLoader = function(gis, layer) {
 		layer.legendPanel.expand();
 
 		layer.setOpacity(view.opacity);
-console.log(gis);
 
 		if (loader.updateGui && Ext.isObject(widget)) {
 			widget.setGui(view);

@@ -4098,11 +4098,11 @@ Ext.onReady( function() {
 							menu: gis.layer.thematic1.menu,
 							width: 26
 						});
-						//a.push({
-							//iconCls: 'gis-btn-icon-' + gis.layer.thematic2.id,
-							//menu: gis.layer.thematic2.menu,
-							//width: 26
-						//});
+						a.push({
+							iconCls: 'gis-btn-icon-' + gis.layer.thematic2.id,
+							menu: gis.layer.thematic2.menu,
+							width: 26
+						});
 						//a.push({
 							//iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
 							//menu: gis.layer.facility.menu,
@@ -4362,20 +4362,10 @@ Ext.onReady( function() {
 			layer.widget = GIS.app.LayerWidgetThematic(layer);
 			layer.window = GIS.app.WidgetWindow(layer);
 
-			 //Ext.create('mapfish.widgets.geostat.Thematic1', {
-				//map: gis.olmap,
-				//layer: layer,
-				//menu: layer.menu
-			////});
-
-			//layer = gis.layer.thematic2;
-			//layer.menu = GIS.app.LayerMenu(layer);
-			//layer.window = GIS.app.WidgetWindow(layer);
-			//layer.widget = Ext.create('mapfish.widgets.geostat.Thematic2', {
-				//map: gis.olmap,
-				//layer: layer,
-				//menu: layer.menu
-			//});
+			layer = gis.layer.thematic2;
+			layer.menu = GIS.app.LayerMenu(layer);
+			layer.widget = GIS.app.LayerWidgetThematic(layer);
+			layer.window = GIS.app.WidgetWindow(layer);
 
 			//layer = gis.layer.facility;
 			//layer.menu = GIS.app.LayerMenu(layer);
