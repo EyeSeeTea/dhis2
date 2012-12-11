@@ -112,7 +112,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
         // Organisation unit options
 
         this.cmp.level = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: GIS.i18n.level,
+            fieldLabel: GIS.app.i18n.level,
             editable: false,
             valueField: 'id',
             displayField: 'name',
@@ -261,7 +261,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 						{
 							xtype: 'button',
 							hideLabel: true,
-							text: GIS.i18n.cancel,
+							text: GIS.app.i18n.cancel,
 							handler: function() {
 								GIS.map.relocate.active = false;
 								that.cmp.relocateWindow.destroy();
@@ -358,7 +358,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 				});
 
 				menuItems.push( Ext.create('Ext.menu.Item', {
-					text: GIS.i18n.relocate,
+					text: GIS.app.i18n.relocate,
 					iconCls: 'gis-menu-item-icon-relocate',
 					disabled: !GIS.init.security.isAdmin,
 					handler: function(item) {
@@ -497,49 +497,49 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 
 	validateView: function(view) {
 		if (!view.organisationUnitLevel.id || !Ext.isString(view.organisationUnitLevel.id)) {
-			GIS.logg.push([view.organisationUnitLevel.id, this.xtype + '.organisationUnitLevel.id: string']);
+			GIS.app.logg.push([view.organisationUnitLevel.id, this.xtype + '.organisationUnitLevel.id: string']);
 				alert('No level selected'); //todo
 			return false;
 		}
 		if (!view.organisationUnitLevel.name || !Ext.isString(view.organisationUnitLevel.name)) {
-			GIS.logg.push([view.organisationUnitLevel.name, this.xtype + '.organisationUnitLevel.name: string']);
+			GIS.app.logg.push([view.organisationUnitLevel.name, this.xtype + '.organisationUnitLevel.name: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!view.organisationUnitLevel.level || !Ext.isNumber(view.organisationUnitLevel.level)) {
-			GIS.logg.push([view.organisationUnitLevel.level, this.xtype + '.organisationUnitLevel.level: number']);
+			GIS.app.logg.push([view.organisationUnitLevel.level, this.xtype + '.organisationUnitLevel.level: number']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!view.parentOrganisationUnit.id || !Ext.isString(view.parentOrganisationUnit.id)) {
-			GIS.logg.push([view.parentOrganisationUnit.id, this.xtype + '.parentOrganisationUnit.id: string']);
+			GIS.app.logg.push([view.parentOrganisationUnit.id, this.xtype + '.parentOrganisationUnit.id: string']);
 				alert('No parent organisation unit selected'); //todo
 			return false;
 		}
 		if (!view.parentOrganisationUnit.name || !Ext.isString(view.parentOrganisationUnit.name)) {
-			GIS.logg.push([view.parentOrganisationUnit.name, this.xtype + '.parentOrganisationUnit.name: string']);
+			GIS.app.logg.push([view.parentOrganisationUnit.name, this.xtype + '.parentOrganisationUnit.name: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!view.parentLevel || !Ext.isNumber(view.parentLevel)) {
-			GIS.logg.push([view.parentLevel, this.xtype + '.parentLevel: number']);
+			GIS.app.logg.push([view.parentLevel, this.xtype + '.parentLevel: number']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!view.parentGraph || !Ext.isString(view.parentGraph)) {
-			GIS.logg.push([view.parentGraph, this.xtype + '.parentGraph: string']);
+			GIS.app.logg.push([view.parentGraph, this.xtype + '.parentGraph: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 
 		if (view.parentOrganisationUnit.level > view.organisationUnitLevel.level) {
-			GIS.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, this.xtype + '.parentOrganisationUnit.level: number <= ' + this.xtype + '.organisationUnitLevel.level']);
+			GIS.app.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, this.xtype + '.parentOrganisationUnit.level: number <= ' + this.xtype + '.organisationUnitLevel.level']);
 				alert('Orgunit level cannot be higher than parent level'); //todo
 			return false;
 		}
 
 		if (!view.extended.updateOrganisationUnit && !view.extended.updateData && !view.extended.updateLegend) {
-			GIS.logg.push([view.extended.updateOrganisationUnit, view.extended.updateData, view.extended.updateLegend, this.xtype + '.extended.update ou/data/legend: true||true||true']);
+			GIS.app.logg.push([view.extended.updateOrganisationUnit, view.extended.updateData, view.extended.updateLegend, this.xtype + '.extended.update ou/data/legend: true||true||true']);
 			return false;
 		}
 
@@ -643,7 +643,7 @@ Ext.define('mapfish.widgets.geostat.Boundary', {
 			return;
 		}
 
-		GIS.mask.msg = GIS.i18n.loading;
+		GIS.mask.msg = GIS.app.i18n.loading;
 		GIS.mask.show();
 
 		if (this.tmpView.extended.updateOrganisationUnit) {

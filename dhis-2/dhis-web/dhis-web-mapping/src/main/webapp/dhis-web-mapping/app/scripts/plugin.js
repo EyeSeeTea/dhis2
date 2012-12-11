@@ -25,7 +25,9 @@ Ext.onReady( function() {
 	radiusHigh						number			15					(Optional) Automatic legend set, high radius for points.
 	*/
 
-	GIS.getMap = function(config) {
+	GIS.plugin = {};
+	
+	GIS.plugin.getMap = function(config) {
 		var validateConfig,
 			onRender,
 			afterRender,
@@ -236,7 +238,7 @@ Ext.onReady( function() {
 				return;
 			}
 
-			gis = GIS.getInstance({
+			gis = GIS.core.getInstance({
 				baseUrl: config.url,
 				el: config.el
 			});
@@ -258,4 +260,6 @@ Ext.onReady( function() {
 			GIS.core.MapLoader(gis).load();
 		}();
 	};
+
+	GIS.getMap = GIS.plugin.getMap;
 });

@@ -173,7 +173,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 		// Group set
 
         this.cmp.groupSet = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: GIS.i18n.groupset,
+            fieldLabel: GIS.app.i18n.groupset,
             editable: false,
             valueField: 'id',
             displayField: 'name',
@@ -199,7 +199,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
         // Organisation unit options
 
         this.cmp.level = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: GIS.i18n.level,
+            fieldLabel: GIS.app.i18n.level,
             editable: false,
             valueField: 'id',
             displayField: 'name',
@@ -374,7 +374,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 						{
 							xtype: 'button',
 							hideLabel: true,
-							text: GIS.i18n.cancel,
+							text: GIS.app.i18n.cancel,
 							handler: function() {
 								GIS.map.relocate.active = false;
 								that.cmp.relocateWindow.destroy();
@@ -425,7 +425,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 									bodyStyle: 'padding-right:4px',
 									items: [
 										{
-											html: GIS.i18n.name,
+											html: GIS.app.i18n.name,
 											cls: 'gis-panel-html-title'
 										},
 										{
@@ -436,7 +436,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 											cls: 'gis-panel-html-separator'
 										},
 										{
-											html: GIS.i18n.type,
+											html: GIS.app.i18n.type,
 											cls: 'gis-panel-html-title'
 										},
 										{
@@ -447,7 +447,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 											cls: 'gis-panel-html-separator'
 										},
 										{
-											html: GIS.i18n.code,
+											html: GIS.app.i18n.code,
 											cls: 'gis-panel-html-title'
 										},
 										{
@@ -458,7 +458,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 											cls: 'gis-panel-html-separator'
 										},
 										{
-											html: GIS.i18n.address,
+											html: GIS.app.i18n.address,
 											cls: 'gis-panel-html-title'
 										},
 										{
@@ -469,7 +469,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 											cls: 'gis-panel-html-separator'
 										},
 										{
-											html: GIS.i18n.contact_person,
+											html: GIS.app.i18n.contact_person,
 											cls: 'gis-panel-html-title'
 										},
 										{
@@ -480,7 +480,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 											cls: 'gis-panel-html-separator'
 										},
 										{
-											html: GIS.i18n.email,
+											html: GIS.app.i18n.email,
 											cls: 'gis-panel-html-title'
 										},
 										{
@@ -491,7 +491,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 											cls: 'gis-panel-html-separator'
 										},
 										{
-											html: GIS.i18n.phone_number,
+											html: GIS.app.i18n.phone_number,
 											cls: 'gis-panel-html-title'
 										},
 										{
@@ -507,7 +507,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 									bodyStyle: 'padding-left:4px',
 									items: [
 										{
-											html: GIS.i18n.infrastructural_data,
+											html: GIS.app.i18n.infrastructural_data,
 											cls: 'gis-panel-html-title'
 										},
 										{
@@ -515,7 +515,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 										},
 										{
 											xtype: 'combo',
-											fieldLabel: GIS.i18n.period,
+											fieldLabel: GIS.app.i18n.period,
 											editable: false,
 											valueField: 'id',
 											displayField: 'name',
@@ -594,7 +594,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 
 			if (isPoint) {
 				menuItems.push( Ext.create('Ext.menu.Item', {
-					text: GIS.i18n.relocate,
+					text: GIS.app.i18n.relocate,
 					iconCls: 'gis-menu-item-icon-relocate',
 					disabled: !GIS.init.security.isAdmin,
 					handler: function(item) {
@@ -785,55 +785,55 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 
 	validateView: function(view) {
 		if (!view.organisationUnitGroupSet.id || !Ext.isString(view.organisationUnitGroupSet.id)) {
-			GIS.logg.push([view.organisationUnitGroupSet.id, this.xtype + '.organisationUnitGroupSet.id: string']);
+			GIS.app.logg.push([view.organisationUnitGroupSet.id, this.xtype + '.organisationUnitGroupSet.id: string']);
 				alert('No group set selected'); //todo //i18n
 			return false;
 		}
 
 		if (!view.organisationUnitLevel.id || !Ext.isString(view.organisationUnitLevel.id)) {
-			GIS.logg.push([view.organisationUnitLevel.id, this.xtype + '.organisationUnitLevel.id: string']);
+			GIS.app.logg.push([view.organisationUnitLevel.id, this.xtype + '.organisationUnitLevel.id: string']);
 				alert('No level selected'); //todo
 			return false;
 		}
 		if (!view.organisationUnitLevel.name || !Ext.isString(view.organisationUnitLevel.name)) {
-			GIS.logg.push([view.organisationUnitLevel.name, this.xtype + '.organisationUnitLevel.name: string']);
+			GIS.app.logg.push([view.organisationUnitLevel.name, this.xtype + '.organisationUnitLevel.name: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!view.organisationUnitLevel.level || !Ext.isNumber(view.organisationUnitLevel.level)) {
-			GIS.logg.push([view.organisationUnitLevel.level, this.xtype + '.organisationUnitLevel.level: number']);
+			GIS.app.logg.push([view.organisationUnitLevel.level, this.xtype + '.organisationUnitLevel.level: number']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!view.parentOrganisationUnit.id || !Ext.isString(view.parentOrganisationUnit.id)) {
-			GIS.logg.push([view.parentOrganisationUnit.id, this.xtype + '.parentOrganisationUnit.id: string']);
+			GIS.app.logg.push([view.parentOrganisationUnit.id, this.xtype + '.parentOrganisationUnit.id: string']);
 				alert('No parent organisation unit selected'); //todo
 			return false;
 		}
 		if (!view.parentOrganisationUnit.name || !Ext.isString(view.parentOrganisationUnit.name)) {
-			GIS.logg.push([view.parentOrganisationUnit.name, this.xtype + '.parentOrganisationUnit.name: string']);
+			GIS.app.logg.push([view.parentOrganisationUnit.name, this.xtype + '.parentOrganisationUnit.name: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!view.parentLevel || !Ext.isNumber(view.parentLevel)) {
-			GIS.logg.push([view.parentLevel, this.xtype + '.parentLevel: number']);
+			GIS.app.logg.push([view.parentLevel, this.xtype + '.parentLevel: number']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 		if (!view.parentGraph || !Ext.isString(view.parentGraph)) {
-			GIS.logg.push([view.parentGraph, this.xtype + '.parentGraph: string']);
+			GIS.app.logg.push([view.parentGraph, this.xtype + '.parentGraph: string']);
 				//alert("validation failed"); //todo
 			return false;
 		}
 
 		if (view.parentOrganisationUnit.level > view.organisationUnitLevel.level) {
-			GIS.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, this.xtype + '.parentOrganisationUnit.level: number <= ' + this.xtype + '.organisationUnitLevel.level']);
+			GIS.app.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, this.xtype + '.parentOrganisationUnit.level: number <= ' + this.xtype + '.organisationUnitLevel.level']);
 				alert('Orgunit level cannot be higher than parent level'); //todo
 			return false;
 		}
 
 		if (!view.extended.updateOrganisationUnit && !view.extended.updateData && !view.extended.updateLegend) {
-			GIS.logg.push([view.extended.updateOrganisationUnit, view.extended.updateData, view.extended.updateLegend, this.xtype + '.extended.update ou/data/legend: true||true||true']);
+			GIS.app.logg.push([view.extended.updateOrganisationUnit, view.extended.updateData, view.extended.updateLegend, this.xtype + '.extended.update ou/data/legend: true||true||true']);
 			return false;
 		}
 
@@ -937,7 +937,7 @@ Ext.define('mapfish.widgets.geostat.Facility', {
 			return;
 		}
 
-		GIS.mask.msg = GIS.i18n.loading;
+		GIS.mask.msg = GIS.app.i18n.loading;
 		GIS.mask.show();
 
 		if (this.tmpView.extended.updateOrganisationUnit) {

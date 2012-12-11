@@ -65,7 +65,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
     },
 
     getLoader: function() {
-		return GIS.core.ThematicLoader(this.gis, this.layer);
+		return GIS.core.LayerLoaderThematic(this.gis, this.layer);
 	},
 
 	reset: function() {
@@ -117,15 +117,6 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
         if (this.view.legendType === this.gis.conf.finals.widget.legendtype_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
 		}
-
-		this.view.imageLegend = [];
-
-        for (var i = 0; i < this.classification.bins.length; i++) {
-			this.view.imageLegend.push({
-                label: this.classification.bins[i].label.replace('&nbsp;&nbsp;', ' '),
-                color: this.colorInterpolation[i].toHexString()
-            });
-        }
     },
 
     setClassification: function() {

@@ -65,7 +65,7 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
     },
 
     getLoader: function() {
-		return GIS.core.ThematicLoader(this.gis, this.layer);
+		return GIS.core.LayerLoaderThematic(this.gis, this.layer);
 	},
 
 	reset: function() {

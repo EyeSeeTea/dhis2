@@ -64,7 +64,7 @@ mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
     },
 
     getLoader: function() {
-		return GIS.core.BoundaryLoader(this.gis, this.layer);
+		return GIS.core.LayerLoaderBoundary(this.gis, this.layer);
 	},
 
 	reset: function() {
@@ -84,19 +84,9 @@ mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
     },
 
     createColorInterpolation: function() {
-        var numColors = this.classification.bins.length,
-			tmpView = this.widget.tmpView;
-
-        tmpView.extended.imageLegendConfig = [];
+        var numColors = this.classification.bins.length;
 
 		this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
-
-        for (var i = 0; i < this.classification.bins.length; i++) {
-            tmpView.extended.imageLegendConfig.push({
-                label: this.classification.bins[i].label.replace('&nbsp;&nbsp;', ' '),
-                color: this.colorInterpolation[i].toHexString()
-            });
-        }
     },
 
     setClassification: function() {

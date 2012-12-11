@@ -605,7 +605,146 @@ GIS.core.MapLoader = function(gis) {
 	return loader;
 };
 
-GIS.core.ThematicLoader = function(gis, layer) {
+GIS.core.LayerLoaderBoundary = function(gis, layer) {
+	var olmap = layer.map,
+		compareView,
+		loadOrganisationUnits,
+		loadData,
+		loadLegend,
+		afterLoad,
+		loader;
+
+	compareView = function(view, doExecute) {
+		var src = layer.core.view;
+		
+		if (!src) {
+			if (doExecute) {
+				loadOrganisationUnits(view);
+			}
+			return gis.conf.finals.widget.loadtype_organisationunit;
+		}
+
+		if (view.organisationUnitLevel.id !== src.organisationUnitLevel.id) {
+			if (doExecute) {
+				loadOrganisationUnits(view);
+			}
+			return gis.conf.finals.widget.loadtype_organisationunit;
+		}
+
+		if (view.parentOrganisationUnit.id !== src.parentOrganisationUnit.id) {
+			if (doExecute) {
+				loadOrganisationUnits(view);
+			}
+			return gis.conf.finals.widget.loadtype_organisationunit;
+		}
+	};
+
+    loadOrganisationUnits = function(view) {
+		Ext.data.JsonP.request({
+			url: gis.baseUrl + gis.conf.url.path_gis + 'getGeoJson.action',
+			params: {
+				parentId: view.parentOrganisationUnit.id,
+				level: view.organisationUnitLevel.id
+			},
+			scope: this,
+			disableCaching: false,
+			success: function(r) {
+				var geojson = gis.util.geojson.decode(r),
+					format = new OpenLayers.Format.GeoJSON(),
+					features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
+
+				if (!Ext.isArray(features)) {
+					olmap.mask.hide();
+					alert('Invalid coordinates');
+					return;
+				}
+
+				if (!features.length) {
+					olmap.mask.hide();
+					alert('No valid coordinates found'); //todo //i18n
+					return;
+				}
+
+				loadData(view, features);
+			}
+		});
+    };
+
+    loadData = function(view, features) {
+		features = features || layer.features;
+
+		for (var i = 0; i < features.length; i++) {
+			features[i].label = features[i].attributes.name;
+			features[i].value = 0;
+		}
+		
+		layer.removeFeatures(layer.features);
+		layer.addFeatures(features);
+
+		layer.core.featureStore.loadFeatures(layer.features.slice(0));
+
+		loadLegend(view);
+	};
+
+	loadLegend = function(view) {
+		var options;		
+
+		options = {
+            indicator: gis.conf.finals.widget.value,
+            method: 2,
+            numClasses: 5,
+            colors: layer.core.getColors('000000', '000000'),
+            minSize: 6,
+            maxSize: 6
+        };
+
+		layer.core.applyClassification(options);
+
+		afterLoad(view);
+	};
+
+	afterLoad = function(view) {
+		gis.viewport.eastRegion.doLayout();
+
+		layer.setOpacity(view.opacity);
+
+		if (loader.updateGui && Ext.isObject(layer.widget)) {
+			layer.widget.setGui(view);
+		}
+
+		if (loader.zoomToVisibleExtent) {
+			olmap.zoomToVisibleExtent();
+		}
+
+		if (loader.hideMask) {
+			olmap.mask.hide();
+		}
+
+		if (loader.callBack) {
+			loader.callBack(layer);
+		}
+	};
+
+	loader = {
+		compare: false,
+		updateGui: false,
+		zoomToVisibleExtent: false,
+		hideMask: false,
+		callBack: null,
+		load: function(view) {
+			if (this.compare) {
+				compareView(view, true);
+			}
+			else {
+				loadOrganisationUnits(view);
+			}
+		}
+	};
+
+	return loader;
+};
+
+GIS.core.LayerLoaderThematic = function(gis, layer) {
 	var olmap = layer.map,
 		compareView,
 		loadOrganisationUnits,
@@ -897,7 +1036,7 @@ GIS.core.ThematicLoader = function(gis, layer) {
 	return loader;
 };
 
-GIS.getInstance = function(config) {
+GIS.core.getInstance = function(config) {
 	var gis = {};
 
 	gis.baseUrl = config && config.baseUrl ? config.baseUrl : '../../';
@@ -909,9 +1048,9 @@ GIS.getInstance = function(config) {
 	gis.olmap = GIS.core.getOLMap(gis);
 	gis.layer = GIS.core.getLayers(gis);
 
-	for (var layerId in gis.layer) {
-		if (gis.layer.hasOwnProperty(layerId)) {
-			gis.olmap.addLayer(gis.layer[layerId]);
+	for (var key in gis.layer) {
+		if (gis.layer.hasOwnProperty(key)) {
+			gis.olmap.addLayer(gis.layer[key]);
 		}
 	}
 
