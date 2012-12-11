@@ -697,7 +697,7 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
             minSize: 6,
             maxSize: 6
         };
-
+        
 		layer.core.applyClassification(options);
 
 		afterLoad(view);
@@ -705,8 +705,8 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 
 	afterLoad = function(view) {
 		gis.viewport.eastRegion.doLayout();
-
-		layer.setOpacity(view.opacity);
+		
+		layer.setLayerOpacity(view.opacity);
 
 		if (loader.updateGui && Ext.isObject(layer.widget)) {
 			layer.widget.setGui(view);
@@ -998,7 +998,7 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 		gis.viewport.eastRegion.doLayout();
 		layer.legendPanel.expand();
 
-		layer.setOpacity(view.opacity);
+		layer.setLayerOpacity(view.opacity);
 
 		if (loader.updateGui && Ext.isObject(layer.widget)) {
 			layer.widget.setGui(view);
