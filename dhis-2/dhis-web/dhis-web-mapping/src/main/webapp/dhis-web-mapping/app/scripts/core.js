@@ -507,25 +507,34 @@ GIS.core.MeasureWindow = function(gis) {
 };
 
 GIS.core.MapLoader = function(gis) {
-	var getMap,
+	var failure,
+		getMap,
 		setMap,
 		afterLoad,
 		callBack,
 		register = [],
 		loader;
 
+	failure = function() {
+		gis.olmap.mask.hide();
+		alert('Map id not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
+	};
+
 	getMap = function() {
 		Ext.data.JsonP.request({
 			url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
 			success: function(r) {
 				if (!r) {
-					gis.olmap.mask.hide();
-					alert('Uid not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
+					failure();
 					return;
 				}
 
 				gis.map = r;
 				setMap();
+			},
+			failure: function() {
+				failure();
+				return;
 			}
 		});
 	};

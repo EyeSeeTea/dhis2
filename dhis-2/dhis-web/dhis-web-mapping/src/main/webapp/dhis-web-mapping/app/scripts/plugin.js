@@ -87,16 +87,10 @@ Ext.onReady( function() {
 			}
 		};
 
-		onRender = function(vp) {
-			gis.olmap.mask = new Ext.LoadMask(vp.getEl(), {
-				msg: 'Loading'
-			});
-		};
-
 		afterRender = function(vp) {
-			var count = document.getElementsByClassName('zoomInButton').length;
+			var len = document.getElementsByClassName('zoomInButton').length;
 
-			for (var i = 0; i < count; i++) {
+			for (var i = 0; i < len; i++) {
 				document.getElementsByClassName('zoomInButton')[i].innerHTML = '<img src="images/zoomin_24.png" />';
 				document.getElementsByClassName('zoomOutButton')[i].innerHTML = '<img src="images/zoomout_24.png" />';
 				document.getElementsByClassName('zoomVisibleButton')[i].innerHTML = '<img src="images/zoomvisible_24.png" />';
@@ -225,9 +219,6 @@ Ext.onReady( function() {
 					}
 				],
 				listeners: {
-					render: function() {
-						onRender(this);
-					},
 					afterrender: function() {
 						afterRender();
 					}
@@ -259,6 +250,10 @@ Ext.onReady( function() {
 			};
 
 			gis.viewport = createViewport();
+
+			gis.olmap.mask = Ext.create('Ext.LoadMask', gis.viewport.centerRegion.getEl(), {
+				msg: 'Loading'
+			});
 
 			GIS.core.MapLoader(gis).load();
 		}();
