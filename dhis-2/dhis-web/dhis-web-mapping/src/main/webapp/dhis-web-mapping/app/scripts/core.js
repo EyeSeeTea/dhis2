@@ -687,9 +687,7 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 	};
 
 	loadLegend = function(view) {
-		var options;
-
-		options = {
+		var options = {
             indicator: gis.conf.finals.widget.value,
             method: 2,
             numClasses: 5,
@@ -697,6 +695,8 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
             minSize: 6,
             maxSize: 6
         };
+
+		layer.core.view = view;
 
 		layer.core.applyClassification(options);
 

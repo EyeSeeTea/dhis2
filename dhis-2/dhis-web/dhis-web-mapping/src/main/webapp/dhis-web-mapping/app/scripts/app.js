@@ -2941,7 +2941,7 @@ Ext.onReady( function() {
 							};
 						}
 						else if (direction === 'down') {
-							var level = store.getAt(store.find('level', that.view.organisationUnitLevel.level + 1));
+							var level = store.getAt(store.find('level', view.organisationUnitLevel.level + 1));
 
 							config = {
 								organisationUnitLevel: {
@@ -2952,7 +2952,7 @@ Ext.onReady( function() {
 								parentOrganisationUnit: {
 									id: feature.attributes.id,
 									name: feature.attributes.name,
-									level: that.view.organisationUnitLevel.level
+									level: view.organisationUnitLevel.level
 								},
 								parentGraph: feature.attributes.path
 							};
@@ -3075,9 +3075,6 @@ Ext.onReady( function() {
 
 			// Layer menu
 			layer.menu.enableItems();
-
-			// Update search window
-			featureStore.loadFeatures(layer.features);
 		};
 
 		getView = function(config) {
@@ -4355,9 +4352,6 @@ Ext.onReady( function() {
 
 			// Layer menu
 			layer.menu.enableItems();
-
-			// Update search window
-			featureStore.loadFeatures(layer.features);
 
 			// Update filter window
 			if (layer.filterWindow && layer.filterWindow.isVisible()) {
