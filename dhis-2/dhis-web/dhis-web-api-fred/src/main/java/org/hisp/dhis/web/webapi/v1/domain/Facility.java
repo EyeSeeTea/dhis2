@@ -28,10 +28,8 @@ package org.hisp.dhis.web.webapi.v1.domain;
  */
 
 import org.hibernate.validator.constraints.Length;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.web.webapi.v1.validation.constraint.annotation.ValidProperties;
-import org.hisp.dhis.web.webapi.v1.validation.constraint.annotation.ValidUidReference;
-import org.hisp.dhis.web.webapi.v1.validation.group.Standard;
+import org.hisp.dhis.web.webapi.v1.validation.group.Create;
 import org.hisp.dhis.web.webapi.v1.validation.group.Update;
 
 import javax.validation.constraints.NotNull;
@@ -44,15 +42,14 @@ import java.util.*;
 public class Facility
 {
     // Internal system identifier
-    @Null( groups = Standard.Null.class )
-    @NotNull( groups = Standard.NotNull.class )
-    @Length( min = 11, max = 11, groups = Standard.Length.class )
-    @ValidUidReference( value = OrganisationUnit.class, groups = Update.class )
+    @Null( groups = Create.class )
+    @NotNull( groups = Update.class )
+    @Length(min = 11, max = 11)
     private String id;
 
     // Name of the facility
     @NotNull
-    @Length( min = 2, max = 160 )
+    @Length(min = 2, max = 160)
     private String name;
 
     // Active = true/false indicates whether the facility is active or not
@@ -63,11 +60,9 @@ public class Facility
     private String url;
 
     // ISO 8601 timestamp, including timezone, of when the facility was created
-    @Null
     private Date createdAt;
 
     // ISO 8601 timestamp, including timezone, of when the facility was last updated
-    @Null
     private Date updatedAt;
 
     // Geo-location represented by latitude and longitude coordinates in that order

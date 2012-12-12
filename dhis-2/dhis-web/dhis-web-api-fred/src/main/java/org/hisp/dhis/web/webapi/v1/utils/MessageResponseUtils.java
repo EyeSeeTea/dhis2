@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.webapi.v1.validation.constraint;
+package org.hisp.dhis.web.webapi.v1.utils;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,46 +27,39 @@ package org.hisp.dhis.web.webapi.v1.validation.constraint;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.web.webapi.v1.validation.constraint.annotation.ValidUidReference;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.web.webapi.v1.domain.MessageResponse;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import java.io.IOException;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class UidReferenceValidator implements ConstraintValidator<ValidUidReference, String>
+public class MessageResponseUtils
 {
-    @Autowired
-    @Qualifier( "org.hisp.dhis.common.IdentifiableObjectManager" )
-    private IdentifiableObjectManager identifiableObjectManager;
+    private static ObjectMapper objectMapper;
 
-    private Class<? extends IdentifiableObject> identifiableObjectClass;
-
-    @Override
-    public void initialize( ValidUidReference constraintAnnotation )
+    static
     {
-        identifiableObjectClass = constraintAnnotation.value();
+        objectMapper = new ObjectMapper();
+        objectMapper.configure( JsonGenerator.Feature.ESCAPE_NON_ASCII, true );
+        objectMapper.setSerializationInclusion( JsonSerialize.Inclusion.NON_EMPTY );
     }
 
-    @Override
-    public boolean isValid( String value, ConstraintValidatorContext context )
+    public static String jsonMessage( String message ) throws IOException
     {
-        IdentifiableObject identifiableObject = identifiableObjectManager.get( identifiableObjectClass, value );
+        return messageToJson( new MessageResponse( message, null ) );
+    }
 
-        boolean isValid = identifiableObject != null;
+    public static String jsonMessage( String message, String moreInfo ) throws IOException
+    {
+        return messageToJson( new MessageResponse( message, moreInfo ) );
+    }
 
-        if ( !isValid )
-        {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate( String.format( "No object found with ID %s.", value ) )
-                .addConstraintViolation();
-        }
-
-        return isValid;
+    public static String messageToJson( MessageResponse messageResponse ) throws IOException
+    {
+        return objectMapper.writeValueAsString( messageResponse );
     }
 }

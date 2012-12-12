@@ -69,7 +69,7 @@ Ext.onReady( function() {
 		};
 
 		util.map.hasVisibleFeatures = function() {
-			var layers = util.map.getVisibleVectorLayers(),
+			var layers = util.map.getVisibleVectorLayers(gis.olmap),
 				layer;
 
 			if (layers.length) {
@@ -4927,7 +4927,7 @@ Ext.onReady( function() {
 			layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
 			layer.widget = GIS.app.LayerWidgetBoundary(layer);
 			layer.window = GIS.app.WidgetWindow(layer);
-			
+
 			layer = gis.layer.thematic1;
 			layer.menu = GIS.app.LayerMenu(layer);
 			layer.widget = GIS.app.LayerWidgetThematic(layer);

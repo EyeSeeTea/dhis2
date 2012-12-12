@@ -151,6 +151,24 @@ public class DefaultOrganisationUnitService
         return organisationUnitStore.getAll();
     }
 
+    @Override
+    public Collection<OrganisationUnit> getAllOrganisationUnitsByStatus( boolean active )
+    {
+        return organisationUnitStore.getAllOrganisationUnitsByStatus( active );
+    }
+
+    @Override
+    public Collection<OrganisationUnit> getAllOrganisationUnitsByLastUpdated( Date lastUpdated )
+    {
+        return organisationUnitStore.getAllOrganisationUnitsByLastUpdated( lastUpdated );
+    }
+
+    @Override
+    public Collection<OrganisationUnit> getAllOrganisationUnitsByStatusLastUpdated( boolean active, Date lastUpdated )
+    {
+        return organisationUnitStore.getAllOrganisationUnitsByStatusLastUpdated( active, lastUpdated );
+    }
+
     public void searchOrganisationUnitByName( List<OrganisationUnit> orgUnits, String key )
     {
         Iterator<OrganisationUnit> iterator = orgUnits.iterator();
@@ -210,6 +228,11 @@ public class DefaultOrganisationUnitService
     public int getLevelOfOrganisationUnit( int id )
     {
         return getOrganisationUnit( id ).getOrganisationUnitLevel();
+    }
+
+    public int getLevelOfOrganisationUnit( String uid )
+    {
+        return getOrganisationUnit( uid ).getOrganisationUnitLevel();
     }
 
     public Collection<OrganisationUnit> getLeafOrganisationUnits( int id )
@@ -422,7 +445,7 @@ public class DefaultOrganisationUnitService
         return organisationUnitStore.getOrganisationUnitsByNameAndGroups( query, groups, limit );
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<OrganisationUnit> getOrganisationUnitsByNameAndGroups( String name,
         Collection<OrganisationUnitGroup> groups, OrganisationUnit parent, boolean limit )
     {

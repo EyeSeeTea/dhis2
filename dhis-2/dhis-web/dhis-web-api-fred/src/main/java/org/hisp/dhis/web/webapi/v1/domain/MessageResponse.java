@@ -1,4 +1,4 @@
-package org.hisp.dhis.web.webapi.v1.validation.constraint.annotation;
+package org.hisp.dhis.web.webapi.v1.domain;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,29 +27,45 @@ package org.hisp.dhis.web.webapi.v1.validation.constraint.annotation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.web.webapi.v1.validation.constraint.UidReferenceValidator;
-
-import javax.validation.Constraint;
-import javax.validation.Payload;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.codehaus.jackson.annotate.JsonPropertyOrder;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE })
-@Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = UidReferenceValidator.class)
-public @interface ValidUidReference
+@JsonPropertyOrder( value = { "message", "moreInfo" } )
+public class MessageResponse
 {
-    String message() default "No object found with that ID.";
+    private String message;
 
-    Class<?>[] groups() default { };
+    private String moreInfo;
 
-    Class<? extends Payload>[] payload() default { };
+    public MessageResponse()
+    {
+    }
 
-    Class<? extends IdentifiableObject> value();
+    public MessageResponse( String message, String moreInfo )
+    {
+        this.message = message;
+        this.moreInfo = moreInfo;
+    }
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    public void setMessage( String message )
+    {
+        this.message = message;
+    }
+
+    public String getMoreInfo()
+    {
+        return moreInfo;
+    }
+
+    public void setMoreInfo( String moreInfo )
+    {
+        this.moreInfo = moreInfo;
+    }
 }

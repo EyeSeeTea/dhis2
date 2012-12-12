@@ -2065,7 +2065,13 @@ Ext.onReady( function() {
             var params = [];
             params = params.concat(DV.c.data.url);
             params = params.concat(DV.c.period.url);
-            params = params.concat(DV.c.organisationunit.url);
+
+            if (DV.c.userorganisationunit || DV.c.userorganisationunitchildren) {
+				params.push('ou=' + DV.init.user.ou.id);
+			}
+			else {
+				params = params.concat(DV.c.organisationunit.url);
+			}
 
             var baseurl = DV.conf.finals.ajax.path_api + DV.conf.finals.ajax.data_get;
             Ext.Array.each(params, function(item) {

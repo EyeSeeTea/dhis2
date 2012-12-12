@@ -30,6 +30,7 @@ package org.hisp.dhis.analytics.table;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -41,6 +42,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -52,9 +54,13 @@ import org.springframework.scheduling.annotation.Async;
  * each organisation unit group set and organisation unit level. Also, columns
  * for dataelementid, periodid, organisationunitid, categoryoptioncomboid, value.
  * 
+ * The analytics table is horizontally partitioned. The partition key is the start 
+ * date of the  period of the data record. The table is partitioned according to 
+ * time span with one partition per calendar quarter.
+ * 
  * The data records in this table are not aggregated. Typically, queries will
  * aggregate in organisation unit hierarchy dimension, in the period/time dimension,
- * and the category dimensions, as well as org unit group set dimensions.
+ * and the category dimensions, as well as organisation unit group set dimensions.
  * 
  * @author Lars Helge Overland
  */
@@ -62,11 +68,10 @@ public class JdbcAnalyticsTableManager
     implements AnalyticsTableManager
 {
     private static final Log log = LogFactory.getLog( JdbcAnalyticsTableManager.class );
-    
+
     public static final String PREFIX_ORGUNITGROUPSET = "ougs_";
     public static final String PREFIX_ORGUNITLEVEL = "idlevel";
     public static final String PREFIX_INDEX = "index_";
-    public static final String TABLE_NAME = "analytics";
     
     @Autowired
     private OrganisationUnitService organisationUnitService;
@@ -81,59 +86,76 @@ public class JdbcAnalyticsTableManager
     // Implementation
     // -------------------------------------------------------------------------
   
-    //TODO all data types
-    //TODO create temp table then swap
-    //TODO shard on data year
     //TODO average aggregation operator data, pre-aggregate in time dimension, not in org unit dimension
     
-    public void dropTable()
+    public void createTable( String tableName )
     {
-        final String sql = "drop table " + TABLE_NAME;
+        final String sqlDrop = "drop table " + tableName;
         
-        executeSilently( sql );
+        executeSilently( sqlDrop );
         
-        log.info( "Dropped table: " + TABLE_NAME );
-    }
-    
-    public void createTable()
-    {
-        String sql = "create table " + TABLE_NAME + " (";
+        String sqlCreate = "create table " + tableName + " (";
         
         for ( String[] col : getDimensionColumns() )
         {
-            sql += col[0] + " " + col[1] + ",";
+            sqlCreate += col[0] + " " + col[1] + ",";
         }
         
-        sql += "value double precision)";
+        sqlCreate += "value double precision)";
         
-        log.info( "Create SQL: " + sql );
+        log.info( "Create SQL: " + sqlCreate );
         
-        executeSilently( sql );
-        
-        log.info( "Created table: " + TABLE_NAME );
+        executeSilently( sqlCreate );
     }
-        
+    
     @Async
-    public Future<?> createIndexesAsync( List<String> columns )
+    public Future<?> createIndexesAsync( String tableName, List<String> columns )
     {
         for ( String column : columns )
         {        
-            final String sql = "create index " + PREFIX_INDEX +
-                column + " on " + TABLE_NAME + " (" + column + ")";
+            final String index = PREFIX_INDEX + column + "_" + tableName;
+            
+            final String sql = "create index " + index + " on " + tableName + " (" + column + ")";
                 
             executeSilently( sql );
             
-            log.info( "Created index on column: " + column );
+            log.info( "Created index: " + index );
         }
         
         log.info( "Indexes created" );
         
         return null;
     }
-    
-    public void populateTable()
+
+    public void swapTable( String tableName )
     {
-        String insert = "insert into analytics (";
+        final String realTable = tableName.replaceFirst( TABLE_TEMP_SUFFIX, "" );
+        
+        final String sqlDrop = "drop table " + realTable;
+        
+        executeSilently( sqlDrop );
+        
+        final String sqlAlter = "alter table " + tableName + " rename to " + realTable;
+        
+        executeSilently( sqlAlter );
+    }
+    
+    @Async
+    public Future<?> populateTableAsync( String tableName, Date startDate, Date endDate )
+    {
+        populateTable( tableName, startDate, endDate, "cast(dv.value as double precision)", "int" );
+        
+        populateTable( tableName, startDate, endDate, "1 as value" , "bool" );
+        
+        return null;
+    }
+    
+    private void populateTable( String tableName, Date startDate, Date endDate, String valueExpression, String valueType )
+    {
+        final String start = DateUtils.getMediumDateString( startDate );
+        final String end = DateUtils.getMediumDateString( endDate );
+        
+        String insert = "insert into " + tableName + " (";
         
         for ( String[] col : getDimensionColumns() )
         {
@@ -151,23 +173,22 @@ public class JdbcAnalyticsTableManager
         
         select = select.replace( "organisationunitid", "sourceid" ); // Legacy fix
         
-        select += 
-            "cast(dv.value as double precision) " +
+        select += valueExpression + " " +
             "from datavalue dv " +
             "left join _organisationunitgroupsetstructure ougs on dv.sourceid=ougs.organisationunitid " +
             "left join _orgunitstructure ous on dv.sourceid=ous.organisationunitid " +
             "left join _period_no_disaggregation_structure ps on dv.periodid=ps.periodid " +
             "left join dataelement de on dv.dataelementid=de.dataelementid " +
             "left join period pe on dv.periodid=pe.periodid " +
-            "where de.valuetype='int' and pe.startdate >= '2011-10-01'";
+            "where de.valuetype='" + valueType + "' " +
+            "and pe.startdate >= '" + start + "' " +
+            "and pe.startdate <= '" + end + "'";
 
         final String sql = insert + select;
         
         log.info( "Populate SQL: "+ sql );
         
         jdbcTemplate.execute( sql );
-        
-        log.info( "Populated analytics table" );
     }
 
     public List<String[]> getDimensionColumns()
@@ -222,6 +243,48 @@ public class JdbcAnalyticsTableManager
         return columnNames;
     }
 
+    public Date getEarliestData()
+    {
+        final String sql = "select min(pe.startdate) from datavalue dv " +
+            "join period pe on dv.periodid=pe.periodid";
+        
+        return jdbcTemplate.queryForObject( sql, Date.class );
+    }
+
+    public Date getLatestData()
+    {
+        final String sql = "select max(pe.startdate) from datavalue dv " +
+            "join period pe on dv.periodid=pe.periodid";
+        
+        return jdbcTemplate.queryForObject( sql, Date.class );
+    }
+    
+    public void pruneTable( String tableName )
+    {
+        final String sqlCount = "select count(*) from " + tableName;
+        
+        log.info( "Count SQL: " + sqlCount );
+        
+        final boolean empty = jdbcTemplate.queryForInt( sqlCount ) == 0;
+        
+        if ( empty )
+        {
+            final String sqlDrop = "drop table " + tableName;
+            
+            executeSilently( sqlDrop );
+            
+            log.info( "Drop SQL: " + sqlDrop );
+        }
+    }
+    
+    public void dropTable( String tableName )
+    {
+        final String realTable = tableName.replaceFirst( TABLE_TEMP_SUFFIX, "" );
+        
+        executeSilently( "drop table " + tableName );
+        executeSilently( "drop table " + realTable );
+    }
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------

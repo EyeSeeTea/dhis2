@@ -616,7 +616,7 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 
 	compareView = function(view, doExecute) {
 		var src = layer.core.view;
-		
+
 		if (!src) {
 			if (doExecute) {
 				loadOrganisationUnits(view);
@@ -677,7 +677,7 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 			features[i].label = features[i].attributes.name;
 			features[i].value = 0;
 		}
-		
+
 		layer.removeFeatures(layer.features);
 		layer.addFeatures(features);
 
@@ -687,7 +687,7 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 	};
 
 	loadLegend = function(view) {
-		var options;		
+		var options;
 
 		options = {
             indicator: gis.conf.finals.widget.value,
@@ -697,7 +697,7 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
             minSize: 6,
             maxSize: 6
         };
-        
+
 		layer.core.applyClassification(options);
 
 		afterLoad(view);
@@ -705,8 +705,12 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 
 	afterLoad = function(view) {
 		gis.viewport.eastRegion.doLayout();
-		
+
 		layer.setLayerOpacity(view.opacity);
+
+		if (layer.item) {
+			layer.item.setValue(true);
+		}
 
 		if (loader.updateGui && Ext.isObject(layer.widget)) {
 			layer.widget.setGui(view);
@@ -999,6 +1003,10 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 		layer.legendPanel.expand();
 
 		layer.setLayerOpacity(view.opacity);
+
+		if (layer.item) {
+			layer.item.setValue(true);
+		}
 
 		if (loader.updateGui && Ext.isObject(layer.widget)) {
 			layer.widget.setGui(view);
