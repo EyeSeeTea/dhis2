@@ -204,11 +204,7 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
 			automatic = this.gis.conf.finals.widget.legendtype_automatic,
 			predefined = this.gis.conf.finals.widget.legendtype_predefined,
 			legendNames = this.view.legendSet.names,
-			config = [
-				this.view.valueType === this.gis.conf.finals.dimension.indicator.id ? this.view.indicator.name : this.view.dataElement.name,
-				this.view.period.id, //todo name
-				this.view.organisationUnitLevel.name + ' / ' + this.view.parentOrganisationUnit.name
-			];
+			config = getLegendConfig();
 
         for (var i = 0; i < config.length; i++) {
 			child = document.createElement("div");

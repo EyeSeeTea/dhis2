@@ -251,7 +251,7 @@ GIS.core.getOLMap = function(gis) {
 		gis.layer.boundary.core.reset();
 		gis.layer.thematic1.core.reset();
 		gis.layer.thematic2.core.reset();
-		//olmap.base.facility.core.reset();
+		gis.layer.facility.core.reset();
 	};
 
 	addControl('zoomIn', olmap.zoomIn);
@@ -1044,10 +1044,184 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 	return loader;
 };
 
+GIS.core.LayerLoaderFacility = function(gis, layer) {
+	var olmap = layer.map,
+		compareView,
+		loadOrganisationUnits,
+		loadData,
+		loadLegend,
+		addCircles,
+		afterLoad,
+		loader;
+
+	compareView = function(view, doExecute) {
+		var src = layer.core.view;
+
+		if (!src) {
+			if (doExecute) {
+				loadOrganisationUnits(view);
+			}
+			return gis.conf.finals.widget.loadtype_organisationunit;
+		}
+
+		if (view.groupSet.id !== src.groupSet.id) {
+			if (doExecute) {
+				loadOrganisationUnits(view);
+			}
+			return gis.conf.finals.widget.loadtype_organisationunit;
+		}
+
+		if (view.organisationUnitLevel.id !== src.organisationUnitLevel.id) {
+			if (doExecute) {
+				loadOrganisationUnits(view);
+			}
+			return gis.conf.finals.widget.loadtype_organisationunit;
+		}
+
+		if (view.parentOrganisationUnit.id !== src.parentOrganisationUnit.id) {
+			if (doExecute) {
+				loadOrganisationUnits(view);
+			}
+			return gis.conf.finals.widget.loadtype_organisationunit;
+		}
+
+		if (view.areaRadius !== src.areaRadius) {
+			if (doExecute) {
+				loadLegend(view);
+			}
+			return gis.conf.finals.widget.loadtype_legend;
+		}
+	};
+
+    loadOrganisationUnits = function(view) {
+		Ext.data.JsonP.request({
+			url: gis.baseUrl + gis.conf.url.path_gis + 'getGeoJson.action',
+			params: {
+				parentId: view.parentOrganisationUnit.id,
+				level: view.organisationUnitLevel.id
+			},
+			scope: this,
+			disableCaching: false,
+			success: function(r) {
+				var geojson = layer.core.decode(r),
+					format = new OpenLayers.Format.GeoJSON(),
+					features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
+
+				if (!Ext.isArray(features)) {
+					alert('Invalid coordinates');
+					olmap.mask.hide();
+					return;
+				}
+
+				if (!features.length) {
+					alert('No valid coordinates found'); //todo //i18n
+					olmap.mask.hide();
+					return;
+				}
+
+				loadData(view, features);
+			}
+		});
+    };
+
+    loadData = function(view, features) {
+		features = features || layer.features;
+
+		for (var i = 0; i < features.length; i++) {
+			features[i].attributes.label = features[i].attributes.name;
+		}
+
+		layer.removeFeatures(layer.features);
+		layer.addFeatures(features);
+
+		layer.core.featureStore.loadFeatures(layer.features.slice(0));
+
+		loadLegend(view);
+	};
+
+	loadLegend = function(view) {
+		var store = gis.store.groupsByGroupSet,
+			options;
+
+		store.proxy.url = gis.baseUrl + gis.conf.url.path_gis + 'getOrganisationUnitGroupsByGroupSet.action?id=' + view.organisationUnitGroupSet.id;
+		store.load({
+			scope: this,
+			callback: function() {
+				options = {
+					indicator: view.organisationUnitGroupSet.name
+				};
+
+				layer.core.view = view;
+
+				layer.core.applyClassification(options);
+
+				addCircles();
+
+				afterLoad();
+			}
+		});
+	};
+
+	addCircles = function(view) {
+		var radius = view.areaRadius;
+
+		if (layer.circleLayer) {
+			layer.circleLayer.deactivateControls();
+			layer.circleLayer = null;
+		}
+		if (Ext.isDefined(radius) && radius) {
+			layer.circleLayer = new GIS.app.CircleLayer(layer.features, radius);
+		}
+	};
+
+	afterLoad = function(view) {
+		gis.viewport.eastRegion.doLayout();
+		layer.legendPanel.expand();
+
+		layer.setLayerOpacity(view.opacity);
+
+		if (layer.item) {
+			layer.item.setValue(true);
+		}
+
+		if (loader.updateGui && Ext.isObject(layer.widget)) {
+			layer.widget.setGui(view);
+		}
+
+		if (loader.zoomToVisibleExtent) {
+			olmap.zoomToVisibleExtent();
+		}
+
+		if (loader.hideMask) {
+			olmap.mask.hide();
+		}
+
+		if (loader.callBack) {
+			loader.callBack(layer);
+		}
+	};
+
+	loader = {
+		compare: false,
+		updateGui: false,
+		zoomToVisibleExtent: false,
+		hideMask: false,
+		callBack: null,
+		load: function(view) {
+			if (this.compare) {
+				compareView(view, true);
+			}
+			else {
+				loadOrganisationUnits(view);
+			}
+		}
+	};
+
+	return loader;
+};
+
 GIS.core.getInstance = function(config) {
 	var gis = {};
-
-GIS.gis = gis;
 
 	gis.baseUrl = config && config.baseUrl ? config.baseUrl : '../../';
 	gis.el = config && config.el ? config.el : null;

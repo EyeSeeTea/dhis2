@@ -70,6 +70,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 
 	reset: function() {
 		this.layer.destroyFeatures();
+		this.featureStore.loadFeatures(this.layer.features.slice(0));
 
 		// Legend
 		this.layer.legendPanel.update('');
@@ -80,7 +81,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		}
 	},
 
-	getLegendConfig: function() {		
+	getLegendConfig: function() {
 		return {
 			what: view.indicator.name || view.dataElement.name,
 			when: view.period.id,
@@ -195,11 +196,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 			automatic = this.gis.conf.finals.widget.legendtype_automatic,
 			predefined = this.gis.conf.finals.widget.legendtype_predefined,
 			legendNames = this.view.legendSet.names,
-			config = [
-				this.view.valueType === this.gis.conf.finals.dimension.indicator.id ? this.view.indicator.name : this.view.dataElement.name,
-				this.view.period.id, //todo name
-				this.view.organisationUnitLevel.name + ' / ' + this.view.parentOrganisationUnit.name
-			];
+			config = getLegendConfig();
 
         for (var i = 0; i < config.length; i++) {
 			child = document.createElement("div");
