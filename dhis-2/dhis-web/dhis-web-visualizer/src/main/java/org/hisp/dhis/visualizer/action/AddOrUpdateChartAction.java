@@ -188,11 +188,11 @@ public class AddOrUpdateChartAction
         this.dataSetIds = dataSetIds;
     }
 
-    private boolean lastMonth;
+    private boolean reportingMonth;
 
-    public void setLastMonth( boolean lastMonth )
+    public void setReportingMonth( boolean reportingMonth )
     {
-        this.lastMonth = lastMonth;
+        this.reportingMonth = reportingMonth;
     }
 
     private boolean last12Months;
@@ -209,11 +209,11 @@ public class AddOrUpdateChartAction
         this.last3Months = last3Months;
     }
 
-    private boolean lastQuarter;
+    private boolean reportingQuarter;
 
-    public void setLastQuarter( boolean lastQuarter )
+    public void setReportingQuarter( boolean reportingQuarter )
     {
-        this.lastQuarter = lastQuarter;
+        this.reportingQuarter = reportingQuarter;
     }
 
     private boolean last4Quarters;
@@ -443,14 +443,14 @@ public class AddOrUpdateChartAction
             }
         }
 
-        if ( lastMonth || last12Months|| last3Months || lastQuarter || last4Quarters || lastSixMonth || last2SixMonths || thisYear
+        if ( reportingMonth || last12Months|| last3Months || reportingQuarter || last4Quarters || lastSixMonth || last2SixMonths || thisYear
             || lastYear || last5Years )
         {
             RelativePeriods rp = new RelativePeriods();
-            rp.setReportingMonth( lastMonth );
+            rp.setReportingMonth( reportingMonth );
             rp.setLast12Months( last12Months );
             rp.setLast3Months( last3Months );
-            rp.setReportingQuarter( lastQuarter );
+            rp.setReportingQuarter( reportingQuarter );
             rp.setLast4Quarters( last4Quarters );
             rp.setLastSixMonth( lastSixMonth );
             rp.setLast2SixMonths( last2SixMonths );

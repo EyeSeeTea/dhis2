@@ -99,12 +99,12 @@ GIS.core.getUtils = function(gis) {
 
 	util.map = {};
 
-	util.map.getVisibleVectorLayers = function(olmap) {
+	util.map.getVisibleVectorLayers = function() {
 		var layers = [],
 			layer;
 
-		for (var i = 0; i < olmap.layers.length; i++) {
-			layer = olmap.layers[i];
+		for (var i = 0; i < gis.olmap.layers.length; i++) {
+			layer = gis.olmap.layers[i];
 			if (layer.layerType === conf.finals.layer.type_vector &&
 				layer.visibility &&
 				layer.features.length) {
@@ -674,8 +674,8 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 		features = features || layer.features;
 
 		for (var i = 0; i < features.length; i++) {
-			features[i].label = features[i].attributes.name;
-			features[i].value = 0;
+			features[i].attributes.label = features[i].attributes.name;
+			features[i].attributes.value = 0;
 		}
 
 		layer.removeFeatures(layer.features);
@@ -1046,6 +1046,8 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 
 GIS.core.getInstance = function(config) {
 	var gis = {};
+
+GIS.gis = gis;
 
 	gis.baseUrl = config && config.baseUrl ? config.baseUrl : '../../';
 	gis.el = config && config.el ? config.el : null;

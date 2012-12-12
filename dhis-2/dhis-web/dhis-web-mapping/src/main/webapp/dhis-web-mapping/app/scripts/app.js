@@ -69,7 +69,7 @@ Ext.onReady( function() {
 		};
 
 		util.map.hasVisibleFeatures = function() {
-			var layers = util.map.getVisibleVectorLayers(gis.olmap),
+			var layers = util.map.getVisibleVectorLayers(),
 				layer;
 
 			if (layers.length) {
