@@ -248,7 +248,7 @@ GIS.core.getOLMap = function(gis) {
 	};
 
 	olmap.closeAllLayers = function() {
-		//olmap.base.boundary.core.reset();
+		gis.layer.boundary.core.reset();
 		gis.layer.thematic1.core.reset();
 		gis.layer.thematic2.core.reset();
 		//olmap.base.facility.core.reset();

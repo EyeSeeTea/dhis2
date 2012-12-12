@@ -2871,11 +2871,11 @@ Ext.onReady( function() {
 
 				// Relocate
 				showRelocate = function() {
-					if (layer.relocateWindow) {
-						layer.relocateWindow.destroy();
+					if (gis.olmap.relocate.window) {
+						gis.olmap.relocate.window.destroy();
 					}
 
-					layer.relocateWindow = Ext.create('Ext.window.Window', {
+					gis.olmap.relocate.window = Ext.create('Ext.window.Window', {
 						title: 'Relocate facility',
 						layout: 'fit',
 						iconCls: 'gis-window-title-icon-relocate',
@@ -2895,7 +2895,7 @@ Ext.onReady( function() {
 								text: GIS.i18n.cancel,
 								handler: function() {
 									gis.olmap.relocate.active = false;
-									layer.relocateWindow.destroy();
+									gis.olmap.relocate.window.destroy();
 									gis.olmap.getViewport().style.cursor = 'auto';
 								}
 							}
@@ -2908,10 +2908,10 @@ Ext.onReady( function() {
 						}
 					});
 
-					layer.relocateWindow.show();
-					layer.relocateWindow.setMinWidth(220);
+					gis.olmap.relocate.window.show();
+					gis.olmap.relocate.window.setMinWidth(220);
 
-					gis.util.gui.window.setPositionTopRight(layer.relocateWindow);
+					gis.util.gui.window.setPositionTopRight(gis.olmap.relocate.window);
 				};
 
 				// Drill or float
@@ -3002,7 +3002,6 @@ Ext.onReady( function() {
 						disabled: !gis.init.security.isAdmin,
 						handler: function(item) {
 							gis.olmap.relocate.active = true;
-							gis.olmap.relocate.widget = that;
 							gis.olmap.relocate.feature = feature;
 							gis.olmap.getViewport().style.cursor = 'crosshair';
 							showRelocate();
@@ -3865,11 +3864,11 @@ Ext.onReady( function() {
 
 				// Relocate
 				showRelocate = function() {
-					if (layer.relocateWindow) {
-						layer.relocateWindow.destroy();
+					if (gis.olmap.relocate.window) {
+						gis.olmap.relocate.window.destroy();
 					}
 
-					layer.relocateWindow = Ext.create('Ext.window.Window', {
+					gis.olmap.relocate.window = Ext.create('Ext.window.Window', {
 						title: 'Relocate facility',
 						layout: 'fit',
 						iconCls: 'gis-window-title-icon-relocate',
@@ -3889,7 +3888,7 @@ Ext.onReady( function() {
 								text: GIS.i18n.cancel,
 								handler: function() {
 									gis.olmap.relocate.active = false;
-									layer.relocateWindow.destroy();
+									gis.olmap.relocate.window.destroy();
 									gis.olmap.getViewport().style.cursor = 'auto';
 								}
 							}
@@ -3902,10 +3901,10 @@ Ext.onReady( function() {
 						}
 					});
 
-					layer.relocateWindow.show();
-					layer.relocateWindow.setMinWidth(220);
+					gis.olmap.relocate.window.show();
+					gis.olmap.relocate.window.setMinWidth(220);
 
-					gis.util.gui.window.setPositionTopRight(layer.relocateWindow);
+					gis.util.gui.window.setPositionTopRight(gis.olmap.relocate.window);
 				};
 
 				// Infrastructural data
@@ -4189,7 +4188,6 @@ Ext.onReady( function() {
 						disabled: !gis.init.security.isAdmin,
 						handler: function(item) {
 							gis.olmap.relocate.active = true;
-							gis.olmap.relocate.widget = that;
 							gis.olmap.relocate.feature = feature;
 							gis.olmap.getViewport().style.cursor = 'crosshair';
 							showRelocate();
@@ -4865,7 +4863,7 @@ Ext.onReady( function() {
 							params: {id: gis.olmap.relocate.feature.attributes.id, coordinates: coordinates},
 							success: function(r) {
 								gis.olmap.relocate.active = false;
-								gis.olmap.relocate.widget.cmp.relocateWindow.destroy(); //todo
+								gis.olmap.relocate.window.destroy();
 
 								gis.olmap.relocate.feature.move({x: parseFloat(e.clientX - center.x), y: parseFloat(e.clientY - 28)});
 								gis.olmap.getViewport().style.cursor = 'auto';
