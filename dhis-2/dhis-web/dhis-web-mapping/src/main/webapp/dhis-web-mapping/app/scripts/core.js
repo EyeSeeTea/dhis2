@@ -1104,7 +1104,7 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 			return gis.conf.finals.widget.loadtype_organisationunit;
 		}
 
-		if (view.groupSet.id !== src.groupSet.id) {
+		if (view.organisationUnitGroupSet.id !== src.organisationUnitGroupSet.id) {
 			if (doExecute) {
 				loadOrganisationUnits(view);
 			}
@@ -1216,7 +1216,7 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 			layer.circleLayer = null;
 		}
 		if (Ext.isDefined(radius) && radius) {
-			layer.circleLayer = new GIS.app.CircleLayer(layer.features, radius);
+			layer.circleLayer = GIS.app.CircleLayer(layer.features, radius);
 		}
 	};
 
