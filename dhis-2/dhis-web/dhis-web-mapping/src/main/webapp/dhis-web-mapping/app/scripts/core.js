@@ -741,6 +741,8 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 		hideMask: false,
 		callBack: null,
 		load: function(view) {
+			gis.olmap.mask.show();
+
 			if (this.compare) {
 				compareView(view, true);
 			}
@@ -1041,6 +1043,8 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 		hideMask: false,
 		callBack: null,
 		load: function(view) {
+			gis.olmap.mask.show();
+
 			if (this.compare) {
 				compareView(view, true);
 			}
@@ -1220,6 +1224,8 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 		hideMask: false,
 		callBack: null,
 		load: function(view) {
+			gis.olmap.mask.show();
+
 			if (this.compare) {
 				compareView(view, true);
 			}
