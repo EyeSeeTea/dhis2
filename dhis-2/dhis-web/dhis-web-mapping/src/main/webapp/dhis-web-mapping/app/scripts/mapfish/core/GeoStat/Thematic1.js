@@ -76,8 +76,9 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		this.layer.legendPanel.update('');
 		this.layer.legendPanel.collapse();
 
-		if (this.widget) {
-			this.widget.reset();
+		// Widget
+		if (this.layer.widget) {
+			this.layer.widget.reset();
 		}
 	},
 
