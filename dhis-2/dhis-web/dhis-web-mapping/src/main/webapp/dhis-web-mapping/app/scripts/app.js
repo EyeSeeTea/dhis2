@@ -1255,7 +1255,10 @@ Ext.onReady( function() {
 		updateLabels = function() {
 			if (layer.hasLabels) {
 				layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig());
-				layer.core.loadLegend(layer.widget.getView());
+
+				var loader = layer.core.getLoader();
+				loader.hideMask = true;
+				loader.loadLegend();
 			}
 		};
 
@@ -1334,13 +1337,16 @@ Ext.onReady( function() {
 							layer.hasLabels = true;
 							layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig());
 						}
-						layer.core.loadLegend(layer.widget.getView());
+
+						var loader = layer.core.getLoader();
+						loader.hideMask = true;
+						loader.loadLegend();
 					}
 				}
 			],
 			listeners: {
 				render: function() {
-					util.gui.window.setPositionTopLeft(this);
+					gis.util.gui.window.setPositionTopLeft(this);
 				}
 			}
 		});

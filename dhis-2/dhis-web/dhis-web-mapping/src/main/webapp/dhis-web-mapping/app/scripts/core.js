@@ -877,6 +877,9 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
     };
 
     loadData = function(view, features) {
+		view = view || layer.core.view;
+		features = features || layer.features.slice(0);
+
 		var type = view.valueType,
 			dataUrl = 'mapValues/' + gis.conf.finals.dimension[type].param + '.jsonp',
 			indicator = gis.conf.finals.dimension.indicator,
@@ -884,8 +887,6 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 			period = gis.conf.finals.dimension.period,
 			organisationUnit = gis.conf.finals.dimension.organisationUnit,
 			params = {};
-
-		features = features || layer.features;
 
 		params[type === indicator.id ? indicator.param : dataElement.param] = view[type].id;
 		params[period.param] = view.period.id;
@@ -940,10 +941,12 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 	};
 
 	loadLegend = function(view) {
+		view = view || layer.core.view;
+
 		var options,
 			predefined = gis.conf.finals.widget.legendtype_predefined,
-			classificationType = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS,
-			method = view.legendType === predefined ? classificationType : view.method,
+			classificationMethod = mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS,
+			method = view.legendType === predefined ? classificationMethod : view.method,
 			bounds,
 			colors,
 			names,
@@ -1051,7 +1054,9 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 			else {
 				loadOrganisationUnits(view);
 			}
-		}
+		},
+		loadData: loadData,
+		loadLegend: loadLegend
 	};
 
 	return loader;
