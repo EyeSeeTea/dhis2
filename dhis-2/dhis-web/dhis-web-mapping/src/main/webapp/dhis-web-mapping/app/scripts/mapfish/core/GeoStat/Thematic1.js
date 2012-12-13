@@ -83,9 +83,9 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 
 	getLegendConfig: function() {
 		return {
-			what: view.indicator.name || view.dataElement.name,
-			when: view.period.id,
-			where: view.parentOrganisationUnit.name + ' / ' + view.organisationUnitLevel.name
+			what: this.view.indicator.name || this.view.dataElement.name,
+			when: this.view.period.id,
+			where: this.view.parentOrganisationUnit.name + ' / ' + this.view.organisationUnitLevel.name
 		};
 	},
 
@@ -196,7 +196,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 			automatic = this.gis.conf.finals.widget.legendtype_automatic,
 			predefined = this.gis.conf.finals.widget.legendtype_predefined,
 			legendNames = this.view.legendSet.names,
-			config = getLegendConfig();
+			config = this.getLegendConfig();
 
         for (var i = 0; i < config.length; i++) {
 			child = document.createElement("div");

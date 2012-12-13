@@ -685,7 +685,7 @@ Ext.onReady( function() {
 					}
 
 					layer.filterWindow = layer.id === gis.layer.facility.id ?
-						GIS.app.FilterFacilityWindow(layer) : GIS.app.FilterWindow(layer);
+						GIS.app.FilterWindowFacility(layer) : GIS.app.FilterWindow(layer);
 					layer.filterWindow.show();
 				}
 			};
@@ -1121,7 +1121,7 @@ Ext.onReady( function() {
 		return window;
 	};
 
-	GIS.app.FilterFacilityWindow = function(layer) {
+	GIS.app.FilterWindowFacility = function(layer) {
 		var window,
 			multiSelect,
 			button,
@@ -4667,7 +4667,7 @@ Ext.onReady( function() {
 		// Components
 
 		groupSet = Ext.create('Ext.form.field.ComboBox', {
-            fieldLabel: gis.i18n.groupset,
+            fieldLabel: GIS.i18n.groupset,
             editable: false,
             valueField: 'id',
             displayField: 'name',
@@ -5196,7 +5196,7 @@ Ext.onReady( function() {
 		setGui = function(view) {
 
 			// Components
-			groupSet.setValue(view.groupSet.id);
+			groupSet.setValue(view.organisationUnitGroupSet.id);
 
 			gis.store.organisationUnitLevels.loadFn( function() {
 				level.setValue(view.organisationUnitLevel.id);
@@ -5224,7 +5224,7 @@ Ext.onReady( function() {
 			parentArray = parentArray.length ? parentArray : [{raw: gis.init.rootNodes[0]}];
 
 			view = {
-				groupSet: {
+				organisationUnitGroupSet: {
 					id: groupSet.getValue(),
 					name: groupSet.getRawValue()
 				},
@@ -5250,7 +5250,7 @@ Ext.onReady( function() {
 		};
 
 		extendView = function(view, config) {
-			view.groupSet = config.groupSet || view.groupSet;
+			view.organisationUnitGroupSet = config.organisationUnitGroupSet || view.organisationUnitGroupSet;
 			view.organisationUnitLevel = config.organisationUnitLevel || view.organisationUnitLevel;
 			view.parentOrganisationUnit = config.parentOrganisationUnit || view.parentOrganisationUnit;
 			view.parentLevel = config.parentLevel || view.parentLevel;
@@ -5261,9 +5261,9 @@ Ext.onReady( function() {
 		};
 
 		validateView = function(view) {
-			if (!view.groupSet.id || !Ext.isString(view.groupSet.id)) {
-				GIS.app.logg.push([view.groupSet.id, layer.id + '.groupSet.id: string']);
-					alert('No groupSet selected'); //todo
+			if (!view.organisationUnitGroupSet.id || !Ext.isString(view.organisationUnitGroupSet.id)) {
+				GIS.app.logg.push([view.organisationUnitGroupSet.id, layer.id + '.organisationUnitGroupSet.id: string']);
+					alert('No group set selected'); //todo
 				return false;
 			}
 
@@ -5343,7 +5343,8 @@ Ext.onReady( function() {
 						{
 							html: 'Surrounding areas', //i18n
 							cls: 'gis-form-subtitle'
-						}
+						},
+						areaRadius
 					]
 				}
 			]
@@ -5405,11 +5406,11 @@ Ext.onReady( function() {
 							menu: gis.layer.thematic2.menu,
 							width: 26
 						});
-						//a.push({
-							//iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
-							//menu: gis.layer.facility.menu,
-							//width: 26
-						//});
+						a.push({
+							iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
+							menu: gis.layer.facility.menu,
+							width: 26
+						});
 						a.push({
 							text: 'Favorites', //i18n
 							menu: {},
@@ -5650,7 +5651,6 @@ Ext.onReady( function() {
 			gis.util = GIS.app.getUtils();
 			gis.store = GIS.app.getStores();
 
-
 			layer = gis.layer.boundary;
 			layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
 			layer.widget = GIS.app.LayerWidgetBoundary(layer);
@@ -5666,14 +5666,10 @@ Ext.onReady( function() {
 			layer.widget = GIS.app.LayerWidgetThematic(layer);
 			layer.window = GIS.app.WidgetWindow(layer);
 
-			//layer = gis.layer.facility;
-			//layer.menu = GIS.app.LayerMenu(layer);
-			//layer.window = GIS.app.WidgetWindow(layer);
-			//layer.widget = Ext.create('mapfish.widgets.geostat.Facility', {
-				//map: gis.olmap,
-				//layer: layer,
-				//menu: layer.menu
-			//});
+			layer = gis.layer.facility;
+			layer.menu = GIS.app.LayerMenu(layer);
+			layer.widget = GIS.app.LayerWidgetFacility(layer);
+			layer.window = GIS.app.WidgetWindow(layer);
 
 			gis.viewport = createViewport();
 		}();

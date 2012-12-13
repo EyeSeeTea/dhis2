@@ -1095,12 +1095,11 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 
     loadOrganisationUnits = function(view) {
 		Ext.data.JsonP.request({
-			url: gis.baseUrl + gis.conf.url.path_gis + 'getGeoJson.action',
+			url: gis.baseUrl + gis.conf.url.path_gis + 'getGeoJsonFacilities.action',
 			params: {
 				parentId: view.parentOrganisationUnit.id,
 				level: view.organisationUnitLevel.id
 			},
-			scope: this,
 			disableCaching: false,
 			success: function(r) {
 				var geojson = layer.core.decode(r),
@@ -1120,6 +1119,9 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 				}
 
 				loadData(view, features);
+			},
+			failure: function(r) {
+				alert("f");
 			}
 		});
     };
@@ -1155,9 +1157,9 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 
 				layer.core.applyClassification(options);
 
-				addCircles();
+				addCircles(view);
 
-				afterLoad();
+				afterLoad(view);
 			}
 		});
 	};
@@ -1222,7 +1224,7 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 
 GIS.core.getInstance = function(config) {
 	var gis = {};
-
+GIS.gis = gis;
 	gis.baseUrl = config && config.baseUrl ? config.baseUrl : '../../';
 	gis.el = config && config.el ? config.el : null;
 

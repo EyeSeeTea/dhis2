@@ -73,8 +73,6 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
 				features: []
 			};
 
-        doc = Ext.decode(doc);
-
         for (var i = 0; i < doc.geojson.length; i++) {
 			attr = doc.geojson[i];
 
@@ -111,9 +109,7 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
 
 	getLegendConfig: function() {
 		return {
-			what: view.indicator.name || view.dataElement.name,
-			when: view.period.id,
-			where: view.parentOrganisationUnit.name + ' / ' + view.organisationUnitLevel.name
+			where: this.view.organisationUnitLevel.name + ' / ' + this.view.parentOrganisationUnit.name
 		};
 	},
 
@@ -124,7 +120,7 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
     applyClassification: function(options) {
         this.updateOptions(options);
 
-        var items = GIS.store.groupsByGroupSet.data.items;
+        var items = this.gis.store.groupsByGroupSet.data.items;
 
         var rules = new Array(items.length);
         for (var i = 0; i < items.length; i++) {
@@ -148,9 +144,9 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
 
     updateLegend: function() {
 		var	element = document.createElement("div"),
-			child,
-			items = GIS.store.groupsByGroupSet.data.items,
-			config = getLegendConfig();
+			child = document.createElement("div"),
+			items = this.gis.store.groupsByGroupSet.data.items,
+			config = this.getLegendConfig();
 
         child.style.height = "14px";
 		child.style.overflow = "hidden";
