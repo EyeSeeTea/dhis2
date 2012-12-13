@@ -5518,14 +5518,14 @@ Ext.onReady( function() {
 				items: [
 					{
 						title: 'Layer overview and visibility %', //i18n
-						bodyStyle: 'padding: 6px',
+						bodyStyle: 'padding: 4px 6px 3px',
 						items: GIS.app.LayersPanel(),
 						collapsible: true,
 						animCollapse: false
 					},
 					{
 						title: 'Thematic layer 1 legend', //i18n
-						bodyStyle: 'padding: 6px; border: 0 none',
+						bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
 						collapsible: true,
 						collapsed: true,
 						animCollapse: false,
@@ -5538,7 +5538,7 @@ Ext.onReady( function() {
 					{
 						title: 'Thematic layer 2 legend', //i18n
 						contentEl: 'thematic2Legend',
-						bodyStyle: 'padding: 6px; border: 0 none',
+						bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
 						collapsible: true,
 						collapsed: true,
 						animCollapse: false,
@@ -5551,7 +5551,7 @@ Ext.onReady( function() {
 					{
 						title: 'Facility layer legend', //i18n
 						contentEl: 'facilityLegend',
-						bodyStyle: 'padding: 6px; border: 0 none',
+						bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
 						collapsible: true,
 						collapsed: true,
 						animCollapse: false,
