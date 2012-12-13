@@ -1013,6 +1013,7 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 	};
 
 	afterLoad = function(view) {
+
 		// Legend
 		gis.viewport.eastRegion.doLayout();
 		layer.legendPanel.expand();
@@ -1020,7 +1021,6 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 		// Layer
 		layer.setLayerOpacity(view.opacity);
 
-		// Layer item
 		if (layer.item) {
 			layer.item.setValue(true);
 		}
