@@ -198,17 +198,19 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 			legendNames = this.view.legendSet.names,
 			config = this.getLegendConfig();
 
-        for (var i = 0; i < config.length; i++) {
-			child = document.createElement("div");
-			child.style.height = "14px";
-			child.style.overflow = "hidden";
-			child.title = config[i];
-			child.innerHTML = config[i];
-			element.appendChild(child);
+        for (var key in config) {
+			if (config.hasOwnProperty(key)) {
+				child = document.createElement("div");
+				child.style.height = "14px";
+				child.style.overflow = "hidden";
+				child.title = config[key];
+				child.innerHTML = config[key];
+				element.appendChild(child);
 
-			child = document.createElement("div");
-			child.style.clear = "left";
-			element.appendChild(child);
+				child = document.createElement("div");
+				child.style.clear = "left";
+				element.appendChild(child);
+			}
 		}
 
         child = document.createElement("div");

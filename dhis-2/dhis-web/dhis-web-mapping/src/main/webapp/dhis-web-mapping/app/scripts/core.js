@@ -507,20 +507,19 @@ GIS.core.MeasureWindow = function(gis) {
 };
 
 GIS.core.MapLoader = function(gis) {
-	var failure,
-		getMap,
+	var getMap,
 		setMap,
 		afterLoad,
 		callBack,
 		register = [],
 		loader;
 
-	failure = function() {
-		gis.olmap.mask.hide();
-		alert('Map id not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
-	};
-
 	getMap = function() {
+		var failure = function() {
+			gis.olmap.mask.hide();
+			alert('Map id not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
+		};
+
 		Ext.data.JsonP.request({
 			url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
 			success: function(r) {
@@ -570,6 +569,8 @@ GIS.core.MapLoader = function(gis) {
 	};
 
 	afterLoad = function() {
+		register = [];
+
 		if (gis.el) {
 			gis.olmap.zoomToVisibleExtent();
 		}
@@ -655,7 +656,7 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 
 				if (!Ext.isArray(features)) {
 					olmap.mask.hide();
-					alert('Invalid coordinates');
+					alert('Coordinates are invalid');
 					return;
 				}
 
@@ -666,6 +667,10 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 				}
 
 				loadData(view, features);
+			},
+			failure: function(r) {
+				olmap.mask.hide();
+				alert('Server error while loading organisation units');
 			}
 		});
     };
@@ -861,6 +866,10 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 				}
 
 				loadData(view, features);
+			},
+			failure: function(r) {
+				olmap.mask.hide();
+				alert('Server error while loading organisation units');
 			}
 		});
     };
@@ -1121,7 +1130,8 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 				loadData(view, features);
 			},
 			failure: function(r) {
-				alert("f");
+				olmap.mask.hide();
+				alert('Server error while loading organisation units');
 			}
 		});
     };
@@ -1224,7 +1234,7 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 
 GIS.core.getInstance = function(config) {
 	var gis = {};
-GIS.gis = gis;
+
 	gis.baseUrl = config && config.baseUrl ? config.baseUrl : '../../';
 	gis.el = config && config.el ? config.el : null;
 

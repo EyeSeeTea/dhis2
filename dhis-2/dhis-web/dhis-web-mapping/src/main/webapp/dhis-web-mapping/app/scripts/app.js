@@ -3574,6 +3574,8 @@ Ext.onReady( function() {
 
 					periodsByTypeStore.setIndex(periods);
 					periodsByTypeStore.loadData(periods);
+
+					period.clearValue();
 				}
 			}
 		});
