@@ -656,7 +656,7 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 
 				if (!Ext.isArray(features)) {
 					olmap.mask.hide();
-					alert('Coordinates are invalid');
+					alert('Invalid coordinates');
 					return;
 				}
 
@@ -670,13 +670,14 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 			},
 			failure: function(r) {
 				olmap.mask.hide();
-				alert('Server error while loading organisation units');
+				alert('Server error while loading coordinates');
 			}
 		});
     };
 
     loadData = function(view, features) {
-		features = features || layer.features;
+		view = view || layer.core.view;
+		features = features || layer.features.slice(0);;
 
 		for (var i = 0; i < features.length; i++) {
 			features[i].attributes.label = features[i].attributes.name;
@@ -692,6 +693,8 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 	};
 
 	loadLegend = function(view) {
+		view = view || layer.core.view;
+
 		var options = {
             indicator: gis.conf.finals.widget.value,
             method: 2,
@@ -709,26 +712,31 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 	};
 
 	afterLoad = function(view) {
-		gis.viewport.eastRegion.doLayout();
 
-		layer.setLayerOpacity(view.opacity);
-
+		// Layer
 		if (layer.item) {
-			layer.item.setValue(true);
+			layer.item.setValue(true, view.opacity);
+		}
+		else {
+			layer.setLayerOpacity(view.opacity);
 		}
 
+		// Gui
 		if (loader.updateGui && Ext.isObject(layer.widget)) {
 			layer.widget.setGui(view);
 		}
 
+		// Zoom
 		if (loader.zoomToVisibleExtent) {
 			olmap.zoomToVisibleExtent();
 		}
 
+		// Mask
 		if (loader.hideMask) {
 			olmap.mask.hide();
 		}
 
+		// Map callback
 		if (loader.callBack) {
 			loader.callBack(layer);
 		}
@@ -749,7 +757,9 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 			else {
 				loadOrganisationUnits(view);
 			}
-		}
+		},
+		loadData: loadData,
+		loadLegend: loadLegend
 	};
 
 	return loader;
@@ -856,14 +866,14 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 					features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
 
 				if (!Ext.isArray(features)) {
-					alert('Invalid coordinates');
 					olmap.mask.hide();
+					alert('Coordinates are invalid');
 					return;
 				}
 
 				if (!features.length) {
-					alert('No valid coordinates found'); //todo //i18n
 					olmap.mask.hide();
+					alert('No valid coordinates found'); //todo //i18n
 					return;
 				}
 
@@ -871,7 +881,7 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 			},
 			failure: function(r) {
 				olmap.mask.hide();
-				alert('Server error while loading organisation units');
+				alert('Server error while loading coordinates');
 			}
 		});
     };
@@ -1137,14 +1147,14 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 					features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
 
 				if (!Ext.isArray(features)) {
-					alert('Invalid coordinates');
 					olmap.mask.hide();
+					alert('Coordinates are invalid');
 					return;
 				}
 
 				if (!features.length) {
-					alert('No valid coordinates found'); //todo //i18n
 					olmap.mask.hide();
+					alert('No valid coordinates found'); //todo //i18n
 					return;
 				}
 
@@ -1152,13 +1162,14 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 			},
 			failure: function(r) {
 				olmap.mask.hide();
-				alert('Server error while loading organisation units');
+				alert('Server error while loading coordinates');
 			}
 		});
     };
 
     loadData = function(view, features) {
-		features = features || layer.features;
+		view = view || layer.core.view;
+		features = features || layer.features.slice(0);
 
 		for (var i = 0; i < features.length; i++) {
 			features[i].attributes.label = features[i].attributes.name;
@@ -1173,6 +1184,8 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 	};
 
 	loadLegend = function(view) {
+		view = view || layer.core.view;
+
 		var store = gis.store.groupsByGroupSet,
 			options;
 
@@ -1208,27 +1221,35 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 	};
 
 	afterLoad = function(view) {
+
+		// Legend
 		gis.viewport.eastRegion.doLayout();
 		layer.legendPanel.expand();
 
-		layer.setLayerOpacity(view.opacity);
-
+		// Layer
 		if (layer.item) {
-			layer.item.setValue(true);
+			layer.item.setValue(true, view.opacity);
+		}
+		else {
+			layer.setLayerOpacity(view.opacity);
 		}
 
+		// Gui
 		if (loader.updateGui && Ext.isObject(layer.widget)) {
 			layer.widget.setGui(view);
 		}
 
+		// Zoom
 		if (loader.zoomToVisibleExtent) {
 			olmap.zoomToVisibleExtent();
 		}
 
+		// Mask
 		if (loader.hideMask) {
 			olmap.mask.hide();
 		}
 
+		// Map callback
 		if (loader.callBack) {
 			loader.callBack(layer);
 		}
@@ -1249,7 +1270,9 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 			else {
 				loadOrganisationUnits(view);
 			}
-		}
+		},
+		loadData: loadData,
+		loadLegend: loadLegend
 	};
 
 	return loader;

@@ -102,8 +102,8 @@ mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
 		this.layer.legendPanel.update('');
 		this.layer.legendPanel.collapse();
 
-		if (this.widget) {
-			this.widget.reset();
+		if (this.layer.widget) {
+			this.layer.widget.reset();
 		}
 	},
 

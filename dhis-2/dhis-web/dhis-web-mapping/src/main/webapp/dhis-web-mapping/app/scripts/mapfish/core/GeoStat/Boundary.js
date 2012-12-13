@@ -70,8 +70,8 @@ mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
 	reset: function() {
 		this.layer.destroyFeatures();
 
-		if (this.widget) {
-			this.widget.reset();
+		if (this.layer.widget) {
+			this.layer.widget.reset();
 		}
 	},
 

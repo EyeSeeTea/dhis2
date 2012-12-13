@@ -1184,6 +1184,9 @@ Ext.onReady( function() {
 				button
 			],
 			listeners: {
+				render: function() {
+					gis.util.gui.window.setPositionTopLeft(this);
+				},
 				destroy: function() {
 					layer.removeAllFeatures();
 					layer.addFeatures(coreFeatures);
@@ -4357,7 +4360,7 @@ Ext.onReady( function() {
 			// Layer menu
 			layer.menu.enableItems();
 
-			// Update filter window
+			// Filter
 			if (layer.filterWindow && layer.filterWindow.isVisible()) {
 				layer.filterWindow.filter();
 			}
