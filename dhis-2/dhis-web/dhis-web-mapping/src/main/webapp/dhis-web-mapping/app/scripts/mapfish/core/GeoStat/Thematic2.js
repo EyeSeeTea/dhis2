@@ -70,13 +70,15 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
 
 	reset: function() {
 		this.layer.destroyFeatures();
+		this.featureStore.loadFeatures(this.layer.features.slice(0));
 
 		// Legend
 		this.layer.legendPanel.update('');
 		this.layer.legendPanel.collapse();
 
-		if (this.widget) {
-			this.widget.reset();
+		// Widget
+		if (this.layer.widget) {
+			this.layer.widget.reset();
 		}
 	},
 
@@ -117,15 +119,6 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
         if (this.view.legendType === this.gis.conf.finals.widget.legendtype_automatic) {
 			this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
 		}
-
-		this.view.imageLegend = [];
-
-        for (var i = 0; i < this.classification.bins.length; i++) {
-			this.view.imageLegend.push({
-                label: this.classification.bins[i].label.replace('&nbsp;&nbsp;', ' '),
-                color: this.colorInterpolation[i].toHexString()
-            });
-        }
     },
 
     setClassification: function() {
@@ -206,17 +199,19 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
 			legendNames = this.view.legendSet.names,
 			config = this.getLegendConfig();
 
-        for (var i = 0; i < config.length; i++) {
-			child = document.createElement("div");
-			child.style.height = "14px";
-			child.style.overflow = "hidden";
-			child.title = config[i];
-			child.innerHTML = config[i];
-			element.appendChild(child);
+        for (var key in config) {
+			if (config.hasOwnProperty(key)) {
+				child = document.createElement("div");
+				child.style.height = "14px";
+				child.style.overflow = "hidden";
+				child.title = config[key];
+				child.innerHTML = config[key];
+				element.appendChild(child);
 
-			child = document.createElement("div");
-			child.style.clear = "left";
-			element.appendChild(child);
+				child = document.createElement("div");
+				child.style.clear = "left";
+				element.appendChild(child);
+			}
 		}
 
         child = document.createElement("div");
