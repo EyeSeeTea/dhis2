@@ -1045,8 +1045,6 @@ Ext.onReady( function() {
 
             layer.removeAllFeatures();
             layer.addFeatures(features);
-
-            layer.core.featureStore.loadFeatures(layer.features.slice(0));
         };
 
 		window = Ext.create('Ext.window.Window', {
@@ -1062,7 +1060,7 @@ Ext.onReady( function() {
 				items: [
 					{
 						cls: 'gis-container-inner',
-						html: 'Show organisation units with values..'
+						html: '<b>Show</b> organisation units with values..'
 					},
 					{
 						cls: 'gis-panel-html-separator'
@@ -1072,6 +1070,7 @@ Ext.onReady( function() {
 					},
 					{
 						layout: 'column',
+						height: 22,
 						cls: 'gis-container-inner',
 						items: [
 							{
@@ -1083,7 +1082,11 @@ Ext.onReady( function() {
 						]
 					},
 					{
+						cls: 'gis-panel-html-separator'
+					},
+					{
 						layout: 'column',
+						height: 22,
 						cls: 'gis-container-inner',
 						items: [
 							{
@@ -1113,7 +1116,6 @@ Ext.onReady( function() {
 				destroy: function() {
 					layer.removeAllFeatures();
 					layer.addFeatures(layer.core.featureStore.features);
-					layer.core.featureStore.loadFeatures(layer.featureStore.features.slice(0));
 				}
 			}
 		});

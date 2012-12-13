@@ -1013,27 +1013,39 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 	};
 
 	afterLoad = function(view) {
+		// Legend
 		gis.viewport.eastRegion.doLayout();
 		layer.legendPanel.expand();
 
+		// Layer
 		layer.setLayerOpacity(view.opacity);
 
+		// Layer item
 		if (layer.item) {
 			layer.item.setValue(true);
 		}
 
+		// Filter
+		if (layer.filterWindow && layer.filterWindow.isVisible()) {
+			layer.filterWindow.filter();
+		}
+
+		// Gui
 		if (loader.updateGui && Ext.isObject(layer.widget)) {
 			layer.widget.setGui(view);
 		}
 
+		// Zoom
 		if (loader.zoomToVisibleExtent) {
 			olmap.zoomToVisibleExtent();
 		}
 
+		// Mask
 		if (loader.hideMask) {
 			olmap.mask.hide();
 		}
 
+		// Map callback
 		if (loader.callBack) {
 			loader.callBack(layer);
 		}
