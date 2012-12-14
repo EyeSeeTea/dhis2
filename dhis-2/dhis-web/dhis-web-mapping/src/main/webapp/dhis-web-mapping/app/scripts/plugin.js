@@ -26,7 +26,7 @@ Ext.onReady( function() {
 	*/
 
 	GIS.plugin = {};
-	
+
 	GIS.plugin.getMap = function(config) {
 		var validateConfig,
 			onRender,
@@ -242,6 +242,18 @@ Ext.onReady( function() {
 				baseUrl: config.url,
 				el: config.el
 			});
+
+			Ext.data.JsonP.request({
+				url: gis.baseUrl + gis.conf.url.path_gis + 'initialize.action',
+				success: function(r) {
+					gis.init = r;
+				}
+			});
+
+			GIS.core.createSelectHandlers(gis, gis.layer.boundary);
+			GIS.core.createSelectHandlers(gis, gis.layer.thematic1);
+			GIS.core.createSelectHandlers(gis, gis.layer.thematic2);
+			GIS.core.createSelectHandlers(gis, gis.layer.facility);
 
 			gis.map = {
 				id: config.id,

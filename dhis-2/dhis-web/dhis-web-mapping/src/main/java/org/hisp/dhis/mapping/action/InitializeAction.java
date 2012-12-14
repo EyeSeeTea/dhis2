@@ -87,10 +87,22 @@ public class InitializeAction
     {
         this.id = id;
     }
+    
+    private String callback;
+    
+    public void setCallback( String callback )
+    {
+        this.callback = callback;
+    }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
+    
+    public String getCallback()
+    {
+        return callback;
+    }
 
     private String contextPath;
 

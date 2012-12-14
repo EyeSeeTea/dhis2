@@ -75,6 +75,18 @@ mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
 		}
 	},
 
+	extendView: function(view, config) {
+		view = view || this.view;
+
+		view.organisationUnitLevel = config.organisationUnitLevel || view.organisationUnitLevel;
+		view.parentOrganisationUnit = config.parentOrganisationUnit || view.parentOrganisationUnit;
+		view.parentLevel = config.parentLevel || view.parentLevel;
+		view.parentGraph = config.parentGraph || view.parentGraph;
+		view.opacity = config.opacity || view.opacity;
+
+		return view;
+	},
+
 	getLegendConfig: function() {
 		return;
 	},

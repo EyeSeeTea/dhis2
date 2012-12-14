@@ -192,6 +192,7 @@ GIS.core.getUtils = function(gis) {
 
 GIS.core.getStores = function(gis) {
 	var stores = {};
+
 	stores.organisationUnitLevels = GIS.core.OrganisationUnitLevelStore(gis);
 
 	return stores;
@@ -265,7 +266,8 @@ GIS.core.getOLMap = function(gis) {
 };
 
 GIS.core.getLayers = function(gis) {
-	var layers = {};
+	var layers = {},
+		createSelectionHandlers;
 
 	if (window.google) {
 		layers.googleStreets = new OpenLayers.Layer.Google('Google Streets', {
@@ -336,6 +338,434 @@ GIS.core.getLayers = function(gis) {
 	});
 
 	return layers;
+};
+
+GIS.core.createSelectHandlers = function(gis, layer) {
+	var isRelocate = !!GIS.app ? (gis.init.security.isAdmin ? true : false) : false,
+		isInfo = !!GIS.app,
+
+		window,
+		infrastructuralPeriod,
+		onHoverSelect,
+		onHoverUnselect,
+		onClickSelect;
+
+	onHoverSelect = function fn(feature) {
+		if (window) {
+			window.destroy();
+		}
+		window = Ext.create('Ext.window.Window', {
+			cls: 'gis-window-widget-feature',
+			preventHeader: true,
+			shadow: false,
+			resizable: false,
+			items: {
+				html: feature.attributes.label
+			}
+		});
+
+		window.show();
+
+		var eastX = gis.viewport.eastRegion.getPosition()[0],
+			centerX = gis.viewport.centerRegion.getPosition()[0],
+			centerRegionCenterX = centerX + ((eastX - centerX) / 2),
+			centerRegionY = gis.viewport.centerRegion.getPosition()[1] + (GIS.app ? 32 : 0);
+
+		window.setPosition(centerRegionCenterX - (window.getWidth() / 2), centerRegionY);
+	};
+
+	onHoverUnselect = function fn(feature) {
+		window.destroy();
+	};
+
+	onClickSelect = function fn(feature) {
+		var showInfo,
+			showRelocate,
+			drill,
+			menu,
+			selectHandlers,
+			isPoint = feature.geometry.CLASS_NAME === gis.conf.finals.openLayers.point_classname;
+
+		// Relocate
+		showRelocate = function() {
+			if (gis.olmap.relocate.window) {
+				gis.olmap.relocate.window.destroy();
+			}
+
+			gis.olmap.relocate.window = Ext.create('Ext.window.Window', {
+				title: 'Relocate facility',
+				layout: 'fit',
+				iconCls: 'gis-window-title-icon-relocate',
+				cls: 'gis-container-default',
+				setMinWidth: function(minWidth) {
+					this.setWidth(this.getWidth() < minWidth ? minWidth : this.getWidth());
+				},
+				items: {
+					html: feature.attributes.name,
+					cls: 'gis-container-inner'
+				},
+				bbar: [
+					'->',
+					{
+						xtype: 'button',
+						hideLabel: true,
+						text: GIS.i18n.cancel,
+						handler: function() {
+							gis.olmap.relocate.active = false;
+							gis.olmap.relocate.window.destroy();
+							gis.olmap.getViewport().style.cursor = 'auto';
+						}
+					}
+				],
+				listeners: {
+					close: function() {
+						gis.olmap.relocate.active = false;
+						gis.olmap.getViewport().style.cursor = 'auto';
+					}
+				}
+			});
+
+			gis.olmap.relocate.window.show();
+			gis.olmap.relocate.window.setMinWidth(220);
+
+			gis.util.gui.window.setPositionTopRight(gis.olmap.relocate.window);
+		};
+
+		// Infrastructural data
+		showInfo = function() {
+			Ext.Ajax.request({
+				url: gis.baseUrl + gis.conf.url.path_gis + 'getFacilityInfo.action',
+				params: {
+					id: feature.attributes.id
+				},
+				success: function(r) {
+					var ou = Ext.decode(r.responseText);
+
+					if (layer.infrastructuralWindow) {
+						layer.infrastructuralWindow.destroy();
+					}
+
+					layer.infrastructuralWindow = Ext.create('Ext.window.Window', {
+						title: 'Facility information', //i18n
+						layout: 'column',
+						iconCls: 'gis-window-title-icon-information',
+						cls: 'gis-container-default',
+						width: 460,
+						height: 400, //todo
+						period: null,
+						items: [
+							{
+								cls: 'gis-container-inner',
+								columnWidth: 0.4,
+								bodyStyle: 'padding-right:4px',
+								items: [
+									{
+										html: GIS.i18n.name,
+										cls: 'gis-panel-html-title'
+									},
+									{
+										html: feature.attributes.name,
+										cls: 'gis-panel-html'
+									},
+									{
+										cls: 'gis-panel-html-separator'
+									},
+									{
+										html: GIS.i18n.type,
+										cls: 'gis-panel-html-title'
+									},
+									{
+										html: ou.ty,
+										cls: 'gis-panel-html'
+									},
+									{
+										cls: 'gis-panel-html-separator'
+									},
+									{
+										html: GIS.i18n.code,
+										cls: 'gis-panel-html-title'
+									},
+									{
+										html: ou.co,
+										cls: 'gis-panel-html'
+									},
+									{
+										cls: 'gis-panel-html-separator'
+									},
+									{
+										html: GIS.i18n.address,
+										cls: 'gis-panel-html-title'
+									},
+									{
+										html: ou.ad,
+										cls: 'gis-panel-html'
+									},
+									{
+										cls: 'gis-panel-html-separator'
+									},
+									{
+										html: GIS.i18n.contact_person,
+										cls: 'gis-panel-html-title'
+									},
+									{
+										html: ou.cp,
+										cls: 'gis-panel-html'
+									},
+									{
+										cls: 'gis-panel-html-separator'
+									},
+									{
+										html: GIS.i18n.email,
+										cls: 'gis-panel-html-title'
+									},
+									{
+										html: ou.em,
+										cls: 'gis-panel-html'
+									},
+									{
+										cls: 'gis-panel-html-separator'
+									},
+									{
+										html: GIS.i18n.phone_number,
+										cls: 'gis-panel-html-title'
+									},
+									{
+										html: ou.pn,
+										cls: 'gis-panel-html'
+									}
+								]
+							},
+							{
+								xtype: 'form',
+								cls: 'gis-container-inner gis-form-widget',
+								columnWidth: 0.6,
+								bodyStyle: 'padding-left:4px',
+								items: [
+									{
+										html: GIS.i18n.infrastructural_data,
+										cls: 'gis-panel-html-title'
+									},
+									{
+										cls: 'gis-panel-html-separator'
+									},
+									{
+										xtype: 'combo',
+										fieldLabel: GIS.i18n.period,
+										editable: false,
+										valueField: 'id',
+										displayField: 'name',
+										forceSelection: true,
+										width: 255, //todo
+										labelWidth: 70,
+										store: gis.store.infrastructuralPeriodsByType,
+										lockPosition: false,
+										listeners: {
+											select: function() {
+												infrastructuralPeriod = this.getValue();
+
+												layer.widget.infrastructuralDataElementValuesStore.load({
+													params: {
+														periodId: infrastructuralPeriod,
+														organisationUnitId: feature.attributes.internalId
+													}
+												});
+											}
+										}
+									},
+									{
+										cls: 'gis-panel-html-separator'
+									},
+									{
+										xtype: 'grid',
+										cls: 'gis-grid',
+										height: 300, //todo
+										width: 255,
+										scroll: 'vertical',
+										columns: [
+											{
+												id: 'dataElementName',
+												text: 'Data element',
+												dataIndex: 'dataElementName',
+												sortable: true,
+												width: 195
+											},
+											{
+												id: 'value',
+												header: 'Value',
+												dataIndex: 'value',
+												sortable: true,
+												width: 60
+											}
+										],
+										disableSelection: true,
+										store: layer.widget.infrastructuralDataElementValuesStore
+									}
+								]
+							}
+						],
+						listeners: {
+							show: function() {
+								if (infrastructuralPeriod) {
+									this.down('combo').setValue(infrastructuralPeriod);
+									infrastructuralDataElementValuesStore.load({
+										params: {
+											periodId: infrastructuralPeriod,
+											organisationUnitId: feature.attributes.internalId
+										}
+									});
+								}
+							}
+						}
+					});
+
+					layer.infrastructuralWindow.show();
+					gis.util.gui.window.setPositionTopRight(layer.infrastructuralWindow);
+				}
+			});
+		};
+
+		// Drill or float
+		drill = function(direction) {
+			var store = gis.store.organisationUnitLevels,
+				view = layer.core.view,
+				config,
+				loader;
+
+			store.loadFn( function() {
+				if (direction === 'up') {
+					var rootNode = gis.init.rootNodes[0],
+						level = store.getAt(store.find('level', view.organisationUnitLevel.level - 1));
+
+					config = {
+						organisationUnitLevel: {
+							id: level.data.id,
+							name: level.data.name,
+							level: level.data.level
+						},
+						parentOrganisationUnit: {
+							id: rootNode.id,
+							name: rootNode.text,
+							level: rootNode.level
+						},
+						parentGraph: '/' + gis.init.rootNodes[0].id
+					};
+				}
+				else if (direction === 'down') {
+					var level = store.getAt(store.find('level', view.organisationUnitLevel.level + 1));
+
+					config = {
+						organisationUnitLevel: {
+							id: level.data.id,
+							name: level.data.name,
+							level: level.data.level
+						},
+						parentOrganisationUnit: {
+							id: feature.attributes.id,
+							name: feature.attributes.name,
+							level: view.organisationUnitLevel.level
+						},
+						parentGraph: feature.attributes.path
+					};
+				}
+
+				view = layer.core.extendView(null, config);
+
+				if (view) {
+					loader = layer.core.getLoader();
+					loader.updateGui = true;
+					loader.zoomToVisibleExtent = true;
+					loader.hideMask = true;
+					loader.load(view);
+				}
+			});
+		};
+
+		// Menu
+		var menuItems = [
+			Ext.create('Ext.menu.Item', {
+				text: 'Float up',
+				iconCls: 'gis-menu-item-icon-float',
+				disabled: !feature.attributes.hasCoordinatesUp,
+				handler: function() {
+					drill('up');
+				}
+			}),
+			Ext.create('Ext.menu.Item', {
+				text: 'Drill down',
+				iconCls: 'gis-menu-item-icon-drill',
+				cls: 'gis-menu-item-first',
+				disabled: !feature.attributes.hcwc,
+				handler: function() {
+					drill('down');
+				}
+			})
+		];
+
+		if (isRelocate && isPoint) {
+			menuItems.push({
+				xtype: 'menuseparator'
+			});
+
+			menuItems.push( Ext.create('Ext.menu.Item', {
+				text: GIS.i18n.relocate,
+				iconCls: 'gis-menu-item-icon-relocate',
+				disabled: !gis.init.security.isAdmin,
+				handler: function(item) {
+					gis.olmap.relocate.active = true;
+					gis.olmap.relocate.feature = feature;
+					gis.olmap.getViewport().style.cursor = 'crosshair';
+					showRelocate();
+				}
+			}));
+
+			menuItems.push( Ext.create('Ext.menu.Item', {
+				text: 'Show information', //i18n
+				iconCls: 'gis-menu-item-icon-information',
+				handler: function(item) {
+					if (gis.store.infrastructuralPeriodsByType.isLoaded) {
+						showInfo();
+					}
+					else {
+						gis.store.infrastructuralPeriodsByType.load({
+							params: {
+								name: gis.init.systemSettings.infrastructuralPeriodType
+							},
+							callback: function() {
+								showInfo();
+							}
+						});
+					}
+				}
+			}));
+		}
+
+		menuItems[menuItems.length - 1].addCls('gis-menu-item-last');
+
+		menu = new Ext.menu.Menu({
+			shadow: false,
+			showSeparator: false,
+			defaults: {
+				bodyStyle: 'padding-right:6px'
+			},
+			items: menuItems,
+			listeners: {
+				afterrender: function() {
+					this.getEl().addCls('gis-toolbar-btn-menu');
+				}
+			}
+		});
+
+		menu.showAt([gis.olmap.mouseMove.x, gis.olmap.mouseMove.y]);
+	};
+
+	selectHandlers = new OpenLayers.Control.newSelectFeature(layer, {
+		onHoverSelect: onHoverSelect,
+		onHoverUnselect: onHoverUnselect,
+		onClickSelect: onClickSelect
+	});
+
+	gis.olmap.addControl(selectHandlers);
+	selectHandlers.activate();
 };
 
 GIS.core.OrganisationUnitLevelStore = function(gis) {
@@ -1060,7 +1490,9 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 		}
 		else {
 			gis.map = null;
-			gis.viewport.interpretationButton.disable();
+			if (gis.viewport.interpretationButton) {
+				gis.viewport.interpretationButton.disable();
+			}
 		}
 	};
 

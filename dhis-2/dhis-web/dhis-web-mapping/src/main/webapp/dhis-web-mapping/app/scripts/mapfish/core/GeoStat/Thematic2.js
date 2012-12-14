@@ -82,6 +82,33 @@ mapfish.GeoStat.Thematic2 = OpenLayers.Class(mapfish.GeoStat, {
 		}
 	},
 
+	extendView: function(view, config) {
+		view = view || this.view;
+
+		view.valueType = config.valueType || view.valueType;
+		view.indicatorGroup = config.indicatorGroup || view.indicatorGroup;
+		view.indicator = config.indicator || view.indicator;
+		view.dataElementGroup = config.dataElementGroup || view.dataElementGroup;
+		view.dataElement = config.dataElement || view.dataElement;
+		view.periodType = config.periodType || view.periodType;
+		view.period = config.period || view.period;
+		view.legendType = config.legendType || view.legendType;
+		view.legendSet = config.legendSet || view.legendSet;
+		view.classes = config.classes || view.classes;
+		view.method = config.method || view.method;
+		view.colorLow = config.colorLow || view.colorLow;
+		view.colorHigh = config.colorHigh || view.colorHigh;
+		view.radiusLow = config.radiusLow || view.radiusLow;
+		view.radiusHigh = config.radiusHigh || view.radiusHigh;
+		view.organisationUnitLevel = config.organisationUnitLevel || view.organisationUnitLevel;
+		view.parentOrganisationUnit = config.parentOrganisationUnit || view.parentOrganisationUnit;
+		view.parentLevel = config.parentLevel || view.parentLevel;
+		view.parentGraph = config.parentGraph || view.parentGraph;
+		view.opacity = config.opacity || view.opacity;
+
+		return view;
+	},
+
 	getLegendConfig: function() {
 		return {
 			what: this.view.indicator.name || this.view.dataElement.name,
