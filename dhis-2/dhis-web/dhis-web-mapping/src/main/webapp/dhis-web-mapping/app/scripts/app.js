@@ -3663,7 +3663,7 @@ Ext.onReady( function() {
 					periodsByTypeStore.setIndex(periods);
 					periodsByTypeStore.loadData(periods);
 
-					period.clearValue();
+					period.selectFirst();
 				}
 			}
 		});
@@ -3677,7 +3677,10 @@ Ext.onReady( function() {
 			forceSelection: true,
 			width: gis.conf.layout.widget.item_width,
 			labelWidth: gis.conf.layout.widget.itemlabel_width,
-			store: periodsByTypeStore
+			store: periodsByTypeStore,
+			selectFirst: function() {
+				this.setValue(this.store.getAt(0).data.id);
+			}
 		});
 
 		periodPrev = Ext.create('Ext.button.Button', {
