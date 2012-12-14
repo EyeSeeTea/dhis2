@@ -515,24 +515,15 @@ GIS.core.MapLoader = function(gis) {
 		loader;
 
 	getMap = function() {
-		var failure = function() {
-			gis.olmap.mask.hide();
-			alert('Map id not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
-		};
-
 		Ext.data.JsonP.request({
 			url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + gis.map.id + '.jsonp?links=false',
 			success: function(r) {
-				if (!r) {
-					failure();
-					return;
-				}
-
 				gis.map = r;
 				setMap();
 			},
 			failure: function() {
-				failure();
+				gis.olmap.mask.hide();
+				alert('Map id not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
 				return;
 			}
 		});
@@ -575,7 +566,7 @@ GIS.core.MapLoader = function(gis) {
 			gis.olmap.zoomToVisibleExtent();
 		}
 		else {
-			if (map.longitude && map.latitude && map.zoom) {
+			if (gis.map.longitude && gis.map.latitude && gis.map.zoom) {
 				gis.olmap.setCenter(new OpenLayers.LonLat(gis.map.longitude, gis.map.latitude), gis.map.zoom);
 			}
 			else {

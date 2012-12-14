@@ -1,14 +1,6 @@
 GIS.app = {};
 GIS.app.init = {};
 
-//gis.init = {};
-
-//GIS.obj = {};
-
-//GIS.cmp = {
-	//region: {}
-//};
-
 GIS.logg = [];
 
 Ext.onReady( function() {
@@ -1713,11 +1705,15 @@ Ext.onReady( function() {
 					renderer: function(value, metaData, record) {
 						var fn = function() {
 							var el = Ext.get(record.data.id);
-
 							if (el) {
 								el = el.parent('td');
 								el.addClsOnOver('link');
-								el.dom.setAttribute('onclick', 'GIS.cmp.mapWindow.destroy(); gis.olmap.mapViewLoader = GIS.app.MapViewLoader("' + record.data.id + '"); gis.olmap.mapViewLoader.load();');
+								el.gis = gis;
+								el.map = {
+									id: record.data.id
+								};
+								el.dom.setAttribute('onclick', 'Ext.get(this).gis.map = Ext.get(this).map; console.log(Ext.get(this).gis.map); GIS.core.MapLoader(Ext.get(this).gis).load();');
+								//		.viewport.mapWindow.destroy(); Ext.get(this).gis.olmap.mapViewLoader = GIS.app.MapViewLoader("' + record.data.id + '"); Ext.get(this).gis.olmap.mapViewLoader.load();');
 							}
 						};
 
@@ -1882,7 +1878,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					GIS.cmp.mapGrid = this;
+					gis.viewport.mapGrid = this;
 				},
 				render: function() {
 					var size = Math.floor((gis.viewport.centerRegion.getHeight() - 155) / gis.conf.layout.grid.row_height);
@@ -1896,7 +1892,6 @@ Ext.onReady( function() {
 						}
 					}, this);
 				},
-
 				afterrender: function() {
 					var fn = function() {
 						var editArray = document.getElementsByClassName('tooltip-map-edit'),
@@ -5719,6 +5714,7 @@ Ext.onReady( function() {
 			};
 
 			viewport = Ext.create('Ext.container.Viewport', {
+				id: 'viewport',
 				layout: 'border',
 				eastRegion: eastRegion,
 				centerRegion: centerRegion,
@@ -5767,6 +5763,7 @@ Ext.onReady( function() {
 			layer.window = GIS.app.WidgetWindow(layer);
 
 			gis.viewport = createViewport();
+			gis.viewport.gis = gis;
 		}();
 	};
 
