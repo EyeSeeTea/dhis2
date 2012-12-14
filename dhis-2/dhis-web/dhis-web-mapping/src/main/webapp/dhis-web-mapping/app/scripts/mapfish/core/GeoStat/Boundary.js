@@ -75,6 +75,14 @@ mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
 		}
 	},
 
+	getLegendConfig: function() {
+		return;
+	},
+
+	getImageLegendConfig: function() {
+		return;
+	},
+
     updateOptions: function(newOptions) {
         var oldOptions = OpenLayers.Util.extend({}, this.options);
         this.addOptions(newOptions);

@@ -1773,13 +1773,14 @@ Ext.onReady( function() {
 									if (confirm(message)) {
 										for (var i = 0; i < layers.length; i++) {
 											layer = layers[i];
-											view = layer.widget.getView();
+											view = layer.core.view;
 
 											// add
 											view.layer = layer.id;
 
 											// remove
 											delete view.periodType;
+
 											views.push(view);
 										}
 
@@ -1796,6 +1797,9 @@ Ext.onReady( function() {
 											headers: {'Content-Type': 'application/json'},
 											params: Ext.encode(map),
 											success: function() {
+												gis.map = map;
+												gis.viewport.interpretationButton.enable();
+
 												gis.store.maps.loadStore();
 											}
 										});
@@ -2743,16 +2747,16 @@ Ext.onReady( function() {
 
 		panel = Ext.create('Ext.panel.Panel', {
 			cls: 'gis-container-inner',
-			html: '<b>Link: </b>' + gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.mapLoader.id, //todo
+			html: '<b>Link: </b>' + gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id, //todo
 			style: 'padding-top: 9px; padding-bottom: 2px'
 		});
 
 		button = Ext.create('Ext.button.Button', {
 			text: 'Share', //i18n
 			handler: function() {
-				if (textarea.getValue() && gis.mapLoader) {
+				if (textarea.getValue() && gis.map && gis.map.id) {
 					Ext.Ajax.request({
-						url: gis.baseUrl + gis.conf.url.path_api + 'interpretations/map/' + gis.mapLoader.id,
+						url: gis.baseUrl + gis.conf.url.path_api + 'interpretations/map/' + gis.map.id,
 						method: 'POST',
 						params: textarea.getValue(),
 						headers: {'Content-Type': 'text/html'},

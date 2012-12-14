@@ -735,6 +735,10 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 		if (loader.callBack) {
 			loader.callBack(layer);
 		}
+		else {
+			gis.map = null;
+			gis.viewport.interpretationButton.disable();
+		}
 	};
 
 	loader = {
@@ -1054,6 +1058,10 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 		if (loader.callBack) {
 			loader.callBack(layer);
 		}
+		else {
+			gis.map = null;
+			gis.viewport.interpretationButton.disable();
+		}
 	};
 
 	loader = {
@@ -1247,6 +1255,10 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 		// Map callback
 		if (loader.callBack) {
 			loader.callBack(layer);
+		}
+		else {
+			gis.map = null;
+			gis.viewport.interpretationButton.disable();
 		}
 	};
 
