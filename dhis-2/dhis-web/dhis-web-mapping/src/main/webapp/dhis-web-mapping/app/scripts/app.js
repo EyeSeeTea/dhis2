@@ -4615,12 +4615,6 @@ Ext.onReady( function() {
 				document.getElementsByClassName('zoomVisibleButton')[0].innerHTML = '<img src="images/zoomvisible_24.png" />';
 				document.getElementsByClassName('measureButton')[0].innerHTML = '<img src="images/measure_24.png" />';
 
-				// Map events
-				gis.olmap.events.register('mousemove', null, function(e) {
-					gis.olmap.mouseMove.x = e.clientX;
-					gis.olmap.mouseMove.y = e.clientY;
-				});
-
 				gis.olmap.events.register('click', null, function(e) {
 					if (gis.olmap.relocate.active) {
 						var el = document.getElementById('mouseposition').childNodes[0],

@@ -244,6 +244,12 @@ GIS.core.getOLMap = function(gis) {
 		relocate: {} // Relocate organisation units
 	});
 
+	// Map events
+	olmap.events.register('mousemove', null, function(e) {
+		gis.olmap.mouseMove.x = e.clientX;
+		gis.olmap.mouseMove.y = e.clientY;
+	});
+
 	olmap.zoomToVisibleExtent = function() {
 		gis.util.map.zoomToVisibleExtent(this);
 	};
