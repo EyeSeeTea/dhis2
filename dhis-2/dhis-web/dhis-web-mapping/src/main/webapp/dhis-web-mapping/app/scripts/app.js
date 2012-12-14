@@ -1709,11 +1709,8 @@ Ext.onReady( function() {
 								el = el.parent('td');
 								el.addClsOnOver('link');
 								el.gis = gis;
-								el.map = {
-									id: record.data.id
-								};
-								el.dom.setAttribute('onclick', 'Ext.get(this).gis.map = Ext.get(this).map; console.log(Ext.get(this).gis.map); GIS.core.MapLoader(Ext.get(this).gis).load();');
-								//		.viewport.mapWindow.destroy(); Ext.get(this).gis.olmap.mapViewLoader = GIS.app.MapViewLoader("' + record.data.id + '"); Ext.get(this).gis.olmap.mapViewLoader.load();');
+								el.map = {id: record.data.id};
+								el.dom.setAttribute('onclick', 'Ext.get(this).gis.map = Ext.get(this).map; GIS.core.MapLoader(Ext.get(this).gis).load();');
 							}
 						};
 

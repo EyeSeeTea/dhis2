@@ -540,6 +540,10 @@ GIS.core.MapLoader = function(gis) {
 			return;
 		}
 
+		if (gis.viewport.mapWindow && gis.viewport.mapWindow.isVisible()) {
+			gis.viewport.mapWindow.destroy();
+		}
+
 		gis.olmap.closeAllLayers();
 
 		for (var i = 0; i < views.length; i++) {
