@@ -52,7 +52,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -61,7 +67,14 @@ import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
@@ -129,28 +142,154 @@ public class FacilityController
     // GET HTML
     //--------------------------------------------------------------------------
 
+    private Facility filterFacility( Facility facility, boolean allProperties, String fields )
+    {
+        // if allProperties=false is added, filter away the properties block, and don't care about fields
+        if ( !allProperties )
+        {
+            facility.setProperties( null );
+
+            return facility;
+        }
+
+        if ( fields == null )
+        {
+            return facility;
+        }
+
+        List<String> strings = Arrays.asList( fields.split( "," ) );
+
+        // simple field filtering
+        if ( !strings.contains( "id" ) )
+        {
+            facility.setId( null );
+        }
+
+        if ( !strings.contains( "name" ) )
+        {
+            facility.setName( null );
+        }
+
+        if ( !strings.contains( "active" ) )
+        {
+            facility.setActive( null );
+        }
+
+        if ( !strings.contains( "createdAt" ) )
+        {
+            facility.setCreatedAt( null );
+        }
+
+        if ( !strings.contains( "updatedAt" ) )
+        {
+            facility.setUpdatedAt( null );
+        }
+
+        if ( !strings.contains( "coordinates" ) )
+        {
+            facility.setCoordinates( null );
+        }
+
+        if ( !strings.contains( "url" ) )
+        {
+            facility.setUrl( null );
+        }
+
+        if ( !strings.contains( "identifiers" ) )
+        {
+            facility.setIdentifiers( null );
+        }
+
+        if ( fields.indexOf( ':' ) >= 0 )
+        {
+            Map<String, Object> properties = facility.getProperties();
+            facility.setProperties( new HashMap<String, Object>() );
+
+            for ( String s : strings )
+            {
+                if ( s.contains( ":" ) )
+                {
+                    String[] split = s.split( ":" );
+
+                    if ( split.length > 1 )
+                    {
+                        if ( properties.containsKey( split[1] ) )
+                        {
+                            facility.getProperties().put( split[1], properties.get( split[1] ) );
+                        }
+                    }
+                }
+            }
+        }
+        else if ( !strings.contains( "properties" ) )
+        {
+            facility.setProperties( null );
+        }
+
+        return facility;
+    }
+
     @RequestMapping( value = "", method = RequestMethod.GET )
     public String readFacilities( Model model, @RequestParam( required = false ) Boolean active,
-        @RequestParam( value = "updatedSince", required = false ) Date lastUpdated )
+        @RequestParam( value = "updatedSince", required = false ) Date lastUpdated,
+        @RequestParam( value = "allProperties", required = false, defaultValue = "true" ) Boolean allProperties,
+        @RequestParam( value = "fields", required = false ) String fields,
+        @RequestParam( value = "limit", required = false ) Integer limit,
+        @RequestParam( value = "offset", required = false ) Integer offset )
     {
         Facilities facilities = new Facilities();
         List<OrganisationUnit> allOrganisationUnits;
 
+        if ( offset == null )
+        {
+            offset = 0;
+        }
+
         if ( active == null && lastUpdated == null )
         {
-            allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnits() );
+            if ( limit != null )
+            {
+                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitsBetween( offset, limit ) );
+            }
+            else
+            {
+                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnits() );
+            }
         }
         else if ( active == null )
         {
-            allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnitsByLastUpdated( lastUpdated ) );
+            if ( limit != null )
+            {
+                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.
+                    getOrganisationUnitsBetweenByLastUpdated( lastUpdated, offset, limit ) );
+            }
+            else
+            {
+                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnitsByLastUpdated( lastUpdated ) );
+            }
         }
         else if ( lastUpdated == null )
         {
-            allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnitsByStatus( active ) );
+            if ( limit != null )
+            {
+                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitsBetweenByStatus( active, offset, limit ) );
+            }
+            else
+            {
+                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnitsByStatus( active ) );
+            }
         }
         else
         {
-            allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnitsByStatusLastUpdated( active, lastUpdated ) );
+            if ( limit != null )
+            {
+                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.
+                    getOrganisationUnitsBetweenByStatusLastUpdated( active, lastUpdated, offset, limit ) );
+            }
+            else
+            {
+                allOrganisationUnits = new ArrayList<OrganisationUnit>( organisationUnitService.getAllOrganisationUnitsByStatusLastUpdated( active, lastUpdated ) );
+            }
         }
 
         Collections.sort( allOrganisationUnits, IdentifiableObjectNameComparator.INSTANCE );
@@ -158,6 +297,7 @@ public class FacilityController
         for ( OrganisationUnit organisationUnit : allOrganisationUnits )
         {
             Facility facility = conversionService.convert( organisationUnit, Facility.class );
+            filterFacility( facility, allProperties, fields );
 
             facilities.getFacilities().add( facility );
         }
@@ -174,11 +314,14 @@ public class FacilityController
     }
 
     @RequestMapping( value = "/{id}", method = RequestMethod.GET )
-    public String readFacility( Model model, @PathVariable String id )
+    public String readFacility( Model model, @PathVariable String id,
+        @RequestParam( value = "allProperties", required = false, defaultValue = "true" ) Boolean allProperties,
+        @RequestParam( value = "fields", required = false ) String fields )
     {
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( id );
 
         Facility facility = conversionService.convert( organisationUnit, Facility.class );
+        filterFacility( facility, allProperties, fields );
 
         setAccessRights( model );
 

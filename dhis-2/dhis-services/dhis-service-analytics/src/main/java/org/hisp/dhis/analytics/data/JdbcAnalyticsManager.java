@@ -27,23 +27,25 @@ package org.hisp.dhis.analytics.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.aggregation.AggregatedDataValue;
 import org.hisp.dhis.analytics.AnalyticsManager;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.objectmapper.AggregatedDataValueRowMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
@@ -70,27 +72,83 @@ public class JdbcAnalyticsManager
     
     @Autowired
     private ExpressionService expressionService;
-
+    
     // -------------------------------------------------------------------------
     // Implementation
     // -------------------------------------------------------------------------
 
+    //TODO optimize when all options in dimensions are selected
+    
     @Async
-    public Future<List<AggregatedDataValue>> getAggregatedDataValueTotals( DataQueryParams params )
+    public Future<Map<String, Double>> getAggregatedDataValueTotals( DataQueryParams params )
     {
-        int level = organisationUnitService.getLevelOfOrganisationUnit( params.getOrganisationUnits().iterator().next() );        
+        int level = organisationUnitService.getLevelOfOrganisationUnit( params.getOrganisationUnits().iterator().next() );
+        
         String periodType = PeriodType.getPeriodTypeFromIsoString( params.getPeriods().iterator().next() ).getName().toLowerCase();
         
-        final String sql = 
-            "SELECT dataelementid, 0 as categoryoptioncomboid, periodid, idlevel" + level + " as organisationunitid, SUM(value) as value " +
+        List<String> dimensions = params.getDimensionNames();        
+        List<String> extraDimensions = params.getDynamicDimensionNames();
+        
+        String sql = 
+            "SELECT " + dimensions.get( 0 ) + ", " + 
+            dimensions.get( 1 ) + ", " +
+            periodType + " as " + dimensions.get( 2 ) + ", " + 
+            "uidlevel" + level + " as " + dimensions.get( 3 ) + ", " +
+            getCommaDelimitedString( extraDimensions, false, true ) +
+            "SUM(value) as value " +
+            
             "FROM " + params.getTableName() + " " +
-            "WHERE dataelementid IN ( " + getQuotedCommaDelimitedString( params.getDataElements() ) + " ) " +
+            "WHERE " + dimensions.get( 0 ) + " IN ( " + getQuotedCommaDelimitedString( params.getDataElements() ) + " ) " +
             "AND " + periodType + " IN ( " + getQuotedCommaDelimitedString( params.getPeriods() ) + " ) " +
-            "AND idlevel" + level + " IN ( " + getQuotedCommaDelimitedString( params.getOrganisationUnits() ) + " ) " +
-            "GROUP BY dataelementid, periodid, idlevel" + level;
-                
+            "AND uidlevel" + level + " IN ( " + getQuotedCommaDelimitedString( params.getOrganisationUnits() ) + " ) " +
+            getExtraDimensionQuery( params ) +
+        
+            "GROUP BY " + dimensions.get( 0 ) + ", " + 
+            dimensions.get( 1 ) + ", " +
+            periodType + ", " + 
+            "uidlevel" + level +
+            getCommaDelimitedString( extraDimensions, true, false );
+
         log.info( sql );
         
-        return new AsyncResult<List<AggregatedDataValue>>( jdbcTemplate.query( sql, new AggregatedDataValueRowMapper() ) );
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
+        
+        Map<String, Double> map = new HashMap<String, Double>();
+        
+        while ( rowSet.next() )
+        {
+            StringBuilder key = new StringBuilder();
+            
+            for ( String dim : dimensions )
+            {
+                key.append( rowSet.getString( dim ) + SEP );
+            }
+            
+            key.deleteCharAt( key.length() - SEP.length() );
+            
+            Double value = rowSet.getDouble( "value" );
+            
+            map.put( key.toString(), value );
+        }
+        
+        return new AsyncResult<Map<String, Double>>( map );
     }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private String getExtraDimensionQuery( DataQueryParams params )
+    {
+        Map<String, List<String>> dimensionValues = params.getDimensions();
+        
+        String sql = "";
+        
+        for ( String dim : params.getDynamicDimensionNames() )
+        {
+            sql += "AND " + dim + " IN ( " + getQuotedCommaDelimitedString( dimensionValues.get( dim ) ) + " ) ";
+        }
+        
+        return sql;            
+    }    
 }

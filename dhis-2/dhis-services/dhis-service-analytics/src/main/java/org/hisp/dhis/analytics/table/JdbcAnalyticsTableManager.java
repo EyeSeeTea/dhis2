@@ -37,6 +37,9 @@ import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsTableManager;
+import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.dataelement.DataElementGroupSet;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
@@ -70,11 +73,14 @@ public class JdbcAnalyticsTableManager
     private static final Log log = LogFactory.getLog( JdbcAnalyticsTableManager.class );
 
     public static final String PREFIX_ORGUNITGROUPSET = "ougs_";
-    public static final String PREFIX_ORGUNITLEVEL = "idlevel";
-    public static final String PREFIX_INDEX = "index_";
+    public static final String PREFIX_ORGUNITLEVEL = "uidlevel";
+    public static final String PREFIX_INDEX = "in_";
     
     @Autowired
     private OrganisationUnitService organisationUnitService;
+    
+    @Autowired
+    private DataElementService dataElementService;
     
     @Autowired
     private OrganisationUnitGroupService organisationUnitGroupService;
@@ -113,7 +119,7 @@ public class JdbcAnalyticsTableManager
     {
         for ( String column : columns )
         {        
-            final String index = PREFIX_INDEX + column + "_" + tableName;
+            final String index = PREFIX_INDEX + column + "_" + tableName + "_" + CodeGenerator.generateCode();
             
             final String sql = "create index " + index + " on " + tableName + " (" + column + ")";
                 
@@ -168,17 +174,19 @@ public class JdbcAnalyticsTableManager
         
         for ( String[] col : getDimensionColumns() )
         {
-            select += col[2] + col[0] + ",";
+            select += col[2] + ",";
         }
         
         select = select.replace( "organisationunitid", "sourceid" ); // Legacy fix
         
         select += valueExpression + " " +
             "from datavalue dv " +
+            "left join _dataelementgroupsetstructure degs on dv.dataelementid=degs.dataelementid " +
             "left join _organisationunitgroupsetstructure ougs on dv.sourceid=ougs.organisationunitid " +
             "left join _orgunitstructure ous on dv.sourceid=ous.organisationunitid " +
             "left join _period_no_disaggregation_structure ps on dv.periodid=ps.periodid " +
             "left join dataelement de on dv.dataelementid=de.dataelementid " +
+            "left join categoryoptioncombo coc on dv.categoryoptioncomboid=coc.categoryoptioncomboid " +
             "left join period pe on dv.periodid=pe.periodid " +
             "where de.valuetype='" + valueType + "' " +
             "and pe.startdate >= '" + start + "' " +
@@ -191,40 +199,56 @@ public class JdbcAnalyticsTableManager
         jdbcTemplate.execute( sql );
     }
 
+    /**
+     * Returns a list of dimension columns. Each entry is an array with:
+     * 
+     * 0 = column name
+     * 1 = data type
+     * 2 = column alias and name
+     */
     public List<String[]> getDimensionColumns()
     {
         List<String[]> columns = new ArrayList<String[]>();
 
+        Collection<DataElementGroupSet> dataElementGroupSets =
+            dataElementService.getCompulsoryDataElementGroupSets();
+        
         Collection<OrganisationUnitGroupSet> orgUnitGroupSets = 
             organisationUnitGroupService.getCompulsoryOrganisationUnitGroupSets();
         
         Collection<OrganisationUnitLevel> levels =
             organisationUnitService.getOrganisationUnitLevels();
 
+        for ( DataElementGroupSet groupSet : dataElementGroupSets )
+        {
+            String[] col = { groupSet.getUid(), "character(11)", "degs." + groupSet.getUid() };
+            columns.add( col );
+        }
+        
         for ( OrganisationUnitGroupSet groupSet : orgUnitGroupSets )
         {
-            String[] col = { PREFIX_ORGUNITGROUPSET + groupSet.getUid(), "integer", "ougs." };
+            String[] col = { groupSet.getUid(), "character(11)", "ougs." + groupSet.getUid() };
             columns.add( col );
         }
         
         for ( OrganisationUnitLevel level : levels )
         {
-            String[] col = { PREFIX_ORGUNITLEVEL + level.getLevel(), "integer", "ous." };
+            String column = PREFIX_ORGUNITLEVEL + level.getLevel();
+            String[] col = { column, "character(11)", "ous." + column };
             columns.add( col );
         }
         
         for ( PeriodType periodType : PeriodType.getAvailablePeriodTypes().subList( 0, 7 ) )
         {
-            String[] col = { periodType.getName().toLowerCase(), "character varying(10)", "ps." };
+            String column = periodType.getName().toLowerCase();
+            String[] col = { column, "character varying(10)", "ps." + column };
             columns.add( col );
         }
         
-        String[] de = { "dataelementid", "integer not null", "dv." };
-        String[] pe = { "periodid", "integer not null", "dv." };
-        String[] ou = { "organisationunitid", "integer not null", "dv." };
-        String[] co = { "categoryoptioncomboid", "integer not null", "dv." };
+        String[] de = { "de", "character(11) not null", "de.uid" };
+        String[] co = { "coc", "character(11) not null", "coc.uid" };
         
-        columns.addAll( Arrays.asList( de, pe, ou, co ) );
+        columns.addAll( Arrays.asList( de, co ) );
         
         return columns;
     }

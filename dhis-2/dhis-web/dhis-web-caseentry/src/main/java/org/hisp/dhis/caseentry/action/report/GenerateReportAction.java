@@ -43,6 +43,8 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -75,7 +77,7 @@ public class GenerateReportAction
     {
         this.programInstanceService = programInstanceService;
     }
-    
+
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -156,7 +158,7 @@ public class GenerateReportAction
     {
         return total;
     }
-
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -206,8 +208,9 @@ public class GenerateReportAction
 
             programInstances = programInstanceService.getProgramInstances( program, orgunitIds, sDate, eDate,
                 paging.getStartPos(), paging.getPageSize() );
+
         }
-        
+
         return SUCCESS;
     }
 }

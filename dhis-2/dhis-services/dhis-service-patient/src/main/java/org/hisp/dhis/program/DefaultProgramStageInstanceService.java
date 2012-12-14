@@ -68,6 +68,13 @@ public class DefaultProgramStageInstanceService
         this.programStageInstanceStore = programStageInstanceStore;
     }
 
+    private ProgramInstanceService programInstanceService;
+
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
+    {
+        this.programInstanceService = programInstanceService;
+    }
+
     private PatientDataValueService patientDataValueService;
 
     public void setPatientDataValueService( PatientDataValueService patientDataValueService )
@@ -169,8 +176,8 @@ public class DefaultProgramStageInstanceService
     }
 
     public Grid getTabularReport( ProgramStage programStage, List<TabularReportColumn> columns,
-        Collection<Integer> organisationUnits, int level, Date startDate, Date endDate, boolean descOrder, Boolean completed, Integer min,
-        Integer max )
+        Collection<Integer> organisationUnits, int level, Date startDate, Date endDate, boolean descOrder,
+        Boolean completed, Integer min, Integer max )
     {
         int maxLevel = organisationUnitService.getMaxOfOrganisationUnitLevels();
 
@@ -273,4 +280,59 @@ public class DefaultProgramStageInstanceService
     {
         return programStageInstanceStore.getSendMesssageEvents();
     }
+
+    @Override
+    public Grid getStatisticalReport( Program program, Collection<Integer> orgunitIds, Date startDate, Date endDate,
+        I18n i18n, I18nFormat format )
+    {
+
+        Grid grid = new ListGrid();
+        grid.setTitle( program.getName() + " ( " + format.formatDate( startDate ) + " - " + format.formatDate( endDate )
+            + " )" );
+
+        int total = programInstanceService.countProgramInstances( program, orgunitIds, startDate, endDate );
+        grid.setSubtitle( i18n.getString( "total_result" ) + ": " + total );
+
+        if ( total > 0 )
+        {
+            grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, true ) );
+            grid.addHeader( new GridHeader( i18n.getString( "completed" ), false, false ) );
+            grid.addHeader( new GridHeader( i18n.getString( "percent_completed" ), false, false ) );
+            grid.addHeader( new GridHeader( i18n.getString( "incomplete" ), false, false ) );
+            grid.addHeader( new GridHeader( i18n.getString( "percent_incomplete" ), false, false ) );
+            grid.addHeader( new GridHeader( i18n.getString( "Scheduled" ), false, false ) );
+            grid.addHeader( new GridHeader( i18n.getString( "percent_Scheduled" ), false, false ) );
+            grid.addHeader( new GridHeader( i18n.getString( "overdue" ), false, false ) );
+            grid.addHeader( new GridHeader( i18n.getString( "percent_overdue" ), false, false ) );
+
+            for ( ProgramStage programStage : program.getProgramStages() )
+            {
+                grid.addRow();
+                grid.addValue( programStage.getName() );
+
+                int completed = programStageInstanceStore.getStatisticalProgramStageReport( programStage, orgunitIds,
+                    startDate, endDate, ProgramStageInstance.COMPLETED_STATUS );
+                grid.addValue( completed );
+                grid.addValue( (completed + 0.0) / total );
+
+                int incomplete = programStageInstanceStore.getStatisticalProgramStageReport( programStage, orgunitIds,
+                    startDate, endDate, ProgramStageInstance.VISITED_STATUS );
+                grid.addValue( incomplete );
+                grid.addValue( (incomplete + 0.0) / total );
+
+                int Scheduled = programStageInstanceStore.getStatisticalProgramStageReport( programStage, orgunitIds,
+                    startDate, endDate, ProgramStageInstance.FUTURE_VISIT_STATUS );
+                grid.addValue( Scheduled );
+                grid.addValue( (Scheduled + 0.0) / total );
+
+                int overdue = programStageInstanceStore.getStatisticalProgramStageReport( programStage, orgunitIds,
+                    startDate, endDate, ProgramStageInstance.LATE_VISIT_STATUS );
+                grid.addValue( overdue );
+                grid.addValue( (overdue + 0.0) / total );
+            }
+        }
+
+        return grid;
+    }
+
 }

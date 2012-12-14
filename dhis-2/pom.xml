@@ -333,17 +333,17 @@
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
-        <artifactId>spring-asm</artifactId>
-        <version>${spring.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
         <artifactId>spring-beans</artifactId>
         <version>${spring.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-context</artifactId>
+        <version>${spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context-support</artifactId>
         <version>${spring.version}</version>
       </dependency>
       <dependency>
@@ -823,7 +823,7 @@
       <dependency>
         <groupId>org.geotools</groupId>
         <artifactId>gt-render</artifactId>
-        <version>8.0-M4</version>
+        <version>${geotools.version}</version>
         <exclusions>
           <exclusion>
             <groupId>xalan</groupId>
@@ -838,7 +838,7 @@
       <dependency>
         <groupId>org.geotools</groupId>
         <artifactId>gt-epsg-wkt</artifactId>
-        <version>8.0-M4</version>
+        <version>${geotools.version}</version>
         <exclusions>
           <exclusion>
             <groupId>commons-pool</groupId>
@@ -903,12 +903,13 @@
   <properties>
     <rootDir></rootDir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>3.1.3.RELEASE</spring.version>
+    <spring.version>3.2.0.RELEASE</spring.version>
     <spring.security.version>3.1.3.RELEASE</spring.security.version>
     <hibernate.version>4.1.8.Final</hibernate.version>
     <hibernate-validator.version>4.3.1.Final</hibernate-validator.version>
     <jackson.version>2.1.1</jackson.version>
     <camel.version>2.10.2</camel.version>
     <slf4j.version>1.6.6</slf4j.version>
+    <geotools.version>8.4</geotools.version>
   </properties>
 </project>

@@ -27,12 +27,12 @@ package org.hisp.dhis.analytics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
-
-import org.hisp.dhis.aggregation.AggregatedDataValue;
 
 public interface AnalyticsManager
 {
-    Future<List<AggregatedDataValue>> getAggregatedDataValueTotals(  DataQueryParams params );
+    static final String SEP = "-";
+    
+    Future<Map<String, Double>> getAggregatedDataValueTotals(  DataQueryParams params );
 }

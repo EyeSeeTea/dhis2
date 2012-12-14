@@ -85,7 +85,7 @@ public class AddOrUpdateChartAction
     {
         this.dataSetService = dataSetService;
     }
-    
+
     private PeriodService periodService;
 
     public void setPeriodService( PeriodService periodService )
@@ -113,7 +113,7 @@ public class AddOrUpdateChartAction
     {
         this.currentUserService = currentUserService;
     }
-    
+
     private I18nManager i18nManager;
 
     public void setI18nManager( I18nManager i18nManager )
@@ -201,7 +201,7 @@ public class AddOrUpdateChartAction
     {
         this.last12Months = last12Months;
     }
-    
+
     private boolean last3Months;
 
     public void setLast3Months( boolean last3Months )
@@ -257,16 +257,16 @@ public class AddOrUpdateChartAction
     {
         this.last5Years = last5Years;
     }
-    
+
     private boolean rewind;
-    
+
     public void setRewind( boolean rewind )
     {
         this.rewind = rewind;
     }
-    
+
     private List<String> periodIds;
-    
+
     public void setPeriodIds( List<String> periodIds )
     {
         this.periodIds = periodIds;
@@ -460,20 +460,20 @@ public class AddOrUpdateChartAction
 
             chart.setRelatives( rp );
         }
-        
+
         chart.setRewindRelativePeriods( rewind );
-        
+
         chart.getPeriods().clear();
-        
+
         if ( periodIds != null )
         {
             List<Period> periods = new ArrayList<Period>();
-            
+
             for ( String id : periodIds )
             {
                 periods.add( PeriodType.getPeriodFromIsoString( id ) );
             }
-            
+
             chart.getPeriods().addAll( periodService.reloadPeriods( setNames( periods, i18nManager.getI18nFormat() ) ) );
         }
 
@@ -517,7 +517,7 @@ public class AddOrUpdateChartAction
         chart.setBaseLineLabel( baseLineLabel );
 
         chartService.saveOrUpdate( chart );
-        
+
         chartId = chart.getUid();
 
         return SUCCESS;

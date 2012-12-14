@@ -32,12 +32,14 @@ import static org.hisp.dhis.analytics.AnalyticsTableManager.TABLE_NAME_TEMP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.QuarterlyPeriodType;
+import org.hisp.dhis.period.YearlyPeriodType;
+import org.hisp.dhis.system.util.ListMap;
 import org.junit.Test;
 
 public class PartitionUtilsTest
@@ -47,25 +49,24 @@ public class PartitionUtilsTest
     {
         Cal cal = new Cal();
         Date earliest = cal.set( 2000, 5, 4 ).time();
-        Date latest = cal.set( 2001, 2, 10 ).time();
+        Date latest = cal.set( 2003, 2, 10 ).time();
         
         List<String> tables = PartitionUtils.getTempTableNames( earliest, latest );
         
         assertEquals( 4, tables.size() );
-        assertTrue( tables.contains( TABLE_NAME_TEMP + "_2000Q2" ) );
-        assertTrue( tables.contains( TABLE_NAME_TEMP + "_2000Q3" ) );
-        assertTrue( tables.contains( TABLE_NAME_TEMP + "_2000Q4" ) );
-        assertTrue( tables.contains( TABLE_NAME_TEMP + "_2001Q1" ) );
+        assertTrue( tables.contains( TABLE_NAME_TEMP + "_2000" ) );
+        assertTrue( tables.contains( TABLE_NAME_TEMP + "_2001" ) );
+        assertTrue( tables.contains( TABLE_NAME_TEMP + "_2002" ) );
+        assertTrue( tables.contains( TABLE_NAME_TEMP + "_2003" ) );
     }
     
     @Test
     public void testGetTable()
     {
-        assertEquals( TABLE_NAME + "_2000Q4", PartitionUtils.getTable( "200011" ) );
-        assertEquals( TABLE_NAME + "_2000Q1", PartitionUtils.getTable( "2000W02" ) );
-        assertEquals( TABLE_NAME + "_2000Q2", PartitionUtils.getTable( "2000Q2" ) );
-        assertEquals( TABLE_NAME + "_2000Q3", PartitionUtils.getTable( "2000S2" ) );
-        assertEquals( TABLE_NAME + "_2000Q1", PartitionUtils.getTable( "2000" ) );
+        assertEquals( TABLE_NAME + "_2000", PartitionUtils.getTable( "200011" ) );
+        assertEquals( TABLE_NAME + "_2001", PartitionUtils.getTable( "2001W02" ) );
+        assertEquals( TABLE_NAME + "_2002", PartitionUtils.getTable( "2002Q2" ) );
+        assertEquals( TABLE_NAME + "_2003", PartitionUtils.getTable( "2003S2" ) );
     }
     
     @Test
@@ -73,10 +74,26 @@ public class PartitionUtilsTest
     {
         Cal cal = new Cal();
         
-        Period q2 = new QuarterlyPeriodType().createPeriod( cal.set( 2000, 4, 1 ).time() );
-        Period q4 = new QuarterlyPeriodType().createPeriod( cal.set( 2000, 10, 1 ).time() );
+        Period p1 = new YearlyPeriodType().createPeriod( cal.set( 2000, 4, 1 ).time() );
+        Period p2 = new YearlyPeriodType().createPeriod( cal.set( 2001, 10, 1 ).time() );
         
-        assertEquals( q2, PartitionUtils.getPeriod( TABLE_NAME_TEMP + "_2000Q2" ) );
-        assertEquals( q4, PartitionUtils.getPeriod( TABLE_NAME_TEMP + "_2000Q4" ) );
+        assertEquals( p1, PartitionUtils.getPeriod( TABLE_NAME_TEMP + "_2000" ) );
+        assertEquals( p2, PartitionUtils.getPeriod( TABLE_NAME_TEMP + "_2001" ) );
+    }
+    
+    @Test
+    public void testGetTablePeriodMap()
+    {        
+        ListMap<String, String> map = PartitionUtils.getTablePeriodMap( Arrays.asList( "2000S1", "2000S2", "2001S1", "2001S2", "2002S1" ) );
+        
+        assertEquals( 3, map.size() );
+        
+        assertTrue( map.keySet().contains( TABLE_NAME + "_2000" ) );
+        assertTrue( map.keySet().contains( TABLE_NAME + "_2001" ) );
+        assertTrue( map.keySet().contains( TABLE_NAME + "_2002" ) );
+        
+        assertEquals( 2, map.get( TABLE_NAME + "_2000" ).size() );
+        assertEquals( 2, map.get( TABLE_NAME + "_2001" ).size() );
+        assertEquals( 1, map.get( TABLE_NAME + "_2002" ).size() );
     }
 }
