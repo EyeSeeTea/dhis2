@@ -162,6 +162,7 @@ console.log("aItems", aItems);
 	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
 	//		  	  ]
 
+console.log("");
 	return {
 		items: aItems,
 		span: aSpan,
@@ -203,15 +204,66 @@ var getDims = function(response, settings) {
 	aRows = extendDims(getUniqueRowsArray(response, settings));
 
 	return {
-		cols: aCols,
-		rows: aRows
+		config: {
+			cols: aCols,
+			rows: aRows
+		}
 	};
+};
+
+
+var generate = function() {
+	var panel,
+		items = [];
+
+	panel = Ext.create('Ext.panel.Panel', {
+		renderTo: Ext.get('pivot'),
+		layout: {
+			type: 'table',
+			columns: 4
+		},
+		defaults: {
+			baseCls: 'td'
+		}
+	});
+
+	items.push({
+		html: '11',
+		baseCls: 'dim'
+	});
+
+	items.push({
+		html: '12',
+		colspan: 3
+	});
+
+	items.push({
+		html: '21'
+	});
+
+	items.push({
+		html: '22'
+	});
+
+	items.push({
+		html: '23'
+	});
+
+	items.push({
+		html: '24'
+	});
+
+	panel.add(items);
 };
 
 var initialize = function() {
 	extendResponse(response);
 
 	console.log(getDims(response, settings));
+
+	generate();
+
+
 }();
 
 });
