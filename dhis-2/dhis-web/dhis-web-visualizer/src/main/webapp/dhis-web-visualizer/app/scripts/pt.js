@@ -72,7 +72,23 @@ var response = {
         ["Wdsd99jdmmf", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "854.0"],
         ["Wdsd99jdmmf", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "732.0"],
         ["Wdsd99jdmmf", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "726.0"]
-    ]
+    ],
+    "metaData": {
+        "YtbsuPPo010": "ANC 1 visit",
+        "Vdjeu38jejd": "ANC 2 visit",
+        "Wdsd99jdmmf": "ANC 3 visit",
+        "V6L425pT3A0": "Default",
+        "201201": "Jan 2012",
+        "201202": "Feb 2012",
+        "201203": "Mar 2012",
+        "201204": "Apr 2012",
+        "ImspTQPwCqd": "Kailahun CHPC",
+        "Jdj9kdfn93n": "Bo CHPC",
+        "uYxK4wmcPqA": "Public ownership"
+    },
+    //"headerMap": {
+	//	"de": <header.de>
+	//}
 };
 
 var settings = {
@@ -166,7 +182,8 @@ console.log("");
 	return {
 		items: aItems,
 		span: aSpan,
-		dims: aItems.length
+		dims: aItems.length,
+		size: nCols
 	};
 };
 
@@ -211,57 +228,67 @@ var getDims = function(response, settings) {
 	};
 };
 
-
-var generate = function() {
-	var panel,
-		items = [];
-
-	panel = Ext.create('Ext.panel.Panel', {
-		renderTo: Ext.get('pivot'),
+var getTablePanel = function(pt) {
+	return Ext.create('Ext.panel.Panel', {
+		renderTo: Ext.get('pivottable'),
 		layout: {
 			type: 'table',
-			columns: 4
+			columns: pt.config.cols.size + pt.config.rows.dims
 		},
 		defaults: {
 			baseCls: 'td'
 		}
 	});
-
-	items.push({
-		html: '11',
-		baseCls: 'dim'
-	});
-
-	items.push({
-		html: '12',
-		colspan: 3
-	});
-
-	items.push({
-		html: '21'
-	});
-
-	items.push({
-		html: '22'
-	});
-
-	items.push({
-		html: '23'
-	});
-
-	items.push({
-		html: '24'
-	});
-
-	panel.add(items);
 };
+
+var getEmptyItem = function(pt) {
+	return {
+		html: 'empty',
+		colspan: pt.config.rows.dims,
+		rowspan: pt.config.cols.dims,
+		baseCls: 'td-empty'
+	};
+};
+
+var getColItems = function(pt) {
+	var cols = pt.config.cols,
+		colItems = [];
+
+	for (var i = 0, dimItems, colSpan; i < cols.dims; i++) {
+		dimItems = cols.items[i];
+		colSpan = cols.span[i];
+
+		for (var j = 0, id; j < dimItems.length; j++) {
+			id = dimItems[j];
+			colItems.push({
+				html: response.metaData[id],
+				colspan: colSpan,
+				baseCls: 'td-dim'
+			});
+		}
+	}
+
+	return colItems;
+};
+
+var createTableArray = function(pt) {
+	var panel = getTablePanel(pt);
+
+	panel.add(getEmptyItem(pt));
+
+	panel.add(getColItems(pt));
+};
+
 
 var initialize = function() {
 	extendResponse(response);
 
-	console.log(getDims(response, settings));
+	var pt = getDims(response, settings);
+	console.log(pt);
 
-	generate();
+	var panel = createTableArray(pt);
+
+	//generate();
 
 
 }();
