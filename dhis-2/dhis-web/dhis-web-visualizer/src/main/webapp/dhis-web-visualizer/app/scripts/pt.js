@@ -137,16 +137,14 @@ var extendResponse = function(pt) {
 	}
 };
 
-var extendDims = function(aUniqueCols) {
-
-	//aUniqueCols	= [ [de1, de2, de3], [p1, p2, p3, p4, p5], [ou1, ou2] ]
-	//aUniqueCols	= [ [de1, de2, de3], [p1], [ou1, ou2, ou3, ou4] ]
+var extendDims = function(aUniqueCols) { //aUniqueCols	= [ [de1, de2, de3], [p1], [ou1, ou2, ou3, ou4] ]
 
 	var nCols = 1,
 		aNumCols = [],
 		aAccNumCols = [],
 		aSpan = [],
-		aItems = [];
+		aItems = [],
+		aAllItems = [];
 
 	for (var i = 0, dim; i < aUniqueCols.length; i++) {
 		nNumCols = aUniqueCols[i].length;
@@ -166,12 +164,12 @@ console.log("aAccNumCols", aAccNumCols);
 	//aAccNumCols	= [3, 3, 12]
 
 	for (var i = 0; i < aUniqueCols.length; i++) {
-		aSpan.push(aNumCols[i] === 1 ? nCols : nCols / aAccNumCols[i]); //if only one, span all
+		aSpan.push(aNumCols[i] === 1 ? nCols : nCols / aAccNumCols[i]); //if one, span all
 	}
 
 console.log("aSpan", aSpan);
 
-	//aSpan		= [10, 2, 1]
+	//aSpan			= [10, 2, 1]
 
 	aItems.push(aUniqueCols[0]);
 
@@ -195,9 +193,22 @@ console.log("aItems", aItems);
 	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
 	//		  	  ]
 
+	//for (var i = 0, row, allRow, span; i < aItems.length; i++) {
+		//row = aItems[i];
+		//allRow = [];
+		//span = aSpan[i];
+
+		//for (var j = 0; j < nCols; j++) {
+			//allRow.push({
+
+
 console.log("");
 	return {
-		items: aItems,
+		items: {
+			unique: aUniqueCols,
+			gui: aItems,
+			all: null
+		},
 		span: aSpan,
 		dims: aItems.length,
 		size: nCols
@@ -268,7 +279,7 @@ var getColItems = function(pt) {
 		colItems = [];
 
 	for (var i = 0, dimItems, colSpan; i < cols.dims; i++) {
-		dimItems = cols.items[i];
+		dimItems = cols.items.gui[i];
 		colSpan = cols.span[i];
 
 		for (var j = 0, id; j < dimItems.length; j++) {
