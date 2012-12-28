@@ -1,6 +1,11 @@
 td div div {
 	padding: 5px;
 	background-color: #bbb;
+	text-align: center;
+}
+
+td .empty-body {
+	background-color: #88bbff;
 }
 
 td .dim-body {

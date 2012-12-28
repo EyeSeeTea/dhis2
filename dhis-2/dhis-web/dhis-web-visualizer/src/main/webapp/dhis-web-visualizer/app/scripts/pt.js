@@ -1,6 +1,8 @@
 Ext.onReady( function() {
 
-var response = {
+var pt = {};
+
+pt.response = {
     "headers": [
 		{
 			"name": "de",
@@ -86,23 +88,27 @@ var response = {
         "Jdj9kdfn93n": "Bo CHPC",
         "uYxK4wmcPqA": "Public ownership"
     },
-    //"headerMap": {
+    //"nameHeaderMap": {
 	//	"de": <header.de>
 	//}
 };
 
-var settings = {
-	col: ['de', 'pe', 'coc'],
-	row: ['pe', 'coc', 'ou']
+pt.settings = {
+	col: ['de', 'pe'],
+	row: ['ou']
 };
 
-var extendResponse = function(response) {
-	var headers = response.headers,
+var extendResponse = function(pt) {
+	var response = pt.response,
+		settings = pt.settings,
+		headers = response.headers,
 		header,
 		rows = response.rows,
+		settingsDims = settings.col.concat(settings.row),
 		items;
 
-	response.headerMap = {};
+	response.nameHeaderMap = {};
+	response.idValueMap = {};
 
 	for (var i = 0; i < headers.length; i++) {
 		header = headers[i];
@@ -116,7 +122,18 @@ var extendResponse = function(response) {
 		header.items = Ext.Array.unique(items);
 		header.size = header.items.length;
 
-		response.headerMap[header.name] = header;
+		response.nameHeaderMap[header.name] = header;
+	}
+
+	for (var i = 0, id, valueIndex = response.nameHeaderMap.value.index; i < rows.length; i++) {
+		id = '';
+
+		for (var j = 0, dimIndex; j < settingsDims.length; j++) {
+			dimIndex = response.nameHeaderMap[settingsDims[j]].index;
+			id += rows[i][dimIndex];
+		}
+
+		response.idValueMap[id] = rows[i][valueIndex];
 	}
 };
 
@@ -187,9 +204,9 @@ console.log("");
 	};
 };
 
-var getDims = function(response, settings) {
-	var aCols,
-		aRows,
+var getDims = function(pt) {
+	var response = pt.response,
+		settings = pt.settings,
 		getUniqueColsArray,
 		getUniqueRowsArray;
 
@@ -198,7 +215,7 @@ var getDims = function(response, settings) {
 
 		for (var i = 0, header; i < settings.col.length; i++) {
 			header = settings.col[i];
-			a.push(response.headerMap[header].items);
+			a.push(response.nameHeaderMap[header].items);
 		}
 
 		return a;
@@ -209,7 +226,7 @@ var getDims = function(response, settings) {
 
 		for (var i = 0, header; i < settings.row.length; i++) {
 			header = settings.row[i];
-			a.push(response.headerMap[header].items);
+			a.push(response.nameHeaderMap[header].items);
 		}
 
 		return a;
@@ -217,14 +234,9 @@ var getDims = function(response, settings) {
 
 	// aUniqueCols ->  [[p1, p2, p3], [ou1, ou2, ou3, ou4]]
 
-	aCols = extendDims(getUniqueColsArray(response, settings));
-	aRows = extendDims(getUniqueRowsArray(response, settings));
-
 	return {
-		config: {
-			cols: aCols,
-			rows: aRows
-		}
+		cols: extendDims(getUniqueColsArray(response, settings)),
+		rows: extendDims(getUniqueRowsArray(response, settings))
 	};
 };
 
@@ -246,12 +258,13 @@ var getEmptyItem = function(pt) {
 		html: 'empty',
 		colspan: pt.config.rows.dims,
 		rowspan: pt.config.cols.dims,
-		baseCls: 'td-empty'
+		baseCls: 'empty'
 	};
 };
 
 var getColItems = function(pt) {
-	var cols = pt.config.cols,
+	var response = pt.response,
+		cols = pt.config.cols,
 		colItems = [];
 
 	for (var i = 0, dimItems, colSpan; i < cols.dims; i++) {
@@ -271,6 +284,15 @@ var getColItems = function(pt) {
 	return colItems;
 };
 
+var getRowItems = function(pt) {
+	var rows = pt.config.rows;
+
+	//for (var i = 0; i < rows.size; i++) {
+
+
+
+};
+
 var createTableArray = function(pt) {
 	var panel = getTablePanel(pt);
 
@@ -281,9 +303,9 @@ var createTableArray = function(pt) {
 
 
 var initialize = function() {
-	extendResponse(response);
+	extendResponse(pt, pt);
 
-	var pt = getDims(response, settings);
+	pt.config = getDims(pt, pt);
 	console.log(pt);
 
 	var panel = createTableArray(pt);
