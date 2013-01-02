@@ -147,7 +147,8 @@ var extendDims = function(aUniqueItems) {
 		aAccNumCols = [],
 		aSpan = [],
 		aGuiItems = [],
-		aAllItems = [];
+		aAllItems = [],
+		aColIds = [];
 
 	for (var i = 0, dim; i < aUniqueItems.length; i++) {
 		nNumCols = aUniqueItems[i].length;
@@ -190,6 +191,11 @@ console.log("aSpan", aSpan);
 	}
 
 console.log("aGuiItems", aGuiItems);
+	//aGuiItems	= [ [d1, d2, d3], (3)
+	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (15)
+	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
+	//		  	  ]
+
 
 	for (var i = 0, dimItems, span; i < aUniqueItems.length; i++) {
 		dimItems = [];
@@ -214,24 +220,25 @@ console.log("aGuiItems", aGuiItems);
 	}
 
 console.log("aAllItems", aAllItems);
-
-	
-
-
-	//aGuiItems	= [ [d1, d2, d3], (3)
-	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (15)
-	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
+	//aAllItems	= [ [d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3], (30)
+	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (30)
+	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2] (30)
 	//		  	  ]
 
+	for (var i = 0, id; i < nCols; i++) {
+		id = '';
+		
+		for (var j = 0; j < aAllItems.length; j++) {
+			id += aAllItems[j][i];
+		}
+
+		aColIds.push(id);
+	}
+
+console.log("aColIds", aColIds);
+	//aColIds	= [ aaaaaaaaBBBBBBBBccccccc, aaaaaaaaaccccccccccbbbbbbbbbb, ... ]
 
 
-	//for (var i = 0, row, allRow, span; i < aGuiItems.length; i++) {
-		//row = aGuiItems[i];
-		//allRow = [];
-		//span = aSpan[i];
-
-		//for (var j = 0; j < nCols; j++) {
-			//allRow.push({
 
 
 console.log("");
@@ -239,8 +246,9 @@ console.log("");
 		items: {
 			unique: aUniqueItems,
 			gui: aGuiItems,
-			all: null
+			all: aAllItems
 		},
+		ids: aColIds,
 		span: aSpan,
 		dims: aUniqueItems.length,
 		size: nCols
