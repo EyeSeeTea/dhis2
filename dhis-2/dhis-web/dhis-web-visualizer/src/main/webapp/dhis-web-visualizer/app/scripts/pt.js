@@ -138,7 +138,9 @@ var extendResponse = function(pt) {
 };
 
 var extendDims = function(aUniqueItems) {
-	//aUniqueItems	= [ [de1, de2, de3], [p1], [ou1, ou2, ou3, ou4] ]
+	//aUniqueItems	= [ [de1, de2, de3],
+	//					[p1],
+	//					[ou1, ou2, ou3, ou4] ]
 
 	var nCols = 1,
 		aNumCols = [],
@@ -189,23 +191,31 @@ console.log("aSpan", aSpan);
 
 console.log("aGuiItems", aGuiItems);
 
-	for (var i = 0, items, span; i < aUniqueItems.length; i++) {
-		items = [];
+	for (var i = 0, dimItems, span; i < aUniqueItems.length; i++) {
+		dimItems = [];
 		span = aSpan[i];
-		
-		for (var j = 0; j < aUniqueItems[i].length; j++) {
-			if (i === 0) {
-				for (var k = 0, uniqueItem; k < span; k++) {
-					items.push(aUniqueItems[i][j]);
+
+		if (i === 0) {
+			for (var j = 0; j < aUniqueItems[i].length; j++) {
+				for (var k = 0; k < span; k++) {
+					dimItems.push(aUniqueItems[i][j]);
 				}
 			}
 		}
+		else {
+			var factor = nCols / aUniqueItems[i].length;
+			
+			for (var k = 0; k < factor; k++) {
+				dimItems = dimItems.concat(aUniqueItems[i]);
+			}
+		}			
 
-		aAllItems.push(items);
+		aAllItems.push(dimItems);
 	}
 
 console.log("aAllItems", aAllItems);
-					
+
+	
 
 
 	//aGuiItems	= [ [d1, d2, d3], (3)
