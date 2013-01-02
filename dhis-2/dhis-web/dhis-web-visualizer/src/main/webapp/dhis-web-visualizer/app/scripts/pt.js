@@ -94,7 +94,7 @@ pt.response = {
 };
 
 pt.settings = {
-	col: ['de', 'pe'],
+	col: ['de', 'pe', 'ou'],
 	row: ['ou']
 };
 
@@ -137,17 +137,18 @@ var extendResponse = function(pt) {
 	}
 };
 
-var extendDims = function(aUniqueCols) { //aUniqueCols	= [ [de1, de2, de3], [p1], [ou1, ou2, ou3, ou4] ]
+var extendDims = function(aUniqueItems) {
+	//aUniqueItems	= [ [de1, de2, de3], [p1], [ou1, ou2, ou3, ou4] ]
 
 	var nCols = 1,
 		aNumCols = [],
 		aAccNumCols = [],
 		aSpan = [],
-		aItems = [],
+		aGuiItems = [],
 		aAllItems = [];
 
-	for (var i = 0, dim; i < aUniqueCols.length; i++) {
-		nNumCols = aUniqueCols[i].length;
+	for (var i = 0, dim; i < aUniqueItems.length; i++) {
+		nNumCols = aUniqueItems[i].length;
 
 		aNumCols.push(nNumCols);
 		nCols = nCols * nNumCols;
@@ -163,7 +164,7 @@ console.log("aAccNumCols", aAccNumCols);
 	//nCols			= 12 (3 * 1 * 4)
 	//aAccNumCols	= [3, 3, 12]
 
-	for (var i = 0; i < aUniqueCols.length; i++) {
+	for (var i = 0; i < aUniqueItems.length; i++) {
 		aSpan.push(aNumCols[i] === 1 ? nCols : nCols / aAccNumCols[i]); //if one, span all
 	}
 
@@ -171,30 +172,51 @@ console.log("aSpan", aSpan);
 
 	//aSpan			= [10, 2, 1]
 
-	aItems.push(aUniqueCols[0]);
+	aGuiItems.push(aUniqueItems[0]);
 
-	if (aUniqueCols.length > 1) {
-		for (var i = 1, a, n; i < aUniqueCols.length; i++) {
+	if (aUniqueItems.length > 1) {
+		for (var i = 1, a, n; i < aUniqueItems.length; i++) {
 			a = [];
 			n = aNumCols[i] === 1 ? 1 : aAccNumCols[i-1];
 
 			for (var j = 0; j < n; j++) {
-				a = a.concat(aUniqueCols[i]);
+				a = a.concat(aUniqueItems[i]);
 			}
 
-			aItems.push(a);
+			aGuiItems.push(a);
 		}
 	}
 
-console.log("aItems", aItems);
+console.log("aGuiItems", aGuiItems);
 
-	//aItems	= [ [d1, d2, d3], (3)
+	for (var i = 0, items, span; i < aUniqueItems.length; i++) {
+		items = [];
+		span = aSpan[i];
+		
+		for (var j = 0; j < aUniqueItems[i].length; j++) {
+			if (i === 0) {
+				for (var k = 0, uniqueItem; k < span; k++) {
+					items.push(aUniqueItems[i][j]);
+				}
+			}
+		}
+
+		aAllItems.push(items);
+	}
+
+console.log("aAllItems", aAllItems);
+					
+
+
+	//aGuiItems	= [ [d1, d2, d3], (3)
 	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (15)
 	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
 	//		  	  ]
 
-	//for (var i = 0, row, allRow, span; i < aItems.length; i++) {
-		//row = aItems[i];
+
+
+	//for (var i = 0, row, allRow, span; i < aGuiItems.length; i++) {
+		//row = aGuiItems[i];
 		//allRow = [];
 		//span = aSpan[i];
 
@@ -205,12 +227,12 @@ console.log("aItems", aItems);
 console.log("");
 	return {
 		items: {
-			unique: aUniqueCols,
-			gui: aItems,
+			unique: aUniqueItems,
+			gui: aGuiItems,
 			all: null
 		},
 		span: aSpan,
-		dims: aItems.length,
+		dims: aUniqueItems.length,
 		size: nCols
 	};
 };
