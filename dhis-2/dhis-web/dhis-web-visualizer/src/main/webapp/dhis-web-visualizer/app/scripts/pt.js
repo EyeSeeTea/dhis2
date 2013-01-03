@@ -90,12 +90,18 @@ pt.response = {
     },
     //"nameHeaderMap": {
 	//	"de": <header.de>
+	//	"pe": <header.pe>
 	//}
-};
+	//,
+	//
+	//"idValueMap": {
+	//	"Vdjeu38jejd201201ImspTQPwCqdV6L425pT3A0": "294.0"
+};	//	"Vdjeu38jejd201201Jdj9kdfn93nV6L425pT3A0": "375.0"
+	//}
 
 pt.settings = {
-	col: ['de', 'pe', 'ou'],
-	row: ['ou']
+	col: ['de', 'coc', 'J5jldMd8OHv'],
+	row: ['pe', 'ou']
 };
 
 var extendResponse = function(pt) {
@@ -237,9 +243,7 @@ console.log("aAllItems", aAllItems);
 
 console.log("aColIds", aColIds);
 	//aColIds	= [ aaaaaaaaBBBBBBBBccccccc, aaaaaaaaaccccccccccbbbbbbbbbb, ... ]
-
-
-
+	
 
 console.log("");
 	return {
@@ -291,6 +295,32 @@ var getDims = function(pt) {
 	};
 };
 
+var extendRowDims = function(rows) {
+	var all = rows.items.all,
+		allObjects = [];
+
+	for (var i = 0, allRow; i < all.length; i++) {
+		allRow = [];
+		
+		for (var j = 0; j < all[i].length; j++) {
+			allRow.push({
+				id: all[i][j]
+			});
+		}
+
+		allObjects.push(allRow);
+	}
+
+	for (var i = 0; i < allObjects.length; i++) {
+		for (var j = 0, object; j < allObjects[i].length; j += rows.span[i]) {
+			object = allObjects[i][j];
+			object.rowSpan = rows.span[i];
+		}
+	}
+
+	rows.items.allObjects = allObjects;
+};
+
 var getTablePanel = function(pt) {
 	return Ext.create('Ext.panel.Panel', {
 		renderTo: Ext.get('pivottable'),
@@ -327,7 +357,7 @@ var getColItems = function(pt) {
 			colItems.push({
 				html: response.metaData[id],
 				colspan: colSpan,
-				baseCls: 'td-dim'
+				baseCls: 'dim'
 			});
 		}
 	}
@@ -336,20 +366,48 @@ var getColItems = function(pt) {
 };
 
 var getRowItems = function(pt) {
-	var rows = pt.config.rows;
+	var response = pt.response,
+		rowItems = [],
+		rows = pt.config.rows,
+		size = rows.size,
+		dims = rows.dims,
+		allObjects = rows.items.allObjects;		
 
-	//for (var i = 0; i < rows.size; i++) {
+	for (var i = 0; i < size; i++) {
+		for (var j = 0, object; j < dims; j++) {
+			console.log(i, j);
+			object = allObjects[j][i];
 
+			if (object.rowSpan) {
+				rowItems.push({
+					html: response.metaData[object.id],
+					rowspan: object.rowSpan,
+					baseCls: 'dim'					
+				});
+			}
+		}
 
+		// tmp
+		for (var j = 0; j < pt.config.cols.size; j++) {
+			rowItems.push({
+				html: 'v',
+				baseCls: 'value'
+			});
+		}
+	}
 
+	return rowItems;
 };
 
 var createTableArray = function(pt) {
-	var panel = getTablePanel(pt);
+	var panel = getTablePanel(pt),
+		rowItems = [];
 
 	panel.add(getEmptyItem(pt));
 
 	panel.add(getColItems(pt));
+
+	panel.add(getRowItems(pt));
 };
 
 
@@ -358,6 +416,8 @@ var initialize = function() {
 
 	pt.config = getDims(pt, pt);
 	console.log(pt);
+
+	extendRowDims(pt.config.rows);
 
 	var panel = createTableArray(pt);
 

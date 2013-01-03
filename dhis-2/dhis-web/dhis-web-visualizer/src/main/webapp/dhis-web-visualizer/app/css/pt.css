@@ -2,12 +2,17 @@ td div div {
 	padding: 5px;
 	background-color: #bbb;
 	text-align: center;
+	font-size: 12px;
 }
 
 td .empty-body {
-	background-color: #88bbff;
+	background-color: #aaccff;
 }
 
 td .dim-body {
-	background-color: #0099ff;
+	background-color: #88bbff;
+}
+
+td .value-body {
+	background-color: #ddd;
 }
