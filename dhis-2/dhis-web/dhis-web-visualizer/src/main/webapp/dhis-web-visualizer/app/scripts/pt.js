@@ -46,7 +46,7 @@ pt.response = {
 		}
     ],
     "width": 6,
-    "height": 18,
+    "height": 24,
     "rows": [
         ["YtbsuPPo010", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "456.0"],
         ["YtbsuPPo010", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "876.0"],
@@ -336,7 +336,6 @@ var getTablePanel = function(pt) {
 
 var getEmptyItem = function(pt) {
 	return {
-		html: 'empty',
 		colspan: pt.config.rows.dims,
 		rowspan: pt.config.cols.dims,
 		baseCls: 'empty'
@@ -369,6 +368,7 @@ var getRowItems = function(pt) {
 	var response = pt.response,
 		rowItems = [],
 		rows = pt.config.rows,
+		cols = pt.config.cols,
 		size = rows.size,
 		dims = rows.dims,
 		allObjects = rows.items.allObjects;		
@@ -388,9 +388,12 @@ var getRowItems = function(pt) {
 		}
 
 		// tmp
-		for (var j = 0; j < pt.config.cols.size; j++) {
+		for (var j = 0, id; j < pt.config.cols.size; j++) {
+			id = cols.ids[j] + rows.ids[i];
+			
 			rowItems.push({
-				html: 'v',
+				id: id,
+				html: response.idValueMap[id],
 				baseCls: 'value'
 			});
 		}
