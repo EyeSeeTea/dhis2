@@ -100,8 +100,8 @@ pt.response = {
 	//}
 
 pt.settings = {
-	col: ['de', 'coc', 'J5jldMd8OHv'],
-	row: ['pe', 'ou']
+	col: ['de', 'ou', 'coc'],
+	row: ['J5jldMd8OHv', 'pe']
 };
 
 var extendResponse = function(pt) {
@@ -375,7 +375,6 @@ var getRowItems = function(pt) {
 
 	for (var i = 0; i < size; i++) {
 		for (var j = 0, object; j < dims; j++) {
-			console.log(i, j);
 			object = allObjects[j][i];
 
 			if (object.rowSpan) {
@@ -387,14 +386,18 @@ var getRowItems = function(pt) {
 			}
 		}
 
-		// tmp
-		for (var j = 0, id; j < pt.config.cols.size; j++) {
+		// Values
+		for (var j = 0, id, value, cls; j < pt.config.cols.size; j++) {
 			id = cols.ids[j] + rows.ids[i];
+			value = response.idValueMap[id];
+			cls = parseFloat(value) < 333 ? 'bad' : (parseFloat(value) < 666 ? 'medium' : 'good');
 			
 			rowItems.push({
 				id: id,
-				html: response.idValueMap[id],
-				baseCls: 'value'
+				value: value,
+				html: value,
+				baseCls: 'value',
+				cls: cls
 			});
 		}
 	}
