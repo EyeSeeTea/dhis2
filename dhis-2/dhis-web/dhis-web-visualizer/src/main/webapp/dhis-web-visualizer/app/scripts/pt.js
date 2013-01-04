@@ -216,11 +216,11 @@ console.log("aGuiItems", aGuiItems);
 		}
 		else {
 			var factor = nCols / aUniqueItems[i].length;
-			
+
 			for (var k = 0; k < factor; k++) {
 				dimItems = dimItems.concat(aUniqueItems[i]);
 			}
-		}			
+		}
 
 		aAllItems.push(dimItems);
 	}
@@ -233,7 +233,7 @@ console.log("aAllItems", aAllItems);
 
 	for (var i = 0, id; i < nCols; i++) {
 		id = '';
-		
+
 		for (var j = 0; j < aAllItems.length; j++) {
 			id += aAllItems[j][i];
 		}
@@ -243,7 +243,7 @@ console.log("aAllItems", aAllItems);
 
 console.log("aColIds", aColIds);
 	//aColIds	= [ aaaaaaaaBBBBBBBBccccccc, aaaaaaaaaccccccccccbbbbbbbbbb, ... ]
-	
+
 
 console.log("");
 	return {
@@ -301,7 +301,7 @@ var extendRowDims = function(rows) {
 
 	for (var i = 0, allRow; i < all.length; i++) {
 		allRow = [];
-		
+
 		for (var j = 0; j < all[i].length; j++) {
 			allRow.push({
 				id: all[i][j]
@@ -371,7 +371,7 @@ var getRowItems = function(pt) {
 		cols = pt.config.cols,
 		size = rows.size,
 		dims = rows.dims,
-		allObjects = rows.items.allObjects;		
+		allObjects = rows.items.allObjects;
 
 	for (var i = 0; i < size; i++) {
 		for (var j = 0, object; j < dims; j++) {
@@ -381,7 +381,7 @@ var getRowItems = function(pt) {
 				rowItems.push({
 					html: response.metaData[object.id],
 					rowspan: object.rowSpan,
-					baseCls: 'dim'					
+					baseCls: 'dim'
 				});
 			}
 		}
@@ -391,7 +391,7 @@ var getRowItems = function(pt) {
 			id = cols.ids[j] + rows.ids[i];
 			value = response.idValueMap[id];
 			cls = parseFloat(value) < 333 ? 'bad' : (parseFloat(value) < 666 ? 'medium' : 'good');
-			
+
 			rowItems.push({
 				id: id,
 				value: value,
