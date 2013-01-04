@@ -123,8 +123,8 @@ pt.response = {
 	//}
 
 pt.settings = {
-	col: ['de', 'J5jldMd8OHv', 'ou', 'coc'],
-	row: ['pe']
+	col: ['pe', 'J5jldMd8OHv', 'ou', 'coc'],
+	row: ['de']
 };
 
 var extendResponse = function(pt) {
@@ -408,7 +408,9 @@ var getRowItems = function(pt) {
 		totalRowItems = [],
 		totalRowHtmlItems = [],
 		totalColItems = [],
-		totalColHtmlItems = [];
+		totalColHtmlItems = [],
+		grandTotalItem = 0,
+		grandTotalHtmlItem;
 
 	// Value items
 	for (var i = 0, row; i < size; i++) {
@@ -445,28 +447,57 @@ var getRowItems = function(pt) {
 	}
 
 	// Total row items
-	for (var i = 0, sum; i < valueItems.length; i++) {
-		sum = Ext.Array.sum(valueItems[i]);
-		totalRowItems.push(sum);
+	for (var i = 0, rowSum; i < valueItems.length; i++) {
+		rowSum = Ext.Array.sum(valueItems[i]);
+		totalRowItems.push(rowSum);
 	}
 
 	// Total row html items
-	for (var i = 0, value; i < totalRowItems.length; i++) {
-		value = totalRowItems[i];
+	for (var i = 0, rowSum; i < totalRowItems.length; i++) {
+		rowSum = totalRowItems[i];
 
 		totalRowHtmlItems.push({
-			value: value,
-			html: value.toString(),
-			baseCls: 'valueTotal'
+			value: rowSum,
+			html: rowSum.toString(),
+			baseCls: 'valuetotal'
 		});
 	}
 
+	// Total col items
+	for (var i = 0, colSum; i < valueItems[0].length; i++) {
+		colSum = 0;
 
+		for (var j = 0; j < valueItems.length; j++) {
+			colSum += valueItems[j][i];
+		}
 
+		totalColItems.push(colSum);
+	}
 
+	// Total col html items
+	for (var i = 0, colSum; i < totalColItems.length; i++) {
+		colSum = totalColItems[i];
 
+		totalColHtmlItems.push({
+			value: colSum,
+			html: colSum.toString(),
+			baseCls: 'valuetotal'
+		});
+	}
 
+	// Grand total item
+	grandTotalItem = Ext.Array.sum(totalColItems);
 
+	// Grand total html item
+	grandTotalHtmlItem = {
+		value: grandTotalItem,
+		html: grandTotalItem.toString(),
+		baseCls: 'valuegrandtotal'
+	};
+
+	// GUI
+
+	// Dim html items
 	for (var i = 0; i < size; i++) {
 		for (var j = 0, object; j < dims; j++) {
 			object = allObjects[j][i];
@@ -480,21 +511,20 @@ var getRowItems = function(pt) {
 			}
 		}
 
-		// Values
-		for (var j = 0, id, value, cls; j < pt.config.cols.size; j++) {
-			id = cols.ids[j] + rows.ids[i];
-			value = response.idValueMap[id];
-			cls = parseFloat(value) < 333 ? 'bad' : (parseFloat(value) < 666 ? 'medium' : 'good'); //simplistic legendset
-
-			dimHtmlItems.push({
-				id: id,
-				value: value,
-				html: value,
-				baseCls: 'value',
-				cls: cls
-			});
-		}
+		dimHtmlItems = dimHtmlItems.concat(valueHtmlItems[i]);
+		dimHtmlItems = dimHtmlItems.concat(totalRowHtmlItems[i]);
 	}
+
+	// Final row
+	dimHtmlItems.push({
+		html: 'Total',
+		colspan: rows.dims,
+		baseCls: 'dimtotal'
+	});
+
+	dimHtmlItems = dimHtmlItems.concat(totalColHtmlItems);
+
+	dimHtmlItems.push(grandTotalHtmlItem);
 
 	return dimHtmlItems;
 };

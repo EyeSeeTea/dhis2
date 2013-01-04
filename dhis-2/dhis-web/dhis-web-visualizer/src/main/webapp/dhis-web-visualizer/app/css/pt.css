@@ -11,7 +11,6 @@ td .empty-body {
 td .dim-body {
 	background-color: #dae6f8;
 }
-
 td .dimtotal-body {
 	background-color: #cad6e8;
 }
@@ -19,15 +18,19 @@ td .dimtotal-body {
 td .value-body {
 	background-color: #eaeaea;
 }
+td .valuetotal-body {
+	background-color: #dadada;
+}
+td .valuegrandtotal-body {
+	background-color: #bbb;
+}
 
 td .good div {
 	color: green;
 }
-
 td .medium div {
 	color: #333;
 }
-
 td .bad div {
 	color: red;
 }
