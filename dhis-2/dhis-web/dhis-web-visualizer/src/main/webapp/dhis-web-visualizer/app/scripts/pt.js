@@ -416,11 +416,51 @@ var getRowItems = function(pt) {
 
 		for (var j = 0, id, value, row; j < pt.config.cols.size; j++) {
 			id = cols.ids[j] + rows.ids[i];
-			row.push(response.idValueMap[id]);
+			value = parseFloat(response.idValueMap[id]);
+			row.push(value);
 		}
 
 		valueItems.push(row);
 	}
+
+	// Value html items
+	for (var i = 0, row; i < valueItems.length; i++) {
+		row = [];
+
+		for (var j = 0, id, value, cls; j < valueItems[i].length; j++) {
+			id = cols.ids[j] + rows.ids[i];
+			value = valueItems[i][j];
+			cls = value < 333 ? 'bad' : (value < 666 ? 'medium' : 'good'); //simplistic legendset
+
+			row.push({
+				id: id,
+				value: value,
+				html: value.toString(),
+				baseCls: 'value',
+				cls: cls
+			});
+		}
+
+		valueHtmlItems.push(row);
+	}
+
+	// Total row items
+	for (var i = 0, sum; i < valueItems.length; i++) {
+		sum = Ext.Array.sum(valueItems[i]);
+		totalRowItems.push(sum);
+	}
+
+	// Total row html items
+	for (var i = 0, value; i < totalRowItems.length; i++) {
+		value = totalRowItems[i];
+
+		totalRowHtmlItems.push({
+			value: value,
+			html: value.toString(),
+			baseCls: 'valueTotal'
+		});
+	}
+
 
 
 
@@ -432,7 +472,7 @@ var getRowItems = function(pt) {
 			object = allObjects[j][i];
 
 			if (object.rowSpan) {
-				dimItems.push({
+				dimHtmlItems.push({
 					html: response.metaData[object.id],
 					rowspan: object.rowSpan,
 					baseCls: 'dim'
@@ -446,7 +486,7 @@ var getRowItems = function(pt) {
 			value = response.idValueMap[id];
 			cls = parseFloat(value) < 333 ? 'bad' : (parseFloat(value) < 666 ? 'medium' : 'good'); //simplistic legendset
 
-			dimItems.push({
+			dimHtmlItems.push({
 				id: id,
 				value: value,
 				html: value,
@@ -456,7 +496,7 @@ var getRowItems = function(pt) {
 		}
 	}
 
-	return dimItems;
+	return dimHtmlItems;
 };
 
 var createTableArray = function(pt) {
