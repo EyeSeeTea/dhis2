@@ -329,7 +329,7 @@ public class DefaultDataElementService
         return i18n( i18nService, dataElementStore.getDataElementsByAggregationLevel( aggregationLevel ) );
     }
     
-    public Map<Integer, Set<Integer>> getDataElementCategoryOptionCombos()
+    public Map<String, Set<String>> getDataElementCategoryOptionCombos()
     {
         return dataElementStore.getDataElementCategoryOptionCombos();
     }

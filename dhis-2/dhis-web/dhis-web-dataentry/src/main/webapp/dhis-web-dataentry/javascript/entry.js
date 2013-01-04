@@ -126,8 +126,6 @@ function saveDynamicVal( code, optionComboId, fieldId )
 
 function saveVal( dataElementId, optionComboId, fieldId )
 {
-	dataElementId = parseInt( dataElementId );
-	optionComboId = parseInt( optionComboId );
     fieldId = '#' + fieldId;
 	
     var dataElementName = getDataElementName( dataElementId );

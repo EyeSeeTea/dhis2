@@ -70,14 +70,6 @@ public class ValidationRuleConverter
     private static final String FIELD_RIGHTSIDE_DESCRIPTION = "rightSideDescription";
 
     // -------------------------------------------------------------------------
-    // Properties
-    // -------------------------------------------------------------------------
-
-    private Map<Object, Integer> dataElementMapping;
-
-    private Map<Object, Integer> categoryOptionComboMapping;
-
-    // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
@@ -107,14 +99,10 @@ public class ValidationRuleConverter
      * @param dataElementMapping the data element mapping to use.
      */
     public ValidationRuleConverter( ImportObjectService importObjectService,
-        ValidationRuleService validationRuleService, ExpressionService expressionService,
-        Map<Object, Integer> dataElementMapping, Map<Object, Integer> categoryOptionComboMapping )
+        ValidationRuleService validationRuleService )
     {
         this.importObjectService = importObjectService;
         this.validationRuleService = validationRuleService;
-        this.expressionService = expressionService;
-        this.dataElementMapping = dataElementMapping;
-        this.categoryOptionComboMapping = categoryOptionComboMapping;
     }
 
     // -------------------------------------------------------------------------
@@ -180,18 +168,14 @@ public class ValidationRuleConverter
             validationRule.setType( values.get( FIELD_TYPE ) );
             validationRule.setOperator( Operator.valueOf( values.get( FIELD_OPERATOR ) ) );
 
-            validationRule.getLeftSide().setExpression(
-                expressionService.convertExpression( values.get( FIELD_LEFTSIDE_EXPRESSION ), dataElementMapping,
-                    categoryOptionComboMapping ) );
+            validationRule.getLeftSide().setExpression( values.get( FIELD_LEFTSIDE_EXPRESSION ) );
             validationRule.getLeftSide().setDescription( values.get( FIELD_LEFTSIDE_DESCRIPTION ) );
             validationRule.getLeftSide().setDataElementsInExpression(
                 expressionService.getDataElementsInExpression( validationRule.getLeftSide().getExpression() ) );
             validationRule.getLeftSide().setOptionCombosInExpression(
                 expressionService.getOptionCombosInExpression( validationRule.getLeftSide().getExpression() ) );
 
-            validationRule.getRightSide().setExpression(
-                expressionService.convertExpression( values.get( FIELD_RIGHTSIDE_EXPRESSION ), dataElementMapping,
-                    categoryOptionComboMapping ) );
+            validationRule.getRightSide().setExpression( values.get( FIELD_RIGHTSIDE_EXPRESSION ) );
             validationRule.getRightSide().setDescription( values.get( FIELD_RIGHTSIDE_DESCRIPTION ) );
             validationRule.getRightSide().setDataElementsInExpression(
                 expressionService.getDataElementsInExpression( validationRule.getRightSide().getExpression() ) );
