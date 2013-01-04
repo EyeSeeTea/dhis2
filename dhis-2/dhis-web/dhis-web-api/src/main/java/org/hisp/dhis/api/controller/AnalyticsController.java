@@ -45,43 +45,115 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 @Controller
-@RequestMapping( "/analytics" )
 public class AnalyticsController
 {
+    private static final String RESOURCE_PATH = "/analytics";
     @Autowired
     private AnalyticsService analyticsService;
     
     @Autowired
     private ContextUtils contextUtils;
     
-    @RequestMapping( method = RequestMethod.GET, consumes = { "application/json" }, produces = { "application/json" } )
-    public String getJson( InputStream in,
+    //TODO URL only requests
+
+    // -------------------------------------------------------------------------
+    // Resources
+    // -------------------------------------------------------------------------
+  
+    @RequestMapping( value = RESOURCE_PATH, method = RequestMethod.GET, produces = { "application/json", "application/javascript" } )
+    public String getJson( InputStream in, // JSON, JSONP
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.NO_CACHE ); //TODO
-        
         DataQueryParams params = JacksonUtils.fromJson( in, DataQueryParams.class );
+
+        if ( !valid( params, response ) )
+        {
+            return null;
+        }
         
-        Grid grid = analyticsService.getAggregatedDataValueTotals( params );
-        
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.NO_CACHE ); //TODO        
+        Grid grid = analyticsService.getAggregatedDataValues( params );        
         model.addAttribute( "model", grid );
-        model.addAttribute( "viewClass", "detailed" );        
-        
+        model.addAttribute( "viewClass", "detailed" );
         return "grid";
     }
 
-    @RequestMapping( method = RequestMethod.GET, consumes = { "application/json" }, produces = { "application/xml" } )
+    @RequestMapping( value = RESOURCE_PATH + ".xml", method = RequestMethod.GET )
     public void getXml( InputStream in,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_XML, CacheStrategy.NO_CACHE ); //TODO
-        
         DataQueryParams params = JacksonUtils.fromJson( in, DataQueryParams.class );
-        
-        Grid grid = analyticsService.getAggregatedDataValueTotals( params );
 
+        if ( !valid( params, response ) )
+        {
+            return;
+        }
+        
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_XML, CacheStrategy.NO_CACHE ); //TODO        
+        Grid grid = analyticsService.getAggregatedDataValues( params );
         GridUtils.toXml( grid, response.getOutputStream() );
+    }
+    
+    @RequestMapping( value = RESOURCE_PATH + ".csv", method = RequestMethod.GET )
+    public void getCsv( InputStream in,
+        Model model,
+        HttpServletResponse response ) throws Exception
+    {
+        DataQueryParams params = JacksonUtils.fromJson( in, DataQueryParams.class );
+
+        if ( !valid( params, response ) )
+        {
+            return;
+        }
+        
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_CSV, CacheStrategy.NO_CACHE ); //TODO        
+        Grid grid = analyticsService.getAggregatedDataValues( params );
+        GridUtils.toCsv( grid, response.getOutputStream() );
+    }
+    
+    @RequestMapping( value = RESOURCE_PATH + ".html", method = RequestMethod.GET )
+    public void getHtml( InputStream in,
+        Model model,
+        HttpServletResponse response ) throws Exception
+    {
+        DataQueryParams params = JacksonUtils.fromJson( in, DataQueryParams.class );
+
+        if ( !valid( params, response ) )
+        {
+            return;
+        }
+        
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_HTML, CacheStrategy.NO_CACHE ); //TODO        
+        Grid grid = analyticsService.getAggregatedDataValues( params );
+        GridUtils.toHtml( grid, response.getWriter() );
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+  
+    private boolean valid( DataQueryParams params, HttpServletResponse response )
+    {
+        if ( params == null || params.getDimensions().isEmpty() )
+        {
+            ContextUtils.conflictResponse( response, "At least one dimension must be specified" );
+            return false;
+        }
+        
+        if ( !params.dimensionsAsFilters().isEmpty() )
+        {
+            ContextUtils.conflictResponse( response, "Dimensions cannot also be specified as filters: " + params.dimensionsAsFilters() );
+            return false;
+        }
+        
+        if ( !params.hasPeriods() )
+        {
+            ContextUtils.conflictResponse( response, "Periods must be specified as dimension or filter" );
+            return false;
+        }
+        
+        return true;        
     }
 }

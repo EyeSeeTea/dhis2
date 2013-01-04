@@ -27,42 +27,352 @@ package org.hisp.dhis.analytics.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
+import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.analytics.QueryPlanner;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Cal;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.QuarterlyPeriodType;
+import org.hisp.dhis.period.YearlyPeriodType;
+import org.hisp.dhis.system.util.ListMap;
 import org.junit.Test;
-
-import static org.hisp.dhis.analytics.DataQueryParams.*;
-import static org.junit.Assert.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class QueryPlannerTest
+    extends DhisSpringTest
 {
-    @Test
-    public void getPartitionDimension()
+    @Autowired
+    private QueryPlanner queryPlanner;
+    
+    @Autowired
+    private DataElementService dataElementService;
+    
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+
+    // -------------------------------------------------------------------------
+    // Fixture
+    // -------------------------------------------------------------------------
+
+    private DataElement deA;
+    private DataElement deB;
+    private DataElement deC;
+    private DataElement deD;
+    
+    private OrganisationUnit ouA;
+    private OrganisationUnit ouB;
+    private OrganisationUnit ouC;
+    private OrganisationUnit ouD;
+    private OrganisationUnit ouE;
+
+    @Override
+    public void setUpTest()
+    {
+        deA = createDataElement( 'A' );
+        deB = createDataElement( 'B' );
+        deC = createDataElement( 'C' );
+        deD = createDataElement( 'D' );
+        
+        dataElementService.addDataElement( deA );
+        dataElementService.addDataElement( deB );
+        dataElementService.addDataElement( deC );
+        dataElementService.addDataElement( deD );
+        
+        ouA = createOrganisationUnit( 'A' );
+        ouB = createOrganisationUnit( 'B' );
+        ouC = createOrganisationUnit( 'C' );
+        ouD = createOrganisationUnit( 'D' );
+        ouE = createOrganisationUnit( 'E' );
+        
+        organisationUnitService.addOrganisationUnit( ouA );
+        organisationUnitService.addOrganisationUnit( ouB );
+        organisationUnitService.addOrganisationUnit( ouC );
+        organisationUnitService.addOrganisationUnit( ouD );
+        organisationUnitService.addOrganisationUnit( ouE );
+    }
+
+    // -------------------------------------------------------------------------
+    // Tests
+    // -------------------------------------------------------------------------
+    
+    public void testGetDataPeriodAggregationPeriodMap()
     {
         DataQueryParams params = new DataQueryParams();
-        params.setDataElements( Arrays.asList( "a", "b", "c", "d" ) );
-        params.setOrganisationUnits( Arrays.asList( "a", "b", "c", "d", "e" ) );
+        params.setDataElements( Arrays.asList( deA.getUid(), deB.getUid(), deC.getUid(), deD.getUid() ) );
+        params.setOrganisationUnits( Arrays.asList( ouA.getUid(), ouB.getUid(), ouC.getUid(), ouD.getUid(), ouE.getUid() ) );
         params.setPeriods( Arrays.asList( "2000Q1", "2000Q2", "2000Q3", "2000Q4", "2001Q1", "2001Q2" ) );
+        params.setPeriodType( QuarterlyPeriodType.NAME );
+        params.setDataPeriodType( new YearlyPeriodType() );
         
-        assertEquals( DATAELEMENT_DIM_ID, QueryPlanner.getPartitionDimension( params, 3 ) );
-        assertEquals( DATAELEMENT_DIM_ID, QueryPlanner.getPartitionDimension( params, 4 ) );
-        assertEquals( ORGUNIT_DIM_ID, QueryPlanner.getPartitionDimension( params, 5 ) );
-        assertEquals( PERIOD_DIM_ID, QueryPlanner.getPartitionDimension( params, 6 ) );
-        assertEquals( PERIOD_DIM_ID, QueryPlanner.getPartitionDimension( params, 7 ) );
+        ListMap<String, String> map = params.getDataPeriodAggregationPeriodMap();
+        
+        assertEquals( 2, map.size() );
+        
+        assertTrue( map.keySet().contains( "2000" ) );
+        assertTrue( map.keySet().contains( "2001" ) );
+        
+        assertEquals( 4, map.get( "2000" ).size() );
+        assertEquals( 2, map.get( "2001" ).size() );
+        
+        assertTrue( map.get( "2000" ).contains( "2000Q1" ) );
+        assertTrue( map.get( "2000" ).contains( "2000Q2" ) );
+        assertTrue( map.get( "2000" ).contains( "2000Q3" ) );
+        assertTrue( map.get( "2000" ).contains( "2000Q4" ) );
+
+        assertTrue( map.get( "2001" ).contains( "2001Q1" ) );
+        assertTrue( map.get( "2001" ).contains( "2001Q2" ) );
     }
     
+    /**
+     * Query spans 2 partitions. Splits in 2 queries for each partition, then
+     * splits in 2 queries on organisation units to satisfy optimal for a total 
+     * of 4 queries.
+     */
     @Test
-    public void planQuery()
+    public void planQueryA()
     {
         DataQueryParams params = new DataQueryParams();
-        params.setDataElements( Arrays.asList( "a", "b", "c", "d" ) );
-        params.setOrganisationUnits( Arrays.asList( "a", "b", "c", "d", "e" ) );
+        params.setDataElements( Arrays.asList( deA.getUid(), deB.getUid(), deC.getUid(), deD.getUid() ) );
+        params.setOrganisationUnits( Arrays.asList( ouA.getUid(), ouB.getUid(), ouC.getUid(), ouD.getUid(), ouE.getUid() ) );
         params.setPeriods( Arrays.asList( "2000Q1", "2000Q2", "2000Q3", "2000Q4", "2001Q1", "2001Q2" ) );
         
-        List<DataQueryParams> queries = QueryPlanner.planQuery( params, 4 );
+        List<DataQueryParams> queries = queryPlanner.planQuery( params, 4 );
         
         assertEquals( 4, queries.size() );
+        
+        for ( DataQueryParams query : queries )
+        {
+            assertTrue( samePeriodType( query.getPeriods() ) );
+            assertTrue( samePartition( query.getPeriods() ) );
+        }
+    }
+    
+    /**
+     * Query spans 3 period types. Splits in 3 queries for each period type, then
+     * splits in 2 queries on organisation units to satisfy optimal for a total 
+     * of 6 queries.
+     */
+    @Test
+    public void planQueryB()
+    {
+        DataQueryParams params = new DataQueryParams();
+        params.setDataElements( Arrays.asList( deA.getUid(), deB.getUid(), deC.getUid(), deD.getUid() ) );
+        params.setOrganisationUnits( Arrays.asList( ouA.getUid(), ouB.getUid(), ouC.getUid(), ouD.getUid(), ouE.getUid() ) );
+        params.setPeriods( Arrays.asList( "2000Q1", "2000Q2", "2000", "200002", "200003", "200004" ) );
+        
+        List<DataQueryParams> queries = queryPlanner.planQuery( params, 4 );
+        
+        assertEquals( 6, queries.size() );
+        
+        for ( DataQueryParams query : queries )
+        {
+            assertTrue( samePeriodType( query.getPeriods() ) );
+            assertTrue( samePartition( query.getPeriods() ) );
+        }
+    }
+    
+    /**
+     * Query spans 3 organisation unit levels. Splits in 3 queries for each level,
+     * then splits in 2 queries on organisation units to satisfy optimal for a total 
+     * of 5 queries, as there are only 5 organisation units in total.
+     */
+    @Test
+    public void planQueryC()
+    {
+        ouB.setParent( ouA );
+        ouC.setParent( ouA );
+        ouD.setParent( ouB );
+        ouE.setParent( ouC );
+        ouA.getChildren().add( ouB );
+        ouA.getChildren().add( ouC );
+        ouD.getChildren().add( ouB );
+        ouC.getChildren().add( ouE );
+        organisationUnitService.updateOrganisationUnit( ouA );
+        organisationUnitService.updateOrganisationUnit( ouB );
+        organisationUnitService.updateOrganisationUnit( ouC );
+        organisationUnitService.updateOrganisationUnit( ouD );
+        organisationUnitService.updateOrganisationUnit( ouE );
+        
+        DataQueryParams params = new DataQueryParams();
+        params.setDataElements( Arrays.asList( deA.getUid(), deB.getUid(), deC.getUid(), deD.getUid() ) );
+        params.setOrganisationUnits( Arrays.asList( ouA.getUid(), ouB.getUid(), ouC.getUid(), ouD.getUid(), ouE.getUid() ) );
+        params.setPeriods( Arrays.asList( "2000Q1", "2000Q2", "2000Q3" ) );
+        
+        List<DataQueryParams> queries = queryPlanner.planQuery( params, 4 );
+        
+        assertEquals( 5, queries.size() );
+        
+        for ( DataQueryParams query : queries )
+        {
+            assertTrue( samePeriodType( query.getPeriods() ) );
+            assertTrue( samePartition( query.getPeriods() ) );
+        }
+    }
+    
+    /**
+     * Splits on 3 data elements.
+     */
+    @Test
+    public void planQueryD()
+    {
+        DataQueryParams params = new DataQueryParams();
+        params.setDataElements( Arrays.asList( deA.getUid(), deB.getUid(), deC.getUid() ) );
+        params.setOrganisationUnits( Arrays.asList( ouA.getUid() ) );
+        params.setPeriods( Arrays.asList( "200001", "200002", "200003", "200004", "200005", "200006", "200007", "200008", "200009" ) );
+        
+        List<DataQueryParams> queries = queryPlanner.planQuery( params, 4 );
+        
+        assertEquals( 3, queries.size() );
+        
+        for ( DataQueryParams query : queries )
+        {
+            assertTrue( samePeriodType( query.getPeriods() ) );
+            assertTrue( samePartition( query.getPeriods() ) );
+        }
+    }
+    
+    /**
+     * Splits on 3 data elements. No organisation units specified.
+     */
+    @Test
+    public void planQueryE()
+    {
+        DataQueryParams params = new DataQueryParams();
+        params.setDataElements( Arrays.asList( deA.getUid(), deB.getUid(), deC.getUid() ) );
+        params.setPeriods( Arrays.asList( "200001", "200002", "200003", "200004", "200005", "200006", "200007", "200008", "200009" ) );
+
+        List<DataQueryParams> queries = queryPlanner.planQuery( params, 4 );
+
+        assertEquals( 3, queries.size() );
+
+        for ( DataQueryParams query : queries )
+        {
+            assertTrue( samePeriodType( query.getPeriods() ) );
+            assertTrue( samePartition( query.getPeriods() ) );
+        }
+    }
+
+    /**
+     * Splits on 5 organisation units. No data elements units specified.
+     */
+    @Test
+    public void planQueryF()
+    {
+        DataQueryParams params = new DataQueryParams();
+        params.setOrganisationUnits( Arrays.asList( ouA.getUid(), ouB.getUid(), ouC.getUid(), ouD.getUid(), ouE.getUid() ) );
+        params.setPeriods( Arrays.asList( "200001", "200002", "200003", "200004", "200005", "200006", "200007", "200008", "200009" ) );
+
+        List<DataQueryParams> queries = queryPlanner.planQuery( params, 4 );
+
+        assertEquals( 3, queries.size() );
+
+        for ( DataQueryParams query : queries )
+        {
+            assertTrue( samePeriodType( query.getPeriods() ) );
+            assertTrue( samePartition( query.getPeriods() ) );
+        }
+    }
+    
+    /**
+     * Expected to fail because of no periods specified.
+     */
+    @Test( expected = IllegalArgumentException.class )
+    public void planQueryG()
+    {
+        DataQueryParams params = new DataQueryParams();
+        params.setDataElements( Arrays.asList( deA.getUid(), deB.getUid(), deC.getUid() ) );
+        params.setOrganisationUnits( Arrays.asList( ouA.getUid(), ouB.getUid(), ouC.getUid(), ouD.getUid(), ouE.getUid() ) );
+
+        queryPlanner.planQuery( params, 4 );
+    }
+
+    /**
+     * Query filters span 2 partitions. Splits in 2 queries for each partition, 
+     * then splits in 2 queries on organisation units to satisfy optimal for a 
+     * total of 4 queries.
+     */
+    @Test
+    public void planQueryH()
+    {
+        DataQueryParams params = new DataQueryParams();
+        params.setDataElements( Arrays.asList( deA.getUid(), deB.getUid(), deC.getUid(), deD.getUid() ) );
+        params.setOrganisationUnits( Arrays.asList( ouA.getUid(), ouB.getUid(), ouC.getUid(), ouD.getUid(), ouE.getUid() ) );
+        params.setFilterPeriods( Arrays.asList( "2000Q1", "2000Q2", "2000Q3", "2000Q4", "2001Q1", "2001Q2" ) );
+        
+        List<DataQueryParams> queries = queryPlanner.planQuery( params, 4 );
+        
+        assertEquals( 4, queries.size() );
+    }
+
+    /**
+     * Query spans 3 period types. Splits in 3 queries for each period type, then
+     * splits in 2 queries on data elements units to satisfy optimal for a total 
+     * of 6 queries.
+     */
+    @Test
+    public void planQueryI()
+    {
+        DataQueryParams params = new DataQueryParams();
+        params.setDataElements( Arrays.asList( deA.getUid(), deB.getUid(), deC.getUid(), deD.getUid() ) );
+        params.setFilterOrganisationUnits( Arrays.asList( ouA.getUid(), ouB.getUid(), ouC.getUid(), ouD.getUid(), ouE.getUid() ) );
+        params.setPeriods( Arrays.asList( "2000Q1", "2000Q2", "2000", "200002", "200003", "200004" ) );
+        
+        List<DataQueryParams> queries = queryPlanner.planQuery( params, 4 );
+        
+        assertEquals( 6, queries.size() );
+    }
+    
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private static boolean samePeriodType( List<String> isoPeriods )
+    {
+        Iterator<String> periods = new ArrayList<String>( isoPeriods ).iterator();
+        
+        PeriodType first = PeriodType.getPeriodTypeFromIsoString( periods.next() );
+        
+        while ( periods.hasNext() )
+        {
+            PeriodType next = PeriodType.getPeriodTypeFromIsoString( periods.next() );
+            
+            if ( !first.equals( next ) )
+            {   
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private static boolean samePartition( List<String> isoPeriods )
+    {
+        Iterator<String> periods = new ArrayList<String>( isoPeriods ).iterator();
+        
+        int year = new Cal().set( PeriodType.getPeriodFromIsoString( periods.next() ).getStartDate() ).getYear();
+        
+        while ( periods.hasNext() )
+        {
+            int next = new Cal().set( PeriodType.getPeriodFromIsoString( periods.next() ).getStartDate() ).getYear();
+            
+            if ( year != next )
+            {   
+                return false;
+            }
+        }
+        
+        return true;
     }
 }

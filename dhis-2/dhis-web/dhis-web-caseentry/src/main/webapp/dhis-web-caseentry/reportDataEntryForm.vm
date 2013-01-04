@@ -8,7 +8,7 @@
 		#if( $patient )
 			<tr>            
 				<td>
-					<span class='bold'>$i18n.getString( "full_name" ):</span>
+					<span class='bold' id="patientName">$i18n.getString( "full_name" ):</span>
 				</td>
 				<td>
 					$encoder.htmlEncode( $patient.getFullName() ) ( $i18n.getString( "$patient.gender" ) )
@@ -26,6 +26,12 @@
 				<td class='bold text-column' style="vertical-align:top">$i18n.getString('program_stage'): </td>
 				<td style="vertical-align:right">$programStageInstance.programStage.name</td>
 			</tr>
+			#foreach( $attributeName in $calAttributeValueMap.keySet() )
+			<tr>
+				<td class='bold text-column'>$attributeName</td>
+				<td>$calAttributeValueMap.get($attributeName)</td>
+			</tr>
+			#end
 			<tr><td>&nbsp;</td></tr>
 		#end
 		
@@ -62,6 +68,7 @@
 			enable('completeBtn');
 			disable('uncompleteBtn');
 		#end
+		setInnerHTML("patientNameLbl", "&raquo; " + "$encoder.jsEncode( $patient.getFullName() )");
 	});
 	
 	var i18n_value_must_integer = '$encoder.jsEscape( $i18n.getString( "value_must_integer" ) , "'")';

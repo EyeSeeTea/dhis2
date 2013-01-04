@@ -1,7 +1,7 @@
 package org.hisp.dhis.reportsheet.preview.action;
 
 /*
- * Copyright (c) 2004-2011, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,38 +27,61 @@ package org.hisp.dhis.reportsheet.preview.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.Set;
-
-import com.opensymphony.xwork2.Action;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
 
 /**
- * @author
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class TestAction
-    implements Action
+
+public class XSSFHtmlHelper
+    implements HtmlHelper
 {
-    // TODO remove not required with struts2
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
+    public String colorStyle( String type, CellStyle style )
     {
-        Set<Integer> collectSheets = new HashSet<Integer>();
-        collectSheets.add( 1 );
-
-        try
+        if ( type == null || type.trim().isEmpty() )
         {
-//            new AutoGenerateFormByTemplate( "d:\\template_file.xls", collectSheets );
-        }
-        catch ( Exception e )
-        {
-            System.out.println( e.getMessage() );
+            return EMPTY;
         }
 
-        return SUCCESS;
+        XSSFCellStyle cellStyle = (XSSFCellStyle) style;
+
+        XSSFColor color = null;
+
+        if ( type.equals( FOREGROUND_COLOR ) )
+        {
+            color = cellStyle.getFillForegroundXSSFColor();
+        }
+        else
+        {
+            color = cellStyle.getFont().getXSSFColor();
+        }
+
+        if ( color == null || color.isAuto() )
+        {
+            return EMPTY;
+        }
+
+        byte[] rgb = color.getRgb();
+
+        if ( rgb == null )
+        {
+            return EMPTY;
+        }
+
+        // This is done twice -- rgba is new with CSS 3, and browser that don't
+        // support it will ignore the rgba specification and stick with the
+        // solid color, which is declared first
+
+        byte[] argb = color.getARgb();
+
+        if ( argb == null )
+        {
+            return EMPTY;
+        }
+
+        return "rgb(" + argb[3] + "," + argb[0] + "," + argb[1] + "," + argb[2] + ")";
     }
-
 }

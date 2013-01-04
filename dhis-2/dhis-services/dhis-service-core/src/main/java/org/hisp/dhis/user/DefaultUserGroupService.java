@@ -116,5 +116,4 @@ public class DefaultUserGroupService implements UserGroupService
     {
         return userGroupStore.getBetweenByName( name, first, max );
     }
-
 }

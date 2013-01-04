@@ -35,7 +35,9 @@ function uploadExcelTemplateForGenerateForm()
 		{ 'draft': true, 'allowNewName': false },
 		function( data, e ) {
 			try {
-				window.location.reload();
+				if ( window.confirm( i18n_generate_form_confirm ) ) {
+					autoGenerateFormByTemplate();
+				} else return;
 			}
 			catch(e) {
 				alert(e);
@@ -60,12 +62,52 @@ function autoGenerateFormByTemplateReceived( parentElement )
 {
 	var type = getElementAttribute( parentElement, 'message', 'type' );
 	
-	if ( type && type == 'error' )
+	if ( type && type == 'input' )
 	{
-		showErrorMessage( parentElement.firstChild.nodeValue );
+		var messageTag = parentElement.getElementsByTagName( 'message' )[0];
+		showErrorMessage( messageTag.firstChild.nodeValue, 5000 );
 	}
-	else
-	{	
+	else if ( type && type == 'error' )
+	{
+		var messageTag 			= parentElement.getElementsByTagName( 'message' )[0];
+		var dataElementTag 		= parentElement.getElementsByTagName( 'dataElements' )[0];
+		var indicatorTag		= parentElement.getElementsByTagName( 'indicators' )[0];
+		var validationRuleTag	= parentElement.getElementsByTagName( 'validationRules' )[0];
+
+		var dataElements 		= dataElementTag.getElementsByTagName( 'id' );
+		var indicators 			= indicatorTag.getElementsByTagName( 'id' );
+		var validationRules 	= validationRuleTag.getElementsByTagName( 'id' );
+		
+		var reportId = getElementAttribute( parentElement, 'exportReport', 'id' );
+		var dataSetId = getElementAttribute( parentElement, 'dataSet', 'id' );
+		
+		var url = 'autoGenerateFormRollback.action?';
+
+		for ( var i  = 0 ; i < dataElements.length ; i ++ )
+		{
+			url += 'dataElementIds=' + dataElements[i].firstChild.nodeValue + '&';
+		}
+		for ( var i  = 0 ; i < indicators.length ; i ++ )
+		{
+			url += 'indicatorIds=' + indicators[i].firstChild.nodeValue + '&';
+		}
+		for ( var i  = 0 ; i < validationRules.length ; i ++ )
+		{
+			url += 'validationRuleIds=' + validationRules[i].firstChild.nodeValue + '&';
+		}
+		
+		url += 'exportReportId=' + reportId + '&dataSetId=' + dataSetId + '&message=' + messageTag.firstChild.nodeValue;
+		
+		jQuery.post( url, {}, function( json ) {
+			if ( json.response == "success" ) {
+				showWarningMessage( json.message, 8000 );
+			} else {
+				showErrorMessage( json.message, 5000 );
+			}
+		} );
+	}
+	else if ( type && type == 'success' )
+	{
 		var aKey 	= new Array();
 		var aMerged = new Array();	
 		var cells 	= parentElement.getElementsByTagName( 'cell' );
@@ -92,7 +134,7 @@ function autoGenerateFormByTemplateReceived( parentElement )
 			_rows 		= _sheets[s].getElementsByTagName( 'row' );
 			_orderSheet	= getRootElementAttribute( _sheets[s], "id" );
 
-			_sHTML.push( "<table>" );
+			_sHTML.push( "<table cellspacing='1'><tbody>" );
 
 			for (var i = 0 ; i < _rows.length ; i ++)
 			{
@@ -109,7 +151,7 @@ function autoGenerateFormByTemplateReceived( parentElement )
 					// Printing out the unformatted cells
 					for (; _index < _number ; _index ++)
 					{
-						_sHTML.push( "<td/>" );
+						_sHTML.push( "<td>&nbsp;</td>" );
 					}
 
 					if ( _index == _number )
@@ -117,10 +159,12 @@ function autoGenerateFormByTemplateReceived( parentElement )
 						var _sData		= getElementValue( _cols[j], 'data' );
 						var _align		= getElementAttribute( _cols[j], 'format', 'a' );
 						var _border		= getElementAttribute( _cols[j], 'format', 'b' );
+						var _width		= getElementAttribute( _cols[j], 'format', 'w' );
 						var _size		= getElementAttribute( _cols[j], 'font', 's' );
 						var _bold		= getElementAttribute( _cols[j], 'font', 'b' );
 						var _italic		= getElementAttribute( _cols[j], 'font', 'i' );
-						var _color		= getElementAttribute( _cols[j], 'font', 'c' );
+						var _fcolor		= getElementAttribute( _cols[j], 'font', 'c' );
+						var _bgcolor	= getElementAttribute( _cols[j], 'bg', 'c' );
 
 						// If this cell is merged - Key's form: Sheet#Row#Col
 						_sPattern 		=  _orderSheet + "#" + i + "#" + _number;
@@ -131,33 +175,43 @@ function autoGenerateFormByTemplateReceived( parentElement )
 						_index 	= Number(_index) + Number(_colspan);
 						_size	= Number(_size) + 2;
 
-						_sHTML.push( "<td align='", _align, "' colspan='", _colspan, "'" );
-						_sHTML.push( " style='font-size:", _size, "px" );
-						_sHTML.push( _color == "" ? "'" : ";color:" + _color + "'" );
-						_sHTML.push( _border > 0 ? " ui-widget-content" : "" );
-
+						// style for <td>
+						_sHTML.push( "<td colspan='", _colspan, "'" );
+						_sHTML.push( " style='text-align: ", _align, ";" );
+						_sHTML.push( _bgcolor == "" ? "" : " background-color: " + _bgcolor + ";" );
+						_sHTML.push( _width > 0 ? " width: " + _width + ";" : "" );
+						_sHTML.push( "'>" );
+						
 						if ( _bold == "1" )
 						{
-							_sData = "<b>" + _sData + "</b>";
+							_sData = "<strong>" + _sData + "<strong>";
 						}
 						if ( _italic == "true" )
 						{
 							_sData = "<i>" + _sData + "</i>";
 						}
+						if ( _size > 0 )
+						{
+							_sData = "<span style='font-size: " + _size + "px;'>" + _sData + "</span>";
+						}
+						if ( _fcolor != "" )
+						{
+							_sData = "<span style='color:" + _fcolor + ";'>" + _sData + "</span>";
+						}
 						
-						_sHTML.push( "'>", _sData, "</td>" );
+						_sHTML.push( _sData, "</td>" );
 					}
 				}
 				_sHTML.push( "</tr>" );
 			}
-			_sHTML.push( "</table>" );
+			_sHTML.push( "</tbody></table>" );
 		}
 
 		//jQuery( '#previewDiv' ).html( _sHTML.join('') );
 		//showById( "previewDiv" );
 			
 		unLockScreen();
-		showSuccessMessage( i18n_auto_generate_form_completed );
+		showSuccessMessage( i18n_auto_generate_form_completed, 3000 );
 
 		if ( _sHTML.length > 0 )
 		{

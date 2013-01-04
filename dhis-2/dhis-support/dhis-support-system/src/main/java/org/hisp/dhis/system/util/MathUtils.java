@@ -149,7 +149,7 @@ public class MathUtils
      * @param significantFigures
      * @return
      */
-    public static String roundToString(double value, int significantFigures)
+    public static String roundToString( double value, int significantFigures )
     {
         MathContext mc = new MathContext(significantFigures);
         BigDecimal num = new BigDecimal(value);
@@ -178,6 +178,22 @@ public class MathUtils
     public static int getMax( int number, int max )
     {
         return number > max ? max : number;
+    }
+    
+    /**
+     * Returns the given value if between the min and max value. If lower than
+     * minimum, returns minimum, if higher than maximum, returns maximum.
+     * 
+     * @param value the value.
+     * @param min the minimum value.
+     * @param max the maximum value.
+     * @return an integer value.
+     */
+    public static int getWithin( int value, int min, int max )
+    {
+        value = Math.max( value, min );
+        value = Math.min( value, max );
+        return value;
     }
     
     /**
@@ -414,5 +430,19 @@ public class MathUtils
     {
         double deviation = stdDev * stdDevFactor;
         return average + deviation;
+    }
+    
+    /**
+     * Performs a division and rounds upwards to the next integer.
+     * 
+     * @param numerator the numerator.
+     * @param denominator the denominator.
+     * @return an integer value.
+     */
+    public static int divideToCeil( int numerator, int denominator )
+    {
+        Double result = Math.ceil( (double) numerator / denominator );
+        
+        return result.intValue();
     }
 }

@@ -27,6 +27,7 @@ package org.hisp.dhis.analytics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
@@ -94,11 +95,12 @@ public interface AnalyticsTableManager
     Date getLatestData();
     
     /**
-     * Checks whether the given table has no rows, if so drops the table.
+     * Checks whether the given table has no rows, if so drops the table. Returns
+     * true if the table was empty and pruned, if not false.
      * 
      * @param tableName the name of the table to prune.
      */
-    void pruneTable( String tableName );
+    boolean pruneTable( String tableName );
     
     /**
      * Drops the given table.
@@ -106,4 +108,23 @@ public interface AnalyticsTableManager
      * @param tableName the name of the table to drop.
      */
     void dropTable( String tableName );
+    
+    /**
+     * Applies aggregation level logic to the analytics table by setting the
+     * organisation unit level column values to null for the levels above the
+     * given aggregation level.
+     * 
+     * @param tableName the name of the analytics table.
+     * @param dataElements the data element uids to apply aggregation levels for.
+     * @param aggregationLevel the aggregation level.
+     */
+    void applyAggregationLevels( String tableName, Collection<String> dataElements, int aggregationLevel );
+    
+    /**
+     * Performs vacuum or optimization of the given table. The type of operation
+     * performed is dependent on the underlying DBMS.
+     * 
+     * @param tableName the name of the analytics table.
+     */
+    Future<?> vacuumTableAsync( String tableName );
 }

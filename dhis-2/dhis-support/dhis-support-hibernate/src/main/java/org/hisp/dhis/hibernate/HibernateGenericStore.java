@@ -52,7 +52,6 @@ import java.util.List;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class HibernateGenericStore<T>
     implements GenericNameableObjectStore<T>
@@ -182,7 +181,7 @@ public class HibernateGenericStore<T>
      * @param expressions the Criterions for the Criteria.
      * @return an object of the implementation Class type.
      */
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     protected final T getObject( Criterion... expressions )
     {
         return (T) getCriteria( expressions ).uniqueResult();
@@ -194,7 +193,7 @@ public class HibernateGenericStore<T>
      * @param expressions the Criterions for the Criteria.
      * @return a List with objects of the implementation Class type.
      */
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     protected final List<T> getList( Criterion... expressions )
     {
         return getCriteria( expressions ).list();
@@ -227,21 +226,21 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public final T get( int id )
     {
-        T object = (T) sessionFactory.getCurrentSession().get( getClazz(), id );
         // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
+        T object = (T) sessionFactory.getCurrentSession().get( getClazz(), id );
 
         return object;
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public final T load( int id )
     {
-        T object = (T) sessionFactory.getCurrentSession().load( getClazz(), id );
         // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
+        T object = (T) sessionFactory.getCurrentSession().load( getClazz(), id );
 
         return object;
     }
@@ -249,8 +248,8 @@ public class HibernateGenericStore<T>
     @Override
     public final T getByUid( String uid )
     {
-        T object = getObject( Restrictions.eq( "uid", uid ) );
         // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
+        T object = getObject( Restrictions.eq( "uid", uid ) );
 
         return object;
     }
@@ -258,8 +257,8 @@ public class HibernateGenericStore<T>
     @Override
     public final T getByName( String name )
     {
-        T object = getObject( Restrictions.eq( "name", name ) );
         // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
+        T object = getObject( Restrictions.eq( "name", name ) );
 
         return object;
     }
@@ -267,8 +266,8 @@ public class HibernateGenericStore<T>
     @Override
     public final T getByShortName( String shortName )
     {
-        T object = getObject( Restrictions.eq( "shortName", shortName ) );
         // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
+        T object = getObject( Restrictions.eq( "shortName", shortName ) );
 
         return object;
     }
@@ -276,28 +275,28 @@ public class HibernateGenericStore<T>
     @Override
     public final T getByCode( String code )
     {
-        T object = getObject( Restrictions.eq( "code", code ) );
         // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
+        T object = getObject( Restrictions.eq( "code", code ) );
 
         return object;
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<T> getLikeName( String name )
     {
         return getCriteria().add( Restrictions.ilike( "name", "%" + name + "%" ) ).list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public final Collection<T> getAll()
     {
         return getCriteria().list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public final Collection<T> getAllSorted()
     {
         return getCriteria().addOrder( Order.asc( "name" ) ).list();
@@ -306,11 +305,12 @@ public class HibernateGenericStore<T>
     @Override
     public final void delete( T object )
     {
+        AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_DELETE );
         sessionFactory.getCurrentSession().delete( object );
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<T> getBetween( int first, int max )
     {
         Criteria criteria = getCriteria();
@@ -321,7 +321,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getBetweenOrderderByLastUpdated( int first, int max )
     {
         Criteria criteria = getCriteria();
@@ -332,7 +332,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<T> getBetweenByName( String name, int first, int max )
     {
         Criteria criteria = getCriteria();
@@ -382,21 +382,21 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getByLastUpdated( Date lastUpdated )
     {
         return getCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getByCreated( Date created )
     {
         return getCriteria().add( Restrictions.ge( "created", created ) ).list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getByLastUpdatedSorted( Date lastUpdated )
     {
         return getCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).addOrder( Order.asc( "name" ) ).list();
@@ -411,14 +411,14 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<T> getByUser( User user )
     {
         return getCriteria( Restrictions.eq( "user", user ) ).list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAccessibleByUser( User user )
     {
         //TODO link to interface
@@ -430,7 +430,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAccessibleByLastUpdated( User user, Date lastUpdated )
     {
         Criteria criteria = getCriteria();
@@ -440,7 +440,7 @@ public class HibernateGenericStore<T>
         return criteria.list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAccessibleLikeName( User user, String name )
     {
         Criteria criteria = getCriteria();
@@ -451,7 +451,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAccessibleBetween( User user, int first, int max )
     {
         Criteria criteria = getCriteria();
@@ -462,7 +462,7 @@ public class HibernateGenericStore<T>
         return criteria.list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAccessibleBetweenLikeName( User user, String name, int first, int max )
     {
         Criteria criteria = getCriteria();

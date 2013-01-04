@@ -37,9 +37,11 @@ import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsTableManager;
+import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
@@ -50,6 +52,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
+
+import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
 
 /**
  * This class manages the analytics table. The analytics table is a denormalized
@@ -86,6 +90,9 @@ public class JdbcAnalyticsTableManager
     private OrganisationUnitGroupService organisationUnitGroupService;
    
     @Autowired
+    private StatementBuilder statementBuilder;
+    
+    @Autowired
     private JdbcTemplate jdbcTemplate;
     
     // -------------------------------------------------------------------------
@@ -107,7 +114,7 @@ public class JdbcAnalyticsTableManager
             sqlCreate += col[0] + " " + col[1] + ",";
         }
         
-        sqlCreate += "value double precision)";
+        sqlCreate += "daysxvalue double precision, value double precision)";
         
         log.info( "Create SQL: " + sqlCreate );
         
@@ -151,7 +158,7 @@ public class JdbcAnalyticsTableManager
     {
         populateTable( tableName, startDate, endDate, "cast(dv.value as double precision)", "int" );
         
-        populateTable( tableName, startDate, endDate, "1 as value" , "bool" );
+        populateTable( tableName, startDate, endDate, "1" , "bool" );
         
         return null;
     }
@@ -168,7 +175,7 @@ public class JdbcAnalyticsTableManager
             insert += col[0] + ",";
         }
         
-        insert += "value) ";
+        insert += "daysxvalue, value) ";
         
         String select = "select ";
         
@@ -179,18 +186,22 @@ public class JdbcAnalyticsTableManager
         
         select = select.replace( "organisationunitid", "sourceid" ); // Legacy fix
         
-        select += valueExpression + " " +
+        select += 
+            valueExpression + " * ps.daysno as value, " +
+            valueExpression + " as value " +
             "from datavalue dv " +
             "left join _dataelementgroupsetstructure degs on dv.dataelementid=degs.dataelementid " +
             "left join _organisationunitgroupsetstructure ougs on dv.sourceid=ougs.organisationunitid " +
             "left join _orgunitstructure ous on dv.sourceid=ous.organisationunitid " +
-            "left join _period_no_disagg_structure ps on dv.periodid=ps.periodid " +
+            "left join _periodstructure ps on dv.periodid=ps.periodid " +
             "left join dataelement de on dv.dataelementid=de.dataelementid " +
             "left join categoryoptioncombo coc on dv.categoryoptioncomboid=coc.categoryoptioncomboid " +
             "left join period pe on dv.periodid=pe.periodid " +
             "where de.valuetype='" + valueType + "' " +
             "and pe.startdate >= '" + start + "' " +
-            "and pe.startdate <= '" + end + "'";
+            "and pe.startdate <= '" + end + "'" +
+            "and dv.value != ''" +
+            "and dv.value is not null";
 
         final String sql = insert + select;
         
@@ -247,8 +258,9 @@ public class JdbcAnalyticsTableManager
         
         String[] de = { "de", "character(11) not null", "de.uid" };
         String[] co = { "coc", "character(11) not null", "coc.uid" };
+        String[] level = { "level", "integer", "ous.level" };
         
-        columns.addAll( Arrays.asList( de, co ) );
+        columns.addAll( Arrays.asList( de, co, level ) );
         
         return columns;
     }
@@ -283,7 +295,7 @@ public class JdbcAnalyticsTableManager
         return jdbcTemplate.queryForObject( sql, Date.class );
     }
     
-    public void pruneTable( String tableName )
+    public boolean pruneTable( String tableName )
     {
         final String sqlCount = "select count(*) from " + tableName;
         
@@ -298,7 +310,11 @@ public class JdbcAnalyticsTableManager
             executeSilently( sqlDrop );
             
             log.info( "Drop SQL: " + sqlDrop );
+            
+            return true;
         }
+        
+        return false;
     }
     
     public void dropTable( String tableName )
@@ -307,6 +323,41 @@ public class JdbcAnalyticsTableManager
         
         executeSilently( "drop table " + tableName );
         executeSilently( "drop table " + realTable );
+    }
+    
+    public void applyAggregationLevels( String tableName, Collection<String> dataElements, int aggregationLevel )
+    {
+        StringBuilder sql = new StringBuilder( "update " + tableName + " set " );
+        
+        for ( int i = 0; i < aggregationLevel; i++ )
+        {
+            int level = i + 1;
+            
+            String column = DataQueryParams.LEVEL_PREFIX + level;
+            
+            sql.append( column + " = null," );
+        }
+        
+        sql.deleteCharAt( sql.length() - ",".length() );
+        
+        sql.append( " where level > " + aggregationLevel );
+        sql.append( " and de in (" + getQuotedCommaDelimitedString( dataElements ) + ")" );
+        
+        log.info( "Aggregation level SQL: " + sql.toString() );
+        
+        jdbcTemplate.execute( sql.toString() );
+    }
+    
+    @Async
+    public Future<?> vacuumTableAsync( String tableName )
+    {
+        final String sql = statementBuilder.getVacuum( tableName );
+        
+        log.info( "Vacuum SQL:" + sql );
+        
+        jdbcTemplate.execute( sql );
+        
+        return null;
     }
     
     // -------------------------------------------------------------------------

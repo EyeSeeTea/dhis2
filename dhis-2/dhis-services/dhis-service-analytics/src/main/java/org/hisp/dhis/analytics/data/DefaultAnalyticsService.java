@@ -36,30 +36,33 @@ import java.util.concurrent.Future;
 import org.hisp.dhis.analytics.AnalyticsManager;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.analytics.QueryPlanner;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.system.grid.ListGrid;
+import org.hisp.dhis.system.util.MathUtils;
+import org.hisp.dhis.system.util.SystemUtils;
 import org.hisp.dhis.system.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.hisp.dhis.analytics.AnalyticsManager.SEP;
 
 public class DefaultAnalyticsService
     implements AnalyticsService
 {
-    private static final String VALUE_NAME = "value";
     private static final String VALUE_HEADER_NAME = "Value";
     
-    //TODO period aggregation for multiple period types
-    //TODO hierarchy aggregation for org units at multiple levels
     //TODO indicator aggregation
     //TODO category sub-totals and totals
     
     @Autowired
     private AnalyticsManager analyticsManager;
     
-    public Grid getAggregatedDataValueTotals( DataQueryParams params ) throws Exception
+    @Autowired
+    private QueryPlanner queryPlanner;
+    
+    public Grid getAggregatedDataValues( DataQueryParams params ) throws Exception
     {
-        Map<String, Double> map = getAggregatedDataValueMap( params );
-        
         Grid grid = new ListGrid();
         
         for ( String col : params.getDimensionNames() )
@@ -67,12 +70,14 @@ public class DefaultAnalyticsService
             grid.addHeader( new GridHeader( col, col, String.class.getName(), false, true ) );
         }
         
-        grid.addHeader( new GridHeader( VALUE_NAME, VALUE_HEADER_NAME, Double.class.getName(), false, false ) );
+        grid.addHeader( new GridHeader( DataQueryParams.VALUE_ID, VALUE_HEADER_NAME, Double.class.getName(), false, false ) );
+
+        Map<String, Double> map = getAggregatedDataValueMap( params );
         
         for ( Map.Entry<String, Double> entry : map.entrySet() )
         {
             grid.addRow();
-            grid.addValues( entry.getKey().split( AnalyticsManager.SEP ) );
+            grid.addValues( entry.getKey().split( String.valueOf( SEP ) ) );
             grid.addValue( entry.getValue() );
         }
         
@@ -83,9 +88,11 @@ public class DefaultAnalyticsService
     {
         Timer t = new Timer().start();
 
-        List<DataQueryParams> queries = QueryPlanner.planQuery( params, 6 );
+        int optimalQueries = MathUtils.getWithin( SystemUtils.getCpuCores(), 1, 6 );
         
-        t.getTime( "Planned query" );
+        List<DataQueryParams> queries = queryPlanner.planQuery( params, optimalQueries );
+        
+        t.getTime( "Planned query for optimal: " + optimalQueries + ", got: " + queries.size() );
         
         List<Future<Map<String, Double>>> futures = new ArrayList<Future<Map<String, Double>>>();
         
@@ -93,7 +100,7 @@ public class DefaultAnalyticsService
         
         for ( DataQueryParams query : queries )
         {
-            futures.add( analyticsManager.getAggregatedDataValueTotals( query ) );
+            futures.add( analyticsManager.getAggregatedDataValues( query ) );
         }
         
         for ( Future<Map<String, Double>> future : futures )
@@ -109,5 +116,5 @@ public class DefaultAnalyticsService
         t.getTime( "Got aggregated values" );
         
         return map;
-    }
+    } 
 }

@@ -1,6 +1,29 @@
 Ext.onReady( function() {
 
+
 var pt = {};
+
+pt.request = {
+    "dimensions": {
+        "in": [
+			"Uvn6LCg7dVU",
+			"OdiHJayrsKo",
+            "sB79w2hiLp8",
+            "AUqdhY4mpvp"
+        ],
+        "pe": [
+            "201201",
+            "201202",
+            "201203"
+        ]
+    },
+    "categories": false,
+    "filters": {
+        "ou": [
+            "ImspTQPwCqd"
+        ]
+    }
+};
 
 pt.response = {
     "headers": [
@@ -100,8 +123,8 @@ pt.response = {
 	//}
 
 pt.settings = {
-	col: ['de', 'ou', 'coc'],
-	row: ['J5jldMd8OHv', 'pe']
+	col: ['de', 'J5jldMd8OHv', 'ou', 'coc'],
+	row: ['pe']
 };
 
 var extendResponse = function(pt) {
@@ -326,7 +349,7 @@ var getTablePanel = function(pt) {
 		renderTo: Ext.get('pivottable'),
 		layout: {
 			type: 'table',
-			columns: pt.config.cols.size + pt.config.rows.dims
+			columns: pt.config.cols.size + pt.config.rows.dims + 1
 		},
 		defaults: {
 			baseCls: 'td'
@@ -358,6 +381,14 @@ var getColItems = function(pt) {
 				colspan: colSpan,
 				baseCls: 'dim'
 			});
+
+			if (i === 0 && j === (dimItems.length - 1)) {
+				colItems.push({
+					html: 'Total',
+					rowspan: cols.dims,
+					baseCls: 'dimtotal'
+				});
+			}
 		}
 	}
 
@@ -366,19 +397,42 @@ var getColItems = function(pt) {
 
 var getRowItems = function(pt) {
 	var response = pt.response,
-		rowItems = [],
 		rows = pt.config.rows,
 		cols = pt.config.cols,
 		size = rows.size,
 		dims = rows.dims,
-		allObjects = rows.items.allObjects;
+		allObjects = rows.items.allObjects,
+		dimHtmlItems = [],
+		valueItems = [],
+		valueHtmlItems = [],
+		totalRowItems = [],
+		totalRowHtmlItems = [],
+		totalColItems = [],
+		totalColHtmlItems = [];
+
+	// Value items
+	for (var i = 0, row; i < size; i++) {
+		row = [];
+
+		for (var j = 0, id, value, row; j < pt.config.cols.size; j++) {
+			id = cols.ids[j] + rows.ids[i];
+			row.push(response.idValueMap[id]);
+		}
+
+		valueItems.push(row);
+	}
+
+
+
+
+
 
 	for (var i = 0; i < size; i++) {
 		for (var j = 0, object; j < dims; j++) {
 			object = allObjects[j][i];
 
 			if (object.rowSpan) {
-				rowItems.push({
+				dimItems.push({
 					html: response.metaData[object.id],
 					rowspan: object.rowSpan,
 					baseCls: 'dim'
@@ -390,9 +444,9 @@ var getRowItems = function(pt) {
 		for (var j = 0, id, value, cls; j < pt.config.cols.size; j++) {
 			id = cols.ids[j] + rows.ids[i];
 			value = response.idValueMap[id];
-			cls = parseFloat(value) < 333 ? 'bad' : (parseFloat(value) < 666 ? 'medium' : 'good');
+			cls = parseFloat(value) < 333 ? 'bad' : (parseFloat(value) < 666 ? 'medium' : 'good'); //simplistic legendset
 
-			rowItems.push({
+			dimItems.push({
 				id: id,
 				value: value,
 				html: value,
@@ -402,7 +456,7 @@ var getRowItems = function(pt) {
 		}
 	}
 
-	return rowItems;
+	return dimItems;
 };
 
 var createTableArray = function(pt) {
@@ -416,8 +470,19 @@ var createTableArray = function(pt) {
 	panel.add(getRowItems(pt));
 };
 
-
 var initialize = function() {
+
+	//Ext.Ajax.request({
+		//method: 'POST',
+		//url: 'http://localhost:8080/api/analytics',
+		//headers: {'Content-Type': 'application/json'},
+		//jsonData: pt.request,
+		//success: function(r) {
+			//console.log(r);
+		//}
+	//});
+
+
 	extendResponse(pt, pt);
 
 	pt.config = getDims(pt, pt);
@@ -426,10 +491,6 @@ var initialize = function() {
 	extendRowDims(pt.config.rows);
 
 	var panel = createTableArray(pt);
-
-	//generate();
-
-
 }();
 
 });

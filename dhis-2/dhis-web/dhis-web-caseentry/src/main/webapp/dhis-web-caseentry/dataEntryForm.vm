@@ -26,8 +26,31 @@
 <input type='hidden' name='programStageId' id='programStageId' value='$!programStageInstance.programStage.id'>
 <input type='hidden' name='programId' id='programId' value='$!programStageInstance.programInstance.program.id'>
 <input type='hidden' name='validCompleteOnly' id='validCompleteOnly' value='$!programStageInstance.programStage.validCompleteOnly'>
+<input type='hidden' id='currentUsername' name='currentUsername' value='$!currentUsername'>
 
 <div id='entryForm' #if($!programStageInstance.executionDate) class='visible' #else class='hidden' #end>					
+	<table id="postCommentTbl" class="hidden">
+		<tr>
+			<td class="text-column">$i18n.getString('post_comment'):</td>
+			<td><input type="text" class="{validate:{maxlength:160}}" name="comment_$programStageInstance.id" id="comment_$programStageInstance.id" style="width:450px;" onkeypress="keypressOnComent(event,this,$programStageInstance.id);"></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td colspan='3'>
+				<table>
+					<tbody id="commentTB">
+						#foreach( $comment in $programStageInstance.patientComments )
+						<tr>
+							<td>$format.formatDateTime($comment.createdDate) </td>
+							<td>$comment.creator </td>
+							<td>$comment.commentText</td>
+						</tr>
+						#end
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	</table>
 	#if( $customDataEntryFormCode )
 		#parse( "/dhis-web-caseentry/customDataEntryForm.vm" )
 	#elseif( $sections && $sections.size() > 0 )

@@ -28,7 +28,9 @@ package org.hisp.dhis.analytics.table;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Future;
 
@@ -36,6 +38,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsTableManager;
 import org.hisp.dhis.analytics.AnalyticsTableService;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.util.Clock;
 import org.hisp.dhis.system.util.ConcurrentUtils;
@@ -51,14 +56,20 @@ public class DefaultAnalyticsTableService
     
     @Autowired
     private AnalyticsTableManager tableManager;
+    
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+    
+    @Autowired
+    private DataElementService dataElementService;
 
     // -------------------------------------------------------------------------
     // Implementation
     // -------------------------------------------------------------------------
 
     //TODO generateOrganisationUnitStructures
-    //TODO generateOrganisationUnitGroupSetTable
-    //TODO generatePeriodStructure
+    //     generateOrganisationUnitGroupSetTable
+    //     generatePeriodStructure
     
     @Async
     public Future<?> update()
@@ -68,7 +79,7 @@ public class DefaultAnalyticsTableService
         final Date earliest = tableManager.getEarliestData();
         final Date latest = tableManager.getLatestData();
         final List<String> tables = PartitionUtils.getTempTableNames( earliest, latest );        
-        clock.logTime( "Checked data timespan" );
+        clock.logTime( "Checked data timespan and got tables: " + tables );
         
         //dropTables( tables );
         
@@ -81,8 +92,14 @@ public class DefaultAnalyticsTableService
         pruneTables( tables );
         clock.logTime( "Pruned analytics tables" );
         
+        applyAggregationLevels( tables );
+        clock.logTime( "Applied aggregation levels" );
+        
         createIndexes( tables );
         clock.logTime( "Created all indexes" );
+        
+        vacuumTables( tables );
+        clock.logTime( "Vacuumed tables" );
         
         swapTables( tables );
         clock.logTime( "Swapped analytics tables" );
@@ -106,9 +123,9 @@ public class DefaultAnalyticsTableService
     
     private void populateTables( List<String> tables )
     {
-        int pageSize = Math.max( ( SystemUtils.getCpuCores() - 1 ), 1 );
+        List<List<String>> tablePages = new PaginatedList<String>( tables ).setPageSize( getProcessNo() ).getPages();
         
-        List<List<String>> tablePages = new PaginatedList<String>( tables ).setPageSize( pageSize ).getPages();
+        log.info( "No of pages: " + tablePages.size() );
         
         for ( List<String> tablePage : tablePages )
         {
@@ -125,25 +142,64 @@ public class DefaultAnalyticsTableService
         }
     }
     
-    public void pruneTables( List<String> tables )
+    private void pruneTables( List<String> tables )
     {
-        for ( String table : tables )
+        Iterator<String> iterator = tables.iterator();
+        
+        while ( iterator.hasNext() )
         {
-            tableManager.pruneTable( table );
+            if ( tableManager.pruneTable( iterator.next() ) )
+            {
+                iterator.remove();
+            }
+        }
+    }
+    
+    private void applyAggregationLevels( List<String> tables )
+    {
+        int maxLevels = organisationUnitService.getMaxOfOrganisationUnitLevels();
+        
+        for ( int i = 0; i < maxLevels; i++ )
+        {
+            int level = maxLevels - i;
+            
+            Collection<String> dataElements = IdentifiableObjectUtils.getUids( 
+                dataElementService.getDataElementsByAggregationLevel( level ) );
+            
+            if ( !dataElements.isEmpty() )
+            {
+                for ( String table : tables )
+                {
+                    tableManager.applyAggregationLevels( table, dataElements, level );
+                }
+            }
+        }
+    }
+    
+    private void vacuumTables( List<String> tables )
+    {
+        List<List<String>> tablePages = new PaginatedList<String>( tables ).setPageSize( getProcessNo() ).getPages();
+        
+        for ( List<String> tablePage : tablePages )
+        {
+            List<Future<?>> futures = new ArrayList<Future<?>>();
+            
+            for ( String table : tablePage )
+            {
+                futures.add( tableManager.vacuumTableAsync( table ) );
+            }
+            
+            ConcurrentUtils.waitForCompletion( futures );
         }
     }
     
     private void createIndexes( List<String> tables )
     {
-        int pages = Math.max( ( SystemUtils.getCpuCores() - 1 ), 1 );
-        
-        log.info( "No of pages: " + pages );
-        
         for ( String table : tables )
         {
             List<Future<?>> futures = new ArrayList<Future<?>>();
     
-            List<List<String>> columnPages = new PaginatedList<String>( tableManager.getDimensionColumnNames() ).setNumberOfPages( pages ).getPages();
+            List<List<String>> columnPages = new PaginatedList<String>( tableManager.getDimensionColumnNames() ).setNumberOfPages( getProcessNo() ).getPages();
             
             for ( List<String> columnPage : columnPages )
             {
@@ -168,5 +224,10 @@ public class DefaultAnalyticsTableService
         {
             tableManager.dropTable( table );
         }
+    }
+    
+    private int getProcessNo()
+    {
+        return Math.max( ( SystemUtils.getCpuCores() - 1 ), 1 );
     }
 }

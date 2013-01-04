@@ -1,6 +1,5 @@
 td div div {
 	padding: 5px;
-	background-color: #bbb;
 	text-align: center;
 	font-size: 12px;
 }
@@ -10,11 +9,15 @@ td .empty-body {
 }
 
 td .dim-body {
-	background-color: #99bbff;
+	background-color: #dae6f8;
+}
+
+td .dimtotal-body {
+	background-color: #cad6e8;
 }
 
 td .value-body {
-	background-color: #e1e1e1;
+	background-color: #eaeaea;
 }
 
 td .good div {

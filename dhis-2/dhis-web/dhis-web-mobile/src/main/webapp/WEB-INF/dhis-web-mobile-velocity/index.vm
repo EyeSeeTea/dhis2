@@ -7,8 +7,8 @@
 
     function checkOnlineStatus() {
         return $.ajax({
-            url: '../mobile',
-            async: false
+            url: '$contextPath/mobile/messages',
+            type: 'POST'
         }).error(function() {
            onlineStatus = false;
            loggedInStatus = false;
@@ -19,14 +19,14 @@
             $('body').trigger('dhis2.online');
         }).complete(function() {
             if( onlineStatus && !loggedInStatus ) {
-                document.location = '../mobile';
+                document.location = '$contextPath/mobile';
             }
         });
     }
 
     function getDashboard() {
         return $.ajax({
-            url: '../api/currentUser/dashboard',
+            url: '$contextPath/api/currentUser/dashboard',
             dataType: 'json'
         }).success(function(data) {
             if( data.unreadMessageConversation > 0 ) {
@@ -80,10 +80,11 @@
     }
 
     function onlineTimer() {
-        setTimeout(function () {
-            checkOnlineStatus();
-            onlineTimer();
-        }, 5000);
+        setTimeout( function () {
+            checkOnlineStatus().complete( function () {
+                onlineTimer();
+            } );
+        }, 5000 );
     }
 
     function renderOfflineStatus() {
@@ -124,7 +125,7 @@
 <section data-role="page" id="index-page" data-theme="c">
 
 	<header data-role="header" data-theme="b">
-        <h1 align="center"><img src="$baseUrl/../dhis-web-commons/css/light_blue/logo_banner.png" /></h1>
+        <h1 align="center"><img src="$contextPath/dhis-web-commons/css/light_blue/logo_banner.png" /></h1>
 	</header>
 
 	<section data-role="content">

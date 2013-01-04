@@ -1605,6 +1605,12 @@ function programReports( programInstanceId )
 	$('#programReportDiv').load("getProgramReportHistory.action", {programInstanceId:programInstanceId});
 }
 
+// export program instance history
+function exportProgramReports( programInstanceId, type )
+{
+	window.location.href='getProgramReportHistory.action?programInstanceId=' + programInstanceId + "&type=" + type;
+}
+
 // load SMS message and comments
 function getEventMessages( programInstanceId )
 {
@@ -1647,7 +1653,7 @@ function sendSmsOnePatient( field, programStageInstanceId )
 				setInnerHTML('smsError', json.message);
 				var date = new Date();
 				var currentTime = date.getHours() + ":" + date.getMinutes();
-				jQuery('#commentTB').prepend("<tr><td>" + getFieldValue('currentDate') + " " + currentTime + "</td>"
+				jQuery('[name=commentTB]').prepend("<tr><td>" + getFieldValue('currentDate') + " " + currentTime + "</td>"
 					+ "<td>" + getFieldValue('programStageName') + "</td>"
 					+ "<td>" + getFieldValue('currentUsername') + "</td>"
 					+ "<td>" + field.value + "</td></tr>");
@@ -1670,6 +1676,14 @@ function sendSmsOnePatient( field, programStageInstanceId )
 		});
 }
 
+function keypressOnComent(event, field, programStageInstanceId )
+{
+	var key = getKeyCode( event );
+	if ( key==13 ){ // Enter
+		addComment( field, programStageInstanceId );
+	}
+}
+
 function addComment( field, programStageInstanceId )
 {
 	field.style.backgroundColor = SAVING_COLOR;
@@ -1689,10 +1703,14 @@ function addComment( field, programStageInstanceId )
 			var programStageName = jQuery("#ps_" + programStageInstanceId).attr('programStageName');
 			var date = new Date();
 			var currentTime = date.getHours() + ":" + date.getMinutes();
-			jQuery('#commentTB').prepend("<tr><td>" + getFieldValue("currentDate") + " " + currentTime + "</td>"
-					+ "<td>" + programStageName + "</td>"
-					+ "<td>" + getFieldValue('currentUsername') + "</td>"
-					+ "<td>" + commentText + "</td></tr>");
+			var content = "<tr><td>" + getCurrentDate("currentDate") + " " + currentTime + "</td>"
+			if(programStageName!=undefined)
+			{
+				content += "<td>" + programStageName + "</td>"
+			}
+			content += "<td>" + getFieldValue('currentUsername') + "</td>"
+			content += "<td>" + commentText + "</td></tr>";
+			jQuery('#commentTB').prepend(content);
 			field.value="";
 			showSuccessMessage( i18n_comment_added );
 			field.style.backgroundColor = SUCCESS_COLOR;
@@ -1721,18 +1739,18 @@ function removeComment( programStageInstanceId, commentId )
 
 function commentDivToggle(isHide)
 {
-	jQuery("#commentTB tr").removeClass("hidden");
-	jQuery("#commentTB tr").each( function(index, item){
+	jQuery("#commentReportTB tr").removeClass("hidden");
+	jQuery("#commentReportTB tr").each( function(index, item){
 		if(isHide && index > 4){
-			jQuery(this).addClass("hidden");
+			jQuery(item).addClass("hidden");
 		}
 		else if(!isHide){		
-			jQuery(this).removeClass("hidden");
+			jQuery(item).removeClass("hidden");
 		}
 		index++;
 	});
 	
-	if(jQuery("#commentTB tr").length <= 5 )
+	if(jQuery("#commentReportTB tr").length <= 5 )
 	{
 		hideById('showCommentBtn');
 		hideById('hideCommentBtn');
@@ -1756,4 +1774,49 @@ function backPreviousPage( patientId )
 	else{
 		loadPatientList();
 	}
+}
+
+// ----------------------------------------------
+// Data entry section
+// ----------------------------------------------
+
+function filterInSection( $this )
+{
+    var $tbody = $this.parent().parent().parent().parent().parent().find("tbody");
+	var $trTarget = $tbody.find("tr");
+
+    if ( $this.val() == '' )
+    {
+        $trTarget.show();
+    }
+    else 
+    {
+        var $trTargetChildren = $trTarget.find( 'td:first-child' );
+
+        $trTargetChildren.each( function( idx, item ) 
+        {
+			if( $( item ).find( 'span' ).length != 0 )
+			{
+				var text1 = $this.val().toUpperCase();
+				var text2 = $( item ).find( 'span' ).html().toUpperCase();
+
+				if ( text2.indexOf( text1 ) >= 0 )
+				{
+					$( item ).parent().show();
+				}
+				else
+				{
+					$( item ).parent().hide();
+				}
+			}
+		} );
+    }
+
+    refreshZebraStripes( $tbody );
+}
+
+function refreshZebraStripes( $tbody )
+{
+     $tbody.find( 'tr:visible:even' ).removeClass( 'listRow' ).removeClass( 'listAlternateRow' ).addClass( 'listRow' );
+     $tbody.find( 'tr:visible:odd' ).removeClass( 'listRow' ).removeClass( 'listAlternateRow' ).addClass( 'listAlternateRow' );
 }

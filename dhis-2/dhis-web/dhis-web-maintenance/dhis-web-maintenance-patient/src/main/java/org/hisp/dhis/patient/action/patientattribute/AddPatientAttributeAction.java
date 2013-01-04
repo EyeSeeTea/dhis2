@@ -60,7 +60,7 @@ public class AddPatientAttributeAction
     {
         this.patientAttributeOptionService = patientAttributeOptionService;
     }
-    
+
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
@@ -101,12 +101,19 @@ public class AddPatientAttributeAction
     }
 
     private Boolean inherit;
-    
+
     public void setInherit( Boolean inherit )
     {
         this.inherit = inherit;
     }
-    
+
+    private String expression;
+
+    public void setExpression( String expression )
+    {
+        this.expression = expression;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -119,13 +126,14 @@ public class AddPatientAttributeAction
         patientAttribute.setName( name );
         patientAttribute.setDescription( description );
         patientAttribute.setValueType( valueType );
-        
+        patientAttribute.setExpression( expression );
+
         mandatory = (mandatory == null) ? false : true;
         patientAttribute.setMandatory( mandatory );
-        
+
         inherit = (inherit == null) ? false : true;
         patientAttribute.setInherit( inherit );
-        
+
         patientAttributeService.savePatientAttribute( patientAttribute );
 
         if ( PatientAttribute.TYPE_COMBO.equalsIgnoreCase( valueType ) )

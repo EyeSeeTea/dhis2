@@ -27,27 +27,33 @@ package org.hisp.dhis.analytics.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.analytics.AggregationType.AVERAGE_AGGREGATION;
+import static org.hisp.dhis.analytics.AggregationType.AVERAGE_DISAGGREGATION;
+import static org.hisp.dhis.analytics.DataQueryParams.VALUE_ID;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsManager;
 import org.hisp.dhis.analytics.DataQueryParams;
-import org.hisp.dhis.expression.ExpressionService;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.system.util.ListMap;
+import org.hisp.dhis.system.util.SqlHelper;
+import org.hisp.dhis.system.util.TextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.util.Assert;
 
 /**
  * This class is responsible for producing aggregated data values. It reads data
@@ -59,56 +65,48 @@ import org.springframework.scheduling.annotation.AsyncResult;
 public class JdbcAnalyticsManager
     implements AnalyticsManager
 {
+    //TODO optimize when all options in dimensions are selected
+    
     private static final Log log = LogFactory.getLog( JdbcAnalyticsManager.class );
     
     @Autowired
     private JdbcTemplate jdbcTemplate;
     
-    @Autowired
-    private OrganisationUnitService organisationUnitService;
-    
-    @Autowired
-    private PeriodService periodService;
-    
-    @Autowired
-    private ExpressionService expressionService;
-    
     // -------------------------------------------------------------------------
     // Implementation
     // -------------------------------------------------------------------------
 
-    //TODO optimize when all options in dimensions are selected
-    
     @Async
-    public Future<Map<String, Double>> getAggregatedDataValueTotals( DataQueryParams params )
+    public Future<Map<String, Double>> getAggregatedDataValues( DataQueryParams params )
     {
-        int level = organisationUnitService.getLevelOfOrganisationUnit( params.getOrganisationUnits().iterator().next() );
+        ListMap<String, String> dataPeriodAggregationPeriodMap = params.getDataPeriodAggregationPeriodMap();
+        params.replaceAggregationPeriodsWithDataPeriods( dataPeriodAggregationPeriodMap );
         
-        String periodType = PeriodType.getPeriodTypeFromIsoString( params.getPeriods().iterator().next() ).getName().toLowerCase();
+        List<String> dimensions = params.getDimensionNames();
+        Map<String, List<String>> dimensionMap = params.getDimensionMap();
         
-        List<String> dimensions = params.getDimensionNames();        
-        List<String> extraDimensions = params.getDynamicDimensionNames();
+        SqlHelper sqlHelper = new SqlHelper();
         
-        String sql = 
-            "SELECT " + dimensions.get( 0 ) + ", " + 
-            dimensions.get( 1 ) + ", " +
-            periodType + " as " + dimensions.get( 2 ) + ", " + 
-            "uidlevel" + level + " as " + dimensions.get( 3 ) + ", " +
-            getCommaDelimitedString( extraDimensions, false, true ) +
-            "SUM(value) as value " +
-            
-            "FROM " + params.getTableName() + " " +
-            "WHERE " + dimensions.get( 0 ) + " IN ( " + getQuotedCommaDelimitedString( params.getDataElements() ) + " ) " +
-            "AND " + periodType + " IN ( " + getQuotedCommaDelimitedString( params.getPeriods() ) + " ) " +
-            "AND uidlevel" + level + " IN ( " + getQuotedCommaDelimitedString( params.getOrganisationUnits() ) + " ) " +
-            getExtraDimensionQuery( params ) +
+        String sql = "select " + getCommaDelimitedString( dimensions ) + ", ";
         
-            "GROUP BY " + dimensions.get( 0 ) + ", " + 
-            dimensions.get( 1 ) + ", " +
-            periodType + ", " + 
-            "uidlevel" + level +
-            getCommaDelimitedString( extraDimensions, true, false );
+        int days = PeriodType.getPeriodTypeByName( params.getPeriodType() ).getFrequencyOrder();
+        
+        sql += params.isAggregationType( AVERAGE_AGGREGATION ) ? "sum(daysxvalue) / " + days : "sum(value)";
+        
+        sql += " as value from " + params.getTableName() + " ";
+        
+        for ( String dim : dimensions )
+        {
+            sql += sqlHelper.whereAnd() + " " + dim + " in (" + getQuotedCommaDelimitedString( dimensionMap.get( dim ) ) + " ) ";
+        }
 
+        for ( String filter : params.getFilterNames() )
+        {
+            sql += sqlHelper.whereAnd() + " " + filter + " in (" + getQuotedCommaDelimitedString( params.getFilters().get( filter ) ) + " ) ";
+        }
+        
+        sql += "group by " + getCommaDelimitedString( dimensions );
+    
         log.info( sql );
         
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
@@ -124,31 +122,47 @@ public class JdbcAnalyticsManager
                 key.append( rowSet.getString( dim ) + SEP );
             }
             
-            key.deleteCharAt( key.length() - SEP.length() );
+            key.deleteCharAt( key.length() - 1 );
             
-            Double value = rowSet.getDouble( "value" );
-            
+            Double value = rowSet.getDouble( VALUE_ID );
+
             map.put( key.toString(), value );
         }
+        
+        replaceDataPeriodsWithAggregationPeriods( map, params, dataPeriodAggregationPeriodMap );
         
         return new AsyncResult<Map<String, Double>>( map );
     }
 
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private String getExtraDimensionQuery( DataQueryParams params )
+    public void replaceDataPeriodsWithAggregationPeriods( Map<String, Double> dataValueMap, DataQueryParams params, ListMap<String, String> dataPeriodAggregationPeriodMap )
     {
-        Map<String, List<String>> dimensionValues = params.getDimensions();
-        
-        String sql = "";
-        
-        for ( String dim : params.getDynamicDimensionNames() )
+        if ( params.isAggregationType( AVERAGE_DISAGGREGATION ) )
         {
-            sql += "AND " + dim + " IN ( " + getQuotedCommaDelimitedString( dimensionValues.get( dim ) ) + " ) ";
+            int periodIndex = params.getPeriodDimensionIndex();
+            
+            Set<String> keys = new HashSet<String>( dataValueMap.keySet() );
+            
+            for ( String key : keys )
+            {
+                String[] keyArray = key.split( String.valueOf( SEP ) );
+                
+                Assert.notNull( keyArray[periodIndex], keyArray.toString() );
+                
+                List<String> periods = dataPeriodAggregationPeriodMap.get( keyArray[periodIndex] );
+                
+                Assert.notNull( periods, dataPeriodAggregationPeriodMap.toString() );
+                
+                Double value = dataValueMap.get( key );
+                
+                for ( String period : periods )
+                {
+                    String[] keyCopy = keyArray.clone();
+                    keyCopy[periodIndex] = period;                    
+                    dataValueMap.put( TextUtils.toString( keyCopy, SEP ), value );
+                }
+                
+                dataValueMap.remove( key );
+            }
         }
-        
-        return sql;            
-    }    
+    }
 }
