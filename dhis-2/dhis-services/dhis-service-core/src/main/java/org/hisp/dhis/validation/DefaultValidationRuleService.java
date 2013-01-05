@@ -145,9 +145,9 @@ public class DefaultValidationRuleService
         for ( OrganisationUnit source : sources )
         {
             Collection<ValidationRule> relevantRules = getRelevantValidationRules( source.getDataElementsInDataSets() );
-
+            
             Set<DataElement> dataElements = getDataElementsInValidationRules( relevantRules ); //TODO move outside loop?
-
+            
             if ( relevantRules != null && relevantRules.size() > 0 )
             {
                 for ( Period period : relevantPeriods )

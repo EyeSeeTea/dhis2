@@ -226,8 +226,11 @@ public class HibernateDataElementStore
 
     public Map<String, Set<String>> getDataElementCategoryOptionCombos()
     {
-        final String sql = "select de.uid, coc.uid from dataelement de " +
-            "join categorycombos_optioncombos coc on de.categorycomboid=coc.categorycomboid";
+        final String sql = 
+            "select de.uid, coc.uid " +
+            "from dataelement de " +
+            "join categorycombos_optioncombos cc on de.categorycomboid = cc.categorycomboid " +
+            "join categoryoptioncombo coc on cc.categoryoptioncomboid = coc.categoryoptioncomboid";
         
         final Map<String, Set<String>> sets = new HashMap<String, Set<String>>();
         

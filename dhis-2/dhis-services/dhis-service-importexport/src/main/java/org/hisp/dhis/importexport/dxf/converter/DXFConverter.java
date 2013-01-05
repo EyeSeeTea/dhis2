@@ -915,7 +915,7 @@ public class DXFConverter
 
                 state.setMessage( "importing_validation_rules" );
 
-                XMLConverter converter = new ValidationRuleConverter( importObjectService, validationRuleService );
+                XMLConverter converter = new ValidationRuleConverter( importObjectService, validationRuleService, expressionService );
 
                 converterInvoker.invokeRead( converter, reader, params );
 

@@ -230,7 +230,7 @@ public class DefaultExpressionService
                     !expressionIsValid( indicator.getDenominator() ).equals( VALID ) )
                 {
                     iterator.remove();
-                    log.warn( "Indicator is invalid: " + indicator );
+                    log.warn( "Indicator is invalid: " + indicator + ", " + indicator.getNumerator() + ", " + indicator.getDenominator() );
                 }
             }
         }

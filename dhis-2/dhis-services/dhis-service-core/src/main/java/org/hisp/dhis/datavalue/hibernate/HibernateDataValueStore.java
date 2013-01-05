@@ -409,6 +409,11 @@ public class HibernateDataValueStore
     {
         Map<DataElementOperand, Double> map = new HashMap<DataElementOperand, Double>();
         
+        if ( dataElements.isEmpty() )
+        {
+            return map;
+        }
+        
         final String sql = 
             "select de.uid, coc.uid, value " +
             "from datavalue dv " +
@@ -432,6 +437,6 @@ public class HibernateDataValueStore
             }
         }
         
-        return map;        
+        return map; 
     }
 }

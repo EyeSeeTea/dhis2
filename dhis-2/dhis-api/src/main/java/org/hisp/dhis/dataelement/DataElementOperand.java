@@ -278,7 +278,7 @@ public class DataElementOperand
     {
         this.dataElementId = dataElement.getUid();
         this.optionComboId = categoryOptionCombo.getUid();
-        this.operandId = dataElement.getId() + SEPARATOR + categoryOptionCombo.getId();
+        this.operandId = dataElementId + SEPARATOR + optionComboId;
         this.operandName = getPrettyName( dataElement, categoryOptionCombo );
         this.aggregationOperator = dataElement.getAggregationOperator();
         this.frequencyOrder = dataElement.getFrequencyOrder();
@@ -294,7 +294,7 @@ public class DataElementOperand
     public void updateProperties( DataElement dataElement )
     {
         this.dataElementId = dataElement.getUid();
-        this.operandId = String.valueOf( dataElement.getId() );
+        this.operandId = String.valueOf( dataElementId );
         this.operandName = dataElement.getDisplayName() + SPACE + NAME_TOTAL;
         this.aggregationOperator = dataElement.getAggregationOperator();
         this.frequencyOrder = dataElement.getFrequencyOrder();

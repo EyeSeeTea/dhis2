@@ -193,7 +193,7 @@ public class ExpressionUpgrader
                     {
                         DataElement de = dataElementService.getDataElement( Integer.parseInt( matcher.group( 1 ) ) );
                         DataElementCategoryOptionCombo coc = categoryService.getDataElementCategoryOptionCombo( Integer.parseInt( matcher.group( 2 ) ) );                        
-                        String replacement = de.getUid() + "-" + coc.getUid() + "-val";                        
+                        String replacement = "id=\"" + de.getUid() + "-" + coc.getUid() + "-val\"";                        
                         matcher.appendReplacement( sb, replacement );
                     }
                     

@@ -287,6 +287,8 @@ public interface DataElementService
     int getDataElementCountByName( String name );
 
     Map<String, Set<String>> getDataElementCategoryOptionCombos();
+    
+    Map<String, Integer> getDataElementUidIdMap();
 
     // -------------------------------------------------------------------------
     // DataElementGroup

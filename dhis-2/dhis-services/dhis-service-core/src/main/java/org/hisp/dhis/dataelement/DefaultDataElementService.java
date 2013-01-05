@@ -334,6 +334,18 @@ public class DefaultDataElementService
         return dataElementStore.getDataElementCategoryOptionCombos();
     }
     
+    public Map<String, Integer> getDataElementUidIdMap()
+    {
+        Map<String, Integer> map = new HashMap<String, Integer>();
+        
+        for ( DataElement dataElement : getAllDataElements() )
+        {
+            map.put( dataElement.getUid(), dataElement.getId() );
+        }
+        
+        return map;
+    }
+    
     public Collection<DataElement> getDataElements( DataSet dataSet, String key, Integer max )
     {
         return dataElementStore.get( dataSet, key, max );
