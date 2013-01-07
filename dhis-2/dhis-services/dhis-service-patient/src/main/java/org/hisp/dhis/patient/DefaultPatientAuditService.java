@@ -57,7 +57,7 @@ public class DefaultPatientAuditService
     @Override
     public void deletePatientAudit( PatientAudit patientAudit )
     {
-        patientAuditStore.update( patientAudit );
+        patientAuditStore.delete( patientAudit );
     }
 
     @Override

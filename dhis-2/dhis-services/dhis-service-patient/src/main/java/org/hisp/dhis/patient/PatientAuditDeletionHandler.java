@@ -1,9 +1,5 @@
-package org.hisp.dhis.cache;
-
-import org.hibernate.stat.Statistics;
-
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,16 +25,48 @@ import org.hibernate.stat.Statistics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.patient;
+
+import java.util.Collection;
+
+import org.hisp.dhis.system.deletion.DeletionHandler;
+
 /**
- * @author Lars Helge Overland
+ * @author Chau Thu Tran
+ *
+ * @version PatientAuditDeletionHandler.java 8:44:33 AM Jan 5, 2013 $
  */
-public interface HibernateCacheManager
+public class PatientAuditDeletionHandler extends DeletionHandler
 {
-    void clearObjectCache();
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
     
-    void clearQueryCache();
+    private PatientAuditService patientAuditService;
+
+    public void setPatientAuditService( PatientAuditService patientAuditService )
+    {
+        this.patientAuditService = patientAuditService;
+    }
     
-    void clearCache();
+    // -------------------------------------------------------------------------
+    // DeletionHandler implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String getClassName()
+    {
+        return PatientAudit.class.getSimpleName();
+    }
     
-    Statistics getStatistics();
+    @Override
+    public void deletePatient( Patient patient )
+    {
+        Collection<PatientAudit> patientAudits = patientAuditService.getPatientAudits( patient );
+        
+        for ( PatientAudit patientAudit : patientAudits )
+        {
+            patientAuditService.deletePatientAudit( patientAudit );
+        }
+    }
 }

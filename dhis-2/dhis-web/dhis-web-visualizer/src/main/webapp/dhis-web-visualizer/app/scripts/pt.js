@@ -3,142 +3,132 @@ Ext.onReady( function() {
 
 var pt = {};
 
-pt.request = {
-    "dimensions": {
-        "in": [
-			"Uvn6LCg7dVU",
-			"OdiHJayrsKo",
-            "sB79w2hiLp8",
-            "AUqdhY4mpvp"
-        ],
-        "pe": [
-            "201201",
-            "201202",
-            "201203"
-        ]
-    },
-    "categories": false,
-    "filters": {
-        "ou": [
-            "ImspTQPwCqd"
-        ]
-    }
-};
+//pt.response = {
+    //"headers": [
+		//{
+			//"name": "de",
+			//"column": "de",
+			//"type": "java.lang.String",
+			//"hidden": false,
+			//"meta": true
+		//}, {
+			//"name": "coc",
+			//"column": "coc",
+			//"type": "java.lang.String",
+			//"hidden": false,
+			//"meta": true
+		//}, {
+			//"name": "pe",
+			//"column": "pe",
+			//"type": "java.lang.String",
+			//"hidden": false,
+			//"meta": true
+		//}, {
+			//"name": "ou",
+			//"column": "ou",
+			//"type": "java.lang.String",
+			//"hidden": false,
+			//"meta": true
+		//}, {
+			//"name": "J5jldMd8OHv",
+			//"column": "J5jldMd8OHv",
+			//"type": "java.lang.String",
+			//"hidden": false,
+			//"meta": true,
+						//index: 4
+						//items: ['ImspTQPwCqd']
+						//size: 1
+		//}, {
+			//"name": "value",
+			//"column": "Value",
+			//"type": "java.lang.Double",
+			//"hidden": false,
+			//"meta": false
+		//}
+    //],
+    //"width": 6,
+    //"height": 24,
+    //"rows": [
+        //["YtbsuPPo010", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "456.0"],
+        //["YtbsuPPo010", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "876.0"],
+        //["YtbsuPPo010", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "821.0"],
+        //["YtbsuPPo010", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "567.0"],
+        //["YtbsuPPo010", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "674.0"],
+        //["YtbsuPPo010", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "866.0"],
+        //["YtbsuPPo010", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "334.0"],
+        //["YtbsuPPo010", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "254.0"],
 
-pt.response = {
-    "headers": [
-		{
-			"name": "de",
-			"column": "de",
-			"type": "java.lang.String",
-			"hidden": false,
-			"meta": true
-		}, {
-			"name": "coc",
-			"column": "coc",
-			"type": "java.lang.String",
-			"hidden": false,
-			"meta": true
-		}, {
-			"name": "pe",
-			"column": "pe",
-			"type": "java.lang.String",
-			"hidden": false,
-			"meta": true
-		}, {
-			"name": "ou",
-			"column": "ou",
-			"type": "java.lang.String",
-			"hidden": false,
-			"meta": true
-		}, {
-			"name": "J5jldMd8OHv",
-			"column": "J5jldMd8OHv",
-			"type": "java.lang.String",
-			"hidden": false,
-			"meta": true,
-			//index: 4
-			//items: ['ImspTQPwCqd']
-			//size: 1
-		}, {
-			"name": "value",
-			"column": "Value",
-			"type": "java.lang.Double",
-			"hidden": false,
-			"meta": false
-		}
-    ],
-    "width": 6,
-    "height": 24,
-    "rows": [
-        ["YtbsuPPo010", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "456.0"],
-        ["YtbsuPPo010", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "876.0"],
-        ["YtbsuPPo010", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "821.0"],
-        ["YtbsuPPo010", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "567.0"],
-        ["YtbsuPPo010", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "674.0"],
-        ["YtbsuPPo010", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "866.0"],
-        ["YtbsuPPo010", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "334.0"],
-        ["YtbsuPPo010", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "254.0"],
+        //["Vdjeu38jejd", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "294.0"],
+        //["Vdjeu38jejd", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "663.0"],
+        //["Vdjeu38jejd", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "374.0"],
+        //["Vdjeu38jejd", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "765.0"],
+        //["Vdjeu38jejd", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "375.0"],
+        //["Vdjeu38jejd", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "287.0"],
+        //["Vdjeu38jejd", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "699.0"],
+        //["Vdjeu38jejd", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "883.0"],
 
-        ["Vdjeu38jejd", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "294.0"],
-        ["Vdjeu38jejd", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "663.0"],
-        ["Vdjeu38jejd", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "374.0"],
-        ["Vdjeu38jejd", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "765.0"],
-        ["Vdjeu38jejd", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "375.0"],
-        ["Vdjeu38jejd", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "287.0"],
-        ["Vdjeu38jejd", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "699.0"],
-        ["Vdjeu38jejd", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "883.0"],
+        //["Wdsd99jdmmf", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "475.0"],
+        //["Wdsd99jdmmf", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "264.0"],
+        //["Wdsd99jdmmf", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "233.0"],
+        //["Wdsd99jdmmf", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "445.0"],
+        //["Wdsd99jdmmf", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "788.0"],
+        //["Wdsd99jdmmf", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "854.0"],
+        //["Wdsd99jdmmf", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "732.0"],
+        //["Wdsd99jdmmf", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "726.0"]
+    //],
+    //"metaData": {
+        //"YtbsuPPo010": "ANC 1 visit",
+        //"Vdjeu38jejd": "ANC 2 visit",
+        //"Wdsd99jdmmf": "ANC 3 visit",
+        //"V6L425pT3A0": "Default",
+        //"201201": "Jan 2012",
+        //"201202": "Feb 2012",
+        //"201203": "Mar 2012",
+        //"201204": "Apr 2012",
+        //"ImspTQPwCqd": "Kailahun CHPC",
+        //"Jdj9kdfn93n": "Bo CHPC",
+        //"uYxK4wmcPqA": "Public ownership"
+    //},
+				//"nameHeaderMap": {
+				//	"de": <header.de>
+				//	"pe": <header.pe>
+				//}
+				//,
+				//
+				//"idValueMap": {
+				//	"Vdjeu38jejd201201ImspTQPwCqdV6L425pT3A0": "294.0"
+				//	"Vdjeu38jejd201201Jdj9kdfn93nV6L425pT3A0": "375.0"
+				//}
+//};
 
-        ["Wdsd99jdmmf", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "475.0"],
-        ["Wdsd99jdmmf", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "264.0"],
-        ["Wdsd99jdmmf", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "233.0"],
-        ["Wdsd99jdmmf", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "445.0"],
-        ["Wdsd99jdmmf", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "788.0"],
-        ["Wdsd99jdmmf", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "854.0"],
-        ["Wdsd99jdmmf", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "732.0"],
-        ["Wdsd99jdmmf", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "726.0"]
-    ],
-    "metaData": {
-        "YtbsuPPo010": "ANC 1 visit",
-        "Vdjeu38jejd": "ANC 2 visit",
-        "Wdsd99jdmmf": "ANC 3 visit",
-        "V6L425pT3A0": "Default",
-        "201201": "Jan 2012",
-        "201202": "Feb 2012",
-        "201203": "Mar 2012",
-        "201204": "Apr 2012",
-        "ImspTQPwCqd": "Kailahun CHPC",
-        "Jdj9kdfn93n": "Bo CHPC",
-        "uYxK4wmcPqA": "Public ownership"
-    },
-    //"nameHeaderMap": {
-	//	"de": <header.de>
-	//	"pe": <header.pe>
-	//}
-	//,
-	//
-	//"idValueMap": {
-	//	"Vdjeu38jejd201201ImspTQPwCqdV6L425pT3A0": "294.0"
-};	//	"Vdjeu38jejd201201Jdj9kdfn93nV6L425pT3A0": "375.0"
-	//}
+//pt.settings = {
+	//col: ['pe', 'J5jldMd8OHv', 'ou', 'coc'],
+	//row: ['de']
+//};
 
-pt.settings = {
-	col: ['pe', 'J5jldMd8OHv', 'ou', 'coc'],
-	row: ['de']
-};
+var extendSettings = function(pt) {
+	var settings = pt.settings,
+		col = settings.col,
+		row = settings.row;
+
+	settings.dimensions = Ext.clone(col);
+	Ext.apply(settings.dimensions, row);
+}
 
 var extendResponse = function(pt) {
 	var response = pt.response,
 		settings = pt.settings,
+		dimensions = settings.dimensions,
 		headers = response.headers,
 		header,
 		rows = response.rows,
-		settingsDims = settings.col.concat(settings.row),
+		settingsDims = [],
 		items;
 
 	response.nameHeaderMap = {};
 	response.idValueMap = {};
 
+	// Header items, size. Response nameHeaderMap.
 	for (var i = 0; i < headers.length; i++) {
 		header = headers[i];
 		header.index = i;
@@ -154,6 +144,16 @@ var extendResponse = function(pt) {
 		response.nameHeaderMap[header.name] = header;
 	}
 
+	// Header items. SettingsDims array.
+	for (var dim in dimensions) {
+		if (dimensions.hasOwnProperty(dim)) {
+			settingsDims.push(dim);
+
+			response.nameHeaderMap[dim].items = dimensions[dim];
+		}
+	}
+
+	// Response idValueMap
 	for (var i = 0, id, valueIndex = response.nameHeaderMap.value.index; i < rows.length; i++) {
 		id = '';
 
@@ -285,26 +285,30 @@ console.log("");
 var getDims = function(pt) {
 	var response = pt.response,
 		settings = pt.settings,
+		col = settings.col,
+		row = settings.row,
 		getUniqueColsArray,
 		getUniqueRowsArray;
 
-	getUniqueColsArray = function(response, settings) {
+	getUniqueColsArray = function() {
 		var a = [];
 
-		for (var i = 0, header; i < settings.col.length; i++) {
-			header = settings.col[i];
-			a.push(response.nameHeaderMap[header].items);
+		for (var dim in col) {
+			if (col.hasOwnProperty(dim)) {
+				a.push(response.nameHeaderMap[dim].items);
+			}
 		}
 
 		return a;
 	};
 
-	getUniqueRowsArray = function(response, settings) {
+	getUniqueRowsArray = function() {
 		var a = [];
 
-		for (var i = 0, header; i < settings.row.length; i++) {
-			header = settings.row[i];
-			a.push(response.nameHeaderMap[header].items);
+		for (var dim in row) {
+			if (row.hasOwnProperty(dim)) {
+				a.push(response.nameHeaderMap[dim].items);
+			}
 		}
 
 		return a;
@@ -313,8 +317,8 @@ var getDims = function(pt) {
 	// aUniqueCols ->  [[p1, p2, p3], [ou1, ou2, ou3, ou4]]
 
 	return {
-		cols: extendDims(getUniqueColsArray(response, settings)),
-		rows: extendDims(getUniqueRowsArray(response, settings))
+		cols: extendDims(getUniqueColsArray()),
+		rows: extendDims(getUniqueRowsArray())
 	};
 };
 
@@ -432,14 +436,14 @@ var getRowItems = function(pt) {
 		for (var j = 0, id, value, cls; j < valueItems[i].length; j++) {
 			id = cols.ids[j] + rows.ids[i];
 			value = valueItems[i][j];
-			cls = value < 333 ? 'bad' : (value < 666 ? 'medium' : 'good'); //simplistic legendset
+			//cls = value < 333 ? 'bad' : (value < 666 ? 'medium' : 'good'); //simplistic legendset
 
 			row.push({
 				id: id,
 				value: value,
 				html: value.toString(),
-				baseCls: 'value',
-				cls: cls
+				baseCls: 'value'
+				//cls: cls
 			});
 		}
 
@@ -542,25 +546,50 @@ var createTableArray = function(pt) {
 
 var initialize = function() {
 
-	//Ext.Ajax.request({
-		//method: 'POST',
-		//url: 'http://localhost:8080/api/analytics',
-		//headers: {'Content-Type': 'application/json'},
-		//jsonData: pt.request,
-		//success: function(r) {
-			//console.log(r);
-		//}
-	//});
+	Ext.Ajax.request({
+		method: 'GET',
+		url: 'http://localhost:8080/api/analytics',
+		headers: {'Content-Type': 'application/json'},
+		params: {
+			dimensions: 'de:fbfJHSPpUQD,cYeuwXTCPkU,Jtf34kNZhzP,hfdmMSPBgLG;pe:201201,201202,201203',
+			filters: 'ou:ImspTQPwCqd',
+			categories: false
+		},
+		success: function(r) {
+			pt.response = Ext.decode(r.responseText);
 
+			pt.response.metaData = {
+				'fbfJHSPpUQD': 'ANC 1 visit',
+				'cYeuwXTCPkU': 'ANC 2 visit',
+				'Jtf34kNZhzP': 'ANC 3 visit',
+				'hfdmMSPBgLG': 'ANC 4 visit',
+				'201201': 'Jan 2012',
+				'201202': 'Feb 2012',
+				'201203': 'Mar 2012',
+				'ImspTQPwCqd': 'Sierra Leone'
+			};
 
-	extendResponse(pt, pt);
+			pt.settings = {
+				col: {
+					de: ['fbfJHSPpUQD', 'cYeuwXTCPkU', 'Jtf34kNZhzP', 'hfdmMSPBgLG']
+				},
+				row: {
+					pe: ['201201', '201202', '201203']
+				}
+			};
 
-	pt.config = getDims(pt, pt);
-	console.log(pt);
+			extendSettings(pt);
+			extendResponse(pt);
 
-	extendRowDims(pt.config.rows);
+			pt.config = getDims(pt);
+			console.log(pt);
 
-	var panel = createTableArray(pt);
+			extendRowDims(pt.config.rows);
+
+			var panel = createTableArray(pt);
+		}
+	});
+
 }();
 
 });
