@@ -348,19 +348,6 @@ var extendRowDims = function(rows) {
 	rows.items.allObjects = allObjects;
 };
 
-var getTablePanel = function(pt) {
-	return Ext.create('Ext.panel.Panel', {
-		renderTo: Ext.get('pivottable'),
-		layout: {
-			type: 'table',
-			columns: pt.config.cols.size + pt.config.rows.dims + 1
-		},
-		defaults: {
-			baseCls: 'td'
-		}
-	});
-};
-
 var getEmptyItem = function(pt) {
 	return {
 		colspan: pt.config.rows.dims,
@@ -534,8 +521,17 @@ var getRowItems = function(pt) {
 };
 
 var createTableArray = function(pt) {
-	var panel = getTablePanel(pt),
-		rowItems = [];
+	var rowItems = [],
+		panel = Ext.create('Ext.panel.Panel', {
+			renderTo: Ext.get('pivottable'),
+			layout: {
+				type: 'table',
+				columns: pt.config.cols.size + pt.config.rows.dims + 1
+			},
+			defaults: {
+				baseCls: 'td'
+			}
+		});
 
 	panel.add(getEmptyItem(pt));
 
@@ -549,7 +545,7 @@ var initialize = function() {
 	Ext.Ajax.request({
 		method: 'GET',
 		url: 'http://localhost:8080/api/analytics',
-		headers: {'Content-Type': 'application/json'},
+		//headers: {'Content-Type': 'application/json'},
 		params: {
 			dimensions: 'de:fbfJHSPpUQD,cYeuwXTCPkU,Jtf34kNZhzP,hfdmMSPBgLG;pe:201201,201202,201203',
 			filters: 'ou:ImspTQPwCqd',
