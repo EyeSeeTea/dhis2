@@ -636,7 +636,7 @@ Ext.onReady( function() {
 			width: 184,
 			height: 22,
 			value: false,
-			number: 5,
+			number: 5000,
 			getValue: function() {
 				return this.checkbox.getValue();
 			},
@@ -666,7 +666,7 @@ Ext.onReady( function() {
 				var that = this;
 
 				this.checkbox = Ext.create('Ext.form.field.Checkbox', {
-					width: 196,
+					width: 191,
 					boxLabel: this.text,
 					checked: this.value,
 					disabled: this.disabled,
@@ -686,10 +686,10 @@ Ext.onReady( function() {
 					cls: 'gis-numberfield',
 					fieldStyle: 'border-top-left-radius: 1px; border-bottom-left-radius: 1px',
 					style: 'padding-bottom: 3px',
-					width: 60,
+					width: 65,
 					height: 21,
 					minValue: 0,
-					maxValue: 10000,
+					maxValue: 999999,
 					value: this.number,
 					allowBlank: false,
 					disabled: true
@@ -4196,7 +4196,7 @@ Ext.onReady( function() {
 
 		areaRadius = Ext.create('Ext.ux.panel.CheckTextNumber', {
 			width: 262,
-			text: 'Show circular area with radius (km):' //i18n
+			text: 'Show circular area with radius (m):' //i18n
 		});
 
 		// Functions
