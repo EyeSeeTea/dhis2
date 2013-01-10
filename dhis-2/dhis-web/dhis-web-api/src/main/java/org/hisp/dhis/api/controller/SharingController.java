@@ -104,9 +104,9 @@ public class SharingController
             return;
         }
 
-        if ( !securityService.canRead( object ) )
+        if ( !securityService.canManage( object ) )
         {
-            throw new AccessDeniedException( "You do not have read access to this object." );
+            throw new AccessDeniedException( "You do not have manage access to this object." );
         }
 
         Sharing sharing = new Sharing();
@@ -146,14 +146,19 @@ public class SharingController
             return;
         }
 
-        if ( !securityService.canWrite( object ) )
+        if ( !securityService.canManage( object ) )
         {
-            throw new AccessDeniedException( "You do not have write access to this object." );
+            throw new AccessDeniedException( "You do not have manage access to this object." );
         }
 
         Sharing sharing = JacksonUtils.fromJson( request.getInputStream(), Sharing.class );
 
         object.setPublicAccess( sharing.getObject().getPublicAccess() );
+
+        if ( object.getUser() == null )
+        {
+            object.setUser( currentUserService.getCurrentUser() );
+        }
 
         Iterator<UserGroupAccess> iterator = object.getUserGroupAccesses().iterator();
 

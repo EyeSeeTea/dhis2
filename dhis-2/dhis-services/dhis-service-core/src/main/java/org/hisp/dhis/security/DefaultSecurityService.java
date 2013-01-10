@@ -29,7 +29,7 @@ package org.hisp.dhis.security;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.AccessHelper;
+import org.hisp.dhis.common.AccessUtils;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.message.MessageSender;
@@ -41,7 +41,6 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
-import org.hisp.dhis.user.UserGroupAccess;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -240,63 +239,30 @@ public class DefaultSecurityService
     @Override
     public boolean canRead( IdentifiableObject identifiableObject )
     {
-        if ( isCurrentUser( identifiableObject.getUser() ) || AccessHelper.canRead( identifiableObject.getPublicAccess() ) )
-        {
-            return true;
-        }
-
-        for ( UserGroupAccess userGroupAccess : identifiableObject.getUserGroupAccesses() )
-        {
-            if ( AccessHelper.canRead( userGroupAccess.getAccess() )
-                && userGroupAccess.getUserGroup().getMembers().contains( currentUserService.getCurrentUser() ) )
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return AccessUtils.canRead( currentUserService.getCurrentUser(), identifiableObject );
     }
 
     @Override
     public boolean canWrite( IdentifiableObject identifiableObject )
     {
-        if ( isCurrentUser( identifiableObject.getUser() ) || AccessHelper.canWrite( identifiableObject.getPublicAccess() ) )
-        {
-            return true;
-        }
-
-        for ( UserGroupAccess userGroupAccess : identifiableObject.getUserGroupAccesses() )
-        {
-            if ( AccessHelper.canWrite( userGroupAccess.getAccess() )
-                && userGroupAccess.getUserGroup().getMembers().contains( currentUserService.getCurrentUser() ) )
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return AccessUtils.canWrite( currentUserService.getCurrentUser(), identifiableObject );
     }
 
     @Override
     public boolean canUpdate( IdentifiableObject identifiableObject )
     {
-        return canWrite( identifiableObject );
+        return AccessUtils.canUpdate( currentUserService.getCurrentUser(), identifiableObject );
     }
 
     @Override
     public boolean canDelete( IdentifiableObject identifiableObject )
     {
-        return isCurrentUser( identifiableObject.getUser() );
+        return AccessUtils.canDelete( currentUserService.getCurrentUser(), identifiableObject );
     }
 
     @Override
     public boolean canManage( IdentifiableObject identifiableObject )
     {
-        return canWrite( identifiableObject );
-    }
-
-    public boolean isCurrentUser( User user )
-    {
-        return currentUserService.getCurrentUser() == user;
+        return AccessUtils.canManage( currentUserService.getCurrentUser(), identifiableObject );
     }
 }

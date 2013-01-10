@@ -6,6 +6,7 @@ table {
 td {
 	padding: 0;
 	border: 1px solid #888;
+	background-color: #dae6f8;
 }
 
 
@@ -16,7 +17,7 @@ td div div {
 }
 
 td .empty-body {
-	background-color: #fff;
+	background-color: #dae6f8;
 	border: 0 none;
 }
 

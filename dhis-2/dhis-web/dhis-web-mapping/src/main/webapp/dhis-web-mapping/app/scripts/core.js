@@ -1,6 +1,6 @@
 Ext.onReady( function() {
 
-if (!Ext.isObject(GIS)) {
+if (!Ext.isDefined(GIS)) {
 	GIS = {};
 }
 

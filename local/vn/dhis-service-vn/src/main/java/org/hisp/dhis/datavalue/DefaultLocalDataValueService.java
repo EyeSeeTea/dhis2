@@ -1,3 +1,5 @@
+package org.hisp.dhis.datavalue;
+
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -25,90 +27,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.report;
-
 import java.util.Collection;
-import java.util.List;
 
-import org.hisp.dhis.caseentry.state.SelectedStateManager;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.period.Period;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Chau Thu Tran
- * 
- * @version $TabularReportSelectAction.java Feb 29, 2012 2:57:50 PM$
+ * @author Dang Duy Hieu
+ * @version $Id$
  */
-public class TabularReportSelectAction
-    implements Action
+@Transactional
+public class DefaultLocalDataValueService
+    implements LocalDataValueService
 {
+    private static final Log log = LogFactory.getLog( DefaultLocalDataValueService.class );
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private SelectedStateManager selectedStateManager;
+    private LocalDataValueStore localDataValueStore;
 
-    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
+    public void setDataValueStore( LocalDataValueStore localDataValueStore )
     {
-        this.selectedStateManager = selectedStateManager;
-    }
-
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
+        this.localDataValueStore = localDataValueStore;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Advance methods
     // -------------------------------------------------------------------------
 
-    private Collection<Program> programs;
-
-    public Collection<Program> getPrograms()
+    public Collection<DataValue> getDataValues( OrganisationUnit source, Collection<DataElement> dataElements,
+        Collection<Period> periods )
     {
-        return programs;
-    }
-
-    private OrganisationUnit orgunit;
-
-    public OrganisationUnit getOrgunit()
-    {
-        return orgunit;
-    }
-
-    private List<OrganisationUnitLevel> levels;
-
-    public List<OrganisationUnitLevel> getLevels()
-    {
-        return levels;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
-
-    public String execute()
-    {
-        orgunit = selectedStateManager.getSelectedOrganisationUnit();
-
-        levels = organisationUnitService.getFilledOrganisationUnitLevels();
-
-        programs = programService.getAllPrograms();
-
-        return SUCCESS;
+        return localDataValueStore.getDataValues( source, dataElements, periods );
     }
 }

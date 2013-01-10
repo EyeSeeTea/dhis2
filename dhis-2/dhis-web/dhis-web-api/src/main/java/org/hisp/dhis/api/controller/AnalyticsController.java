@@ -27,6 +27,8 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Set;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.analytics.AnalyticsService;
@@ -34,6 +36,7 @@ import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.ContextUtils.CacheStrategy;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -53,6 +56,9 @@ public class AnalyticsController
     @Autowired
     private ContextUtils contextUtils;
     
+    @Autowired
+    private I18nManager i18nManager;
+    
     //TODO URL only requests
 
     // -------------------------------------------------------------------------
@@ -61,16 +67,13 @@ public class AnalyticsController
   
     @RequestMapping( value = RESOURCE_PATH, method = RequestMethod.GET, produces = { "application/json", "application/javascript" } )
     public String getJson( // JSON, JSONP
-        @RequestParam String dimensions,
-        @RequestParam(required = false) String filters,
+        @RequestParam Set<String> dimension,
+        @RequestParam(required = false) Set<String> filter,
         @RequestParam(required = false) boolean categories,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = DataQueryParams.getFromUrl( dimensions, filters, categories );
-System.out.println("dim " + dimensions);
-System.out.println("fl " + filters);
-System.out.println("par " + params);
+        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, categories, i18nManager.getI18nFormat() );
 
         if ( !valid( params, response ) )
         {
@@ -86,13 +89,13 @@ System.out.println("par " + params);
 
     @RequestMapping( value = RESOURCE_PATH + ".xml", method = RequestMethod.GET )
     public void getXml( 
-        @RequestParam String dimensions,
-        @RequestParam(required = false) String filters,
+        @RequestParam Set<String> dimension,
+        @RequestParam(required = false) Set<String> filter,
         @RequestParam(required = false) boolean categories,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = DataQueryParams.getFromUrl( dimensions, filters, categories );
+        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, categories, i18nManager.getI18nFormat() );
 
         if ( !valid( params, response ) )
         {
@@ -106,13 +109,13 @@ System.out.println("par " + params);
     
     @RequestMapping( value = RESOURCE_PATH + ".csv", method = RequestMethod.GET )
     public void getCsv( 
-        @RequestParam String dimensions, 
-        @RequestParam(required = false) String filters,
+        @RequestParam Set<String> dimension,
+        @RequestParam(required = false) Set<String> filter,
         @RequestParam(required = false) boolean categories,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = DataQueryParams.getFromUrl( dimensions, filters, categories );
+        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, categories, i18nManager.getI18nFormat() );
 
         if ( !valid( params, response ) )
         {
@@ -126,13 +129,13 @@ System.out.println("par " + params);
     
     @RequestMapping( value = RESOURCE_PATH + ".html", method = RequestMethod.GET )
     public void getHtml( 
-        @RequestParam String dimensions, 
-        @RequestParam(required = false) String filters,
+        @RequestParam Set<String> dimension,
+        @RequestParam(required = false) Set<String> filter,
         @RequestParam(required = false) boolean categories,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = DataQueryParams.getFromUrl( dimensions, filters, categories );
+        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, categories, i18nManager.getI18nFormat() );
 
         if ( !valid( params, response ) )
         {

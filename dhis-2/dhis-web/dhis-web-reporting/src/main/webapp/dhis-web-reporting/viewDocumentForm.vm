@@ -53,7 +53,8 @@ function addUserGroupAccess( ugName, ugId, ugAccess )
         $( '<td style="width: 100px;" />' ).attr( 'access', ugAccess ).text( "Read" ).appendTo( $tr );
     }
 
-    $( '<td style="width: 80px;"/>' ).html('<button class="removeUgButton" style="width: 80px; height: 22px;">Remove</button>' ).appendTo( $tr );
+    $( '<td style="width: 80px;"/>' ).html('<button class="removeUgButton" style="width: 80px; height: 22px;">'
+            + "$encoder.jsEscape( $i18n.getString( "remove" ) , "'")" + '</button>' ).appendTo( $tr );
 
     $( '#sharingUserGroupAccesses table tbody' ).append( $tr );
 }
@@ -61,6 +62,23 @@ function addUserGroupAccess( ugName, ugId, ugAccess )
 function formatItem( item )
 {
     return '<span data-id=' + item.id + '>' + item.name + '</span>';
+}
+
+function getUserGroupAccesses()
+{
+    var userGroupAccesses = [];
+
+    $( '#sharingUserGroupAccesses table tbody' ).find('tr').each(function(idx, item) {
+        var tr = $(item);
+        var uga = {};
+
+        uga.id = $(tr.children()[0]).attr('id');
+        uga.access = $(tr.children()[1]).attr('access');
+
+        userGroupAccesses.push(uga);
+    });
+
+    return userGroupAccesses;
 }
 
 function showSharingDialog( type, uid ) {
@@ -78,11 +96,12 @@ function showSharingDialog( type, uid ) {
             tr.remove()
         } );
 
-        $( '#addUserGroupAccess' ).click(function() {
+        $( '#addUserGroupAccess' ).unbind('click' ).on('click', function() {
             var data = $( '#sharingUserGroupInput' ).select2('data');
             var access = $('#sharingUserGroupAccess :selected' ).val();
 
             addUserGroupAccess(data.name, data.id, access);
+            $('#sharingUserGroupInput').select2('data', null);
         });
 
         if(data.object.userGroupAccesses !== undefined)
@@ -112,6 +131,26 @@ function showSharingDialog( type, uid ) {
                      }
                 },
                 results: function(data, page) {
+                    var ugas = getUserGroupAccesses();
+                    var ugs = data.userGroups;
+                    data.userGroups = [];
+
+                    $.each(ugs, function(idx, ug) {
+                        var found = false;
+
+                        $.each(ugas, function(idx, uga) {
+                            if(ug.id == uga.id)
+                            {
+                                found = true;
+                            }
+                        });
+
+                        if(!found)
+                        {
+                            data.userGroups.push( ug );
+                        }
+                    });
+
                     return { results: data.userGroups }
                 }
             },
@@ -134,17 +173,7 @@ function showSharingDialog( type, uid ) {
                     var me = $( this );
 
                     data.object.publicAccess = $( '#sharingPublicAccess :selected' ).val();
-                    data.object.userGroupAccesses = [];
-
-                    $( '#sharingUserGroupAccesses table tbody' ).find('tr').each(function(idx, item) {
-                        var tr = $(item);
-                        var uga = {};
-
-                        uga.id = $(tr.children()[0]).attr('id');
-                        uga.access = $(tr.children()[1]).attr('access');
-
-                        data.object.userGroupAccesses.push(uga);
-                    });
+                    data.object.userGroupAccesses = getUserGroupAccesses();
 
                     saveSharingSettings( type, uid, data ).done( function () {
                         me.dialog( 'close' );
@@ -156,10 +185,10 @@ function showSharingDialog( type, uid ) {
 }
 </script>
 
-<div id="sharingSettings" title="Sharing Settings" style="display: none;">
+<div id="sharingSettings" title='$i18n.getString( "sharing_settings" )' style="display: none;">
     <div class="dialog-form">
         <p>
-        <label for="sharingName">Name</label>
+        <label for="sharingName">$i18n.getString( "name" )</label>
         </p>
 
         <p>
@@ -167,29 +196,34 @@ function showSharingDialog( type, uid ) {
         </p>
 
         <p>
-        <label for="sharingPublicAccess">Public Access</label>
+        <label for="sharingPublicAccess">$i18n.getString( "public_access" )</label>
         </p>
 
         <p>
         <select style="width: 440px;" id="sharingPublicAccess">
-            <option value="--------">None</option>
-            <option value="r-------">Read</option>
-            <option value="rw------">Read / Write</option>
+            <option value="--------">$i18n.getString( "no_access" )</option>
+            <option value="r-------">$i18n.getString( "read_access" )</option>
+            <option value="rw------">$i18n.getString( "read_write_access" )</option>
         </select>
         </p>
 
         <p>
-        <label for="sharingUserGroupInput">User Group Access</label>
+        <label for="sharingUserGroupAccesses">$i18n.getString( "user_group_access" )</label>
         </p>
 
         <p>
         <div id="sharingUserGroupAccesses" style="overflow-x: hidden; overflow-y: scroll; height: 100px; width: 440px;">
             <table style="width: 425px;">
+                <colgroup>
+                    <col />
+                    <col style="width: 105px;" />
+                    <col style="width: 85px;" />
+                </colgroup>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Access</th>
-                        <th>Actions</th>
+                        <th>$i18n.getString( "group_name" )</th>
+                        <th>$i18n.getString( "access" )</th>
+                        <th>$i18n.getString( "actions" )</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -199,13 +233,13 @@ function showSharingDialog( type, uid ) {
         </p>
 
         <p>
-        <button id="addUserGroupAccess" style="width: 30px; height: 22px; padding: 0; margin: 0;">Add</button>
+        <button id="addUserGroupAccess" style="width: 30px; height: 22px; padding: 0; margin: 0;">$i18n.getString( "add" )</button>
 
         <input style="width: 290px;" id="sharingUserGroupInput" />
 
         <select style="width: 111px;" id="sharingUserGroupAccess">
-            <option value="r-------">Read</option>
-            <option value="rw------">Read / Write</option>
+            <option value="r-------">$i18n.getString( "read_access" )</option>
+            <option value="rw------">$i18n.getString( "read_write_access" )</option>
         </select>
 
         </p>
@@ -252,7 +286,10 @@ function showSharingDialog( type, uid ) {
 					<td>
                         #if ( $security.canManage( $document ) )
                         <a href="javascript:showSharingDialog('document', '$document.uid');"><img src="../images/relationship.png" alt="$i18n.getString( 'sharing_settings' )"></a>
+                        #else
+                        <img src="../images/relationship-denied.png">
                         #end
+
 						#if ( $document.external )
                     	   <a href="${document.url}" title="$i18n.getString( 'view_resource' )">
                     	#else
@@ -263,12 +300,17 @@ function showSharingDialog( type, uid ) {
 
                         #if( $security.canUpdate( $document ) )
                     	<a href="displayAddDocumentForm.action?id=$!document.id" title="$i18n.getString( "edit" )"><img src="../images/edit.png" alt="$i18n.getString( "edit" )"></a>
+                        #else
+                        <img src="../images/edit-denied.png">
                         #end
 
 						<a href="javascript:addDocumentToDashboard( '$document.id' )" title="$i18n.getString( 'add_to_dashboard' )"><img src="../images/add_to_dashboard.png" alt="$i18n.getString( 'add_to_dashboard' )"></a>
+
 						#if( $auth.hasAccess( "dhis-web-reporting", "removeDocument" ) && $security.canDelete( $document ) )
 						<a href="javascript:removeDocument( $document.id )" title="$i18n.getString( 'remove_report' )"><img src="../images/delete.png" alt="$i18n.getString( 'remove_report' )"></a>
-						#else <img src="../images/delete-denied.png"> #end
+						#else
+                        <img src="../images/delete-denied.png">
+                        #end
 					</td>
                 </tr>
                 #end

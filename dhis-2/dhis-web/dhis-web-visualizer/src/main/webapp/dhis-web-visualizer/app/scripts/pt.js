@@ -3,103 +3,104 @@ Ext.onReady( function() {
 
 var pt = {};
 
-//pt.response = {
-    //"headers": [
-		//{
-			//"name": "de",
-			//"column": "de",
-			//"type": "java.lang.String",
-			//"hidden": false,
-			//"meta": true
-		//}, {
-			//"name": "coc",
-			//"column": "coc",
-			//"type": "java.lang.String",
-			//"hidden": false,
-			//"meta": true
-		//}, {
-			//"name": "pe",
-			//"column": "pe",
-			//"type": "java.lang.String",
-			//"hidden": false,
-			//"meta": true
-		//}, {
-			//"name": "ou",
-			//"column": "ou",
-			//"type": "java.lang.String",
-			//"hidden": false,
-			//"meta": true
-		//}, {
-			//"name": "J5jldMd8OHv",
-			//"column": "J5jldMd8OHv",
-			//"type": "java.lang.String",
-			//"hidden": false,
-			//"meta": true,
+pt.response = {
+    "headers": [
+		{
+			"name": "de",
+			"column": "de",
+			"type": "java.lang.String",
+			"hidden": false,
+			"meta": true
+		}, {
+			"name": "coc",
+			"column": "coc",
+			"type": "java.lang.String",
+			"hidden": false,
+			"meta": true
+		}, {
+			"name": "pe",
+			"column": "pe",
+			"type": "java.lang.String",
+			"hidden": false,
+			"meta": true
+		}, {
+			"name": "ou",
+			"column": "ou",
+			"type": "java.lang.String",
+			"hidden": false,
+			"meta": true
+		}, {
+			"name": "J5jldMd8OHv",
+			"column": "J5jldMd8OHv",
+			"type": "java.lang.String",
+			"hidden": false,
+			"meta": true
 						//index: 4
 						//items: ['ImspTQPwCqd']
 						//size: 1
-		//}, {
-			//"name": "value",
-			//"column": "Value",
-			//"type": "java.lang.Double",
-			//"hidden": false,
-			//"meta": false
-		//}
-    //],
-    //"width": 6,
-    //"height": 24,
-    //"rows": [
-        //["YtbsuPPo010", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "456.0"],
-        //["YtbsuPPo010", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "876.0"],
-        //["YtbsuPPo010", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "821.0"],
-        //["YtbsuPPo010", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "567.0"],
-        //["YtbsuPPo010", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "674.0"],
-        //["YtbsuPPo010", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "866.0"],
-        //["YtbsuPPo010", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "334.0"],
-        //["YtbsuPPo010", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "254.0"],
+		}, {
+			"name": "value",
+			"column": "Value",
+			"type": "java.lang.Double",
+			"hidden": false,
+			"meta": false
+		}
+    ],
+    "width": 6,
+    "height": 24,
+    "rows": [
+        ["YtbsuPPo010", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "456.0"],
+        ["YtbsuPPo010", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "876.0"],
+        ["YtbsuPPo010", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "821.0"],
+        ["YtbsuPPo010", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "567.0"],
+        ["YtbsuPPo010", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "674.0"],
+        ["YtbsuPPo010", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "866.0"],
+        ["YtbsuPPo010", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "334.0"],
+        ["YtbsuPPo010", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "254.0"],
 
-        //["Vdjeu38jejd", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "294.0"],
-        //["Vdjeu38jejd", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "663.0"],
-        //["Vdjeu38jejd", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "374.0"],
-        //["Vdjeu38jejd", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "765.0"],
-        //["Vdjeu38jejd", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "375.0"],
-        //["Vdjeu38jejd", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "287.0"],
-        //["Vdjeu38jejd", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "699.0"],
-        //["Vdjeu38jejd", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "883.0"],
+        ["Vdjeu38jejd", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "294.0"],
+        ["Vdjeu38jejd", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "663.0"],
+        ["Vdjeu38jejd", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "374.0"],
+        ["Vdjeu38jejd", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "765.0"],
+        ["Vdjeu38jejd", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "375.0"],
+        ["Vdjeu38jejd", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "287.0"],
+        ["Vdjeu38jejd", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "699.0"],
+        ["Vdjeu38jejd", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "883.0"],
 
-        //["Wdsd99jdmmf", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "475.0"],
-        //["Wdsd99jdmmf", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "264.0"],
-        //["Wdsd99jdmmf", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "233.0"],
-        //["Wdsd99jdmmf", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "445.0"],
-        //["Wdsd99jdmmf", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "788.0"],
-        //["Wdsd99jdmmf", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "854.0"],
-        //["Wdsd99jdmmf", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "732.0"],
-        //["Wdsd99jdmmf", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "726.0"]
-    //],
-    //"metaData": {
-        //"YtbsuPPo010": "ANC 1 visit",
-        //"Vdjeu38jejd": "ANC 2 visit",
-        //"Wdsd99jdmmf": "ANC 3 visit",
-        //"V6L425pT3A0": "Default",
-        //"201201": "Jan 2012",
-        //"201202": "Feb 2012",
-        //"201203": "Mar 2012",
-        //"201204": "Apr 2012",
-        //"ImspTQPwCqd": "Kailahun CHPC",
-        //"Jdj9kdfn93n": "Bo CHPC",
-        //"uYxK4wmcPqA": "Public ownership"
-    //},
+        ["Wdsd99jdmmf", "V6L425pT3A0", "201201", "ImspTQPwCqd", "uYxK4wmcPqA", "475.0"],
+        ["Wdsd99jdmmf", "V6L425pT3A0", "201202", "ImspTQPwCqd", "uYxK4wmcPqA", "264.0"],
+        ["Wdsd99jdmmf", "V6L425pT3A0", "201203", "ImspTQPwCqd", "uYxK4wmcPqA", "233.0"],
+        ["Wdsd99jdmmf", "V6L425pT3A0", "201204", "ImspTQPwCqd", "uYxK4wmcPqA", "445.0"],
+        ["Wdsd99jdmmf", "V6L425pT3A0", "201201", "Jdj9kdfn93n", "uYxK4wmcPqA", "788.0"],
+        ["Wdsd99jdmmf", "V6L425pT3A0", "201202", "Jdj9kdfn93n", "uYxK4wmcPqA", "854.0"],
+        ["Wdsd99jdmmf", "V6L425pT3A0", "201203", "Jdj9kdfn93n", "uYxK4wmcPqA", "732.0"],
+        ["Wdsd99jdmmf", "V6L425pT3A0", "201204", "Jdj9kdfn93n", "uYxK4wmcPqA", "726.0"]
+    ],
+    "metaData": {
+        "YtbsuPPo010": "ANC 1 visit",
+        "Vdjeu38jejd": "ANC 2 visit",
+        "Wdsd99jdmmf": "ANC 3 visit",
+        "V6L425pT3A0": "Default",
+        "201201": "Jan 2012",
+        "201202": "Feb 2012",
+        "201203": "Mar 2012",
+        "201204": "Apr 2012",
+        "ImspTQPwCqd": "Kailahun CHPC",
+        "Jdj9kdfn93n": "Bo CHPC",
+        "uYxK4wmcPqA": "Public ownership"
+    }
+
 				//"nameHeaderMap": {
-				//	"de": <header.de>
-				//	"pe": <header.pe>
+					//"de": <header.de>
+					//"pe": <header.pe>
 				//}
 				//,
-				//
+
 				//"idValueMap": {
-				//	"Vdjeu38jejd201201ImspTQPwCqdV6L425pT3A0": "294.0"
-				//	"Vdjeu38jejd201201Jdj9kdfn93nV6L425pT3A0": "375.0"
+					//"Vdjeu38jejd201201ImspTQPwCqdV6L425pT3A0": "294.0"
+					//"Vdjeu38jejd201201Jdj9kdfn93nV6L425pT3A0": "375.0"
 				//}
-//};
+};
 
 //pt.settings = {
 	//col: ['pe', 'J5jldMd8OHv', 'ou', 'coc'],
@@ -113,7 +114,7 @@ var extendSettings = function(pt) {
 
 	settings.dimensions = Ext.clone(col);
 	Ext.apply(settings.dimensions, row);
-}
+};
 
 var extendResponse = function(pt) {
 	var response = pt.response,
@@ -542,35 +543,31 @@ var createTableArray = function(pt) {
 
 var initialize = function() {
 
-	Ext.Ajax.request({
-		method: 'GET',
-		url: 'http://localhost:8080/api/analytics',
-		//headers: {'Content-Type': 'application/json'},
-		params: {
-			dimensions: 'de:fbfJHSPpUQD,cYeuwXTCPkU,Jtf34kNZhzP,hfdmMSPBgLG;pe:201201,201202,201203',
-			filters: 'ou:ImspTQPwCqd',
-			categories: false
-		},
-		success: function(r) {
-			pt.response = Ext.decode(r.responseText);
+	//var params = '?dimension=Bpx0589u8y0:PVLOW4bCshG&dimension=de:fbfJHSPpUQD,cYeuwXTCPkU,Jtf34kNZhzP,hfdmMSPBgLG&dimension=pe:201201,201202,201203';
 
-			pt.response.metaData = {
-				'fbfJHSPpUQD': 'ANC 1 visit',
-				'cYeuwXTCPkU': 'ANC 2 visit',
-				'Jtf34kNZhzP': 'ANC 3 visit',
-				'hfdmMSPBgLG': 'ANC 4 visit',
-				'201201': 'Jan 2012',
-				'201202': 'Feb 2012',
-				'201203': 'Mar 2012',
-				'ImspTQPwCqd': 'Sierra Leone'
-			};
+	//Ext.Ajax.request({
+		//method: 'GET',
+		//url: 'http://localhost:8080/api/analytics' + params,
+		//headers: {'Content-Type': 'application/json'},
+		//params: {
+			//filter: 'ou:ImspTQPwCqd',
+			//categories: false
+		//},
+		//success: function(r) {
+			//pt.response = Ext.decode(r.responseText);
+
+    //de: ['YtbsuPPo010', 'Vdjeu38jejd', 'Wdsd99jdmmf'],
+
+    //pe: ['201201', '201201', '201201', '201201'],
+    //ou: ['ImspTQPwCqd', 'Jdj9kdfn93n']
 
 			pt.settings = {
 				col: {
-					de: ['fbfJHSPpUQD', 'cYeuwXTCPkU', 'Jtf34kNZhzP', 'hfdmMSPBgLG']
+					de: ['YtbsuPPo010', 'Vdjeu38jejd', 'Wdsd99jdmmf']
 				},
 				row: {
-					pe: ['201201', '201202', '201203']
+					pe: ['201201', '201202', '201203', '201204'],
+					ou: ['ImspTQPwCqd', 'Jdj9kdfn93n']
 				}
 			};
 
@@ -583,8 +580,8 @@ var initialize = function() {
 			extendRowDims(pt.config.rows);
 
 			var panel = createTableArray(pt);
-		}
-	});
+		//}
+	//});
 
 }();
 

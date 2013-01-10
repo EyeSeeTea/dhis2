@@ -30,20 +30,27 @@ package org.hisp.dhis.hibernate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
+import org.hisp.dhis.common.AccessUtils;
 import org.hisp.dhis.common.AuditLogUtil;
 import org.hisp.dhis.common.GenericNameableObjectStore;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -141,6 +148,80 @@ public class HibernateGenericStore<T>
         return query;
     }
 
+    private boolean hasShareProperties()
+    {
+        try
+        {
+            // for now we need to have this test, since not all idObjectClasses are converted
+            sessionFactory.getClassMetadata( clazz ).getPropertyType( "publicAccess" );
+        }
+        catch ( HibernateException ignored )
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Creates a Criteria for the implementation Class type based on the accessibility of objects.
+     *
+     * @return a Criteria instance.
+     */
+    protected final Criteria getAccessibleCriteria()
+    {
+        Criteria criteria = getCriteria();
+        User currentUser = currentUserService.getCurrentUser();
+
+        if ( currentUser == null || currentUser.getUserCredentials().getAllAuthorities().contains( "ALL" ) )
+        {
+            return criteria;
+        }
+
+        if ( !hasShareProperties() )
+        {
+            return criteria;
+        }
+
+        criteria.setResultTransformer( Criteria.DISTINCT_ROOT_ENTITY );
+
+        criteria.createAlias( "userGroupAccesses", "u", JoinType.LEFT_OUTER_JOIN );
+        criteria.createAlias( "u.userGroup", "ug", JoinType.LEFT_OUTER_JOIN );
+        criteria.createAlias( "ug.members", "member", JoinType.LEFT_OUTER_JOIN );
+
+        Disjunction root = Restrictions.disjunction();
+        root.add( Restrictions.ilike( "publicAccess", "r%" ) );
+        root.add( Restrictions.eq( "user", currentUser ) );
+
+        Conjunction ugAccess = Restrictions.conjunction();
+        ugAccess.add( Restrictions.ilike( "u.access", "r%" ) );
+        ugAccess.add( Restrictions.eq( "member.uid", currentUser.getUid() ) );
+        root.add( ugAccess );
+
+        criteria.add( root );
+
+        return criteria;
+    }
+
+    /**
+     * Creates a Criteria for the implementation Class type restricted by the
+     * given Criterions.
+     *
+     * @param expressions the Criterions for the Criteria.
+     * @return a Criteria instance.
+     */
+    protected final Criteria getAccessibleCriteria( Criterion... expressions )
+    {
+        Criteria criteria = getAccessibleCriteria();
+
+        for ( Criterion expression : expressions )
+        {
+            criteria.add( expression );
+        }
+
+        return criteria;
+    }
+
     /**
      * Creates a Criteria for the implementation Class type.
      *
@@ -206,6 +287,12 @@ public class HibernateGenericStore<T>
     @Override
     public int save( T object )
     {
+        if ( !isWriteAllowed( object ) )
+        {
+            AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_CREATE_DENIED );
+            throw new AccessDeniedException( "You do not have write access to object" );
+        }
+
         AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_CREATE );
         return (Integer) sessionFactory.getCurrentSession().save( object );
     }
@@ -213,6 +300,12 @@ public class HibernateGenericStore<T>
     @Override
     public void update( T object )
     {
+        if ( !isUpdateAllowed( object ) )
+        {
+            AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_UPDATE_DENIED );
+            throw new AccessDeniedException( "You do not have update access to object" );
+        }
+
         AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_UPDATE );
         sessionFactory.getCurrentSession().update( object );
     }
@@ -220,6 +313,12 @@ public class HibernateGenericStore<T>
     @Override
     public void saveOrUpdate( T object )
     {
+        if ( !isWriteAllowed( object ) )
+        {
+            AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_UPDATE_DENIED );
+            throw new AccessDeniedException( "You do not have write access to object" );
+        }
+
         // TODO check if object is persisted or not to decide logging? defaulting to edit for now
         AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_UPDATE );
         sessionFactory.getCurrentSession().saveOrUpdate( object );
@@ -229,9 +328,15 @@ public class HibernateGenericStore<T>
     @SuppressWarnings("unchecked")
     public final T get( int id )
     {
-        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         T object = (T) sessionFactory.getCurrentSession().get( getClazz(), id );
 
+        if ( !isReadAllowed( object ) )
+        {
+            AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ_DENIED );
+            throw new AccessDeniedException( "You do not have read access to object with id " + id );
+        }
+
+        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         return object;
     }
 
@@ -239,45 +344,75 @@ public class HibernateGenericStore<T>
     @SuppressWarnings("unchecked")
     public final T load( int id )
     {
-        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         T object = (T) sessionFactory.getCurrentSession().load( getClazz(), id );
 
+        if ( !isReadAllowed( object ) )
+        {
+            AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ_DENIED );
+            throw new AccessDeniedException( "You do not have read access to object with id " + id );
+        }
+
+        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         return object;
     }
 
     @Override
     public final T getByUid( String uid )
     {
-        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         T object = getObject( Restrictions.eq( "uid", uid ) );
 
+        if ( !isReadAllowed( object ) )
+        {
+            AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ_DENIED );
+            throw new AccessDeniedException( "You do not have read access to object with uid " + uid );
+        }
+
+        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         return object;
     }
 
     @Override
     public final T getByName( String name )
     {
-        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         T object = getObject( Restrictions.eq( "name", name ) );
 
+        if ( !isReadAllowed( object ) )
+        {
+            AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ_DENIED );
+            throw new AccessDeniedException( "You do not have read access to object with name " + name );
+        }
+
+        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         return object;
     }
 
     @Override
     public final T getByShortName( String shortName )
     {
-        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         T object = getObject( Restrictions.eq( "shortName", shortName ) );
 
+        if ( !isReadAllowed( object ) )
+        {
+            AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ_DENIED );
+            throw new AccessDeniedException( "You do not have read access to object with shortName " + shortName );
+        }
+
+        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         return object;
     }
 
     @Override
     public final T getByCode( String code )
     {
-        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         T object = getObject( Restrictions.eq( "code", code ) );
 
+        if ( !isReadAllowed( object ) )
+        {
+            AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ_DENIED );
+            throw new AccessDeniedException( "You do not have read access to object with code " + code );
+        }
+
+        // AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ );
         return object;
     }
 
@@ -285,26 +420,32 @@ public class HibernateGenericStore<T>
     @SuppressWarnings("unchecked")
     public Collection<T> getLikeName( String name )
     {
-        return getCriteria().add( Restrictions.ilike( "name", "%" + name + "%" ) ).list();
+        return getAccessibleCriteria().add( Restrictions.ilike( "name", "%" + name + "%" ) ).list();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public final Collection<T> getAll()
     {
-        return getCriteria().list();
+        return getAccessibleCriteria().list();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public final Collection<T> getAllSorted()
     {
-        return getCriteria().addOrder( Order.asc( "name" ) ).list();
+        return getAccessibleCriteria().addOrder( Order.asc( "name" ) ).list();
     }
 
     @Override
     public final void delete( T object )
     {
+        if ( !isDeleteAllowed( object ) )
+        {
+            AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_DELETE_DENIED );
+            throw new AccessDeniedException( "You do not have delete access to this object." );
+        }
+
         AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_DELETE );
         sessionFactory.getCurrentSession().delete( object );
     }
@@ -313,7 +454,7 @@ public class HibernateGenericStore<T>
     @SuppressWarnings("unchecked")
     public Collection<T> getBetween( int first, int max )
     {
-        Criteria criteria = getCriteria();
+        Criteria criteria = getAccessibleCriteria();
         criteria.addOrder( Order.asc( "name" ) );
         criteria.setFirstResult( first );
         criteria.setMaxResults( max );
@@ -324,7 +465,7 @@ public class HibernateGenericStore<T>
     @SuppressWarnings("unchecked")
     public List<T> getBetweenOrderderByLastUpdated( int first, int max )
     {
-        Criteria criteria = getCriteria();
+        Criteria criteria = getAccessibleCriteria();
         criteria.addOrder( Order.desc( "lastUpdated" ) );
         criteria.setFirstResult( first );
         criteria.setMaxResults( max );
@@ -335,7 +476,7 @@ public class HibernateGenericStore<T>
     @SuppressWarnings("unchecked")
     public Collection<T> getBetweenByName( String name, int first, int max )
     {
-        Criteria criteria = getCriteria();
+        Criteria criteria = getAccessibleCriteria();
         criteria.add( Restrictions.ilike( "name", "%" + name + "%" ) );
         criteria.addOrder( Order.asc( "name" ) );
         criteria.setFirstResult( first );
@@ -346,7 +487,7 @@ public class HibernateGenericStore<T>
     @Override
     public int getCount()
     {
-        Criteria criteria = getCriteria();
+        Criteria criteria = getAccessibleCriteria();
         criteria.setProjection( Projections.rowCount() );
         return ((Number) criteria.uniqueResult()).intValue();
     }
@@ -354,7 +495,7 @@ public class HibernateGenericStore<T>
     @Override
     public int getCountByName( String name )
     {
-        Criteria criteria = getCriteria();
+        Criteria criteria = getAccessibleCriteria();
         criteria.setProjection( Projections.rowCount() );
         criteria.add( Restrictions.ilike( "name", "%" + name + "%" ) );
         return ((Number) criteria.uniqueResult()).intValue();
@@ -385,27 +526,27 @@ public class HibernateGenericStore<T>
     @SuppressWarnings("unchecked")
     public List<T> getByLastUpdated( Date lastUpdated )
     {
-        return getCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).list();
+        return getAccessibleCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).list();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public List<T> getByCreated( Date created )
     {
-        return getCriteria().add( Restrictions.ge( "created", created ) ).list();
+        return getAccessibleCriteria().add( Restrictions.ge( "created", created ) ).list();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public List<T> getByLastUpdatedSorted( Date lastUpdated )
     {
-        return getCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).addOrder( Order.asc( "name" ) ).list();
+        return getAccessibleCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).addOrder( Order.asc( "name" ) ).list();
     }
 
     @Override
     public long getCountByLastUpdated( Date lastUpdated )
     {
-        Object count = getCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).setProjection( Projections.rowCount() ).list().get( 0 );
+        Object count = getAccessibleCriteria().add( Restrictions.ge( "lastUpdated", lastUpdated ) ).setProjection( Projections.rowCount() ).list().get( 0 );
 
         return count != null ? (Long) count : -1;
     }
@@ -414,7 +555,7 @@ public class HibernateGenericStore<T>
     @SuppressWarnings("unchecked")
     public Collection<T> getByUser( User user )
     {
-        return getCriteria( Restrictions.eq( "user", user ) ).list();
+        return getAccessibleCriteria( Restrictions.eq( "user", user ) ).list();
     }
 
     @Override
@@ -472,5 +613,65 @@ public class HibernateGenericStore<T>
         criteria.setFirstResult( first );
         criteria.setMaxResults( max );
         return criteria.list();
+    }
+
+    private boolean isReadAllowed( T object )
+    {
+        if ( IdentifiableObject.class.isInstance( object ) )
+        {
+            IdentifiableObject idObject = (IdentifiableObject) object;
+
+            if ( hasShareProperties() )
+            {
+                return AccessUtils.canRead( currentUserService.getCurrentUser(), idObject );
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isWriteAllowed( T object )
+    {
+        if ( IdentifiableObject.class.isInstance( object ) )
+        {
+            IdentifiableObject idObject = (IdentifiableObject) object;
+
+            if ( hasShareProperties() )
+            {
+                return AccessUtils.canWrite( currentUserService.getCurrentUser(), idObject );
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isUpdateAllowed( T object )
+    {
+        if ( IdentifiableObject.class.isInstance( object ) )
+        {
+            IdentifiableObject idObject = (IdentifiableObject) object;
+
+            if ( hasShareProperties() )
+            {
+                return AccessUtils.canUpdate( currentUserService.getCurrentUser(), idObject );
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isDeleteAllowed( T object )
+    {
+        if ( IdentifiableObject.class.isInstance( object ) )
+        {
+            IdentifiableObject idObject = (IdentifiableObject) object;
+
+            if ( hasShareProperties() )
+            {
+                return AccessUtils.canDelete( currentUserService.getCurrentUser(), idObject );
+            }
+        }
+
+        return true;
     }
 }
