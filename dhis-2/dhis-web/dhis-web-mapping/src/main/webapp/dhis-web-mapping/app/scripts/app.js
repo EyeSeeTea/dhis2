@@ -848,26 +848,37 @@ Ext.onReady( function() {
 			items = [],
 			item,
 			panel,
-			visibleLayerId = window.google ? layers.googleStreets.id : layers.openStreetMap.id;
+			visibleLayer = window.google ? layers.googleStreets : layers.openStreetMap,
+			reversedLayers = [];
 
 		for (var key in gis.layer) {
 			if (gis.layer.hasOwnProperty(key)) {
-				layer = gis.layer[key];
-
-				item = Ext.create('Ext.ux.panel.LayerItemPanel', {
-					cls: 'gis-container-inner',
-					height: 23,
-					layer: layer,
-					text: layer.name,
-					imageUrl: 'images/' + layer.id + '_14.png',
-					value: layer.id === visibleLayerId ? true : false,
-					opacity: layer.layerOpacity,
-					numberFieldDisabled: layer.id !== visibleLayerId
-				});
-
-				layer.item = item;
-				items.push(layer.item);
+				reversedLayers.push(gis.layer[key]);
 			}
+		}
+
+		reversedLayers = reversedLayers.reverse();
+
+		for (var i = 0; i < reversedLayers.length; i++) {
+			layer = reversedLayers[i];
+
+			item = Ext.create('Ext.ux.panel.LayerItemPanel', {
+				cls: 'gis-container-inner',
+				height: 23,
+				layer: layer,
+				text: layer.name,
+				imageUrl: 'images/' + layer.id + '_14.png',
+				value: layer.id === visibleLayer.id ? true : false,
+				opacity: layer.layerOpacity,
+				numberFieldDisabled: layer.id !== visibleLayer.id
+			});
+
+			layer.item = item;
+			items.push(layer.item);
+		}
+
+		if (window.google) {
+			visibleLayer.item.setValue(true);
 		}
 
         panel = Ext.create('Ext.panel.Panel', {
@@ -4542,7 +4553,7 @@ Ext.onReady( function() {
 				collapseMode: 'mini',
 				items: [
 					{
-						title: 'Layer overview and visibility %', //i18n
+						title: 'Layer stack / transparency', //i18n
 						bodyStyle: 'padding: 4px 6px 3px',
 						items: GIS.app.LayersPanel(),
 						collapsible: true,
