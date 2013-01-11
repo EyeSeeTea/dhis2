@@ -543,18 +543,20 @@ var createTableArray = function(pt) {
 
 var initialize = function() {
 
-	//var params = '?dimension=Bpx0589u8y0:PVLOW4bCshG&dimension=de:fbfJHSPpUQD,cYeuwXTCPkU,Jtf34kNZhzP,hfdmMSPBgLG&dimension=pe:201201,201202,201203';
+	var params = '?dimension=Bpx0589u8y0:MAs88nJc9nL&dimension=de:fbfJHSPpUQD,cYeuwXTCPkU,Jtf34kNZhzP,hfdmMSPBgLG&dimension=pe:201201,201202,201203';
 
-	//Ext.Ajax.request({
-		//method: 'GET',
-		//url: 'http://localhost:8080/api/analytics' + params,
-		//headers: {'Content-Type': 'application/json'},
-		//params: {
-			//filter: 'ou:ImspTQPwCqd',
-			//categories: false
-		//},
-		//success: function(r) {
-			//pt.response = Ext.decode(r.responseText);
+	Ext.Ajax.request({
+		method: 'GET',
+		url: 'http://localhost:8080/api/analytics' + params,
+		headers: {'Content-Type': 'application/json'},
+		params: {
+			filter: 'ou:ImspTQPwCqd',
+			categories: false
+		},
+		success: function(r) {
+			pt.response = Ext.decode(r.responseText);
+		}
+	});
 
     //de: ['YtbsuPPo010', 'Vdjeu38jejd', 'Wdsd99jdmmf'],
 
