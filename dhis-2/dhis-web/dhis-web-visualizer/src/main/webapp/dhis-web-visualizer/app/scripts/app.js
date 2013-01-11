@@ -2733,7 +2733,8 @@ Ext.onReady( function() {
 								height: 430,
 								items: [
 									{
-										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.indicators + '</div>',
+										//title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.indicators + '</div>',
+										title: '<div style="height:17px; padding-right: 4px"><div style="background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px; width:50%; display:inline;">' + DV.i18n.indicators + '</div><div style="display:inline; float:right; color:#555; font-weight:normal; font-size:10px">Data</div></div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -2904,7 +2905,8 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.data_elements + '</div>',
+										//title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.data_elements + '</div>',
+										title: '<div style="height:17px; padding-right: 4px"><div style="background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px; width:50%; display:inline;">' + DV.i18n.data_elements + '</div><div style="display:inline; float:right; color:#555; font-weight:normal; font-size:10px">Data</div></div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -3074,7 +3076,8 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.reporting_rates + '</div>',
+										//title: '<div style="height:17px; background-image:url(images/data.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.reporting_rates + '</div>',
+										title: '<div style="height:17px; padding-right: 4px"><div style="background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px; width:50%; display:inline;">' + DV.i18n.reporting_rates + '</div><div style="display:inline; float:right; color:#555; font-weight:normal; font-size:10px">Data</div></div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -3194,7 +3197,8 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.relative_periods + '</div>',
+										//title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.relative_periods + '</div>',
+										title: '<div style="height:17px; padding-right: 4px"><div style="background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px; width:50%; display:inline;">' + DV.i18n.relative_periods + '</div><div style="display:inline; float:right; color:#555; font-weight:normal; font-size:10px">Period</div></div>',
 										hideCollapseTool: true,
 										autoScroll: true,
 										items: [
@@ -3402,7 +3406,8 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.fixed_periods + '</div>',
+										//title: '<div style="height:17px; background-image:url(images/period.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.fixed_periods + '</div>',
+										title: '<div style="height:17px; padding-right: 4px"><div style="background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px; width:50%; display:inline;">' + DV.i18n.fixed_periods + '</div><div style="display:inline; float:right; color:#555; font-weight:normal; font-size:10px">Period</div></div>',
 										hideCollapseTool: true,
 										items: [
 											{
@@ -3584,7 +3589,8 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.organisation_units + '</div>',
+										//title: '<div style="height:17px; background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.organisation_units + '</div>',
+										title: '<div style="height:17px; padding-right: 4px"><div style="background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px; width:50%; display:inline;">' + DV.i18n.organisation_units + '</div><div style="display:inline; float:right; color:#555; font-weight:normal; font-size:10px">Org unit</div></div>',
 										hideCollapseTool: true,
 										collapsed: false,
 										items: [
@@ -3863,7 +3869,8 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										title: '<div style="height:17px; background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.organisation_unit_groups + '</div>',
+										//title: '<div style="height:17px; background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px">' + DV.i18n.organisation_unit_groups + '</div>',
+										title: '<div style="height:17px; padding-right: 4px"><div style="background-image:url(images/organisationunit.png); background-repeat:no-repeat; padding-left:20px; width:50%; display:inline;">' + DV.i18n.organisation_unit_groups + '</div><div style="display:inline; float:right; color:#555; font-weight:normal; font-size:10px">Org unit</div></div>',
 										hideCollapseTool: true,
 										bodyStyle: 'padding-bottom: 0px',
 										items: [
@@ -3912,11 +3919,11 @@ Ext.onReady( function() {
 												xtype: 'panel',
 												layout: 'column',
 												bodyStyle: 'padding-bottom:3px',
-												width: DV.conf.layout.west_fieldset_width,
 												items: [
 													{
 														xtype: 'checkbox',
-														columnWidth: 0.5,
+														style: 'margin-right:6px',
+														width: ((DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2) - 3,
 														boxLabel: DV.i18n.show_data,
 														labelWidth: DV.conf.layout.form_label_width,
 														listeners: {
@@ -3927,7 +3934,7 @@ Ext.onReady( function() {
 													},
 													{
 														xtype: 'checkbox',
-														columnWidth: 0.5,
+														width: ((DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2) - 3,
 														boxLabel: DV.i18n.hide_subtitle,
 														labelWidth: DV.conf.layout.form_label_width,
 														listeners: {
@@ -3942,11 +3949,11 @@ Ext.onReady( function() {
 												xtype: 'panel',
 												layout: 'column',
 												bodyStyle: 'padding-bottom:15px',
-												width: DV.conf.layout.west_fieldset_width,
 												items: [
 													{
 														xtype: 'checkbox',
-														columnWidth: 0.5,
+														style: 'margin-right:6px',
+														width: ((DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2) - 3,
 														boxLabel: DV.i18n.trend_line,
 														labelWidth: DV.conf.layout.form_label_width,
 														listeners: {
@@ -3957,7 +3964,7 @@ Ext.onReady( function() {
 													},
 													{
 														xtype: 'checkbox',
-														columnWidth: 0.5,
+														width: ((DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_subtractor) / 2) - 3,
 														boxLabel: DV.i18n.hide_legend,
 														labelWidth: DV.conf.layout.form_label_width,
 														listeners: {
