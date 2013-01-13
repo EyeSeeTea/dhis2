@@ -86,6 +86,7 @@ public class JdbcAnalyticsManager
         params.replaceAggregationPeriodsWithDataPeriods( dataPeriodAggregationPeriodMap );
         
         List<String> dimensions = params.getDimensionNames();
+        List<String> queryDimensions = params.getDimensionNamesIgnoreCategories();
         Map<String, List<IdentifiableObject>> dimensionMap = params.getDimensionMap();
         
         SqlHelper sqlHelper = new SqlHelper();
@@ -98,8 +99,10 @@ public class JdbcAnalyticsManager
         
         sql += " as value from " + params.getTableName() + " ";
         
-        for ( String dim : dimensions )
+        for ( String dim : queryDimensions )
         {
+            System.out.println("dim " + dim);
+            System.out.println("dim map " + dimensionMap);
             sql += sqlHelper.whereAnd() + " " + dim + " in (" + getQuotedCommaDelimitedString( getUids( dimensionMap.get( dim ) ) ) + " ) ";
         }
 
