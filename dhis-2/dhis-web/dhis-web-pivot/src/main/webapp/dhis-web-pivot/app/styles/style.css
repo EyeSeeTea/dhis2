@@ -1,3 +1,5 @@
+/* Pivot */
+
 table {
 	border-collapse: collapse;
 	border-spacing: 0px;
@@ -47,5 +49,30 @@ td .medium div {
 }
 td .bad div {
 	color: red;
+}
+
+
+/* Panel */
+
+pt-panel-title-data,
+pt-panel-title-period,
+pt-panel-title-organisationunit,
+pt-panel-title-organisationunitgroupset {
+	height: 17px;
+	background-repeat: no-repeat;
+	padding-left: 20px
+}
+
+pt-panel-title-data {
+	background-image: url(images/data.png);
+}
+pt-panel-title-period {
+	background-image: url(images/period.png);
+}
+pt-panel-title-organisationunit {
+	background-image: url(images/organisationunit.png);
+}
+pt-panel-title-organisationunitgroupset {
+	background-image: url(images/organisationunitgroupset.png);
 }
 
