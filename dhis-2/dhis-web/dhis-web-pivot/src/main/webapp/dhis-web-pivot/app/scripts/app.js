@@ -1,6 +1,5 @@
 Ext.onReady( function() {
 
-
 var pt = {};
 
 pt.response = {
@@ -555,13 +554,6 @@ var initialize = function() {
 		},
 		success: function(r) {
 			pt.response = Ext.decode(r.responseText);
-		//}
-	//});
-
-    //de: ['YtbsuPPo010', 'Vdjeu38jejd', 'Wdsd99jdmmf'],
-
-    //pe: ['201201', '201201', '201201', '201201'],
-    //ou: ['ImspTQPwCqd', 'Jdj9kdfn93n']
 
 			pt.settings = {
 				col: {

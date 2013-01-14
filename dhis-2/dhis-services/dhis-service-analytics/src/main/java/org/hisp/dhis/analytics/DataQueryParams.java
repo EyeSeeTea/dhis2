@@ -121,12 +121,27 @@ public class DataQueryParams
      */
     public List<String> getDimensionNames()
     {
-        List<String> list = getDimensionNamesAsList();
-        
+        List<String> list = getDimensionNamesIgnoreCategories();
+
         if ( categories )
         {
             list.add( CATEGORYOPTIONCOMBO_DIM_ID );
         }
+        
+        return list;
+    }
+    
+    /**
+     * Creates a list of the names of all dimensions for this query. If the period
+     * type property is set, the period dimension name will be replaced by the name
+     * of the period type, if present. If the organisation unit level property
+     * is set, the organisation unit dimension name will be replaced by the name
+     * of the organisation unit level column. Does not include the categories
+     * dimension, even if the categories property of this object is true.
+     */
+    public List<String> getDimensionNamesIgnoreCategories()
+    {
+        List<String> list = getDimensionNamesAsList();
         
         if ( list.contains( PERIOD_DIM_ID ) && periodType != null )
         {
@@ -140,7 +155,7 @@ public class DataQueryParams
                 
         return list;
     }
-    
+
     /**
      * Returns the index of the period dimension in the index list.
      */
@@ -168,6 +183,7 @@ public class DataQueryParams
         Map<String, List<IdentifiableObject>> map = new HashMap<String, List<IdentifiableObject>>();
 
         map.putAll( dimensions );
+        map.remove( INDICATOR_DIM_ID );
         
         if ( periodType != null )
         {
@@ -275,12 +291,12 @@ public class DataQueryParams
     // Static methods
     // -------------------------------------------------------------------------
 
-    public static String getDimension( String param )
+    public static String getDimensionFromParam( String param )
     {
         return param != null && param.split( DIMENSION_NAME_SEP ).length > 0 ? param.split( DIMENSION_NAME_SEP )[0] : null;
     }
     
-    public static List<String> getDimensionOptions( String param )
+    public static List<String> getDimensionOptionsFromParam( String param )
     {
         if ( param != null && param.split( DIMENSION_NAME_SEP ).length > 0 )
         {
@@ -295,11 +311,15 @@ public class DataQueryParams
     // -------------------------------------------------------------------------
 
     /**
-     * Returns the dimension names as a list.
+     * Returns the dimension names as a list. The indicator key is included as
+     * indicator is not a true dimension, rather a formula based on the data
+     * element dimension.
      */
     private List<String> getDimensionNamesAsList()
     {
-        return new ArrayList<String>( dimensions.keySet() );
+        List<String> list = new ArrayList<String>( dimensions.keySet() );
+        list.remove( INDICATOR_DIM_ID );
+        return list;
     }
 
     // -------------------------------------------------------------------------
@@ -471,7 +491,17 @@ public class DataQueryParams
     // Get and set helpers for dimensions
     // -------------------------------------------------------------------------
   
-    public List<IdentifiableObject> getDatElements()
+    public List<IdentifiableObject> getIndicators()
+    {
+        return dimensions.get( INDICATOR_DIM_ID );
+    }
+    
+    public void setIndicators( List<IdentifiableObject> indicators )
+    {
+        dimensions.put( INDICATOR_DIM_ID, indicators );
+    }
+    
+    public List<IdentifiableObject> getDataElements()
     {
         return dimensions.get( DATAELEMENT_DIM_ID );
     }

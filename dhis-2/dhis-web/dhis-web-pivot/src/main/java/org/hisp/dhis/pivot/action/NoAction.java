@@ -1,4 +1,4 @@
-package org.hisp.dhis.mobile.api.model;
+package org.hisp.dhis.pivot.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,48 +27,17 @@ package org.hisp.dhis.mobile.api.model;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.*;
+import com.opensymphony.xwork2.Action;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
-import org.hisp.dhis.api.mobile.model.MobileOrgUnitLinks;
-import org.junit.Test;
-
-public class OrgUnitTest
+/**
+ * @author Jan Henrik Overland
+ * @version $Id$
+ */
+public class NoAction
+    implements Action
 {
-
-    @Test
-    public void testSerialization()
-        throws IOException
+    public String execute()
     {
-        MobileOrgUnitLinks unit = new MobileOrgUnitLinks();
-        
-        unit.setId( 1 );
-        unit.setName( "name" );
-        unit.setUpdateActivityPlanUrl("updateActivityPlanUrl");
-        unit.setDownloadAllUrl( "downloadAllUrl" );
-        unit.setUploadActivityReportUrl( "uploadActivityReportUrl" );
-        unit.setUploadFacilityReportUrl( "uploadFacilityReportUrl" );
-        unit.setUpdateDataSetUrl( "updateDataSetUrl" );
-        unit.setChangeUpdateDataSetLangUrl( "changeUpdateDataSetLangUrl" );
-        unit.setSearchUrl( "search" );
-        unit.setUpdateNewVersionUrl( "" );
-        unit.setUpdateContactUrl( "updateContactUrl" );
-        unit.setFindPatientUrl( "findPatientUrl" );
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream( baos );
-        unit.serialize( dos );
-        dos.flush();
-        MobileOrgUnitLinks unit2 = new MobileOrgUnitLinks();
-        unit2.deSerialize( new DataInputStream( new ByteArrayInputStream( baos.toByteArray() ) ) );
-
-        assertEquals( unit.getName(), unit2.getName() );
-        assertEquals( unit.getId(), unit2.getId() );
-
+        return SUCCESS;
     }
 }
