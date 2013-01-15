@@ -1,3 +1,9 @@
+/*
+ * Pivot
+ * Combobox
+ * Multiselect
+*/
+
 /* Pivot */
 
 table {
@@ -54,25 +60,94 @@ td .bad div {
 
 /* Panel */
 
-pt-panel-title-data,
-pt-panel-title-period,
-pt-panel-title-organisationunit,
-pt-panel-title-organisationunitgroupset {
+.pt-panel-title-data,
+.pt-panel-title-period,
+.pt-panel-title-organisationunit,
+.pt-panel-title-organisationunitgroupset {
 	height: 17px;
 	background-repeat: no-repeat;
 	padding-left: 20px
 }
 
-pt-panel-title-data {
+.pt-panel-title-data {
 	background-image: url(images/data.png);
 }
-pt-panel-title-period {
+.pt-panel-title-period {
 	background-image: url(images/period.png);
 }
-pt-panel-title-organisationunit {
+.pt-panel-title-organisationunit {
 	background-image: url(images/organisationunit.png);
 }
-pt-panel-title-organisationunitgroupset {
+.pt-panel-title-organisationunitgroupset {
 	background-image: url(images/organisationunitgroupset.png);
 }
 
+/* Combobox */
+
+.pt-combo-label-default {
+	padding-left: 7px;
+	width: 90px;
+}
+
+/* Multiselect */
+
+	/* Inner border */
+.x-fit-item {
+    border-style: none;
+}
+
+.pt-multiselect {
+    color: #111;
+}
+
+.pt-toolbar-multiselect-left .x-docked-top {
+	border-top-left-radius: 2px;
+}
+.pt-toolbar-multiselect-right .x-docked-top {
+	border-top-right-radius: 2px;
+}
+
+	/* Multiselect docked bar font size */
+.pt-toolbar-multiselect-left .pt-toolbar-multiselect-left-label {
+    font-size: 11px;
+    padding-left: 6px;
+}
+.pt-toolbar-multiselect-right .pt-toolbar-multiselect-right-label {
+    font-size: 11px;
+    padding-right: 7px;
+}
+
+	/* Multiselect boundlist */
+.pt-toolbar-multiselect-left .x-boundlist-item-over {
+    background-color: transparent;
+    border-color: transparent;
+}
+.pt-toolbar-multiselect-left .x-boundlist-selected {
+    background-color: #e5e5e5;
+    border-color: #e5e5e5;
+}
+
+.pt-toolbar-multiselect-right .x-boundlist-item-over {
+    background-color: transparent;
+    border-color: transparent;
+}
+.pt-toolbar-multiselect-right .x-boundlist-selected {
+    background-color: #e5e5e5;
+    border-color: #e5e5e5;
+}
+
+	/* Boundlist (multiselect, comboboxlist etc) */
+.x-boundlist-item {
+    color: #333;
+    padding: 3px 2px 3px 4px;
+    font-size: 10px;
+    border: 1px solid transparent;
+}
+.x-boundlist-item-over {
+    background-color: #e1e1e1;
+    border-color: #e1e1e1;
+}
+.x-boundlist-selected {
+    background-color: #d3d3d3;
+    border-color: #d3d3d3;
+}
