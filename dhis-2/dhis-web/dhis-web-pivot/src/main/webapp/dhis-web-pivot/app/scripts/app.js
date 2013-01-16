@@ -947,7 +947,7 @@ Ext.onReady( function() {
 													columns: [
 														{
 															dataIndex: 'name',
-															width: DV.conf.layout.treepanel_toolbar_menu_width_group,
+															width: pt.conf.layout.treepanel_toolbar_menu_width_group,
 															style: 'display:none'
 														}
 													],
@@ -963,20 +963,22 @@ Ext.onReady( function() {
 														itemclick: function(g, r) {
 															g.getSelectionModel().select([], false);
 															this.up('menu').hide();
-															DV.cmp.dimension.organisationunit.treepanel.selectByGroup(r.data.id);
+															pt.cmp.dimension.organisationunit.treepanel.selectByGroup(r.data.id);
 														}
 													}
 												}
 											],
 											listeners: {
 												show: function() {
-													if (!DV.store.group.isloaded) {
-														DV.store.group.load({scope: this, callback: function() {
-															this.down('grid').setHeightInMenu(DV.store.group);
+													var store = pt.store.group;
+
+													if (!store.isLoaded) {
+														store.load({scope: this, callback: function() {
+															this.down('grid').setHeightInMenu(store);
 														}});
 													}
 													else {
-														this.down('grid').setHeightInMenu(DV.store.group);
+														this.down('grid').setHeightInMenu(store);
 													}
 												}
 											}
@@ -987,10 +989,151 @@ Ext.onReady( function() {
 						],
 						listeners: {
 							added: function() {
-								DV.cmp.dimension.organisationunit.toolbar = this;
+								pt.cmp.dimension.organisationunit.toolbar = this;
 							}
 						}
 					},
+					{
+						xtype: 'treepanel',
+						cls: 'pt-tree',
+						width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
+						rootVisible: false,
+						autoScroll: true,
+						multiSelect: true,
+						rendered: false,
+						selectRootIf: function() {
+							if (this.getSelectionModel().getSelection().length < 1) {
+								var node = this.getRootNode().findChild('id', DV.init.system.rootnodes[0].id, true);
+								if (this.rendered) {
+									this.getSelectionModel().select(node);
+								}
+								return node;
+							}
+						},
+						numberOfRecords: 0,
+						recordsToSelect: [],
+						multipleSelectIf: function() {
+							if (this.recordsToSelect.length === this.numberOfRecords) {
+								this.getSelectionModel().select(this.recordsToSelect);
+								this.recordsToSelect = [];
+								this.numberOfRecords = 0;
+							}
+						},
+						multipleExpand: function(id, path) {
+							this.expandPath('/' + DV.conf.finals.root.id + path, 'id', '/', function() {
+								var record = this.getRootNode().findChild('id', id, true);
+								this.recordsToSelect.push(record);
+								this.multipleSelectIf();
+							}, this);
+						},
+						select: function(url, params) {
+							if (!params) {
+								params = {};
+							}
+							Ext.Ajax.request({
+								url: url,
+								method: 'GET',
+								params: params,
+								scope: this,
+								success: function(r) {
+									var a = Ext.JSON.decode(r.responseText).organisationUnits;
+									this.numberOfRecords = a.length;
+									for (var i = 0; i < a.length; i++) {
+										this.multipleExpand(a[i].id, a[i].path);
+									}
+								}
+							});
+						},
+						selectByGroup: function(id) {
+							if (id) {
+								var url = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunit_getbygroup,
+									params = {id: id};
+								this.select(url, params);
+							}
+						},
+						selectByLevel: function(level) {
+							if (level) {
+								var url = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunit_getbylevel,
+									params = {level: level};
+								this.select(url, params);
+							}
+						},
+						selectByIds: function(ids) {
+							if (ids) {
+								var url = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunit_getbyids;
+								Ext.Array.each(ids, function(item) {
+									url = Ext.String.urlAppend(url, 'ids=' + item);
+								});
+								if (!this.rendered) {
+									DV.cmp.dimension.organisationunit.panel.expand();
+								}
+								this.select(url);
+							}
+						},
+						store: Ext.create('Ext.data.TreeStore', {
+							proxy: {
+								type: 'ajax',
+								url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunitchildren_get
+							},
+							root: {
+								id: DV.conf.finals.root.id,
+								expanded: true,
+								children: DV.init.system.rootnodes
+							},
+							listeners: {
+								load: function(s, node, r) {
+									for (var i = 0; i < r.length; i++) {
+										r[i].data.text = DV.conf.util.jsonEncodeString(r[i].data.text);
+									}
+								}
+							}
+						}),
+						xable: function(checked, value) {
+							if (checked || value) {
+								this.disable();
+							}
+							else {
+								this.enable();
+							}
+						},
+						listeners: {
+							added: function() {
+								DV.cmp.dimension.organisationunit.treepanel = this;
+							},
+							render: function() {
+								this.rendered = true;
+							},
+							itemcontextmenu: function(v, r, h, i, e) {
+								v.getSelectionModel().select(r, false);
+
+								if (v.menu) {
+									v.menu.destroy();
+								}
+								v.menu = Ext.create('Ext.menu.Menu', {
+									id: 'treepanel-contextmenu',
+									showSeparator: false
+								});
+								if (!r.data.leaf) {
+									v.menu.add({
+										id: 'treepanel-contextmenu-item',
+										text: DV.i18n.select_all_children,
+										icon: 'images/node-select-child.png',
+										handler: function() {
+											r.expand(false, function() {
+												v.getSelectionModel().select(r.childNodes, true);
+												v.getSelectionModel().deselect(r);
+											});
+										}
+									});
+								}
+								else {
+									return;
+								}
+
+								v.menu.showAt(e.xy);
+							}
+						}
+					}
 
 
 
