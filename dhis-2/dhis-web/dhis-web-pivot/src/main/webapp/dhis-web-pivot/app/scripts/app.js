@@ -866,6 +866,48 @@ Ext.onReady( function() {
 				}
 			});
 
+			organisationUnit = Ext.create('Ext.panel.Panel', {
+				hideCollapseTool: true,
+				collapsed: false,
+				items: [
+					{
+						layout: 'column',
+						bodyStyle: 'border:0 none; padding-bottom:4px',
+						items: [
+							{
+								xtype: 'checkbox',
+								columnWidth: 0.5,
+								boxLabel: 'User organisation unit', //i18n DV.i18n.user_orgunit,
+								labelWidth: pt.conf.layout.form_label_width,
+								handler: function(chb, checked) {
+									pt.cmp.dimension.organisationunit.toolbar.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
+									pt.cmp.dimension.organisationunit.treepanel.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
+								},
+								listeners: {
+									added: function() {
+										pt.cmp.favorite.userOrganisationUnit = this;
+									}
+								}
+							},
+							{
+								xtype: 'checkbox',
+								columnWidth: 0.5,
+								boxLabel: 'User organisation unit children', //i18n DV.i18n.user_orgunit_children,
+								labelWidth: pt.conf.layout.form_label_width,
+								handler: function(chb, checked) {
+									pt.cmp.dimension.organisationunit.toolbar.xable(checked, DV.cmp.favorite.userOrganisationUnit.getValue());
+									pt.cmp.dimension.organisationunit.treepanel.xable(checked, DV.cmp.favorite.userOrganisationUnit.getValue());
+								},
+								listeners: {
+									added: function() {
+										pt.cmp.favorite.userOrganisationUnitChildren = this;
+									}
+								}
+							}
+						]
+					},
+
+
 
 
 
