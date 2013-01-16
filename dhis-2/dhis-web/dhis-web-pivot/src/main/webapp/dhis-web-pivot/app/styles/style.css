@@ -1,29 +1,44 @@
 /*
  * General
  * Pivot
+ *
  * Panel
+ * PT Panel
+ *
  * Combobox
+ * PT Combobox
+ *
  * Multiselect
- * Label
- * Grid
+ * PT Multiselect
+ *
  * Checkbox
+ * PT Checkbox
+ *
  * Toolbar
+ * PT Toolbar
+ *
+ * Menu
+ * PT Menu
+ *
+ * Grid
  * Button
  * Tooltip
- * Menu
- * Window
- * Textfield
- * PT panel
- * PT menu grid
- * PT tree panel
- * PT window
- * PT radiogroup
- * PT messagebox
- * PT statusbar
- * PT textarea
+ *
+ * PT Window
+ * PT Label
+ * PT Textfield
+ * PT Menugrid
+ * PT Treepanel
+ * PT Radiogroup
+ * PT Messagebox
+ * PT Statusbar
+ * PT Accordion
+ * PT Textarea
 */
 
-/* General */
+/*----------------------------------------------------------------------------
+ * General
+ *--------------------------------------------------------------------------*/
 
 body,
 .x-body,
@@ -55,7 +70,9 @@ body {
 }
 
 
-/* Pivot */
+/*----------------------------------------------------------------------------
+ * Pivot
+ *--------------------------------------------------------------------------*/
 
 table {
 	border-collapse: collapse;
@@ -109,7 +126,9 @@ td .bad div {
 }
 
 
-/* Panel */
+/*----------------------------------------------------------------------------
+ * Panel
+ *--------------------------------------------------------------------------*/
 
 .x-panel-body {
     font-size: 11px;
@@ -119,7 +138,36 @@ td .bad div {
 }
 
 
-/* Combobox */
+/*----------------------------------------------------------------------------
+ * PT Panel
+ *--------------------------------------------------------------------------*/
+
+.pt-panel-title-data,
+.pt-panel-title-period,
+.pt-panel-title-organisationunit,
+.pt-panel-title-organisationunitgroupset {
+	height: 17px;
+	background-repeat: no-repeat;
+	padding-left: 20px
+}
+
+.pt-panel-title-data {
+	background-image: url(images/data.png);
+}
+.pt-panel-title-period {
+	background-image: url(images/period.png);
+}
+.pt-panel-title-organisationunit {
+	background-image: url(images/organisationunit.png);
+}
+.pt-panel-title-organisationunitgroupset {
+	background-image: url(images/organisationunitgroupset.png);
+}
+
+
+/*----------------------------------------------------------------------------
+ * Combobox
+ *--------------------------------------------------------------------------*/
 
 	/* Combobox text position*/
 .x-webkit .x-form-empty-field {
@@ -138,12 +186,58 @@ td .bad div {
 }
 
 
-/* Multiselect */
+/*----------------------------------------------------------------------------
+ * PT Combobox
+ *--------------------------------------------------------------------------*/
+
+.pt-combo-label-default {
+	padding-left: 7px;
+	width: 90px;
+}
+
+	/* Combobox text position*/
+.pt-combo .x-form-text {
+    padding-left: 5px;
+}
+.pt-combo .small .x-form-field {
+	padding-top: 2px;
+}
+
+	/* Combobox border-radius */
+.pt-combo input {
+    border-radius: 2px 0px 0px 0px;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Multiselect
+ *--------------------------------------------------------------------------*/
 
 	/* Inner border */
 .x-fit-item {
     border-style: none;
 }
+
+	/* Boundlist (multiselect, comboboxlist etc) */
+.x-boundlist-item {
+    color: #333;
+    padding: 3px 2px 3px 4px;
+    font-size: 10px;
+    border: 1px solid transparent;
+}
+.x-boundlist-item-over {
+    background-color: #e1e1e1;
+    border-color: #e1e1e1;
+}
+.x-boundlist-selected {
+    background-color: #d3d3d3;
+    border-color: #d3d3d3;
+}
+
+
+/*----------------------------------------------------------------------------
+ * PT Multiselect
+ *--------------------------------------------------------------------------*/
 
 .pt-multiselect {
     color: #111;
@@ -185,41 +279,120 @@ td .bad div {
     border-color: #e5e5e5;
 }
 
-	/* Boundlist (multiselect, comboboxlist etc) */
-.x-boundlist-item {
-    color: #333;
-    padding: 3px 2px 3px 4px;
-    font-size: 10px;
-    border: 1px solid transparent;
-}
-.x-boundlist-item-over {
-    background-color: #e1e1e1;
-    border-color: #e1e1e1;
-}
-.x-boundlist-selected {
-    background-color: #d3d3d3;
-    border-color: #d3d3d3;
-}
 
+/*----------------------------------------------------------------------------
+ * Checkbox
+ *--------------------------------------------------------------------------*/
 
-/* Label */
-
-	/* Label heading periods */
-.pt-label-period-heading,
-.pt-label-period-heading-options {
+	/* Box label */
+.x-form-cb-label-after {
+    padding-left: 1px;
     font-size: 11px;
-    font-weight: bold;
-    color: #333;
-    line-height: 20px;
 }
-.pt-label-period-heading-options {
-    background-color: #e1e1e1;
-    padding: 1px 5px;
-    border-radius: 2px
+
+	/* Icons */
+.x-form-checkbox {
+    background-image: url('../images/checkbox.gif');
 }
 
 
-/* Grid */
+/*----------------------------------------------------------------------------
+ * PT Checkbox
+ *--------------------------------------------------------------------------*/
+
+.pt-checkbox .x-form-item-label {
+    padding-left: 5px;
+}
+.pt-checkbox .x-form-cb-label-after {
+    margin-left: 3px;
+    font-size: 11px;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Toolbar
+ *--------------------------------------------------------------------------*/
+
+	/* Separator */
+.x-toolbar .x-toolbar-separator-horizontal {
+    height: 15px;
+    border-right: 1px solid #f2f2f2;
+}
+
+	/* Background */
+.x-toolbar-default {
+    border-color: #D0D0D0;
+    background-image: none;
+    background-color: #f3f3f3;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f1f1f1), color-stop(100%, #f5f5f5));
+    background-image: -webkit-linear-gradient(top, #f1f1f1,#f5f5f5);
+    background-image: -moz-linear-gradient(top, #f1f1f1,#f5f5f5);
+    background-image: -o-linear-gradient(top, #f1f1f1,#f5f5f5);
+    background-image: -ms-linear-gradient(top, #f1f1f1,#f5f5f5);
+    background-image: linear-gradient(top, #f1f1f1,#f5f5f5);
+}
+
+
+/*----------------------------------------------------------------------------
+ * PT Toolbar
+ *--------------------------------------------------------------------------*/
+
+	/* Align menu */
+.pt-toolbar-btn-menu {
+	margin-top: 5px;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Menu
+ *--------------------------------------------------------------------------*/
+
+.x-menu-body {
+    border-color: #bbb;
+    border-radius: 2px;
+}
+
+.x-menu-item-active .x-menu-item-link {
+	border-radius: 0;
+	border-color: #e1e1e1;
+	background-color: #e1e1e1;
+	background-image: none;
+}
+.x-menu-body {
+	padding: 0;
+}
+
+	/* Menu item */
+.x-menu-item-link {
+    padding: 4px 5px 4px 28px;
+}
+	/* Menu item color */
+.x-menu-item-text {
+    color: #111;
+}
+
+/*----------------------------------------------------------------------------
+ * PT Menu
+ *--------------------------------------------------------------------------*/
+
+	/* Menu item icon */
+.pt-menu-item-png {
+    background-image:url('../images/png.png');
+    padding-left: 18px;
+}
+.pt-menu-item-pdf {
+    background-image:url('../images/pdf.png');
+    padding-left: 18px;
+}
+.pt-menu-item-edit {
+    background-image:url('../images/edit.png');
+    padding-left: 18px;
+}
+
+
+/*----------------------------------------------------------------------------
+ * Grid
+ *--------------------------------------------------------------------------*/
 
 .x-grid-row .x-grid-cell {
     color: #222;
@@ -244,56 +417,9 @@ td .bad div {
 }
 
 
-/* Checkbox */
-
-	/* Box label */
-.x-form-cb-label-after {
-    padding-left: 1px;
-    font-size: 11px;
-}
-
-.pt-checkbox .x-form-item-label {
-    padding-left: 5px;
-}
-.pt-checkbox .x-form-cb-label-after {
-    margin-left: 3px;
-    font-size: 11px;
-}
-
-	/* Icons */
-.x-form-checkbox {
-    background-image: url('../images/checkbox.gif');
-}
-
-
-/* Toolbar */
-
-	/* Separator */
-.x-toolbar .x-toolbar-separator-horizontal {
-    height: 15px;
-    border-right: 1px solid #f2f2f2;
-}
-
-	/* Background */
-.x-toolbar-default {
-    border-color: #D0D0D0;
-    background-image: none;
-    background-color: #f3f3f3;
-    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f1f1f1), color-stop(100%, #f5f5f5));
-    background-image: -webkit-linear-gradient(top, #f1f1f1,#f5f5f5);
-    background-image: -moz-linear-gradient(top, #f1f1f1,#f5f5f5);
-    background-image: -o-linear-gradient(top, #f1f1f1,#f5f5f5);
-    background-image: -ms-linear-gradient(top, #f1f1f1,#f5f5f5);
-    background-image: linear-gradient(top, #f1f1f1,#f5f5f5);
-}
-
-	/* Align menu */
-.pt-toolbar-btn-menu {
-	margin-top: 5px;
-}
-
-
-/* Button */
+/*----------------------------------------------------------------------------
+ * Button
+ *--------------------------------------------------------------------------*/
 
 .x-btn-arrow {
 	background-image: url('../images/arrow.png') !important;
@@ -331,7 +457,9 @@ td .bad div {
 }
 
 
-/* Tooltip */
+/*----------------------------------------------------------------------------
+ * Tooltip
+ *--------------------------------------------------------------------------*/
 
 .x-tip {
     border-radius: 2px;
@@ -351,39 +479,9 @@ td .bad div {
 }
 
 
-/* Menu */
-
-.x-menu-body {
-    border-color: #bbb;
-    border-radius: 2px;
-}
-
-.x-menu-item-active .x-menu-item-link {
-	border-radius: 0;
-	border-color: #e1e1e1;
-	background-color: #e1e1e1;
-	background-image: none;
-}
-.x-menu-body {
-	padding: 0;
-}
-
-	/* Menu item icon */
-.pt-menu-item-png {
-    background-image:url('../images/png.png');
-    padding-left: 18px;
-}
-.pt-menu-item-pdf {
-    background-image:url('../images/pdf.png');
-    padding-left: 18px;
-}
-.pt-menu-item-edit {
-    background-image:url('../images/edit.png');
-    padding-left: 18px;
-}
-
-
-/* Window */
+/*----------------------------------------------------------------------------
+ * PT Window
+ *--------------------------------------------------------------------------*/
 
 .pt-window-title-favorite {
     padding-left: 19px;
@@ -403,8 +501,36 @@ td .bad div {
     background-position-y: 1px;
 }
 
+	/* Confirm list */
+.pt-window-confirm-list .x-panel-body {
+    color: #444;
+    font-size: 10px;
+    border-style: none;
+}
 
-/* Textfield */
+
+/*----------------------------------------------------------------------------
+ * PT Label
+ *--------------------------------------------------------------------------*/
+
+	/* Label heading periods */
+.pt-label-period-heading,
+.pt-label-period-heading-options {
+    font-size: 11px;
+    font-weight: bold;
+    color: #333;
+    line-height: 20px;
+}
+.pt-label-period-heading-options {
+    background-color: #e1e1e1;
+    padding: 1px 5px;
+    border-radius: 2px
+}
+
+
+/*----------------------------------------------------------------------------
+ * PT Textfield
+ *--------------------------------------------------------------------------*/
 
 .pt-textfield .x-form-field, .pt-textfield-alt1 .x-form-field {
     height: 26px;
@@ -423,53 +549,9 @@ td .bad div {
 }
 
 
-/* PT panel */
-
-.pt-panel-title-data,
-.pt-panel-title-period,
-.pt-panel-title-organisationunit,
-.pt-panel-title-organisationunitgroupset {
-	height: 17px;
-	background-repeat: no-repeat;
-	padding-left: 20px
-}
-
-.pt-panel-title-data {
-	background-image: url(images/data.png);
-}
-.pt-panel-title-period {
-	background-image: url(images/period.png);
-}
-.pt-panel-title-organisationunit {
-	background-image: url(images/organisationunit.png);
-}
-.pt-panel-title-organisationunitgroupset {
-	background-image: url(images/organisationunitgroupset.png);
-}
-
-
-/* PT combobox */
-
-.pt-combo-label-default {
-	padding-left: 7px;
-	width: 90px;
-}
-
-	/* Combobox text position*/
-.pt-combo .x-form-text {
-    padding-left: 5px;
-}
-.pt-combo .small .x-form-field {
-	padding-top: 2px;
-}
-
-	/* Combobox border-radius */
-.pt-combo input {
-    border-radius: 2px 0px 0px 0px;
-}
-
-
-/* PT menu grid */
+/*----------------------------------------------------------------------------
+ * PT Menugrid
+ *--------------------------------------------------------------------------*/
 
 .pt-menugrid .x-grid-row .x-grid-cell, .pt-menugrid .x-grid-row-selected .x-grid-cell {
     border: 0 none;
@@ -514,7 +596,9 @@ td .bad div {
 }
 
 
-/* PT tree panel */
+/*----------------------------------------------------------------------------
+ * PT Treepanel
+ *--------------------------------------------------------------------------*/
 
 	/* Node height */
 .pt-tree .x-tree-panel .x-grid-row .x-grid-cell-inner {
@@ -540,27 +624,11 @@ td .bad div {
     border-style: solid;
     border-color: #aaa;
 }
-	/* Menu item */
-.x-menu-item-link {
-    padding: 4px 5px 4px 28px;
-}
-	/* Menu item color */
-.x-menu-item-text {
-    color: #111;
-}
 
 
-/* PT window */
-
-	/* Confirm list */
-.pt-window-confirm-list .x-panel-body {
-    color: #444;
-    font-size: 10px;
-    border-style: none;
-}
-
-
-/* PT radiogroup */
+/*----------------------------------------------------------------------------
+ * PT Radiogroup
+ *--------------------------------------------------------------------------*/
 
 .pt-radiogroup .x-form-cb-wrap {
     padding-left: 7px;
@@ -575,7 +643,9 @@ td .bad div {
 }
 
 
-/* PT messagebox */
+/*----------------------------------------------------------------------------
+ * PT Messagebox
+ *--------------------------------------------------------------------------*/
 
 .pt-messagebox .x-window-body-default {
 	background-color: #fff;
@@ -589,7 +659,9 @@ td .bad div {
 }
 
 
-/* PT statusbar */
+/*----------------------------------------------------------------------------
+ * PT Statusbar
+ *--------------------------------------------------------------------------*/
 
 .pt-statusbar .x-panel-body-default {
 	padding: 5px 0 0 6px;
@@ -602,7 +674,9 @@ td .bad div {
 }
 
 
-/* PT accordion */
+/*----------------------------------------------------------------------------
+ * PT Accordion
+ *--------------------------------------------------------------------------*/
 
 	/* accordion title bar, shared */
 .pt-accordion .x-accordion-item .x-accordion-hd, .pt-accordion .pt-accordion-options .x-accordion-hd {
@@ -688,7 +762,9 @@ td .bad div {
 }
 
 
-/* PT textarea */
+/*----------------------------------------------------------------------------
+ * PT Textarea
+ *--------------------------------------------------------------------------*/
 
 .pt-textarea .x-form-field {
 	font-size: 11px;
