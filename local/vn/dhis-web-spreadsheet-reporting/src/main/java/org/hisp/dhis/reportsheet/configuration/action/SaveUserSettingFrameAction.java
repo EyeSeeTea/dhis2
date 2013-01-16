@@ -1,4 +1,4 @@
-package org.hisp.dhis.datavalue;
+package org.hisp.dhis.reportsheet.configuration.action;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,43 +27,49 @@ package org.hisp.dhis.datavalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import org.hisp.dhis.user.UserSettingService;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
-import org.springframework.transaction.annotation.Transactional;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Dang Duy Hieu
  * @version $Id$
  */
-@Transactional
-public class DefaultLocalDataValueService
-    implements LocalDataValueService
-{
-    private static final Log log = LogFactory.getLog( DefaultLocalDataValueService.class );
 
+public class SaveUserSettingFrameAction
+    implements Action
+{
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private LocalDataValueStore localDataValueStore;
+    private UserSettingService userSettingService;
 
-    public void setLocalDataValueStore( LocalDataValueStore localDataValueStore )
+    public void setUserSettingService( UserSettingService userSettingService )
     {
-        this.localDataValueStore = localDataValueStore;
+        this.userSettingService = userSettingService;
     }
 
     // -------------------------------------------------------------------------
-    // Advance methods
+    // Getter and Setter
     // -------------------------------------------------------------------------
 
-    public Collection<DataValue> getDataValues( OrganisationUnit source, Collection<DataElement> dataElements,
-        Collection<Period> periods )
+    private String interfaceType;
+
+    public void setInterfaceType( String interfaceType )
     {
-        return localDataValueStore.getDataValues( source, dataElements, periods );
+        this.interfaceType = interfaceType;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {        
+        userSettingService.saveUserSetting( UserSettingService.KEY_GENERATE_REPORT_INTERFACE, interfaceType );
+
+        return SUCCESS;
     }
 }
