@@ -906,6 +906,91 @@ Ext.onReady( function() {
 							}
 						]
 					},
+					{
+						id: 'organisationunit_t',
+						xtype: 'toolbar',
+						style: 'margin-bottom: 5px',
+						width: pt.conf.layout.west_fieldset_width - 18,
+						xable: function(checked, value) {
+							if (checked || value) {
+								this.disable();
+							}
+							else {
+								this.enable();
+							}
+						},
+						defaults: {
+							height: 24
+						},
+						items: [
+							{
+								xtype: 'label',
+								text: 'Auto-select organisation units by', //i18n
+								style: 'padding-left:8px; color:#666; line-height:24px'
+							},
+							'->',
+							{
+								text: 'Group..',
+								handler: function() {},
+								listeners: {
+									added: function() {
+										this.menu = Ext.create('Ext.menu.Menu', {
+											shadow: false,
+											showSeparator: false,
+											width: pt.conf.layout.treepanel_toolbar_menu_width_group,
+											items: [
+												{
+													xtype: 'grid',
+													cls: 'pt-menugrid',
+													width: pt.conf.layout.treepanel_toolbar_menu_width_group,
+													scroll: 'vertical',
+													columns: [
+														{
+															dataIndex: 'name',
+															width: DV.conf.layout.treepanel_toolbar_menu_width_group,
+															style: 'display:none'
+														}
+													],
+													setHeightInMenu: function(store) {
+														var h = store.getCount() * 24,
+															sh = DV.util.viewport.getSize().y * 0.6;
+														this.setHeight(h > sh ? sh : h);
+														this.doLayout();
+														this.up('menu').doLayout();
+													},
+													store: DV.store.group,
+													listeners: {
+														itemclick: function(g, r) {
+															g.getSelectionModel().select([], false);
+															this.up('menu').hide();
+															DV.cmp.dimension.organisationunit.treepanel.selectByGroup(r.data.id);
+														}
+													}
+												}
+											],
+											listeners: {
+												show: function() {
+													if (!DV.store.group.isloaded) {
+														DV.store.group.load({scope: this, callback: function() {
+															this.down('grid').setHeightInMenu(DV.store.group);
+														}});
+													}
+													else {
+														this.down('grid').setHeightInMenu(DV.store.group);
+													}
+												}
+											}
+										});
+									}
+								}
+							}
+						],
+						listeners: {
+							added: function() {
+								DV.cmp.dimension.organisationunit.toolbar = this;
+							}
+						}
+					},
 
 
 
