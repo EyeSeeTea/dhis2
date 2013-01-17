@@ -18,4 +18,13 @@
     <property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
   </bean>
 
+  <!-- OrganisationUnit -->
+
+  <bean id="org.hisp.dhis.pivot.action.GetOrganisationUnitChildrenAction"
+    class="org.hisp.dhis.pivot.action.GetOrganisationUnitChildrenAction"
+    scope="prototype">
+    <property name="organisationUnitService"
+      ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+  </bean>
+
 </beans>

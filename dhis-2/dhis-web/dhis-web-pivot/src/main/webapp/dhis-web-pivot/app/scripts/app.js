@@ -1228,7 +1228,7 @@ Ext.onReady( function() {
 							root: {
 								id: pt.conf.finals.root.id,
 								expanded: true,
-								children: pt.init.rootnodes
+								children: pt.init.rootNodes
 							},
 							listeners: {
 								load: function(s, node, r) {
@@ -1292,7 +1292,7 @@ Ext.onReady( function() {
 					expand: function(p) {
 						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_organisationunit);
 						pt.cmp.dimension.organisationUnit.treepanel.setHeight(p.getHeight() - pt.conf.layout.west_fill_accordion_organisationunit);
-						pt.cmp.dimension.organisationUnit.treepanel.selectRootIf();
+						//pt.cmp.dimension.organisationUnit.treepanel.selectRootIf();
 					}
 				}
 			});

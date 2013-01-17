@@ -149,6 +149,18 @@ PT.core.getConfigs = function() {
         multiselect_fill_reportingrates: 315
     };
 
+    conf.util = {
+		jsonEncodeString: function(str) {
+			return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
+		},
+		jsonEncodeArray: function(a) {
+			for (var i = 0; i < a.length; i++) {
+				a[i] = DV.conf.util.jsonEncodeString(a[i]);
+			}
+			return a;
+		}
+	};
+
 	return conf;
 };
 

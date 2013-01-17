@@ -20,5 +20,13 @@
             <result name="success" type="velocity-json">/dhis-web-pivot/jsonInitialize.vm</result>
         </action>
 
+        <!-- OrganisationUnit -->
+
+		<action name="getOrganisationUnitChildren"
+			class="org.hisp.dhis.pivot.action.GetOrganisationUnitChildrenAction">
+			<result name="success" type="velocity-json">
+				/dhis-web-pivot/jsonminOrganisationUnitChildren.vm</result>
+		</action>
+
 	</package>
 </struts>
