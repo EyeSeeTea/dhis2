@@ -1367,7 +1367,7 @@ Ext.onReady( function() {
 	};
 
 	Ext.Ajax.request({
-		url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + 'initialize.action',
+		url: pt.baseUrl + pt.conf.finals.ajax.path_pivot_static + 'initialize.action',
 		success: function(r) {
 			PT.app.init.onInitialize(r);
 	}});

@@ -9,7 +9,8 @@ PT.core.getConfigs = function() {
 
 	conf.finals = {
         ajax: {
-            path_pivot: 'dhis-web-pivot/',
+            path_pivot: '../',
+            path_pivot_static: 'dhis-web-pivot/',
             path_api: '../../api/',
             path_commons: '../../dhis-web-commons-ajax-json/',
             path_lib: '../../dhis-web-commons/javascripts/',
