@@ -15,6 +15,9 @@ Ext.onReady( function() {
 
 	var pt = PT.core.getInstance();
 
+	PT.app.getStores = function() {
+
+
 	PT.app.init.onInitialize = function(r) {
 		var createViewport;
 
@@ -1211,6 +1214,6 @@ Ext.onReady( function() {
 		createViewport();
 	};
 
-	PT.app.init.onInitialize(r);
+	PT.app.init.onInitialize();
 });
 

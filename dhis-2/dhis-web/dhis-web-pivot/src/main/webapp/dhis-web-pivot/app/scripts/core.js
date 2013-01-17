@@ -43,37 +43,37 @@ PT.core.getConfigs = function() {
                 value: 'data',
                 rawvalue: 'Data', //i18n PT.i18n.data,
                 warning: {
-					filter: PT.i18n.wm_multiple_filter_ind_de
+					filter: '...'//PT.i18n.wm_multiple_filter_ind_de
 				}
             },
             indicator: {
                 value: 'indicator',
-                rawvalue: PT.i18n.indicator,
+                rawvalue: 'Indicator', //i18n PT.i18n.indicator,
                 paramname: 'in'
             },
             dataelement: {
                 value: 'dataelement',
-                rawvalue: PT.i18n.data_element,
+                rawvalue: 'Data element', //i18n PT.i18n.data_element,
                 paramname: 'de'
             },
             dataset: {
 				value: 'dataset',
-                rawvalue: PT.i18n.dataset,
+                rawvalue: 'Data set', //i18n PT.i18n.dataset,
                 paramname: 'ds'
 			},
             period: {
                 value: 'period',
-                rawvalue: PT.i18n.period,
+                rawvalue: 'Period', //i18n PT.i18n.period,
                 warning: {
-					filter: PT.i18n.wm_multiple_filter_period
+					filter: '...'//PT.i18n.wm_multiple_filter_period
 				}
             },
             organisationunit: {
                 value: 'organisationunit',
-                rawvalue: PT.i18n.organisation_unit,
+                rawvalue: 'Organisation unit', //i18n PT.i18n.organisation_unit,
                 paramname: 'ou',
                 warning: {
-					filter: PT.i18n.wm_multiple_filter_orgunit
+					filter: '...'//PT.i18n.wm_multiple_filter_orgunit
 				}
             },
             organisationunitgroup: {
