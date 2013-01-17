@@ -27,12 +27,16 @@
 
 package org.hisp.dhis.patientreport;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.user.User;
 
 /**
@@ -60,24 +64,42 @@ public class PatientAggregateReport
     public static final int POSITION_ROW_ORGUNIT_COLUMN_DATA = 7;
 
     public static final int POSITION_ROW_DATA = 8;
-    
-    public static final String FILTER_ORGANISATION_UNIT = "ou";
 
-    public static final String FILTER_PERIOD = "pd";
+    private ProgramStage programStage;
 
-    public static final String FILTER_DATA = "de";
+    // Date period range
 
-    private List<OrganisationUnit> organisationUnits;
+    private Date startDate;
 
-    private List<Period> periods;
+    private Date endDate;
 
-    private List<ProgramStageDataElement> dataElements;
+    // Relative periods
 
-    private int position;
+    private Set<String> relativePeriods = new HashSet<String>();
+
+    // Fixed periods
+
+    private List<String> fixedPeriods = new ArrayList<String>();
+
+    // Organisation units
+
+    private Set<OrganisationUnit> organisationUnits;
+
+    // Data element filter values
+
+    private Set<String> filterValues = new HashSet<String>();
 
     // Option
 
+    private String facilityLB;
+
     private Integer limitRecords;
+
+    private int position;
+
+    private DataElement deGroupBy;
+
+    private String aggregateType;
 
     // User created
 
@@ -96,34 +118,94 @@ public class PatientAggregateReport
     // Getters && Setters
     // -------------------------------------------------------------------------
 
-    public List<OrganisationUnit> getOrganisationUnits()
+    public ProgramStage getProgramStage()
+    {
+        return programStage;
+    }
+
+    public void setProgramStage( ProgramStage programStage )
+    {
+        this.programStage = programStage;
+    }
+    
+    public Date getStartDate()
+    {
+        return startDate;
+    }
+
+    public void setStartDate( Date startDate )
+    {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate()
+    {
+        return endDate;
+    }
+
+    public void setEndDate( Date endDate )
+    {
+        this.endDate = endDate;
+    }
+
+    public Set<String> getRelativePeriods()
+    {
+        return relativePeriods;
+    }
+
+    public void setRelativePeriods( Set<String> relativePeriods )
+    {
+        this.relativePeriods = relativePeriods;
+    }
+
+    public List<String> getFixedPeriods()
+    {
+        return fixedPeriods;
+    }
+
+    public void setFixedPeriods( List<String> fixedPeriods )
+    {
+        this.fixedPeriods = fixedPeriods;
+    }
+
+    public Set<OrganisationUnit> getOrganisationUnits()
     {
         return organisationUnits;
     }
 
-    public void setOrganisationUnits( List<OrganisationUnit> organisationUnits )
+    public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
     {
         this.organisationUnits = organisationUnits;
     }
 
-    public List<Period> getPeriods()
+    public Set<String> getFilterValues()
     {
-        return periods;
+        return filterValues;
     }
 
-    public void setPeriods( List<Period> periods )
+    public void setFilterValues( Set<String> filterValues )
     {
-        this.periods = periods;
+        this.filterValues = filterValues;
     }
 
-    public List<ProgramStageDataElement> getDataElements()
+    public String getFacilityLB()
     {
-        return dataElements;
+        return facilityLB;
     }
 
-    public void setDataElements( List<ProgramStageDataElement> dataElements )
+    public void setFacilityLB( String facilityLB )
     {
-        this.dataElements = dataElements;
+        this.facilityLB = facilityLB;
+    }
+
+    public Integer getLimitRecords()
+    {
+        return limitRecords;
+    }
+
+    public void setLimitRecords( Integer limitRecords )
+    {
+        this.limitRecords = limitRecords;
     }
 
     public int getPosition()
@@ -136,14 +218,24 @@ public class PatientAggregateReport
         this.position = position;
     }
 
-    public Integer getLimitRecords()
+    public DataElement getDeGroupBy()
     {
-        return limitRecords;
+        return deGroupBy;
     }
 
-    public void setLimitRecords( Integer limitRecords )
+    public void setDeGroupBy( DataElement deGroupBy )
     {
-        this.limitRecords = limitRecords;
+        this.deGroupBy = deGroupBy;
+    }
+
+    public String getAggregateType()
+    {
+        return aggregateType;
+    }
+
+    public void setAggregateType( String aggregateType )
+    {
+        this.aggregateType = aggregateType;
     }
 
     public User getUser()

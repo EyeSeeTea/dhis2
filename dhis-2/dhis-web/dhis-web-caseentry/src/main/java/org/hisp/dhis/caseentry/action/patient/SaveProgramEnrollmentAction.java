@@ -29,6 +29,7 @@ package org.hisp.dhis.caseentry.action.patient;
 import java.util.Collection;
 import java.util.Date;
 
+import org.hisp.dhis.caseentry.state.SelectedStateManager;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.patient.Patient;
 import org.hisp.dhis.patient.PatientService;
@@ -80,6 +81,13 @@ public class SaveProgramEnrollmentAction
     public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
     {
         this.programStageInstanceService = programStageInstanceService;
+    }
+
+    private SelectedStateManager selectedStateManager;
+
+    public void setSelectedStateManager( SelectedStateManager selectedStateManager )
+    {
+        this.selectedStateManager = selectedStateManager;
     }
 
     private I18nFormat format;
@@ -202,6 +210,8 @@ public class SaveProgramEnrollmentAction
 
                         if ( program.isSingleEvent() )
                         {
+                            programStageInstance.setOrganisationUnit( selectedStateManager
+                                .getSelectedOrganisationUnit() );
                             programStageInstance.setExecutionDate( dueDate );
                         }
                         programStageInstanceService.addProgramStageInstance( programStageInstance );

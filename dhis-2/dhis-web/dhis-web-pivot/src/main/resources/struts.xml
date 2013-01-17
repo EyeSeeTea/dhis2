@@ -6,8 +6,7 @@
 
 	<include file="dhis-web-commons.xml" />
 
-	<package name="dhis-web-pivot" extends="dhis-web-commons"
-		namespace="/dhis-web-pivot">
+	<package name="dhis-web-pivot" extends="dhis-web-commons" namespace="/dhis-web-pivot">
 
 		<!-- Default -->
 

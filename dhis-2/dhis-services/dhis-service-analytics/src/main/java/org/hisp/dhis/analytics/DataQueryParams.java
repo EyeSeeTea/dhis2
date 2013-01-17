@@ -36,12 +36,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.Dxf2Namespace;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.CollectionUtils;
 import org.hisp.dhis.system.util.ListMap;
+import org.hisp.dhis.system.util.MapMap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -56,9 +60,13 @@ public class DataQueryParams
     public static final String ORGUNIT_DIM_ID = "ou";
     public static final String VALUE_ID = "value";    
     public static final String LEVEL_PREFIX = "uidlevel";
-
+    
     private static final String DIMENSION_NAME_SEP = ":";
     private static final String OPTION_SEP = ",";
+    public static final String DIMENSION_SEP = "-";
+    
+    private static final DimensionOption[] DIM_OPT_ARR = new DimensionOption[0];
+    private static final DimensionOption[][] DIM_OPT_2D_ARR = new DimensionOption[0][];
     
     private Map<String, List<IdentifiableObject>> dimensions = new HashMap<String, List<IdentifiableObject>>();
     
@@ -141,7 +149,7 @@ public class DataQueryParams
      */
     public List<String> getDimensionNamesIgnoreCategories()
     {
-        List<String> list = getDimensionNamesAsList();
+        List<String> list = getDimensionNamesAsListIgnoreCategories();
         
         if ( list.contains( PERIOD_DIM_ID ) && periodType != null )
         {
@@ -152,12 +160,36 @@ public class DataQueryParams
         {
             list.set( list.indexOf( ORGUNIT_DIM_ID ), LEVEL_PREFIX + organisationUnitLevel );
         }
-                
+        
         return list;
     }
 
     /**
-     * Returns the index of the period dimension in the index list.
+     * Returns the index of the indicator dimension in the dimension map.
+     */
+    public int getIndicatorDimensionIndex()
+    {
+        return getDimensionNamesAsList().indexOf( INDICATOR_DIM_ID );
+    }
+    
+    /**
+     * Returns the index of the data element dimension in the dimension map.
+     */
+    public int getDataElementDimensionIndex()
+    {
+        return getDimensionNamesAsList().indexOf( DATAELEMENT_DIM_ID );
+    }
+
+    /**
+     * Returns the index of the category option combo dimension in the dimension map.
+     */
+    public int getCategoryOptionComboDimensionIndex()
+    {
+        return getDimensionNamesAsList().indexOf( CATEGORYOPTIONCOMBO_DIM_ID );
+    }
+    
+    /**
+     * Returns the index of the period dimension in the dimension map.
      */
     public int getPeriodDimensionIndex()
     {
@@ -286,7 +318,69 @@ public class DataQueryParams
         
         return map;
     }
+    
+    /**
+     * Generates all permutations of the dimension options for this query.
+     */
+    public List<List<DimensionOption>> getDimensionOptionPermutations()
+    {
+        List<DimensionOption[]> dimensionOptions = new ArrayList<DimensionOption[]>();
+        
+        List<String> dimensionNames = getDimensionNamesAsList();
 
+        List<String> ignoreDims = Arrays.asList( DATAELEMENT_DIM_ID, CATEGORYOPTIONCOMBO_DIM_ID, INDICATOR_DIM_ID );
+        
+        for ( String dim : dimensionNames )
+        {
+            if ( !ignoreDims.contains( dim ) )
+            {
+                List<DimensionOption> options = new ArrayList<DimensionOption>();
+                
+                for ( IdentifiableObject option : dimensions.get( dim ) )
+                {
+                    options.add( new DimensionOption( dim, option ) );
+                }
+                
+                dimensionOptions.add( options.toArray( DIM_OPT_ARR ) );
+            }
+        }
+        
+        CombinationGenerator<DimensionOption> generator = new CombinationGenerator<DimensionOption>( dimensionOptions.toArray( DIM_OPT_2D_ARR ) );
+        
+        return generator.getCombinations();
+    }
+
+    /**
+     * Returns a mapping of permutation keys and mappings of data element operands
+     * and values, based on the given mapping of dimension option keys and 
+     * aggregated values.
+     */
+    public Map<String, Map<DataElementOperand, Double>> getPermutationOperandValueMap( Map<String, Double> aggregatedDataMap )
+    {
+        MapMap<String, DataElementOperand, Double> valueMap = new MapMap<String, DataElementOperand, Double>();
+        
+        for ( String key : aggregatedDataMap.keySet() )
+        {
+            List<String> keys = new ArrayList<String>( Arrays.asList( key.split( DIMENSION_SEP ) ) );
+            
+            String de = keys.get( getDataElementDimensionIndex() );
+            String coc = keys.get( getCategoryOptionComboDimensionIndex() );
+            
+            keys.remove( getDataElementDimensionIndex() );
+            keys.remove( getCategoryOptionComboDimensionIndex() - 1 );
+            
+            String permKey = StringUtils.join( keys, DIMENSION_SEP );
+            
+            DataElementOperand operand = new DataElementOperand( de, coc );
+            
+            Double value = aggregatedDataMap.get( key );
+            
+            valueMap.putEntry( permKey, operand, value );            
+        }
+        
+        return valueMap;
+    }
+    
     // -------------------------------------------------------------------------
     // Static methods
     // -------------------------------------------------------------------------
@@ -315,10 +409,30 @@ public class DataQueryParams
      * indicator is not a true dimension, rather a formula based on the data
      * element dimension.
      */
-    private List<String> getDimensionNamesAsList()
+    private List<String> getDimensionNamesAsListIgnoreCategories()
     {
         List<String> list = new ArrayList<String>( dimensions.keySet() );
+        
         list.remove( INDICATOR_DIM_ID );
+        
+        return list;
+    }
+
+    /**
+     * Returns the dimension names as a list. The indicator key is included as
+     * indicator is not a true dimension, rather a formula based on the data
+     * element dimension. Adds the category option combo dimension if the
+     * categories parameter of this query is true.
+     */
+    public List<String> getDimensionNamesAsList()
+    {
+        List<String> list = getDimensionNamesAsListIgnoreCategories();
+        
+        if ( categories )
+        {
+            list.add( CATEGORYOPTIONCOMBO_DIM_ID );
+        }
+        
         return list;
     }
 

@@ -28,7 +28,6 @@
 package org.hisp.dhis.caseentry.action.report;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +40,7 @@ import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.CalendarPeriodType;
+import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
@@ -154,25 +153,18 @@ public class GenerateAggregateReportAction
         this.relativePeriods = relativePeriods;
     }
 
-    private String periodTypeName;
+    private List<String> startDates = new ArrayList<String>();
 
-    public void setPeriodTypeName( String periodTypeName )
+    public void setStartDates( List<String> startDates )
     {
-        this.periodTypeName = periodTypeName;
+        this.startDates = startDates;
     }
 
-    private String startDate;
+    private List<String> endDates = new ArrayList<String>();
 
-    public void setStartDate( String startDate )
+    public void setEndDates( List<String> endDates )
     {
-        this.startDate = startDate;
-    }
-
-    private String endDate;
-
-    public void setEndDate( String endDate )
-    {
-        this.endDate = endDate;
+        this.endDates = endDates;
     }
 
     private String facilityLB; // All, children, current
@@ -189,18 +181,25 @@ public class GenerateAggregateReportAction
         this.position = position;
     }
 
-    private Integer limit;
+    private Integer limitRecords;
 
-    public void setLimit( Integer limit )
+    public void setLimitRecords( Integer limitRecords )
     {
-        this.limit = limit;
+        this.limitRecords = limitRecords;
     }
 
-    private Integer dataElementId;
+    private Integer deGroupBy;
 
-    public void setDataElementId( Integer dataElementId )
+    public void setDeGroupBy( Integer deGroupBy )
     {
-        this.dataElementId = dataElementId;
+        this.deGroupBy = deGroupBy;
+    }
+
+    private Boolean useCompletedEvents;
+
+    public void setUseCompletedEvents( Boolean useCompletedEvents )
+    {
+        this.useCompletedEvents = useCompletedEvents;
     }
 
     private String type;
@@ -263,13 +262,13 @@ public class GenerateAggregateReportAction
         Collection<Period> periods = new HashSet<Period>();
 
         // Create period from start-date and end-date
-        if ( startDate != null && endDate != null && periodTypeName != null )
+
+        for ( int i = 0; i < startDates.size(); i++ )
         {
-            Calendar today = Calendar.getInstance();
-            today.add( Calendar.DATE, -1 );
-            CalendarPeriodType periodType = (CalendarPeriodType) CalendarPeriodType
-                .getPeriodTypeByName( periodTypeName );
-            periods.addAll( periodType.generatePeriods( format.parseDate( startDate ), format.parseDate( endDate ) ) );
+            Period period = new Period();
+            period.setStartDate( format.parseDate( startDates.get( i ) ) );
+            period.setEndDate( format.parseDate( endDates.get( i ) ) );
+            periods.add( period );
         }
 
         // Fixed periods
@@ -292,12 +291,14 @@ public class GenerateAggregateReportAction
             deFilterMap = new HashMap<Integer, String>();
             for ( String deFilter : deFilters )
             {
-                String[] arr = deFilter.split( SEPARATE_FILTER );
-                deFilterMap.put( Integer.parseInt( arr[0] ), arr[1] );
+                int index = deFilter.indexOf( SEPARATE_FILTER );
+                deFilterMap.put( Integer.parseInt( deFilter.substring( 0, index - 1 ) ),
+                    deFilter.substring( index + 1, deFilter.length() ) );
             }
         }
-        grid = programStageInstanceService.getAggregateReport( position, programStage, organisationUnits,
-            dataElementId, deFilterMap, periods, aggregateType, limit, format, i18n );
+        
+        grid = programStageInstanceService.getAggregateReport( position, programStage, organisationUnits, deGroupBy,
+            deFilterMap, periods, aggregateType, limitRecords, useCompletedEvents, format, i18n );
 
         return type == null ? SUCCESS : type;
     }

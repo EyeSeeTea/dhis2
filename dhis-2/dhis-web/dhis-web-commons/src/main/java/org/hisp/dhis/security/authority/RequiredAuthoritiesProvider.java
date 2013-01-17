@@ -44,7 +44,7 @@ public interface RequiredAuthoritiesProvider
      * the action config. The specified action config is set as the secure
      * object. The SecurityMetadataSource may include additional attributes if
      * needed.
-     * 
+     *
      * @param actionConfig the secure actionConfig to get required authorities
      *        from.
      */
@@ -54,7 +54,7 @@ public interface RequiredAuthoritiesProvider
      * Creates an SecurityMetadataSource for a specified secure object based on
      * the required authorities for the action config. The
      * SecurityMetadataSource may include additional attributes if needed.
-     * 
+     *
      * @param actionConfig the actionConfig to get required authorities from.
      * @param object the secure object.
      */

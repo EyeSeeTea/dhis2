@@ -28,7 +28,6 @@ package org.hisp.dhis.common;
  */
 
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserGroup;
 
 import java.util.Collection;
 import java.util.Date;
@@ -59,10 +58,17 @@ public interface GenericIdentifiableObjectStore<T>
     /**
      * Retrieves the object with the given code.
      *
-     * @param name the code.
+     * @param code the code.
      * @return the object with the given code.
      */
     T getByCode( String code );
+
+    /**
+     * Retrieves a Collection of all objects (sorted on name).
+     *
+     * @return a Collection of all objects.
+     */
+    Collection<T> getAllOrderedName();
 
     /**
      * Retrieves the objects determined by the given first result and max result.
@@ -71,7 +77,15 @@ public interface GenericIdentifiableObjectStore<T>
      * @param max   the max number of result objects to return.
      * @return collection of objects.
      */
-    Collection<T> getBetween( int first, int max );
+    Collection<T> getAllOrderedName( int first, int max );
+
+    /**
+     * Retrieves a Collection of objects where the name is like the given name.
+     *
+     * @param name the name.
+     * @return a Collection of objects.
+     */
+    Collection<T> getAllLikeName( String name );
 
     /**
      * Retrieves the objects determined by the given first result and max result.
@@ -81,18 +95,18 @@ public interface GenericIdentifiableObjectStore<T>
      * @param max   the max number of result objects to return.
      * @return collection of objects.
      */
-    List<T> getBetweenOrderderByLastUpdated( int first, int max );
+    List<T> getAllOrderedLastUpdated( int first, int max );
 
     /**
      * Retrieves the objects determined by the given first result and max result
      * which name is like the given name.
      *
-     * @param the   name which result object names must be like.
+     * @param name  the name which result object names must be like.
      * @param first the first result object to return.
      * @param max   the max number of result objects to return.
      * @return collection of objects.
      */
-    Collection<T> getBetweenByName( String name, int first, int max );
+    Collection<T> getAllLikeNameOrderedName( String name, int first, int max );
 
     /**
      * Gets the count of objects which name is like the given name.
@@ -100,7 +114,7 @@ public interface GenericIdentifiableObjectStore<T>
      * @param name the name which result object names must be like.
      * @return the count of objects.
      */
-    int getCountByName( String name );
+    int getCountLikeName( String name );
 
     /**
      * Retrieves a list of objects referenced by the given collection of uids.
@@ -116,7 +130,7 @@ public interface GenericIdentifiableObjectStore<T>
      * @param created Date to compare with.
      * @return All objects equal or newer than given date.
      */
-    List<T> getByCreated( Date created );
+    List<T> getAllGeCreated( Date created );
 
     /**
      * Returns all objects that are equal to or newer than given date.
@@ -124,16 +138,16 @@ public interface GenericIdentifiableObjectStore<T>
      * @param lastUpdated Date to compare with.
      * @return All objects equal or newer than given date.
      */
-    List<T> getByLastUpdated( Date lastUpdated );
+    List<T> getAllGeLastUpdated( Date lastUpdated );
 
     /**
      * Returns all objects that are equal to or newer than given date.
-     * (sorted by name)
+     * (ordered by name)
      *
      * @param lastUpdated Date to compare to.
      * @return All objects equal or newer than given date.
      */
-    List<T> getByLastUpdatedSorted( Date lastUpdated );
+    List<T> getAllGeLastUpdatedOrderedName( Date lastUpdated );
 
     /**
      * Returns the number of objects that are equal to or newer than given date.
@@ -141,13 +155,13 @@ public interface GenericIdentifiableObjectStore<T>
      * @param lastUpdated Date to compare to.
      * @return the number of objects equal or newer than given date.
      */
-    long getCountByLastUpdated( Date lastUpdated );
+    long getCountGeLastUpdated( Date lastUpdated );
 
     /**
      * Retrieves objects associated with the given user.
      *
      * @param user the user.
-     * @param a    list of objects.
+     * @return list of objects.
      */
     Collection<T> getByUser( User user );
 
