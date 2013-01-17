@@ -1332,7 +1332,12 @@ Ext.onReady( function() {
 							organisationUnit
 						]
 					}
-				]
+				],
+				listeners: {
+					added: function() {
+						pt.cmp.dimension.panel = this;
+					}
+				}
 			});
 
 			westRegion = Ext.create('Ext.panel.Panel', {
