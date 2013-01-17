@@ -25,6 +25,21 @@ Ext.onReady( function() {
 		return init;
 	};
 
+	PT.app.getUtils = function() {
+		var util = pt.util || {};
+
+		util.dimension = {
+			panel: {
+				setHeight: function(mx) {
+					var h = pt.viewport.westRegion.getHeight() - pt.conf.layout.west_fill;
+					pt.cmp.dimension.panel.setHeight(h > mx ? mx : h);
+				}
+			}
+		};
+
+		return util;
+	};
+
 	PT.app.getStores = function() {
 		var store = pt.store || {};
 
@@ -718,7 +733,7 @@ Ext.onReady( function() {
 									{
 										xtype: 'label',
 										text: 'Quarters', //i18n pt.i18n.quarters,
-										cls: 'dv-label-period-heading'
+										cls: 'pt-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
@@ -753,7 +768,7 @@ Ext.onReady( function() {
 									{
 										xtype: 'label',
 										text: 'Six-months', //i18n pt.i18n.six_months,
-										cls: 'dv-label-period-heading'
+										cls: 'pt-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
@@ -795,7 +810,7 @@ Ext.onReady( function() {
 									{
 										xtype: 'label',
 										text: 'Years', //i18n pt.i18n.years,
-										cls: 'dv-label-period-heading'
+										cls: 'pt-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
@@ -884,7 +899,7 @@ Ext.onReady( function() {
 			});
 
 			fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
-				cls: 'dv-toolbar-multiselect-right',
+				cls: 'pt-toolbar-multiselect-right',
 				width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
 				valueField: 'id',
 				displayField: 'name',
@@ -912,7 +927,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'label',
 						text: 'Selected', //i18n pt.i18n.selected,
-						cls: 'dv-toolbar-multiselect-right-label'
+						cls: 'pt-toolbar-multiselect-right-label'
 					}
 				],
 				listeners: {
@@ -1305,7 +1320,7 @@ Ext.onReady( function() {
 						xtype: 'panel',
 						layout: 'accordion',
 						activeOnTop: true,
-						cls: 'dv-accordion',
+						cls: 'pt-accordion',
 						bodyStyle: 'border:0 none',
 						height: 430,
 						items: [
@@ -1325,21 +1340,40 @@ Ext.onReady( function() {
 				preventHeader: true,
 				collapsible: true,
 				collapseMode: 'mini',
-				items: accordion
+				items: accordion,
+				width: 500,
+                listeners: {
+                    collapse: function() {
+                        this.collapsed = true;
+                        pt.cmp.toolbar.resizewest.setText('>>>');
+                    },
+                    expand: function() {
+                        this.collapsed = false;
+                        pt.cmp.toolbar.resizewest.setText('<<<');
+                    }
+                }
 			});
+
+			centerRegion = Ext.create('Ext.panel.Panel', {
+				region: 'center',
+				items: [
+					{
+						html: 'Center'
+					}
+				]
+			});
+
 
 			viewport = Ext.create('Ext.container.Viewport', {
 				layout: 'border',
 				items: [
-					{
-						region: 'west',
-						preventHeader: true,
-						collapsible: true,
-						collapseMode: 'mini',
-						items: westRegion
-					}
+					westRegion,
+					centerRegion
 				]
 			});
+
+			viewport.westRegion = westRegion;
+			viewport.centerRegion = centerRegion;
 
 			addListeners = function() {
 				pt.store.indicatorAvailable.on('load', function() {
@@ -1355,15 +1389,19 @@ Ext.onReady( function() {
 					s.sort('name', 'ASC');
 				});
 			}();
+
+			return viewport;
 		};
 
 		pt.init = PT.app.getInits(r);
+
+		pt.util = PT.app.getUtils();
 
 		pt.store = PT.app.getStores();
 
 		pt.cmp = PT.app.getCmp();
 
-		createViewport();
+		pt.viewport = createViewport();
 	};
 
 	Ext.Ajax.request({

@@ -152,16 +152,16 @@ td .bad div {
 }
 
 .pt-panel-title-data {
-	background-image: url(images/data.png);
+	background-image: url(../images/data.png);
 }
 .pt-panel-title-period {
-	background-image: url(images/period.png);
+	background-image: url(../images/period.png);
 }
 .pt-panel-title-organisationunit {
-	background-image: url(images/organisationunit.png);
+	background-image: url(../images/organisationunit.png);
 }
 .pt-panel-title-organisationunitgroupset {
-	background-image: url(images/organisationunitgroupset.png);
+	background-image: url(../images/organisationunitgroupset.png);
 }
 
 

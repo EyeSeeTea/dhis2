@@ -155,7 +155,7 @@ PT.core.getConfigs = function() {
 		},
 		jsonEncodeArray: function(a) {
 			for (var i = 0; i < a.length; i++) {
-				a[i] = DV.conf.util.jsonEncodeString(a[i]);
+				a[i] = pt.conf.util.jsonEncodeString(a[i]);
 			}
 			return a;
 		}
