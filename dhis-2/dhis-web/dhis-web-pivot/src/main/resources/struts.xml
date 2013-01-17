@@ -15,5 +15,13 @@
 			<result name="success" type="redirect">app/index.html</result>
 		</action>
 
+		<!-- Initialize -->
+
+        <action name="initialize"
+            class="org.hisp.dhis.pivot.action.InitializeAction">
+            <result name="success" type="velocity-json">
+                /dhis-web-pivot/jsonInitialize.vm</result>
+        </action>
+
 	</package>
 </struts>
