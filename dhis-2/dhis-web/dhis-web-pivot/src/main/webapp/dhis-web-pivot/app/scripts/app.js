@@ -1153,7 +1153,7 @@ Ext.onReady( function() {
 						rendered: false,
 						selectRootIf: function() {
 							if (this.getSelectionModel().getSelection().length < 1) {
-								var node = this.getRootNode().findChild('id', pt.init.system.rootnodes[0].id, true);
+								var node = this.getRootNode().findChild('id', pt.init.rootnodes[0].id, true);
 								if (this.rendered) {
 									this.getSelectionModel().select(node);
 								}
@@ -1228,7 +1228,7 @@ Ext.onReady( function() {
 							root: {
 								id: pt.conf.finals.root.id,
 								expanded: true,
-								children: pt.init.system.rootnodes
+								children: pt.init.rootnodes
 							},
 							listeners: {
 								load: function(s, node, r) {
@@ -1356,6 +1356,8 @@ Ext.onReady( function() {
 				});
 			}();
 		};
+
+		pt.init = PT.app.getInits(r);
 
 		pt.store = PT.app.getStores();
 
