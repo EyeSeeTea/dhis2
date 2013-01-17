@@ -9,7 +9,7 @@ PT.core.getConfigs = function() {
 
 	conf.finals = {
         ajax: {
-            path_visualizer: '../',
+            path_pivot: '../',
             path_api: '../../api/',
             path_commons: '../../dhis-web-commons-ajax-json/',
             path_lib: '../../dhis-web-commons/javascripts/',
@@ -41,7 +41,7 @@ PT.core.getConfigs = function() {
         dimension: {
             data: {
                 value: 'data',
-                rawvalue: PT.i18n.data,
+                rawvalue: 'Data', //i18n PT.i18n.data,
                 warning: {
 					filter: PT.i18n.wm_multiple_filter_ind_de
 				}
@@ -185,8 +185,8 @@ PT.core.getUtils = function(pt) {
 		},
 		resizeDimensions: function() {
 			var a = [PT.cmp.dimension.indicator.panel, PT.cmp.dimension.dataelement.panel, PT.cmp.dimension.dataset.panel,
-					PT.cmp.dimension.relativeperiod.panel, PT.cmp.dimension.fixedperiod.panel, PT.cmp.dimension.organisationunit.panel,
-					PT.cmp.dimension.organisationunitgroup.panel, PT.cmp.options.panel];
+					PT.cmp.dimension.relativeperiod.panel, PT.cmp.dimension.fixedperiod.panel, PT.cmp.dimension.organisationUnit.panel,
+					PT.cmp.dimension.organisationUnitGroup.panel, PT.cmp.options.panel];
 			for (var i = 0; i < a.length; i++) {
 				if (!a[i].collapsed) {
 					a[i].fireEvent('expand');

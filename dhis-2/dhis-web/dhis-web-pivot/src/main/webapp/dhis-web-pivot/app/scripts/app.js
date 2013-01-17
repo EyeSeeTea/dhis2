@@ -19,7 +19,8 @@ Ext.onReady( function() {
 		var createViewport;
 
 		createViewport = function() {
-			var westRegion,
+			var viewport,
+				westRegion,
 				centerRegion,
 
 				indicatorAvailable,
@@ -36,7 +37,8 @@ Ext.onReady( function() {
 				fixedPeriodAvailable,
 				fixedPeriodSelected,
 				fixedPeriod,
-				organisationUnit
+				organisationUnit,
+				accordion,
 
 				getOrganisationUnitGroupSetItems,
 				setListeners;
@@ -109,7 +111,7 @@ Ext.onReady( function() {
 					'->',
 					{
 						xtype: 'label',
-						text: 'Selected', //i18n DV.i18n.selected,
+						text: 'Selected', //i18n pt.i18n.selected,
 						cls: 'pt-toolbar-multiselect-right-label'
 					}
 				],
@@ -120,7 +122,7 @@ Ext.onReady( function() {
 						}, this);
 					}
 				}
-			};
+			});
 
 			indicator = Ext.create('Ext.panel.Panel', {
 				title: '<div class="pt-panel-title-data">Indicators</div>', //i18n
@@ -279,7 +281,7 @@ Ext.onReady( function() {
 					'->',
 					{
 						xtype: 'label',
-						text: 'Selected', //i18n DV.i18n.selected,
+						text: 'Selected', //i18n pt.i18n.selected,
 						cls: 'pt-toolbar-multiselect-right-label'
 					}
 				],
@@ -290,7 +292,7 @@ Ext.onReady( function() {
 						}, this);
 					}
 				}
-			};
+			});
 
 			dataElement = Ext.create('Ext.panel.Panel', {
 				title: '<div class="pt-panel-title-data">Data elements</div>', //i18n
@@ -449,7 +451,7 @@ Ext.onReady( function() {
 					'->',
 					{
 						xtype: 'label',
-						text: 'Selected', //i18n DV.i18n.selected,
+						text: 'Selected', //i18n pt.i18n.selected,
 						cls: 'pt-toolbar-multiselect-right-label'
 					}
 				],
@@ -460,7 +462,7 @@ Ext.onReady( function() {
 						}, this);
 					}
 				}
-			};
+			});
 
 			dataSet = Ext.create('Ext.panel.Panel', {
 				title: '<div class="pt-panel-title-data">Data sets</div>', //i18n
@@ -494,10 +496,10 @@ Ext.onReady( function() {
 				xable: function() {
 					this.setDisabled(pt.util.checkbox.isAllFalse());
 				}
-			};
+			});
 
 			relativePeriod = Ext.create('Ext.panel.Panel', {
-				title: '<div class="pt-panel-title-period">Relative periods</div>', //i18n DV.i18n.relative_periods
+				title: '<div class="pt-panel-title-period">Relative periods</div>', //i18n pt.i18n.relative_periods
 				hideCollapseTool: true,
 				autoScroll: true,
 				items: [
@@ -526,23 +528,23 @@ Ext.onReady( function() {
 								items: [
 									{
 										xtype: 'label',
-										text: 'Months', //i18n DV.i18n.months,
+										text: 'Months', //i18n pt.i18n.months,
 										cls: 'pt-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
 										paramName: 'reportingMonth',
-										boxLabel: 'Last month', //i18n DV.i18n.last_month
+										boxLabel: 'Last month', //i18n pt.i18n.last_month
 									},
 									{
 										xtype: 'checkbox',
 										paramName: 'last3Months',
-										boxLabel: 'Last 3 months', //i18n DV.i18n.last_3_months
+										boxLabel: 'Last 3 months', //i18n pt.i18n.last_3_months
 									},
 									{
 										xtype: 'checkbox',
 										paramName: 'last12Months',
-										boxLabel: 'Last 12 months', //i18n DV.i18n.last_12_months,
+										boxLabel: 'Last 12 months', //i18n pt.i18n.last_12_months,
 										checked: true
 									}
 								]
@@ -567,18 +569,18 @@ Ext.onReady( function() {
 								items: [
 									{
 										xtype: 'label',
-										text: 'Quarters', //i18n DV.i18n.quarters,
+										text: 'Quarters', //i18n pt.i18n.quarters,
 										cls: 'dv-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
 										paramName: 'reportingQuarter',
-										boxLabel: 'Last quarter', //i18n DV.i18n.last_quarter
+										boxLabel: 'Last quarter', //i18n pt.i18n.last_quarter
 									},
 									{
 										xtype: 'checkbox',
 										paramName: 'last4Quarters',
-										boxLabel: 'Last 4 quarters', //i18n DV.i18n.last_4_quarters
+										boxLabel: 'Last 4 quarters', //i18n pt.i18n.last_4_quarters
 									}
 								]
 							},
@@ -602,18 +604,18 @@ Ext.onReady( function() {
 								items: [
 									{
 										xtype: 'label',
-										text: 'Six-months', //i18n DV.i18n.six_months,
+										text: 'Six-months', //i18n pt.i18n.six_months,
 										cls: 'dv-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
 										paramName: 'lastSixMonth',
-										boxLabel: 'Last six-month', //i18n DV.i18n.last_six_month
+										boxLabel: 'Last six-month', //i18n pt.i18n.last_six_month
 									},
 									{
 										xtype: 'checkbox',
 										paramName: 'last2SixMonths',
-										boxLabel: 'Last two six-months', //i18n DV.i18n.last_two_six_month
+										boxLabel: 'Last two six-months', //i18n pt.i18n.last_two_six_month
 									}
 								]
 							}
@@ -644,23 +646,23 @@ Ext.onReady( function() {
 								items: [
 									{
 										xtype: 'label',
-										text: 'Years', //i18n DV.i18n.years,
+										text: 'Years', //i18n pt.i18n.years,
 										cls: 'dv-label-period-heading'
 									},
 									{
 										xtype: 'checkbox',
 										paramName: 'thisYear',
-										boxLabel: 'This year', //i18n DV.i18n.this_year
+										boxLabel: 'This year', //i18n pt.i18n.this_year
 									},
 									{
 										xtype: 'checkbox',
 										paramName: 'lastYear',
-										boxLabel: 'Last year', //i18n DV.i18n.last_year
+										boxLabel: 'Last year', //i18n pt.i18n.last_year
 									},
 									{
 										xtype: 'checkbox',
 										paramName: 'last5Years',
-										boxLabel: 'Last 5 years', //i18n DV.i18n.last_5_years
+										boxLabel: 'Last 5 years', //i18n pt.i18n.last_5_years
 									}
 								]
 							},
@@ -698,11 +700,11 @@ Ext.onReady( function() {
 				width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
 				valueField: 'id',
 				displayField: 'name',
-				store: DV.store.fixedPeriodAvailable,
+				store: pt.store.fixedPeriodAvailable,
 				tbar: [
 					{
 						xtype: 'label',
-						text: 'Available', //i18n DV.i18n.available,
+						text: 'Available', //i18n pt.i18n.available,
 						cls: 'pt-toolbar-multiselect-left-label'
 					},
 					'->',
@@ -739,7 +741,7 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'name',
 				ddReorder: false,
-				store: DV.store.fixedPeriodSelected,
+				store: pt.store.fixedPeriodSelected,
 				tbar: [
 					' ',
 					{
@@ -761,7 +763,7 @@ Ext.onReady( function() {
 					'->',
 					{
 						xtype: 'label',
-						text: 'Selected', //i18n DV.i18n.selected,
+						text: 'Selected', //i18n pt.i18n.selected,
 						cls: 'dv-toolbar-multiselect-right-label'
 					}
 				],
@@ -774,8 +776,8 @@ Ext.onReady( function() {
 				}
 			});
 
-			fixedPeriods = Ext.create('Ext.panel.Panel', {
-				title: '<div class="pt-panel-title-period">Fixed periods</div>', //i18n DV.i18n.fixed_periods
+			fixedPeriod = Ext.create('Ext.panel.Panel', {
+				title: '<div class="pt-panel-title-period">Fixed periods</div>', //i18n pt.i18n.fixed_periods
 				hideCollapseTool: true,
 				items: [
 					{
@@ -790,7 +792,7 @@ Ext.onReady( function() {
 								width: 261,
 								valueField: 'id',
 								displayField: 'name',
-								fieldLabel: 'Select type', //i18n DV.i18n.select_type,
+								fieldLabel: 'Select type', //i18n pt.i18n.select_type,
 								fieldCls: 'pt-combo-label-default',
 								editable: false,
 								queryMode: 'remote',
@@ -877,11 +879,11 @@ Ext.onReady( function() {
 							{
 								xtype: 'checkbox',
 								columnWidth: 0.5,
-								boxLabel: 'User organisation unit', //i18n DV.i18n.user_orgunit,
+								boxLabel: 'User organisation unit', //i18n pt.i18n.user_orgunit,
 								labelWidth: pt.conf.layout.form_label_width,
 								handler: function(chb, checked) {
-									pt.cmp.dimension.organisationunit.toolbar.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
-									pt.cmp.dimension.organisationunit.treepanel.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
+									pt.cmp.dimension.organisationUnit.toolbar.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
+									pt.cmp.dimension.organisationUnit.treepanel.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
 								},
 								listeners: {
 									added: function() {
@@ -892,11 +894,11 @@ Ext.onReady( function() {
 							{
 								xtype: 'checkbox',
 								columnWidth: 0.5,
-								boxLabel: 'User organisation unit children', //i18n DV.i18n.user_orgunit_children,
+								boxLabel: 'User organisation unit children', //i18n pt.i18n.user_orgunit_children,
 								labelWidth: pt.conf.layout.form_label_width,
 								handler: function(chb, checked) {
-									pt.cmp.dimension.organisationunit.toolbar.xable(checked, DV.cmp.favorite.userOrganisationUnit.getValue());
-									pt.cmp.dimension.organisationunit.treepanel.xable(checked, DV.cmp.favorite.userOrganisationUnit.getValue());
+									pt.cmp.dimension.organisationUnit.toolbar.xable(checked, pt.cmp.favorite.userOrganisationUnit.getValue());
+									pt.cmp.dimension.organisationUnit.treepanel.xable(checked, pt.cmp.favorite.userOrganisationUnit.getValue());
 								},
 								listeners: {
 									added: function() {
@@ -953,17 +955,17 @@ Ext.onReady( function() {
 													],
 													setHeightInMenu: function(store) {
 														var h = store.getCount() * 24,
-															sh = DV.util.viewport.getSize().y * 0.6;
+															sh = pt.util.viewport.getSize().y * 0.6;
 														this.setHeight(h > sh ? sh : h);
 														this.doLayout();
 														this.up('menu').doLayout();
 													},
-													store: DV.store.group,
+													store: pt.store.group,
 													listeners: {
 														itemclick: function(g, r) {
 															g.getSelectionModel().select([], false);
 															this.up('menu').hide();
-															pt.cmp.dimension.organisationunit.treepanel.selectByGroup(r.data.id);
+															pt.cmp.dimension.organisationUnit.treepanel.selectByGroup(r.data.id);
 														}
 													}
 												}
@@ -989,7 +991,7 @@ Ext.onReady( function() {
 						],
 						listeners: {
 							added: function() {
-								pt.cmp.dimension.organisationunit.toolbar = this;
+								pt.cmp.dimension.organisationUnit.toolbar = this;
 							}
 						}
 					},
@@ -1003,7 +1005,7 @@ Ext.onReady( function() {
 						rendered: false,
 						selectRootIf: function() {
 							if (this.getSelectionModel().getSelection().length < 1) {
-								var node = this.getRootNode().findChild('id', DV.init.system.rootnodes[0].id, true);
+								var node = this.getRootNode().findChild('id', pt.init.system.rootnodes[0].id, true);
 								if (this.rendered) {
 									this.getSelectionModel().select(node);
 								}
@@ -1020,7 +1022,7 @@ Ext.onReady( function() {
 							}
 						},
 						multipleExpand: function(id, path) {
-							this.expandPath('/' + DV.conf.finals.root.id + path, 'id', '/', function() {
+							this.expandPath('/' + pt.conf.finals.root.id + path, 'id', '/', function() {
 								var record = this.getRootNode().findChild('id', id, true);
 								this.recordsToSelect.push(record);
 								this.multipleSelectIf();
@@ -1036,7 +1038,7 @@ Ext.onReady( function() {
 								params: params,
 								scope: this,
 								success: function(r) {
-									var a = Ext.JSON.decode(r.responseText).organisationUnits;
+									var a = Ext.decode(r.responseText).organisationUnits;
 									this.numberOfRecords = a.length;
 									for (var i = 0; i < a.length; i++) {
 										this.multipleExpand(a[i].id, a[i].path);
@@ -1046,26 +1048,26 @@ Ext.onReady( function() {
 						},
 						selectByGroup: function(id) {
 							if (id) {
-								var url = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunit_getbygroup,
+								var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbygroup,
 									params = {id: id};
 								this.select(url, params);
 							}
 						},
 						selectByLevel: function(level) {
 							if (level) {
-								var url = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunit_getbylevel,
+								var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbylevel,
 									params = {level: level};
 								this.select(url, params);
 							}
 						},
 						selectByIds: function(ids) {
 							if (ids) {
-								var url = DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunit_getbyids;
+								var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbyids;
 								Ext.Array.each(ids, function(item) {
 									url = Ext.String.urlAppend(url, 'ids=' + item);
 								});
 								if (!this.rendered) {
-									DV.cmp.dimension.organisationunit.panel.expand();
+									pt.cmp.dimension.organisationUnit.panel.expand();
 								}
 								this.select(url);
 							}
@@ -1073,17 +1075,17 @@ Ext.onReady( function() {
 						store: Ext.create('Ext.data.TreeStore', {
 							proxy: {
 								type: 'ajax',
-								url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.organisationunitchildren_get
+								url: pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunitchildren_get
 							},
 							root: {
-								id: DV.conf.finals.root.id,
+								id: pt.conf.finals.root.id,
 								expanded: true,
-								children: DV.init.system.rootnodes
+								children: pt.init.system.rootnodes
 							},
 							listeners: {
 								load: function(s, node, r) {
 									for (var i = 0; i < r.length; i++) {
-										r[i].data.text = DV.conf.util.jsonEncodeString(r[i].data.text);
+										r[i].data.text = pt.conf.util.jsonEncodeString(r[i].data.text);
 									}
 								}
 							}
@@ -1098,7 +1100,7 @@ Ext.onReady( function() {
 						},
 						listeners: {
 							added: function() {
-								DV.cmp.dimension.organisationunit.treepanel = this;
+								pt.cmp.dimension.organisationUnit.treepanel = this;
 							},
 							render: function() {
 								this.rendered = true;
@@ -1116,7 +1118,7 @@ Ext.onReady( function() {
 								if (!r.data.leaf) {
 									v.menu.add({
 										id: 'treepanel-contextmenu-item',
-										text: DV.i18n.select_all_children,
+										text: 'Select all children', //i18n pt.i18n.select_all_children,
 										icon: 'images/node-select-child.png',
 										handler: function() {
 											r.expand(false, function() {
@@ -1134,26 +1136,62 @@ Ext.onReady( function() {
 							}
 						}
 					}
+				],
+				listeners: {
+					added: function() {
+						pt.cmp.dimension.panels.push(this);
+					},
+					expand: function(p) {
+						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_organisationunit);
+						pt.cmp.dimension.organisationUnit.treepanel.setHeight(p.getHeight() - pt.conf.layout.west_fill_accordion_organisationunit);
+						pt.cmp.dimension.organisationUnit.treepanel.selectRootIf();
+					}
+				}
+			});
 
-
-
-
-
-
-
-
-
+			accordion = Ext.create('Ext.panel.Panel', {
+				bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:6px;',
+				layout: 'fit',
+				items: [
+					{
+						xtype: 'panel',
+						layout: 'accordion',
+						activeOnTop: true,
+						cls: 'dv-accordion',
+						bodyStyle: 'border:0 none',
+						height: 430,
+						items: [
+							indicator,
+							dataElement,
+							dataSet,
+							relativePeriod,
+							fixedPeriod,
+							organisationUnit
+						]
+					}
+				]
+			});
 
 			westRegion = Ext.create('Ext.panel.Panel', {
 				region: 'west',
 				preventHeader: true,
 				collapsible: true,
 				collapseMode: 'mini',
+				items: accordion
+			});
+
+			viewport = Ext.create('Ext.container.Viewport', {
+				layout: 'border',
 				items: [
-
-
-
-
+					{
+						region: 'west',
+						preventHeader: true,
+						collapsible: true,
+						collapseMode: 'mini',
+						items: westRegion
+					}
+				]
+			});
 
 			setListeners = function() {
 				pt.store.indicatorAvailable.on('load', function() {
@@ -1168,5 +1206,11 @@ Ext.onReady( function() {
 					pt.util.multiselect.filterAvailable(dataSetAvailable, dataSetSelected);
 				});
 			}();
+		};
 
+		createViewport();
+	};
+
+	PT.app.init.onInitialize(r);
+});
 
