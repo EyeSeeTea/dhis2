@@ -15,8 +15,153 @@ Ext.onReady( function() {
 
 	var pt = PT.core.getInstance();
 
-	PT.app.getStores = function() {
+	PT.app.getInits = function(r) {
+		var init = Ext.decode(r.responseText);
 
+		for (var i = 0; i < init.rootNodes.length; i++) {
+			init.rootNodes[i].path = '/' + pt.conf.finals.root.id + '/' + init.rootNodes[i].id;
+		}
+
+		return init;
+	};
+
+	PT.app.getStores = function() {
+		var store = pt.store || {};
+
+		store.indicatorAvailable = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				reader: {
+					type: 'json',
+					root: 'indicators'
+				}
+			},
+			storage: {},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			},
+			listeners: {
+				load: function(s) {
+					s.each( function(r) {
+						r.data.name = pt.conf.util.jsonEncodeString(r.data.name);
+					});
+					pt.util.store.addToStorage(s);
+				}
+			}
+		});
+
+		store.indicatorSelected = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		store.dataElementAvailable = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: pt.conf.finals.ajax.path_visualizer + pt.conf.finals.ajax.dataelement_get,
+				reader: {
+					type: 'json',
+					root: 'dataElements'
+				}
+			},
+			storage: {},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			},
+			listeners: {
+				load: function(s) {
+					s.each( function(r) {
+						r.data.name = pt.conf.util.jsonEncodeString(r.data.name);
+					});
+					pt.util.store.addToStorage(s);
+				}
+			}
+		});
+
+		store.dataElementSelected = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		store.dataSetAvailable = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: pt.conf.finals.ajax.path_api + pt.conf.finals.ajax.dataset_get,
+				reader: {
+					type: 'json',
+					root: 'dataSets'
+				}
+			},
+			storage: {},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			},
+			isloaded: false,
+			listeners: {
+				load: function(s) {
+					this.isloaded = true;
+					s.each( function(r) {
+						r.data.name = pt.conf.util.jsonEncodeString(r.data.name);
+					});
+					pt.util.store.addToStorage(s);
+				}
+			}
+		});
+
+		store.dataSetSelected = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		store.periodType = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: pt.conf.period.periodtypes
+		});
+
+		store.fixedPeriodAvailable = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'index'],
+			data: [],
+			setIndex: function(periods) {
+				for (var i = 0; i < periods.length; i++) {
+					periods[i].index = i;
+				}
+			},
+			sortStore: function() {
+				this.sort('index', 'ASC');
+			}
+		});
+
+		store.fixedPeriodSelected = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		return store;
+	};
+
+	PT.app.getCmp = function() {
+		var cmp = {};
+
+		cmp.dimension = {
+			panels: [],
+
+			indicator: {},
+			dataElement: {},
+			dataSet: {},
+			relativePeriod: {},
+			fixedPeriod: {},
+			organisationUnit: {}
+		};
+
+		cmp.dimension.relativePeriod.checkbox = [];
+
+		cmp.favorite = {};
+
+		return cmp;
+	};
 
 	PT.app.init.onInitialize = function(r) {
 		var createViewport;
@@ -44,7 +189,7 @@ Ext.onReady( function() {
 				accordion,
 
 				getOrganisationUnitGroupSetItems,
-				setListeners;
+				addListeners;
 
 			indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 				cls: 'pt-toolbar-multiselect-left',
@@ -520,7 +665,7 @@ Ext.onReady( function() {
 									listeners: {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
-												pt.cmp.dimension.relativeperiod.checkbox.push(chb);
+												pt.cmp.dimension.relativePeriod.checkbox.push(chb);
 											}
 										},
 										change: function() {
@@ -561,7 +706,7 @@ Ext.onReady( function() {
 									listeners: {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
-												pt.cmp.dimension.relativeperiod.checkbox.push(chb);
+												pt.cmp.dimension.relativePeriod.checkbox.push(chb);
 											}
 										},
 										change: function() {
@@ -596,7 +741,7 @@ Ext.onReady( function() {
 									listeners: {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
-												pt.cmp.dimension.relativeperiod.checkbox.push(chb);
+												pt.cmp.dimension.relativePeriod.checkbox.push(chb);
 											}
 										},
 										change: function() {
@@ -638,7 +783,7 @@ Ext.onReady( function() {
 									listeners: {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
-												pt.cmp.dimension.relativeperiod.checkbox.push(chb);
+												pt.cmp.dimension.relativePeriod.checkbox.push(chb);
 											}
 										},
 										change: function() {
@@ -1196,7 +1341,7 @@ Ext.onReady( function() {
 				]
 			});
 
-			setListeners = function() {
+			addListeners = function() {
 				pt.store.indicatorAvailable.on('load', function() {
 					pt.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
 				});
@@ -1205,15 +1350,24 @@ Ext.onReady( function() {
 					pt.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
 				});
 
-				pt.store.dataSetAvailable.on('load', function() {
+				pt.store.dataSetAvailable.on('load', function(s) {
 					pt.util.multiselect.filterAvailable(dataSetAvailable, dataSetSelected);
+					s.sort('name', 'ASC');
 				});
 			}();
 		};
 
+		pt.store = PT.app.getStores();
+
+		pt.cmp = PT.app.getCmp();
+
 		createViewport();
 	};
 
-	PT.app.init.onInitialize();
+	Ext.Ajax.request({
+		url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + 'initialize.action',
+		success: function(r) {
+			PT.app.init.onInitialize(r);
+	}});
 });
 

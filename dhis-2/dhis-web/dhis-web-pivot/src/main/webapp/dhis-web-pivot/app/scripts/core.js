@@ -79,7 +79,10 @@ PT.core.getConfigs = function() {
             organisationunitgroup: {
 				value: 'organisationunitgroup'
 			}
-        }
+        },
+        root: {
+			id: 'root'
+		}
 	};
 
 	conf.period = {
