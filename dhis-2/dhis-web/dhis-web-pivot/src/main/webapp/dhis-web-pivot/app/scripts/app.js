@@ -15,12 +15,18 @@ Ext.onReady( function() {
 
 	var pt = PT.core.getInstance();
 
+	PT.pt = pt;
+
 	PT.app.getInits = function(r) {
 		var init = Ext.decode(r.responseText);
 
 		for (var i = 0; i < init.rootNodes.length; i++) {
 			init.rootNodes[i].path = '/' + pt.conf.finals.root.id + '/' + init.rootNodes[i].id;
 		}
+
+		init.afterRender = function() {
+			pt.cmp.dimension.panels[0].expand();
+		};
 
 		return init;
 	};
@@ -365,6 +371,9 @@ Ext.onReady( function() {
 					}
 				],
 				listeners: {
+					added: function() {
+						pt.cmp.dimension.panels.push(this);
+					},
 					expand: function() {
 						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_indicator);
 						pt.util.multiselect.setHeight(
@@ -535,6 +544,9 @@ Ext.onReady( function() {
 					}
 				],
 				listeners: {
+					added: function() {
+						pt.cmp.dimension.panels.push(this);
+					},
 					expand: function() {
 						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_indicator);
 						pt.util.multiselect.setHeight(
@@ -642,6 +654,9 @@ Ext.onReady( function() {
 					}
 				],
 				listeners: {
+					added: function() {
+						pt.cmp.dimension.panels.push(this);
+					},
 					expand: function() {
 						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_indicator);
 						pt.util.multiselect.setHeight(
@@ -1377,13 +1392,17 @@ Ext.onReady( function() {
 				]
 			});
 
-
 			viewport = Ext.create('Ext.container.Viewport', {
 				layout: 'border',
 				items: [
 					westRegion,
 					centerRegion
-				]
+				],
+				listeners: {
+					afterrender: function() {
+						pt.init.afterRender();
+					}
+				}
 			});
 
 			viewport.westRegion = westRegion;
