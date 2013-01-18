@@ -116,7 +116,7 @@ PT.core.getConfigs = function() {
 	conf.layout = {
         west_width: 424,
         west_fieldset_width: 410,
-        west_width_subtractor: 18,
+        west_width_padding: 18,
         west_fill: 117,
         west_fill_accordion_indicator: 77,
         west_fill_accordion_dataelement: 77,
@@ -273,6 +273,42 @@ PT.core.getUtils = function(pt) {
 			var mx = PT.conf.layout.treepanel_maxheight;
 			var mn = PT.conf.layout.treepanel_minheight;
 			return h > mx ? mx : h < mn ? mn : h;
+		}
+	};
+
+	util.store = {
+		addToStorage: function(s, records) {
+			s.each( function(r) {
+				if (!s.storage[r.data.id]) {
+					s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
+				}
+			});
+			if (records) {
+				Ext.Array.each(records, function(r) {
+					if (!s.storage[r.data.id]) {
+						s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
+					}
+				});
+			}
+		},
+		loadFromStorage: function(s) {
+			var items = [];
+			s.removeAll();
+			for (var obj in s.storage) {
+				if (s.storage[obj].parent === s.parent) {
+					items.push(s.storage[obj]);
+				}
+			}
+			s.add(items);
+			s.sort('name', 'ASC');
+		},
+		containsParent: function(s) {
+			for (var obj in s.storage) {
+				if (s.storage[obj].parent === s.parent) {
+					return true;
+				}
+			}
+			return false;
 		}
 	};
 
@@ -810,7 +846,7 @@ PT.core.getUtils = function(pt) {
 
 			panel.add(getRowItems(pt));
 		}
-	}
+	};
 
 	return util;
 };

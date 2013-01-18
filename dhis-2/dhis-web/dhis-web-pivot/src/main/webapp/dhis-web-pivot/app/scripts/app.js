@@ -299,7 +299,7 @@ Ext.onReady( function() {
 						valueField: 'id',
 						displayField: 'name',
 						fieldLabel: 'Select group', //i18n pt.i18n.select_group
-						fieldCls: 'pt-combo-label-default',
+						labelStyle: 'padding-left:7px',
 						editable: false,
 						store: {
 							xtype: 'store',
@@ -334,7 +334,7 @@ Ext.onReady( function() {
 						},
 						listeners: {
 							select: function(cb) {
-								var store = pt.store.indicator.available;
+								var store = pt.store.indicatorAvailable;
 								store.parent = cb.getValue();
 
 								if (pt.util.store.containsParent(store)) {
@@ -1032,6 +1032,7 @@ Ext.onReady( function() {
 			});
 
 			organisationUnit = Ext.create('Ext.panel.Panel', {
+				title: '<div class="pt-panel-title-organisationunit">Organisation units</div>', //i18n pt.i18n.organisation_units
 				hideCollapseTool: true,
 				collapsed: false,
 				items: [
@@ -1345,8 +1346,8 @@ Ext.onReady( function() {
 				preventHeader: true,
 				collapsible: true,
 				collapseMode: 'mini',
+				width: pt.conf.layout.west_width,
 				items: accordion,
-				width: 500,
                 listeners: {
                     collapse: function() {
                         this.collapsed = true;
