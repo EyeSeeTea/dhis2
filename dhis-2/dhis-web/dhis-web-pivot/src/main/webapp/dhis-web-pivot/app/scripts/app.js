@@ -485,7 +485,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						param: 'in',
+						param: 'de',
 						items: []
 					};
 
@@ -668,7 +668,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						param: 'in',
+						param: 'ds',
 						items: []
 					};
 
@@ -713,7 +713,6 @@ Ext.onReady( function() {
 			});
 
 			relativePeriod = Ext.create('Ext.panel.Panel', {
-				//title: '<div class="pt-panel-title-period">Relative periods</div>', //i18n pt.i18n.relative_periods
 				hideCollapseTool: true,
 				autoScroll: true,
 				bodyStyle: 'border:0 none',
@@ -748,17 +747,17 @@ Ext.onReady( function() {
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'reportingMonth',
+										paramName: 'LAST_MONTH',
 										boxLabel: 'Last month', //i18n pt.i18n.last_month
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'last3Months',
+										paramName: 'LAST_3_MONTHS',
 										boxLabel: 'Last 3 months', //i18n pt.i18n.last_3_months
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'last12Months',
+										paramName: 'LAST_12_MONTHS',
 										boxLabel: 'Last 12 months', //i18n pt.i18n.last_12_months,
 										checked: true
 									}
@@ -789,12 +788,12 @@ Ext.onReady( function() {
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'reportingQuarter',
+										paramName: 'LAST_QUARTER',
 										boxLabel: 'Last quarter', //i18n pt.i18n.last_quarter
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'last4Quarters',
+										paramName: 'LAST_4_QUARTERS',
 										boxLabel: 'Last 4 quarters', //i18n pt.i18n.last_4_quarters
 									}
 								]
@@ -824,12 +823,12 @@ Ext.onReady( function() {
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'lastSixMonth',
+										paramName: 'LAST_SIX_MONTH',
 										boxLabel: 'Last six-month', //i18n pt.i18n.last_six_month
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'last2SixMonths',
+										paramName: 'LAST_2_SIXMONTHS',
 										boxLabel: 'Last two six-months', //i18n pt.i18n.last_two_six_month
 									}
 								]
@@ -866,17 +865,17 @@ Ext.onReady( function() {
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'thisYear',
+										paramName: 'THIS_YEAR',
 										boxLabel: 'This year', //i18n pt.i18n.this_year
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'lastYear',
+										paramName: 'LAST_YEAR',
 										boxLabel: 'Last year', //i18n pt.i18n.last_year
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'last5Years',
+										paramName: 'LAST_5_YEARS',
 										boxLabel: 'Last 5 years', //i18n pt.i18n.last_5_years
 									}
 								]
@@ -899,15 +898,7 @@ Ext.onReady( function() {
 							}
 						]
 					}
-				],
-				listeners: {
-					//added: function() {
-						//pt.cmp.dimension.panels.push(this);
-					//},
-					//expand: function() {
-						//pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_relativeperiod);
-					//}
-				}
+				]
 			});
 
 			fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
@@ -994,33 +985,26 @@ Ext.onReady( function() {
 			});
 
 			period = Ext.create('Ext.panel.Panel', {
-				title: '<div class="pt-panel-title-period">Periods</div>', //i18n pt.i18n.fixed_periods
+				title: '<div class="pt-panel-title-period">Periods</div>',
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						param: 'in',
-						items: []
-					};
+							param: 'pe',
+							items: []
+						},
+						chb = pt.cmp.dimension.relativePeriod.checkbox;
 
+					pt.store.fixedPeriodSelected.each( function(r) {
+						data.items.push(r.data.id);
+					});
 
+					for (var i = 0; i < chb.length; i++) {
+						if (chb[i].getValue()) {
+							data.items.push(chb[i].paramName);
+						}
+					}
 
-
-
-
-					//var data = {
-						//param: 'in',
-						//items: []
-					//};
-
-					//pt.store.dataSetSelected.each( function(r) {
-						//data.items.push(r.data.id);
-					//});
-
-					//return data.items.length ? data : null;
-
-
-
-					//pt.cmp.dimension.relativePeriod.checkbox
+					return data.items.length ? data : null;
 				},
 				items: [
 					{
