@@ -664,7 +664,7 @@ Ext.onReady( function() {
 			});
 
 			dataSet = Ext.create('Ext.panel.Panel', {
-				title: '<div class="pt-panel-title-data">Data sets</div>', //i18n
+				title: '<div class="pt-panel-title-data">Reporting rates</div>', //i18n
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
@@ -1396,7 +1396,7 @@ Ext.onReady( function() {
 			});
 
 			options = Ext.create('Ext.panel.Panel', {
-				title: '<div class="pt-panel-title-options">Pivot options</div>', //i18n pt.i18n.chart_options
+				title: '<div class="pt-panel-title-options">Options</div>', //i18n pt.i18n.chart_options
 				hideCollapseTool: true,
 				cls: 'pt-accordion-options',
 				items: []
