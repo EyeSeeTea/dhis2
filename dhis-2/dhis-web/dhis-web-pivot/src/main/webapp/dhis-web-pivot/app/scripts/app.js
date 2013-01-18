@@ -1313,6 +1313,13 @@ Ext.onReady( function() {
 				}
 			});
 
+			options = Ext.create('Ext.panel.Panel', {
+				title: '<div class="pt-panel-title-options">Pivot options</div>', //i18n pt.i18n.chart_options
+				hideCollapseTool: true,
+				cls: 'pt-accordion-options',
+				items: []
+			});
+
 			accordion = Ext.create('Ext.panel.Panel', {
 				bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:6px;',
 				layout: 'fit',
@@ -1330,7 +1337,8 @@ Ext.onReady( function() {
 							dataSet,
 							relativePeriod,
 							fixedPeriod,
-							organisationUnit
+							organisationUnit,
+							options
 						]
 					}
 				],
