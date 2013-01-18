@@ -469,7 +469,7 @@ Ext.onReady( function() {
 						valueField: 'id',
 						displayField: 'name',
 						fieldLabel: 'Select group', //i18n pt.i18n.select_group
-						fieldCls: 'pt-combo-label-default',
+						labelStyle: 'padding-left:7px',
 						editable: false,
 						store: {
 							xtype: 'store',
@@ -956,17 +956,17 @@ Ext.onReady( function() {
 								valueField: 'id',
 								displayField: 'name',
 								fieldLabel: 'Select type', //i18n pt.i18n.select_type,
-								fieldCls: 'pt-combo-label-default',
+								labelStyle: 'padding-left:7px',
 								editable: false,
 								queryMode: 'remote',
 								store: pt.store.periodType,
 								periodOffset: 0,
 								listeners: {
 									select: function() {
-										var pt = new PeriodType(),
+										var ptype = new PeriodType(),
 											periodType = this.getValue();
 
-										var periods = pt.get(periodType).generatePeriods({
+										var periods = ptype.get(periodType).generatePeriods({
 											offset: this.periodOffset,
 											filterFuturePeriods: true,
 											reversePeriods: true

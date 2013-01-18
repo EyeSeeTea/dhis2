@@ -201,7 +201,7 @@ PT.core.getUtils = function(pt) {
 		},
 		resizeDimensions: function() {
 			var a = [PT.cmp.dimension.indicator.panel, PT.cmp.dimension.dataelement.panel, PT.cmp.dimension.dataset.panel,
-					PT.cmp.dimension.relativeperiod.panel, PT.cmp.dimension.fixedperiod.panel, PT.cmp.dimension.organisationUnit.panel,
+					PT.cmp.dimension.relativePeriod.panel, PT.cmp.dimension.fixedperiod.panel, PT.cmp.dimension.organisationUnit.panel,
 					PT.cmp.dimension.organisationUnitGroup.panel, PT.cmp.options.panel];
 			for (var i = 0; i < a.length; i++) {
 				if (!a[i].collapsed) {
@@ -314,15 +314,15 @@ PT.core.getUtils = function(pt) {
 
 	util.mask = {
 		showMask: function(cmp, str) {
-			if (PT.mask) {
-				PT.mask.destroy();
+			if (pt.viewport.mask) {
+				pt.viewport.mask.destroy();
 			}
-			PT.mask = new Ext.LoadMask(cmp, {msg: str});
-			PT.mask.show();
+			pt.viewport.mask = new Ext.LoadMask(cmp, {msg: str});
+			pt.viewport.mask.show();
 		},
 		hideMask: function() {
-			if (PT.mask) {
-				PT.mask.hide();
+			if (pt.viewport.mask) {
+				pt.viewport.mask.hide();
 			}
 		}
 	};
@@ -331,7 +331,7 @@ PT.core.getUtils = function(pt) {
 		setRelativePeriods: function(rp) {
 			if (rp) {
 				for (var r in rp) {
-					var cmp = PT.util.getCmp('checkbox[paramName="' + r + '"]');
+					var cmp = pt.util.getCmp('checkbox[paramName="' + r + '"]');
 					if (cmp) {
 						cmp.setValue(rp[r]);
 					}
@@ -342,13 +342,13 @@ PT.core.getUtils = function(pt) {
 			}
 		},
 		setAllFalse: function() {
-			var a = PT.cmp.dimension.relativeperiod.checkbox;
+			var a = pt.cmp.dimension.relativePeriod.checkbox;
 			for (var i = 0; i < a.length; i++) {
 				a[i].setValue(false);
 			}
 		},
 		isAllFalse: function() {
-			var a = PT.cmp.dimension.relativeperiod.checkbox;
+			var a = pt.cmp.dimension.relativePeriod.checkbox;
 			for (var i = 0; i < a.length; i++) {
 				if (a[i].getValue()) {
 					return false;
