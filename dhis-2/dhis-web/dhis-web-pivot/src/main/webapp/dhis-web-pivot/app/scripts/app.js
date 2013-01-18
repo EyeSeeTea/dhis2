@@ -15,7 +15,7 @@ Ext.onReady( function() {
 
 	var pt = PT.core.getInstance();
 
-	PT.pt = pt;
+	PT.instance = pt;
 
 	PT.app.getInits = function(r) {
 		var init = Ext.decode(r.responseText);
@@ -184,6 +184,12 @@ Ext.onReady( function() {
 		return cmp;
 	};
 
+	PT.app.DataLoader = function() {
+		var loader = {};
+
+
+	};
+
 	PT.app.init.onInitialize = function(r) {
 		var createViewport;
 
@@ -240,8 +246,7 @@ Ext.onReady( function() {
 						handler: function() {
 							pt.util.multiselect.selectAll(indicatorAvailable, indicatorSelected);
 						}
-					},
-					' '
+					}
 				],
 				listeners: {
 					afterrender: function() {
@@ -260,7 +265,6 @@ Ext.onReady( function() {
 				ddReorder: true,
 				store: pt.store.indicatorSelected,
 				tbar: [
-					' ',
 					{
 						xtype: 'button',
 						icon: 'images/arrowleftdouble.png',
@@ -296,6 +300,18 @@ Ext.onReady( function() {
 			indicator = Ext.create('Ext.panel.Panel', {
 				title: '<div class="pt-panel-title-data">Indicators</div>', //i18n
 				hideCollapseTool: true,
+				getData: function() {
+					var data = {
+						param: 'in',
+						items: []
+					};
+
+					pt.store.indicatorSelected.each( function(r) {
+						data.items.push(r.data.id);
+					});
+
+					return data.items.length ? data : null;
+				},
 				items: [
 					{
 						xtype: 'combobox',
@@ -413,8 +429,7 @@ Ext.onReady( function() {
 						handler: function() {
 							pt.util.multiselect.selectAll(dataElementAvailable, dataElementSelected);
 						}
-					},
-					' '
+					}
 				],
 				listeners: {
 					afterrender: function() {
@@ -433,7 +448,6 @@ Ext.onReady( function() {
 				ddReorder: true,
 				store: pt.store.dataElementSelected,
 				tbar: [
-					' ',
 					{
 						xtype: 'button',
 						icon: 'images/arrowleftdouble.png',
@@ -469,6 +483,18 @@ Ext.onReady( function() {
 			dataElement = Ext.create('Ext.panel.Panel', {
 				title: '<div class="pt-panel-title-data">Data elements</div>', //i18n
 				hideCollapseTool: true,
+				getData: function() {
+					var data = {
+						param: 'in',
+						items: []
+					};
+
+					pt.store.dataElementSelected.each( function(r) {
+						data.items.push(r.data.id);
+					});
+
+					return data.items.length ? data : null;
+				},
 				items: [
 					{
 						xtype: 'combobox',
@@ -586,8 +612,7 @@ Ext.onReady( function() {
 						handler: function() {
 							pt.util.multiselect.selectAll(dataSetAvailable, dataSetSelected);
 						}
-					},
-					' '
+					}
 				],
 				listeners: {
 					afterrender: function() {
@@ -606,7 +631,6 @@ Ext.onReady( function() {
 				ddReorder: true,
 				store: pt.store.dataSetSelected,
 				tbar: [
-					' ',
 					{
 						xtype: 'button',
 						icon: 'images/arrowleftdouble.png',
@@ -642,6 +666,18 @@ Ext.onReady( function() {
 			dataSet = Ext.create('Ext.panel.Panel', {
 				title: '<div class="pt-panel-title-data">Data sets</div>', //i18n
 				hideCollapseTool: true,
+				getData: function() {
+					var data = {
+						param: 'in',
+						items: []
+					};
+
+					pt.store.dataSetSelected.each( function(r) {
+						data.items.push(r.data.id);
+					});
+
+					return data.items.length ? data : null;
+				},
 				items: [
 					{
 						xtype: 'panel',
@@ -677,9 +713,10 @@ Ext.onReady( function() {
 			});
 
 			relativePeriod = Ext.create('Ext.panel.Panel', {
-				title: '<div class="pt-panel-title-period">Relative periods</div>', //i18n pt.i18n.relative_periods
+				//title: '<div class="pt-panel-title-period">Relative periods</div>', //i18n pt.i18n.relative_periods
 				hideCollapseTool: true,
 				autoScroll: true,
+				bodyStyle: 'border:0 none',
 				items: [
 					{
 						xtype: 'panel',
@@ -864,18 +901,19 @@ Ext.onReady( function() {
 					}
 				],
 				listeners: {
-					added: function() {
-						pt.cmp.dimension.panels.push(this);
-					},
-					expand: function() {
-						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_relativeperiod);
-					}
+					//added: function() {
+						//pt.cmp.dimension.panels.push(this);
+					//},
+					//expand: function() {
+						//pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_relativeperiod);
+					//}
 				}
 			});
 
 			fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 				cls: 'pt-toolbar-multiselect-left',
 				width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+				height: 180,
 				valueField: 'id',
 				displayField: 'name',
 				store: pt.store.fixedPeriodAvailable,
@@ -916,6 +954,7 @@ Ext.onReady( function() {
 			fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
 				cls: 'pt-toolbar-multiselect-right',
 				width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+				height: 180,
 				valueField: 'id',
 				displayField: 'name',
 				ddReorder: false,
@@ -954,9 +993,35 @@ Ext.onReady( function() {
 				}
 			});
 
-			fixedPeriod = Ext.create('Ext.panel.Panel', {
-				title: '<div class="pt-panel-title-period">Fixed periods</div>', //i18n pt.i18n.fixed_periods
+			period = Ext.create('Ext.panel.Panel', {
+				title: '<div class="pt-panel-title-period">Periods</div>', //i18n pt.i18n.fixed_periods
 				hideCollapseTool: true,
+				getData: function() {
+					var data = {
+						param: 'in',
+						items: []
+					};
+
+
+
+
+
+
+					//var data = {
+						//param: 'in',
+						//items: []
+					//};
+
+					//pt.store.dataSetSelected.each( function(r) {
+						//data.items.push(r.data.id);
+					//});
+
+					//return data.items.length ? data : null;
+
+
+
+					//pt.cmp.dimension.relativePeriod.checkbox
+				},
 				items: [
 					{
 						xtype: 'panel',
@@ -1024,24 +1089,26 @@ Ext.onReady( function() {
 					{
 						xtype: 'panel',
 						layout: 'column',
-						bodyStyle: 'border-style:none',
+						bodyStyle: 'border-style:none; padding-bottom:10px',
 						items: [
 							fixedPeriodAvailable,
 							fixedPeriodSelected
 						]
-					}
+					},
+					relativePeriod
 				],
 				listeners: {
 					added: function() {
 						pt.cmp.dimension.panels.push(this);
 					},
 					expand: function() {
-						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_fixedperiod);
-						pt.util.multiselect.setHeight(
-							[fixedPeriodAvailable, fixedPeriodSelected],
-							this,
-							pt.conf.layout.west_fill_accordion_fixedperiod
-						);
+						pt.util.dimension.panel.setHeight(600);
+						//pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_fixedperiod + pt.conf.layout.west_maxheight_accordion_relativeperiod);
+						//pt.util.multiselect.setHeight(
+							//[fixedPeriodAvailable, fixedPeriodSelected],
+							//this,
+							//pt.conf.layout.west_fill_accordion_fixedperiod
+						//);
 					}
 				}
 			});
@@ -1336,7 +1403,7 @@ Ext.onReady( function() {
 			});
 
 			accordion = Ext.create('Ext.panel.Panel', {
-				bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:6px;',
+				bodyStyle: 'border-style:none; padding:6px;',
 				layout: 'fit',
 				items: [
 					{
@@ -1350,8 +1417,7 @@ Ext.onReady( function() {
 							indicator,
 							dataElement,
 							dataSet,
-							relativePeriod,
-							fixedPeriod,
+							period,
 							organisationUnit,
 							options
 						]
