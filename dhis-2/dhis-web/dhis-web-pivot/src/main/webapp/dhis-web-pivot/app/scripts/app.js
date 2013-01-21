@@ -187,22 +187,25 @@ Ext.onReady( function() {
 	PT.app.DataLoader = function() {
 		var loader = {},
 			panels = pt.cmp.dimension.panels,
-			data = {};
+			data = {},
+			getData,
+			getRequest;
 
-		for (var i = 0, dimData; i < panels.length; i++) {
-			dimData = panels[i].getData();
+		getData = function() {
+			for (var i = 0, dimData; i < panels.length; i++) {
+				dimData = panels[i].getData();
 
-			if (dimData) {
-				data[dimData.param] = dimData.items;
+				if (dimData) {
+					data[dimData.param] = dimData.items;
+				}
 			}
-		}
+		}();
 
 		// validate
 
-		
-			
-
-
+		getRequest = function() {
+			console.log(data);
+		}();
 	};
 
 	PT.app.init.onInitialize = function(r) {
@@ -321,7 +324,7 @@ Ext.onReady( function() {
 						items: []
 					};
 
-					pt.store.dataElementSelected.each( function(r) {
+					pt.store.indicatorSelected.each( function(r) {
 						data.items.push(r.data.id);
 					});
 
@@ -1123,8 +1126,8 @@ Ext.onReady( function() {
 							items: []
 						};
 
-					for (var i = 0; i < record.length; i++) {
-						data.items.push(record[i].data.id);
+					for (var i = 0; i < records.length; i++) {
+						data.items.push(records[i].data.id);
 					}
 
 					return data.items.length ? data : null;
@@ -1465,7 +1468,17 @@ Ext.onReady( function() {
 				region: 'center',
 				items: [
 					{
-						html: 'Center'
+						html: 'Center',
+						tbar: {
+							items: [
+								{
+									text: 'Test',
+									handler: function() {
+										var loader = PT.app.DataLoader();
+									}
+								}
+							]
+						}
 					}
 				]
 			});
