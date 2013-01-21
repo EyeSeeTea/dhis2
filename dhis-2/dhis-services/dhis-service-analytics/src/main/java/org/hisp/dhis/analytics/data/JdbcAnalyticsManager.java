@@ -29,6 +29,7 @@ package org.hisp.dhis.analytics.data;
 
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_AGGREGATION;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_DISAGGREGATION;
+import static org.hisp.dhis.analytics.AggregationType.COUNT_AGGREGATION;
 import static org.hisp.dhis.analytics.DataQueryParams.*;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
@@ -78,24 +79,35 @@ public class JdbcAnalyticsManager
     // -------------------------------------------------------------------------
     // Implementation
     // -------------------------------------------------------------------------
-
+    
     @Async
     public Future<Map<String, Double>> getAggregatedDataValues( DataQueryParams params )
     {
         ListMap<IdentifiableObject, IdentifiableObject> dataPeriodAggregationPeriodMap = params.getDataPeriodAggregationPeriodMap();
         params.replaceAggregationPeriodsWithDataPeriods( dataPeriodAggregationPeriodMap );
         
-        List<String> dimensions = params.getDimensionNames();
-        List<String> queryDimensions = params.getDimensionNamesIgnoreCategories();
+        List<String> selectDimensions = params.getSelectDimensionNames();
+        List<String> queryDimensions = params.getQueryDimensionNames();
         Map<String, List<IdentifiableObject>> dimensionMap = params.getDimensionMap();
         
         SqlHelper sqlHelper = new SqlHelper();
         
-        String sql = "select " + getCommaDelimitedString( dimensions ) + ", ";
+        String sql = "select " + getCommaDelimitedString( selectDimensions ) + ", ";
         
         int days = PeriodType.getPeriodTypeByName( params.getPeriodType() ).getFrequencyOrder();
         
-        sql += params.isAggregationType( AVERAGE_AGGREGATION ) ? "sum(daysxvalue) / " + days : "sum(value)";
+        if ( params.isAggregationType( AVERAGE_AGGREGATION ) )
+        {
+            sql += "sum(daysxvalue) / " + days;
+        }
+        else if ( params.isAggregationType( COUNT_AGGREGATION ) )
+        {
+            sql += "count(value)";
+        }
+        else
+        {
+            sql += "sum(value)";
+        }
         
         sql += " as value from " + params.getTableName() + " ";
         
@@ -109,7 +121,7 @@ public class JdbcAnalyticsManager
             sql += sqlHelper.whereAnd() + " " + filter + " in (" + getQuotedCommaDelimitedString( getUids( params.getFilters().get( filter ) ) ) + " ) ";
         }
         
-        sql += "group by " + getCommaDelimitedString( dimensions );
+        sql += "group by " + getCommaDelimitedString( selectDimensions );
     
         log.info( sql );
         
@@ -121,7 +133,7 @@ public class JdbcAnalyticsManager
         {
             StringBuilder key = new StringBuilder();
             
-            for ( String dim : dimensions )
+            for ( String dim : selectDimensions )
             {
                 key.append( rowSet.getString( dim ) + DIMENSION_SEP );
             }

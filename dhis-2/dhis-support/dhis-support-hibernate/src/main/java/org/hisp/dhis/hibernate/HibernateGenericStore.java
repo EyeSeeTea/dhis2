@@ -30,17 +30,18 @@ package org.hisp.dhis.hibernate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.common.AccessUtils;
+import org.hisp.dhis.common.AccessStringHelper;
 import org.hisp.dhis.common.AuditLogUtil;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.GenericNameableObjectStore;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.SharingUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -215,6 +216,30 @@ public class HibernateGenericStore<T>
             throw new AccessDeniedException( "You do not have write access to object" );
         }
 
+        if ( SharingUtils.isSupported( clazz ) )
+        {
+            BaseIdentifiableObject identifiableObject = (BaseIdentifiableObject) object;
+
+            if ( identifiableObject.getUser() == null )
+            {
+                identifiableObject.setUser( currentUserService.getCurrentUser() );
+            }
+
+            if ( SharingUtils.canCreatePublic( currentUserService.getCurrentUser(), identifiableObject ) )
+            {
+                identifiableObject.setPublicAccess( AccessStringHelper.newInstance().enable( AccessStringHelper.Permission.READ ).build() );
+            }
+            else if ( SharingUtils.canCreatePrivate( currentUserService.getCurrentUser(), identifiableObject ) )
+            {
+                identifiableObject.setPublicAccess( AccessStringHelper.newInstance().build() );
+            }
+            else
+            {
+                AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_CREATE_DENIED );
+                throw new AccessDeniedException( "You are not allowed to create public or private objects of this kind" );
+            }
+        }
+
         AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_CREATE );
         return (Integer) sessionFactory.getCurrentSession().save( object );
     }
@@ -349,7 +374,7 @@ public class HibernateGenericStore<T>
     private Query getQueryAllACL()
     {
         String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.publicAccess like 'r%' or c.user=:user"
+            + " where c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')";
 
@@ -376,7 +401,7 @@ public class HibernateGenericStore<T>
     private Query getQueryAllLikeNameACL( String name )
     {
         String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where lower(name) like :name and ( c.publicAccess like 'r%' or c.user=:user"
+            + " where lower(name) like :name and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
             + " ) order by c.name";
@@ -408,7 +433,7 @@ public class HibernateGenericStore<T>
     private Query getQueryAllOrderedNameACL()
     {
         String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.publicAccess like 'r%' or c.user=:user"
+            + " where c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
             + " order by c.name";
@@ -451,7 +476,7 @@ public class HibernateGenericStore<T>
     private Query getQueryAllOrderedLastUpdatedACL()
     {
         String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.publicAccess like 'r%' or c.user=:user"
+            + " where c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
             + " order by c.lastUpdated desc";
@@ -482,7 +507,7 @@ public class HibernateGenericStore<T>
     private Query getQueryAllLikeNameOrderedNameACL( String name )
     {
         String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where lower(c.name) like :name and ( c.publicAccess like 'r%' or c.user=:user"
+            + " where lower(c.name) like :name and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
             + " ) order by c.name";
@@ -513,7 +538,7 @@ public class HibernateGenericStore<T>
     private Query getQueryCountACL()
     {
         String hql = "select count(distinct c) from " + clazz.getName() + " c"
-            + " where c.publicAccess like 'r%' or c.user=:user"
+            + " where c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')";
 
@@ -539,7 +564,7 @@ public class HibernateGenericStore<T>
     private Query getQueryCountLikeNameACL( String name )
     {
         String hql = "select count(distinct c) from " + clazz.getName() + " c"
-            + " where lower(name) like :name and (c.publicAccess like 'r%' or c.user=:user"
+            + " where lower(name) like :name and (c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
             + " )";
@@ -570,7 +595,7 @@ public class HibernateGenericStore<T>
     private Query getQueryCountGeLastUpdatedACL( Date lastUpdated )
     {
         String hql = "select count(distinct c) from " + clazz.getName() + " c"
-            + " where c.lastUpdated >= :lastUpdated and (c.publicAccess like 'r%' or c.user=:user"
+            + " where c.lastUpdated >= :lastUpdated and (c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
             + " )";
@@ -602,7 +627,7 @@ public class HibernateGenericStore<T>
     private Query getQueryAllGeLastUpdatedACL( Date lastUpdated )
     {
         String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.lastUpdated >= :lastUpdated and ( c.publicAccess like 'r%' or c.user=:user"
+            + " where c.lastUpdated >= :lastUpdated and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
             + " )";
@@ -634,7 +659,7 @@ public class HibernateGenericStore<T>
     private Query getQueryAllGeCreatedACL( Date created )
     {
         String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.created >= :created and ( c.publicAccess like 'r%' or c.user=:user"
+            + " where c.created >= :created and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
             + " ) order by c.name";
@@ -666,7 +691,7 @@ public class HibernateGenericStore<T>
     private Query getQueryAllGeLastUpdatedOrderedNameACL( Date lastUpdated )
     {
         String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.lastUpdated >= :lastUpdated and ( c.publicAccess like 'r%' or c.user=:user"
+            + " where c.lastUpdated >= :lastUpdated and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
             + " or exists "
             + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
             + " ) order by c.name";
@@ -780,23 +805,8 @@ public class HibernateGenericStore<T>
 
     private boolean sharingEnabled()
     {
-        return hasShareProperties()
-            && !(currentUserService.getCurrentUser() == null || currentUserService.getCurrentUser().getUserCredentials().getAllAuthorities().contains( "ALL" ));
-    }
-
-    private boolean hasShareProperties()
-    {
-        try
-        {
-            // for now we need to have this test, since not all idObjectClasses are converted
-            sessionFactory.getClassMetadata( clazz ).getPropertyType( "publicAccess" );
-        }
-        catch ( HibernateException ignored )
-        {
-            return false;
-        }
-
-        return true;
+        return SharingUtils.isSupported( clazz ) && !(currentUserService.getCurrentUser() == null ||
+            currentUserService.getCurrentUser().getUserCredentials().getAllAuthorities().contains( SharingUtils.SHARING_OVERRIDE_AUTHORITY ));
     }
 
     private boolean isReadAllowed( T object )
@@ -805,9 +815,9 @@ public class HibernateGenericStore<T>
         {
             IdentifiableObject idObject = (IdentifiableObject) object;
 
-            if ( hasShareProperties() )
+            if ( sharingEnabled() )
             {
-                return AccessUtils.canRead( currentUserService.getCurrentUser(), idObject );
+                return SharingUtils.canRead( currentUserService.getCurrentUser(), idObject );
             }
         }
 
@@ -820,9 +830,9 @@ public class HibernateGenericStore<T>
         {
             IdentifiableObject idObject = (IdentifiableObject) object;
 
-            if ( hasShareProperties() )
+            if ( sharingEnabled() )
             {
-                return AccessUtils.canWrite( currentUserService.getCurrentUser(), idObject );
+                return SharingUtils.canWrite( currentUserService.getCurrentUser(), idObject );
             }
         }
 
@@ -835,9 +845,9 @@ public class HibernateGenericStore<T>
         {
             IdentifiableObject idObject = (IdentifiableObject) object;
 
-            if ( hasShareProperties() )
+            if ( SharingUtils.isSupported( clazz ) )
             {
-                return AccessUtils.canUpdate( currentUserService.getCurrentUser(), idObject );
+                return SharingUtils.canUpdate( currentUserService.getCurrentUser(), idObject );
             }
         }
 
@@ -850,9 +860,9 @@ public class HibernateGenericStore<T>
         {
             IdentifiableObject idObject = (IdentifiableObject) object;
 
-            if ( hasShareProperties() )
+            if ( SharingUtils.isSupported( clazz ) )
             {
-                return AccessUtils.canDelete( currentUserService.getCurrentUser(), idObject );
+                return SharingUtils.canDelete( currentUserService.getCurrentUser(), idObject );
             }
         }
 

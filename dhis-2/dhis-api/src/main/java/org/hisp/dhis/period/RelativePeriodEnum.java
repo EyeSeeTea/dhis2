@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.webdomain.sharing;
+package org.hisp.dhis.period;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,40 +27,45 @@ package org.hisp.dhis.api.webdomain.sharing;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-/**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
-public class Sharing
+public enum RelativePeriodEnum
 {
-    @JsonProperty
-    private Meta meta = new Meta();
-
-    @JsonProperty
-    private SharingObject object = new SharingObject();
-
-    public Sharing()
+    LAST_MONTH,
+    LAST_BIMONTH,
+    LAST_QUARTER,
+    LAST_SIX_MONTH,
+    MONTHS_THIS_YEAR,
+    QUARTERS_THIS_YEAR,
+    THIS_YEAR,
+    MONTHS_LAST_YEAR,
+    QUARTERS_LAST_YEAR,
+    LAST_YEAR,
+    LAST_5_YEARS,
+    LAST_12_MONTHS,
+    LAST_3_MONTHS,
+    LAST_6_BIMONTHS,
+    LAST_4_QUARTERS,
+    LAST_2_SIXMONTHS,
+    THIS_FINANCIAL_YEAR,
+    LAST_FINANCIAL_YEAR,
+    LAST_5_FINANCIAL_YEARS,
+    LAST_4_WEEKS,
+    LAST_12_WEEKS,
+    LAST_52_WEEKS;
+    
+    public static Set<String> OPTIONS = new HashSet<String>() { {
+        addAll( Arrays.asList( LAST_MONTH.toString(), LAST_BIMONTH.toString(), LAST_QUARTER.toString(), LAST_SIX_MONTH.toString(),
+            MONTHS_THIS_YEAR.toString(), QUARTERS_THIS_YEAR.toString(), THIS_YEAR.toString(), MONTHS_LAST_YEAR.toString(), QUARTERS_LAST_YEAR.toString(),
+            LAST_YEAR.toString(), LAST_5_YEARS.toString(), LAST_12_MONTHS.toString(), LAST_3_MONTHS.toString(), LAST_6_BIMONTHS.toString(), 
+            LAST_4_QUARTERS.toString(), LAST_2_SIXMONTHS.toString(), THIS_FINANCIAL_YEAR.toString(), LAST_FINANCIAL_YEAR.toString(), 
+            LAST_5_FINANCIAL_YEARS.toString(), LAST_4_WEEKS.toString(), LAST_12_WEEKS.toString(), LAST_52_WEEKS.toString() ) );
+    } };
+    
+    public static boolean contains( String relativePeriod )
     {
-    }
-
-    public Meta getMeta()
-    {
-        return meta;
-    }
-
-    public void setMeta( Meta meta )
-    {
-        this.meta = meta;
-    }
-
-    public SharingObject getObject()
-    {
-        return object;
-    }
-
-    public void setObject( SharingObject object )
-    {
-        this.object = object;
+        return OPTIONS.contains( relativePeriod );
     }
 }

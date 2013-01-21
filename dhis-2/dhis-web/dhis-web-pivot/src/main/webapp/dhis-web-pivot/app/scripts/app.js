@@ -185,7 +185,22 @@ Ext.onReady( function() {
 	};
 
 	PT.app.DataLoader = function() {
-		var loader = {};
+		var loader = {},
+			panels = pt.cmp.dimension.panels,
+			data = {};
+
+		for (var i = 0, dimData; i < panels.length; i++) {
+			dimData = panels[i].getData();
+
+			if (dimData) {
+				data[dimData.param] = dimData.items;
+			}
+		}
+
+		// validate
+
+		
+			
 
 
 	};
@@ -306,7 +321,7 @@ Ext.onReady( function() {
 						items: []
 					};
 
-					pt.store.indicatorSelected.each( function(r) {
+					pt.store.dataElementSelected.each( function(r) {
 						data.items.push(r.data.id);
 					});
 
@@ -1101,6 +1116,19 @@ Ext.onReady( function() {
 				title: '<div class="pt-panel-title-organisationunit">Organisation units</div>', //i18n pt.i18n.organisation_units
 				hideCollapseTool: true,
 				collapsed: false,
+				getData: function() {
+					var records = pt.cmp.dimension.organisationUnit.treepanel.getSelectionModel().getSelection(),
+						data = {
+							param: 'ou',
+							items: []
+						};
+
+					for (var i = 0; i < record.length; i++) {
+						data.items.push(record[i].data.id);
+					}
+
+					return data.items.length ? data : null;
+				},					
 				items: [
 					{
 						layout: 'column',

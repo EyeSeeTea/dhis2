@@ -34,9 +34,8 @@ import org.hisp.dhis.api.webdomain.sharing.SharingUserGroups;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.document.Document;
+import org.hisp.dhis.common.SharingUtils;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
-import org.hisp.dhis.report.Report;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.UserGroup;
@@ -53,26 +52,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = SharingController.RESOURCE_PATH, method = RequestMethod.GET )
+@RequestMapping(value = SharingController.RESOURCE_PATH, method = RequestMethod.GET)
 public class SharingController
 {
     public static final String RESOURCE_PATH = "/sharing";
-
-    public static final Map<String, Class<? extends IdentifiableObject>> TYPE_MAP = new HashMap<String, Class<? extends IdentifiableObject>>();
-
-    static
-    {
-        TYPE_MAP.put( "document", Document.class );
-        TYPE_MAP.put( "report", Report.class );
-    }
 
     @Autowired
     private CurrentUserService currentUserService;
@@ -89,16 +78,16 @@ public class SharingController
     @Autowired
     private UserGroupAccessService userGroupAccessService;
 
-    @RequestMapping( value = "", produces = { "application/json", "text/*" } )
+    @RequestMapping(value = "", produces = { "application/json", "text/*" })
     public void getSharing( @RequestParam String type, @RequestParam String id, HttpServletResponse response ) throws IOException
     {
-        if ( !TYPE_MAP.containsKey( type ) )
+        if ( !SharingUtils.isSupported( type ) )
         {
             ContextUtils.notFoundResponse( response, "Type " + type + " is not supported." );
             return;
         }
 
-        IdentifiableObject object = manager.get( TYPE_MAP.get( type ), id );
+        IdentifiableObject object = manager.get( SharingUtils.classForType( type ), id );
 
         if ( object == null )
         {
@@ -113,8 +102,9 @@ public class SharingController
 
         Sharing sharing = new Sharing();
 
+        sharing.getMeta().setAllowPublicAccess( SharingUtils.canCreatePublic( currentUserService.getCurrentUser(), object ) );
+
         sharing.getObject().setId( object.getUid() );
-        sharing.getObject().setClazz( TYPE_MAP.get( type ).getName() );
         sharing.getObject().setName( object.getDisplayName() );
         sharing.getObject().setPublicAccess( object.getPublicAccess() );
 
@@ -137,10 +127,10 @@ public class SharingController
         JacksonUtils.toJson( response.getOutputStream(), sharing );
     }
 
-    @RequestMapping( value = "", method = RequestMethod.POST, consumes = "application/json" )
+    @RequestMapping(value = "", method = RequestMethod.POST, consumes = "application/json")
     public void setSharing( @RequestParam String type, @RequestParam String id, HttpServletResponse response, HttpServletRequest request ) throws IOException
     {
-        BaseIdentifiableObject object = (BaseIdentifiableObject) manager.get( TYPE_MAP.get( type ), id );
+        BaseIdentifiableObject object = (BaseIdentifiableObject) manager.get( SharingUtils.classForType( type ), id );
 
         if ( object == null )
         {
@@ -155,7 +145,12 @@ public class SharingController
 
         Sharing sharing = JacksonUtils.fromJson( request.getInputStream(), Sharing.class );
 
-        object.setPublicAccess( sharing.getObject().getPublicAccess() );
+        // just ignore publicAccess if user is not allowed to make objects public, this should be hidden
+        // in the UI.
+        if ( SharingUtils.canCreatePublic( currentUserService.getCurrentUser(), object ) )
+        {
+            object.setPublicAccess( sharing.getObject().getPublicAccess() );
+        }
 
         if ( object.getUser() == null )
         {
