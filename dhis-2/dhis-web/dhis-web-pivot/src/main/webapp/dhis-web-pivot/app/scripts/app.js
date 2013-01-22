@@ -43,6 +43,54 @@ Ext.onReady( function() {
 			}
 		};
 
+		util.pivot.getSettings = function() {
+			var data = {},
+				extended = {
+					col: {},
+					row: {},
+					filter: {}
+				},
+				settings = {
+					col: ['de'],
+					row: ['pe'],
+					filter: ['ou'],
+					categories: false
+				};
+
+			getData = function() {
+				var panels = pt.cmp.dimension.panels;
+					
+				for (var i = 0, dimData; i < panels.length; i++) {
+					dimData = panels[i].getData();
+
+					if (dimData) {
+						data[dimData.param] = dimData.items;
+					}
+				}
+			}();
+
+			extendSettings = function() {
+				for (var i = 0, dim; i < settings.col.length; i++) {
+					dim = settings.col[i];
+					extended.col[dim] = data[dim];
+				}
+
+				for (var i = 0, dim; i < settings.row.length; i++) {
+					dim = settings.row[i];
+					extended.row[dim] = data[dim];
+				}
+
+				for (var i = 0, dim; i < settings.filter.length; i++) {
+					dim = settings.filter[i];
+					extended.filter[dim] = data[dim];
+				}
+
+				extended.categories = settings.categories;
+			}();
+
+			return extended;
+		};
+
 		return util;
 	};
 
@@ -182,30 +230,6 @@ Ext.onReady( function() {
 		cmp.favorite = {};
 
 		return cmp;
-	};
-
-	PT.app.DataLoader = function() {
-		var loader = {},
-			panels = pt.cmp.dimension.panels,
-			data = {},
-			getData,
-			getRequest;
-
-		getData = function() {
-			for (var i = 0, dimData; i < panels.length; i++) {
-				dimData = panels[i].getData();
-
-				if (dimData) {
-					data[dimData.param] = dimData.items;
-				}
-			}
-		}();
-
-		// validate
-
-		getRequest = function() {
-			console.log(data);
-		}();
 	};
 
 	PT.app.init.onInitialize = function(r) {
@@ -1466,21 +1490,22 @@ Ext.onReady( function() {
 
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				region: 'center',
-				items: [
-					{
-						html: 'Center',
-						tbar: {
-							items: [
-								{
-									text: 'Test',
-									handler: function() {
-										var loader = PT.app.DataLoader();
-									}
-								}
-							]
+				items: [],
+				tbar: {
+                    defaults: {
+                        height: 26
+                    },
+					items: [
+						{
+							text: '<b>Update</b>',
+							handler: function() {
+								pt.settings = pt.util.pivot.getSettings();
+
+								pt.util.pivot.getTable(pt, centerRegion);
+							}
 						}
-					}
-				]
+					]
+				}
 			});
 
 			viewport = Ext.create('Ext.container.Viewport', {

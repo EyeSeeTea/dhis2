@@ -359,8 +359,10 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.pivot = {
-		getPivotTable: function(pt) {
-			var extendSettings,
+		getTable: function(pt, panel) {
+			var getParams,
+				getSettings,
+				mergeSettings,
 				extendResponse,
 				extendDims,
 				getDims,
@@ -369,21 +371,51 @@ PT.core.getUtils = function(pt) {
 				getColItems,
 				getRowItems,
 				createTableArray,
-				initialize;
-
-			extendSettings = function(pt) {
+				initialize;				
+			
+			getMergedSettings = function() {
 				var settings = pt.settings,
 					col = settings.col,
-					row = settings.row;
+					row = settings.row,
+					dimensions;
 
-				settings.dimensions = Ext.clone(col);
-				Ext.apply(settings.dimensions, row);
+				dimensions = Ext.clone(col);
+				Ext.apply(dimensions, row);
+
+				return dimensions;
 			};
 
-			extendResponse = function(pt) {
+			getParams = function(dims) {
+				var params = '?';
+console.log(dims);				
+				for (var key in dims) {
+					if (dims.hasOwnProperty(key)) {
+						params += 'dimension=' + key + ':' + dims[key].join(',') + '&';
+					}
+				}
+
+				params = params.substring(0, params.length-1);
+
+				params += '&filter=ou:' + pt.init.rootNodes[0].id;
+				params += '&categories=false';
+
+				return params;
+			};
+
+			//getSettings = function() {
+				
+							//col: {
+								//de: ['fbfJHSPpUQD', 'cYeuwXTCPkU', 'Jtf34kNZhzP', 'hfdmMSPBgLG']
+							//},
+							//row: {
+								//'J5jldMd8OHv': ['CXw2yu5fodb', 'tDZVQ1WtwpA'],
+								//pe: ['201201', '201202', '201203', '201204']
+							//}
+						//};
+
+			extendResponse = function(dimensions) {
 				var response = pt.response,
 					settings = pt.settings,
-					dimensions = settings.dimensions,
 					headers = response.headers,
 					header,
 					rows = response.rows,
@@ -547,7 +579,7 @@ PT.core.getUtils = function(pt) {
 				};
 			};
 
-			getDims = function(pt) {
+			getDims = function() {
 				var response = pt.response,
 					settings = pt.settings,
 					col = settings.col,
@@ -613,7 +645,7 @@ PT.core.getUtils = function(pt) {
 				rows.items.allObjects = allObjects;
 			};
 
-			getEmptyItem = function(pt) {
+			getEmptyItem = function() {
 				return {
 					colspan: pt.config.rows.dims,
 					rowspan: pt.config.cols.dims,
@@ -621,7 +653,7 @@ PT.core.getUtils = function(pt) {
 				};
 			};
 
-			getColItems = function(pt) {
+			getColItems = function() {
 				var response = pt.response,
 					cols = pt.config.cols,
 					colItems = [];
@@ -651,7 +683,7 @@ PT.core.getUtils = function(pt) {
 				return colItems;
 			};
 
-			getRowItems = function(pt) {
+			getRowItems = function() {
 				var response = pt.response,
 					rows = pt.config.rows,
 					cols = pt.config.cols,
@@ -785,7 +817,7 @@ PT.core.getUtils = function(pt) {
 				return dimHtmlItems;
 			};
 
-			createTableArray = function(pt) {
+			createTableArray = function() {
 				var rowItems = [],
 					panel = Ext.create('Ext.panel.Panel', {
 						renderTo: Ext.get('pivottable'),
@@ -802,34 +834,20 @@ PT.core.getUtils = function(pt) {
 			};
 
 			initialize = function() {
-
-				var params = '?&dimension=J5jldMd8OHv:CXw2yu5fodb,tDZVQ1WtwpA&dimension=de:fbfJHSPpUQD,cYeuwXTCPkU,Jtf34kNZhzP,hfdmMSPBgLG&dimension=pe:201201,201202,201203,201204';
-
+				var dims = getMergedSettings(),
+					params = getParams(dims);
+				
 				Ext.Ajax.request({
 					method: 'GET',
 					url: 'http://localhost:8080/api/analytics' + params,
 					headers: {'Content-Type': 'application/json'},
-					params: {
-						filter: 'ou:ImspTQPwCqd',
-						categories: false
-					},
+					disableCaching: false,
 					success: function(r) {
-						pt.response = Ext.decode(r.responseText);
+						pt.response = r;
 
-						pt.settings = {
-							col: {
-								de: ['fbfJHSPpUQD', 'cYeuwXTCPkU', 'Jtf34kNZhzP', 'hfdmMSPBgLG']
-							},
-							row: {
-								'J5jldMd8OHv': ['CXw2yu5fodb', 'tDZVQ1WtwpA'],
-								pe: ['201201', '201202', '201203', '201204']
-							}
-						};
+						extendResponse(dims);
 
-						extendSettings(pt);
-						extendResponse(pt);
-
-						pt.config = getDims(pt);
+						pt.config = getDims();
 						console.log(pt);
 
 						extendRowDims(pt.config.rows);
