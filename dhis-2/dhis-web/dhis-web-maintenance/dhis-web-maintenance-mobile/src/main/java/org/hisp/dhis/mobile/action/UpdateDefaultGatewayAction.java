@@ -28,8 +28,8 @@ package org.hisp.dhis.mobile.action;
  */
 
 import org.hisp.dhis.sms.SmsConfigurationManager;
-import org.hisp.dhis.sms.config.SMPPGatewayConfig;
 import org.hisp.dhis.sms.config.SmsConfiguration;
+import org.hisp.dhis.sms.config.SmsGatewayConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -39,7 +39,7 @@ import com.opensymphony.xwork2.Action;
  * @version $Id$
  */
 
-public class UpdateSMPPGateWayConfigAction
+public class UpdateDefaultGatewayAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -50,49 +50,14 @@ public class UpdateSMPPGateWayConfigAction
     private SmsConfigurationManager smsConfigurationManager;
 
     // -------------------------------------------------------------------------
-    // Input
+    // Output
     // -------------------------------------------------------------------------
 
-    private String name;
+    private Integer index;
 
-    public void setName( String name )
+    public void setIndex( Integer index )
     {
-        this.name = name;
-    }
-
-    private String password;
-
-    public void setPassword( String password )
-    {
-        this.password = password;
-    }
-
-    private String username;
-
-    public void setUsername( String username )
-    {
-        this.username = username;
-    }
-
-    private String gatewayType;
-
-    public void setGatewayType( String gatewayType )
-    {
-        this.gatewayType = gatewayType;
-    }
-
-    private int port;
-
-    public void setPort( int port )
-    {
-        this.port = port;
-    }
-
-    private String address;
-
-    public void setAddress( String address )
-    {
-        this.address = address;
+        this.index = index;
     }
 
     // -------------------------------------------------------------------------
@@ -102,48 +67,29 @@ public class UpdateSMPPGateWayConfigAction
     public String execute()
         throws Exception
     {
-        if ( gatewayType != null && gatewayType.equals( "smpp_gw" ) )
+        SmsConfiguration smsConfig = smsConfigurationManager.getSmsConfiguration();
+
+        SmsGatewayConfig defaultGateway = smsConfig.getGateways().get( index );
+
+        if ( defaultGateway != null )
         {
-            SmsConfiguration config = smsConfigurationManager.getSmsConfiguration();
+            int i = 0;
 
-            if ( config != null )
+            for ( SmsGatewayConfig gw : smsConfig.getGateways() )
             {
-                SMPPGatewayConfig gatewayConfig = (SMPPGatewayConfig) smsConfigurationManager
-                    .checkInstanceOfGateway( SMPPGatewayConfig.class );
-
-                int index = -1;
-
-                if ( gatewayConfig == null )
+                if ( index == i )
                 {
-                    gatewayConfig = new SMPPGatewayConfig();
+                    gw.setDefault( true );
                 }
                 else
                 {
-                    index = config.getGateways().indexOf( gatewayConfig );
+                    gw.setDefault( false );
                 }
 
-                gatewayConfig.setName( name );
-                gatewayConfig.setPassword( password );
-                gatewayConfig.setUsername( username );
-                gatewayConfig.setAddress( address );
-                gatewayConfig.setPort( port );
-
-                if ( config.getGateways() == null || config.getGateways().isEmpty() )
-                {
-                    gatewayConfig.setDefault( true );
-                }
-
-                if ( index >= 0 )
-                {
-                    config.getGateways().set( index, gatewayConfig );
-                }
-                else
-                {
-                    config.getGateways().add( gatewayConfig );
-                }
-
-                smsConfigurationManager.updateSmsConfiguration( config );
+                smsConfig.getGateways().set( i++, gw );
             }
+
+            smsConfigurationManager.updateSmsConfiguration( smsConfig );
         }
 
         return SUCCESS;
