@@ -27,6 +27,7 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
@@ -34,6 +35,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroupAccess;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -63,6 +65,10 @@ public class SharingUtils
         SUPPORTED_TYPES.put( "reportTable", ReportTable.class );
         PUBLIC_AUTHORITIES.put( ReportTable.class, "F_REPORTTABLE_PUBLIC_ADD" );
         PRIVATE_AUTHORITIES.put( ReportTable.class, "F_REPORTTABLE_PRIVATE_ADD" );
+
+        SUPPORTED_TYPES.put( "dataSet", DataSet.class );
+        PUBLIC_AUTHORITIES.put( DataSet.class, "F_DATASET_PUBLIC_ADD" );
+        PRIVATE_AUTHORITIES.put( DataSet.class, "F_DATASET_PRIVATE_ADD" );
     }
 
     public static boolean isSupported( String type )
@@ -97,7 +103,7 @@ public class SharingUtils
      */
     public static boolean canCreatePublic( User user, IdentifiableObject object )
     {
-        Set<String> authorities = user.getUserCredentials().getAllAuthorities();
+        Set<String> authorities = user != null ? user.getUserCredentials().getAllAuthorities() : new HashSet<String>();
         return authorities.contains( SHARING_OVERRIDE_AUTHORITY ) || authorities.contains( PUBLIC_AUTHORITIES.get( object.getClass() ) );
     }
 
@@ -113,7 +119,7 @@ public class SharingUtils
      */
     public static boolean canCreatePrivate( User user, IdentifiableObject object )
     {
-        Set<String> authorities = user.getUserCredentials().getAllAuthorities();
+        Set<String> authorities = user != null ? user.getUserCredentials().getAllAuthorities() : new HashSet<String>();
         return authorities.contains( SHARING_OVERRIDE_AUTHORITY ) || authorities.contains( PRIVATE_AUTHORITIES.get( object.getClass() ) );
     }
 

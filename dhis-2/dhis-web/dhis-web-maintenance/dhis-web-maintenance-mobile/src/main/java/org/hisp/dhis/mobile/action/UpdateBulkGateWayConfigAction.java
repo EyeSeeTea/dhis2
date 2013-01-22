@@ -73,9 +73,9 @@ public class UpdateBulkGateWayConfigAction
     {
         this.username = username;
     }
-    
+
     private String region;
-    
+
     public String getRegion()
     {
         return region;
@@ -124,7 +124,12 @@ public class UpdateBulkGateWayConfigAction
                 gatewayConfig.setPassword( password );
                 gatewayConfig.setUsername( username );
                 gatewayConfig.setRegion( region );
-                
+
+                if ( config.getGateways() == null || config.getGateways().isEmpty() )
+                {
+                    gatewayConfig.setDefault( true );
+                }
+
                 if ( index >= 0 )
                 {
                     config.getGateways().set( index, gatewayConfig );

@@ -359,7 +359,7 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.pivot = {
-		getTable: function(pt, panel) {
+		getTable: function(pt, container) {
 			var getParams,
 				getSettings,
 				mergeSettings,
@@ -387,7 +387,7 @@ PT.core.getUtils = function(pt) {
 
 			getParams = function(dims) {
 				var params = '?';
-console.log(dims);				
+				
 				for (var key in dims) {
 					if (dims.hasOwnProperty(key)) {
 						params += 'dimension=' + key + ':' + dims[key].join(',') + '&';
@@ -817,29 +817,32 @@ console.log(dims);
 				return dimHtmlItems;
 			};
 
-			createTableArray = function() {
-				var rowItems = [],
-					panel = Ext.create('Ext.panel.Panel', {
-						renderTo: Ext.get('pivottable'),
-						layout: {
-							type: 'table',
-							columns: pt.config.cols.size + pt.config.rows.dims + 1
-						},
-						defaults: {
-							baseCls: 'td'
-						}
-					});
+			createTablePanel = function() {
+				var config = {
+					layout: {
+						type: 'table',
+						columns: pt.config.cols.size + pt.config.rows.dims + 1
+					},
+					bodyStyle: 'border:0 none',
+					defaults: {
+						baseCls: 'td'
+					}
+				};
 
-				return util;
+				if (pt.el) {
+					config.renderTo = pt.el;
+				};
+				
+				return Ext.create('Ext.panel.Panel', config);
 			};
 
 			initialize = function() {
 				var dims = getMergedSettings(),
 					params = getParams(dims);
 				
-				Ext.Ajax.request({
+				Ext.data.JsonP.request({
 					method: 'GET',
-					url: 'http://localhost:8080/api/analytics' + params,
+					url: 'http://localhost:8080/api/analytics.jsonp' + params,
 					headers: {'Content-Type': 'application/json'},
 					disableCaching: false,
 					success: function(r) {
@@ -852,17 +855,22 @@ console.log(dims);
 
 						extendRowDims(pt.config.rows);
 
-						var panel = createTableArray(pt);
+						var panel = createTablePanel(pt);
+
+						panel.add(getEmptyItem(pt));
+
+						panel.add(getColItems(pt));
+
+						panel.add(getRowItems(pt));
+
+						if (!pt.el) {
+							container.removeAll();
+							container.add(panel);
+						}
 					}
 				});
 
 			}();
-
-			panel.add(getEmptyItem(pt));
-
-			panel.add(getColItems(pt));
-
-			panel.add(getRowItems(pt));
 		}
 	};
 

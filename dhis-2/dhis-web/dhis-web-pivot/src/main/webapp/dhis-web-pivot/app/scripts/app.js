@@ -1490,7 +1490,7 @@ Ext.onReady( function() {
 
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				region: 'center',
-				items: [],
+				bodyStyle: 'padding:20px',
 				tbar: {
                     defaults: {
                         height: 26
