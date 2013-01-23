@@ -167,7 +167,7 @@ PT.core.getConfigs = function() {
 PT.core.getUtils = function(pt) {
 	var util = {};
 
-    util.getUrlParam = function(s) {
+    util.url.getParam = function(s) {
 		var output = '';
 		var href = window.location.href;
 		if (href.indexOf('?') > -1 ) {
@@ -373,6 +373,7 @@ PT.core.getUtils = function(pt) {
 				createTableArray,
 				initialize;				
 			
+			// settings to merged settings
 			getMergedSettings = function() {
 				var settings = pt.settings,
 					col = settings.col,
@@ -385,6 +386,7 @@ PT.core.getUtils = function(pt) {
 				return dimensions;
 			};
 
+			// merged settings to query string
 			getParams = function(dims) {
 				var params = '?';
 				
@@ -402,6 +404,7 @@ PT.core.getUtils = function(pt) {
 				return params;
 			};
 
+			// response to extended response
 			extendResponse = function(dimensions) {
 				var response = pt.response,
 					settings = pt.settings,
