@@ -88,16 +88,16 @@ PT.core.getConfigs = function() {
 
 	conf.period = {
 		relativeperiodunits: {
-			reportingMonth: 1,
-			last3Months: 3,
-			last12Months: 12,
-			reportingQuarter: 1,
-			last4Quarters: 4,
-			lastSixMonth: 1,
-			last2SixMonths: 2,
-			thisYear: 1,
-			lastYear: 1,
-			last5Years: 5
+			LAST_MONTH: 1,
+			LAST_3_MONTHS: 3,
+			LAST_12_MONTHS: 12,
+			LAST_QUARTER: 1,
+			LAST_4_QUARTERS: 4,
+			LAST_SIX_MONTH: 1,
+			LAST_2_SIXMONTHS: 2,
+			THIS_YEAR: 1,
+			LAST_YEAR: 1,
+			LAST_5_YEARS: 5
 		},
 		periodtypes: [
 			{id: 'Daily', name: 'Daily'},
@@ -401,17 +401,6 @@ PT.core.getUtils = function(pt) {
 
 				return params;
 			};
-
-			//getSettings = function() {
-				
-							//col: {
-								//de: ['fbfJHSPpUQD', 'cYeuwXTCPkU', 'Jtf34kNZhzP', 'hfdmMSPBgLG']
-							//},
-							//row: {
-								//'J5jldMd8OHv': ['CXw2yu5fodb', 'tDZVQ1WtwpA'],
-								//pe: ['201201', '201202', '201203', '201204']
-							//}
-						//};
 
 			extendResponse = function(dimensions) {
 				var response = pt.response,
@@ -720,14 +709,14 @@ PT.core.getUtils = function(pt) {
 					for (var j = 0, id, value, cls; j < valueItems[i].length; j++) {
 						id = cols.ids[j] + rows.ids[i];
 						value = valueItems[i][j];
-						//cls = value < 333 ? 'bad' : (value < 666 ? 'medium' : 'good'); //simplistic legendset
+						cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
 
 						row.push({
 							id: id,
 							value: value,
 							html: value.toString(),
-							baseCls: 'value'
-							//cls: cls
+							baseCls: 'value',
+							cls: cls
 						});
 					}
 

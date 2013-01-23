@@ -5,6 +5,10 @@ Ext.onReady( function() {
 	Ext.Ajax.method = 'GET';
 	Ext.QuickTips.init();
 
+	document.body.oncontextmenu = function() {
+		return false;
+	};
+
     Ext.override(Ext.LoadMask, {
 		onHide: function() {
 			this.callParent();

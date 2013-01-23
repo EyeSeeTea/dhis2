@@ -89,7 +89,6 @@ td {
 td div div {
 	padding: 5px;
 	text-align: center;
-	font-family: roboto thin;
 	font-size: 12px;
 }
 
@@ -116,13 +115,15 @@ td .valuegrandtotal-body {
 }
 
 td .good div {
-	color: green;
+	background-color: #bbddbb;
+	color: #000;
 }
 td .medium div {
-	color: #333;
+
 }
 td .bad div {
-	color: red;
+	background-color: #eacccc;
+	color: #000;
 }
 
 
@@ -600,8 +601,9 @@ td .bad div {
  *--------------------------------------------------------------------------*/
 
 	/* Node height */
-.pt-tree .x-tree-panel .x-grid-row .x-grid-cell-inner {
+.pt-tree.x-tree-panel .x-grid-row .x-grid-cell-inner {
     height: 17px;
+    font-size: 10px;
 }
 
 	/* Selected row background */

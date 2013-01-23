@@ -540,13 +540,24 @@ function showCreateNewEvent( programInstanceId, programStageId )
 
 function setSuggestedDueDate( programInstanceId )
 {
-	var standardInterval =  jQuery('#repeatableProgramStage_' + programInstanceId + ' option:selected').attr('standardInterval');
-	var date = new Date();
+	var lastVisit = jQuery('.stage-object-selected').attr('reportDate');
+	jQuery('#tb_' + programInstanceId + ' input').each(function()
+	{
+		var reportDate = jQuery(this).attr('reportDate');
+		if( reportDate > lastVisit )
+		{
+			lastVisit = reportDate;
+		}
+	});
+	
+	var standardInterval = jQuery('#repeatableProgramStage_' + programInstanceId + ' option:selected').attr('standardInterval');
+	var date = $.datepicker.parseDate( dateFormat, lastVisit );
 	var d = date.getDate() + eval(standardInterval);
 	var m = date.getMonth();
 	var y = date.getFullYear();
 	var edate= new Date(y, m, d);
-	jQuery( '#dueDateNewEncounter_' + programInstanceId ).datepicker( "setDate" , edate );
+	var sdate = jQuery.datepicker.formatDate( dateFormat , edate ) ;
+	jQuery( '#dueDateNewEncounter_' + programInstanceId ).val(sdate);
 }
 
 function closeDueDateDiv( programInstanceId )
@@ -1354,28 +1365,31 @@ function saveEnrollment()
 
 function unenrollmentForm( programInstanceId )
 {	
-	$.ajax({
-		type: "POST",
-		url: 'removeEnrollment.action',
-		data: "programInstanceId=" + programInstanceId,
-		success: function( json ) 
-		{
-			var completed  = "<tr onclick='javascript:loadActiveProgramStageRecords(" + programInstanceId + ");' >";
-				completed += "<td><a><span id='infor_" + programInstanceId + "'>" + jQuery('#tr1_' + programInstanceId + " span" ).html() + "</span></a></td></tr>";
-			jQuery('#completedTB' ).prepend( completed );
-			jQuery('#tr1_' + programInstanceId ).remove();
-			jQuery('#tr2_' + programInstanceId ).remove();
-			
-			jQuery("[id=tab-2] :input").prop('disabled', true);
-			jQuery("[id=tab-3] :input").prop('disabled', true);
-			jQuery("[id=tab-4] :input").prop('disabled', true);
-			jQuery("[id=tab-5] :input").prop('disabled', true);
-			jQuery("[id=tab-3] :input").datepicker("destroy");
-			
-			showSuccessMessage( i18n_unenrol_success );
-		}
-    });
+	if( confirm(i18n_incomplete_confirm_message) )
+	{
+		$.ajax({
+			type: "POST",
+			url: 'removeEnrollment.action',
+			data: "programInstanceId=" + programInstanceId,
+			success: function( json ) 
+			{
+				var completed  = "<tr onclick='javascript:loadActiveProgramStageRecords(" + programInstanceId + ");' >";
+					completed += "<td><a><span id='infor_" + programInstanceId + "'>" + jQuery('#tr1_' + programInstanceId + " span" ).html() + "</span></a></td></tr>";
+				jQuery('#completedTB' ).prepend( completed );
+				jQuery('#tr1_' + programInstanceId ).remove();
+				jQuery('#tr2_' + programInstanceId ).remove();
+				
+				jQuery("[id=tab-2] :input").prop('disabled', true);
+				jQuery("[id=tab-3] :input").prop('disabled', true);
+				jQuery("[id=tab-4] :input").prop('disabled', true);
+				jQuery("[id=tab-5] :input").prop('disabled', true);
+				jQuery("[id=tab-3] :input").datepicker("destroy");
+				
+				showSuccessMessage( i18n_unenrol_success );
+			}
+		});
 	
+	}
 	
 }
 
