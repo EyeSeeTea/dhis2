@@ -47,14 +47,14 @@ Ext.onReady( function() {
 			}
 		};
 
-		util.pivot.getSettings = function() {
+		util.pivot.getSettingsConfig = function() {
 			var data = {},
-				extended = {
+				config = {
 					col: {},
 					row: {},
 					filter: {}
 				},
-				settings = {
+				setup = {
 					col: ['de'],
 					row: ['pe'],
 					filter: ['ou'],
@@ -74,25 +74,25 @@ Ext.onReady( function() {
 			}();
 
 			extendSettings = function() {
-				for (var i = 0, dim; i < settings.col.length; i++) {
-					dim = settings.col[i];
-					extended.col[dim] = data[dim];
+				for (var i = 0, dim; i < setup.col.length; i++) {
+					dim = setup.col[i];
+					config.col[dim] = data[dim];
 				}
 
-				for (var i = 0, dim; i < settings.row.length; i++) {
-					dim = settings.row[i];
-					extended.row[dim] = data[dim];
+				for (var i = 0, dim; i < setup.row.length; i++) {
+					dim = setup.row[i];
+					config.row[dim] = data[dim];
 				}
 
-				for (var i = 0, dim; i < settings.filter.length; i++) {
-					dim = settings.filter[i];
-					extended.filter[dim] = data[dim];
+				for (var i = 0, dim; i < setup.filter.length; i++) {
+					dim = setup.filter[i];
+					config.filter[dim] = data[dim];
 				}
 
-				extended.categories = settings.categories;
+				config.categories = setup.categories;
 			}();
 
-			return extended;
+			return config;
 		};
 
 		return util;
@@ -1503,9 +1503,9 @@ Ext.onReady( function() {
 						{
 							text: '<b>Update</b>',
 							handler: function() {
-								pt.settings = pt.util.pivot.getSettings();
+								var settings = pt.util.api.Settings(pt.util.pivot.getSettingsConfig());
 
-								pt.util.pivot.getTable(pt, centerRegion);
+								pt.util.pivot.getTable(settings, pt, centerRegion);
 							}
 						}
 					]

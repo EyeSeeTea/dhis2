@@ -167,23 +167,39 @@ PT.core.getConfigs = function() {
 PT.core.getUtils = function(pt) {
 	var util = {};
 
-    util.url.getParam = function(s) {
-		var output = '';
-		var href = window.location.href;
-		if (href.indexOf('?') > -1 ) {
-			var query = href.substr(href.indexOf('?') + 1);
-			var query = query.split('&');
-			for (var i = 0; i < query.length; i++) {
-				if (query[i].indexOf('=') > -1) {
-					var a = query[i].split('=');
-					if (a[0].toLowerCase() === s) {
-						output = a[1];
-						break;
+	util.object = {
+		getLength: function(object) {
+			var size = 0;
+			
+			for (var key in object) {
+				if (object.hasOwnProperty(key)) {
+					size++;
+				}
+			}
+
+			return size;
+		}
+	};
+	
+    util.url = {
+		getParam: function(s) {
+			var output = '';
+			var href = window.location.href;
+			if (href.indexOf('?') > -1 ) {
+				var query = href.substr(href.indexOf('?') + 1);
+				var query = query.split('&');
+				for (var i = 0; i < query.length; i++) {
+					if (query[i].indexOf('=') > -1) {
+						var a = query[i].split('=');
+						if (a[0].toLowerCase() === s) {
+							output = a[1];
+							break;
+						}
 					}
 				}
 			}
+			return unescape(output);
 		}
-		return unescape(output);
 	};
 
 	util.viewport = {
@@ -359,10 +375,10 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.pivot = {
-		getTable: function(pt, container) {
-			var getParams,
-				getSettings,
-				mergeSettings,
+		getTable: function(settings, pt, container) {
+			var getDimensionItemsFromSettings,
+				getParamStringFromDimensionItems,
+				
 				extendResponse,
 				extendDims,
 				getDims,
@@ -372,36 +388,53 @@ PT.core.getUtils = function(pt) {
 				getRowItems,
 				createTableArray,
 				initialize;				
+
 			
-			// settings to merged settings
-			getMergedSettings = function() {
-				var settings = pt.settings,
-					col = settings.col,
+			getDimensionItemsFromSettings = function() {
+				var col = settings.col,
 					row = settings.row,
-					dimensions;
+					dimensionItems;
 
-				dimensions = Ext.clone(col);
-				Ext.apply(dimensions, row);
+				dimensionItems = Ext.clone(col);
+				Ext.apply(dimensionItems, row);
 
-				return dimensions;
+				return dimensionItems;
 			};
-
-			// merged settings to query string
-			getParams = function(dims) {
-				var params = '?';
+			
+			getParamStringFromDimensionItems = function(dimensionItems) {
+				var paramString = '?';
 				
-				for (var key in dims) {
-					if (dims.hasOwnProperty(key)) {
-						params += 'dimension=' + key + ':' + dims[key].join(',') + '&';
+				for (var key in dimensionItems) {
+					if (dimensionItems.hasOwnProperty(key)) {
+						paramString += 'dimension=' + key + ':' + dimensionItems[key].join(',') + '&';
 					}
 				}
 
-				params = params.substring(0, params.length-1);
+				paramString = paramString.substring(0, paramString.length-1);
 
-				params += '&filter=ou:' + pt.init.rootNodes[0].id;
-				params += '&categories=false';
+				paramString += '&filter=ou:' + pt.init.rootNodes[0].id;
+				paramString += '&categories=false';
 
-				return params;
+				return paramString;
+			};
+
+			getFilterParamStringFromSettings = function() {
+				var filter = settings.filter,
+					filterParamString = '';
+
+				for (var key in filter) {
+					if (filter.hasOwnProperty(key)) {
+						filterParamString += key + ':';
+
+						var a = filter[key];
+
+						for (var i = 0; i < a.length; i++) {
+							filterParamString += a[i] + ',';
+						}
+
+						filterParamString = filterParamString.substring(0, filterParamString.length-1);
+					}
+				}
 			};
 
 			// response to extended response
@@ -829,18 +862,29 @@ PT.core.getUtils = function(pt) {
 			};
 
 			initialize = function() {
-				var dims = getMergedSettings(),
-					params = getParams(dims);
+				var dimensionItems,
+					paramString;
+
+				dimensionItems = getDimensionItemsFromSettings(settings);
+
+				paramString = getParamStringFromDimensionItems(dimensionItems);
 				
 				Ext.data.JsonP.request({
 					method: 'GET',
 					url: 'http://localhost:8080/api/analytics.jsonp' + params,
-					headers: {'Content-Type': 'application/json'},
+					params: {
+						filter: getFilterParamStringFromSettings(),
+						categories: settings.categories
+					},
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept': 'application/json'
+					},
 					disableCaching: false,
 					success: function(r) {
 						pt.response = r;
 
-						extendResponse(dims);
+						extendResponse(dimensionItems);
 
 						pt.config = getDims();
 						console.log(pt);
@@ -867,6 +911,54 @@ PT.core.getUtils = function(pt) {
 	};
 
 	return util;
+};
+
+PT.core.getAPI = function(pt) {
+	var api = {};
+
+	api.Settings = function(config) {
+		var col,
+			row,
+			filter,
+			settings = {};
+
+		if (!(config && Ext.isObject(config))) {
+			alert('Settings config not an object');
+			return;
+		}
+
+		col = (config.col && Ext.isObject(config.col) && pt.util.object.getLength(config.col)) ? config.col : null;
+		
+		row = (config.row && Ext.isObject(config.row) && pt.util.object.getLength(config.row)) ? config.row : null;
+
+		if (!(col || row)) {
+			alert('No col or row items selected');
+			return;
+		}
+
+		filter = config.filter;
+
+		if (!(filter && Ext.isObject(filter) && pt.util.object.getLength(filter))) {
+			alert('No filter items selected');
+			return;
+		}
+
+		if (col) {
+			settings.col = col;
+		}
+
+		if (row) {
+			settings.row = row;
+		}
+
+		settings.filter = filter;
+
+		settings.categories = config.categories ? true : false;
+
+		return settings;
+	};
+
+	return api;
 };
 
 PT.core.getInstance = function(config) {

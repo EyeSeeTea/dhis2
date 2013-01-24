@@ -4783,6 +4783,10 @@ Ext.onReady( function() {
                                 document.getElementById('svgField').value = svg[0].parentNode.innerHTML;
                                 document.getElementById('typeField').value = type;
 
+console.log(document.getElementById('titleField').value);
+console.log(document.getElementById('svgField').value);
+console.log(document.getElementById('typeField').value);
+
                                 var exportForm = document.getElementById('exportForm');
                                 exportForm.action = '../exportImage.action';
 
