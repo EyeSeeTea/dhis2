@@ -753,6 +753,7 @@ Ext.onReady( function() {
 						legend: DV.c.hidelegend ? false : DV.util.chart.def.getLegend(),
 						axes: axes,
 						series: series,
+                        //labels: ['nissa'],
 						theme: 'dv1'
 					});
 				},
@@ -2280,7 +2281,8 @@ Ext.onReady( function() {
 				style: {
 					opacity: 0.8
 				},
-				tips: DV.util.chart.def.series.getTips()
+				tips: DV.util.chart.def.series.getTips(),
+                title: ['BCG &lt;1']
 			};
 			if (DV.c.showdata) {
 				main.label = {display: 'outside', field: DV.c.series.names};
@@ -4782,10 +4784,6 @@ Ext.onReady( function() {
                                 document.getElementById('titleField').value = DV.c.filter.names[0] || 'Example chart';
                                 document.getElementById('svgField').value = svg[0].parentNode.innerHTML;
                                 document.getElementById('typeField').value = type;
-
-console.log(document.getElementById('titleField').value);
-console.log(document.getElementById('svgField').value);
-console.log(document.getElementById('typeField').value);
 
                                 var exportForm = document.getElementById('exportForm');
                                 exportForm.action = '../exportImage.action';

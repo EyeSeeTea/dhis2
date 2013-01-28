@@ -1503,7 +1503,7 @@ Ext.onReady( function() {
 						{
 							text: '<b>Update</b>',
 							handler: function() {
-								var settings = pt.util.api.Settings(pt.util.pivot.getSettingsConfig());
+								var settings = pt.api.Settings(pt.util.pivot.getSettingsConfig());
 
 								pt.util.pivot.getTable(settings, pt, centerRegion);
 							}

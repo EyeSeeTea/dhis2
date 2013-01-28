@@ -412,8 +412,8 @@ PT.core.getUtils = function(pt) {
 
 				paramString = paramString.substring(0, paramString.length-1);
 
-				paramString += '&filter=ou:' + pt.init.rootNodes[0].id;
-				paramString += '&categories=false';
+				//paramString += '&filter=ou:' + pt.init.rootNodes[0].id;
+				//paramString += '&categories=false';
 
 				return paramString;
 			};
@@ -435,6 +435,8 @@ PT.core.getUtils = function(pt) {
 						filterParamString = filterParamString.substring(0, filterParamString.length-1);
 					}
 				}
+
+				return filterParamString;
 			};
 
 			// response to extended response
@@ -606,7 +608,6 @@ PT.core.getUtils = function(pt) {
 
 			getDims = function() {
 				var response = pt.response,
-					settings = pt.settings,
 					col = settings.col,
 					row = settings.row,
 					getUniqueColsArray,
@@ -871,7 +872,7 @@ PT.core.getUtils = function(pt) {
 				
 				Ext.data.JsonP.request({
 					method: 'GET',
-					url: 'http://localhost:8080/api/analytics.jsonp' + params,
+					url: 'http://localhost:8080/api/analytics.jsonp' + paramString,
 					params: {
 						filter: getFilterParamStringFromSettings(),
 						categories: settings.categories
@@ -923,7 +924,7 @@ PT.core.getAPI = function(pt) {
 			settings = {};
 
 		if (!(config && Ext.isObject(config))) {
-			alert('Settings config not an object');
+			alert('Settings config is not an object'); //i18n
 			return;
 		}
 
@@ -932,14 +933,14 @@ PT.core.getAPI = function(pt) {
 		row = (config.row && Ext.isObject(config.row) && pt.util.object.getLength(config.row)) ? config.row : null;
 
 		if (!(col || row)) {
-			alert('No col or row items selected');
+			alert('No col or row items selected'); //i18n
 			return;
 		}
 
 		filter = config.filter;
 
 		if (!(filter && Ext.isObject(filter) && pt.util.object.getLength(filter))) {
-			alert('No filter items selected');
+			alert('No filter items selected'); //i18n
 			return;
 		}
 
@@ -969,6 +970,7 @@ PT.core.getInstance = function(config) {
 
 	pt.conf = PT.core.getConfigs();
 	pt.util = PT.core.getUtils(pt);
+	pt.api = PT.core.getAPI(pt);
 
 	return pt;
 };
