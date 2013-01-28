@@ -400,6 +400,11 @@ PT.core.getUtils = function(pt) {
 				dimensionItems = Ext.clone(col);
 				Ext.apply(dimensionItems, row);
 
+/////////////////////////tmp
+dimensionItems['Bpx0589u8y0'] = ['oRVt7g429ZO', 'MAs88nJc9nL', 'PVLOW4bCshG', 'w0gFTTmsUcF'];
+console.log(dimensionItems);
+/////////////////////////tmp
+
 				return dimensionItems;
 			};
 			
@@ -441,7 +446,6 @@ PT.core.getUtils = function(pt) {
 				return filterParamString;
 			};
 
-			// response to extended response
 			extendResponse = function(dimensionItems) {
 				var response = pt.response,
 					headers = response.headers,
@@ -777,7 +781,9 @@ PT.core.getUtils = function(pt) {
 
 					for (var j = 0, id, value, row; j < pt.config.cols.size; j++) {
 						id = cols.ids[j] + rows.ids[i];
-						value = parseFloat(response.idValueMap[id]);
+						value = response.idValueMap[id] ? parseFloat(response.idValueMap[id]) : 0;
+//console.log(value);						
+						//value = Ext.isNumber(value) ? value : 0;
 						row.push(value);
 					}
 
@@ -789,9 +795,12 @@ PT.core.getUtils = function(pt) {
 					row = [];
 
 					for (var j = 0, id, value, cls; j < valueItems[i].length; j++) {
-						id = cols.ids[j] + rows.ids[i];
+						id = cols.ids[j] + rows.ids[i];						
 						value = valueItems[i][j];
-						cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
+						
+						//if (Ext.isNumber(value)) {
+							//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
+						//}
 
 						row.push({
 							id: id,

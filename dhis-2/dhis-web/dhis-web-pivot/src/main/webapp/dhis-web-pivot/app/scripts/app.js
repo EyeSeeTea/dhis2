@@ -55,7 +55,7 @@ Ext.onReady( function() {
 					filter: {}
 				},
 				setup = {
-					col: ['de'],
+					col: ['de', 'Bpx0589u8y0'],
 					row: ['pe'],
 					filter: ['ou'],
 					categories: false
