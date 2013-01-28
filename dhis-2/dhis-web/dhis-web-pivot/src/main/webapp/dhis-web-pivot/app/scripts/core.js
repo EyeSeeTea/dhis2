@@ -79,6 +79,9 @@ PT.core.getConfigs = function() {
             },
             organisationunitgroup: {
 				value: 'organisationunitgroup'
+			},
+			value: {
+				value: 'value'
 			}
         },
         root: {
@@ -443,78 +446,93 @@ PT.core.getUtils = function(pt) {
 				var response = pt.response,
 					headers = response.headers,
 					metaData = response.metaData,
-					rows = response.rows,
-					settingsDims = [];
+					rows = response.rows;
 
 				response.metaDataHeaderMap = {};
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
-				// Extend headers: index, items (unique), size
-				for (var i = 0, header, items; i < headers.length; i++) {
-					header = headers[i];
-					items = [];
-					
-					header.index = i;
-
-					for (var j = 0; j < rows.length; j++) {
-						items.push(rows[j][header.index]);
-					}
-
-					header.items = Ext.Array.unique(items);
-					header.size = header.items.length;
-				}
-
-				// metaDataHeaderMap (metaDataId: header)
-				for (var i = 0, header; i < headers.length; i++) {
-					header = headers[i];
-					
-					for (var j = 0, item; j < header.items.length; j++) {
-						item = header.items[j];
-						
-						response.metaDataHeaderMap[item] = header.name;
-					}
-				}
+				var extendHeaders = function() {
 				
-				// nameHeaderMap (headerName: header)
-				for (var i = 0, header; i < headers.length; i++) {
-					header = headers[i];
+					// Extend headers: index, items (unique), size
+					for (var i = 0, header, items; i < headers.length; i++) {
+						header = headers[i];
+						items = [];
+						
+						header.index = i;
+
+						for (var j = 0; j < rows.length; j++) {
+							items.push(rows[j][header.index]);
+						}
+
+						header.items = Ext.Array.unique(items);
+						header.size = header.items.length;
+					}
+
+					// metaDataHeaderMap (metaDataId: header)
+					for (var i = 0, header; i < headers.length; i++) {
+						header = headers[i];
+
+						if (header.meta) {
+							for (var j = 0, item; j < header.items.length; j++) {
+								item = header.items[j];
+								
+								response.metaDataHeaderMap[item] = header.name;
+							}
+						}
+					}			
 					
-					response.nameHeaderMap[header.name] = header;
-				}
+					// nameHeaderMap (headerName: header)
+					for (var i = 0, header; i < headers.length; i++) {
+						header = headers[i];
+						
+						response.nameHeaderMap[header.name] = header;
+					}
 
-				// Sort header items based on metaData
-				for (var key in metaData) {
-					if (metaData.hasOwnProperty(key)) {
-						var headerName = response.metaDataHeaderMap[key],
-							header = response.nameHeaderMap[headerName];
+					// Remove all header items
+					for (var i = 0, header; i < headers.length; i++) {
+						header = headers[i];
+
+						header.items = [];
+					}
+					
+					// Add sorted header items based on metaData
+					for (var key in metaData) {
+						if (metaData.hasOwnProperty(key)) {
+							var headerName = response.metaDataHeaderMap[key],
+								header = response.nameHeaderMap[headerName];
+
+							if (header) {
+								header.items.push(key);
+							}
+						}
+					}
+				}();
+
+				var createValueIds = function() {
+					var valueHeaderIndex = response.nameHeaderMap[pt.conf.finals.dimension.value.value].index,
+						dimensionNames = [];
+
+					// Dimension names
+					for (var key in dimensionItems) {
+						if (dimensionItems.hasOwnProperty(key)) {
+							dimensionNames.push(key);
+						}
+					}
+
+					// idValueMap
+					for (var i = 0, id; i < rows.length; i++) {
+						id = '';
+
+						for (var j = 0, header; j < dimensionNames.length; j++) {
+							header = response.nameHeaderMap[dimensionNames[j]];
 							
-						header.items.push(key);
+							id += rows[i][header.index];
+						}
+
+						response.idValueMap[id] = rows[i][valueHeaderIndex];
 					}
-				}
-							
-
-
-				// Response[header]Header items. SettingsDims array.
-				for (var dim in dimensionItems) {
-					if (dimensionItems.hasOwnProperty(dim)) {
-						settingsDims.push(dim);
-
-						response.nameHeaderMap[dim].items = dimensionItems[dim];
-					}
-				}
-
-				// Response idValueMap
-				for (var i = 0, id, valueIndex = response.nameHeaderMap.value.index; i < rows.length; i++) {
-					id = '';
-
-					for (var j = 0, dimIndex; j < settingsDims.length; j++) {
-						dimIndex = response.nameHeaderMap[settingsDims[j]].index;
-						id += rows[i][dimIndex];
-					}
-
-					response.idValueMap[id] = rows[i][valueIndex];
-				}
+				}();
 			};
 
 			extendDims = function(aUniqueItems) {
