@@ -387,8 +387,7 @@ PT.core.getUtils = function(pt) {
 				getColItems,
 				getRowItems,
 				createTableArray,
-				initialize;				
-
+				initialize;
 			
 			getDimensionItemsFromSettings = function() {
 				var col = settings.col,
@@ -440,23 +439,23 @@ PT.core.getUtils = function(pt) {
 			};
 
 			// response to extended response
-			extendResponse = function(dimensions) {
+			extendResponse = function(dimensionItems) {
 				var response = pt.response,
-					settings = pt.settings,
 					headers = response.headers,
-					header,
+					metaData = response.metaData,
 					rows = response.rows,
-					settingsDims = [],
-					items;
+					settingsDims = [];
 
+				response.metaDataHeaderMap = {};
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
-				// Header items, size. Response nameHeaderMap.
-				for (var i = 0; i < headers.length; i++) {
+				// Extend headers: index, items (unique), size
+				for (var i = 0, header, items; i < headers.length; i++) {
 					header = headers[i];
-					header.index = i;
 					items = [];
+					
+					header.index = i;
 
 					for (var j = 0; j < rows.length; j++) {
 						items.push(rows[j][header.index]);
@@ -464,16 +463,44 @@ PT.core.getUtils = function(pt) {
 
 					header.items = Ext.Array.unique(items);
 					header.size = header.items.length;
+				}
 
+				// metaDataHeaderMap (metaDataId: header)
+				for (var i = 0, header; i < headers.length; i++) {
+					header = headers[i];
+					
+					for (var j = 0, item; j < header.items.length; j++) {
+						item = header.items[j];
+						
+						response.metaDataHeaderMap[item] = header.name;
+					}
+				}
+				
+				// nameHeaderMap (headerName: header)
+				for (var i = 0, header; i < headers.length; i++) {
+					header = headers[i];
+					
 					response.nameHeaderMap[header.name] = header;
 				}
 
-				// Header items. SettingsDims array.
-				for (var dim in dimensions) {
-					if (dimensions.hasOwnProperty(dim)) {
+				// Sort header items based on metaData
+				for (var key in metaData) {
+					if (metaData.hasOwnProperty(key)) {
+						var headerName = response.metaDataHeaderMap[key],
+							header = response.nameHeaderMap[headerName];
+							
+						header.items.push(key);
+					}
+				}
+							
+
+
+				// Response[header]Header items. SettingsDims array.
+				for (var dim in dimensionItems) {
+					if (dimensionItems.hasOwnProperty(dim)) {
 						settingsDims.push(dim);
 
-						response.nameHeaderMap[dim].items = dimensions[dim];
+						response.nameHeaderMap[dim].items = dimensionItems[dim];
 					}
 				}
 
