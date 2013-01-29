@@ -31,6 +31,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.Dimension;
@@ -62,8 +63,6 @@ public class AnalyticsController
     @Autowired
     private I18nManager i18nManager;
     
-    //TODO URL only requests
-
     // -------------------------------------------------------------------------
     // Resources
     // -------------------------------------------------------------------------
@@ -72,11 +71,12 @@ public class AnalyticsController
     public String getJson( // JSON, JSONP
         @RequestParam Set<String> dimension,
         @RequestParam(required = false) Set<String> filter,
-        @RequestParam(required = false) boolean categories,
+        @RequestParam(required = false) AggregationType aggregationType,
+        @RequestParam(required = false) String measureCriteria,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, categories, i18nManager.getI18nFormat() );
+        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, i18nManager.getI18nFormat() );
 
         if ( !valid( params, response ) )
         {
@@ -94,11 +94,12 @@ public class AnalyticsController
     public void getXml( 
         @RequestParam Set<String> dimension,
         @RequestParam(required = false) Set<String> filter,
-        @RequestParam(required = false) boolean categories,
+        @RequestParam(required = false) AggregationType aggregationType,
+        @RequestParam(required = false) String measureCriteria,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, categories, i18nManager.getI18nFormat() );
+        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, i18nManager.getI18nFormat() );
 
         if ( !valid( params, response ) )
         {
@@ -114,11 +115,12 @@ public class AnalyticsController
     public void getCsv( 
         @RequestParam Set<String> dimension,
         @RequestParam(required = false) Set<String> filter,
-        @RequestParam(required = false) boolean categories,
+        @RequestParam(required = false) AggregationType aggregationType,
+        @RequestParam(required = false) String measureCriteria,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, categories, i18nManager.getI18nFormat() );
+        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, i18nManager.getI18nFormat() );
 
         if ( !valid( params, response ) )
         {
@@ -134,11 +136,12 @@ public class AnalyticsController
     public void getHtml( 
         @RequestParam Set<String> dimension,
         @RequestParam(required = false) Set<String> filter,
-        @RequestParam(required = false) boolean categories,
+        @RequestParam(required = false) AggregationType aggregationType,
+        @RequestParam(required = false) String measureCriteria,
         Model model,
         HttpServletResponse response ) throws Exception
     {
-        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, categories, i18nManager.getI18nFormat() );
+        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria, i18nManager.getI18nFormat() );
 
         if ( !valid( params, response ) )
         {
@@ -164,13 +167,13 @@ public class AnalyticsController
         
         if ( !params.dimensionsAsFilters().isEmpty() )
         {
-            ContextUtils.conflictResponse( response, "Dimensions cannot also be specified as filters: " + params.dimensionsAsFilters() );
+            ContextUtils.conflictResponse( response, "Dimensions cannot be specified as dimension and filter simultaneously: " + params.dimensionsAsFilters() );
             return false;
         }
         
         if ( !params.hasPeriods() )
         {
-            ContextUtils.conflictResponse( response, "Periods must be specified as dimension or filter" );
+            ContextUtils.conflictResponse( response, "At least one period must be specified as dimension or filter" );
             return false;
         }
         

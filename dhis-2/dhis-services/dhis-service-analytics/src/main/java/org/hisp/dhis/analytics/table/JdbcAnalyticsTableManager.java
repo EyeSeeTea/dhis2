@@ -40,6 +40,7 @@ import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -85,7 +86,7 @@ public class JdbcAnalyticsTableManager
             sqlCreate += col[0] + " " + col[1] + ",";
         }
         
-        sqlCreate += "daysxvalue double precision, value double precision)";
+        sqlCreate += "daysxvalue double precision, daysno integer not null, value double precision)";
         
         log.info( "Create SQL: " + sqlCreate );
         
@@ -93,16 +94,21 @@ public class JdbcAnalyticsTableManager
     }
     
     @Async
-    public Future<?> populateTableAsync( String tableName, Date startDate, Date endDate )
+    public Future<?> populateTableAsync( String tableName, Period period )
     {
-        populateTable( tableName, startDate, endDate, "cast(dv.value as double precision)", "int" );
+        Date startDate = period.getStartDate();
+        Date endDate = period.getEndDate();
         
-        populateTable( tableName, startDate, endDate, "1" , "bool" );
+        populateTable( tableName, startDate, endDate, "cast(dv.value as double precision)", "int", "dv.value != ''" );
+        
+        populateTable( tableName, startDate, endDate, "1" , "bool", "dv.value = 'true'" );
+
+        populateTable( tableName, startDate, endDate, "0" , "bool", "dv.value = 'false'" );
         
         return null;
     }
     
-    private void populateTable( String tableName, Date startDate, Date endDate, String valueExpression, String valueType )
+    private void populateTable( String tableName, Date startDate, Date endDate, String valueExpression, String valueType, String clause )
     {
         final String start = DateUtils.getMediumDateString( startDate );
         final String end = DateUtils.getMediumDateString( endDate );
@@ -114,7 +120,7 @@ public class JdbcAnalyticsTableManager
             insert += col[0] + ",";
         }
         
-        insert += "daysxvalue, value) ";
+        insert += "daysxvalue, daysno, value) ";
         
         String select = "select ";
         
@@ -123,10 +129,9 @@ public class JdbcAnalyticsTableManager
             select += col[2] + ",";
         }
         
-        select = select.replace( "organisationunitid", "sourceid" ); // Legacy fix
-        
         select += 
-            valueExpression + " * ps.daysno as value, " +
+            valueExpression + " * ps.daysno as daysxvalue, " +
+            "ps.daysno as daysno, " +
             valueExpression + " as value " +
             "from datavalue dv " +
             "left join _dataelementgroupsetstructure degs on dv.dataelementid=degs.dataelementid " +
@@ -139,8 +144,8 @@ public class JdbcAnalyticsTableManager
             "where de.valuetype='" + valueType + "' " +
             "and pe.startdate >= '" + start + "' " +
             "and pe.startdate <= '" + end + "'" +
-            "and dv.value != ''" +
-            "and dv.value is not null";
+            "and dv.value is not null " + 
+            "and " + clause;
 
         final String sql = insert + select;
         
@@ -207,7 +212,7 @@ public class JdbcAnalyticsTableManager
 
     public Date getLatestData()
     {
-        final String sql = "select max(pe.startdate) from datavalue dv " +
+        final String sql = "select max(pe.enddate) from datavalue dv " +
             "join period pe on dv.periodid=pe.periodid";
         
         return jdbcTemplate.queryForObject( sql, Date.class );

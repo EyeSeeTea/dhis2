@@ -423,6 +423,7 @@
     <property name="dataElementCategoryComboStore" ref="org.hisp.dhis.dataelement.DataElementCategoryComboStore" />
     <property name="dataElementCategoryOptionComboStore" ref="org.hisp.dhis.dataelement.DataElementCategoryOptionComboStore" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitService" class="org.hisp.dhis.organisationunit.DefaultOrganisationUnitService">
@@ -430,6 +431,7 @@
     <property name="organisationUnitLevelStore" ref="org.hisp.dhis.organisationunit.OrganisationUnitLevelStore" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="versionService" ref="org.hisp.dhis.version.VersionService" />
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
   <bean id="org.hisp.dhis.organisationunit.OrganisationUnitGroupService"
@@ -549,10 +551,12 @@
   <bean id="org.hisp.dhis.attribute.AttributeService" class="org.hisp.dhis.attribute.DefaultAttributeService">
     <property name="attributeStore" ref="org.hisp.dhis.attribute.AttributeStore" />
     <property name="attributeValueStore" ref="org.hisp.dhis.attribute.AttributeValueStore" />
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
   <bean id="org.hisp.dhis.option.OptionService" class="org.hisp.dhis.option.DefaultOptionService">
     <property name="optionStore" ref="org.hisp.dhis.option.OptionStore" />
+    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
   <bean id="org.hisp.dhis.mapping.MappingService" class="org.hisp.dhis.mapping.DefaultMappingService">

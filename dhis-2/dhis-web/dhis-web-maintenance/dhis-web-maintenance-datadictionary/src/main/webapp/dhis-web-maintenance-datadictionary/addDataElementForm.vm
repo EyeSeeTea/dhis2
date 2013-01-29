@@ -67,11 +67,12 @@
 		<td><label for="valueType">$i18n.getString( "value_type" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
 		<td>
 			<select id="valueType" onchange="changeValueType( this.value )">
-				<option value="int" selected="selected" onclick="enable('numberType');">$i18n.getString( "number" )</option>
-				<option value="string" onclick="disable('numberType');enable('textType')">$i18n.getString( "text" )</option>
-				<option value="bool" onclick="disable('numberType');">$i18n.getString( "yes_no" )</option>
-				<option value="trueOnly" onclick="disable('numberType');">$i18n.getString( "yes_only" )</option>
-				<option value="date" onclick="disable('numberType');">$i18n.getString( "date" )</option>
+				<option value="int" selected="selected">$i18n.getString( "number" )</option>
+				<option value="string">$i18n.getString( "text" )</option>
+				<option value="bool">$i18n.getString( "yes_no" )</option>
+				<option value="trueOnly">$i18n.getString( "yes_only" )</option>
+				<option value="date">$i18n.getString( "date" )</option>
+				<option value="username">$i18n.getString( "user_name" )</option>
 			</select>
 			<input type="hidden" id="submitValueType" name="valueType"/>
 		</td>
@@ -123,7 +124,7 @@
 		<td>
 			<select id="selectedCategoryComboId">				
 			#foreach( $dataElementCategoryCombo in $dataElementCategoryCombos )
-				<option value="$dataElementCategoryCombo.id" #if( $dataElementCategoryCombo.id == $defaultCategoryCombo.id ) selected="selected" #end>$encoder.htmlEncode( $dataElementCategoryCombo.name )</option>
+				<option value="$dataElementCategoryCombo.id" #if( $dataElementCategoryCombo.id == $defaultCategoryCombo.id ) selected="selected" #end>$encoder.htmlEncode( $dataElementCategoryCombo.displayName )</option>
 			#end
 			</select>
 			<input type="hidden" id="submitCategoryComboId" name="selectedCategoryComboId"/>
@@ -139,7 +140,7 @@
 			<select id="selectedOptionSetId" name="selectedOptionSetId">
 				<option value="0">[$i18n.getString('please_select')]</option>
 				#foreach ( $optionSet in $optionSets )
-				<option value="$optionSet.id">$encoder.htmlEncode( $optionSet.name )</option>
+				<option value="$optionSet.id">$encoder.htmlEncode( $optionSet.displayName )</option>
 				#end
 			</select>
 		</td>
@@ -169,7 +170,7 @@
 		<td>
 			<select multiple size="4" id="organisationUnitLevels" style="width:440px" ondblclick="moveSelectedById( 'organisationUnitLevels', 'aggregationLevels' )">
 			#foreach( $level in $organisationUnitLevels )
-				<option value="$level.level">$level.name</option>
+				<option value="$level.level">$level.displayName</option>
 			#end
 			</select>
 		</td>

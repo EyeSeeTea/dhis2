@@ -126,6 +126,13 @@ function saveDynamicVal( code, optionComboId, fieldId )
 
 function saveVal( dataElementId, optionComboId, fieldId )
 {
+	var fieldIds = fieldId.split( "-" );
+	
+	if ( fieldIds.length > 3 )
+	{
+		currentOrganisationUnitId = fieldIds[0];
+	}
+
     fieldId = '#' + fieldId;
 	
     var dataElementName = getDataElementName( dataElementId );
@@ -218,8 +225,6 @@ function saveVal( dataElementId, optionComboId, fieldId )
 
 function saveBoolean( dataElementId, optionComboId, fieldId )
 {
-	dataElementId = parseInt( dataElementId );
-	optionComboId = parseInt( optionComboId );
     fieldId = '#' + fieldId;
     
     var value = $( fieldId + ' option:selected' ).val();

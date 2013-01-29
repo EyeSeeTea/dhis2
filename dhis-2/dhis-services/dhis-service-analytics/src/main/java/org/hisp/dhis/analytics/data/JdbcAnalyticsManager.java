@@ -27,13 +27,15 @@ package org.hisp.dhis.analytics.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.analytics.AggregationType.AVERAGE_AGGREGATION;
-import static org.hisp.dhis.analytics.AggregationType.AVERAGE_DISAGGREGATION;
-import static org.hisp.dhis.analytics.AggregationType.COUNT_AGGREGATION;
+import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT;
+import static org.hisp.dhis.analytics.AggregationType.AVERAGE_BOOL;
+import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT_DISAGGREGATION;
+import static org.hisp.dhis.analytics.AggregationType.COUNT;
 import static org.hisp.dhis.analytics.DataQueryParams.DIMENSION_SEP;
 import static org.hisp.dhis.analytics.DataQueryParams.VALUE_ID;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
+import static org.hisp.dhis.analytics.MeasureFilter.*;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,10 +50,12 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsManager;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.Dimension;
+import org.hisp.dhis.analytics.MeasureFilter;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.ListMap;
+import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.system.util.TextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +78,7 @@ public class JdbcAnalyticsManager
     //TODO optimize when all options in dimensions are selected
     
     private static final Log log = LogFactory.getLog( JdbcAnalyticsManager.class );
-    
+        
     @Autowired
     private JdbcTemplate jdbcTemplate;
     
@@ -87,27 +91,30 @@ public class JdbcAnalyticsManager
     {
         ListMap<IdentifiableObject, IdentifiableObject> dataPeriodAggregationPeriodMap = params.getDataPeriodAggregationPeriodMap();
         params.replaceAggregationPeriodsWithDataPeriods( dataPeriodAggregationPeriodMap );
-
+        
         params.populateDimensionNames();
         
-        List<Dimension> selectDimensions = params.getSelectDimensions();
         List<Dimension> queryDimensions = params.getQueryDimensions();
         
         SqlHelper sqlHelper = new SqlHelper();
-        
-        String sql = "select " + getCommaDelimitedString( selectDimensions ) + ", "; //TODO
-        
+
         int days = PeriodType.getPeriodTypeByName( params.getPeriodType() ).getFrequencyOrder();
         
-        if ( params.isAggregationType( AVERAGE_AGGREGATION ) )
+        String sql = "select " + getCommaDelimitedString( queryDimensions ) + ", ";
+        
+        if ( params.isAggregationType( AVERAGE_INT ) )
         {
             sql += "sum(daysxvalue) / " + days;
         }
-        else if ( params.isAggregationType( COUNT_AGGREGATION ) )
+        else if ( params.isAggregationType( AVERAGE_BOOL ) )
+        {
+            sql += "sum(daysxvalue) / sum(daysno) * 100";
+        }
+        else if ( params.isAggregationType( COUNT ) )
         {
             sql += "count(value)";
         }
-        else
+        else // SUM, AVERAGE_DISAGGREGATION and undefined //TODO
         {
             sql += "sum(value)";
         }
@@ -116,15 +123,21 @@ public class JdbcAnalyticsManager
         
         for ( Dimension dim : queryDimensions )
         {
-            sql += sqlHelper.whereAnd() + " " + dim.getDimensionName() + " in (" + getQuotedCommaDelimitedString( getUids( dim.getOptions() ) ) + " ) ";
+            if ( !dim.isAllOptions() )
+            {
+                sql += sqlHelper.whereAnd() + " " + dim.getDimensionName() + " in (" + getQuotedCommaDelimitedString( getUids( dim.getOptions() ) ) + " ) ";
+            }
         }
 
         for ( Dimension filter : params.getFilters() )
         {
-            sql += sqlHelper.whereAnd() + " " + filter.getDimensionName() + " in (" + getQuotedCommaDelimitedString( getUids( filter.getOptions() ) ) + " ) ";
+            if ( !filter.isAllOptions() )
+            {
+                sql += sqlHelper.whereAnd() + " " + filter.getDimensionName() + " in (" + getQuotedCommaDelimitedString( getUids( filter.getOptions() ) ) + " ) ";
+            }
         }
         
-        sql += "group by " + getCommaDelimitedString( selectDimensions );
+        sql += "group by " + getCommaDelimitedString( queryDimensions );
     
         log.info( sql );
         
@@ -134,17 +147,22 @@ public class JdbcAnalyticsManager
         
         while ( rowSet.next() )
         {
+            Double value = rowSet.getDouble( VALUE_ID );
+
+            if ( !measureCriteriaSatisfied( params, value ) )
+            {
+                continue;
+            }
+            
             StringBuilder key = new StringBuilder();
             
-            for ( Dimension dim : selectDimensions )
+            for ( Dimension dim : queryDimensions )
             {
                 key.append( rowSet.getString( dim.getDimensionName() ) + DIMENSION_SEP );
             }
             
             key.deleteCharAt( key.length() - 1 );
             
-            Double value = rowSet.getDouble( VALUE_ID );
-
             map.put( key.toString(), value );
         }
         
@@ -155,7 +173,7 @@ public class JdbcAnalyticsManager
 
     public void replaceDataPeriodsWithAggregationPeriods( Map<String, Double> dataValueMap, DataQueryParams params, ListMap<IdentifiableObject, IdentifiableObject> dataPeriodAggregationPeriodMap )
     {
-        if ( params.isAggregationType( AVERAGE_DISAGGREGATION ) )
+        if ( params.isAggregationType( AVERAGE_INT_DISAGGREGATION ) )
         {
             int periodIndex = params.getPeriodDimensionIndex();
             
@@ -184,8 +202,52 @@ public class JdbcAnalyticsManager
             }
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
     
-    private static String getCommaDelimitedString( Collection<Dimension> dimensions )
+    private boolean measureCriteriaSatisfied( DataQueryParams params, Double value )
+    {
+        if ( value == null )
+        {
+            return false;
+        }
+        
+        for ( MeasureFilter filter : params.getMeasureCriteria().keySet() )
+        {
+            Double criterion = params.getMeasureCriteria().get( filter );
+            
+            if ( EQ.equals( filter ) && !MathUtils.isEqual( value, criterion ) )
+            {
+                return false;
+            }
+            
+            if ( GT.equals( filter ) && Double.compare( value, criterion ) <= 0 )
+            {
+                return false;
+            }
+            
+            if ( GE.equals( filter ) && Double.compare( value, criterion ) < 0 )
+            {
+                return false;
+            }
+            
+            if ( LT.equals( filter ) && Double.compare( value, criterion ) >= 0 )
+            {
+                return false;
+            }
+            
+            if ( LE.equals( filter ) && Double.compare( value, criterion ) > 0 )
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private String getCommaDelimitedString( Collection<Dimension> dimensions )
     {
         final StringBuilder builder = new StringBuilder();
         

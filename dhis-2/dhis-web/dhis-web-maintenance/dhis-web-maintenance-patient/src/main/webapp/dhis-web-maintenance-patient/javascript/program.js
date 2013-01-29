@@ -20,6 +20,9 @@ function showProgramDetails( programId )
 		var displayProvidedOtherFacility = ( json.program.displayProvidedOtherFacility == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'displayProvidedOtherFacilityField', displayProvidedOtherFacility );   	
 		
+		var blockEntryForm = ( json.program.blockEntryForm == 'true') ? i18n_yes : i18n_no;
+		setInnerHTML( 'blockEntryFormField', blockEntryForm );   	
+		
 		var displayIncidentDate = ( json.program.displayIncidentDate == 'true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'displayIncidentDateField', displayIncidentDate );   	
 		
@@ -60,9 +63,12 @@ function programOnChange()
 		disable("dateOfIncidentDescription");
 		disable("generatedByEnrollmentDate");
 		disable("availablePropertyIds");
+		disable('ignoreOverdueEvents');
 		hideById("selectedList");
 		jQuery("[name=displayed]").attr("disabled", true);
 		jQuery("[name=displayed]").removeAttr("checked");
+		
+		jQuery("[name=nonAnonymous]").hide();
 	}
 	else{
 		jQuery("[name=displayed]").prop("disabled", false);
@@ -71,6 +77,13 @@ function programOnChange()
 		enable("generatedByEnrollmentDate");
 		enable('dateOfEnrollmentDescription');
 		enable("displayIncidentDate");
+		enable('ignoreOverdueEvents');
+		
+		jQuery("[name=nonAnonymous]").show();
+		if( type == 2 ){
+			disable('ignoreOverdueEvents');
+		}
+		
 		if(byId('displayIncidentDate').checked){
 			enable("dateOfIncidentDescription");
 		}

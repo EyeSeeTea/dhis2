@@ -18,7 +18,7 @@
 		#foreach( $program in $programs )
 		  {
 			"id":  "${program.id}" ,
-			"name": "$!encoder.jsonEncode( ${program.name} )",
+			"name": "$!encoder.jsonEncode( ${program.displayName} )",
 			"type": "$program.type"
 		  }#if( $velocityCount < $programs.size() ),#end
 		#end
@@ -35,7 +35,7 @@
 		#foreach( $level in $levels )
 		  {
 			"value":  "${level.level}" ,
-			"name": "$!encoder.jsonEncode( ${level.name} )"
+			"name": "$!encoder.jsonEncode( ${level.displayName} )"
 		  }#if($velocityCount < $levels.size()),#end
 		#end
 	]

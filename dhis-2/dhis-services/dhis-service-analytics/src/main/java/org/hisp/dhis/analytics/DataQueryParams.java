@@ -27,7 +27,7 @@ package org.hisp.dhis.analytics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.analytics.AggregationType.AVERAGE_DISAGGREGATION;
+import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT_DISAGGREGATION;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +46,7 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.CollectionUtils;
 import org.hisp.dhis.system.util.ListMap;
 import org.hisp.dhis.system.util.MapMap;
+import org.hisp.dhis.system.util.MathUtils;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
@@ -70,9 +71,11 @@ public class DataQueryParams
     
     private List<Dimension> dimensions = new ArrayList<Dimension>();
     
-    private boolean categories = false;
-
     private List<Dimension> filters = new ArrayList<Dimension>();
+
+    private AggregationType aggregationType;
+    
+    private Map<MeasureFilter, Double> measureCriteria = new HashMap<MeasureFilter, Double>();
     
     // -------------------------------------------------------------------------
     // Transient properties
@@ -84,8 +87,6 @@ public class DataQueryParams
     
     private transient int organisationUnitLevel;
     
-    private transient AggregationType aggregationType;
-    
     private transient PeriodType dataPeriodType;
     
     // -------------------------------------------------------------------------
@@ -95,24 +96,17 @@ public class DataQueryParams
     public DataQueryParams()
     {
     }
-    
-    public DataQueryParams( List<Dimension> dimensions, boolean categories, List<Dimension> filters )
-    {
-        this.dimensions = dimensions;
-        this.categories = categories;
-        this.filters = filters;
-    }
-    
+        
     public DataQueryParams( DataQueryParams params )
     {
         this.dimensions = new ArrayList<Dimension>( params.getDimensions() );
-        this.categories = params.isCategories();
         this.filters = new ArrayList<Dimension>( params.getFilters() );
+        this.aggregationType = params.getAggregationType();
+        this.measureCriteria = params.getMeasureCriteria();
         
         this.tableName = params.getTableName();
         this.periodType = params.getPeriodType();
         this.organisationUnitLevel = params.getOrganisationUnitLevel();
-        this.aggregationType = params.getAggregationType();
         this.dataPeriodType = params.getDataPeriodType();
     }
 
@@ -120,23 +114,6 @@ public class DataQueryParams
     // Logic
     // -------------------------------------------------------------------------
 
-    /**
-     * Creates a list of the names of all dimensions for this query.
-     */
-    public List<Dimension> getSelectDimensions()
-    {
-        List<Dimension> list = new ArrayList<Dimension>( dimensions );
-        
-        list.remove( new Dimension( INDICATOR_DIM_ID ) );
-        
-        if ( categories )
-        {
-            list.add( new Dimension( CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<IdentifiableObject>() ) );
-        }
-        
-        return list;
-    }
-    
     /**
      * Creates a list of the names of all dimensions for this query. 
      */
@@ -162,7 +139,7 @@ public class DataQueryParams
      */
     public int getDataElementOrIndicatorDimensionIndex()
     {
-        List<String> dims = getAllDimensionNamesAsList();
+        List<String> dims = getInputDimensionNamesAsList();
         
         return dims.contains( DATAELEMENT_DIM_ID ) ? dims.indexOf( DATAELEMENT_DIM_ID ) : dims.indexOf( INDICATOR_DIM_ID );
     }
@@ -172,7 +149,7 @@ public class DataQueryParams
      */
     public int getDataElementDimensionIndex()
     {
-        return getAllDimensionNamesAsList().indexOf( DATAELEMENT_DIM_ID );
+        return getInputDimensionNamesAsList().indexOf( DATAELEMENT_DIM_ID );
     }
 
     /**
@@ -180,7 +157,7 @@ public class DataQueryParams
      */
     public int getCategoryOptionComboDimensionIndex()
     {
-        return getAllDimensionNamesAsList().indexOf( CATEGORYOPTIONCOMBO_DIM_ID );
+        return getInputDimensionNamesAsList().indexOf( CATEGORYOPTIONCOMBO_DIM_ID );
     }
     
     /**
@@ -188,7 +165,7 @@ public class DataQueryParams
      */
     public int getPeriodDimensionIndex()
     {
-        return getAllDimensionNamesAsList().indexOf( PERIOD_DIM_ID );
+        return getInputDimensionNamesAsList().indexOf( PERIOD_DIM_ID );
     }
         
     /**
@@ -231,6 +208,30 @@ public class DataQueryParams
     public Collection<Dimension> dimensionsAsFilters()
     {
         return CollectionUtils.intersection( dimensions, filters );
+    }
+    
+    /**
+     * Returns the first dimension which has no dimension options. 
+     */
+    public Dimension getEmptyDimension()
+    {
+        for ( Dimension dim : dimensions )
+        {
+            if ( dim.getOptions() == null || dim.getOptions().isEmpty() )
+            {
+                return dim;
+            }
+        }
+        
+        for ( Dimension filter : filters )
+        {
+            if ( filter == null ||  filter.getOptions().isEmpty() )
+            {
+                return filter;
+            }
+        }
+        
+        return null;
     }
     
     /**
@@ -279,7 +280,7 @@ public class DataQueryParams
      */
     public void replaceAggregationPeriodsWithDataPeriods( ListMap<IdentifiableObject, IdentifiableObject> dataPeriodAggregationPeriodMap )
     {
-        if ( isAggregationType( AVERAGE_DISAGGREGATION ) &&  dataPeriodType != null )
+        if ( isAggregationType( AVERAGE_INT_DISAGGREGATION ) &&  dataPeriodType != null )
         {
             this.periodType = this.dataPeriodType.getName();
             
@@ -422,19 +423,72 @@ public class DataQueryParams
     // Static methods
     // -------------------------------------------------------------------------
 
+    /**
+     * Retrieves the dimension name from the given string. Returns the part of
+     * the string preceding the dimension name separator, or the whole string if
+     * the separator is not present.
+     */
     public static String getDimensionFromParam( String param )
     {
-        return param != null && param.split( DIMENSION_NAME_SEP ).length > 0 ? param.split( DIMENSION_NAME_SEP )[0] : null;
+        if ( param == null )
+        {
+            return null;
+        }
+        
+        return param.split( DIMENSION_NAME_SEP ).length > 0 ? param.split( DIMENSION_NAME_SEP )[0] : param;
     }
     
+    /**
+     * Retrieves the dimension options from the given string. Looks for the part
+     * succeeding the dimension name separator, if exists, splits the string part
+     * on the option separator and returns the resulting values. If the dimension
+     * name separator does not exist an empty list is returned, indicating that
+     * all dimension options should be used.
+     */
     public static List<String> getDimensionOptionsFromParam( String param )
     {
-        if ( param != null && param.split( DIMENSION_NAME_SEP ).length > 0 )
+        if ( param == null )
+        {
+            return null;
+        }
+        
+        if ( param.split( DIMENSION_NAME_SEP ).length > 1 )
         {
             return Arrays.asList( param.split( DIMENSION_NAME_SEP )[1].split( OPTION_SEP ) );
         }
         
-        return null;
+        return new ArrayList<String>();
+    }
+    
+    /**
+     * Retrieves the measure criteria from the given string. Criteria are separated
+     * by the option separator, while the criterion filter and value are separated
+     * with the dimension name separator.
+     */
+    public static Map<MeasureFilter, Double> getMeasureCriteriaFromParam( String param )
+    {
+        if ( param == null )
+        {
+            return null;
+        }
+        
+        Map<MeasureFilter, Double> map = new HashMap<MeasureFilter, Double>();
+        
+        String[] criteria = param.split( OPTION_SEP );
+        
+        for ( String c : criteria )
+        {
+            String[] criterion = c.split( DIMENSION_NAME_SEP );
+            
+            if ( criterion != null && criterion.length == 2 && MathUtils.isNumeric( criterion[1] ) )
+            {
+                MeasureFilter filter = MeasureFilter.valueOf( criterion[0] );
+                Double value = Double.valueOf( criterion[1] );
+                map.put( filter, value );
+            }
+        }
+        
+        return map;
     }
     
     // -------------------------------------------------------------------------
@@ -452,19 +506,7 @@ public class DataQueryParams
         
         return list;
     }
-    
-    private List<String> getAllDimensionNamesAsList()
-    {
-        List<String> list = getInputDimensionNamesAsList();
-
-        if ( categories )
-        {
-            list.add( CATEGORYOPTIONCOMBO_DIM_ID );
-        }
         
-        return list;
-    }
-    
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // -------------------------------------------------------------------------
@@ -474,7 +516,6 @@ public class DataQueryParams
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ( categories ? 1231 : 1237);
         result = prime * result + ( ( dimensions == null ) ? 0 : dimensions.hashCode() );
         result = prime * result + ( ( filters == null ) ? 0 : filters.hashCode() );
         return result;
@@ -512,11 +553,6 @@ public class DataQueryParams
             return false;
         }
         
-        if ( categories != other.categories )
-        {
-            return false;
-        }
-
         if ( filters == null )
         {
             if ( other.filters != null )
@@ -552,16 +588,6 @@ public class DataQueryParams
         this.dimensions = dimensions;
     }
 
-    public boolean isCategories()
-    {
-        return categories;
-    }
-
-    public void setCategories( boolean categories )
-    {
-        this.categories = categories;
-    }
-
     public List<Dimension> getFilters()
     {
         return filters;
@@ -570,6 +596,26 @@ public class DataQueryParams
     public void setFilters( List<Dimension> filters )
     {
         this.filters = filters;
+    }
+
+    public AggregationType getAggregationType()
+    {
+        return aggregationType;
+    }
+
+    public void setAggregationType( AggregationType aggregationType )
+    {
+        this.aggregationType = aggregationType;
+    }
+
+    public Map<MeasureFilter, Double> getMeasureCriteria()
+    {
+        return measureCriteria;
+    }
+
+    public void setMeasureCriteria( Map<MeasureFilter, Double> measureCriteria )
+    {
+        this.measureCriteria = measureCriteria;
     }
 
     // -------------------------------------------------------------------------
@@ -681,6 +727,31 @@ public class DataQueryParams
         setDimensionOptions( ORGUNIT_DIM_ID, DimensionType.ORGANISATIONUNIT, organisationUnits );
     }
     
+    public List<Dimension> getDataElementGroupSets()
+    {
+        List<Dimension> list = new ArrayList<Dimension>();
+        
+        for ( Dimension dimension : dimensions )
+        {
+            if ( DimensionType.DATAELEMENT_GROUPSET.equals( dimension.getType() ) )
+            {
+                list.add( dimension );
+            }
+        }
+        
+        return list;
+    }
+    
+    public void setDataElementGroupSet( Dimension dimension, List<IdentifiableObject> dataElementGroups )
+    {
+        setDimensionOptions( dimension.getDimension(), DimensionType.DATAELEMENT_GROUPSET, dataElementGroups );
+    }
+    
+    public void enableCategoryOptionCombos()
+    {
+        setDimensionOptions( CATEGORYOPTIONCOMBO_DIM_ID, DimensionType.CATEGORY_OPTION_COMBO, new ArrayList<IdentifiableObject>() );
+    }
+    
     // -------------------------------------------------------------------------
     // Get and set helpers for filters
     // -------------------------------------------------------------------------
@@ -718,16 +789,6 @@ public class DataQueryParams
     // -------------------------------------------------------------------------
     // Get and set methods for transient properties
     // -------------------------------------------------------------------------
-
-    public AggregationType getAggregationType()
-    {
-        return aggregationType;
-    }
-
-    public void setAggregationType( AggregationType aggregationType )
-    {
-        this.aggregationType = aggregationType;
-    }
 
     public PeriodType getDataPeriodType()
     {

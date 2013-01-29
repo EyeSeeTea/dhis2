@@ -152,14 +152,14 @@ public class DefaultProgramDataEntryService
 
                 DataElement dataElement = null;
 
-                String programStageName = programStage.getName();
+                String programStageName = programStage.getDisplayName();
 
                 if ( programStageId != programStage.getId() )
                 {
                     dataElement = dataElementService.getDataElement( dataElementId );
 
                     ProgramStage otherProgramStage = programStageService.getProgramStage( programStageId );
-                    programStageName = otherProgramStage != null ? otherProgramStage.getName() : "N/A";
+                    programStageName = otherProgramStage != null ? otherProgramStage.getDisplayName() : "N/A";
                 }
                 else
                 {
@@ -242,7 +242,8 @@ public class DefaultProgramDataEntryService
                 tabindex++;
 
                 if ( DataElement.VALUE_TYPE_INT.equals( dataElement.getType() )
-                    || DataElement.VALUE_TYPE_STRING.equals( dataElement.getType() ) )
+                    || DataElement.VALUE_TYPE_STRING.equals( dataElement.getType() )
+                    || DataElement.VALUE_TYPE_USER_NAME.equals( dataElement.getType() ) )
                 {
                     inputHTML = populateCustomDataEntryForTextBox( dataElement, inputHTML, dataElementValue );
                 }

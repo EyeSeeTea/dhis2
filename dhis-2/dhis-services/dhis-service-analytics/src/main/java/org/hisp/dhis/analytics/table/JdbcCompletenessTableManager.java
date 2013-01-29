@@ -35,6 +35,7 @@ import java.util.concurrent.Future;
 
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -68,10 +69,10 @@ public class JdbcCompletenessTableManager
     }
     
     @Async
-    public Future<?> populateTableAsync( String tableName, Date startDate, Date endDate )
+    public Future<?> populateTableAsync( String tableName, Period period )
     {
-        final String start = DateUtils.getMediumDateString( startDate );
-        final String end = DateUtils.getMediumDateString( endDate );
+        final String start = DateUtils.getMediumDateString( period.getStartDate() );
+        final String end = DateUtils.getMediumDateString( period.getEndDate() );
         
         String insert = "insert into " + tableName + " (";
         
@@ -89,7 +90,7 @@ public class JdbcCompletenessTableManager
             select += col[2] + ",";
         }
         
-        select = select.replace( "organisationunitid", "sourceid" ); // Legacy fix
+        select = select.replace( "organisationunitid", "sourceid" ); // Legacy fix TODO remove
         
         select += 
             "cdr.date as date " +
@@ -142,9 +143,9 @@ public class JdbcCompletenessTableManager
             columns.add( col );
         }
         
-        String[] de = { "ds", "character(11) not null", "ds.uid" };
+        String[] ds = { "ds", "character(11) not null", "ds.uid" };
         
-        columns.add( de );
+        columns.add( ds );
         
         return columns;
     }
@@ -159,7 +160,7 @@ public class JdbcCompletenessTableManager
 
     public Date getLatestData()
     {
-        final String sql = "select max(pe.startdate) from completedatasetregistration cdr " +
+        final String sql = "select max(pe.enddate) from completedatasetregistration cdr " +
             "join period pe on cdr.periodid=pe.periodid";
         
         return jdbcTemplate.queryForObject( sql, Date.class );
