@@ -259,9 +259,9 @@ Ext.onReady( function() {
 				fixedPeriodSelected,
 				fixedPeriod,
 				organisationUnit,
+				getOrganisationUnitGroupSetPanels,
 				accordion,
 
-				getOrganisationUnitGroupSetItems,
 				addListeners;
 
 			indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
@@ -1394,6 +1394,9 @@ Ext.onReady( function() {
 							render: function() {
 								this.rendered = true;
 							},
+							afterrender: function() {
+								this.getSelectionModel().select(0);
+							},
 							itemcontextmenu: function(v, r, h, i, e) {
 								v.getSelectionModel().select(r, false);
 
@@ -1445,6 +1448,220 @@ Ext.onReady( function() {
 				items: []
 			});
 
+			getOrganisationUnitGroupSetPanels = function() {
+				var	getAvailableStore,
+					getSelectedStore,
+
+					createPanel,
+					getPanels;
+
+				getAvailableStore = function(groupSetId) {
+					return Ext.create('Ext.data.Store', {
+						fields: ['id', 'name'],
+						proxy: {
+							type: 'ajax',
+							url: pt.conf.finals.ajax.path_api + 'organisationUnitGroupSets/' + groupSetId + '.json?links=false&paging=false',
+							reader: {
+								type: 'json',
+								root: 'organisationUnitGroups'
+							}
+						},
+						isLoaded: false,
+						storage: {},
+						sortStore: function() {
+							this.sort('name', 'ASC');
+						},
+						listeners: {
+							load: function(s) {
+								s.isLoaded = true;
+								s.each( function(r) {
+									r.data.name = pt.conf.util.jsonEncodeString(r.data.name);
+								});
+								pt.util.store.addToStorage(s);
+							}
+						}
+					});
+				};
+
+				getSelectedStore = function() {
+					return Ext.create('Ext.data.Store', {
+						fields: ['id', 'name'],
+						data: []
+					});
+				};
+
+				createPanel = function(groupSet) {
+					var getAvailable,
+						getSelected,
+						
+						availableStore,
+						selectedStore,
+						available,
+						selected,
+
+						panel;
+
+					getAvailable = function(availableStore) {
+						return Ext.create('Ext.ux.form.MultiSelect', {
+							cls: 'pt-toolbar-multiselect-left',
+							width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+							valueField: 'id',
+							displayField: 'name',
+							store: availableStore,
+							tbar: [
+								{
+									xtype: 'label',
+									text: 'Available', //i18n pt.i18n.available
+									cls: 'pt-toolbar-multiselect-left-label'
+								},
+								'->',
+								{
+									xtype: 'button',
+									icon: 'images/arrowright.png',
+									width: 22,
+									handler: function() {
+										pt.util.multiselect.select(available, selected);
+									}
+								},
+								{
+									xtype: 'button',
+									icon: 'images/arrowrightdouble.png',
+									width: 22,
+									handler: function() {
+										pt.util.multiselect.selectAll(available, selected);
+									}
+								}
+							],
+							listeners: {
+								afterrender: function() {
+									this.boundList.on('itemdblclick', function() {
+										pt.util.multiselect.select(available, selected);
+									}, this);
+								}
+							}
+						});
+					};
+
+					getSelected = function(selectedStore) {
+						return Ext.create('Ext.ux.form.MultiSelect', {
+							cls: 'pt-toolbar-multiselect-right',
+							width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
+							valueField: 'id',
+							displayField: 'name',
+							ddReorder: true,
+							store: selectedStore,
+							tbar: [
+								{
+									xtype: 'button',
+									icon: 'images/arrowleftdouble.png',
+									width: 22,
+									handler: function() {
+										pt.util.multiselect.unselectAll(available, selected);
+									}
+								},
+								{
+									xtype: 'button',
+									icon: 'images/arrowleft.png',
+									width: 22,
+									handler: function() {
+										pt.util.multiselect.unselect(available, selected);
+									}
+								},
+								'->',
+								{
+									xtype: 'label',
+									text: 'Selected', //i18n pt.i18n.selected,
+									cls: 'pt-toolbar-multiselect-right-label'
+								}
+							],
+							listeners: {
+								afterrender: function() {
+									this.boundList.on('itemdblclick', function() {
+										pt.util.multiselect.unselect(available, selected);
+									}, this);
+								}
+							}
+						});
+					};
+
+					availableStore = getAvailableStore(groupSet.id);
+					selectedStore = getSelectedStore();
+					
+					available = getAvailable(availableStore);
+					selected = getSelected(selectedStore);
+
+					availableStore.on('load', function() {
+						pt.util.multiselect.filterAvailable(available, selected);
+					});
+
+					panel = Ext.create('Ext.panel.Panel', {
+						title: '<div class="pt-panel-title-organisationunit">Group set: ' + groupSet.name + '</div>', //i18n
+						hideCollapseTool: true,
+						getData: function() {
+							var data = {
+								param: groupSet.id,
+								items: []
+							};
+
+							selectedStore.each( function(r) {
+								data.items.push(r.data.id);
+							});
+
+							return data.items.length ? data : null;
+						},
+						items: [
+							{
+								xtype: 'panel',
+								layout: 'column',
+								bodyStyle: 'border-style:none',
+								items: [
+									available,
+									selected
+								]
+							}
+						],
+						listeners: {
+							added: function() {
+								pt.cmp.dimension.panels.push(this);
+							},
+							expand: function() {
+								if (!availableStore.isLoaded) {
+									availableStore.load();
+								}
+								
+								pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_indicator);
+
+								pt.util.multiselect.setHeight(
+									[available, selected],
+									this,
+									pt.conf.layout.west_fill_accordion_indicator
+								);
+							}
+						}
+					});
+
+					return panel;
+				};
+
+				getPanels = function() {
+					var ougs = pt.init.ougs,
+						panels = [],
+						groupSet;
+
+					for (var i = 0, panel; i < ougs.length; i++) {
+						groupSet = ougs[i];
+
+						panel = createPanel(groupSet);
+
+						panels.push(panel);
+					}
+
+					return panels;
+				};
+
+				return getPanels();
+			};
+
 			accordion = Ext.create('Ext.panel.Panel', {
 				bodyStyle: 'border-style:none; padding:6px;',
 				layout: 'fit',
@@ -1456,14 +1673,20 @@ Ext.onReady( function() {
 						cls: 'pt-accordion',
 						bodyStyle: 'border:0 none',
 						height: 430,
-						items: [
-							indicator,
-							dataElement,
-							dataSet,
-							period,
-							organisationUnit,
-							options
-						]
+						items: function() {
+							var panels = [
+								indicator,
+								dataElement,
+								dataSet,
+								period,
+								organisationUnit
+							];
+
+							panels = panels.concat(getOrganisationUnitGroupSetPanels());
+							panels.push(options);
+
+							return panels;
+						}(),
 					}
 				],
 				listeners: {
@@ -1558,7 +1781,7 @@ Ext.onReady( function() {
 	};
 
 	Ext.Ajax.request({
-		url: pt.baseUrl + pt.conf.finals.ajax.path_pivot_static + 'initialize.action',
+		url: pt.conf.finals.ajax.path_pivot + 'initialize.action',
 		success: function(r) {
 			PT.app.init.onInitialize(r);
 	}});
