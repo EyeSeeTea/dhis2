@@ -400,11 +400,6 @@ PT.core.getUtils = function(pt) {
 				dimensionItems = Ext.clone(col);
 				Ext.apply(dimensionItems, row);
 
-/////////////////////////tmp
-//dimensionItems['Bpx0589u8y0'] = ['oRVt7g429ZO', 'MAs88nJc9nL', 'PVLOW4bCshG', 'w0gFTTmsUcF'];
-//console.log(dimensionItems);
-/////////////////////////tmp
-
 				return dimensionItems;
 			};
 			

@@ -249,31 +249,34 @@ td .bad div {
 .pt-toolbar-multiselect-right .x-docked-top {
 	border-top-right-radius: 2px;
 }
+.pt-toolbar-multiselect-leftright .x-docked-top {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+}
 
 	/* Multiselect docked bar font size */
-.pt-toolbar-multiselect-left .pt-toolbar-multiselect-left-label {
+.pt-toolbar-multiselect-left .pt-toolbar-multiselect-left-label,
+.pt-toolbar-multiselect-right .pt-toolbar-multiselect-right-label,
+.pt-toolbar-multiselect-leftright .pt-toolbar-multiselect-leftright-label {
     font-size: 11px;
-    padding-left: 6px;
+}
+.pt-toolbar-multiselect-left .pt-toolbar-multiselect-left-label {
+	padding-left: 6px;
 }
 .pt-toolbar-multiselect-right .pt-toolbar-multiselect-right-label {
-    font-size: 11px;
     padding-right: 7px;
+}
+.pt-toolbar-multiselect-leftright .pt-toolbar-multiselect-leftright-label {
+    padding-left: 4px;
 }
 
 	/* Multiselect boundlist */
-.pt-toolbar-multiselect-left .x-boundlist-item-over {
-    background-color: transparent;
-    border-color: transparent;
-}
-.pt-toolbar-multiselect-left .x-boundlist-selected {
-    background-color: #e5e5e5;
-    border-color: #e5e5e5;
-}
-
+.pt-toolbar-multiselect-left .x-boundlist-item-over,
 .pt-toolbar-multiselect-right .x-boundlist-item-over {
     background-color: transparent;
     border-color: transparent;
 }
+.pt-toolbar-multiselect-left .x-boundlist-selected,
 .pt-toolbar-multiselect-right .x-boundlist-selected {
     background-color: #e5e5e5;
     border-color: #e5e5e5;

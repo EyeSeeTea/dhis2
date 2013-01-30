@@ -236,6 +236,207 @@ Ext.onReady( function() {
 		return cmp;
 	};
 
+	PT.app.SettingsWindow = function(pt) {
+		var dimension,
+			dimensionStore,
+			row,
+			//rowStore,
+			col,
+			//colStore,
+			filter,
+			//filterStore,
+			value,
+
+			getData,
+			getStore,
+			
+			dimensionPanel,
+			selectPanel,
+			window;
+
+		getData = function() {
+			var groupSets = [],
+				data = [
+					{ id: 'dx', name: 'Data' },
+					{ id: 'coc', name: 'Categories' },
+					{ id: 'pe', name: 'Periods' },
+					{ id: 'ou', name: 'Organisation units' }
+				];
+
+			for (var i = 0; i < pt.init.ougs.length; i++) {
+				var gs = pt.init.ougs[i];
+
+				groupSets.push({
+					id: gs.id,
+					name: 'Group set: ' + gs.name //i18n
+				});
+			}
+
+			return data.concat(groupSets);
+		};
+
+		getStore = function(data) {
+			return Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: data || [],
+				listeners: {
+					add: function() {
+						console.log(arguments);
+					}
+				}
+			});
+		};			
+		
+		dimensionStore = getStore(getData());
+
+		dimension = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'pt-toolbar-multiselect-leftright',
+			width: 150,
+			height: 300,
+			style: 'margin-right:10px',
+			valueField: 'id',
+			displayField: 'name',
+			dragGroup: 'settingsDD',
+			dropGroup: 'settingsDD',
+			store: dimensionStore,
+			tbar: {
+				height: 25,
+				items: {
+					xtype: 'label',
+					text: 'Dimensions', //i18n
+					cls: 'pt-toolbar-multiselect-leftright-label'
+				}
+			}
+		});
+
+		row = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'pt-toolbar-multiselect-leftright',
+			width: 150,
+			height: 120,
+			style: 'margin-right:4px',
+			valueField: 'id',
+			displayField: 'name',
+			dragGroup: 'settingsDD',
+			dropGroup: 'settingsDD',
+			store: getStore(),
+			tbar: {
+				height: 25,
+				items: {
+					xtype: 'label',
+					text: 'Row', //i18n
+					cls: 'pt-toolbar-multiselect-leftright-label'
+				}
+			},
+			listeners: {
+				afterrender: function(ms) {
+					ms.boundList.on('itemdblclick', function(view, record) {
+						ms.store.remove(record);
+						dimensionStore.add(record);
+					});
+				}
+			}
+		});
+
+		col = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'pt-toolbar-multiselect-leftright',
+			width: 150,
+			height: 120,
+			valueField: 'id',
+			displayField: 'name',
+			dragGroup: 'settingsDD',
+			dropGroup: 'settingsDD',
+			store: getStore(),
+			tbar: {
+				height: 25,
+				items: {
+					xtype: 'label',
+					text: 'Column', //i18n
+					cls: 'pt-toolbar-multiselect-leftright-label'
+				}
+			},
+			listeners: {
+				afterrender: function(ms) {
+					ms.boundList.on('itemdblclick', function(view, record) {
+						ms.store.remove(record);
+						dimensionStore.add(record);
+					});
+				}
+			}
+		});
+
+		filter = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'pt-toolbar-multiselect-leftright',
+			width: 150,
+			height: 120,
+			style: 'margin-right:4px',
+			valueField: 'id',
+			displayField: 'name',
+			dragGroup: 'settingsDD',
+			dropGroup: 'settingsDD',
+			store: getStore(),
+			tbar: {
+				height: 25,
+				items: {
+					xtype: 'label',
+					text: 'Filter', //i18n
+					cls: 'pt-toolbar-multiselect-leftright-label'
+				}
+			},
+			listeners: {
+				afterrender: function(ms) {
+					ms.boundList.on('itemdblclick', function(view, record) {
+						ms.store.remove(record);
+						dimensionStore.add(record);
+					});
+				}
+			}
+		});
+
+		value = Ext.create('Ext.form.Label', {
+			text: 'Value = DHIS 2 data value'
+		});
+
+		selectPanel = Ext.create('Ext.panel.Panel', {
+			bodyStyle: 'border:0 none',
+			items: [
+				{
+					layout: 'column',
+					bodyStyle: 'border:0 none',
+					items: [
+						filter,
+						col
+					]
+				},
+				{
+					layout: 'column',
+					bodyStyle: 'border:0 none',
+					items: [
+						row,
+						value
+					]
+				}
+			]
+		});
+
+		window = Ext.create('Ext.window.Window', {
+			title: 'Pivot settings', //i18n
+			layout: 'fit',
+			bodyStyle: 'background-color:#fff; padding:8px',
+			width: 500,
+			modal: true,
+			items: {
+				layout: 'column',
+				bodyStyle: 'border:0 none',
+				items: [
+					dimension,					
+					selectPanel
+				]
+			}
+		});
+
+		return window;
+	};
+
 	PT.app.init.onInitialize = function(r) {
 		var createViewport;
 
@@ -308,7 +509,6 @@ Ext.onReady( function() {
 				width: (pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding) / 2,
 				valueField: 'id',
 				displayField: 'name',
-				ddReorder: true,
 				store: pt.store.indicatorSelected,
 				tbar: [
 					{
@@ -1723,6 +1923,14 @@ Ext.onReady( function() {
                         height: 26
                     },
 					items: [
+						{
+							text: 'Settings',
+							handler: function() {
+								var window = PT.app.SettingsWindow(pt);
+
+								window.show();
+							}
+						},
 						{
 							text: '<b>Update</b>',
 							handler: function() {
