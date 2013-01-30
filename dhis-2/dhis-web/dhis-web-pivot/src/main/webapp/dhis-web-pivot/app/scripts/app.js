@@ -56,7 +56,7 @@ Ext.onReady( function() {
 				},
 				setup = {
 					col: ['de', 'Bpx0589u8y0'],
-					row: ['pe'],
+					row: ['pe', 'J5jldMd8OHv'],
 					filter: ['ou'],
 					categories: false
 				};
