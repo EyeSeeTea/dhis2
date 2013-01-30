@@ -240,11 +240,11 @@ Ext.onReady( function() {
 		var dimension,
 			dimensionStore,
 			row,
-			//rowStore,
+			rowStore,
 			col,
-			//colStore,
+			colStore,
 			filter,
-			//filterStore,
+			filterStore,
 			value,
 
 			getData,
@@ -291,7 +291,7 @@ Ext.onReady( function() {
 
 		dimension = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
-			width: 150,
+			width: 160,
 			height: 300,
 			style: 'margin-right:10px',
 			valueField: 'id',
@@ -306,12 +306,23 @@ Ext.onReady( function() {
 					text: 'Dimensions', //i18n
 					cls: 'pt-toolbar-multiselect-leftright-label'
 				}
+			},
+			listeners: {
+				afterrender: function(ms) {
+					ms.store.on('add', function() {
+						Ext.defer( function() {
+							ms.boundList.getSelectionModel().deselectAll();
+						}, 10);
+					});
+				}
 			}
 		});
 
+		rowStore = getStore();
+
 		row = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
-			width: 150,
+			width: 160,
 			height: 120,
 			style: 'margin-right:4px',
 			valueField: 'id',
@@ -333,13 +344,19 @@ Ext.onReady( function() {
 						ms.store.remove(record);
 						dimensionStore.add(record);
 					});
+
+					ms.store.on('add', function() {
+						Ext.defer( function() {
+							ms.boundList.getSelectionModel().deselectAll();
+						}, 10);
+					});
 				}
 			}
 		});
 
 		col = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
-			width: 150,
+			width: 160,
 			height: 120,
 			valueField: 'id',
 			displayField: 'name',
@@ -360,15 +377,21 @@ Ext.onReady( function() {
 						ms.store.remove(record);
 						dimensionStore.add(record);
 					});
+
+					ms.store.on('add', function() {
+						Ext.defer( function() {
+							ms.boundList.getSelectionModel().deselectAll();
+						}, 10);
+					});
 				}
 			}
 		});
 
 		filter = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
-			width: 150,
+			width: 160,
 			height: 120,
-			style: 'margin-right:4px',
+			style: 'margin-right:5px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
@@ -387,6 +410,12 @@ Ext.onReady( function() {
 					ms.boundList.on('itemdblclick', function(view, record) {
 						ms.store.remove(record);
 						dimensionStore.add(record);
+					});
+
+					ms.store.on('add', function() {
+						Ext.defer( function() {
+							ms.boundList.getSelectionModel().deselectAll();
+						}, 10);
 					});
 				}
 			}
@@ -421,9 +450,9 @@ Ext.onReady( function() {
 		window = Ext.create('Ext.window.Window', {
 			title: 'Pivot settings', //i18n
 			layout: 'fit',
-			bodyStyle: 'background-color:#fff; padding:8px',
-			width: 500,
+			bodyStyle: 'background-color:#fff; padding:8px 8px 3px',
 			modal: true,
+			resizable: false,
 			items: {
 				layout: 'column',
 				bodyStyle: 'border:0 none',
@@ -431,7 +460,21 @@ Ext.onReady( function() {
 					dimension,					
 					selectPanel
 				]
-			}
+			},
+			bbar: [
+				'->',
+				{
+					text: 'Hide',
+					handler: function() {
+						window.hide();
+					}
+				}
+			],
+			listeners: {
+				afterrender: function(w) {
+					w.setPosition(w.getPosition()[0], 100);
+				}
+			}					
 		});
 
 		return window;
