@@ -479,12 +479,11 @@ Ext.onReady( function() {
 			};
 		};
 
-		PT.s = colStore;
-
 		window = Ext.create('Ext.window.Window', {
 			title: 'Pivot settings', //i18n
 			layout: 'fit',
 			bodyStyle: 'background-color:#fff; padding:8px 8px 3px',
+			closeAction: 'hide',
 			modal: true,
 			resizable: false,
 			getSetup: getSetup,
