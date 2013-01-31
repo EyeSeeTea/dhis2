@@ -43,10 +43,14 @@ PT.core.getConfigs = function() {
             data: {
                 value: 'data',
                 rawvalue: 'Data', //i18n PT.i18n.data,
+                paramname: 'dx',
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_ind_de
 				}
             },
+            category: {
+				paramname: 'coc'
+			},
             indicator: {
                 value: 'indicator',
                 rawvalue: 'Indicator', //i18n PT.i18n.indicator,
@@ -409,14 +413,16 @@ PT.core.getUtils = function(pt) {
 
 				for (var key in dimensionItems) {
 					if (dimensionItems.hasOwnProperty(key)) {
-						paramString += 'dimension=' + key + ':' + dimensionItems[key].join(',') + '&';
+						if (key === pt.conf.finals.dimension.category.paramname) {
+							paramString += 'dimension=' + key + '&';
+						}
+						else {
+							paramString += 'dimension=' + key + ':' + dimensionItems[key].join(',') + '&';
+						}
 					}
 				}
 
 				paramString = paramString.substring(0, paramString.length-1);
-
-				//paramString += '&filter=ou:' + pt.init.rootNodes[0].id;
-				//paramString += '&categories=false';
 
 				return paramString;
 			};
@@ -924,8 +930,7 @@ PT.core.getUtils = function(pt) {
 					method: 'GET',
 					url: 'http://localhost:8080/api/analytics.jsonp' + paramString,
 					params: {
-						filter: getFilterParamStringFromSettings(),
-						categories: settings.categories
+						filter: getFilterParamStringFromSettings()
 					},
 					headers: {
 						'Content-Type': 'application/json',
@@ -1003,8 +1008,6 @@ PT.core.getAPI = function(pt) {
 		}
 
 		settings.filter = filter;
-
-		settings.categories = config.categories ? true : false;
 
 		return settings;
 	};

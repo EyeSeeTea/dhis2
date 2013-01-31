@@ -49,27 +49,34 @@ Ext.onReady( function() {
 
 		util.pivot.getSettingsConfig = function() {
 			var data = {},
+				setup = pt.viewport.settingsWindow.getSetup(),
 				config = {
 					col: {},
 					row: {},
 					filter: {}
 				},
-				setup = {
-					col: ['de', 'Bpx0589u8y0'],
-					row: ['pe', 'J5jldMd8OHv'],
-					filter: ['ou'],
-					categories: false
-				};
+				getData,
+				extendSettings;
 
 			getData = function() {
-				var panels = pt.cmp.dimension.panels;
+				var panels = pt.cmp.dimension.panels,
+					dxItems = [];
 
 				for (var i = 0, dimData; i < panels.length; i++) {
 					dimData = panels[i].getData();
 
 					if (dimData) {
-						data[dimData.param] = dimData.items;
+						if (dimData.param === pt.conf.finals.dimension.data.paramname) {
+							dxItems = dxItems.concat(dimData.items);
+						}
+						else {
+							data[dimData.param] = dimData.items;
+						}
 					}
+				}
+
+				if (dxItems.length) {
+					data[pt.conf.finals.dimension.data.paramname] = dxItems;
 				}
 			}();
 
@@ -88,8 +95,6 @@ Ext.onReady( function() {
 					dim = setup.filter[i];
 					config.filter[dim] = data[dim];
 				}
-
-				config.categories = setup.categories;
 			}();
 
 			return config;
@@ -250,6 +255,7 @@ Ext.onReady( function() {
 			getData,
 			getStore,
 			getCmpHeight,
+			getSetup,
 
 			dimensionPanel,
 			selectPanel,
@@ -284,16 +290,14 @@ Ext.onReady( function() {
 		getStore = function(data) {
 			return Ext.create('Ext.data.Store', {
 				fields: ['id', 'name'],
-				data: data || [],
-				listeners: {
-					add: function() {
-						console.log(arguments);
-					}
-				}
+				data: data || []
 			});
 		};
 
 		dimensionStore = getStore(getData());
+		rowStore = getStore();
+		colStore = getStore();
+		filterStore = getStore();
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
@@ -340,8 +344,6 @@ Ext.onReady( function() {
 			}
 		});
 
-		rowStore = getStore();
-
 		row = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
 			width: defaultWidth,
@@ -351,7 +353,7 @@ Ext.onReady( function() {
 			displayField: 'name',
 			dragGroup: 'settingsDD',
 			dropGroup: 'settingsDD',
-			store: getStore(),
+			store: rowStore,
 			tbar: {
 				height: 25,
 				items: {
@@ -384,7 +386,7 @@ Ext.onReady( function() {
 			displayField: 'name',
 			dragGroup: 'settingsDD',
 			dropGroup: 'settingsDD',
-			store: getStore(),
+			store: colStore,
 			tbar: {
 				height: 25,
 				items: {
@@ -418,7 +420,7 @@ Ext.onReady( function() {
 			displayField: 'name',
 			dragGroup: 'settingsDD',
 			dropGroup: 'settingsDD',
-			store: getStore(),
+			store: filterStore,
 			tbar: {
 				height: 25,
 				items: {
@@ -469,12 +471,23 @@ Ext.onReady( function() {
 			]
 		});
 
+		getSetup = function() {
+			return {
+				col: colStore.data.keys,
+				row: rowStore.data.keys,
+				filter: filterStore.data.keys
+			};
+		};
+
+		PT.s = colStore;
+
 		window = Ext.create('Ext.window.Window', {
 			title: 'Pivot settings', //i18n
 			layout: 'fit',
 			bodyStyle: 'background-color:#fff; padding:8px 8px 3px',
 			modal: true,
 			resizable: false,
+			getSetup: getSetup,
 			items: {
 				layout: 'column',
 				bodyStyle: 'border:0 none',
@@ -613,7 +626,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						param: 'in',
+						param: pt.conf.finals.dimension.indicator.paramname,
 						items: []
 					};
 
@@ -796,7 +809,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						param: 'de',
+						param: pt.conf.finals.dimension.indicator.paramname,
 						items: []
 					};
 
@@ -979,7 +992,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						param: 'ds',
+						param: pt.conf.finals.dimension.indicator.paramname,
 						items: []
 					};
 
@@ -1300,7 +1313,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-							param: 'pe',
+						param: pt.conf.finals.dimension.period.paramname,
 							items: []
 						},
 						chb = pt.cmp.dimension.relativePeriod.checkbox;
@@ -1991,9 +2004,11 @@ Ext.onReady( function() {
 						{
 							text: 'Settings',
 							handler: function() {
-								var window = PT.app.SettingsWindow(pt);
+								if (!pt.viewport.settingsWindow) {
+									pt.viewport.settingsWindow = PT.app.SettingsWindow(pt);
+								}
 
-								window.show();
+								pt.viewport.settingsWindow.show();
 							}
 						},
 						{
@@ -2001,7 +2016,9 @@ Ext.onReady( function() {
 							handler: function() {
 								var settings = pt.api.Settings(pt.util.pivot.getSettingsConfig());
 
-								pt.util.pivot.getTable(settings, pt, centerRegion);
+								if (settings && Ext.isObject(settings)) {
+									pt.util.pivot.getTable(settings, pt, centerRegion);
+								}
 							}
 						}
 					]
