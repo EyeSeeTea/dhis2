@@ -27,15 +27,11 @@ package org.hisp.dhis.analytics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public enum DimensionType
+public class IllegalQueryException
+    extends RuntimeException
 {
-    INDICATOR,
-    DATAELEMENT,
-    DATASET,
-    DATA_X,
-    CATEGORY_OPTION_COMBO,
-    PERIOD,
-    ORGANISATIONUNIT,
-    DATAELEMENT_GROUPSET,
-    ORGANISATIONUNIT_GROUPSET
+    public IllegalQueryException( String message )
+    {
+        super( message );
+    }
 }

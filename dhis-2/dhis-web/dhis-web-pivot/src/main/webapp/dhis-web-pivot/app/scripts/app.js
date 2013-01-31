@@ -63,7 +63,7 @@ Ext.onReady( function() {
 
 			getData = function() {
 				var panels = pt.cmp.dimension.panels;
-					
+
 				for (var i = 0, dimData; i < panels.length; i++) {
 					dimData = panels[i].getData();
 
@@ -249,7 +249,8 @@ Ext.onReady( function() {
 
 			getData,
 			getStore,
-			
+			getWindowHeight,
+
 			dimensionPanel,
 			selectPanel,
 			window;
@@ -285,25 +286,26 @@ Ext.onReady( function() {
 					}
 				}
 			});
-		};			
-		
+		};
+
 		dimensionStore = getStore(getData());
 
 		dimension = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
 			width: 160,
 			height: 300,
-			style: 'margin-right:10px',
+			style: 'margin-right:5px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
 			dropGroup: 'settingsDD',
 			store: dimensionStore,
 			tbar: {
+				cls: 'pt-toolbar-main',
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: 'Dimensions', //i18n
+					text: 'Available dimensions', //i18n
 					cls: 'pt-toolbar-multiselect-leftright-label'
 				}
 			},
@@ -323,7 +325,7 @@ Ext.onReady( function() {
 		row = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
 			width: 160,
-			height: 120,
+			height: 148,
 			style: 'margin-right:4px',
 			valueField: 'id',
 			displayField: 'name',
@@ -357,7 +359,7 @@ Ext.onReady( function() {
 		col = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
 			width: 160,
-			height: 120,
+			height: 148,
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
@@ -390,7 +392,7 @@ Ext.onReady( function() {
 		filter = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
 			width: 160,
-			height: 120,
+			height: 148,
 			style: 'margin-right:5px',
 			valueField: 'id',
 			displayField: 'name',
@@ -447,6 +449,11 @@ Ext.onReady( function() {
 			]
 		});
 
+		getWindowHeight = function() {
+			var size = dimensionStore.totalCount;
+
+		};
+
 		window = Ext.create('Ext.window.Window', {
 			title: 'Pivot settings', //i18n
 			layout: 'fit',
@@ -457,7 +464,7 @@ Ext.onReady( function() {
 				layout: 'column',
 				bodyStyle: 'border:0 none',
 				items: [
-					dimension,					
+					dimension,
 					selectPanel
 				]
 			},
@@ -474,7 +481,7 @@ Ext.onReady( function() {
 				afterrender: function(w) {
 					w.setPosition(w.getPosition()[0], 100);
 				}
-			}					
+			}
 		});
 
 		return window;
@@ -1402,7 +1409,7 @@ Ext.onReady( function() {
 					}
 
 					return data.items.length ? data : null;
-				},					
+				},
 				items: [
 					{
 						layout: 'column',
@@ -1736,7 +1743,7 @@ Ext.onReady( function() {
 				createPanel = function(groupSet) {
 					var getAvailable,
 						getSelected,
-						
+
 						availableStore,
 						selectedStore,
 						available,
@@ -1829,7 +1836,7 @@ Ext.onReady( function() {
 
 					availableStore = getAvailableStore(groupSet.id);
 					selectedStore = getSelectedStore();
-					
+
 					available = getAvailable(availableStore);
 					selected = getSelected(selectedStore);
 
@@ -1871,7 +1878,7 @@ Ext.onReady( function() {
 								if (!availableStore.isLoaded) {
 									availableStore.load();
 								}
-								
+
 								pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_indicator);
 
 								pt.util.multiselect.setHeight(

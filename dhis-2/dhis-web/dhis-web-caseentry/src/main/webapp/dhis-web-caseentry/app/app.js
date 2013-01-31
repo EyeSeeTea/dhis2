@@ -1227,7 +1227,8 @@ Ext.onReady( function() {
 								Ext.getCmp('limitOption').setValue( f.limitRecords );
 								TR.util.positionFilter.convert( f.position );
 								Ext.getCmp('dataElementGroupByCbx').setValue( f.deGroupBy );
-								Ext.getCmp('aggregateType').setValue( f.deGroupBy );
+								Ext.getCmp('deSumCbx').setValue( f.deSum );
+								Ext.getCmp('aggregateType').setValue( f.aggregateType );
 								Ext.getCmp('levelCombobox').setValue( f.level );
 																
 								// Program stage									
@@ -1235,7 +1236,6 @@ Ext.onReady( function() {
 								storeProgramStage.parent = f.programStageId;
 								storeProgramStage.isLoadFromFavorite = true;
 								storeProgramStage.load({params: {programId: f.programId}});
-								
 								Ext.getCmp('programStageCombobox').setValue( f.programStageId );
 								
 								TR.exe.execute();
@@ -1290,6 +1290,8 @@ Ext.onReady( function() {
 						Ext.getCmp('programStageCombobox').disable();
 						var programStageId = TR.store.programStage.data.items[0].raw.id;
 						Ext.getCmp('programStageCombobox').setValue( programStageId );
+						
+						// Load data element list
 						var store = TR.store.dataelement.available;
 						TR.store.dataelement.available.loadData([],false);
 						if( !TR.store.programStage.isLoadFromFavorite)
@@ -1327,6 +1329,16 @@ Ext.onReady( function() {
 						this.isloaded = true;
                         TR.util.store.addToStorage(s);
                         TR.util.multiselect.filterAvailable(TR.cmp.params.dataelement.available, TR.cmp.params.dataelement.selected);
+						
+						TR.store.aggregateDataelement.loadData([],false);
+						TR.cmp.params.dataelement.available.store.each( function(r) {
+							if(r.data.valueType == 'int'){
+								TR.store.aggregateDataelement.add({
+									'id': r.data.id,
+									'name': r.data.name
+								});
+							}
+						});
                     }
 				}
             }),
@@ -1428,6 +1440,10 @@ Ext.onReady( function() {
         },
 		dateRange: Ext.create('Ext.data.Store', {
 			fields: ['startDate', 'endDate'],
+			data: []
+		}),
+		aggregateDataelement: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
 			data: []
 		})
 	}
@@ -1903,6 +1919,10 @@ Ext.onReady( function() {
 				var p = {};
 				p.programStageId = TR.cmp.params.programStage.getValue();
 				p.aggregateType = Ext.getCmp('aggregateType').getValue().aggregateType;
+				if( p.aggregateType != 'count')
+				{
+					p.deSum = Ext.getCmp('deSumCbx').getValue().split('_')[1];
+				}				
 				
 				// orgunits
 				
@@ -2004,6 +2024,13 @@ Ext.onReady( function() {
 				}
 				else{
 					document.getElementById('limitRecords').value = "";
+				}
+				
+				if( Ext.getCmp('aggregateType').getValue().aggregateType != 'count'){
+					document.getElementById('deSum').value = Ext.getCmp('deSumCbx').getValue();
+				}
+				else{
+					document.getElementById('deSum').value = '';
 				}
 				
 				// orgunits
@@ -2178,6 +2205,12 @@ Ext.onReady( function() {
 						return false;
 					}
 					
+					if( Ext.getCmp('aggregateType').getValue().aggregateType != 'count'
+						&& ( Ext.getCmp('deSumCbx').getValue() == null || Ext.getCmp('deSumCbx').getValue=='')){
+						TR.util.notification.error(TR.i18n.select_a_dataelement_for_sum_avg_operator, TR.i18n.select_a_dataelement_for_sum_avg_operator );
+						return false;	
+					}
+				
 					return true;
 				},
 				response: function(r) {
@@ -2714,7 +2747,6 @@ Ext.onReady( function() {
 									id: 'reportTypeGroup',
 									fieldLabel: TR.i18n.report_type,
 									labelStyle: 'font-weight:bold',
-									//labelAlign: 'top',
 									columns: 2,
 									vertical: true,
 									items: [
@@ -2727,6 +2759,7 @@ Ext.onReady( function() {
 											change: function (cb, nv, ov) {
 												if(nv)
 												{
+													// for case-based report
 													dataElementTabTitle.innerHTML = TR.i18n.data_elements;
 													Ext.getCmp('limitOption').setVisible(false);
 													Ext.getCmp('dataElementGroupByCbx').setVisible(false);
@@ -2737,6 +2770,7 @@ Ext.onReady( function() {
 													Ext.getCmp('completedEventsOpt').setVisible(false);
 													Ext.getCmp('aggregateFavoriteBtn').setVisible(false);
 													Ext.getCmp('datePeriodRangeDiv').setVisible(false);
+													Ext.getCmp('deSumCbx').setVisible(false);
 													Ext.getCmp('caseBasedFavoriteBtn').setVisible(true);
 													Ext.getCmp('levelCombobox').setVisible(true);
 													
@@ -2756,6 +2790,7 @@ Ext.onReady( function() {
 											change: function (cb, nv, ov) {
 												if(nv)
 												{
+													// For aggregate report
 													dataElementTabTitle.innerHTML = TR.i18n.data_filter;
 													Ext.getCmp('limitOption').setVisible(true);
 													Ext.getCmp('dataElementGroupByCbx').setVisible(true);
@@ -2763,11 +2798,12 @@ Ext.onReady( function() {
 													Ext.getCmp('downloadPdfIcon').setVisible(true);
 													Ext.getCmp('downloadCvsIcon').setVisible(true);
 													Ext.getCmp('aggregateFavoriteBtn').setVisible(true);
-													Ext.getCmp('caseBasedFavoriteBtn').setVisible(false);
 													Ext.getCmp('positionField').setVisible(true);
 													Ext.getCmp('completedEventsOpt').setVisible(true);
+													Ext.getCmp('deSumCbx').setVisible(true);
 													Ext.getCmp('dateRangeDiv').setVisible(false);
 													Ext.getCmp('levelCombobox').setVisible(false);
+													Ext.getCmp('caseBasedFavoriteBtn').setVisible(false);
 													
 													Ext.getCmp('datePeriodRangeDiv').setVisible(true);
 													Ext.getCmp('fixedPeriodsDiv').setVisible(true);
@@ -4143,7 +4179,43 @@ Ext.onReady( function() {
 														boxLabel: TR.i18n.avg,
 														name: 'aggregateType',
 														inputValue: 'avg'
-													}]
+													}],
+													listeners: {
+														change : function(thisFormField, newValue, oldValue, eOpts) {
+														  var opt = newValue.aggregateType[0];
+														  
+														  if( opt==oldValue.aggregateType && newValue.aggregateType.length > 1){
+															opt = newValue.aggregateType[1];
+														  }
+														  
+														  if (opt=='sum' || opt=='avg') {
+															Ext.getCmp('deSumCbx').enable();
+														  }
+														  else  if (opt=='count'){
+															Ext.getCmp('deSumCbx').disable();
+														  }
+														}
+													}
+												},
+												{
+													xtype: 'combobox',
+													cls: 'tr-combo',
+													id: 'deSumCbx',
+													disabled: true,
+													fieldLabel: TR.i18n.sum_avg_of,
+													labelWidth: 135,
+													emptyText: TR.i18n.please_select,
+													queryMode: 'local',
+													editable: true,
+													valueField: 'id',
+													displayField: 'name',
+													width: TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor - 40,
+													store: TR.store.aggregateDataelement,
+													listeners: {
+														added: function() {
+															TR.cmp.settings.aggregateDataelement = this;
+														}
+													}
 												},
 												{
 													xtype: 'checkbox',
@@ -5474,6 +5546,7 @@ Ext.onReady( function() {
 				dataElementTabTitle.innerHTML = TR.i18n.data_elements;
 				Ext.getCmp('limitOption').setVisible(false);
 				Ext.getCmp('dataElementGroupByCbx').setVisible(false);
+				Ext.getCmp('deSumCbx').setVisible(false);
 				Ext.getCmp('aggregateType').setVisible(false);
 				Ext.getCmp('downloadPdfIcon').setVisible(false);
 				Ext.getCmp('downloadCvsIcon').setVisible(false);

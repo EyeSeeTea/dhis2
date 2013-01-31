@@ -334,6 +334,17 @@ td .bad div {
     background-image: -ms-linear-gradient(top, #f1f1f1,#f5f5f5);
     background-image: linear-gradient(top, #f1f1f1,#f5f5f5);
 }
+.pt-toolbar-main {
+    border-color: #D0D0D0;
+    background-image: none;
+    background-color: #f1f1f1;
+    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #e3e3e3), color-stop(100%, #eaeaea));
+    background-image: -webkit-linear-gradient(top, #e3e3e3,#eaeaea);
+    background-image: -moz-linear-gradient(top, #e3e3e3,#eaeaea);
+    background-image: -o-linear-gradient(top, #e3e3e3,#eaeaea);
+    background-image: -ms-linear-gradient(top, #e3e3e3,#eaeaea);
+    background-image: linear-gradient(top, #e3e3e3,#eaeaea);
+}
 
 
 /*----------------------------------------------------------------------------

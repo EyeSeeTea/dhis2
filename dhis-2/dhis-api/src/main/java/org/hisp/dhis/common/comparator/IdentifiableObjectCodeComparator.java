@@ -1,4 +1,4 @@
-package org.hisp.dhis.analytics;
+package org.hisp.dhis.common.comparator;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,15 +27,25 @@ package org.hisp.dhis.analytics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public enum DimensionType
+import java.util.Comparator;
+
+import org.hisp.dhis.common.IdentifiableObject;
+
+/**
+ * @author Lars Helge Overland
+ */
+public class IdentifiableObjectCodeComparator
+    implements Comparator<IdentifiableObject>
 {
-    INDICATOR,
-    DATAELEMENT,
-    DATASET,
-    DATA_X,
-    CATEGORY_OPTION_COMBO,
-    PERIOD,
-    ORGANISATIONUNIT,
-    DATAELEMENT_GROUPSET,
-    ORGANISATIONUNIT_GROUPSET
+    public static final Comparator<IdentifiableObject> INSTANCE = new IdentifiableObjectCodeComparator();
+    
+    public int compare( IdentifiableObject object0, IdentifiableObject object1 )
+    {
+        if ( object0 == null )
+        {
+            return object1 == null ? 0 : -1;
+        }
+        
+        return object1 == null ? 1 : object0.getCode().compareToIgnoreCase( object1.getCode() );
+    }
 }

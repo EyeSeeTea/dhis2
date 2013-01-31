@@ -28,6 +28,7 @@ package org.hisp.dhis.web.webapi.v1.controller;
  */
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.hisp.dhis.api.controller.organisationunit.OrganisationUnitLevelController;
 import org.hisp.dhis.common.DeleteNotAllowedException;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
@@ -42,6 +43,7 @@ import org.hisp.dhis.web.webapi.v1.domain.Facilities;
 import org.hisp.dhis.web.webapi.v1.domain.Facility;
 import org.hisp.dhis.web.webapi.v1.utils.ContextUtils;
 import org.hisp.dhis.web.webapi.v1.utils.MessageResponseUtils;
+import org.hisp.dhis.web.webapi.v1.utils.ObjectMapperFactoryBean;
 import org.hisp.dhis.web.webapi.v1.utils.ValidationUtils;
 import org.hisp.dhis.web.webapi.v1.validation.group.Create;
 import org.hisp.dhis.web.webapi.v1.validation.group.Update;
@@ -54,6 +56,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -85,9 +88,9 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Controller(value = "facility-controller-" + FredController.PREFIX)
-@RequestMapping(FacilityController.RESOURCE_PATH)
-@PreAuthorize("hasRole('M_dhis-web-api-fred') or hasRole('ALL')")
+@Controller( value = "facility-controller-" + FredController.PREFIX )
+@RequestMapping( FacilityController.RESOURCE_PATH )
+@PreAuthorize( "hasRole('M_dhis-web-api-fred') or hasRole('ALL')" )
 public class FacilityController
 {
     public static final String RESOURCE_PATH = "/" + FredController.PREFIX + "/facilities";
@@ -233,13 +236,13 @@ public class FacilityController
         return facility;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET)
-    public String readFacilities( Model model, @RequestParam(required = false) Boolean active,
-        @RequestParam(value = "updatedSince", required = false) Date lastUpdated,
-        @RequestParam(value = "allProperties", required = false, defaultValue = "true") Boolean allProperties,
-        @RequestParam(value = "fields", required = false) String fields,
-        @RequestParam(value = "limit", required = false) Integer limit,
-        @RequestParam(value = "offset", required = false) Integer offset,
+    @RequestMapping( value = "", method = RequestMethod.GET )
+    public String readFacilities( Model model, @RequestParam( required = false ) Boolean active,
+        @RequestParam( value = "updatedSince", required = false ) Date lastUpdated,
+        @RequestParam( value = "allProperties", required = false, defaultValue = "true" ) Boolean allProperties,
+        @RequestParam( value = "fields", required = false ) String fields,
+        @RequestParam( value = "limit", required = false ) Integer limit,
+        @RequestParam( value = "offset", required = false ) Integer offset,
         HttpServletRequest request )
     {
         Facilities facilities = new Facilities();
@@ -321,10 +324,10 @@ public class FacilityController
         return FredController.PREFIX + "/layout";
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @RequestMapping( value = "/{id}", method = RequestMethod.GET )
     public String readFacility( Model model, @PathVariable String id,
-        @RequestParam(value = "allProperties", required = false, defaultValue = "true") Boolean allProperties,
-        @RequestParam(value = "fields", required = false) String fields,
+        @RequestParam( value = "allProperties", required = false, defaultValue = "true" ) Boolean allProperties,
+        @RequestParam( value = "fields", required = false ) String fields,
         HttpServletRequest request )
     {
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( id );
@@ -364,6 +367,11 @@ public class FacilityController
 
     private void addHierarchyPropertyToFacility( List<OrganisationUnitLevel> organisationUnitLevels, OrganisationUnit organisationUnit, Facility facility )
     {
+        if ( facility.getProperties() == null )
+        {
+            return;
+        }
+
         // TODO this probably belongs in "meta": {}
         List<Map<String, Object>> hierarchy = new ArrayList<Map<String, Object>>();
         facility.getProperties().put( "hierarchy", hierarchy );
@@ -389,8 +397,8 @@ public class FacilityController
     // POST JSON
     //--------------------------------------------------------------------------
 
-    @RequestMapping(value = "", method = RequestMethod.POST)
-    @PreAuthorize("hasRole('F_FRED_CREATE') or hasRole('ALL')")
+    @RequestMapping( value = "", method = RequestMethod.POST )
+    @PreAuthorize( "hasRole('F_FRED_CREATE') or hasRole('ALL')" )
     public ResponseEntity<String> createFacility( @RequestBody Facility facility ) throws IOException
     {
         Set<ConstraintViolation<Facility>> constraintViolations = validator.validate( facility, Default.class, Create.class );
@@ -439,13 +447,19 @@ public class FacilityController
     // PUT JSON
     //--------------------------------------------------------------------------
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('F_FRED_UPDATE') or hasRole('ALL')")
-    public ResponseEntity<String> updateFacility( @PathVariable String id, @RequestBody Facility facility ) throws IOException
+    protected String generateETagHeaderValue( byte[] bytes )
+    {
+        StringBuilder builder = new StringBuilder( "\"0" );
+        DigestUtils.appendMd5DigestAsHex( bytes, builder );
+        builder.append( '"' );
+        return builder.toString();
+    }
+
+    @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
+    @PreAuthorize( "hasRole('F_FRED_UPDATE') or hasRole('ALL')" )
+    public ResponseEntity<String> updateFacility( @PathVariable String id, @RequestBody Facility facility, HttpServletRequest request ) throws Exception
     {
         facility.setId( id );
-        OrganisationUnit organisationUnit = conversionService.convert( facility, OrganisationUnit.class );
-
         Set<ConstraintViolation<Facility>> constraintViolations = validator.validate( facility, Default.class, Update.class );
 
         String json = ValidationUtils.constraintViolationsToJson( constraintViolations );
@@ -455,48 +469,66 @@ public class FacilityController
 
         if ( constraintViolations.isEmpty() )
         {
-            OrganisationUnit ou = organisationUnitService.getOrganisationUnit( facility.getId() );
+            OrganisationUnit organisationUnitUpdate = conversionService.convert( facility, OrganisationUnit.class );
+            OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( facility.getId() );
 
-            if ( ou == null )
+            if ( request.getHeader( "ETag" ) != null )
+            {
+                Facility old_facility = conversionService.convert( organisationUnit, Facility.class );
+                List<OrganisationUnitLevel> organisationUnitLevels = organisationUnitService.getOrganisationUnitLevels();
+                addHierarchyPropertyToFacility( organisationUnitLevels, organisationUnitUpdate, old_facility );
+                ObjectMapper objectMapper = new ObjectMapperFactoryBean().getObject();
+                String body = objectMapper.writeValueAsString( old_facility );
+
+                String ETag = generateETagHeaderValue( body.getBytes() );
+
+                if ( !ETag.equals( request.getHeader( "ETag" ) ) )
+                {
+                    return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( "ETag provided does not match current ETag of facility" ),
+                        headers, HttpStatus.PRECONDITION_FAILED );
+                }
+            }
+
+            if ( organisationUnit == null )
             {
                 return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( "No object with that identifier exists." ),
                     headers, HttpStatus.NOT_FOUND );
             }
-            else if ( !ou.getName().equals( organisationUnit.getName() ) )
+            else if ( !organisationUnit.getName().equals( organisationUnitUpdate.getName() ) )
             {
-                OrganisationUnit ouByName = organisationUnitService.getOrganisationUnitByName( organisationUnit.getName() );
+                OrganisationUnit ouByName = organisationUnitService.getOrganisationUnitByName( organisationUnitUpdate.getName() );
 
-                if ( ouByName != null && !ou.getUid().equals( ouByName.getUid() ) )
+                if ( ouByName != null && !organisationUnit.getUid().equals( ouByName.getUid() ) )
                 {
                     return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( "Another object with the same name already exists." ),
                         headers, HttpStatus.CONFLICT );
                 }
             }
-            else if ( organisationUnit.getCode() != null )
+            else if ( organisationUnitUpdate.getCode() != null )
             {
-                OrganisationUnit ouByCode = organisationUnitService.getOrganisationUnitByCode( organisationUnit.getCode() );
+                OrganisationUnit ouByCode = organisationUnitService.getOrganisationUnitByCode( organisationUnitUpdate.getCode() );
 
-                if ( ouByCode != null && !ou.getUid().equals( ouByCode.getUid() ) )
+                if ( ouByCode != null && !organisationUnit.getUid().equals( ouByCode.getUid() ) )
                 {
                     return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( "Another object with the same code already exists." ),
                         headers, HttpStatus.CONFLICT );
                 }
             }
 
-            ou.setName( organisationUnit.getName() );
-            ou.setShortName( organisationUnit.getShortName() );
-            ou.setCode( organisationUnit.getCode() );
-            ou.setFeatureType( organisationUnit.getFeatureType() );
-            ou.setCoordinates( organisationUnit.getCoordinates() );
-            ou.setParent( organisationUnit.getParent() );
-            ou.setActive( organisationUnit.isActive() );
+            organisationUnit.setName( organisationUnitUpdate.getName() );
+            organisationUnit.setShortName( organisationUnitUpdate.getShortName() );
+            organisationUnit.setCode( organisationUnitUpdate.getCode() );
+            organisationUnit.setFeatureType( organisationUnitUpdate.getFeatureType() );
+            organisationUnit.setCoordinates( organisationUnitUpdate.getCoordinates() );
+            organisationUnit.setParent( organisationUnitUpdate.getParent() );
+            organisationUnit.setActive( organisationUnitUpdate.isActive() );
 
-            ou.removeAllDataSets();
-            organisationUnitService.updateOrganisationUnit( ou );
+            organisationUnit.removeAllDataSets();
+            organisationUnitService.updateOrganisationUnit( organisationUnit );
 
-            for ( DataSet dataSet : organisationUnit.getDataSets() )
+            for ( DataSet dataSet : organisationUnitUpdate.getDataSets() )
             {
-                dataSet.addOrganisationUnit( ou );
+                dataSet.addOrganisationUnit( organisationUnit );
                 dataSetService.updateDataSet( dataSet );
             }
 
@@ -512,8 +544,8 @@ public class FacilityController
     // DELETE JSON
     //--------------------------------------------------------------------------
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    @PreAuthorize("hasRole('F_FRED_DELETE') or hasRole('ALL')")
+    @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )
+    @PreAuthorize( "hasRole('F_FRED_DELETE') or hasRole('ALL')" )
     public ResponseEntity<Void> deleteFacility( @PathVariable String id ) throws HierarchyViolationException
     {
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( id );
@@ -532,7 +564,7 @@ public class FacilityController
     // EXCEPTION HANDLERS
     //--------------------------------------------------------------------------
 
-    @ExceptionHandler({ DeleteNotAllowedException.class, HierarchyViolationException.class })
+    @ExceptionHandler( { DeleteNotAllowedException.class, HierarchyViolationException.class } )
     public ResponseEntity<String> exceptionHandler( Exception ex )
     {
         return new ResponseEntity<String>( ex.getMessage(), HttpStatus.FORBIDDEN );
