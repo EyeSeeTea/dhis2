@@ -249,11 +249,16 @@ Ext.onReady( function() {
 
 			getData,
 			getStore,
-			getWindowHeight,
+			getCmpHeight,
 
 			dimensionPanel,
 			selectPanel,
-			window;
+			window,
+
+			margin = 5,
+			defaultWidth = 160,
+			defaultHeight = 158,
+			maxHeight = (pt.viewport.getHeight() - 100) / 2;
 
 		getData = function() {
 			var groupSets = [],
@@ -290,22 +295,37 @@ Ext.onReady( function() {
 
 		dimensionStore = getStore(getData());
 
+		getCmpHeight = function() {
+			var size = dimensionStore.totalCount,
+				expansion = 10,
+				height = defaultHeight,
+				diff;
+
+			if (size > 10) {
+				diff = size - 10;
+				height += (diff * expansion);
+			}
+
+			height = height > maxHeight ? maxHeight : height;
+
+			return height;
+		};
+
 		dimension = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
-			width: 160,
-			height: 300,
-			style: 'margin-right:5px',
+			width: defaultWidth,
+			height: (getCmpHeight() * 2) + margin,
+			style: 'margin-right:' + margin + 'px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
 			dropGroup: 'settingsDD',
 			store: dimensionStore,
 			tbar: {
-				cls: 'pt-toolbar-main',
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: 'Available dimensions', //i18n
+					text: 'Dimensions', //i18n
 					cls: 'pt-toolbar-multiselect-leftright-label'
 				}
 			},
@@ -324,9 +344,9 @@ Ext.onReady( function() {
 
 		row = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
-			width: 160,
-			height: 148,
-			style: 'margin-right:4px',
+			width: defaultWidth,
+			height: getCmpHeight(),
+			style: 'margin-right:' + margin + 'px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
@@ -358,8 +378,8 @@ Ext.onReady( function() {
 
 		col = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
-			width: 160,
-			height: 148,
+			width: defaultWidth,
+			height: getCmpHeight(),
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
@@ -391,9 +411,9 @@ Ext.onReady( function() {
 
 		filter = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'pt-toolbar-multiselect-leftright',
-			width: 160,
-			height: 148,
-			style: 'margin-right:5px',
+			width: defaultWidth,
+			height: getCmpHeight(),
+			style: 'margin-right:' + margin + 'px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
@@ -448,11 +468,6 @@ Ext.onReady( function() {
 				}
 			]
 		});
-
-		getWindowHeight = function() {
-			var size = dimensionStore.totalCount;
-
-		};
 
 		window = Ext.create('Ext.window.Window', {
 			title: 'Pivot settings', //i18n

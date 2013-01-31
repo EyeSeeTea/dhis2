@@ -50,21 +50,22 @@ PT.core.getConfigs = function() {
             indicator: {
                 value: 'indicator',
                 rawvalue: 'Indicator', //i18n PT.i18n.indicator,
-                paramname: 'in'
+                paramname: 'dx'
             },
             dataelement: {
                 value: 'dataelement',
                 rawvalue: 'Data element', //i18n PT.i18n.data_element,
-                paramname: 'de'
+                paramname: 'dx'
             },
             dataset: {
 				value: 'dataset',
                 rawvalue: 'Data set', //i18n PT.i18n.dataset,
-                paramname: 'ds'
+                paramname: 'dx'
 			},
             period: {
                 value: 'period',
                 rawvalue: 'Period', //i18n PT.i18n.period,
+                paramname: 'pe',
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_period
 				}
@@ -173,7 +174,7 @@ PT.core.getUtils = function(pt) {
 	util.object = {
 		getLength: function(object) {
 			var size = 0;
-			
+
 			for (var key in object) {
 				if (object.hasOwnProperty(key)) {
 					size++;
@@ -183,7 +184,7 @@ PT.core.getUtils = function(pt) {
 			return size;
 		}
 	};
-	
+
     util.url = {
 		getParam: function(s) {
 			var output = '';
@@ -381,7 +382,7 @@ PT.core.getUtils = function(pt) {
 		getTable: function(settings, pt, container) {
 			var getDimensionItemsFromSettings,
 				getParamStringFromDimensionItems,
-				
+
 				extendResponse,
 				extendDims,
 				getDims,
@@ -391,7 +392,7 @@ PT.core.getUtils = function(pt) {
 				getRowItems,
 				createTableArray,
 				initialize;
-			
+
 			getDimensionItemsFromSettings = function() {
 				var col = settings.col,
 					row = settings.row,
@@ -402,10 +403,10 @@ PT.core.getUtils = function(pt) {
 
 				return dimensionItems;
 			};
-			
+
 			getParamStringFromDimensionItems = function(dimensionItems) {
 				var paramString = '?';
-				
+
 				for (var key in dimensionItems) {
 					if (dimensionItems.hasOwnProperty(key)) {
 						paramString += 'dimension=' + key + ':' + dimensionItems[key].join(',') + '&';
@@ -452,12 +453,12 @@ PT.core.getUtils = function(pt) {
 				response.idValueMap = {};
 
 				var extendHeaders = function() {
-				
+
 					// Extend headers: index, items (unique), size
 					for (var i = 0, header, items; i < headers.length; i++) {
 						header = headers[i];
 						items = [];
-						
+
 						header.index = i;
 
 						for (var j = 0; j < rows.length; j++) {
@@ -475,16 +476,16 @@ PT.core.getUtils = function(pt) {
 						if (header.meta) {
 							for (var j = 0, item; j < header.items.length; j++) {
 								item = header.items[j];
-								
+
 								response.metaDataHeaderMap[item] = header.name;
 							}
 						}
-					}			
-					
+					}
+
 					// nameHeaderMap (headerName: header)
 					for (var i = 0, header; i < headers.length; i++) {
 						header = headers[i];
-						
+
 						response.nameHeaderMap[header.name] = header;
 					}
 
@@ -494,7 +495,7 @@ PT.core.getUtils = function(pt) {
 
 						header.items = [];
 					}
-					
+
 					// Add sorted header items based on metaData
 					for (var key in metaData) {
 						if (metaData.hasOwnProperty(key)) {
@@ -525,7 +526,7 @@ PT.core.getUtils = function(pt) {
 
 						for (var j = 0, header; j < dimensionNames.length; j++) {
 							header = response.nameHeaderMap[dimensionNames[j]];
-							
+
 							id += rows[i][header.index];
 						}
 
@@ -777,7 +778,7 @@ PT.core.getUtils = function(pt) {
 					for (var j = 0, id, value, row; j < pt.config.cols.size; j++) {
 						id = cols.ids[j] + rows.ids[i];
 						value = response.idValueMap[id] ? parseFloat(response.idValueMap[id]) : 0;
-//console.log(value);						
+//console.log(value);
 						//value = Ext.isNumber(value) ? value : 0;
 						row.push(value);
 					}
@@ -790,9 +791,9 @@ PT.core.getUtils = function(pt) {
 					row = [];
 
 					for (var j = 0, id, value, cls; j < valueItems[i].length; j++) {
-						id = cols.ids[j] + rows.ids[i];						
+						id = cols.ids[j] + rows.ids[i];
 						value = valueItems[i][j];
-						
+
 						//if (Ext.isNumber(value)) {
 							//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
 						//}
@@ -907,7 +908,7 @@ PT.core.getUtils = function(pt) {
 				if (pt.el) {
 					config.renderTo = pt.el;
 				};
-				
+
 				return Ext.create('Ext.panel.Panel', config);
 			};
 
@@ -918,7 +919,7 @@ PT.core.getUtils = function(pt) {
 				dimensionItems = getDimensionItemsFromSettings(settings);
 
 				paramString = getParamStringFromDimensionItems(dimensionItems);
-				
+
 				Ext.data.JsonP.request({
 					method: 'GET',
 					url: 'http://localhost:8080/api/analytics.jsonp' + paramString,
@@ -978,7 +979,7 @@ PT.core.getAPI = function(pt) {
 		}
 
 		col = (config.col && Ext.isObject(config.col) && pt.util.object.getLength(config.col)) ? config.col : null;
-		
+
 		row = (config.row && Ext.isObject(config.row) && pt.util.object.getLength(config.row)) ? config.row : null;
 
 		if (!(col || row)) {
