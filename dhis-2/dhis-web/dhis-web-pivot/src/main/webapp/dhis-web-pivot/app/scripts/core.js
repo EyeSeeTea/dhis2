@@ -417,7 +417,7 @@ PT.core.getUtils = function(pt) {
 							paramString += 'dimension=' + key + '&';
 						}
 						else {
-							paramString += 'dimension=' + key + ':' + dimensionItems[key].join(',') + '&';
+							paramString += 'dimension=' + key + ':' + dimensionItems[key].join(';') + '&';
 						}
 					}
 				}
