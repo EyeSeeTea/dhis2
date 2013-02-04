@@ -1,7 +1,7 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.web.mobile.interceptors;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,39 +27,32 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.i18n.I18nManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface GenericNameableObjectStore<T>
-    extends GenericIdentifiableObjectStore<T>
+@Component
+public class I18nInterceptor extends HandlerInterceptorAdapter
 {
-    /**
-     * Retrieves the object with the given short name.
-     *
-     * @param shortName the short name.
-     * @return the object with the given short name.
-     */
-    T getByShortName( String shortName );
+    @Autowired
+    private I18nManager i18nManager;
 
-    /**
-     * Return the number of objects where the name is equal the given name.
-     * <p/>
-     * This count is _unfiltered_ (no ACL!), so this is not the same as
-     * getAllEqShortName().size().
-     *
-     * @param shortName the name.
-     * @return Count of objects.
-     */
-    int getCountEqShortNameNoAcl( String shortName );
-
-    /**
-     * Retrieves a Collection of objects where the name is like the given name.
-     *
-     * @param shortName the name.
-     * @return a Collection of objects.
-     */
-    Collection<T> getAllEqShortName( String shortName );
+    @Override
+    public void postHandle( HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView ) throws Exception
+    {
+        if ( modelAndView != null )
+        {
+            I18n i18n = i18nManager.getI18n( "org.hisp.dhis.web.mobile" );
+            modelAndView.addObject( "i18n", i18n );
+        }
+    }
 }
