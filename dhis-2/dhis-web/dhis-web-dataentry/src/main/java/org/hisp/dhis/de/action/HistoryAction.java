@@ -113,16 +113,26 @@ public class HistoryAction
     // Input
     // -------------------------------------------------------------------------
 
-    private Integer dataElementId;
+    private String dataElementId;
 
-    public void setDataElementId( Integer dataElementId )
+    public String getDataElementId()
+    {
+        return dataElementId;
+    }
+
+    public void setDataElementId( String dataElementId )
     {
         this.dataElementId = dataElementId;
     }
 
-    private Integer optionComboId;
+    private String optionComboId;
 
-    public void setOptionComboId( Integer optionComboId )
+    public String getOptionComboId()
+    {
+        return optionComboId;
+    }
+
+    public void setOptionComboId( String optionComboId )
     {
         this.optionComboId = optionComboId;
     }
