@@ -927,7 +927,7 @@ PT.core.getUtils = function(pt) {
 
 			addTdClasses = function(panel) {
 				var items = panel.items.items;
-				
+
 				for (var i = 0, td, div; i < items.length; i++) {
 					div = items[i].el;
 					td = div.parent('td');
@@ -949,7 +949,7 @@ PT.core.getUtils = function(pt) {
 					}
 					else if (div.hasCls('pivot-valuegrandtotal')) {
 						td.addCls('pivot-valuegrandtotal-body');
-					}					
+					}
 				}
 			};				
 			
