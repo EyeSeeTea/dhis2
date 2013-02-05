@@ -497,6 +497,13 @@ Ext.onReady( function() {
 					handler: function() {
 						window.hide();
 					}
+				},
+				{
+					text: '<b>Update</b>',
+					handler: function() {
+						pt.viewport.update();
+						window.hide();
+					}
 				}
 			],
 			listeners: {
@@ -516,6 +523,7 @@ Ext.onReady( function() {
 			var viewport,
 				westRegion,
 				centerRegion,
+				accordion,
 
 				indicatorAvailable,
 				indicatorSelected,
@@ -533,7 +541,7 @@ Ext.onReady( function() {
 				fixedPeriod,
 				organisationUnit,
 				getOrganisationUnitGroupSetPanels,
-				accordion,
+				update,
 
 				addListeners;
 
@@ -1933,6 +1941,14 @@ Ext.onReady( function() {
 				return getPanels();
 			};
 
+			update = function() {
+				var settings = pt.api.Settings(pt.util.pivot.getSettingsConfig());
+
+				if (settings && Ext.isObject(settings)) {
+					pt.util.pivot.getTable(settings, pt, centerRegion);
+				}
+			};				
+
 			accordion = Ext.create('Ext.panel.Panel', {
 				bodyStyle: 'border-style:none; padding:3px;',
 				layout: 'fit',
@@ -2008,11 +2024,7 @@ Ext.onReady( function() {
 						{
 							text: '<b>Update</b>',
 							handler: function() {
-								var settings = pt.api.Settings(pt.util.pivot.getSettingsConfig());
-
-								if (settings && Ext.isObject(settings)) {
-									pt.util.pivot.getTable(settings, pt, centerRegion);
-								}
+								update();
 							}
 						}
 					]
@@ -2034,6 +2046,7 @@ Ext.onReady( function() {
 
 			viewport.westRegion = westRegion;
 			viewport.centerRegion = centerRegion;
+			viewport.update = update;
 
 			addListeners = function() {
 				pt.store.indicatorAvailable.on('load', function() {
