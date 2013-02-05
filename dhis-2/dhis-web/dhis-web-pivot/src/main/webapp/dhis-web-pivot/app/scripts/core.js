@@ -399,9 +399,7 @@ PT.core.getUtils = function(pt) {
 				getRowItems,
 				createTableArray,
 				addClasses,
-				initialize,
-
-				htmlItems = [];
+				initialize;
 
 			getDimensionItemsFromSettings = function() {
 				var col = settings.col,
@@ -922,7 +920,7 @@ PT.core.getUtils = function(pt) {
 					config.renderTo = pt.el;
 				};
 
-				return Ext.create('Ext.container.Container', config);
+				return Ext.create('Ext.panel.Panel', config);
 			};
 
 			addTdClasses = function(panel) {
@@ -979,22 +977,20 @@ PT.core.getUtils = function(pt) {
 						}
 						
 						pt.response = r;
-
+//todo
 pt.response.metaData['PT59n8BQbqM'] = '(Outreach)';
 pt.response.metaData['pq2XI5kz2BY'] = '(Fixed)';
 
 						extendResponse(dimensionItems);
-
 						pt.config = getDims();
-
 						extendRowDims(pt.config.rows);
 
-						panel = createTablePanel(pt);
 						items.push(getEmptyItem(pt));						
 						items = items.concat(getColItems(pt));
-						items = items.concat(getRowItems(pt));						
+						items = items.concat(getRowItems(pt));
+						
+						panel = createTablePanel(pt);
 						panel.add(items);
-
 
 						if (!pt.el) {
 							container.removeAll(true);
