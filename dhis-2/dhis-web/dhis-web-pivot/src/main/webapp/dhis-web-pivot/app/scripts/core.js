@@ -399,7 +399,9 @@ PT.core.getUtils = function(pt) {
 				getRowItems,
 				createTableArray,
 				addClasses,
-				initialize;
+				initialize,
+
+				htmlItems = [];
 
 			getDimensionItemsFromSettings = function() {
 				var col = settings.col,
@@ -908,6 +910,11 @@ PT.core.getUtils = function(pt) {
 					bodyStyle: 'border:0 none',
 					defaults: {
 						baseCls: 'td'
+					},
+					listeners: {
+						resize: function(p) {
+							addTdClasses(p);
+						}
 					}
 				};
 
@@ -915,15 +922,15 @@ PT.core.getUtils = function(pt) {
 					config.renderTo = pt.el;
 				};
 
-				return Ext.create('Ext.panel.Panel', config);
+				return Ext.create('Ext.container.Container', config);
 			};
 
-			addClasses = function() {
-				var a = document.getElementsByTagName('td');
-
-				for (var i = 0, td, div; i < a.length; i++) {
-					td = Ext.get(a[i]);
-					div = td.child('*');
+			addTdClasses = function(panel) {
+				var items = panel.items.items;
+				
+				for (var i = 0, td, div; i < items.length; i++) {
+					div = items[i].el;
+					td = div.parent('td');
 					
 					if (div.hasCls('pivot-empty')) {
 						td.addCls('pivot-empty-body');
@@ -964,6 +971,9 @@ PT.core.getUtils = function(pt) {
 					},
 					disableCaching: false,
 					success: function(r) {
+						var panel,
+							items = [];
+
 						if (!validateResponse(r)) {
 							return;
 						}
@@ -979,20 +989,19 @@ pt.response.metaData['pq2XI5kz2BY'] = '(Fixed)';
 
 						extendRowDims(pt.config.rows);
 
-						var panel = createTablePanel(pt);
+						panel = createTablePanel(pt);
+						items.push(getEmptyItem(pt));						
+						items = items.concat(getColItems(pt));
+						items = items.concat(getRowItems(pt));						
+						panel.add(items);
 
-						panel.add(getEmptyItem(pt));
-
-						panel.add(getColItems(pt));
-
-						panel.add(getRowItems(pt));
 
 						if (!pt.el) {
-							container.removeAll();
+							container.removeAll(true);
 							container.add(panel);
 						}
-
-						addClasses();
+						
+						addTdClasses(panel);
 					}
 				});
 
