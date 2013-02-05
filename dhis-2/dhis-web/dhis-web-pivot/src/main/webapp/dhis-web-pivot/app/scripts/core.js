@@ -407,7 +407,6 @@ PT.core.getUtils = function(pt) {
 				getColItems,
 				getRowItems,
 				createTableArray,
-				addClasses,
 				initialize;
 
 			getDimensionItemsFromSettings = function() {
@@ -458,7 +457,7 @@ PT.core.getUtils = function(pt) {
 
 			validateResponse = function(response) {
 				if (response.width < 1 || response.height < 1 || response.rows.length < 1) {
-					alert('No values');
+					alert('No values found');
 					return false;
 				}
 
@@ -767,21 +766,9 @@ PT.core.getUtils = function(pt) {
 					for (var j = 0, id; j < dimItems.length; j++) {
 						id = dimItems[j];						
 						rowArray.push('<td class="pivot-dim" colspan="' + colSpan + '">' + response.metaData[id] + '</td>');
-						
-						//colItems.push({
-							//html: response.metaData[id],
-							//colspan: colSpan,
-							//baseCls: 'pivot-dim'
-						//});
 
 						if (i === 0 && j === (dimItems.length - 1)) {
 							rowArray.push('<td class="pivot-dimtotal" rowspan="' + cols.dims + '">Total</td>');
-							
-							//colItems.push({
-								//html: 'Total',
-								//rowspan: cols.dims,
-								//baseCls: 'pivot-dimtotal'
-							//});
 						}
 					}
 
@@ -834,14 +821,6 @@ PT.core.getUtils = function(pt) {
 						//}
 
 						row.push('<td id="' + id + '" class="pivot-value">' + value + '</td>');
-
-						//row.push({
-							//id: id,
-							//value: value,
-							//html: value.toString(),
-							//baseCls: 'pivot-value',
-							//cls: cls
-						//});
 					}
 
 					valueHtmlItems.push(row);
@@ -858,12 +837,6 @@ PT.core.getUtils = function(pt) {
 					rowSum = totalRowItems[i];
 
 					totalRowHtmlItems.push('<td class="pivot-valuetotal">' + rowSum.toString() + '</td>');
-
-					//totalRowHtmlItems.push({
-						//value: rowSum,
-						//html: rowSum.toString(),
-						//baseCls: 'pivot-valuetotal'
-					//});
 				}
 
 				// Total col items
@@ -881,13 +854,7 @@ PT.core.getUtils = function(pt) {
 				for (var i = 0, colSum; i < totalColItems.length; i++) {
 					colSum = totalColItems[i];
 
-					totalColHtmlItems.push('<td class="pivot-valuetotal">' + rowSum.toString() + '</td>');
-
-					//totalColHtmlItems.push({
-						//value: colSum,
-						//html: colSum.toString(),
-						//baseCls: 'pivot-valuetotal'
-					//});
+					totalColHtmlItems.push('<td class="pivot-valuetotal">' + colSum.toString() + '</td>');
 				}
 
 				// Grand total item
@@ -895,12 +862,6 @@ PT.core.getUtils = function(pt) {
 
 				// Grand total html item
 				grandTotalHtmlItem = '<td class="pivot-valuegrandtotal">' + grandTotalItem.toString() + '</td>';
-				
-				//grandTotalHtmlItem = {
-					//value: grandTotalItem,
-					//html: grandTotalItem.toString(),
-					//baseCls: 'pivot-valuegrandtotal'
-				//};
 
 				// GUI
 
@@ -913,20 +874,11 @@ PT.core.getUtils = function(pt) {
 
 						if (object.rowSpan) {
 							row.push('<td class="pivot-dim" rowspan="' + object.rowSpan + '">' + response.metaData[object.id] + '</td>');
-							
-							//dimHtmlItems.push({
-								//html: response.metaData[object.id],
-								//rowspan: object.rowSpan,
-								//baseCls: 'pivot-dim'
-							//});
 						}
 					}
 
 					row = row.concat(valueHtmlItems[i]);
 					row = row.concat(totalRowHtmlItems[i]);
-
-					//dimHtmlItems = dimHtmlItems.concat(valueHtmlItems[i]);
-					//dimHtmlItems = dimHtmlItems.concat(totalRowHtmlItems[i]);
 
 					dimHtmlItems.push(row);
 				}
@@ -935,30 +887,11 @@ PT.core.getUtils = function(pt) {
 				var finalRow = [];
 
 				finalRow.push('<td class="pivot-dimtotal" colspan="' + rows.dims + '">Total</td>');
-				
-				//dimHtmlItems.push({
-					//html: 'Total',
-					//colspan: rows.dims,
-					//baseCls: 'pivot-dimtotal'
-				//});
 
 				finalRow = finalRow.concat(totalColHtmlItems);
 				finalRow = finalRow.concat(grandTotalHtmlItem);
 
-				//dimHtmlItems = dimHtmlItems.concat(totalColHtmlItems);
-				//dimHtmlItems.push(grandTotalHtmlItem);
-
 				dimHtmlItems.push(finalRow);
-
-//console.log("valueItems", valueItems);
-//console.log("valueHtmlItems", valueHtmlItems);
-//console.log("totalRowItems", totalRowItems);
-//console.log("totalRowHtmlItems", totalRowHtmlItems);
-//console.log("totalColItems", totalColItems);
-//console.log("totalColHtmlItems", totalColHtmlItems);
-//console.log("grandTotalItem", grandTotalItem);
-//console.log("grandTotalHtmlItem", grandTotalHtmlItem);
-//console.log("dimHtmlItems", dimHtmlItems);
 
 				return dimHtmlItems;
 			};
@@ -974,11 +907,9 @@ PT.core.getUtils = function(pt) {
 
 				return Ext.create('Ext.panel.Panel', {
 					bodyStyle: 'border:0 none',
+					autoScroll: true,
 					html: html
 				});
-						
-
-
 				
 				//var config = {
 					//layout: {
@@ -1003,34 +934,6 @@ PT.core.getUtils = function(pt) {
 
 				//return Ext.create('Ext.panel.Panel', config);
 			};
-
-			addTdClasses = function(panel) {
-				var items = panel.items.items;
-
-				for (var i = 0, td, div; i < items.length; i++) {
-					div = items[i].el;
-					td = div.parent('td');
-					
-					if (div.hasCls('pivot-empty')) {
-						td.addCls('pivot-empty-body');
-					}
-					else if (div.hasCls('pivot-dim')) {
-						td.addCls('pivot-dim-body');
-					}
-					else if (div.hasCls('pivot-dimtotal')) {
-						td.addCls('pivot-dimtotal-body');
-					}
-					else if (div.hasCls('pivot-value')) {
-						td.addCls('pivot-value-body');
-					}
-					else if (div.hasCls('pivot-valuetotal')) {
-						td.addCls('pivot-valuetotal-body');
-					}
-					else if (div.hasCls('pivot-valuegrandtotal')) {
-						td.addCls('pivot-valuegrandtotal-body');
-					}
-				}
-			};				
 			
 			initialize = function() {
 				var dimensionItems,
@@ -1076,22 +979,16 @@ pt.response.metaData['pq2XI5kz2BY'] = '(Fixed)';
 						pt.config = getDims();
 						extendRowDims(pt.config.rows);
 
-						//items.push(getEmptyItem(pt));
-						items = getColItems();
-						
-						//items = items.concat(getColItems());
+						items = getColItems();						
 						items = items.concat(getRowItems());
 						
 						panel = createTablePanel(items);
-						//panel.add(items);
 
 						if (!pt.el) {
 							container.removeAll(true);
 							container.add(panel);
 						}
 						
-						//addTdClasses(panel);
-
 						pt.util.mask.hideMask();
 					}
 				});
