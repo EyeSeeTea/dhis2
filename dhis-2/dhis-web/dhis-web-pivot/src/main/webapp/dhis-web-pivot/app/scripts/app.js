@@ -2021,17 +2021,7 @@ Ext.onReady( function() {
 				collapsible: true,
 				collapseMode: 'mini',
 				width: pt.conf.layout.west_width,
-				items: accordion,
-                listeners: {
-                    collapse: function() {
-                        this.collapsed = true;
-                        pt.cmp.toolbar.resizewest.setText('>>>');
-                    },
-                    expand: function() {
-                        this.collapsed = false;
-                        pt.cmp.toolbar.resizewest.setText('<<<');
-                    }
-                }
+				items: accordion
 			});
 
 			centerRegion = Ext.create('Ext.panel.Panel', {
@@ -2043,6 +2033,16 @@ Ext.onReady( function() {
                         height: 26
                     },
 					items: [
+						{
+							text: '<<<',
+							handler: function(b) {
+								var text = b.getText();
+								text = text === '<<<' ? '>>>' : '<<<';
+								b.setText(text);
+								
+								westRegion.toggleCollapse();
+							}
+						},								
 						{
 							text: 'Settings',
 							handler: function() {

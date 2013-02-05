@@ -339,11 +339,20 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.mask = {
-		showMask: function(cmp, str) {
+		showMask: function(cmp, msg) {
+			cmp = cmp || pt.viewport;
+			msg = msg || 'Loading..';
+			
 			if (pt.viewport.mask) {
 				pt.viewport.mask.destroy();
 			}
-			pt.viewport.mask = new Ext.LoadMask(cmp, {msg: str});
+			pt.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
+				id: 'pt-loadmask',
+				shadow: false,
+				msg: msg,
+				style: 'box-shadow:0',
+				bodyStyle: 'box-shadow:0'
+			});
 			pt.viewport.mask.show();
 		},
 		hideMask: function() {
@@ -955,6 +964,8 @@ PT.core.getUtils = function(pt) {
 				var dimensionItems,
 					paramString;
 
+				pt.util.mask.showMask();
+
 				dimensionItems = getDimensionItemsFromSettings(settings);
 
 				paramString = getParamStringFromDimensionItems(dimensionItems);
@@ -968,11 +979,19 @@ PT.core.getUtils = function(pt) {
 						'Accept': 'application/json'
 					},
 					disableCaching: false,
+					failure: function() {
+						pt.util.mask.hideMask();
+						console.log(arguments);
+						alert('Data request failed');
+					},						
 					success: function(r) {
 						var panel,
 							items = [];
 
 						if (!validateResponse(r)) {
+							pt.util.mask.hideMask();
+							console.log(r);
+							alert('Data response invalid');
 							return;
 						}
 						
@@ -998,6 +1017,8 @@ pt.response.metaData['pq2XI5kz2BY'] = '(Fixed)';
 						}
 						
 						addTdClasses(panel);
+
+						pt.util.mask.hideMask();
 					}
 				});
 

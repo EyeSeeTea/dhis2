@@ -23,6 +23,7 @@
  * Grid
  * Button
  * Tooltip
+ * LoadMask
  *
  * PT Window
  * PT Label
@@ -488,6 +489,26 @@ td .bad div {
 
 .x-tip-anchor {
 	border-bottom-color: #111;
+}
+
+
+/*----------------------------------------------------------------------------
+ * LoadMask
+ *--------------------------------------------------------------------------*/
+
+.x-mask-msg {
+	padding: 0;
+	border: 0 none;
+	background-image: none;
+	background-color: transparent;
+}
+.x-mask-msg .x-mask-loading {
+	border: 0 none;
+	background-color: #000;
+	color: #fff;
+	border-radius: 2px;
+	padding: 10px 9px 10px 25px;
+	opacity: 0.65;
 }
 
 
