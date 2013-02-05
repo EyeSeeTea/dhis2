@@ -313,13 +313,13 @@ Ext.onReady( function() {
 		dimensionStore = getStore(getData());
 
 		rowStore = getStore();
-		rowStore.add({id: 'pe', name: 'Periods'});
+		rowStore.add({id: 'pe', name: 'Periods'}); //i18n
 		
 		colStore = getStore();
-		colStore.add({id: 'dx', name: 'Data'});
+		colStore.add({id: 'dx', name: 'Data'}); //i18n
 		
 		filterStore = getStore();
-		filterStore.add({id: 'ou', name: 'Organisation units'});
+		filterStore.add({id: 'ou', name: 'Organisation units'}); //i18n
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
