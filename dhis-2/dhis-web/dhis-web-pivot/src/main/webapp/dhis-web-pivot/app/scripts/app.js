@@ -280,7 +280,7 @@ Ext.onReady( function() {
 
 				groupSets.push({
 					id: gs.id,
-					name: 'Group set: ' + gs.name //i18n
+					name: gs.name
 				});
 			}
 
@@ -445,10 +445,6 @@ Ext.onReady( function() {
 			}
 		});
 
-		value = Ext.create('Ext.form.Label', {
-			text: 'Value = DHIS 2 data value'
-		});
-
 		selectPanel = Ext.create('Ext.panel.Panel', {
 			bodyStyle: 'border:0 none',
 			items: [
@@ -464,8 +460,7 @@ Ext.onReady( function() {
 					layout: 'column',
 					bodyStyle: 'border:0 none',
 					items: [
-						row,
-						value
+						row
 					]
 				}
 			]
@@ -1871,7 +1866,7 @@ Ext.onReady( function() {
 					});
 
 					panel = Ext.create('Ext.panel.Panel', {
-						title: '<div class="pt-panel-title-organisationunit">Group set: ' + groupSet.name + '</div>', //i18n
+						title: '<div class="pt-panel-title-organisationunit">' + groupSet.name + '</div>', //i18n
 						hideCollapseTool: true,
 						getData: function() {
 							var data = {
