@@ -50,13 +50,15 @@ Ext.onReady( function() {
 		util.pivot.getSettingsConfig = function() {
 			var data = {},
 				setup = pt.viewport.settingsWindow.getSetup(),
-				config = {
-					col: [],
-					row: [],
-					filter: []
-				},
 				getData,
-				extendSettings;
+				extendSettings,
+				config;
+
+			config = {
+				col: [],
+				row: [],
+				filter: []
+			};
 
 			getData = function() {
 				var panels = pt.cmp.dimension.panels,
@@ -1981,7 +1983,8 @@ Ext.onReady( function() {
 			};
 
 			update = function() {
-				var settings = pt.api.Settings(pt.util.pivot.getSettingsConfig());
+				var config = pt.util.pivot.getSettingsConfig(),
+					settings = pt.api.Settings(config);
 
 				if (settings) {
 					pt.util.pivot.getTable(settings, pt, centerRegion);

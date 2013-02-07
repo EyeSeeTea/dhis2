@@ -996,15 +996,13 @@ PT.core.getAPI = function(pt) {
 			filter,
 			settings = {},
 
-			msg,
-			setMsg,
-
+			removeEmptyDimensions,
 			isAxisValid,
-			removeEmptyDimensions;
+			initialize;
 
 		removeEmptyDimensions = function(axis) {
 			if (!axis) {
-				return null;
+				return;
 			}
 			
 			for (var i = 0, dimension, remove; i < axis.length; i++) {
@@ -1015,16 +1013,17 @@ PT.core.getAPI = function(pt) {
 					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
 						remove = true;
 					}
-
-					for (var j = 0; j < dimension.items.length; i++) {
-						if (!Ext.isString(dimension.items[j])) {
-							remove = true;
+					else {
+						for (var j = 0; j < dimension.items.length; i++) {
+							if (!Ext.isString(dimension.items[j])) {
+								remove = true;
+							}
 						}
 					}
 				}
 
 				if (remove) {
-					axis.splice(i,1);
+					axis = Ext.Array.erase(axis, i, 1);
 					i = i - 1;
 				}
 			}
@@ -1032,56 +1031,49 @@ PT.core.getAPI = function(pt) {
 			return axis;
 		};
 
-		isAxisValid = function(axis) {
-			axis = removeEmptyDimensions(axis);
-			
+		getValidatedAxis = function(axis) {			
 			if (!(axis && Ext.isArray(axis) && axis.length)) {
-				return false;
+				return;
 			}
 
 			for (var i = 0, dimension; i < axis.length; i++) {
 				dimension = axis[i];
 
 				if (!(Ext.isObject(dimension) && Ext.isString(dimension.name))) {
-					return false;
+					return;
 				}
 			}
+			
+			axis = removeEmptyDimensions(axis);
 
-			return true;
+			return axis.length ? axis : null;
 		};
 
-		setMsg = function(str) {
-			if (!msg) {
-				msg = str;
+		initialize = function() {
+			if (!(config && Ext.isObject(config))) {
+				alert('Settings config is not an object'); //i18n
+				return;
 			}
-		};
+			
+			col = getValidatedAxis(config.col);
+			row = getValidatedAxis(config.row);
+			filter = getValidatedAxis(config.filter);
 
-		if (!(config && Ext.isObject(config))) {
-			setMsg('Settings config is not an object'); //i18n
-		}
+			if (!(col || row)) {
+				alert('Invalid column/row configuration'); //i18n
+				return;
+			}
 
-		col = isAxisValid(config.col) ? config.col : null;
-		row = isAxisValid(config.row) ? config.row : null;
-		filter = isAxisValid(config.filter) ? config.filter : null;
-
-		if (!(col || row)) {
-			setMsg('Invalid column/row configuration'); //i18n
-		}
-
-		if (msg) {
-			alert(msg);
-			return;
-		}
-
-		if (col) {
-			settings.col = removeEmptyDimensions(col);
-		}
-		if (row) {
-			settings.row = removeEmptyDimensions(row);
-		}
-		if (filter) {
-			settings.filter = removeEmptyDimensions(filter);
-		}
+			if (col) {
+				settings.col = removeEmptyDimensions(col);
+			}
+			if (row) {
+				settings.row = removeEmptyDimensions(row);
+			}
+			if (filter) {
+				settings.filter = removeEmptyDimensions(filter);
+			}
+		}();
 
 		return settings;
 	};
