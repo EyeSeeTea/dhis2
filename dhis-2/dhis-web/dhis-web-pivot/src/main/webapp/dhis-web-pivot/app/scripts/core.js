@@ -457,8 +457,25 @@ PT.core.getUtils = function(pt) {
 			};
 
 			validateResponse = function(response) {
-				if (response.width < 1 || response.height < 1 || response.rows.length < 1) {
+				if (!(response && Ext.isObject(response))) {
+					alert('Data invalid');
+					return false;
+				}
+
+				if (!(response.headers && Ext.isArray(response.headers) && response.headers.length)) {
+					alert('Data invalid');
+					return false;
+				}
+				
+				if (!(Ext.isNumber(response.width) && response.width > 0 &&
+					  Ext.isNumber(response.height) && response.height > 0 &&
+					  Ext.isArray(response.rows) && response.rows.length > 0)) {
 					alert('No values found');
+					return false;
+				}
+
+				if (response.headers.length !== response.rows[0].length) {
+					alert('Data invalid');
 					return false;
 				}
 
@@ -937,7 +954,6 @@ PT.core.getUtils = function(pt) {
 						if (!validateResponse(r)) {
 							pt.util.mask.hideMask();
 							console.log(r);
-							alert('Data response invalid');
 							return;
 						}
 						
