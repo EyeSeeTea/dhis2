@@ -51,9 +51,9 @@ Ext.onReady( function() {
 			var data = {},
 				setup = pt.viewport.settingsWindow.getSetup(),
 				config = {
-					col: {},
-					row: {},
-					filter: {}
+					col: [],
+					row: [],
+					filter: []
 				},
 				getData,
 				extendSettings;
@@ -62,15 +62,15 @@ Ext.onReady( function() {
 				var panels = pt.cmp.dimension.panels,
 					dxItems = [];
 
-				for (var i = 0, dimData; i < panels.length; i++) {
-					dimData = panels[i].getData();
+				for (var i = 0, dim; i < panels.length; i++) {
+					dim = panels[i].getData();
 
-					if (dimData) {
-						if (dimData.param === pt.conf.finals.dimension.data.paramname) {
-							dxItems = dxItems.concat(dimData.items);
+					if (dim) {
+						if (dim.name === pt.conf.finals.dimension.data.paramname) {
+							dxItems = dxItems.concat(dim.items);
 						}
 						else {
-							data[dimData.param] = dimData.items;
+							data[dim.name] = dim.items;
 						}
 					}
 				}
@@ -81,19 +81,28 @@ Ext.onReady( function() {
 			}();
 
 			extendSettings = function() {
-				for (var i = 0, dim; i < setup.col.length; i++) {
-					dim = setup.col[i];
-					config.col[dim] = data[dim];
+				for (var i = 0, name; i < setup.col.length; i++) {
+					name = setup.col[i];
+					config.col.push({
+						name: name,
+						items: data[name]
+					});
 				}
-
-				for (var i = 0, dim; i < setup.row.length; i++) {
-					dim = setup.row[i];
-					config.row[dim] = data[dim];
+				
+				for (var i = 0, name; i < setup.row.length; i++) {
+					name = setup.row[i];
+					config.row.push({
+						name: name,
+						items: data[name]
+					});
 				}
-
-				for (var i = 0, dim; i < setup.filter.length; i++) {
-					dim = setup.filter[i];
-					config.filter[dim] = data[dim];
+				
+				for (var i = 0, name; i < setup.filter.length; i++) {
+					name = setup.filter[i];
+					config.filter.push({
+						name: name,
+						items: data[name]
+					});
 				}
 			}();
 			
@@ -652,7 +661,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						param: pt.conf.finals.dimension.indicator.paramname,
+						name: pt.conf.finals.dimension.indicator.paramname,
 						items: []
 					};
 
@@ -836,7 +845,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						param: pt.conf.finals.dimension.indicator.paramname,
+						name: pt.conf.finals.dimension.indicator.paramname,
 						items: []
 					};
 
@@ -1020,7 +1029,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						param: pt.conf.finals.dimension.indicator.paramname,
+						name: pt.conf.finals.dimension.indicator.paramname,
 						items: []
 					};
 
@@ -1343,7 +1352,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						param: pt.conf.finals.dimension.period.paramname,
+						name: pt.conf.finals.dimension.period.paramname,
 							items: []
 						},
 						chb = pt.cmp.dimension.relativePeriod.checkbox;
@@ -1458,7 +1467,7 @@ Ext.onReady( function() {
 				getData: function() {
 					var records = pt.cmp.dimension.organisationUnit.treepanel.getSelectionModel().getSelection(),
 						data = {
-							param: 'ou',
+							name: 'ou',
 							items: []
 						};
 
@@ -1908,7 +1917,7 @@ Ext.onReady( function() {
 						hideCollapseTool: true,
 						getData: function() {
 							var data = {
-								param: groupSet.id,
+								name: groupSet.id,
 								items: []
 							};
 

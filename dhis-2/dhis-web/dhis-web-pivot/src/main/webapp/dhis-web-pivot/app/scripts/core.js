@@ -1000,10 +1000,42 @@ PT.core.getAPI = function(pt) {
 			setMsg,
 			alertMsg,
 
-			isPivotValid,
-			isFilterValid;
+			isAxisValid,
+			removeEmptyDimensions;
+
+		removeEmptyDimensions = function(axis) {
+			if (!axis) {
+				return null;
+			}
+			
+			for (var i = 0, dimension, remove; i < axis.length; i++) {
+				remove = false;
+				dimension = axis[i];
+				
+				if (dimension.name !== 'coc') {
+					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
+						remove = true;
+					}
+
+					for (var j = 0; j < dimension.items.length; i++) {
+						if (!Ext.isString(dimension.items[j])) {
+							remove = true;
+						}
+					}
+				}
+
+				if (remove) {
+					axis.splice(i,1);
+					i = i - 1;
+				}
+			}
+
+			return axis;
+		};
 
 		isAxisValid = function(axis) {
+			axis = removeEmptyDimensions(axis);
+			
 			if (!(axis && Ext.isArray(axis) && axis.length)) {
 				return false;
 			}
@@ -1013,18 +1045,6 @@ PT.core.getAPI = function(pt) {
 
 				if (!(Ext.isObject(dimension) && Ext.isString(dimension.name))) {
 					return false;
-				}
-
-				if (dimension.name !== 'coc') {
-					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
-						return false;
-					}
-
-					for (var i = 0; i < dimension.items.length; i++) {
-						if (!Ext.isString(dimension.items[i])) {
-							return false;
-						}
-					}
 				}
 			}
 
@@ -1054,18 +1074,18 @@ PT.core.getAPI = function(pt) {
 		filter = isAxisValid(config.filter) ? config.filter : null;
 
 		if (!(col || row)) {
-			setMsg('Invalid column and row configuration'); //i18n
+			setMsg('Invalid column/row configuration'); //i18n
 			return;
 		}
 
 		if (col) {
-			settings.col = col;
+			settings.col = removeEmptyDimensions(col);
 		}
 		if (row) {
-			settings.row = row;
+			settings.row = removeEmptyDimensions(row);
 		}
 		if (filter) {
-			settings.filter = filter;
+			settings.filter = removeEmptyDimensions(filter);
 		}
 
 		return settings;
