@@ -928,7 +928,7 @@ PT.core.getUtils = function(pt) {
 				var dimensionItems,
 					paramString;
 
-				pt.util.mask.showMask();
+				pt.util.mask.showMask(container);
 
 				dimensionItems = getDimensionItemsFromSettings(settings);
 
@@ -998,7 +998,6 @@ PT.core.getAPI = function(pt) {
 
 			msg,
 			setMsg,
-			alertMsg,
 
 			isAxisValid,
 			removeEmptyDimensions;
@@ -1057,16 +1056,8 @@ PT.core.getAPI = function(pt) {
 			}
 		};
 
-		alertMsg = function() {
-			if (msg) {
-				alert(msg);
-				msg = null;
-			}
-		};
-
 		if (!(config && Ext.isObject(config))) {
 			setMsg('Settings config is not an object'); //i18n
-			return;
 		}
 
 		col = isAxisValid(config.col) ? config.col : null;
@@ -1075,6 +1066,10 @@ PT.core.getAPI = function(pt) {
 
 		if (!(col || row)) {
 			setMsg('Invalid column/row configuration'); //i18n
+		}
+
+		if (msg) {
+			alert(msg);
 			return;
 		}
 

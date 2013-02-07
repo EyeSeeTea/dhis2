@@ -1983,7 +1983,7 @@ Ext.onReady( function() {
 			update = function() {
 				var settings = pt.api.Settings(pt.util.pivot.getSettingsConfig());
 
-				if (settings && Ext.isObject(settings)) {
+				if (settings) {
 					pt.util.pivot.getTable(settings, pt, centerRegion);
 				}
 			};				
