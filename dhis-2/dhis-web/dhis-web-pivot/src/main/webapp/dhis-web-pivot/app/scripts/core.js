@@ -994,38 +994,79 @@ PT.core.getAPI = function(pt) {
 		var col,
 			row,
 			filter,
-			settings = {};
+			settings = {},
+
+			msg,
+			setMsg,
+			alertMsg,
+
+			isPivotValid,
+			isFilterValid;
+
+		isAxisValid = function(axis) {
+			if (!(axis && Ext.isArray(axis) && axis.length)) {
+				return false;
+			}
+
+			for (var i = 0, dimension; i < axis.length; i++) {
+				dimension = axis[i];
+
+				if (!(Ext.isObject(dimension) && Ext.isString(dimension.name))) {
+					return false;
+				}
+
+				if (dimension.name !== 'coc') {
+					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
+						return false;
+					}
+
+					for (var i = 0; i < dimension.items.length; i++) {
+						if (!Ext.isString(dimension.items[i])) {
+							return false;
+						}
+					}
+				}
+			}
+
+			return true;
+		};
+
+		setMsg = function(str) {
+			if (!msg) {
+				msg = str;
+			}
+		};
+
+		alertMsg = function() {
+			if (msg) {
+				alert(msg);
+				msg = null;
+			}
+		};
 
 		if (!(config && Ext.isObject(config))) {
-			alert('Settings config is not an object'); //i18n
+			setMsg('Settings config is not an object'); //i18n
 			return;
 		}
 
-		col = (config.col && Ext.isObject(config.col) && pt.util.object.getLength(config.col)) ? config.col : null;
-
-		row = (config.row && Ext.isObject(config.row) && pt.util.object.getLength(config.row)) ? config.row : null;
+		col = isAxisValid(config.col) ? config.col : null;
+		row = isAxisValid(config.row) ? config.row : null;
+		filter = isAxisValid(config.filter) ? config.filter : null;
 
 		if (!(col || row)) {
-			alert('No col or row items selected'); //i18n
-			return;
-		}
-
-		filter = config.filter;
-
-		if (!(filter === undefined || Ext.isObject(filter))) {
-			alert('Illegal filter type'); //i18n
+			setMsg('Invalid column and row configuration'); //i18n
 			return;
 		}
 
 		if (col) {
 			settings.col = col;
 		}
-
 		if (row) {
 			settings.row = row;
 		}
-
-		settings.filter = filter;
+		if (filter) {
+			settings.filter = filter;
+		}
 
 		return settings;
 	};
