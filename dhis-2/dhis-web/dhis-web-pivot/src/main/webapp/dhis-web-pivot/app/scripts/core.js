@@ -422,50 +422,33 @@ PT.core.getUtils = function(pt) {
 
 	util.pivot = {
 		getTable: function(settings, pt, container) {
-			var getDimensionsFromSettings,
-				getParamStringFromDimensions,
-
+			var getParamStringFromDimensions,
+				extendSettings,
 				validateResponse,
 				extendResponse,
-				extendDimensions,
-				getDims,
-				extendRowDims,
-				getEmptyItem,
-				getColItems,
-				getRowItems,
-				createTableArray,
+				extendAxis,
+				extendRowAxis,
+				getTableHtmlItems,
+				getTablePanel,
 				initialize;
 
-			getDimensionsFromSettings = function() {
-				var dimensions = [];
-
-				if (settings.col) {
-					dimensions = dimensions.concat(settings.col);
-				}
-				if (settings.row) {
-					dimensions = dimensions.concat(settings.row);
-				}
-				
-				return dimensions;
-			};
-
-			getParamStringFromDimensions = function(dimensions) {
-				var paramString = '?',
+			getParamString = function(xSettings) {
+				var sortedDimensions,
 					filterDimensions = [],
-					dim;
+					paramString = '?';
 
-				dimensions = pt.util.array.sortDimensions(dimensions);
+				sortedDimensions = pt.util.array.sortDimensions(xSettings.dimensions);
 
-				for (var i = 0; i < dimensions.length; i++) {
-					dim = dimensions[i];
+				for (var i = 0, sortedDim; i < sortedDimensions.length; i++) {
+					sortedDim = sortedDimensions[i];
 
-					paramString += 'dimension=' + dim.name;
+					paramString += 'dimension=' + sortedDim.name;
 
-					if (dim.name !== pt.conf.finals.dimension.category.paramname) {
-						paramString += ':' + dim.items.join(';');
+					if (sortedDim.name !== pt.conf.finals.dimension.category.paramname) {
+						paramString += ':' + sortedDim.items.join(';');
 					}
 
-					if (i < (dimensions.length - 1)) {
+					if (i < (sortedDimensions.length - 1)) {
 						paramString += '&';
 					}
 				}
@@ -481,6 +464,35 @@ PT.core.getUtils = function(pt) {
 				}
 
 				return paramString;
+			};
+
+			extendSettings = function(settings) {
+				var getDimensions;
+
+				getDimensions = function() {
+					var dimensions = [];
+
+					if (settings.col) {
+						dimensions = dimensions.concat(settings.col);
+					}
+					if (settings.row) {
+						dimensions = dimensions.concat(settings.row);
+					}
+					
+					settings.dimensions = dimensions;
+				}();
+
+				getDimensionNames = function() {
+					var names = [];
+					
+					for (var i = 0; i < settings.dimensions.length; i++) {
+						names.push(settings.dimensions[i].name);
+					}
+
+					settings.dimensionNames = names;
+				}();						
+
+				return settings;
 			};
 
 			validateResponse = function(response) {
@@ -577,25 +589,6 @@ PT.core.getUtils = function(pt) {
 							}
 						}
 					}
-					
-					// Remove all header items
-					//for (var i = 0, header; i < headers.length; i++) {
-						//header = headers[i];
-
-						//header.items = [];
-					//}
-
-					// Add sorted header items based on metaData
-					//for (var key in metaData) {
-						//if (metaData.hasOwnProperty(key)) {
-							//var headerName = response.metaDataHeaderMap[key],
-								//header = response.nameHeaderMap[headerName];
-
-							//if (header) {
-								//header.items.push(key);
-							//}
-						//}
-					//}
 				}();
 
 				var createValueIds = function() {
@@ -840,7 +833,7 @@ PT.core.getUtils = function(pt) {
 					for (var i = 0, row; i < size; i++) {
 						row = [];
 
-						for (var j = 0, id, value, row; j < xColAxis.size; j++) {
+						for (var j = 0, id, value; j < xColAxis.size; j++) {
 							id = xColAxis.ids[j] + xRowAxis.ids[i];
 							value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0;
 							row.push(value);
@@ -960,19 +953,19 @@ PT.core.getUtils = function(pt) {
 			};
 			
 			initialize = function() {
-				var dimensions,
+				var xSettings,
 					xResponse,
-					colAxis = settings.col,
 					xColAxis,
-					rowAxis = settings.row,
 					xRowAxis,
 					paramString;
 
 				pt.util.mask.showMask(container);
 
+				xSettings = extendSettings(settings);
+
 				dimensions = getDimensionsFromSettings();
 
-				paramString = getParamStringFromDimensions(dimensions);
+				paramString = getParamString(xSettings);
 
 				Ext.data.JsonP.request({
 					method: 'GET',
@@ -1001,7 +994,7 @@ response.metaData['pq2XI5kz2BY'] = '(Fixed)';
 
 						xResponse = extendResponse(response, dimensions);
 
-						xColAxis = extendAxis(colAxis, xResponse);
+						xColAxis = extendAxis(settings.col, xResponse);
 						xRowAxis = extendRowAxis(rowAxis, xResponse);
 						
 						tableHtmlItems = getTableHtmlItems(xColAxis, xRowAxis, xResponse);
