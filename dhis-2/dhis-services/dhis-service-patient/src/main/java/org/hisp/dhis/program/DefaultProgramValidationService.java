@@ -33,14 +33,17 @@ import static org.hisp.dhis.program.ProgramExpression.SEPARATOR_ID;
 import static org.hisp.dhis.program.ProgramExpression.SEPARATOR_OBJECT;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.patientdatavalue.PatientDataValue;
+import org.hisp.dhis.patientdatavalue.PatientDataValueService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -62,6 +65,8 @@ public class DefaultProgramValidationService
 
     private ProgramExpressionService expressionService;
 
+    private PatientDataValueService patientDataValueService;
+
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
@@ -69,6 +74,11 @@ public class DefaultProgramValidationService
     public void setValidationStore( ProgramValidationStore validationStore )
     {
         this.validationStore = validationStore;
+    }
+
+    public void setPatientDataValueService( PatientDataValueService patientDataValueService )
+    {
+        this.patientDataValueService = patientDataValueService;
     }
 
     public void setExpressionService( ProgramExpressionService expressionService )
@@ -120,28 +130,63 @@ public class DefaultProgramValidationService
     }
 
     @Override
-    public ProgramValidationResult validate( ProgramValidation validation, ProgramStageInstance programStageInstance,
-        I18nFormat format )
+    public Collection<ProgramValidationResult> validate( Collection<ProgramValidation> validation,
+        ProgramStageInstance programStageInstance )
     {
-        String leftSideValue = expressionService.getProgramExpressionValue( validation.getLeftSide(),
-            programStageInstance, format );
-        String rightSideValue = expressionService.getProgramExpressionValue( validation.getRightSide(),
-            programStageInstance, format );
-        String operator = validation.getOperator().getMathematicalOperator();
+        Collection<ProgramValidationResult> result = new HashSet<ProgramValidationResult>();
 
-        if ( (leftSideValue != null && rightSideValue.equals( NOT_NULL_VALUE_IN_EXPRESSION ) && rightSideValue == null)
-            || ((leftSideValue != null && rightSideValue != null && !((operator.equals( "==" ) && leftSideValue
-                .compareTo( rightSideValue ) == 0)
-                || (operator.equals( "<" ) && leftSideValue.compareTo( rightSideValue ) < 0)
-                || (operator.equals( "<=" ) && (leftSideValue.compareTo( rightSideValue ) <= 0))
-                || (operator.equals( ">" ) && leftSideValue.compareTo( rightSideValue ) > 0)
-                || (operator.equals( ">=" ) && leftSideValue.compareTo( rightSideValue ) >= 0) || (operator
-                .equals( "!=" ) && leftSideValue.compareTo( rightSideValue ) == 0)))) )
+        // ---------------------------------------------------------------------
+        // Get patient-data-values
+        // ---------------------------------------------------------------------
+
+        Program program = programStageInstance.getProgramInstance().getProgram();
+        Collection<PatientDataValue> patientDataValues = null;
+        if ( program.isSingleEvent() )
         {
-            return new ProgramValidationResult( programStageInstance, validation, leftSideValue, rightSideValue );
+            patientDataValues = patientDataValueService.getPatientDataValues( programStageInstance );
+        }
+        else
+        {
+            patientDataValues = patientDataValueService.getPatientDataValues(  programStageInstance.getProgramInstance().getProgramStageInstances() );
         }
 
-        return null;
+        Map<String, String> patientDataValueMap = new HashMap<String, String>( patientDataValues.size() );
+
+        for ( PatientDataValue patientDataValue : patientDataValues )
+        {
+            String key = patientDataValue.getProgramStageInstance().getProgramStage().getId() + "."
+                + patientDataValue.getDataElement().getId();
+            patientDataValueMap.put( key, patientDataValue.getValue() );
+        }
+
+        // ---------------------------------------------------------------------
+        // Validate rules
+        // ---------------------------------------------------------------------
+
+        for ( ProgramValidation validate : validation )
+        {
+            String leftSideValue = expressionService.getProgramExpressionValue( validate.getLeftSide(),
+                programStageInstance, patientDataValueMap );
+            String rightSideValue = expressionService.getProgramExpressionValue( validate.getRightSide(),
+                programStageInstance, patientDataValueMap );
+            String operator = validate.getOperator().getMathematicalOperator();
+
+            if ( (leftSideValue != null && rightSideValue.equals( NOT_NULL_VALUE_IN_EXPRESSION ) && rightSideValue == null)
+                || ((leftSideValue != null && rightSideValue != null && !((operator.equals( "==" ) && leftSideValue
+                    .compareTo( rightSideValue ) == 0)
+                    || (operator.equals( "<" ) && leftSideValue.compareTo( rightSideValue ) < 0)
+                    || (operator.equals( "<=" ) && (leftSideValue.compareTo( rightSideValue ) <= 0))
+                    || (operator.equals( ">" ) && leftSideValue.compareTo( rightSideValue ) > 0)
+                    || (operator.equals( ">=" ) && leftSideValue.compareTo( rightSideValue ) >= 0) || (operator
+                    .equals( "!=" ) && leftSideValue.compareTo( rightSideValue ) == 0)))) )
+            {
+                ProgramValidationResult validationResult = new ProgramValidationResult( programStageInstance, validate,
+                    leftSideValue, rightSideValue );
+                result.add( validationResult );
+            }
+        }
+
+        return result;
     }
 
     public Collection<ProgramValidation> getProgramValidation( Program program )
