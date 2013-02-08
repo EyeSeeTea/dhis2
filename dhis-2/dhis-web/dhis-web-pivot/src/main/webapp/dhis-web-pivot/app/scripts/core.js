@@ -530,7 +530,7 @@ PT.core.getUtils = function(pt) {
 				return true;
 			};
 		
-			extendResponse = function(response, dimensions) {
+			extendResponse = function(response, xSettings) {
 				var headers = response.headers,
 					metaData = response.metaData,
 					rows = response.rows;
@@ -540,6 +540,7 @@ PT.core.getUtils = function(pt) {
 				response.idValueMap = {};
 
 				var extendHeaders = function() {
+					var dimensions = xSettings.dimensions;
 
 					// Extend headers: index, items (unique), size
 					for (var i = 0, header, items; i < headers.length; i++) {
@@ -602,24 +603,30 @@ PT.core.getUtils = function(pt) {
 
 				var createValueIds = function() {
 					var valueHeaderIndex = response.nameHeaderMap[pt.conf.finals.dimension.value.value].index,
-						dimensionNames = [];
+						dimensionNames = xSettings.dimensionNames,
+						idIndexOrder = [];
 
-					// Dimension names
-					for (var i = 0; i < dimensions.length; i++) {
-						dimensionNames.push(dimensions[i].name);
+					// idIndexOrder
+					for (var i = 0; i < dimensionNames.length; i++) {
+						idIndexOrder.push(response.nameHeaderMap[dimensionNames[i]].index);
 					}
 
 					// idValueMap
-					for (var i = 0, id; i < rows.length; i++) {
+					for (var i = 0, row, id; i < rows.length; i++) {
+						row = rows[i];
 						id = '';
 
-						for (var j = 0, header; j < dimensionNames.length; j++) {
-							header = response.nameHeaderMap[dimensionNames[j]];
-
-							id += rows[i][header.index];
+						for (var j = 0; j < idIndexOrder.length; j++) {
+							id += row[idIndexOrder[j]];
 						}
 
-						response.idValueMap[id] = rows[i][valueHeaderIndex];
+						//for (var j = 0, header; j < dimensionNames.length; j++) {
+							//header = response.nameHeaderMap[dimensionNames[j]];
+
+							//id += rows[i][header.index];
+						//}
+
+						response.idValueMap[id] = row[valueHeaderIndex];
 					}
 				}();
 
@@ -965,18 +972,15 @@ PT.core.getUtils = function(pt) {
 				var xSettings,
 					xResponse,
 					xColAxis,
-					xRowAxis,
-					paramString;
+					xRowAxis;
 
 				pt.util.mask.showMask(container);
 
 				xSettings = extendSettings(settings);
 
-				paramString = getParamString(xSettings);
-
 				Ext.data.JsonP.request({
 					method: 'GET',
-					url: pt.init.contextPath + '/api/analytics.jsonp' + paramString,
+					url: pt.init.contextPath + '/api/analytics.jsonp' + getParamString(xSettings),
 					callbackName: 'analytics',
 					headers: {
 						'Content-Type': 'application/json',
