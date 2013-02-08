@@ -47,8 +47,16 @@ public class CaseAggregationCondition
 
     public static final String AGGRERATION_COUNT = "COUNT";
 
-    public static final String AGGRERATION_SUM = "SUM";
-
+    public static final String AGGRERATION_SUM = "times";
+    
+    public static final String AGGRERATION_SUM_VALUE = "sum";
+    
+    public static final String AGGRERATION_AVG_VALUE = "avg";
+    
+    public static final String AGGRERATION_AVG_MIN = "min";
+    
+    public static final String AGGRERATION_AVG_MAX = "max";
+    
     public static final String OPERATOR_AND = "AND";
 
     public static final String OPERATOR_OR = "OR";
@@ -85,6 +93,8 @@ public class CaseAggregationCondition
     private DataElement aggregationDataElement;
 
     private DataElementCategoryOptionCombo optionCombo;
+    
+    private DataElement deSum;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -103,6 +113,18 @@ public class CaseAggregationCondition
         this.aggregationExpression = aggregationExpression;
         this.aggregationDataElement = aggregationDataElement;
         this.optionCombo = optionCombo;
+    }
+
+    
+    public CaseAggregationCondition( String name, String operator, String aggregationExpression, DataElement aggregationDataElement,
+        DataElementCategoryOptionCombo optionCombo, DataElement deSum )
+    {
+        this.name = name;
+        this.operator = operator;
+        this.aggregationExpression = aggregationExpression;
+        this.aggregationDataElement = aggregationDataElement;
+        this.optionCombo = optionCombo;
+        this.deSum = deSum;
     }
 
     // -------------------------------------------------------------------------
@@ -193,5 +215,15 @@ public class CaseAggregationCondition
     public void setAggregationExpression( String aggregationExpression )
     {
         this.aggregationExpression = aggregationExpression;
+    }
+
+    public DataElement getDeSum()
+    {
+        return deSum;
+    }
+
+    public void setDeSum( DataElement deSum )
+    {
+        this.deSum = deSum;
     }
 }

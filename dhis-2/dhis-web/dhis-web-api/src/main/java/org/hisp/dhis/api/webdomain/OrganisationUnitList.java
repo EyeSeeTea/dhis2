@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.api.webdomain;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,47 +27,35 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface GenericNameableObjectStore<T>
-    extends GenericIdentifiableObjectStore<T>
+@JacksonXmlRootElement( localName = "organisationUnitGroup", namespace = Dxf2Namespace.NAMESPACE )
+public class OrganisationUnitList
 {
-    /**
-     * Retrieves the object with the given short name.
-     *
-     * @param shortName the short name.
-     * @return the object with the given short name.
-     */
-    T getByShortName( String shortName );
+    private Set<OrganisationUnit> members = new HashSet<OrganisationUnit>();
 
-    /**
-     * Return the number of objects where the name is equal the given name.
-     * <p/>
-     * This count is _unfiltered_ (no ACL!), so this is not the same as
-     * getAllEqShortName().size().
-     *
-     * @param shortName the name.
-     * @return Count of objects.
-     */
-    int getCountEqShortNameNoAcl( String shortName );
+    @JsonProperty( value = "organisationUnits" )
+    @JacksonXmlElementWrapper( localName = "organisationUnits", namespace = Dxf2Namespace.NAMESPACE )
+    @JacksonXmlProperty( localName = "organisationUnit", namespace = Dxf2Namespace.NAMESPACE )
+    public Set<OrganisationUnit> getMembers()
+    {
+        return members;
+    }
 
-    /**
-     * Retrieves a List of objects where the name is like the given name.
-     *
-     * @param shortName the name.
-     * @return a List of objects.
-     */
-    List<T> getAllEqShortName( String shortName );
+    public void setMembers( Set<OrganisationUnit> members )
+    {
+        this.members = members;
+    }
 
-    /**
-     * Retrieves a List of objects where the name is like the given name (ignore case).
-     *
-     * @param shortName the name.
-     * @return a List of objects.
-     */
-    List<T> getAllEqShortNameIgnoreCase( String shortName );
 }

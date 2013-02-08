@@ -140,11 +140,15 @@ public class DefaultAnalyticsService
         
         queryPlanner.validate( params );
         
-        Grid grid = new ListGrid();
-
+        params.conform();
+        
+        Integer cocIndex = params.getDeQueryCocIndex();
+        
         // ---------------------------------------------------------------------
         // Headers and meta-data
         // ---------------------------------------------------------------------
+
+        Grid grid = new ListGrid();
 
         grid.setMetaData( getUidNameMap( params ) );
         
@@ -198,6 +202,15 @@ public class DefaultAnalyticsService
                             
                             row.add( indicatorIndex, new DimensionOption( INDICATOR_DIM_ID, indicator ) );
                             
+                            if ( cocIndex != null )
+                            {
+                                // ---------------------------------------------
+                                // Add null to get same number of columns
+                                // ---------------------------------------------
+
+                                row.add( cocIndex, null );
+                            }
+                            
                             grid.addRow();
                             grid.addValues( DimensionOption.getOptionIdentifiers( row ) );
                             grid.addValue( MathUtils.getRounded( value, 1 ) );
@@ -243,8 +256,19 @@ public class DefaultAnalyticsService
 
             for ( Map.Entry<String, Double> entry : aggregatedDataMap.entrySet() )
             {
+                List<String> row = new ArrayList<String>( Arrays.asList( entry.getKey().split( DIMENSION_SEP ) ) );
+
+                if ( cocIndex != null )
+                {
+                    // ---------------------------------------------------------
+                    // Add null to get same number of columns
+                    // ---------------------------------------------------------
+
+                    row.add( cocIndex, null );
+                }
+                
                 grid.addRow();
-                grid.addValues( entry.getKey().split( DIMENSION_SEP ) );
+                grid.addValues( row.toArray() );
                 grid.addValue( entry.getValue() );
             }
         }

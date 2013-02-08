@@ -393,10 +393,37 @@ PT.core.getUtils = function(pt) {
 		}
 	};
 
+	util.array = {
+		sortDimensions: function(dimensions) {
+
+			// Sort object order
+			Ext.Array.sort(dimensions, function(a,b) {
+				if (a.name < b.name) {
+					return -1;
+				}
+				if (a.name > b.name) {
+					return 1;
+				}
+				return 0;
+			});
+
+			// Sort object items order
+			for (var i = 0, dim; i < dimensions.length; i++) {
+				dim = dimensions[i];
+
+				if (dim.items) {
+					dimensions[i].items.sort();
+				}
+			}
+
+			return dimensions;
+		}
+	};
+
 	util.pivot = {
 		getTable: function(settings, pt, container) {
-			var getDimensionItemsFromSettings,
-				getParamStringFromDimensionItems,
+			var getDimensionsFromSettings,
+				getParamStringFromDimensions,
 
 				validateResponse,
 				extendResponse,
@@ -409,47 +436,47 @@ PT.core.getUtils = function(pt) {
 				createTableArray,
 				initialize;
 
-			getDimensionItemsFromSettings = function() {
-				var col = settings.col,
-					row = settings.row,
-					dimensionItems;
+			getDimensionsFromSettings = function() {
+				var dimensions = [];
 
-				dimensionItems = Ext.clone(col);
-				Ext.apply(dimensionItems, row);
-
-				return dimensionItems;
+				if (settings.col) {
+					dimensions = dimensions.concat(settings.col);
+				}
+				if (settings.row) {
+					dimensions = dimensions.concat(settings.row);
+				}
+				
+				return dimensions;
 			};
 
-			getParamStringFromDimensionItems = function(dimensionItems) {
+			getParamStringFromDimensions = function(dimensions) {
 				var paramString = '?',
+					filterDimensions = [],
 					dim;
 
-				for (var key in dimensionItems) {
-					if (dimensionItems.hasOwnProperty(key)) {
-						if (key === pt.conf.finals.dimension.category.paramname) {
-							paramString += 'dimension=' + key + '&';
-						}
-						else {
-							dim = dimensionItems[key];
+				dimensions = pt.util.array.sortDimensions(dimensions);
 
-							if (!(dim && Ext.isArray(dim) && dim.length)) {
-								pt.util.mask.hideMask();
-								alert('Empty dimension');
-								return;
-							}
+				for (var i = 0; i < dimensions.length; i++) {
+					dim = dimensions[i];
 
-							Ext.Array.sort(dim);
-							paramString += 'dimension=' + key + ':' + dim.join(';') + '&';
-						}
+					paramString += 'dimension=' + dim.name;
+
+					if (dim.name !== pt.conf.finals.dimension.category.paramname) {
+						paramString += ':' + dim.items.join(';');
+					}
+
+					if (i < (dimensions.length - 1)) {
+						paramString += '&';
 					}
 				}
 
-				paramString = paramString.substring(0, paramString.length-1);
+				if (settings.filter) {
+					filterDimensions = pt.util.array.sortDimensions(settings.filter.slice(0));
 
-				for (var key in settings.filter) {
-					if (settings.filter.hasOwnProperty(key)) {
-						dim = settings.filter[key];
-						paramString += '&filter=' + key + ':' + dim.join(';');
+					for (var i = 0, filterDim; i < filterDimensions.length; i++) {
+						filterDim = filterDimensions[i];
+						
+						paramString += '&filter=' + filterDim.name + ':' + filterDim.items.join(';');
 					}
 				}
 
@@ -695,28 +722,15 @@ PT.core.getUtils = function(pt) {
 				var response = pt.response,
 					col = settings.col,
 					row = settings.row,
-					getUniqueColsArray,
-					getUniqueRowsArray;
+					getUniqueDimensionsNames;
 
-				getUniqueColsArray = function() {
+				getUniqueDimensionsNames = function(axis) {
 					var a = [];
 
-					for (var dim in col) {
-						if (col.hasOwnProperty(dim)) {
-							a.push(response.nameHeaderMap[dim].items);
-						}
-					}
-
-					return a;
-				};
-
-				getUniqueRowsArray = function() {
-					var a = [];
-
-					for (var dim in row) {
-						if (row.hasOwnProperty(dim)) {
-							a.push(response.nameHeaderMap[dim].items);
-						}
+					for (var i = 0, dim; i < axis.length; i++) {
+						dim = axis[i];
+						
+						a.push(response.nameHeaderMap[dim.name].items);
 					}
 
 					return a;
@@ -725,8 +739,8 @@ PT.core.getUtils = function(pt) {
 				// aUniqueCols ->  [[p1, p2, p3], [ou1, ou2, ou3, ou4]]
 
 				return {
-					cols: extendDims(getUniqueColsArray()),
-					rows: extendDims(getUniqueRowsArray())
+					cols: extendDims(getUniqueDimensionsNames(col)),
+					rows: extendDims(getUniqueDimensionsNames(row))
 				};
 			};
 
@@ -930,9 +944,9 @@ PT.core.getUtils = function(pt) {
 
 				pt.util.mask.showMask(container);
 
-				dimensionItems = getDimensionItemsFromSettings(settings);
+				dimensions = getDimensionsFromSettings();
 
-				paramString = getParamStringFromDimensionItems(dimensionItems);
+				paramString = getParamStringFromDimensions(dimensions);
 
 				Ext.data.JsonP.request({
 					method: 'GET',
@@ -1000,7 +1014,7 @@ PT.core.getAPI = function(pt) {
 			isAxisValid,
 			initialize;
 
-		removeEmptyDimensions = function(axis) {
+		removeEmptyDimensions = function(axis) {			
 			if (!axis) {
 				return;
 			}
@@ -1014,7 +1028,7 @@ PT.core.getAPI = function(pt) {
 						remove = true;
 					}
 					else {
-						for (var j = 0; j < dimension.items.length; i++) {
+						for (var j = 0; j < dimension.items.length; j++) {
 							if (!Ext.isString(dimension.items[j])) {
 								remove = true;
 							}
@@ -1031,7 +1045,7 @@ PT.core.getAPI = function(pt) {
 			return axis;
 		};
 
-		getValidatedAxis = function(axis) {			
+		getValidatedAxis = function(axis) {
 			if (!(axis && Ext.isArray(axis) && axis.length)) {
 				return;
 			}
@@ -1065,13 +1079,13 @@ PT.core.getAPI = function(pt) {
 			}
 
 			if (col) {
-				settings.col = removeEmptyDimensions(col);
+				settings.col = col;
 			}
 			if (row) {
-				settings.row = removeEmptyDimensions(row);
+				settings.row = row;
 			}
 			if (filter) {
-				settings.filter = removeEmptyDimensions(filter);
+				settings.filter = filter;
 			}
 		}();
 
