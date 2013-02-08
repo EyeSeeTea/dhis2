@@ -427,7 +427,7 @@ PT.core.getUtils = function(pt) {
 
 				validateResponse,
 				extendResponse,
-				extendDims,
+				extendDimensions,
 				getDims,
 				extendRowDims,
 				getEmptyItem,
@@ -509,9 +509,8 @@ PT.core.getUtils = function(pt) {
 				return true;
 			};
 		
-			extendResponse = function(dimensionItems) {
-				var response = pt.response,
-					headers = response.headers,
+			extendResponse = function(response, dimensions) {
+				var headers = response.headers,
 					metaData = response.metaData,
 					rows = response.rows;
 
@@ -556,24 +555,47 @@ PT.core.getUtils = function(pt) {
 						response.nameHeaderMap[header.name] = header;
 					}
 
-					// Remove all header items
-					for (var i = 0, header; i < headers.length; i++) {
+					// Sort header items based on settings
+					for (var i = 0, header, sortedItems; i < headers.length; i++) {
+						sortedItems = [];
 						header = headers[i];
 
-						header.items = [];
-					}
+						for (var j = 0, dim, item; j < dimensions.length; j++) {
+							dim = dimensions[j];
+							
+							if (header.name === dim.name && dim.items) {
+								for (var k = 0, item; k < dim.items.length; k++) {
+									item = dim.items[k];
 
-					// Add sorted header items based on metaData
-					for (var key in metaData) {
-						if (metaData.hasOwnProperty(key)) {
-							var headerName = response.metaDataHeaderMap[key],
-								header = response.nameHeaderMap[headerName];
+									if (Ext.Array.contains(header.items, item)) {
+										sortedItems.push(item);
+									}
+								}
 
-							if (header) {
-								header.items.push(key);
+								header.items = sortedItems;console.log(sortedItems);
+								break;
 							}
 						}
 					}
+					
+					// Remove all header items
+					//for (var i = 0, header; i < headers.length; i++) {
+						//header = headers[i];
+
+						//header.items = [];
+					//}
+
+					// Add sorted header items based on metaData
+					//for (var key in metaData) {
+						//if (metaData.hasOwnProperty(key)) {
+							//var headerName = response.metaDataHeaderMap[key],
+								//header = response.nameHeaderMap[headerName];
+
+							//if (header) {
+								//header.items.push(key);
+							//}
+						//}
+					//}
 				}();
 
 				var createValueIds = function() {
@@ -581,10 +603,8 @@ PT.core.getUtils = function(pt) {
 						dimensionNames = [];
 
 					// Dimension names
-					for (var key in dimensionItems) {
-						if (dimensionItems.hasOwnProperty(key)) {
-							dimensionNames.push(key);
-						}
+					for (var i = 0; i < dimensions.length; i++) {
+						dimensionNames.push(dimensions[i].name);
 					}
 
 					// idValueMap
@@ -600,20 +620,40 @@ PT.core.getUtils = function(pt) {
 						response.idValueMap[id] = rows[i][valueHeaderIndex];
 					}
 				}();
+
+				return response;
 			};
 
-			extendDims = function(aUniqueItems) {
-				//aUniqueItems	= [ [de1, de2, de3],
-				//					[p1],
-				//					[ou1, ou2, ou3, ou4] ]
-
+			extendAxis = function(axis, xResponse) {
 				var nCols = 1,
 					aNumCols = [],
 					aAccNumCols = [],
 					aSpan = [],
 					aGuiItems = [],
 					aAllItems = [],
-					aColIds = [];
+					aColIds = [],
+					aUniqueItems,
+					getUniqueDimensionNames;
+					
+				getUniqueDimensionNames = function() {
+					var a = [];
+
+					for (var i = 0, dim; i < axis.length; i++) {
+						dim = axis[i];
+						
+						a.push(xResponse.nameHeaderMap[dim.name].items);
+					}
+
+					return a;
+				};
+
+				aUniqueItems = getUniqueDimensionNames();
+
+				console.log("aUniqueItems", aUniqueItems);
+				
+				//aUniqueItems	= [ [de1, de2, de3],
+				//					[p1],
+				//					[ou1, ou2, ou3, ou4] ]
 
 				for (var i = 0, dim; i < aUniqueItems.length; i++) {
 					nNumCols = aUniqueItems[i].length;
@@ -706,7 +746,8 @@ PT.core.getUtils = function(pt) {
 
 			console.log("");
 				return {
-					items: {
+					items: axis.items,
+					xItems: {
 						unique: aUniqueItems,
 						gui: aGuiItems,
 						all: aAllItems
@@ -718,34 +759,23 @@ PT.core.getUtils = function(pt) {
 				};
 			};
 
-			getDims = function() {
-				var response = pt.response,
-					col = settings.col,
-					row = settings.row,
-					getUniqueDimensionsNames;
+			//getAxes = function(xResponse) {
+				//var col = settings.col,
+					//row = settings.row,
+					//getUniqueDimensionNames;
 
-				getUniqueDimensionsNames = function(axis) {
-					var a = [];
 
-					for (var i = 0, dim; i < axis.length; i++) {
-						dim = axis[i];
-						
-						a.push(response.nameHeaderMap[dim.name].items);
-					}
+				//// aUniqueCols ->  [[p1, p2, p3], [ou1, ou2, ou3, ou4]]
 
-					return a;
-				};
+				//return {
+					//cols: extendDimensions(getUniqueDimensionNames(col)),
+					//rows: extendDimensions(getUniqueDimensionNames(row))
+				//};
+			//};
 
-				// aUniqueCols ->  [[p1, p2, p3], [ou1, ou2, ou3, ou4]]
-
-				return {
-					cols: extendDims(getUniqueDimensionsNames(col)),
-					rows: extendDims(getUniqueDimensionsNames(row))
-				};
-			};
-
-			extendRowDims = function(rows) {
-				var all = rows.items.all,
+			extendRowAxis = function(rowAxis, xResponse) {
+				var xRowAxis = extendAxis(rowAxis, xResponse),
+					all = xRowAxis.xItems.all,
 					allObjects = [];
 
 				for (var i = 0, allRow; i < all.length; i++) {
@@ -761,185 +791,193 @@ PT.core.getUtils = function(pt) {
 				}
 
 				for (var i = 0; i < allObjects.length; i++) {
-					for (var j = 0, object; j < allObjects[i].length; j += rows.span[i]) {
+					for (var j = 0, object; j < allObjects[i].length; j += xRowAxis.span[i]) {
 						object = allObjects[i][j];
-						object.rowSpan = rows.span[i];
+						object.rowSpan = xRowAxis.span[i];
 					}
 				}
 
-				rows.items.allObjects = allObjects;
+				xRowAxis.xItems.allObjects = allObjects;
 			};
 
-			getEmptyItem = function() {
-				return '<td class="pivot-empty" colspan="' + pt.config.rows.dims + '" rowspan="' + pt.config.cols.dims + '"></td>';
-			};
+			getTableHtmlItems = function(xColAxis, xRowAxis, xResponse) {
+				var colAxisHtml,
+					getColAxisHtml,
+					rowAxisHtml,
+					getRowAxisHtml,
+					tableHtml;
 
-			getColItems = function() {
-				var response = pt.response,
-					rows = pt.config.rows,
-					cols = pt.config.cols,
-					colItems = [];
+				getColAxisHtml = function() {
+					var colAxisHtml = [];
 
-				for (var i = 0, dimItems, colSpan, rowArray; i < cols.dims; i++) {
-					dimItems = cols.items.gui[i];
-					colSpan = cols.span[i];
-					rowArray = [];
+					for (var i = 0, dimItems, colSpan, rowArray; i < xColAxis.dims; i++) {
+						dimItems = xColAxis.xItems.gui[i];
+						colSpan = xColAxis.span[i];
+						dimHtml = [];
 
-					if (i === 0) {
-						rowArray.push(getEmptyItem());
-					}
-
-					for (var j = 0, id; j < dimItems.length; j++) {
-						id = dimItems[j];						
-						rowArray.push('<td class="pivot-dim" colspan="' + colSpan + '">' + response.metaData[id] + '</td>');
-
-						if (i === 0 && j === (dimItems.length - 1)) {
-							rowArray.push('<td class="pivot-dimtotal" rowspan="' + cols.dims + '">Total</td>');
+						if (i === 0) {
+							dimHtml.push('<td class="pivot-empty" colspan="' + xRowAxis.dims + '" rowspan="' + xColAxis.dims + '"></td>');
 						}
-					}
 
-					colItems.push(rowArray);
-				}
+						for (var j = 0, id; j < dimItems.length; j++) {
+							id = dimItems[j];						
+							dimHtml.push('<td class="pivot-dim" colspan="' + colSpan + '">' + xResponse.metaData[id] + '</td>');
 
-				return colItems;
-			};
-
-			getRowItems = function() {
-				var response = pt.response,
-					rows = pt.config.rows,
-					cols = pt.config.cols,
-					size = rows.size,
-					dims = rows.dims,
-					allObjects = rows.items.allObjects,
-					dimHtmlItems = [],
-					valueItems = [],
-					valueHtmlItems = [],
-					totalRowItems = [],
-					totalRowHtmlItems = [],
-					totalColItems = [],
-					totalColHtmlItems = [],
-					grandTotalItem = 0,
-					grandTotalHtmlItem;
-
-				// Value items
-				for (var i = 0, row; i < size; i++) {
-					row = [];
-
-					for (var j = 0, id, value, row; j < pt.config.cols.size; j++) {
-						id = cols.ids[j] + rows.ids[i];
-						value = response.idValueMap[id] ? parseFloat(response.idValueMap[id]) : 0;
-						row.push(value);
-					}
-
-					valueItems.push(row);
-				}
-
-				// Value html items
-				for (var i = 0, row; i < valueItems.length; i++) {
-					row = [];
-
-					for (var j = 0, id, value, cls; j < valueItems[i].length; j++) {
-						id = cols.ids[j] + rows.ids[i];
-						value = valueItems[i][j];
-
-						//if (Ext.isNumber(value)) {
-							//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
-						//}
-
-						row.push('<td id="' + id + '" class="pivot-value">' + value + '</td>');
-					}
-
-					valueHtmlItems.push(row);
-				}
-
-				// Total row items
-				for (var i = 0, rowSum; i < valueItems.length; i++) {
-					rowSum = Ext.Array.sum(valueItems[i]);
-					totalRowItems.push(rowSum);
-				}
-
-				// Total row html items
-				for (var i = 0, rowSum; i < totalRowItems.length; i++) {
-					rowSum = totalRowItems[i];
-
-					totalRowHtmlItems.push('<td class="pivot-valuetotal">' + rowSum.toString() + '</td>');
-				}
-
-				// Total col items
-				for (var i = 0, colSum; i < valueItems[0].length; i++) {
-					colSum = 0;
-
-					for (var j = 0; j < valueItems.length; j++) {
-						colSum += valueItems[j][i];
-					}
-
-					totalColItems.push(colSum);
-				}
-
-				// Total col html items
-				for (var i = 0, colSum; i < totalColItems.length; i++) {
-					colSum = totalColItems[i];
-
-					totalColHtmlItems.push('<td class="pivot-valuetotal">' + colSum.toString() + '</td>');
-				}
-
-				// Grand total item
-				grandTotalItem = Ext.Array.sum(totalColItems);
-
-				// Grand total html item
-				grandTotalHtmlItem = '<td class="pivot-valuegrandtotal">' + grandTotalItem.toString() + '</td>';
-
-				// GUI
-
-				// Dim html items
-				for (var i = 0, row; i < size; i++) {
-					row = [];
-					
-					for (var j = 0, object; j < dims; j++) {
-						object = allObjects[j][i];
-
-						if (object.rowSpan) {
-							row.push('<td class="pivot-dim" rowspan="' + object.rowSpan + '">' + response.metaData[object.id] + '</td>');
+							if (i === 0 && j === (dimItems.length - 1)) {
+								dimHtml.push('<td class="pivot-dimtotal" rowspan="' + xColAxis.dims + '">Total</td>');
+							}
 						}
+
+						colAxisHtml.push(dimHtml);
 					}
 
-					row = row.concat(valueHtmlItems[i]);
-					row = row.concat(totalRowHtmlItems[i]);
+					return colAxisHtml;
+				};
 
-					dimHtmlItems.push(row);
-				}
+				getRowAxisHtml = function() {
+					var size = xRowAxis.size,
+						dims = xRowAxis.dims,
+						allObjects = xRowAxis.xItems.allObjects,
+						rowAxisHtml = [],
+						valueItems = [],
+						valueHtmlItems = [],
+						totalRowItems = [],
+						totalRowHtmlItems = [],
+						totalColItems = [],
+						totalColHtmlItems = [],
+						grandTotalItem = 0,
+						grandTotalHtmlItem;
 
-				// Final row
-				var finalRow = [];
+					// Value items
+					for (var i = 0, row; i < size; i++) {
+						row = [];
 
-				finalRow.push('<td class="pivot-dimtotal" colspan="' + rows.dims + '">Total</td>');
+						for (var j = 0, id, value, row; j < pt.config.xColAxis.size; j++) {
+							id = xColAxis.ids[j] + xRowAxis.ids[i];
+							value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0;
+							row.push(value);
+						}
 
-				finalRow = finalRow.concat(totalColHtmlItems);
-				finalRow = finalRow.concat(grandTotalHtmlItem);
+						valueItems.push(row);
+					}
 
-				dimHtmlItems.push(finalRow);
+					// Value html items
+					for (var i = 0, row; i < valueItems.length; i++) {
+						row = [];
 
-				return dimHtmlItems;
+						for (var j = 0, id, value, cls; j < valueItems[i].length; j++) {
+							id = xColAxis.ids[j] + xRowAxis.ids[i];
+							value = valueItems[i][j];
+
+							//if (Ext.isNumber(value)) {
+								//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
+							//}
+
+							row.push('<td id="' + id + '" class="pivot-value">' + value + '</td>');
+						}
+
+						valueHtmlItems.push(row);
+					}
+
+					// Total row items
+					for (var i = 0, rowSum; i < valueItems.length; i++) {
+						rowSum = Ext.Array.sum(valueItems[i]);
+						totalRowItems.push(rowSum);
+					}
+
+					// Total row html items
+					for (var i = 0, rowSum; i < totalRowItems.length; i++) {
+						rowSum = totalRowItems[i];
+
+						totalRowHtmlItems.push('<td class="pivot-valuetotal">' + rowSum.toString() + '</td>');
+					}
+
+					// Total col items
+					for (var i = 0, colSum; i < valueItems[0].length; i++) {
+						colSum = 0;
+
+						for (var j = 0; j < valueItems.length; j++) {
+							colSum += valueItems[j][i];
+						}
+
+						totalColItems.push(colSum);
+					}
+
+					// Total col html items
+					for (var i = 0, colSum; i < totalColItems.length; i++) {
+						colSum = totalColItems[i];
+
+						totalColHtmlItems.push('<td class="pivot-valuetotal">' + colSum.toString() + '</td>');
+					}
+
+					// Grand total item
+					grandTotalItem = Ext.Array.sum(totalColItems);
+
+					// Grand total html item
+					grandTotalHtmlItem = '<td class="pivot-valuegrandtotal">' + grandTotalItem.toString() + '</td>';
+
+					// GUI
+
+					// Dim html items
+					for (var i = 0, row; i < size; i++) {
+						row = [];
+						
+						for (var j = 0, object; j < dims; j++) {
+							object = allObjects[j][i];
+
+							if (object.rowSpan) {
+								row.push('<td class="pivot-dim" rowspan="' + object.rowSpan + '">' + xResponse.metaData[object.id] + '</td>');
+							}
+						}
+
+						row = row.concat(valueHtmlItems[i]);
+						row = row.concat(totalRowHtmlItems[i]);
+
+						rowAxisHtml.push(row);
+					}
+
+					// Final row
+					var finalRow = [];
+
+					finalRow.push('<td class="pivot-dimtotal" colspan="' + xRowAxis.dims + '">Total</td>');
+
+					finalRow = finalRow.concat(totalColHtmlItems);
+					finalRow = finalRow.concat(grandTotalHtmlItem);
+
+					rowAxisHtml.push(finalRow);
+
+					return rowAxisHtml;
+				};
+
+				colAxisHtml = getColAxisHtml();
+				rowAxisHtml = getRowAxisHtml();
+
+				return colAxisHtml.concat(rowAxisHtml);
 			};
 
-			createTablePanel = function(items) {
-				var html = '<table class="pivot">';
+			getTablePanel = function(tableHtmlItems) {
+				var tableHtml = '<table class="pivot">';
 
-				for (var i = 0; i < items.length; i++) {
-					html += '<tr>' + items[i].join('') + '</tr>';
+				for (var i = 0; i < tableHtmlItems.length; i++) {
+					tableHtml += '<tr>' + tableHtmlItems[i].join('') + '</tr>';
 				}
 
-				html += '</table>';
+				tableHtml += '</table>';
 
 				return Ext.create('Ext.panel.Panel', {
 					bodyStyle: 'border:0 none',
 					autoScroll: true,
-					html: html
+					html: tableHtml
 				});
 			};
 			
 			initialize = function() {
-				var dimensionItems,
+				var dimensions,
+					xResponse,
+					colAxis = settings.col,
+					xColAxis,
+					rowAxis = settings.row,
+					xRowAxis,
 					paramString;
 
 				pt.util.mask.showMask(container);
@@ -961,33 +999,30 @@ PT.core.getUtils = function(pt) {
 						pt.util.mask.hideMask();
 						alert('Data request failed');
 					},						
-					success: function(r) {
-						var panel,
-							items = [];
+					success: function(response) {
+						var tablePanel;
 
-						if (!validateResponse(r)) {
+						if (!validateResponse(response)) {
 							pt.util.mask.hideMask();
-							console.log(r);
+							console.log(response);
 							return;
 						}
-						
-						pt.response = r;
 //todo
-pt.response.metaData['PT59n8BQbqM'] = '(Outreach)';
-pt.response.metaData['pq2XI5kz2BY'] = '(Fixed)';
+response.metaData['PT59n8BQbqM'] = '(Outreach)';
+response.metaData['pq2XI5kz2BY'] = '(Fixed)';
 
-						extendResponse(dimensionItems);
-						pt.config = getDims();
-						extendRowDims(pt.config.rows);
+						xResponse = extendResponse(response, dimensions);
 
-						items = getColItems();						
-						items = items.concat(getRowItems());
+						xColAxis = extendAxis(colAxis, xResponse);
+						xRowAxis = extendRowAxis(rowAxis, xResponse);
 						
-						panel = createTablePanel(items);
+						tableHtmlItems = getTableHtmlItems(xColAxis, xRowAxis, xResponse);
+						
+						tablePanel = getTablePanel(tableHtmlItems);
 
 						if (!pt.el) {
 							container.removeAll(true);
-							container.add(panel);
+							container.add(tablePanel);
 						}
 						
 						pt.util.mask.hideMask();

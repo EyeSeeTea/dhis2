@@ -13,3 +13,13 @@ DHIS.getPivotTable({
 		{name: 'ou', items: ['ImspTQPwCqd']}
 	]
 });
+
+
+
+dimensions = [
+    {name: 'dx', items: ['Uvn6LCg7dVU', 'OdiHJayrsKo', 'sB79w2hiLp8']},
+    {name: 'coc'},
+    {name: 'pe', items: ['201201', '201202', '201203']},
+    {name: 'Bpx0589u8y0', items: ['MAs88nJc9nL', 'PVLOW4bCshG']},
+    {name: 'ou', items: ['ImspTQPwCqd']}
+];
