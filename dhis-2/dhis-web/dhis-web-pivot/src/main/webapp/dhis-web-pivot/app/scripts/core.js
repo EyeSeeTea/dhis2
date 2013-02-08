@@ -759,20 +759,6 @@ PT.core.getUtils = function(pt) {
 				};
 			};
 
-			//getAxes = function(xResponse) {
-				//var col = settings.col,
-					//row = settings.row,
-					//getUniqueDimensionNames;
-
-
-				//// aUniqueCols ->  [[p1, p2, p3], [ou1, ou2, ou3, ou4]]
-
-				//return {
-					//cols: extendDimensions(getUniqueDimensionNames(col)),
-					//rows: extendDimensions(getUniqueDimensionNames(row))
-				//};
-			//};
-
 			extendRowAxis = function(rowAxis, xResponse) {
 				var xRowAxis = extendAxis(rowAxis, xResponse),
 					all = xRowAxis.xItems.all,
@@ -798,6 +784,8 @@ PT.core.getUtils = function(pt) {
 				}
 
 				xRowAxis.xItems.allObjects = allObjects;
+
+				return xRowAxis;
 			};
 
 			getTableHtmlItems = function(xColAxis, xRowAxis, xResponse) {
@@ -852,7 +840,7 @@ PT.core.getUtils = function(pt) {
 					for (var i = 0, row; i < size; i++) {
 						row = [];
 
-						for (var j = 0, id, value, row; j < pt.config.xColAxis.size; j++) {
+						for (var j = 0, id, value, row; j < xColAxis.size; j++) {
 							id = xColAxis.ids[j] + xRowAxis.ids[i];
 							value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0;
 							row.push(value);
