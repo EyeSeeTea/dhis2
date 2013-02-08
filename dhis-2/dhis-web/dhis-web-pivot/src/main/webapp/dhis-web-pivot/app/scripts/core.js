@@ -501,6 +501,18 @@ PT.core.getUtils = function(pt) {
 					}
 				}();
 
+				addNameDimensionMap = function() {
+					settings.nameDimensionMap = {};
+
+					for (var i = 0, dim; i < settings.dimensions.length; i++) {
+						dim = settings.dimensions[i];
+
+						if (dim.name !== 'coc') {
+							settings.nameDimensionMap[dim.name] = dim.items;
+						}
+					}
+				}();
+				
 				return settings;
 			};
 
@@ -542,18 +554,34 @@ PT.core.getUtils = function(pt) {
 				var extendHeaders = function() {
 					var dimensions = xSettings.dimensions;
 
-					// Extend headers: index, items (unique), size
-					for (var i = 0, header, items; i < headers.length; i++) {
+					// Extend headers: index, items (ordered), size
+					for (var i = 0, header, orderedItems, items, orderedHeaderItems; i < headers.length; i++) {
 						header = headers[i];
+						orderedItems = xSettings.nameDimensionMap[header.name],
 						items = [];
+						orderedHeaderItems = [];
 
+						// index
 						header.index = i;
 
+						// order items
 						for (var j = 0; j < rows.length; j++) {
 							items.push(rows[j][header.index]);
 						}
 
-						header.items = Ext.Array.unique(items);
+						items = Ext.Array.unique(items);
+
+						for (var j = 0, item; j < orderedItems.length; j++) {
+							item = orderedItems[j];
+
+							if (Ext.Array.contains(items, item)) {
+								orderedHeaderItems.push(item);
+							}
+						}
+
+						header.items = orderedHeaderItems;
+
+						// size
 						header.size = header.items.length;
 					}
 
@@ -620,12 +648,6 @@ PT.core.getUtils = function(pt) {
 							id += row[idIndexOrder[j]];
 						}
 
-						//for (var j = 0, header; j < dimensionNames.length; j++) {
-							//header = response.nameHeaderMap[dimensionNames[j]];
-
-							//id += rows[i][header.index];
-						//}
-
 						response.idValueMap[id] = row[valueHeaderIndex];
 					}
 				}();
@@ -641,31 +663,33 @@ PT.core.getUtils = function(pt) {
 					aGuiItems = [],
 					aAllItems = [],
 					aColIds = [],
-					aUniqueItems,
-					getUniqueDimensionNames;
+					aUniqueIds,
+					getUniqueIds;
 					
-				getUniqueDimensionNames = function() {
+				getUniqueIds = function() {
 					var a = [];
 
 					for (var i = 0, dim; i < axis.length; i++) {
 						dim = axis[i];
+
+						a.push(dim.items);
 						
-						a.push(xResponse.nameHeaderMap[dim.name].items);
+						//a.push(xResponse.nameHeaderMap[dim.name].items);
 					}
 
 					return a;
 				};
 
-				aUniqueItems = getUniqueDimensionNames();
+				aUniqueIds = getUniqueIds();
 
-				console.log("aUniqueItems", aUniqueItems);
+				console.log("aUniqueIds", aUniqueIds);
 				
-				//aUniqueItems	= [ [de1, de2, de3],
+				//aUniqueIds	= [ [de1, de2, de3],
 				//					[p1],
 				//					[ou1, ou2, ou3, ou4] ]
 
-				for (var i = 0, dim; i < aUniqueItems.length; i++) {
-					nNumCols = aUniqueItems[i].length;
+				for (var i = 0, dim; i < aUniqueIds.length; i++) {
+					nNumCols = aUniqueIds[i].length;
 
 					aNumCols.push(nNumCols);
 					nCols = nCols * nNumCols;
@@ -681,7 +705,7 @@ PT.core.getUtils = function(pt) {
 				//nCols			= 12 (3 * 1 * 4)
 				//aAccNumCols	= [3, 3, 12]
 
-				for (var i = 0; i < aUniqueItems.length; i++) {
+				for (var i = 0; i < aUniqueIds.length; i++) {
 					aSpan.push(aNumCols[i] === 1 ? nCols : nCols / aAccNumCols[i]); //if one, span all
 				}
 
@@ -689,15 +713,15 @@ PT.core.getUtils = function(pt) {
 
 				//aSpan			= [10, 2, 1]
 
-				aGuiItems.push(aUniqueItems[0]);
+				aGuiItems.push(aUniqueIds[0]);
 
-				if (aUniqueItems.length > 1) {
-					for (var i = 1, a, n; i < aUniqueItems.length; i++) {
+				if (aUniqueIds.length > 1) {
+					for (var i = 1, a, n; i < aUniqueIds.length; i++) {
 						a = [];
 						n = aNumCols[i] === 1 ? 1 : aAccNumCols[i-1];
 
 						for (var j = 0; j < n; j++) {
-							a = a.concat(aUniqueItems[i]);
+							a = a.concat(aUniqueIds[i]);
 						}
 
 						aGuiItems.push(a);
@@ -711,22 +735,22 @@ PT.core.getUtils = function(pt) {
 				//		  	  ]
 
 
-				for (var i = 0, dimItems, span; i < aUniqueItems.length; i++) {
+				for (var i = 0, dimItems, span; i < aUniqueIds.length; i++) {
 					dimItems = [];
 					span = aSpan[i];
 
 					if (i === 0) {
-						for (var j = 0; j < aUniqueItems[i].length; j++) {
+						for (var j = 0; j < aUniqueIds[i].length; j++) {
 							for (var k = 0; k < span; k++) {
-								dimItems.push(aUniqueItems[i][j]);
+								dimItems.push(aUniqueIds[i][j]);
 							}
 						}
 					}
 					else {
-						var factor = nCols / aUniqueItems[i].length;
+						var factor = nCols / aUniqueIds[i].length;
 
 						for (var k = 0; k < factor; k++) {
-							dimItems = dimItems.concat(aUniqueItems[i]);
+							dimItems = dimItems.concat(aUniqueIds[i]);
 						}
 					}
 
@@ -757,13 +781,13 @@ PT.core.getUtils = function(pt) {
 				return {
 					items: axis.items,
 					xItems: {
-						unique: aUniqueItems,
+						unique: aUniqueIds,
 						gui: aGuiItems,
 						all: aAllItems
 					},
 					ids: aColIds,
 					span: aSpan,
-					dims: aUniqueItems.length,
+					dims: aUniqueIds.length,
 					size: nCols
 				};
 			};
