@@ -507,9 +507,7 @@ PT.core.getUtils = function(pt) {
 					for (var i = 0, dim; i < settings.dimensions.length; i++) {
 						dim = settings.dimensions[i];
 
-						if (dim.name !== 'coc') {
-							settings.nameDimensionMap[dim.name] = dim.items;
-						}
+						settings.nameDimensionMap[dim.name] = dim.items || [];
 					}
 				}();
 				
@@ -579,7 +577,7 @@ PT.core.getUtils = function(pt) {
 							}
 						}
 
-						header.items = orderedHeaderItems;
+						header.items = orderedHeaderItems.length ? orderedHeaderItems : items;
 
 						// size
 						header.size = header.items.length;
