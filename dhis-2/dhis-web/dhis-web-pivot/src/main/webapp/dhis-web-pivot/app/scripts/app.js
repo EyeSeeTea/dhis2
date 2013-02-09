@@ -1292,7 +1292,7 @@ Ext.onReady( function() {
 						icon: 'images/arrowrightdouble.png',
 						width: 22,
 						handler: function() {
-							pt.util.multiselect.selectAll(fixedPeriodAvailable, fixedPeriodSelected);
+							pt.util.multiselect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
 						}
 					},
 					' '

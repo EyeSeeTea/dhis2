@@ -249,11 +249,14 @@ PT.core.getUtils = function(pt) {
 			}
 			this.filterAvailable(a, s);
 		},
-		selectAll: function(a, s) {
+		selectAll: function(a, s, doReverse) {
 			var array = [];
 			a.store.each( function(r) {
 				array.push({id: r.data.id, name: r.data.name});
 			});
+			if (doReverse) {
+				array.reverse();
+			}
 			s.store.add(array);
 			this.filterAvailable(a, s);
 		},
