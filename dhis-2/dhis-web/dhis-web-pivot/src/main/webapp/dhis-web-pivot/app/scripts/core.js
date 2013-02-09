@@ -432,36 +432,6 @@ PT.core.getUtils = function(pt) {
 				getTablePanel,
 				initialize;
 
-			getParamString = function(xSettings) {
-				var sortedDimensions = xSettings.sortedDimensions,
-					sortedFilterDimensions = xSettings.sortedFilterDimensions,
-					paramString = '?';				
-
-				for (var i = 0, sortedDim; i < sortedDimensions.length; i++) {
-					sortedDim = sortedDimensions[i];
-
-					paramString += 'dimension=' + sortedDim.name;
-
-					if (sortedDim.name !== pt.conf.finals.dimension.category.paramname) {
-						paramString += ':' + sortedDim.items.join(';');
-					}
-
-					if (i < (sortedDimensions.length - 1)) {
-						paramString += '&';
-					}
-				}
-
-				if (sortedFilterDimensions) {
-					for (var i = 0, sortedFilterDim; i < sortedFilterDimensions.length; i++) {
-						sortedFilterDim = sortedFilterDimensions[i];
-						
-						paramString += '&filter=' + sortedFilterDim.name + ':' + sortedFilterDim.items.join(';');
-					}
-				}
-
-				return paramString;
-			};
-
 			extendSettings = function(settings) {
 				var addDimensions,
 					addDimensionNames,
@@ -501,17 +471,47 @@ PT.core.getUtils = function(pt) {
 					}
 				}();
 
-				addNameDimensionMap = function() {
-					settings.nameDimensionMap = {};
+				addNameItemsMap = function() {
+					settings.nameItemsMap = {};
 
 					for (var i = 0, dim; i < settings.dimensions.length; i++) {
 						dim = settings.dimensions[i];
 
-						settings.nameDimensionMap[dim.name] = dim.items || [];
+						settings.nameItemsMap[dim.name] = dim.items || [];						
 					}
 				}();
 				
 				return settings;
+			};
+			
+			getParamString = function(xSettings) {
+				var sortedDimensions = xSettings.sortedDimensions,
+					sortedFilterDimensions = xSettings.sortedFilterDimensions,
+					paramString = '?';				
+
+				for (var i = 0, sortedDim; i < sortedDimensions.length; i++) {
+					sortedDim = sortedDimensions[i];
+
+					paramString += 'dimension=' + sortedDim.name;
+
+					if (sortedDim.name !== pt.conf.finals.dimension.category.paramname) {
+						paramString += ':' + sortedDim.items.join(';');
+					}
+
+					if (i < (sortedDimensions.length - 1)) {
+						paramString += '&';
+					}
+				}
+
+				if (sortedFilterDimensions) {
+					for (var i = 0, sortedFilterDim; i < sortedFilterDimensions.length; i++) {
+						sortedFilterDim = sortedFilterDimensions[i];
+						
+						paramString += '&filter=' + sortedFilterDim.name + ':' + sortedFilterDim.items.join(';');
+					}
+				}
+
+				return paramString;
 			};
 
 			validateResponse = function(response) {
@@ -545,7 +545,7 @@ PT.core.getUtils = function(pt) {
 					metaData = response.metaData,
 					rows = response.rows;
 
-				response.metaDataHeaderMap = {};
+				//response.metaDataHeaderNameMap = {};
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
@@ -553,48 +553,57 @@ PT.core.getUtils = function(pt) {
 					var dimensions = xSettings.dimensions;
 
 					// Extend headers: index, items (ordered), size
-					for (var i = 0, header, orderedItems, items, orderedHeaderItems; i < headers.length; i++) {
+					for (var i = 0, header, settingsItems, responseItems, orderedResponseItems; i < headers.length; i++) {
 						header = headers[i];
-						orderedItems = xSettings.nameDimensionMap[header.name],
-						items = [];
-						orderedHeaderItems = [];
+						settingsItems = xSettings.nameItemsMap[header.name],
+						responseItems = [];
+						orderedResponseItems = [];
 
 						// index
 						header.index = i;
 
-						// order items
-						for (var j = 0; j < rows.length; j++) {
-							items.push(rows[j][header.index]);
-						}
+						if (header.meta) {
 
-						items = Ext.Array.unique(items);
-
-						for (var j = 0, item; j < orderedItems.length; j++) {
-							item = orderedItems[j];
-
-							if (Ext.Array.contains(items, item)) {
-								orderedHeaderItems.push(item);
+							// items
+							for (var j = 0; j < rows.length; j++) {
+								responseItems.push(rows[j][header.index]);
 							}
+
+							responseItems = Ext.Array.unique(responseItems);
+							
+							if (settingsItems.length) {							
+								for (var j = 0, item; j < settingsItems.length; j++) {
+									item = settingsItems[j];
+
+									if (Ext.Array.contains(responseItems, item)) {
+										orderedResponseItems.push(item);
+									}
+								}
+							}
+							else {
+								alert("sort");
+								orderedResponseItems = responseItems.sort();
+							}
+
+							header.items = orderedResponseItems;
+
+							// size
+							header.size = header.items.length;
 						}
-
-						header.items = orderedHeaderItems.length ? orderedHeaderItems : items;
-
-						// size
-						header.size = header.items.length;
 					}
 
 					// metaDataHeaderMap (metaDataId: header)
-					for (var i = 0, header; i < headers.length; i++) {
-						header = headers[i];
+					//for (var i = 0, header; i < headers.length; i++) {
+						//header = headers[i];
 
-						if (header.meta) {
-							for (var j = 0, item; j < header.items.length; j++) {
-								item = header.items[j];
+						//if (header.meta) {
+							//for (var j = 0, item; j < header.items.length; j++) {
+								//item = header.items[j];
 
-								response.metaDataHeaderMap[item] = header.name;
-							}
-						}
-					}
+								//response.metaDataHeaderNameMap[item] = header.name;
+							//}
+						//}
+					//}
 
 					// nameHeaderMap (headerName: header)
 					for (var i = 0, header; i < headers.length; i++) {
@@ -604,27 +613,27 @@ PT.core.getUtils = function(pt) {
 					}
 
 					// Sort header items based on settings
-					for (var i = 0, header, sortedItems; i < headers.length; i++) {
-						sortedItems = [];
-						header = headers[i];
+					//for (var i = 0, header, sortedItems; i < headers.length; i++) {
+						//sortedItems = [];
+						//header = headers[i];
 
-						for (var j = 0, dim, item; j < dimensions.length; j++) {
-							dim = dimensions[j];
+						//for (var j = 0, dim, item; j < dimensions.length; j++) {
+							//dim = dimensions[j];
 							
-							if (header.name === dim.name && dim.items) {
-								for (var k = 0, item; k < dim.items.length; k++) {
-									item = dim.items[k];
+							//if (header.name === dim.name && dim.items) {
+								//for (var k = 0, item; k < dim.items.length; k++) {
+									//item = dim.items[k];
 
-									if (Ext.Array.contains(header.items, item)) {
-										sortedItems.push(item);
-									}
-								}
+									//if (Ext.Array.contains(header.items, item)) {
+										//sortedItems.push(item);
+									//}
+								//}
 
-								header.items = sortedItems;console.log(sortedItems);
-								break;
-							}
-						}
-					}
+								//header.items = sortedItems;console.log(sortedItems);
+								//break;
+							//}
+						//}
+					//}
 				}();
 
 				var createValueIds = function() {

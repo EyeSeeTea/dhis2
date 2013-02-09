@@ -44,8 +44,9 @@ xSettings = {
 	sortedFilterDimensions: [
 		{name: 'ou', items: ['ImspTQPwCqd']}
 	],
-	nameDimensionMap: {
+	nameItemsMap: {
 		'dx': ['Uvn6LCg7dVU', 'OdiHJayrsKo', 'sB79w2hiLp8'],
+		'coc': [],
 		'pe': ['201201', '201202', '201203'],
 		'Bpx0589u8y0': ['MAs88nJc9nL', 'PVLOW4bCshG'],
 		'ou': ['ImspTQPwCqd']
@@ -79,5 +80,21 @@ xResponse = {
 			"201201",
 			"12.0"
 		]
-	]
+	],
+	//metaDataHeaderMap: {
+		//'Jtf34kNZhzP': 'dx'
+	//}
+	nameHeaderMap: {
+		'dx': {
+			name: "dx",
+			column: "dx",
+			type: "java.lang.String",
+			hidden: false,
+			meta: true,
+			index: 0,
+			size: 3,
+			items: [
+			
+		}
+	}
 };
