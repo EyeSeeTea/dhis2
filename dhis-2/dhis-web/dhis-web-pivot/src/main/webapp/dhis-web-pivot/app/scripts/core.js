@@ -1049,7 +1049,7 @@ PT.core.getAPI = function(pt) {
 			isAxisValid,
 			initialize;
 
-		removeEmptyDimensions = function(axis) {			
+		removeEmptyDimensions = function(axis) {
 			if (!axis) {
 				return;
 			}
