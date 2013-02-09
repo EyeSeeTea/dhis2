@@ -560,7 +560,6 @@ PT.core.getUtils = function(pt) {
 					metaData = response.metaData,
 					rows = response.rows;
 
-				//response.metaDataHeaderNameMap = {};
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
@@ -585,7 +584,6 @@ PT.core.getUtils = function(pt) {
 							}
 
 							responseItems = Ext.Array.unique(responseItems);
-console.log("settingsItems", settingsItems);							
 							
 							if (settingsItems.length) {							
 								for (var j = 0, item; j < settingsItems.length; j++) {
@@ -597,7 +595,6 @@ console.log("settingsItems", settingsItems);
 								}
 							}
 							else {
-								alert("sort");
 								orderedResponseItems = responseItems.sort();
 							}
 
@@ -608,48 +605,12 @@ console.log("settingsItems", settingsItems);
 						}
 					}
 
-					// metaDataHeaderMap (metaDataId: header)
-					//for (var i = 0, header; i < headers.length; i++) {
-						//header = headers[i];
-
-						//if (header.meta) {
-							//for (var j = 0, item; j < header.items.length; j++) {
-								//item = header.items[j];
-
-								//response.metaDataHeaderNameMap[item] = header.name;
-							//}
-						//}
-					//}
-
 					// nameHeaderMap (headerName: header)
 					for (var i = 0, header; i < headers.length; i++) {
 						header = headers[i];
 
 						response.nameHeaderMap[header.name] = header;
 					}
-
-					// Sort header items based on settings
-					//for (var i = 0, header, sortedItems; i < headers.length; i++) {
-						//sortedItems = [];
-						//header = headers[i];
-
-						//for (var j = 0, dim, item; j < dimensions.length; j++) {
-							//dim = dimensions[j];
-							
-							//if (header.name === dim.name && dim.items) {
-								//for (var k = 0, item; k < dim.items.length; k++) {
-									//item = dim.items[k];
-
-									//if (Ext.Array.contains(header.items, item)) {
-										//sortedItems.push(item);
-									//}
-								//}
-
-								//header.items = sortedItems;console.log(sortedItems);
-								//break;
-							//}
-						//}
-					//}
 				}();
 
 				var createValueIds = function() {
@@ -695,9 +656,9 @@ console.log("settingsItems", settingsItems);
 					for (var i = 0, dim; i < axis.length; i++) {
 						dim = axis[i];
 
-						a.push(dim.items);
+						//a.push(dim.items);
 						
-						//a.push(xResponse.nameHeaderMap[dim.name].items);
+						a.push(xResponse.nameHeaderMap[dim.name].items);
 					}
 
 					return a;
