@@ -439,46 +439,58 @@ PT.core.getUtils = function(pt) {
 					addSortedFilterDimensions;
 
 				addDimensions = function() {
-					var a = [];
+					var a = [],
+						col,
+						row;
 
 					if (settings.col) {
-						a = a.concat(settings.col);
+						col = Ext.clone(settings.col);
+						a = a.concat(col);
 					}
 					if (settings.row) {
-						a = a.concat(settings.row);
+						row = Ext.clone(settings.row);
+						a = a.concat(row);
 					}
 					
 					settings.dimensions = a;
 				}();
 				
 				addDimensionNames = function() {
-					var a = [];
+					var a = [],
+						dimensions = Ext.clone(settings.dimensions);
 					
-					for (var i = 0; i < settings.dimensions.length; i++) {
-						a.push(settings.dimensions[i].name);
+					for (var i = 0; i < dimensions.length; i++) {
+						a.push(dimensions[i].name);
 					}
 
 					settings.dimensionNames = a;
 				}();
 
 				addSortedDimensions = function() {
-					settings.sortedDimensions = pt.util.array.sortDimensions(settings.dimensions.slice(0));
+					var dimensions = Ext.clone(settings.dimensions);
+					settings.sortedDimensions = pt.util.array.sortDimensions(dimensions);
 				}();
 
 				addSortedFilterDimensions = function() {
+					var filter;
+					
 					if (settings.filter) {
-						settings.sortedFilterDimensions = pt.util.array.sortDimensions(settings.filter.slice(0));
+						filter = Ext.clone(settings.filter);
+						settings.sortedFilterDimensions = pt.util.array.sortDimensions(filter);
 					}
 				}();
 
 				addNameItemsMap = function() {
-					settings.nameItemsMap = {};
+					var map = {},
+						dimensions = Ext.clone(settings.dimensions);
 
-					for (var i = 0, dim; i < settings.dimensions.length; i++) {
-						dim = settings.dimensions[i];
+					for (var i = 0, dim; i < dimensions.length; i++) {
+						dim = dimensions[i];
 
-						settings.nameItemsMap[dim.name] = dim.items || [];						
+						map[dim.name] = dim.items || [];						
 					}
+					
+					settings.nameItemsMap = map;
 				}();
 				
 				return settings;
@@ -570,6 +582,7 @@ PT.core.getUtils = function(pt) {
 							}
 
 							responseItems = Ext.Array.unique(responseItems);
+console.log("settingsItems", settingsItems);							
 							
 							if (settingsItems.length) {							
 								for (var j = 0, item; j < settingsItems.length; j++) {
