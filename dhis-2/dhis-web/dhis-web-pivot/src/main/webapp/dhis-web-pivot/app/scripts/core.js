@@ -624,9 +624,10 @@ PT.core.getUtils = function(pt) {
 			extendAxis = function(axis, xResponse) {
 				if (!axis || (Ext.isArray(axis) && !axis.length)) {
 					return;
-				}
+				}		
 				
-				var nCols = 1,
+				var axis = Ext.clone(axis),
+					nCols = 1,
 					aNumCols = [],
 					aAccNumCols = [],
 					aSpan = [],
@@ -641,8 +642,6 @@ PT.core.getUtils = function(pt) {
 
 					for (var i = 0, dim; i < axis.length; i++) {
 						dim = axis[i];
-
-						//a.push(dim.items);
 						
 						a.push(xResponse.nameHeaderMap[dim.name].items);
 					}
@@ -749,7 +748,7 @@ PT.core.getUtils = function(pt) {
 
 			console.log("");
 				return {
-					items: axis.items,
+					items: axis,
 					xItems: {
 						unique: aUniqueIds,
 						gui: aGuiItems,
@@ -796,26 +795,40 @@ PT.core.getUtils = function(pt) {
 			};
 
 			getTableHtmlItems = function(xColAxis, xRowAxis, xResponse) {
-				var colAxisHtml,
+				var getEmptyHtmlArray,
 					getColAxisHtml,
-					rowAxisHtml,
 					getRowAxisHtml,
-					tableHtml;
 
-				getColAxisHtml = function() {
-					var colAxisHtml = [];
+					valueItems = [],
+					totalColItems = [],
 
-					if (!xColAxis || (Ext.isArray(xColAxis) && !xColAxis.length)) {
-						return colAxisHtml;
-					}
+					tableHtmlArray;
 					
-					for (var i = 0, dimItems, colSpan, rowArray; i < xColAxis.dims; i++) {
+console.log("xColAxis", xColAxis);
+console.log("xRowAxis", xRowAxis);
+
+				getEmptyHtmlArray = function() {
+					return (xColAxis && xRowAxis) ?
+						'<td class="pivot-empty" colspan="' + xRowAxis.dims + '" rowspan="' + xColAxis.dims + '"></td>' : '';
+				};
+
+				getColAxisHtmlArray = function() {
+					var a = [],
+						dims;
+					
+					if (!(xColAxis && Ext.isObject(xColAxis))) {
+						return a;
+					}
+
+					dims = xColAxis.dims;
+					
+					for (var i = 0, dimItems, colSpan, dimHtml; i < dims; i++) {
 						dimItems = xColAxis.xItems.gui[i];
 						colSpan = xColAxis.span[i];
 						dimHtml = [];
 
 						if (i === 0) {
-							dimHtml.push('<td class="pivot-empty" colspan="' + xRowAxis.dims + '" rowspan="' + xColAxis.dims + '"></td>');
+							dimHtml.push(getEmptyHtmlArray());
 						}
 
 						for (var j = 0, id; j < dimItems.length; j++) {
@@ -823,65 +836,131 @@ PT.core.getUtils = function(pt) {
 							dimHtml.push('<td class="pivot-dim" colspan="' + colSpan + '">' + xResponse.metaData[id] + '</td>');
 
 							if (i === 0 && j === (dimItems.length - 1)) {
-								dimHtml.push('<td class="pivot-dimtotal" rowspan="' + xColAxis.dims + '">Total</td>');
+								dimHtml.push('<td class="pivot-dimtotal" rowspan="' + dims + '">Total</td>');
 							}
 						}
 
-						colAxisHtml.push(dimHtml);
+						a.push(dimHtml);
 					}
 
-					return colAxisHtml;
+					return a;
 				};
 
-				getRowAxisHtml = function() {
-					var size = xRowAxis.size,
-						dims = xRowAxis.dims,
-						allObjects = xRowAxis.xItems.allObjects,
-						rowAxisHtml = [],
-						valueItems = [],
-						valueHtmlItems = [],
-						totalRowItems = [],
-						totalRowHtmlItems = [],
-						totalColItems = [],
-						totalColHtmlItems = [],
-						grandTotalItem = 0,
-						grandTotalHtmlItem;
+				getRowAxisHtmlArray = function() {
+					var a = [],
+						size,
+						dims,
+						allObjects;
 
-					if (!xRowAxis || (Ext.isArray(xRowAxis) && !xRowAxis.length)) {
-						return rowAxisHtml;
+					if (!(xRowAxis && Ext.isObject(xRowAxis))) {
+						return a;
 					}
 
-					// Value items
+					size = xRowAxis.size;
+					dims = xRowAxis.dims;
+					allObjects = xRowAxis.xItems.allObjects;
+
+					// Dim html items
 					for (var i = 0, row; i < size; i++) {
 						row = [];
+						
+						for (var j = 0, object; j < dims; j++) {
+							object = allObjects[j][i];
 
-						for (var j = 0, id, value; j < xColAxis.size; j++) {
-							id = xColAxis.ids[j] + xRowAxis.ids[i];
-							value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0;
-							row.push(value);
-						}
+							if (object.rowSpan) {
+								row.push('<td class="pivot-dim" rowspan="' + object.rowSpan + '">' + xResponse.metaData[object.id] + '</td>');
+							}
+						}							
 
-						valueItems.push(row);
+						//row = row.concat(valueHtmlItems[i]);
+						//row = row.concat(totalRowHtmlItems[i]);
+
+						a.push(row);
 					}
 
+					a.push(['<td class="pivot-dimtotal" colspan="' + dims + '">Total</td>']);
+
+					return a;
+				};
+
+				getValueHtmlArray = function() {
+					var a = [],
+						items = [],
+						colSize = xColAxis ? xColAxis.size : 1,
+						rowSize = xRowAxis ? xRowAxis.size : 1;						
+
+					// Value items
+					//if (xColAxis && xRowAxis) {
+					for (var i = 0, itemRow, valueItemRow; i < rowSize; i++) {
+						itemRow = [];
+						valueItemRow = [];
+
+						for (var j = 0, id, value; j < colSize; j++) {
+							id = (xColAxis ? xColAxis.ids[j] : '') + (xRowAxis ? xRowAxis.ids[i] : '');
+							value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0; //todo
+							itemRow.push({id: id, value: value});
+							valueItemRow.push(value);
+						}
+
+						items.push(itemRow);
+						valueItems.push(valueItemRow);
+					}
+					//}
+					//else if (xColAxis) {
+						//var row = [];
+						
+						//for (var i = 0, id, value; i < xColAxis.size; i++) {
+							//id = xColAxis.ids[i];
+							//value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0; //todo							
+							//row.push({
+								//id: id,
+								//value: value
+							//});
+						//}
+
+						//valueItems.push(row);
+					//}
+					//else {
+						//for (var i = 0, row; i < xRowAxis.size; i++) {
+							//row = [];
+
+							//for (var j = 0, id, value; j < xColAxis.size; j++) {
+								//id = xRowAxis.ids[i];
+								//value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0; //todo
+								//row.push({
+									//id: id,
+									//value: value
+								//});
+							//}
+
+							//valueItems.push(row);
+						//}
+					//}
+
 					// Value html items
-					for (var i = 0, row; i < valueItems.length; i++) {
+					for (var i = 0, row; i < items.length; i++) {
 						row = [];
 
-						for (var j = 0, id, value, cls; j < valueItems[i].length; j++) {
-							id = xColAxis.ids[j] + xRowAxis.ids[i];
-							value = valueItems[i][j];
+						for (var j = 0, item, cls; j < items[i].length; j++) {
+							item = items[i][j];
 
 							//if (Ext.isNumber(value)) {
 								//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
 							//}
 
-							row.push('<td id="' + id + '" class="pivot-value">' + value + '</td>');
+							row.push('<td id="' + item.id + '" class="pivot-value">' + item.value + '</td>');
 						}
 
-						valueHtmlItems.push(row);
+						a.push(row);
 					}
 
+					return a;
+				};
+
+				getRowTotalHtmlArray = function() {
+					var totalRowItems = [],
+						a = [];
+						
 					// Total row items
 					for (var i = 0, rowSum; i < valueItems.length; i++) {
 						rowSum = Ext.Array.sum(valueItems[i]);
@@ -892,8 +971,14 @@ PT.core.getUtils = function(pt) {
 					for (var i = 0, rowSum; i < totalRowItems.length; i++) {
 						rowSum = totalRowItems[i];
 
-						totalRowHtmlItems.push('<td class="pivot-valuetotal">' + rowSum.toString() + '</td>');
+						a.push(['<td class="pivot-valuetotal">' + rowSum.toString() + '</td>']);
 					}
+
+					return a;
+				};
+
+				getColTotalHtmlArray = function() {						
+					var a = [];
 
 					// Total col items
 					for (var i = 0, colSum; i < valueItems[0].length; i++) {
@@ -910,14 +995,40 @@ PT.core.getUtils = function(pt) {
 					for (var i = 0, colSum; i < totalColItems.length; i++) {
 						colSum = totalColItems[i];
 
-						totalColHtmlItems.push('<td class="pivot-valuetotal">' + colSum.toString() + '</td>');
+						a.push(['<td class="pivot-valuetotal">' + colSum.toString() + '</td>']);
 					}
 
-					// Grand total item
-					grandTotalItem = Ext.Array.sum(totalColItems);
+					return a;
+				};
 
-					// Grand total html item
-					grandTotalHtmlItem = '<td class="pivot-valuegrandtotal">' + grandTotalItem.toString() + '</td>';
+				getGrandTotalHtmlArray = function() {
+					var grandTotalItem,
+						a = [];
+
+					if (xColAxis && xRowAxis) {
+						grandTotalItem = Ext.Array.sum(totalColItems) || 0;
+
+						a.push(['<td class="pivot-valuegrandtotal">' + grandTotalItem.toString() + '</td>']);
+					}
+
+					return a;
+				};
+
+				getRowHtmlArray = function() {
+					var axis = getRowAxisHtmlArray(),
+						values = getValueHtmlArray(),
+						total = getRowTotalHtmlArray(),
+						a = [];
+
+					for (var i = 0, row; i < total.length; i++) {
+						row = [];
+
+				tableHtmlArray = [].concat(getColAxisHtmlArray());
+				
+
+
+
+
 
 					// GUI
 
@@ -936,24 +1047,24 @@ PT.core.getUtils = function(pt) {
 						row = row.concat(valueHtmlItems[i]);
 						row = row.concat(totalRowHtmlItems[i]);
 
-						rowAxisHtml.push(row);
+						a.push(row);
 					}
 
 					// Final row
 					var finalRow = [];
 
-					finalRow.push('<td class="pivot-dimtotal" colspan="' + xRowAxis.dims + '">Total</td>');
+					//finalRow.push('<td class="pivot-dimtotal" colspan="' + xRowAxis.dims + '">Total</td>');
 
 					finalRow = finalRow.concat(totalColHtmlItems);
 					finalRow = finalRow.concat(grandTotalHtmlItem);
 
-					rowAxisHtml.push(finalRow);
+					a.push(finalRow);
 
-					return rowAxisHtml;
+					return a;
 				};
 
-				colAxisHtml = getColAxisHtml();
-				rowAxisHtml = getRowAxisHtml();
+				colAxisHtml = getColAxisHtmlArray();
+				rowAxisHtml = getRowAxisHtmlArray();
 
 				return [].concat(Ext.clone(colAxisHtml), Ext.clone(rowAxisHtml));
 			};
