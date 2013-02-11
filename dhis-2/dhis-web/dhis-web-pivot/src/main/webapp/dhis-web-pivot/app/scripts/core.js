@@ -431,7 +431,7 @@ PT.core.getUtils = function(pt) {
 				extendResponse,
 				extendAxis,
 				extendRowAxis,
-				getTableHtmlItems,
+				getTableHtmlArrays,
 				getTablePanel,
 				initialize;
 
@@ -794,15 +794,19 @@ PT.core.getUtils = function(pt) {
 				return xRowAxis;
 			};
 
-			getTableHtmlItems = function(xColAxis, xRowAxis, xResponse) {
+			getTableHtmlArrays = function(xColAxis, xRowAxis, xResponse) {
 				var getEmptyHtmlArray,
-					getColAxisHtml,
-					getRowAxisHtml,
+					getColAxisHtmlArray,
+					getRowAxisHtmlArray,
+					getValueHtmlArray,
+					getRowTotalHtmlArray,
+					getColTotalHtmlArray,
+					getGrandTotalHtmlArray,
+					getRowHtmlArray,
+					getTotalHtmlArray,
 
 					valueItems = [],
-					totalColItems = [],
-
-					tableHtmlArray;
+					totalColItems = [];
 					
 console.log("xColAxis", xColAxis);
 console.log("xRowAxis", xRowAxis);
@@ -1021,59 +1025,50 @@ console.log("xRowAxis", xRowAxis);
 						a = [];
 
 					for (var i = 0, row; i < total.length; i++) {
-						row = [];
-
-				tableHtmlArray = [].concat(getColAxisHtmlArray());
-				
-
-
-
-
-
-					// GUI
-
-					// Dim html items
-					for (var i = 0, row; i < size; i++) {
-						row = [];
-						
-						for (var j = 0, object; j < dims; j++) {
-							object = allObjects[j][i];
-
-							if (object.rowSpan) {
-								row.push('<td class="pivot-dim" rowspan="' + object.rowSpan + '">' + xResponse.metaData[object.id] + '</td>');
-							}
-						}
-
-						row = row.concat(valueHtmlItems[i]);
-						row = row.concat(totalRowHtmlItems[i]);
+						row = [].concat(Ext.clone(axis[i] || []), Ext.clone(values[i] || []), Ext.clone(total[i] || []));
 
 						a.push(row);
 					}
 
-					// Final row
-					var finalRow = [];
-
-					//finalRow.push('<td class="pivot-dimtotal" colspan="' + xRowAxis.dims + '">Total</td>');
-
-					finalRow = finalRow.concat(totalColHtmlItems);
-					finalRow = finalRow.concat(grandTotalHtmlItem);
-
-					a.push(finalRow);
-
 					return a;
 				};
 
-				colAxisHtml = getColAxisHtmlArray();
-				rowAxisHtml = getRowAxisHtmlArray();
+				getTotalHtmlArray = function() {
+					var colTotal = getColTotalHtmlArray(),
+						grandTotal = getGrandTotalHtmlArray();
 
-				return [].concat(Ext.clone(colAxisHtml), Ext.clone(rowAxisHtml));
+					return [].concat(Ext.clone(colTotal) || [], Ext.clone(grandTotal) || []);
+				};
+
+				return [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
 			};
 
-			getTablePanel = function(tableHtmlItems) {
+
+		
+					// Final row
+					//var finalRow = [];
+
+					//finalRow.push('<td class="pivot-dimtotal" colspan="' + xRowAxis.dims + '">Total</td>');
+
+					//finalRow = finalRow.concat(totalColHtmlItems);
+					//finalRow = finalRow.concat(grandTotalHtmlItem);
+
+					//a.push(finalRow);
+
+					//return a;
+				//};
+
+				//colAxisHtml = getColAxisHtmlArray();
+				//rowAxisHtml = getRowAxisHtmlArray();
+
+				//return [].concat(Ext.clone(colAxisHtml), Ext.clone(rowAxisHtml));
+			//};
+
+			getTablePanel = function(tableHtmlArrays) {
 				var tableHtml = '<table class="pivot">';
 
-				for (var i = 0; i < tableHtmlItems.length; i++) {
-					tableHtml += '<tr>' + tableHtmlItems[i].join('') + '</tr>';
+				for (var i = 0; i < tableHtmlArrays.length; i++) {
+					tableHtml += '<tr>' + tableHtmlArrays[i].join('') + '</tr>';
 				}
 
 				tableHtml += '</table>';
@@ -1109,7 +1104,8 @@ console.log("xRowAxis", xRowAxis);
 						alert('Data request failed');
 					},						
 					success: function(response) {
-						var tablePanel;
+						var tableHtmlArrays,
+							tablePanel;
 
 						if (!validateResponse(response)) {
 							pt.util.mask.hideMask();
@@ -1125,9 +1121,9 @@ response.metaData['pq2XI5kz2BY'] = '(Fixed)';
 						xColAxis = extendAxis(xSettings.col, xResponse);
 						xRowAxis = extendRowAxis(xSettings.row, xResponse);
 						
-						tableHtmlItems = getTableHtmlItems(xColAxis, xRowAxis, xResponse);
+						tableHtmlArrays = getTableHtmlArrays(xColAxis, xRowAxis, xResponse);
 						
-						tablePanel = getTablePanel(tableHtmlItems);
+						tablePanel = getTablePanel(tableHtmlArrays);
 
 						if (!pt.el) {
 							container.removeAll(true);
