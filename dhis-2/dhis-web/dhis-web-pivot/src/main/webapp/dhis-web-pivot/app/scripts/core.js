@@ -442,25 +442,12 @@ PT.core.getUtils = function(pt) {
 					addSortedFilterDimensions;
 
 				addDimensions = function() {
-					var a = [],
-						col,
-						row;
-
-					if (settings.col) {
-						col = Ext.clone(settings.col);
-						a = a.concat(col);
-					}
-					if (settings.row) {
-						row = Ext.clone(settings.row);
-						a = a.concat(row);
-					}
-					
-					settings.dimensions = a;
+					settings.dimensions = [].concat(Ext.clone(settings.col) || [], Ext.clone(settings.row) || []);
 				}();
 				
 				addDimensionNames = function() {
 					var a = [],
-						dimensions = Ext.clone(settings.dimensions);
+						dimensions = Ext.clone(settings.dimensions) || [];
 					
 					for (var i = 0; i < dimensions.length; i++) {
 						a.push(dimensions[i].name);
@@ -470,22 +457,16 @@ PT.core.getUtils = function(pt) {
 				}();
 
 				addSortedDimensions = function() {
-					var dimensions = Ext.clone(settings.dimensions);
-					settings.sortedDimensions = pt.util.array.sortDimensions(dimensions);
+					settings.sortedDimensions = pt.util.array.sortDimensions(Ext.clone(settings.dimensions) || []);
 				}();
 
 				addSortedFilterDimensions = function() {
-					var filter;
-					
-					if (settings.filter) {
-						filter = Ext.clone(settings.filter);
-						settings.sortedFilterDimensions = pt.util.array.sortDimensions(filter);
-					}
+						settings.sortedFilterDimensions = pt.util.array.sortDimensions(Ext.clone(settings.filter) || []);
 				}();
 
 				addNameItemsMap = function() {
 					var map = {},
-						dimensions = Ext.clone(settings.dimensions);
+						dimensions = Ext.clone(settings.dimensions) || [];
 
 					for (var i = 0, dim; i < dimensions.length; i++) {
 						dim = dimensions[i];
@@ -1043,11 +1024,11 @@ PT.core.getAPI = function(pt) {
 		var col,
 			row,
 			filter,
-			settings = {},
+			settings,
 
 			removeEmptyDimensions,
-			isAxisValid,
-			initialize;
+			getValidatedAxis,
+			validateSettings;
 
 		removeEmptyDimensions = function(axis) {
 			if (!axis) {
@@ -1098,7 +1079,39 @@ PT.core.getAPI = function(pt) {
 			return axis.length ? axis : null;
 		};
 
-		initialize = function() {
+		validateSettings = function() {
+			var a = [].concat(Ext.clone(col), Ext.clone(row), Ext.clone(filter)),
+				names = [];			
+			
+			if (!(col || row)) {
+				alert('No column or row dimensions selected'); //i18n
+				return;
+			}
+console.log(a);			
+
+			for (var i = 0; i < a.length; i++) {
+				if (a[i]) {
+					names.push(a[i].name);
+				}
+			}
+console.log("names", names);
+
+			if (!Ext.Array.contains(names, 'dx')) {
+				alert('No indicators, data elements or data sets selected');
+				return;
+			}
+
+			if (!Ext.Array.contains(names, 'pe')) {
+				alert('No periods selected');
+				return;
+			}
+			
+			return true;
+		};
+		
+		settings = function() {
+			var obj = {};
+			
 			if (!(config && Ext.isObject(config))) {
 				alert('Settings config is not an object'); //i18n
 				return;
@@ -1108,20 +1121,21 @@ PT.core.getAPI = function(pt) {
 			row = getValidatedAxis(config.row);
 			filter = getValidatedAxis(config.filter);
 
-			if (!(col || row)) {
-				alert('Invalid column/row configuration'); //i18n
+			if (!validateSettings()) {
 				return;
-			}
+			}			
 
 			if (col) {
-				settings.col = col;
+				obj.col = col;
 			}
 			if (row) {
-				settings.row = row;
+				obj.row = row;
 			}
 			if (filter) {
-				settings.filter = filter;
+				obj.filter = filter;
 			}
+
+			return obj;
 		}();
 
 		return settings;

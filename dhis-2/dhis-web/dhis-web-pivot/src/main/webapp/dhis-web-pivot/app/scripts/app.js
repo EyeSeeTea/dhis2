@@ -1986,6 +1986,7 @@ Ext.onReady( function() {
 			update = function() {
 				var config = pt.util.pivot.getSettingsConfig(),
 					settings = pt.api.Settings(config);
+console.log("settings", settings);					
 
 				if (settings) {
 					pt.util.pivot.getTable(settings, pt, centerRegion);
