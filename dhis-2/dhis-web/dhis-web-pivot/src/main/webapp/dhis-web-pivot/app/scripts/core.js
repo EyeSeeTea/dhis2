@@ -436,37 +436,38 @@ PT.core.getUtils = function(pt) {
 				initialize;
 
 			extendSettings = function(settings) {
-				var addDimensions,
+				var xSettings = Ext.clone(settings),
+					addDimensions,
 					addDimensionNames,
 					addSortedDimensions,
 					addSortedFilterDimensions;
 
 				addDimensions = function() {
-					settings.dimensions = [].concat(Ext.clone(settings.col) || [], Ext.clone(settings.row) || []);
+					xSettings.dimensions = [].concat(Ext.clone(xSettings.col) || [], Ext.clone(xSettings.row) || []);
 				}();
 				
 				addDimensionNames = function() {
 					var a = [],
-						dimensions = Ext.clone(settings.dimensions) || [];
+						dimensions = Ext.clone(xSettings.dimensions) || [];
 					
 					for (var i = 0; i < dimensions.length; i++) {
 						a.push(dimensions[i].name);
 					}
 
-					settings.dimensionNames = a;
+					xSettings.dimensionNames = a;
 				}();
 
 				addSortedDimensions = function() {
-					settings.sortedDimensions = pt.util.array.sortDimensions(Ext.clone(settings.dimensions) || []);
+					xSettings.sortedDimensions = pt.util.array.sortDimensions(Ext.clone(xSettings.dimensions) || []);
 				}();
 
 				addSortedFilterDimensions = function() {
-						settings.sortedFilterDimensions = pt.util.array.sortDimensions(Ext.clone(settings.filter) || []);
+						xSettings.sortedFilterDimensions = pt.util.array.sortDimensions(Ext.clone(xSettings.filter) || []);
 				}();
 
 				addNameItemsMap = function() {
 					var map = {},
-						dimensions = Ext.clone(settings.dimensions) || [];
+						dimensions = Ext.clone(xSettings.dimensions) || [];
 
 					for (var i = 0, dim; i < dimensions.length; i++) {
 						dim = dimensions[i];
@@ -474,10 +475,10 @@ PT.core.getUtils = function(pt) {
 						map[dim.name] = dim.items || [];						
 					}
 					
-					settings.nameItemsMap = map;
+					xSettings.nameItemsMap = map;
 				}();
 				
-				return settings;
+				return xSettings;
 			};
 			
 			getParamString = function(xSettings) {
@@ -621,6 +622,10 @@ PT.core.getUtils = function(pt) {
 			};
 
 			extendAxis = function(axis, xResponse) {
+				if (!axis || (Ext.isArray(axis) && !axis.length)) {
+					return;
+				}
+				
 				var nCols = 1,
 					aNumCols = [],
 					aAccNumCols = [],
@@ -758,6 +763,10 @@ PT.core.getUtils = function(pt) {
 			};
 
 			extendRowAxis = function(rowAxis, xResponse) {
+				if (!rowAxis || (Ext.isArray(rowAxis) && !rowAxis.length)) {
+					return;
+				}
+					
 				var xRowAxis = extendAxis(rowAxis, xResponse),
 					all = xRowAxis.xItems.all,
 					allObjects = [];
@@ -796,6 +805,10 @@ PT.core.getUtils = function(pt) {
 				getColAxisHtml = function() {
 					var colAxisHtml = [];
 
+					if (!xColAxis || (Ext.isArray(xColAxis) && !xColAxis.length)) {
+						return colAxisHtml;
+					}
+					
 					for (var i = 0, dimItems, colSpan, rowArray; i < xColAxis.dims; i++) {
 						dimItems = xColAxis.xItems.gui[i];
 						colSpan = xColAxis.span[i];
@@ -833,6 +846,10 @@ PT.core.getUtils = function(pt) {
 						totalColHtmlItems = [],
 						grandTotalItem = 0,
 						grandTotalHtmlItem;
+
+					if (!xRowAxis || (Ext.isArray(xRowAxis) && !xRowAxis.length)) {
+						return rowAxisHtml;
+					}
 
 					// Value items
 					for (var i = 0, row; i < size; i++) {
@@ -938,7 +955,7 @@ PT.core.getUtils = function(pt) {
 				colAxisHtml = getColAxisHtml();
 				rowAxisHtml = getRowAxisHtml();
 
-				return colAxisHtml.concat(rowAxisHtml);
+				return [].concat(Ext.clone(colAxisHtml), Ext.clone(rowAxisHtml));
 			};
 
 			getTablePanel = function(tableHtmlItems) {
@@ -1087,14 +1104,12 @@ PT.core.getAPI = function(pt) {
 				alert('No column or row dimensions selected'); //i18n
 				return;
 			}
-console.log(a);			
 
 			for (var i = 0; i < a.length; i++) {
 				if (a[i]) {
 					names.push(a[i].name);
 				}
 			}
-console.log("names", names);
 
 			if (!Ext.Array.contains(names, 'dx')) {
 				alert('No indicators, data elements or data sets selected');
