@@ -1724,7 +1724,8 @@ Ext.onReady( function() {
 								}
 								v.menu = Ext.create('Ext.menu.Menu', {
 									id: 'treepanel-contextmenu',
-									showSeparator: false
+									showSeparator: false,
+									shadow: false
 								});
 								if (!r.data.leaf) {
 									v.menu.add({
