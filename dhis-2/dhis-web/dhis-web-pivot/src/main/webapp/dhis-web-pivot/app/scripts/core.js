@@ -1013,8 +1013,6 @@ PT.core.getUtils = function(pt) {
 
 					return a;
 				};
-var g = getTotalHtmlArray();
-
 
 				return [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
 			};
