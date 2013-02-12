@@ -994,7 +994,7 @@ PT.core.getUtils = function(pt) {
 						total = getRowTotalHtmlArray(),
 						a = [];
 
-					for (var i = 0, row; i < total.length; i++) {
+					for (var i = 0, row; i < values.length; i++) {
 						row = [].concat(Ext.clone(axis[i] || []), Ext.clone(values[i] || []), Ext.clone(total[i] || []));
 
 						a.push(row);
@@ -1026,27 +1026,6 @@ PT.core.getUtils = function(pt) {
 
 				return htmlArray;
 			};
-
-
-		
-					// Final row
-					//var finalRow = [];
-
-					//finalRow.push('<td class="pivot-dimtotal" colspan="' + xRowAxis.dims + '">Total</td>');
-
-					//finalRow = finalRow.concat(totalColHtmlItems);
-					//finalRow = finalRow.concat(grandTotalHtmlItem);
-
-					//a.push(finalRow);
-
-					//return a;
-				//};
-
-				//colAxisHtml = getColAxisHtmlArray();
-				//rowAxisHtml = getRowAxisHtmlArray();
-
-				//return [].concat(Ext.clone(colAxisHtml), Ext.clone(rowAxisHtml));
-			//};
 
 			getTablePanel = function(tableHtmlArrays) {
 				var tableHtml = '<table class="pivot">';
