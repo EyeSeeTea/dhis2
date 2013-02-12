@@ -547,7 +547,6 @@ PT.core.getUtils = function(pt) {
 				}
 			};
 				
-			
 			getParamString = function(xSettings) {
 				var sortedDimensions = xSettings.sortedDimensions,
 					sortedFilterDimensions = xSettings.sortedFilterDimensions,
@@ -861,7 +860,7 @@ PT.core.getUtils = function(pt) {
 				return xRowAxis;
 			};
 
-			getTableHtmlArrays = function(xColAxis, xRowAxis, xResponse) {
+			getTableHtml = function(xColAxis, xRowAxis, xResponse) {
 				var getEmptyHtmlArray,
 					getColAxisHtmlArray,
 					getRowAxisHtmlArray,
@@ -871,6 +870,7 @@ PT.core.getUtils = function(pt) {
 					getGrandTotalHtmlArray,
 					getRowHtmlArray,
 					getTotalHtmlArray,
+					getHtml,
 
 					valueItems = [],
 					totalColItems = [],
@@ -1088,25 +1088,29 @@ PT.core.getUtils = function(pt) {
 					return a;
 				};
 
-				var htmlArray = [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
+				getHtml = function() {
+					var s = '<table class="pivot">';
+
+					for (var i = 0; i < htmlArray.length; i++) {
+						s += '<tr>' + htmlArray[i].join('') + '</tr>';
+					}
+
+					s += '</table>';
+
+					return s;
+				};					
+				
+				htmlArray = [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
 				htmlArray = Ext.Array.clean(htmlArray);
 
-				return htmlArray;
+				return getHtml(htmlArray);
 			};
 
-			getTablePanel = function(tableHtmlArrays) {
-				var tableHtml = '<table class="pivot">';
-
-				for (var i = 0; i < tableHtmlArrays.length; i++) {
-					tableHtml += '<tr>' + tableHtmlArrays[i].join('') + '</tr>';
-				}
-
-				tableHtml += '</table>';
-
+			getTablePanel = function(html) {
 				return Ext.create('Ext.panel.Panel', {
 					bodyStyle: 'border:0 none',
 					autoScroll: true,
-					html: tableHtml
+					html: html
 				});
 			};
 			
@@ -1134,7 +1138,7 @@ PT.core.getUtils = function(pt) {
 						alert('Data request failed');
 					},						
 					success: function(response) {
-						var tableHtmlArrays,
+						var html,
 							tablePanel;
 
 						if (!validateResponse(response)) {
@@ -1158,9 +1162,9 @@ response.metaData['pq2XI5kz2BY'] = '(Fixed)';
 						xColAxis = extendAxis(xSettings.col, xResponse);
 						xRowAxis = extendRowAxis(xSettings.row, xResponse);
 						
-						tableHtmlArrays = getTableHtmlArrays(xColAxis, xRowAxis, xResponse);
+						html = getTableHtml(xColAxis, xRowAxis, xResponse);
 						
-						tablePanel = getTablePanel(tableHtmlArrays);
+						tablePanel = getTablePanel(html);
 
 						if (!pt.el) {
 							container.removeAll(true);
