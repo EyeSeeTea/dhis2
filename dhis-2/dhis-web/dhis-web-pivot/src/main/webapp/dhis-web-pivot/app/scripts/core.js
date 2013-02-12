@@ -950,32 +950,34 @@ PT.core.getUtils = function(pt) {
 
 				getValueHtmlArray = function() {
 					var a = [],
-						items = [],
+						htmlValueItems = [],
 						colSize = xColAxis ? xColAxis.size : 1,
 						rowSize = xRowAxis ? xRowAxis.size : 1;						
 
 					// Value items
-					for (var i = 0, itemRow, valueItemRow; i < rowSize; i++) {
-						itemRow = [];
+					for (var i = 0, valueItemRow, htmlValueItemRow; i < rowSize; i++) {
 						valueItemRow = [];
+						htmlValueItemRow = [];
 
 						for (var j = 0, id, value; j < colSize; j++) {
 							id = (xColAxis ? xColAxis.ids[j] : '') + (xRowAxis ? xRowAxis.ids[i] : '');
 							value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0; //todo
-							itemRow.push({id: id, value: value});
+							htmlValue = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : '-'; //todo
+
 							valueItemRow.push(value);
+							htmlValueItemRow.push({id: id, value: htmlValue});
 						}
 
-						items.push(itemRow);
 						valueItems.push(valueItemRow);
+						htmlValueItems.push(htmlValueItemRow);
 					}
 
 					// Value html items
-					for (var i = 0, row; i < items.length; i++) {
+					for (var i = 0, row; i < htmlValueItems.length; i++) {
 						row = [];
 
-						for (var j = 0, item, cls; j < items[i].length; j++) {
-							item = items[i][j];
+						for (var j = 0, item, cls; j < htmlValueItems[i].length; j++) {
+							item = htmlValueItems[i][j];
 
 							//if (Ext.isNumber(value)) {
 								//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
