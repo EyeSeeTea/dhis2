@@ -806,7 +806,8 @@ PT.core.getUtils = function(pt) {
 					getTotalHtmlArray,
 
 					valueItems = [],
-					totalColItems = [];
+					totalColItems = [],
+					htmlArray;
 
 				getEmptyHtmlArray = function() {
 					return (xColAxis && xRowAxis) ?
@@ -925,43 +926,49 @@ PT.core.getUtils = function(pt) {
 				getRowTotalHtmlArray = function() {
 					var totalRowItems = [],
 						a = [];
-						
-					// Total row items
-					for (var i = 0, rowSum; i < valueItems.length; i++) {
-						rowSum = Ext.Array.sum(valueItems[i]);
-						totalRowItems.push(rowSum);
-					}
 
-					// Total row html items
-					for (var i = 0, rowSum; i < totalRowItems.length; i++) {
-						rowSum = totalRowItems[i];
+					if (xColAxis) {
+							
+						// Total row items
+						for (var i = 0, rowSum; i < valueItems.length; i++) {
+							rowSum = Ext.Array.sum(valueItems[i]);
+							totalRowItems.push(rowSum);
+						}
 
-						a.push(['<td class="pivot-valuetotal">' + rowSum.toString() + '</td>']);
+						// Total row html items
+						for (var i = 0, rowSum; i < totalRowItems.length; i++) {
+							rowSum = totalRowItems[i];
+
+							a.push(['<td id="nissa" class="pivot-valuetotal">' + rowSum.toString() + '</td>']);
+						}
 					}
 
 					return a;
 				};
 
 
-				getColTotalHtmlArray = function() {						
+				getColTotalHtmlArray = function() {
 					var a = [];
 
-					// Total col items
-					for (var i = 0, colSum; i < valueItems[0].length; i++) {
-						colSum = 0;
+					if (xRowAxis) {
 
-						for (var j = 0; j < valueItems.length; j++) {
-							colSum += valueItems[j][i];
+						// Total col items
+						for (var i = 0, colSum; i < valueItems[0].length; i++) {
+							colSum = 0;
+
+							for (var j = 0; j < valueItems.length; j++) {
+								colSum += valueItems[j][i];
+							}
+
+							totalColItems.push(colSum);
 						}
 
-						totalColItems.push(colSum);
-					}
+						// Total col html items
+						for (var i = 0, colSum; i < totalColItems.length; i++) {
+							colSum = totalColItems[i];
 
-					// Total col html items
-					for (var i = 0, colSum; i < totalColItems.length; i++) {
-						colSum = totalColItems[i];
-
-						a.push('<td class="pivot-valuetotal">' + colSum.toString() + '</td>');
+							a.push('<td class="pivot-valuetotal">' + colSum.toString() + '</td>');
+						}
 					}
 
 					return a;
@@ -987,7 +994,7 @@ PT.core.getUtils = function(pt) {
 						total = getRowTotalHtmlArray(),
 						a = [];
 
-					for (var i = 0, row; i < axis.length; i++) {
+					for (var i = 0, row; i < total.length; i++) {
 						row = [].concat(Ext.clone(axis[i] || []), Ext.clone(values[i] || []), Ext.clone(total[i] || []));
 
 						a.push(row);
@@ -1014,7 +1021,10 @@ PT.core.getUtils = function(pt) {
 					return a;
 				};
 
-				return [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
+				var htmlArray = [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
+				htmlArray = Ext.Array.clean(htmlArray);
+
+				return htmlArray;
 			};
 
 
