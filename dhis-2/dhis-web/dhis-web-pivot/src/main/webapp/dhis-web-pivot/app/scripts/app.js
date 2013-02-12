@@ -2005,7 +2005,6 @@ Ext.onReady( function() {
 				if (!settings) {
 					return;
 				}
-
 				if (!validateSpecialCases(settings)) {
 					return;
 				}
