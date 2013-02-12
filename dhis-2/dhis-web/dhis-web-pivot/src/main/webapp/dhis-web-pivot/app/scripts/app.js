@@ -2002,6 +2002,10 @@ Ext.onReady( function() {
 				var config = pt.util.pivot.getSettingsConfig(),
 					settings = pt.api.Settings(config);
 
+				if (!settings) {
+					return;
+				}
+
 				if (!validateSpecialCases(settings)) {
 					return;
 				}
