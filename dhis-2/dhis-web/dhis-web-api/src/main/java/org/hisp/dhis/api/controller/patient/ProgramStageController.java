@@ -1,4 +1,4 @@
-package org.hisp.dhis.interpretation;
+package org.hisp.dhis.api.controller.patient;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,55 +27,18 @@ package org.hisp.dhis.interpretation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.user.User;
-
-import java.util.Date;
+import org.hisp.dhis.api.controller.AbstractCrudController;
+import org.hisp.dhis.program.ProgramStage;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement(localName = "interpretationComment", namespace = DxfNamespaces.DXF_2_0 )
-public class InterpretationComment
-    extends BaseIdentifiableObject
+@Controller
+@RequestMapping( value = ProgramStageController.RESOURCE_PATH )
+public class ProgramStageController
+    extends AbstractCrudController<ProgramStage>
 {
-    private String text;
-
-    public InterpretationComment()
-    {
-        this.created = new Date();
-    }
-
-    public InterpretationComment( String text )
-    {
-        this.text = text;
-        this.created = new Date();
-    }
-
-    public InterpretationComment( String text, User user )
-    {
-        this.text = text;
-        this.user = user;
-        this.created = new Date();
-    }
-
-    @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0 )
-    public String getText()
-    {
-        return text;
-    }
-
-    public void setText( String text )
-    {
-        this.text = text;
-    }
+    public static final String RESOURCE_PATH = "/programStages";
 }
