@@ -648,8 +648,14 @@ PT.core.getUtils = function(pt) {
 								for (var j = 0, item; j < settingsItems.length; j++) {
 									item = settingsItems[j];
 
-									if (Ext.Array.contains(responseItems, item)) {
-										orderedResponseItems.push(item);
+									if (header.name === 'pe' && pt.conf.period.relativeperiodunits[item]) {
+										orderedResponseItems = responseItems;
+										orderedResponseItems.sort();
+									}
+									else {
+										if (Ext.Array.contains(responseItems, item)) {
+											orderedResponseItems.push(item);
+										}
 									}
 								}
 							}
@@ -961,8 +967,7 @@ console.log("aColIds", aColIds);
 						valueItemRow = [];
 						htmlValueItemRow = [];
 
-						for (var j = 0, id, value; j < colSize; j++) {
-//console.log((xColAxis ? xColAxis.ids[j] : ''), (xRowAxis ? xRowAxis.ids[i] : ''));							
+						for (var j = 0, id, value; j < colSize; j++) {						
 							id = (xColAxis ? xColAxis.ids[j] : '') + (xRowAxis ? xRowAxis.ids[i] : '');
 							value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0; //todo
 							htmlValue = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : '-'; //todo
@@ -1129,6 +1134,7 @@ console.log("aColIds", aColIds);
 					xRowAxis;
 
 				pt.util.mask.showMask(container);
+				
 
 				xSettings = extendSettings(settings);
 
