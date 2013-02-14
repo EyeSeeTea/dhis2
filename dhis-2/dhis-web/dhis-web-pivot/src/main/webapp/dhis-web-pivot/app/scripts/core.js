@@ -951,8 +951,6 @@ console.log("aColIds", aColIds);
 				};
 
 				getValueHtmlArray = function() {
-console.log("xColAxis.ids", xColAxis.ids);
-console.log("xRowAxis.ids", xRowAxis.ids);
 					var a = [],
 						htmlValueItems = [],
 						colSize = xColAxis ? xColAxis.size : 1,
