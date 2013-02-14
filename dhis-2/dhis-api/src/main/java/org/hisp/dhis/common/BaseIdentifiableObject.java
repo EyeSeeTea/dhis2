@@ -35,7 +35,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.apache.commons.lang.Validate;
-import org.hisp.dhis.common.view.BasicView;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.user.User;
@@ -51,7 +50,7 @@ import java.util.Set;
 /**
  * @author Bob Jolliffe
  */
-@JacksonXmlRootElement(localName = "identifiableObject", namespace = Dxf2Namespace.NAMESPACE)
+@JacksonXmlRootElement(localName = "identifiableObject", namespace = DxfNamespaces.DXF_2_0)
 public class BaseIdentifiableObject
     extends BaseLinkableObject
     implements IdentifiableObject
@@ -173,7 +172,6 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, BasicView.class, ExportView.class })
     @JacksonXmlProperty(isAttribute = true)
     public String getCode()
     {
@@ -186,7 +184,6 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, BasicView.class, ExportView.class })
     @JacksonXmlProperty(isAttribute = true)
     public String getName()
     {
@@ -198,8 +195,13 @@ public class BaseIdentifiableObject
         this.name = name;
     }
 
+    @Override
+    public boolean haveUniqueNames()
+    {
+        return true;
+    }
+
     @JsonProperty
-    @JsonView({ DetailedView.class, BasicView.class, ExportView.class })
     @JacksonXmlProperty(isAttribute = true)
     public Date getCreated()
     {
@@ -212,7 +214,6 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, BasicView.class, ExportView.class })
     @JacksonXmlProperty(isAttribute = true)
     public Date getLastUpdated()
     {
@@ -226,7 +227,8 @@ public class BaseIdentifiableObject
 
     @Override
     @JsonProperty
-    @JacksonXmlProperty(namespace = Dxf2Namespace.NAMESPACE)
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getPublicAccess()
     {
         return publicAccess;
@@ -239,8 +241,9 @@ public class BaseIdentifiableObject
 
     @Override
     @JsonProperty
+    @JsonView({ DetailedView.class, ExportView.class })
     @JsonSerialize(as = BaseIdentifiableObject.class)
-    @JacksonXmlProperty(namespace = Dxf2Namespace.NAMESPACE)
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public User getUser()
     {
         return user;
@@ -252,8 +255,9 @@ public class BaseIdentifiableObject
     }
 
     @JsonProperty
-    @JacksonXmlElementWrapper(localName = "userGroupAccesses", namespace = Dxf2Namespace.NAMESPACE)
-    @JacksonXmlProperty(localName = "userGroupAccess", namespace = Dxf2Namespace.NAMESPACE)
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlElementWrapper(localName = "userGroupAccesses", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty(localName = "userGroupAccess", namespace = DxfNamespaces.DXF_2_0)
     public Set<UserGroupAccess> getUserGroupAccesses()
     {
         return userGroupAccesses;
@@ -285,6 +289,7 @@ public class BaseIdentifiableObject
         result = 31 * result + (code != null ? code.hashCode() : 0);
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (lastUpdated != null ? lastUpdated.hashCode() : 0);
+        result = 31 * result + (created != null ? created.hashCode() : 0);
 
         return result;
     }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,41 +27,34 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserGroupAccess;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import java.util.Date;
-import java.util.Set;
+import org.junit.Test;
 
-public interface IdentifiableObject
-    extends ImportableObject, LinkableObject, Comparable<IdentifiableObject>, Mergeable<IdentifiableObject>
+import static org.junit.Assert.*;
+
+/**
+ * @author Lars Helge Overland
+ */
+public class ListUtilsTest
 {
-    final String[] I18N_PROPERTIES = { "name" };
-
-    enum IdentifiableProperty
+    @Test
+    public void testRemoveAll()
     {
-        ID, UID, UUID, NAME, CODE
+        List<String> list = new ArrayList<String>( Arrays.asList( "a", "b", "c", "d", "e", "f", "g", "h" ) );
+        
+        Integer[] indexes = { 0, 2, 5, 7 };
+
+        assertEquals( 8, list.size() );
+        
+        ListUtils.removeAll( list, indexes );
+        
+        assertEquals( 4, list.size() );
+        assertTrue( list.contains( "b" ) );
+        assertTrue( list.contains( "d" ) );
+        assertTrue( list.contains( "e" ) );
+        assertTrue( list.contains( "g" ) );
     }
-
-    int getId();
-
-    String getUid();
-
-    String getName();
-
-    boolean haveUniqueNames();
-
-    String getCode();
-
-    Date getCreated();
-
-    Date getLastUpdated();
-
-    String getPublicAccess();
-
-    User getUser();
-
-    Set<UserGroupAccess> getUserGroupAccesses();
-
-    String getDisplayName();
 }

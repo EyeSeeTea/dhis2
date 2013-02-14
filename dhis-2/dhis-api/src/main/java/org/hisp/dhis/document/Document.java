@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -40,7 +40,7 @@ import org.hisp.dhis.common.view.ExportView;
 /**
  * @author Lars Helge Overland
  */
-@JacksonXmlRootElement(localName = "document", namespace = Dxf2Namespace.NAMESPACE)
+@JacksonXmlRootElement( localName = "document", namespace = DxfNamespaces.DXF_2_0 )
 public class Document
     extends BaseIdentifiableObject
 {
@@ -85,9 +85,15 @@ public class Document
         return name.equals( other.name );
     }
 
+    @Override
+    public boolean haveUniqueNames()
+    {
+        return false;
+    }
+
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlProperty(namespace = Dxf2Namespace.NAMESPACE)
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getUrl()
     {
         return url;
@@ -99,8 +105,8 @@ public class Document
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlProperty(namespace = Dxf2Namespace.NAMESPACE)
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isExternal()
     {
         return external;
@@ -112,8 +118,8 @@ public class Document
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlProperty(namespace = Dxf2Namespace.NAMESPACE)
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getContentType()
     {
         return contentType;

@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.Dxf2Namespace;
+import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.ImportableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -44,7 +44,7 @@ import java.util.regex.Pattern;
 /**
  * @author Bharath Kumar
  */
-@JacksonXmlRootElement( localName = "dataEntryForm", namespace = Dxf2Namespace.NAMESPACE )
+@JacksonXmlRootElement(localName = "dataEntryForm", namespace = DxfNamespaces.DXF_2_0)
 public class DataEntryForm
     implements Serializable, ImportableObject
 {
@@ -52,15 +52,16 @@ public class DataEntryForm
     public static final String STYLE_REGULAR = "regular";
     public static final String STYLE_COMPACT = "compact";
     public static final String STYLE_NONE = "none";
-    
+
     public static final int CURRENT_FORMAT = 2;
-    
+
     /**
      * Determines if a de-serialized file is compatible with this class.
      */
     private static final long serialVersionUID = 3183079113944562138L;
 
     public static final Pattern INPUT_PATTERN = Pattern.compile( "value\\[\\d+\\]\\.value:value\\[\\d+\\]\\.value" );
+
     public static final Pattern OPERAND_PATTERN = Pattern.compile( "\\d+" );
 
     /**
@@ -72,7 +73,7 @@ public class DataEntryForm
      * Name of DataEntryForm. Required and unique.
      */
     private String name;
-    
+
     /**
      * The display style to use to render the form.
      */
@@ -82,7 +83,7 @@ public class DataEntryForm
      * HTML Code of DataEntryForm
      */
     private String htmlCode;
-    
+
     /**
      * The format of the DataEntryForm.
      */
@@ -165,7 +166,7 @@ public class DataEntryForm
             throw new IllegalArgumentException( message );
         }
     }
-    
+
     // -------------------------------------------------------------------------
     // hashCode and equals
     // -------------------------------------------------------------------------
@@ -214,8 +215,8 @@ public class DataEntryForm
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getName()
     {
         return name;
@@ -227,8 +228,8 @@ public class DataEntryForm
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getStyle()
     {
         return style;
@@ -240,8 +241,8 @@ public class DataEntryForm
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public String getHtmlCode()
     {
         return htmlCode;
@@ -253,8 +254,8 @@ public class DataEntryForm
     }
 
     @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty( namespace = Dxf2Namespace.NAMESPACE )
+    @JsonView({ DetailedView.class, ExportView.class })
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public int getFormat()
     {
         return format;

@@ -27,10 +27,19 @@
 
 package org.hisp.dhis.validation;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
+
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
+@JacksonXmlRootElement(localName = "validationCriteria", namespace = DxfNamespaces.DXF_2_0)
 public class ValidationCriteria
 {
     public static final int OPERATOR_LESS_THAN = -1;
@@ -100,6 +109,14 @@ public class ValidationCriteria
         return id;
     }
 
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getName()
     {
         return name;
@@ -110,11 +127,9 @@ public class ValidationCriteria
         this.name = name;
     }
 
-    public void setId( int id )
-    {
-        this.id = id;
-    }
-
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDescription()
     {
         return description;
@@ -125,6 +140,9 @@ public class ValidationCriteria
         this.description = description;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getProperty()
     {
         return property;
@@ -135,6 +153,9 @@ public class ValidationCriteria
         this.property = property;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public int getOperator()
     {
         return operator;
@@ -145,6 +166,9 @@ public class ValidationCriteria
         this.operator = operator;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Object getValue()
     {
         return value;
