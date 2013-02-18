@@ -2105,6 +2105,63 @@ Ext.onReady( function() {
 							}
 						}
 					]
+				},
+				listeners: {
+					afterrender: function(p) {
+						var top,
+							left,
+							width,
+							height,
+							fixedElStyle,
+							setFixed = function(item, i) {
+								if (!item.hasCls('fixed')) {
+									item.addCls('fixed');
+									item.setTop(fixedElStyle[i].top + 'px');
+									item.setLeft(fixedElStyle[i].left + 'px');
+									item.setWidth(fixedElStyle[i].width + 'px');
+									item.setHeight(fixedElStyle[i].height + 'px');
+
+									if (i > 0) {
+										item.setStyle('border-left', 0);
+									}
+									
+								}
+							};							
+						
+						p.body.dom.addEventListener('scroll', function() {
+							var fixedEl = document.getElementsByClassName('scroll-fixed-tr'),
+								relativeEl = document.getElementsByClassName('scroll-relative'),
+								relativeElStyle	= [],
+								el;
+
+							fixedElStyle = [];
+
+							for (var i = 0; i < fixedEl.length; i++) {
+								//alert(Ext.get(relativeEl[i]).getWidth());
+								el = Ext.get(fixedEl[i]);
+								fixedElStyle.push({
+									top: el.getTop() + 1,
+									left: el.getLeft(),
+									width: el.getWidth(),
+									height: el.getHeight()
+								});
+							}
+								
+							for (var i = 0; i < relativeEl.length; i++) {
+								//alert(Ext.get(relativeEl[i]).getWidth());
+								relativeElStyle.push(Ext.get(relativeEl[i]).getWidth());
+							}
+
+							for (var i = 0; i < fixedEl.length; i++) {
+								setFixed(Ext.get(fixedEl[i]), i);
+							}
+
+							for (var i = 0; i < relativeEl.length; i++) {
+								//alert(Ext.get(relativeEl[i]).getWidth());
+								Ext.get(relativeEl[i]).setWidth(relativeElStyle[i]);
+							}
+						});
+					}
 				}
 			});
 

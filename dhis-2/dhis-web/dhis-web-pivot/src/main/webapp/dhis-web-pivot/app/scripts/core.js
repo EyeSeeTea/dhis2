@@ -861,7 +861,7 @@ console.log("aColIds", aColIds);
 
 				getEmptyHtmlArray = function() {
 					return (xColAxis && xRowAxis) ?
-						'<td class="pivot-empty" colspan="' + xRowAxis.dims + '" rowspan="' + xColAxis.dims + '"></td>' : '';
+						'<td class="pivot-empty scroll-fixed" colspan="' + xRowAxis.dims + '" rowspan="' + xColAxis.dims + '"></td>' : '';
 				};
 
 				getColAxisHtmlArray = function() {
@@ -885,10 +885,10 @@ console.log("aColIds", aColIds);
 
 						for (var j = 0, id; j < dimItems.length; j++) {
 							id = dimItems[j];						
-							dimHtml.push('<td class="pivot-dim" colspan="' + colSpan + '">' + xResponse.metaData[id] + '</td>');
+							dimHtml.push('<td class="pivot-dim scroll-fixed" colspan="' + colSpan + '">' + xResponse.metaData[id] + '</td>');
 
 							if (i === 0 && j === (dimItems.length - 1)) {
-								dimHtml.push('<td class="pivot-dimtotal" rowspan="' + dims + '">Total</td>');
+								dimHtml.push('<td class="pivot-dimtotal scroll-fixed" rowspan="' + dims + '">Total</td>');
 							}
 						}
 
@@ -921,7 +921,7 @@ console.log("aColIds", aColIds);
 							object = allObjects[j][i];
 
 							if (object.rowSpan) {
-								row.push('<td class="pivot-dim" rowspan="' + object.rowSpan + '">' + xResponse.metaData[object.id] + '</td>');
+								row.push('<td class="pivot-dim scroll-relative" rowspan="' + object.rowSpan + '">' + xResponse.metaData[object.id] + '</td>');
 							}
 						}
 
@@ -966,7 +966,7 @@ console.log("aColIds", aColIds);
 								//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
 							//}
 
-							row.push('<td id="' + item.id + '" class="pivot-value">' + item.value + '</td>');
+							row.push('<td id="' + item.id + '" class="pivot-value scroll-relative">' + item.value + '</td>');
 						}
 
 						a.push(row);
@@ -992,7 +992,7 @@ console.log("aColIds", aColIds);
 							rowSum = totalRowItems[i];							
 							rowSum = pt.util.number.roundIf(rowSum, 1);
 
-							a.push(['<td id="nissa" class="pivot-valuetotal">' + rowSum.toString() + '</td>']);
+							a.push(['<td id="nissa" class="pivot-valuetotal scroll-relative">' + rowSum.toString() + '</td>']);
 						}
 					}
 
@@ -1021,7 +1021,7 @@ console.log("aColIds", aColIds);
 							colSum = totalColItems[i];
 							colSum = pt.util.number.roundIf(colSum, 1);
 
-							a.push('<td class="pivot-valuetotal">' + colSum.toString() + '</td>');
+							a.push('<td class="pivot-valuetotal scroll-relative">' + colSum.toString() + '</td>');
 						}
 					}
 
@@ -1036,7 +1036,7 @@ console.log("aColIds", aColIds);
 						grandTotalSum = Ext.Array.sum(totalColItems) || 0;
 						grandTotalSum = pt.util.number.roundIf(grandTotalSum, 1);
 
-						a.push('<td class="pivot-valuegrandtotal">' + grandTotalSum.toString() + '</td>');
+						a.push('<td class="pivot-valuegrandtotal scroll-relative">' + grandTotalSum.toString() + '</td>');
 					}
 
 					return a;
@@ -1066,7 +1066,7 @@ console.log("aColIds", aColIds);
 						a = [];
 
 					if (xRowAxis) {
-						dimTotalArray = ['<td class="pivot-dimtotal" colspan="' + xRowAxis.dims + '">Total</td>'];
+						dimTotalArray = ['<td class="pivot-dimtotal scroll-relative" colspan="' + xRowAxis.dims + '">Total</td>'];
 					}
 
 					row = [].concat(dimTotalArray || [], Ext.clone(colTotal) || [], Ext.clone(grandTotal) || []);
@@ -1080,7 +1080,12 @@ console.log("aColIds", aColIds);
 					var s = '<table id="pivottable" class="pivot">';
 
 					for (var i = 0; i < htmlArray.length; i++) {
-						s += '<tr>' + htmlArray[i].join('') + '</tr>';
+						if (i < 2) {
+							s += '<tr class="scroll-fixed-tr">' + htmlArray[i].join('') + '</tr>';
+						}
+						else {
+							s += '<tr>' + htmlArray[i].join('') + '</tr>';
+						}
 					}
 
 					s += '</table>';
