@@ -124,20 +124,17 @@ PT.core.getConfigs = function() {
 	conf.layout = {
         west_width: 424,
         west_fieldset_width: 416,
-        west_width_padding: 18,
-        west_fill: 117,
-        west_fill_accordion_indicator: 77,
-        west_fill_accordion_dataelement: 77,
-        west_fill_accordion_dataset: 45,
-        west_fill_accordion_period: 270,
-        //west_fill_accordion_fixedperiod: 77,
+        west_width_padding: 12,
+        west_fill: 6,
+        west_fill_accordion_indicator: 74,
+        west_fill_accordion_dataelement: 74,
+        west_fill_accordion_dataset: 44,
+        west_fill_accordion_period: 264,
         west_fill_accordion_organisationunit: 103,
-        west_maxheight_accordion_indicator: 478,
-        west_maxheight_accordion_dataelement: 478,
-        west_maxheight_accordion_dataset: 478,
+        west_maxheight_accordion_indicator: 500,
+        west_maxheight_accordion_dataelement: 500,
+        west_maxheight_accordion_dataset: 500,
         west_maxheight_accordion_period: 700,
-        //west_maxheight_accordion_relativeperiod: 423,
-        //west_maxheight_accordion_fixedperiod: 478,
         west_maxheight_accordion_organisationunit: 756,
         west_maxheight_accordion_organisationunitgroup: 298,
         west_maxheight_accordion_options: 449,
@@ -320,7 +317,7 @@ PT.core.getUtils = function(pt) {
 		showMask: function(cmp, msg) {
 			cmp = cmp || pt.viewport;
 			msg = msg || 'Loading..';
-			
+
 			if (pt.viewport.mask) {
 				pt.viewport.mask.destroy();
 			}
@@ -432,11 +429,11 @@ PT.core.getUtils = function(pt) {
 				addDimensions = function() {
 					xSettings.dimensions = [].concat(Ext.clone(xSettings.col) || [], Ext.clone(xSettings.row) || []);
 				}();
-				
+
 				addDimensionNames = function() {
 					var a = [],
 						dimensions = Ext.clone(xSettings.dimensions) || [];
-					
+
 					for (var i = 0; i < dimensions.length; i++) {
 						a.push(dimensions[i].name);
 					}
@@ -459,18 +456,18 @@ PT.core.getUtils = function(pt) {
 					for (var i = 0, dim; i < dimensions.length; i++) {
 						dim = dimensions[i];
 
-						map[dim.name] = dim.items || [];						
+						map[dim.name] = dim.items || [];
 					}
-					
+
 					xSettings.nameItemsMap = map;
 				}();
-				
+
 				return xSettings;
 			};
 
 			getSyncronizedXSettings = function(xSettings, response) {
 				var getHeaderNames,
-				
+
 					headerNames,
 					newSettings;
 
@@ -490,7 +487,7 @@ PT.core.getUtils = function(pt) {
 					getAxis = function(axis) {
 						var axis = Ext.clone(axis),
 							dimension;
-						
+
 						for (var i = 0; i < axis.length; i++) {
 							if (axis[i].name === dimensionName) {
 								dimension = axis[i];
@@ -512,15 +509,15 @@ PT.core.getUtils = function(pt) {
 					}
 					if (settings.filter) {
 						settings.filter = getAxis(settings.filter);
-					}						
+					}
 				};
-				
+
 				headerNames = getHeaderNames();
-				
+
 				// remove coc from settings if it does not exist in response
 				if (Ext.Array.contains(xSettings.dimensionNames, 'coc') && !(Ext.Array.contains(headerNames, 'coc'))) {
 					removeDimensionFromSettings('coc');
-					
+
 					newSettings = pt.api.Settings(settings);
 
 					if (!newSettings) {
@@ -533,11 +530,11 @@ PT.core.getUtils = function(pt) {
 					return xSettings;
 				}
 			};
-				
+
 			getParamString = function(xSettings) {
 				var sortedDimensions = xSettings.sortedDimensions,
 					sortedFilterDimensions = xSettings.sortedFilterDimensions,
-					paramString = '?';				
+					paramString = '?';
 
 				for (var i = 0, sortedDim; i < sortedDimensions.length; i++) {
 					sortedDim = sortedDimensions[i];
@@ -556,7 +553,7 @@ PT.core.getUtils = function(pt) {
 				if (sortedFilterDimensions) {
 					for (var i = 0, sortedFilterDim; i < sortedFilterDimensions.length; i++) {
 						sortedFilterDim = sortedFilterDimensions[i];
-						
+
 						paramString += '&filter=' + sortedFilterDim.name + ':' + sortedFilterDim.items.join(';');
 					}
 				}
@@ -574,7 +571,7 @@ PT.core.getUtils = function(pt) {
 					alert('Data invalid');
 					return false;
 				}
-				
+
 				if (!(Ext.isNumber(response.width) && response.width > 0 &&
 					  Ext.isNumber(response.height) && response.height > 0 &&
 					  Ext.isArray(response.rows) && response.rows.length > 0)) {
@@ -589,7 +586,7 @@ PT.core.getUtils = function(pt) {
 
 				return true;
 			};
-		
+
 			extendResponse = function(response, xSettings) {
 				var headers = response.headers,
 					metaData = response.metaData,
@@ -618,8 +615,8 @@ PT.core.getUtils = function(pt) {
 							}
 
 							responseItems = Ext.Array.unique(responseItems);
-							
-							if (settingsItems.length) {							
+
+							if (settingsItems.length) {
 								for (var j = 0, item; j < settingsItems.length; j++) {
 									item = settingsItems[j];
 
@@ -682,8 +679,8 @@ PT.core.getUtils = function(pt) {
 			extendAxis = function(axis, xResponse) {
 				if (!axis || (Ext.isArray(axis) && !axis.length)) {
 					return;
-				}		
-				
+				}
+
 				var axis = Ext.clone(axis),
 					nCols = 1,
 					aNumCols = [],
@@ -693,13 +690,13 @@ PT.core.getUtils = function(pt) {
 					aAllItems = [],
 					aColIds = [],
 					aUniqueIds;
-					
+
 				aUniqueIds = function() {
 					var a = [];
 
 					for (var i = 0, dim; i < axis.length; i++) {
 						dim = axis[i];
-						
+
 						a.push(xResponse.nameHeaderMap[dim.name].items);
 					}
 
@@ -814,7 +811,7 @@ console.log("aColIds", aColIds);
 				if (!rowAxis || (Ext.isArray(rowAxis) && !rowAxis.length)) {
 					return;
 				}
-					
+
 				var xRowAxis = extendAxis(rowAxis, xResponse),
 					all = xRowAxis.xItems.all,
 					allObjects = [];
@@ -867,13 +864,13 @@ console.log("aColIds", aColIds);
 				getColAxisHtmlArray = function() {
 					var a = [],
 						dims;
-					
+
 					if (!(xColAxis && Ext.isObject(xColAxis))) {
 						return a;
 					}
 
 					dims = xColAxis.dims;
-					
+
 					for (var i = 0, dimItems, colSpan, dimHtml; i < dims; i++) {
 						dimItems = xColAxis.xItems.gui[i];
 						colSpan = xColAxis.span[i];
@@ -884,7 +881,7 @@ console.log("aColIds", aColIds);
 						}
 
 						for (var j = 0, id; j < dimItems.length; j++) {
-							id = dimItems[j];						
+							id = dimItems[j];
 							dimHtml.push('<td class="pivot-dim scroll-fixed" colspan="' + colSpan + '">' + xResponse.metaData[id] + '</td>');
 
 							if (i === 0 && j === (dimItems.length - 1)) {
@@ -916,7 +913,7 @@ console.log("aColIds", aColIds);
 					// Dim html items
 					for (var i = 0, row; i < size; i++) {
 						row = [];
-						
+
 						for (var j = 0, object; j < dims; j++) {
 							object = allObjects[j][i];
 
@@ -935,14 +932,14 @@ console.log("aColIds", aColIds);
 					var a = [],
 						htmlValueItems = [],
 						colSize = xColAxis ? xColAxis.size : 1,
-						rowSize = xRowAxis ? xRowAxis.size : 1;						
+						rowSize = xRowAxis ? xRowAxis.size : 1;
 
 					// Value items
 					for (var i = 0, valueItemRow, htmlValueItemRow; i < rowSize; i++) {
 						valueItemRow = [];
 						htmlValueItemRow = [];
 
-						for (var j = 0, id, value; j < colSize; j++) {						
+						for (var j = 0, id, value; j < colSize; j++) {
 							id = (xColAxis ? xColAxis.ids[j] : '') + (xRowAxis ? xRowAxis.ids[i] : '');
 							value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0; //todo
 							htmlValue = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : '-'; //todo
@@ -980,7 +977,7 @@ console.log("aColIds", aColIds);
 						a = [];
 
 					if (xColAxis) {
-							
+
 						// Total row items
 						for (var i = 0, rowSum; i < valueItems.length; i++) {
 							rowSum = Ext.Array.sum(valueItems[i]);
@@ -989,7 +986,7 @@ console.log("aColIds", aColIds);
 
 						// Total row html items
 						for (var i = 0, rowSum; i < totalRowItems.length; i++) {
-							rowSum = totalRowItems[i];							
+							rowSum = totalRowItems[i];
 							rowSum = pt.util.number.roundIf(rowSum, 1);
 
 							a.push(['<td id="nissa" class="pivot-valuetotal scroll-relative">' + rowSum.toString() + '</td>']);
@@ -1012,7 +1009,7 @@ console.log("aColIds", aColIds);
 							for (var j = 0; j < valueItems.length; j++) {
 								colSum += valueItems[j][i];
 							}
-							
+
 							totalColItems.push(colSum);
 						}
 
@@ -1070,7 +1067,7 @@ console.log("aColIds", aColIds);
 					}
 
 					row = [].concat(dimTotalArray || [], Ext.clone(colTotal) || [], Ext.clone(grandTotal) || []);
-					
+
 					a.push(row);
 
 					return a;
@@ -1091,8 +1088,8 @@ console.log("aColIds", aColIds);
 					s += '</table>';
 
 					return s;
-				};					
-				
+				};
+
 				htmlArray = [].concat(getColAxisHtmlArray(), getRowHtmlArray(), getTotalHtmlArray());
 				htmlArray = Ext.Array.clean(htmlArray);
 
@@ -1106,7 +1103,7 @@ console.log("aColIds", aColIds);
 					html: html
 				});
 			};
-			
+
 			initialize = function() {
 				var xSettings,
 					xResponse,
@@ -1114,7 +1111,7 @@ console.log("aColIds", aColIds);
 					xRowAxis;
 
 				pt.util.mask.showMask(container);
-				
+
 
 				xSettings = extendSettings(settings);
 
@@ -1130,7 +1127,7 @@ console.log("aColIds", aColIds);
 					failure: function() {
 						pt.util.mask.hideMask();
 						alert('Data request failed');
-					},						
+					},
 					success: function(response) {
 						var html,
 							el;
@@ -1155,19 +1152,19 @@ response.metaData['pq2XI5kz2BY'] = '(Fixed)';
 
 						xColAxis = extendAxis(xSettings.col, xResponse);
 						xRowAxis = extendRowAxis(xSettings.row, xResponse);
-						
+
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
 
 						if (!pt.el && container) {
 							el = Ext.get('pivottable');
-							
+
 							if (el) {
 								el.destroy();
 							}
-														
+
 							container.update(html);
 						}
-						
+
 						pt.util.mask.hideMask();
 					}
 				});
@@ -1195,11 +1192,11 @@ PT.core.getAPI = function(pt) {
 			if (!axis) {
 				return;
 			}
-			
+
 			for (var i = 0, dimension, remove; i < axis.length; i++) {
 				remove = false;
 				dimension = axis[i];
-				
+
 				if (dimension.name !== 'coc') {
 					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
 						remove = true;
@@ -1234,7 +1231,7 @@ PT.core.getAPI = function(pt) {
 					return;
 				}
 			}
-			
+
 			axis = removeEmptyDimensions(axis);
 
 			return axis.length ? axis : null;
@@ -1242,8 +1239,8 @@ PT.core.getAPI = function(pt) {
 
 		validateSettings = function() {
 			var a = [].concat(Ext.clone(col), Ext.clone(row), Ext.clone(filter)),
-				names = [];			
-			
+				names = [];
+
 			if (!(col || row)) {
 				alert('No column or row dimensions selected'); //i18n
 				return;
@@ -1264,25 +1261,25 @@ PT.core.getAPI = function(pt) {
 				alert('At least one period must be specified as column, row or filter');
 				return;
 			}
-			
+
 			return true;
 		};
-		
+
 		return function() {
 			var obj = {};
-			
+
 			if (!(config && Ext.isObject(config))) {
 				alert('Settings config is not an object'); //i18n
 				return;
 			}
-			
+
 			col = getValidatedAxis(config.col);
 			row = getValidatedAxis(config.row);
 			filter = getValidatedAxis(config.filter);
 
 			if (!validateSettings()) {
 				return;
-			}			
+			}
 
 			if (col) {
 				obj.col = col;
