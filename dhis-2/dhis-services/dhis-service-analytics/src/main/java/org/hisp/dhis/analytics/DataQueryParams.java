@@ -130,23 +130,6 @@ public class DataQueryParams
             removeDimension( CATEGORYOPTIONCOMBO_DIM_ID );
         }
     }
-
-    /**
-     * Returns the index of the category option combo dimension as it will appear
-     * in the data element query. Returns null if this query does not contain 
-     * the category option combo dimension. Currently unused.
-     */
-    public Integer getDeQueryCocIndex()
-    {
-        List<Dimension> list = new ArrayList<Dimension>( dimensions );
-                
-        list.remove( new Dimension( INDICATOR_DIM_ID ) );
-        list.remove( new Dimension( DATASET_DIM_ID ) );
-        
-        int index = list.indexOf( new Dimension( CATEGORYOPTIONCOMBO_DIM_ID ) );
-        
-        return index == -1 ? null : index;
-    }
     
     /**
      * Creates a list of dimensions for use as headers. Will replace any of
@@ -175,7 +158,7 @@ public class DataQueryParams
         
         return list;
     }
-        
+    
     /**
      * Creates a list of dimensions used to query. 
      */
@@ -280,6 +263,17 @@ public class DataQueryParams
         List<IdentifiableObject> filterOpts = getFilterOptions( PERIOD_DIM_ID );
         
         return ( dimOpts != null && !dimOpts.isEmpty() ) || ( filterOpts != null && !filterOpts.isEmpty() );
+    }
+    
+    /**
+     * Returns the index of the category option combo dimension. Returns null
+     * if this dimension is not present.
+     */
+    public Integer getCocIndex()
+    {
+        int index = dimensions.indexOf( new Dimension( CATEGORYOPTIONCOMBO_DIM_ID ) );
+        
+        return index == -1 ? null : index;
     }
     
     /**

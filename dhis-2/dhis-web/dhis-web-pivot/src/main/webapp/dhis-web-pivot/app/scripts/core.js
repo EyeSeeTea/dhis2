@@ -858,7 +858,7 @@ console.log("aColIds", aColIds);
 
 				getEmptyHtmlArray = function() {
 					return (xColAxis && xRowAxis) ?
-						'<td class="pivot-empty" colspan="' + xRowAxis.dims + '" rowspan="' + xColAxis.dims + '">&nbsp;</td>' : '';
+						'<td class="pivot-empty " colspan="' + xRowAxis.dims + '" rowspan="' + xColAxis.dims + '">&nbsp;</td>' : '';
 				};
 
 				getColAxisHtmlArray = function() {
@@ -962,8 +962,10 @@ console.log("aColIds", aColIds);
 							//if (Ext.isNumber(value)) {
 								//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
 							//}
+							var c = i === 2 ? 'hide' : '';
+							c = '';
 
-							row.push('<td id="' + item.id + '" class="pivot-value">' + item.value + '</td>');
+							row.push('<td id="' + item.id + '" class="pivot-value ' + c + '">' + item.value + '</td>');
 						}
 
 						a.push(row);
