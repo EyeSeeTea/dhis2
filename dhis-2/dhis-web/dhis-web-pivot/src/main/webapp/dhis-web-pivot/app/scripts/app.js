@@ -255,6 +255,7 @@ Ext.onReady( function() {
 	PT.app.SettingsWindow = function(pt) {
 		var dimension,
 			dimensionStore,
+			dimensionOrder,
 			row,
 			rowStore,
 			col,
@@ -278,22 +279,21 @@ Ext.onReady( function() {
 			defaultHeight = 158,
 			maxHeight = (pt.viewport.getHeight() - 100) / 2;
 
-		getData = function() {
-			var groupSets = [],
-				data = [
-					{id: 'coc', name: 'Categories'}
-				];
+		dimensionOrder = function() {
+			var order = ['dx', 'coc', 'pe', 'ou'],
+				ougsOrder = [];
 
 			for (var i = 0; i < pt.init.ougs.length; i++) {
-				var gs = pt.init.ougs[i];
-
-				groupSets.push({
-					id: gs.id,
-					name: gs.name
-				});
+				ougsOrder.push(pt.init.ougs[i].id);
 			}
 
-			return data.concat(groupSets);
+			return order.concat(ougsOrder);
+		}();
+
+		getData = function() {
+			var data = [{id: 'coc', name: 'Categories'}];
+
+			return data.concat(pt.init.ougs);
 		};
 
 		getStore = function(data) {
@@ -516,6 +516,7 @@ Ext.onReady( function() {
 			autoShow: true,
 			modal: true,
 			resizable: false,
+			shadow: 'drop',
 			getSetup: getSetup,
 			dimensionStore: dimensionStore,
 			rowStore: rowStore,
