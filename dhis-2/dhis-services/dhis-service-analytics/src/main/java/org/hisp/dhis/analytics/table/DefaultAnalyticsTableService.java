@@ -32,10 +32,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.analytics.AnalyticsIndex;
 import org.hisp.dhis.analytics.AnalyticsTableManager;
 import org.hisp.dhis.analytics.AnalyticsTableService;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
@@ -185,19 +187,28 @@ public class DefaultAnalyticsTableService
     
     private void createIndexes( List<String> tables )
     {
+        ConcurrentLinkedQueue<AnalyticsIndex> indexes = new ConcurrentLinkedQueue<AnalyticsIndex>();
+        
+        List<String> columns = tableManager.getDimensionColumnNames();
+        
         for ( String table : tables )
         {
-            List<Future<?>> futures = new ArrayList<Future<?>>();
-    
-            List<List<String>> columnPages = new PaginatedList<String>( tableManager.getDimensionColumnNames() ).setNumberOfPages( getProcessNo() ).getPages();
-            
-            for ( List<String> columnPage : columnPages )
+            for ( String column : columns )
             {
-                futures.add( tableManager.createIndexesAsync( table, columnPage ) );
+                indexes.add( new AnalyticsIndex( table, column ) );
             }
-            
-            ConcurrentUtils.waitForCompletion( futures );
         }
+        
+        log.info( "No of indexes: " + indexes.size() );
+        
+        List<Future<?>> futures = new ArrayList<Future<?>>();
+
+        for ( int i = 0; i < getProcessNo(); i++ )
+        {
+            futures.add( tableManager.createIndexesAsync( indexes ) );
+        }
+
+        ConcurrentUtils.waitForCompletion( futures );
     }
 
     private void vacuumTables( List<String> tables )

@@ -30,6 +30,7 @@ package org.hisp.dhis.analytics;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
 import org.hisp.dhis.period.Period;
@@ -61,10 +62,9 @@ public interface AnalyticsTableManager
      * Creates single indexes on the given columns of the analytics table with
      * the given name.
      * 
-     * @param tableName the name of the table to create indexes on.
-     * @param columns the columns to create single indexes for.
+     * @param indexes
      */
-    Future<?> createIndexesAsync( String tableName, List<String> columns );
+    Future<?> createIndexesAsync( ConcurrentLinkedQueue<AnalyticsIndex> indexes );
     
     /**
      * Attempts to drop analytics table, then rename temporary table to analytics
