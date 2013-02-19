@@ -357,6 +357,7 @@ Ext.onReady( function() {
 			displayField: 'name',
 			dragGroup: 'settingsDD',
 			dropGroup: 'settingsDD',
+			ddReorder: false,
 			store: dimensionStore,
 			tbar: {
 				height: 25,
