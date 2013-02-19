@@ -84,13 +84,13 @@ public abstract class AbstractJdbcTableManager
     @Async
     public Future<?> createIndexesAsync( ConcurrentLinkedQueue<AnalyticsIndex> indexes )
     {
-        indexLoop : while ( true )
+        taskLoop : while ( true )
         {
             AnalyticsIndex inx = indexes.poll();
             
             if ( inx == null )
             {
-                break indexLoop;
+                break taskLoop;
             }
             
             final String index = PREFIX_INDEX + inx.getColumn() + "_" + inx.getTable() + "_" + CodeGenerator.generateCode();
@@ -101,8 +101,6 @@ public abstract class AbstractJdbcTableManager
             
             log.info( "Created index: " + index );
         }
-        
-        log.info( "Indexes created" );
         
         return null;
     }
@@ -157,13 +155,23 @@ public abstract class AbstractJdbcTableManager
     }
 
     @Async
-    public Future<?> vacuumTableAsync( String tableName )
+    public Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<String> tables )
     {
-        final String sql = statementBuilder.getVacuum( tableName );
-        
-        log.info( "Vacuum SQL: " + sql );
-        
-        jdbcTemplate.execute( sql );
+        taskLoop : while ( true )
+        {
+            String table = tables.poll();
+            
+            if ( table == null )
+            {
+                break taskLoop;
+            }
+            
+            final String sql = statementBuilder.getVacuum( table );
+            
+            log.info( "Vacuum SQL: " + sql );
+            
+            jdbcTemplate.execute( sql );
+        }
         
         return null;
     }

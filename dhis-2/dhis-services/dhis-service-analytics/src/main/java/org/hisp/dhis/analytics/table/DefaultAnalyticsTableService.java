@@ -43,10 +43,8 @@ import org.hisp.dhis.analytics.AnalyticsTableService;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.util.Clock;
 import org.hisp.dhis.system.util.ConcurrentUtils;
-import org.hisp.dhis.system.util.PaginatedList;
 import org.hisp.dhis.system.util.SystemUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -130,25 +128,16 @@ public class DefaultAnalyticsTableService
     
     private void populateTables( List<String> tables )
     {
-        List<List<String>> tablePages = new PaginatedList<String>( tables ).setPageSize( getProcessNo() ).getPages();
+        ConcurrentLinkedQueue<String> tableQ = new ConcurrentLinkedQueue<String>( tables );
         
-        log.info( "No of table pages: " + tablePages.size() );
+        List<Future<?>> futures = new ArrayList<Future<?>>();
         
-        for ( List<String> tablePage : tablePages )
+        for ( int i = 0; i < getProcessNo(); i++ )
         {
-            log.info( "Table page: " + tablePage );
-            
-            List<Future<?>> futures = new ArrayList<Future<?>>();
-            
-            for ( String table : tablePage )
-            {
-                Period period = PartitionUtils.getPeriod( table );
-                
-                futures.add( tableManager.populateTableAsync( table, period ) );
-            }
-            
-            ConcurrentUtils.waitForCompletion( futures );
+            futures.add( tableManager.populateTableAsync( tableQ ) );
         }
+        
+        ConcurrentUtils.waitForCompletion( futures );
     }
     
     private void pruneTables( List<String> tables )
@@ -168,20 +157,28 @@ public class DefaultAnalyticsTableService
     {
         int maxLevels = organisationUnitService.getMaxOfOrganisationUnitLevels();
         
-        for ( int i = 0; i < maxLevels; i++ )
+        levelLoop : for ( int i = 0; i < maxLevels; i++ )
         {
             int level = maxLevels - i;
             
             Collection<String> dataElements = IdentifiableObjectUtils.getUids( 
                 dataElementService.getDataElementsByAggregationLevel( level ) );
             
-            if ( !dataElements.isEmpty() )
+            if ( dataElements.isEmpty() )
             {
-                for ( String table : tables )
-                {
-                    tableManager.applyAggregationLevels( table, dataElements, level );
-                }
+                continue levelLoop;
             }
+                        
+            ConcurrentLinkedQueue<String> tableQ = new ConcurrentLinkedQueue<String>( tables );
+
+            List<Future<?>> futures = new ArrayList<Future<?>>();
+            
+            for ( int j = 0; j < getProcessNo(); j++ )
+            {
+                futures.add( tableManager.applyAggregationLevels( tableQ, dataElements, level ) );
+            }
+
+            ConcurrentUtils.waitForCompletion( futures );
         }
     }
     
@@ -213,19 +210,16 @@ public class DefaultAnalyticsTableService
 
     private void vacuumTables( List<String> tables )
     {
-        List<List<String>> tablePages = new PaginatedList<String>( tables ).setPageSize( getProcessNo() ).getPages();
+        ConcurrentLinkedQueue<String> tableQ = new ConcurrentLinkedQueue<String>( tables );
         
-        for ( List<String> tablePage : tablePages )
+        List<Future<?>> futures = new ArrayList<Future<?>>();
+        
+        for ( int i = 0; i < getProcessNo(); i++ )
         {
-            List<Future<?>> futures = new ArrayList<Future<?>>();
-            
-            for ( String table : tablePage )
-            {
-                futures.add( tableManager.vacuumTableAsync( table ) );
-            }
-            
-            ConcurrentUtils.waitForCompletion( futures );
+            tableManager.vacuumTablesAsync( tableQ );
         }
+        
+        ConcurrentUtils.waitForCompletion( futures );        
     }
     
     private void swapTables( List<String> tables )
