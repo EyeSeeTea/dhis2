@@ -692,7 +692,7 @@ Ext.onReady( function() {
 							valueField: 'id',
 							displayField: 'name',
 							fieldLabel: 'Select group', //i18n pt.i18n.select_group
-							labelStyle: 'padding-left:7px',
+							labelStyle: 'padding-left:6px',
 							editable: false,
 							store: {
 								xtype: 'store',
@@ -877,7 +877,7 @@ Ext.onReady( function() {
 						valueField: 'id',
 						displayField: 'name',
 						fieldLabel: 'Select group', //i18n pt.i18n.select_group
-						labelStyle: 'padding-left:7px',
+						labelStyle: 'padding-left:6px',
 						editable: false,
 						store: {
 							xtype: 'store',
