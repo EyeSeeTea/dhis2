@@ -8,23 +8,30 @@ selection.setListenerFunction( organisationUnitSelected );
 
 function generatedStatisticalProgramReport()
 {
-	hideById('statisticalReportDiv');
-	hideById('detailsDiv');
-	showLoader();
-	jQuery( "#statisticalReportDiv" ).load( "generateStatisticalProgramReport.action",
+	if(  getFieldValue('type') =='' ){
+		hideById('statisticalReportDiv');
+		hideById('detailsDiv');
+		showLoader();
+		jQuery( "#statisticalReportDiv" ).load( "generateStatisticalProgramReport.action",
+		{
+			programId: getFieldValue('programId'),
+			startDate: getFieldValue('startDate'),
+			endDate: getFieldValue( 'endDate' ),
+			facilityLB: $('input[name=facilityLB]:checked').val(),
+		}, function() 
+		{ 
+			setTableStyles();
+			hideById('reportForm');
+			showById('statisticalReportDiv');
+			showById('reportTbl');
+			hideLoader();
+		});
+	}
+	else
 	{
-		programId: getFieldValue('programId'),
-		startDate: getFieldValue('startDate'),
-		endDate: getFieldValue( 'endDate' ),
-		facilityLB: $('input[name=facilityLB]:checked').val()
-	}, function() 
-	{ 
-		setTableStyles();
-		hideById('reportForm');
-		showById('statisticalReportDiv');
-		showById('reportTbl');
-		hideLoader();
-	});
+		byId('reportForm').submit();
+	}
+	
 }
 
 function statisticalProgramDetailsReport( programStageId, status, total )
@@ -73,9 +80,9 @@ function loadDataEntry( programStageInstanceId )
 	jQuery('#viewRecordsDiv' )
 		.load( 'viewProgramStageRecords.action?programStageInstanceId=' + programStageInstanceId
 		,function(){
+			showById('reportTitle');
 			jQuery("#viewRecordsDiv :input" ).attr("disabled", true);
 			jQuery("#viewRecordsDiv :input" ).datepicker("destroy");
-			showById('patientNameLbl');
 			jQuery(".ui-combobox" ).hide();
 			showById("viewRecordsDiv");
 			hideById('inputCriteriaDiv');
@@ -88,7 +95,6 @@ function entryFormContainerOnReady(){}
 function showCriteriaForm()
 {
 	showById('reportForm');
-	hideById('statisticalReportDiv');
 }
 
 function showStatisticalReport()
@@ -109,13 +115,4 @@ function detailsReport()
 	showById('totalLbl');
 	showById('programStageTitleLbl');
 	hideById('patientNameLbl');
-}
-
-function showStatisticalReportForm()
-{
-	if( getInnerHTML('statisticalReportDiv' )!="")
-	{
-		hideById('reportForm');
-		showById('statisticalReportDiv');
-	}
 }

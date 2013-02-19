@@ -1018,7 +1018,11 @@ Ext.onReady( function() {
 								TR.store.dataelement.selected.removeAll();
 								if (f.dataElements) {
 									for (var i = 0; i < f.dataElements.length; i++) {
-										TR.cmp.params.dataelement.objects.push({id: f.dataElements[i].id, name: TR.util.string.getEncodedString(f.dataElements[i].name), compulsory: f.dataElements[i].compulsory, valueType:f.dataElements[i].valueType });
+										var name = TR.util.string.getEncodedString(f.dataElements[i].name);
+										var compulsory = f.dataElements[i].compulsory;
+										var valueType = f.dataElements[i].valueType;
+										TR.cmp.params.dataelement.objects.push({id: f.dataElements[i].id, name: name, compulsory: compulsory, valueType: valueType});
+										TR.util.multiselect.addFilterField( 'filterPanel', f.dataElements[i].id, name, valueType );
 									}
 									TR.store.dataelement.selected.add(TR.cmp.params.dataelement.objects);
 									
@@ -1484,11 +1488,12 @@ Ext.onReady( function() {
 			return this.aggregateReport.getParams();
 		},
 		getURLParams: function( type, isSorted ){
-			if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true')
-			{
-				return this.caseBasedReport.getURLParams( type, isSorted );
+			if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true'){
+				this.caseBasedReport.getURLParams( type, isSorted );
 			}
-			return this.aggregateReport.getURLParams( type );
+			else{
+				this.aggregateReport.getURLParams( type );
+			}
 		},
 		paramChanged: function() {
 			if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true')
@@ -1510,7 +1515,10 @@ Ext.onReady( function() {
 				// Export to XLS 
 				if( type)
 				{
-					window.location.href = url + "?type=" + type + "&" + TR.state.caseBasedReport.getURLParams( isSorted );
+					TR.state.caseBasedReport.getURLParams();
+  				    var exportForm = document.getElementById('exportForm');
+					exportForm.action = url + "?type=" + type;
+					exportForm.submit();
 				}
 				// Show report on grid
 				else
@@ -1599,119 +1607,108 @@ Ext.onReady( function() {
 				
 				// Get searching values
 				p.searchingValues = [];
-				if( !TR.state.caseBasedReport.isParamChanged() || isSorted )
-				{
-					var cols = TR.datatable.datatable.columns;
-					for( var k in cols )
+				
+				TR.cmp.params.dataelement.selected.store.each( function(r) {
+					var valueType = r.data.valueType;
+					var deId = r.data.id;
+					var length = Ext.getCmp('p_' + deId).items.length/4;
+					var hidden = TR.state.caseBasedReport.isColHidden(deId);
+					
+					for(var idx=0;idx<length;idx++)
 					{
-						var col = cols[k];
-						if( col.name )
-						{
-							var params = TR.state.getFilterValueByColumn(col.name);
-							for(var i in params){
-								p.searchingValues.push(params[i]);
+						var id = deId + '_' + idx;
+						var filterValue = Ext.getCmp('filter_' + id).rawValue;
+						var filter = deId + '_' + hidden 
+						if( filterValue!=''){
+							var filterOpt = Ext.getCmp('filter_opt_' + id).rawValue;
+							filter += '_' + filterOpt + ' ';
+						
+							if( filterOpt == 'IN' )
+							{
+								var filterValues = filterValue.split(";");
+								filter +="(";
+								for(var i=0;i<filterValues.length;i++)
+								{
+									filter += "'"+ filterValues[i] +"',";
+								}
+								filter = filter.substr(0,filter.length - 1) + ")";
+							}
+							else
+							{
+								filter += "'" + filterValue + "'";
 							}
 						}
+						p.searchingValues.push( filter );
 					}
-				}
-				else
-				{
-					// Data elements
-					TR.cmp.params.dataelement.selected.store.each( function(r) {
-						p.searchingValues.push( r.data.id +  '_false_' );
-					});
-				}
+				});
+					
 				return p;
 			},
 			getURLParams: function( isSorted ) {
-				var p = "";
 				
-				p += "startDate=" + TR.cmp.settings.startDate.rawValue;
-				p += "&endDate=" + TR.cmp.settings.endDate.rawValue;
-				p += "&facilityLB=" + TR.cmp.settings.facilityLB.getValue();
-				p += "&level=" + Ext.getCmp('levelCombobox').getValue();
+				document.getElementById('startDate').value = TR.cmp.settings.startDate.rawValue;
+				document.getElementById('endDate').value = TR.cmp.settings.endDate.rawValue;
+				document.getElementById('facilityLB').value =  TR.cmp.settings.facilityLB.getValue();
+				document.getElementById('level').value = Ext.getCmp('levelCombobox').getValue();
+				document.getElementById('orderByOrgunitAsc').value = this.orderByOrgunitAsc;
+				document.getElementById('orderByExecutionDateByAsc').value = this.orderByExecutionDateByAsc;
+				document.getElementById('programStageId').value = TR.cmp.params.programStage.getValue();				
 				
-				// orders
-				p += "&orderByOrgunitAsc=" + this.orderByOrgunitAsc;
-				p += "&orderByExecutionDateByAsc=" + this.orderByExecutionDateByAsc;
-				
-				p += "&programStageId=" + TR.cmp.params.programStage.getValue();
-				p += "&currentPage=" + this.currentPage;
-				
-				// organisation unit
-				for( var i=0; i<TR.state.orgunitIds.length; i++ )
-				{
-					p += "&orgunitIds=" + TR.state.orgunitIds[i];
+				// orgunits
+				var orgunitIdList = document.getElementById('orgunitIds');
+				TR.util.list.clearList(orgunitIdList);
+				for( var i in TR.state.orgunitIds){
+					TR.util.list.addOptionToList(orgunitIdList, TR.state.orgunitIds[i], '');
 				}
 				
 				// Get searching values
-				if( !TR.state.caseBasedReport.isParamChanged() || isSorted )
-				{
-					var cols = TR.datatable.datatable.columns;
-					for( var k in cols )
+				var searchingValues = document.getElementById('searchingValues');
+				TR.util.list.clearList(searchingValues);
+				TR.cmp.params.dataelement.selected.store.each( function(r) {
+					var valueType = r.data.valueType;
+					var deId = r.data.id;
+					var length = Ext.getCmp('p_' + deId).items.length/4;
+					var hidden = TR.state.caseBasedReport.isColHidden(deId);
+					
+					for(var idx=0;idx<length;idx++)
 					{
-						var col = cols[k];
-						if( col.name )
-						{
-							var params = TR.state.getFilterValueByColumn(col.name);
-							for(var i in params){
-								p += "&searchingValues=" + params[i];
-							}
-						}
-					}
-				}
-				else
-				{
-					// Data elements
-					TR.cmp.params.dataelement.selected.store.each( function(r) {
-						p += "&searchingValues=" + r.data.id +  '_false_';
-					});
-				}
-				
-				return p;
-			},
-			getFilterValueByColumn: function( colname ) {
-				var grid = TR.datatable.datatable;
-				var cols = grid.columns;
-				var editor = grid.getStore().getAt(0);
-				var params = [];
-				for( var i=0; i<cols.length; i++ )
-				{
-					var col = cols[i];
-					var p = "";
-					if( col.name && col.name == colname )
-					{
-						var filters = grid.filters.getFilterData();
-						var value = "";
-						for( var i=0; i<filters.length; i++ )
-						{
-							var filter = filters[i];
-							if(col.dataIndex == filter.field)
+						var id = deId + '_' + idx;
+						var filterValue = Ext.getCmp('filter_' + id).rawValue;
+						var filter = deId + '_' + hidden 
+						if( filterValue!=''){
+							var filterOpt = Ext.getCmp('filter_opt_' + id).rawValue;
+							filter += '_' + filterOpt + ' ';
+						
+							if( filterOpt == 'IN' )
 							{
-								var compare = '=';
-								if( filter.data.comparison == 'lt')
-									compare = '<' ;
-								else if( filter.data.comparison == 'gt' )
-									compare = '>' ;
-								value = compare + "'"+ filter.data.value + "'";
-								var hidden = (col.hidden==undefined)? false : col.hidden;
-								if( value!=null && value!= ''){	
-									var value = TR.util.getValueFormula(value);
-									p = colname + '_' + hidden + "_" + value;
+								var filterValues = filterValue.split(";");
+								filter +="(";
+								for(var i=0;i<filterValues.length;i++)
+								{
+									filter += "'"+ filterValues[i] +"',";
 								}
-								params.push(p);
+								filter = filter.substr(0,filter.length - 1) + ")";
+							}
+							else
+							{
+								filter += "'" + filterValue + "'";
 							}
 						}
-						if (value=='')
-						{
-							p = colname + '_' + col.hidden + "_";
-							params.push(p);
-						}
-						return params;
+						TR.util.list.addOptionToList(searchingValues, filter, '');
 					}
-				}		
-				params.push(colname + "_false_");
-				return params
+				});
+			},
+			isColHidden: function( colname ) {
+				var grid = TR.datatable.datatable;
+				if( grid != null ){
+					var cols = grid.columns;
+					for (var i = 0; i < cols.length; i++) {
+						if (cols[i].name == colname) {
+							return(cols[i].hidden==undefined)? false : cols[i].hidden;
+						}
+					}
+				} 
+				return false;
 			},
 			isParamChanged: function() {
 				if( TR.store.datatable && TR.store.datatable.data.length > 0 )
@@ -1856,9 +1853,6 @@ Ext.onReady( function() {
 					});
 				}
 				TR.util.notification.ok();
-			},
-			filter: function() {
-			
 			},
 			getPosition: function() {
 				// 1 - Rows
@@ -2200,14 +2194,30 @@ Ext.onReady( function() {
 					
 					var position = TR.state.aggregateReport.getPosition();
 					if( position==''){
-						TR.util.notification.error(TR.i18n.invalid_position, TR.i18n.invalid_position);
-						return false;	
+						var o = TR.cmp.settings.positionOrgunit.value;
+						var p = TR.cmp.settings.positionPeriod.value;
+						var d = TR.cmp.settings.positionData.value;
+
+						if( o!='1' && p!='1' && d!='1')
+						{
+							TR.util.notification.error(TR.i18n.please_select_one_position_for_row, TR.i18n.please_select_one_position_for_row);
+							return false;
+						}
+						if( o!='3' && p!='3' && d!='3')
+						{
+							TR.util.notification.error(TR.i18n.please_select_one_position_for_filter, TR.i18n.please_select_one_position_for_filter);
+							return false;
+						}
+						else {
+							TR.util.notification.error(TR.i18n.invalid_position, TR.i18n.invalid_position);
+							return false;
+						}
 					}
 					
 					if( Ext.getCmp('aggregateType').getValue().aggregateType != 'count'
 						&& ( Ext.getCmp('deSumCbx').getValue() == null || Ext.getCmp('deSumCbx').getValue=='')){
 						TR.util.notification.error(TR.i18n.select_a_dataelement_for_sum_avg_operator, TR.i18n.select_a_dataelement_for_sum_avg_operator );
-						return false;	
+						return false;
 					}
 				
 					// Check orgunit by period
@@ -2812,6 +2822,7 @@ Ext.onReady( function() {
 													Ext.getCmp('relativePeriodsDiv').setVisible(false); 
 													Ext.getCmp('fixedPeriodsDiv').setVisible(false);
 													Ext.getCmp('dateRangeDiv').expand();
+													Ext.getCmp('filterPanel').setHeight(155);
 												}
 											}
 										}
@@ -2843,6 +2854,7 @@ Ext.onReady( function() {
 													Ext.getCmp('fixedPeriodsDiv').setVisible(true);
 													Ext.getCmp('relativePeriodsDiv').setVisible(true);
 													Ext.getCmp('datePeriodRangeDiv').expand();
+													Ext.getCmp('filterPanel').setHeight(105);
 												}
 											}
 										}
@@ -4051,7 +4063,12 @@ Ext.onReady( function() {
 																		Ext.getCmp('selectedDEBar').setVisible(false);
 																		Ext.getCmp('availableDataelements').setVisible(false);
 																		Ext.getCmp('selectedDataelements').setVisible(false);
-																		Ext.getCmp('filterPanel').setHeight(260);
+																		if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true'){
+																			Ext.getCmp('filterPanel').setHeight(300);
+																		}
+																		else{
+																			Ext.getCmp('filterPanel').setHeight(255);
+																		}
 																		this.setIcon('images/arrowdown.png');
 																		this.up = false;
 																	}
@@ -4060,7 +4077,12 @@ Ext.onReady( function() {
 																		Ext.getCmp('selectedDEBar').setVisible(true);
 																		Ext.getCmp('availableDataelements').setVisible(true);
 																		Ext.getCmp('selectedDataelements').setVisible(true);
-																		Ext.getCmp('filterPanel').setHeight(110);
+																		if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true'){
+																			Ext.getCmp('filterPanel').setHeight(155);
+																		}
+																		else{
+																			Ext.getCmp('filterPanel').setHeight(105);
+																		}
 																		this.setIcon('images/arrowup.png');
 																		this.up = true;
 																	}
@@ -4076,7 +4098,7 @@ Ext.onReady( function() {
 														autoScroll: true,
 														overflowX: 'hidden',
 														overflowY: 'auto',
-														height: 110,
+														height: 160,
 														width: (TR.conf.layout.west_fieldset_width - TR.conf.layout.west_width_subtractor) ,
 														items: []
 													}

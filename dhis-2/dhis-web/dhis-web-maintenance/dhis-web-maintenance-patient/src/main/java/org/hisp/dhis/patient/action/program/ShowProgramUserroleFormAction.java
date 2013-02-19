@@ -24,80 +24,82 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.hisp.dhis.patient;
 
-import static org.hisp.dhis.i18n.I18nUtils.i18n;
+package org.hisp.dhis.patient.action.program;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
-import org.hisp.dhis.i18n.I18nService;
-import org.springframework.transaction.annotation.Transactional;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserService;
+
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $Id$
+ * 
+ * @version ShowProgramUserroleFormAction.java 12:44:19 PM Feb 19, 2013 $
  */
-@Transactional
-public class DefaultPatientAttributeGroupService
-    implements PatientAttributeGroupService
+public class ShowProgramUserroleFormAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+    
+    private UserService userService;
 
-    private PatientAttributeGroupStore patientAttributeGroupStore;
-
-    public void setPatientAttributeGroupStore( PatientAttributeGroupStore patientAttributeGroupStore )
+    public void setUserService( UserService userService )
     {
-        this.patientAttributeGroupStore = patientAttributeGroupStore;
+        this.userService = userService;
     }
 
-    private I18nService i18nService;
+    private ProgramService programService;
 
-    public void setI18nService( I18nService service )
+    public void setProgramService( ProgramService programService )
     {
-        i18nService = service;
+        this.programService = programService;
     }
 
     // -------------------------------------------------------------------------
-    // Implementation methods
+    // Input/output
     // -------------------------------------------------------------------------
 
-    public int savePatientAttributeGroup( PatientAttributeGroup patientAttributeGroup )
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        return patientAttributeGroupStore.save( patientAttributeGroup );
+        this.id = id;
     }
 
-    public void deletePatientAttributeGroup( PatientAttributeGroup patientAttributeGroup )
+    private Collection<UserAuthorityGroup> userRoles;
+
+    public Collection<UserAuthorityGroup> getUserRoles()
     {
-        patientAttributeGroupStore.delete( patientAttributeGroup );
+        return userRoles;
     }
 
-    public void updatePatientAttributeGroup( PatientAttributeGroup patientAttributeGroup )
+    private Program program;
+
+    public Program getProgram()
     {
-        patientAttributeGroupStore.update( patientAttributeGroup );
+        return program;
     }
 
-    public PatientAttributeGroup getPatientAttributeGroup( int id )
-    {
-        return i18n( i18nService, patientAttributeGroupStore.get( id ) );
-    }
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
-    public PatientAttributeGroup getPatientAttributeGroupByName( String name )
+    @Override
+    public String execute()
     {
-        return i18n( i18nService, patientAttributeGroupStore.getByName( name ) );
-    }
+        program = programService.getProgram( id );
 
-    public Collection<PatientAttributeGroup> getAllPatientAttributeGroups()
-    {
-        return i18n( i18nService, patientAttributeGroupStore.getAll() );
-    }
+        userRoles = userService.getAllUserAuthorityGroups();
+        userRoles.removeAll( program.getUserRoles() );
 
-    public List<PatientAttribute> getPatientAttributes( PatientAttributeGroup patientAttributeGroup )
-    {
-        return new ArrayList<PatientAttribute>( i18n( i18nService, patientAttributeGroup.getAttributes() ) );
+        return SUCCESS;
     }
 
 }

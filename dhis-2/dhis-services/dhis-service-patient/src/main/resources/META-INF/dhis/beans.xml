@@ -57,6 +57,8 @@
 	<bean id="org.hisp.dhis.program.ProgramStore" class="org.hisp.dhis.program.hibernate.HibernateProgramStore">
 		<property name="clazz" value="org.hisp.dhis.program.Program" />
 		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="userService" ref="org.hisp.dhis.user.UserService" />
+		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramValidationStore"
@@ -180,6 +182,7 @@
 		<property name="programStageInstanceService"
 			ref="org.hisp.dhis.program.ProgramStageInstanceService" />
 		<property name="statementBuilder" ref="statementBuilder" />
+		<property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.relationship.RelationshipService" class="org.hisp.dhis.relationship.DefaultRelationshipService">
@@ -190,6 +193,7 @@
 		class="org.hisp.dhis.relationship.DefaultRelationshipTypeService">
 		<property name="relationshipTypeStore"
 			ref="org.hisp.dhis.relationship.RelationshipTypeStore" />
+		<property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramStageInstanceService"
