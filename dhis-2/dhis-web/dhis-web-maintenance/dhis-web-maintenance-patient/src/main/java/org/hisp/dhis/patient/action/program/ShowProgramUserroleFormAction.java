@@ -25,46 +25,34 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.patient;
+package org.hisp.dhis.patient.action.program;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.comparator.ProgramDisplayNameComparator;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version ShowProgramUserroleFormAction.java 12:44:19 PM Feb 19, 2013 $
  */
-public class SelectAction
+public class ShowProgramUserroleFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+    
+    private UserService userService;
 
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
+    public void setUserService( UserService userService )
     {
-        this.selectionManager = selectionManager;
-    }
-
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
+        this.userService = userService;
     }
 
     private ProgramService programService;
@@ -78,50 +66,40 @@ public class SelectAction
     // Input/output
     // -------------------------------------------------------------------------
 
-    private Collection<PatientAttribute> patientAttributes;
+    private Integer id;
 
-    public Collection<PatientAttribute> getPatientAttributes()
+    public void setId( Integer id )
     {
-        return patientAttributes;
+        this.id = id;
     }
 
-    private List<Program> programs;
+    private Collection<UserAuthorityGroup> userRoles;
 
-    public List<Program> getPrograms()
+    public Collection<UserAuthorityGroup> getUserRoles()
     {
-        return programs;
+        return userRoles;
     }
 
-    private OrganisationUnit organisationUnit;
+    private Program program;
 
-    public OrganisationUnit getOrganisationUnit()
+    public Program getProgram()
     {
-        return organisationUnit;
-    }
-
-    private int status;
-
-    public int getStatus()
-    {
-        return status;
+        return program;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
-        throws Exception
     {
-        patientAttributes = patientAttributeService.getAllPatientAttributes();
+        program = programService.getProgram( id );
 
-        programs = new ArrayList<Program>(programService.getProgramsByCurrentUser());
-        programs.removeAll( programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) );
-        
-        Collections.sort( programs, new ProgramDisplayNameComparator() );
-
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        userRoles = userService.getAllUserAuthorityGroups();
+        userRoles.removeAll( program.getUserRoles() );
 
         return SUCCESS;
     }
+
 }

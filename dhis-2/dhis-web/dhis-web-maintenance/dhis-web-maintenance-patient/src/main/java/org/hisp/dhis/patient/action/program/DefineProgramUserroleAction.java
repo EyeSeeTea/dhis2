@@ -25,47 +25,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.caseentry.action.patient;
+package org.hisp.dhis.patient.action.program;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.comparator.ProgramDisplayNameComparator;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Chau Thu Tran
+ * 
+ * @version DefineProgramUserroleAction.java 12:43:40 PM Feb 19, 2013 $
  */
-public class SelectAction
+public class DefineProgramUserroleAction
     implements Action
-{
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
-
-    private PatientAttributeService patientAttributeService;
-
-    public void setPatientAttributeService( PatientAttributeService patientAttributeService )
-    {
-        this.patientAttributeService = patientAttributeService;
-    }
+{// -------------------------------------------------------------------------
+ // Dependency
+ // -------------------------------------------------------------------------
 
     private ProgramService programService;
 
@@ -74,54 +56,53 @@ public class SelectAction
         this.programService = programService;
     }
 
+    private UserService userService;
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
+    }
+
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input
     // -------------------------------------------------------------------------
 
-    private Collection<PatientAttribute> patientAttributes;
+    private Integer id;
 
-    public Collection<PatientAttribute> getPatientAttributes()
+    public void setId( Integer id )
     {
-        return patientAttributes;
+        this.id = id;
     }
 
-    private List<Program> programs;
+    private Collection<Integer> userRoleIds = new HashSet<Integer>();
 
-    public List<Program> getPrograms()
+    public void setUserRoleIds( Collection<Integer> userRoleIds )
     {
-        return programs;
-    }
-
-    private OrganisationUnit organisationUnit;
-
-    public OrganisationUnit getOrganisationUnit()
-    {
-        return organisationUnit;
-    }
-
-    private int status;
-
-    public int getStatus()
-    {
-        return status;
+        this.userRoleIds = userRoleIds;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
-        patientAttributes = patientAttributeService.getAllPatientAttributes();
+        Program program = programService.getProgram( id );
 
-        programs = new ArrayList<Program>(programService.getProgramsByCurrentUser());
-        programs.removeAll( programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) );
-        
-        Collections.sort( programs, new ProgramDisplayNameComparator() );
+        Set<UserAuthorityGroup> userAutorities = new HashSet<UserAuthorityGroup>();
 
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+        for ( Integer userRoleId : this.userRoleIds )
+        {
+            userAutorities.add( userService.getUserAuthorityGroup( userRoleId ) );
+        }
+
+        program.setUserRoles( userAutorities );
+
+        programService.updateProgram( program );
 
         return SUCCESS;
     }
+
 }

@@ -112,7 +112,8 @@ public class TabularInitializeAction
         Collections.sort( orgunitGroups, IdentifiableObjectNameComparator.INSTANCE );
         
         programs = programService.getAllPrograms();
-
+        programs.retainAll( programService.getProgramsByCurrentUser());
+        
         levels = organisationUnitService.getOrganisationUnitLevels();
 
         return SUCCESS;
