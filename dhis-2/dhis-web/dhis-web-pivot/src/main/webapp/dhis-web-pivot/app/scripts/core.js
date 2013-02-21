@@ -883,7 +883,7 @@ console.log("aColIds", aColIds);
 
 							//todo subtotal
 							if (true && (xColAxis.dims > 1) && i === 0) {
-								dimHtml.push('<td class="pivot-dimsubtotal" rowspan="' + xColAxis.dims + '">Subtotal</td>');
+								dimHtml.push('<td class="pivot-dimsubtotal" rowspan="' + xColAxis.dims + '">Sub total</td>');
 							}
 
 							if (i === 0 && j === (dimItems.length - 1)) {
@@ -932,7 +932,7 @@ console.log("aColIds", aColIds);
 						if (true && (xRowAxis.dims > 1) && count === uniqueSize) {
 							count = 0;
 							row = [];
-							row.push('<td class="pivot-dimsubtotal" colspan="' + xRowAxis.dims + '">Subtotal</td>');
+							row.push('<td class="pivot-dimsubtotal" colspan="' + xRowAxis.dims + '">Sub total</td>');
 							a.push(row);
 						}
 					}
@@ -994,21 +994,21 @@ console.log("aColIds", aColIds);
 					if (doSubtotals(xColAxis)) {
 						var tmp = [];
 
-						for (var i = 0, row, rowSubTotal, cellCount; i < htmlValueItems.length; i++) {
+						for (var i = 0, row, rowSubTotal, colCount; i < htmlValueItems.length; i++) {
 							row = [];
 							rowSubTotal = 0;
-							cellCount = 0;
+							colCount = 0;
 
 							for (var j = 0, item; j < htmlValueItems[i].length; j++) {
 								item = htmlValueItems[i][j];
 								rowSubTotal += item.value;
-								cellCount++;
+								colCount++;
 
 								row.push(item);
 
-								if (cellCount === colUniqueSize) {
-									row.push({value: rowSubTotal, htmlValue: value, cls: 'pivot-valuesubtotal'});
-									cellCount = 0;
+								if (colCount === colUniqueSize) {
+									row.push({value: rowSubTotal, htmlValue: rowSubTotal, cls: 'pivot-valuesubtotal'});
+									colCount = 0;
 									rowSubTotal = 0;
 								}
 							}
@@ -1039,10 +1039,8 @@ console.log("aColIds", aColIds);
 								count++;
 
 								if (count === rowUniqueSize) {
-									var arr = subTotals[subTotalsIndex];
-
-
-									arr.push({value: subTotal, htmlValue: subTotal, cls: 'pivot-valuesubtotal'});
+									console.log(i, j, "subTotal", subTotal);
+									subTotals[subTotalsIndex].push({value: subTotal, htmlValue: subTotal, cls: 'pivot-valuesubtotal'});
 									count = 0;
 									subTotal = 0;
 									subTotalsIndex++;
@@ -1051,17 +1049,16 @@ console.log("aColIds", aColIds);
 						}
 
 						// Add sub total arrays to htmlValueItems
-
-						count = 0;
-
-						for (var i = 0; i < htmlValueItems.length; i++) {
+						for (var i = 0, count = 0; i < htmlValueItems.length; i++) {
 							tmp.push(htmlValueItems[i]);
 							count++;
 
 							if (count === rowUniqueSize) {
 								count = 0;
 
-								tmp.push(subTotals.pop());
+								var sta = subTotals.shift();
+
+								tmp.push(sta);
 							}
 						}
 
