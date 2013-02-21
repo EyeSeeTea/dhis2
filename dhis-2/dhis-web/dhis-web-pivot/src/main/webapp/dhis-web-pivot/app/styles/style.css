@@ -114,6 +114,9 @@ table.pivot {
 .pivot-dim {
 	background-color: #dae6f8;
 }
+.pivot-dimsubtotal {
+	background-color: #c4d8f3;
+}
 .pivot-dimtotal {
 	background-color: #b0c4de;
 }
@@ -121,8 +124,11 @@ table.pivot {
 .pivot-value {
 	background-color: #fff;
 }
+.pivot-valuesubtotal {
+	background-color: #f5f5f5;
+}
 .pivot-valuetotal {
-	background-color: #eaeaea;
+	background-color: #e6e6e6;
 }
 .pivot-valuegrandtotal {
 	background-color: #ccc;

@@ -862,16 +862,13 @@ console.log("aColIds", aColIds);
 				};
 
 				getColAxisHtmlArray = function() {
-					var a = [],
-						dims;
+					var a = [];
 
 					if (!(xColAxis && Ext.isObject(xColAxis))) {
 						return a;
 					}
 
-					dims = xColAxis.dims;
-
-					for (var i = 0, dimItems, colSpan, dimHtml; i < dims; i++) {
+					for (var i = 0, dimItems, colSpan, dimHtml; i < xColAxis.dims; i++) {
 						dimItems = xColAxis.xItems.gui[i];
 						colSpan = xColAxis.span[i];
 						dimHtml = [];
@@ -884,8 +881,13 @@ console.log("aColIds", aColIds);
 							id = dimItems[j];
 							dimHtml.push('<td class="pivot-dim" colspan="' + colSpan + '">' + xResponse.metaData[id] + '</td>');
 
+							//todo subtotal
+							if (true && (xColAxis.dims > 1) && i === 0) {
+								dimHtml.push('<td class="pivot-dimsubtotal" rowspan="' + xColAxis.dims + '">Subtotal</td>');
+							}
+
 							if (i === 0 && j === (dimItems.length - 1)) {
-								dimHtml.push('<td class="pivot-dimtotal" rowspan="' + dims + '">Total</td>');
+								dimHtml.push('<td class="pivot-dimtotal" rowspan="' + xColAxis.dims + '">Total</td>');
 							}
 						}
 
@@ -899,22 +901,24 @@ console.log("aColIds", aColIds);
 				getRowAxisHtmlArray = function() {
 					var a = [],
 						size,
-						dims,
-						allObjects;
+						allObjects,
+						uniqueLength,
+						count = 0;
 
 					if (!(xRowAxis && Ext.isObject(xRowAxis))) {
 						return a;
 					}
 
 					size = xRowAxis.size;
-					dims = xRowAxis.dims;
 					allObjects = xRowAxis.xItems.allObjects;
+					uniqueLength = xRowAxis.xItems.unique[xRowAxis.xItems.unique.length - 1].length;
 
 					// Dim html items
 					for (var i = 0, row; i < size; i++) {
 						row = [];
+						count++;
 
-						for (var j = 0, object; j < dims; j++) {
+						for (var j = 0, object; j < xRowAxis.dims; j++) {
 							object = allObjects[j][i];
 
 							if (object.rowSpan) {
@@ -923,6 +927,14 @@ console.log("aColIds", aColIds);
 						}
 
 						a.push(row);
+
+						//todo subtotal
+						if (true && (xRowAxis.dims > 1) && count === uniqueLength) {
+							count = 0;
+							row = [];
+							row.push('<td class="pivot-dimsubtotal" colspan="' + xRowAxis.dims + '">Subtotal</td>');
+							a.push(row);
+						}
 					}
 
 					return a;
@@ -931,41 +943,91 @@ console.log("aColIds", aColIds);
 				getValueHtmlArray = function() {
 					var a = [],
 						htmlValueItems = [],
+						htmlValueColItems = [],
 						colSize = xColAxis ? xColAxis.size : 1,
-						rowSize = xRowAxis ? xRowAxis.size : 1;
+						rowSize = xRowAxis ? xRowAxis.size : 1,
+						colUniqueLength = xColAxis ? xColAxis.xItems.unique[xColAxis.xItems.unique.length - 1].length : null,
+						rowUniqueLength = xRowAxis ? xRowAxis.xItems.unique[xRowAxis.xItems.unique.length - 1].length : null,
+						hasSubtotals,
+						subtotal,
+						td;
 
-					// Value items
+					doSubtotals = function(xAxis) {
+						var multiItemDimension = 0,
+							unique;
+
+						if (!(true && xAxis && xAxis.dims > 1)) {
+							return false;
+						}
+
+						unique = xAxis.xItems.unique;
+
+						for (var i = 0; i < unique.length; i++) {
+							if (unique[i].length > 1) {
+								multiItemDimension++;
+							}
+						}
+
+						return (multiItemDimension > 1);
+					};
+
+					// Value / htmlvalue items
 					for (var i = 0, valueItemRow, htmlValueItemRow; i < rowSize; i++) {
 						valueItemRow = [];
 						htmlValueItemRow = [];
 
 						for (var j = 0, id, value; j < colSize; j++) {
 							id = (xColAxis ? xColAxis.ids[j] : '') + (xRowAxis ? xRowAxis.ids[i] : '');
+
 							value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0; //todo
 							htmlValue = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : '-'; //todo
 
 							valueItemRow.push(value);
-							htmlValueItemRow.push({id: id, value: htmlValue});
+							htmlValueItemRow.push({value: htmlValue, cls: 'pivot-value'});
 						}
 
 						valueItems.push(valueItemRow);
 						htmlValueItems.push(htmlValueItemRow);
 					}
 
+					if (doSubtotals(xColAxis)) {
+
+						// Add row subtotals
+						for (var i = 0, row, rowSubTotal, cellCount; i < htmlValueItems.length; i++) {
+							row = [];
+							rowSubTotal = 0;
+							cellCount = 0;
+
+							for (var j = 0, htmlValue; j < htmlValueItems[i].length; j++) {
+								htmlValue = htmlValueItems[i][j];
+								rowSubTotal += valueItems[i][j];
+								cellCount++;
+
+								row.push(htmlValue);
+
+								if (cellCount === colUniqueLength) {
+									row.push({value: rowSubTotal, cls: 'pivot-valuesubtotal'});
+									cellCount = 0;
+									rowSubTotal = 0;
+								}
+							}
+
+							htmlValueColItems.push(row);
+						}
+					}
+
 					// Value html items
-					for (var i = 0, row; i < htmlValueItems.length; i++) {
+					for (var i = 0, row; i < htmlValueColItems.length; i++) {
 						row = [];
 
-						for (var j = 0, item, cls; j < htmlValueItems[i].length; j++) {
-							item = htmlValueItems[i][j];
+						for (var j = 0, item, cls; j < htmlValueColItems[i].length; j++) {
+							item = htmlValueColItems[i][j];
 
 							//if (Ext.isNumber(value)) {
 								//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
 							//}
-							var c = i === 2 ? 'hide' : '';
-							c = '';
 
-							row.push('<td id="' + item.id + '" class="pivot-value ' + c + '">' + item.value + '</td>');
+							row.push('<td class="' + item.cls + '">' + item.value + '</td>');
 						}
 
 						a.push(row);
