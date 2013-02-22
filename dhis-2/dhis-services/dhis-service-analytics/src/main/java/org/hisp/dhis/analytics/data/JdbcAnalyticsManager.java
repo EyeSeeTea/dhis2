@@ -59,6 +59,7 @@ import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.system.util.TextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.scheduling.annotation.Async;
@@ -91,19 +92,19 @@ public class JdbcAnalyticsManager
     {
         ListMap<IdentifiableObject, IdentifiableObject> dataPeriodAggregationPeriodMap = params.getDataPeriodAggregationPeriodMap();
         params.replaceAggregationPeriodsWithDataPeriods( dataPeriodAggregationPeriodMap );
-        
+                
         params.populateDimensionNames();
-        
-        List<Dimension> queryDimensions = params.getQueryDimensions();
-        
+
+        List<Dimension> dimensions = params.getQueryDimensions();
+
         SqlHelper sqlHelper = new SqlHelper();
 
-        int days = PeriodType.getPeriodTypeByName( params.getPeriodType() ).getFrequencyOrder();
-        
-        String sql = "select " + getCommaDelimitedString( queryDimensions ) + ", ";
+        String sql = "select " + getCommaDelimitedString( dimensions ) + ", ";
         
         if ( params.isAggregationType( AVERAGE_INT ) )
         {
+            int days = PeriodType.getPeriodTypeByName( params.getPeriodType() ).getFrequencyOrder();
+            
             sql += "sum(daysxvalue) / " + days;
         }
         else if ( params.isAggregationType( AVERAGE_BOOL ) )
@@ -118,10 +119,10 @@ public class JdbcAnalyticsManager
         {
             sql += "sum(value)";
         }
-        
+                
         sql += " as value from " + params.getTableName() + " ";
         
-        for ( Dimension dim : queryDimensions )
+        for ( Dimension dim : dimensions )
         {
             if ( !dim.isAllOptions() )
             {
@@ -137,13 +138,24 @@ public class JdbcAnalyticsManager
             }
         }
         
-        sql += "group by " + getCommaDelimitedString( queryDimensions );
+        sql += "group by " + getCommaDelimitedString( dimensions );
     
         log.info( sql );
-        
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
-        
+
         Map<String, Double> map = new HashMap<String, Double>();
+        
+        SqlRowSet rowSet = null;
+        
+        try
+        {
+            rowSet = jdbcTemplate.queryForRowSet( sql );
+        }
+        catch ( BadSqlGrammarException ex )
+        {
+            log.info( "Query failed, likely because the requested analytics table does not exist", ex );
+            
+            return new AsyncResult<Map<String, Double>>( map );
+        }
         
         while ( rowSet.next() )
         {
@@ -156,7 +168,7 @@ public class JdbcAnalyticsManager
             
             StringBuilder key = new StringBuilder();
             
-            for ( Dimension dim : queryDimensions )
+            for ( Dimension dim : dimensions )
             {
                 key.append( rowSet.getString( dim.getDimensionName() ) + DIMENSION_SEP );
             }

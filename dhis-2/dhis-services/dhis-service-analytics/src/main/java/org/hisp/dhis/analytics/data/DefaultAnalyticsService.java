@@ -29,6 +29,7 @@ package org.hisp.dhis.analytics.data;
 
 import static org.hisp.dhis.analytics.AnalyticsTableManager.ANALYTICS_TABLE_NAME;
 import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TABLE_NAME;
+import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TARGET_TABLE_NAME;
 import static org.hisp.dhis.analytics.DataQueryParams.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.analytics.DataQueryParams.DATAELEMENT_DIM_ID;
 import static org.hisp.dhis.analytics.DataQueryParams.DATASET_DIM_ID;
@@ -54,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AggregationType;
@@ -91,6 +93,7 @@ import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.period.comparator.PeriodComparator;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.ConversionUtils;
+import org.hisp.dhis.system.util.ListUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.SystemUtils;
 import org.hisp.dhis.system.util.Timer;
@@ -106,7 +109,7 @@ public class DefaultAnalyticsService
     
     //TODO completeness
     //TODO make sure data x dims are successive
-    //TODO check if partition table exists before query
+    //TODO max value limit, 5000?
     
     @Autowired
     private AnalyticsManager analyticsManager;
@@ -181,7 +184,7 @@ public class DefaultAnalyticsService
             
             dataSourceParams = replaceIndicatorsWithDataElements( dataSourceParams, indicatorIndex );
 
-            Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( dataSourceParams, ANALYTICS_TABLE_NAME );
+            Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( dataSourceParams );
 
             Map<String, Map<DataElementOperand, Double>> permutationOperandValueMap = dataSourceParams.getPermutationOperandValueMap( aggregatedDataMap );
             
@@ -213,7 +216,7 @@ public class DefaultAnalyticsService
                             grid.addValues( DimensionOption.getOptionIdentifiers( row ) );
                             grid.addValue( MathUtils.getRounded( value, 1 ) );
                         }
-                    }                    
+                    }
                 }
             }
         }
@@ -228,7 +231,7 @@ public class DefaultAnalyticsService
             dataSourceParams.removeDimension( INDICATOR_DIM_ID );
             dataSourceParams.removeDimension( DATASET_DIM_ID );
             
-            Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( dataSourceParams, ANALYTICS_TABLE_NAME );
+            Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( dataSourceParams );
             
             for ( Map.Entry<String, Double> entry : aggregatedDataMap.entrySet() )
             {
@@ -243,22 +246,43 @@ public class DefaultAnalyticsService
         // ---------------------------------------------------------------------
 
         if ( params.getDataSets() != null )
-        {
+        {            
             DataQueryParams dataSourceParams = new DataQueryParams( params );
             dataSourceParams.removeDimension( INDICATOR_DIM_ID );
             dataSourceParams.removeDimension( DATAELEMENT_DIM_ID );
-            dataSourceParams.removeDimension( CATEGORYOPTIONCOMBO_DIM_ID );
             dataSourceParams.setAggregationType( AggregationType.COUNT );
 
-            Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( dataSourceParams, COMPLETENESS_TABLE_NAME );
+            Map<String, Double> aggregatedDataMap = getAggregatedCompletenessValueMap( dataSourceParams );
 
+            DataQueryParams dataTargetParams = new DataQueryParams( params );
+            dataTargetParams.setDimensions( ListUtils.getAll( dataTargetParams.getDimensions(), dataTargetParams.getCompletenessDimensionIndexes() ) );
+            dataTargetParams.setFilters( ListUtils.getAll( dataTargetParams.getFilters(), dataTargetParams.getCompletenessFilterIndexes() ) );
+            dataTargetParams.setAggregationType( AggregationType.COUNT );
+            dataTargetParams.setSkipPartitioning( true );
+
+            Map<String, Double> targetMap = getAggregatedCompletenessTargetMap( dataTargetParams ); //TODO
+            
+            Integer periodIndex = dataSourceParams.getPeriodDimensionIndex();
+            Integer dataSetIndex = dataSourceParams.getDataSetDimensionIndex();
+            
+            //TODO time aggregation for completeness, use data set period type and period.getPeriodSpan
+            
             for ( Map.Entry<String, Double> entry : aggregatedDataMap.entrySet() )
             {
                 List<String> row = new ArrayList<String>( Arrays.asList( entry.getKey().split( DIMENSION_SEP ) ) );
                 
-                grid.addRow();
-                grid.addValues( row.toArray() );
-                grid.addValue( entry.getValue() );
+                List<String> targetRow = ListUtils.getAll( row, dataTargetParams.getCompletenessDimensionIndexes() );
+                String targetKey = StringUtils.join( targetRow, DIMENSION_SEP );
+                Double target = targetMap.get( targetKey );
+                             
+                if ( target != null && entry.getValue() != null )
+                {
+                    double value = entry.getValue() / target;
+                    
+                    grid.addRow();
+                    grid.addValues( row.toArray() );
+                    grid.addValue( value );
+                }
             }
         }
 
@@ -268,7 +292,7 @@ public class DefaultAnalyticsService
 
         if ( params.getIndicators() == null && params.getDataElements() == null && params.getDataSets() == null )
         {
-            Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( new DataQueryParams( params ), ANALYTICS_TABLE_NAME );
+            Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( new DataQueryParams( params ) );
             
             for ( Map.Entry<String, Double> entry : aggregatedDataMap.entrySet() )
             {
@@ -292,7 +316,30 @@ public class DefaultAnalyticsService
         return grid;
     }
     
-    public Map<String, Double> getAggregatedDataValueMap( DataQueryParams params, String tableName )
+    public Map<String, Double> getAggregatedDataValueMap( DataQueryParams params )
+        throws IllegalQueryException, Exception
+    {
+        return getAggregatedValueMap( params, ANALYTICS_TABLE_NAME );
+    }
+    
+    public Map<String, Double> getAggregatedCompletenessValueMap( DataQueryParams params )
+        throws IllegalQueryException, Exception
+    {
+        return getAggregatedValueMap( params, COMPLETENESS_TABLE_NAME );
+    }
+
+    private Map<String, Double> getAggregatedCompletenessTargetMap( DataQueryParams params )
+        throws IllegalQueryException, Exception
+    {
+        return getAggregatedValueMap( params, COMPLETENESS_TARGET_TABLE_NAME );
+    }
+    
+    /**
+     * Generates a mapping between a dimension key and the aggregated value. The
+     * dimension key is a concatenation of the identifiers in for the dimensions
+     * separated by "-".
+     */
+    private Map<String, Double> getAggregatedValueMap( DataQueryParams params, String tableName )
         throws IllegalQueryException, Exception
     {
         queryPlanner.validate( params );

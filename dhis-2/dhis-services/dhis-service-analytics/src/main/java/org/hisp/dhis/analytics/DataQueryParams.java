@@ -28,6 +28,7 @@ package org.hisp.dhis.analytics;
  */
 
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT_DISAGGREGATION;
+import static org.hisp.dhis.analytics.DimensionType.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,6 +69,8 @@ public class DataQueryParams
     public static final List<String> DATA_DIMS = Arrays.asList( INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATASET_DIM_ID );
     public static final List<String> FIXED_DIMS = Arrays.asList( DATA_X_DIM_ID, INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATASET_DIM_ID, PERIOD_DIM_ID, ORGUNIT_DIM_ID );
     
+    private static final List<DimensionType> COMPLETENESS_DIMENSION_TYTPES = Arrays.asList( DATASET, ORGANISATIONUNIT, ORGANISATIONUNIT_GROUPSET );
+    
     private static final DimensionOption[] DIM_OPT_ARR = new DimensionOption[0];
     private static final DimensionOption[][] DIM_OPT_2D_ARR = new DimensionOption[0][];
     
@@ -91,6 +94,8 @@ public class DataQueryParams
     
     private transient PeriodType dataPeriodType;
     
+    private transient boolean skipPartitioning;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -110,6 +115,7 @@ public class DataQueryParams
         this.periodType = params.getPeriodType();
         this.organisationUnitLevel = params.getOrganisationUnitLevel();
         this.dataPeriodType = params.getDataPeriodType();
+        this.skipPartitioning = params.isSkipPartitioning();
     }
 
     // -------------------------------------------------------------------------
@@ -170,6 +176,42 @@ public class DataQueryParams
         
         return list;
     }
+    
+    /**
+     * Creates a list of dimension indexes which are relevant to completeness queries.
+     */
+    public List<Integer> getCompletenessDimensionIndexes()
+    {
+        List<Integer> indexes = new ArrayList<Integer>();
+        
+        for ( int i = 0; i < dimensions.size(); i++ )
+        {
+            if ( COMPLETENESS_DIMENSION_TYTPES.contains( dimensions.get( i ).getType() ) )
+            {
+                indexes.add( i );
+            }
+        }
+        
+        return indexes;
+    }
+
+    /**
+     * Creates a list of filter indexes which are relevant to completeness queries.
+     */
+    public List<Integer> getCompletenessFilterIndexes()
+    {
+        List<Integer> indexes = new ArrayList<Integer>();
+        
+        for ( int i = 0; i < filters.size(); i++ )
+        {
+            if ( COMPLETENESS_DIMENSION_TYTPES.contains( filters.get( i ).getType() ) )
+            {
+                indexes.add( i );
+            }
+        }
+        
+        return indexes;
+    }
 
     /**
      * Removes the dimension with the given identifier.
@@ -193,6 +235,14 @@ public class DataQueryParams
     public int getDataElementDimensionIndex()
     {
         return getInputDimensionNamesAsList().indexOf( DATAELEMENT_DIM_ID );
+    }
+    
+    /**
+     * Returns the index of the data set dimension in the dimension map.
+     */
+    public int getDataSetDimensionIndex()
+    {
+        return getInputDimensionNamesAsList().indexOf( DATASET_DIM_ID );
     }
 
     /**
@@ -689,7 +739,17 @@ public class DataQueryParams
     {
         this.dataPeriodType = dataPeriodType;
     }
-    
+
+    public boolean isSkipPartitioning()
+    {
+        return skipPartitioning;
+    }
+
+    public void setSkipPartitioning( boolean skipPartitioning )
+    {
+        this.skipPartitioning = skipPartitioning;
+    }
+
     // -------------------------------------------------------------------------
     // Get and set helpers for dimensions or filter
     // -------------------------------------------------------------------------
