@@ -72,7 +72,7 @@ Ext.onReady( function() {
 				var vpw = pt.viewport.getWidth(),
 					targetx = target ? target.getPosition()[0] : 4,
 					winw = w.getWidth(),
-					y = target ? target.getPosition()[1] + target.getHeight() + 6 : 35;
+					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
 
 				if ((targetx + winw) > vpw) {
 					w.setPosition((vpw - winw - 4), y);
@@ -288,7 +288,7 @@ Ext.onReady( function() {
 		return cmp;
 	};
 
-	PT.app.SettingsWindow = function(pt) {
+	PT.app.SettingsWindow = function() {
 		var dimension,
 			dimensionStore,
 			dimensionOrder,
@@ -584,7 +584,47 @@ Ext.onReady( function() {
 			listeners: {
 				show: function(w) {
 					pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
-					nissa = w;
+				}
+			}
+		});
+
+		return window;
+	};
+
+	PT.app.OptionsWindow = function() {
+		var window;
+
+		window = Ext.create('Ext.window.Window', {
+			title: 'Table options', //i18n
+			bodyStyle: 'background-color:#fff; padding:6px',
+			closeAction: 'hide',
+			autoShow: true,
+			modal: true,
+			resizable: false,
+			items: [
+				{
+					html: 'Show sub totals and other options'
+				}
+			],
+			bbar: [
+				'->',
+				{
+					text: 'Hide',
+					handler: function() {
+						window.hide();
+					}
+				},
+				{
+					text: '<b>Update</b>',
+					handler: function() {
+						pt.viewport.updateViewport();
+						window.hide();
+					}
+				}
+			],
+			listeners: {
+				show: function(w) {
+					pt.util.window.setAnchorPosition(w, pt.viewport.optionsButton);
 				}
 			}
 		});
