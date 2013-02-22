@@ -1956,7 +1956,9 @@ Ext.onReady( function() {
 						pt.util.multiselect.filterAvailable(available, selected);
 					});
 
-					panel = Ext.create('Ext.panel.Panel', {
+					//panel = Ext.create('Ext.panel.Panel', {
+					panel = {
+						xtype: 'panel',
 						title: '<div class="pt-panel-title-organisationunit">' + groupSet.name + '</div>', //i18n
 						hideCollapseTool: true,
 						getData: function() {
@@ -2003,7 +2005,7 @@ Ext.onReady( function() {
 								p.onExpand();
 							}
 						}
-					});
+					};
 
 					return panel;
 				};
@@ -2011,7 +2013,8 @@ Ext.onReady( function() {
 				getPanels = function() {
 					var ougs = pt.init.ougs,
 						panels = [],
-						groupSet;
+						groupSet,
+						last;
 
 					for (var i = 0, panel; i < ougs.length; i++) {
 						groupSet = ougs[i];
@@ -2020,6 +2023,9 @@ Ext.onReady( function() {
 
 						panels.push(panel);
 					}
+
+					last = panels[panels.length - 1];
+					last.cls = 'pt-accordion-last';
 
 					return panels;
 				};

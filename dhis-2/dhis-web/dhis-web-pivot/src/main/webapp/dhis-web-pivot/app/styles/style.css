@@ -738,15 +738,12 @@ td .bad div {
  *--------------------------------------------------------------------------*/
 
 	/* accordion title bar, shared */
-.pt-accordion .x-accordion-item .x-accordion-hd, .pt-accordion .pt-accordion-options .x-accordion-hd {
+.pt-accordion .x-accordion-item .x-accordion-hd {
 	padding: 6px 5px 4px 8px;
 	border: 0 none;
 	cursor: pointer;
 	border-top-left-radius: 1px;
 	border-top-right-radius: 1px;
-}
-	/* accordion title dock, default */
-.pt-accordion .x-accordion-item .x-accordion-hd {
     background-image: none;
     background-color: #e0e0e0;
     background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #dcdcdc), color-stop(100%, #e5e5e5)) !important;
@@ -756,24 +753,13 @@ td .bad div {
     background-image: -ms-linear-gradient(top, #dcdcdc, #e5e5e5) !important;
     background-image: linear-gradient(top, #dcdcdc, #e5e5e5) !important;
 }
-	/* accordion title dock, options */
-.pt-accordion .pt-accordion-options .x-accordion-hd {
-    background-image: none;
-    background-color: #d0d0d0;
-    background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #cccccc), color-stop(100%, #d3d3d3)) !important;
-    background-image: -webkit-linear-gradient(top, #cccccc, #d3d3d3) !important;
-    background-image: -moz-linear-gradient(top, #cccccc, #d3d3d3) !important;
-    background-image: -o-linear-gradient(top, #cccccc, #d3d3d3) !important;
-    background-image: -ms-linear-gradient(top, #cccccc, #d3d3d3) !important;
-    background-image: linear-gradient(top, #cccccc, #d3d3d3) !important;
-}
 	/* accordion title dock, default, collapsed */
 .pt-accordion .collapsed .x-accordion-hd {
 	padding-bottom: 5px !important;
 }
 
 	/* accordion title dock outer, shared */
-.pt-accordion .x-accordion-item, .pt-accordion-options .x-accordion-item {
+.pt-accordion .x-accordion-item {
 	border-top-left-radius: 2px;
 	border-top-right-radius: 2px;
 }
@@ -782,9 +768,9 @@ td .bad div {
 	border: 1px solid #c5c5c5;
 	border-bottom: 0 none;
 }
-	/* accordion title dock outer, options */
-.pt-accordion .pt-accordion-options {
-	border: 1px solid #c0c0c0;
+	/* accordion title dock outer, last */
+.pt-accordion .pt-accordion-last {
+	border: 1px solid #c5c5c5;
 }
 
 	/* accordion title dock text, shared */
