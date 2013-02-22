@@ -404,6 +404,10 @@ PT.core.getUtils = function(pt) {
 		roundIf: function(x, fix) {
 			var dec = pt.util.number.getNumberOfDecimals(x);
 			return parseFloat(dec > fix ? x.toFixed(fix) : x);
+		},
+
+		pp: function(x) {
+			return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 		}
 	};
 
@@ -1077,7 +1081,7 @@ PT.core.getUtils = function(pt) {
 								//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
 							//}
 
-							row.push('<td class="' + item.cls + '">' + item.htmlValue + '</td>');
+							row.push('<td class="' + item.cls + '">' + pt.util.number.pp(item.htmlValue) + '</td>');
 						}
 
 						a.push(row);
@@ -1088,13 +1092,14 @@ PT.core.getUtils = function(pt) {
 
 				getRowTotalHtmlArray = function() {
 					var totalRowItems = [],
+						vItems = Ext.clone(valueItems),
 						a = [];
 
 					if (xColAxis) {
 
 						// Total row items
-						for (var i = 0, rowSum; i < valueItems.length; i++) {
-							rowSum = Ext.Array.sum(valueItems[i]);
+						for (var i = 0, rowSum; i < vItems.length; i++) {
+							rowSum = Ext.Array.sum(vItems[i]);
 							totalRowItems.push({value: rowSum, htmlValue: rowSum, cls: 'pivot-value-total'});
 						}
 
@@ -1121,7 +1126,7 @@ PT.core.getUtils = function(pt) {
 							item = totalRowItems[i];
 							item.htmlValue = pt.util.number.roundIf(item.htmlValue, 1);
 
-							a.push(['<td class="' + item.cls + '">' + item.htmlValue + '</td>']);
+							a.push(['<td class="' + item.cls + '">' + pt.util.number.pp(item.htmlValue) + '</td>']);
 						}
 					}
 
@@ -1169,7 +1174,7 @@ PT.core.getUtils = function(pt) {
 							item = totalColItems[i];
 							item.htmlValue = pt.util.number.roundIf(item.htmlValue, 1);
 
-							a.push('<td class="' + item.cls + '">' + item.htmlValue + '</td>');
+							a.push('<td class="' + item.cls + '">' + pt.util.number.pp(item.htmlValue) + '</td>');
 						}
 					}
 
@@ -1189,7 +1194,7 @@ PT.core.getUtils = function(pt) {
 						grandTotalSum = Ext.Array.sum(values) || 0;
 						grandTotalSum = pt.util.number.roundIf(grandTotalSum, 1);
 
-						a.push('<td class="pivot-value-grandtotal">' + grandTotalSum.toString() + '</td>');
+						a.push('<td class="pivot-value-grandtotal">' + pt.util.number.pp(grandTotalSum) + '</td>');
 					}
 
 					return a;
