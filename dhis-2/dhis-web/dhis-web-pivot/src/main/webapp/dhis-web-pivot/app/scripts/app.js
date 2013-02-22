@@ -1067,6 +1067,7 @@ Ext.onReady( function() {
 			dataSet = {
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-data">Reporting rates</div>', //i18n
+				bodyStyle: 'padding-top:3px',
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
@@ -1956,10 +1957,10 @@ Ext.onReady( function() {
 						pt.util.multiselect.filterAvailable(available, selected);
 					});
 
-					//panel = Ext.create('Ext.panel.Panel', {
 					panel = {
 						xtype: 'panel',
 						title: '<div class="pt-panel-title-organisationunit">' + groupSet.name + '</div>', //i18n
+						bodyStyle: 'padding-top:3px',
 						hideCollapseTool: true,
 						getData: function() {
 							var data = {
