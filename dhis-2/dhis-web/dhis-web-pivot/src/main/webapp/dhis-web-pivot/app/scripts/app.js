@@ -68,17 +68,17 @@ Ext.onReady( function() {
 		};
 
 		util.window = {
-			setPositionCenterTopLeft: function(w) {
+			setAnchorPosition: function(w, target) {
 				var vpw = pt.viewport.getWidth(),
-					centerx = pt.viewport.centerRegion.getPosition()[0],
+					targetx = target ? target.getPosition()[0] : 4,
 					winw = w.getWidth(),
-					y = 35;
+					y = target ? target.getPosition()[1] + target.getHeight() + 6 : 35;
 
-				if ((centerx + winw) > vpw) {
+				if ((targetx + winw) > vpw) {
 					w.setPosition((vpw - winw - 4), y);
 				}
 				else {
-					w.setPosition(centerx + 4, y);
+					w.setPosition(targetx, y);
 				}
 			}
 		};
@@ -547,7 +547,7 @@ Ext.onReady( function() {
 		window = Ext.create('Ext.window.Window', {
 			title: 'Table layout', //i18n
 			layout: 'fit',
-			bodyStyle: 'background-color:#fff; padding:5px 5px 0px',
+			bodyStyle: 'background-color:#fff; padding:2px 2px 0px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -558,6 +558,7 @@ Ext.onReady( function() {
 			rowStore: rowStore,
 			colStore: colStore,
 			filterStore: filterStore,
+			isRendered: false,
 			items: {
 				layout: 'column',
 				bodyStyle: 'border:0 none',
@@ -584,7 +585,12 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					pt.util.window.setPositionCenterTopLeft(w);
+					if (!w.isRendered) {
+						w.isRendered = true;
+					}
+					else {
+						pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
+					}
 				}
 			}
 		});
@@ -2133,6 +2139,17 @@ Ext.onReady( function() {
 				items: accordion
 			});
 
+			layoutButton = Ext.create('Ext.button.Button', {
+				text: 'Layout',
+				handler: function() {
+					if (!pt.viewport.settingsWindow) {
+						pt.viewport.settingsWindow = PT.app.SettingsWindow(pt);
+					}
+
+					pt.viewport.settingsWindow.show();
+				}
+			});
+
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				region: 'center',
 				bodyStyle: 'padding:1px',
@@ -2158,16 +2175,7 @@ Ext.onReady( function() {
 								update();
 							}
 						},
-						{
-							text: 'Layout',
-							handler: function() {
-								if (!pt.viewport.settingsWindow) {
-									pt.viewport.settingsWindow = PT.app.SettingsWindow(pt);
-								}
-
-								pt.viewport.settingsWindow.show();
-							}
-						},
+						layoutButton,
 						{
 							text: 'Options',
 							handler: function() {
@@ -2258,6 +2266,7 @@ Ext.onReady( function() {
 				westRegion: westRegion,
 				centerRegion: centerRegion,
 				updateViewport: update,
+				layoutButton: layoutButton,
 				items: [
 					westRegion,
 					centerRegion
