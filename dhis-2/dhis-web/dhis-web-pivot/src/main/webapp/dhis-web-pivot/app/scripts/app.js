@@ -67,6 +67,22 @@ Ext.onReady( function() {
 			}
 		};
 
+		util.window = {
+			setPositionCenterTopLeft: function(w) {
+				var vpw = pt.viewport.getWidth(),
+					centerx = pt.viewport.centerRegion.getPosition()[0],
+					winw = w.getWidth(),
+					y = 35;
+
+				if ((centerx + winw) > vpw) {
+					w.setPosition((vpw - winw - 4), y);
+				}
+				else {
+					w.setPosition(centerx + 4, y);
+				}
+			}
+		};
+
 		util.pivot.getSettingsConfig = function() {
 			var data = {},
 				setup = pt.viewport.settingsWindow.getSetup(),
@@ -568,8 +584,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					var x = (pt.viewport.getWidth() / 2) - (w.getWidth() / 2);
-					w.setPosition(x, 60);
+					pt.util.window.setPositionCenterTopLeft(w);
 				}
 			}
 		});
