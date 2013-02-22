@@ -310,7 +310,7 @@ Ext.onReady( function() {
 			selectPanel,
 			window,
 
-			margin = 5,
+			margin = 2,
 			defaultWidth = 160,
 			defaultHeight = 158,
 			maxHeight = (pt.viewport.getHeight() - 100) / 2;
@@ -388,7 +388,7 @@ Ext.onReady( function() {
 			cls: 'pt-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: (getCmpHeight() * 2) + margin,
-			style: 'margin-right:' + margin + 'px',
+			style: 'margin-right:' + margin + 'px; margin-bottom:0px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
@@ -418,7 +418,7 @@ Ext.onReady( function() {
 			cls: 'pt-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: getCmpHeight(),
-			style: 'margin-right:' + margin + 'px',
+			style: 'margin-bottom:0px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
@@ -452,6 +452,7 @@ Ext.onReady( function() {
 			cls: 'pt-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: getCmpHeight(),
+			style: 'margin-bottom:' + margin + 'px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
@@ -485,7 +486,7 @@ Ext.onReady( function() {
 			cls: 'pt-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: getCmpHeight(),
-			style: 'margin-right:' + margin + 'px',
+			style: 'margin-right:' + margin + 'px; margin-bottom:' + margin + 'px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'settingsDD',
@@ -546,19 +547,17 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: 'Table layout', //i18n
-			layout: 'fit',
-			bodyStyle: 'background-color:#fff; padding:2px 2px 0px',
+			//layout: 'fit',
+			bodyStyle: 'background-color:#fff; padding:2px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
 			resizable: false,
-			shadow: 'drop',
 			getSetup: getSetup,
 			dimensionStore: dimensionStore,
 			rowStore: rowStore,
 			colStore: colStore,
 			filterStore: filterStore,
-			isRendered: false,
 			items: {
 				layout: 'column',
 				bodyStyle: 'border:0 none',
@@ -585,12 +584,8 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					if (!w.isRendered) {
-						w.isRendered = true;
-					}
-					else {
-						pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
-					}
+					pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
+					nissa = w;
 				}
 			}
 		});
@@ -2150,6 +2145,17 @@ Ext.onReady( function() {
 				}
 			});
 
+			optionsButton = Ext.create('Ext.button.Button', {
+				text: 'Options',
+				handler: function() {
+					if (!pt.viewport.optionsWindow) {
+						pt.viewport.optionsWindow = PT.app.OptionsWindow(pt);
+					}
+
+					pt.viewport.optionsWindow.show();
+				}
+			});
+
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				region: 'center',
 				bodyStyle: 'padding:1px',
@@ -2176,11 +2182,7 @@ Ext.onReady( function() {
 							}
 						},
 						layoutButton,
-						{
-							text: 'Options',
-							handler: function() {
-							}
-						},
+						optionsButton,
 						{
 							xtype: 'tbseparator',
 							height: 18,
@@ -2267,6 +2269,7 @@ Ext.onReady( function() {
 				centerRegion: centerRegion,
 				updateViewport: update,
 				layoutButton: layoutButton,
+				optionsButton: optionsButton,
 				items: [
 					westRegion,
 					centerRegion
