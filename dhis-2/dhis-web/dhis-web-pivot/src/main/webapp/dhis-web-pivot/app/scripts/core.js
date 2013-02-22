@@ -921,9 +921,9 @@ PT.core.getUtils = function(pt) {
 					uniqueSize = xRowAxis.xItems.unique[xRowAxis.xItems.unique.length - 1].length;
 
 					// Dim html items
-					for (var i = 0, row; i < size; i++) {
+					for (var i = 0, row, rowCount = 0; i < size; i++) {
 						row = [];
-						count++;
+						rowCount++;
 
 						for (var j = 0, object; j < xRowAxis.dims; j++) {
 							object = allObjects[j][i];
@@ -936,11 +936,11 @@ PT.core.getUtils = function(pt) {
 						a.push(row);
 
 						//todo subtotal
-						if (true && (xRowAxis.dims > 1) && count === uniqueSize) {
-							count = 0;
+						if (doSubTotals(xRowAxis) && rowCount === uniqueSize) {
 							row = [];
 							row.push('<td class="pivot-dim-subtotal" colspan="' + xRowAxis.dims + '"></td>');
 							a.push(row);
+							rowCount = 0;
 						}
 					}
 
@@ -1128,15 +1128,34 @@ PT.core.getUtils = function(pt) {
 								colSum += valueItems[j][i];
 							}
 
-							totalColItems.push(colSum);
+							totalColItems.push({value: colSum, htmlValue: colSum, cls: 'pivot-value-total'});
+						}
+
+						if (xColAxis && doSubTotals(xColAxis)) {
+							var tmp = [];
+
+							for (var i = 0, item, subTotal = 0, colCount = 0; i < totalColItems.length; i++) {
+								item = totalColItems[i];
+								tmp.push(item);
+								subTotal += item.value;
+								colCount++;
+
+								if (colCount === colUniqueSize) {
+									tmp.push({value: subTotal, htmlValue: subTotal, cls: 'pivot-value-total-subgrandtotal'});
+									subTotal = 0;
+									colCount = 0;
+								}
+							}
+
+							totalColItems = tmp;
 						}
 
 						// Total col html items
-						for (var i = 0, colSum; i < totalColItems.length; i++) {
-							colSum = totalColItems[i];
-							colSum = pt.util.number.roundIf(colSum, 1);
+						for (var i = 0, item; i < totalColItems.length; i++) {
+							item = totalColItems[i];
+							item.htmlValue = pt.util.number.roundIf(item.htmlValue, 1);
 
-							a.push('<td class="pivot-value-total">' + colSum.toString() + '</td>');
+							a.push('<td class="' + item.cls + '">' + item.htmlValue + '</td>');
 						}
 					}
 
@@ -1145,10 +1164,15 @@ PT.core.getUtils = function(pt) {
 
 				getGrandTotalHtmlArray = function() {
 					var grandTotalSum,
+						values = [],
 						a = [];
 
+					for (var i = 0; i < totalColItems.length; i++) {
+						values.push(totalColItems[i].value);
+					}
+
 					if (xColAxis && xRowAxis) {
-						grandTotalSum = Ext.Array.sum(totalColItems) || 0;
+						grandTotalSum = Ext.Array.sum(values) || 0;
 						grandTotalSum = pt.util.number.roundIf(grandTotalSum, 1);
 
 						a.push('<td class="pivot-value-grandtotal">' + grandTotalSum.toString() + '</td>');
