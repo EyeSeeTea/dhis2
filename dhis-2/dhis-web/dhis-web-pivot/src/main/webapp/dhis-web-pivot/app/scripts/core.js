@@ -726,7 +726,17 @@ PT.core.getUtils = function(pt) {
 
 
 				for (var i = 0; i < aUniqueIds.length; i++) {
-					aSpan.push(aNumCols[i] === 1 ? nCols : nCols / aAccNumCols[i]); //if one, span all
+					if (aNumCols[i] === 1) {
+						if (i === 0) {
+							aSpan.push(nCols); //if just one and top level, span all
+						}
+						else {
+							aSpan.push(aSpan[0]); //if just one and not top level, span same as top level
+						}
+					}
+					else {
+						aSpan.push(nCols / aAccNumCols[i]);
+					}
 				}
 	//aSpan			= [4, 12, 1]
 
@@ -736,7 +746,7 @@ PT.core.getUtils = function(pt) {
 				if (aUniqueIds.length > 1) {
 					for (var i = 1, a, n; i < aUniqueIds.length; i++) {
 						a = [];
-						n = aNumCols[i] === 1 ? 1 : aAccNumCols[i-1];
+						n = aNumCols[i] === 1 ? aNumCols[0] : aAccNumCols[i-1];
 
 						for (var j = 0; j < n; j++) {
 							a = a.concat(aUniqueIds[i]);
