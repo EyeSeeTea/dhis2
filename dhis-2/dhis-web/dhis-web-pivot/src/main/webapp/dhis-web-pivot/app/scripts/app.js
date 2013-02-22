@@ -509,7 +509,7 @@ Ext.onReady( function() {
 		};
 
 		window = Ext.create('Ext.window.Window', {
-			title: 'Pivot settings', //i18n
+			title: 'Table layout', //i18n
 			layout: 'fit',
 			bodyStyle: 'background-color:#fff; padding:5px 5px 0px',
 			closeAction: 'hide',
@@ -2104,7 +2104,13 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							text: 'Settings',
+							text: '<b>Update</b>',
+							handler: function() {
+								update();
+							}
+						},
+						{
+							text: 'Layout',
 							handler: function() {
 								if (!pt.viewport.settingsWindow) {
 									pt.viewport.settingsWindow = PT.app.SettingsWindow(pt);
@@ -2114,11 +2120,21 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							text: '<b>Update</b>',
+							text: 'Options',
 							handler: function() {
-								update();
 							}
 						},
+						{
+							xtype: 'tbseparator',
+							height: 18,
+							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
+						},
+						{
+							text: 'Favorites',
+							handler: function() {
+							}
+						},
+
                         '->',
                         {
                             xtype: 'button',
