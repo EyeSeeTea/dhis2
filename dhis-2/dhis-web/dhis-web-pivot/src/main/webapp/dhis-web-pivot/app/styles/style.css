@@ -381,7 +381,6 @@ td .bad div {
 	margin-top: 5px;
 }
 
-
 /*----------------------------------------------------------------------------
  * Menu
  *--------------------------------------------------------------------------*/
@@ -796,7 +795,7 @@ td .bad div {
 
 	/* accordion item body */
 .pt-accordion .x-accordion-body {
-	padding: 8px 6px 0px 6px;
+	padding: 5px 4px 0px;
 	border-top: 1px solid #c5c5c5 !important;
 }
 

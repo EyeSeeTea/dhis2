@@ -30,6 +30,14 @@ Ext.onReady( function() {
 
 		init.afterRender = function() {
 			pt.cmp.dimension.panels[0].expand();
+
+			pt.viewport.westRegion.on('resize', function() {
+				var panel = pt.util.dimension.panel.getExpanded();
+
+				if (panel) {
+					panel.onExpand();
+				}
+			});
 		};
 
 		return init;
@@ -43,6 +51,18 @@ Ext.onReady( function() {
 				setHeight: function(mx) {
 					var h = pt.viewport.westRegion.getHeight() - pt.conf.layout.west_fill;
 					pt.cmp.dimension.panel.setHeight(h > mx ? mx : h);
+				},
+
+				getExpanded: function() {
+					for (var i = 0, panel; i < pt.cmp.dimension.panels.length; i++) {
+						panel = pt.cmp.dimension.panels[i];
+
+						if (!panel.collapsed) {
+							return panel;
+						}
+					}
+
+					return null;
 				}
 			}
 		};
@@ -541,7 +561,7 @@ Ext.onReady( function() {
 				{
 					text: '<b>Update</b>',
 					handler: function() {
-						pt.viewport.update();
+						pt.viewport.updateViewport();
 						window.hide();
 					}
 				}
@@ -682,6 +702,14 @@ Ext.onReady( function() {
 
 					return data.items.length ? data : null;
 				},
+				onExpand: function() {
+					pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_indicator);
+					pt.util.multiselect.setHeight(
+						[indicatorAvailable, indicatorSelected],
+						this,
+						pt.conf.layout.west_fill_accordion_indicator
+					);
+				},
 				items: {
 					xtype: 'panel',
 					bodyStyle: 'border:0 none; padding:0',
@@ -689,7 +717,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'combobox',
 							cls: 'pt-combo',
-							style: 'margin-bottom:6px',
+							style: 'margin-bottom:4px',
 							width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
 							valueField: 'id',
 							displayField: 'name',
@@ -764,13 +792,8 @@ Ext.onReady( function() {
 					added: function() {
 						pt.cmp.dimension.panels.push(this);
 					},
-					expand: function() {
-						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_indicator);
-						pt.util.multiselect.setHeight(
-							[indicatorAvailable, indicatorSelected],
-							this,
-							pt.conf.layout.west_fill_accordion_indicator
-						);
+					expand: function(p) {
+						p.onExpand();
 					}
 				}
 			};
@@ -870,11 +893,19 @@ Ext.onReady( function() {
 
 					return data.items.length ? data : null;
 				},
+				onExpand: function() {
+					pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_dataelement);
+					pt.util.multiselect.setHeight(
+						[dataElementAvailable, dataElementSelected],
+						this,
+						pt.conf.layout.west_fill_accordion_indicator
+					);
+				},
 				items: [
 					{
 						xtype: 'combobox',
 						cls: 'pt-combo',
-						style: 'margin-bottom:6px',
+						style: 'margin-bottom:4px',
 						width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
 						valueField: 'id',
 						displayField: 'name',
@@ -948,13 +979,8 @@ Ext.onReady( function() {
 					added: function() {
 						pt.cmp.dimension.panels.push(this);
 					},
-					expand: function() {
-						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_dataelement);
-						pt.util.multiselect.setHeight(
-							[dataElementAvailable, dataElementSelected],
-							this,
-							pt.conf.layout.west_fill_accordion_indicator
-						);
+					expand: function(p) {
+						p.onExpand();
 					}
 				}
 			};
@@ -1054,6 +1080,14 @@ Ext.onReady( function() {
 
 					return data.items.length ? data : null;
 				},
+				onExpand: function() {
+					pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_dataset);
+					pt.util.multiselect.setHeight(
+						[dataSetAvailable, dataSetSelected],
+						this,
+						pt.conf.layout.west_fill_accordion_dataset
+					);
+				},
 				items: [
 					{
 						xtype: 'panel',
@@ -1069,13 +1103,8 @@ Ext.onReady( function() {
 					added: function() {
 						pt.cmp.dimension.panels.push(this);
 					},
-					expand: function() {
-						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_dataset);
-						pt.util.multiselect.setHeight(
-							[dataSetAvailable, dataSetSelected],
-							this,
-							pt.conf.layout.west_fill_accordion_dataset
-						);
+					expand: function(p) {
+						p.onExpand();
 					}
 				}
 			};
@@ -1384,6 +1413,14 @@ Ext.onReady( function() {
 
 					return data.items.length ? data : null;
 				},
+				onExpand: function() {
+					pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_period);
+					pt.util.multiselect.setHeight(
+						[fixedPeriodAvailable, fixedPeriodSelected],
+						this,
+						pt.conf.layout.west_fill_accordion_period
+					);
+				},
 				items: [
 					{
 						xtype: 'panel',
@@ -1393,7 +1430,7 @@ Ext.onReady( function() {
 							{
 								xtype: 'combobox',
 								cls: 'pt-combo',
-								style: 'margin-bottom:6px',
+								style: 'margin-bottom:4px',
 								width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 62 - 62 - 7,
 								valueField: 'id',
 								displayField: 'name',
@@ -1423,7 +1460,7 @@ Ext.onReady( function() {
 							{
 								xtype: 'button',
 								text: 'Prev year', //i18n
-								style: 'margin-left:4px',
+								style: 'margin-left:4px; border-radius:2px',
 								height: 24,
 								handler: function() {
 									var cb = this.up('panel').down('combobox');
@@ -1436,7 +1473,7 @@ Ext.onReady( function() {
 							{
 								xtype: 'button',
 								text: 'Next year', //i18n
-								style: 'margin-left:3px',
+								style: 'margin-left:3px; border-radius:2px',
 								height: 24,
 								handler: function() {
 									var cb = this.up('panel').down('combobox');
@@ -1463,18 +1500,14 @@ Ext.onReady( function() {
 					added: function() {
 						pt.cmp.dimension.panels.push(this);
 					},
-					expand: function() {
-						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_period);
-						pt.util.multiselect.setHeight(
-							[fixedPeriodAvailable, fixedPeriodSelected],
-							this,
-							pt.conf.layout.west_fill_accordion_period
-						);
+					expand: function(p) {
+						p.onExpand();
 					}
 				}
 			};
 
 			organisationUnit = {
+				//id: 'organisationunit_t',
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-organisationunit">Organisation units</div>', //i18n pt.i18n.organisation_units
 				bodyStyle: 'padding-top:6px',
@@ -1493,10 +1526,14 @@ Ext.onReady( function() {
 
 					return data.items.length ? data : null;
 				},
+				onExpand: function() {
+					pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_organisationunit);
+					pt.cmp.dimension.organisationUnit.treepanel.setHeight(this.getHeight() - pt.conf.layout.west_fill_accordion_organisationunit);
+				},
 				items: [
 					{
 						layout: 'column',
-						bodyStyle: 'border:0 none; padding-bottom:3px; padding-left:3px',
+						bodyStyle: 'border:0 none; padding-bottom:3px; padding-left:7px',
 						items: [
 							{
 								xtype: 'checkbox',
@@ -1533,7 +1570,7 @@ Ext.onReady( function() {
 					{
 						id: 'organisationunit_t',
 						xtype: 'toolbar',
-						style: 'margin-bottom: 5px',
+						style: 'margin-bottom: 4px',
 						width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
 						xable: function(checked, value) {
 							if (checked || value) {
@@ -1544,13 +1581,13 @@ Ext.onReady( function() {
 							}
 						},
 						defaults: {
-							height: 24
+							height: 22
 						},
 						items: [
 							{
 								xtype: 'label',
 								text: 'Auto-select organisation units by', //i18n
-								style: 'padding-left:8px; color:#666; line-height:24px'
+								style: 'padding-left:8px; color:#666; line-height:23px'
 							},
 							'->',
 							{
@@ -1768,19 +1805,9 @@ Ext.onReady( function() {
 						pt.cmp.dimension.panels.push(this);
 					},
 					expand: function(p) {
-						pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_organisationunit);
-						pt.cmp.dimension.organisationUnit.treepanel.setHeight(p.getHeight() - pt.conf.layout.west_fill_accordion_organisationunit);
-						//pt.cmp.dimension.organisationUnit.treepanel.selectRootIf();
+						p.onExpand();
 					}
 				}
-			};
-
-			options = {
-				xtype: 'panel',
-				title: '<div class="pt-panel-title-options">Options</div>', //i18n pt.i18n.chart_options
-				hideCollapseTool: true,
-				cls: 'pt-accordion-options',
-				items: []
 			};
 
 			getOrganisationUnitGroupSetPanels = function() {
@@ -1944,6 +1971,19 @@ Ext.onReady( function() {
 
 							return data.items.length ? data : null;
 						},
+						onExpand: function() {
+							if (!availableStore.isLoaded) {
+								availableStore.load();
+							}
+
+							pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_dataset);
+
+							pt.util.multiselect.setHeight(
+								[available, selected],
+								this,
+								pt.conf.layout.west_fill_accordion_dataset
+							);
+						},
 						items: [
 							{
 								xtype: 'panel',
@@ -1959,18 +1999,8 @@ Ext.onReady( function() {
 							added: function() {
 								pt.cmp.dimension.panels.push(this);
 							},
-							expand: function() {
-								if (!availableStore.isLoaded) {
-									availableStore.load();
-								}
-
-								pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_dataset);
-
-								pt.util.multiselect.setHeight(
-									[available, selected],
-									this,
-									pt.conf.layout.west_fill_accordion_dataset
-								);
+							expand: function(p) {
+								p.onExpand();
 							}
 						}
 					});
@@ -2055,22 +2085,19 @@ Ext.onReady( function() {
 							];
 
 							panels = panels.concat(getOrganisationUnitGroupSetPanels());
-							panels.push(options);
 
 							return panels;
 						}(),
 						listeners: {
 							added: function() {
 								pt.cmp.dimension.panel = this;
-								pacc = this;
 							}
 						}
 					}
 				],
 				listeners: {
 					added: function() {
-						//pt.cmp.dimension.panel = this;
-						acc = this;
+						pt.cmp.dimension.panel = this;
 					}
 				}
 			};
@@ -2206,20 +2233,22 @@ Ext.onReady( function() {
 
 			viewport = Ext.create('Ext.container.Viewport', {
 				layout: 'border',
+				westRegion: westRegion,
+				centerRegion: centerRegion,
+				updateViewport: update,
 				items: [
 					westRegion,
 					centerRegion
 				],
 				listeners: {
+					render: function(vp) {
+						pt.viewport = vp;
+					},
 					afterrender: function() {
 						pt.init.afterRender();
 					}
 				}
 			});
-
-			viewport.westRegion = westRegion;
-			viewport.centerRegion = centerRegion;
-			viewport.update = update;
 
 			addListeners = function() {
 				pt.store.indicatorAvailable.on('load', function() {
