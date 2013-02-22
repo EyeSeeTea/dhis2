@@ -837,8 +837,22 @@ PT.core.getUtils = function(pt) {
 					getTotalHtmlArray,
 					getHtml,
 
-					colUniqueSize = xColAxis ? xColAxis.xItems.unique[xColAxis.xItems.unique.length - 1].length : null,
-					rowUniqueSize = xRowAxis ? xRowAxis.xItems.unique[xRowAxis.xItems.unique.length - 1].length : null,
+					getUniqueFactor = function(xAxis) {
+						if (!xAxis) {
+							return null;
+						}
+
+						var unique = xAxis.xItems.unique;
+
+						if (unique) {
+							return unique.length < 2 ? 1 : unique[unique.length - 1].length;
+						}
+
+						return null;
+					},
+
+					colUniqueFactor = getUniqueFactor(xColAxis),
+					rowUniqueFactor = getUniqueFactor(xRowAxis),
 
 					valueItems = [],
 					totalColItems = [],
@@ -889,7 +903,7 @@ PT.core.getUtils = function(pt) {
 							dimHtml.push('<td class="pivot-dim" colspan="' + colSpan + '">' + xResponse.metaData[id] + '</td>');
 
 							//todo subtotal
-							if (true && (xColAxis.dims > 1) && i === 0) {
+							if (doSubTotals(xColAxis) && i === 0) {
 								dimHtml.push('<td class="pivot-dim-subtotal" rowspan="' + xColAxis.dims + '"></td>');
 							}
 
@@ -936,7 +950,7 @@ PT.core.getUtils = function(pt) {
 						a.push(row);
 
 						//todo subtotal
-						if (doSubTotals(xRowAxis) && rowCount === uniqueSize) {
+						if (doSubTotals(xRowAxis) && rowCount === rowUniqueFactor) {
 							row = [];
 							row.push('<td class="pivot-dim-subtotal" colspan="' + xRowAxis.dims + '"></td>');
 							a.push(row);
@@ -992,7 +1006,7 @@ PT.core.getUtils = function(pt) {
 
 								row.push(item);
 
-								if (colCount === colUniqueSize) {
+								if (colCount === colUniqueFactor) {
 									row.push({value: rowSubTotal, htmlValue: rowSubTotal, cls: 'pivot-value-subtotal'});
 									colCount = 0;
 									rowSubTotal = 0;
@@ -1025,7 +1039,7 @@ PT.core.getUtils = function(pt) {
 								subTotal += item.value;
 								rowCount++;
 
-								if (rowCount === rowUniqueSize) {
+								if (rowCount === rowUniqueFactor) {
 									var cls = xColAxis && doSubTotals(xColAxis) && (item.cls === 'pivot-value-subtotal') ? 'pivot-value-subtotal-total' : 'pivot-value-subtotal';
 									subTotals[subTotalsIndex].push({value: subTotal, htmlValue: subTotal, cls: cls});
 									rowCount = 0;
@@ -1040,7 +1054,7 @@ PT.core.getUtils = function(pt) {
 							tmp.push(htmlValueItems[i]);
 							count++;
 
-							if (count === rowUniqueSize) {
+							if (count === rowUniqueFactor) {
 								count = 0;
 
 								var sta = subTotals.shift();
@@ -1092,7 +1106,7 @@ PT.core.getUtils = function(pt) {
 								rowCount++;
 								subTotal += totalRowItems[i].value;
 
-								if (rowCount === rowUniqueSize) {
+								if (rowCount === rowUniqueFactor) {
 									tmp.push({value: subTotal, htmlValue: subTotal, cls: 'pivot-value-total-subgrandtotal'});
 									rowCount = 0;
 									subTotal = 0;
@@ -1140,7 +1154,7 @@ PT.core.getUtils = function(pt) {
 								subTotal += item.value;
 								colCount++;
 
-								if (colCount === colUniqueSize) {
+								if (colCount === colUniqueFactor) {
 									tmp.push({value: subTotal, htmlValue: subTotal, cls: 'pivot-value-total-subgrandtotal'});
 									subTotal = 0;
 									colCount = 0;
