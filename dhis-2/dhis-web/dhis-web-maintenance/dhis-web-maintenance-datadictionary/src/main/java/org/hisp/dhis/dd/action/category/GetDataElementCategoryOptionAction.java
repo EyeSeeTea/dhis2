@@ -1,7 +1,5 @@
-package org.hisp.dhis.dd.action.category;
-
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,21 +25,29 @@ package org.hisp.dhis.dd.action.category;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.dd.action.category;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.paging.ActionPagingSupport;
 
 /**
  * @author Chau Thu Tran
- * @version $Id$
+ * 
+ * @version GetDataElementCategoryOptionList.java 8:47:42 AM Feb 22, 2013 $
  */
-public class UpdateDataElementCategoryOptionAction
-    implements Action
+public class GetDataElementCategoryOptionAction
+    extends ActionPagingSupport<DataElementCategoryOption>
 {
     // -------------------------------------------------------------------------
-    // Dependency
+    // Dependencies
     // -------------------------------------------------------------------------
 
     private DataElementCategoryService dataElementCategoryService;
@@ -59,7 +65,7 @@ public class UpdateDataElementCategoryOptionAction
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Getters & Setters
     // -------------------------------------------------------------------------
 
     private Integer id;
@@ -69,25 +75,18 @@ public class UpdateDataElementCategoryOptionAction
         this.id = id;
     }
 
-    private String name;
+    private DataElementCategoryOption dataElementCategoryOption;
 
-    public void setName( String name )
+    public DataElementCategoryOption getDataElementCategoryOption()
     {
-        this.name = name;
+        return dataElementCategoryOption;
     }
 
-    private String code;
+    private List<Concept> concepts;
 
-    public void setCode( String code )
+    public List<Concept> getConcepts()
     {
-        this.code = code;
-    }
-
-    private Integer conceptId;
-
-    public void setConceptId( Integer conceptId )
-    {
-        this.conceptId = conceptId;
+        return concepts;
     }
 
     // -------------------------------------------------------------------------
@@ -96,13 +95,13 @@ public class UpdateDataElementCategoryOptionAction
 
     public String execute()
     {
-        DataElementCategoryOption categoryOption = dataElementCategoryService.getDataElementCategoryOption( id );
-        categoryOption.setName( name );
-        categoryOption.setCode( code );
-        categoryOption.setConcept( conceptService.getConcept( conceptId ) );
+        dataElementCategoryOption = dataElementCategoryService.getDataElementCategoryOption( id );
 
-        dataElementCategoryService.updateDataElementCategoryOption( categoryOption );
+        concepts = new ArrayList<Concept>( conceptService.getAllConcepts() );
 
+        Collections.sort( concepts, IdentifiableObjectNameComparator.INSTANCE );
+        
         return SUCCESS;
     }
+
 }
