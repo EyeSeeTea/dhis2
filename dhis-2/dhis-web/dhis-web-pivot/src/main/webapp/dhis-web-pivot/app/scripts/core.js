@@ -706,10 +706,10 @@ PT.core.getUtils = function(pt) {
 
 					return a;
 				}();
-
 //aUniqueIds	= [ [de1, de2, de3],
 //					[p1],
 //					[ou1, ou2, ou3, ou4] ]
+
 
 				for (var i = 0, dim; i < aUniqueIds.length; i++) {
 					nNumCols = aUniqueIds[i].length;
@@ -718,16 +718,18 @@ PT.core.getUtils = function(pt) {
 					nCols = nCols * nNumCols;
 					aAccNumCols.push(nCols);
 				}
-
 	//aNumCols		= [3, 1, 4]
-	//nCols			= 12 (3 * 1 * 4)
+	//nCols			= (12) [3, 3, 12] (3 * 1 * 4)
 	//aAccNumCols	= [3, 3, 12]
+
+	//nCols			= 12
+
 
 				for (var i = 0; i < aUniqueIds.length; i++) {
 					aSpan.push(aNumCols[i] === 1 ? nCols : nCols / aAccNumCols[i]); //if one, span all
 				}
+	//aSpan			= [4, 12, 1]
 
-	//aSpan			= [10, 2, 1]
 
 				aGuiItems.push(aUniqueIds[0]);
 
@@ -748,6 +750,7 @@ PT.core.getUtils = function(pt) {
 	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
 	//		  	  ]
 
+
 				for (var i = 0, aAllRow, aUniqueRow, span, factor; i < aUniqueIds.length; i++) {
 					aAllRow = [];
 					aUniqueRow = aUniqueIds[i];
@@ -764,11 +767,11 @@ PT.core.getUtils = function(pt) {
 
 					aAllItems.push(aAllRow);
 				}
-
 	//aAllItems	= [ [d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3], (30)
 	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (30)
 	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2] (30)
 	//		  	  ]
+
 
 				for (var i = 0, id; i < nCols; i++) {
 					id = '';
@@ -779,8 +782,8 @@ PT.core.getUtils = function(pt) {
 
 					aColIds.push(id);
 				}
-
 	//aColIds	= [ aaaaaaaaBBBBBBBBccccccc, aaaaaaaaaccccccccccbbbbbbbbbb, ... ]
+
 
 				return {
 					items: axis,
@@ -854,7 +857,6 @@ PT.core.getUtils = function(pt) {
 							}
 							else {
 								return xAxis.size / unique[0].length;
-							//return unique.length < 2 ? 1 : unique[unique.length - 1].length;
 							}
 						}
 
