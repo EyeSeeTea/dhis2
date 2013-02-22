@@ -849,7 +849,13 @@ PT.core.getUtils = function(pt) {
 						var unique = xAxis.xItems.unique;
 
 						if (unique) {
-							return unique.length < 2 ? 1 : unique[unique.length - 1].length;
+							if (unique.length < 2) {
+								return 1;
+							}
+							else {
+								return xAxis.size / unique[0].length;
+							//return unique.length < 2 ? 1 : unique[unique.length - 1].length;
+							}
 						}
 
 						return null;
@@ -947,7 +953,7 @@ PT.core.getUtils = function(pt) {
 							object = allObjects[j][i];
 
 							if (object.rowSpan) {
-								row.push('<td class="pivot-dim" rowspan="' + object.rowSpan + '">' + xResponse.metaData[object.id] + '</td>');
+								row.push('<td class="pivot-dim nobreak" rowspan="' + object.rowSpan + '">' + xResponse.metaData[object.id] + '</td>');
 							}
 						}
 
