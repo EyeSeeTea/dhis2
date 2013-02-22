@@ -703,8 +703,6 @@ PT.core.getUtils = function(pt) {
 					return a;
 				}();
 
-console.log("aUniqueIds", aUniqueIds);
-
 //aUniqueIds	= [ [de1, de2, de3],
 //					[p1],
 //					[ou1, ou2, ou3, ou4] ]
@@ -717,11 +715,6 @@ console.log("aUniqueIds", aUniqueIds);
 					aAccNumCols.push(nCols);
 				}
 
-console.log("");
-console.log("aNumCols", aNumCols);
-console.log("nCols", nCols);
-console.log("aAccNumCols", aAccNumCols);
-
 	//aNumCols		= [3, 1, 4]
 	//nCols			= 12 (3 * 1 * 4)
 	//aAccNumCols	= [3, 3, 12]
@@ -729,8 +722,6 @@ console.log("aAccNumCols", aAccNumCols);
 				for (var i = 0; i < aUniqueIds.length; i++) {
 					aSpan.push(aNumCols[i] === 1 ? nCols : nCols / aAccNumCols[i]); //if one, span all
 				}
-
-console.log("aSpan", aSpan);
 
 	//aSpan			= [10, 2, 1]
 
@@ -748,8 +739,6 @@ console.log("aSpan", aSpan);
 						aGuiItems.push(a);
 					}
 				}
-
-console.log("aGuiItems", aGuiItems);
 	//aGuiItems	= [ [d1, d2, d3], (3)
 	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (15)
 	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
@@ -772,7 +761,6 @@ console.log("aGuiItems", aGuiItems);
 					aAllItems.push(aAllRow);
 				}
 
-console.log("aAllItems", aAllItems);
 	//aAllItems	= [ [d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3], (30)
 	//				[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (30)
 	//				[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2] (30)
@@ -788,11 +776,8 @@ console.log("aAllItems", aAllItems);
 					aColIds.push(id);
 				}
 
-console.log("aColIds", aColIds);
 	//aColIds	= [ aaaaaaaaBBBBBBBBccccccc, aaaaaaaaaccccccccccbbbbbbbbbb, ... ]
 
-
-			console.log("");
 				return {
 					items: axis,
 					xItems: {
@@ -852,13 +837,35 @@ console.log("aColIds", aColIds);
 					getTotalHtmlArray,
 					getHtml,
 
+					colUniqueSize = xColAxis ? xColAxis.xItems.unique[xColAxis.xItems.unique.length - 1].length : null,
+					rowUniqueSize = xRowAxis ? xRowAxis.xItems.unique[xRowAxis.xItems.unique.length - 1].length : null,
+
 					valueItems = [],
 					totalColItems = [],
 					htmlArray;
 
+				doSubTotals = function(xAxis) {
+					var multiItemDimension = 0,
+						unique;
+
+					if (!(true && xAxis && xAxis.dims > 1)) {
+						return false;
+					}
+
+					unique = xAxis.xItems.unique;
+
+					for (var i = 0; i < unique.length; i++) {
+						if (unique[i].length > 1) {
+							multiItemDimension++;
+						}
+					}
+
+					return (multiItemDimension > 1);
+				};
+
 				getEmptyHtmlArray = function() {
 					return (xColAxis && xRowAxis) ?
-						'<td class="pivot-empty " colspan="' + xRowAxis.dims + '" rowspan="' + xColAxis.dims + '">&nbsp;</td>' : '';
+						'<td class="pivot-dim-empty " colspan="' + xRowAxis.dims + '" rowspan="' + xColAxis.dims + '">&nbsp;</td>' : '';
 				};
 
 				getColAxisHtmlArray = function() {
@@ -883,11 +890,11 @@ console.log("aColIds", aColIds);
 
 							//todo subtotal
 							if (true && (xColAxis.dims > 1) && i === 0) {
-								dimHtml.push('<td class="pivot-dimsubtotal" rowspan="' + xColAxis.dims + '">Sub total</td>');
+								dimHtml.push('<td class="pivot-dim-subtotal" rowspan="' + xColAxis.dims + '"></td>');
 							}
 
 							if (i === 0 && j === (dimItems.length - 1)) {
-								dimHtml.push('<td class="pivot-dimtotal" rowspan="' + xColAxis.dims + '">Total</td>');
+								dimHtml.push('<td class="pivot-dim-total" rowspan="' + xColAxis.dims + '">Total</td>');
 							}
 						}
 
@@ -932,7 +939,7 @@ console.log("aColIds", aColIds);
 						if (true && (xRowAxis.dims > 1) && count === uniqueSize) {
 							count = 0;
 							row = [];
-							row.push('<td class="pivot-dimsubtotal" colspan="' + xRowAxis.dims + '">Sub total</td>');
+							row.push('<td class="pivot-dim-subtotal" colspan="' + xRowAxis.dims + '"></td>');
 							a.push(row);
 						}
 					}
@@ -946,31 +953,10 @@ console.log("aColIds", aColIds);
 						htmlValueColItems = [],
 						colSize = xColAxis ? xColAxis.size : 1,
 						rowSize = xRowAxis ? xRowAxis.size : 1,
-						colUniqueSize = xColAxis ? xColAxis.xItems.unique[xColAxis.xItems.unique.length - 1].length : null,
-						rowUniqueSize = xRowAxis ? xRowAxis.xItems.unique[xRowAxis.xItems.unique.length - 1].length : null,
 						rowRootSize = xRowAxis ? xRowAxis.xItems.unique[0].length : null,
 						hasSubtotals,
 						subtotal,
 						td;
-
-					doSubtotals = function(xAxis) {
-						var multiItemDimension = 0,
-							unique;
-
-						if (!(true && xAxis && xAxis.dims > 1)) {
-							return false;
-						}
-
-						unique = xAxis.xItems.unique;
-
-						for (var i = 0; i < unique.length; i++) {
-							if (unique[i].length > 1) {
-								multiItemDimension++;
-							}
-						}
-
-						return (multiItemDimension > 1);
-					};
 
 					// Value / htmlvalue items
 					for (var i = 0, valueItemRow, htmlValueItemRow; i < rowSize; i++) {
@@ -991,7 +977,7 @@ console.log("aColIds", aColIds);
 						htmlValueItems.push(htmlValueItemRow);
 					}
 
-					if (doSubtotals(xColAxis)) {
+					if (doSubTotals(xColAxis)) {
 						var tmp = [];
 
 						for (var i = 0, row, rowSubTotal, colCount; i < htmlValueItems.length; i++) {
@@ -1007,7 +993,7 @@ console.log("aColIds", aColIds);
 								row.push(item);
 
 								if (colCount === colUniqueSize) {
-									row.push({value: rowSubTotal, htmlValue: rowSubTotal, cls: 'pivot-valuesubtotal'});
+									row.push({value: rowSubTotal, htmlValue: rowSubTotal, cls: 'pivot-value-subtotal'});
 									colCount = 0;
 									rowSubTotal = 0;
 								}
@@ -1019,7 +1005,7 @@ console.log("aColIds", aColIds);
 						htmlValueItems = tmp;
 					}
 
-					if (doSubtotals(xRowAxis)) {
+					if (doSubTotals(xRowAxis)) {
 						var tmp = [],
 							subTotals = [],
 							count;
@@ -1034,14 +1020,15 @@ console.log("aColIds", aColIds);
 							subTotal = 0;
 							subTotalsIndex = 0;
 
-							for (var j = 0, count = 0; j < xRowAxis.size; j++) {
-								subTotal += htmlValueItems[j][i].value;
-								count++;
+							for (var j = 0, rowCount = 0, item; j < xRowAxis.size; j++) {
+								item = htmlValueItems[j][i];
+								subTotal += item.value;
+								rowCount++;
 
-								if (count === rowUniqueSize) {
-									console.log(i, j, "subTotal", subTotal);
-									subTotals[subTotalsIndex].push({value: subTotal, htmlValue: subTotal, cls: 'pivot-valuesubtotal'});
-									count = 0;
+								if (rowCount === rowUniqueSize) {
+									var cls = xColAxis && doSubTotals(xColAxis) && (item.cls === 'pivot-value-subtotal') ? 'pivot-value-subtotal-total' : 'pivot-value-subtotal';
+									subTotals[subTotalsIndex].push({value: subTotal, htmlValue: subTotal, cls: cls});
+									rowCount = 0;
 									subTotal = 0;
 									subTotalsIndex++;
 								}
@@ -1094,15 +1081,33 @@ console.log("aColIds", aColIds);
 						// Total row items
 						for (var i = 0, rowSum; i < valueItems.length; i++) {
 							rowSum = Ext.Array.sum(valueItems[i]);
-							totalRowItems.push(rowSum);
+							totalRowItems.push({value: rowSum, htmlValue: rowSum, cls: 'pivot-value-total'});
+						}
+
+						if (xRowAxis && doSubTotals(xRowAxis)) {
+							var tmp = [];
+
+							for (var i = 0, rowCount = 0, subTotal = 0; i < totalRowItems.length; i++) {
+								tmp.push(totalRowItems[i]);
+								rowCount++;
+								subTotal += totalRowItems[i].value;
+
+								if (rowCount === rowUniqueSize) {
+									tmp.push({value: subTotal, htmlValue: subTotal, cls: 'pivot-value-total-subgrandtotal'});
+									rowCount = 0;
+									subTotal = 0;
+								}
+							}
+
+							totalRowItems = tmp;
 						}
 
 						// Total row html items
-						for (var i = 0, rowSum; i < totalRowItems.length; i++) {
-							rowSum = totalRowItems[i];
-							rowSum = pt.util.number.roundIf(rowSum, 1);
+						for (var i = 0, item; i < totalRowItems.length; i++) {
+							item = totalRowItems[i];
+							item.htmlValue = pt.util.number.roundIf(item.htmlValue, 1);
 
-							a.push(['<td id="nissa" class="pivot-valuetotal">' + rowSum.toString() + '</td>']);
+							a.push(['<td class="' + item.cls + '">' + item.htmlValue + '</td>']);
 						}
 					}
 
@@ -1131,7 +1136,7 @@ console.log("aColIds", aColIds);
 							colSum = totalColItems[i];
 							colSum = pt.util.number.roundIf(colSum, 1);
 
-							a.push('<td class="pivot-valuetotal">' + colSum.toString() + '</td>');
+							a.push('<td class="pivot-value-total">' + colSum.toString() + '</td>');
 						}
 					}
 
@@ -1146,7 +1151,7 @@ console.log("aColIds", aColIds);
 						grandTotalSum = Ext.Array.sum(totalColItems) || 0;
 						grandTotalSum = pt.util.number.roundIf(grandTotalSum, 1);
 
-						a.push('<td class="pivot-valuegrandtotal">' + grandTotalSum.toString() + '</td>');
+						a.push('<td class="pivot-value-grandtotal">' + grandTotalSum.toString() + '</td>');
 					}
 
 					return a;
@@ -1176,7 +1181,7 @@ console.log("aColIds", aColIds);
 						a = [];
 
 					if (xRowAxis) {
-						dimTotalArray = ['<td class="pivot-dimtotal" colspan="' + xRowAxis.dims + '">Total</td>'];
+						dimTotalArray = ['<td class="pivot-dim-total" colspan="' + xRowAxis.dims + '">Total</td>'];
 					}
 
 					row = [].concat(dimTotalArray || [], Ext.clone(colTotal) || [], Ext.clone(grandTotal) || []);
@@ -1243,9 +1248,6 @@ console.log("aColIds", aColIds);
 							console.log(response);
 							return;
 						}
-//todo
-response.metaData['PT59n8BQbqM'] = '(Outreach)';
-response.metaData['pq2XI5kz2BY'] = '(Fixed)';
 
 						xSettings = getSyncronizedXSettings(xSettings, response);
 

@@ -107,30 +107,35 @@ table.pivot {
 	text-align: center;
 }
 
-.pivot-empty {
-	background-color: #deeafc;
-}
-
 .pivot-dim {
 	background-color: #dae6f8;
 }
-.pivot-dimsubtotal {
+.pivot-dim-subtotal {
 	background-color: #c4d8f3;
 }
-.pivot-dimtotal {
+.pivot-dim-total {
 	background-color: #b0c4de;
+}
+.pivot-dim-empty {
+	background-color: #dae6f8;
 }
 
 .pivot-value {
 	background-color: #fff;
 }
-.pivot-valuesubtotal {
+.pivot-value-subtotal {
 	background-color: #f5f5f5;
 }
-.pivot-valuetotal {
-	background-color: #e6e6e6;
+.pivot-value-subtotal-total {
+	background-color: #e9e9e9;
 }
-.pivot-valuegrandtotal {
+.pivot-value-total {
+	background-color: #e5e5e5;
+}
+.pivot-value-total-subgrandtotal {
+	background-color: #dadada;
+}
+.pivot-value-grandtotal {
 	background-color: #ccc;
 }
 
