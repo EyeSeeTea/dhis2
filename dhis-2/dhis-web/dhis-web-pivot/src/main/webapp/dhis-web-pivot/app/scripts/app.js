@@ -607,7 +607,7 @@ Ext.onReady( function() {
 		});
 
 		cellPadding = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: 'Cell padding',
+			fieldLabel: 'Display density',
 			labelStyle: 'color:#333',
 			cls: 'pt-combo',
 			width: 230,
@@ -618,9 +618,9 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 'compact', text: 'Compact'},
+					{id: 'comfortable', text: 'Comfortable'},
 					{id: 'normal', text: 'Normal'},
-					{id: 'comfortable', text: 'Comfortable'}
+					{id: 'compact', text: 'Compact'}
 				]
 			})
 		});
@@ -638,9 +638,9 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 'small', text: 'Small'},
+					{id: 'large', text: 'Large'},
 					{id: 'normal', text: 'Normal'},
-					{id: 'large', text: 'Large'}
+					{id: 'small', text: 'Small'}
 				]
 			})
 		});
@@ -678,7 +678,7 @@ Ext.onReady( function() {
 			},
 			items: [
 				{
-					bodyStyle: 'border:0 none; color:#000; font-size:13px',
+					bodyStyle: 'border:0 none; color:#444; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px',
 					html: 'Data'
 				},
@@ -687,7 +687,7 @@ Ext.onReady( function() {
 					bodyStyle: 'border:0 none; padding:7px'
 				},
 				{
-					bodyStyle: 'border:0 none; color:#000; font-size:13px',
+					bodyStyle: 'border:0 none; color:#444; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px',
 					html: 'Style'
 				},
