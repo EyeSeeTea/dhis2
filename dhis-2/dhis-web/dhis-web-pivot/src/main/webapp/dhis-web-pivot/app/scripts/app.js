@@ -226,10 +226,10 @@ Ext.onReady( function() {
 			sortStore: function() {
 				this.sort('name', 'ASC');
 			},
-			isloaded: false,
+			isLoaded: false,
 			listeners: {
 				load: function(s) {
-					this.isloaded = true;
+					this.isLoaded = true;
 					s.each( function(r) {
 						r.data.name = pt.conf.util.jsonEncodeString(r.data.name);
 					});
@@ -1229,6 +1229,10 @@ Ext.onReady( function() {
 						this,
 						pt.conf.layout.west_fill_accordion_dataset
 					);
+
+					if (!pt.store.dataSetAvailable.isLoaded) {
+						pt.store.dataSetAvailable.load();
+					}
 				},
 				items: [
 					{
