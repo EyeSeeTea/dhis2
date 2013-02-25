@@ -1653,7 +1653,7 @@ Ext.onReady( function() {
 				//id: 'organisationunit_t',
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-organisationunit">Organisation units</div>', //i18n pt.i18n.organisation_units
-				bodyStyle: 'padding-top:6px',
+				bodyStyle: 'padding-top:5px',
 				hideCollapseTool: true,
 				collapsed: false,
 				getData: function() {
@@ -1684,7 +1684,7 @@ Ext.onReady( function() {
 								boxLabel: 'User organisation unit', //i18n pt.i18n.user_orgunit,
 								labelWidth: pt.conf.layout.form_label_width,
 								handler: function(chb, checked) {
-									pt.cmp.dimension.organisationUnit.toolbar.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
+									//pt.cmp.dimension.organisationUnit.toolbar.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
 									pt.cmp.dimension.organisationUnit.treepanel.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
 								},
 								listeners: {
@@ -1699,7 +1699,7 @@ Ext.onReady( function() {
 								boxLabel: 'User organisation unit children', //i18n pt.i18n.user_orgunit_children,
 								labelWidth: pt.conf.layout.form_label_width,
 								handler: function(chb, checked) {
-									pt.cmp.dimension.organisationUnit.toolbar.xable(checked, pt.cmp.favorite.userOrganisationUnit.getValue());
+									//pt.cmp.dimension.organisationUnit.toolbar.xable(checked, pt.cmp.favorite.userOrganisationUnit.getValue());
 									pt.cmp.dimension.organisationUnit.treepanel.xable(checked, pt.cmp.favorite.userOrganisationUnit.getValue());
 								},
 								listeners: {
@@ -1710,93 +1710,93 @@ Ext.onReady( function() {
 							}
 						]
 					},
-					{
-						id: 'organisationunit_t',
-						xtype: 'toolbar',
-						style: 'margin-bottom: 4px',
-						width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
-						xable: function(checked, value) {
-							if (checked || value) {
-								this.disable();
-							}
-							else {
-								this.enable();
-							}
-						},
-						defaults: {
-							height: 22
-						},
-						items: [
-							{
-								xtype: 'label',
-								text: 'Auto-select organisation units by', //i18n
-								style: 'padding-left:8px; color:#666; line-height:23px'
-							},
-							'->',
-							{
-								text: 'Group..',
-								handler: function() {},
-								listeners: {
-									added: function() {
-										this.menu = Ext.create('Ext.menu.Menu', {
-											shadow: false,
-											showSeparator: false,
-											width: pt.conf.layout.treepanel_toolbar_menu_width_group,
-											items: [
-												{
-													xtype: 'grid',
-													cls: 'pt-menugrid',
-													width: pt.conf.layout.treepanel_toolbar_menu_width_group,
-													scroll: 'vertical',
-													columns: [
-														{
-															dataIndex: 'name',
-															width: pt.conf.layout.treepanel_toolbar_menu_width_group,
-															style: 'display:none'
-														}
-													],
-													setHeightInMenu: function(store) {
-														var h = store.getCount() * 24,
-															sh = pt.util.viewport.getSize().y * 0.6;
-														this.setHeight(h > sh ? sh : h);
-														this.doLayout();
-														this.up('menu').doLayout();
-													},
-													store: pt.store.group,
-													listeners: {
-														itemclick: function(g, r) {
-															g.getSelectionModel().select([], false);
-															this.up('menu').hide();
-															pt.cmp.dimension.organisationUnit.treepanel.selectByGroup(r.data.id);
-														}
-													}
-												}
-											],
-											listeners: {
-												show: function() {
-													var store = pt.store.group;
+					//{
+						//id: 'organisationunit_t',
+						//xtype: 'toolbar',
+						//style: 'margin-bottom: 4px',
+						//width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
+						//xable: function(checked, value) {
+							//if (checked || value) {
+								//this.disable();
+							//}
+							//else {
+								//this.enable();
+							//}
+						//},
+						//defaults: {
+							//height: 22
+						//},
+						//items: [
+							//{
+								//xtype: 'label',
+								//text: 'Auto-select organisation units by', //i18n
+								//style: 'padding-left:8px; color:#666; line-height:23px'
+							//},
+							//'->',
+							//{
+								//text: 'Group..',
+								//handler: function() {},
+								//listeners: {
+									//added: function() {
+										//this.menu = Ext.create('Ext.menu.Menu', {
+											//shadow: false,
+											//showSeparator: false,
+											//width: pt.conf.layout.treepanel_toolbar_menu_width_group,
+											//items: [
+												//{
+													//xtype: 'grid',
+													//cls: 'pt-menugrid',
+													//width: pt.conf.layout.treepanel_toolbar_menu_width_group,
+													//scroll: 'vertical',
+													//columns: [
+														//{
+															//dataIndex: 'name',
+															//width: pt.conf.layout.treepanel_toolbar_menu_width_group,
+															//style: 'display:none'
+														//}
+													//],
+													//setHeightInMenu: function(store) {
+														//var h = store.getCount() * 24,
+															//sh = pt.util.viewport.getSize().y * 0.6;
+														//this.setHeight(h > sh ? sh : h);
+														//this.doLayout();
+														//this.up('menu').doLayout();
+													//},
+													//store: pt.store.group,
+													//listeners: {
+														//itemclick: function(g, r) {
+															//g.getSelectionModel().select([], false);
+															//this.up('menu').hide();
+															//pt.cmp.dimension.organisationUnit.treepanel.selectByGroup(r.data.id);
+														//}
+													//}
+												//}
+											//],
+											//listeners: {
+												//show: function() {
+													//var store = pt.store.group;
 
-													if (!store.isLoaded) {
-														store.load({scope: this, callback: function() {
-															this.down('grid').setHeightInMenu(store);
-														}});
-													}
-													else {
-														this.down('grid').setHeightInMenu(store);
-													}
-												}
-											}
-										});
-									}
-								}
-							}
-						],
-						listeners: {
-							added: function() {
-								pt.cmp.dimension.organisationUnit.toolbar = this;
-							}
-						}
-					},
+													//if (!store.isLoaded) {
+														//store.load({scope: this, callback: function() {
+															//this.down('grid').setHeightInMenu(store);
+														//}});
+													//}
+													//else {
+														//this.down('grid').setHeightInMenu(store);
+													//}
+												//}
+											//}
+										//});
+									//}
+								//}
+							//}
+						//],
+						//listeners: {
+							//added: function() {
+								//pt.cmp.dimension.organisationUnit.toolbar = this;
+							//}
+						//}
+					//},
 					{
 						xtype: 'treepanel',
 						cls: 'pt-tree',
