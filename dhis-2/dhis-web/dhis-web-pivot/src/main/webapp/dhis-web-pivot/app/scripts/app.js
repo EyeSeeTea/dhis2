@@ -144,6 +144,8 @@ Ext.onReady( function() {
 				}
 			}();
 
+			config.options = pt.viewport.optionsWindow.getOptions();
+
 			return config;
 		};
 
@@ -592,19 +594,62 @@ Ext.onReady( function() {
 	};
 
 	PT.app.OptionsWindow = function() {
-		var window,
+		var showSubTotals,
+			cellPadding,
+			fontSize,
+
 			data,
-			style;
+			style,
+			window;
+
+		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: 'Show sub totals'
+		});
+
+		cellPadding = Ext.create('Ext.form.field.ComboBox', {
+			fieldLabel: 'Cell padding',
+			labelStyle: 'color:#333',
+			cls: 'pt-combo',
+			width: 230,
+			queryMode: 'local',
+			valueField: 'id',
+			editable: false,
+			value: 'normal',
+			store: Ext.create('Ext.data.Store', {
+				fields: ['id', 'text'],
+				data: [
+					{id: 'compact', text: 'Compact'},
+					{id: 'normal', text: 'Normal'},
+					{id: 'comfortable', text: 'Comfortable'}
+				]
+			})
+		});
+
+		fontSize = Ext.create('Ext.form.field.ComboBox', {
+			xtype: 'combobox',
+			fieldLabel: 'Font size',
+			labelStyle: 'color:#333',
+			cls: 'pt-combo',
+			width: 230,
+			queryMode: 'local',
+			valueField: 'id',
+			editable: false,
+			value: 'normal',
+			store: Ext.create('Ext.data.Store', {
+				fields: ['id', 'text'],
+				data: [
+					{id: 'small', text: 'Small'},
+					{id: 'normal', text: 'Normal'},
+					{id: 'large', text: 'Large'}
+				]
+			})
+		});
 
 		data = {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				{
-					xtype: 'checkbox',
-					boxLabel: 'Show sub totals',
-					labelStyle: 'color:red'
-				}
+				showSubTotals
 			]
 		};
 
@@ -612,44 +657,8 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				{
-					xtype: 'combobox',
-					fieldLabel: 'Cell padding',
-					labelStyle: 'color:#333',
-					cls: 'pt-combo',
-					width: 230,
-					queryMode: 'local',
-					valueField: 'id',
-					editable: false,
-					value: 2,
-					store: Ext.create('Ext.data.Store', {
-						fields: ['id', 'text'],
-						data: [
-							{id: 1, text: 'Compact'},
-							{id: 2, text: 'Normal'},
-							{id: 3, text: 'Comfortable'}
-						]
-					})
-				},
-				{
-					xtype: 'combobox',
-					fieldLabel: 'Font size',
-					labelStyle: 'color:#333',
-					cls: 'pt-combo',
-					width: 230,
-					queryMode: 'local',
-					valueField: 'id',
-					editable: false,
-					value: 2,
-					store: Ext.create('Ext.data.Store', {
-						fields: ['id', 'text'],
-						data: [
-							{id: 1, text: 'Small'},
-							{id: 2, text: 'Normal'},
-							{id: 3, text: 'Large'}
-						]
-					})
-				}
+				cellPadding,
+				fontSize
 			]
 		};
 
@@ -660,6 +669,13 @@ Ext.onReady( function() {
 			autoShow: true,
 			modal: true,
 			resizable: false,
+			getOptions: function() {
+				return {
+					showSubTotals: showSubTotals.getValue(),
+					cellPadding: cellPadding.getValue(),
+					fontSize: fontSize.getValue()
+				};
+			},
 			items: [
 				{
 					bodyStyle: 'border:0 none; color:#000; font-size:13px',
@@ -2258,9 +2274,9 @@ Ext.onReady( function() {
 			optionsButton = Ext.create('Ext.button.Button', {
 				text: 'Options',
 				handler: function() {
-					if (!pt.viewport.optionsWindow) {
-						pt.viewport.optionsWindow = PT.app.OptionsWindow(pt);
-					}
+					//if (!pt.viewport.optionsWindow) {
+						//pt.viewport.optionsWindow = PT.app.OptionsWindow(pt);
+					//}
 
 					pt.viewport.optionsWindow.show();
 				}
@@ -2418,8 +2434,11 @@ Ext.onReady( function() {
 		pt.cmp = PT.app.getCmp();
 		pt.viewport = createViewport();
 
-		pt.viewport.settingsWindow = PT.app.SettingsWindow(pt);
+		pt.viewport.settingsWindow = PT.app.SettingsWindow();
 		pt.viewport.settingsWindow.hide();
+
+		pt.viewport.optionsWindow = PT.app.OptionsWindow();
+		pt.viewport.optionsWindow.hide();
 	};
 
 	Ext.Ajax.request({

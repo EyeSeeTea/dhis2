@@ -156,6 +156,19 @@ PT.core.getConfigs = function() {
         multiselect_fill_reportingrates: 315
     };
 
+	conf.pivot = {
+		cellPadding: {
+			'compact': '2px',
+			'normal': '5px',
+			'comfortable': '10px'
+		},
+		fontSize: {
+			'small': '10px',
+			'normal': '11px',
+			'large': '13px'
+		}
+	};
+
     conf.util = {
 		jsonEncodeString: function(str) {
 			return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
@@ -412,28 +425,32 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.pivot = {
-		getTdHtml: function(config) {
+		getTdHtml: function(options, config) {
+			var cls,
+				colspan,
+				rowspan,
+				htmlValue,
+				cellPadding,
+				fontSize;
+console.log(options, config);
+
 			if (!(config && Ext.isObject(config))) {
 				return '<td></td>';
 			}
 
-			var cls,
-				colspan,
-				rowspan;
-
-			config.htmlValue = config.htmlValue || config.value || '&nbsp;';
-			config.padding = config.padding || '5px';
-			config.fontSize = config.fontSize || '14px';
-
 			cls = config.cls ? 'class="' + config.cls + '"' : '';
 			colspan = config.colspan ? 'colspan="' + config.colspan + '"' : '';
 			rowspan = config.rowspan ? 'rowspan="' + config.rowspan + '"' : '';
+			htmlValue = config.htmlValue || config.value || '&nbsp;';
+			cellPadding = pt.conf.pivot.cellPadding[config.cellPadding] || pt.conf.pivot.cellPadding[options.cellPadding];
+			fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[options.fontSize];
 
-			return '<td ' + cls + ' ' + colspan + ' ' + rowspan + ' style="padding:' + config.padding + '; font-size:' + config.fontSize + ';">' + config.htmlValue + '</td>';
+			return '<td ' + cls + ' ' + colspan + ' ' + rowspan + ' style="padding:' + cellPadding + '; font-size:' + fontSize + ';">' + htmlValue + '</td>';
 		},
 
 		getTable: function(settings, pt, container) {
-			var getParamStringFromDimensions,
+			var options = settings.options,
+				getParamStringFromDimensions,
 				extendSettings,
 				validateResponse,
 				extendResponse,
@@ -921,7 +938,7 @@ PT.core.getUtils = function(pt) {
 
 				getEmptyHtmlArray = function() {
 					return (xColAxis && xRowAxis) ?
-						pt.util.pivot.getTdHtml({cls: 'pivot-dim-empty', colspan: xRowAxis.dims, rowspan: xColAxis.dims}) : '';
+						pt.util.pivot.getTdHtml(options, {cls: 'pivot-dim-empty', colspan: xRowAxis.dims, rowspan: xColAxis.dims}) : '';
 				};
 
 				getColAxisHtmlArray = function() {
@@ -942,21 +959,21 @@ PT.core.getUtils = function(pt) {
 
 						for (var j = 0, id; j < dimItems.length; j++) {
 							id = dimItems[j];
-							dimHtml.push(pt.util.pivot.getTdHtml({
+							dimHtml.push(pt.util.pivot.getTdHtml(options, {
 								cls: 'pivot-dim',
 								colspan: colSpan,
 								htmlValue: xResponse.metaData[id]
 							}));
 
 							if (doSubTotals(xColAxis) && i === 0) {
-								dimHtml.push(pt.util.pivot.getTdHtml({
+								dimHtml.push(pt.util.pivot.getTdHtml(options, {
 									cls: 'pivot-dim-subtotal',
 									rowspan: xColAxis.dims
 								}));
 							}
 
 							if (i === 0 && j === (dimItems.length - 1)) {
-								dimHtml.push(pt.util.pivot.getTdHtml({
+								dimHtml.push(pt.util.pivot.getTdHtml(options, {
 									cls: 'pivot-dim-total',
 									rowspan: xColAxis.dims,
 									htmlValue: 'Total'
@@ -995,7 +1012,7 @@ PT.core.getUtils = function(pt) {
 							object = allObjects[j][i];
 
 							if (object.rowSpan) {
-								row.push(pt.util.pivot.getTdHtml({
+								row.push(pt.util.pivot.getTdHtml(options, {
 									cls: 'pivot-dim nobreak',
 									rowspan: object.rowSpan,
 									htmlValue: xResponse.metaData[object.id]
@@ -1008,7 +1025,7 @@ PT.core.getUtils = function(pt) {
 						//todo subtotal
 						if (doSubTotals(xRowAxis) && rowCount === rowUniqueFactor) {
 							row = [];
-							row.push(pt.util.pivot.getTdHtml({
+							row.push(pt.util.pivot.getTdHtml(options, {
 								cls: 'pivot-dim-subtotal',
 								colspan: 'xRowAxis.dims'
 							}));
@@ -1136,7 +1153,7 @@ PT.core.getUtils = function(pt) {
 								//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
 							//}
 
-							row.push(pt.util.pivot.getTdHtml({
+							row.push(pt.util.pivot.getTdHtml(options, {
 								cls: item.cls,
 								htmlValue: pt.util.number.pp(item.htmlValue)
 							}));
@@ -1184,7 +1201,7 @@ PT.core.getUtils = function(pt) {
 							item = totalRowItems[i];
 							item.htmlValue = pt.util.number.roundIf(item.htmlValue, 1);
 
-							a.push([pt.util.pivot.getTdHtml({
+							a.push([pt.util.pivot.getTdHtml(options, {
 								cls: item.cls,
 								htmlValue: pt.util.number.pp(item.htmlValue)
 							})]);
@@ -1235,7 +1252,7 @@ PT.core.getUtils = function(pt) {
 							item = totalColItems[i];
 							item.htmlValue = pt.util.number.roundIf(item.htmlValue, 1);
 
-							a.push(pt.util.pivot.getTdHtml({
+							a.push(pt.util.pivot.getTdHtml(options, {
 								cls: item.cls,
 								htmlValue: pt.util.number.pp(item.htmlValue)
 							}));
@@ -1258,7 +1275,7 @@ PT.core.getUtils = function(pt) {
 						grandTotalSum = Ext.Array.sum(values) || 0;
 						grandTotalSum = pt.util.number.roundIf(grandTotalSum, 1);
 
-						a.push(pt.util.pivot.getTdHtml({
+						a.push(pt.util.pivot.getTdHtml(options, {
 							cls: 'pivot-value-grandtotal',
 							htmlValue: pt.util.number.pp(grandTotalSum)
 						}));
@@ -1291,7 +1308,7 @@ PT.core.getUtils = function(pt) {
 						a = [];
 
 					if (xRowAxis) {
-						dimTotalArray = [pt.util.pivot.getTdHtml({
+						dimTotalArray = [pt.util.pivot.getTdHtml(options, {
 							cls: 'pivot-dim-total',
 							colspan: xRowAxis.dims,
 							htmlValue: 'Total'
@@ -1408,7 +1425,13 @@ PT.core.getAPI = function(pt) {
 
 			removeEmptyDimensions,
 			getValidatedAxis,
-			validateSettings;
+			validateSettings,
+
+			defaultOptions = {
+				showSubTotals: true,
+				cellPadding: 'normal',
+				fontSize: 'normal'
+			};
 
 		removeEmptyDimensions = function(axis) {
 			if (!axis) {
@@ -1457,6 +1480,18 @@ PT.core.getAPI = function(pt) {
 			axis = removeEmptyDimensions(axis);
 
 			return axis.length ? axis : null;
+		};
+
+		getValidatedOptions = function(options) {
+			if (!(options && Ext.isObject(options))) {
+				return defaultOptions;
+			}
+
+			options.showSubTotals = options.showSubTotals || defaultOptions.showSubTotals;
+			options.cellPadding = options.cellPadding || defaultOptions.cellPadding;
+			options.fontSize = options.fontSize || defaultOptions.fontSize;
+
+			return options;
 		};
 
 		validateSettings = function() {
@@ -1512,6 +1547,8 @@ PT.core.getAPI = function(pt) {
 			if (filter) {
 				obj.filter = filter;
 			}
+
+			obj.options = getValidatedOptions(config.options);
 
 			return obj;
 		}();
