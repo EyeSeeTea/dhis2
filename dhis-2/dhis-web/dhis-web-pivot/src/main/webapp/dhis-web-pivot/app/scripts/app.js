@@ -859,12 +859,12 @@ Ext.onReady( function() {
 						{
 							xtype: 'combobox',
 							cls: 'pt-combo',
-							style: 'margin-bottom:4px',
+							style: 'margin-bottom:4px; margin-top:2px',
 							width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
 							valueField: 'id',
 							displayField: 'name',
 							fieldLabel: 'Select group', //i18n pt.i18n.select_group
-							labelStyle: 'padding-left:6px',
+							labelStyle: 'padding-left:8px',
 							editable: false,
 							store: {
 								xtype: 'store',
@@ -1047,12 +1047,12 @@ Ext.onReady( function() {
 					{
 						xtype: 'combobox',
 						cls: 'pt-combo',
-						style: 'margin-bottom:4px',
+						style: 'margin-bottom:4px; margin-top:2px',
 						width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
 						valueField: 'id',
 						displayField: 'name',
 						fieldLabel: 'Select group', //i18n pt.i18n.select_group
-						labelStyle: 'padding-left:6px',
+						labelStyle: 'padding-left:8px',
 						editable: false,
 						store: {
 							xtype: 'store',
@@ -1209,7 +1209,6 @@ Ext.onReady( function() {
 			dataSet = {
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-data">Reporting rates</div>', //i18n
-				bodyStyle: 'padding-top:3px',
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
@@ -1569,6 +1568,7 @@ Ext.onReady( function() {
 						xtype: 'panel',
 						layout: 'column',
 						bodyStyle: 'border-style:none',
+						style: 'margin-top:2px',
 						items: [
 							{
 								xtype: 'combobox',
@@ -1578,7 +1578,7 @@ Ext.onReady( function() {
 								valueField: 'id',
 								displayField: 'name',
 								fieldLabel: 'Select type', //i18n pt.i18n.select_type,
-								labelStyle: 'padding-left:6px',
+								labelStyle: 'padding-left:8px',
 								editable: false,
 								queryMode: 'remote',
 								store: pt.store.periodType,
@@ -2102,7 +2102,6 @@ Ext.onReady( function() {
 					panel = {
 						xtype: 'panel',
 						title: '<div class="pt-panel-title-organisationunit">' + groupSet.name + '</div>', //i18n
-						bodyStyle: 'padding-top:3px',
 						hideCollapseTool: true,
 						getData: function() {
 							var data = {
