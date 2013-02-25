@@ -42,6 +42,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.DataElementOperand;
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.CollectionUtils;
@@ -68,6 +69,8 @@ public class DataQueryParams
 
     public static final List<String> DATA_DIMS = Arrays.asList( INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATASET_DIM_ID );
     public static final List<String> FIXED_DIMS = Arrays.asList( DATA_X_DIM_ID, INDICATOR_DIM_ID, DATAELEMENT_DIM_ID, DATASET_DIM_ID, PERIOD_DIM_ID, ORGUNIT_DIM_ID );
+    
+    public static final int MAX_DIM_OPT_PERM = 5000;
     
     private static final List<DimensionType> COMPLETENESS_DIMENSION_TYTPES = Arrays.asList( DATASET, ORGANISATIONUNIT, ORGANISATIONUNIT_GROUPSET );
     
@@ -313,6 +316,39 @@ public class DataQueryParams
         List<IdentifiableObject> filterOpts = getFilterOptions( PERIOD_DIM_ID );
         
         return ( dimOpts != null && !dimOpts.isEmpty() ) || ( filterOpts != null && !filterOpts.isEmpty() );
+    }
+    
+    /**
+     * Returns the number of dimension option permutations.
+     */
+    public int getNumberOfDimensionOptionPermutations()
+    {
+        int total = 1;
+        
+        for ( Dimension dim : dimensions )
+        {
+            total *= dim.getOptions().size();
+        }
+        
+        return total;
+    }
+    
+    /**
+     * Returns a mapping between identifier and period type for all data sets
+     * in this query.
+     */
+    public Map<String, PeriodType> getDataSetPeriodTypeMap()
+    {
+        Map<String, PeriodType> map = new HashMap<String, PeriodType>();
+        
+        for ( IdentifiableObject dataSet : getDataSets() )
+        {
+            DataSet ds = (DataSet) dataSet;
+            
+            map.put( ds.getUid(), ds.getPeriodType() );
+        }
+        
+        return map;
     }
     
     /**

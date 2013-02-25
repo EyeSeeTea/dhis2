@@ -1017,6 +1017,10 @@ Ext.onReady( function() {
 								}
 								
 								// Data element
+								
+								Ext.getCmp('filterPanel').removeAll();
+								Ext.getCmp('filterPanel').doLayout();
+	
 								TR.cmp.params.dataelement.objects = [];
 								TR.store.dataelement.selected.removeAll();
 								if (f.dataElements) {
@@ -1050,8 +1054,8 @@ Ext.onReady( function() {
 								storeProgramStage.load({params: {programId: f.programId}});
 								
 								Ext.getCmp('programStageCombobox').setValue( f.programStageId );
-								
 								TR.cmp.params.organisationunit.treepanel.getSelectionModel().deselectAll();
+				
 								TR.exe.execute();
 							}
 						});
@@ -1497,13 +1501,6 @@ Ext.onReady( function() {
 				this.aggregateReport.getURLParams( type );
 			}
 		},
-		paramChanged: function() {
-			if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true')
-			{
-				return this.caseBasedReport.isParamChanged();
-			}
-			return true;
-		},
 		
 		caseBasedReport: {
 			generate: function( type, isSorted ) {
@@ -1566,30 +1563,6 @@ Ext.onReady( function() {
 				}
 				TR.util.notification.ok();
 			},
-			filter: function() {
-				TR.util.mask.showMask(TR.cmp.region.center, TR.i18n.loading);
-				TR.state.isFilter = true;
-				var url = TR.conf.finals.ajax.path_root + TR.conf.finals.ajax.generatetabularreport_get;
-				Ext.Ajax.request({
-					url: url,
-					method: "POST",
-					scope: this,
-					params: this.getParams(),
-					success: function(r) {
-						var json = Ext.JSON.decode(r.responseText);
-						TR.value.values = json.items;
-						TR.state.total = json.total;
-						TR.state.totalRecords = json.totalRecords
-						TR.value.columns = json.columns;
-						TR.store.datatable.loadData(TR.value.values,false);
-						
-						TR.datatable.setPagingToolbarStatus();
-							
-						TR.util.notification.ok();
-						TR.util.mask.hideMask();
-					}
-				});
-			},
 			getParams: function(isSorted) {
 				var p = {};
 				p.startDate = TR.cmp.settings.startDate.rawValue;
@@ -1598,11 +1571,11 @@ Ext.onReady( function() {
 				p.level = Ext.getCmp('levelCombobox').getValue();
 				
 				// orders
-				p.orderByOrgunitAsc = this.orderByOrgunitAsc;
-				p.orderByExecutionDateByAsc= this.orderByExecutionDateByAsc;
+				p.orderByOrgunitAsc = TR.state.orderByOrgunitAsc;
+				p.orderByExecutionDateByAsc= TR.state.orderByExecutionDateByAsc;
 				
 				p.programStageId = TR.cmp.params.programStage.getValue();
-				p.currentPage = this.currentPage;
+				p.currentPage = TR.state.currentPage;
 				
 				// organisation unit
 				p.orgunitIds = TR.state.orgunitIds;
@@ -1718,43 +1691,6 @@ Ext.onReady( function() {
 				} 
 				return false;
 			},
-			isParamChanged: function() {
-				if( TR.store.datatable && TR.store.datatable.data.length > 0 )
-				{
-					var orgUnitCols = TR.init.system.maxLevels + 1 - TR.cmp.settings.level.getValue();
-					var orgUnitColsInTable =  ( TR.datatable.datatable.columns.length 
-										- TR.cmp.params.dataelement.selected.store.data.length - 2 );
-					if( orgUnitCols!=orgUnitColsInTable )
-					{
-						return true;
-					}
-					
-					var colNames=[];
-					TR.cmp.params.dataelement.selected.store.each( function(r) {
-						colNames.push( r.data.id );
-					});
-						
-					var cols = TR.datatable.datatable.columns;
-					var colDataLen = 0;
-					for( var i=0; i<cols.length; i++ )
-					{
-						var col = cols[i];
-						if( col.name && col.name.indexOf('meta_')==-1 )
-						{
-							colDataLen ++;
-							if( colNames.indexOf(col.name) == -1 )
-								return true;
-						}
-					}
-					if( colDataLen < colNames.length )
-					{
-						return true;
-					}
-					
-					return !TR.state.isFilter;
-				}
-				return true;
-			},
 			validation: {
 				objects: function() {
 					
@@ -1789,6 +1725,11 @@ Ext.onReady( function() {
 						return false;
 					}
 					
+					if(TR.cmp.params.dataelement.selected.store.data.items.length == 0 )
+					{
+						TR.util.notification.error(TR.i18n.em_no_data_element, TR.i18n.em_no_data_element);
+						return false;
+					}
 					return true;
 				},
 				response: function(r) {
@@ -1845,7 +1786,9 @@ Ext.onReady( function() {
 								TR.value.title = json.title;
 								TR.value.columns = json.columns;
 								TR.value.values = json.items;
+								
 								// Get fields
+								
 								var fields = [];
 								for( var index=0; index < TR.value.columns.length; index++ )
 								{
@@ -1853,7 +1796,15 @@ Ext.onReady( function() {
 								}
 								TR.value.fields = fields;
 								
+								if(TR.cmp.params.dataelement.selected.store.data.length>0){
+									Ext.getCmp('btnClean').enable();
+								}
+								else{
+									Ext.getCmp('btnClean').disable();
+								}
+								
 								// Set data for grid
+								
 								TR.store.getDataTableStore();
 								TR.datatable.getDataTable();
 								TR.datatable.hidePagingBar();
@@ -2349,16 +2300,6 @@ Ext.onReady( function() {
 				scroll: 'both',
 				title: title,
 				selType: 'cellmodel',
-				features: [{
-					ftype: 'filters',
-					autoReload: true,
-					encode: true,
-					local: false,
-					buildQuery : function (filters) {
-						TR.exe.filter();
-					},
-					filters: []
-				}],
 				bbar: [
 					{
 						xtype: 'button',
@@ -2396,22 +2337,6 @@ Ext.onReady( function() {
 						listeners: {
 							added: function() {
 								TR.cmp.settings.currentPage = this;
-							},						
-							specialkey: function( textfield, e, eOpts ){
-								
-								if (e.keyCode == e.ENTER)
-								{
-									var oldValue = TR.state.currentPage;
-									var newValue = textfield.rawValue;
-									if( newValue < 1 || newValue > TR.state.total )
-									{
-										textfield.setValue(oldValue);
-									}
-									else
-									{
-										TR.exe.paging( newValue );
-									}
-								}
 							}
 						},
 					},
@@ -2557,75 +2482,11 @@ Ext.onReady( function() {
 			params.isEditAllowed = true;
 			params.compulsory = compulsory;
 			
-			params.editor = {}; 
-			params.editor.xtype = TR.value.covertXType( type ); 
-			params.editor.editable = true;
-
-			params.filter = {};
-			params.filter.type = TR.value.covertValueType( type );
-				
 			type = type.toLowerCase();
 			if( type == 'date' )
 			{
 				params.renderer = Ext.util.Format.dateRenderer( TR.i18n.format_date );
-				params.filter.dateFormat = TR.i18n.format_date;
-				params.filter.beforeText = TR.i18n.before;
-				params.filter.afterText = TR.i18n.after;
-				params.filter.onText = TR.i18n.on;
-				
-				params.editor.format = TR.i18n.format_date;
 			}
-			else if( type == 'bool' || type == 'trueonly' )
-			{
-				params.editor.xtype = 'combobox';
-				params.editor.queryMode = 'local';
-				params.editor.editable = true;
-				params.editor.valueField = 'value';
-				params.editor.displayField = 'name';
-				params.editor.selectOnFocus = true;
-				if( type.toLowerCase() == 'bool' ){
-					params.editor.store = new Ext.data.ArrayStore({
-						fields: ['value', 'name'],
-						data: [['', ''],['true', TR.i18n.true_value], ['false', TR.i18n.false_value]]
-					});
-				}
-				else{
-					params.editor.store = new Ext.data.ArrayStore({
-						fields: ['value', 'name'],
-						data: [['', ''], ['true', TR.i18n.true_value]]
-					});
-				}
-			}
-			else if( type == 'list' )
-			{
-				params.editor.xtype = 'combobox';
-				params.editor.typeAhead = true;
-				params.editor.selectOnFocus = true;
-				params.editor.triggerAction = 'all';
-				params.editor.transform = 'light';
-				params.editor.lazyRender = true;
-				params.editor.forceSelection = true;
-				params.editor.hideTrigger = true;
-				params.editor.validateOnBlur = true;
-				params.editor.queryMode = 'remote';
-				params.editor.valueField = 'o';
-				params.editor.displayField = 'o';
-				params.editor.store = Ext.create('Ext.data.Store', {
-					fields: ['o'],
-					data:[],
-					expandData: true,
-					proxy: {
-						type: 'ajax',
-						url: TR.conf.finals.ajax.path_commons + TR.conf.finals.ajax.suggested_dataelement_get,
-						extraParams:{id: objectId},
-						reader: {
-							type: 'json',
-							root: 'options'
-						}
-					}
-				})		
-			}
-			
 			return params;
 		},
         setPagingToolbarStatus: function() {
@@ -2721,20 +2582,12 @@ Ext.onReady( function() {
 		execute: function( type, isSorted ) {
 			TR.state.generateReport( type, isSorted );
 		},
-		filter: function() {
-			TR.state.isFilter = true;
-			TR.state.filterReport();
-		},
 		paging: function( currentPage )
 		{
 			TR.state.currentPage = currentPage;
 			TR.state.filterReport();
 			Ext.getCmp('currentPage').setValue( currentPage );	
 			TR.datatable.setPagingToolbarStatus();
-		},
-		reset: function() {
-			TR.store.datatable.loadData([],false);
-			this.execute();
 		},
 		datatable: function() {
 			TR.store.getDataTableStore();
@@ -2827,6 +2680,7 @@ Ext.onReady( function() {
 													Ext.getCmp('levelCombobox').setVisible(true);
 													
 													Ext.getCmp('dateRangeDiv').setVisible(true);
+													Ext.getCmp('btnSortBy').setVisible(true);
 													Ext.getCmp('relativePeriodsDiv').setVisible(false); 
 													Ext.getCmp('fixedPeriodsDiv').setVisible(false);
 													Ext.getCmp('dateRangeDiv').expand();
@@ -2856,6 +2710,7 @@ Ext.onReady( function() {
 													Ext.getCmp('dateRangeDiv').setVisible(false);
 													Ext.getCmp('levelCombobox').setVisible(false);
 													Ext.getCmp('caseBasedFavoriteBtn').setVisible(false);
+													Ext.getCmp('btnSortBy').setVisible(false);
 													
 													Ext.getCmp('datePeriodRangeDiv').setVisible(true);
 													Ext.getCmp('fixedPeriodsDiv').setVisible(true);
@@ -4440,14 +4295,7 @@ Ext.onReady( function() {
 						cls: 'tr-toolbar-btn-1',
 						text: TR.i18n.update,
 						handler: function() {
-							if( !TR.state.paramChanged() )
-							{
-								TR.exe.filter();
-							}
-							else
-							{
-								TR.exe.execute();
-							}
+							TR.exe.execute();
 						}
 					},
 					{
@@ -4456,17 +4304,25 @@ Ext.onReady( function() {
 						id: 'btnClean',
 						disabled: true,
 						handler: function() {
-							var grid = TR.datatable.datatable;
-							var cols = grid.columns;
-							var editor = grid.getStore().getAt(0);
-							var colLen = cols.length;
-							for( var i=1; i<colLen; i++ )
+							if(Ext.getCmp('reportTypeGroup').getValue().reportType=='true')
 							{
-								var col = cols[i];
-								var dataIndex = col.dataIndex;
-								TR.store.datatable.first().data[dataIndex] = "";
-							}
 							
+								TR.cmp.params.dataelement.selected.store.each( function(r) {
+									var deId = r.data.id;
+									var length = Ext.getCmp('p_' + deId).items.length/4;
+									for(var idx=0;idx<length;idx++)
+									{					
+										var id = deId + '_' + idx;
+										Ext.getCmp('filter_' + id).setValue('');
+									}
+								});
+							}
+							else
+							{
+								TR.store.dataelement.selected.removeAll();
+								Ext.getCmp('filterPanel').removeAll();
+								Ext.getCmp('filterPanel').doLayout();
+							}
 							TR.exe.execute();
 						}
 					},
@@ -4475,9 +4331,7 @@ Ext.onReady( function() {
 						text: TR.i18n.sort_by,
 						id: 'btnSortBy',
 						disabled: true,
-						execute: function() {
-							TR.exe.execute(false, true );
-						},
+						menu: {},
 						listeners: {
 							afterrender: function(b) {
 								this.menu = Ext.create('Ext.menu.Menu', {
@@ -4491,7 +4345,7 @@ Ext.onReady( function() {
 											minWidth: 105,
 											handler: function() {
 												TR.state.orderByOrgunitAsc = "true";
-												b.execute();
+												TR.exe.execute(false, true );
 											}
 										},
 										{
@@ -4500,7 +4354,7 @@ Ext.onReady( function() {
 											minWidth: 105,
 											handler: function() {
 												TR.state.orderByOrgunitAsc = "false";
-												b.execute();
+												TR.exe.execute(false, true );
 											}
 										}
 									]                                            
@@ -4513,6 +4367,7 @@ Ext.onReady( function() {
 						cls: 'tr-toolbar-btn-2',
 						id: 'caseBasedFavoriteBtn',
 						text: TR.i18n.favorites + '..',
+						menu: {},
 						hidden: true,
 						listeners: {
 							afterrender: function(b) {
@@ -5017,6 +4872,7 @@ Ext.onReady( function() {
 						cls: 'tr-toolbar-btn-2',
 						id: 'aggregateFavoriteBtn',
 						text: TR.i18n.favorites + '..',
+						menu: {},
 						listeners: {
 							afterrender: function(b) {
 								this.menu = Ext.create('Ext.menu.Menu', {
@@ -5516,6 +5372,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'button',
 						text: TR.i18n.download + '..',
+						menu: {},
 						execute: function(type) {
 							TR.exe.execute( type );
 						},
