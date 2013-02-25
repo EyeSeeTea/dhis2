@@ -331,7 +331,7 @@ Ext.onReady( function() {
 		getData = function() {
 			var data = [{id: 'coc', name: 'Categories'}];
 
-			return data.concat(pt.init.ougs);
+			return [].concat(pt.init.ougs, pt.init.degs);
 		};
 
 		getStore = function(data) {
@@ -1957,24 +1957,17 @@ Ext.onReady( function() {
 				}
 			};
 
-			getOrganisationUnitGroupSetPanels = function() {
+			getGroupSetPanels = function(groupSets, url) {
 				var	getAvailableStore,
 					getSelectedStore,
 
 					createPanel,
 					getPanels;
 
-				getAvailableStore = function(groupSetId) {
+				getAvailableStore = function(groupSet) {
 					return Ext.create('Ext.data.Store', {
 						fields: ['id', 'name'],
-						proxy: {
-							type: 'ajax',
-							url: pt.conf.finals.ajax.path_api + 'organisationUnitGroupSets/' + groupSetId + '.json?links=false&paging=false',
-							reader: {
-								type: 'json',
-								root: 'organisationUnitGroups'
-							}
-						},
+						data: groupSet.items,
 						isLoaded: false,
 						storage: {},
 						sortStore: function() {
@@ -2093,7 +2086,7 @@ Ext.onReady( function() {
 						});
 					};
 
-					availableStore = getAvailableStore(groupSet.id);
+					availableStore = getAvailableStore(groupSet);
 					selectedStore = getSelectedStore();
 
 					available = getAvailable(availableStore);
@@ -2157,21 +2150,17 @@ Ext.onReady( function() {
 				};
 
 				getPanels = function() {
-					var ougs = pt.init.ougs,
-						panels = [],
+					var panels = [],
 						groupSet,
 						last;
 
-					for (var i = 0, panel; i < ougs.length; i++) {
-						groupSet = ougs[i];
+					for (var i = 0, panel; i < groupSets.length; i++) {
+						groupSet = groupSets[i];
 
 						panel = createPanel(groupSet);
 
 						panels.push(panel);
 					}
-
-					last = panels[panels.length - 1];
-					last.cls = 'pt-accordion-last';
 
 					return panels;
 				};
@@ -2236,7 +2225,12 @@ Ext.onReady( function() {
 								organisationUnit
 							];
 
-							panels = panels.concat(getOrganisationUnitGroupSetPanels());
+							panels = panels.concat(getGroupSetPanels(pt.init.ougs, 'organisationUnitGroupSets'));
+
+							panels = panels.concat(getGroupSetPanels(pt.init.degs, 'dataElementGroupSets'));
+
+							last = panels[panels.length - 1];
+							last.cls = 'pt-accordion-last';
 
 							return panels;
 						}(),
@@ -2277,9 +2271,9 @@ Ext.onReady( function() {
 			optionsButton = Ext.create('Ext.button.Button', {
 				text: 'Options',
 				handler: function() {
-					//if (!pt.viewport.optionsWindow) {
-						//pt.viewport.optionsWindow = PT.app.OptionsWindow(pt);
-					//}
+					if (!pt.viewport.optionsWindow) {
+						pt.viewport.optionsWindow = PT.app.OptionsWindow();
+					}
 
 					pt.viewport.optionsWindow.show();
 				}
