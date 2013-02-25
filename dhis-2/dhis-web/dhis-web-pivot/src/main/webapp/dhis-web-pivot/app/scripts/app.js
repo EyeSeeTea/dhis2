@@ -75,7 +75,7 @@ Ext.onReady( function() {
 					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
 
 				if ((targetx + winw) > vpw) {
-					w.setPosition((vpw - winw - 4), y);
+					w.setPosition((vpw - winw - 2), y);
 				}
 				else {
 					w.setPosition(targetx, y);
@@ -592,19 +592,90 @@ Ext.onReady( function() {
 	};
 
 	PT.app.OptionsWindow = function() {
-		var window;
+		var window,
+			data,
+			style;
+
+		data = {
+			bodyStyle: 'border:0 none',
+			style: 'margin-left:14px',
+			items: [
+				{
+					xtype: 'checkbox',
+					boxLabel: 'Show sub totals',
+					labelStyle: 'color:red'
+				}
+			]
+		};
+
+		style = {
+			bodyStyle: 'border:0 none',
+			style: 'margin-left:14px',
+			items: [
+				{
+					xtype: 'combobox',
+					fieldLabel: 'Cell padding',
+					labelStyle: 'color:#333',
+					cls: 'pt-combo',
+					width: 230,
+					queryMode: 'local',
+					valueField: 'id',
+					editable: false,
+					value: 2,
+					store: Ext.create('Ext.data.Store', {
+						fields: ['id', 'text'],
+						data: [
+							{id: 1, text: 'Compact'},
+							{id: 2, text: 'Normal'},
+							{id: 3, text: 'Comfortable'}
+						]
+					})
+				},
+				{
+					xtype: 'combobox',
+					fieldLabel: 'Font size',
+					labelStyle: 'color:#333',
+					cls: 'pt-combo',
+					width: 230,
+					queryMode: 'local',
+					valueField: 'id',
+					editable: false,
+					value: 2,
+					store: Ext.create('Ext.data.Store', {
+						fields: ['id', 'text'],
+						data: [
+							{id: 1, text: 'Small'},
+							{id: 2, text: 'Normal'},
+							{id: 3, text: 'Large'}
+						]
+					})
+				}
+			]
+		};
 
 		window = Ext.create('Ext.window.Window', {
 			title: 'Table options', //i18n
-			bodyStyle: 'background-color:#fff; padding:6px',
+			bodyStyle: 'background-color:#fff; padding:8px 8px 3px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
 			resizable: false,
 			items: [
 				{
-					html: 'Show sub totals and other options'
-				}
+					bodyStyle: 'border:0 none; color:#000; font-size:13px',
+					style: 'margin-bottom:6px',
+					html: 'Data'
+				},
+				data,
+				{
+					bodyStyle: 'border:0 none; padding:7px'
+				},
+				{
+					bodyStyle: 'border:0 none; color:#000; font-size:13px',
+					style: 'margin-bottom:6px',
+					html: 'Style'
+				},
+				style
 			],
 			bbar: [
 				'->',
