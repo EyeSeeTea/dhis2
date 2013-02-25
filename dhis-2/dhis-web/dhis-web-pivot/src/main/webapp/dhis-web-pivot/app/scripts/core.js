@@ -158,7 +158,7 @@ PT.core.getConfigs = function() {
 
 	conf.pivot = {
 		cellPadding: {
-			'compact': '2px',
+			'compact': '3px',
 			'normal': '5px',
 			'comfortable': '10px'
 		},
@@ -432,7 +432,6 @@ PT.core.getUtils = function(pt) {
 				htmlValue,
 				cellPadding,
 				fontSize;
-console.log(options, config);
 
 			if (!(config && Ext.isObject(config))) {
 				return '<td></td>';
@@ -918,22 +917,24 @@ console.log(options, config);
 					htmlArray;
 
 				doSubTotals = function(xAxis) {
-					var multiItemDimension = 0,
-						unique;
+					return !!options.showSubTotals;
 
-					if (!(true && xAxis && xAxis.dims > 1)) {
-						return false;
-					}
+					//var multiItemDimension = 0,
+						//unique;
 
-					unique = xAxis.xItems.unique;
+					//if (!(options.showSubTotals && xAxis && xAxis.dims > 1)) {
+						//return false;
+					//}
 
-					for (var i = 0; i < unique.length; i++) {
-						if (unique[i].length > 1) {
-							multiItemDimension++;
-						}
-					}
+					//unique = xAxis.xItems.unique;
 
-					return (multiItemDimension > 1);
+					//for (var i = 0; i < unique.length; i++) {
+						//if (unique[i].length > 1) {
+							//multiItemDimension++;
+						//}
+					//}
+
+					//return (multiItemDimension > 1);
 				};
 
 				getEmptyHtmlArray = function() {
@@ -1027,7 +1028,7 @@ console.log(options, config);
 							row = [];
 							row.push(pt.util.pivot.getTdHtml(options, {
 								cls: 'pivot-dim-subtotal',
-								colspan: 'xRowAxis.dims'
+								colspan: xRowAxis.dims
 							}));
 							a.push(row);
 							rowCount = 0;
@@ -1487,7 +1488,7 @@ PT.core.getAPI = function(pt) {
 				return defaultOptions;
 			}
 
-			options.showSubTotals = options.showSubTotals || defaultOptions.showSubTotals;
+			options.showSubTotals = Ext.isDefined(options.showSubTotals) ? options.showSubTotals : defaultOptions.showSubTotals;
 			options.cellPadding = options.cellPadding || defaultOptions.cellPadding;
 			options.fontSize = options.fontSize || defaultOptions.fontSize;
 
