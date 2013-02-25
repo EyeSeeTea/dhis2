@@ -331,7 +331,7 @@ Ext.onReady( function() {
 		getData = function() {
 			var data = [{id: 'coc', name: 'Categories'}];
 
-			return [].concat(pt.init.ougs, pt.init.degs);
+			return data.concat(pt.init.ougs, pt.init.degs);
 		};
 
 		getStore = function(data) {
