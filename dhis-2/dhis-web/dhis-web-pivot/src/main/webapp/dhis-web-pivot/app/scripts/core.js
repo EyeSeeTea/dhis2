@@ -1324,7 +1324,7 @@ PT.core.getUtils = function(pt) {
 				};
 
 				getHtml = function() {
-					var s = '<table id="pivottable" class="pivot">';
+					var s = '<table id="' + pt.el + '" class="pivot">';
 
 					for (var i = 0; i < htmlArray.length; i++) {
 						s += '<tr>' + htmlArray[i].join('') + '</tr>';
@@ -1355,7 +1355,6 @@ PT.core.getUtils = function(pt) {
 
 				pt.util.mask.showMask(pt.viewport);
 
-
 				xSettings = extendSettings(settings);
 
 				Ext.data.JsonP.request({
@@ -1372,8 +1371,7 @@ PT.core.getUtils = function(pt) {
 						alert('Data request failed');
 					},
 					success: function(response) {
-						var html,
-							el;
+						var html;
 
 						if (!validateResponse(response)) {
 							pt.util.mask.hideMask();
@@ -1389,9 +1387,12 @@ PT.core.getUtils = function(pt) {
 						}
 
 						xResponse = extendResponse(response, xSettings);
+console.log("xResponse", xResponse);
 
 						xColAxis = extendAxis(xSettings.col, xResponse);
 						xRowAxis = extendRowAxis(xSettings.row, xResponse);
+console.log("xColAxis", xColAxis);
+console.log("xRowAxis", xRowAxis);
 
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
 
@@ -1555,7 +1556,7 @@ PT.core.getInstance = function(config) {
 	var pt = {};
 
 	pt.baseUrl = config && config.baseUrl ? config.baseUrl : '../../';
-	pt.el = config && config.el ? config.el : 'viewport';
+	pt.el = config && config.el ? config.el : 'app';
 
 	pt.conf = PT.core.getConfigs();
 	pt.util = PT.core.getUtils(pt);
