@@ -46,6 +46,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
@@ -222,11 +223,17 @@ public class ReportTable
     private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
 
     /**
+     * The list of DataElementGroups the ReportTable contains.
+     */
+    private List<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>();
+    
+    /**
      * The list of OrganisationUnitGroups the ReportTable contains.
      */
     @Scanned
     private List<OrganisationUnitGroup> organisationUnitGroups = new ArrayList<OrganisationUnitGroup>();
 
+    
     /**
      * The DataElementCategoryCombo for the ReportTable.
      */
@@ -1058,6 +1065,21 @@ public class ReportTable
     public void setOrganisationUnits( List<OrganisationUnit> units )
     {
         this.organisationUnits = units;
+    }
+
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "dataElementGroups", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( localName = "dataElementGroup", namespace = DxfNamespaces.DXF_2_0)
+    public List<DataElementGroup> getDataElementGroups()
+    {
+        return dataElementGroups;
+    }
+
+    public void setDataElementGroups( List<DataElementGroup> dataElementGroups )
+    {
+        this.dataElementGroups = dataElementGroups;
     }
 
     @JsonProperty
