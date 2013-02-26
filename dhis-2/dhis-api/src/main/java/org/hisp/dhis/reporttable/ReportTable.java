@@ -299,6 +299,14 @@ public class ReportTable
      * Indicates use of the organisation unit children of the current user.
      */
     private boolean userOrganisationUnitChildren;
+
+    // -------------------------------------------------------------------------
+    // Presentation properties
+    // -------------------------------------------------------------------------
+
+    private Map<String, DataElementGroup> dataElementGroupSets = new HashMap<String, DataElementGroup>();
+    
+    private Map<String, OrganisationUnitGroup> organisationUnitGroupSets = new HashMap<String, OrganisationUnitGroup>();
     
     // -------------------------------------------------------------------------
     // Transient properties
@@ -524,6 +532,13 @@ public class ReportTable
     // Public methods
     // -------------------------------------------------------------------------
 
+    public ReportTable populatePresentationProperties()
+    {
+        
+        
+        return this;
+    }
+    
     /**
      * Creates a map which contains mappings between the organisation unit
      * identifier and the name of the group this organisation unit is a member
@@ -1290,6 +1305,36 @@ public class ReportTable
     public void setUserOrganisationUnitChildren( boolean userOrganisationUnitChildren )
     {
         this.userOrganisationUnitChildren = userOrganisationUnitChildren;
+    }
+
+    // -------------------------------------------------------------------------
+    // Get- and set-methods for presentation properties
+    // -------------------------------------------------------------------------
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Map<String, DataElementGroup> getDataElementGroupSets()
+    {
+        return dataElementGroupSets;
+    }
+
+    public void setDataElementGroupSets( Map<String, DataElementGroup> dataElementGroupSets )
+    {
+        this.dataElementGroupSets = dataElementGroupSets;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Map<String, OrganisationUnitGroup> getOrganisationUnitGroupSets()
+    {
+        return organisationUnitGroupSets;
+    }
+
+    public void setOrganisationUnitGroupSets( Map<String, OrganisationUnitGroup> organisationUnitGroupSets )
+    {
+        this.organisationUnitGroupSets = organisationUnitGroupSets;
     }
 
     // -------------------------------------------------------------------------
