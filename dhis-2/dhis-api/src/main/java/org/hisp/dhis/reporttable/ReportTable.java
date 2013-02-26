@@ -46,6 +46,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
@@ -222,11 +223,17 @@ public class ReportTable
     private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
 
     /**
+     * The list of DataElementGroups the ReportTable contains.
+     */
+    private List<DataElementGroup> dataElementGroups = new ArrayList<DataElementGroup>();
+    
+    /**
      * The list of OrganisationUnitGroups the ReportTable contains.
      */
     @Scanned
     private List<OrganisationUnitGroup> organisationUnitGroups = new ArrayList<OrganisationUnitGroup>();
 
+    
     /**
      * The DataElementCategoryCombo for the ReportTable.
      */
@@ -264,10 +271,43 @@ public class ReportTable
     private Integer sortOrder;
 
     /**
-     * Inidicates whether the table should be limited from top by this value.
+     * Indicates whether the table should be limited from top by this value.
      */
     private Integer topLimit;
 
+    /**
+     * Indicates rendering of sub-totals for the table.
+     */
+    private boolean subtotals;
+    
+    /**
+     * The display density of the text in the table.
+     */
+    private String displayDensity;
+    
+    /**
+     * The font size of the text in the table.
+     */
+    private String fontSize;
+    
+    /**
+     * Indicates use of the organisation unit of the current user.
+     */
+    private boolean userOrganisationUnit;
+    
+    /**
+     * Indicates use of the organisation unit children of the current user.
+     */
+    private boolean userOrganisationUnitChildren;
+
+    // -------------------------------------------------------------------------
+    // Presentation properties
+    // -------------------------------------------------------------------------
+
+    private Map<String, DataElementGroup> dataElementGroupSets = new HashMap<String, DataElementGroup>();
+    
+    private Map<String, OrganisationUnitGroup> organisationUnitGroupSets = new HashMap<String, OrganisationUnitGroup>();
+    
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
@@ -492,6 +532,13 @@ public class ReportTable
     // Public methods
     // -------------------------------------------------------------------------
 
+    public ReportTable populatePresentationProperties()
+    {
+        
+        
+        return this;
+    }
+    
     /**
      * Creates a map which contains mappings between the organisation unit
      * identifier and the name of the group this organisation unit is a member
@@ -1063,6 +1110,21 @@ public class ReportTable
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlElementWrapper( localName = "dataElementGroups", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( localName = "dataElementGroup", namespace = DxfNamespaces.DXF_2_0)
+    public List<DataElementGroup> getDataElementGroups()
+    {
+        return dataElementGroups;
+    }
+
+    public void setDataElementGroups( List<DataElementGroup> dataElementGroups )
+    {
+        this.dataElementGroups = dataElementGroups;
+    }
+
+    @JsonProperty
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "organisationUnitGroups", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty( localName = "organisationUnitGroup", namespace = DxfNamespaces.DXF_2_0)
     public List<OrganisationUnitGroup> getOrganisationUnitGroups()
@@ -1154,6 +1216,9 @@ public class ReportTable
         this.reportParams = reportParams;
     }
 
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public Integer getSortOrder()
     {
         return sortOrder;
@@ -1175,6 +1240,101 @@ public class ReportTable
     public void setTopLimit( Integer topLimit )
     {
         this.topLimit = topLimit;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public boolean isSubtotals()
+    {
+        return subtotals;
+    }
+
+    public void setSubtotals( boolean subtotals )
+    {
+        this.subtotals = subtotals;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getDisplayDensity()
+    {
+        return displayDensity;
+    }
+
+    public void setDisplayDensity( String displayDensity )
+    {
+        this.displayDensity = displayDensity;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getFontSize()
+    {
+        return fontSize;
+    }
+
+    public void setFontSize( String fontSize )
+    {
+        this.fontSize = fontSize;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public boolean isUserOrganisationUnit()
+    {
+        return userOrganisationUnit;
+    }
+
+    public void setUserOrganisationUnit( boolean userOrganisationUnit )
+    {
+        this.userOrganisationUnit = userOrganisationUnit;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public boolean isUserOrganisationUnitChildren()
+    {
+        return userOrganisationUnitChildren;
+    }
+
+    public void setUserOrganisationUnitChildren( boolean userOrganisationUnitChildren )
+    {
+        this.userOrganisationUnitChildren = userOrganisationUnitChildren;
+    }
+
+    // -------------------------------------------------------------------------
+    // Get- and set-methods for presentation properties
+    // -------------------------------------------------------------------------
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Map<String, DataElementGroup> getDataElementGroupSets()
+    {
+        return dataElementGroupSets;
+    }
+
+    public void setDataElementGroupSets( Map<String, DataElementGroup> dataElementGroupSets )
+    {
+        this.dataElementGroupSets = dataElementGroupSets;
+    }
+
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Map<String, OrganisationUnitGroup> getOrganisationUnitGroupSets()
+    {
+        return organisationUnitGroupSets;
+    }
+
+    public void setOrganisationUnitGroupSets( Map<String, OrganisationUnitGroup> organisationUnitGroupSets )
+    {
+        this.organisationUnitGroupSets = organisationUnitGroupSets;
     }
 
     // -------------------------------------------------------------------------
