@@ -81,9 +81,9 @@ public class DefaultQueryPlanner
             throw new IllegalQueryException( "At least one dimension must be specified" );
         }
         
-        if ( !params.dimensionsAsFilters().isEmpty() )
+        if ( !params.getDimensionsAsFilters().isEmpty() )
         {
-            throw new IllegalQueryException( "Dimensions cannot be specified as dimension and filter simultaneously: " + params.dimensionsAsFilters() );
+            throw new IllegalQueryException( "Dimensions cannot be specified as dimension and filter simultaneously: " + params.getDimensionsAsFilters() );
         }
         
         if ( !params.hasPeriods() && !params.isSkipPartitioning() )
@@ -106,7 +106,15 @@ public class DefaultQueryPlanner
             throw new IllegalQueryException( "Table exceeds max number of cells: " + MAX_DIM_OPT_PERM );
         }
         
-        //TODO check if any dimension occur more than once
+        if ( !params.getDuplicateDimensions().isEmpty() )
+        {
+            throw new IllegalQueryException( "Dimensions cannot be specified more than once: " + params.getDuplicateDimensions() );
+        }
+        
+        if ( params.hasDimensionOrFilter( DataQueryParams.DATASET_DIM_ID ) && !params.getDataElementGroupSets().isEmpty() )
+        {
+            throw new IllegalQueryException( "Data sets and data element group sets cannot be specified simultaneously" );
+        }
     }
     
     public List<DataQueryParams> planQuery( DataQueryParams params, int optimalQueries, String tableName )
@@ -270,7 +278,7 @@ public class DefaultQueryPlanner
         }
         else
         {
-            throw new IllegalQueryException( "Query does not contain any period dimension options" );
+            throw new IllegalQueryException( "Query does not contain any period dimension items" );
         }
         
         return queries;
@@ -314,7 +322,7 @@ public class DefaultQueryPlanner
         }
         else
         {
-            throw new IllegalQueryException( "Query does not contain any period dimension options" );
+            throw new IllegalQueryException( "Query does not contain any period dimension items" );
         }
         
         return queries;        
@@ -381,7 +389,7 @@ public class DefaultQueryPlanner
      * meaningful to split on multiple data element group sets.
      * 
      * If the aggregation type is already set/overridden in the request, the
-     * query will be returned unchanged. If there are no dimension options specified
+     * query will be returned unchanged. If there are no dimension items specified
      * the aggregation type will fall back to sum.
      */
     private List<DataQueryParams> groupByAggregationType( DataQueryParams params )
@@ -411,11 +419,11 @@ public class DefaultQueryPlanner
             }
         }
         else if ( params.getDataElementGroupSets() != null && !params.getDataElementGroupSets().isEmpty() &&
-            ( groupSet = params.getDataElementGroupSets().iterator().next() ).getOptions() != null && !groupSet.getOptions().isEmpty() )
+            ( groupSet = params.getDataElementGroupSets().iterator().next() ).getItems() != null && !groupSet.getItems().isEmpty() )
         {
             PeriodType periodType = PeriodType.getPeriodTypeByName( params.getPeriodType() );
             
-            ListMap<AggregationType, IdentifiableObject> aggregationTypeDataElementGroupMap = getAggregationTypeDataElementGroupMap( groupSet.getOptions(), periodType );
+            ListMap<AggregationType, IdentifiableObject> aggregationTypeDataElementGroupMap = getAggregationTypeDataElementGroupMap( groupSet.getItems(), periodType );
 
             for ( AggregationType aggregationType : aggregationTypeDataElementGroupMap.keySet() )
             {

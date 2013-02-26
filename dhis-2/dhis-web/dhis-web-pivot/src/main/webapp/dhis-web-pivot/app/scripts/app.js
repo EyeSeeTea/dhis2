@@ -2200,7 +2200,7 @@ Ext.onReady( function() {
 				}
 
 				if (settings) {
-					pt.util.pivot.getTable(settings, pt, centerRegion);
+					pt.util.pivot.getTable(settings, pt);
 				}
 			};
 
@@ -2421,6 +2421,8 @@ Ext.onReady( function() {
 					s.sort('name', 'ASC');
 				});
 			}();
+
+			pt.container = centerRegion;
 
 			return viewport;
 		};

@@ -1,3 +1,13 @@
+<link href="../dhis-web-commons/javascripts/jQuery/ui/css/redmond/jquery-ui-1.9.1.custom.css" media="screen" rel="stylesheet" type="text/css">
+<link href="../dhis-web-commons/css/light_blue/light_blue.css" media="screen" rel="stylesheet" type="text/css">
+<link href="../dhis-web-commons/css/widgets.css" media="screen" rel="stylesheet" type="text/css">
+<link href="../dhis-web-commons/css/print.css" media="print" rel="stylesheet" type="text/css">
+<link href="../favicon.ico" rel="shortcut icon">
+<link rel="stylesheet" type="text/css" href="http://localhost:8080/dhis/dhis-web-commons/ckeditor/skins/kama/editor.css?t=B8DJ5M3"/>
+
+
+
+
 <script type="text/javascript">
   
 	jQuery(document).ready(	function()
@@ -37,12 +47,12 @@
 	padding: 2px;
 }
 
-#fixedAttrSelector, #identifiersSelector, #attributesSelector,  {
+#fixedAttrSelector, #identifiersSelector, #attributesSelector, #programSelector {
 	padding: 2px;
 }
 </style>
 
-<form id="saveDataEntryForm" name="saveDataEntryForm" action="savePatientRegistrationForm.action" method="post" onsubmit="validateForm();">
+<form id="saveDataEntryForm" name="saveDataEntryForm" action="savePatientRegistrationForm.action" method="post" onsubmit="return validateForm();">
 
 <input type="hidden" name="id" id="id" value="$!registrationForm.id"/>
 <input type="hidden" name="programId" id="programId" value="$!programId"/>
@@ -61,9 +71,6 @@
 			</td>
 			<td>
 				<input type="text" id="name" value="$!registrationForm.dataEntryForm.name" name="name" class="{validate:{required:true,rangelength:[4,150],alphanumericwithbasicpuncspaces:true,firstletteralphabet:false}}" style="width:30em;">
-			</td>	
-			<td align="right">
-				<input type="button" value="$i18n.getString( 'properties' )" onclick="openPropertiesSelector()"/><br>
 			</td>			
 		</tr>
 		<tr>
@@ -73,7 +80,10 @@
 	
 	<table width="100%">
 		<tr>
-			<th>$i18n.getString( "design_patient_registration_form" )</th>
+			<th>
+				$i18n.getString( "design_patient_registration_form" )
+				<input type='hidden' id='requiredField' name='requiredField' class="{validate:{required:true}}" title="$i18n.getString('please_insert_all_required_fields')">
+			</th>
 		</tr>
 		<tr>
 			<td>
@@ -82,19 +92,20 @@
 	        	</div>
 			</td>
 		</tr>
-		<tr>
-			<td><input type='hidden' id='requiredField' name='requiredField' class="{validate:{required:true}}"></td>
-		</tr>
 	</table>
 </div>
 
 <table width="100%">	
     <tr>
         <td>
-            <input type="submit" name="save" value="$i18n.getString( 'save' )" style="width:120px"/>
-            <input type="button" name="cancel" value="$i18n.getString( 'cancel' )" style="width:120px" onclick="window.location='patientRegistrationForm.action'">            
-			#if( $!registationForm.dataEntryForm )
-			<input type="button" name="delete" value="$i18n.getString( 'delete' )" style="width:120px" onclick="deleteDataEntryForm( $registrationForm.id )" />
+		    <button type="submit" id="saveButton"/>$i18n.getString( 'save' )</button>
+            <button type="button" id="cancelButton" onclick="window.location='patientRegistrationForm.action'">$i18n.getString( 'cancel' )</button>
+			&nbsp;&nbsp;<span style="color:#606060">|</span>&nbsp;
+		    <button type="button" id="propertiesButton" onclick="openPropertiesSelector()"/>$i18n.getString( 'insert_properties' )</button>
+			<button type="button" id="insertImagesButton">$i18n.getString( 'insert_images' )</button>
+			#if($!registrationForm.dataEntryForm)
+			&nbsp;&nbsp;<span style="color:#606060">|</span>&nbsp;
+		    <button type="button" id="deleteButton" onclick="deleteRegistrationForm( $registrationForm.id, '$registrationForm.dataEntryForm.name' )" />$i18n.getString( 'delete' )</button>
 			#end
         </td>		
     </tr>
@@ -106,9 +117,8 @@
 	<table id="fixedAttrTab">
 		<tr>
 			<td>
-				<input type='text' placeholder="$i18n.getString('filter')" style="width:278px;">
-				<input type='button' value="$i18n.getString('filter')" style="width:80px;">
-				<input type='button' value="$i18n.getString('clear')" style="width:80px;">
+				<input type='text' id='fixedAttrFilter' placeholder="$i18n.getString('filter')" style="width:365px;" onkeyup="filterList( this.value, 'fixedAttrSelector' )">
+				<input type='button' value="$i18n.getString('clear')" style="width:80px;" onclick="setFieldValue('fixedAttrFilter','');">
 			</td>
 		</tr>
 		<tr>
@@ -131,9 +141,8 @@
 	<table id="identifierTypeTab" class='hidden'>
 		<tr>
 			<td>
-				<input type='text' placeholder="$i18n.getString('filter')" style="width:278px;">
-				<input type='button' value="$i18n.getString('filter')" style="width:80px;">
-				<input type='button' value="$i18n.getString('clear')" style="width:80px;">
+				<input type='text' id='identifierTypeFilter' placeholder="$i18n.getString('filter')" style="width:365px;" onkeyup="filterList( this.value, 'identifiersSelector' )">
+				<input type='button' value="$i18n.getString('clear')" style="width:80px;" onclick="setFieldValue('identifierTypeFilter','');">
 			</td>
 		</tr>
 		<tr>
@@ -150,9 +159,8 @@
 	<table id="attributeTab" class='hidden'>
 		<tr>
 			<td>
-				<input type='text' placeholder="$i18n.getString('filter')" style="width:278px;">
-				<input type='button' value="$i18n.getString('filter')" style="width:80px;">
-				<input type='button' value="$i18n.getString('clear')" style="width:80px;">
+				<input type='text' id='attributeFilter' placeholder="$i18n.getString('filter')" style="width:365px;" onkeyup="filterList( this.value, 'attributesSelector' )">
+				<input type='button' value="$i18n.getString('clear')" style="width:80px;" onclick="setFieldValue('attributeFilter','');">
 			</td>
 		</tr>
 		<tr>
@@ -170,8 +178,7 @@
 	<table id="programAttrTab" class='hidden'>
 		<tr>
 			<td>
-				<input type='text' placeholder="$i18n.getString('filter')" style="width:278px;">
-				<input type='button' value="$i18n.getString('filter')" style="width:80px;">
+				<input type='text' placeholder="$i18n.getString('filter')" style="width:365px;" onkeyup="filterList( this.value, 'programAttrSelector' )">
 				<input type='button' value="$i18n.getString('clear')" style="width:80px;">
 			</td>
 		</tr>
@@ -197,6 +204,8 @@
 				#if($!program)
 					<button type="button" id="programAttrButton" onclick="programAttrOnClick()">$i18n.getString( "program" )</button>
 				#end
+				&nbsp;&nbsp;<span style="color:#606060">|</span>&nbsp;
+				<button type="button" id="insertButton" onclick="insertElement( 'fixedAttr' )" >$i18n.getString( "insert" )</button>
 			</td>
 		</tr>
 	</table>
@@ -205,7 +214,30 @@
 
 </div>
 
+<div id="imageDialog" title="$i18n.getString( 'insert_images' )" class='hidden'>
+	<div style="margin:4px">
+		<div>
+			<select id="imageSelector" multiple="multiple" style="height: 200px; width:100%;" ondblclick='insertImage();'>
+			#foreach( $flag in $flags )
+			<option value="../dhis-web-commons/flags/${flag}.png">$i18n.getString( ${flag} )</option>
+			#end
+			</select>
+		</div>
+		<div style="margin-top:6px"><button type="button" id="insertImageButton">$i18n.getString( "insert" )</button></div>
+	</div>
+</div>
+
+<div id="validateDiv"></div>
+
 <script>
 	var i18n_delete_program_data_entry_confirm = '$encoder.jsEscape( $i18n.getString( "delete_program_data_entry_confirm" ) , "'" )';
 	var i18n_property_is_inserted = '$encoder.jsEscape( $i18n.getString( "property_is_inserted" ) , "'" )';
+	var i18n_please_insert_all_required_fields = '$encoder.jsEscape( $i18n.getString( "please_insert_all_required_fields" ) , "'" )';
+	var i18n_required_fields_valivation = '$encoder.jsEscape( $i18n.getString( "required_fields_valivation" ) , "'" )';
+	var i18n_registration_date = '$encoder.jsEscape( $i18n.getString( "registration_date" ) , "'" )';
+	var i18n_full_name = '$encoder.jsEscape( $i18n.getString( "full_name" ) , "'" )';;
+	var i18n_gender = '$encoder.jsEscape( $i18n.getString( "gender" ) , "'" )';;
+	var i18n_date_of_birth = '$encoder.jsEscape( $i18n.getString( "date_of_birth" ) , "'" )';
+	var i18n_properties = '$encoder.jsEscape( $i18n.getString( "properties" ) , "'" )';
+	var i18n_confirm_delete = '$encoder.jsEscape( $i18n.getString( "confirm_delete_patient_registration_form" ) , "'" )';
 </script>

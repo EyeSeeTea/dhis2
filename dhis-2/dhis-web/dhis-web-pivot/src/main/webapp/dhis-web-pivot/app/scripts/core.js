@@ -447,7 +447,7 @@ PT.core.getUtils = function(pt) {
 			return '<td ' + cls + ' ' + colspan + ' ' + rowspan + ' style="padding:' + cellPadding + '; font-size:' + fontSize + ';">' + htmlValue + '</td>';
 		},
 
-		getTable: function(settings, pt, container) {
+		getTable: function(settings, pt) {
 			var options = settings.options,
 				getParamStringFromDimensions,
 				extendSettings,
@@ -1353,7 +1353,7 @@ PT.core.getUtils = function(pt) {
 					xColAxis,
 					xRowAxis;
 
-				pt.util.mask.showMask(container);
+				pt.util.mask.showMask(pt.viewport);
 
 
 				xSettings = extendSettings(settings);
@@ -1395,15 +1395,8 @@ PT.core.getUtils = function(pt) {
 
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
 
-						if (!pt.el && container) {
-							el = Ext.get('pivottable');
-
-							if (el) {
-								el.destroy();
-							}
-
-							container.update(html);
-						}
+						pt.container.removeAll(true);
+						pt.container.update(html);
 
 						pt.util.mask.hideMask();
 					}
@@ -1562,7 +1555,7 @@ PT.core.getInstance = function(config) {
 	var pt = {};
 
 	pt.baseUrl = config && config.baseUrl ? config.baseUrl : '../../';
-	pt.el = config && config.el ? config.el : null;
+	pt.el = config && config.el ? config.el : 'viewport';
 
 	pt.conf = PT.core.getConfigs();
 	pt.util = PT.core.getUtils(pt);
