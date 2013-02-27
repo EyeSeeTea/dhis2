@@ -456,7 +456,6 @@ PT.core.getUtils = function(pt) {
 				extendAxis,
 				extendRowAxis,
 				getTableHtmlArrays,
-				getTablePanel,
 				initialize;
 
 			extendSettings = function(settings) {
@@ -716,12 +715,13 @@ PT.core.getUtils = function(pt) {
 				return response;
 			};
 
-			extendAxis = function(axis, xResponse) {
+			extendAxis = function(type, axis, xResponse) {
 				if (!axis || (Ext.isArray(axis) && !axis.length)) {
 					return;
 				}
 
 				var axis = Ext.clone(axis),
+					spanType = type === 'col' ? 'colSpan' : 'rowSpan',
 					nCols = 1,
 					aNumCols = [],
 					aAccNumCols = [],
@@ -729,6 +729,7 @@ PT.core.getUtils = function(pt) {
 					aGuiItems = [],
 					aAllItems = [],
 					aColIds = [],
+					aAllObjects = [],
 					aUniqueIds;
 
 				aUniqueIds = function() {
@@ -831,12 +832,57 @@ PT.core.getUtils = function(pt) {
 	//aColIds	= [ aaaaaaaaBBBBBBBBccccccc, aaaaaaaaaccccccccccbbbbbbbbbb, ... ]
 
 
+
+				// allObjects
+
+				for (var i = 0, allRow; i < aAllItems.length; i++) {
+					allRow = [];
+
+					for (var j = 0; j < aAllItems[i].length; j++) {
+						allRow.push({
+							id: aAllItems[i][j]
+						});
+					}
+
+					aAllObjects.push(allRow);
+				}
+
+				// create objects
+				for (var i = 0; i < aAllObjects.length; i++) {
+					for (var j = 0, object; j < aAllObjects[i].length; j += aSpan[i]) {
+						object = aAllObjects[i][j];
+						object[spanType] = aSpan[i];
+					}
+				}
+
+				// add parents
+				if (aAllObjects.length > 1) {
+					for (var i = 1, allRow; i < aAllObjects.length; i++) {
+						allRow = aAllObjects[i];
+
+						for (var j = 0, obj, sizeCount = 0, span = aSpan[i - 1], parentObj = aAllObjects[i - 1][0]; j < allRow.length; j++) {
+							obj = allRow[j];
+							obj.parent = parentObj;
+							sizeCount++;
+
+							if (sizeCount === span) {
+								parentObj = aAllObjects[i - 1][sizeCount];
+								sizeCount = 0;
+							}
+						}
+					}
+				}
+
 				return {
+					type: type,
 					items: axis,
 					xItems: {
 						unique: aUniqueIds,
 						gui: aGuiItems,
 						all: aAllItems
+					},
+					objects: {
+						all: aAllObjects
 					},
 					ids: aColIds,
 					span: aSpan,
@@ -845,38 +891,38 @@ PT.core.getUtils = function(pt) {
 				};
 			};
 
-			extendRowAxis = function(rowAxis, xResponse) {
-				if (!rowAxis || (Ext.isArray(rowAxis) && !rowAxis.length)) {
-					return;
-				}
+			//extendRowAxis = function(rowAxis, xResponse) {
+				//if (!rowAxis || (Ext.isArray(rowAxis) && !rowAxis.length)) {
+					//return;
+				//}
 
-				var xRowAxis = extendAxis(rowAxis, xResponse),
-					all = xRowAxis.xItems.all,
-					allObjects = [];
+				//var xRowAxis = extendAxis(rowAxis, xResponse),
+					//all = xRowAxis.xItems.all,
+					//allObjects = [];
 
-				for (var i = 0, allRow; i < all.length; i++) {
-					allRow = [];
+				//for (var i = 0, allRow; i < all.length; i++) {
+					//allRow = [];
 
-					for (var j = 0; j < all[i].length; j++) {
-						allRow.push({
-							id: all[i][j]
-						});
-					}
+					//for (var j = 0; j < all[i].length; j++) {
+						//allRow.push({
+							//id: all[i][j]
+						//});
+					//}
 
-					allObjects.push(allRow);
-				}
+					//allObjects.push(allRow);
+				//}
 
-				for (var i = 0; i < allObjects.length; i++) {
-					for (var j = 0, object; j < allObjects[i].length; j += xRowAxis.span[i]) {
-						object = allObjects[i][j];
-						object.rowSpan = xRowAxis.span[i];
-					}
-				}
+				//for (var i = 0; i < allObjects.length; i++) {
+					//for (var j = 0, object; j < allObjects[i].length; j += xRowAxis.span[i]) {
+						//object = allObjects[i][j];
+						//object.rowSpan = xRowAxis.span[i];
+					//}
+				//}
 
-				xRowAxis.xItems.allObjects = allObjects;
+				//xRowAxis.xItems.allObjects = allObjects;
 
-				return xRowAxis;
-			};
+				//return xRowAxis;
+			//};
 
 			getTableHtml = function(xColAxis, xRowAxis, xResponse) {
 				var getEmptyHtmlArray,
@@ -1001,7 +1047,7 @@ PT.core.getUtils = function(pt) {
 					}
 
 					size = xRowAxis.size;
-					allObjects = xRowAxis.xItems.allObjects;
+					allObjects = xRowAxis.objects.all;
 					uniqueSize = xRowAxis.xItems.unique[xRowAxis.xItems.unique.length - 1].length;
 
 					// Dim html items
@@ -1339,14 +1385,6 @@ PT.core.getUtils = function(pt) {
 				return getHtml(htmlArray);
 			};
 
-			getTablePanel = function(html) {
-				return Ext.create('Ext.panel.Panel', {
-					bodyStyle: 'border:0 none',
-					autoScroll: true,
-					html: html
-				});
-			};
-
 			initialize = function() {
 				var xSettings,
 					xResponse,
@@ -1389,8 +1427,8 @@ PT.core.getUtils = function(pt) {
 						xResponse = extendResponse(response, xSettings);
 console.log("xResponse", xResponse);
 
-						xColAxis = extendAxis(xSettings.col, xResponse);
-						xRowAxis = extendRowAxis(xSettings.row, xResponse);
+						xColAxis = extendAxis('col', xSettings.col, xResponse);
+						xRowAxis = extendAxis('row', xSettings.row, xResponse);
 console.log("xColAxis", xColAxis);
 console.log("xRowAxis", xRowAxis);
 
