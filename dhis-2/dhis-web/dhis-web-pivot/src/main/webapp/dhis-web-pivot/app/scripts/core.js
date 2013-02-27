@@ -928,6 +928,7 @@ PT.core.getUtils = function(pt) {
 				var getEmptyHtmlArray,
 					getColAxisHtmlArray,
 					getRowAxisHtmlArray,
+					rowAxisHtmlArray,
 					getValueHtmlArray,
 					getRowTotalHtmlArray,
 					getColTotalHtmlArray,
@@ -1081,6 +1082,8 @@ PT.core.getUtils = function(pt) {
 						}
 					}
 
+					rowAxisHtmlArray = a;
+
 					return a;
 				};
 
@@ -1093,7 +1096,21 @@ PT.core.getUtils = function(pt) {
 						rowRootSize = xRowAxis ? xRowAxis.xItems.unique[0].length : null,
 						hasSubtotals,
 						subtotal,
-						td;
+						td,
+						recursiveReduce;
+
+					recursiveReduce = function(obj) {
+						if (!obj.rowSpan || (Ext.isNumber(obj.rowSpan) && obj.rowSpan === 1)) {
+							obj.hidden = true;
+						}
+						else {
+							obj.rowSpan--;
+						}
+
+						if (obj.parent) {
+							recursiveReduce(obj.parent);
+						}
+					};
 
 					// Value / htmlvalue items
 					for (var i = 0, valueItemRow, htmlValueItemRow; i < rowSize; i++) {
@@ -1102,12 +1119,19 @@ PT.core.getUtils = function(pt) {
 
 						for (var j = 0, id, value; j < colSize; j++) {
 							id = (xColAxis ? xColAxis.ids[j] : '') + (xRowAxis ? xRowAxis.ids[i] : '');
+							value = xResponse.idValueMap[id];
 
-							value = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : 0; //todo
-							htmlValue = xResponse.idValueMap[id] ? parseFloat(xResponse.idValueMap[id]) : '-'; //todo
+							value = value ? parseFloat(value) : 0; //todo
+							htmlValue = value || '-'; //todo
 
 							valueItemRow.push(value);
-							htmlValueItemRow.push({value: value, htmlValue: htmlValue, cls: 'pivot-value'});
+							htmlValueItemRow.push({
+								type: 'value',
+								cls: 'pivot-value',
+								value: value,
+								htmlValue: htmlValue,
+								empty: !!(htmlValue === '-')
+							});
 						}
 
 						valueItems.push(valueItemRow);
@@ -1130,7 +1154,12 @@ PT.core.getUtils = function(pt) {
 								row.push(item);
 
 								if (colCount === colUniqueFactor) {
-									row.push({value: rowSubTotal, htmlValue: rowSubTotal, cls: 'pivot-value-subtotal'});
+									row.push({
+										type: 'subtotal',
+										value: rowSubTotal,
+										htmlValue: rowSubTotal,
+										cls: 'pivot-value-subtotal'
+									});
 									colCount = 0;
 									rowSubTotal = 0;
 								}
@@ -1164,7 +1193,12 @@ PT.core.getUtils = function(pt) {
 
 								if (rowCount === rowUniqueFactor) {
 									var cls = xColAxis && doSubTotals(xColAxis) && (item.cls === 'pivot-value-subtotal') ? 'pivot-value-subtotal-total' : 'pivot-value-subtotal';
-									subTotals[subTotalsIndex].push({value: subTotal, htmlValue: subTotal, cls: cls});
+									subTotals[subTotalsIndex].push({
+										type: 'subtotal',
+										value: subTotal,
+										htmlValue: subTotal,
+										cls: cls
+									});
 									rowCount = 0;
 									subTotal = 0;
 									subTotalsIndex++;
@@ -1200,13 +1234,37 @@ PT.core.getUtils = function(pt) {
 								//cls = value < 5000 ? 'bad' : (value < 20000 ? 'medium' : 'good'); //basic legendset
 							//}
 
-							row.push(pt.util.pivot.getTdHtml(options, {
-								cls: item.cls,
-								htmlValue: pt.util.number.pp(item.htmlValue)
-							}));
+							row.push(item);
 						}
 
 						a.push(row);
+					}
+
+					// Look for and hide empty rows
+					if (true) {
+						for (var i = 0, row, empty, parent; i < htmlValueItems.length; i++) {
+							row = htmlValueItems[i];
+							empty = true;
+
+							for (var j = 0, empty = true; j < row.length; j++) {
+								if (!row[j].empty) {
+									empty = false;
+									break;
+								}
+							}
+
+							if (empty && xRowAxis) {
+
+								// Hide values
+								for (var j = 0; j < row.length; j++) {
+									row[j].hidden = true;
+								}
+
+								// Hide/reduce parent span
+								parent = xRowAxis.objects.all[xRowAxis.dims-1][i];
+								recursiveReduce(parent);
+							}
+						}
 					}
 
 					return a;
