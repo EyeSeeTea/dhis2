@@ -847,7 +847,7 @@ PT.core.getUtils = function(pt) {
 					aAllObjects.push(allRow);
 				}
 
-				// create objects
+				// add span
 				for (var i = 0; i < aAllObjects.length; i++) {
 					for (var j = 0, object; j < aAllObjects[i].length; j += aSpan[i]) {
 						object = aAllObjects[i][j];
@@ -866,7 +866,7 @@ PT.core.getUtils = function(pt) {
 							sizeCount++;
 
 							if (sizeCount === span) {
-								parentObj = aAllObjects[i - 1][sizeCount];
+								parentObj = aAllObjects[i - 1][j];
 								sizeCount = 0;
 							}
 						}
@@ -1034,7 +1034,6 @@ PT.core.getUtils = function(pt) {
 
 					return a;
 				};
-
 
 				getRowAxisHtmlArray = function() {
 					var a = [],
