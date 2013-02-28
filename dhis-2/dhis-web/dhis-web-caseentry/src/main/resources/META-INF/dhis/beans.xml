@@ -701,8 +701,6 @@
 	<bean id="org.hisp.dhis.caseentry.action.patient.GetPartnerAction"
 		class="org.hisp.dhis.caseentry.action.patient.GetPartnerAction" scope="prototype">
 		<property name="patientService" ref="org.hisp.dhis.patient.PatientService" />
-		<property name="patientIdentifierService"
-			ref="org.hisp.dhis.patient.PatientIdentifierService" />
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 		<property name="patientAttributeValueService"
 			ref="org.hisp.dhis.patientattributevalue.PatientAttributeValueService" />
@@ -880,6 +878,10 @@
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
 		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
 		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+		<property name="patientAttributeService"
+			ref="org.hisp.dhis.patient.PatientAttributeService" />
+		<property name="patientIdentifierTypeService"
+			ref="org.hisp.dhis.patient.PatientIdentifierTypeService" />
 	</bean>
 
 	<bean

@@ -984,13 +984,14 @@ PT.core.getUtils = function(pt) {
 					//return (multiItemDimension > 1);
 				};
 
-				getEmptyHtmlArray = function() {
-					return (xColAxis && xRowAxis) ?
-						pt.util.pivot.getTdHtml(options, {cls: 'pivot-dim-empty', colspan: xRowAxis.dims, rowspan: xColAxis.dims}) : '';
-				};
-
 				getColAxisHtmlArray = function() {
-					var a = [];
+					var a = [],
+						getEmptyHtmlArray;
+
+					getEmptyHtmlArray = function() {
+						return (xColAxis && xRowAxis) ?
+							pt.util.pivot.getTdHtml(options, {cls: 'pivot-dim-empty', colspan: xRowAxis.dims, rowspan: xColAxis.dims}) : '';
+					};
 
 					if (!(xColAxis && Ext.isObject(xColAxis))) {
 						return a;
@@ -1034,6 +1035,7 @@ PT.core.getUtils = function(pt) {
 
 					return a;
 				};
+
 
 				getRowAxisHtmlArray = function() {
 					var a = [],

@@ -14,7 +14,7 @@
   <bean id="org.hisp.dhis.dxf2.datavalueset.DataValueSetStore"
       class="org.hisp.dhis.dxf2.datavalueset.SpringDataValueSetStore" />
 
-  <!-- register object handlers -->
+  <!-- register idObject handlers -->
 
   <bean id="organisationUnitObjectHandler"
       class="org.hisp.dhis.dxf2.metadata.handlers.OrganisationUnitObjectHandler" scope="prototype"/>
@@ -104,6 +104,10 @@
 
   <bean id="indicatorGroupSetImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter">
     <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.indicator.IndicatorGroupSet" />
+  </bean>
+
+  <bean id="mapImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.mapping.Map" />
   </bean>
 
   <bean id="mapViewImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter">

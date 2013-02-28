@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.metadata;
 
 /*
- * Copyright (c) 2012, University of Oslo
+ * Copyright (c) 2012-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,6 +100,10 @@ final public class ExchangeClasses
         allExportClasses.put( OptionSet.class, "optionSets" );
         allExportClasses.put( Attribute.class, "attributeTypes" );
 
+        allExportClasses.put( MapLegend.class, "mapLegends" );
+        allExportClasses.put( MapLegendSet.class, "mapLegendSets" );
+        allExportClasses.put( MapLayer.class, "mapLayers" );
+
         allExportClasses.put( OrganisationUnit.class, "organisationUnits" );
         allExportClasses.put( OrganisationUnitLevel.class, "organisationUnitLevels" );
         allExportClasses.put( OrganisationUnitGroup.class, "organisationUnitGroups" );
@@ -131,11 +135,8 @@ final public class ExchangeClasses
         allExportClasses.put( ValidationRule.class, "validationRules" );
         allExportClasses.put( ValidationRuleGroup.class, "validationRuleGroups" );
 
-        allExportClasses.put( org.hisp.dhis.mapping.Map.class, "maps" );
         allExportClasses.put( MapView.class, "mapViews" );
-        allExportClasses.put( MapLegend.class, "mapLegends" );
-        allExportClasses.put( MapLegendSet.class, "mapLegendSets" );
-        allExportClasses.put( MapLayer.class, "mapLayers" );
+        allExportClasses.put( org.hisp.dhis.mapping.Map.class, "maps" );
 
         allExportClasses.put( User.class, "users" );
         allExportClasses.put( UserGroup.class, "userGroups" );
