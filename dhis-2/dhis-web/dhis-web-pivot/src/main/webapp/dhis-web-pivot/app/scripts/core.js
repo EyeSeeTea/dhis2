@@ -1246,10 +1246,10 @@ PT.core.getUtils = function(pt) {
 							count++;
 
 							for (var j = 0; j < xRowAxis.objects.all.length; j++) {
-								row.push(xRowAxis.objects.all[i][j]);
+								row.push(xRowAxis.objects.all[j][i]);
 
 								if (j === xRowAxis.dims - 1) {
-									collapsed.push(!!xRowAxis.objects.all[i][j].collapsed);
+									collapsed.push(!!xRowAxis.objects.all[j][i].collapsed);
 								}
 							}
 
@@ -1260,59 +1260,10 @@ PT.core.getUtils = function(pt) {
 									rowAxisObjects.push(getSubTotalRow());
 								}
 								collapsed = [];
+								count = 0;
 							}
 						}
-
-
-
-
-
-						// Get subtotal indexes and booleans
-						for (var i = 0, tmp = [], obj, subTotalIndex; i < topLevelDimObjects.length; i++) {
-							obj = topLevelDimObjects[i];
-							tmp.push(obj);
-
-							if (obj.root) {
-								if (!obj.collapsed) {
-									subTotalIndexes.push(i + xRowAxis.span[0]);
-								}
-								isRootCollapsed.push(!!obj.collapsed);
-							}
-						}
-
-						// Add axis subtotal objects
-						for (var i = 0, dim; i < all.length; i++) {
-							dim = [];
-
-							for (var j = 0, subTotalObj; j < all[i].length; j++) {
-								dim.push(all[i][j]);
-
-								if (Ext.Array.contains(subTotalIndexes, j)) {
-									subTotalObj = {};
-									subTotalObj.cls = 'pivot-dim-subtotal';
-
-									if (i === 0) {
-										subTotalObj.htmlValue = 'Total';
-										subTotalObj.colSpan = xRowAxis.dims;
-									}
-									//else {
-										//subTotalObj.hidden = true;
-									//}
-
-									dim.push(subTotalObj);
-								}
-							}
-
-							allObjects.push(dim);
-						}
-
-						// Add value subtotal objects
-						for (var i = 0; i <
-
-
-
-
-
+console.log("rowAxisObjects", rowAxisObjects);
 
 						// Create sub total arrays
 						for (var i = 0; i < topLevelDimObjects.length; i++) {
@@ -1382,14 +1333,7 @@ PT.core.getUtils = function(pt) {
 
 					// Merge dim, value, total
 					for (var i = 0, row; i < rowSize; i++) {
-						row = [];
-
-						// Dim
-						for (var j = 0; j < xRowAxis.objects.all.length; j++) {
-							row.push(xRowAxis.objects.all[j][i]);
-						}
-
-						row = row.concat(valueObjects[i], rowValueTotalObjects[i]);
+						row = [].concat(rowAxisObjects[i], valueObjects[i], rowValueTotalObjects[i]);
 
 						mergedObjects.push(row);
 					}
