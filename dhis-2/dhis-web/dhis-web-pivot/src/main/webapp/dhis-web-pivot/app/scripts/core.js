@@ -1229,8 +1229,11 @@ PT.core.getUtils = function(pt) {
 								obj.cls += !Ext.Array.contains(collapsed, false) ? ' collapsed' : '';
 
 								if (i === 0) {
-									obj.htmlValue = 'Total'; //i18n
+									obj.htmlValue = '&nbsp;'; //i18n
 									obj.colSpan = xRowAxis.dims;
+								}
+								else {
+									obj.hidden = true;
 								}
 
 								row.push(obj);
@@ -1265,25 +1268,26 @@ PT.core.getUtils = function(pt) {
 console.log("axisObjects", axisObjects);
 
 						// Create sub total arrays
-						for (var i = 0; i < x.length; i++) {
-							if (!topLevelDimObjects[i].hidden) {
-								subTotals.push([]);
-							}
+						for (var i = 0; i < xRowAxis.size + xRowAxis.xItems.gui[0].length; i++) {
+							tmp.push([]);
 						}
 
 						// Populate sub total arrays
-						for (var i = 0, subTotal, subTotalsIndex; i < valueObjects[0].length; i++) {
+						for (var i = 0, subTotal, empty; i < valueObjects[0].length; i++) {
 							subTotal = 0;
-							subTotalsIndex = 0;
+							empty = [];
 
-							for (var j = 0, rowCount = 0, item; j < xRowAxis.size; j++) {
+							for (var j = 0, rowCount = 0, tmpCount = 0, item; j < xRowAxis.size; j++) {
 								item = valueObjects[j][i];
+								tmp[tmpCount++].push(item);
 								subTotal += item.value;
+								empty.push(!!item.empty);
 								rowCount++;
 
 								if (rowCount === rowUniqueFactor) {
 									var cls = xColAxis && doSubTotals(xColAxis) && (item.cls === 'pivot-value-subtotal') ? 'pivot-value-subtotal-total' : 'pivot-value-subtotal';
-									subTotals[subTotalsIndex].push({
+									cls += !Ext.Array.contains(empty, false) ? ' collapsed' : '';
+									tmp[tmpCount++].push({
 										type: 'subtotal',
 										value: subTotal,
 										htmlValue: subTotal,
@@ -1291,26 +1295,29 @@ console.log("axisObjects", axisObjects);
 									});
 									rowCount = 0;
 									subTotal = 0;
-									subTotalsIndex++;
+									empty = [];
 								}
 							}
 						}
+console.log(tmp);
+valueObjects = tmp;
 
-						// Add sub total arrays to htmlValueItems
-						for (var i = 0, count = 0; i < htmlValueItems.length; i++) {
-							tmp.push(htmlValueItems[i]);
-							count++;
+						//// Add sub total arrays to htmlValueItems
+						//for (var i = 0, count = 0; i < htmlValueItems.length; i++) {
+							//tmp.push(htmlValueItems[i]);
+							//count++;
 
-							if (count === rowUniqueFactor) {
-								count = 0;
+							//if (count === rowUniqueFactor) {
+								//count = 0;
 
-								var sta = subTotals.shift();
+								//var sta = subTotals.shift();
 
-								tmp.push(sta);
-							}
-						}
+								//tmp.push(sta);
+							//}
+						//}
 
-						htmlValueItems = tmp;
+						//htmlValueItems = tmp;
+					//}
 					}
 
 					// Value html items
@@ -1332,7 +1339,7 @@ console.log("axisObjects", axisObjects);
 
 					// Merge dim, value, total
 					for (var i = 0, row; i < rowSize; i++) {
-						row = [].concat(rowAxisObjects[i], valueObjects[i], rowValueTotalObjects[i]);
+						row = [].concat(axisObjects[i], valueObjects[i], rowValueTotalObjects[i]);
 
 						mergedObjects.push(row);
 					}
