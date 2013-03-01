@@ -859,6 +859,7 @@ PT.core.getUtils = function(pt) {
 						object = aAllObjects[i][j];
 						object[spanType] = aSpan[i];
 						object.children = aSpan[i];
+						object.root = true;
 					}
 				}
 
@@ -1065,13 +1066,16 @@ PT.core.getUtils = function(pt) {
 
 				getValueHtmlArray = function() {
 					var a = [],
+						rowAxisObjects = [],
 						valueObjects = [],
 						rowValueTotalObjects = [],
 						mergedObjects = [],
+						allObjects = [],
 						valueItemsCopy,
 						colSize = xColAxis ? xColAxis.size : 1,
 						rowSize = xRowAxis ? xRowAxis.size : 1,
 						rowRootSize = xRowAxis ? xRowAxis.xItems.unique[0].length : null,
+						all = xRowAxis ? Ext.clone(xRowAxis.objects.all) : [],
 						subtotal,
 						td,
 						recursiveReduce;
@@ -1097,8 +1101,8 @@ PT.core.getUtils = function(pt) {
 					};
 
 					// Populate dim objects
-					for (var i = 0, row; i < xRowAxis.objects.all.length; i++) {
-						row = xRowAxis.objects.all[i];
+					for (var i = 0, row; i < all.length; i++) {
+						row = all[i];
 
 						for (var j = 0; j < row.length; j++) {
 							row[j].cls = 'pivot-dim td-nobreak';
@@ -1170,7 +1174,7 @@ PT.core.getUtils = function(pt) {
 								rowValueTotalObjects[i].collapsed = true;
 
 								// Hide/reduce parent dim span
-								parent = xRowAxis.objects.all[xRowAxis.dims-1][i];
+								parent = all[xRowAxis.dims-1][i];
 								recursiveReduce(parent);
 							}
 						}
@@ -1206,17 +1210,115 @@ PT.core.getUtils = function(pt) {
 							tmp.push(row);
 						}
 
-						htmlValueItems = tmp;
+						valueObjects = tmp;
 					}
 
 					if (doSubTotals(xRowAxis)) {
 						var tmp = [],
 							subTotals = [],
-							count;
+							topLevelDimObjects = all[0],
+							count,
+							isRootCollapsed = [],
+							subTotalIndexes = [];
+
+						getSubTotalRow = function() {
+							var row = [];
+
+							for (var i = 0, obj; i < xRowAxis.dims; i++) {
+								obj = {};
+								obj.cls = 'pivot-dim-subtotal';
+
+								if (i === 0) {
+									obj.htmlValue = 'Total'; //i18n
+									obj.colSpan = xRowAxis.dims;
+								}
+
+								row.push(obj);
+							}
+
+							return row;
+						};
+
+						// Row axis objects
+						for (var i = 0, row, collapsed, count = 0; i < xRowAxis.objects.all[0].length; i++) {
+							row = [];
+							collapsed = [];
+							count++;
+
+							for (var j = 0; j < xRowAxis.objects.all.length; j++) {
+								row.push(xRowAxis.objects.all[i][j]);
+
+								if (j === xRowAxis.dims - 1) {
+									collapsed.push(!!xRowAxis.objects.all[i][j].collapsed);
+								}
+							}
+
+							rowAxisObjects.push(row);
+
+							if (count === xRowAxis.span[0]) {
+								if (Ext.Array.contains(collapsed, false)) {
+									rowAxisObjects.push(getSubTotalRow());
+								}
+								collapsed = [];
+							}
+						}
+
+
+
+
+
+						// Get subtotal indexes and booleans
+						for (var i = 0, tmp = [], obj, subTotalIndex; i < topLevelDimObjects.length; i++) {
+							obj = topLevelDimObjects[i];
+							tmp.push(obj);
+
+							if (obj.root) {
+								if (!obj.collapsed) {
+									subTotalIndexes.push(i + xRowAxis.span[0]);
+								}
+								isRootCollapsed.push(!!obj.collapsed);
+							}
+						}
+
+						// Add axis subtotal objects
+						for (var i = 0, dim; i < all.length; i++) {
+							dim = [];
+
+							for (var j = 0, subTotalObj; j < all[i].length; j++) {
+								dim.push(all[i][j]);
+
+								if (Ext.Array.contains(subTotalIndexes, j)) {
+									subTotalObj = {};
+									subTotalObj.cls = 'pivot-dim-subtotal';
+
+									if (i === 0) {
+										subTotalObj.htmlValue = 'Total';
+										subTotalObj.colSpan = xRowAxis.dims;
+									}
+									//else {
+										//subTotalObj.hidden = true;
+									//}
+
+									dim.push(subTotalObj);
+								}
+							}
+
+							allObjects.push(dim);
+						}
+
+						// Add value subtotal objects
+						for (var i = 0; i <
+
+
+
+
+
 
 						// Create sub total arrays
-						for (var i = 0; i < rowRootSize; i++) {
-							subTotals.push([]);
+						for (var i = 0; i < topLevelDimObjects.length; i++) {
+							if (!topLevelDimObjects[i].hidden) {
+								subTotals.push([]);
+							}
 						}
 
 						// Populate sub total arrays
@@ -1308,51 +1410,51 @@ aa = a;
 					return a;
 				};
 
-				getRowTotalHtmlArray = function() {
-					var totalRowItems = [],
-						vItems = Ext.clone(valueItems),
-						a = [];
+				//getRowTotalHtmlArray = function() {
+					//var totalRowItems = [],
+						//vItems = Ext.clone(valueItems),
+						//a = [];
 
-					if (xColAxis) {
+					//if (xColAxis) {
 
-						// Total row items
-						for (var i = 0, rowSum; i < vItems.length; i++) {
-							rowSum = Ext.Array.sum(vItems[i]);
-							totalRowItems.push({value: rowSum, htmlValue: rowSum, cls: 'pivot-value-total'});
-						}
+						//// Total row items
+						//for (var i = 0, rowSum; i < vItems.length; i++) {
+							//rowSum = Ext.Array.sum(vItems[i]);
+							//totalRowItems.push({value: rowSum, htmlValue: rowSum, cls: 'pivot-value-total'});
+						//}
 
-						if (xRowAxis && doSubTotals(xRowAxis)) {
-							var tmp = [];
+						//if (xRowAxis && doSubTotals(xRowAxis)) {
+							//var tmp = [];
 
-							for (var i = 0, rowCount = 0, subTotal = 0; i < totalRowItems.length; i++) {
-								tmp.push(totalRowItems[i]);
-								rowCount++;
-								subTotal += totalRowItems[i].value;
+							//for (var i = 0, rowCount = 0, subTotal = 0; i < totalRowItems.length; i++) {
+								//tmp.push(totalRowItems[i]);
+								//rowCount++;
+								//subTotal += totalRowItems[i].value;
 
-								if (rowCount === rowUniqueFactor) {
-									tmp.push({value: subTotal, htmlValue: subTotal, cls: 'pivot-value-total-subgrandtotal'});
-									rowCount = 0;
-									subTotal = 0;
-								}
-							}
+								//if (rowCount === rowUniqueFactor) {
+									//tmp.push({value: subTotal, htmlValue: subTotal, cls: 'pivot-value-total-subgrandtotal'});
+									//rowCount = 0;
+									//subTotal = 0;
+								//}
+							//}
 
-							totalRowItems = tmp;
-						}
+							//totalRowItems = tmp;
+						//}
 
-						// Total row html items
-						for (var i = 0, item; i < totalRowItems.length; i++) {
-							item = totalRowItems[i];
-							item.htmlValue = pt.util.number.roundIf(item.htmlValue, 1);
+						//// Total row html items
+						//for (var i = 0, item; i < totalRowItems.length; i++) {
+							//item = totalRowItems[i];
+							//item.htmlValue = pt.util.number.roundIf(item.htmlValue, 1);
 
-							a.push([pt.util.pivot.getTdHtml(options, {
-								cls: item.cls,
-								htmlValue: pt.util.number.pp(item.htmlValue)
-							})]);
-						}
-					}
+							//a.push([pt.util.pivot.getTdHtml(options, {
+								//cls: item.cls,
+								//htmlValue: pt.util.number.pp(item.htmlValue)
+							//})]);
+						//}
+					//}
 
-					return a;
-				};
+					//return a;
+				//};
 
 
 				getColTotalHtmlArray = function() {
