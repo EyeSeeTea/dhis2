@@ -84,11 +84,15 @@ body.x-windows {
 	position: fixed;
 }
 
-.nobreak {
+.td-nobreak {
 	white-space: nowrap;
 }
 
-.hidden {
+.td-hidden {
+	display: none;
+}
+
+.td-collapsed {
 	display: none;
 }
 

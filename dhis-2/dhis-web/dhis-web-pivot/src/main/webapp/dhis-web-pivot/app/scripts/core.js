@@ -442,10 +442,11 @@ PT.core.getUtils = function(pt) {
 			}
 
 			cls = config.cls ? config.cls : '';
-			cls += config.hidden ? ' hidden' : '';
+			cls += config.hidden ? ' td-hidden' : '';
+			cls += config.collapsed ? ' td-collapsed' : '';
 			colSpan = config.colSpan ? 'colspan="' + config.colSpan + '"' : '';
 			rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '"' : '';
-			htmlValue = config.htmlValue || config.value || '&nbsp;';
+			htmlValue = config.collapsed ? '' : config.htmlValue || config.value || '&nbsp;';
 			cellPadding = pt.conf.pivot.cellPadding[config.cellPadding] || pt.conf.pivot.cellPadding[options.cellPadding];
 			fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[options.fontSize];
 
@@ -857,6 +858,7 @@ PT.core.getUtils = function(pt) {
 					for (var j = 0, object; j < aAllObjects[i].length; j += aSpan[i]) {
 						object = aAllObjects[i][j];
 						object[spanType] = aSpan[i];
+						object.children = aSpan[i];
 					}
 				}
 
@@ -1035,7 +1037,7 @@ PT.core.getUtils = function(pt) {
 
 							//if (object.rowSpan) {
 								//row.push(pt.util.pivot.getTdHtml(options, {
-									//cls: 'pivot-dim nobreak',
+									//cls: 'pivot-dim td-nobreak',
 									//rowSpan: object.rowSpan,
 									//htmlValue: xResponse.metaData[object.id]
 								//}));
@@ -1075,11 +1077,18 @@ PT.core.getUtils = function(pt) {
 						recursiveReduce;
 
 					recursiveReduce = function(obj) {
-						if (!obj.rowSpan || (Ext.isNumber(obj.rowSpan) && obj.rowSpan === 1)) {
-							obj.hidden = true;
+						//if (!obj.rowSpan || (Ext.isNumber(obj.rowSpan) && obj.rowSpan === 1)) {
+							//obj.hidden = true;
+						//}
+						//else {
+							//obj.rowSpan--;
+						//}
+
+						if (!obj.children || (Ext.isNumber(obj.children) && obj.children === 1)) {
+							obj.collapsed = true;
 						}
 						else {
-							obj.rowSpan--;
+							obj.children--;
 						}
 
 						if (obj.parent) {
@@ -1092,8 +1101,8 @@ PT.core.getUtils = function(pt) {
 						row = xRowAxis.objects.all[i];
 
 						for (var j = 0; j < row.length; j++) {
-							row[j].cls = 'pivot-dim';
-							row[j].cls += !(row[j].rowSpan || row[j].colSpan) ? ' hidden' : '';
+							row[j].cls = 'pivot-dim td-nobreak';
+							row[j].cls += !(row[j].rowSpan || row[j].colSpan) ? ' td-hidden' : '';
 							row[j].htmlValue = xResponse.metaData[row[j].id];
 						}
 					}
@@ -1154,11 +1163,11 @@ PT.core.getUtils = function(pt) {
 
 								// Hide values
 								for (var j = 0; j < row.length; j++) {
-									row[j].hidden = true;
+									row[j].collapsed = true;
 								}
 
 								// Hide total
-								rowValueTotalObjects[i].hidden = true;
+								rowValueTotalObjects[i].collapsed = true;
 
 								// Hide/reduce parent dim span
 								parent = xRowAxis.objects.all[xRowAxis.dims-1][i];
