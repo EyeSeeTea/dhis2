@@ -5,8 +5,12 @@
 
 function saveVal( dataElementId )
 {
-	if( jQuery('#entryFormContainer [id=programStageId]') == null) return;
+
 	var programStageId = jQuery('.stage-object-selected').attr('psid');
+	if(programStageId==undefined){
+		if( jQuery('#entryFormContainer [id=programStageId]') == null) return;
+		else programStageId = jQuery('#entryFormContainer [id=programStageId]').val();
+	}
         
 	var fieldId = programStageId + '-' + dataElementId + '-val';
 	
@@ -351,7 +355,6 @@ function ExecutionDateSaver( programId_, programStageInstanceId_, executionDate_
 					jQuery('#executionDate').val(executionDate);
 					jQuery("#org_" + programStageInstanceId ).html(getFieldValue("orgunitName"));
 					showById('inputCriteriaDiv');
-					
 					handleResponse (json);
 			   },
 			   error: function(request,status,errorThrown) {

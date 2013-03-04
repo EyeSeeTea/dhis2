@@ -91,12 +91,6 @@ public class OrganisationUnitGroup
     // Logic
     // -------------------------------------------------------------------------
 
-    @Override
-    public String getShortName()
-    {
-        return name;
-    }
-
     public void addOrganisationUnit( OrganisationUnit organisationUnit )
     {
         members.add( organisationUnit );
@@ -171,6 +165,11 @@ public class OrganisationUnitGroup
         {
             addDataSet( ds );
         }
+    }
+    
+    public boolean hasSymbol()
+    {
+        return symbol != null && !symbol.trim().isEmpty();
     }
 
     // -------------------------------------------------------------------------

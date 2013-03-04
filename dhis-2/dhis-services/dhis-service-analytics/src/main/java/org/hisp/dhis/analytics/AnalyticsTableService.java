@@ -29,7 +29,15 @@ package org.hisp.dhis.analytics;
 
 import java.util.concurrent.Future;
 
+import org.hisp.dhis.scheduling.TaskId;
+
 public interface AnalyticsTableService
 {
-    Future<?> update();
+    /**
+     * Rebuilds the analytics tables.
+     * 
+     * @param last3Years whether to update last 3 years of data only or all.
+     * @param taskId the TaskId.
+     */
+    Future<?> update( boolean last3Years, TaskId id );
 }

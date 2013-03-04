@@ -19,7 +19,7 @@ input.small-button[type="button"]
 	height: 30px;
 }
 
-input.normal-button[type="button"] 
+input.normal-button[type="button"] , input.normal-button[type="submit"] 
 {
     width: 60px;
 }
@@ -113,7 +113,7 @@ table.information, td.information
 	background-color: #FFCFCF
 }
 
-#advanced-search 
+.advanced-search 
 {
   position: relative;
   border: 1px solid #a4d2a3;
@@ -171,7 +171,7 @@ div.actions
 
 input.criteria
 {
-	width: 150px;
+	width: 130px;
 	margin-right: 5px;
 }
 
@@ -513,4 +513,36 @@ div.link-area-tracking
     border-width: 1px;
     border-style: solid;
     border-color: #aaa;
+}
+
+
+/* --------------------------------------------------------------
+// Capture Coordinates
+// -------------------------------------------------------------- */
+
+.coordinates1{
+    width: 100px;
+}
+
+.coordinates2{
+    width: 150px;
+}
+
+
+.visit-schedule
+{
+  overflow-y: auto;
+  overflow-x:hidden;
+}
+
+.visit-schedule table
+{
+	width:100%;
+}
+
+.visit-schedule td
+{
+  padding-top:3px;
+  padding-bottom:3px;
+  border-bottom:1px solid #cad5e5;
 }

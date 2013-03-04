@@ -158,11 +158,9 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 deleteAttributeValues( object );
                 deleteExpression( object, "leftSide" );
                 deleteExpression( object, "rightSide" );
-                // deleteDataEntryForm( object, "dataEntryForm" );
+                deleteDataEntryForm( object, "dataEntryForm" );
                 // deleteDataElementOperands( idObject, "compulsoryDataElementOperands" );
                 deleteDataElementOperands( object, "greyedFields" );
-
-                sessionFactory.getCurrentSession().flush();
             }
         }
 
@@ -171,7 +169,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             saveAttributeValues( object, attributeValues );
             saveExpression( object, "leftSide", leftSide );
             saveExpression( object, "rightSide", rightSide );
-            // saveDataEntryForm( object, "dataEntryForm", dataEntryForm );
+            saveDataEntryForm( object, "dataEntryForm", dataEntryForm );
             // saveDataElementOperands( idObject, "compulsoryDataElementOperands", compulsoryDataElementOperands );
             saveDataElementOperands( object, "greyedFields", greyedFields );
         }
@@ -214,6 +212,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             if ( dataEntryForm != null )
             {
                 dataEntryFormService.deleteDataEntryForm( dataEntryForm );
+                sessionFactory.getCurrentSession().flush();
             }
         }
 

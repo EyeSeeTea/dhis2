@@ -674,8 +674,14 @@ function disableCompletedButton( disabled )
 
 function saveDueDate( programInstanceId, programStageInstanceId, programStageInstanceName )
 {
-	var field = document.getElementById( 'value_' + programStageInstanceId + '_date' );
+	var field = byId( 'value_' + programStageInstanceId + '_date' );
 	var dateOfIncident = new Date( byId('dateOfIncident').value );
+	
+	if(field.value==''){
+		field.style.backgroundColor = '#FFCC00';
+		alert( i18n_insert_a_due_date );
+		return;
+	}	
 	var dueDate = new Date(field.value);
 	
 	if( dueDate < dateOfIncident )
@@ -1391,23 +1397,77 @@ function unenrollmentForm( programInstanceId )
 	{
 		$.ajax({
 			type: "POST",
-			url: 'removeEnrollment.action',
-			data: "programInstanceId=" + programInstanceId,
+			url: 'setProgramInstanceStatus.action',
+			data: "programInstanceId=" + programInstanceId + "&completed=false",
 			success: function( json ) 
 			{
-				var completed  = "<tr onclick='javascript:loadActiveProgramStageRecords(" + programInstanceId + ");' >";
-					completed += "<td><a><span id='infor_" + programInstanceId + "'>" + jQuery('#tr1_' + programInstanceId + " span" ).html() + "</span></a></td></tr>";
+				var type=jQuery("#tr1_" + programInstanceId ).attr('type');
+				var programStageInstanceId=jQuery("#tr1_" + programInstanceId ).attr('programStageInstanceId');
+				
+				var completed  = "<tr id='tr1_" + programInstanceId + "' type='" + type + "' programStageInstanceId='" + programStageInstanceId + "' onclick='javascript:loadActiveProgramStageRecords(" + programInstanceId + ");' >";
+					completed += jQuery('#td_' + programInstanceId).parent().html() + "</tr>";
+				
+				var activeEvent2 = jQuery("#tr2_" + programInstanceId );
+				if( activeEvent2.length>0 )
+				{
+					completed += "<tr class='hidden'>" + activeEvent2.parent().html() + "</tr>";
+				}
 				jQuery('#completedTB' ).prepend( completed );
-				jQuery('#tr1_' + programInstanceId ).remove();
-				jQuery('#tr2_' + programInstanceId ).remove();
+				
+				jQuery('#activeTB [id=tr1_' + programInstanceId + ']').remove();
+				jQuery('#activeTB [id=tr2_' + programInstanceId + ']').remove();
 				
 				jQuery("[id=tab-2] :input").prop('disabled', true);
 				jQuery("[id=tab-3] :input").prop('disabled', true);
 				jQuery("[id=tab-4] :input").prop('disabled', true);
 				jQuery("[id=tab-5] :input").prop('disabled', true);
 				jQuery("[id=tab-3] :input").datepicker("destroy");
+				jQuery("#completeProgram").attr('disabled', true);
+				jQuery("#incompleteProgram").attr('disabled', false);
 				
 				showSuccessMessage( i18n_unenrol_success );
+			}
+		});
+	
+	}
+	
+}
+
+function reenrollmentForm( programInstanceId )
+{	
+	if( confirm(i18n_incomplete_confirm_message) )
+	{
+		$.ajax({
+			type: "POST",
+			url: 'setProgramInstanceStatus.action',
+			data: "programInstanceId=" + programInstanceId + "&completed=true",
+			success: function( json ) 
+			{
+				var type=jQuery("#tr1_" + programInstanceId ).attr('type');
+				var programStageInstanceId=jQuery("#tr1_" + programInstanceId ).attr('programStageInstanceId');
+				
+				var completed  = "<tr type='" + type + "' programStageInstanceId='" + programStageInstanceId + "' onclick='javascript:loadActiveProgramStageRecords(" + programInstanceId + ");' >";
+					completed += jQuery('#td_' + programInstanceId).parent().html() + "</tr>";
+				
+				var activeEvent = jQuery("#tr2_" + programInstanceId );
+				if( activeEvent.length>0 )
+				{
+					completed += "<tr>" + activeEvent.parent().html() + "</tr>";
+				}
+				jQuery('#activeTB' ).prepend( completed );
+				
+				jQuery('#completedTB [id=tr1_' + programInstanceId + ']').remove();
+				jQuery('#completedTB [id=tr2_' + programInstanceId + ']').remove();
+				
+				jQuery("[id=tab-2] :input").prop('disabled', false);
+				jQuery("[id=tab-3] :input").prop('disabled', false);
+				jQuery("[id=tab-4] :input").prop('disabled', false);
+				jQuery("[id=tab-5] :input").prop('disabled', false);
+				jQuery("#completeProgram").attr('disabled', false);
+				jQuery("#incompleteProgram").attr('disabled', true);
+				jQuery("[id=tab-3] :input").datepicker("destroy");
+				
+				showSuccessMessage( i18n_reenrol_success );
 			}
 		});
 	
@@ -1855,4 +1915,63 @@ function refreshZebraStripes( $tbody )
 {
      $tbody.find( 'tr:visible:even' ).removeClass( 'listRow' ).removeClass( 'listAlternateRow' ).addClass( 'listRow' );
      $tbody.find( 'tr:visible:odd' ).removeClass( 'listRow' ).removeClass( 'listAlternateRow' ).addClass( 'listAlternateRow' );
+}
+
+function saveCoordinatesEvent(programStageInstanceId)
+{
+	var longitude = jQuery.trim(getFieldValue('longitude'));
+	var latitude = jQuery.trim(getFieldValue('latitude'));
+	var isValid = true;
+	
+	if(longitude=='' && latitude==''){
+		isValid = true;
+	}
+	else if(longitude=='' || latitude==''){
+		alert(i18n_enter_values_for_longitude_and_latitude_fields);
+		isValid = false;
+	}	
+	else if(!isInt(longitude)){
+		byId('longitude').style.backgroundColor = '#ffcc00';
+		alert(i18n_enter_a_valid_number);
+		isValid = false;
+	}
+	else if(!isInt(latitude)){
+		byId('latitude').style.backgroundColor = '#ffcc00';
+		alert(i18n_enter_a_valid_number);
+		isValid = false;
+	}
+	else if(eval(longitude)>180){
+		byId('longitude').style.backgroundColor = '#ffcc00';
+		alert(i18n_enter_a_value_less_than_or_equal_to_180);
+		isValid = false;
+	}
+	else if(eval(longitude)<-180){
+		byId('longitude').style.backgroundColor = '#ffcc00';
+		alert(i18n_enter_a_value_greater_than_or_equal_to_nagetive_180);
+		isValid = false;
+	}
+	else if(eval(latitude)>90){
+		byId('latitude').style.backgroundColor = '#ffcc00';
+		alert(i18n_enter_a_value_less_than_or_equal_to_90);
+		isValid = false;
+	}
+	else if(eval(latitude)<-90){
+		byId('latitude').style.backgroundColor = '#ffcc00';
+		alert(i18n_enter_a_value_greater_than_or_equal_to_nagetive_90);
+		isValid = false;
+	}
+	
+	if( isValid ){
+		jQuery.postJSON( "saveCoordinatesEvent.action",
+			{ 
+				programStageInstanceId:programStageInstanceId,
+				longitude: longitude,
+				latitude: latitude
+			}, 
+			function( json ) 
+			{   
+				 byId('longitude').style.backgroundColor = SUCCESS_COLOR;
+				 byId('latitude').style.backgroundColor = SUCCESS_COLOR;
+			});
+	}
 }
