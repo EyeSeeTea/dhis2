@@ -1084,7 +1084,7 @@ PT.core.getUtils = function(pt) {
 
 							if (obj.parent) {
 								obj.parent.children--;
-								obj.parent.rowSpan--;
+								obj.parent.rowSpan = obj.parent.parent ? obj.parent.rowSpan-- : obj.parent.rowSpan;
 							}
 						}
 
