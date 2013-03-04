@@ -1110,7 +1110,6 @@ PT.core.getUtils = function(pt) {
 
 						axisObjects.push(row);
 					}
-console.log("axisObjects", axisObjects);
 
 					// Value objects
 					for (var i = 0, valueItemsRow, valueObjectsRow; i < rowSize; i++) {
@@ -1152,7 +1151,7 @@ console.log("axisObjects", axisObjects);
 					}
 
 					// Hide empty rows/totals
-					if (true) {
+					if (options.hideEmptyRows) {
 						for (var i = 0, valueRow, empty, parent; i < valueObjects.length; i++) {
 							valueRow = valueObjects[i];
 							empty = [];
@@ -1162,7 +1161,6 @@ console.log("axisObjects", axisObjects);
 							}
 
 							if (!Ext.Array.contains(empty, false) && xRowAxis) {
-console.log("valueRow " + i, valueRow);
 
 								// Hide values
 								for (var j = 0; j < valueRow.length; j++) {
@@ -1178,7 +1176,6 @@ console.log("valueRow " + i, valueRow);
 							}
 						}
 					}
-//console.log("axisObjects", axisObjects);return;
 
 					if (doSubTotals(xColAxis)) {
 						var tmpValueObjects = [];
@@ -1213,15 +1210,11 @@ console.log("valueRow " + i, valueRow);
 						valueObjects = tmpValueObjects;
 					}
 
+console.log("axisObjects", axisObjects);
 					if (doSubTotals(xRowAxis)) {
 						var tmpAxisObjects = [],
 							tmpValueObjects = [],
-							tmpTotalValueObjects = [],
-							subTotals = [],
-							topLevelDimObjects = axisObjects[0],
-							count,
-							isRootCollapsed = [],
-							subTotalIndexes = [];
+							tmpTotalValueObjects = [];
 
 						getAxisSubTotalRow = function(collapsed) {
 							var row = [];
@@ -1248,7 +1241,6 @@ console.log("valueRow " + i, valueRow);
 
 						// Row axis objects
 						for (var i = 0, row, collapsed = [], count = 0; i < axisObjects.length; i++) {
-							//row = [];
 							tmpAxisObjects.push(axisObjects[i]);
 							collapsed.push(!!axisObjects[i][0].collapsed);
 							count++;
@@ -1260,14 +1252,11 @@ console.log("valueRow " + i, valueRow);
 								count = 0;
 							}
 						}
-console.log("tmpAxisObjects", tmpAxisObjects);
 
 						// Create tmp value object arrays
 						for (var i = 0; i < tmpAxisObjects.length; i++) {
 							tmpValueObjects.push([]);
 						}
-console.log("tmpValueObjects", tmpValueObjects);
-
 
 						// Populate tmp value object arrays
 						for (var i = 0, subTotal, empty; i < valueObjects[0].length; i++) {
@@ -1323,24 +1312,8 @@ console.log("tmpValueObjects", tmpValueObjects);
 						axisObjects = tmpAxisObjects;
 						valueObjects = tmpValueObjects;
 						totalValueObjects = tmpTotalValueObjects;
-
-						//// Add sub total arrays to htmlValueItems
-						//for (var i = 0, count = 0; i < htmlValueItems.length; i++) {
-							//tmp.push(htmlValueItems[i]);
-							//count++;
-
-							//if (count === rowUniqueFactor) {
-								//count = 0;
-
-								//var sta = subTotals.shift();
-
-								//tmp.push(sta);
-							//}
-						//}
-
-						//htmlValueItems = tmp;
-					//}
 					}
+console.log("axisObjects", axisObjects);
 
 					// Value html items
 					//for (var i = 0, row; i < valueObjects.length; i++) {
@@ -1360,7 +1333,7 @@ console.log("tmpValueObjects", tmpValueObjects);
 					//}
 
 					// Merge dim, value, total
-					for (var i = 0, row; i < rowSize; i++) {
+					for (var i = 0, row; i < axisObjects.length; i++) {
 						row = [].concat(axisObjects[i], valueObjects[i], totalValueObjects[i]);
 
 						mergedObjects.push(row);

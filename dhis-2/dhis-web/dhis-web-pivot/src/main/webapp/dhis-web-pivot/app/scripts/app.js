@@ -595,6 +595,7 @@ Ext.onReady( function() {
 
 	PT.app.OptionsWindow = function() {
 		var showSubTotals,
+			hideEmptyRows,
 			cellPadding,
 			fontSize,
 
@@ -603,7 +604,11 @@ Ext.onReady( function() {
 			window;
 
 		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: 'Show sub totals'
+			boxLabel: 'Show sub totals' //i18n
+		});
+
+		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: 'Hide empty rows' //i18n
 		});
 
 		cellPadding = Ext.create('Ext.form.field.ComboBox', {
@@ -649,7 +654,8 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				showSubTotals
+				showSubTotals,
+				hideEmptyRows
 			]
 		};
 
@@ -672,6 +678,7 @@ Ext.onReady( function() {
 			getOptions: function() {
 				return {
 					showSubTotals: showSubTotals.getValue(),
+					hideEmptyRows: hideEmptyRows.getValue(),
 					cellPadding: cellPadding.getValue(),
 					fontSize: fontSize.getValue()
 				};
