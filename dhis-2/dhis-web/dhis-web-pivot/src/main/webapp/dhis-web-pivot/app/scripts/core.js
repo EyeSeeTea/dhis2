@@ -1259,28 +1259,27 @@ console.log("axisObjects", axisObjects);
 						}
 
 						// Populate tmp value object arrays
-						for (var i = 0, subTotal, empty; i < valueObjects[0].length; i++) {
-							subTotal = 0;
-							empty = [];
-
-							for (var j = 0, rowCount = 0, tmpCount = 0, item; j < valueObjects.length; j++) {
+						for (var i = 0; i < valueObjects[0].length; i++) {
+							for (var j = 0, rowCount = 0, tmpCount = 0, subTotal = 0, empty, item; j < valueObjects.length; j++) {
 								item = valueObjects[j][i];
 								tmpValueObjects[tmpCount++].push(item);
 								subTotal += item.value;
-								empty.push(!!item.empty);
 								rowCount++;
+
+								if (rowCount === 1) {
+									empty = !!tmpAxisObjects[j][0].collapsed;
+								}
 
 								if (rowCount === rowUniqueFactor) {
 									tmpValueObjects[tmpCount++].push({
 										type: item.cls === 'pivot-value-subtotal' ? 'valueSubtotal' : 'valueSubtotalTotal',
 										value: subTotal,
 										htmlValue: subTotal,
-										collapsed: !Ext.Array.contains(empty, false),
+										collapsed: empty,
 										cls: item.cls === 'pivot-value-subtotal' ? 'pivot-value-subtotal-total' : 'pivot-value-subtotal'
 									});
 									rowCount = 0;
 									subTotal = 0;
-									empty = [];
 								}
 							}
 						}
