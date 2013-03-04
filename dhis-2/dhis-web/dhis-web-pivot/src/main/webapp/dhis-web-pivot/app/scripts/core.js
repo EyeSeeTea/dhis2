@@ -443,6 +443,7 @@ PT.core.getUtils = function(pt) {
 			colSpan = config.colSpan ? 'colspan="' + config.colSpan + '"' : '';
 			rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '"' : '';
 			htmlValue = config.collapsed ? '' : config.htmlValue || config.value || '&nbsp;';
+			htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue) : htmlValue;
 			cellPadding = pt.conf.pivot.cellPadding[config.cellPadding] || pt.conf.pivot.cellPadding[options.cellPadding];
 			fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[options.fontSize];
 
@@ -1185,9 +1186,10 @@ PT.core.getUtils = function(pt) {
 							rowSubTotal = 0;
 							colCount = 0;
 
-							for (var j = 0, item; j < valueObjects[i].length; j++) {
+							for (var j = 0, item, collapsed = []; j < valueObjects[i].length; j++) {
 								item = valueObjects[i][j];
 								rowSubTotal += item.value;
+								collapsed.push(!!item.collapsed);
 								colCount++;
 
 								row.push(item);
@@ -1196,11 +1198,13 @@ PT.core.getUtils = function(pt) {
 									row.push({
 										type: 'valueSubtotal',
 										value: rowSubTotal,
-										htmlValue: rowSubTotal,
-										cls: 'pivot-value-subtotal'
+										htmlValue: rowSubTotal === 0 ? '-' : rowSubTotal.toString(),
+										cls: 'pivot-value-subtotal',
+										collapsed: !Ext.Array.contains(collapsed, false)
 									});
 									colCount = 0;
 									rowSubTotal = 0;
+									collapsed = [];
 								}
 							}
 
@@ -1210,7 +1214,6 @@ PT.core.getUtils = function(pt) {
 						valueObjects = tmpValueObjects;
 					}
 
-console.log("axisObjects", axisObjects);
 					if (doSubTotals(xRowAxis)) {
 						var tmpAxisObjects = [],
 							tmpValueObjects = [],
@@ -1312,7 +1315,6 @@ console.log("axisObjects", axisObjects);
 						valueObjects = tmpValueObjects;
 						totalValueObjects = tmpTotalValueObjects;
 					}
-console.log("axisObjects", axisObjects);
 
 					// Value html items
 					//for (var i = 0, row; i < valueObjects.length; i++) {
@@ -1337,7 +1339,6 @@ console.log("axisObjects", axisObjects);
 
 						mergedObjects.push(row);
 					}
-mo = mergedObjects;
 
 					// Create html items
 					for (var i = 0, row; i < mergedObjects.length; i++) {
@@ -1349,7 +1350,6 @@ mo = mergedObjects;
 
 						a.push(row);
 					}
-aa = a;
 
 					return a;
 				};
