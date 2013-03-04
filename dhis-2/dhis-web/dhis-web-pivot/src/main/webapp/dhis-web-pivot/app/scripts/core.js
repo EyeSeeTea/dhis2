@@ -854,7 +854,7 @@ PT.core.getUtils = function(pt) {
 					for (var j = 0, obj; j < aAllObjects[i].length; j += aSpan[i]) {
 						obj = aAllObjects[i][j];
 						obj[spanType] = aSpan[i];
-						obj.children = aSpan[i];
+						obj.children = aSpan[i] === 1 ? 0 : aSpan[i];
 
 						if (i === 0) {
 							obj.root = true;
@@ -1079,12 +1079,6 @@ PT.core.getUtils = function(pt) {
 						recursiveReduce;
 
 					recursiveReduce = function(obj) {
-						//if (!obj.rowSpan || (Ext.isNumber(obj.rowSpan) && obj.rowSpan === 1)) {
-							//obj.hidden = true;
-						//}
-						//else {
-							//obj.rowSpan--;
-						//}
 						if (!obj.children) {
 							obj.collapse = true;
 
@@ -1092,22 +1086,6 @@ PT.core.getUtils = function(pt) {
 								obj.parent.children--;
 								obj.parent.rowSpan--;
 							}
-						}
-
-						if (obj.parent) {
-							recursiveReduce(obj.parent);
-						}
-
-
-
-
-
-
-						if (!obj.children || (Ext.isNumber(obj.children) && obj.children === 1)) {
-							obj.collapsed = true;
-						}
-						else {
-							obj.rowSpan--;
 						}
 
 						if (obj.parent) {
@@ -1174,7 +1152,7 @@ console.log("axisObjects", axisObjects);
 					}
 
 					// Hide empty rows/totals
-					if (false) {
+					if (true) {
 						for (var i = 0, valueRow, empty, parent; i < valueObjects.length; i++) {
 							valueRow = valueObjects[i];
 							empty = [];
@@ -1267,24 +1245,15 @@ console.log("axisObjects", axisObjects);
 						};
 
 						// Row axis objects
-						for (var i = 0, row, collapsed, count = 0; i < axisObjects.length; i++) {
-							row = [];
-							collapsed = [];
+						for (var i = 0, row, collapsed = [], count = 0; i < axisObjects.length; i++) {
+							//row = [];
+							tmpAxisObjects.push(axisObjects[i]);
+							collapsed.push(!!axisObjects[i][0].collapsed);
 							count++;
-
-							for (var j = 0, obj; j < axisObjects.length; j++) {
-								obj = axisObjects[j][i];
-								row.push(obj);
-
-								if (j === xRowAxis.dims - 1) {
-									collapsed.push(!!obj.collapsed);
-								}
-							}
-
-							tmpAxisObjects.push(row);
 
 							if (count === xRowAxis.span[0]) {
 								tmpAxisObjects.push(getAxisSubTotalRow(collapsed));
+
 								collapsed = [];
 								count = 0;
 							}
@@ -1292,7 +1261,7 @@ console.log("axisObjects", axisObjects);
 console.log("tmpAxisObjects", tmpAxisObjects);
 
 						// Create tmp value object arrays
-						for (var i = 0; i < tmpAxisObjects[0].length; i++) {
+						for (var i = 0; i < tmpAxisObjects.length; i++) {
 							tmpValueObjects.push([]);
 						}
 console.log("tmpValueObjects", tmpValueObjects);
@@ -1305,7 +1274,6 @@ console.log("tmpValueObjects", tmpValueObjects);
 
 							for (var j = 0, rowCount = 0, tmpCount = 0, item; j < valueObjects.length; j++) {
 								item = valueObjects[j][i];
-console.log(tmpCount);
 								tmpValueObjects[tmpCount++].push(item);
 								subTotal += item.value;
 								empty.push(!!item.empty);
