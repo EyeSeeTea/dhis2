@@ -1080,7 +1080,7 @@ PT.core.getUtils = function(pt) {
 
 					recursiveReduce = function(obj) {
 						if (!obj.children) {
-							obj.collapse = true;
+							obj.collapsed = true;
 
 							if (obj.parent) {
 								obj.parent.children--;
@@ -1098,7 +1098,7 @@ PT.core.getUtils = function(pt) {
 						row = [];
 
 						for (var j = 0, obj, newObj; j < xRowAxis.objects.all.length; j++) {
-							obj = Ext.clone(xRowAxis.objects.all[j][i]);
+							obj = xRowAxis.objects.all[j][i];
 							obj.type = 'dimension';
 							obj.cls = 'pivot-dim td-nobreak';
 							obj.noBreak = true;
@@ -1162,6 +1162,7 @@ console.log("axisObjects", axisObjects);
 							}
 
 							if (!Ext.Array.contains(empty, false) && xRowAxis) {
+console.log("valueRow " + i, valueRow);
 
 								// Hide values
 								for (var j = 0; j < valueRow.length; j++) {
@@ -1177,6 +1178,7 @@ console.log("axisObjects", axisObjects);
 							}
 						}
 					}
+//console.log("axisObjects", axisObjects);return;
 
 					if (doSubTotals(xColAxis)) {
 						var tmpValueObjects = [];
