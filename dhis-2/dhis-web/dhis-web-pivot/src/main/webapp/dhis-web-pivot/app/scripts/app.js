@@ -1654,7 +1654,6 @@ Ext.onReady( function() {
 			};
 
 			organisationUnit = {
-				//id: 'organisationunit_t',
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-organisationunit">Organisation units</div>', //i18n pt.i18n.organisation_units
 				bodyStyle: 'padding-top:5px',
@@ -1804,6 +1803,7 @@ Ext.onReady( function() {
 					{
 						xtype: 'treepanel',
 						cls: 'pt-tree',
+						style: 'border-top: 1px solid #ddd; padding-top: 1px',
 						width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
 						rootVisible: false,
 						autoScroll: true,
