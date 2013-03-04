@@ -130,7 +130,7 @@ PT.core.getConfigs = function() {
         west_fill_accordion_dataelement: 63,
         west_fill_accordion_dataset: 33,
         west_fill_accordion_period: 256,
-        west_fill_accordion_organisationunit: 95,
+        west_fill_accordion_organisationunit: 62,
         west_maxheight_accordion_indicator: 620,
         west_maxheight_accordion_dataelement: 620,
         west_maxheight_accordion_dataset: 620,
