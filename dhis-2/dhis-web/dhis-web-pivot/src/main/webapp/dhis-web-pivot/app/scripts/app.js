@@ -50,6 +50,7 @@ Ext.onReady( function() {
 			panel: {
 				setHeight: function(mx) {
 					var h = pt.viewport.westRegion.getHeight() - pt.conf.layout.west_fill;
+					mx = mx + (pt.cmp.dimension.panels.length * 28);
 					pt.cmp.dimension.panel.setHeight(h > mx ? mx : h);
 				},
 
@@ -1289,6 +1290,7 @@ Ext.onReady( function() {
 								bodyStyle: 'border-style:none; padding:0 0 0 10px',
 								defaults: {
 									labelSeparator: '',
+									style: 'margin-bottom:2px',
 									listeners: {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
@@ -1330,6 +1332,7 @@ Ext.onReady( function() {
 								bodyStyle: 'border-style:none; padding:0 0 0 32px',
 								defaults: {
 									labelSeparator: '',
+									style: 'margin-bottom:2px',
 									listeners: {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
@@ -1365,6 +1368,7 @@ Ext.onReady( function() {
 								bodyStyle: 'border-style:none; padding:0 0 0 32px',
 								defaults: {
 									labelSeparator: '',
+									style: 'margin-bottom:2px',
 									listeners: {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
@@ -1407,6 +1411,7 @@ Ext.onReady( function() {
 								bodyStyle: 'border-style:none; padding:5px 0 0 10px',
 								defaults: {
 									labelSeparator: '',
+									style: 'margin-bottom:2px',
 									listeners: {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
@@ -1446,7 +1451,8 @@ Ext.onReady( function() {
 								layout: 'anchor',
 								bodyStyle: 'border-style:none; padding:5px 0 0 46px',
 								defaults: {
-									labelSeparator: ''
+									labelSeparator: '',
+									style: 'margin-bottom:2px',
 								},
 								items: [
 									{
