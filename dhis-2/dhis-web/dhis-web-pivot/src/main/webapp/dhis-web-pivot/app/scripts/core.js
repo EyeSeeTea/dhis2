@@ -1023,13 +1023,9 @@ PT.core.getUtils = function(pt) {
 						valueObjects = [],
 						totalValueObjects = [],
 						mergedObjects = [],
-						allObjects = [],
 						valueItemsCopy,
 						colSize = xColAxis ? xColAxis.size : 1,
 						rowSize = xRowAxis ? xRowAxis.size : 1,
-						rowRootSize = xRowAxis ? xRowAxis.xItems.unique[0].length : null,
-						subtotal,
-						td,
 						recursiveReduce;
 
 					recursiveReduce = function(obj) {
@@ -1092,16 +1088,18 @@ PT.core.getUtils = function(pt) {
 					}
 
 					// Value total objects
-					valueItemsCopy = Ext.clone(valueItems);
+					if (xColAxis) {
+						valueItemsCopy = Ext.clone(valueItems);
 
-					for (var i = 0, rowSum; i < valueItemsCopy.length; i++) {
-						rowSum = Ext.Array.sum(valueItemsCopy[i]);
-						totalValueObjects.push({
-							type: 'valueTotal',
-							value: rowSum,
-							htmlValue: rowSum,
-							cls: 'pivot-value-total'
-						});
+						for (var i = 0, rowSum; i < valueItemsCopy.length; i++) {
+							rowSum = Ext.Array.sum(valueItemsCopy[i]);
+							totalValueObjects.push({
+								type: 'valueTotal',
+								value: rowSum,
+								htmlValue: rowSum,
+								cls: 'pivot-value-total'
+							});
+						}
 					}
 
 					// Hide empty rows/totals
