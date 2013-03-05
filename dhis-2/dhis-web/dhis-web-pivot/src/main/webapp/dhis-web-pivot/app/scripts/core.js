@@ -1044,21 +1044,23 @@ PT.core.getUtils = function(pt) {
 					};
 
 					// Populate dim objects
-					for (var i = 0, row; i < xRowAxis.objects.all[0].length; i++) {
-						row = [];
+					if (xRowAxis) {
+						for (var i = 0, row; i < xRowAxis.objects.all[0].length; i++) {
+							row = [];
 
-						for (var j = 0, obj, newObj; j < xRowAxis.objects.all.length; j++) {
-							obj = xRowAxis.objects.all[j][i];
-							obj.type = 'dimension';
-							obj.cls = 'pivot-dim td-nobreak';
-							obj.noBreak = true;
-							obj.hidden = !(obj.rowSpan || obj.colSpan);
-							obj.htmlValue = xResponse.metaData[obj.id];
+							for (var j = 0, obj, newObj; j < xRowAxis.objects.all.length; j++) {
+								obj = xRowAxis.objects.all[j][i];
+								obj.type = 'dimension';
+								obj.cls = 'pivot-dim td-nobreak';
+								obj.noBreak = true;
+								obj.hidden = !(obj.rowSpan || obj.colSpan);
+								obj.htmlValue = xResponse.metaData[obj.id];
 
-							row.push(obj);
+								row.push(obj);
+							}
+
+							axisObjects.push(row);
 						}
-
-						axisObjects.push(row);
 					}
 
 					// Value objects
@@ -1103,28 +1105,30 @@ PT.core.getUtils = function(pt) {
 					}
 
 					// Hide empty rows/totals
-					if (options.hideEmptyRows) {
-						for (var i = 0, valueRow, empty, parent; i < valueObjects.length; i++) {
-							valueRow = valueObjects[i];
-							empty = [];
+					if (xColAxis && xRowAxis) {
+						if (options.hideEmptyRows) {
+							for (var i = 0, valueRow, empty, parent; i < valueObjects.length; i++) {
+								valueRow = valueObjects[i];
+								empty = [];
 
-							for (var j = 0; j < valueRow.length; j++) {
-								empty.push(!!valueRow[j].empty);
-							}
-
-							if (!Ext.Array.contains(empty, false) && xRowAxis) {
-
-								// Hide values
 								for (var j = 0; j < valueRow.length; j++) {
-									valueRow[j].collapsed = true;
+									empty.push(!!valueRow[j].empty);
 								}
 
-								// Hide total
-								totalValueObjects[i].collapsed = true;
+								if (!Ext.Array.contains(empty, false) && xRowAxis) {
 
-								// Hide/reduce parent dim span
-								parent = axisObjects[i][xRowAxis.dims-1];
-								recursiveReduce(parent);
+									// Hide values
+									for (var j = 0; j < valueRow.length; j++) {
+										valueRow[j].collapsed = true;
+									}
+
+									// Hide total
+									totalValueObjects[i].collapsed = true;
+
+									// Hide/reduce parent dim span
+									parent = axisObjects[i][xRowAxis.dims-1];
+									recursiveReduce(parent);
+								}
 							}
 						}
 					}
@@ -1268,8 +1272,14 @@ PT.core.getUtils = function(pt) {
 					}
 
 					// Merge dim, value, total
-					for (var i = 0, row; i < axisObjects.length; i++) {
-						row = [].concat(axisObjects[i], valueObjects[i]);
+					for (var i = 0, row; i < valueObjects.length; i++) {
+						row = [];
+						
+						if (xRowAxis) {
+							row = row.concat(axisObjects[i]);
+						}
+
+						row = row.concat(valueObjects[i]);
 
 						if (xColAxis) {
 							row = row.concat(totalValueObjects[i]);
