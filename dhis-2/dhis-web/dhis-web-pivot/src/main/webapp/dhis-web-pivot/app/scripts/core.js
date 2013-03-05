@@ -1095,6 +1095,7 @@ PT.core.getUtils = function(pt) {
 
 						for (var i = 0, rowSum; i < valueItemsCopy.length; i++) {
 							rowSum = Ext.Array.sum(valueItemsCopy[i]);
+							rowSum = pt.util.number.roundIf(rowSum, 1);
 							totalValueObjects.push({
 								type: 'valueTotal',
 								value: rowSum,
@@ -1150,6 +1151,8 @@ PT.core.getUtils = function(pt) {
 								row.push(item);
 
 								if (colCount === colUniqueFactor) {
+									rowSubTotal = pt.util.number.roundIf(rowSubTotal, 1);
+									
 									row.push({
 										type: 'valueSubtotal',
 										value: rowSubTotal,
@@ -1229,6 +1232,8 @@ PT.core.getUtils = function(pt) {
 								}
 
 								if (rowCount === rowUniqueFactor) {
+									subTotal = pt.util.number.roundIf(subTotal, 1);
+									
 									tmpValueObjects[tmpCount++].push({
 										type: item.cls === 'pivot-value-subtotal' ? 'valueSubtotal' : 'valueSubtotalTotal',
 										value: subTotal,
@@ -1252,6 +1257,8 @@ PT.core.getUtils = function(pt) {
 							count++;
 
 							if (count === xRowAxis.span[0]) {
+								subTotal = pt.util.number.roundIf(subTotal, 1);
+								
 								tmpTotalValueObjects.push({
 									type: 'valueTotalSubgrandtotal',
 									cls: 'pivot-value-total-subgrandtotal',
@@ -1315,7 +1322,12 @@ PT.core.getUtils = function(pt) {
 								colSum += valueItems[j][i];
 							}
 
-							totalColItems.push({value: colSum, htmlValue: colSum, cls: 'pivot-value-total'});
+							totalColItems.push({
+								type: 'valueTotal',
+								value: colSum,
+								htmlValue: colSum,
+								cls: 'pivot-value-total'
+							});
 						}
 
 						if (xColAxis && doSubTotals(xColAxis)) {
@@ -1327,8 +1339,14 @@ PT.core.getUtils = function(pt) {
 								subTotal += item.value;
 								colCount++;
 
-								if (colCount === colUniqueFactor) {
-									tmp.push({value: subTotal, htmlValue: subTotal, cls: 'pivot-value-total-subgrandtotal'});
+								if (colCount === colUniqueFactor) {									
+									tmp.push({
+										type: 'valueTotalSubgrandtotal',
+										value: subTotal,
+										htmlValue: subTotal,
+										cls: 'pivot-value-total-subgrandtotal'
+									});
+									
 									subTotal = 0;
 									colCount = 0;
 								}
