@@ -2178,18 +2178,19 @@ Ext.onReady( function() {
 			};
 
 			validateSpecialCases = function(settings) {
+				var dimConf = pt.conf.finals.dimension;
 
 				// indicator as filter
 				if (settings.filter && pt.store.indicatorSelected.data.length) {
 					for (var i = 0; i < settings.filter.length; i++) {
-						if (settings.filter[i].name === 'dx') {
+						if (settings.filter[i].name === dimConf.data.paramName) {
 							alert('Indicators cannot be specified as filter');
 							return;
 						}
 					}
 				}
 
-				if (settings.filter && pt.viewport.settingsWindow.filterStore.getById('coc')) {
+				if (settings.filter && pt.viewport.settingsWindow.filterStore.getById(dimConf.category.paramName)) {
 					alert('Categories cannot be specified as filter');
 					return;
 				}

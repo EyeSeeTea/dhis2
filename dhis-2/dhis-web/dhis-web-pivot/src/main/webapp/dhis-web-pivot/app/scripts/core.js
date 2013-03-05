@@ -460,7 +460,9 @@ PT.core.getUtils = function(pt) {
 				extendAxis,
 				extendRowAxis,
 				getTableHtmlArrays,
-				initialize;
+				initialize,
+									
+				dimConf = pt.conf.finals.dimension;
 
 			extendSettings = function(settings) {
 				var xSettings = Ext.clone(settings),
@@ -557,9 +559,9 @@ PT.core.getUtils = function(pt) {
 
 				headerNames = getHeaderNames();
 
-				// remove coc from settings if it does not exist in response
-				if (Ext.Array.contains(xSettings.dimensionNames, 'coc') && !(Ext.Array.contains(headerNames, 'coc'))) {
-					removeDimensionFromSettings('coc');
+				// remove co from settings if it does not exist in response
+				if (Ext.Array.contains(xSettings.dimensionNames, dimConf.category.paramName) && !(Ext.Array.contains(headerNames, dimConf.category.paramName))) {
+					removeDimensionFromSettings(dimConf.category.paramName);
 
 					newSettings = pt.api.Settings(settings);
 
@@ -663,7 +665,7 @@ PT.core.getUtils = function(pt) {
 								for (var j = 0, item; j < settingsItems.length; j++) {
 									item = settingsItems[j];
 
-									if (header.name === 'pe' && pt.conf.period.relativePeriods[item]) {
+									if (header.name === dimConf.period.paramName && pt.conf.period.relativePeriods[item]) {
 										orderedResponseItems = responseItems;
 										orderedResponseItems.sort();
 									}
@@ -1619,7 +1621,7 @@ PT.core.getAPI = function(pt) {
 				remove = false;
 				dimension = axis[i];
 
-				if (dimension.name !== 'coc') {
+				if (dimension.name !== pt.conf.finals.dimension.category.paramName) {
 					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
 						remove = true;
 					}
@@ -1673,7 +1675,8 @@ PT.core.getAPI = function(pt) {
 
 		validateSettings = function() {
 			var a = [].concat(Ext.clone(col), Ext.clone(row), Ext.clone(filter)),
-				names = [];
+				names = [],
+				dimConf = pt.conf.finals.dimension;
 
 			if (!(col || row)) {
 				alert('No column or row dimensions selected'); //i18n
@@ -1686,12 +1689,12 @@ PT.core.getAPI = function(pt) {
 				}
 			}
 
-			if (!Ext.Array.contains(names, 'dx')) {
+			if (!Ext.Array.contains(names, dimConf.data.paramName)) {
 				alert('At least one indicator, data element or dataset must be specified as column, row or filter');
 				return;
 			}
 
-			if (!Ext.Array.contains(names, 'pe')) {
+			if (!Ext.Array.contains(names, dimConf.period.paramName)) {
 				alert('At least one period must be specified as column, row or filter');
 				return;
 			}
