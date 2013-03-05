@@ -104,7 +104,7 @@ Ext.onReady( function() {
 					dim = panels[i].getData();
 
 					if (dim) {
-						if (dim.name === pt.conf.finals.dimension.data.paramname) {
+						if (dim.name === pt.conf.finals.dimension.data.paramName) {
 							dxItems = dxItems.concat(dim.items);
 						}
 						else {
@@ -114,7 +114,7 @@ Ext.onReady( function() {
 				}
 
 				if (dxItems.length) {
-					data[pt.conf.finals.dimension.data.paramname] = dxItems;
+					data[pt.conf.finals.dimension.data.paramName] = dxItems;
 				}
 			}();
 
@@ -315,10 +315,12 @@ Ext.onReady( function() {
 			margin = 2,
 			defaultWidth = 160,
 			defaultHeight = 158,
-			maxHeight = (pt.viewport.getHeight() - 100) / 2;
+			maxHeight = (pt.viewport.getHeight() - 100) / 2,
+
+			dimConf = pt.conf.finals.dimension;
 
 		dimensionOrder = function() {
-			var order = ['dx', 'coc', 'pe', 'ou'],
+			var order = [dimConf.data.paramName, dimConf.category.paramName, dimConf.period.paramName, dimConf.organisationUnit.paramName],
 				ougsOrder = [];
 
 			for (var i = 0; i < pt.init.ougs.length; i++) {
@@ -329,7 +331,7 @@ Ext.onReady( function() {
 		}();
 
 		getData = function() {
-			var data = [{id: 'coc', name: 'Categories'}];
+			var data = [{id: dimConf.category.paramName, name: dimConf.category.rawValue}];
 
 			return data.concat(pt.init.ougs, pt.init.degs);
 		};
@@ -362,13 +364,13 @@ Ext.onReady( function() {
 		dimensionStore = getStore(getData());
 
 		rowStore = getStore();
-		rowStore.add({id: 'pe', name: 'Periods'}); //i18n
+		rowStore.add({id: dimConf.period.paramName, name: dimConf.period.rawValue}); //i18n
 
 		colStore = getStore();
-		colStore.add({id: 'dx', name: 'Data'}); //i18n
+		colStore.add({id: dimConf.data.paramName, name: dimConf.data.rawValue}); //i18n
 
 		filterStore = getStore();
-		filterStore.add({id: 'ou', name: 'Organisation units'}); //i18n
+		filterStore.add({id: dimConf.organisationUnit.paramName, name: dimConf.organisationUnit.rawValue}); //i18n
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
@@ -841,7 +843,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						name: pt.conf.finals.dimension.indicator.paramname,
+						name: pt.conf.finals.dimension.indicator.paramName,
 						items: []
 					};
 
@@ -1032,7 +1034,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						name: pt.conf.finals.dimension.indicator.paramname,
+						name: pt.conf.finals.dimension.indicator.paramName,
 						items: []
 					};
 
@@ -1219,7 +1221,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						name: pt.conf.finals.dimension.indicator.paramname,
+						name: pt.conf.finals.dimension.indicator.paramName,
 						items: []
 					};
 
@@ -1549,7 +1551,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						name: pt.conf.finals.dimension.period.paramname,
+						name: pt.conf.finals.dimension.period.paramName,
 							items: []
 						},
 						chb = pt.cmp.dimension.relativePeriod.checkbox;

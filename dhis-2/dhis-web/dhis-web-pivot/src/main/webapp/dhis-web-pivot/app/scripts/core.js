@@ -42,47 +42,48 @@ PT.core.getConfigs = function() {
         dimension: {
             data: {
                 value: 'data',
-                rawvalue: 'Data', //i18n PT.i18n.data,
-                paramname: 'dx',
+                rawValue: 'Data', //i18n PT.i18n.data,
+                paramName: 'dx',
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_ind_de
 				}
             },
             category: {
-				paramname: 'coc'
+				paramName: 'co',
+				rawValue: 'Categories'
 			},
             indicator: {
                 value: 'indicator',
-                rawvalue: 'Indicator', //i18n PT.i18n.indicator,
-                paramname: 'dx'
+                rawValue: 'Indicators', //i18n PT.i18n.indicator,
+                paramName: 'dx'
             },
-            dataelement: {
+            dataElement: {
                 value: 'dataelement',
-                rawvalue: 'Data element', //i18n PT.i18n.data_element,
-                paramname: 'dx'
+                rawValue: 'Data elements', //i18n PT.i18n.data_element,
+                paramName: 'dx'
             },
-            dataset: {
+            dataSet: {
 				value: 'dataset',
-                rawvalue: 'Data set', //i18n PT.i18n.dataset,
-                paramname: 'dx'
+                rawValue: 'Data sets', //i18n PT.i18n.dataset,
+                paramName: 'dx'
 			},
             period: {
                 value: 'period',
-                rawvalue: 'Period', //i18n PT.i18n.period,
-                paramname: 'pe',
+                rawValue: 'Periods', //i18n PT.i18n.period,
+                paramName: 'pe',
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_period
 				}
             },
-            organisationunit: {
+            organisationUnit: {
                 value: 'organisationunit',
-                rawvalue: 'Organisation unit', //i18n PT.i18n.organisation_unit,
-                paramname: 'ou',
+                rawValue: 'Organisation units', //i18n PT.i18n.organisation_unit,
+                paramName: 'ou',
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_orgunit
 				}
             },
-            organisationunitgroup: {
+            organisationUnitGroup: {
 				value: 'organisationunitgroup'
 			},
 			value: {
@@ -583,7 +584,7 @@ PT.core.getUtils = function(pt) {
 
 					paramString += 'dimension=' + sortedDim.name;
 
-					if (sortedDim.name !== pt.conf.finals.dimension.category.paramname) {
+					if (sortedDim.name !== pt.conf.finals.dimension.category.paramName) {
 						paramString += ':' + sortedDim.items.join(';');
 					}
 
@@ -984,6 +985,7 @@ PT.core.getUtils = function(pt) {
 						for (var j = 0, id; j < dimItems.length; j++) {
 							id = dimItems[j];
 							dimHtml.push(pt.util.pivot.getTdHtml(options, {
+								type: 'dimension',
 								cls: 'pivot-dim',
 								colSpan: colSpan,
 								htmlValue: xResponse.metaData[id]

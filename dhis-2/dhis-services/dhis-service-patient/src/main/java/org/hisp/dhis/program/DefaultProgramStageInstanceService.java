@@ -374,11 +374,14 @@ public class DefaultProgramStageInstanceService
 
         Grid grid = new ListGrid();
         grid.setTitle( program.getDisplayName() );
+        grid.setSubtitle( i18n.getString( "from" ) + " : " + DateUtils.getMediumDateString( startDate ) + " "
+            + i18n.getString( "to" ) + " : " + DateUtils.getMediumDateString( endDate ) );
 
         List<PatientIdentifierType> identifierTypes = program.getPatientIdentifierTypes();
 
         // Header
         grid.addHeader( new GridHeader( i18n.getString( "date_scheduled" ), false, false ) );
+        grid.addHeader( new GridHeader( i18n.getString( "orgunit" ), false, false ) );
         grid.addHeader( new GridHeader( i18n.getString( "full_name" ), false, false ) );
         grid.addHeader( new GridHeader( i18n.getString( "phone_number" ), false, false ) );
         grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, false ) );
@@ -391,7 +394,8 @@ public class DefaultProgramStageInstanceService
             {
                 for ( PatientIdentifier identifier : patient.getIdentifiers() )
                 {
-                    if ( identifier.getIdentifierType()!=null && identifier.getIdentifierType().getId() == identifierType.getId() )
+                    if ( identifier.getIdentifierType() != null
+                        && identifier.getIdentifierType().getId() == identifierType.getId() )
                     {
                         displayPatientName = identifier.getIdentifier();
                         break;
@@ -401,6 +405,14 @@ public class DefaultProgramStageInstanceService
 
             grid.addRow();
             grid.addValue( DateUtils.getMediumDateString( stageInstance.getDueDate() ) );
+            if( stageInstance.getExecutionDate() != null )
+            {
+                grid.addValue( stageInstance.getOrganisationUnit().getName() );
+            }
+            else
+            {
+                grid.addValue( patient.getOrganisationUnit().getName() );
+            }
             grid.addValue( displayPatientName );
             grid.addValue( patient.getPhoneNumber() );
             grid.addValue( stageInstance.getProgramStage().getDisplayName() );
@@ -409,9 +421,11 @@ public class DefaultProgramStageInstanceService
         return grid;
     }
 
+    @Override
     public int getActiveInstanceCount( Program program, Collection<Integer> orgunitIds, Date startDate, Date endDate,
         Collection<Integer> statusList )
     {
         return programStageInstanceStore.getActiveInstanceCount( program, orgunitIds, startDate, endDate, statusList );
     }
+    
 }

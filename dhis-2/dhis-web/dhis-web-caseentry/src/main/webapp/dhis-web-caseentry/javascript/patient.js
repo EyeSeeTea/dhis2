@@ -241,14 +241,21 @@ function loadPatientList()
 	showById('mainLinkLbl');
 	showById('selectDiv');
 	showById('searchDiv');
-	
-	if( statusSearching == 0)
+	if(statusSearching==2)
+	{
+		return;
+	}
+	else if( statusSearching == 0)
 	{
 		listAllPatient();
 	}
 	else if( statusSearching == 1 )
 	{
 		validateAdvancedSearch();
+	}
+	else if( statusSearching == 3 )
+	{
+		showById('listPatientDiv');
 	}
 }
 
