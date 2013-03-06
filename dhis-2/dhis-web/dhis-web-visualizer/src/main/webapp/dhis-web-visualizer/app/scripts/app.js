@@ -234,7 +234,7 @@ DV.conf = {
         west_width: 424,
         west_fieldset_width: 416,
         west_width_padding: 4,
-        west_fill: 2,
+        west_fill: 101,
         west_fill_accordion_indicator: 63,
         west_fill_accordion_dataelement: 63,
         west_fill_accordion_dataset: 33,
