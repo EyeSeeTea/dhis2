@@ -1972,7 +1972,7 @@ Ext.onReady( function() {
 				}
 			};
 
-			getGroupSetPanels = function(groupSets, url) {
+			getGroupSetPanels = function(groupSets, iconCls) {
 				var	getAvailableStore,
 					getSelectedStore,
 
@@ -2113,7 +2113,7 @@ Ext.onReady( function() {
 
 					panel = {
 						xtype: 'panel',
-						title: '<div class="pt-panel-title-organisationunit">' + groupSet.name + '</div>', //i18n
+						title: '<div class="' + iconCls + '">' + groupSet.name + '</div>', //i18n
 						hideCollapseTool: true,
 						getData: function() {
 							var data = {
@@ -2246,8 +2246,8 @@ Ext.onReady( function() {
 							pt.util.array.sortObjectsByString(ougs);
 							pt.util.array.sortObjectsByString(degs);
 
-							panels = panels.concat(getGroupSetPanels(ougs, 'organisationUnitGroupSets'));
-							panels = panels.concat(getGroupSetPanels(degs, 'dataElementGroupSets'));
+							panels = panels.concat(getGroupSetPanels(ougs, 'pt-panel-title-organisationunitgroupset'));
+							panels = panels.concat(getGroupSetPanels(degs, 'pt-panel-title-dataelementgroupset'));
 
 							last = panels[panels.length - 1];
 							last.cls = 'pt-accordion-last';
