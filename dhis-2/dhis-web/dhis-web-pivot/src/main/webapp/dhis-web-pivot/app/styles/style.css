@@ -405,7 +405,7 @@ td .bad div {
 
 	/* Align menu */
 .pt-toolbar-btn-menu {
-	margin-top: 5px;
+	margin-top: 4px;
 }
 
 /*----------------------------------------------------------------------------
@@ -441,16 +441,12 @@ td .bad div {
  *--------------------------------------------------------------------------*/
 
 	/* Menu item icon */
-.pt-menu-item-png {
-    background-image:url('../images/png.png');
-    padding-left: 18px;
-}
-.pt-menu-item-pdf {
+.pt-menu-item-xls {
     background-image:url('../images/pdf.png');
     padding-left: 18px;
 }
-.pt-menu-item-edit {
-    background-image:url('../images/edit.png');
+.pt-menu-item-csv {
+    background-image:url('../images/pdf.png');
     padding-left: 18px;
 }
 

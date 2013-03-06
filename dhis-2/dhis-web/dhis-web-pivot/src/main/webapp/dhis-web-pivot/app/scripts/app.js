@@ -586,9 +586,20 @@ Ext.onReady( function() {
 					}
 				}
 			],
+			hasBlurHandler: false,
 			listeners: {
 				show: function(w) {
 					pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
+
+					if (!w.hasBlurHandler) {
+						var el = Ext.get(document.getElementsByClassName('x-mask')[0]);
+
+						el.on('click', function() {
+							w.hide();
+						});
+
+						w.hasBlurHandler = true;
+					}
 				}
 			}
 		});
@@ -719,9 +730,20 @@ Ext.onReady( function() {
 					}
 				}
 			],
+			hasBlurHandler: false,
 			listeners: {
 				show: function(w) {
 					pt.util.window.setAnchorPosition(w, pt.viewport.optionsButton);
+
+					if (!w.hasBlurHandler) {
+						var el = Ext.get(document.getElementsByClassName('x-mask')[0]);
+
+						el.on('click', function() {
+							w.hide();
+						});
+
+						w.hasBlurHandler = true;
+					}
 				}
 			}
 		});
@@ -733,12 +755,7 @@ Ext.onReady( function() {
 		var createViewport;
 
 		createViewport = function() {
-			var viewport,
-				westRegion,
-				centerRegion,
-				accordion,
-
-				indicatorAvailable,
+			var indicatorAvailable,
 				indicatorSelected,
 				indicator,
 				dataElementAvailable,
@@ -751,10 +768,20 @@ Ext.onReady( function() {
 				relativePeriod,
 				fixedPeriodAvailable,
 				fixedPeriodSelected,
-				fixedPeriod,
+				period,
 				organisationUnit,
-				getOrganisationUnitGroupSetPanels,
+				getGroupSetPanels,
+				validateSpecialCases,
 				update,
+
+				layoutButton,
+				optionsButton,
+				downloadButton,
+
+				accordion,
+				westRegion,
+				centerRegion,
+				viewport,
 
 				addListeners;
 
@@ -2279,6 +2306,7 @@ Ext.onReady( function() {
 
 			layoutButton = Ext.create('Ext.button.Button', {
 				text: 'Layout',
+				menu: {},
 				handler: function() {
 					if (!pt.viewport.settingsWindow) {
 						pt.viewport.settingsWindow = PT.app.SettingsWindow(pt);
@@ -2290,12 +2318,49 @@ Ext.onReady( function() {
 
 			optionsButton = Ext.create('Ext.button.Button', {
 				text: 'Options',
+				menu: {},
 				handler: function() {
 					if (!pt.viewport.optionsWindow) {
 						pt.viewport.optionsWindow = PT.app.OptionsWindow();
 					}
 
 					pt.viewport.optionsWindow.show();
+				}
+			});
+
+			downloadButton = Ext.create('Ext.button.Button', {
+				text: 'Download',
+				disabled: true,
+				menu: {
+					cls: 'pt-menu',
+					width: 105,
+					shadow: false,
+					showSeparator: false,
+					items: [
+						{
+							text: 'Excel (XLS)',
+							iconCls: 'pt-menu-item-xls',
+							handler: function() {
+								if (pt.baseUrl && pt.paramString) {
+									window.location.href = pt.baseUrl + '/api/analytics.xls' + pt.paramString;
+								}
+							}
+						},
+						{
+							text: 'CSV',
+							iconCls: 'pt-menu-item-csv',
+							handler: function() {
+								if (pt.baseUrl && pt.paramString) {
+									window.location.href = pt.baseUrl + '/api/analytics.csv' + pt.paramString;
+								}
+							}
+						}
+					],
+					listeners: {
+						afterrender: function() {
+							this.getEl().addCls('pt-toolbar-btn-menu');
+						}
+					}
 				}
 			});
 
@@ -2336,7 +2401,7 @@ Ext.onReady( function() {
 							handler: function() {
 							}
 						},
-
+						downloadButton,
                         '->',
                         {
                             xtype: 'button',
@@ -2413,6 +2478,7 @@ Ext.onReady( function() {
 				updateViewport: update,
 				layoutButton: layoutButton,
 				optionsButton: optionsButton,
+				downloadButton: downloadButton,
 				items: [
 					westRegion,
 					centerRegion
@@ -2448,9 +2514,14 @@ Ext.onReady( function() {
 		};
 
 		pt.init = PT.app.getInits(r);
+		pt.baseUrl = pt.init.contextPath;
+
 		pt.util = PT.app.getUtils();
+
 		pt.store = PT.app.getStores();
+
 		pt.cmp = PT.app.getCmp();
+
 		pt.viewport = createViewport();
 
 		pt.viewport.settingsWindow = PT.app.SettingsWindow();

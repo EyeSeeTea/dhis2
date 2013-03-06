@@ -920,15 +920,12 @@ PT.core.getUtils = function(pt) {
 			};
 
 			getTableHtml = function(xColAxis, xRowAxis, xResponse) {
-				var getEmptyHtmlArray,
+				var doSubTotals,
 					getColAxisHtmlArray,
-					getRowAxisHtmlArray,
-					rowAxisHtmlArray,
 					getRowHtmlArray,
-					getRowTotalHtmlArray,
+					rowAxisHtmlArray,
 					getColTotalHtmlArray,
 					getGrandTotalHtmlArray,
-					getRowHtmlArray,
 					getTotalHtmlArray,
 					getHtml,
 
@@ -1454,19 +1451,31 @@ PT.core.getUtils = function(pt) {
 			};
 
 			initialize = function() {
-				var xSettings,
+				var url,
+					xSettings,
 					xResponse,
 					xColAxis,
 					xRowAxis;
 
-				pt.util.mask.showMask(pt.viewport);
-
 				xSettings = extendSettings(settings);
+
+				pt.paramString = getParamString(xSettings);
+				url = pt.init.contextPath + '/api/analytics.jsonp' + pt.paramString;
+
+				if (url.length > 2000) {
+					var percent = ((url.length - 2000) / url.length) * 100;
+
+					alert('Too many parameters selected. Please reduce the number of parameters by minimum ' + percent.toFixed(0) + '%');
+					return;
+				}
+
+				pt.util.mask.showMask(pt.viewport);
 
 				Ext.data.JsonP.request({
 					method: 'GET',
-					url: pt.init.contextPath + '/api/analytics.jsonp' + getParamString(xSettings),
+					url: url,
 					callbackName: 'analytics',
+					timeout: 60000,
 					headers: {
 						'Content-Type': 'application/json',
 						'Accept': 'application/json'
@@ -1493,19 +1502,21 @@ PT.core.getUtils = function(pt) {
 						}
 
 						xResponse = extendResponse(response, xSettings);
-console.log("xResponse", xResponse);
 
 						xColAxis = extendAxis('col', xSettings.col, xResponse);
 						xRowAxis = extendAxis('row', xSettings.row, xResponse);
-console.log("xColAxis", xColAxis);
-console.log("xRowAxis", xRowAxis);
 
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
 
 						pt.container.removeAll(true);
 						pt.container.update(html);
 
+						// After table success
 						pt.util.mask.hideMask();
+
+						if (pt.viewport.downloadButton) {
+							pt.viewport.downloadButton.enable();
+						}
 					}
 				});
 
