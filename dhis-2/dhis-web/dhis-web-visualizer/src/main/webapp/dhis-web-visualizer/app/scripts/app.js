@@ -320,6 +320,10 @@ Ext.onReady( function() {
     DV.init.initialize = function() {
 		DV.cmp.dimension.indicator.panel.expand();
 
+		DV.cmp.region.west.on('resize', function() {
+			DV.util.viewport.resizeDimensions();
+		});
+
 		DV.c = DV.chart.model;
         DV.util.combobox.filter.category();
 
@@ -2532,7 +2536,6 @@ Ext.onReady( function() {
 
     DV.viewport = Ext.create('Ext.container.Viewport', {
         layout: 'border',
-        renderTo: Ext.getBody(),
         items: [
             {
                 region: 'west',
@@ -5072,8 +5075,6 @@ Ext.onReady( function() {
             },
             resize: function(vp) {
                 DV.cmp.region.west.setWidth(DV.conf.layout.west_width);
-
-				DV.util.viewport.resizeDimensions();
 
                 if (DV.datatable.datatable) {
                     DV.datatable.datatable.setHeight(DV.util.viewport.getSize().y - DV.conf.layout.east_tbar_height);
