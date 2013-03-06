@@ -406,6 +406,23 @@ PT.core.getUtils = function(pt) {
 			}
 
 			return dimensions;
+		},
+
+		sortObjectsByString: function(array, key) {
+			key = key || 'name';
+			array.sort( function(a, b) {
+				var nameA = a[key].toLowerCase(),
+					nameB = b[key].toLowerCase();
+
+				if (nameA < nameB) {
+					return -1;
+				}
+				if (nameA > nameB) {
+					return 1;
+				}
+				return 0;
+			});
+			return array;
 		}
 	};
 

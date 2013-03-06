@@ -2239,11 +2239,15 @@ Ext.onReady( function() {
 								dataSet,
 								period,
 								organisationUnit
-							];
+							],
+							ougs = Ext.clone(pt.init.ougs),
+							degs = Ext.clone(pt.init.degs);
 
-							panels = panels.concat(getGroupSetPanels(pt.init.ougs, 'organisationUnitGroupSets'));
+							pt.util.array.sortObjectsByString(ougs);
+							pt.util.array.sortObjectsByString(degs);
 
-							panels = panels.concat(getGroupSetPanels(pt.init.degs, 'dataElementGroupSets'));
+							panels = panels.concat(getGroupSetPanels(ougs, 'organisationUnitGroupSets'));
+							panels = panels.concat(getGroupSetPanels(degs, 'dataElementGroupSets'));
 
 							last = panels[panels.length - 1];
 							last.cls = 'pt-accordion-last';
