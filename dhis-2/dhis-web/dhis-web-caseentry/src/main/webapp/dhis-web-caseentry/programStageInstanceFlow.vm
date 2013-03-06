@@ -7,7 +7,8 @@
 			<div id='flow_$!programInstance.id' class="stage-flow">
 				<table class="table-flow">											
 					<tr id='programStageIdTR_$!programInstance.id'>
-						#if( $programInstance)
+						#if( $programStageInstances)
+						#else
 							#set( $programStageInstances = $programInstance.programStageInstances)
 						#end
 						#foreach( $programStageInstance in $programStageInstances )
@@ -30,7 +31,7 @@
 								reportDateDes="$programStageInstance.programStage.reportDateDescription"
 								dueDate="$format.formatDate( $programStageInstance.dueDate )"
 								class="stage-object" 
-								value="$programStageInstance.programStage.displayName&#13;&#10;$valueDate" 
+								value="$programStageInstance.programStage.displayName&#13;&#10;&nbsp;$valueDate" 
 								onclick="javascript:loadDataEntry( $programStageInstance.id );">
 							<script>	
 								var status = $programStageInstance.getEventStatus();
