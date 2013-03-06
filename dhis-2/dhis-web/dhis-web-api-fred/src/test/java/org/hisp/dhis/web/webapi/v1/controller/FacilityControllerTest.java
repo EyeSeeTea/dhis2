@@ -1,7 +1,7 @@
-package org.hisp.dhis.web.webapi.v1.domain;
+package org.hisp.dhis.web.webapi.v1.controller;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,45 +27,21 @@ package org.hisp.dhis.web.webapi.v1.domain;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
+import org.hisp.dhis.web.FredSpringWebTest;
+import org.junit.Test;
+import org.springframework.http.MediaType;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JsonPropertyOrder( value = { "code", "message" } )
-public class MessageResponse
+public class FacilityControllerTest extends FredSpringWebTest
 {
-    private String code;
-
-    private String message;
-
-    public MessageResponse()
+    @Test
+    public void testBogusIsNotFound() throws Exception
     {
-    }
-
-    public MessageResponse( String code, String message )
-    {
-        this.code = code;
-        this.message = message;
-    }
-
-    public String getCode()
-    {
-        return code;
-    }
-
-    public void setCode( String code )
-    {
-        this.code = code;
-    }
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    public void setMessage( String message )
-    {
-        this.message = message;
+        mockMvc.perform( get( "/bogus" ).accept( MediaType.ALL ) ).andExpect( status().isNotFound() );
     }
 }
