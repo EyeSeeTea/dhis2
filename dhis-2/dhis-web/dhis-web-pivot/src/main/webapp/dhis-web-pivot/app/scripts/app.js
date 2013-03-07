@@ -778,7 +778,7 @@ Ext.onReady( function() {
 
 			mapWindow;
 
-		gis.store.maps.on('load', function(store, records) {
+		pt.store.maps.on('load', function(store, records) {
 			info.setText(records.length + ' favorite' + (records.length !== 1 ? 's' : '') + ' available');
 		});
 
@@ -2969,16 +2969,16 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					afterrender: function(p) {
-						var liStyle = 'padding:3px 10px',
+						var liStyle = 'padding:3px 10px; color:#333',
 							html = '';
 
 						html += '<div style="padding:20px">';
 						html += '<div style="font-size:14px; padding-bottom:8px">Creating a table</div>';
 						html += '<div style="' + liStyle + '">- Select items from any of the dimensions in the left menu</div>';
 						html += '<div style="' + liStyle + '">- Click "Layout" to arrange your dimensions on table rows and columns</div>';
-						html += '<div style="' + liStyle + '">- Click <b>Update</b> to create your table</div>';
+						html += '<div style="' + liStyle + '">- Click "<b>Update</b>" to create your table</div>';
 						html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">Working with a table</div>';
-						html += '<div style="' + liStyle + '">- Click "Options" to hide sub-totals or hide empty rows, adjust font size and more</div>';
+						html += '<div style="' + liStyle + '">- Click "Options" to hide sub-totals or empty rows, adjust font size and more</div>';
 						html += '<div style="' + liStyle + '">- Click "Favorites" to save your table for later use</div>';
 						html += '<div style="' + liStyle + '">- Click "Download" to save table data to your computer</div>';
 						html += '</div>';
