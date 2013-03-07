@@ -862,6 +862,7 @@ Ext.onReady( function() {
 
 					favorite.name = name;
 
+					// Dimensions
 					for (var i = 0, obj, key, items; i < pt.xSettings.objects; i++) {
 						obj = pt.xSettings.objects[i];
 
@@ -892,7 +893,7 @@ Ext.onReady( function() {
 							}
 						}
 						else {
-							key = pt.conf.finals.dimension.nameObjectMap[obj.objectName].value;
+							key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
 							favorite[key] = [];
 
 							for (var j = 0, item; j < obj.items.length; j++) {
@@ -905,12 +906,43 @@ Ext.onReady( function() {
 						}
 					}
 
+					// Setup
+					if (xSettings.col) {
+						var a = [];
+
+						for (var i = 0; i < xSettings.col.length; i++) {
+							a.push(xSettings.col[i].dimensionName);
+						}
+
+						favorite['columnDimensions'] = a;
+					}
+
+					if (xSettings.row) {
+						var a = [];
+
+						for (var i = 0; i < xSettings.row.length; i++) {
+							a.push(xSettings.row[i].dimensionName);
+						}
+
+						favorite['rowDimensions'] = a;
+					}
+
+					if (xSettings.filter) {
+						var a = [];
+
+						for (var i = 0; i < xSettings.filter.length; i++) {
+							a.push(xSettings.filter[i].dimensionName);
+						}
+
+						favorite['filterDimensions'] = a;
+					}
 
 
 
 
-						key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
-						items = [];
+
+
+
 
 						if (obj.
 
