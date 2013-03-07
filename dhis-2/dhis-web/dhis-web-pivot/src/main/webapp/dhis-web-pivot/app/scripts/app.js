@@ -95,7 +95,7 @@ Ext.onReady( function() {
 				col: [],
 				row: [],
 				filter: [],
-				dimensionObjects: []
+				objects: []
 			};
 
 			getData = function() {
@@ -106,7 +106,7 @@ Ext.onReady( function() {
 					dim = panels[i].getData();
 
 					if (dim) {
-						config.dimensionObjects.push(dim);
+						config.objects.push(dim);
 
 						if (dim.dimensionName === pt.conf.finals.dimension.data.dimensionName) {
 							dxItems = dxItems.concat(dim.items);
@@ -663,7 +663,7 @@ Ext.onReady( function() {
 			window;
 
 		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: 'Show sub totals', //i18n
+			boxLabel: 'Show sub-totals', //i18n
 			checked: true
 		});
 
@@ -2852,7 +2852,6 @@ Ext.onReady( function() {
 				if (!validateSpecialCases(settings)) {
 					return;
 				}
-console.log("settings", settings);return;
 
 				if (settings) {
 					pt.util.pivot.getTable(settings, pt);

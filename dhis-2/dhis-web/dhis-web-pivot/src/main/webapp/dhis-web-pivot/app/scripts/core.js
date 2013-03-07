@@ -390,14 +390,15 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.array = {
-		sortDimensions: function(dimensions) {
+		sortDimensions: function(dimensions, key) {
+			key = key || 'dimensionName';
 
 			// Sort object order
 			Ext.Array.sort(dimensions, function(a,b) {
-				if (a.name < b.name) {
+				if (a[key] < b[key]) {
 					return -1;
 				}
-				if (a.name > b.name) {
+				if (a[key] > b[key]) {
 					return 1;
 				}
 				return 0;
@@ -505,7 +506,7 @@ PT.core.getUtils = function(pt) {
 						dimensions = Ext.clone(xSettings.dimensions) || [];
 
 					for (var i = 0; i < dimensions.length; i++) {
-						a.push(dimensions[i].name);
+						a.push(dimensions[i].dimensionName);
 					}
 
 					xSettings.dimensionNames = a;
@@ -526,7 +527,7 @@ PT.core.getUtils = function(pt) {
 					for (var i = 0, dim; i < dimensions.length; i++) {
 						dim = dimensions[i];
 
-						map[dim.name] = dim.items || [];
+						map[dim.dimensionName] = dim.items || [];
 					}
 
 					xSettings.nameItemsMap = map;
@@ -609,9 +610,9 @@ PT.core.getUtils = function(pt) {
 				for (var i = 0, sortedDim; i < sortedDimensions.length; i++) {
 					sortedDim = sortedDimensions[i];
 
-					paramString += 'dimension=' + sortedDim.name;
+					paramString += 'dimension=' + sortedDim.dimensionName;
 
-					if (sortedDim.name !== pt.conf.finals.dimension.category.dimensionName) {
+					if (sortedDim.dimensionName !== pt.conf.finals.dimension.category.dimensionName) {
 						paramString += ':' + sortedDim.items.join(';');
 					}
 
@@ -624,7 +625,7 @@ PT.core.getUtils = function(pt) {
 					for (var i = 0, sortedFilterDim; i < sortedFilterDimensions.length; i++) {
 						sortedFilterDim = sortedFilterDimensions[i];
 
-						paramString += '&filter=' + sortedFilterDim.name + ':' + sortedFilterDim.items.join(';');
+						paramString += '&filter=' + sortedFilterDim.dimensionName + ':' + sortedFilterDim.items.join(';');
 					}
 				}
 
@@ -769,7 +770,7 @@ PT.core.getUtils = function(pt) {
 					for (var i = 0, dim; i < axis.length; i++) {
 						dim = axis[i];
 
-						a.push(xResponse.nameHeaderMap[dim.name].items);
+						a.push(xResponse.nameHeaderMap[dim.dimensionName].items);
 					}
 
 					return a;
@@ -1567,7 +1568,6 @@ PT.core.getAPI = function(pt) {
 				cellPadding: 'normal',
 				fontSize: 'normal'
 			};
-console.log("settingsConfig", config);
 
 		removeEmptyDimensions = function(axis) {
 			if (!axis) {
@@ -1578,7 +1578,7 @@ console.log("settingsConfig", config);
 				remove = false;
 				dimension = axis[i];
 
-				if (dimension.name !== pt.conf.finals.dimension.category.dimensionName) {
+				if (dimension.dimensionName !== pt.conf.finals.dimension.category.dimensionName) {
 					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
 						remove = true;
 					}
@@ -1601,6 +1601,7 @@ console.log("settingsConfig", config);
 		};
 
 		getValidatedAxis = function(axis) {
+
 			if (!(axis && Ext.isArray(axis) && axis.length)) {
 				return;
 			}
@@ -1608,7 +1609,7 @@ console.log("settingsConfig", config);
 			for (var i = 0, dimension; i < axis.length; i++) {
 				dimension = axis[i];
 
-				if (!(Ext.isObject(dimension) && Ext.isString(dimension.name))) {
+				if (!(Ext.isObject(dimension) && Ext.isString(dimension.dimensionName))) {
 					return;
 				}
 			}
@@ -1632,7 +1633,7 @@ console.log("settingsConfig", config);
 
 		validateSettings = function() {
 			var a = [].concat(Ext.clone(col), Ext.clone(row), Ext.clone(filter)),
-				names = [],
+				dimensionNames = [],
 				dimConf = pt.conf.finals.dimension;
 
 			if (!(col || row)) {
@@ -1640,19 +1641,14 @@ console.log("settingsConfig", config);
 				return;
 			}
 
-			// Selected dimensions
+			// Selected dimension names
 			for (var i = 0; i < a.length; i++) {
 				if (a[i]) {
-					names.push(a[i].name);
+					dimensionNames.push(a[i].dimensionName);
 				}
 			}
 
-			//if (!Ext.Array.contains(names, dimConf.data.dimensionName)) {
-				//alert('At least one indicator, data element or dataset must be specified as column, row or filter');
-				//return;
-			//}
-
-			if (!Ext.Array.contains(names, dimConf.period.dimensionName)) {
+			if (!Ext.Array.contains(dimensionNames, dimConf.period.dimensionName)) {
 				alert('At least one period must be specified as column, row or filter');
 				return;
 			}
@@ -1685,6 +1681,8 @@ console.log("settingsConfig", config);
 			if (filter) {
 				obj.filter = filter;
 			}
+
+			obj.objects = config.objects;
 
 			obj.options = getValidatedOptions(config.options);
 
