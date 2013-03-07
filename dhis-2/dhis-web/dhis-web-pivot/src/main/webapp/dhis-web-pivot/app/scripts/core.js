@@ -560,7 +560,7 @@ PT.core.getUtils = function(pt) {
 							dimension;
 
 						for (var i = 0; i < axis.length; i++) {
-							if (axis[i].name === dimensionName) {
+							if (axis[i].dimensionName === dimensionName) {
 								dimension = axis[i];
 							}
 						}
