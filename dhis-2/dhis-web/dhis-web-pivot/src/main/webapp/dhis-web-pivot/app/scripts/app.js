@@ -862,6 +862,67 @@ Ext.onReady( function() {
 
 					favorite.name = name;
 
+					for (var i = 0, obj, key, items; i < pt.xSettings.objects; i++) {
+						obj = pt.xSettings.objects[i];
+
+						if (obj.objectName === pt.conf.finals.dimension.period.objectName) {
+							for (var j = 0, item; j < obj.items.length; j++) {
+								item = obj.items[j];
+
+								if (pt.conf.period.relativePeriods[item]) {
+									key = pt.conf.finals.dimension.relativePeriod.value;
+
+									if (!favorite[key]) {
+										favorite[key] = {};
+									}
+
+									favorite[key][item] = true;
+								}
+								else {
+									key = pt.conf.finals.dimension.period.value;
+
+									if (!favorite[key]) {
+										favorite[key] = [];
+									}
+
+									favorite[key].push({
+										id: item
+									});
+								}
+							}
+						}
+						else {
+							key = pt.conf.finals.dimension.nameObjectMap[obj.objectName].value;
+							favorite[key] = [];
+
+							for (var j = 0, item; j < obj.items.length; j++) {
+								item = obj.items[j];
+
+								favorite[key].push({
+									id: item
+								});
+							}
+						}
+					}
+
+
+
+
+
+						key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
+						items = [];
+
+						if (obj.
+
+						for (var j = 0; j < obj.items.length; j++) {
+							items.push({
+								id: obj.items[j]
+							});
+						}
+
+						favorite[key] = items;
+					}
+
 
 					if (layers.length) {
 						if (name) {

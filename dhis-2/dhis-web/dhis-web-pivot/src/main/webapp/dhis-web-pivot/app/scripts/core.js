@@ -82,6 +82,12 @@ PT.core.getConfigs = function() {
 					filter: '...'//PT.i18n.wm_multiple_filter_period
 				}
             },
+            fixedPeriod: {
+				value: 'periods'
+			},
+			relativePeriod: {
+				value: 'relativePeriods'
+			},
             organisationUnit: {
                 value: 'organisationUnits',
                 rawValue: 'Organisation units', //i18n PT.i18n.organisation_unit,
