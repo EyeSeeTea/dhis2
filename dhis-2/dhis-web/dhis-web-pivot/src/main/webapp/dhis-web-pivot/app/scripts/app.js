@@ -941,43 +941,6 @@ Ext.onReady( function() {
 
 
 
-
-
-
-						if (obj.
-
-						for (var j = 0; j < obj.items.length; j++) {
-							items.push({
-								id: obj.items[j]
-							});
-						}
-
-						favorite[key] = items;
-					}
-
-
-					if (layers.length) {
-						if (name) {
-							for (var i = 0; i < layers.length; i++) {
-								layer = layers[i];
-								view = layer.widget.getView();
-
-								// add
-								view.layer = layer.id;
-
-								// remove
-								delete view.periodType;
-								views.push(view);
-							}
-
-							map = {
-								name: name,
-								longitude: lonlat.lon,
-								latitude: lonlat.lat,
-								zoom: pt.olmap.getZoom(),
-								mapViews: views
-							};
-
 							if (!system) {
 								map.user = {
 									id: 'currentUser'
@@ -2678,7 +2641,7 @@ Ext.onReady( function() {
 				}
 			};
 
-			getGroupSetPanels = function(groupSets, iconCls) {
+			getGroupSetPanels = function(groupSets, objectName, iconCls) {
 				var	getAvailableStore,
 					getSelectedStore,
 
@@ -2824,7 +2787,7 @@ Ext.onReady( function() {
 						getData: function() {
 							var data = {
 								dimensionName: groupSet.id,
-								objectName: groupSet.id,
+								objectName: objectName,
 								items: []
 							};
 
@@ -2971,8 +2934,8 @@ Ext.onReady( function() {
 							pt.util.array.sortObjectsByString(ougs);
 							pt.util.array.sortObjectsByString(degs);
 
-							panels = panels.concat(getGroupSetPanels(ougs, 'pt-panel-title-organisationunitgroupset'));
-							panels = panels.concat(getGroupSetPanels(degs, 'pt-panel-title-dataelementgroupset'));
+							panels = panels.concat(getGroupSetPanels(ougs, pt.conf.finals.dimension.organisationUnitGroupSet.objectName, 'pt-panel-title-organisationunitgroupset'));
+							panels = panels.concat(getGroupSetPanels(degs, pt.conf.finals.dimension.dataElementGroupSet.objectName, 'pt-panel-title-dataelementgroupset'));
 
 							last = panels[panels.length - 1];
 							last.cls = 'pt-accordion-last';
