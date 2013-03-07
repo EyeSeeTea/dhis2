@@ -105,7 +105,7 @@ Ext.onReady( function() {
 					dim = panels[i].getData();
 
 					if (dim) {
-						if (dim.name === pt.conf.finals.dimension.data.paramName) {
+						if (dim.name === pt.conf.finals.dimension.data.dimensionName) {
 							dxItems = dxItems.concat(dim.items);
 						}
 						else {
@@ -115,7 +115,7 @@ Ext.onReady( function() {
 				}
 
 				if (dxItems.length) {
-					data[pt.conf.finals.dimension.data.paramName] = dxItems;
+					data[pt.conf.finals.dimension.data.dimensionName] = dxItems;
 				}
 			}();
 
@@ -267,6 +267,48 @@ Ext.onReady( function() {
 			data: []
 		});
 
+		store.tables = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'lastUpdated'],
+			proxy: {
+				type: 'ajax',
+				reader: {
+					type: 'json',
+					root: 'reportTables'
+				}
+			},
+			isLoaded: false,
+			pageSize: 10,
+			page: 1,
+			defaultUrl: pt.baseUrl + pt.conf.finals.ajax.path_api + 'reportTables.json?links=false',
+			loadStore: function(url) {
+				this.proxy.url = url || this.defaultUrl;
+
+				this.load({
+					params: {
+						pageSize: this.pageSize,
+						page: this.page
+					}
+				});
+			},
+			loadFn: function(fn) {
+				if (this.isLoaded) {
+					fn.call();
+				}
+				else {
+					this.load(fn);
+				}
+			},
+			listeners: {
+				load: function() {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+
+					this.sort('name', 'ASC');
+				}
+			}
+		});
+
 		return store;
 	};
 
@@ -321,7 +363,7 @@ Ext.onReady( function() {
 			dimConf = pt.conf.finals.dimension;
 
 		dimensionOrder = function() {
-			var order = [dimConf.data.paramName, dimConf.category.paramName, dimConf.period.paramName, dimConf.organisationUnit.paramName],
+			var order = [dimConf.data.dimensionName, dimConf.category.dimensionName, dimConf.period.dimensionName, dimConf.organisationUnit.dimensionName],
 				ougsOrder = [];
 
 			for (var i = 0; i < pt.init.ougs.length; i++) {
@@ -332,7 +374,7 @@ Ext.onReady( function() {
 		}();
 
 		getData = function() {
-			var data = [{id: dimConf.category.paramName, name: dimConf.category.rawValue}];
+			var data = [{id: dimConf.category.dimensionName, name: dimConf.category.rawValue}];
 
 			return data.concat(pt.init.ougs, pt.init.degs);
 		};
@@ -365,13 +407,13 @@ Ext.onReady( function() {
 		dimensionStore = getStore(getData());
 
 		rowStore = getStore();
-		rowStore.add({id: dimConf.period.paramName, name: dimConf.period.rawValue}); //i18n
+		rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.rawValue}); //i18n
 
 		colStore = getStore();
-		colStore.add({id: dimConf.data.paramName, name: dimConf.data.rawValue}); //i18n
+		colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.rawValue}); //i18n
 
 		filterStore = getStore();
-		filterStore.add({id: dimConf.organisationUnit.paramName, name: dimConf.organisationUnit.rawValue}); //i18n
+		filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.rawValue}); //i18n
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
@@ -778,7 +820,7 @@ Ext.onReady( function() {
 
 			mapWindow;
 
-		pt.store.maps.on('load', function(store, records) {
+		pt.store.tables.on('load', function(store, records) {
 			info.setText(records.length + ' favorite' + (records.length !== 1 ? 's' : '') + ' available');
 		});
 
@@ -804,7 +846,7 @@ Ext.onReady( function() {
 				labelWidth: 70,
 				fieldLabel: 'System', //i18n
 				style: 'margin-bottom: 0',
-				disabled: !gis.init.security.isAdmin,
+				disabled: !pt.init.user.isAdmin,
 				checked: !id ? false : (record.data.user ? false : true)
 			});
 
@@ -813,9 +855,13 @@ Ext.onReady( function() {
 				handler: function() {
 					var name = nameTextfield.getValue(),
 						system = systemCheckbox.getValue(),
-						layers = gis.util.map.getVisibleVectorLayers(),
+
+
+
+
+						layers = pt.util.map.getVisibleVectorLayers(),
 						layer,
-						lonlat = gis.olmap.getCenter(),
+						lonlat = pt.olmap.getCenter(),
 						views = [],
 						view,
 						map;
@@ -838,7 +884,7 @@ Ext.onReady( function() {
 								name: name,
 								longitude: lonlat.lon,
 								latitude: lonlat.lat,
-								zoom: gis.olmap.getZoom(),
+								zoom: pt.olmap.getZoom(),
 								mapViews: views
 							};
 
@@ -849,16 +895,16 @@ Ext.onReady( function() {
 							}
 
 							Ext.Ajax.request({
-								url: gis.baseUrl + gis.conf.url.path_api + 'maps/',
+								url: pt.baseUrl + pt.conf.finals.ajax.path_api + 'reportTables/',
 								method: 'POST',
 								headers: {'Content-Type': 'application/json'},
 								params: Ext.encode(map),
 								success: function(r) {
 									var id = r.getAllResponseHeaders().location.split('/').pop();
 
-									gis.store.maps.loadStore();
+									pt.store.maps.loadStore();
 
-									gis.viewport.interpretationButton.enable();
+									pt.viewport.interpretationButton.enable();
 
 									window.destroy();
 								}
@@ -881,9 +927,9 @@ Ext.onReady( function() {
 						system = systemCheckbox.getValue();
 
 					Ext.Ajax.request({
-						url: gis.baseUrl + gis.conf.url.path_gis + 'renameMap.action?id=' + id + '&name=' + name + '&user=' + !system,
+						url: pt.baseUrl + pt.conf.url.path_gis + 'renameMap.action?id=' + id + '&name=' + name + '&user=' + !system,
 						success: function() {
-							gis.store.maps.loadStore();
+							pt.store.maps.loadStore();
 
 							window.destroy();
 						}
@@ -948,8 +994,8 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? gis.baseUrl + gis.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
-							store = gis.store.maps;
+							url = value ? pt.baseUrl + pt.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+							store = pt.store.maps;
 
 						store.page = 1;
 						store.loadStore(url);
@@ -962,8 +1008,8 @@ Ext.onReady( function() {
 			text: 'Prev', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? gis.baseUrl + gis.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
-					store = gis.store.maps;
+					url = value ? pt.baseUrl + pt.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+					store = pt.store.maps;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
 				store.loadStore(url);
@@ -974,8 +1020,8 @@ Ext.onReady( function() {
 			text: 'Next', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? gis.baseUrl + gis.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
-					store = gis.store.maps;
+					url = value ? pt.baseUrl + pt.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
+					store = pt.store.maps;
 
 				store.page = store.page + 1;
 				store.loadStore(url);
@@ -1005,7 +1051,7 @@ Ext.onReady( function() {
 								el.addClsOnOver('link');
 								el.gis = gis;
 								el.map = {id: record.data.id};
-								el.dom.setAttribute('onclick', 'Ext.get(this).gis.map = Ext.get(this).map; GIS.core.MapLoader(Ext.get(this).gis).load();');
+								el.dom.setAttribute('onclick', 'Ext.get(this).pt.map = Ext.get(this).map; GIS.core.MapLoader(Ext.get(this).gis).load();');
 							}
 						};
 
@@ -1023,7 +1069,7 @@ Ext.onReady( function() {
 							iconCls: 'gis-grid-row-icon-edit',
 							getClass: function(value, metaData, record) {
 								var system = !record.data.user,
-									isAdmin = gis.init.security.isAdmin;
+									isAdmin = pt.init.security.isAdmin;
 
 								if (isAdmin || (!isAdmin && !system)) {
 									return 'tooltip-map-edit';
@@ -1033,7 +1079,7 @@ Ext.onReady( function() {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
 									system = !record.data.user,
-									isAdmin = gis.init.security.isAdmin;
+									isAdmin = pt.init.security.isAdmin;
 
 								if (isAdmin || (!isAdmin && !system)) {
 									var id = this.up('grid').store.getAt(rowIndex).data.id;
@@ -1046,7 +1092,7 @@ Ext.onReady( function() {
 							iconCls: 'gis-grid-row-icon-overwrite',
 							getClass: function(value, metaData, record) {
 								var system = !record.data.user,
-									isAdmin = gis.init.security.isAdmin;
+									isAdmin = pt.init.security.isAdmin;
 
 								if (isAdmin || (!isAdmin && !system)) {
 									return 'tooltip-map-overwrite';
@@ -1056,9 +1102,9 @@ Ext.onReady( function() {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
 									name = record.data.name,
-									layers = gis.util.map.getVisibleVectorLayers(),
+									layers = pt.util.map.getVisibleVectorLayers(),
 									layer,
-									lonlat = gis.olmap.getCenter(),
+									lonlat = pt.olmap.getCenter(),
 									views = [],
 									view,
 									map,
@@ -1082,20 +1128,20 @@ Ext.onReady( function() {
 										map = {
 											longitude: lonlat.lon,
 											latitude: lonlat.lat,
-											zoom: gis.olmap.getZoom(),
+											zoom: pt.olmap.getZoom(),
 											mapViews: views
 										};
 
 										Ext.Ajax.request({
-											url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + id,
+											url: pt.baseUrl + pt.conf.url.path_api + 'maps/' + id,
 											method: 'PUT',
 											headers: {'Content-Type': 'application/json'},
 											params: Ext.encode(map),
 											success: function() {
-												gis.map = map;
-												gis.viewport.interpretationButton.enable();
+												pt.map = map;
+												pt.viewport.interpretationButton.enable();
 
-												gis.store.maps.loadStore();
+												pt.store.maps.loadStore();
 											}
 										});
 									}
@@ -1118,7 +1164,7 @@ Ext.onReady( function() {
 
 								if (confirm(message)) {
 									Ext.Ajax.request({
-										url: gis.baseUrl + gis.conf.url.path_gis + 'addMapViewToDashboard.action',
+										url: pt.baseUrl + pt.conf.url.path_gis + 'addMapViewToDashboard.action',
 										params: {
 											id: id
 										}
@@ -1130,7 +1176,7 @@ Ext.onReady( function() {
 							iconCls: 'gis-grid-row-icon-delete',
 							getClass: function(value, metaData, record) {
 								var system = !record.data.user,
-									isAdmin = gis.init.security.isAdmin;
+									isAdmin = pt.init.security.isAdmin;
 
 								if (isAdmin || (!isAdmin && !system)) {
 									return 'tooltip-map-delete';
@@ -1144,10 +1190,10 @@ Ext.onReady( function() {
 
 								if (confirm(message)) {
 									Ext.Ajax.request({
-										url: gis.baseUrl + gis.conf.url.path_api + 'maps/' + id,
+										url: pt.baseUrl + pt.conf.url.path_api + 'maps/' + id,
 										method: 'DELETE',
 										success: function() {
-											gis.store.maps.loadStore();
+											pt.store.maps.loadStore();
 										}
 									});
 								}
@@ -1155,7 +1201,7 @@ Ext.onReady( function() {
 						}
 					],
 					renderer: function(value, metaData, record) {
-						if (!gis.init.security.isAdmin && !record.data.user) {
+						if (!pt.init.security.isAdmin && !record.data.user) {
 							metaData.tdCls = 'gis-grid-row-icon-disabled';
 						}
 					}
@@ -1165,7 +1211,7 @@ Ext.onReady( function() {
 					width: 6
 				}
 			],
-			store: gis.store.maps,
+			store: pt.store.maps,
 			bbar: [
 				info,
 				'->',
@@ -1174,15 +1220,15 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					gis.viewport.mapGrid = this;
+					pt.viewport.mapGrid = this;
 				},
 				render: function() {
-					var size = Math.floor((gis.viewport.centerRegion.getHeight() - 155) / gis.conf.layout.grid.row_height);
+					var size = Math.floor((pt.viewport.centerRegion.getHeight() - 155) / pt.conf.layout.grid.row_height);
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
 
-					gis.store.maps.on('load', function() {
+					pt.store.maps.on('load', function() {
 						if (this.isVisible()) {
 							this.fireEvent('afterrender');
 						}
@@ -1408,7 +1454,8 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						name: pt.conf.finals.dimension.indicator.paramName,
+						dimensionName: pt.conf.finals.dimension.indicator.dimensionName,
+						objectName: pt.conf.finals.dimension.indicator.objectName,
 						items: []
 					};
 
@@ -1599,7 +1646,8 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						name: pt.conf.finals.dimension.indicator.paramName,
+						dimensionName: pt.conf.finals.dimension.dataElement.dimensionName,
+						objectName: pt.conf.finals.dimension.dataElement.objectName,
 						items: []
 					};
 
@@ -1786,7 +1834,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						name: pt.conf.finals.dimension.indicator.paramName,
+						name: pt.conf.finals.dimension.indicator.dimensionName,
 						items: []
 					};
 
@@ -2121,7 +2169,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						name: pt.conf.finals.dimension.period.paramName,
+						name: pt.conf.finals.dimension.period.dimensionName,
 							items: []
 						},
 						chb = pt.cmp.dimension.relativePeriod.checkbox;
@@ -2132,7 +2180,7 @@ Ext.onReady( function() {
 
 					for (var i = 0; i < chb.length; i++) {
 						if (chb[i].getValue()) {
-							data.items.push(chb[i].paramName);
+							data.items.push(chb[i].dimensionName);
 						}
 					}
 
@@ -2760,7 +2808,7 @@ Ext.onReady( function() {
 				// Indicator as filter
 				if (settings.filter && pt.store.indicatorSelected.data.length) {
 					for (var i = 0; i < settings.filter.length; i++) {
-						if (settings.filter[i].name === dimConf.data.paramName) {
+						if (settings.filter[i].name === dimConf.data.dimensionName) {
 							alert('Indicators cannot be specified as filter'); //i18n
 							return;
 						}
@@ -2768,13 +2816,13 @@ Ext.onReady( function() {
 				}
 
 				// Categories as filter
-				if (settings.filter && pt.viewport.settingsWindow.filterStore.getById(dimConf.category.paramName)) {
+				if (settings.filter && pt.viewport.settingsWindow.filterStore.getById(dimConf.category.dimensionName)) {
 					alert('Categories cannot be specified as filter');
 					return;
 				}
 
 				// Degs and datasets in the same query
-				if (Ext.Array.contains(settingsNames, dimConf.data.paramName) && pt.store.dataSetSelected.data.length) {
+				if (Ext.Array.contains(settingsNames, dimConf.data.dimensionName) && pt.store.dataSetSelected.data.length) {
 					for (var i = 0; i < pt.init.degs.length; i++) {
 						if (Ext.Array.contains(settingsNames, pt.init.degs[i].id)) {
 							alert('Data element group sets cannot be specified together with data sets');

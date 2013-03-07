@@ -43,34 +43,40 @@ PT.core.getConfigs = function() {
             data: {
                 value: 'data',
                 rawValue: 'Data', //i18n PT.i18n.data,
-                paramName: 'dx',
+                dimensionName: 'dx',
+                objectName: 'dx',
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_ind_de
 				}
             },
             category: {
-				paramName: 'co',
-				rawValue: 'Categories'
+				rawValue: 'Categories',
+				dimensionName: 'co',
+                objectName: 'co',
 			},
             indicator: {
                 value: 'indicator',
                 rawValue: 'Indicators', //i18n PT.i18n.indicator,
-                paramName: 'dx'
+                dimensionName: 'dx',
+                objectName: 'in'
             },
             dataElement: {
                 value: 'dataelement',
                 rawValue: 'Data elements', //i18n PT.i18n.data_element,
-                paramName: 'dx'
+                dimensionName: 'dx',
+                objectName: 'de'
             },
             dataSet: {
 				value: 'dataset',
                 rawValue: 'Data sets', //i18n PT.i18n.dataset,
-                paramName: 'dx'
+                dimensionName: 'dx',
+                objectName: 'ds'
 			},
             period: {
                 value: 'period',
                 rawValue: 'Periods', //i18n PT.i18n.period,
-                paramName: 'pe',
+                dimensionName: 'pe',,
+                objectName: 'pe'
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_period
 				}
@@ -78,7 +84,8 @@ PT.core.getConfigs = function() {
             organisationUnit: {
                 value: 'organisationunit',
                 rawValue: 'Organisation units', //i18n PT.i18n.organisation_unit,
-                paramName: 'ou',
+                dimensionName: 'ou',,
+                objectName: 'ou'
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_orgunit
 				}
@@ -470,13 +477,14 @@ PT.core.getUtils = function(pt) {
 
 		getTable: function(settings, pt) {
 			var options = settings.options,
-				getParamStringFromDimensions,
 				extendSettings,
+				getSyncronizedXSettings,
+				getParamString,
 				validateResponse,
 				extendResponse,
 				extendAxis,
-				extendRowAxis,
-				getTableHtmlArrays,
+				validateUrl,
+				getTableHtml,
 				initialize,
 
 				dimConf = pt.conf.finals.dimension;
@@ -577,8 +585,8 @@ PT.core.getUtils = function(pt) {
 				headerNames = getHeaderNames();
 
 				// remove co from settings if it does not exist in response
-				if (Ext.Array.contains(xSettings.dimensionNames, dimConf.category.paramName) && !(Ext.Array.contains(headerNames, dimConf.category.paramName))) {
-					removeDimensionFromSettings(dimConf.category.paramName);
+				if (Ext.Array.contains(xSettings.dimensionNames, dimConf.category.dimensionName) && !(Ext.Array.contains(headerNames, dimConf.category.dimensionName))) {
+					removeDimensionFromSettings(dimConf.category.dimensionName);
 
 					newSettings = pt.api.Settings(settings);
 
@@ -603,7 +611,7 @@ PT.core.getUtils = function(pt) {
 
 					paramString += 'dimension=' + sortedDim.name;
 
-					if (sortedDim.name !== pt.conf.finals.dimension.category.paramName) {
+					if (sortedDim.name !== pt.conf.finals.dimension.category.dimensionName) {
 						paramString += ':' + sortedDim.items.join(';');
 					}
 
@@ -682,7 +690,7 @@ PT.core.getUtils = function(pt) {
 								for (var j = 0, item; j < settingsItems.length; j++) {
 									item = settingsItems[j];
 
-									if (header.name === dimConf.period.paramName && pt.conf.period.relativePeriods[item]) {
+									if (header.name === dimConf.period.dimensionName && pt.conf.period.relativePeriods[item]) {
 										orderedResponseItems = responseItems;
 										orderedResponseItems.sort();
 									}
@@ -917,6 +925,16 @@ PT.core.getUtils = function(pt) {
 					dims: aUniqueIds.length,
 					size: nCols
 				};
+			};
+
+			validateUrl = function(url) {
+				if (!Ext.isString(url) || url.length > 2000) {
+					var percent = ((url.length - 2000) / url.length) * 100;
+					alert('Too many parameters selected. Please reduce the number of parameters by minimum ' + percent.toFixed(0) + '%');
+					return;
+				}
+
+				return true;
 			};
 
 			getTableHtml = function(xColAxis, xRowAxis, xResponse) {
@@ -1466,10 +1484,7 @@ PT.core.getUtils = function(pt) {
 				pt.paramString = getParamString(xSettings);
 				url = pt.init.contextPath + '/api/analytics.jsonp' + pt.paramString;
 
-				if (url.length > 2000) {
-					var percent = ((url.length - 2000) / url.length) * 100;
-
-					alert('Too many parameters selected. Please reduce the number of parameters by minimum ' + percent.toFixed(0) + '%');
+				if (!validateUrl(url)) {
 					return;
 				}
 
@@ -1521,6 +1536,10 @@ PT.core.getUtils = function(pt) {
 						if (pt.viewport.downloadButton) {
 							pt.viewport.downloadButton.enable();
 						}
+
+						pt.xSettings = xSettings;
+						pt.xResponse = xResponse;
+nissa = pt;
 					}
 				});
 
@@ -1558,7 +1577,7 @@ PT.core.getAPI = function(pt) {
 				remove = false;
 				dimension = axis[i];
 
-				if (dimension.name !== pt.conf.finals.dimension.category.paramName) {
+				if (dimension.name !== pt.conf.finals.dimension.category.dimensionName) {
 					if (!(Ext.isArray(dimension.items) && dimension.items.length)) {
 						remove = true;
 					}
@@ -1627,12 +1646,12 @@ PT.core.getAPI = function(pt) {
 				}
 			}
 
-			//if (!Ext.Array.contains(names, dimConf.data.paramName)) {
+			//if (!Ext.Array.contains(names, dimConf.data.dimensionName)) {
 				//alert('At least one indicator, data element or dataset must be specified as column, row or filter');
 				//return;
 			//}
 
-			if (!Ext.Array.contains(names, dimConf.period.paramName)) {
+			if (!Ext.Array.contains(names, dimConf.period.dimensionName)) {
 				alert('At least one period must be specified as column, row or filter');
 				return;
 			}
