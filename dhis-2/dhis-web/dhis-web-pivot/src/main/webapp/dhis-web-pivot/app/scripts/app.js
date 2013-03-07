@@ -858,16 +858,10 @@ Ext.onReady( function() {
 				handler: function() {
 					var name = nameTextfield.getValue(),
 						system = systemCheckbox.getValue(),
+						favorite = Ext.clone(pt.xSettings.options);
 
+					favorite.name = name;
 
-
-
-						layers = pt.util.map.getVisibleVectorLayers(),
-						layer,
-						lonlat = pt.olmap.getCenter(),
-						views = [],
-						view,
-						map;
 
 					if (layers.length) {
 						if (name) {

@@ -5,7 +5,8 @@ PT.core = {};
 Ext.onReady( function() {
 
 PT.core.getConfigs = function() {
-	var conf = {};
+	var conf = {},
+		dim;
 
 	conf.finals = {
         ajax: {
@@ -55,19 +56,19 @@ PT.core.getConfigs = function() {
                 objectName: 'co',
 			},
             indicator: {
-                value: 'indicator',
+                value: 'indicators',
                 rawValue: 'Indicators', //i18n PT.i18n.indicator,
                 dimensionName: 'dx',
                 objectName: 'in'
             },
             dataElement: {
-                value: 'dataelement',
+                value: 'dataElements',
                 rawValue: 'Data elements', //i18n PT.i18n.data_element,
                 dimensionName: 'dx',
                 objectName: 'de'
             },
             dataSet: {
-				value: 'dataset',
+				value: 'dataSets',
                 rawValue: 'Data sets', //i18n PT.i18n.dataset,
                 dimensionName: 'dx',
                 objectName: 'ds'
@@ -82,7 +83,7 @@ PT.core.getConfigs = function() {
 				}
             },
             organisationUnit: {
-                value: 'organisationunit',
+                value: 'organisationUnits',
                 rawValue: 'Organisation units', //i18n PT.i18n.organisation_unit,
                 dimensionName: 'ou',
                 objectName: 'ou',
@@ -90,8 +91,13 @@ PT.core.getConfigs = function() {
 					filter: '...'//PT.i18n.wm_multiple_filter_orgunit
 				}
             },
-            organisationUnitGroup: {
-				value: 'organisationunitgroup'
+            organisationUnitGroupSet: {
+				value: 'organisationUnitGroupSets',
+				objectName: 'ougs'
+			},
+            dataElementGroupSet: {
+				value: 'dataElementGroupSets',
+				objectName: 'degs'
 			},
 			value: {
 				value: 'value'
@@ -101,6 +107,17 @@ PT.core.getConfigs = function() {
 			id: 'root'
 		}
 	};
+
+	dim = conf.finals.dimension;
+
+	dim.objectNameMap = {};
+	dim.objectNameMap[dim.indicator.objectName] = dim.indicator;
+	dim.objectNameMap[dim.dataElement.objectName] = dim.dataElement;
+	dim.objectNameMap[dim.dataSet.objectName] = dim.dataSet;
+	dim.objectNameMap[dim.period.objectName] = dim.period;
+	dim.objectNameMap[dim.organisationUnit.objectName] = dim.organisationUnit;
+	dim.objectNameMap[dim.organisationUnit.objectName] = dim.organisationUnit;
+	dim.objectNameMap[dim.dataElementGroupSet.objectName] = dim.dataElementGroupSet;
 
 	conf.period = {
 		relativePeriods: {
