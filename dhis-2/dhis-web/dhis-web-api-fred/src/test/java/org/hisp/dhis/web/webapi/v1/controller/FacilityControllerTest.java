@@ -30,9 +30,11 @@ package org.hisp.dhis.web.webapi.v1.controller;
 import org.hisp.dhis.web.FredSpringWebTest;
 import org.junit.Test;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -40,8 +42,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class FacilityControllerTest extends FredSpringWebTest
 {
     @Test
-    public void testBogusIsNotFound() throws Exception
+    public void testRedirectedToV1() throws Exception
     {
-        mockMvc.perform( get( "/bogus" ).accept( MediaType.ALL ) ).andExpect( status().isNotFound() );
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( get( "/api-fred" ).session( session ) ).andExpect( redirectedUrl( "/api-fred/v1" ) );
+        mvc.perform( get( "/api-fred/" ).session( session ) ).andExpect( redirectedUrl( "/api-fred/v1" ) );
+    }
+
+    @Test
+    public void testGetFacilities() throws Exception
+    {
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( get( "/v1/facilities" ).session( session ).accept( MediaType.APPLICATION_JSON ) )
+            .andExpect( status().isOk() );
     }
 }
