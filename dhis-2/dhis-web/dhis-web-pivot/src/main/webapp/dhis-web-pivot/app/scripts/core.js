@@ -176,6 +176,7 @@ PT.core.getConfigs = function() {
         window_confirm_width: 250,
         window_share_width: 500,
         grid_favorite_width: 420,
+        grid_row_height: 27,
         treepanel_minheight: 135,
         treepanel_maxheight: 400,
         treepanel_fill_default: 310,

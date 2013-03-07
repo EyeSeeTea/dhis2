@@ -1255,7 +1255,7 @@ Ext.onReady( function() {
 					pt.viewport.favoriteGrid = this;
 				},
 				render: function() {
-					var size = Math.floor((pt.viewport.centerRegion.getHeight() - 155) / pt.conf.layout.grid.row_height);
+					var size = Math.floor((pt.viewport.centerRegion.getHeight() - 155) / pt.conf.layout.grid_row_height);
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
