@@ -94,7 +94,8 @@ Ext.onReady( function() {
 			config = {
 				col: [],
 				row: [],
-				filter: []
+				filter: [],
+				dimensionObjects: []
 			};
 
 			getData = function() {
@@ -105,11 +106,13 @@ Ext.onReady( function() {
 					dim = panels[i].getData();
 
 					if (dim) {
-						if (dim.name === pt.conf.finals.dimension.data.dimensionName) {
+						config.dimensionObjects.push(dim);
+
+						if (dim.dimensionName === pt.conf.finals.dimension.data.dimensionName) {
 							dxItems = dxItems.concat(dim.items);
 						}
 						else {
-							data[dim.name] = dim.items;
+							data[dim.dimensionName] = dim.items;
 						}
 					}
 				}
@@ -120,27 +123,27 @@ Ext.onReady( function() {
 			}();
 
 			extendSettings = function() {
-				for (var i = 0, name; i < setup.col.length; i++) {
-					name = setup.col[i];
+				for (var i = 0, dimensionName; i < setup.col.length; i++) {
+					dimensionName = setup.col[i];
 					config.col.push({
-						name: name,
-						items: data[name]
+						dimensionName: dimensionName,
+						items: data[dimensionName]
 					});
 				}
 
-				for (var i = 0, name; i < setup.row.length; i++) {
-					name = setup.row[i];
+				for (var i = 0, dimensionName; i < setup.row.length; i++) {
+					dimensionName = setup.row[i];
 					config.row.push({
-						name: name,
-						items: data[name]
+						dimensionName: dimensionName,
+						items: data[dimensionName]
 					});
 				}
 
-				for (var i = 0, name; i < setup.filter.length; i++) {
-					name = setup.filter[i];
+				for (var i = 0, dimensionName; i < setup.filter.length; i++) {
+					dimensionName = setup.filter[i];
 					config.filter.push({
-						name: name,
-						items: data[name]
+						dimensionName: dimensionName,
+						items: data[dimensionName]
 					});
 				}
 			}();
@@ -1834,7 +1837,8 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						name: pt.conf.finals.dimension.indicator.dimensionName,
+						dimensionName: pt.conf.finals.dimension.dataSet.dimensionName,
+						objectName: pt.conf.finals.dimension.dataSet.objectName,
 						items: []
 					};
 
@@ -1878,7 +1882,7 @@ Ext.onReady( function() {
 			};
 
 			rewind = Ext.create('Ext.form.field.Checkbox', {
-				paramName: 'rewind',
+				relativePeriodId: 'rewind',
 				boxLabel: 'Rewind one period',
 				xable: function() {
 					this.setDisabled(pt.util.checkbox.isAllFalse());
@@ -1922,17 +1926,17 @@ Ext.onReady( function() {
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'LAST_MONTH',
+										relativePeriodId: 'LAST_MONTH',
 										boxLabel: 'Last month', //i18n pt.i18n.last_month
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'LAST_3_MONTHS',
+										relativePeriodId: 'LAST_3_MONTHS',
 										boxLabel: 'Last 3 months', //i18n pt.i18n.last_3_months
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'LAST_12_MONTHS',
+										relativePeriodId: 'LAST_12_MONTHS',
 										boxLabel: 'Last 12 months', //i18n pt.i18n.last_12_months,
 										checked: true
 									}
@@ -1964,12 +1968,12 @@ Ext.onReady( function() {
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'LAST_QUARTER',
+										relativePeriodId: 'LAST_QUARTER',
 										boxLabel: 'Last quarter', //i18n pt.i18n.last_quarter
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'LAST_4_QUARTERS',
+										relativePeriodId: 'LAST_4_QUARTERS',
 										boxLabel: 'Last 4 quarters', //i18n pt.i18n.last_4_quarters
 									}
 								]
@@ -2000,12 +2004,12 @@ Ext.onReady( function() {
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'LAST_SIX_MONTH',
+										relativePeriodId: 'LAST_SIX_MONTH',
 										boxLabel: 'Last six-month', //i18n pt.i18n.last_six_month
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'LAST_2_SIXMONTHS',
+										relativePeriodId: 'LAST_2_SIXMONTHS',
 										boxLabel: 'Last two six-months', //i18n pt.i18n.last_two_six_month
 									}
 								]
@@ -2043,17 +2047,17 @@ Ext.onReady( function() {
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'THIS_YEAR',
+										relativePeriodId: 'THIS_YEAR',
 										boxLabel: 'This year', //i18n pt.i18n.this_year
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'LAST_YEAR',
+										relativePeriodId: 'LAST_YEAR',
 										boxLabel: 'Last year', //i18n pt.i18n.last_year
 									},
 									{
 										xtype: 'checkbox',
-										paramName: 'LAST_5_YEARS',
+										relativePeriodId: 'LAST_5_YEARS',
 										boxLabel: 'Last 5 years', //i18n pt.i18n.last_5_years
 									}
 								]
@@ -2169,7 +2173,8 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				getData: function() {
 					var data = {
-						name: pt.conf.finals.dimension.period.dimensionName,
+							dimensionName: pt.conf.finals.dimension.period.dimensionName,
+							objectName: pt.conf.finals.dimension.period.objectName,
 							items: []
 						},
 						chb = pt.cmp.dimension.relativePeriod.checkbox;
@@ -2180,7 +2185,7 @@ Ext.onReady( function() {
 
 					for (var i = 0; i < chb.length; i++) {
 						if (chb[i].getValue()) {
-							data.items.push(chb[i].dimensionName);
+							data.items.push(chb[i].relativePeriodId);
 						}
 					}
 
@@ -2208,8 +2213,9 @@ Ext.onReady( function() {
 								width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 62 - 62 - 7,
 								valueField: 'id',
 								displayField: 'name',
-								fieldLabel: 'Select type', //i18n pt.i18n.select_type,
+								fieldLabel: 'Select period type', //i18n pt.i18n.select_type,
 								labelStyle: 'padding-left:8px',
+								labelWidth: 110,
 								editable: false,
 								queryMode: 'remote',
 								store: pt.store.periodType,
@@ -2289,7 +2295,8 @@ Ext.onReady( function() {
 				getData: function() {
 					var records = pt.cmp.dimension.organisationUnit.treepanel.getSelectionModel().getSelection(),
 						data = {
-							name: 'ou',
+							dimensionName: pt.conf.finals.dimension.organisationUnit.dimensionName,
+							objectName: pt.conf.finals.dimension.organisationUnit.objectName,
 							items: []
 						};
 
@@ -2729,7 +2736,8 @@ Ext.onReady( function() {
 						hideCollapseTool: true,
 						getData: function() {
 							var data = {
-								name: groupSet.id,
+								dimensionName: groupSet.id,
+								objectName: groupSet.id,
 								items: []
 							};
 
@@ -2797,18 +2805,18 @@ Ext.onReady( function() {
 
 			validateSpecialCases = function(settings) {
 				var dimConf = pt.conf.finals.dimension,
-					settingsNames = [],
+					dimensionNames = [],
 					settingsObjects = [].concat(Ext.clone(settings.col || []), Ext.clone(settings.row || []), Ext.clone(settings.filter || []));
 
 				// Settings names
 				for (var i = 0; i < settingsObjects.length; i++) {
-					settingsNames.push(settingsObjects[i].name);
+					dimensionNames.push(settingsObjects[i].dimensionName);
 				}
 
 				// Indicator as filter
 				if (settings.filter && pt.store.indicatorSelected.data.length) {
 					for (var i = 0; i < settings.filter.length; i++) {
-						if (settings.filter[i].name === dimConf.data.dimensionName) {
+						if (settings.filter[i].dimensionName === dimConf.data.dimensionName) {
 							alert('Indicators cannot be specified as filter'); //i18n
 							return;
 						}
@@ -2822,9 +2830,9 @@ Ext.onReady( function() {
 				}
 
 				// Degs and datasets in the same query
-				if (Ext.Array.contains(settingsNames, dimConf.data.dimensionName) && pt.store.dataSetSelected.data.length) {
+				if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && pt.store.dataSetSelected.data.length) {
 					for (var i = 0; i < pt.init.degs.length; i++) {
-						if (Ext.Array.contains(settingsNames, pt.init.degs[i].id)) {
+						if (Ext.Array.contains(dimensionNames, pt.init.degs[i].id)) {
 							alert('Data element group sets cannot be specified together with data sets');
 							return;
 						}
@@ -2844,6 +2852,7 @@ Ext.onReady( function() {
 				if (!validateSpecialCases(settings)) {
 					return;
 				}
+console.log("settings", settings);return;
 
 				if (settings) {
 					pt.util.pivot.getTable(settings, pt);

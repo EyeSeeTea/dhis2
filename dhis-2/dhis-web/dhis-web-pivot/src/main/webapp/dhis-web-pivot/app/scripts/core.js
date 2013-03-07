@@ -75,8 +75,8 @@ PT.core.getConfigs = function() {
             period: {
                 value: 'period',
                 rawValue: 'Periods', //i18n PT.i18n.period,
-                dimensionName: 'pe',,
-                objectName: 'pe'
+                dimensionName: 'pe',
+                objectName: 'pe',
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_period
 				}
@@ -84,8 +84,8 @@ PT.core.getConfigs = function() {
             organisationUnit: {
                 value: 'organisationunit',
                 rawValue: 'Organisation units', //i18n PT.i18n.organisation_unit,
-                dimensionName: 'ou',,
-                objectName: 'ou'
+                dimensionName: 'ou',
+                objectName: 'ou',
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_orgunit
 				}
@@ -362,7 +362,7 @@ PT.core.getUtils = function(pt) {
 		setRelativePeriods: function(rp) {
 			if (rp) {
 				for (var r in rp) {
-					var cmp = pt.util.getCmp('checkbox[paramName="' + r + '"]');
+					var cmp = pt.util.getCmp('checkbox[relativePeriodId="' + r + '"]');
 					if (cmp) {
 						cmp.setValue(rp[r]);
 					}
@@ -1567,6 +1567,7 @@ PT.core.getAPI = function(pt) {
 				cellPadding: 'normal',
 				fontSize: 'normal'
 			};
+console.log("settingsConfig", config);
 
 		removeEmptyDimensions = function(axis) {
 			if (!axis) {
