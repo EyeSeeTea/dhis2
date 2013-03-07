@@ -1,7 +1,7 @@
 package org.hisp.dhis.reportsheet.organisationunit.action;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,27 +27,16 @@ package org.hisp.dhis.reportsheet.organisationunit.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.paging.ActionPagingSupport;
+import org.hisp.dhis.reportsheet.action.ActionSupport;
 
 /**
  * @author Dang Duy Hieu
  * @version $Id$
  */
-public class ShowAddDepartmentFormAction
-    extends ActionPagingSupport<OrganisationUnit>
+public class GetDepartmentAction
+    extends ActionSupport
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -60,48 +49,22 @@ public class ShowAddDepartmentFormAction
         this.organisationUnitService = organisationUnitService;
     }
 
-    private OrganisationUnitGroupService organisationUnitGroupService;
-
-    public void setOrganisationUnitGroupService( OrganisationUnitGroupService organisationUnitGroupService )
-    {
-        this.organisationUnitGroupService = organisationUnitGroupService;
-    }
-
-    private OrganisationUnitSelectionManager selectionManager;
-
-    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
-    {
-        this.selectionManager = selectionManager;
-    }
-
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
 
-    private List<OrganisationUnitGroupSet> groupSets;
+    private String id;
 
-    public List<OrganisationUnitGroupSet> getGroupSets()
+    public void setId( String id )
     {
-        return groupSets;
+        this.id = id;
     }
 
-    private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
+    private OrganisationUnit organisationUnit;
 
-    public List<OrganisationUnit> getOrganisationUnits()
+    public OrganisationUnit getOrganisationUnit()
     {
-        return organisationUnits;
-    }
-
-    private String key;
-
-    public String getKey()
-    {
-        return key;
-    }
-
-    public void setKey( String key )
-    {
-        this.key = key;
+        return organisationUnit;
     }
 
     // -------------------------------------------------------------------------
@@ -109,37 +72,21 @@ public class ShowAddDepartmentFormAction
     // -------------------------------------------------------------------------
 
     public String execute()
+        throws Exception
     {
-        groupSets = new ArrayList<OrganisationUnitGroupSet>( organisationUnitGroupService
-            .getCompulsoryOrganisationUnitGroupSetsWithMembers() );
+        organisationUnit = organisationUnitService.getOrganisationUnitByUuid( id );
 
-        Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
-
-        //
+        if ( organisationUnit == null )
+        {
+            organisationUnit = organisationUnitService.getOrganisationUnit( Integer.parseInt( id ) );
+        }
         
-        Collection<OrganisationUnit> selectedUnits = selectionManager.getSelectedOrganisationUnits();
-
-        if ( selectedUnits.isEmpty() )
+        if ( organisationUnit == null )
         {
-            organisationUnits.addAll( selectionManager.getRootOrganisationUnits() );
+            message = i18n.getString( "organisation_unit_unavailable" );
+            
+            return ERROR;
         }
-        else
-        {
-            for ( OrganisationUnit selectedUnit : selectedUnits )
-            {
-                organisationUnits.addAll( selectedUnit.getChildren() );
-            }
-        }
-
-        Collections.sort( organisationUnits, new IdentifiableObjectNameComparator() );
-
-        if ( isNotBlank( key ) )
-        {
-            organisationUnitService.searchOrganisationUnitByName( organisationUnits, key );
-        }
-
-        this.paging = createPaging( organisationUnits.size() );
-        organisationUnits = getBlockElement( organisationUnits, paging.getStartPos(), paging.getPageSize() );
 
         return SUCCESS;
     }
