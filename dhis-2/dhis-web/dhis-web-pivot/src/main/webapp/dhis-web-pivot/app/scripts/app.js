@@ -805,6 +805,9 @@ Ext.onReady( function() {
 		// Instances
 			nameWindow,
 
+		// Functions
+			getBody,
+
 		// Components
 			addButton,
 			searchTextfield,
@@ -826,6 +829,96 @@ Ext.onReady( function() {
 		pt.store.tables.on('load', function(store, records) {
 			info.setText(records.length + ' favorite' + (records.length !== 1 ? 's' : '') + ' available');
 		});
+
+		getBody = function() {
+			var name = nameTextfield.getValue(),
+				system = systemCheckbox.getValue(),
+				favorite;
+
+			if (pt.xSettings) {
+				favorite = Ext.clone(pt.xSettings.options);
+
+				favorite.name = name;
+				favorite.user = system ? null : {id: 'currentUser'};
+
+				// Dimensions
+				for (var i = 0, obj, key, items; i < pt.xSettings.objects; i++) {
+					obj = pt.xSettings.objects[i];
+
+					if (obj.objectName === pt.conf.finals.dimension.period.objectName) {
+						for (var j = 0, item; j < obj.items.length; j++) {
+							item = obj.items[j];
+
+							if (pt.conf.period.relativePeriods[item]) {
+								key = pt.conf.finals.dimension.relativePeriod.value;
+
+								if (!favorite[key]) {
+									favorite[key] = {};
+								}
+
+								favorite[key][item] = true;
+							}
+							else {
+								key = pt.conf.finals.dimension.period.value;
+
+								if (!favorite[key]) {
+									favorite[key] = [];
+								}
+
+								favorite[key].push({
+									id: item
+								});
+							}
+						}
+					}
+					else {
+						key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
+						favorite[key] = [];
+
+						for (var j = 0, item; j < obj.items.length; j++) {
+							item = obj.items[j];
+
+							favorite[key].push({
+								id: item
+							});
+						}
+					}
+				}
+
+				// Setup
+				if (xSettings.col) {
+					var a = [];
+
+					for (var i = 0; i < xSettings.col.length; i++) {
+						a.push(xSettings.col[i].dimensionName);
+					}
+
+					favorite['columnDimensions'] = a;
+				}
+
+				if (xSettings.row) {
+					var a = [];
+
+					for (var i = 0; i < xSettings.row.length; i++) {
+						a.push(xSettings.row[i].dimensionName);
+					}
+
+					favorite['rowDimensions'] = a;
+				}
+
+				if (xSettings.filter) {
+					var a = [];
+
+					for (var i = 0; i < xSettings.filter.length; i++) {
+						a.push(xSettings.filter[i].dimensionName);
+					}
+
+					favorite['filterDimensions'] = a;
+				}
+			}
+
+			return favorite;
+		};
 
 		NameWindow = function(id) {
 			var window,
@@ -856,119 +949,29 @@ Ext.onReady( function() {
 			createButton = Ext.create('Ext.button.Button', {
 				text: 'Create', //i18n
 				handler: function() {
-					var name = nameTextfield.getValue(),
-						system = systemCheckbox.getValue(),
-						favorite = Ext.clone(pt.xSettings.options);
+					var favorite = getBody();
 
-					favorite.name = name;
+					if (favorite) {
+						Ext.Ajax.request({
+							url: pt.baseUrl + pt.conf.finals.ajax.path_api + 'reportTables/',
+							method: 'POST',
+							headers: {'Content-Type': 'application/json'},
+							params: Ext.encode(favorite),
+							success: function(r) {
+								var id = r.getAllResponseHeaders().location.split('/').pop();
 
-					// Dimensions
-					for (var i = 0, obj, key, items; i < pt.xSettings.objects; i++) {
-						obj = pt.xSettings.objects[i];
+								pt.favorite = favorite;
 
-						if (obj.objectName === pt.conf.finals.dimension.period.objectName) {
-							for (var j = 0, item; j < obj.items.length; j++) {
-								item = obj.items[j];
+								pt.store.tables.loadStore();
 
-								if (pt.conf.period.relativePeriods[item]) {
-									key = pt.conf.finals.dimension.relativePeriod.value;
+								//pt.viewport.interpretationButton.enable();
 
-									if (!favorite[key]) {
-										favorite[key] = {};
-									}
-
-									favorite[key][item] = true;
-								}
-								else {
-									key = pt.conf.finals.dimension.period.value;
-
-									if (!favorite[key]) {
-										favorite[key] = [];
-									}
-
-									favorite[key].push({
-										id: item
-									});
-								}
+								window.destroy();
 							}
-						}
-						else {
-							key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
-							favorite[key] = [];
-
-							for (var j = 0, item; j < obj.items.length; j++) {
-								item = obj.items[j];
-
-								favorite[key].push({
-									id: item
-								});
-							}
-						}
-					}
-
-					// Setup
-					if (xSettings.col) {
-						var a = [];
-
-						for (var i = 0; i < xSettings.col.length; i++) {
-							a.push(xSettings.col[i].dimensionName);
-						}
-
-						favorite['columnDimensions'] = a;
-					}
-
-					if (xSettings.row) {
-						var a = [];
-
-						for (var i = 0; i < xSettings.row.length; i++) {
-							a.push(xSettings.row[i].dimensionName);
-						}
-
-						favorite['rowDimensions'] = a;
-					}
-
-					if (xSettings.filter) {
-						var a = [];
-
-						for (var i = 0; i < xSettings.filter.length; i++) {
-							a.push(xSettings.filter[i].dimensionName);
-						}
-
-						favorite['filterDimensions'] = a;
-					}
-
-
-
-
-
-							if (!system) {
-								map.user = {
-									id: 'currentUser'
-								};
-							}
-
-							Ext.Ajax.request({
-								url: pt.baseUrl + pt.conf.finals.ajax.path_api + 'reportTables/',
-								method: 'POST',
-								headers: {'Content-Type': 'application/json'},
-								params: Ext.encode(map),
-								success: function(r) {
-									var id = r.getAllResponseHeaders().location.split('/').pop();
-
-									pt.store.maps.loadStore();
-
-									pt.viewport.interpretationButton.enable();
-
-									window.destroy();
-								}
-							});
-						}
-						else {
-							alert('Please enter a name');
-						}
+						});
 					}
 					else {
-						alert('Please create a map first');
+						alert('Please create a table first');
 					}
 				}
 			});
@@ -980,9 +983,9 @@ Ext.onReady( function() {
 						system = systemCheckbox.getValue();
 
 					Ext.Ajax.request({
-						url: pt.baseUrl + pt.conf.url.path_gis + 'renameMap.action?id=' + id + '&name=' + name + '&user=' + !system,
+						url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + 'renameMap.action?id=' + id + '&name=' + name + '&user=' + !system,
 						success: function() {
-							pt.store.maps.loadStore();
+							pt.store.tables.loadStore();
 
 							window.destroy();
 						}
@@ -999,8 +1002,8 @@ Ext.onReady( function() {
 
 			window = Ext.create('Ext.window.Window', {
 				title: id ? 'Rename favorite' : 'Create new favorite',
-				iconCls: 'gis-window-title-icon-favorite',
-				cls: 'gis-container-default',
+				//iconCls: 'pt-window-title-icon-favorite',
+				bodyStyle: 'padding: 8px; background: #fff',
 				resizable: false,
 				modal: true,
 				items: [
@@ -1013,8 +1016,8 @@ Ext.onReady( function() {
 					id ? updateButton : createButton
 				],
 				listeners: {
-					show: function() {
-						this.setPosition(mapWindow.x + 14, mapWindow.y + 67);
+					show: function(w) {
+						pt.util.window.setAnchorPosition(w, pt.viewport.favoriteButton);
 					}
 				}
 			});
@@ -1047,8 +1050,8 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? pt.baseUrl + pt.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
-							store = pt.store.maps;
+							url = value ? pt.baseUrl + pt.conf.finals.ajax.path_api +  'reportTables/query/' + value + '.json?links=false' : null,
+							store = pt.store.tables;
 
 						store.page = 1;
 						store.loadStore(url);
@@ -1061,8 +1064,8 @@ Ext.onReady( function() {
 			text: 'Prev', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.baseUrl + pt.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
-					store = pt.store.maps;
+					url = value ? pt.baseUrl + pt.conf.finals.ajax.path_api +  'reportTables/query/' + value + '.json?links=false' : null,
+					store = pt.store.tables;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
 				store.loadStore(url);
@@ -1073,8 +1076,8 @@ Ext.onReady( function() {
 			text: 'Next', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.baseUrl + pt.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
-					store = pt.store.maps;
+					url = value ? pt.baseUrl + pt.conf.finals.ajax.path_api +  'reportTables/query/' + value + '.json?links=false' : null,
+					store = pt.store.tables;
 
 				store.page = store.page + 1;
 				store.loadStore(url);
@@ -1082,13 +1085,13 @@ Ext.onReady( function() {
 		});
 
 		info = Ext.create('Ext.form.Label', {
-			cls: 'gis-label-info',
+			cls: 'pt-label-info',
 			width: 300,
 			height: 22
 		});
 
 		grid = Ext.create('Ext.grid.Panel', {
-			cls: 'gis-grid',
+			cls: 'pt-grid',
 			scroll: false,
 			hideHeaders: true,
 			columns: [
@@ -1102,9 +1105,9 @@ Ext.onReady( function() {
 							if (el) {
 								el = el.parent('td');
 								el.addClsOnOver('link');
-								el.gis = gis;
-								el.map = {id: record.data.id};
-								el.dom.setAttribute('onclick', 'Ext.get(this).pt.map = Ext.get(this).map; GIS.core.MapLoader(Ext.get(this).gis).load();');
+								el.pt = pt;
+								el.favorite = {id: record.data.id};
+								el.dom.setAttribute('onclick', 'Ext.get(this).pt.favorite = Ext.get(this).favorite; PT.core.TableLoader(Ext.get(this).pt).load();');
 							}
 						};
 
@@ -1119,20 +1122,20 @@ Ext.onReady( function() {
 					width: 80,
 					items: [
 						{
-							iconCls: 'gis-grid-row-icon-edit',
+							iconCls: 'pt-grid-row-icon-edit',
 							getClass: function(value, metaData, record) {
 								var system = !record.data.user,
-									isAdmin = pt.init.security.isAdmin;
+									isAdmin = pt.init.user.isAdmin;
 
 								if (isAdmin || (!isAdmin && !system)) {
-									return 'tooltip-map-edit';
+									return 'tooltip-favorite-edit';
 								}
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
 									system = !record.data.user,
-									isAdmin = pt.init.security.isAdmin;
+									isAdmin = pt.init.user.isAdmin;
 
 								if (isAdmin || (!isAdmin && !system)) {
 									var id = this.up('grid').store.getAt(rowIndex).data.id;
@@ -1142,72 +1145,48 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							iconCls: 'gis-grid-row-icon-overwrite',
+							iconCls: 'pt-grid-row-icon-overwrite',
 							getClass: function(value, metaData, record) {
 								var system = !record.data.user,
-									isAdmin = pt.init.security.isAdmin;
+									isAdmin = pt.init.user.isAdmin;
 
 								if (isAdmin || (!isAdmin && !system)) {
-									return 'tooltip-map-overwrite';
+									return 'tooltip-favorite-overwrite';
 								}
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
 									name = record.data.name,
-									layers = pt.util.map.getVisibleVectorLayers(),
-									layer,
-									lonlat = pt.olmap.getCenter(),
-									views = [],
-									view,
-									map,
-									message = 'Overwrite favorite?\n\n' + name;
+									message = 'Overwrite favorite?\n\n' + name,
+									favorite = getBody();
 
-								if (layers.length) {
+								if (favorite) {
 									if (confirm(message)) {
-										for (var i = 0; i < layers.length; i++) {
-											layer = layers[i];
-											view = layer.core.view;
-
-											// add
-											view.layer = layer.id;
-
-											// remove
-											delete view.periodType;
-
-											views.push(view);
-										}
-
-										map = {
-											longitude: lonlat.lon,
-											latitude: lonlat.lat,
-											zoom: pt.olmap.getZoom(),
-											mapViews: views
-										};
-
 										Ext.Ajax.request({
-											url: pt.baseUrl + pt.conf.url.path_api + 'maps/' + id,
+											url: pt.baseUrl + pt.conf.url.path_api + 'reportTables/' + id,
 											method: 'PUT',
 											headers: {'Content-Type': 'application/json'},
-											params: Ext.encode(map),
+											params: Ext.encode(favorite),
 											success: function() {
-												pt.map = map;
-												pt.viewport.interpretationButton.enable();
+												pt.favorite = favorite;
 
-												pt.store.maps.loadStore();
+												//pt.viewport.interpretationButton.enable();
+
+												pt.store.tables.loadStore();
 											}
 										});
 									}
 								}
 								else {
-									alert('No layers to save'); //i18n
+									alert('Please create a table first'); //i18n
 								}
 							}
 						},
 						{
-							iconCls: 'gis-grid-row-icon-dashboard',
+							iconCls: 'pt-grid-row-icon-dashboard',
 							getClass: function() {
-								return 'tooltip-map-dashboard';
+								return 'tooltip-favorite-dashboard';
 							},
 							handler: function(grid, rowIndex) {
 								var record = this.up('grid').store.getAt(rowIndex),
@@ -1217,7 +1196,7 @@ Ext.onReady( function() {
 
 								if (confirm(message)) {
 									Ext.Ajax.request({
-										url: pt.baseUrl + pt.conf.url.path_gis + 'addMapViewToDashboard.action',
+										url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + 'addMapViewToDashboard.action',
 										params: {
 											id: id
 										}
@@ -1226,13 +1205,13 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							iconCls: 'gis-grid-row-icon-delete',
+							iconCls: 'pt-grid-row-icon-delete',
 							getClass: function(value, metaData, record) {
 								var system = !record.data.user,
 									isAdmin = pt.init.security.isAdmin;
 
 								if (isAdmin || (!isAdmin && !system)) {
-									return 'tooltip-map-delete';
+									return 'tooltip-favorite-delete';
 								}
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
@@ -1243,10 +1222,10 @@ Ext.onReady( function() {
 
 								if (confirm(message)) {
 									Ext.Ajax.request({
-										url: pt.baseUrl + pt.conf.url.path_api + 'maps/' + id,
+										url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + 'reportTables/' + id,
 										method: 'DELETE',
 										success: function() {
-											pt.store.maps.loadStore();
+											pt.store.tables.loadStore();
 										}
 									});
 								}
@@ -1254,8 +1233,8 @@ Ext.onReady( function() {
 						}
 					],
 					renderer: function(value, metaData, record) {
-						if (!pt.init.security.isAdmin && !record.data.user) {
-							metaData.tdCls = 'gis-grid-row-icon-disabled';
+						if (!pt.init.user.isAdmin && !record.data.user) {
+							metaData.tdCls = 'pt-grid-row-icon-disabled';
 						}
 					}
 				},
@@ -1264,7 +1243,7 @@ Ext.onReady( function() {
 					width: 6
 				}
 			],
-			store: pt.store.maps,
+			store: pt.store.tables,
 			bbar: [
 				info,
 				'->',
@@ -1273,7 +1252,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					pt.viewport.mapGrid = this;
+					pt.viewport.favoriteGrid = this;
 				},
 				render: function() {
 					var size = Math.floor((pt.viewport.centerRegion.getHeight() - 155) / pt.conf.layout.grid.row_height);
@@ -1281,7 +1260,7 @@ Ext.onReady( function() {
 					this.store.page = 1;
 					this.store.loadStore();
 
-					pt.store.maps.on('load', function() {
+					pt.store.tables.on('load', function() {
 						if (this.isVisible()) {
 							this.fireEvent('afterrender');
 						}
@@ -1289,10 +1268,10 @@ Ext.onReady( function() {
 				},
 				afterrender: function() {
 					var fn = function() {
-						var editArray = document.getElementsByClassName('tooltip-map-edit'),
-							overwriteArray = document.getElementsByClassName('tooltip-map-overwrite'),
-							dashboardArray = document.getElementsByClassName('tooltip-map-dashboard'),
-							deleteArray = document.getElementsByClassName('tooltip-map-delete'),
+						var editArray = document.getElementsByClassName('tooltip-favorite-edit'),
+							overwriteArray = document.getElementsByClassName('tooltip-favorite-overwrite'),
+							dashboardArray = document.getElementsByClassName('tooltip-favorite-dashboard'),
+							deleteArray = document.getElementsByClassName('tooltip-favorite-delete'),
 							el;
 
 						for (var i = 0; i < deleteArray.length; i++) {
@@ -1351,10 +1330,10 @@ Ext.onReady( function() {
 			}
 		});
 
-		mapWindow = Ext.create('Ext.window.Window', {
+		favoriteWindow = Ext.create('Ext.window.Window', {
 			title: 'Manage favorites',
-			iconCls: 'gis-window-title-icon-favorite',
-			cls: 'gis-container-default',
+			iconCls: 'pt-window-title-icon-favorite',
+			bodyStyle: 'border:0 none; background-color:#fff',
 			resizable: false,
 			modal: true,
 			width: 450,
@@ -1363,7 +1342,7 @@ Ext.onReady( function() {
 					xtype: 'panel',
 					layout: 'hbox',
 					width: 422,
-					cls: 'gis-container-inner',
+					bodyStyle: 'border:0 none',
 					items: [
 						addButton,
 						{
@@ -1384,7 +1363,7 @@ Ext.onReady( function() {
 			}
 		});
 
-		return mapWindow;
+		return favoriteWindow;
 	};
 
 	PT.app.init.onInitialize = function(r) {
@@ -2989,6 +2968,18 @@ Ext.onReady( function() {
 				}
 			});
 
+			favoriteButton = Ext.create('Ext.button.Button', {
+				text: 'Favorites',
+				menu: {},
+				handler: function() {
+					if (!pt.viewport.favoriteWindow) {
+						pt.viewport.favoriteWindow = PT.app.FavoriteWindow();
+					}
+
+					pt.viewport.favoriteWindow.show();
+				}
+			});
+
 			downloadButton = Ext.create('Ext.button.Button', {
 				text: 'Download',
 				disabled: true,
@@ -3057,11 +3048,7 @@ Ext.onReady( function() {
 							height: 18,
 							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
 						},
-						{
-							text: 'Favorites',
-							handler: function() {
-							}
-						},
+						favoriteButton,
 						downloadButton,
                         '->',
                         {

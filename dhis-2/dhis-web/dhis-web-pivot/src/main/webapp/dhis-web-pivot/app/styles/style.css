@@ -477,6 +477,81 @@ td .bad div {
     border-radius: 0 2px 2px 0;
 }
 
+/*----------------------------------------------------------------------------
+ * PT Grid
+ *--------------------------------------------------------------------------*/
+
+.pt-grid-row-icon-edit,
+.pt-grid-row-icon-overwrite,
+.pt-grid-row-icon-dashboard,
+.pt-grid-row-icon-delete {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+}
+.pt-grid-row-icon-edit {
+	background: url('../images/grid-edit_16.png') no-repeat;
+}
+.pt-grid-row-icon-overwrite {
+	background: url('../images/grid-save_16.png') no-repeat;
+	margin-left: 4px;
+}
+.pt-grid-row-icon-dashboard {
+	background: url('../images/grid-dashboard_16.png') no-repeat;
+	margin-left: 4px;
+}
+.pt-grid-row-icon-delete {
+	background: url('../images/grid-delete_16.png') no-repeat;
+	margin-left: 4px;
+}
+.pt-grid-row-icon-disabled img.pt-grid-row-icon-edit,
+.pt-grid-row-icon-disabled img.pt-grid-row-icon-overwrite,
+.pt-grid-row-icon-disabled img.pt-grid-row-icon-delete {
+	opacity: 0;
+	filter:Alpha(opacity=0);
+}
+.pt-grid-row-icon-disabled * {
+	cursor: default !important;
+}
+.pt-grid-row-icon-disabled img.pt-grid-row-icon-dashboard {
+	cursor: pointer !important;
+}
+
+.pt-grid .x-grid-cell-inner,
+.pt-grid .x-grid-cell-inner * {
+	font-size: 10px !important;
+}
+.pt-grid .x-grid-cell-inner {
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+
+.pt-grid .x-column-header-text {
+	color: #333;
+}
+.pt-grid .x-grid-header-ct {
+	border-bottom-width: 1px !important;
+	border-bottom-color: #d0d0d0;
+}
+.pt-grid .x-grid-body {
+	border-top: 0 none !important;
+}
+
+.pt-grid .x-grid-dirty-cell { /* hide red "dirty" icon */
+	background-image: none;
+}
+.pt-grid .x-grid-row { /* middle align text in row with image */
+	vertical-align: middle;
+}
+
+.pt-grid .link,
+.pt-grid .link * {
+	cursor: pointer;
+	cursor: hand;
+	color: blue;
+	text-decoration: underline;
+}
+
 
 /*----------------------------------------------------------------------------
  * Button
@@ -608,6 +683,14 @@ td .bad div {
     border-radius: 2px
 }
 
+	/* Window bbar info */
+.pt-label-info {
+	font-size: 10px !important;
+	color: #666;
+	padding-left: 4px;
+	height: 22px;
+	line-height: 21px;
+}
 
 /*----------------------------------------------------------------------------
  * PT Textfield
