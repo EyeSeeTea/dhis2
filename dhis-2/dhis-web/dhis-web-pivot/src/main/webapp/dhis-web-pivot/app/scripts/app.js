@@ -674,7 +674,7 @@ Ext.onReady( function() {
 	PT.app.OptionsWindow = function() {
 		var showSubTotals,
 			hideEmptyRows,
-			cellPadding,
+			displayDensity,
 			fontSize,
 
 			data,
@@ -685,12 +685,14 @@ Ext.onReady( function() {
 			boxLabel: 'Show sub-totals', //i18n
 			checked: true
 		});
+		pt.viewport.showSubTotals = showSubTotals;
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: 'Hide empty rows' //i18n
 		});
+		pt.viewport.hideEmptyRows = hideEmptyRows;
 
-		cellPadding = Ext.create('Ext.form.field.ComboBox', {
+		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			fieldLabel: 'Display density',
 			labelStyle: 'color:#333',
 			cls: 'pt-combo',
@@ -708,6 +710,7 @@ Ext.onReady( function() {
 				]
 			})
 		});
+		pt.viewport.displayDensity = displayDensity;
 
 		fontSize = Ext.create('Ext.form.field.ComboBox', {
 			xtype: 'combobox',
@@ -728,6 +731,7 @@ Ext.onReady( function() {
 				]
 			})
 		});
+		pt.viewport.fontSize = fontSize;
 
 		data = {
 			bodyStyle: 'border:0 none',
@@ -742,7 +746,7 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				cellPadding,
+				displayDensity,
 				fontSize
 			]
 		};
@@ -758,7 +762,7 @@ Ext.onReady( function() {
 				return {
 					showSubTotals: showSubTotals.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
-					cellPadding: cellPadding.getValue(),
+					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue()
 				};
 			},
@@ -3240,6 +3244,13 @@ Ext.onReady( function() {
 					}
 				}
 
+				// Options
+				pt.viewport.showSubTotals.setValue(!!r.subtotals);
+				pt.viewport.hideEmptyRows.setValue(!!r.hideEmptyRows);
+				pt.viewport.displayDensity.setValue(!!r.displayDensity);
+				pt.viewport.fontSize.setValue(!!r.fontSize);
+
+				update();
 			};
 
 			viewport = Ext.create('Ext.container.Viewport', {

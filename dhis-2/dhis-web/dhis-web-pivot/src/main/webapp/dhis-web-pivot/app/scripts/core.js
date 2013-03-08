@@ -214,7 +214,7 @@ PT.core.getConfigs = function() {
     };
 
 	conf.pivot = {
-		cellPadding: {
+		displayDensity: {
 			'compact': '3px',
 			'normal': '5px',
 			'comfortable': '10px'
@@ -1004,7 +1004,7 @@ PT.core.getUtils = function(pt) {
 						colSpan,
 						rowSpan,
 						htmlValue,
-						cellPadding,
+						displayDensity,
 						fontSize;
 
 					if (!(config && Ext.isObject(config))) {
@@ -1018,10 +1018,10 @@ PT.core.getUtils = function(pt) {
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '"' : '';
 					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
 					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue) : htmlValue;
-					cellPadding = pt.conf.pivot.cellPadding[config.cellPadding] || pt.conf.pivot.cellPadding[options.cellPadding];
+					displayDensity = pt.conf.pivot.cellPadding[config.displayDensity] || pt.conf.pivot.displayDensity[options.displayDensity];
 					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[options.fontSize];
 
-					return '<td class="' + cls + '" ' + colSpan + ' ' + rowSpan + ' style="padding:' + cellPadding + '; font-size:' + fontSize + ';">' + htmlValue + '</td>';
+					return '<td class="' + cls + '" ' + colSpan + ' ' + rowSpan + ' style="padding:' + displayDensity + '; font-size:' + fontSize + ';">' + htmlValue + '</td>';
 				};
 
 				doSubTotals = function(xAxis) {
@@ -1628,7 +1628,7 @@ PT.core.getAPI = function(pt) {
 
 			defaultOptions = {
 				showSubTotals: true,
-				cellPadding: 'normal',
+				displayDensity: 'normal',
 				fontSize: 'normal'
 			};
 
@@ -1688,7 +1688,7 @@ PT.core.getAPI = function(pt) {
 			}
 
 			options.showSubTotals = Ext.isDefined(options.showSubTotals) ? options.showSubTotals : defaultOptions.showSubTotals;
-			options.cellPadding = options.cellPadding || defaultOptions.cellPadding;
+			options.displayDensity = options.displayDensity || defaultOptions.displayDensity;
 			options.fontSize = options.fontSize || defaultOptions.fontSize;
 
 			return options;
