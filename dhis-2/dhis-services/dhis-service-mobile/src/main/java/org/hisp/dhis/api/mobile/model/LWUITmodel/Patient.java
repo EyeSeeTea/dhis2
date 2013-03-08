@@ -38,12 +38,14 @@ import org.hisp.dhis.api.mobile.model.Beneficiary;
 import org.hisp.dhis.api.mobile.model.DataStreamSerializable;
 import org.hisp.dhis.api.mobile.model.PatientAttribute;
 import org.hisp.dhis.api.mobile.model.PatientIdentifier;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
  * @author Nguyen Kim Lai
  * 
  * @version $ Patient.java Jan 22, 2013 $
  */
+
 public class Patient
     implements DataStreamSerializable
 {
@@ -77,8 +79,10 @@ public class Patient
     private List<Program> programs;
 
     private List<Relationship> relationships;
-    
-    private List<Program> enrollmentPrograms;
+
+    private String phoneNumber;
+
+    private OrganisationUnit organisationUnit;
 
     public List<PatientIdentifier> getIdentifiers()
     {
@@ -108,16 +112,6 @@ public class Patient
     public void setRelationships( List<Relationship> relationships )
     {
         this.relationships = relationships;
-    }
-
-    public List<Program> getEnrollmentPrograms()
-    {
-        return enrollmentPrograms;
-    }
-
-    public void setEnrollmentPrograms( List<Program> enrollmentPrograms )
-    {
-        this.enrollmentPrograms = enrollmentPrograms;
     }
 
     public String getFullName()
@@ -266,6 +260,26 @@ public class Patient
         this.clientVersion = clientVersion;
     }
 
+    public String getPhoneNumber()
+    {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber( String phoneNumber )
+    {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
+
+    public void setOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        this.organisationUnit = organisationUnit;
+    }
+
     @Override
     public void serialize( DataOutputStream out )
         throws IOException
@@ -278,6 +292,8 @@ public class Patient
         dout.writeUTF( this.getMiddleName() );
         dout.writeUTF( this.getLastName() );
         dout.writeInt( this.getAge() );
+        dout.writeUTF( this.getPhoneNumber() );
+        dout.writeUTF( this.getGender() );
 
         if ( gender != null )
         {
@@ -321,6 +337,16 @@ public class Patient
             dout.writeBoolean( false );
         }
 
+        if ( phoneNumber != null )
+        {
+            dout.writeBoolean( true );
+            dout.writeUTF( phoneNumber );
+        }
+        else
+        {
+            dout.writeBoolean( false );
+        }
+
         /*
          * Write attribute which is used as group factor of beneficiary - false:
          * no group factor, true: with group factor
@@ -356,7 +382,7 @@ public class Patient
         {
             each.serialize( dout );
         }
-        
+
         // Write Relationships
         dout.writeInt( relationships.size() );
         for ( Relationship each : relationships )
@@ -364,21 +390,46 @@ public class Patient
             each.serialize( dout );
         }
 
-        // Write Available Program To Enroll
-        dout.writeInt( enrollmentPrograms.size() );
-        for ( Program each : enrollmentPrograms )
-        {
-            each.serialize( dout );
-        }
-        
         bout.flush();
         bout.writeTo( out );
     }
 
     @Override
-    public void deSerialize( DataInputStream dataInputStream )
+    public void deSerialize( DataInputStream din )
         throws IOException
     {
+        this.setId( din.readInt() );
+        this.setFirstName( din.readUTF() );
+        this.setGender( din.readUTF() );
+        this.setPhoneNumber( din.readUTF() );
+
+        if ( din.readBoolean() )
+        {
+            char dobTypeDeserialized = din.readChar();
+            this.setDobType( new Character( dobTypeDeserialized ) );
+        }
+        else
+        {
+            this.setDobType( null );
+        }
+
+        if ( din.readBoolean() )
+        {
+            this.setBirthDate( new Date( din.readLong() ) );
+        }
+        else
+        {
+            this.setBirthDate( null );
+        }
+
+        if ( din.readBoolean() )
+        {
+            this.setRegistrationDate( new Date( din.readLong() ) );
+        }
+        else
+        {
+            this.setRegistrationDate( null );
+        }
 
     }
 
@@ -562,7 +613,7 @@ public class Patient
         throws IOException
     {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

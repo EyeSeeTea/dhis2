@@ -92,9 +92,7 @@ public class JdbcAnalyticsManager
     {
         ListMap<IdentifiableObject, IdentifiableObject> dataPeriodAggregationPeriodMap = params.getDataPeriodAggregationPeriodMap();
         params.replaceAggregationPeriodsWithDataPeriods( dataPeriodAggregationPeriodMap );
-                
-        params.populateDimensionNames();
-
+        
         List<Dimension> dimensions = params.getQueryDimensions();
 
         SqlHelper sqlHelper = new SqlHelper();
@@ -119,25 +117,36 @@ public class JdbcAnalyticsManager
         {
             sql += "sum(value)";
         }
-                
+        
         sql += " as value from " + params.getTableName() + " ";
         
         for ( Dimension dim : dimensions )
         {
-            if ( !dim.isAllOptions() )
+            if ( !dim.isAllItems() )
             {
-                sql += sqlHelper.whereAnd() + " " + dim.getDimensionName() + " in (" + getQuotedCommaDelimitedString( getUids( dim.getItems() ) ) + " ) ";
+                sql += sqlHelper.whereAnd() + " " + dim.getDimensionName() + " in (" + getQuotedCommaDelimitedString( getUids( dim.getItems() ) ) + ") ";
             }
         }
 
-        for ( Dimension filter : params.getFilters() )
-        {
-            if ( !filter.isAllOptions() )
-            {
-                sql += sqlHelper.whereAnd() + " " + filter.getDimensionName() + " in (" + getQuotedCommaDelimitedString( getUids( filter.getItems() ) ) + " ) ";
-            }
-        }
+        ListMap<String, Dimension> filters = params.getDimensionFilterMap();
         
+        //TODO check if any items for all filters
+        
+        for ( String dimension : filters.keySet() )
+        {
+            sql += sqlHelper.whereAnd() + " (";
+            
+            for ( Dimension filter : filters.get( dimension ) )
+            {
+                if ( filter != null && filter.hasItems() )
+                {
+                    sql += filter.getDimensionName() + " in (" + getQuotedCommaDelimitedString( getUids( filter.getItems() ) ) + ") or ";
+                }
+            }
+            
+            sql = sql.substring( 0, sql.length() - " or ".length() ) + ") ";
+        }
+                
         sql += "group by " + getCommaDelimitedString( dimensions );
     
         log.info( sql );
