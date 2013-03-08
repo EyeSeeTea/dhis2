@@ -282,7 +282,7 @@ Ext.onReady( function() {
 			isLoaded: false,
 			pageSize: 10,
 			page: 1,
-			defaultUrl: pt.baseUrl + pt.conf.finals.ajax.path_api + 'reportTables.json?links=false',
+			defaultUrl: pt.baseUrl + '/api/reportTables.json?links=false',
 			loadStore: function(url) {
 				this.proxy.url = url || this.defaultUrl;
 
@@ -922,7 +922,7 @@ Ext.onReady( function() {
 
 		NameWindow = function(id) {
 			var window,
-				record = gis.store.maps.getById(id);
+				record = pt.store.tables.getById(id);
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
@@ -953,7 +953,7 @@ Ext.onReady( function() {
 
 					if (favorite) {
 						Ext.Ajax.request({
-							url: pt.baseUrl + pt.conf.finals.ajax.path_api + 'reportTables/',
+							url: pt.baseUrl + '/api/reportTables/',
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
@@ -1003,7 +1003,7 @@ Ext.onReady( function() {
 			window = Ext.create('Ext.window.Window', {
 				title: id ? 'Rename favorite' : 'Create new favorite',
 				//iconCls: 'pt-window-title-icon-favorite',
-				bodyStyle: 'padding: 8px; background: #fff',
+				bodyStyle: 'padding:8px; background:#fff',
 				resizable: false,
 				modal: true,
 				items: [
@@ -1040,7 +1040,7 @@ Ext.onReady( function() {
 		searchTextfield = Ext.create('Ext.form.field.Text', {
 			width: 340,
 			height: 26,
-			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb',
+			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
 			emptyText: 'Search for favorites', //i18n
 			enableKeyEvents: true,
 			currentValue: '',
@@ -1050,7 +1050,7 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? pt.baseUrl + pt.conf.finals.ajax.path_api +  'reportTables/query/' + value + '.json?links=false' : null,
+							url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
 							store = pt.store.tables;
 
 						store.page = 1;
@@ -1064,7 +1064,7 @@ Ext.onReady( function() {
 			text: 'Prev', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.baseUrl + pt.conf.finals.ajax.path_api +  'reportTables/query/' + value + '.json?links=false' : null,
+					url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
 					store = pt.store.tables;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1076,7 +1076,7 @@ Ext.onReady( function() {
 			text: 'Next', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.baseUrl + pt.conf.finals.ajax.path_api +  'reportTables/query/' + value + '.json?links=false' : null,
+					url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
 					store = pt.store.tables;
 
 				store.page = store.page + 1;
@@ -1094,6 +1094,8 @@ Ext.onReady( function() {
 			cls: 'pt-grid',
 			scroll: false,
 			hideHeaders: true,
+			bodyStyle: 'padding-bottom:1px solid red !important',
+			style: 'padding-bottom:1px solid red !important',
 			columns: [
 				{
 					dataIndex: 'name',
@@ -1164,7 +1166,7 @@ Ext.onReady( function() {
 								if (favorite) {
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: pt.baseUrl + pt.conf.url.path_api + 'reportTables/' + id,
+											url: pt.baseUrl + '/api/reportTables/' + id,
 											method: 'PUT',
 											headers: {'Content-Type': 'application/json'},
 											params: Ext.encode(favorite),
@@ -1208,7 +1210,7 @@ Ext.onReady( function() {
 							iconCls: 'pt-grid-row-icon-delete',
 							getClass: function(value, metaData, record) {
 								var system = !record.data.user,
-									isAdmin = pt.init.security.isAdmin;
+									isAdmin = pt.init.user.isAdmin;
 
 								if (isAdmin || (!isAdmin && !system)) {
 									return 'tooltip-favorite-delete';
@@ -1332,8 +1334,8 @@ Ext.onReady( function() {
 
 		favoriteWindow = Ext.create('Ext.window.Window', {
 			title: 'Manage favorites',
-			iconCls: 'pt-window-title-icon-favorite',
-			bodyStyle: 'border:0 none; background-color:#fff',
+			//iconCls: 'pt-window-title-icon-favorite',
+			bodyStyle: 'padding: 8px; background-color:#fff',
 			resizable: false,
 			modal: true,
 			width: 450,
@@ -1357,8 +1359,8 @@ Ext.onReady( function() {
 				grid
 			],
 			listeners: {
-				show: function() {
-					this.setPosition(115, 37);
+				show: function(w) {
+					pt.util.window.setAnchorPosition(w, pt.viewport.favoriteButton);
 				}
 			}
 		});
@@ -2972,10 +2974,11 @@ Ext.onReady( function() {
 				text: 'Favorites',
 				menu: {},
 				handler: function() {
-					if (!pt.viewport.favoriteWindow) {
-						pt.viewport.favoriteWindow = PT.app.FavoriteWindow();
+					if (pt.viewport.favoriteWindow) {
+						pt.viewport.favoriteWindow.destroy();
 					}
 
+					pt.viewport.favoriteWindow = PT.app.FavoriteWindow();
 					pt.viewport.favoriteWindow.show();
 				}
 			});
@@ -3066,11 +3069,11 @@ Ext.onReady( function() {
 							html = '';
 
 						html += '<div style="padding:20px">';
-						html += '<div style="font-size:14px; padding-bottom:8px">Creating a table</div>';
+						html += '<div style="font-size:14px; padding-bottom:8px">Creating a pivot table</div>';
 						html += '<div style="' + liStyle + '">- Select items from any of the dimensions in the left menu</div>';
 						html += '<div style="' + liStyle + '">- Click "Layout" to arrange your dimensions on table rows and columns</div>';
 						html += '<div style="' + liStyle + '">- Click "<b>Update</b>" to create your table</div>';
-						html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">Working with a table</div>';
+						html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">Working with a pivot table</div>';
 						html += '<div style="' + liStyle + '">- Click "Options" to hide sub-totals or empty rows, adjust font size and more</div>';
 						html += '<div style="' + liStyle + '">- Click "Favorites" to save your table for later use</div>';
 						html += '<div style="' + liStyle + '">- Click "Download" to save table data to your computer</div>';
@@ -3088,6 +3091,7 @@ Ext.onReady( function() {
 				updateViewport: update,
 				layoutButton: layoutButton,
 				optionsButton: optionsButton,
+				favoriteButton: favoriteButton,
 				downloadButton: downloadButton,
 				items: [
 					westRegion,

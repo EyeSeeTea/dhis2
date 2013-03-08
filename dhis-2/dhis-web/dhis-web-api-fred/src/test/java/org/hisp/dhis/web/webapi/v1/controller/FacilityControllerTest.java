@@ -32,6 +32,7 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.web.FredSpringWebTest;
 import org.hisp.dhis.web.webapi.v1.domain.Facility;
+import org.hisp.dhis.web.webapi.v1.utils.OrganisationUnitToFacilityConverter;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -56,6 +57,10 @@ public class FacilityControllerTest extends FredSpringWebTest
         mvc.perform( get( "/api-fred" ).session( session ) ).andExpect( redirectedUrl( "/api-fred/v1" ) );
         mvc.perform( get( "/api-fred/" ).session( session ) ).andExpect( redirectedUrl( "/api-fred/v1" ) );
     }
+
+    //---------------------------------------------------------------------------------------------
+    // Test GET
+    //---------------------------------------------------------------------------------------------
 
     @Test
     public void testGetFacilitiesWithALL() throws Exception
@@ -154,13 +159,123 @@ public class FacilityControllerTest extends FredSpringWebTest
             .andExpect( status().isOk() );
     }
 
+    //---------------------------------------------------------------------------------------------
+    // Test PUT
+    //---------------------------------------------------------------------------------------------
+
     @Test
     public void testPutFacility404() throws Exception
     {
         MockHttpSession session = getSession( "ALL" );
 
-        mvc.perform( put( "/v1/facilities/abc123" ).content( "{}" ).session( session ).contentType( MediaType.APPLICATION_JSON ) )
+        mvc.perform( put( "/v1/facilities/INVALID_IDENTIFIER" ).content( "{}" ).session( session ).contentType( MediaType.APPLICATION_JSON ) )
             .andExpect( status().isNotFound() );
+    }
+
+    @Test
+    public void testPutInvalidJsonUid() throws Exception
+    {
+        OrganisationUnit organisationUnit = createOrganisationUnit( 'A' );
+        manager.save( organisationUnit );
+
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( put( "/v1/facilities/" + organisationUnit.getUid() ).content( "INVALID JSON" )
+            .session( session ).contentType( MediaType.APPLICATION_JSON ) )
+            .andExpect( status().isBadRequest() );
+    }
+
+    @Test
+    public void testPutInvalidJsonUuid() throws Exception
+    {
+        OrganisationUnit organisationUnit = createOrganisationUnit( 'A' );
+        manager.save( organisationUnit );
+
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( put( "/v1/facilities/" + organisationUnit.getUuid() ).content( "INVALID JSON" )
+            .session( session ).contentType( MediaType.APPLICATION_JSON ) )
+            .andExpect( status().isBadRequest() );
+    }
+
+    @Test
+    public void testPutFacilityWithoutRequiredPropertiesUid() throws Exception
+    {
+        OrganisationUnit organisationUnit = createOrganisationUnit( 'A' );
+        manager.save( organisationUnit );
+
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( put( "/v1/facilities/" + organisationUnit.getUid() ).content( "{}" )
+            .session( session ).contentType( MediaType.APPLICATION_JSON ) )
+            .andExpect( status().isUnprocessableEntity() );
+    }
+
+    @Test
+    public void testPutFacilityWithoutRequiredPropertiesUuid() throws Exception
+    {
+        OrganisationUnit organisationUnit = createOrganisationUnit( 'A' );
+        manager.save( organisationUnit );
+
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( put( "/v1/facilities/" + organisationUnit.getUuid() ).content( "{}" )
+            .session( session ).contentType( MediaType.APPLICATION_JSON ) )
+            .andExpect( status().isUnprocessableEntity() );
+    }
+
+    @Test
+    public void testPutFacilityUid() throws Exception
+    {
+        OrganisationUnit organisationUnit = createOrganisationUnit( 'A' );
+        manager.save( organisationUnit );
+
+        Facility facility = new OrganisationUnitToFacilityConverter().convert( organisationUnit );
+        facility.setName( "FacilityB" );
+        facility.setActive( false );
+
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( put( "/v1/facilities/" + organisationUnit.getUid() ).content( objectMapper.writeValueAsString( facility ) )
+            .session( session ).contentType( MediaType.APPLICATION_JSON ) )
+            .andExpect( content().contentType( MediaType.APPLICATION_JSON ) )
+            .andExpect( jsonPath( "$.name" ).value( "FacilityB" ) )
+            .andExpect( jsonPath( "$.active" ).value( false ) )
+            .andExpect( status().isOk() );
+    }
+
+    @Test
+    public void testPutFacilityUuid() throws Exception
+    {
+        OrganisationUnit organisationUnit = createOrganisationUnit( 'A' );
+        manager.save( organisationUnit );
+
+        Facility facility = new OrganisationUnitToFacilityConverter().convert( organisationUnit );
+        facility.setName( "FacilityB" );
+        facility.setActive( false );
+
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( put( "/v1/facilities/" + organisationUnit.getUuid() ).content( objectMapper.writeValueAsString( facility ) )
+            .session( session ).contentType( MediaType.APPLICATION_JSON ) )
+            .andExpect( content().contentType( MediaType.APPLICATION_JSON ) )
+            .andExpect( jsonPath( "$.name" ).value( "FacilityB" ) )
+            .andExpect( jsonPath( "$.active" ).value( false ) )
+            .andExpect( status().isOk() );
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // Test POST
+    //---------------------------------------------------------------------------------------------
+
+    @Test
+    public void testPostWithoutRequiredProperties() throws Exception
+    {
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( post( "/v1/facilities" ).content( "{}" )
+            .session( session ).contentType( MediaType.APPLICATION_JSON ) )
+            .andExpect( status().isUnprocessableEntity() );
     }
 
     @Test
@@ -174,6 +289,7 @@ public class FacilityControllerTest extends FredSpringWebTest
             .session( session ).contentType( MediaType.APPLICATION_JSON ) )
             .andExpect( content().contentType( MediaType.APPLICATION_JSON ) )
             .andExpect( jsonPath( "$.name" ).value( "FacilityA" ) )
+            .andExpect( jsonPath( "$.active" ).value( true ) )
             .andExpect( status().isCreated() );
     }
 
@@ -210,5 +326,51 @@ public class FacilityControllerTest extends FredSpringWebTest
             .andExpect( content().contentType( MediaType.APPLICATION_JSON ) )
             .andExpect( jsonPath( "$.name" ).value( "FacilityA" ) )
             .andExpect( status().isCreated() );
+    }
+
+    @Test
+    public void testPostInvalidJson() throws Exception
+    {
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( post( "/v1/facilities" ).content( "INVALID JSON" ).session( session ).contentType( MediaType.APPLICATION_JSON ) )
+            .andExpect( status().isBadRequest() );
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // Test DELETE
+    //---------------------------------------------------------------------------------------------
+
+    @Test
+    public void testDeleteFacility404() throws Exception
+    {
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( delete( "/v1/facilities/INVALID_IDENTIFIER" ).session( session ) )
+            .andExpect( status().isNotFound() );
+    }
+
+    @Test
+    public void testDeleteFacilityUid() throws Exception
+    {
+        OrganisationUnit organisationUnit = createOrganisationUnit( 'A' );
+        manager.save( organisationUnit );
+
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( delete( "/v1/facilities/" + organisationUnit.getUid() ).session( session ) )
+            .andExpect( status().isOk() );
+    }
+
+    @Test
+    public void testDeleteFacilityUuid() throws Exception
+    {
+        OrganisationUnit organisationUnit = createOrganisationUnit( 'A' );
+        manager.save( organisationUnit );
+
+        MockHttpSession session = getSession( "ALL" );
+
+        mvc.perform( delete( "/v1/facilities/" + organisationUnit.getUuid() ).session( session ) )
+            .andExpect( status().isOk() );
     }
 }
