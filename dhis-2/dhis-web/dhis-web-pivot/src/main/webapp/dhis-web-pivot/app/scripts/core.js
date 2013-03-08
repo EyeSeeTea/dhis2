@@ -117,6 +117,7 @@ PT.core.getConfigs = function() {
 	dim = conf.finals.dimension;
 
 	dim.objectNameMap = {};
+	dim.objectNameMap[dim.data.objectName] = dim.data;
 	dim.objectNameMap[dim.indicator.objectName] = dim.indicator;
 	dim.objectNameMap[dim.dataElement.objectName] = dim.dataElement;
 	dim.objectNameMap[dim.dataSet.objectName] = dim.dataSet;

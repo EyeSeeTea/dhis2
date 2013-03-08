@@ -376,8 +376,19 @@ Ext.onReady( function() {
 			return order.concat(ougsOrder);
 		}();
 
-		getData = function() {
-			var data = [{id: dimConf.category.dimensionName, name: dimConf.category.rawValue}];
+		getData = function(all) {
+			var data = [];
+
+			if (all) {
+				data.push({id: dimConf.data.dimensionName, name: dimConf.data.rawValue});
+			}
+
+			data.push({id: dimConf.category.dimensionName, name: dimConf.category.rawValue});
+
+			if (all) {
+				data.push({id: dimConf.period.dimensionName, name: dimConf.period.rawValue});
+				data.push({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.rawValue});
+			}
 
 			return data.concat(pt.init.ougs, pt.init.degs);
 		};
@@ -408,14 +419,22 @@ Ext.onReady( function() {
 		};
 
 		dimensionStore = getStore(getData());
+		dimensionStore.reset = function(all) {
+			dimensionStore.removeAll();
+			dimensionStore.add(getData(all));
+		};
+		pt.viewport.dimensionStore = dimensionStore;
 
 		rowStore = getStore();
+		pt.viewport.rowStore = rowStore;
 		rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.rawValue}); //i18n
 
 		colStore = getStore();
+		pt.viewport.colStore = colStore;
 		colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.rawValue}); //i18n
 
 		filterStore = getStore();
+		pt.viewport.filterStore = filterStore;
 		filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.rawValue}); //i18n
 
 		getCmpHeight = function() {
@@ -1405,6 +1424,7 @@ Ext.onReady( function() {
 				fixedPeriodSelected,
 				period,
 				organisationUnit,
+				groupSetIdStoreMap,
 				getGroupSetPanels,
 				validateSpecialCases,
 				update,
@@ -2648,6 +2668,8 @@ Ext.onReady( function() {
 				}
 			};
 
+			groupSetIdStoreMap = {};
+
 			getGroupSetPanels = function(groupSets, objectName, iconCls) {
 				var	getAvailableStore,
 					getSelectedStore,
@@ -2779,6 +2801,8 @@ Ext.onReady( function() {
 
 					availableStore = getAvailableStore(groupSet);
 					selectedStore = getSelectedStore();
+
+					groupSetIdStoreMap[groupSet.id] = selectedStore;
 
 					available = getAvailable(availableStore);
 					selected = getSelected(selectedStore);
@@ -3111,22 +3135,32 @@ Ext.onReady( function() {
 			});
 
 			setFavorite = function(r) {
+
+				// Indicators
 				if (Ext.isArray(r.indicators)) {
 					pt.store.indicatorSelected.removeAll();
 					pt.store.indicatorSelected.add(r.indicators);
 				}
+
+				// Data elements
 				if (Ext.isArray(r.dataElements)) {
 					pt.store.dataElementSelected.removeAll();
 					pt.store.dataElementSelected.add(r.dataElements);
 				}
+
+				// Data sets
 				if (Ext.isArray(r.dataSets)) {
 					pt.store.dataSetsSelected.removeAll();
 					pt.store.dataSetsSelected.add(r.dataSets);
 				}
+
+				// Fixed periods
 				if (Ext.isArray(r.periods)) {
 					pt.store.fixedPeriodSelected.removeAll();
 					pt.store.fixedPeriodSelected.add(r.periods);
 				}
+
+				// Relative periods
 				if (Ext.isObject(r.relativePeriods)) {
 
 					//todo
@@ -3140,6 +3174,8 @@ Ext.onReady( function() {
 						}
 					}
 				}
+
+				// Organisation units
 				if (Ext.isArray(r.organisationUnits) && Ext.isObject(r.parentGraphMap)) {
 					for (var key in r.parentGraphMap) {
 						if (r.parentGraphMap.hasOwnProperty(key)) {
@@ -3147,6 +3183,63 @@ Ext.onReady( function() {
 						}
 					}
 				}
+
+				// Organisation unit group sets
+				if (Ext.isObject(r.organisationUnitGroupSets)) {
+					for (var key in r.organisationUnitGroupSets) {
+						if (r.organisationUnitGroupSets.hasOwnProperty(key)) {
+							groupSetIdStoreMap[key].removeAll();
+							groupSetIdStoreMap[key].add(r.organisationUnitGroupSets[key]);
+						}
+					}
+				}
+
+				// Data element group sets
+				if (Ext.isObject(r.dataElementGroupSets)) {
+					for (var key in r.dataElementGroupSets) {
+						if (r.dataElementGroupSets.hasOwnProperty(key)) {
+							groupSetIdStoreMap[key].removeAll();
+							groupSetIdStoreMap[key].add(r.dataElementGroupSets[key]);
+						}
+					}
+				}
+
+				// Layout
+				pt.viewport.dimensionStore.reset(true);
+				pt.viewport.colStore.removeAll();
+				pt.viewport.rowStore.removeAll();
+				pt.viewport.filterStore.removeAll();
+
+				if (Ext.isArray(r.columnDimensions)) {
+					for (var i = 0, dim; i < r.columnDimensions.length; i++) {
+						dim = pt.conf.finals.dimension.objectNameMap[r.columnDimensions[i]];
+						pt.viewport.colStore.add({
+							id: dim.dimensionName,
+							name: dim.rawValue
+						});
+					}
+				}
+
+				if (Ext.isArray(r.rowDimensions)) {
+					for (var i = 0, dim; i < r.rowDimensions.length; i++) {
+						dim = pt.conf.finals.dimension.objectNameMap[r.rowDimensions[i]];
+						pt.viewport.rowStore.add({
+							id: dim.dimensionName,
+							name: dim.rawValue
+						});
+					}
+				}
+
+				if (Ext.isArray(r.filterDimensions)) {
+					for (var i = 0, dim; i < r.filterDimensions.length; i++) {
+						dim = pt.conf.finals.dimension.objectNameMap[r.filterDimensions[i]];
+						pt.viewport.filterStore.add({
+							id: dim.dimensionName,
+							name: dim.rawValue
+						});
+					}
+				}
+
 			};
 
 			viewport = Ext.create('Ext.container.Viewport', {
@@ -3159,6 +3252,7 @@ Ext.onReady( function() {
 				favoriteButton: favoriteButton,
 				downloadButton: downloadButton,
 				setFavorite: setFavorite,
+				groupSetIdStoreMap: groupSetIdStoreMap,
 				items: [
 					westRegion,
 					centerRegion
