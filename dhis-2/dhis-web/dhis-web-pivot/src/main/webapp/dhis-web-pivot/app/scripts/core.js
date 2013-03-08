@@ -138,7 +138,7 @@ PT.core.getConfigs = function() {
 			LAST_YEAR: 1,
 			LAST_5_YEARS: 5
 		},
-		relativePeriodKeys: {
+		relativePeriodValueKeys: {
 			'LAST_MONTH': 'reportingMonth',
 			'LAST_3_MONTHS': 'last3Months',
 			'LAST_12_MONTHS': 'last12Months',
@@ -149,6 +149,18 @@ PT.core.getConfigs = function() {
 			'THIS_YEAR': 'thisYear',
 			'LAST_YEAR': 'lastYear',
 			'LAST_5_YEARS': 'last5Years'
+		},
+		relativePeriodParamKeys: {
+			'reportingMonth': 'LAST_MONTH',
+			'last3Months': 'LAST_3_MONTHS',
+			'last12Months': 'LAST_12_MONTHS',
+			'reportingQuarter': 'LAST_QUARTER',
+			'last4Quarters': 'LAST_4_QUARTERS',
+			'lastSixMonth': 'LAST_SIX_MONTH',
+			'last2SixMonths': 'LAST_2_SIXMONTHS',
+			'thisYear': 'THIS_YEAR',
+			'lastYear': 'LAST_YEAR',
+			'last5Years': 'LAST_5_YEARS'
 		},
 		periodTypes: [
 			{id: 'Daily', name: 'Daily'},

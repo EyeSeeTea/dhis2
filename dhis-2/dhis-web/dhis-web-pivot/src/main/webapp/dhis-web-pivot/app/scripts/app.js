@@ -849,17 +849,17 @@ Ext.onReady( function() {
 						for (var j = 0, item; j < obj.items.length; j++) {
 							item = obj.items[j];
 
-							if (pt.conf.period.relativePeriodKeys[item]) {
+							if (pt.conf.period.relativePeriodValueKeys[item]) {
 								key = pt.conf.finals.dimension.relativePeriod.value;
 
 								if (!favorite[key]) {
 									favorite[key] = {};
 								}
 
-								favorite[key][pt.conf.period.relativePeriodKeys[item]] = true;
+								favorite[key][pt.conf.period.relativePeriodValueKeys[item]] = true;
 							}
 							else {
-								key = pt.conf.finals.dimension.period.value;
+								key = pt.conf.finals.dimension.fixedPeriod.value;
 
 								if (!favorite[key]) {
 									favorite[key] = [];
@@ -1945,6 +1945,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				autoScroll: true,
 				bodyStyle: 'border:0 none',
+				valueComponentMap: {},
 				items: [
 					{
 						xtype: 'panel',
@@ -1962,6 +1963,7 @@ Ext.onReady( function() {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
 												pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 											}
 										},
 										change: function() {
@@ -2004,6 +2006,7 @@ Ext.onReady( function() {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
 												pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 											}
 										},
 										change: function() {
@@ -2040,6 +2043,7 @@ Ext.onReady( function() {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
 												pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 											}
 										},
 										change: function() {
@@ -2083,6 +2087,7 @@ Ext.onReady( function() {
 										added: function(chb) {
 											if (chb.xtype === 'checkbox') {
 												pt.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
 											}
 										},
 										change: function() {
@@ -3105,15 +3110,33 @@ Ext.onReady( function() {
 			});
 
 			setFavorite = function(r) {
-				if (r.indicators) {
+				if (Ext.isArray(r.indicators)) {
+					indicatorSelected.removeAll();
 					indicatorSelected.add(r.indicators);
 				}
-				if (r.dataElements) {
+				if (Ext.isArray(r.dataElements)) {
+					dataElementSelected.removeAll();
 					dataElementSelected.add(r.dataElements);
 				}
-				if (r.dataSets) {
+				if (Ext.isArray(r.dataSets)) {
+					dataSetsSelected.removeAll();
 					dataSetsSelected.add(r.dataSets);
 				}
+				if (Ext.isArray(r.periods)) {
+					fixedPeriodSelected.removeAll();
+					fixedPeriodSelected.add(r.periods);
+				}
+				if (Ext.isObject(r.relativePeriods)) {
+					for (var key in r.relativePeriods) {
+						if (r.relativePeriods.hasOwnProperty(key)) {
+							var value = pt.conf.period.relativePeriodParamKeys[key];
+							relativePeriod.valueComponentMap[value].setValue(!!r.relativePeriods[key]);
+						}
+					}
+				}
+
+
+
 
 			};
 
@@ -3126,6 +3149,7 @@ Ext.onReady( function() {
 				optionsButton: optionsButton,
 				favoriteButton: favoriteButton,
 				downloadButton: downloadButton,
+				setFavorite: setFavorite,
 				items: [
 					westRegion,
 					centerRegion
