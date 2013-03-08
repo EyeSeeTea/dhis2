@@ -2597,6 +2597,7 @@ Ext.onReady( function() {
 						listeners: {
 							added: function() {
 								pt.cmp.dimension.organisationUnit.treepanel = this;
+								organisationUnit.treePanel = this;
 							},
 							render: function() {
 								this.rendered = true;
@@ -3111,33 +3112,41 @@ Ext.onReady( function() {
 
 			setFavorite = function(r) {
 				if (Ext.isArray(r.indicators)) {
-					indicatorSelected.removeAll();
-					indicatorSelected.add(r.indicators);
+					pt.store.indicatorSelected.removeAll();
+					pt.store.indicatorSelected.add(r.indicators);
 				}
 				if (Ext.isArray(r.dataElements)) {
-					dataElementSelected.removeAll();
-					dataElementSelected.add(r.dataElements);
+					pt.store.dataElementSelected.removeAll();
+					pt.store.dataElementSelected.add(r.dataElements);
 				}
 				if (Ext.isArray(r.dataSets)) {
-					dataSetsSelected.removeAll();
-					dataSetsSelected.add(r.dataSets);
+					pt.store.dataSetsSelected.removeAll();
+					pt.store.dataSetsSelected.add(r.dataSets);
 				}
 				if (Ext.isArray(r.periods)) {
-					fixedPeriodSelected.removeAll();
-					fixedPeriodSelected.add(r.periods);
+					pt.store.fixedPeriodSelected.removeAll();
+					pt.store.fixedPeriodSelected.add(r.periods);
 				}
 				if (Ext.isObject(r.relativePeriods)) {
+
+					//todo
+					r.relativePeriods.reportingMonth = r.relativePeriods.lastMonth;
+					r.relativePeriods.reportingQuarter = r.relativePeriods.lastQuarter;
+
 					for (var key in r.relativePeriods) {
-						if (r.relativePeriods.hasOwnProperty(key)) {
+						if (r.relativePeriods.hasOwnProperty(key) && pt.conf.period.relativePeriodParamKeys.hasOwnProperty(key)) {
 							var value = pt.conf.period.relativePeriodParamKeys[key];
 							relativePeriod.valueComponentMap[value].setValue(!!r.relativePeriods[key]);
 						}
 					}
 				}
-
-
-
-
+				if (Ext.isArray(r.organisationUnits) && Ext.isObject(r.parentGraphMap)) {
+					for (var key in r.parentGraphMap) {
+						if (r.parentGraphMap.hasOwnProperty(key)) {
+							organisationUnit.treePanel.selectPath('/root' + r.parentGraphMap[key] + '/' + key);
+						}
+					}
+				}
 			};
 
 			viewport = Ext.create('Ext.container.Viewport', {
