@@ -842,21 +842,21 @@ Ext.onReady( function() {
 				favorite.user = system ? null : {id: 'currentUser'};
 
 				// Dimensions
-				for (var i = 0, obj, key, items; i < pt.xSettings.objects; i++) {
+				for (var i = 0, obj, key, items; i < pt.xSettings.objects.length; i++) {
 					obj = pt.xSettings.objects[i];
 
 					if (obj.objectName === pt.conf.finals.dimension.period.objectName) {
 						for (var j = 0, item; j < obj.items.length; j++) {
 							item = obj.items[j];
 
-							if (pt.conf.period.relativePeriods[item]) {
+							if (pt.conf.period.relativePeriodKeys[item]) {
 								key = pt.conf.finals.dimension.relativePeriod.value;
 
 								if (!favorite[key]) {
 									favorite[key] = {};
 								}
 
-								favorite[key][item] = true;
+								favorite[key][pt.conf.period.relativePeriodKeys[item]] = true;
 							}
 							else {
 								key = pt.conf.finals.dimension.period.value;
@@ -869,6 +869,24 @@ Ext.onReady( function() {
 									id: item
 								});
 							}
+						}
+					}
+					else if (obj.objectName === pt.conf.finals.dimension.organisationUnitGroupSet.objectName ||
+							 obj.objectName === pt.conf.finals.dimension.dataElementGroupSet.objectName) {
+						key = pt.conf.finals.dimension.objectNameMap[obj.objectName].value;
+
+						if (!favorite[key]) {
+							favorite[key] = {};
+						}
+
+						favorite[key][obj.dimensionName] = [];
+
+						for (var j = 0, item; j < obj.items.length; j++) {
+							item = obj.items[j];
+
+							favorite[key][obj.dimensionName].push({
+								id: item
+							});
 						}
 					}
 					else {
@@ -886,31 +904,31 @@ Ext.onReady( function() {
 				}
 
 				// Setup
-				if (xSettings.col) {
+				if (pt.xSettings.col) {
 					var a = [];
 
-					for (var i = 0; i < xSettings.col.length; i++) {
-						a.push(xSettings.col[i].dimensionName);
+					for (var i = 0; i < pt.xSettings.col.length; i++) {
+						a.push(pt.xSettings.col[i].dimensionName);
 					}
 
 					favorite['columnDimensions'] = a;
 				}
 
-				if (xSettings.row) {
+				if (pt.xSettings.row) {
 					var a = [];
 
-					for (var i = 0; i < xSettings.row.length; i++) {
-						a.push(xSettings.row[i].dimensionName);
+					for (var i = 0; i < pt.xSettings.row.length; i++) {
+						a.push(pt.xSettings.row[i].dimensionName);
 					}
 
 					favorite['rowDimensions'] = a;
 				}
 
-				if (xSettings.filter) {
+				if (pt.xSettings.filter) {
 					var a = [];
 
-					for (var i = 0; i < xSettings.filter.length; i++) {
-						a.push(xSettings.filter[i].dimensionName);
+					for (var i = 0; i < pt.xSettings.filter.length; i++) {
+						a.push(pt.xSettings.filter[i].dimensionName);
 					}
 
 					favorite['filterDimensions'] = a;
@@ -1108,8 +1126,8 @@ Ext.onReady( function() {
 								el = el.parent('td');
 								el.addClsOnOver('link');
 								el.pt = pt;
-								el.favorite = {id: record.data.id};
-								el.dom.setAttribute('onclick', 'Ext.get(this).pt.favorite = Ext.get(this).favorite; PT.core.TableLoader(Ext.get(this).pt).load();');
+								el.favoriteId = record.data.id;
+								el.dom.setAttribute('onclick', 'Ext.get(this).pt.util.pivot.loadTable(Ext.get(this).favoriteId);');
 							}
 						};
 
@@ -1224,7 +1242,7 @@ Ext.onReady( function() {
 
 								if (confirm(message)) {
 									Ext.Ajax.request({
-										url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + 'reportTables/' + id,
+										url: pt.baseUrl + '/api/reportTables/' + id,
 										method: 'DELETE',
 										success: function() {
 											pt.store.tables.loadStore();
@@ -1398,8 +1416,10 @@ Ext.onReady( function() {
 				accordion,
 				westRegion,
 				centerRegion,
-				viewport,
 
+				setFavorite,
+
+				viewport,
 				addListeners;
 
 			indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
@@ -3084,6 +3104,19 @@ Ext.onReady( function() {
 				}
 			});
 
+			setFavorite = function(r) {
+				if (r.indicators) {
+					indicatorSelected.add(r.indicators);
+				}
+				if (r.dataElements) {
+					dataElementSelected.add(r.dataElements);
+				}
+				if (r.dataSets) {
+					dataSetsSelected.add(r.dataSets);
+				}
+
+			};
+
 			viewport = Ext.create('Ext.container.Viewport', {
 				layout: 'border',
 				westRegion: westRegion,
@@ -3121,8 +3154,6 @@ Ext.onReady( function() {
 					s.sort('name', 'ASC');
 				});
 			}();
-
-			pt.container = centerRegion;
 
 			return viewport;
 		};

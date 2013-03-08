@@ -122,7 +122,7 @@ PT.core.getConfigs = function() {
 	dim.objectNameMap[dim.dataSet.objectName] = dim.dataSet;
 	dim.objectNameMap[dim.period.objectName] = dim.period;
 	dim.objectNameMap[dim.organisationUnit.objectName] = dim.organisationUnit;
-	dim.objectNameMap[dim.organisationUnit.objectName] = dim.organisationUnit;
+	dim.objectNameMap[dim.organisationUnitGroupSet.objectName] = dim.organisationUnitGroupSet;
 	dim.objectNameMap[dim.dataElementGroupSet.objectName] = dim.dataElementGroupSet;
 
 	conf.period = {
@@ -137,6 +137,18 @@ PT.core.getConfigs = function() {
 			THIS_YEAR: 1,
 			LAST_YEAR: 1,
 			LAST_5_YEARS: 5
+		},
+		relativePeriodKeys: {
+			'LAST_MONTH': 'reportingMonth',
+			'LAST_3_MONTHS': 'last3Months',
+			'LAST_12_MONTHS': 'last12Months',
+			'LAST_QUARTER': 'reportingQuarter',
+			'LAST_4_QUARTERS': 'last4Quarters',
+			'LAST_SIX_MONTH': 'lastSixMonth',
+			'LAST_2_SIXMONTHS': 'last2SixMonths',
+			'THIS_YEAR': 'thisYear',
+			'LAST_YEAR': 'lastYear',
+			'LAST_5_YEARS': 'last5Years'
 		},
 		periodTypes: [
 			{id: 'Daily', name: 'Daily'},
@@ -475,31 +487,6 @@ PT.core.getUtils = function(pt) {
 	};
 
 	util.pivot = {
-		getTdHtml: function(options, config) {
-			var cls,
-				colSpan,
-				rowSpan,
-				htmlValue,
-				cellPadding,
-				fontSize;
-
-			if (!(config && Ext.isObject(config))) {
-				return '';
-			}
-
-			cls = config.cls ? config.cls : '';
-			cls += config.hidden ? ' td-hidden' : '';
-			cls += config.collapsed ? ' td-collapsed' : '';
-			colSpan = config.colSpan ? 'colspan="' + config.colSpan + '"' : '';
-			rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '"' : '';
-			htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
-			htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue) : htmlValue;
-			cellPadding = pt.conf.pivot.cellPadding[config.cellPadding] || pt.conf.pivot.cellPadding[options.cellPadding];
-			fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[options.fontSize];
-
-			return '<td class="' + cls + '" ' + colSpan + ' ' + rowSpan + ' style="padding:' + cellPadding + '; font-size:' + fontSize + ';">' + htmlValue + '</td>';
-		},
-
 		getTable: function(settings, pt) {
 			var options = settings.options,
 				extendSettings,
@@ -963,7 +950,8 @@ PT.core.getUtils = function(pt) {
 			};
 
 			getTableHtml = function(xColAxis, xRowAxis, xResponse) {
-				var doSubTotals,
+				var getTdHtml,
+					doSubTotals,
 					getColAxisHtmlArray,
 					getRowHtmlArray,
 					rowAxisHtmlArray,
@@ -998,6 +986,31 @@ PT.core.getUtils = function(pt) {
 					totalColItems = [],
 					htmlArray;
 
+				getTdHtml = function(options, config) {
+					var cls,
+						colSpan,
+						rowSpan,
+						htmlValue,
+						cellPadding,
+						fontSize;
+
+					if (!(config && Ext.isObject(config))) {
+						return '';
+					}
+
+					cls = config.cls ? config.cls : '';
+					cls += config.hidden ? ' td-hidden' : '';
+					cls += config.collapsed ? ' td-collapsed' : '';
+					colSpan = config.colSpan ? 'colspan="' + config.colSpan + '"' : '';
+					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '"' : '';
+					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
+					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue) : htmlValue;
+					cellPadding = pt.conf.pivot.cellPadding[config.cellPadding] || pt.conf.pivot.cellPadding[options.cellPadding];
+					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[options.fontSize];
+
+					return '<td class="' + cls + '" ' + colSpan + ' ' + rowSpan + ' style="padding:' + cellPadding + '; font-size:' + fontSize + ';">' + htmlValue + '</td>';
+				};
+
 				doSubTotals = function(xAxis) {
 					return !!options.showSubTotals && xAxis && xAxis.dims > 1;
 
@@ -1024,8 +1037,7 @@ PT.core.getUtils = function(pt) {
 						getEmptyHtmlArray;
 
 					getEmptyHtmlArray = function() {
-						return (xColAxis && xRowAxis) ?
-							pt.util.pivot.getTdHtml(options, {cls: 'pivot-dim-empty', colSpan: xRowAxis.dims, rowSpan: xColAxis.dims}) : '';
+						return (xColAxis && xRowAxis) ? getTdHtml(options, {cls: 'pivot-dim-empty', colSpan: xRowAxis.dims, rowSpan: xColAxis.dims}) : '';
 					};
 
 					if (!(xColAxis && Ext.isObject(xColAxis))) {
@@ -1043,7 +1055,7 @@ PT.core.getUtils = function(pt) {
 
 						for (var j = 0, id; j < dimItems.length; j++) {
 							id = dimItems[j];
-							dimHtml.push(pt.util.pivot.getTdHtml(options, {
+							dimHtml.push(getTdHtml(options, {
 								type: 'dimension',
 								cls: 'pivot-dim',
 								colSpan: colSpan,
@@ -1051,7 +1063,7 @@ PT.core.getUtils = function(pt) {
 							}));
 
 							if (doSubTotals(xColAxis) && i === 0) {
-								dimHtml.push(pt.util.pivot.getTdHtml(options, {
+								dimHtml.push(getTdHtml(options, {
 									type: 'dimensionSubtotal',
 									cls: 'pivot-dim-subtotal',
 									rowSpan: xColAxis.dims
@@ -1059,7 +1071,7 @@ PT.core.getUtils = function(pt) {
 							}
 
 							if (i === 0 && j === (dimItems.length - 1)) {
-								dimHtml.push(pt.util.pivot.getTdHtml(options, {
+								dimHtml.push(getTdHtml(options, {
 									type: 'dimensionTotal',
 									cls: 'pivot-dim-total',
 									rowSpan: xColAxis.dims,
@@ -1368,7 +1380,7 @@ PT.core.getUtils = function(pt) {
 						row = [];
 
 						for (var j = 0; j < mergedObjects[i].length; j++) {
-							row.push(pt.util.pivot.getTdHtml(options, mergedObjects[i][j]));
+							row.push(getTdHtml(options, mergedObjects[i][j]));
 						}
 
 						a.push(row);
@@ -1428,7 +1440,7 @@ PT.core.getUtils = function(pt) {
 							item = totalColItems[i];
 							item.htmlValue = pt.util.number.roundIf(item.htmlValue, 1).toString();
 
-							a.push(pt.util.pivot.getTdHtml(options, {
+							a.push(getTdHtml(options, {
 								cls: item.cls,
 								htmlValue: item.htmlValue
 							}));
@@ -1450,7 +1462,7 @@ PT.core.getUtils = function(pt) {
 					if (xColAxis && xRowAxis) {
 						grandTotalSum = Ext.Array.sum(values);
 
-						a.push(pt.util.pivot.getTdHtml(options, {
+						a.push(getTdHtml(options, {
 							cls: 'pivot-value-grandtotal',
 							htmlValue: pt.util.number.roundIf(grandTotalSum, 1).toString()
 						}));
@@ -1467,7 +1479,7 @@ PT.core.getUtils = function(pt) {
 						a = [];
 
 					if (xRowAxis) {
-						dimTotalArray = [pt.util.pivot.getTdHtml(options, {
+						dimTotalArray = [getTdHtml(options, {
 							cls: 'pivot-dim-total',
 							colSpan: xRowAxis.dims,
 							htmlValue: 'Total'
@@ -1552,8 +1564,8 @@ PT.core.getUtils = function(pt) {
 
 						html = getTableHtml(xColAxis, xRowAxis, xResponse);
 
-						pt.container.removeAll(true);
-						pt.container.update(html);
+						pt.viewport.centerRegion.removeAll(true);
+						pt.viewport.centerRegion.update(html);
 
 						// After table success
 						pt.util.mask.hideMask();
@@ -1564,11 +1576,25 @@ PT.core.getUtils = function(pt) {
 
 						pt.xSettings = xSettings;
 						pt.xResponse = xResponse;
-nissa = pt;
 					}
 				});
 
 			}();
+		},
+
+		loadTable: function(id) {
+			if (!Ext.isString(id)) {
+				alert('Invalid id');
+				return;
+			}
+
+			Ext.data.JsonP.request({
+				url: pt.baseUrl + '/api/reportTables/' + id + '.jsonp?links=false',
+				method: 'GET',
+				success: function(r) {
+					pt.viewport.setFavorite(r);
+				}
+			});
 		}
 	};
 
