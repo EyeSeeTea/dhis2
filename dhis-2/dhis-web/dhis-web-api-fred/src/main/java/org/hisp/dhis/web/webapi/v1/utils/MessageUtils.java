@@ -1,7 +1,7 @@
-package org.hisp.dhis.smscommand;
+package org.hisp.dhis.web.webapi.v1.utils;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,18 +27,43 @@ package org.hisp.dhis.smscommand;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Set;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.hisp.dhis.web.webapi.v1.domain.MessageResponse;
 
-public interface SMSCommandStore
+import java.io.IOException;
+
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public final class MessageUtils
 {
-    Collection<SMSCommand> getSMSCommands();
+    private static ObjectMapper objectMapper;
 
-    SMSCommand getSMSCommand( int id );
+    static
+    {
+        objectMapper = new ObjectMapper();
+        objectMapper.configure( JsonGenerator.Feature.ESCAPE_NON_ASCII, true );
+        objectMapper.setSerializationInclusion( JsonSerialize.Inclusion.NON_EMPTY );
+    }
 
-    int save( SMSCommand cmd );
+    public static String jsonMessage( String message ) throws IOException
+    {
+        return messageToJson( new MessageResponse( null, message ) );
+    }
 
-    void delete( SMSCommand cmd );
+    public static String jsonMessage( String code, String message ) throws IOException
+    {
+        return messageToJson( new MessageResponse( code, message ) );
+    }
 
-    void save( Set<SMSCode> codes );
+    public static String messageToJson( MessageResponse messageResponse ) throws IOException
+    {
+        return objectMapper.writeValueAsString( messageResponse );
+    }
+
+    private MessageUtils()
+    {
+    }
 }

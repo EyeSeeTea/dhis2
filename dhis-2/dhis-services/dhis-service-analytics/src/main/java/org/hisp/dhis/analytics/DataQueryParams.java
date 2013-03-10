@@ -93,6 +93,8 @@ public class DataQueryParams
     
     private transient String tableName;
 
+    private ListMap<String, IdentifiableObject> tableNamePeriodMap;
+    
     private transient String periodType;
         
     private transient PeriodType dataPeriodType;
@@ -118,6 +120,7 @@ public class DataQueryParams
         this.periodType = params.getPeriodType();
         this.dataPeriodType = params.getDataPeriodType();
         this.skipPartitioning = params.isSkipPartitioning();
+        this.tableNamePeriodMap = params.getTableNamePeriodMap();
     }
 
     // -------------------------------------------------------------------------
@@ -142,7 +145,46 @@ public class DataQueryParams
     }
     
     /**
-     * Creates a mapping between the dimension names and the filter dimensions.
+     * Indicates whether the filters of this query spans more than one partition.
+     * If true it means that a period filter exists and that the periods span
+     * multiple years.
+     */
+    public boolean filterSpansMultiplePartitions()
+    {
+        return tableNamePeriodMap != null && !tableNamePeriodMap.isEmpty();
+    }
+    
+    /**
+     * If the filters of this query spans more than partition, this method will
+     * return a list of queries with a query for each partition, generated from 
+     * this query, where the table name and filter period items are set according 
+     * to the relevant partition.
+     */
+    public List<DataQueryParams> getPartitionFilterParams()
+    {
+        List<DataQueryParams> filters = new ArrayList<DataQueryParams>();
+        
+        if ( !filterSpansMultiplePartitions() )
+        {
+            return filters;
+        }   
+        
+        for ( String tableName : tableNamePeriodMap.keySet() )
+        {
+            List<IdentifiableObject> periods = tableNamePeriodMap.get( tableName );
+            
+            DataQueryParams params = new DataQueryParams( this );
+            params.setTableName( tableName );
+            params.updateFilterOptions( PERIOD_DIM_ID, periods );
+            filters.add( params );
+        }
+        
+        return filters;
+    }
+    
+    /**
+     * Creates a mapping between dimension identifiers and filter dimensions. Filters 
+     * are guaranteed not to be null.
      */
     public ListMap<String, Dimension> getDimensionFilterMap()
     {
@@ -150,7 +192,10 @@ public class DataQueryParams
         
         for ( Dimension filter : filters )
         {
-            map.putValue( filter.getDimension(), filter );
+            if ( filter != null )
+            {
+                map.putValue( filter.getDimension(), filter );
+            }
         }
         
         return map;
@@ -419,11 +464,11 @@ public class DataQueryParams
             
             if ( getPeriods() != null ) // Period is dimension
             {
-                setPeriods( new ArrayList<IdentifiableObject>( dataPeriodAggregationPeriodMap.keySet() ) );
+                setDimensionOptions( PERIOD_DIM_ID, DimensionType.PERIOD, dataPeriodType.getName(), new ArrayList<IdentifiableObject>( dataPeriodAggregationPeriodMap.keySet() ) );
             }
             else // Period is filter
             {
-                setFilterPeriods( new ArrayList<IdentifiableObject>( dataPeriodAggregationPeriodMap.keySet() ) );
+                setFilterOptions( PERIOD_DIM_ID, DimensionType.PERIOD, dataPeriodType.getName(), new ArrayList<IdentifiableObject>( dataPeriodAggregationPeriodMap.keySet() ) );
             }
         }
     }
@@ -571,6 +616,23 @@ public class DataQueryParams
         return this;
     }
     
+    /**
+     * Updates the options for the given filter.
+     */
+    public DataQueryParams updateFilterOptions( String filter, List<IdentifiableObject> options )
+    {
+        int index = filters.indexOf( new Dimension( filter ) );
+        
+        if ( index != -1 )
+        {
+            Dimension existing = filters.get( index );
+            
+            filters.set( index, new Dimension( existing.getDimension(), existing.getType(), existing.getDimensionName(), options ) );
+        }
+        
+        return this;
+    }
+    
     // -------------------------------------------------------------------------
     // Static methods
     // -------------------------------------------------------------------------
@@ -641,6 +703,28 @@ public class DataQueryParams
         }
         
         return map;
+    }
+    
+    /**
+     * Indicates whether at least one of the given dimenions has at least one
+     * item.
+     */
+    public static boolean anyDimensionHasItems( Collection<Dimension> dimensions )
+    {
+        if ( dimensions == null || dimensions.isEmpty() )
+        {
+            return false;
+        }
+        
+        for ( Dimension dim : dimensions )
+        {
+            if ( dim.hasItems() )
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     // -------------------------------------------------------------------------
@@ -782,6 +866,16 @@ public class DataQueryParams
     public void setTableName( String tableName )
     {
         this.tableName = tableName;
+    }
+
+    public ListMap<String, IdentifiableObject> getTableNamePeriodMap()
+    {
+        return tableNamePeriodMap;
+    }
+
+    public void setTableNamePeriodMap( ListMap<String, IdentifiableObject> tableNamePeriodMap )
+    {
+        this.tableNamePeriodMap = tableNamePeriodMap;
     }
 
     public String getPeriodType()

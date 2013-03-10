@@ -28,8 +28,8 @@ package org.hisp.dhis.web.webapi.v1.controller;
  */
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.hisp.dhis.api.controller.organisationunit.OrganisationUnitLevelController;
-import org.hisp.dhis.common.DeleteNotAllowedException;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -41,9 +41,14 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.web.webapi.v1.domain.Facilities;
 import org.hisp.dhis.web.webapi.v1.domain.Facility;
 import org.hisp.dhis.web.webapi.v1.domain.Identifier;
+import org.hisp.dhis.web.webapi.v1.exception.DuplicateCodeException;
+import org.hisp.dhis.web.webapi.v1.exception.DuplicateUidException;
+import org.hisp.dhis.web.webapi.v1.exception.DuplicateUuidException;
+import org.hisp.dhis.web.webapi.v1.exception.ETagVerificationException;
+import org.hisp.dhis.web.webapi.v1.exception.FacilityNotFoundException;
+import org.hisp.dhis.web.webapi.v1.exception.UuidFormatException;
 import org.hisp.dhis.web.webapi.v1.utils.ContextUtils;
-import org.hisp.dhis.web.webapi.v1.utils.MessageResponseUtils;
-import org.hisp.dhis.web.webapi.v1.utils.ObjectMapperFactoryBean;
+import org.hisp.dhis.web.webapi.v1.utils.MessageUtils;
 import org.hisp.dhis.web.webapi.v1.utils.ValidationUtils;
 import org.hisp.dhis.web.webapi.v1.validation.group.Create;
 import org.hisp.dhis.web.webapi.v1.validation.group.Update;
@@ -58,16 +63,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
@@ -113,6 +114,9 @@ public class FacilityController
 
     @Autowired
     private Validator validator;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @InitBinder
     protected void initBinder( WebDataBinder binder )
@@ -327,7 +331,7 @@ public class FacilityController
         {
             Facility facility = conversionService.convert( organisationUnit, Facility.class );
             filterFacility( facility, allProperties, fields );
-            addHierarchyPropertyToFacility( organisationUnitLevels, organisationUnit, facility );
+            addHierarchyPropertyToFacility( organisationUnitLevels, facility );
 
             facilities.getFacilities().add( facility );
         }
@@ -346,7 +350,7 @@ public class FacilityController
             model.addAttribute( "prevDisabled", true );
         }
 
-        if ( (offset + limitValue) >= organisationUnitService.getNumberOfOrganisationUnits() )
+        if ( (offset + (limitValue == null ? 0 : limitValue) >= organisationUnitService.getNumberOfOrganisationUnits()) )
         {
             model.addAttribute( "nextDisabled", true );
         }
@@ -358,20 +362,20 @@ public class FacilityController
     public String readFacility( Model model, @PathVariable String id,
         @RequestParam( value = "allProperties", required = false, defaultValue = "true" ) Boolean allProperties,
         @RequestParam( value = "fields", required = false ) String fields,
-        HttpServletRequest request )
+        HttpServletRequest request ) throws FacilityNotFoundException
     {
         OrganisationUnit organisationUnit = getOrganisationUnit( id );
 
         if ( organisationUnit == null )
         {
-            throw new HttpClientErrorException( HttpStatus.NOT_FOUND );
+            throw new FacilityNotFoundException();
         }
 
         List<OrganisationUnitLevel> organisationUnitLevels = organisationUnitService.getOrganisationUnitLevels();
 
         Facility facility = conversionService.convert( organisationUnit, Facility.class );
         filterFacility( facility, allProperties, fields );
-        addHierarchyPropertyToFacility( organisationUnitLevels, organisationUnit, facility );
+        addHierarchyPropertyToFacility( organisationUnitLevels, facility );
 
         setAccessRights( model );
 
@@ -412,7 +416,7 @@ public class FacilityController
         }
     }
 
-    private void addHierarchyPropertyToFacility( List<OrganisationUnitLevel> organisationUnitLevels, OrganisationUnit organisationUnit, Facility facility )
+    private void addHierarchyPropertyToFacility( List<OrganisationUnitLevel> organisationUnitLevels, Facility facility )
     {
         if ( facility.getProperties() == null )
         {
@@ -462,8 +466,7 @@ public class FacilityController
             }
             catch ( IllegalArgumentException ignored )
             {
-                return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( HttpStatus.PRECONDITION_FAILED.toString(),
-                    "Bad id: (does not match expected UUID string format)" ), HttpStatus.PRECONDITION_FAILED );
+                throw new UuidFormatException();
             }
         }
 
@@ -480,18 +483,15 @@ public class FacilityController
 
             if ( organisationUnitService.getOrganisationUnit( organisationUnit.getUuid() ) != null )
             {
-                return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( HttpStatus.CONFLICT.toString(),
-                    "An object with that UUID already exists." ), headers, HttpStatus.CONFLICT );
+                throw new DuplicateUuidException();
             }
             if ( organisationUnitService.getOrganisationUnit( organisationUnit.getUid() ) != null )
             {
-                return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( HttpStatus.CONFLICT.toString(),
-                    "An object with that UID already exists." ), headers, HttpStatus.CONFLICT );
+                throw new DuplicateUidException();
             }
             else if ( organisationUnit.getCode() != null && organisationUnitService.getOrganisationUnitByCode( organisationUnit.getCode() ) != null )
             {
-                return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( HttpStatus.CONFLICT.toString(),
-                    "An object with that code already exists." ), headers, HttpStatus.CONFLICT );
+                throw new DuplicateCodeException();
             }
 
             organisationUnitService.addOrganisationUnit( organisationUnit );
@@ -506,8 +506,8 @@ public class FacilityController
 
             facility = conversionService.convert( organisationUnit, Facility.class );
             List<OrganisationUnitLevel> organisationUnitLevels = organisationUnitService.getOrganisationUnitLevels();
-            addHierarchyPropertyToFacility( organisationUnitLevels, organisationUnit, facility );
-            json = new ObjectMapperFactoryBean().getObject().writeValueAsString( facility );
+            addHierarchyPropertyToFacility( organisationUnitLevels, facility );
+            json = objectMapper.writeValueAsString( facility );
 
             return new ResponseEntity<String>( json, headers, HttpStatus.CREATED );
         }
@@ -532,8 +532,7 @@ public class FacilityController
 
         if ( organisationUnit == null )
         {
-            return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( HttpStatus.NOT_FOUND.toString(),
-                "Facility with that ID not found" ), headers, HttpStatus.NOT_FOUND );
+            throw new FacilityNotFoundException();
         }
 
         // getId == null is not legal, but will be catched by bean validation
@@ -547,8 +546,7 @@ public class FacilityController
             }
             catch ( IllegalArgumentException ignored )
             {
-                return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( HttpStatus.PRECONDITION_FAILED.toString(),
-                    "Bad id: (does not match expected UUID string format)" ), headers, HttpStatus.PRECONDITION_FAILED );
+                throw new UuidFormatException();
             }
         }
 
@@ -565,31 +563,24 @@ public class FacilityController
             {
                 Facility old_facility = conversionService.convert( organisationUnit, Facility.class );
                 List<OrganisationUnitLevel> organisationUnitLevels = organisationUnitService.getOrganisationUnitLevels();
-                addHierarchyPropertyToFacility( organisationUnitLevels, organisationUnitUpdate, old_facility );
-                String body = new ObjectMapperFactoryBean().getObject().writeValueAsString( old_facility );
+                addHierarchyPropertyToFacility( organisationUnitLevels, old_facility );
+                String body = objectMapper.writeValueAsString( old_facility );
 
                 String ETag = generateETagHeaderValue( body.getBytes() );
 
                 if ( !ETag.equals( request.getHeader( "If-Match" ) ) )
                 {
-                    return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( HttpStatus.PRECONDITION_FAILED.toString(),
-                        "ETag provided does not match current ETag of facility" ), headers, HttpStatus.PRECONDITION_FAILED );
+                    throw new ETagVerificationException();
                 }
             }
 
-            if ( organisationUnit == null )
-            {
-                return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( HttpStatus.NOT_FOUND.toString(),
-                    "No object with that identifier exists." ), headers, HttpStatus.NOT_FOUND );
-            }
-            else if ( organisationUnitUpdate.getCode() != null )
+            if ( organisationUnitUpdate.getCode() != null )
             {
                 OrganisationUnit ouByCode = organisationUnitService.getOrganisationUnitByCode( organisationUnitUpdate.getCode() );
 
                 if ( ouByCode != null && !organisationUnit.getUid().equals( ouByCode.getUid() ) )
                 {
-                    return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( HttpStatus.CONFLICT.toString(),
-                        "Another object with the same code already exists." ), headers, HttpStatus.CONFLICT );
+                    throw new DuplicateCodeException();
                 }
             }
 
@@ -612,8 +603,8 @@ public class FacilityController
 
             facility = conversionService.convert( organisationUnit, Facility.class );
             List<OrganisationUnitLevel> organisationUnitLevels = organisationUnitService.getOrganisationUnitLevels();
-            addHierarchyPropertyToFacility( organisationUnitLevels, organisationUnit, facility );
-            json = new ObjectMapperFactoryBean().getObject().writeValueAsString( facility );
+            addHierarchyPropertyToFacility( organisationUnitLevels, facility );
+            json = objectMapper.writeValueAsString( facility );
 
             return new ResponseEntity<String>( json, headers, HttpStatus.OK );
         }
@@ -627,37 +618,21 @@ public class FacilityController
     // DELETE JSON
     //--------------------------------------------------------------------------
 
-    @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )
+    @RequestMapping( value = "/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE )
     @PreAuthorize( "hasRole('F_FRED_DELETE') or hasRole('ALL')" )
-    public ResponseEntity<String> deleteFacility( @PathVariable String id ) throws HierarchyViolationException, IOException
+    public ResponseEntity<String> deleteFacility( @PathVariable String id ) throws HierarchyViolationException, IOException, FacilityNotFoundException
     {
         OrganisationUnit organisationUnit = getOrganisationUnit( id );
 
         if ( organisationUnit == null )
         {
-            return new ResponseEntity<String>( MessageResponseUtils.jsonMessage( HttpStatus.NOT_FOUND.toString(),
-                "Facility with that ID not found" ), HttpStatus.NOT_FOUND );
+            throw new FacilityNotFoundException();
         }
 
         organisationUnitService.deleteOrganisationUnit( organisationUnit );
 
-        return new ResponseEntity<String>( HttpStatus.OK );
-    }
-
-    //--------------------------------------------------------------------------
-    // EXCEPTION HANDLERS
-    //--------------------------------------------------------------------------
-
-    @ExceptionHandler( { HttpClientErrorException.class, HttpServerErrorException.class } )
-    public ResponseEntity<String> statusCodeExceptionHandler( HttpStatusCodeException ex )
-    {
-        return new ResponseEntity<String>( ex.getMessage(), ex.getStatusCode() );
-    }
-
-    @ExceptionHandler( { DeleteNotAllowedException.class, HierarchyViolationException.class } )
-    public ResponseEntity<String> dhisExceptionHandler( Exception ex )
-    {
-        return new ResponseEntity<String>( ex.getMessage(), HttpStatus.FORBIDDEN );
+        return new ResponseEntity<String>( MessageUtils.jsonMessage( HttpStatus.OK.toString(),
+            "{}" ), HttpStatus.OK );
     }
 
     //--------------------------------------------------------------------------

@@ -1,7 +1,7 @@
-package org.hisp.dhis.smscommand;
+package org.hisp.dhis.web.webapi.v1.exception;
 
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,18 +27,18 @@ package org.hisp.dhis.smscommand;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.Set;
-
-public interface SMSCommandStore
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class DuplicateCodeException extends Exception
 {
-    Collection<SMSCommand> getSMSCommands();
+    public DuplicateCodeException()
+    {
+        super( "A facility with that CODE already exists." );
+    }
 
-    SMSCommand getSMSCommand( int id );
-
-    int save( SMSCommand cmd );
-
-    void delete( SMSCommand cmd );
-
-    void save( Set<SMSCode> codes );
+    public DuplicateCodeException( String message )
+    {
+        super( message );
+    }
 }

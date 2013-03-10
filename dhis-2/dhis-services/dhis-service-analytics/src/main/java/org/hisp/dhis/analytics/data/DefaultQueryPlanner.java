@@ -200,6 +200,17 @@ public class DefaultQueryPlanner
         }
 
         // ---------------------------------------------------------------------
+        // Group by data set
+        // ---------------------------------------------------------------------
+        
+        queries = splitByDimension( queries, DataQueryParams.DATASET_DIM_ID, optimalQueries );
+
+        if ( queries.size() >= optimalQueries )
+        {
+            return queries;
+        }
+
+        // ---------------------------------------------------------------------
         // Group by organisation unit
         // ---------------------------------------------------------------------
         
@@ -271,27 +282,23 @@ public class DefaultQueryPlanner
         }
         else if ( params.getPeriods() != null && !params.getPeriods().isEmpty() )
         {
-            ListMap<String, IdentifiableObject> tablePeriodMap = PartitionUtils.getTablePeriodMap( params.getPeriods(), tableName );
+            ListMap<String, IdentifiableObject> tableNamePeriodMap = PartitionUtils.getTableNamePeriodMap( params.getPeriods(), tableName );
             
-            for ( String table : tablePeriodMap.keySet() )
+            for ( String table : tableNamePeriodMap.keySet() )
             {
                 DataQueryParams query = new DataQueryParams( params );
-                query.setPeriods( tablePeriodMap.get( table ) );
+                query.setPeriods( tableNamePeriodMap.get( table ) );
                 query.setTableName( table );
                 queries.add( query );            
             }
         }
-        else if ( params.getFilterPeriods() != null && !params.getFilterPeriods().isEmpty() ) //TODO fix
+        else if ( params.getFilterPeriods() != null && !params.getFilterPeriods().isEmpty() )
         {
-            ListMap<String, IdentifiableObject> tablePeriodMap = PartitionUtils.getTablePeriodMap( params.getFilterPeriods(), tableName );
+            ListMap<String, IdentifiableObject> tableNamePeriodMap = PartitionUtils.getTableNamePeriodMap( params.getFilterPeriods(), tableName );
             
-            for ( String table : tablePeriodMap.keySet() )
-            {
-                DataQueryParams query = new DataQueryParams( params );
-                query.setFilterPeriods( tablePeriodMap.get( table ) );
-                query.setTableName( table );
-                queries.add( query );            
-            }
+            DataQueryParams query = new DataQueryParams( params );
+            query.setTableNamePeriodMap( tableNamePeriodMap );
+            queries.add( query );
         }
         else
         {
@@ -446,7 +453,7 @@ public class DefaultQueryPlanner
         
         return queries;
     }
-        
+    
     /**
      * Groups the given query in sub queries based on the period type of its
      * data elements. Sets the data period type on each query.

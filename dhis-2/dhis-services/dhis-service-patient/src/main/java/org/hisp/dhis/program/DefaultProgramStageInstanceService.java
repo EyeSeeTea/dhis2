@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -365,7 +364,7 @@ public class DefaultProgramStageInstanceService
         // Average number of stages for complete programs
 
         int stageCount = program.getProgramStages().size();
-        int stageCompleted = getProgramStageInstanceCount( program, orgunitIds, startDate, endDate, true );
+        int stageCompleted = getProgramStageInstanceCount( program, orgunitIds, startDate, endDate, true );    
         double average = 0.0;
         if ( total != 0 && stageCompleted != 0 )
         {
@@ -418,7 +417,7 @@ public class DefaultProgramStageInstanceService
         grid.addValue( i18n.getString( "visits_overdue_percent" ) );
 
         // Add values for stage details
-
+        
         for ( ProgramStage programStage : program.getProgramStages() )
         {
             grid.addRow();
@@ -471,7 +470,7 @@ public class DefaultProgramStageInstanceService
             }
             grid.addValue( format.formatValue( percent ) + "%" );
         }
-
+        
         return grid;
     }
 
