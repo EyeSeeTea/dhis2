@@ -353,7 +353,7 @@ public class MobileOrganisationUnitController extends AbstractMobileController {
 	@ResponseBody
 	public Patient findPatientByName(@PathVariable int id,
 			@RequestHeader("name") String fullName) throws NotAllowedException {
-		return activityReportingService.findPatient(fullName);
+		return activityReportingService.findPatient(fullName, 0);
 	}
 
 	@RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/orgUnits/{id}/uploadProgramStage" )

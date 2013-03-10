@@ -185,7 +185,7 @@ PT.core.getConfigs = function() {
         west_fill_accordion_indicator: 63,
         west_fill_accordion_dataelement: 63,
         west_fill_accordion_dataset: 33,
-        west_fill_accordion_period: 256,
+        west_fill_accordion_period: 240,
         west_fill_accordion_organisationunit: 62,
         west_maxheight_accordion_indicator: 400,
         west_maxheight_accordion_dataelement: 400,
@@ -490,8 +490,11 @@ PT.core.getUtils = function(pt) {
 		},
 
 		roundIf: function(x, fix) {
-			var dec = pt.util.number.getNumberOfDecimals(x);
-			return parseFloat(dec > fix ? x.toFixed(fix) : x);
+			if (Ext.isNumber(x) && Ext.isNumber(fix)) {
+				var dec = pt.util.number.getNumberOfDecimals(x);
+				return parseFloat(dec > fix ? x.toFixed(fix) : x);
+			}
+			return x;
 		},
 
 		pp: function(x) {
@@ -1018,7 +1021,7 @@ PT.core.getUtils = function(pt) {
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '"' : '';
 					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
 					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue) : htmlValue;
-					displayDensity = pt.conf.pivot.cellPadding[config.displayDensity] || pt.conf.pivot.displayDensity[options.displayDensity];
+					displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[options.displayDensity];
 					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[options.fontSize];
 
 					return '<td class="' + cls + '" ' + colSpan + ' ' + rowSpan + ' style="padding:' + displayDensity + '; font-size:' + fontSize + ';">' + htmlValue + '</td>';
