@@ -469,6 +469,7 @@ public class ActivityReportingServiceImpl
 
         Period period = new Period( new DateTime( patient.getBirthDate() ), new DateTime() );
         patientModel.setAge( period.getYears() );
+        patientModel.setPhoneNumber( patient.getPhoneNumber() );
 
         this.setSetting( getSettings() );
 
@@ -602,7 +603,7 @@ public class ActivityReportingServiceImpl
             enrollmentProgramListMobileList.add( enrollmentProgramMobile );
         }
         
-        patientModel.setPrograms( enrollmentProgramListMobileList );
+        patientModel.setEnrollmentPrograms( enrollmentProgramListMobileList );
         
         return patientModel;
     }
@@ -972,7 +973,21 @@ public class ActivityReportingServiceImpl
         }
         else
         {
-            programStageInstance.setCompleted( true );
+            programStageInstance.setCompleted ( true );
+            
+            // check if any compulsory value is null
+            for ( int i = 0; i < dataElements.size(); i++ )
+            {
+                if ( dataElements.get( i ).isCompulsory() == true  )
+                {
+                    if ( dataElements.get( i ).getValue().equals( "" ) )
+                    {
+                        programStageInstance.setCompleted( false );
+                        //break;
+                        throw NotAllowedException.INVALID_PROGRAM_STAGE;        
+                    }
+                }
+            }
             programStageInstanceService.updateProgramStageInstance( programStageInstance );
             return PROGRAM_STAGE_UPLOADED;
         }

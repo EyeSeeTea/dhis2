@@ -29,13 +29,19 @@ Ext.onReady( function() {
 		}
 
 		// Ougs
-		for (var i = 0, dim = pt.conf.finals.dimension; i < init.ougs.length; i++) {
-			dim.objectNameMap[init.ougs[i].id] = init.ougs[i];
+		for (var i = 0, dim = pt.conf.finals.dimension, oug; i < init.ougs.length; i++) {
+			oug = init.ougs[i];
+			oug.dimensionName = oug.id;
+			oug.objectName = pt.conf.finals.dimension.organisationUnitGroupSet.objectName;
+			dim.objectNameMap[oug.id] = oug;
 		}
 
 		// Degs
-		for (var i = 0, dim = pt.conf.finals.dimension; i < init.degs.length; i++) {
-			dim.objectNameMap[init.degs[i].id] = init.degs[i];
+		for (var i = 0, dim = pt.conf.finals.dimension, deg; i < init.degs.length; i++) {
+			deg = init.degs[i];
+			deg.dimensionName = deg.id;
+			deg.objectName = pt.conf.finals.dimension.dataElementGroupSet.objectName;
+			dim.objectNameMap[deg.id] = deg;
 		}
 
 		init.afterRender = function() {
@@ -390,14 +396,14 @@ Ext.onReady( function() {
 			var data = [];
 
 			if (all) {
-				data.push({id: dimConf.data.dimensionName, name: dimConf.data.rawValue});
+				data.push({id: dimConf.data.dimensionName, name: dimConf.data.name});
 			}
 
-			data.push({id: dimConf.category.dimensionName, name: dimConf.category.rawValue});
+			data.push({id: dimConf.category.dimensionName, name: dimConf.category.name});
 
 			if (all) {
-				data.push({id: dimConf.period.dimensionName, name: dimConf.period.rawValue});
-				data.push({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.rawValue});
+				data.push({id: dimConf.period.dimensionName, name: dimConf.period.name});
+				data.push({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 			}
 
 			return data.concat(pt.init.ougs, pt.init.degs);
@@ -437,15 +443,15 @@ Ext.onReady( function() {
 
 		rowStore = getStore();
 		pt.viewport.rowStore = rowStore;
-		rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.rawValue}); //i18n
+		rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name}); //i18n
 
 		colStore = getStore();
 		pt.viewport.colStore = colStore;
-		colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.rawValue}); //i18n
+		colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.name}); //i18n
 
 		filterStore = getStore();
 		pt.viewport.filterStore = filterStore;
-		filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.rawValue}); //i18n
+		filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name}); //i18n
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
@@ -3224,13 +3230,16 @@ Ext.onReady( function() {
 				pt.viewport.rowStore.removeAll();
 				pt.viewport.filterStore.removeAll();
 
+console.log(pt.conf.finals.dimension.objectNameMap);
+
 				if (Ext.isArray(r.columnDimensions)) {
 					for (var i = 0, dim; i < r.columnDimensions.length; i++) {
 						dim = pt.conf.finals.dimension.objectNameMap[r.columnDimensions[i]];
-console.log(pt.conf.finals.dimension.objectNameMap, r.columnDimensions[i], dim);
+console.log("r.columnDimensions[i]", r.columnDimensions[i]);
+console.log("dim", dim);
 						pt.viewport.colStore.add({
 							id: dim.dimensionName,
-							name: dim.rawValue
+							name: dim.name
 						});
 					}
 				}
@@ -3240,7 +3249,7 @@ console.log(pt.conf.finals.dimension.objectNameMap, r.columnDimensions[i], dim);
 						dim = pt.conf.finals.dimension.objectNameMap[r.rowDimensions[i]];
 						pt.viewport.rowStore.add({
 							id: dim.dimensionName,
-							name: dim.rawValue
+							name: dim.name
 						});
 					}
 				}
@@ -3250,7 +3259,7 @@ console.log(pt.conf.finals.dimension.objectNameMap, r.columnDimensions[i], dim);
 						dim = pt.conf.finals.dimension.objectNameMap[r.filterDimensions[i]];
 						pt.viewport.filterStore.add({
 							id: dim.dimensionName,
-							name: dim.rawValue
+							name: dim.name
 						});
 					}
 				}

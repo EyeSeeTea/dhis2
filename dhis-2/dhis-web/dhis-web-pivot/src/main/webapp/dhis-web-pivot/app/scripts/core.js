@@ -43,7 +43,7 @@ PT.core.getConfigs = function() {
         dimension: {
             data: {
                 value: 'data',
-                rawValue: 'Data', //i18n PT.i18n.data,
+                name: 'Data', //i18n PT.i18n.data,
                 dimensionName: 'dx',
                 objectName: 'dx',
                 warning: {
@@ -51,31 +51,31 @@ PT.core.getConfigs = function() {
 				}
             },
             category: {
-				rawValue: 'Categories',
+				name: 'Categories',
 				dimensionName: 'co',
                 objectName: 'co',
 			},
             indicator: {
                 value: 'indicators',
-                rawValue: 'Indicators', //i18n PT.i18n.indicator,
+                name: 'Indicators', //i18n PT.i18n.indicator,
                 dimensionName: 'dx',
                 objectName: 'in'
             },
             dataElement: {
                 value: 'dataElements',
-                rawValue: 'Data elements', //i18n PT.i18n.data_element,
+                name: 'Data elements', //i18n PT.i18n.data_element,
                 dimensionName: 'dx',
                 objectName: 'de'
             },
             dataSet: {
 				value: 'dataSets',
-                rawValue: 'Data sets', //i18n PT.i18n.dataset,
+                name: 'Data sets', //i18n PT.i18n.dataset,
                 dimensionName: 'dx',
                 objectName: 'ds'
 			},
             period: {
                 value: 'period',
-                rawValue: 'Periods', //i18n PT.i18n.period,
+                name: 'Periods', //i18n PT.i18n.period,
                 dimensionName: 'pe',
                 objectName: 'pe',
                 warning: {
@@ -90,7 +90,7 @@ PT.core.getConfigs = function() {
 			},
             organisationUnit: {
                 value: 'organisationUnits',
-                rawValue: 'Organisation units', //i18n PT.i18n.organisation_unit,
+                name: 'Organisation units', //i18n PT.i18n.organisation_unit,
                 dimensionName: 'ou',
                 objectName: 'ou',
                 warning: {
