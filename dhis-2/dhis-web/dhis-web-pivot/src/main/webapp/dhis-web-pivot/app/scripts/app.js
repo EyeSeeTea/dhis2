@@ -175,6 +175,9 @@ Ext.onReady( function() {
 
 			config.options = pt.viewport.optionsWindow.getOptions();
 
+			config.options.userOrganisationUnit = pt.viewport.userOrganisationUnit.getValue();
+			config.options.userOrganisationUnitChildren = pt.viewport.userOrganisationUnitChildren.getValue();
+
 			return config;
 		};
 
@@ -2567,23 +2570,10 @@ Ext.onReady( function() {
 							dimensionName: pt.conf.finals.dimension.organisationUnit.dimensionName,
 							objectName: pt.conf.finals.dimension.organisationUnit.objectName,
 							items: []
-						},
-						uo = userOrganisationUnit.getValue(),
-						uoc = userOrganisationUnitChildren.getValue();
+						};
 
-					if (uo || uoc) {
-						if (uo) {
-							data.items.push(pt.conf.finals.dimension.organisationUnit.userOrganisationUnit);
-						}
-
-						if (uoc) {
-							data.items.push(pt.conf.finals.dimension.organisationUnit.userOrganisationUnitChildren);
-						}
-					}
-					else {
-						for (var i = 0; i < records.length; i++) {
-							data.items.push(records[i].data.id);
-						}
+					for (var i = 0; i < records.length; i++) {
+						data.items.push(records[i].data.id);
 					}
 
 					return data.items.length ? data : null;
@@ -3131,7 +3121,6 @@ Ext.onReady( function() {
 					}
 				}
 				else {
-					treePanel.collapseAll();
 					treePanel.reset();
 				}
 
