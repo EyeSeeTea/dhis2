@@ -877,6 +877,9 @@ Ext.onReady( function() {
 			if (pt.xSettings) {
 				favorite = Ext.clone(pt.xSettings.options);
 
+				// server
+				favorite.subtotals = favorite.showSubTotals;
+
 				favorite.name = name;
 				favorite.user = system ? null : {id: 'currentUser'};
 
@@ -1166,7 +1169,10 @@ Ext.onReady( function() {
 								el.addClsOnOver('link');
 								el.pt = pt;
 								el.favoriteId = record.data.id;
-								el.dom.setAttribute('onclick', 'Ext.get(this).pt.util.pivot.loadTable(Ext.get(this).favoriteId);');
+								el.hideWindow = function() {
+									favoriteWindow.hide();
+								};
+								el.dom.setAttribute('onclick', 'Ext.get(this).hideWindow(); Ext.get(this).pt.util.pivot.loadTable(Ext.get(this).favoriteId);');
 							}
 						};
 
