@@ -123,6 +123,7 @@ PT.core.getConfigs = function() {
 	dim.objectNameMap[dim.indicator.objectName] = dim.indicator;
 	dim.objectNameMap[dim.dataElement.objectName] = dim.dataElement;
 	dim.objectNameMap[dim.dataSet.objectName] = dim.dataSet;
+	dim.objectNameMap[dim.category.objectName] = dim.category;
 	dim.objectNameMap[dim.period.objectName] = dim.period;
 	dim.objectNameMap[dim.organisationUnit.objectName] = dim.organisationUnit;
 	dim.objectNameMap[dim.organisationUnitGroupSet.objectName] = dim.organisationUnitGroupSet;
@@ -492,6 +493,10 @@ PT.core.getUtils = function(pt) {
 		},
 
 		roundIf: function(x, fix) {
+			if (Ext.isString(x)) {
+				x = parseFloat(x);
+			}
+
 			if (Ext.isNumber(x) && Ext.isNumber(fix)) {
 				var dec = pt.util.number.getNumberOfDecimals(x);
 				return parseFloat(dec > fix ? x.toFixed(fix) : x);
@@ -747,14 +752,6 @@ PT.core.getUtils = function(pt) {
 						header = headers[i];
 
 						response.nameHeaderMap[header.name] = header;
-					}
-
-					// values
-					for (var i = 0, valueIndex = response.nameHeaderMap[pt.conf.finals.dimension.value.value].index; i < response.rows.length; i++) {
-						value = response.rows[i][valueIndex];
-						if (Ext.isString(value) && value.substring(value.length-2, value.length) === '.0') {
-							response.rows[i][valueIndex] = value.substring(0, value.length-2);
-						}
 					}
 				}();
 
