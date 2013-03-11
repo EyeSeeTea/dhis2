@@ -2169,24 +2169,24 @@ Ext.onReady( function() {
 										boxLabel: 'Last 5 years', //i18n pt.i18n.last_5_years
 									}
 								]
-							},
-							{
-								xtype: 'panel',
-								layout: 'anchor',
-								bodyStyle: 'border-style:none; padding:5px 0 0 46px',
-								defaults: {
-									labelSeparator: '',
-									style: 'margin-bottom:2px',
-								},
-								items: [
-									{
-										xtype: 'label',
-										text: 'Options',
-										cls: 'pt-label-period-heading-options'
-									},
-									rewind
-								]
 							}
+							//{
+								//xtype: 'panel',
+								//layout: 'anchor',
+								//bodyStyle: 'border-style:none; padding:5px 0 0 46px',
+								//defaults: {
+									//labelSeparator: '',
+									//style: 'margin-bottom:2px',
+								//},
+								//items: [
+									//{
+										//xtype: 'label',
+										//text: 'Options',
+										//cls: 'pt-label-period-heading-options'
+									//},
+									//rewind
+								//]
+							//}
 						]
 					}
 				]
