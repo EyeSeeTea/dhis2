@@ -1095,7 +1095,7 @@ Ext.onReady( function() {
 		});
 
 		searchTextfield = Ext.create('Ext.form.field.Text', {
-			width: 340,
+			width: 350,
 			height: 26,
 			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
 			emptyText: 'Search for favorites', //i18n
@@ -1392,7 +1392,7 @@ Ext.onReady( function() {
 		favoriteWindow = Ext.create('Ext.window.Window', {
 			title: 'Manage favorites',
 			//iconCls: 'pt-window-title-icon-favorite',
-			bodyStyle: 'padding: 8px; background-color:#fff',
+			bodyStyle: 'padding: 5px; background-color:#fff',
 			resizable: false,
 			modal: true,
 			width: 450,
@@ -1400,14 +1400,13 @@ Ext.onReady( function() {
 				{
 					xtype: 'panel',
 					layout: 'hbox',
-					width: 422,
 					bodyStyle: 'border:0 none',
 					items: [
 						addButton,
 						{
 							height: 24,
 							width: 1,
-							style: 'width: 1px; margin-left: 7px; margin-right: 7px; margin-top: 1px',
+							style: 'width: 1px; margin-left: 5px; margin-right: 5px; margin-top: 1px',
 							bodyStyle: 'border-left: 1px solid #aaa'
 						},
 						searchTextfield
@@ -1418,6 +1417,16 @@ Ext.onReady( function() {
 			listeners: {
 				show: function(w) {
 					pt.util.window.setAnchorPosition(w, pt.viewport.favoriteButton);
+
+					if (!w.hasBlurHandler) {
+						var el = Ext.get(document.getElementsByClassName('x-mask')[0]);
+
+						el.on('click', function() {
+							w.hide();
+						});
+
+						w.hasBlurHandler = true;
+					}
 				}
 			}
 		});
