@@ -28,6 +28,16 @@ Ext.onReady( function() {
 			init.rootNodes[i].path = '/' + pt.conf.finals.root.id + '/' + init.rootNodes[i].id;
 		}
 
+		// Ougs
+		for (var i = 0, dim = pt.conf.finals.dimension; i < init.ougs.length; i++) {
+			dim.objectNameMap[init.ougs[i].id] = init.ougs[i];
+		}
+
+		// Degs
+		for (var i = 0, dim = pt.conf.finals.dimension; i < init.degs.length; i++) {
+			dim.objectNameMap[init.degs[i].id] = init.degs[i];
+		}
+
 		init.afterRender = function() {
 			pt.cmp.dimension.panels[0].expand();
 
@@ -3217,6 +3227,7 @@ Ext.onReady( function() {
 				if (Ext.isArray(r.columnDimensions)) {
 					for (var i = 0, dim; i < r.columnDimensions.length; i++) {
 						dim = pt.conf.finals.dimension.objectNameMap[r.columnDimensions[i]];
+console.log(pt.conf.finals.dimension.objectNameMap, r.columnDimensions[i], dim);
 						pt.viewport.colStore.add({
 							id: dim.dimensionName,
 							name: dim.rawValue

@@ -746,6 +746,14 @@ PT.core.getUtils = function(pt) {
 
 						response.nameHeaderMap[header.name] = header;
 					}
+
+					// values
+					for (var i = 0, valueIndex = response.nameHeaderMap[pt.conf.finals.dimension.value.value].index; i < response.rows.length; i++) {
+						value = response.rows[i][valueIndex];
+						if (Ext.isString(value) && value.substring(value.length-2, value.length) === '.0') {
+							response.rows[i][valueIndex] = value.substring(0, value.length-2);
+						}
+					}
 				}();
 
 				var createValueIds = function() {
