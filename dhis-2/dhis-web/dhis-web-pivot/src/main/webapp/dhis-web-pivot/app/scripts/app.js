@@ -97,6 +97,15 @@ Ext.onReady( function() {
 				else {
 					w.setPosition(targetx, y);
 				}
+			},
+			addBlurHandler: function(w) {
+				var el = Ext.get(document.getElementsByClassName('x-mask')[0]);
+
+				el.on('click', function() {
+					w.hide();
+				});
+
+				w.hasBlurHandler = true;
 			}
 		};
 
@@ -672,13 +681,7 @@ Ext.onReady( function() {
 					pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
 
 					if (!w.hasBlurHandler) {
-						var el = Ext.get(document.getElementsByClassName('x-mask')[0]);
-
-						el.on('click', function() {
-							w.hide();
-						});
-
-						w.hasBlurHandler = true;
+						pt.util.window.addBlurHandler(w);
 					}
 				}
 			}
@@ -821,13 +824,7 @@ Ext.onReady( function() {
 					pt.util.window.setAnchorPosition(w, pt.viewport.optionsButton);
 
 					if (!w.hasBlurHandler) {
-						var el = Ext.get(document.getElementsByClassName('x-mask')[0]);
-
-						el.on('click', function() {
-							w.hide();
-						});
-
-						w.hasBlurHandler = true;
+						pt.util.window.addBlurHandler(w);
 					}
 				}
 			}
@@ -1419,13 +1416,7 @@ Ext.onReady( function() {
 					pt.util.window.setAnchorPosition(w, pt.viewport.favoriteButton);
 
 					if (!w.hasBlurHandler) {
-						var el = Ext.get(document.getElementsByClassName('x-mask')[0]);
-
-						el.on('click', function() {
-							w.hide();
-						});
-
-						w.hasBlurHandler = true;
+						pt.util.window.addBlurHandler(w);
 					}
 				}
 			}
@@ -2402,9 +2393,15 @@ Ext.onReady( function() {
 				autoScroll: true,
 				multiSelect: true,
 				rendered: false,
+				reset: function() {
+					var rootNode = this.getRootNode().findChild('id', pt.init.rootNodes[0].id);
+					this.collapseAll();
+					this.expandPath(rootNode.getPath());
+					this.getSelectionModel().select(rootNode);
+				},
 				selectRootIf: function() {
 					if (this.getSelectionModel().getSelection().length < 1) {
-						var node = this.getRootNode().findChild('id', pt.init.rootnodes[0].id, true);
+						var node = this.getRootNode().findChild('id', pt.init.rootNodes[0].id);
 						if (this.rendered) {
 							this.getSelectionModel().select(node);
 						}
@@ -2500,7 +2497,6 @@ Ext.onReady( function() {
 				listeners: {
 					added: function() {
 						pt.cmp.dimension.organisationUnit.treepanel = this;
-						organisationUnit.treePanel = this;
 					},
 					render: function() {
 						this.rendered = true;
@@ -2566,7 +2562,7 @@ Ext.onReady( function() {
 				hideCollapseTool: true,
 				collapsed: false,
 				getData: function() {
-					var records = pt.cmp.dimension.organisationUnit.treepanel.getSelectionModel().getSelection(),
+					var records = treePanel.getSelectionModel().getSelection(),
 						data = {
 							dimensionName: pt.conf.finals.dimension.organisationUnit.dimensionName,
 							objectName: pt.conf.finals.dimension.organisationUnit.objectName,
@@ -2594,7 +2590,7 @@ Ext.onReady( function() {
 				},
 				onExpand: function() {
 					pt.util.dimension.panel.setHeight(pt.conf.layout.west_maxheight_accordion_organisationunit);
-					pt.cmp.dimension.organisationUnit.treepanel.setHeight(this.getHeight() - pt.conf.layout.west_fill_accordion_organisationunit);
+					treePanel.setHeight(this.getHeight() - pt.conf.layout.west_fill_accordion_organisationunit);
 				},
 				items: [
 					{
@@ -3086,26 +3082,26 @@ Ext.onReady( function() {
 			setFavorite = function(r) {
 
 				// Indicators
+				pt.store.indicatorSelected.removeAll();
 				if (Ext.isArray(r.indicators)) {
-					pt.store.indicatorSelected.removeAll();
 					pt.store.indicatorSelected.add(r.indicators);
 				}
 
 				// Data elements
+				pt.store.dataElementSelected.removeAll();
 				if (Ext.isArray(r.dataElements)) {
-					pt.store.dataElementSelected.removeAll();
 					pt.store.dataElementSelected.add(r.dataElements);
 				}
 
 				// Data sets
+				pt.store.dataSetSelected.removeAll();
 				if (Ext.isArray(r.dataSets)) {
-					pt.store.dataSetsSelected.removeAll();
-					pt.store.dataSetsSelected.add(r.dataSets);
+					pt.store.dataSetSelected.add(r.dataSets);
 				}
 
 				// Fixed periods
+				pt.store.fixedPeriodSelected.removeAll();
 				if (Ext.isArray(r.periods)) {
-					pt.store.fixedPeriodSelected.removeAll();
 					pt.store.fixedPeriodSelected.add(r.periods);
 				}
 
@@ -3126,15 +3122,21 @@ Ext.onReady( function() {
 
 				// Organisation units
 				if (Ext.isArray(r.organisationUnits) && Ext.isObject(r.parentGraphMap)) {
+					treePanel.numberOfRecords = pt.util.object.getLength(r.parentGraphMap);
+
 					for (var key in r.parentGraphMap) {
 						if (r.parentGraphMap.hasOwnProperty(key)) {
-							organisationUnit.treePanel.selectPath('/root' + r.parentGraphMap[key] + '/' + key);
+							treePanel.multipleExpand(key, r.parentGraphMap[key]);
 						}
 					}
 				}
+				else {
+					treePanel.collapseAll();
+					treePanel.reset();
+				}
 
-				pt.viewport.userOrganisationUnit.setValue(r.userOrganisationUnit);
-				pt.viewport.userOrganisationUnitChildren.setValue(r.userOrganisationUnitChildren);
+				userOrganisationUnit.setValue(r.userOrganisationUnit);
+				userOrganisationUnitChildren.setValue(r.userOrganisationUnitChildren);
 
 				// Organisation unit group sets
 				if (Ext.isObject(r.organisationUnitGroupSets)) {
