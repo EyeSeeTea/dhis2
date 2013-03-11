@@ -1443,6 +1443,9 @@ Ext.onReady( function() {
 				fixedPeriodAvailable,
 				fixedPeriodSelected,
 				period,
+				userOrganisationUnit,
+				userOrganisationUnitChildren,
+				treePanel,
 				organisationUnit,
 				groupSetIdStoreMap,
 				getGroupSetPanels,
@@ -2382,6 +2385,171 @@ Ext.onReady( function() {
 				}
 			};
 
+			treePanel = Ext.create('Ext.tree.Panel', {
+				cls: 'pt-tree',
+				style: 'border-top: 1px solid #ddd; padding-top: 1px',
+				width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
+				rootVisible: false,
+				autoScroll: true,
+				multiSelect: true,
+				rendered: false,
+				selectRootIf: function() {
+					if (this.getSelectionModel().getSelection().length < 1) {
+						var node = this.getRootNode().findChild('id', pt.init.rootnodes[0].id, true);
+						if (this.rendered) {
+							this.getSelectionModel().select(node);
+						}
+						return node;
+					}
+				},
+				numberOfRecords: 0,
+				recordsToSelect: [],
+				multipleSelectIf: function() {
+					if (this.recordsToSelect.length === this.numberOfRecords) {
+						this.getSelectionModel().select(this.recordsToSelect);
+						this.recordsToSelect = [];
+						this.numberOfRecords = 0;
+					}
+				},
+				multipleExpand: function(id, path) {
+					this.expandPath('/' + pt.conf.finals.root.id + path, 'id', '/', function() {
+						var record = this.getRootNode().findChild('id', id, true);
+						this.recordsToSelect.push(record);
+						this.multipleSelectIf();
+					}, this);
+				},
+				select: function(url, params) {
+					if (!params) {
+						params = {};
+					}
+					Ext.Ajax.request({
+						url: url,
+						method: 'GET',
+						params: params,
+						scope: this,
+						success: function(r) {
+							var a = Ext.decode(r.responseText).organisationUnits;
+							this.numberOfRecords = a.length;
+							for (var i = 0; i < a.length; i++) {
+								this.multipleExpand(a[i].id, a[i].path);
+							}
+						}
+					});
+				},
+				selectByGroup: function(id) {
+					if (id) {
+						var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbygroup,
+							params = {id: id};
+						this.select(url, params);
+					}
+				},
+				selectByLevel: function(level) {
+					if (level) {
+						var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbylevel,
+							params = {level: level};
+						this.select(url, params);
+					}
+				},
+				selectByIds: function(ids) {
+					if (ids) {
+						var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbyids;
+						Ext.Array.each(ids, function(item) {
+							url = Ext.String.urlAppend(url, 'ids=' + item);
+						});
+						if (!this.rendered) {
+							pt.cmp.dimension.organisationUnit.panel.expand();
+						}
+						this.select(url);
+					}
+				},
+				store: Ext.create('Ext.data.TreeStore', {
+					proxy: {
+						type: 'ajax',
+						url: pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunitchildren_get
+					},
+					root: {
+						id: pt.conf.finals.root.id,
+						expanded: true,
+						children: pt.init.rootNodes
+					},
+					listeners: {
+						load: function(s, node, r) {
+							for (var i = 0; i < r.length; i++) {
+								r[i].data.text = pt.conf.util.jsonEncodeString(r[i].data.text);
+							}
+						}
+					}
+				}),
+				xable: function(checked, value) {
+					if (checked || value) {
+						this.disable();
+					}
+					else {
+						this.enable();
+					}
+				},
+				listeners: {
+					added: function() {
+						pt.cmp.dimension.organisationUnit.treepanel = this;
+						organisationUnit.treePanel = this;
+					},
+					render: function() {
+						this.rendered = true;
+					},
+					afterrender: function() {
+						this.getSelectionModel().select(0);
+					},
+					itemcontextmenu: function(v, r, h, i, e) {
+						v.getSelectionModel().select(r, false);
+
+						if (v.menu) {
+							v.menu.destroy();
+						}
+						v.menu = Ext.create('Ext.menu.Menu', {
+							id: 'treepanel-contextmenu',
+							showSeparator: false,
+							shadow: false
+						});
+						if (!r.data.leaf) {
+							v.menu.add({
+								id: 'treepanel-contextmenu-item',
+								text: 'Select all children', //i18n pt.i18n.select_all_children,
+								icon: 'images/node-select-child.png',
+								handler: function() {
+									r.expand(false, function() {
+										v.getSelectionModel().select(r.childNodes, true);
+										v.getSelectionModel().deselect(r);
+									});
+								}
+							});
+						}
+						else {
+							return;
+						}
+
+						v.menu.showAt(e.xy);
+					}
+				}
+			});
+
+			userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
+				columnWidth: 0.5,
+				boxLabel: 'User organisation unit', //i18n pt.i18n.user_orgunit,
+				labelWidth: pt.conf.layout.form_label_width,
+				handler: function(chb, checked) {
+					treePanel.xable(checked, userOrganisationUnitChildren.getValue());
+				}
+			});
+
+			userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
+				columnWidth: 0.5,
+				boxLabel: 'User organisation unit children', //i18n pt.i18n.user_orgunit_children,
+				labelWidth: pt.conf.layout.form_label_width,
+				handler: function(chb, checked) {
+					treePanel.xable(checked, userOrganisationUnit.getValue());
+				}
+			});
+
 			organisationUnit = {
 				xtype: 'panel',
 				title: '<div class="pt-panel-title-organisationunit">Organisation units</div>', //i18n pt.i18n.organisation_units
@@ -2394,10 +2562,23 @@ Ext.onReady( function() {
 							dimensionName: pt.conf.finals.dimension.organisationUnit.dimensionName,
 							objectName: pt.conf.finals.dimension.organisationUnit.objectName,
 							items: []
-						};
+						},
+						uo = userOrganisationUnit.getValue(),
+						uoc = userOrganisationUnitChildren.getValue();
 
-					for (var i = 0; i < records.length; i++) {
-						data.items.push(records[i].data.id);
+					if (uo || uoc) {
+						if (uo) {
+							data.items.push(pt.conf.finals.dimension.organisationUnit.userOrganisationUnit);
+						}
+
+						if (uoc) {
+							data.items.push(pt.conf.finals.dimension.organisationUnit.userOrganisationUnitChildren);
+						}
+					}
+					else {
+						for (var i = 0; i < records.length; i++) {
+							data.items.push(records[i].data.id);
+						}
 					}
 
 					return data.items.length ? data : null;
@@ -2411,272 +2592,11 @@ Ext.onReady( function() {
 						layout: 'column',
 						bodyStyle: 'border:0 none; padding-bottom:3px; padding-left:7px',
 						items: [
-							{
-								xtype: 'checkbox',
-								columnWidth: 0.5,
-								boxLabel: 'User organisation unit', //i18n pt.i18n.user_orgunit,
-								labelWidth: pt.conf.layout.form_label_width,
-								handler: function(chb, checked) {
-									//pt.cmp.dimension.organisationUnit.toolbar.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
-									pt.cmp.dimension.organisationUnit.treepanel.xable(checked, pt.cmp.favorite.userOrganisationUnitChildren.getValue());
-								},
-								listeners: {
-									added: function() {
-										pt.cmp.favorite.userOrganisationUnit = this;
-									}
-								}
-							},
-							{
-								xtype: 'checkbox',
-								columnWidth: 0.5,
-								boxLabel: 'User organisation unit children', //i18n pt.i18n.user_orgunit_children,
-								labelWidth: pt.conf.layout.form_label_width,
-								handler: function(chb, checked) {
-									//pt.cmp.dimension.organisationUnit.toolbar.xable(checked, pt.cmp.favorite.userOrganisationUnit.getValue());
-									pt.cmp.dimension.organisationUnit.treepanel.xable(checked, pt.cmp.favorite.userOrganisationUnit.getValue());
-								},
-								listeners: {
-									added: function() {
-										pt.cmp.favorite.userOrganisationUnitChildren = this;
-									}
-								}
-							}
+							userOrganisationUnit,
+							userOrganisationUnitChildren
 						]
 					},
-					//{
-						//id: 'organisationunit_t',
-						//xtype: 'toolbar',
-						//style: 'margin-bottom: 4px',
-						//width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
-						//xable: function(checked, value) {
-							//if (checked || value) {
-								//this.disable();
-							//}
-							//else {
-								//this.enable();
-							//}
-						//},
-						//defaults: {
-							//height: 22
-						//},
-						//items: [
-							//{
-								//xtype: 'label',
-								//text: 'Auto-select organisation units by', //i18n
-								//style: 'padding-left:8px; color:#666; line-height:23px'
-							//},
-							//'->',
-							//{
-								//text: 'Group..',
-								//handler: function() {},
-								//listeners: {
-									//added: function() {
-										//this.menu = Ext.create('Ext.menu.Menu', {
-											//shadow: false,
-											//showSeparator: false,
-											//width: pt.conf.layout.treepanel_toolbar_menu_width_group,
-											//items: [
-												//{
-													//xtype: 'grid',
-													//cls: 'pt-menugrid',
-													//width: pt.conf.layout.treepanel_toolbar_menu_width_group,
-													//scroll: 'vertical',
-													//columns: [
-														//{
-															//dataIndex: 'name',
-															//width: pt.conf.layout.treepanel_toolbar_menu_width_group,
-															//style: 'display:none'
-														//}
-													//],
-													//setHeightInMenu: function(store) {
-														//var h = store.getCount() * 24,
-															//sh = pt.util.viewport.getSize().y * 0.6;
-														//this.setHeight(h > sh ? sh : h);
-														//this.doLayout();
-														//this.up('menu').doLayout();
-													//},
-													//store: pt.store.group,
-													//listeners: {
-														//itemclick: function(g, r) {
-															//g.getSelectionModel().select([], false);
-															//this.up('menu').hide();
-															//pt.cmp.dimension.organisationUnit.treepanel.selectByGroup(r.data.id);
-														//}
-													//}
-												//}
-											//],
-											//listeners: {
-												//show: function() {
-													//var store = pt.store.group;
-
-													//if (!store.isLoaded) {
-														//store.load({scope: this, callback: function() {
-															//this.down('grid').setHeightInMenu(store);
-														//}});
-													//}
-													//else {
-														//this.down('grid').setHeightInMenu(store);
-													//}
-												//}
-											//}
-										//});
-									//}
-								//}
-							//}
-						//],
-						//listeners: {
-							//added: function() {
-								//pt.cmp.dimension.organisationUnit.toolbar = this;
-							//}
-						//}
-					//},
-					{
-						xtype: 'treepanel',
-						cls: 'pt-tree',
-						style: 'border-top: 1px solid #ddd; padding-top: 1px',
-						width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
-						rootVisible: false,
-						autoScroll: true,
-						multiSelect: true,
-						rendered: false,
-						selectRootIf: function() {
-							if (this.getSelectionModel().getSelection().length < 1) {
-								var node = this.getRootNode().findChild('id', pt.init.rootnodes[0].id, true);
-								if (this.rendered) {
-									this.getSelectionModel().select(node);
-								}
-								return node;
-							}
-						},
-						numberOfRecords: 0,
-						recordsToSelect: [],
-						multipleSelectIf: function() {
-							if (this.recordsToSelect.length === this.numberOfRecords) {
-								this.getSelectionModel().select(this.recordsToSelect);
-								this.recordsToSelect = [];
-								this.numberOfRecords = 0;
-							}
-						},
-						multipleExpand: function(id, path) {
-							this.expandPath('/' + pt.conf.finals.root.id + path, 'id', '/', function() {
-								var record = this.getRootNode().findChild('id', id, true);
-								this.recordsToSelect.push(record);
-								this.multipleSelectIf();
-							}, this);
-						},
-						select: function(url, params) {
-							if (!params) {
-								params = {};
-							}
-							Ext.Ajax.request({
-								url: url,
-								method: 'GET',
-								params: params,
-								scope: this,
-								success: function(r) {
-									var a = Ext.decode(r.responseText).organisationUnits;
-									this.numberOfRecords = a.length;
-									for (var i = 0; i < a.length; i++) {
-										this.multipleExpand(a[i].id, a[i].path);
-									}
-								}
-							});
-						},
-						selectByGroup: function(id) {
-							if (id) {
-								var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbygroup,
-									params = {id: id};
-								this.select(url, params);
-							}
-						},
-						selectByLevel: function(level) {
-							if (level) {
-								var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbylevel,
-									params = {level: level};
-								this.select(url, params);
-							}
-						},
-						selectByIds: function(ids) {
-							if (ids) {
-								var url = pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunit_getbyids;
-								Ext.Array.each(ids, function(item) {
-									url = Ext.String.urlAppend(url, 'ids=' + item);
-								});
-								if (!this.rendered) {
-									pt.cmp.dimension.organisationUnit.panel.expand();
-								}
-								this.select(url);
-							}
-						},
-						store: Ext.create('Ext.data.TreeStore', {
-							proxy: {
-								type: 'ajax',
-								url: pt.conf.finals.ajax.path_pivot + pt.conf.finals.ajax.organisationunitchildren_get
-							},
-							root: {
-								id: pt.conf.finals.root.id,
-								expanded: true,
-								children: pt.init.rootNodes
-							},
-							listeners: {
-								load: function(s, node, r) {
-									for (var i = 0; i < r.length; i++) {
-										r[i].data.text = pt.conf.util.jsonEncodeString(r[i].data.text);
-									}
-								}
-							}
-						}),
-						xable: function(checked, value) {
-							if (checked || value) {
-								this.disable();
-							}
-							else {
-								this.enable();
-							}
-						},
-						listeners: {
-							added: function() {
-								pt.cmp.dimension.organisationUnit.treepanel = this;
-								organisationUnit.treePanel = this;
-							},
-							render: function() {
-								this.rendered = true;
-							},
-							afterrender: function() {
-								this.getSelectionModel().select(0);
-							},
-							itemcontextmenu: function(v, r, h, i, e) {
-								v.getSelectionModel().select(r, false);
-
-								if (v.menu) {
-									v.menu.destroy();
-								}
-								v.menu = Ext.create('Ext.menu.Menu', {
-									id: 'treepanel-contextmenu',
-									showSeparator: false,
-									shadow: false
-								});
-								if (!r.data.leaf) {
-									v.menu.add({
-										id: 'treepanel-contextmenu-item',
-										text: 'Select all children', //i18n pt.i18n.select_all_children,
-										icon: 'images/node-select-child.png',
-										handler: function() {
-											r.expand(false, function() {
-												v.getSelectionModel().select(r.childNodes, true);
-												v.getSelectionModel().deselect(r);
-											});
-										}
-									});
-								}
-								else {
-									return;
-								}
-
-								v.menu.showAt(e.xy);
-							}
-						}
-					}
+					treePanel
 				],
 				listeners: {
 					added: function() {
@@ -3204,6 +3124,9 @@ Ext.onReady( function() {
 					}
 				}
 
+				pt.viewport.userOrganisationUnit.setValue(r.userOrganisationUnit);
+				pt.viewport.userOrganisationUnitChildren.setValue(r.userOrganisationUnitChildren);
+
 				// Organisation unit group sets
 				if (Ext.isObject(r.organisationUnitGroupSets)) {
 					for (var key in r.organisationUnitGroupSets) {
@@ -3230,13 +3153,9 @@ Ext.onReady( function() {
 				pt.viewport.rowStore.removeAll();
 				pt.viewport.filterStore.removeAll();
 
-console.log(pt.conf.finals.dimension.objectNameMap);
-
 				if (Ext.isArray(r.columnDimensions)) {
 					for (var i = 0, dim; i < r.columnDimensions.length; i++) {
 						dim = pt.conf.finals.dimension.objectNameMap[r.columnDimensions[i]];
-console.log("r.columnDimensions[i]", r.columnDimensions[i]);
-console.log("dim", dim);
 						pt.viewport.colStore.add({
 							id: dim.dimensionName,
 							name: dim.name
@@ -3265,10 +3184,10 @@ console.log("dim", dim);
 				}
 
 				// Options
-				pt.viewport.showSubTotals.setValue(!!r.subtotals);
-				pt.viewport.hideEmptyRows.setValue(!!r.hideEmptyRows);
-				pt.viewport.displayDensity.setValue(!!r.displayDensity);
-				pt.viewport.fontSize.setValue(!!r.fontSize);
+				pt.viewport.showSubTotals.setValue(r.subtotals);
+				pt.viewport.hideEmptyRows.setValue(r.hideEmptyRows);
+				pt.viewport.displayDensity.setValue(r.displayDensity);
+				pt.viewport.fontSize.setValue(r.fontSize);
 
 				update();
 			};
@@ -3282,6 +3201,8 @@ console.log("dim", dim);
 				optionsButton: optionsButton,
 				favoriteButton: favoriteButton,
 				downloadButton: downloadButton,
+				userOrganisationUnit: userOrganisationUnit,
+				userOrganisationUnitChildren: userOrganisationUnitChildren,
 				setFavorite: setFavorite,
 				groupSetIdStoreMap: groupSetIdStoreMap,
 				items: [

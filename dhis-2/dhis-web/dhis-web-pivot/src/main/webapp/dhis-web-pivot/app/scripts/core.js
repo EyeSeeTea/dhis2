@@ -93,6 +93,8 @@ PT.core.getConfigs = function() {
                 name: 'Organisation units', //i18n PT.i18n.organisation_unit,
                 dimensionName: 'ou',
                 objectName: 'ou',
+                userOrganisationUnit: 'USER_ORGUNIT',
+                userOrganisationUnitChildren: 'USER_ORGUNIT_CHILDREN',
                 warning: {
 					filter: '...'//PT.i18n.wm_multiple_filter_orgunit
 				}
