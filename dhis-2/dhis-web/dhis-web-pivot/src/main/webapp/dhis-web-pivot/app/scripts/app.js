@@ -1517,26 +1517,87 @@ Ext.onReady( function() {
 		return favoriteWindow;
 	};
 
-	//PT.app.SharingWindow = function(id) {
-		//var sharing,
+	PT.app.SharingWindow = function(id) {
+		var sharing,
+			groups = {},
 
-			//UserGroup,
-			//userGroup;
+			UserGroup,
+			userGroup,
 
-		//UserGroup = function(obj) {
-			//var userGroup,
-				//store,
-				//del,
-				//panel;
+			window;
 
-			//store = Ext.create('Ext.data.Store', {
-				//fields: ['id', 'name'],
-				//data: [
-					//{id:
+		UserGroup = function(obj) {
+			var group,
+				store,
+				del,
+				panel,
+				data = [
+					{id: 'r-------', name: 'Read only'}, //i18n
+					{id: 'rw------', name: 'Read and write'}
+				],
+				items = [];
 
-			//userGroup = Ext.create('Ext.form.field.ComboBox', {
+			if (!obj) {
+				data.unshift({id: '-------', name: 'None'});
+			}
 
+			store = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: data
+			});
 
+			group = Ext.create('Ext.form.field.ComboBox', {
+				fieldLabel: !obj ? 'Public access' : obj.name, //i18n
+				labelStyle: 'color:#333',
+				cls: 'pt-combo',
+				width: 230,
+				queryMode: 'local',
+				valueField: 'id',
+				displayField: 'name',
+				editable: false,
+				value: !obj ? 'r------' : obj.access,
+				store: store
+			});
+
+			items.push(group);
+
+			if (!obj) {
+				del = Ext.create('Ext.Img', {
+					src: 'images/grid-delete_16.png',
+					style: 'margin-top:2px; margin-left:10px',
+					width: 16,
+					height: 16,
+					listeners: {
+						render: function(i) {
+							i.getEl().on('click', function(e) {
+								alert('User clicked image');
+							});
+						}
+					}
+				});
+
+				items.push(del);
+			}
+
+			panel = Ext.create('Ext.panel.Panel', {
+				layout: 'column',
+				bodyStyle: 'border:0 none',
+				items: items
+			});
+
+			return panel;
+		};
+
+		window = Ext.create('Ext.window.Window', {
+			title: 'Sharing settings',
+			bodyStyle: 'padding:5px; background-color:#fff',
+			width: 300,
+			resizable: false,
+			modal: true,
+			items: UserGroup()
+		});
+
+		return window;
 
 
 		//Ext.Ajax.request({
@@ -1549,9 +1610,7 @@ Ext.onReady( function() {
 			//success: function(r) {
 				//sharing = Ext.decode(r.responseText);
 
-
-
-
+	};
 
 	PT.app.init.onInitialize = function(r) {
 		var createViewport;
