@@ -1,7 +1,5 @@
-package org.hisp.dhis.user.action;
-
 /*
- * Copyright (c) 2004-2012, University of Oslo
+ * Copyright (c) 2004-2009, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,69 +25,98 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+package org.hisp.dhis.sms.outcoming;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 
-import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.user.UserGroup;
-import org.hisp.dhis.user.UserGroupService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.patient.PatientAttribute;
+import org.hisp.dhis.patient.PatientAttributeService;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class GetUserGroupListAction
-    extends ActionPagingSupport<UserGroup>
+import com.opensymphony.xwork2.Action;
+
+/**
+ * @author Abyot Asalefew Gizaw
+ * @version $Id$
+ */
+public class ShowSendSMSBeneficiaryFormAction
+    implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private UserGroupService userGroupService;
+    @Autowired
+    private OutboundSmsTransportService transportService;
 
-    public void setUserGroupService( UserGroupService userGroupService )
+    @Autowired
+    private OrganisationUnitSelectionManager selectionManager;
+
+    @Autowired
+    private PatientAttributeService patientAttributeService;
+
+    @Autowired
+    private ProgramService programService;
+
+    // -------------------------------------------------------------------------
+    // Input/output
+    // -------------------------------------------------------------------------
+
+    private Collection<PatientAttribute> patientAttributes;
+
+    public Collection<PatientAttribute> getPatientAttributes()
     {
-        this.userGroupService = userGroupService;
+        return patientAttributes;
+    }
+
+    private Collection<Program> programs;
+
+    public Collection<Program> getPrograms()
+    {
+        return programs;
+    }
+
+    private OrganisationUnit organisationUnit;
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
+
+    private int status;
+
+    public int getStatus()
+    {
+        return status;
+    }
+
+    public Map<String, String> getGatewayMap()
+    {
+        return transportService.getGatewayMap();
     }
 
     // -------------------------------------------------------------------------
-    // Parameters
-    // -------------------------------------------------------------------------
-
-    private List<UserGroup> userGroupList;
-
-    public List<UserGroup> getUserGroupList()
-    {
-        return userGroupList;
-    }
-
-    private String key;
-    
-    public String getKey()
-    {
-        return key;
-    }
-
-    public void setKey( String key )
-    {
-        this.key = key;
-    }
-    // -------------------------------------------------------------------------
-    // Action Implementation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
-        if ( isNotBlank( key ) ) // Filter on key only if set
+        patientAttributes = patientAttributeService.getAllPatientAttributes();
+
+        programs = programService.getAllPrograms();
+
+        organisationUnit = selectionManager.getSelectedOrganisationUnit();
+
+        if ( organisationUnit == null )
         {
-            this.paging = createPaging( userGroupService.getUserGroupCountByName( key ) );
-            
-            userGroupList = new ArrayList<UserGroup>( userGroupService.getUserGroupsBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
-        }
-        else
-        {
-            this.paging = createPaging( userGroupService.getUserGroupCount() );
-            
-            userGroupList = new ArrayList<UserGroup>( userGroupService.getUserGroupsBetween( paging.getStartPos(), paging.getPageSize() ) );
+            status = 1;
         }
         
         return SUCCESS;

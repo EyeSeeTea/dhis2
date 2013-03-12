@@ -901,18 +901,13 @@ Ext.onReady( function() {
 		});
 
 		getBody = function() {
-			var name = nameTextfield.getValue(),
-				system = systemCheckbox.getValue(),
-				favorite;
+			var favorite;
 
 			if (pt.xSettings) {
 				favorite = Ext.clone(pt.xSettings.options);
 
-				// server
+				// Server sync
 				favorite.subtotals = favorite.showSubTotals;
-
-				favorite.name = name;
-				favorite.user = system ? null : {id: 'currentUser'};
 
 				// Dimensions
 				for (var i = 0, obj, key, items; i < pt.xSettings.objects.length; i++) {
@@ -1029,18 +1024,12 @@ Ext.onReady( function() {
 				}
 			});
 
-			systemCheckbox = Ext.create('Ext.form.field.Checkbox', {
-				labelWidth: 70,
-				fieldLabel: 'System', //i18n
-				style: 'margin-bottom: 0',
-				disabled: !pt.init.user.isAdmin,
-				checked: !id ? false : (record.data.user ? false : true)
-			});
-
 			createButton = Ext.create('Ext.button.Button', {
 				text: 'Create', //i18n
 				handler: function() {
 					var favorite = getBody();
+
+					favorite.name = nameTextfield.getValue();
 
 					if (favorite) {
 						Ext.Ajax.request({
@@ -1048,6 +1037,10 @@ Ext.onReady( function() {
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
+							failure: function(r) {
+								pt.viewport.mask.show();
+								alert(r.responseText);
+							},
 							success: function(r) {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
 
@@ -1071,16 +1064,37 @@ Ext.onReady( function() {
 				text: 'Update', //i18n
 				handler: function() {
 					var name = nameTextfield.getValue(),
-						system = systemCheckbox.getValue();
+						reportTable;
 
-					Ext.Ajax.request({
-						url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + 'renameMap.action?id=' + id + '&name=' + name + '&user=' + !system,
-						success: function() {
-							pt.store.tables.loadStore();
+					if (id && name) {
+						Ext.Ajax.request({
+							url: pt.baseUrl + '/api/reportTables/' + id + '.json?links=false',
+							method: 'GET',
+							failure: function(r) {
+								pt.viewport.mask.show();
+								alert(r.responseText);
+							},
+							success: function(r) {
+								reportTable = Ext.decode(r.responseText);
+								reportTable.name = name;
 
-							window.destroy();
-						}
-					});
+								Ext.Ajax.request({
+									url: pt.baseUrl + '/api/reportTables/' + reportTable.id,
+									method: 'PUT',
+									headers: {'Content-Type': 'application/json'},
+									params: Ext.encode(reportTable),
+									failure: function(r) {
+										pt.viewport.mask.show();
+										alert(r.responseText);
+									},
+									success: function(r) {
+										pt.store.tables.loadStore();
+										window.destroy();
+									}
+								});
+							}
+						});
+					}
 				}
 			});
 
@@ -1098,8 +1112,7 @@ Ext.onReady( function() {
 				resizable: false,
 				modal: true,
 				items: [
-					nameTextfield,
-					systemCheckbox
+					nameTextfield
 				],
 				bbar: [
 					cancelButton,
@@ -1230,11 +1243,9 @@ Ext.onReady( function() {
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
-									system = !record.data.user,
 									isAdmin = pt.init.user.isAdmin;
 
-								if (isAdmin || (!isAdmin && !system)) {
-									var id = this.up('grid').store.getAt(rowIndex).data.id;
+								if (isAdmin) {
 									nameWindow = new NameWindow(id);
 									nameWindow.show();
 								}
@@ -1243,10 +1254,7 @@ Ext.onReady( function() {
 						{
 							iconCls: 'pt-grid-row-icon-overwrite',
 							getClass: function(value, metaData, record) {
-								var system = !record.data.user,
-									isAdmin = pt.init.user.isAdmin;
-
-								if (isAdmin || (!isAdmin && !system)) {
+								if (pt.init.user.isAdmin) {
 									return 'tooltip-favorite-overwrite';
 								}
 							},
@@ -1258,6 +1266,8 @@ Ext.onReady( function() {
 									favorite = getBody();
 
 								if (favorite) {
+									favorite.name = name;
+
 									if (confirm(message)) {
 										Ext.Ajax.request({
 											url: pt.baseUrl + '/api/reportTables/' + id,

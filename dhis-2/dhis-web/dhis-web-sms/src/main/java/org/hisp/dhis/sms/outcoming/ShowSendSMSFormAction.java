@@ -1,4 +1,4 @@
-package org.hisp.dhis.user.action;
+package org.hisp.dhis.sms.outcoming;
 
 /*
  * Copyright (c) 2004-2012, University of Oslo
@@ -27,78 +27,75 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.i18n.I18n;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
+import org.hisp.dhis.user.comparator.UserGroupComparator;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class ValidateUserGroupAction
+import com.opensymphony.xwork2.Action;
+
+/**
+ * @author Dang Duy Hieu
+ * @version $Id$
+ */
+
+public class ShowSendSMSFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
+    private OutboundSmsTransportService transportService;
+
+    @Autowired
     private UserGroupService userGroupService;
 
-    public void setUserGroupService( UserGroupService userGroupService )
+    // -------------------------------------------------------------------------
+    // Input && Output
+    // -------------------------------------------------------------------------
+
+    private String sendTo;
+
+    public void setSendTo( String sendTo )
     {
-        this.userGroupService = userGroupService;
+        this.sendTo = sendTo;
     }
 
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
+    public String getSendTo()
     {
-        this.i18n = i18n;
+        return sendTo == null || sendTo.trim().isEmpty() ? "phone" : sendTo;
+    }
+
+    public Map<String, String> getGatewayMap()
+    {
+        return transportService.getGatewayMap();
+    }
+
+    private List<UserGroup> userGroups;
+
+    public List<UserGroup> getUserGroups()
+    {
+        return userGroups;
     }
 
     // -------------------------------------------------------------------------
-    // Parameters
-    // -------------------------------------------------------------------------
-
-    private Integer id;
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action Implementation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
         throws Exception
     {
+        userGroups = new ArrayList<UserGroup>( userGroupService.getAllUserGroups() );
 
-        if ( name != null )
-        {
-            UserGroup match = userGroupService.getUserGroupByName( name ).get( 0 );
-
-            if ( match != null && (id == null || match.getId() != id) )
-            {
-                message = i18n.getString( "name_in_use" );
-
-                return ERROR;
-            }
-        }
-
-        message = i18n.getString( "everything_is_ok" );
+        Collections.sort( userGroups, new UserGroupComparator() );
 
         return SUCCESS;
     }

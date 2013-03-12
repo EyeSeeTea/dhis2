@@ -1,4 +1,4 @@
-package org.hisp.dhis.mapping.action;
+package org.hisp.dhis.pivot.action;
 
 import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.mapping.MappingService;
