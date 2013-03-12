@@ -62,7 +62,7 @@
 		</tbody>
 	</table>
 
-	#parse( "dhis-web-maintenance-mobile/searchPatientCritetia.vm" )
+	#parse( "dhis-web-sms/searchPatientCritetia.vm" )
 	
 	<!-- List searching patients -->
 	#parse( "dhis-web-commons/loader/loader.vm" )
