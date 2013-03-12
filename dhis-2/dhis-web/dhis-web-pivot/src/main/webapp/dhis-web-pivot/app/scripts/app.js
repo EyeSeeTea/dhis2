@@ -1290,9 +1290,9 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							iconCls: 'pt-grid-row-icon-dashboard',
+							iconCls: 'pt-grid-row-icon-sharing',
 							getClass: function() {
-								return 'tooltip-favorite-dashboard';
+								return 'tooltip-favorite-sharing';
 							},
 							handler: function(grid, rowIndex) {
 								var record = this.up('grid').store.getAt(rowIndex),
@@ -1377,6 +1377,7 @@ Ext.onReady( function() {
 						var editArray = document.getElementsByClassName('tooltip-favorite-edit'),
 							overwriteArray = document.getElementsByClassName('tooltip-favorite-overwrite'),
 							dashboardArray = document.getElementsByClassName('tooltip-favorite-dashboard'),
+							sharingArray = document.getElementsByClassName('tooltip-favorite-sharing'),
 							deleteArray = document.getElementsByClassName('tooltip-favorite-delete'),
 							el;
 
@@ -1414,6 +1415,17 @@ Ext.onReady( function() {
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
 								html: 'Add to dashboard',
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+						}
+
+						for (var i = 0; i < sharingArray.length; i++) {
+							el = sharingArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Share with other people',
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
