@@ -727,6 +727,7 @@ Ext.onReady( function() {
 	PT.app.OptionsWindow = function() {
 		var showSubTotals,
 			hideEmptyRows,
+			numberFormatting,
 			displayDensity,
 			fontSize,
 
@@ -745,8 +746,28 @@ Ext.onReady( function() {
 		});
 		pt.viewport.hideEmptyRows = hideEmptyRows;
 
+		numberFormatting = Ext.create('Ext.form.field.ComboBox', {
+			fieldLabel: 'Number formatting', //i18n
+			labelStyle: 'color:#333',
+			cls: 'pt-combo',
+			width: 230,
+			queryMode: 'local',
+			valueField: 'id',
+			editable: false,
+			value: 'space',
+			store: Ext.create('Ext.data.Store', {
+				fields: ['id', 'text'],
+				data: [
+					{id: 'comma', text: 'Comma'},
+					{id: 'space', text: 'Space'},
+					{id: 'none', text: 'None'}
+				]
+			})
+		});
+		pt.viewport.numberFormatting = numberFormatting;
+
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: 'Display density',
+			fieldLabel: 'Display density', //i18n
 			labelStyle: 'color:#333',
 			cls: 'pt-combo',
 			width: 230,
@@ -767,7 +788,7 @@ Ext.onReady( function() {
 
 		fontSize = Ext.create('Ext.form.field.ComboBox', {
 			xtype: 'combobox',
-			fieldLabel: 'Font size',
+			fieldLabel: 'Font size', //i18n
 			labelStyle: 'color:#333',
 			cls: 'pt-combo',
 			width: 230,
@@ -799,6 +820,7 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
+				numberFormatting,
 				displayDensity,
 				fontSize
 			]
@@ -815,6 +837,7 @@ Ext.onReady( function() {
 				return {
 					showSubTotals: showSubTotals.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
+					numberFormatting: numberFormatting.getValue(),
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue()
 				};
@@ -3245,6 +3268,7 @@ Ext.onReady( function() {
 				// Options
 				pt.viewport.showSubTotals.setValue(r.subtotals);
 				pt.viewport.hideEmptyRows.setValue(r.hideEmptyRows);
+				pt.viewport.numberFormatting.setValue(r.numberFormatting);
 				pt.viewport.displayDensity.setValue(r.displayDensity);
 				pt.viewport.fontSize.setValue(r.fontSize);
 
