@@ -1,5 +1,7 @@
+package org.hisp.dhis.sms.outcoming;
+
 /*
- * Copyright (c) 2004-2009, University of Oslo
+ * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,27 +27,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.mobile.action;
-
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.patient.PatientAttribute;
-import org.hisp.dhis.patient.PatientAttributeService;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.sms.outbound.OutboundSmsTransportService;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupService;
+import org.hisp.dhis.user.comparator.UserGroupComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
+ * @author Dang Duy Hieu
  * @version $Id$
  */
-public class ShowSendSMSBeneficiaryFormAction
+
+public class ShowSendSMSFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -56,49 +56,34 @@ public class ShowSendSMSBeneficiaryFormAction
     private OutboundSmsTransportService transportService;
 
     @Autowired
-    private OrganisationUnitSelectionManager selectionManager;
-
-    @Autowired
-    private PatientAttributeService patientAttributeService;
-
-    @Autowired
-    private ProgramService programService;
+    private UserGroupService userGroupService;
 
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input && Output
     // -------------------------------------------------------------------------
 
-    private Collection<PatientAttribute> patientAttributes;
+    private String sendTo;
 
-    public Collection<PatientAttribute> getPatientAttributes()
+    public void setSendTo( String sendTo )
     {
-        return patientAttributes;
+        this.sendTo = sendTo;
     }
 
-    private Collection<Program> programs;
-
-    public Collection<Program> getPrograms()
+    public String getSendTo()
     {
-        return programs;
-    }
-
-    private OrganisationUnit organisationUnit;
-
-    public OrganisationUnit getOrganisationUnit()
-    {
-        return organisationUnit;
-    }
-
-    private int status;
-
-    public int getStatus()
-    {
-        return status;
+        return sendTo == null || sendTo.trim().isEmpty() ? "phone" : sendTo;
     }
 
     public Map<String, String> getGatewayMap()
     {
         return transportService.getGatewayMap();
+    }
+
+    private List<UserGroup> userGroups;
+
+    public List<UserGroup> getUserGroups()
+    {
+        return userGroups;
     }
 
     // -------------------------------------------------------------------------
@@ -108,17 +93,10 @@ public class ShowSendSMSBeneficiaryFormAction
     public String execute()
         throws Exception
     {
-        patientAttributes = patientAttributeService.getAllPatientAttributes();
+        userGroups = new ArrayList<UserGroup>( userGroupService.getAllUserGroups() );
 
-        programs = programService.getAllPrograms();
+        Collections.sort( userGroups, new UserGroupComparator() );
 
-        organisationUnit = selectionManager.getSelectedOrganisationUnit();
-
-        if ( organisationUnit == null )
-        {
-            status = 1;
-        }
-        
         return SUCCESS;
     }
 }
