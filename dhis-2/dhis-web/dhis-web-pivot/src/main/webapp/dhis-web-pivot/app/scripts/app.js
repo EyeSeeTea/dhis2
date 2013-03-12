@@ -109,7 +109,7 @@ Ext.onReady( function() {
 				}
 			},
 			addBlurHandler: function(w) {
-				var el = Ext.get(document.getElementsByClassName('x-mask')[0]);
+				var el = Ext.get(Ext.query('.x-mask')[0]);
 
 				el.on('click', function() {
 					w.hide();
@@ -121,10 +121,12 @@ Ext.onReady( function() {
 
 		util.pivot.getSettingsConfig = function() {
 			var data = {},
-				setup = pt.viewport.settingsWindow.getSetup(),
+				setup,
 				getData,
 				extendSettings,
 				config;
+
+			setup = pt.viewport.settingsWindow ? pt.viewport.settingsWindow.getSetup() : {};
 
 			config = {
 				col: [],
@@ -697,15 +699,23 @@ Ext.onReady( function() {
 				'->',
 				{
 					text: 'Hide',
-					handler: function() {
-						window.hide();
+					listeners: {
+						added: function(b) {
+							b.on('click', function() {
+								window.hide();
+							});
+						}
 					}
 				},
 				{
 					text: '<b>Update</b>',
-					handler: function() {
-						pt.viewport.updateViewport();
-						window.hide();
+					listeners: {
+						added: function(b) {
+							b.on('click', function() {
+								pt.viewport.updateViewport();
+								window.hide();
+							});
+						}
 					}
 				}
 			],
@@ -912,7 +922,6 @@ Ext.onReady( function() {
 			info,
 
 			nameTextfield,
-			systemCheckbox,
 			createButton,
 			updateButton,
 			cancelButton,
@@ -1509,6 +1518,25 @@ Ext.onReady( function() {
 
 		return favoriteWindow;
 	};
+
+	//PT.app.SharingWindow = function(id) {
+		//var sharing;
+
+
+
+		//Ext.Ajax.request({
+			//url: pt.baseUrl + '/api/sharing?type=reportTable&id=' + id,
+			//method: 'GET',
+			//failure: function(r) {
+				//pt.viewport.mask.hide();
+				//alert(r.responseText);
+			//},
+			//success: function(r) {
+				//sharing = Ext.decode(r.responseText);
+
+
+
+
 
 	PT.app.init.onInitialize = function(r) {
 		var createViewport;
