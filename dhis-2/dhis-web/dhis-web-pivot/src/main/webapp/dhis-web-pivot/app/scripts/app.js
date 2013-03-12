@@ -121,12 +121,10 @@ Ext.onReady( function() {
 
 		util.pivot.getSettingsConfig = function() {
 			var data = {},
-				setup,
+				setup = pt.viewport.settingsWindow ? pt.viewport.settingsWindow.getSetup() : {},
 				getData,
 				extendSettings,
 				config;
-
-			setup = pt.viewport.settingsWindow ? pt.viewport.settingsWindow.getSetup() : {};
 
 			config = {
 				col: [],
@@ -1520,7 +1518,24 @@ Ext.onReady( function() {
 	};
 
 	//PT.app.SharingWindow = function(id) {
-		//var sharing;
+		//var sharing,
+
+			//UserGroup,
+			//userGroup;
+
+		//UserGroup = function(obj) {
+			//var userGroup,
+				//store,
+				//del,
+				//panel;
+
+			//store = Ext.create('Ext.data.Store', {
+				//fields: ['id', 'name'],
+				//data: [
+					//{id:
+
+			//userGroup = Ext.create('Ext.form.field.ComboBox', {
+
 
 
 
@@ -3102,6 +3117,24 @@ Ext.onReady( function() {
 							handler: function() {
 								if (pt.baseUrl && pt.paramString) {
 									window.location.href = pt.baseUrl + '/api/analytics.csv' + pt.paramString;
+								}
+							}
+						},
+						{
+							text: 'JSON',
+							iconCls: 'pt-menu-item-csv',
+							handler: function() {
+								if (pt.baseUrl && pt.paramString) {
+									window.open(pt.baseUrl + '/api/analytics.json' + pt.paramString);
+								}
+							}
+						},
+						{
+							text: 'XML',
+							iconCls: 'pt-menu-item-csv',
+							handler: function() {
+								if (pt.baseUrl && pt.paramString) {
+									window.open(pt.baseUrl + '/api/analytics.xml' + pt.paramString);
 								}
 							}
 						}
