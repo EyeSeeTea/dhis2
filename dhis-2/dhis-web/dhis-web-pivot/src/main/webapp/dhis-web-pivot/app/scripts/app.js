@@ -1521,9 +1521,7 @@ Ext.onReady( function() {
 
 	PT.app.SharingWindow = function(sharing) {
 		var groupContainer,
-			groupPanels = [],
-
-			idPanelMap = {},
+			publicGroup,
 
 			UserGroup,
 			userGroup,
@@ -1535,6 +1533,8 @@ Ext.onReady( function() {
 			var getData,
 				store,
 				getItems,
+				combo,
+				getAccess,
 				panel;
 
 			getData = function() {
@@ -1558,7 +1558,7 @@ Ext.onReady( function() {
 			getItems = function() {
 				var items = [];
 
-				items.push(Ext.create('Ext.form.field.ComboBox', {
+				combo = Ext.create('Ext.form.field.ComboBox', {
 					fieldLabel: isPublicAccess ? 'Public access' : obj.name, //i18n
 					labelStyle: 'color:#333',
 					cls: 'pt-combo',
@@ -1572,7 +1572,9 @@ Ext.onReady( function() {
 					disabled: !!disallowPublicAccess,
 					value: obj.access,
 					store: store
-				}));
+				});
+
+				items.push(combo);
 
 				if (!isPublicAccess) {
 					items.push(Ext.create('Ext.Img', {
@@ -1595,13 +1597,46 @@ Ext.onReady( function() {
 				return items;
 			};
 
+			getAccess = function() {
+				return {
+					id: obj.id,
+					name: obj.name,
+					access: combo.getValue()
+				};
+			};
+
 			panel = Ext.create('Ext.panel.Panel', {
 				layout: 'column',
 				bodyStyle: 'border:0 none',
+				getAccess: getAccess,
 				items: getItems()
 			});
 
 			return panel;
+		};
+
+		getBody = function() {
+			var body = {
+				object: {
+					id: sharing.object.id,
+					name: sharing.object.name,
+					publicAccess: publicGroup.down('combobox').getValue(),
+					user: {
+						id: pt.init.user.id,
+						name: pt.init.user.name
+					}
+				}
+			};
+
+			if (groupContainer.items.items.length > 1) {
+				body.object.userGroupAccesses = [];
+				for (var i = 1, item; i < groupContainer.items.items.length; i++) {
+					item = groupContainer.items.items[i];
+					body.object.userGroupAccesses.push(item.getAccess());
+				}
+			}
+
+			return body;
 		};
 
 		// Initialize
@@ -1609,7 +1644,7 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none'
 		});
 
-		groupContainer.add(UserGroup({
+		publicGroup = groupContainer.add(UserGroup({
 			id: sharing.object.id,
 			name: sharing.object.name,
 			access: sharing.object.publicAccess
@@ -1640,49 +1675,7 @@ Ext.onReady( function() {
 							headers: {
 								'Content-Type': 'application/json'
 							},
-							params: function() {
-								var sharing = {
-									"object": {
-										"publicAccess": "r-------",
-										"userGroupAccesses": [
-											{
-												"id": "GTLqBevdN44",
-												"name": "Malaria Program Coordinators",
-												"access": "r-------"
-											},
-											{
-												id: "Rg8wusV7QYi",
-												name: "HIV Program Coordinators",
-												access: "rw------"
-											}
-										]
-									}
-								};
-
-								//var sharing = {
-									//"object": {
-										//publicAccess: "r-------",
-										//user: {
-											//id: "GOLswS44mh8",
-											//name: "System Administrator"
-										//},
-										//userGroupAccesses: [
-											//{
-												//id: "Rg8wusV7QYi",
-												//name: "HIV Program Coordinators",
-												//access: "rw------"
-											//},
-											//{
-												//id: "GTLqBevdN44",
-												//name: "Malaria Program Coordinators",
-												//access: "rw------"
-											//}
-										//]
-									//}
-								//};
-
-								return Ext.encode(sharing);
-							}(),
+							params: Ext.encode(getBody())
 						});
 					}
 				}
