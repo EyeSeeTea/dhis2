@@ -918,13 +918,15 @@ Ext.onReady( function() {
 			tbar,
 			bbar,
 			info,
-
 			nameTextfield,
 			createButton,
 			updateButton,
 			cancelButton,
+			mapWindow,
 
-			mapWindow;
+		// Vars
+			windowWidth = 500,
+			windowCmpWidth = windowWidth - 22;
 
 		pt.store.tables.on('load', function(store, records) {
 			info.setText(records.length + ' favorite' + (records.length !== 1 ? 's' : '') + ' available');
@@ -1172,7 +1174,7 @@ Ext.onReady( function() {
 		});
 
 		searchTextfield = Ext.create('Ext.form.field.Text', {
-			width: 350,
+			width: windowCmpWidth - addButton.width - 11,
 			height: 26,
 			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
 			emptyText: 'Search for favorites', //i18n
@@ -1234,7 +1236,7 @@ Ext.onReady( function() {
 				{
 					dataIndex: 'name',
 					sortable: false,
-					width: 340,
+					width: windowCmpWidth - 88,
 					renderer: function(value, metaData, record) {
 						var fn = function() {
 							var el = Ext.get(record.data.id);
@@ -1486,7 +1488,7 @@ Ext.onReady( function() {
 			bodyStyle: 'padding: 5px; background-color:#fff',
 			resizable: false,
 			modal: true,
-			width: 450,
+			width: windowWidth,
 			items: [
 				{
 					xtype: 'panel',
@@ -1545,8 +1547,8 @@ Ext.onReady( function() {
 
 			getData = function() {
 				var data = [
-					{id: 'r-------', name: 'Read only'}, //i18n
-					{id: 'rw------', name: 'Read and write'}
+					{id: 'r-------', name: 'Can view'}, //i18n
+					{id: 'rw------', name: 'Can edit and view'}
 				];
 
 				if (isPublicAccess) {
@@ -1667,7 +1669,7 @@ Ext.onReady( function() {
 			queryDelay: 200,
 			minChars: 1,
 			hideTrigger: true,
-			fieldStyle: 'height:26px; padding-left:5px',
+			fieldStyle: 'height:26px; padding-left:6px; border-radius:1px; font-size:11px',
 			style: 'margin-bottom:8px',
 			width: 380,
 			store: userGroupStore,
@@ -1685,12 +1687,10 @@ Ext.onReady( function() {
 
 		userGroupButton = Ext.create('Ext.button.Button', {
 			text: '+',
-			style: 'margin-left:2px; padding-right:4px; padding-left:4px; border-radius:0',
+			style: 'margin-left:2px; padding-right:4px; padding-left:4px; border-radius:1px',
 			disabled: true,
 			height: 26,
 			handler: function(b) {
-				alert(userGroupField.getValue());
-
 				userGroupRowContainer.add(UserGroupRow({
 					id: userGroupField.getValue(),
 					name: userGroupField.getRawValue(),
@@ -1699,7 +1699,6 @@ Ext.onReady( function() {
 
 				userGroupField.clearValue();
 				b.disable();
-
 			}
 		});
 
@@ -1760,7 +1759,12 @@ Ext.onReady( function() {
 						window.destroy();
 					}
 				}
-			]
+			],
+			listeners: {
+				show: function(w) {
+					w.setPosition(w.getPosition()[0], 45);
+				}
+			}
 		});
 
 		return window;

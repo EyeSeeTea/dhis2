@@ -1580,7 +1580,6 @@ PT.core.getUtils = function(pt) {
 
 						if (!validateResponse(response)) {
 							pt.util.mask.hideMask();
-							console.log(response);
 							return;
 						}
 
