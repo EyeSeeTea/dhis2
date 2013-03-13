@@ -361,7 +361,7 @@ Ext.onReady( function() {
 				}
 			},
 			listeners: {
-				load: function() {
+				load: function(s) {
 					if (!this.isLoaded) {
 						this.isLoaded = true;
 					}
@@ -929,7 +929,20 @@ Ext.onReady( function() {
 			windowCmpWidth = windowWidth - 22;
 
 		pt.store.tables.on('load', function(store, records) {
-			info.setText(records.length + ' favorite' + (records.length !== 1 ? 's' : '') + ' available');
+			var pager = store.proxy.reader.jsonData.pager;
+
+			info.setText('Page ' + pager.page + ' of ' + pager.pageCount);
+
+			prevButton.enable();
+			nextButton.enable();
+
+			if (pager.page === 1) {
+				prevButton.disable();
+			}
+
+			if (pager.page === pager.pageCount) {
+				nextButton.disable();
+			}
 		});
 
 		getBody = function() {
@@ -1669,7 +1682,7 @@ Ext.onReady( function() {
 			minChars: 1,
 			hideTrigger: true,
 			fieldStyle: 'height:26px; padding-left:6px; border-radius:1px; font-size:11px',
-			style: 'margin-bottom:8px',
+			style: 'margin-bottom:5px',
 			width: 380,
 			store: userGroupStore,
 			listeners: {
@@ -1747,7 +1760,7 @@ Ext.onReady( function() {
 					text: 'Save',
 					handler: function() {
 						Ext.Ajax.request({
-							url: pt.baseUrl + '/api/sharing?type=reportTable&id=tWg9OiyV7mu',
+							url: pt.baseUrl + '/api/sharing?type=reportTable&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
