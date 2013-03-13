@@ -1057,10 +1057,11 @@ Ext.onReady( function() {
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
-				width: 300,
+				width: 250,
 				labelWidth: 70,
-				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
+				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
 				style: 'margin-bottom:0',
+				emptyText: 'Favorite name',
 				value: id ? record.data.name : '',
 				listeners: {
 					afterrender: function() {
@@ -1073,10 +1074,9 @@ Ext.onReady( function() {
 				text: 'Create', //i18n
 				handler: function() {
 					var favorite = getBody();
-
 					favorite.name = nameTextfield.getValue();
 
-					if (favorite) {
+					if (favorite && favorite.name) {
 						Ext.Ajax.request({
 							url: pt.baseUrl + '/api/reportTables/',
 							method: 'POST',
@@ -1098,9 +1098,6 @@ Ext.onReady( function() {
 								window.destroy();
 							}
 						});
-					}
-					else {
-						alert('Please create a table first');
 					}
 				}
 			});
@@ -1164,7 +1161,7 @@ Ext.onReady( function() {
 				],
 				listeners: {
 					show: function(w) {
-						pt.util.window.setAnchorPosition(w, pt.viewport.favoriteButton);
+						pt.util.window.setAnchorPosition(w, addButton);
 					}
 				}
 			});
@@ -1773,7 +1770,8 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					w.setPosition(w.getPosition()[0], 33);
+					var pos = pt.viewport.favoriteWindow.getPosition();
+					w.setPosition(pos[0] + 5, pos[1] + 5);
 				}
 			}
 		});
