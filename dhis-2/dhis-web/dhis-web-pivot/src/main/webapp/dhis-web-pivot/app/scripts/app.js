@@ -1520,16 +1520,21 @@ Ext.onReady( function() {
 	};
 
 	PT.app.SharingWindow = function(sharing) {
-		var groupContainer,
+
+		// Objects
+		var UserGroupRow,
+
+		// Functions
+			getBody,
+
+		// Components
+			userGroupField,
+			userGroupStore,
+			userGroupRowContainer,
 			publicGroup,
-
-			UserGroup,
-			userGroup,
-
-			initialize,
 			window;
 
-		UserGroup = function(obj, isPublicAccess, disallowPublicAccess) {
+		UserGroupRow = function(obj, isPublicAccess, disallowPublicAccess) {
 			var getData,
 				store,
 				getItems,
@@ -1628,32 +1633,38 @@ Ext.onReady( function() {
 				}
 			};
 
-			if (groupContainer.items.items.length > 1) {
+			if (userGroupRowContainer.items.items.length > 1) {
 				body.object.userGroupAccesses = [];
-				for (var i = 1, item; i < groupContainer.items.items.length; i++) {
-					item = groupContainer.items.items[i];
+				for (var i = 1, item; i < userGroupRowContainer.items.items.length; i++) {
+					item = userGroupRowContainer.items.items[i];
 					body.object.userGroupAccesses.push(item.getAccess());
 				}
 			}
+			console.log(body);
 
 			return body;
 		};
 
 		// Initialize
-		groupContainer = Ext.create('Ext.container.Container', {
+		//userGroupField = Ext.create('Ext.form.field.ComboBox', {
+
+
+
+
+		userGroupRowContainer = Ext.create('Ext.container.Container', {
 			bodyStyle: 'border:0 none'
 		});
 
-		publicGroup = groupContainer.add(UserGroup({
+		publicGroup = userGroupRowContainer.add(UserGroupRow({
 			id: sharing.object.id,
 			name: sharing.object.name,
 			access: sharing.object.publicAccess
 		}, true, !sharing.meta.allowPublicAccess));
 
 		if (Ext.isArray(sharing.object.userGroupAccesses)) {
-			for (var i = 0, userGroup; i < sharing.object.userGroupAccesses.length; i++) {
-				userGroup = UserGroup(sharing.object.userGroupAccesses[i]);
-				groupContainer.add(userGroup);
+			for (var i = 0, userGroupRow; i < sharing.object.userGroupAccesses.length; i++) {
+				userGroupRow = UserGroupRow(sharing.object.userGroupAccesses[i]);
+				userGroupRowContainer.add(userGroupRow);
 			}
 		}
 
@@ -1663,7 +1674,7 @@ Ext.onReady( function() {
 			width: 436,
 			resizable: false,
 			modal: true,
-			items: groupContainer,
+			items: userGroupRowContainer,
 			bbar: [
 				'->',
 				{
@@ -1684,8 +1695,6 @@ Ext.onReady( function() {
 
 		return window;
 	};
-
-ss = PT.app.SharingWindow;
 
 	PT.app.init.onInitialize = function(r) {
 		var createViewport;
