@@ -83,6 +83,10 @@ body.x-windows {
 	position: fixed;
 }
 
+.pointer {
+	cursor: pointer;
+}
+
 .td-nobreak {
 	white-space: nowrap;
 }

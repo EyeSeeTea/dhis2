@@ -1263,19 +1263,15 @@ Ext.onReady( function() {
 						{
 							iconCls: 'pt-grid-row-icon-edit',
 							getClass: function(value, metaData, record) {
-								var system = !record.data.user,
-									isAdmin = pt.init.user.isAdmin;
-
-								if (isAdmin || (!isAdmin && !system)) {
+								if (pt.init.user.isAdmin) {
 									return 'tooltip-favorite-edit';
 								}
 							},
 							handler: function(grid, rowIndex, colIndex, col, event) {
 								var record = this.up('grid').store.getAt(rowIndex),
-									id = record.data.id,
-									isAdmin = pt.init.user.isAdmin;
+									id = record.data.id;
 
-								if (isAdmin) {
+								if (pt.init.user.isAdmin) {
 									nameWindow = new NameWindow(id);
 									nameWindow.show();
 								}
@@ -1327,17 +1323,23 @@ Ext.onReady( function() {
 							handler: function(grid, rowIndex) {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
-									name = record.data.name,
-									message = 'Add to dashboard?\n\n' + name;
+									window;
+									//name = record.data.name,
+									//message = 'Add to dashboard?\n\n' + name;
 
-								if (confirm(message)) {
-									Ext.Ajax.request({
-										url: pt.baseUrl + pt.conf.finals.ajax.path_pivot + 'addMapViewToDashboard.action',
-										params: {
-											id: id
-										}
-									});
-								}
+								Ext.Ajax.request({
+									url: pt.baseUrl + '/api/sharing?type=reportTable&id=' + id,
+									method: 'GET',
+									failure: function(r) {
+										pt.viewport.mask.hide();
+										alert(r.responseText);
+									},
+									success: function(r) {
+										sharing = Ext.decode(r.responseText);
+										window = PT.app.SharingWindow(sharing);
+										window.show();
+									}
+								});
 							}
 						},
 						{
@@ -1517,100 +1519,180 @@ Ext.onReady( function() {
 		return favoriteWindow;
 	};
 
-	PT.app.SharingWindow = function(id) {
-		var sharing,
-			groups = {},
+	PT.app.SharingWindow = function(sharing) {
+		var groupContainer,
+			groupPanels = [],
+
+			idPanelMap = {},
 
 			UserGroup,
 			userGroup,
 
+			initialize,
 			window;
 
-		UserGroup = function(obj) {
-			var group,
+		UserGroup = function(obj, isPublicAccess, disallowPublicAccess) {
+			var getData,
 				store,
-				del,
-				panel,
-				data = [
+				getItems,
+				panel;
+
+			getData = function() {
+				var data = [
 					{id: 'r-------', name: 'Read only'}, //i18n
 					{id: 'rw------', name: 'Read and write'}
-				],
-				items = [];
+				];
 
-			if (!obj) {
-				data.unshift({id: '-------', name: 'None'});
+				if (isPublicAccess) {
+					data.unshift({id: '-------', name: 'None'});
+				}
+
+				return data;
 			}
 
 			store = Ext.create('Ext.data.Store', {
 				fields: ['id', 'name'],
-				data: data
+				data: getData()
 			});
 
-			group = Ext.create('Ext.form.field.ComboBox', {
-				fieldLabel: !obj ? 'Public access' : obj.name, //i18n
-				labelStyle: 'color:#333',
-				cls: 'pt-combo',
-				width: 230,
-				queryMode: 'local',
-				valueField: 'id',
-				displayField: 'name',
-				editable: false,
-				value: !obj ? 'r------' : obj.access,
-				store: store
-			});
+			getItems = function() {
+				var items = [];
 
-			items.push(group);
+				items.push(Ext.create('Ext.form.field.ComboBox', {
+					fieldLabel: isPublicAccess ? 'Public access' : obj.name, //i18n
+					labelStyle: 'color:#333',
+					cls: 'pt-combo',
+					width: 380,
+					labelWidth: 250,
+					queryMode: 'local',
+					valueField: 'id',
+					displayField: 'name',
+					labelSeparator: null,
+					editable: false,
+					disabled: !!disallowPublicAccess,
+					value: obj.access,
+					store: store
+				}));
 
-			if (!obj) {
-				del = Ext.create('Ext.Img', {
-					src: 'images/grid-delete_16.png',
-					style: 'margin-top:2px; margin-left:10px',
-					width: 16,
-					height: 16,
-					listeners: {
-						render: function(i) {
-							i.getEl().on('click', function(e) {
-								alert('User clicked image');
-							});
+				if (!isPublicAccess) {
+					items.push(Ext.create('Ext.Img', {
+						src: 'images/grid-delete_16.png',
+						style: 'margin-top:2px; margin-left:10px',
+						overCls: 'pointer',
+						width: 16,
+						height: 16,
+						listeners: {
+							render: function(i) {
+								i.getEl().on('click', function(e) {
+									i.up('panel').destroy();
+									window.doLayout();
+								});
+							}
 						}
-					}
-				});
+					}));
+				}
 
-				items.push(del);
-			}
+				return items;
+			};
 
 			panel = Ext.create('Ext.panel.Panel', {
 				layout: 'column',
 				bodyStyle: 'border:0 none',
-				items: items
+				items: getItems()
 			});
 
 			return panel;
 		};
 
+		// Initialize
+		groupContainer = Ext.create('Ext.container.Container', {
+			bodyStyle: 'border:0 none'
+		});
+
+		groupContainer.add(UserGroup({
+			id: sharing.object.id,
+			name: sharing.object.name,
+			access: sharing.object.publicAccess
+		}, true, !sharing.meta.allowPublicAccess));
+
+		if (Ext.isArray(sharing.object.userGroupAccesses)) {
+			for (var i = 0, userGroup; i < sharing.object.userGroupAccesses.length; i++) {
+				userGroup = UserGroup(sharing.object.userGroupAccesses[i]);
+				groupContainer.add(userGroup);
+			}
+		}
+
 		window = Ext.create('Ext.window.Window', {
 			title: 'Sharing settings',
-			bodyStyle: 'padding:5px; background-color:#fff',
-			width: 300,
+			bodyStyle: 'padding:8px 8px 3px; background-color:#fff',
+			width: 436,
 			resizable: false,
 			modal: true,
-			items: UserGroup()
+			items: groupContainer,
+			bbar: [
+				'->',
+				{
+					text: 'Save',
+					handler: function() {
+						Ext.Ajax.request({
+							url: pt.baseUrl + '/api/sharing?type=reportTable&id=tWg9OiyV7mu',
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							params: function() {
+								var sharing = {
+									"object": {
+										"publicAccess": "r-------",
+										"userGroupAccesses": [
+											{
+												"id": "GTLqBevdN44",
+												"name": "Malaria Program Coordinators",
+												"access": "r-------"
+											},
+											{
+												id: "Rg8wusV7QYi",
+												name: "HIV Program Coordinators",
+												access: "rw------"
+											}
+										]
+									}
+								};
+
+								//var sharing = {
+									//"object": {
+										//publicAccess: "r-------",
+										//user: {
+											//id: "GOLswS44mh8",
+											//name: "System Administrator"
+										//},
+										//userGroupAccesses: [
+											//{
+												//id: "Rg8wusV7QYi",
+												//name: "HIV Program Coordinators",
+												//access: "rw------"
+											//},
+											//{
+												//id: "GTLqBevdN44",
+												//name: "Malaria Program Coordinators",
+												//access: "rw------"
+											//}
+										//]
+									//}
+								//};
+
+								return Ext.encode(sharing);
+							}(),
+						});
+					}
+				}
+			]
 		});
 
 		return window;
-
-
-		//Ext.Ajax.request({
-			//url: pt.baseUrl + '/api/sharing?type=reportTable&id=' + id,
-			//method: 'GET',
-			//failure: function(r) {
-				//pt.viewport.mask.hide();
-				//alert(r.responseText);
-			//},
-			//success: function(r) {
-				//sharing = Ext.decode(r.responseText);
-
 	};
+
+ss = PT.app.SharingWindow;
 
 	PT.app.init.onInitialize = function(r) {
 		var createViewport;
