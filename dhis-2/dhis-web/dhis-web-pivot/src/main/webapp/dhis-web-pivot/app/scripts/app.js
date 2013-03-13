@@ -1060,7 +1060,7 @@ Ext.onReady( function() {
 				width: 300,
 				labelWidth: 70,
 				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb',
-				fieldLabel: 'Name', //i18n
+				style: 'margin-bottom:0',
 				value: id ? record.data.name : '',
 				listeners: {
 					afterrender: function() {
@@ -1153,12 +1153,10 @@ Ext.onReady( function() {
 			window = Ext.create('Ext.window.Window', {
 				title: id ? 'Rename favorite' : 'Create new favorite',
 				//iconCls: 'pt-window-title-icon-favorite',
-				bodyStyle: 'padding:8px; background:#fff',
+				bodyStyle: 'padding:5px; background:#fff',
 				resizable: false,
 				modal: true,
-				items: [
-					nameTextfield
-				],
+				items: nameTextfield,
 				bbar: [
 					cancelButton,
 					'->',
@@ -1180,6 +1178,7 @@ Ext.onReady( function() {
 			height: 26,
 			style: 'border-radius: 1px;',
 			menu: {},
+			disabled: !Ext.isObject(pt.xSettings),
 			handler: function() {
 				nameWindow = new NameWindow(null, 'create');
 				nameWindow.show();
