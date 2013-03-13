@@ -431,6 +431,7 @@ html * {
 
 .gis-grid-row-icon-edit,
 .gis-grid-row-icon-overwrite,
+.gis-grid-row-icon-sharing,
 .gis-grid-row-icon-dashboard,
 .gis-grid-row-icon-delete {
 	width: 16px;
@@ -442,6 +443,10 @@ html * {
 }
 .gis-grid-row-icon-overwrite {
 	background: url('../images/grid-save_16.png') no-repeat;
+	margin-left: 4px;
+}
+.gis-grid-row-icon-sharing {
+	background: url('../images/grid-sharing_16.png') no-repeat;
 	margin-left: 4px;
 }
 .gis-grid-row-icon-dashboard {
@@ -461,6 +466,7 @@ html * {
 .gis-grid-row-icon-disabled * {
 	cursor: default !important;
 }
+.gis-grid-row-icon-disabled img.gis-grid-row-icon-sharing,
 .gis-grid-row-icon-disabled img.gis-grid-row-icon-dashboard {
 	cursor: pointer !important;
 }
@@ -554,6 +560,7 @@ label.x-form-cb-label {
 .x-tip .x-tip-body {
 	font-size: 10px;
 	color: #fff;
+	-webkit-text-stroke: 0.2px #fff;
 }
 
 .x-tip-anchor {

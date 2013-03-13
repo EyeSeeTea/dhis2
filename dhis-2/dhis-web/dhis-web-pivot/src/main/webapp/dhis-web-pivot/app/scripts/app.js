@@ -1071,7 +1071,6 @@ Ext.onReady( function() {
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
 				width: 250,
-				labelWidth: 70,
 				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
 				style: 'margin-bottom:0',
 				emptyText: 'Favorite name',
@@ -1262,8 +1261,6 @@ Ext.onReady( function() {
 			cls: 'pt-grid',
 			scroll: false,
 			hideHeaders: true,
-			bodyStyle: 'padding-bottom:1px solid red !important',
-			style: 'padding-bottom:1px solid red !important',
 			columns: [
 				{
 					dataIndex: 'name',
@@ -1358,8 +1355,6 @@ Ext.onReady( function() {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id,
 									window;
-									//name = record.data.name,
-									//message = 'Add to dashboard?\n\n' + name;
 
 								Ext.Ajax.request({
 									url: pt.baseUrl + '/api/sharing?type=reportTable&id=' + id,
@@ -1369,7 +1364,7 @@ Ext.onReady( function() {
 										alert(r.responseText);
 									},
 									success: function(r) {
-										sharing = Ext.decode(r.responseText);
+										var sharing = Ext.decode(r.responseText);
 										window = PT.app.SharingWindow(sharing);
 										window.show();
 									}
@@ -1490,17 +1485,6 @@ Ext.onReady( function() {
 								showDelay: 1000
 							});
 						}
-
-						//for (var i = 0; i < dashboardArray.length; i++) {
-							//el = dashboardArray[i];
-							//Ext.create('Ext.tip.ToolTip', {
-								//target: el,
-								//html: 'Add to dashboard',
-								//'anchor': 'bottom',
-								//anchorOffset: -14,
-								//showDelay: 1000
-							//});
-						//}
 					};
 
 					Ext.defer(fn, 100);
@@ -1521,7 +1505,7 @@ Ext.onReady( function() {
 		favoriteWindow = Ext.create('Ext.window.Window', {
 			title: 'Manage favorites',
 			//iconCls: 'pt-window-title-icon-favorite',
-			bodyStyle: 'padding: 5px; background-color:#fff',
+			bodyStyle: 'padding:5px; background-color:#fff',
 			resizable: false,
 			modal: true,
 			width: windowWidth,
