@@ -1643,7 +1643,6 @@ Ext.onReady( function() {
 					body.object.userGroupAccesses.push(item.getAccess());
 				}
 			}
-			console.log(body);
 
 			return body;
 		};
@@ -1762,7 +1761,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					w.setPosition(w.getPosition()[0], 45);
+					w.setPosition(w.getPosition()[0], 33);
 				}
 			}
 		});
