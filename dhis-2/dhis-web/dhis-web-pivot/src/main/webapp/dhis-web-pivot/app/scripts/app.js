@@ -1440,47 +1440,29 @@ Ext.onReady( function() {
 				},
 				afterrender: function() {
 					var fn = function() {
-						var editArray = document.getElementsByClassName('tooltip-favorite-edit'),
-							overwriteArray = document.getElementsByClassName('tooltip-favorite-overwrite'),
-							dashboardArray = document.getElementsByClassName('tooltip-favorite-dashboard'),
-							sharingArray = document.getElementsByClassName('tooltip-favorite-sharing'),
-							deleteArray = document.getElementsByClassName('tooltip-favorite-delete'),
+						var editArray = Ext.query('.tooltip-favorite-edit'),
+							overwriteArray = Ext.query('.tooltip-favorite-overwrite'),
+							//dashboardArray = Ext.query('.tooltip-favorite-dashboard'),
+							sharingArray = Ext.query('.tooltip-favorite-sharing'),
+							deleteArray = Ext.query('.tooltip-favorite-delete'),
 							el;
 
-						for (var i = 0; i < deleteArray.length; i++) {
-							el = editArray[i];
+						for (var i = 0; i < editArray.length; i++) {
+							var el = editArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: 'Rename',
-								'anchor': 'bottom',
-								anchorOffset: -14,
-								showDelay: 1000
-							});
-
-							el = overwriteArray[i];
-							Ext.create('Ext.tip.ToolTip', {
-								target: el,
-								html: 'Overwrite',
-								'anchor': 'bottom',
-								anchorOffset: -14,
-								showDelay: 1000
-							});
-
-							el = deleteArray[i];
-							Ext.create('Ext.tip.ToolTip', {
-								target: el,
-								html: 'Delete',
+								html: 'Rename', //i18n
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
 							});
 						}
 
-						for (var i = 0; i < dashboardArray.length; i++) {
-							el = dashboardArray[i];
+						for (var i = 0; i < overwriteArray.length; i++) {
+							el = overwriteArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: 'Add to dashboard',
+								html: 'Overwrite', //i18n
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -1491,12 +1473,34 @@ Ext.onReady( function() {
 							el = sharingArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: 'Share with other people',
+								html: 'Share with other people', //i18n
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
 							});
 						}
+
+						for (var i = 0; i < deleteArray.length; i++) {
+							el = deleteArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Delete', //i18n
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+						}
+
+						//for (var i = 0; i < dashboardArray.length; i++) {
+							//el = dashboardArray[i];
+							//Ext.create('Ext.tip.ToolTip', {
+								//target: el,
+								//html: 'Add to dashboard',
+								//'anchor': 'bottom',
+								//anchorOffset: -14,
+								//showDelay: 1000
+							//});
+						//}
 					};
 
 					Ext.defer(fn, 100);
