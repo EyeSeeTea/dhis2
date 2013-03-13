@@ -108,14 +108,27 @@ Ext.onReady( function() {
 					w.setPosition(targetx, y);
 				}
 			},
-			addBlurHandler: function(w) {
+			addHideOnBlurHandler: function(w) {
 				var el = Ext.get(Ext.query('.x-mask')[0]);
 
 				el.on('click', function() {
-					w.hide();
+					if (w.hideOnBlur) {
+						w.hide();
+					}
 				});
 
-				w.hasBlurHandler = true;
+				w.hasHideOnBlurHandler = true;
+			},
+			addDestroyOnBlurHandler: function(w) {
+				var el = Ext.get(Ext.query('.x-mask')[0]);
+
+				el.on('click', function() {
+					if (w.destroyOnBlur) {
+						w.destroy();
+					}
+				});
+
+				w.hasDestroyOnBlurHandler = true;
 			}
 		};
 
@@ -685,6 +698,7 @@ Ext.onReady( function() {
 			rowStore: rowStore,
 			colStore: colStore,
 			filterStore: filterStore,
+			hideOnBlur: true,
 			items: {
 				layout: 'column',
 				bodyStyle: 'border:0 none',
@@ -717,13 +731,12 @@ Ext.onReady( function() {
 					}
 				}
 			],
-			hasBlurHandler: false,
 			listeners: {
 				show: function(w) {
 					pt.util.window.setAnchorPosition(w, pt.viewport.layoutButton);
 
-					if (!w.hasBlurHandler) {
-						pt.util.window.addBlurHandler(w);
+					if (!w.hasHideOnBlurHandler) {
+						pt.util.window.addHideOnBlurHandler(w);
 					}
 				}
 			}
@@ -841,6 +854,7 @@ Ext.onReady( function() {
 			autoShow: true,
 			modal: true,
 			resizable: false,
+			hideOnBlur: true,
 			getOptions: function() {
 				return {
 					showSubTotals: showSubTotals.getValue(),
@@ -883,13 +897,12 @@ Ext.onReady( function() {
 					}
 				}
 			],
-			hasBlurHandler: false,
 			listeners: {
 				show: function(w) {
 					pt.util.window.setAnchorPosition(w, pt.viewport.optionsButton);
 
-					if (!w.hasBlurHandler) {
-						pt.util.window.addBlurHandler(w);
+					if (!w.hasHideOnBlurHandler) {
+						pt.util.window.addHideOnBlurHandler(w);
 					}
 				}
 			}
@@ -1154,6 +1167,7 @@ Ext.onReady( function() {
 				resizable: false,
 				modal: true,
 				items: nameTextfield,
+				destroyOnBlur: true,
 				bbar: [
 					cancelButton,
 					'->',
@@ -1162,6 +1176,15 @@ Ext.onReady( function() {
 				listeners: {
 					show: function(w) {
 						pt.util.window.setAnchorPosition(w, addButton);
+
+						if (!w.hasDestroyBlurHandler) {
+							pt.util.window.addDestroyOnBlurHandler(w);
+						}
+
+						pt.viewport.favoriteWindow.destroyOnBlur = false;
+					},
+					destroy: function() {
+						pt.viewport.favoriteWindow.destroyOnBlur = true;
 					}
 				}
 			});
@@ -1498,6 +1521,7 @@ Ext.onReady( function() {
 			resizable: false,
 			modal: true,
 			width: windowWidth,
+			destroyOnBlur: true,
 			items: [
 				{
 					xtype: 'panel',
@@ -1520,8 +1544,8 @@ Ext.onReady( function() {
 				show: function(w) {
 					pt.util.window.setAnchorPosition(w, pt.viewport.favoriteButton);
 
-					if (!w.hasBlurHandler) {
-						pt.util.window.addBlurHandler(w);
+					if (!w.hasDestroyOnBlurHandler) {
+						pt.util.window.addDestroyOnBlurHandler(w);
 					}
 				}
 			}
@@ -1733,6 +1757,7 @@ Ext.onReady( function() {
 			width: 434,
 			resizable: false,
 			modal: true,
+			destroyOnBlur: true,
 			items: [
 				{
 					html: sharing.object.name,
@@ -1772,6 +1797,15 @@ Ext.onReady( function() {
 				show: function(w) {
 					var pos = pt.viewport.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
+
+					if (!w.hasDestroyOnBlurHandler) {
+						pt.util.window.addDestroyOnBlurHandler(w);
+					}
+
+					pt.viewport.favoriteWindow.destroyOnBlur = false;
+				},
+				destroy: function() {
+					pt.viewport.favoriteWindow.destroyOnBlur = true;
 				}
 			}
 		});
