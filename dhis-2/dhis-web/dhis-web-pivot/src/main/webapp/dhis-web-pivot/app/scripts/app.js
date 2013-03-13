@@ -1528,8 +1528,9 @@ Ext.onReady( function() {
 			getBody,
 
 		// Components
-			userGroupField,
 			userGroupStore,
+			userGroupField,
+			userGroupButton,
 			userGroupRowContainer,
 			publicGroup,
 			window;
@@ -1584,7 +1585,7 @@ Ext.onReady( function() {
 				if (!isPublicAccess) {
 					items.push(Ext.create('Ext.Img', {
 						src: 'images/grid-delete_16.png',
-						style: 'margin-top:2px; margin-left:10px',
+						style: 'margin-top:2px; margin-left:7px',
 						overCls: 'pointer',
 						width: 16,
 						height: 16,
@@ -1646,10 +1647,61 @@ Ext.onReady( function() {
 		};
 
 		// Initialize
-		//userGroupField = Ext.create('Ext.form.field.ComboBox', {
+		userGroupStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: pt.baseUrl + '/api/sharing/search',
+				reader: {
+					type: 'json',
+					root: 'userGroups'
+				}
+			}
+		});
 
+		userGroupField = Ext.create('Ext.form.field.ComboBox', {
+			valueField: 'id',
+			displayField: 'name',
+			emptyText: 'Search for user groups', //i18n
+			queryParam: 'key',
+			queryDelay: 200,
+			minChars: 1,
+			hideTrigger: true,
+			fieldStyle: 'height:26px; padding-left:5px',
+			style: 'margin-bottom:8px',
+			width: 380,
+			store: userGroupStore,
+			listeners: {
+				beforeselect: function(cb) { // beforeselect instead of select, fires regardless of currently selected item
+					userGroupButton.enable();
+				},
+				afterrender: function(cb) {
+					cb.inputEl.on('keyup', function() {
+						userGroupButton.disable();
+					});
+				}
+			}
+		});
 
+		userGroupButton = Ext.create('Ext.button.Button', {
+			text: '+',
+			style: 'margin-left:2px; padding-right:4px; padding-left:4px; border-radius:0',
+			disabled: true,
+			height: 26,
+			handler: function(b) {
+				alert(userGroupField.getValue());
 
+				userGroupRowContainer.add(UserGroupRow({
+					id: userGroupField.getValue(),
+					name: userGroupField.getRawValue(),
+					access: 'r-------'
+				}));
+
+				userGroupField.clearValue();
+				b.disable();
+
+			}
+		});
 
 		userGroupRowContainer = Ext.create('Ext.container.Container', {
 			bodyStyle: 'border:0 none'
@@ -1671,10 +1723,26 @@ Ext.onReady( function() {
 		window = Ext.create('Ext.window.Window', {
 			title: 'Sharing settings',
 			bodyStyle: 'padding:8px 8px 3px; background-color:#fff',
-			width: 436,
+			width: 434,
 			resizable: false,
 			modal: true,
-			items: userGroupRowContainer,
+			items: [
+				{
+					html: sharing.object.name,
+					bodyStyle: 'border:0 none; font-weight:bold; color:#333',
+					style: 'margin-bottom:8px'
+				},
+				{
+					xtype: 'container',
+					layout: 'column',
+					bodyStyle: 'border:0 none',
+					items: [
+						userGroupField,
+						userGroupButton
+					]
+				},
+				userGroupRowContainer
+			],
 			bbar: [
 				'->',
 				{
@@ -1688,6 +1756,8 @@ Ext.onReady( function() {
 							},
 							params: Ext.encode(getBody())
 						});
+
+						window.destroy();
 					}
 				}
 			]
