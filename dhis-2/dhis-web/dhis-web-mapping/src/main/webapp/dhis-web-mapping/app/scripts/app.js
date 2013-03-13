@@ -1702,7 +1702,7 @@ Ext.onReady( function() {
 					text: 'Save',
 					handler: function() {
 						Ext.Ajax.request({
-							url: gis.baseUrl + gis.conf.url.path_api + 'sharing?type=reportTable&id=' + sharing.object.id,
+							url: gis.baseUrl + gis.conf.url.path_api + 'sharing?type=map&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'

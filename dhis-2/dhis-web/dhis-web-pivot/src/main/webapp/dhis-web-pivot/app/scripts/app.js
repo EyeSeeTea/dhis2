@@ -1520,7 +1520,7 @@ Ext.onReady( function() {
 						{
 							height: 24,
 							width: 1,
-							style: 'width: 1px; margin-left: 5px; margin-right: 5px; margin-top: 1px',
+							style: 'width:1px; margin-left:5px; margin-right:5px; margin-top:1px',
 							bodyStyle: 'border-left: 1px solid #aaa'
 						},
 						searchTextfield
