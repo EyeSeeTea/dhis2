@@ -71,7 +71,7 @@ DV.conf = {
 					},
 					user: {
 						id: r.user.id,
-						isadmin: r.user.isAdmin,
+						isAdmin: r.user.isAdmin,
 						ou: r.user.ou,
 						ouc: r.user.ouc
 					},
@@ -255,6 +255,7 @@ DV.conf = {
         window_confirm_width: 250,
         window_share_width: 500,
         grid_favorite_width: 420,
+        grid_row_height: 27,
         treepanel_minheight: 135,
         treepanel_maxheight: 400,
         treepanel_fill_default: 310,
@@ -1322,7 +1323,22 @@ Ext.onReady( function() {
                     });
                 }
             }
-        }
+        },
+        window: {
+			setAnchorPosition: function(w, target) {
+				var vpw = DV.viewport.getWidth(),
+					targetx = target ? target.getPosition()[0] : 4,
+					winw = w.getWidth(),
+					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+				if ((targetx + winw) > vpw) {
+					w.setPosition((vpw - winw - 2), y);
+				}
+				else {
+					w.setPosition(targetx, y);
+				}
+			}
+		}
     };
 
     DV.store = {
@@ -1536,13 +1552,33 @@ Ext.onReady( function() {
             fields: ['id', 'name', 'lastUpdated', 'userId'],
             proxy: {
                 type: 'ajax',
-                url: DV.conf.finals.ajax.path_visualizer + DV.conf.finals.ajax.favorite_getall,
                 reader: {
                     type: 'json',
                     root: 'charts'
                 }
             },
             isloaded: false,
+            pageSize: 10,
+            page: 1,
+			defaultUrl: DV.init.contextPath + '/api/charts.json?links=false',
+			loadStore: function(url) {
+				this.proxy.url = url || this.defaultUrl;
+
+				this.load({
+					params: {
+						pageSize: this.pageSize,
+						page: this.page
+					}
+				});
+			},
+			loadFn: function(fn) {
+				if (this.isLoaded) {
+					fn.call();
+				}
+				else {
+					this.load(fn);
+				}
+			},
             sorting: {
                 field: 'name',
                 direction: 'ASC'
@@ -1551,7 +1587,7 @@ Ext.onReady( function() {
                 this.sort(this.sorting.field, this.sorting.direction);
             },
             filtersystem: function() {
-				if (!DV.init.user.isadmin) {
+				if (!DV.init.user.isAdmin) {
 					this.filterBy( function(r) {
 						return r.data.userId ? true : false;
 					});
@@ -2713,7 +2749,7 @@ Ext.onReady( function() {
 
 		NameWindow = function(id) {
 			var window,
-				record = pt.store.tables.getById(id);
+				record = DV.store.favorite.getById(id);
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
@@ -2737,20 +2773,20 @@ Ext.onReady( function() {
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
-							url: pt.baseUrl + '/api/reportTables/',
+							url: DV.init.contextPath + '/api/charts/',
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
 							failure: function(r) {
-								pt.viewport.mask.show();
+								DV.util.mask.hideMask();
 								alert(r.responseText);
 							},
 							success: function(r) {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
 
-								pt.favorite = favorite;
+								//pt.favorite = favorite;
 
-								pt.store.tables.loadStore();
+								DV.store.favorite.loadStore();
 
 								//pt.viewport.interpretationButton.enable();
 
@@ -2765,31 +2801,31 @@ Ext.onReady( function() {
 				text: 'Update', //i18n
 				handler: function() {
 					var name = nameTextfield.getValue(),
-						reportTable;
+						favorite;
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: pt.baseUrl + '/api/reportTables/' + id + '.json?links=false',
+							url: DV.init.contextPath + '/api/charts/' + id + '.json?links=false',
 							method: 'GET',
 							failure: function(r) {
-								pt.viewport.mask.show();
+								DV.util.mask.hideMask();
 								alert(r.responseText);
 							},
 							success: function(r) {
-								reportTable = Ext.decode(r.responseText);
-								reportTable.name = name;
+								favorite = Ext.decode(r.responseText);
+								favorite.name = name;
 
 								Ext.Ajax.request({
-									url: pt.baseUrl + '/api/reportTables/' + reportTable.id,
+									url: DV.init.contextPath + '/api/charts/' + favorite.id,
 									method: 'PUT',
 									headers: {'Content-Type': 'application/json'},
-									params: Ext.encode(reportTable),
+									params: Ext.encode(favorite),
 									failure: function(r) {
-										pt.viewport.mask.show();
+										DV.util.mask.hideMask();
 										alert(r.responseText);
 									},
 									success: function(r) {
-										pt.store.tables.loadStore();
+										DV.store.favorite.loadStore();
 										window.destroy();
 									}
 								});
@@ -2808,12 +2844,12 @@ Ext.onReady( function() {
 
 			window = Ext.create('Ext.window.Window', {
 				title: id ? 'Rename favorite' : 'Create new favorite',
-				//iconCls: 'pt-window-title-icon-favorite',
+				//iconCls: 'dv-window-title-icon-favorite',
 				bodyStyle: 'padding:5px; background:#fff',
 				resizable: false,
 				modal: true,
 				items: nameTextfield,
-				destroyOnBlur: true,
+				//destroyOnBlur: true,
 				bbar: [
 					cancelButton,
 					'->',
@@ -2821,16 +2857,16 @@ Ext.onReady( function() {
 				],
 				listeners: {
 					show: function(w) {
-						pt.util.window.setAnchorPosition(w, addButton);
+						DV.util.window.setAnchorPosition(w, addButton);
 
-						if (!w.hasDestroyBlurHandler) {
-							pt.util.window.addDestroyOnBlurHandler(w);
-						}
+						//if (!w.hasDestroyBlurHandler) {
+							//pt.util.window.addDestroyOnBlurHandler(w);
+						//}
 
-						pt.viewport.favoriteWindow.destroyOnBlur = false;
+						//pt.viewport.favoriteWindow.destroyOnBlur = false;
 					},
 					destroy: function() {
-						pt.viewport.favoriteWindow.destroyOnBlur = true;
+						//pt.viewport.favoriteWindow.destroyOnBlur = true;
 					}
 				}
 			});
@@ -2844,7 +2880,7 @@ Ext.onReady( function() {
 			height: 26,
 			style: 'border-radius: 1px;',
 			menu: {},
-			disabled: !Ext.isObject(pt.xLayout),
+			disabled: !DV.c.rendered,
 			handler: function() {
 				nameWindow = new NameWindow(null, 'create');
 				nameWindow.show();
@@ -2864,8 +2900,8 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
-							store = pt.store.tables;
+							url = value ? DV.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
+							store = DV.store.favorite;
 
 						store.page = 1;
 						store.loadStore(url);
@@ -2878,8 +2914,8 @@ Ext.onReady( function() {
 			text: 'Prev', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
-					store = pt.store.tables;
+					url = value ? DV.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
+					store = DV.store.favorite;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
 				store.loadStore(url);
@@ -2890,8 +2926,8 @@ Ext.onReady( function() {
 			text: 'Next', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
-					store = pt.store.tables;
+					url = value ? DV.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
+					store = DV.store.favorite;
 
 				store.page = store.page + 1;
 				store.loadStore(url);
@@ -2899,13 +2935,13 @@ Ext.onReady( function() {
 		});
 
 		info = Ext.create('Ext.form.Label', {
-			cls: 'pt-label-info',
+			cls: 'dv-label-info',
 			width: 300,
 			height: 22
 		});
 
 		grid = Ext.create('Ext.grid.Panel', {
-			cls: 'pt-grid',
+			cls: 'dv-grid',
 			scroll: false,
 			hideHeaders: true,
 			columns: [
@@ -2919,12 +2955,11 @@ Ext.onReady( function() {
 							if (el) {
 								el = el.parent('td');
 								el.addClsOnOver('link');
-								el.pt = pt;
 								el.favoriteId = record.data.id;
 								el.hideWindow = function() {
 									favoriteWindow.hide();
 								};
-								el.dom.setAttribute('onclick', 'Ext.get(this).hideWindow(); Ext.get(this).pt.util.pivot.loadTable(Ext.get(this).favoriteId);');
+								el.dom.setAttribute('onclick', 'Ext.get(this).hideWindow(); DV.exe.execute(Ext.get(this).favoriteId);');
 							}
 						};
 
@@ -2939,9 +2974,9 @@ Ext.onReady( function() {
 					width: 80,
 					items: [
 						{
-							iconCls: 'pt-grid-row-icon-edit',
+							iconCls: 'dv-grid-row-icon-edit',
 							getClass: function(value, metaData, record) {
-								if (pt.init.user.isAdmin) {
+								if (DV.init.user.isAdmin) {
 									return 'tooltip-favorite-edit';
 								}
 							},
@@ -2949,16 +2984,16 @@ Ext.onReady( function() {
 								var record = this.up('grid').store.getAt(rowIndex),
 									id = record.data.id;
 
-								if (pt.init.user.isAdmin) {
+								if (DV.init.user.isAdmin) {
 									nameWindow = new NameWindow(id);
 									nameWindow.show();
 								}
 							}
 						},
 						{
-							iconCls: 'pt-grid-row-icon-overwrite',
+							iconCls: 'dv-grid-row-icon-overwrite',
 							getClass: function(value, metaData, record) {
-								if (pt.init.user.isAdmin) {
+								if (DV.init.user.isAdmin) {
 									return 'tooltip-favorite-overwrite';
 								}
 							},
@@ -2974,16 +3009,16 @@ Ext.onReady( function() {
 
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: pt.baseUrl + '/api/reportTables/' + id,
+											url: DV.init.contextPath + '/api/charts/' + id,
 											method: 'PUT',
 											headers: {'Content-Type': 'application/json'},
 											params: Ext.encode(favorite),
 											success: function() {
-												pt.favorite = favorite;
+												//pt.favorite = favorite;
 
 												//pt.viewport.interpretationButton.enable();
 
-												pt.store.tables.loadStore();
+												DV.store.favorite.loadStore();
 											}
 										});
 									}
@@ -2994,7 +3029,7 @@ Ext.onReady( function() {
 							}
 						},
 						{
-							iconCls: 'pt-grid-row-icon-sharing',
+							iconCls: 'dv-grid-row-icon-sharing',
 							getClass: function() {
 								return 'tooltip-favorite-sharing';
 							},
@@ -3004,27 +3039,24 @@ Ext.onReady( function() {
 									window;
 
 								Ext.Ajax.request({
-									url: pt.baseUrl + '/api/sharing?type=reportTable&id=' + id,
+									url: DV.init.contextPath + '/api/sharing?type=chart&id=' + id,
 									method: 'GET',
 									failure: function(r) {
-										pt.viewport.mask.hide();
+										DV.util.mask.hideMask();
 										alert(r.responseText);
 									},
 									success: function(r) {
 										var sharing = Ext.decode(r.responseText);
-										window = PT.app.SharingWindow(sharing);
+										window = DV.app.SharingWindow(sharing);
 										window.show();
 									}
 								});
 							}
 						},
 						{
-							iconCls: 'pt-grid-row-icon-delete',
+							iconCls: 'dv-grid-row-icon-delete',
 							getClass: function(value, metaData, record) {
-								var system = !record.data.user,
-									isAdmin = pt.init.user.isAdmin;
-
-								if (isAdmin || (!isAdmin && !system)) {
+								if (DV.init.user.isAdmin) {
 									return 'tooltip-favorite-delete';
 								}
 							},
@@ -3036,10 +3068,10 @@ Ext.onReady( function() {
 
 								if (confirm(message)) {
 									Ext.Ajax.request({
-										url: pt.baseUrl + '/api/reportTables/' + id,
+										url: DV.init.contextPath + '/api/charts/' + id,
 										method: 'DELETE',
 										success: function() {
-											pt.store.tables.loadStore();
+											DV.store.favorite.loadStore();
 										}
 									});
 								}
@@ -3047,8 +3079,8 @@ Ext.onReady( function() {
 						}
 					],
 					renderer: function(value, metaData, record) {
-						if (!pt.init.user.isAdmin && !record.data.user) {
-							metaData.tdCls = 'pt-grid-row-icon-disabled';
+						if (!DV.init.user.isAdmin && !record.data.user) {
+							metaData.tdCls = 'dv-grid-row-icon-disabled';
 						}
 					}
 				},
@@ -3057,7 +3089,7 @@ Ext.onReady( function() {
 					width: 6
 				}
 			],
-			store: pt.store.tables,
+			store: DV.store.favorite,
 			bbar: [
 				info,
 				'->',
@@ -3066,15 +3098,15 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					pt.viewport.favoriteGrid = this;
+					DV.viewport.favoriteGrid = this;
 				},
 				render: function() {
-					var size = Math.floor((pt.viewport.centerRegion.getHeight() - 155) / pt.conf.layout.grid_row_height);
+					var size = Math.floor((DV.viewport.centerRegion.getHeight() - 155) / DV.conf.layout.grid_row_height);
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
 
-					pt.store.tables.on('load', function() {
+					DV.store.favorite.on('load', function() {
 						if (this.isVisible()) {
 							this.fireEvent('afterrender');
 						}
@@ -3151,7 +3183,7 @@ Ext.onReady( function() {
 
 		favoriteWindow = Ext.create('Ext.window.Window', {
 			title: 'Manage favorites',
-			//iconCls: 'pt-window-title-icon-favorite',
+			//iconCls: 'dv-window-title-icon-favorite',
 			bodyStyle: 'padding:5px; background-color:#fff',
 			resizable: false,
 			modal: true,
@@ -3177,11 +3209,11 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					pt.util.window.setAnchorPosition(w, pt.viewport.favoriteButton);
+					DV.util.window.setAnchorPosition(w, DV.cmp.toolbar.favorite);
 
-					if (!w.hasDestroyOnBlurHandler) {
-						pt.util.window.addDestroyOnBlurHandler(w);
-					}
+					//if (!w.hasDestroyOnBlurHandler) {
+						//pt.util.window.addDestroyOnBlurHandler(w);
+					//}
 				}
 			}
 		});
@@ -4855,6 +4887,11 @@ Ext.onReady( function() {
 
 								DV.cmp.favorite.window = DV.app.FavoriteWindow();
 								DV.cmp.favorite.window.show();
+							},
+							listeners: {
+								added: function() {
+									DV.cmp.toolbar.favorite = this;
+								}
 							}
 						},
 
@@ -4914,9 +4951,9 @@ Ext.onReady( function() {
                                                                             //style: 'padding-bottom:2px',
                                                                             //fieldLabel: DV.i18n.system,
                                                                             //labelWidth: DV.conf.layout.form_label_width,
-                                                                            //disabled: !DV.init.user.isadmin,
+                                                                            //disabled: !DV.init.user.isAdmin,
                                                                             //check: function() {
-                                                                                //if (!DV.init.user.isadmin) {
+                                                                                //if (!DV.init.user.isAdmin) {
                                                                                     //if (DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue()) === -1) {
                                                                                         //this.setValue(false);
                                                                                     //}
@@ -5252,7 +5289,7 @@ Ext.onReady( function() {
 																				//if (DV.cmp.favorite.name.getValue()) {
 																					//var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
 																					//if (index != -1) {
-																						//if (DV.store.favorite.getAt(index).data.userId || DV.init.user.isadmin) {
+																						//if (DV.store.favorite.getAt(index).data.userId || DV.init.user.isAdmin) {
 																							//this.enable();
 																							//DV.cmp.favorite.label.setText('');
 																							//return true;
@@ -5723,6 +5760,8 @@ Ext.onReady( function() {
         ],
         listeners: {
             afterrender: function(vp) {
+				vp.centerRegion = DV.cmp.region.center;
+
                 DV.init.initialize(vp);
             },
             resize: function(vp) {
