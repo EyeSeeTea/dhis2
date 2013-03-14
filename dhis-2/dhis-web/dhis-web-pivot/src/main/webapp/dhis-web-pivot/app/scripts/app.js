@@ -759,18 +759,21 @@ Ext.onReady( function() {
 
 		showTotals = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: 'Show totals', //i18n
+			style: 'margin-bottom:3px',
 			checked: true
 		});
 		pt.viewport.showTotals = showTotals;
 
 		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: 'Show sub-totals', //i18n
+			style: 'margin-bottom:3px',
 			checked: true
 		});
 		pt.viewport.showSubTotals = showSubTotals;
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: 'Hide empty rows' //i18n
+			boxLabel: 'Hide empty rows', //i18n
+			style: 'margin-bottom:3px',
 		});
 		pt.viewport.hideEmptyRows = hideEmptyRows;
 
