@@ -749,7 +749,7 @@ Ext.onReady( function() {
 		var showTotals,
 			showSubTotals,
 			hideEmptyRows,
-			numberFormatting,
+			digitGroupSeparator,
 			displayDensity,
 			fontSize,
 
@@ -777,7 +777,7 @@ Ext.onReady( function() {
 		});
 		pt.viewport.hideEmptyRows = hideEmptyRows;
 
-		numberFormatting = Ext.create('Ext.form.field.ComboBox', {
+		digitGroupSeparator = Ext.create('Ext.form.field.ComboBox', {
 			fieldLabel: 'Number formatting', //i18n
 			labelStyle: 'color:#333',
 			cls: 'pt-combo',
@@ -795,7 +795,7 @@ Ext.onReady( function() {
 				]
 			})
 		});
-		pt.viewport.numberFormatting = numberFormatting;
+		pt.viewport.digitGroupSeparator = digitGroupSeparator;
 
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			fieldLabel: 'Display density', //i18n
@@ -852,9 +852,9 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				numberFormatting,
 				displayDensity,
-				fontSize
+				fontSize,
+				digitGroupSeparator
 			]
 		};
 
@@ -871,9 +871,9 @@ Ext.onReady( function() {
 					showTotals: showTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
-					numberFormatting: numberFormatting.getValue(),
 					displayDensity: displayDensity.getValue(),
-					fontSize: fontSize.getValue()
+					fontSize: fontSize.getValue(),
+					digitGroupSeparator: digitGroupSeparator.getValue()
 				};
 			},
 			items: [
@@ -3591,9 +3591,9 @@ Ext.onReady( function() {
 				pt.viewport.showTotals.setValue(r.totals);
 				pt.viewport.showSubTotals.setValue(r.subtotals);
 				pt.viewport.hideEmptyRows.setValue(r.hideEmptyRows);
-				pt.viewport.numberFormatting.setValue(r.numberFormatting);
 				pt.viewport.displayDensity.setValue(r.displayDensity);
 				pt.viewport.fontSize.setValue(r.fontSize);
+				pt.viewport.digitGroupSeparator.setValue(r.digitGroupSeparator);
 
 				update();
 			};

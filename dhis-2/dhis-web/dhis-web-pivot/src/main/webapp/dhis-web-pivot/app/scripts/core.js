@@ -217,7 +217,7 @@ PT.core.getConfigs = function() {
     };
 
 	conf.pivot = {
-		numberFormatting: {
+		digitGroupSeparator: {
 			'comma': ',',
 			'space': ' '
 		},
@@ -515,7 +515,7 @@ PT.core.getUtils = function(pt) {
 				return x;
 			}
 
-			return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, pt.conf.pivot.numberFormatting[nf]);
+			return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, pt.conf.pivot.digitGroupSeparator[nf]);
 		}
 	};
 
@@ -1038,7 +1038,7 @@ PT.core.getUtils = function(pt) {
 					colSpan = config.colSpan ? 'colspan="' + config.colSpan + '"' : '';
 					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '"' : '';
 					htmlValue = config.collapsed ? '&nbsp;' : config.htmlValue || config.value || '&nbsp;';
-					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, options.numberFormatting) : htmlValue;
+					htmlValue = config.type !== 'dimension' ? pt.util.number.pp(htmlValue, options.digitGroupSeparator) : htmlValue;
 					displayDensity = pt.conf.pivot.displayDensity[config.displayDensity] || pt.conf.pivot.displayDensity[options.displayDensity];
 					fontSize = pt.conf.pivot.fontSize[config.fontSize] || pt.conf.pivot.fontSize[options.fontSize];
 
@@ -1668,9 +1668,9 @@ PT.core.getAPI = function(pt) {
 				showTotals: true,
 				showSubTotals: true,
 				hideEmptyRows: false,
-				numberFormatting: 'space',
 				displayDensity: 'normal',
-				fontSize: 'normal'
+				fontSize: 'normal',
+				digitGroupSeparator: 'space'
 			};
 
 		removeEmptyDimensions = function(axis) {
@@ -1731,9 +1731,9 @@ PT.core.getAPI = function(pt) {
 			options.showTotals = Ext.isDefined(options.showTotals) ? options.showTotals : defaultOptions.showTotals;
 			options.showSubTotals = Ext.isDefined(options.showSubTotals) ? options.showSubTotals : defaultOptions.showSubTotals;
 			options.hideEmptyRows = Ext.isDefined(options.hideEmptyRows) ? options.hideEmptyRows : defaultOptions.hideEmptyRows;
-			options.numberFormatting = Ext.isDefined(options.numberFormatting) ? options.numberFormatting : defaultOptions.numberFormatting;
 			options.displayDensity = options.displayDensity || defaultOptions.displayDensity;
 			options.fontSize = options.fontSize || defaultOptions.fontSize;
+			options.digitGroupSeparator = Ext.isDefined(options.digitGroupSeparator) ? options.digitGroupSeparator : defaultOptions.digitGroupSeparator;
 
 			return options;
 		};

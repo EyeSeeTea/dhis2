@@ -16,9 +16,9 @@ settings = {
 		showTotals: true,
 		showSubTotals: true,
 		hideEmptyRows: false,
-		numberFormatting: 'space',
 		displayDensity: 'normal',
 		fontSize: 'normal',
+		digitGroupSeparator: 'space',
 		userOrganisationUnit: true,
 		userOrganisationUnitChildren: false
 	}
@@ -65,9 +65,9 @@ xSettings = {
 		showTotals: true,
 		showSubTotals: true,
 		hideEmptyRows: false,
-		numberFormatting: 'space',
 		displayDensity: 'normal',
-		fontSize: 'normal'
+		fontSize: 'normal',
+		digitGroupSeparator: 'space'
 	}
 };
 
