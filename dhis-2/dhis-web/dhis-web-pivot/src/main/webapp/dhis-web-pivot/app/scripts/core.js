@@ -985,6 +985,7 @@ PT.core.getUtils = function(pt) {
 			getTableHtml = function(xColAxis, xRowAxis, xResponse) {
 				var getTdHtml,
 					doSubTotals,
+					doTotals,
 					getColAxisHtmlArray,
 					getRowHtmlArray,
 					rowAxisHtmlArray,
@@ -1065,6 +1066,10 @@ PT.core.getUtils = function(pt) {
 					//return (multiItemDimension > 1);
 				};
 
+				doTotals = function() {
+					return !!options.showTotals;
+				};
+
 				getColAxisHtmlArray = function() {
 					var a = [],
 						getEmptyHtmlArray;
@@ -1103,13 +1108,15 @@ PT.core.getUtils = function(pt) {
 								}));
 							}
 
-							if (i === 0 && j === (dimItems.length - 1)) {
-								dimHtml.push(getTdHtml(options, {
-									type: 'dimensionTotal',
-									cls: 'pivot-dim-total',
-									rowSpan: xColAxis.dims,
-									htmlValue: 'Total'
-								}));
+							if (doTotals()) {
+								if (i === 0 && j === (dimItems.length - 1)) {
+									dimHtml.push(getTdHtml(options, {
+										type: 'dimensionTotal',
+										cls: 'pivot-dim-total',
+										rowSpan: xColAxis.dims,
+										htmlValue: 'Total'
+									}));
+								}
 							}
 						}
 
@@ -1199,7 +1206,7 @@ PT.core.getUtils = function(pt) {
 					}
 
 					// Value total objects
-					if (xColAxis) {
+					if (xColAxis && doTotals()) {
 						for (var i = 0, empty, total; i < valueObjects.length; i++) {
 							empty = [];
 							total = 0;
@@ -1239,7 +1246,9 @@ PT.core.getUtils = function(pt) {
 									}
 
 									// Hide total
-									totalValueObjects[i].collapsed = true;
+									if (doTotals()) {
+										totalValueObjects[i].collapsed = true;
+									}
 
 									// Hide/reduce parent dim span
 									parent = axisObjects[i][xRowAxis.dims-1];
@@ -1425,7 +1434,7 @@ PT.core.getUtils = function(pt) {
 				getColTotalHtmlArray = function() {
 					var a = [];
 
-					if (xRowAxis) {
+					if (xRowAxis && doTotals()) {
 
 						// Total col items
 						for (var i = 0, colSum; i < valueItems[0].length; i++) {
@@ -1488,17 +1497,19 @@ PT.core.getUtils = function(pt) {
 						values = [],
 						a = [];
 
-					for (var i = 0; i < totalColItems.length; i++) {
-						values.push(totalColItems[i].value);
-					}
+					if (doTotals()) {
+						for (var i = 0; i < totalColItems.length; i++) {
+							values.push(totalColItems[i].value);
+						}
 
-					if (xColAxis && xRowAxis) {
-						grandTotalSum = Ext.Array.sum(values);
+						if (xColAxis && xRowAxis) {
+							grandTotalSum = Ext.Array.sum(values);
 
-						a.push(getTdHtml(options, {
-							cls: 'pivot-value-grandtotal',
-							htmlValue: pt.util.number.roundIf(grandTotalSum, 1).toString()
-						}));
+							a.push(getTdHtml(options, {
+								cls: 'pivot-value-grandtotal',
+								htmlValue: pt.util.number.roundIf(grandTotalSum, 1).toString()
+							}));
+						}
 					}
 
 					return a;
@@ -1511,17 +1522,19 @@ PT.core.getUtils = function(pt) {
 						row,
 						a = [];
 
-					if (xRowAxis) {
-						dimTotalArray = [getTdHtml(options, {
-							cls: 'pivot-dim-total',
-							colSpan: xRowAxis.dims,
-							htmlValue: 'Total'
-						})];
+					if (doTotals()) {
+						if (xRowAxis) {
+							dimTotalArray = [getTdHtml(options, {
+								cls: 'pivot-dim-total',
+								colSpan: xRowAxis.dims,
+								htmlValue: 'Total'
+							})];
+						}
+
+						row = [].concat(dimTotalArray || [], Ext.clone(colTotal) || [], Ext.clone(grandTotal) || []);
+
+						a.push(row);
 					}
-
-					row = [].concat(dimTotalArray || [], Ext.clone(colTotal) || [], Ext.clone(grandTotal) || []);
-
-					a.push(row);
 
 					return a;
 				};
@@ -1652,6 +1665,7 @@ PT.core.getAPI = function(pt) {
 			validateSettings,
 
 			defaultOptions = {
+				showTotals: true,
 				showSubTotals: true,
 				hideEmptyRows: false,
 				numberFormatting: 'space',
@@ -1714,6 +1728,7 @@ PT.core.getAPI = function(pt) {
 				return defaultOptions;
 			}
 
+			options.showTotals = Ext.isDefined(options.showTotals) ? options.showTotals : defaultOptions.showTotals;
 			options.showSubTotals = Ext.isDefined(options.showSubTotals) ? options.showSubTotals : defaultOptions.showSubTotals;
 			options.hideEmptyRows = Ext.isDefined(options.hideEmptyRows) ? options.hideEmptyRows : defaultOptions.hideEmptyRows;
 			options.numberFormatting = Ext.isDefined(options.numberFormatting) ? options.numberFormatting : defaultOptions.numberFormatting;

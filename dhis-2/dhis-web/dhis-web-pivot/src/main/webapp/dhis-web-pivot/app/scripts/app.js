@@ -746,7 +746,8 @@ Ext.onReady( function() {
 	};
 
 	PT.app.OptionsWindow = function() {
-		var showSubTotals,
+		var showTotals,
+			showSubTotals,
 			hideEmptyRows,
 			numberFormatting,
 			displayDensity,
@@ -755,6 +756,12 @@ Ext.onReady( function() {
 			data,
 			style,
 			window;
+
+		showTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: 'Show totals', //i18n
+			checked: true
+		});
+		pt.viewport.showTotals = showTotals;
 
 		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: 'Show sub-totals', //i18n
@@ -832,6 +839,7 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
+				showTotals,
 				showSubTotals,
 				hideEmptyRows
 			]
@@ -857,6 +865,7 @@ Ext.onReady( function() {
 			hideOnBlur: true,
 			getOptions: function() {
 				return {
+					showTotals: showTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
 					numberFormatting: numberFormatting.getValue(),
@@ -965,6 +974,7 @@ Ext.onReady( function() {
 				favorite = Ext.clone(pt.xSettings.options);
 
 				// Server sync
+				favorite.totals = favorite.showTotals;
 				favorite.subtotals = favorite.showSubTotals;
 
 				// Dimensions
@@ -3575,6 +3585,7 @@ Ext.onReady( function() {
 				}
 
 				// Options
+				pt.viewport.showTotals.setValue(r.totals);
 				pt.viewport.showSubTotals.setValue(r.subtotals);
 				pt.viewport.hideEmptyRows.setValue(r.hideEmptyRows);
 				pt.viewport.numberFormatting.setValue(r.numberFormatting);

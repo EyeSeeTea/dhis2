@@ -13,6 +13,7 @@ settings = {
 		{name: 'ou', items: ['ImspTQPwCqd']}
 	],
 	options: {
+		showTotals: true,
 		showSubTotals: true,
 		hideEmptyRows: false,
 		numberFormatting: 'space',
@@ -61,7 +62,10 @@ xSettings = {
 		'ou': ['ImspTQPwCqd']
 	},
 	options: {
-		showSubTotals: false,
+		showTotals: true,
+		showSubTotals: true,
+		hideEmptyRows: false,
+		numberFormatting: 'space',
 		displayDensity: 'normal',
 		fontSize: 'normal'
 	}
