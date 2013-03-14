@@ -759,29 +759,30 @@ Ext.onReady( function() {
 
 		showTotals = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: 'Show totals', //i18n
-			style: 'margin-bottom:3px',
+			style: 'margin-bottom:4px',
 			checked: true
 		});
 		pt.viewport.showTotals = showTotals;
 
 		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: 'Show sub-totals', //i18n
-			style: 'margin-bottom:3px',
+			style: 'margin-bottom:4px',
 			checked: true
 		});
 		pt.viewport.showSubTotals = showSubTotals;
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: 'Hide empty rows', //i18n
-			style: 'margin-bottom:3px',
+			style: 'margin-bottom:4px',
 		});
 		pt.viewport.hideEmptyRows = hideEmptyRows;
 
 		digitGroupSeparator = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: 'Number formatting', //i18n
 			labelStyle: 'color:#333',
 			cls: 'pt-combo',
-			width: 230,
+			width: 250,
+			labelWidth: 130,
+			fieldLabel: 'Digit group separator', //i18n
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
@@ -798,10 +799,11 @@ Ext.onReady( function() {
 		pt.viewport.digitGroupSeparator = digitGroupSeparator;
 
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'pt-combo',
+			width: 250,
+			labelWidth: 130,
 			fieldLabel: 'Display density', //i18n
 			labelStyle: 'color:#333',
-			cls: 'pt-combo',
-			width: 230,
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
@@ -818,11 +820,11 @@ Ext.onReady( function() {
 		pt.viewport.displayDensity = displayDensity;
 
 		fontSize = Ext.create('Ext.form.field.ComboBox', {
-			xtype: 'combobox',
+			cls: 'pt-combo',
+			width: 250,
+			labelWidth: 130,
 			fieldLabel: 'Font size', //i18n
 			labelStyle: 'color:#333',
-			cls: 'pt-combo',
-			width: 230,
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
