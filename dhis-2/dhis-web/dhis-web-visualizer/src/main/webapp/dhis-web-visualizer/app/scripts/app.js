@@ -2534,6 +2534,661 @@ Ext.onReady( function() {
 		}
     };
 
+	DV.app = {};
+
+	DV.app.FavoriteWindow = function() {
+
+		// Objects
+		var NameWindow,
+
+		// Instances
+			nameWindow,
+
+		// Functions
+			getBody,
+
+		// Components
+			addButton,
+			searchTextfield,
+			grid,
+			prevButton,
+			nextButton,
+			tbar,
+			bbar,
+			info,
+			nameTextfield,
+			createButton,
+			updateButton,
+			cancelButton,
+			mapWindow,
+
+		// Vars
+			windowWidth = 500,
+			windowCmpWidth = windowWidth - 22;
+
+		DV.store.favorite.on('load', function(store, records) {
+			var pager = store.proxy.reader.jsonData.pager;
+
+			info.setText('Page ' + pager.page + ' of ' + pager.pageCount);
+
+			prevButton.enable();
+			nextButton.enable();
+
+			if (pager.page === 1) {
+				prevButton.disable();
+			}
+
+			if (pager.page === pager.pageCount) {
+				nextButton.disable();
+			}
+		});
+
+		getBody = function() {
+			var favorite;
+
+			if (DV.c.rendered) {
+				var p = DV.state.getParams();
+				favorite = {};
+
+				// Server sync
+				p.lastMonth = p.reportingMonth;
+				p.lastQuarter = p.reportingQuarter;
+
+				favorite.type = p.type;
+				favorite.series = p.series;
+				favorite.category = p.category;
+				favorite.filter = p.filter;
+				favorite.hideLegend = p.hideLegend;
+				favorite.hideSubtitle = p.hideSubtitle;
+				favorite.showData = p.showData;
+				favorite.regression = p.trendLine;
+				favorite.userOrganisationUnit = p.userOrganisationUnit;
+				favorite.userOrganisationUnitChildren = p.userOrganisationUnitChildren;
+
+				// Options
+				if (p.domainAxisLabel) {
+					favorite.domainAxisLabel = p.domainAxisLabel;
+				}
+				if (p.rangeAxisLabel) {
+					favorite.rangeAxisLabel = p.rangeAxisLabel;
+				}
+				if (p.targetLineValue) {
+					favorite.targetLineValue = p.targetLineValue;
+				}
+				if (p.targetLineLabel) {
+					favorite.targetLineLabel = p.targetLineLabel;
+				}
+				if (p.baseLineValue) {
+					favorite.baseLineValue = p.baseLineValue;
+				}
+				if (p.baseLineLabel) {
+					favorite.baseLineLabel = p.baseLineLabel;
+				}
+
+				// Indicators
+				if (Ext.isArray(p.indicatorIds) && p.indicatorIds.length) {
+					favorite.indicators = [];
+
+					for (var i = 0; i < p.indicatorIds.length; i++) {
+						favorite.indicators.push({
+							id: p.indicatorIds[i]
+						});
+					}
+				}
+
+				// Data elements
+				if (Ext.isArray(p.dataElementIds) && p.dataElementIds.length) {
+					favorite.dataElements = [];
+
+					for (var i = 0; i < p.dataElementIds.length; i++) {
+						favorite.dataElements.push({
+							id: p.dataElementIds[i]
+						});
+					}
+				}
+
+				// Data sets
+				if (Ext.isArray(p.dataSetIds) && p.dataSetIds.length) {
+					favorite.dataSets = [];
+
+					for (var i = 0; i < p.dataSetIds.length; i++) {
+						favorite.dataSets.push({
+							id: p.dataSetIds[i]
+						});
+					}
+				}
+
+				// Fixed periods
+				if (Ext.isArray(p.periodIds) && p.periodIds.length) {
+					favorite.periods = [];
+
+					for (var i = 0; i < p.periodIds.length; i++) {
+						favorite.periods.push({
+							id: p.periodIds[i]
+						});
+					}
+				}
+
+				// Relative periods
+				favorite.relativePeriods = {};
+
+				if (p.lastMonth || p.last3Months || p.last12Months || p.lastQuarter || p.last4Quarters ||
+					p.lastSixMonth || p.last2SixMonths || p.thisYear || p.lastYear || p.last5Years) {
+
+					if (p.lastMonth) {favorite.lastMonth = true;}
+					if (p.last3Months) {favorite.last3Months = true;}
+					if (p.last12Months) {favorite.last12Months = true;}
+					if (p.lastQuarter) {favorite.lastQuarter = true;}
+					if (p.last4Quarters) {favorite.last4Quarters = true;}
+					if (p.lastSixMonth) {favorite.lastSixMonth = true;}
+					if (p.last2SixMonths) {favorite.last2SixMonths = true;}
+					if (p.thisYear) {favorite.thisYear = true;}
+					if (p.lastYear) {favorite.lastYear = true;}
+					if (p.last5Years) {favorite.last5Years = true;}
+				}
+
+				if (p.rewind) {
+					favorite.rewindRelativePeriods = true;
+				}
+
+				// Organisation units
+				if (Ext.isArray(p.organisationUnitIds) && p.organisationUnitIds.length) {
+					favorite.organisationUnits = [];
+
+					for (var i = 0; i < p.organisationUnitIds.length; i++) {
+						favorite.organisationUnits.push({
+							id: p.organisationUnitIds[i]
+						});
+					}
+				}
+
+				// Organisation unit group set
+				if (p.organisationUnitGroupSetId) {
+					favorite.organisationUnitGroupSetId = p.organisationUnitGroupSetId;
+				}
+			}
+
+			return favorite;
+		};
+
+		NameWindow = function(id) {
+			var window,
+				record = pt.store.tables.getById(id);
+
+			nameTextfield = Ext.create('Ext.form.field.Text', {
+				height: 26,
+				width: 250,
+				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
+				style: 'margin-bottom:0',
+				emptyText: 'Favorite name',
+				value: id ? record.data.name : '',
+				listeners: {
+					afterrender: function() {
+						this.focus();
+					}
+				}
+			});
+
+			createButton = Ext.create('Ext.button.Button', {
+				text: 'Create', //i18n
+				handler: function() {
+					var favorite = getBody();
+					favorite.name = nameTextfield.getValue	();
+
+					if (favorite && favorite.name) {
+						Ext.Ajax.request({
+							url: pt.baseUrl + '/api/reportTables/',
+							method: 'POST',
+							headers: {'Content-Type': 'application/json'},
+							params: Ext.encode(favorite),
+							failure: function(r) {
+								pt.viewport.mask.show();
+								alert(r.responseText);
+							},
+							success: function(r) {
+								var id = r.getAllResponseHeaders().location.split('/').pop();
+
+								pt.favorite = favorite;
+
+								pt.store.tables.loadStore();
+
+								//pt.viewport.interpretationButton.enable();
+
+								window.destroy();
+							}
+						});
+					}
+				}
+			});
+
+			updateButton = Ext.create('Ext.button.Button', {
+				text: 'Update', //i18n
+				handler: function() {
+					var name = nameTextfield.getValue(),
+						reportTable;
+
+					if (id && name) {
+						Ext.Ajax.request({
+							url: pt.baseUrl + '/api/reportTables/' + id + '.json?links=false',
+							method: 'GET',
+							failure: function(r) {
+								pt.viewport.mask.show();
+								alert(r.responseText);
+							},
+							success: function(r) {
+								reportTable = Ext.decode(r.responseText);
+								reportTable.name = name;
+
+								Ext.Ajax.request({
+									url: pt.baseUrl + '/api/reportTables/' + reportTable.id,
+									method: 'PUT',
+									headers: {'Content-Type': 'application/json'},
+									params: Ext.encode(reportTable),
+									failure: function(r) {
+										pt.viewport.mask.show();
+										alert(r.responseText);
+									},
+									success: function(r) {
+										pt.store.tables.loadStore();
+										window.destroy();
+									}
+								});
+							}
+						});
+					}
+				}
+			});
+
+			cancelButton = Ext.create('Ext.button.Button', {
+				text: 'Cancel', //i18n
+				handler: function() {
+					window.destroy();
+				}
+			});
+
+			window = Ext.create('Ext.window.Window', {
+				title: id ? 'Rename favorite' : 'Create new favorite',
+				//iconCls: 'pt-window-title-icon-favorite',
+				bodyStyle: 'padding:5px; background:#fff',
+				resizable: false,
+				modal: true,
+				items: nameTextfield,
+				destroyOnBlur: true,
+				bbar: [
+					cancelButton,
+					'->',
+					id ? updateButton : createButton
+				],
+				listeners: {
+					show: function(w) {
+						pt.util.window.setAnchorPosition(w, addButton);
+
+						if (!w.hasDestroyBlurHandler) {
+							pt.util.window.addDestroyOnBlurHandler(w);
+						}
+
+						pt.viewport.favoriteWindow.destroyOnBlur = false;
+					},
+					destroy: function() {
+						pt.viewport.favoriteWindow.destroyOnBlur = true;
+					}
+				}
+			});
+
+			return window;
+		};
+
+		addButton = Ext.create('Ext.button.Button', {
+			text: 'Add new', //i18n
+			width: 67,
+			height: 26,
+			style: 'border-radius: 1px;',
+			menu: {},
+			disabled: !Ext.isObject(pt.xLayout),
+			handler: function() {
+				nameWindow = new NameWindow(null, 'create');
+				nameWindow.show();
+			}
+		});
+
+		searchTextfield = Ext.create('Ext.form.field.Text', {
+			width: windowCmpWidth - addButton.width - 11,
+			height: 26,
+			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
+			emptyText: 'Search for favorites', //i18n
+			enableKeyEvents: true,
+			currentValue: '',
+			listeners: {
+				keyup: function() {
+					if (this.getValue() !== this.currentValue) {
+						this.currentValue = this.getValue();
+
+						var value = this.getValue(),
+							url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
+							store = pt.store.tables;
+
+						store.page = 1;
+						store.loadStore(url);
+					}
+				}
+			}
+		});
+
+		prevButton = Ext.create('Ext.button.Button', {
+			text: 'Prev', //i18n
+			handler: function() {
+				var value = searchTextfield.getValue(),
+					url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
+					store = pt.store.tables;
+
+				store.page = store.page <= 1 ? 1 : store.page - 1;
+				store.loadStore(url);
+			}
+		});
+
+		nextButton = Ext.create('Ext.button.Button', {
+			text: 'Next', //i18n
+			handler: function() {
+				var value = searchTextfield.getValue(),
+					url = value ? pt.baseUrl + '/api/reportTables/query/' + value + '.json?links=false' : null,
+					store = pt.store.tables;
+
+				store.page = store.page + 1;
+				store.loadStore(url);
+			}
+		});
+
+		info = Ext.create('Ext.form.Label', {
+			cls: 'pt-label-info',
+			width: 300,
+			height: 22
+		});
+
+		grid = Ext.create('Ext.grid.Panel', {
+			cls: 'pt-grid',
+			scroll: false,
+			hideHeaders: true,
+			columns: [
+				{
+					dataIndex: 'name',
+					sortable: false,
+					width: windowCmpWidth - 88,
+					renderer: function(value, metaData, record) {
+						var fn = function() {
+							var el = Ext.get(record.data.id);
+							if (el) {
+								el = el.parent('td');
+								el.addClsOnOver('link');
+								el.pt = pt;
+								el.favoriteId = record.data.id;
+								el.hideWindow = function() {
+									favoriteWindow.hide();
+								};
+								el.dom.setAttribute('onclick', 'Ext.get(this).hideWindow(); Ext.get(this).pt.util.pivot.loadTable(Ext.get(this).favoriteId);');
+							}
+						};
+
+						Ext.defer(fn, 100);
+
+						return '<div id="' + record.data.id + '">' + value + '</div>';
+					}
+				},
+				{
+					xtype: 'actioncolumn',
+					sortable: false,
+					width: 80,
+					items: [
+						{
+							iconCls: 'pt-grid-row-icon-edit',
+							getClass: function(value, metaData, record) {
+								if (pt.init.user.isAdmin) {
+									return 'tooltip-favorite-edit';
+								}
+							},
+							handler: function(grid, rowIndex, colIndex, col, event) {
+								var record = this.up('grid').store.getAt(rowIndex),
+									id = record.data.id;
+
+								if (pt.init.user.isAdmin) {
+									nameWindow = new NameWindow(id);
+									nameWindow.show();
+								}
+							}
+						},
+						{
+							iconCls: 'pt-grid-row-icon-overwrite',
+							getClass: function(value, metaData, record) {
+								if (pt.init.user.isAdmin) {
+									return 'tooltip-favorite-overwrite';
+								}
+							},
+							handler: function(grid, rowIndex, colIndex, col, event) {
+								var record = this.up('grid').store.getAt(rowIndex),
+									id = record.data.id,
+									name = record.data.name,
+									message = 'Overwrite favorite?\n\n' + name,
+									favorite = getBody();
+
+								if (favorite) {
+									favorite.name = name;
+
+									if (confirm(message)) {
+										Ext.Ajax.request({
+											url: pt.baseUrl + '/api/reportTables/' + id,
+											method: 'PUT',
+											headers: {'Content-Type': 'application/json'},
+											params: Ext.encode(favorite),
+											success: function() {
+												pt.favorite = favorite;
+
+												//pt.viewport.interpretationButton.enable();
+
+												pt.store.tables.loadStore();
+											}
+										});
+									}
+								}
+								else {
+									alert('Please create a table first'); //i18n
+								}
+							}
+						},
+						{
+							iconCls: 'pt-grid-row-icon-sharing',
+							getClass: function() {
+								return 'tooltip-favorite-sharing';
+							},
+							handler: function(grid, rowIndex) {
+								var record = this.up('grid').store.getAt(rowIndex),
+									id = record.data.id,
+									window;
+
+								Ext.Ajax.request({
+									url: pt.baseUrl + '/api/sharing?type=reportTable&id=' + id,
+									method: 'GET',
+									failure: function(r) {
+										pt.viewport.mask.hide();
+										alert(r.responseText);
+									},
+									success: function(r) {
+										var sharing = Ext.decode(r.responseText);
+										window = PT.app.SharingWindow(sharing);
+										window.show();
+									}
+								});
+							}
+						},
+						{
+							iconCls: 'pt-grid-row-icon-delete',
+							getClass: function(value, metaData, record) {
+								var system = !record.data.user,
+									isAdmin = pt.init.user.isAdmin;
+
+								if (isAdmin || (!isAdmin && !system)) {
+									return 'tooltip-favorite-delete';
+								}
+							},
+							handler: function(grid, rowIndex, colIndex, col, event) {
+								var record = this.up('grid').store.getAt(rowIndex),
+									id = record.data.id,
+									name = record.data.name,
+									message = 'Delete favorite?\n\n' + name;
+
+								if (confirm(message)) {
+									Ext.Ajax.request({
+										url: pt.baseUrl + '/api/reportTables/' + id,
+										method: 'DELETE',
+										success: function() {
+											pt.store.tables.loadStore();
+										}
+									});
+								}
+							}
+						}
+					],
+					renderer: function(value, metaData, record) {
+						if (!pt.init.user.isAdmin && !record.data.user) {
+							metaData.tdCls = 'pt-grid-row-icon-disabled';
+						}
+					}
+				},
+				{
+					sortable: false,
+					width: 6
+				}
+			],
+			store: pt.store.tables,
+			bbar: [
+				info,
+				'->',
+				prevButton,
+				nextButton
+			],
+			listeners: {
+				added: function() {
+					pt.viewport.favoriteGrid = this;
+				},
+				render: function() {
+					var size = Math.floor((pt.viewport.centerRegion.getHeight() - 155) / pt.conf.layout.grid_row_height);
+					this.store.pageSize = size;
+					this.store.page = 1;
+					this.store.loadStore();
+
+					pt.store.tables.on('load', function() {
+						if (this.isVisible()) {
+							this.fireEvent('afterrender');
+						}
+					}, this);
+				},
+				afterrender: function() {
+					var fn = function() {
+						var editArray = Ext.query('.tooltip-favorite-edit'),
+							overwriteArray = Ext.query('.tooltip-favorite-overwrite'),
+							//dashboardArray = Ext.query('.tooltip-favorite-dashboard'),
+							sharingArray = Ext.query('.tooltip-favorite-sharing'),
+							deleteArray = Ext.query('.tooltip-favorite-delete'),
+							el;
+
+						for (var i = 0; i < editArray.length; i++) {
+							var el = editArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Rename', //i18n
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+						}
+
+						for (var i = 0; i < overwriteArray.length; i++) {
+							el = overwriteArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Overwrite', //i18n
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+						}
+
+						for (var i = 0; i < sharingArray.length; i++) {
+							el = sharingArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Share with other people', //i18n
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+						}
+
+						for (var i = 0; i < deleteArray.length; i++) {
+							el = deleteArray[i];
+							Ext.create('Ext.tip.ToolTip', {
+								target: el,
+								html: 'Delete', //i18n
+								'anchor': 'bottom',
+								anchorOffset: -14,
+								showDelay: 1000
+							});
+						}
+					};
+
+					Ext.defer(fn, 100);
+				},
+				itemmouseenter: function(grid, record, item) {
+					this.currentItem = Ext.get(item);
+					this.currentItem.removeCls('x-grid-row-over');
+				},
+				select: function() {
+					this.currentItem.removeCls('x-grid-row-selected');
+				},
+				selectionchange: function() {
+					this.currentItem.removeCls('x-grid-row-focused');
+				}
+			}
+		});
+
+		favoriteWindow = Ext.create('Ext.window.Window', {
+			title: 'Manage favorites',
+			//iconCls: 'pt-window-title-icon-favorite',
+			bodyStyle: 'padding:5px; background-color:#fff',
+			resizable: false,
+			modal: true,
+			width: windowWidth,
+			destroyOnBlur: true,
+			items: [
+				{
+					xtype: 'panel',
+					layout: 'hbox',
+					bodyStyle: 'border:0 none',
+					items: [
+						addButton,
+						{
+							height: 24,
+							width: 1,
+							style: 'width:1px; margin-left:5px; margin-right:5px; margin-top:1px',
+							bodyStyle: 'border-left: 1px solid #aaa'
+						},
+						searchTextfield
+					]
+				},
+				grid
+			],
+			listeners: {
+				show: function(w) {
+					pt.util.window.setAnchorPosition(w, pt.viewport.favoriteButton);
+
+					if (!w.hasDestroyOnBlurHandler) {
+						pt.util.window.addDestroyOnBlurHandler(w);
+					}
+				}
+			}
+		});
+
+		return favoriteWindow;
+	};
+
     DV.viewport = Ext.create('Ext.container.Viewport', {
         layout: 'border',
         items: [
@@ -4166,7 +4821,6 @@ Ext.onReady( function() {
                     },
                     items: [
                         {
-                            xtype: 'button',
                             name: 'resizewest',
                             text: '<<<',
                             handler: function() {
@@ -4185,7 +4839,6 @@ Ext.onReady( function() {
                             }
                         },
                         {
-                            xtype: 'button',
                             text: '<b>' + DV.i18n.update + '</b>',
                             handler: function() {
 								DV.c.currentFavorite = null;
@@ -4193,582 +4846,591 @@ Ext.onReady( function() {
                             }
                         },
                         {
-                            xtype: 'button',
                             text: DV.i18n.favorites,
                             menu: {},
-                            listeners: {
-                                afterrender: function(b) {
-                                    this.menu = Ext.create('Ext.menu.Menu', {
-                                        shadow: false,
-                                        showSeparator: false,
-                                        items: [
-                                            {
-                                                text: DV.i18n.manage_favorites,
-                                                iconCls: 'dv-menu-item-edit',
-                                                handler: function() {
-													DV.store.favorite.filtersystem();
-                                                    if (DV.cmp.favorite.window) {
-                                                        DV.cmp.favorite.window.show();
-                                                    }
-                                                    else {
-                                                        DV.cmp.favorite.window = Ext.create('Ext.window.Window', {
-                                                            title: DV.i18n.manage_favorites,
-                                                            iconCls: 'dv-window-title-favorite',
-                                                            bodyStyle: 'padding:8px; background-color:#fff',
-															width: DV.conf.layout.grid_favorite_width,
-                                                            closeAction: 'hide',
-                                                            resizable: false,
-                                                            modal: true,
-                                                            resetForm: function() {
-                                                                DV.cmp.favorite.name.setValue('');
-                                                                DV.cmp.favorite.system.setValue(false);
-                                                            },
-                                                            items: [
-                                                                {
-                                                                    xtype: 'form',
-                                                                    bodyStyle: 'border-style:none',
-                                                                    items: [
-                                                                        {
-                                                                            xtype: 'textfield',
-                                                                            cls: 'dv-textfield',
-                                                                            fieldLabel: DV.i18n.name,
-                                                                            maxLength: 160,
-                                                                            enforceMaxLength: true,
-                                                                            labelWidth: DV.conf.layout.form_label_width,
-                                                                            width: DV.conf.layout.grid_favorite_width - 28,
-                                                                            listeners: {
-                                                                                added: function() {
-                                                                                    DV.cmp.favorite.name = this;
-                                                                                },
-                                                                                change: function() {
-                                                                                    DV.cmp.favorite.system.check();
-                                                                                    DV.cmp.favorite.save.xable();
-                                                                                }
-                                                                            }
-                                                                        },
-                                                                        {
-                                                                            xtype: 'checkbox',
-                                                                            cls: 'dv-checkbox',
-                                                                            style: 'padding-bottom:2px',
-                                                                            fieldLabel: DV.i18n.system,
-                                                                            labelWidth: DV.conf.layout.form_label_width,
-                                                                            disabled: !DV.init.user.isadmin,
-                                                                            check: function() {
-                                                                                if (!DV.init.user.isadmin) {
-                                                                                    if (DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue()) === -1) {
-                                                                                        this.setValue(false);
-                                                                                    }
-                                                                                }
-                                                                            },
-                                                                            listeners: {
-                                                                                added: function() {
-                                                                                    DV.cmp.favorite.system = this;
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
-                                                                    xtype: 'grid',
-                                                                    width: DV.conf.layout.grid_favorite_width - 28,
-                                                                    scroll: 'vertical',
-                                                                    multiSelect: true,
-                                                                    columns: [
-                                                                        {
-                                                                            dataIndex: 'name',
-                                                                            width: DV.conf.layout.grid_favorite_width - 139,
-                                                                            style: 'display:none'
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'lastUpdated',
-                                                                            width: 111,
-                                                                            style: 'display:none'
-                                                                        }
-                                                                    ],
-                                                                    setHeightInWindow: function(store) {
-                                                                        var h = (store.getCount() * 23) + 30,
-                                                                            sh = DV.util.viewport.getSize().y * 0.6;
-                                                                        this.setHeight(h > sh ? sh : h);
-                                                                        this.doLayout();
-                                                                        this.up('window').doLayout();
-                                                                    },
-                                                                    store: DV.store.favorite,
-                                                                    tbar: {
-                                                                        id: 'favorite_t',
-                                                                        defaults: {
-                                                                            height: 24
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                text: DV.i18n.sort_by + '..',
-                                                                                cls: 'dv-toolbar-btn-2',
-                                                                                listeners: {
-                                                                                    added: function() {
-                                                                                        DV.cmp.favorite.sortby = this;
-                                                                                    },
-                                                                                    afterrender: function(b) {
-                                                                                        this.addCls('dv-menu-togglegroup');
-                                                                                        this.menu = Ext.create('Ext.menu.Menu', {
-																							margin: '-1 0 0 -1',
-																							shadow: false,
-                                                                                            showSeparator: false,
-                                                                                            width: 109,
-                                                                                            height: 67,
-                                                                                            items: [
-                                                                                                {
-                                                                                                    xtype: 'radiogroup',
-                                                                                                    cls: 'dv-radiogroup',
-                                                                                                    columns: 1,
-                                                                                                    vertical: true,
-                                                                                                    items: [
-                                                                                                        {
-                                                                                                            boxLabel: DV.i18n.name,
-                                                                                                            name: 'sortby',
-                                                                                                            handler: function() {
-                                                                                                                if (this.getValue()) {
-                                                                                                                    var store = DV.store.favorite;
-                                                                                                                    store.sorting.field = 'name';
-                                                                                                                    store.sorting.direction = 'ASC';
-                                                                                                                    store.sortStore();
-                                                                                                                    this.up('menu').hide();
-                                                                                                                }
-                                                                                                            }
-                                                                                                        },
-                                                                                                        {
-                                                                                                            boxLabel: DV.i18n.system,
-                                                                                                            name: 'sortby',
-                                                                                                            handler: function() {
-                                                                                                                if (this.getValue()) {
-                                                                                                                    var store = DV.store.favorite;
-                                                                                                                    store.sorting.field = 'userId';
-                                                                                                                    store.sorting.direction = 'ASC';
-                                                                                                                    store.sortStore();
-                                                                                                                    this.up('menu').hide();
-                                                                                                                }
-                                                                                                            }
-                                                                                                        },
-                                                                                                        {
-                                                                                                            boxLabel:  DV.i18n.last_updated,
-                                                                                                            name: 'sortby',
-                                                                                                            checked: true,
-                                                                                                            handler: function() {
-                                                                                                                if (this.getValue()) {
-                                                                                                                    var store = DV.store.favorite;
-                                                                                                                    store.sorting.field = 'lastUpdated';
-                                                                                                                    store.sorting.direction = 'DESC';
-                                                                                                                    store.sortStore();
-                                                                                                                    this.up('menu').hide();
-                                                                                                                }
-                                                                                                            }
-                                                                                                        }
-                                                                                                    ]
-                                                                                                }
-                                                                                            ]
-                                                                                        });
-                                                                                    }
-                                                                                }
-                                                                            },
-                                                                            '->',
-                                                                            {
-                                                                                text: DV.i18n.rename + '..',
-                                                                                cls: 'dv-toolbar-btn-2',
-                                                                                disabled: true,
-                                                                                xable: function() {
-                                                                                    if (DV.cmp.favorite.grid.getSelectionModel().getSelection().length == 1) {
-                                                                                        DV.cmp.favorite.rename.button.enable();
-                                                                                    }
-                                                                                    else {
-                                                                                        DV.cmp.favorite.rename.button.disable();
-                                                                                    }
-                                                                                },
-                                                                                handler: function() {
-                                                                                    var selected = DV.cmp.favorite.grid.getSelectionModel().getSelection()[0];
-                                                                                    var w = Ext.create('Ext.window.Window', {
-                                                                                        title: DV.i18n.rename_favorite,
-                                                                                        layout: 'fit',
-                                                                                        width: DV.conf.layout.window_confirm_width,
-                                                                                        bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
-                                                                                        modal: true,
-                                                                                        cmp: {},
-                                                                                        items: [
-                                                                                            {
-                                                                                                xtype: 'textfield',
-                                                                                                cls: 'dv-textfield',
-                                                                                                maxLength: 160,
-                                                                                                enforceMaxLength: true,
-                                                                                                value: selected.data.name,
-                                                                                                listeners: {
-                                                                                                    added: function() {
-                                                                                                        this.up('window').cmp.name = this;
-                                                                                                    },
-                                                                                                    change: function() {
-                                                                                                        this.up('window').cmp.rename.xable();
-                                                                                                    }
-                                                                                                }
-                                                                                            }
-                                                                                        ],
-                                                                                        bbar: {
-																							cls: 'dv-toolbar-bbar',
-																							defaults: {
-																								height: 22
-																							},
-																							items: [
-																								{
-																									xtype: 'label',
-																									style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:50%',
-																									listeners: {
-																										added: function() {
-																											DV.cmp.favorite.rename.label = this;
-																										}
-																									}
-																								},
-																								'->',
-																								{
-																									text: DV.i18n.cancel,
-																									handler: function() {
-																										this.up('window').close();
-																									}
-																								},
-																								{
-																									text: DV.i18n.rename,
-																									disabled: true,
-																									xable: function() {
-																										var value = this.up('window').cmp.name.getValue();
-																										if (value) {
-																											if (DV.store.favorite.findExact('name', value) == -1) {
-																												this.enable();
-																												DV.cmp.favorite.rename.label.setText('');
-																												return;
-																											}
-																											else {
-																												DV.cmp.favorite.rename.label.setText(DV.i18n.name_already_in_use);
-																											}
-																										}
-																										this.disable();
-																									},
-																									handler: function() {
-																										DV.util.crud.favorite.updateName(this.up('window').cmp.name.getValue());
-																									},
-																									listeners: {
-																										afterrender: function() {
-																											this.up('window').cmp.rename = this;
-																										},
-																										change: function() {
-																											this.xable();
-																										}
-																									}
-																								}
-																							]
-																						},
-                                                                                        listeners: {
-                                                                                            afterrender: function() {
-                                                                                                DV.cmp.favorite.rename.window = this;
-                                                                                            }
-                                                                                        }
-                                                                                    });
-                                                                                    w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
-                                                                                    w.show();
-                                                                                },
-                                                                                listeners: {
-                                                                                    added: function() {
-                                                                                        DV.cmp.favorite.rename.button = this;
-                                                                                    }
-                                                                                }
-                                                                            },
-                                                                            {
-                                                                                text: DV.i18n.delete_object + '..',
-                                                                                cls: 'dv-toolbar-btn-2',
-                                                                                disabled: true,
-                                                                                xable: function() {
-                                                                                    if (DV.cmp.favorite.grid.getSelectionModel().getSelection().length) {
-                                                                                        DV.cmp.favorite.del.enable();
-                                                                                    }
-                                                                                    else {
-                                                                                        DV.cmp.favorite.del.disable();
-                                                                                    }
-                                                                                },
-                                                                                handler: function() {
-                                                                                    var sel = DV.cmp.favorite.grid.getSelectionModel().getSelection();
-                                                                                    if (sel.length) {
-                                                                                        var str = '';
-                                                                                        for (var i = 0; i < sel.length; i++) {
-                                                                                            var out = sel[i].data.name.length > 35 ? (sel[i].data.name.substr(0,35) + '...') : sel[i].data.name;
-                                                                                            str += '<br/>' + out;
-                                                                                        }
-                                                                                        var w = Ext.create('Ext.window.Window', {
-                                                                                            title: DV.i18n.delete_favorite,
-                                                                                            width: DV.conf.layout.window_confirm_width,
-                                                                                            bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
-                                                                                            modal: true,
-                                                                                            items: [
-                                                                                                {
-                                                                                                    html: DV.i18n.are_you_sure,
-                                                                                                    bodyStyle: 'border-style:none'
-                                                                                                },
-                                                                                                {
-                                                                                                    html: str,
-                                                                                                    cls: 'dv-window-confirm-list'
-                                                                                                }
-                                                                                            ],
-                                                                                            bbar: {
-																								cls: 'dv-toolbar-bbar',
-																								defaults: {
-																									height: 22
-																								},
-																								items: [
-																									{
-																										text: DV.i18n.cancel,
-																										handler: function() {
-																											this.up('window').close();
-																										}
-																									},
-																									'->',
-																									{
-																										text: DV.i18n.delete_object,
-																										handler: function() {
-																											this.up('window').close();
-																											DV.util.crud.favorite.del(function() {
-																												DV.cmp.favorite.name.setValue('');
-																												DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
-																											});
-																										}
-																									}
-																								]
-																							}
-                                                                                        });
-                                                                                        w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
-                                                                                        w.show();
-                                                                                    }
-                                                                                },
-                                                                                listeners: {
-                                                                                    added: function() {
-                                                                                        DV.cmp.favorite.del = this;
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        ]
-                                                                    },
-                                                                    listeners: {
-                                                                        added: function() {
-                                                                            DV.cmp.favorite.grid = this;
-                                                                        },
-                                                                        itemclick: function(g, r) {
-                                                                            DV.cmp.favorite.name.setValue(r.data.name);
-                                                                            DV.cmp.favorite.system.setValue(r.data.userId ? false : true);
-                                                                            DV.cmp.favorite.rename.button.xable();
-                                                                            DV.cmp.favorite.del.xable();
-                                                                        },
-                                                                        itemdblclick: function() {
-                                                                            if (DV.cmp.favorite.save.xable()) {
-                                                                                DV.cmp.favorite.save.handler();
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            ],
-                                                            bbar: {
-																cls: 'dv-toolbar-bbar',
-																defaults: {
-																	height: 22
-																},
-																items: [
-																	{
-																		xtype: 'label',
-																		style: 'padding-left:6px; line-height:22px; font-size:10px; color:#666; width:70%',
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.label = this;
-																			}
-																		}
-																	},
-																	'->',
-																	{
-																		text: DV.i18n.save,
-																		disabled: true,
-																		xable: function() {
-																			if (DV.c.rendered) {
-																				if (DV.cmp.favorite.name.getValue()) {
-																					var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
-																					if (index != -1) {
-																						if (DV.store.favorite.getAt(index).data.userId || DV.init.user.isadmin) {
-																							this.enable();
-																							DV.cmp.favorite.label.setText('');
-																							return true;
-																						}
-																						else {
-																							DV.cmp.favorite.label.setText(DV.i18n.system_favorite_overwrite_not_allowed);
-																						}
-																					}
-																					else {
-																						this.enable();
-																						DV.cmp.favorite.label.setText('');
-																						return true;
-																					}
-																				}
-																				else {
-																					DV.cmp.favorite.label.setText('');
-																				}
-																			}
-																			else {
-																				if (DV.cmp.favorite.name.getValue()) {
-																					DV.cmp.favorite.label.setText('* ' + DV.i18n.create_chart_before_saving);
-																				}
-																				else {
-																					DV.cmp.favorite.label.setText('');
-																				}
-																			}
-																			this.disable();
-																			return false;
-																		},
-																		handler: function() {
-																			if (this.xable()) {
-																				var value = DV.cmp.favorite.name.getValue();
-																				if (DV.store.favorite.findExact('name', value) != -1) {
-																					var item = value.length > 40 ? (value.substr(0,40) + '...') : value;
-																					var w = Ext.create('Ext.window.Window', {
-																						title: DV.i18n.save_favorite,
-																						width: DV.conf.layout.window_confirm_width,
-																						bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
-																						modal: true,
-																						items: [
-																							{
-																								html: DV.i18n.are_you_sure,
-																								bodyStyle: 'border-style:none'
-																							},
-																							{
-																								html: '<br/>' + item,
-																								cls: 'dv-window-confirm-list'
-																							}
-																						],
-																						bbar: {
-																							cls: 'dv-toolbar-bbar',
-																							defaults: {
-																								height: 22
-																							},
-																							items: [
-																								{
-																									text: DV.i18n.cancel,
-																									handler: function() {
-																										this.up('window').close();
-																									}
-																								},
-																								'->',
-																								{
-																									text: DV.i18n.overwrite,
-																									handler: function() {
-																										this.up('window').close();
-																										DV.util.crud.favorite.update(function() {
-																											DV.cmp.favorite.window.resetForm();
-																										});
+                            handler: function() {
+								if (DV.cmp.favorite.window) {
+									DV.cmp.favorite.window.destroy();
+								}
 
-																									}
-																								}
-																							]
-																						}
-																					});
-																					w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
-																					w.show();
-																				}
-																				else {
-																					DV.util.crud.favorite.create(function() {
-																						DV.cmp.favorite.window.resetForm();
-																						DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
-																					});
-																				}
-																			}
-																		},
-																		listeners: {
-																			added: function() {
-																				DV.cmp.favorite.save = this;
-																			}
-																		}
-																	}
-																]
-															},
-                                                            listeners: {
-                                                                show: function() {
-                                                                    DV.cmp.favorite.save.xable();
-                                                                    this.down('grid').setHeightInWindow(DV.store.favorite);
-                                                                },
-                                                                hide: function() {
-																	DV.store.favorite.clearFilter();
-																}
-                                                            }
-                                                        });
-                                                        var w = DV.cmp.favorite.window;
-                                                        w.setPosition((screen.width/2)-(DV.conf.layout.grid_favorite_width/2), DV.conf.layout.window_favorite_ypos, true);
-                                                        w.show();
-                                                    }
-                                                },
-                                                listeners: {
-                                                    added: function() {
-                                                        DV.cmp.toolbar.menuitem.datatable = this;
-                                                    }
-                                                }
-                                            },
-                                            {
-												xtype: 'menuseparator',
-												height: 1,
-												style: 'margin:1px 0; border-color:#dadada'
-											},
-                                            {
-                                                xtype: 'grid',
-                                                cls: 'dv-menugrid',
-                                                width: 420,
-                                                scroll: 'vertical',
-                                                columns: [
-                                                    {
-                                                        dataIndex: 'icon',
-                                                        width: 25,
-                                                        style: 'display:none'
-                                                    },
-                                                    {
-                                                        dataIndex: 'name',
-                                                        width: 285,
-                                                        style: 'display:none'
-                                                    },
-                                                    {
-                                                        dataIndex: 'lastUpdated',
-                                                        width: 110,
-                                                        style: 'display:none'
-                                                    }
-                                                ],
-                                                setHeightInMenu: function(store) {
-                                                    var h = store.getCount() * 23,
-                                                        sh = DV.util.viewport.getSize().y * 0.6;
-                                                    this.setHeight(h > sh ? sh : h);
-                                                    this.doLayout();
-                                                    this.up('menu').doLayout();
-                                                },
-                                                store: DV.store.favorite,
-                                                listeners: {
-                                                    itemclick: function(g, r) {
-                                                        g.getSelectionModel().select([], false);
-                                                        this.up('menu').hide();
-                                                        DV.exe.execute(r.data.id);
-                                                    }
-                                                }
-                                            }
-                                        ],
-                                        listeners: {
-											afterrender: function() {
-												this.getEl().addCls('dv-toolbar-btn-menu');
-											},
-                                            show: function() {
-                                                if (!DV.store.favorite.isloaded) {
-                                                    DV.store.favorite.load({scope: this, callback: function() {
-                                                        this.down('grid').setHeightInMenu(DV.store.favorite);
-                                                    }});
-                                                }
-                                                else {
-                                                    this.down('grid').setHeightInMenu(DV.store.favorite);
-                                                }
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        },
+								DV.cmp.favorite.window = DV.app.FavoriteWindow();
+								DV.cmp.favorite.window.show();
+							}
+						},
+
+                            //listeners: {
+                                //afterrender: function(b) {
+                                    //this.menu = Ext.create('Ext.menu.Menu', {
+                                        //shadow: false,
+                                        //showSeparator: false,
+                                        //items: [
+                                            //{
+                                                //text: DV.i18n.manage_favorites,
+                                                //iconCls: 'dv-menu-item-edit',
+                                                //handler: function() {
+													//DV.store.favorite.filtersystem();
+                                                    //if (DV.cmp.favorite.window) {
+                                                        //DV.cmp.favorite.window.show();
+                                                    //}
+                                                    //else {
+                                                        //DV.cmp.favorite.window = Ext.create('Ext.window.Window', {
+                                                            //title: DV.i18n.manage_favorites,
+                                                            //iconCls: 'dv-window-title-favorite',
+                                                            //bodyStyle: 'padding:8px; background-color:#fff',
+															//width: DV.conf.layout.grid_favorite_width,
+                                                            //closeAction: 'hide',
+                                                            //resizable: false,
+                                                            //modal: true,
+                                                            //resetForm: function() {
+                                                                //DV.cmp.favorite.name.setValue('');
+                                                                //DV.cmp.favorite.system.setValue(false);
+                                                            //},
+                                                            //items: [
+                                                                //{
+                                                                    //xtype: 'form',
+                                                                    //bodyStyle: 'border-style:none',
+                                                                    //items: [
+                                                                        //{
+                                                                            //xtype: 'textfield',
+                                                                            //cls: 'dv-textfield',
+                                                                            //fieldLabel: DV.i18n.name,
+                                                                            //maxLength: 160,
+                                                                            //enforceMaxLength: true,
+                                                                            //labelWidth: DV.conf.layout.form_label_width,
+                                                                            //width: DV.conf.layout.grid_favorite_width - 28,
+                                                                            //listeners: {
+                                                                                //added: function() {
+                                                                                    //DV.cmp.favorite.name = this;
+                                                                                //},
+                                                                                //change: function() {
+                                                                                    //DV.cmp.favorite.system.check();
+                                                                                    //DV.cmp.favorite.save.xable();
+                                                                                //}
+                                                                            //}
+                                                                        //},
+                                                                        //{
+                                                                            //xtype: 'checkbox',
+                                                                            //cls: 'dv-checkbox',
+                                                                            //style: 'padding-bottom:2px',
+                                                                            //fieldLabel: DV.i18n.system,
+                                                                            //labelWidth: DV.conf.layout.form_label_width,
+                                                                            //disabled: !DV.init.user.isadmin,
+                                                                            //check: function() {
+                                                                                //if (!DV.init.user.isadmin) {
+                                                                                    //if (DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue()) === -1) {
+                                                                                        //this.setValue(false);
+                                                                                    //}
+                                                                                //}
+                                                                            //},
+                                                                            //listeners: {
+                                                                                //added: function() {
+                                                                                    //DV.cmp.favorite.system = this;
+                                                                                //}
+                                                                            //}
+                                                                        //}
+                                                                    //]
+                                                                //},
+                                                                //{
+                                                                    //xtype: 'grid',
+                                                                    //width: DV.conf.layout.grid_favorite_width - 28,
+                                                                    //scroll: 'vertical',
+                                                                    //multiSelect: true,
+                                                                    //columns: [
+                                                                        //{
+                                                                            //dataIndex: 'name',
+                                                                            //width: DV.conf.layout.grid_favorite_width - 139,
+                                                                            //style: 'display:none'
+                                                                        //},
+                                                                        //{
+                                                                            //dataIndex: 'lastUpdated',
+                                                                            //width: 111,
+                                                                            //style: 'display:none'
+                                                                        //}
+                                                                    //],
+                                                                    //setHeightInWindow: function(store) {
+                                                                        //var h = (store.getCount() * 23) + 30,
+                                                                            //sh = DV.util.viewport.getSize().y * 0.6;
+                                                                        //this.setHeight(h > sh ? sh : h);
+                                                                        //this.doLayout();
+                                                                        //this.up('window').doLayout();
+                                                                    //},
+                                                                    //store: DV.store.favorite,
+                                                                    //tbar: {
+                                                                        //id: 'favorite_t',
+                                                                        //defaults: {
+                                                                            //height: 24
+                                                                        //},
+                                                                        //items: [
+                                                                            //{
+                                                                                //text: DV.i18n.sort_by + '..',
+                                                                                //cls: 'dv-toolbar-btn-2',
+                                                                                //listeners: {
+                                                                                    //added: function() {
+                                                                                        //DV.cmp.favorite.sortby = this;
+                                                                                    //},
+                                                                                    //afterrender: function(b) {
+                                                                                        //this.addCls('dv-menu-togglegroup');
+                                                                                        //this.menu = Ext.create('Ext.menu.Menu', {
+																							//margin: '-1 0 0 -1',
+																							//shadow: false,
+                                                                                            //showSeparator: false,
+                                                                                            //width: 109,
+                                                                                            //height: 67,
+                                                                                            //items: [
+                                                                                                //{
+                                                                                                    //xtype: 'radiogroup',
+                                                                                                    //cls: 'dv-radiogroup',
+                                                                                                    //columns: 1,
+                                                                                                    //vertical: true,
+                                                                                                    //items: [
+                                                                                                        //{
+                                                                                                            //boxLabel: DV.i18n.name,
+                                                                                                            //name: 'sortby',
+                                                                                                            //handler: function() {
+                                                                                                                //if (this.getValue()) {
+                                                                                                                    //var store = DV.store.favorite;
+                                                                                                                    //store.sorting.field = 'name';
+                                                                                                                    //store.sorting.direction = 'ASC';
+                                                                                                                    //store.sortStore();
+                                                                                                                    //this.up('menu').hide();
+                                                                                                                //}
+                                                                                                            //}
+                                                                                                        //},
+                                                                                                        //{
+                                                                                                            //boxLabel: DV.i18n.system,
+                                                                                                            //name: 'sortby',
+                                                                                                            //handler: function() {
+                                                                                                                //if (this.getValue()) {
+                                                                                                                    //var store = DV.store.favorite;
+                                                                                                                    //store.sorting.field = 'userId';
+                                                                                                                    //store.sorting.direction = 'ASC';
+                                                                                                                    //store.sortStore();
+                                                                                                                    //this.up('menu').hide();
+                                                                                                                //}
+                                                                                                            //}
+                                                                                                        //},
+                                                                                                        //{
+                                                                                                            //boxLabel:  DV.i18n.last_updated,
+                                                                                                            //name: 'sortby',
+                                                                                                            //checked: true,
+                                                                                                            //handler: function() {
+                                                                                                                //if (this.getValue()) {
+                                                                                                                    //var store = DV.store.favorite;
+                                                                                                                    //store.sorting.field = 'lastUpdated';
+                                                                                                                    //store.sorting.direction = 'DESC';
+                                                                                                                    //store.sortStore();
+                                                                                                                    //this.up('menu').hide();
+                                                                                                                //}
+                                                                                                            //}
+                                                                                                        //}
+                                                                                                    //]
+                                                                                                //}
+                                                                                            //]
+                                                                                        //});
+                                                                                    //}
+                                                                                //}
+                                                                            //},
+                                                                            //'->',
+                                                                            //{
+                                                                                //text: DV.i18n.rename + '..',
+                                                                                //cls: 'dv-toolbar-btn-2',
+                                                                                //disabled: true,
+                                                                                //xable: function() {
+                                                                                    //if (DV.cmp.favorite.grid.getSelectionModel().getSelection().length == 1) {
+                                                                                        //DV.cmp.favorite.rename.button.enable();
+                                                                                    //}
+                                                                                    //else {
+                                                                                        //DV.cmp.favorite.rename.button.disable();
+                                                                                    //}
+                                                                                //},
+                                                                                //handler: function() {
+                                                                                    //var selected = DV.cmp.favorite.grid.getSelectionModel().getSelection()[0];
+                                                                                    //var w = Ext.create('Ext.window.Window', {
+                                                                                        //title: DV.i18n.rename_favorite,
+                                                                                        //layout: 'fit',
+                                                                                        //width: DV.conf.layout.window_confirm_width,
+                                                                                        //bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
+                                                                                        //modal: true,
+                                                                                        //cmp: {},
+                                                                                        //items: [
+                                                                                            //{
+                                                                                                //xtype: 'textfield',
+                                                                                                //cls: 'dv-textfield',
+                                                                                                //maxLength: 160,
+                                                                                                //enforceMaxLength: true,
+                                                                                                //value: selected.data.name,
+                                                                                                //listeners: {
+                                                                                                    //added: function() {
+                                                                                                        //this.up('window').cmp.name = this;
+                                                                                                    //},
+                                                                                                    //change: function() {
+                                                                                                        //this.up('window').cmp.rename.xable();
+                                                                                                    //}
+                                                                                                //}
+                                                                                            //}
+                                                                                        //],
+                                                                                        //bbar: {
+																							//cls: 'dv-toolbar-bbar',
+																							//defaults: {
+																								//height: 22
+																							//},
+																							//items: [
+																								//{
+																									//xtype: 'label',
+																									//style: 'padding-left:2px; line-height:22px; font-size:10px; color:#666; width:50%',
+																									//listeners: {
+																										//added: function() {
+																											//DV.cmp.favorite.rename.label = this;
+																										//}
+																									//}
+																								//},
+																								//'->',
+																								//{
+																									//text: DV.i18n.cancel,
+																									//handler: function() {
+																										//this.up('window').close();
+																									//}
+																								//},
+																								//{
+																									//text: DV.i18n.rename,
+																									//disabled: true,
+																									//xable: function() {
+																										//var value = this.up('window').cmp.name.getValue();
+																										//if (value) {
+																											//if (DV.store.favorite.findExact('name', value) == -1) {
+																												//this.enable();
+																												//DV.cmp.favorite.rename.label.setText('');
+																												//return;
+																											//}
+																											//else {
+																												//DV.cmp.favorite.rename.label.setText(DV.i18n.name_already_in_use);
+																											//}
+																										//}
+																										//this.disable();
+																									//},
+																									//handler: function() {
+																										//DV.util.crud.favorite.updateName(this.up('window').cmp.name.getValue());
+																									//},
+																									//listeners: {
+																										//afterrender: function() {
+																											//this.up('window').cmp.rename = this;
+																										//},
+																										//change: function() {
+																											//this.xable();
+																										//}
+																									//}
+																								//}
+																							//]
+																						//},
+                                                                                        //listeners: {
+                                                                                            //afterrender: function() {
+                                                                                                //DV.cmp.favorite.rename.window = this;
+                                                                                            //}
+                                                                                        //}
+                                                                                    //});
+                                                                                    //w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
+                                                                                    //w.show();
+                                                                                //},
+                                                                                //listeners: {
+                                                                                    //added: function() {
+                                                                                        //DV.cmp.favorite.rename.button = this;
+                                                                                    //}
+                                                                                //}
+                                                                            //},
+                                                                            //{
+                                                                                //text: DV.i18n.delete_object + '..',
+                                                                                //cls: 'dv-toolbar-btn-2',
+                                                                                //disabled: true,
+                                                                                //xable: function() {
+                                                                                    //if (DV.cmp.favorite.grid.getSelectionModel().getSelection().length) {
+                                                                                        //DV.cmp.favorite.del.enable();
+                                                                                    //}
+                                                                                    //else {
+                                                                                        //DV.cmp.favorite.del.disable();
+                                                                                    //}
+                                                                                //},
+                                                                                //handler: function() {
+                                                                                    //var sel = DV.cmp.favorite.grid.getSelectionModel().getSelection();
+                                                                                    //if (sel.length) {
+                                                                                        //var str = '';
+                                                                                        //for (var i = 0; i < sel.length; i++) {
+                                                                                            //var out = sel[i].data.name.length > 35 ? (sel[i].data.name.substr(0,35) + '...') : sel[i].data.name;
+                                                                                            //str += '<br/>' + out;
+                                                                                        //}
+                                                                                        //var w = Ext.create('Ext.window.Window', {
+                                                                                            //title: DV.i18n.delete_favorite,
+                                                                                            //width: DV.conf.layout.window_confirm_width,
+                                                                                            //bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
+                                                                                            //modal: true,
+                                                                                            //items: [
+                                                                                                //{
+                                                                                                    //html: DV.i18n.are_you_sure,
+                                                                                                    //bodyStyle: 'border-style:none'
+                                                                                                //},
+                                                                                                //{
+                                                                                                    //html: str,
+                                                                                                    //cls: 'dv-window-confirm-list'
+                                                                                                //}
+                                                                                            //],
+                                                                                            //bbar: {
+																								//cls: 'dv-toolbar-bbar',
+																								//defaults: {
+																									//height: 22
+																								//},
+																								//items: [
+																									//{
+																										//text: DV.i18n.cancel,
+																										//handler: function() {
+																											//this.up('window').close();
+																										//}
+																									//},
+																									//'->',
+																									//{
+																										//text: DV.i18n.delete_object,
+																										//handler: function() {
+																											//this.up('window').close();
+																											//DV.util.crud.favorite.del(function() {
+																												//DV.cmp.favorite.name.setValue('');
+																												//DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
+																											//});
+																										//}
+																									//}
+																								//]
+																							//}
+                                                                                        //});
+                                                                                        //w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
+                                                                                        //w.show();
+                                                                                    //}
+                                                                                //},
+                                                                                //listeners: {
+                                                                                    //added: function() {
+                                                                                        //DV.cmp.favorite.del = this;
+                                                                                    //}
+                                                                                //}
+                                                                            //}
+                                                                        //]
+                                                                    //},
+                                                                    //listeners: {
+                                                                        //added: function() {
+                                                                            //DV.cmp.favorite.grid = this;
+                                                                        //},
+                                                                        //itemclick: function(g, r) {
+                                                                            //DV.cmp.favorite.name.setValue(r.data.name);
+                                                                            //DV.cmp.favorite.system.setValue(r.data.userId ? false : true);
+                                                                            //DV.cmp.favorite.rename.button.xable();
+                                                                            //DV.cmp.favorite.del.xable();
+                                                                        //},
+                                                                        //itemdblclick: function() {
+                                                                            //if (DV.cmp.favorite.save.xable()) {
+                                                                                //DV.cmp.favorite.save.handler();
+                                                                            //}
+                                                                        //}
+                                                                    //}
+                                                                //}
+                                                            //],
+                                                            //bbar: {
+																//cls: 'dv-toolbar-bbar',
+																//defaults: {
+																	//height: 22
+																//},
+																//items: [
+																	//{
+																		//xtype: 'label',
+																		//style: 'padding-left:6px; line-height:22px; font-size:10px; color:#666; width:70%',
+																		//listeners: {
+																			//added: function() {
+																				//DV.cmp.favorite.label = this;
+																			//}
+																		//}
+																	//},
+																	//'->',
+																	//{
+																		//text: DV.i18n.save,
+																		//disabled: true,
+																		//xable: function() {
+																			//if (DV.c.rendered) {
+																				//if (DV.cmp.favorite.name.getValue()) {
+																					//var index = DV.store.favorite.findExact('name', DV.cmp.favorite.name.getValue());
+																					//if (index != -1) {
+																						//if (DV.store.favorite.getAt(index).data.userId || DV.init.user.isadmin) {
+																							//this.enable();
+																							//DV.cmp.favorite.label.setText('');
+																							//return true;
+																						//}
+																						//else {
+																							//DV.cmp.favorite.label.setText(DV.i18n.system_favorite_overwrite_not_allowed);
+																						//}
+																					//}
+																					//else {
+																						//this.enable();
+																						//DV.cmp.favorite.label.setText('');
+																						//return true;
+																					//}
+																				//}
+																				//else {
+																					//DV.cmp.favorite.label.setText('');
+																				//}
+																			//}
+																			//else {
+																				//if (DV.cmp.favorite.name.getValue()) {
+																					//DV.cmp.favorite.label.setText('* ' + DV.i18n.create_chart_before_saving);
+																				//}
+																				//else {
+																					//DV.cmp.favorite.label.setText('');
+																				//}
+																			//}
+																			//this.disable();
+																			//return false;
+																		//},
+																		//handler: function() {
+																			//if (this.xable()) {
+																				//var value = DV.cmp.favorite.name.getValue();
+																				//if (DV.store.favorite.findExact('name', value) != -1) {
+																					//var item = value.length > 40 ? (value.substr(0,40) + '...') : value;
+																					//var w = Ext.create('Ext.window.Window', {
+																						//title: DV.i18n.save_favorite,
+																						//width: DV.conf.layout.window_confirm_width,
+																						//bodyStyle: 'padding:10px 5px; background-color:#fff; text-align:center',
+																						//modal: true,
+																						//items: [
+																							//{
+																								//html: DV.i18n.are_you_sure,
+																								//bodyStyle: 'border-style:none'
+																							//},
+																							//{
+																								//html: '<br/>' + item,
+																								//cls: 'dv-window-confirm-list'
+																							//}
+																						//],
+																						//bbar: {
+																							//cls: 'dv-toolbar-bbar',
+																							//defaults: {
+																								//height: 22
+																							//},
+																							//items: [
+																								//{
+																									//text: DV.i18n.cancel,
+																									//handler: function() {
+																										//this.up('window').close();
+																									//}
+																								//},
+																								//'->',
+																								//{
+																									//text: DV.i18n.overwrite,
+																									//handler: function() {
+																										//this.up('window').close();
+																										//DV.util.crud.favorite.update(function() {
+																											//DV.cmp.favorite.window.resetForm();
+																										//});
+
+																									//}
+																								//}
+																							//]
+																						//}
+																					//});
+																					//w.setPosition((screen.width/2)-(DV.conf.layout.window_confirm_width/2), DV.conf.layout.window_favorite_ypos + 100, true);
+																					//w.show();
+																				//}
+																				//else {
+																					//DV.util.crud.favorite.create(function() {
+																						//DV.cmp.favorite.window.resetForm();
+																						//DV.cmp.favorite.window.down('grid').setHeightInWindow(DV.store.favorite);
+																					//});
+																				//}
+																			//}
+																		//},
+																		//listeners: {
+																			//added: function() {
+																				//DV.cmp.favorite.save = this;
+																			//}
+																		//}
+																	//}
+																//]
+															//},
+                                                            //listeners: {
+                                                                //show: function() {
+                                                                    //DV.cmp.favorite.save.xable();
+                                                                    //this.down('grid').setHeightInWindow(DV.store.favorite);
+                                                                //},
+                                                                //hide: function() {
+																	//DV.store.favorite.clearFilter();
+																//}
+                                                            //}
+                                                        //});
+                                                        //var w = DV.cmp.favorite.window;
+                                                        //w.setPosition((screen.width/2)-(DV.conf.layout.grid_favorite_width/2), DV.conf.layout.window_favorite_ypos, true);
+                                                        //w.show();
+                                                    //}
+                                                //},
+                                                //listeners: {
+                                                    //added: function() {
+                                                        //DV.cmp.toolbar.menuitem.datatable = this;
+                                                    //}
+                                                //}
+                                            //},
+                                            //{
+												//xtype: 'menuseparator',
+												//height: 1,
+												//style: 'margin:1px 0; border-color:#dadada'
+											//},
+                                            //{
+                                                //xtype: 'grid',
+                                                //cls: 'dv-menugrid',
+                                                //width: 420,
+                                                //scroll: 'vertical',
+                                                //columns: [
+                                                    //{
+                                                        //dataIndex: 'icon',
+                                                        //width: 25,
+                                                        //style: 'display:none'
+                                                    //},
+                                                    //{
+                                                        //dataIndex: 'name',
+                                                        //width: 285,
+                                                        //style: 'display:none'
+                                                    //},
+                                                    //{
+                                                        //dataIndex: 'lastUpdated',
+                                                        //width: 110,
+                                                        //style: 'display:none'
+                                                    //}
+                                                //],
+                                                //setHeightInMenu: function(store) {
+                                                    //var h = store.getCount() * 23,
+                                                        //sh = DV.util.viewport.getSize().y * 0.6;
+                                                    //this.setHeight(h > sh ? sh : h);
+                                                    //this.doLayout();
+                                                    //this.up('menu').doLayout();
+                                                //},
+                                                //store: DV.store.favorite,
+                                                //listeners: {
+                                                    //itemclick: function(g, r) {
+                                                        //g.getSelectionModel().select([], false);
+                                                        //this.up('menu').hide();
+                                                        //DV.exe.execute(r.data.id);
+                                                    //}
+                                                //}
+                                            //}
+                                        //],
+                                        //listeners: {
+											//afterrender: function() {
+												//this.getEl().addCls('dv-toolbar-btn-menu');
+											//},
+                                            //show: function() {
+                                                //if (!DV.store.favorite.isloaded) {
+                                                    //DV.store.favorite.load({scope: this, callback: function() {
+                                                        //this.down('grid').setHeightInMenu(DV.store.favorite);
+                                                    //}});
+                                                //}
+                                                //else {
+                                                    //this.down('grid').setHeightInMenu(DV.store.favorite);
+                                                //}
+                                            //}
+                                        //}
+                                    //});
+                                //}
+                            //}
+                        //},
 						{
 							xtype: 'tbseparator',
 							height: 18,
@@ -4891,8 +5553,8 @@ Ext.onReady( function() {
 										{
 											xtype: 'panel',
 											html: '<b>Link: </b>' + DV.init.contextPath + '/dhis-web-visualizer/app/index.html?id=' + DV.c.currentFavorite.id,
-											style: 'padding-top: 9px; padding-bottom: 6px',
-											bodyStyle: 'border: 0 none'
+											bodyStyle: 'border: 0 none; -webkit-touch-callout:all; -webkit-user-select:all; -khtml-user-select:all; -moz-user-select:all; -ms-user-select:all; user-select:all',
+											style: 'padding-top: 9px; padding-bottom: 6px'
 										}
 									],
 									bbar: {
