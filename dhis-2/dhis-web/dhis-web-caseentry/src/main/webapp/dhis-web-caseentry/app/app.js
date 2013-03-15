@@ -476,6 +476,7 @@ Ext.onReady( function() {
 							fields: ['value','name'],
 							data: [ ['=','='],['in',TR.i18n.in] ]
 						});
+						params.value = 'in';
 					}
 					else
 					{
@@ -483,6 +484,7 @@ Ext.onReady( function() {
 							fields: ['value','name'],
 							data: [ ['=','='],['like',TR.i18n.like],['in',TR.i18n.in] ]
 						});
+						params.value = 'in';
 					}
 				}
 				else if( valueType == 'trueOnly' || valueType == 'bool' ){
@@ -502,6 +504,20 @@ Ext.onReady( function() {
 								['<=','<='],
 								['!=','!=' ] ]
 					});
+				}
+				
+				params.listeners={};
+				params.listeners.select = function(cb)  {
+					var opt = cb.getValue();
+					if(opt == 'in')
+					{
+						Ext.getCmp('filter_' + id).multiSelect = true;
+					}
+					else
+					{
+						Ext.getCmp('filter_' + id).clearValue();
+						Ext.getCmp('filter_' + id).multiSelect = false;
+					}
 				}
 				
 				return params;
@@ -533,8 +549,9 @@ Ext.onReady( function() {
 						params.editable = false;
 						if( fixedId=='fixedAttr_gender')
 						{
-							params.forceSelection = true;
 							params.multiSelect = true;
+							params.delimiter = ';';
+							params.forceSelection = true;
 							params.store = new Ext.data.ArrayStore({
 								fields: ['value', 'name'],
 								data: [['', TR.i18n.please_select], 
@@ -546,8 +563,9 @@ Ext.onReady( function() {
 						else if( fixedId=='fixedAttr_dobType')
 						{
 							params.forceSelection = true;
-							params.editable = false;
 							params.multiSelect = true;
+							params.delimiter = ';';
+							params.editable = false;
 							params.store = new Ext.data.ArrayStore({
 								fields: ['value', 'name'],
 								data: [['', TR.i18n.please_select],
@@ -567,8 +585,7 @@ Ext.onReady( function() {
 							});
 						}
 					}
-					else if( valueType == 'trueOnly')
-					{
+					else if( valueType == 'trueOnly'){
 						params.queryMode = 'local';
 						params.valueField = 'value';
 						params.displayField = 'name';
@@ -583,6 +600,7 @@ Ext.onReady( function() {
 						params.valueField = 'u';
 						params.displayField = 'u';
 						params.multiSelect = true;
+						params.delimiter = ';';
 						params.store = Ext.create('Ext.data.Store', {
 							fields: ['u'],
 							data:[],
@@ -984,6 +1002,15 @@ Ext.onReady( function() {
 				
 				caseBasedReport:{
 					create: function(fn, isupdate) {
+						// Validation
+						
+						if( !TR.state.caseBasedReport.validation.objects() )
+						{
+							return;
+						}
+						
+						// Save favorite
+						
 						TR.util.mask.showMask(TR.cmp.caseBasedFavorite.window, TR.i18n.saving + '...');
 						var p = TR.state.caseBasedReport.getParams(false);
 						p.name = TR.cmp.caseBasedFavorite.name.getValue();
@@ -1152,6 +1179,15 @@ Ext.onReady( function() {
 				
 				aggregateReport:{
 					create: function(fn, isupdate) {
+						// Validation
+						
+						if( !TR.state.aggregateReport.validation.objects() )
+						{
+							return;
+						}
+						
+						// Save favorite
+						
 						TR.util.mask.showMask(TR.cmp.aggregateFavorite.window, TR.i18n.saving + '...');
 						var p = TR.state.getParams();
 						p.name = TR.cmp.aggregateFavorite.name.getValue();
@@ -1244,11 +1280,18 @@ Ext.onReady( function() {
 								
 								// Relative periods
 								
+								Ext.Array.each(TR.cmp.params.relativeperiod.checkbox, function(item) {
+									if(item.getValue() && !item.hidden){
+										item.setValue(false);
+									}
+								});
 								for (var i = 0; i < f.relativePeriods.length; i++) {
 									TR.util.getCmp('checkbox[paramName="' + f.relativePeriods[i] + '"]').setValue(true);
 								}
 								
 								// Fixed periods
+								
+								TR.store.fixedperiod.selected.removeAll();
 								
 								var periods = [];
 								for (var i = 0; i < f.fixedPeriods.length; i++) {
