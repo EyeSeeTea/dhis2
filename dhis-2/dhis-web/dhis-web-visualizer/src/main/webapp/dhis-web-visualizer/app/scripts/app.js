@@ -613,7 +613,7 @@ Ext.onReady( function() {
 						count = 0;
                     for (var key in rp) {
                         if (rp[key]) {
-							count += DV.conf.period.relativePeriods[key];
+							count += DV.conf.period.relativePeriods[key] || DV.conf.period.relativePeriods[DV.conf.period.relativePeriodParamKeys[key]];
                         }
                     }
                     for (var i = 0; i < count; i++) {
@@ -670,10 +670,11 @@ Ext.onReady( function() {
 				},
                 getUrl: function() {
 					var a = [],
-						rp = DV.c.relativeperiod.rp;
+						rp = DV.c.relativeperiod.rp,
+						param;
 					for (var key in rp) {
 						if (rp[key]) {
-							a.push(DV.conf.period.relativePeriodValueKeys[key] + '=true');
+							a.push((DV.conf.period.relativePeriodValueKeys[key] || key) + '=true');
 						}
 					}
 
@@ -2656,124 +2657,87 @@ Ext.onReady( function() {
 			var favorite;
 
 			if (DV.c.rendered) {
-				var p = DV.state.getParams();
 				favorite = {};
 
 				// Server sync
-				p.lastMonth = p.reportingMonth;
-				p.lastQuarter = p.reportingQuarter;
+				//DV.c.lastMonth = DV.c.reportingMonth;
+				//DV.c.lastQuarter = DV.c.reportingQuarter;
 
-				favorite.type = p.type;
-				favorite.series = p.series;
-				favorite.category = p.category;
-				favorite.filter = p.filter;
-				favorite.hideLegend = p.hideLegend;
-				favorite.hideSubtitle = p.hideSubtitle;
-				favorite.showData = p.showData;
-				favorite.regression = p.trendLine;
-				favorite.userOrganisationUnit = p.userOrganisationUnit;
-				favorite.userOrganisationUnitChildren = p.userOrganisationUnitChildren;
+				favorite.type = DV.c.type;
+				favorite.series = DV.c.dimension.series;
+				favorite.category = DV.c.dimension.category;
+				favorite.filter = DV.c.dimension.filter;
+				favorite.hideLegend = DV.c.hidelegend;
+				favorite.hideSubtitle = DV.c.hidesubtitle;
+				favorite.showData = DV.c.showdata;
+				favorite.regression = DV.c.trendline;
+				favorite.userOrganisationUnit = DV.c.userorganisationunit;
+				favorite.userOrganisationUnitChildren = DV.c.userorganisationunitchildren;
 
 				// Options
-				if (p.domainAxisLabel) {
-					favorite.domainAxisLabel = p.domainAxisLabel;
+				if (DV.c.domainAxisLabel) {
+					favorite.domainAxisLabel = DV.c.domainaxislabel;
 				}
-				if (p.rangeAxisLabel) {
-					favorite.rangeAxisLabel = p.rangeAxisLabel;
+				if (DV.c.rangeAxisLabel) {
+					favorite.rangeAxisLabel = DV.c.rangeaxislabel;
 				}
-				if (p.targetLineValue) {
-					favorite.targetLineValue = p.targetLineValue;
+				if (DV.c.targetLineValue) {
+					favorite.targetLineValue = DV.c.targetlinevalue;
 				}
-				if (p.targetLineLabel) {
-					favorite.targetLineLabel = p.targetLineLabel;
+				if (DV.c.targetLineLabel) {
+					favorite.targetLineLabel = DV.c.targetlinelabel;
 				}
-				if (p.baseLineValue) {
-					favorite.baseLineValue = p.baseLineValue;
+				if (DV.c.baseLineValue) {
+					favorite.baseLineValue = DV.c.baselinevalue;
 				}
-				if (p.baseLineLabel) {
-					favorite.baseLineLabel = p.baseLineLabel;
+				if (DV.c.baseLineLabel) {
+					favorite.baseLineLabel = DV.c.baselinelabel;
 				}
 
 				// Indicators
-				if (Ext.isArray(p.indicatorIds) && p.indicatorIds.length) {
-					favorite.indicators = [];
-
-					for (var i = 0; i < p.indicatorIds.length; i++) {
-						favorite.indicators.push({
-							id: p.indicatorIds[i]
-						});
-					}
+				if (Ext.isObject(DV.c.indicator) && Ext.isArray(DV.c.indicator.records) && DV.c.indicator.records.length) {
+					favorite.indicators = Ext.clone(DV.c.indicator.records);
 				}
 
 				// Data elements
-				if (Ext.isArray(p.dataElementIds) && p.dataElementIds.length) {
-					favorite.dataElements = [];
-
-					for (var i = 0; i < p.dataElementIds.length; i++) {
-						favorite.dataElements.push({
-							id: p.dataElementIds[i]
-						});
-					}
+				if (Ext.isObject(DV.c.dataelement) && Ext.isArray(DV.c.dataelement.records) && DV.c.dataelement.records.length) {
+					favorite.dataElements = Ext.clone(DV.c.dataelement.records);
 				}
 
 				// Data sets
-				if (Ext.isArray(p.dataSetIds) && p.dataSetIds.length) {
-					favorite.dataSets = [];
-
-					for (var i = 0; i < p.dataSetIds.length; i++) {
-						favorite.dataSets.push({
-							id: p.dataSetIds[i]
-						});
-					}
+				if (Ext.isObject(DV.c.dataset) && Ext.isArray(DV.c.dataset.records) && DV.c.dataset.records.length) {
+					favorite.dataSets = Ext.clone(DV.c.dataset.records);
 				}
 
 				// Fixed periods
-				if (Ext.isArray(p.periodIds) && p.periodIds.length) {
-					favorite.periods = [];
-
-					for (var i = 0; i < p.periodIds.length; i++) {
-						favorite.periods.push({
-							id: p.periodIds[i]
-						});
-					}
+				if (Ext.isObject(DV.c.fixedperiod) && Ext.isArray(DV.c.fixedperiod.records) && DV.c.fixedperiod.records.length) {
+					favorite.periods = Ext.clone(DV.c.fixedperiod.records);
 				}
 
 				// Relative periods
 				favorite.relativePeriods = {};
 
-				if (p.lastMonth || p.last3Months || p.last12Months || p.lastQuarter || p.last4Quarters ||
-					p.lastSixMonth || p.last2SixMonths || p.thisYear || p.lastYear || p.last5Years) {
+				if (Ext.isObject(DV.c.relativeperiod)) {
+					favorite.rewindRelativePeriods = !!DV.c.relativeperiod.rewind;
 
-					if (p.lastMonth) {favorite.relativePeriods.lastMonth = true;}
-					if (p.last3Months) {favorite.relativePeriods.last3Months = true;}
-					if (p.last12Months) {favorite.relativePeriods.last12Months = true;}
-					if (p.lastQuarter) {favorite.relativePeriods.lastQuarter = true;}
-					if (p.last4Quarters) {favorite.relativePeriods.last4Quarters = true;}
-					if (p.lastSixMonth) {favorite.relativePeriods.lastSixMonth = true;}
-					if (p.last2SixMonths) {favorite.relativePeriods.last2SixMonths = true;}
-					if (p.thisYear) {favorite.relativePeriods.thisYear = true;}
-					if (p.lastYear) {favorite.relativePeriods.lastYear = true;}
-					if (p.last5Years) {favorite.relativePeriods.last5Years = true;}
-				}
-
-				if (p.rewind) {
-					favorite.rewindRelativePeriods = true;
-				}
-
-				// Organisation units
-				if (Ext.isArray(p.organisationUnitIds) && p.organisationUnitIds.length) {
-					favorite.organisationUnits = [];
-
-					for (var i = 0; i < p.organisationUnitIds.length; i++) {
-						favorite.organisationUnits.push({
-							id: p.organisationUnitIds[i]
-						});
+					if (Ext.isObject(DV.c.relativeperiod.rp)) {
+						for (var key in DV.c.relativeperiod.rp) {
+							if (DV.c.relativeperiod.rp.hasOwnProperty(key) && !!DV.c.relativeperiod.rp[key]) {
+								favorite.relativePeriods[DV.conf.period.relativePeriodValueKeys[key]] = true;
+							}
+						}
 					}
 				}
 
-				// Organisation unit group set
-				if (p.organisationUnitGroupSetId) {
-					favorite.organisationUnitGroupSetId = p.organisationUnitGroupSetId;
+				// Organisation units
+				if (Ext.isObject(DV.c.organisationunit)) {
+					if (Ext.isString(DV.c.organisationunit.groupsetid)) {
+						favorite.organisationUnitGroupSetId = DV.c.organisationunit.groupsetid;
+					}
+
+					if (Ext.isArray(DV.c.organisationunit.records) && DV.c.organisationunit.records.length) {
+						favorite.organisationUnits = Ext.clone(DV.c.organisationunit.records);
+					}
 				}
 			}
 
