@@ -189,17 +189,50 @@ DV.conf = {
 		}
     },
     period: {
-		relativeperiodunits: {
-			reportingMonth: 1,
-			last3Months: 3,
-			last12Months: 12,
-			reportingQuarter: 1,
-			last4Quarters: 4,
-			lastSixMonth: 1,
-			last2SixMonths: 2,
-			thisYear: 1,
-			lastYear: 1,
-			last5Years: 5
+		relativePeriods: {
+			'LAST_WEEK': 1,
+			'LAST_4_WEEKS': 4,
+			'LAST_12_WEEKS': 12,
+			'LAST_MONTH': 1,
+			'LAST_3_MONTHS': 3,
+			'LAST_12_MONTHS': 12,
+			'LAST_QUARTER': 1,
+			'LAST_4_QUARTERS': 4,
+			'LAST_SIX_MONTH': 1,
+			'LAST_2_SIXMONTHS': 2,
+			'THIS_YEAR': 1,
+			'LAST_YEAR': 1,
+			'LAST_5_YEARS': 5
+		},
+		relativePeriodValueKeys: {
+			'LAST_WEEK': 'lastWeek',
+			'LAST_4_WEEKS': 'last4Weeks',
+			'LAST_12_WEEKS': 'last12Weeks',
+			'LAST_MONTH': 'reportingMonth',
+			'LAST_3_MONTHS': 'last3Months',
+			'LAST_12_MONTHS': 'last12Months',
+			'LAST_QUARTER': 'reportingQuarter',
+			'LAST_4_QUARTERS': 'last4Quarters',
+			'LAST_SIX_MONTH': 'lastSixMonth',
+			'LAST_2_SIXMONTHS': 'last2SixMonths',
+			'THIS_YEAR': 'thisYear',
+			'LAST_YEAR': 'lastYear',
+			'LAST_5_YEARS': 'last5Years'
+		},
+		relativePeriodParamKeys: {
+			'lastWeek': 'LAST_WEEK',
+			'last4Weeks': 'LAST_4_WEEKS',
+			'last12Weeks': 'LAST_12_WEEKS',
+			'reportingMonth': 'LAST_MONTH',
+			'last3Months': 'LAST_3_MONTHS',
+			'last12Months': 'LAST_12_MONTHS',
+			'reportingQuarter': 'LAST_QUARTER',
+			'last4Quarters': 'LAST_4_QUARTERS',
+			'lastSixMonth': 'LAST_SIX_MONTH',
+			'last2SixMonths': 'LAST_2_SIXMONTHS',
+			'thisYear': 'THIS_YEAR',
+			'lastYear': 'LAST_YEAR',
+			'last5Years': 'LAST_5_YEARS'
 		},
 		periodtypes: [
 			{id: 'Daily', name: 'Daily'},
@@ -575,12 +608,12 @@ Ext.onReady( function() {
 				}
             },
             relativeperiod: {
-                getRecordsByRelativePeriods: function(obj) {
+                getRecordsByRelativePeriods: function(rp) {
 					var a = [],
 						count = 0;
-                    for (var rp in obj) {
-                        if (obj[rp]) {
-							count += DV.conf.period.relativeperiodunits[rp];
+                    for (var key in rp) {
+                        if (rp[key]) {
+							count += DV.conf.period.relativePeriods[key];
                         }
                     }
                     for (var i = 0; i < count; i++) {
@@ -600,7 +633,7 @@ Ext.onReady( function() {
                     var a = {},
                         cmp = DV.cmp.dimension.relativeperiod.checkbox;
                     Ext.Array.each(cmp, function(item) {
-                        a[item.paramName] = item.getValue();
+                        a[item.relativePeriodId] = item.getValue();
                     });
                     return a;
                 },
@@ -637,10 +670,10 @@ Ext.onReady( function() {
 				},
                 getUrl: function() {
 					var a = [],
-						obj = DV.c.relativeperiod.rp;
-					for (var rp in obj) {
-						if (obj[rp]) {
-							a.push(rp + '=true');
+						rp = DV.c.relativeperiod.rp;
+					for (var key in rp) {
+						if (rp[key]) {
+							a.push(DV.conf.period.relativePeriodValueKeys[key] + '=true');
 						}
 					}
 
@@ -4331,7 +4364,7 @@ Ext.onReady( function() {
 																	}
 																},
 																change: function() {
-																	rewind.xable();
+																	DV.cmp.dimension.relativeperiod.rewind.xable();
 																}
 															}
 														},
@@ -4379,23 +4412,23 @@ Ext.onReady( function() {
 														items: [
 															{
 																xtype: 'label',
-																text: 'Months', //i18n pt.i18n.months,
+																text: DV.i18n.months,
 																cls: 'dv-label-period-heading'
 															},
 															{
 																xtype: 'checkbox',
 																relativePeriodId: 'LAST_MONTH',
-																boxLabel: 'Last month', //i18n pt.i18n.last_month
+																boxLabel: DV.i18n.last_month
 															},
 															{
 																xtype: 'checkbox',
 																relativePeriodId: 'LAST_3_MONTHS',
-																boxLabel: 'Last 3 months', //i18n pt.i18n.last_3_months
+																boxLabel: DV.i18n.last_3_months
 															},
 															{
 																xtype: 'checkbox',
 																relativePeriodId: 'LAST_12_MONTHS',
-																boxLabel: 'Last 12 months', //i18n pt.i18n.last_12_months,
+																boxLabel: DV.i18n.last_12_months,
 																checked: true
 															}
 														]
@@ -4421,18 +4454,18 @@ Ext.onReady( function() {
 														items: [
 															{
 																xtype: 'label',
-																text: 'Quarters', //i18n pt.i18n.quarters,
+																text: DV.i18n.quarters,
 																cls: 'dv-label-period-heading'
 															},
 															{
 																xtype: 'checkbox',
 																relativePeriodId: 'LAST_QUARTER',
-																boxLabel: 'Last quarter', //i18n pt.i18n.last_quarter
+																boxLabel: DV.i18n.last_quarter
 															},
 															{
 																xtype: 'checkbox',
 																relativePeriodId: 'LAST_4_QUARTERS',
-																boxLabel: 'Last 4 quarters', //i18n pt.i18n.last_4_quarters
+																boxLabel: DV.i18n.last_4_quarters
 															}
 														]
 													}
@@ -4464,18 +4497,18 @@ Ext.onReady( function() {
 														items: [
 															{
 																xtype: 'label',
-																text: 'Six-months', //i18n pt.i18n.six_months,
+																text: DV.i18n.six_months,
 																cls: 'dv-label-period-heading'
 															},
 															{
 																xtype: 'checkbox',
 																relativePeriodId: 'LAST_SIX_MONTH',
-																boxLabel: 'Last six-month', //i18n pt.i18n.last_six_month
+																boxLabel: DV.i18n.last_six_month
 															},
 															{
 																xtype: 'checkbox',
 																relativePeriodId: 'LAST_2_SIXMONTHS',
-																boxLabel: 'Last 2 six-months', //i18n pt.i18n.last_two_six_month
+																boxLabel: DV.i18n.last_two_six_month
 															}
 														]
 													},

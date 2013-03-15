@@ -375,7 +375,7 @@ body {
 }
 
 .x-tip-anchor {
-	border-bottom-color: #111;
+	border-top-color: #111;
 }
 
 /* Chart tips (tooltip) */
