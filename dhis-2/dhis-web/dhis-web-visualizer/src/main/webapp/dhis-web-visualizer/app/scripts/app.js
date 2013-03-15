@@ -5280,7 +5280,7 @@ Ext.onReady( function() {
 									layout: 'fit',
 									iconCls: 'dv-window-title-interpretation',
 									width: 500,
-									bodyStyle: 'padding:8px 8px 3px; background-color:#fff',
+									bodyStyle: 'padding:5px 5px 0; background-color:#fff',
 									resizable: true,
 									modal: true,
 									items: [
@@ -5304,7 +5304,7 @@ Ext.onReady( function() {
 											xtype: 'panel',
 											html: '<b>Link: </b>' + DV.init.contextPath + '/dhis-web-visualizer/app/index.html?id=' + DV.c.currentFavorite.id,
 											bodyStyle: 'border: 0 none; -webkit-touch-callout:all; -webkit-user-select:all; -khtml-user-select:all; -moz-user-select:all; -ms-user-select:all; user-select:all',
-											style: 'padding-top: 9px; padding-bottom: 6px'
+											style: 'padding:6px 0 6px 1px'
 										}
 									],
 									bbar: {
@@ -5350,8 +5350,8 @@ Ext.onReady( function() {
 										]
 									},
 									listeners: {
-										show: function() {
-											this.setPosition(this.getPosition()[0], 100);
+										show: function(w) {
+											DV.util.window.setAnchorPosition(w, DV.cmp.toolbar.share);
 										},
 										hide: function() {
 											document.body.oncontextmenu = function(){return false;};
