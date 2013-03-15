@@ -203,8 +203,9 @@ body {
 
 /* Tree panel */
 
-.dv-tree .x-tree-panel .x-grid-row .x-grid-cell-inner { /* node height */
+.dv-tree.x-tree-panel .x-grid-row .x-grid-cell-inner { /* node height, font size */
     height: 17px;
+    font-size: 10px;
 }
 
 .dv-tree .x-grid-row-selected .x-grid-cell,
