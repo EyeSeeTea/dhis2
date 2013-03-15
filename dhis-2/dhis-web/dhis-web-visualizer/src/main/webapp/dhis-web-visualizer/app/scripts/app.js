@@ -1203,10 +1203,10 @@ Ext.onReady( function() {
         checkbox: {
             setRelativePeriods: function(rp) {
 				if (rp) {
-					for (var r in rp) {
-						var cmp = DV.util.getCmp('checkbox[paramName="' + r + '"]');
+					for (var key in rp) {
+						var cmp = DV.util.getCmp('checkbox[relativePeriodId="' + (DV.conf.period.relativePeriodParamKeys[key] || key) + '"]');
 						if (cmp) {
-							cmp.setValue(rp[r]);
+							cmp.setValue(rp[key]);
 						}
 					}
 				}
