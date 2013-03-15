@@ -239,14 +239,14 @@ DV.conf = {
         west_fill_accordion_dataelement: 63,
         west_fill_accordion_dataset: 33,
         west_fill_accordion_period: 240,
-        west_fill_accordion_organisationunit: 97,
+        west_fill_accordion_organisationunit: 62,
         west_maxheight_accordion_indicator: 500,
         west_maxheight_accordion_dataelement: 500,
         west_maxheight_accordion_dataset: 500,
-        west_maxheight_accordion_period: 513,
-        west_maxheight_accordion_organisationunit: 900,
-        west_maxheight_accordion_organisationunitgroup: 281,
-        west_maxheight_accordion_options: 431,
+        west_maxheight_accordion_period: 650,
+        west_maxheight_accordion_organisationunit: 700,
+        west_maxheight_accordion_organisationunitgroup: 253,
+        west_maxheight_accordion_options: 403,
         east_tbar_height: 31,
         east_gridcolumn_height: 30,
         form_label_width: 55,
@@ -4584,7 +4584,7 @@ Ext.onReady( function() {
 														boxLabel: DV.i18n.user_orgunit,
 														labelWidth: DV.conf.layout.form_label_width,
 														handler: function(chb, checked) {
-															DV.cmp.dimension.organisationunit.toolbar.xable(checked, DV.cmp.favorite.userorganisationunitchildren.getValue());
+															//DV.cmp.dimension.organisationunit.toolbar.xable(checked, DV.cmp.favorite.userorganisationunitchildren.getValue());
 															DV.cmp.dimension.organisationunit.treepanel.xable(checked, DV.cmp.favorite.userorganisationunitchildren.getValue());
 														},
 														listeners: {
@@ -4599,7 +4599,7 @@ Ext.onReady( function() {
 														boxLabel: DV.i18n.user_orgunit_children,
 														labelWidth: DV.conf.layout.form_label_width,
 														handler: function(chb, checked) {
-															DV.cmp.dimension.organisationunit.toolbar.xable(checked, DV.cmp.favorite.userorganisationunit.getValue());
+															//DV.cmp.dimension.organisationunit.toolbar.xable(checked, DV.cmp.favorite.userorganisationunit.getValue());
 															DV.cmp.dimension.organisationunit.treepanel.xable(checked, DV.cmp.favorite.userorganisationunit.getValue());
 														},
 														listeners: {
@@ -4610,94 +4610,95 @@ Ext.onReady( function() {
 													}
 												]
 											},
-											{
-												id: 'organisationunit_t',
-												xtype: 'toolbar',
-												style: 'margin-bottom: 5px',
-												width: DV.conf.layout.west_fieldset_width - 4,
-												xable: function(checked, value) {
-													if (checked || value) {
-														this.disable();
-													}
-													else {
-														this.enable();
-													}
-												},
-												defaults: {
-													height: 24
-												},
-												items: [
-													{
-														xtype: 'label',
-														text: 'Auto-select organisation units by',
-														style: 'padding-left:8px; color:#666; line-height:24px'
-													},
-													'->',
-													{
-														text: 'Group..',
-														handler: function() {},
-														listeners: {
-															added: function() {
-																this.menu = Ext.create('Ext.menu.Menu', {
-																	shadow: false,
-																	showSeparator: false,
-																	width: DV.conf.layout.treepanel_toolbar_menu_width_group,
-																	items: [
-																		{
-																			xtype: 'grid',
-																			cls: 'dv-menugrid',
-																			width: DV.conf.layout.treepanel_toolbar_menu_width_group,
-																			scroll: 'vertical',
-																			columns: [
-																				{
-																					dataIndex: 'name',
-																					width: DV.conf.layout.treepanel_toolbar_menu_width_group,
-																					style: 'display:none'
-																				}
-																			],
-																			setHeightInMenu: function(store) {
-																				var h = store.getCount() * 24,
-																					sh = DV.util.viewport.getSize().y * 0.6;
-																				this.setHeight(h > sh ? sh : h);
-																				this.doLayout();
-																				this.up('menu').doLayout();
-																			},
-																			store: DV.store.group,
-																			listeners: {
-																				itemclick: function(g, r) {
-																					g.getSelectionModel().select([], false);
-																					this.up('menu').hide();
-																					DV.cmp.dimension.organisationunit.treepanel.selectByGroup(r.data.id);
-																				}
-																			}
-																		}
-																	],
-																	listeners: {
-																		show: function() {
-																			if (!DV.store.group.isloaded) {
-																				DV.store.group.load({scope: this, callback: function() {
-																					this.down('grid').setHeightInMenu(DV.store.group);
-																				}});
-																			}
-																			else {
-																				this.down('grid').setHeightInMenu(DV.store.group);
-																			}
-																		}
-																	}
-																});
-															}
-														}
-													}
-												],
-												listeners: {
-													added: function() {
-														DV.cmp.dimension.organisationunit.toolbar = this;
-													}
-												}
-											},
+											//{
+												//id: 'organisationunit_t',
+												//xtype: 'toolbar',
+												//style: 'margin-bottom: 5px',
+												//width: DV.conf.layout.west_fieldset_width - 4,
+												//xable: function(checked, value) {
+													//if (checked || value) {
+														//this.disable();
+													//}
+													//else {
+														//this.enable();
+													//}
+												//},
+												//defaults: {
+													//height: 24
+												//},
+												//items: [
+													//{
+														//xtype: 'label',
+														//text: 'Auto-select organisation units by',
+														//style: 'padding-left:8px; color:#666; line-height:24px'
+													//},
+													//'->',
+													//{
+														//text: 'Group..',
+														//handler: function() {},
+														//listeners: {
+															//added: function() {
+																//this.menu = Ext.create('Ext.menu.Menu', {
+																	//shadow: false,
+																	//showSeparator: false,
+																	//width: DV.conf.layout.treepanel_toolbar_menu_width_group,
+																	//items: [
+																		//{
+																			//xtype: 'grid',
+																			//cls: 'dv-menugrid',
+																			//width: DV.conf.layout.treepanel_toolbar_menu_width_group,
+																			//scroll: 'vertical',
+																			//columns: [
+																				//{
+																					//dataIndex: 'name',
+																					//width: DV.conf.layout.treepanel_toolbar_menu_width_group,
+																					//style: 'display:none'
+																				//}
+																			//],
+																			//setHeightInMenu: function(store) {
+																				//var h = store.getCount() * 24,
+																					//sh = DV.util.viewport.getSize().y * 0.6;
+																				//this.setHeight(h > sh ? sh : h);
+																				//this.doLayout();
+																				//this.up('menu').doLayout();
+																			//},
+																			//store: DV.store.group,
+																			//listeners: {
+																				//itemclick: function(g, r) {
+																					//g.getSelectionModel().select([], false);
+																					//this.up('menu').hide();
+																					//DV.cmp.dimension.organisationunit.treepanel.selectByGroup(r.data.id);
+																				//}
+																			//}
+																		//}
+																	//],
+																	//listeners: {
+																		//show: function() {
+																			//if (!DV.store.group.isloaded) {
+																				//DV.store.group.load({scope: this, callback: function() {
+																					//this.down('grid').setHeightInMenu(DV.store.group);
+																				//}});
+																			//}
+																			//else {
+																				//this.down('grid').setHeightInMenu(DV.store.group);
+																			//}
+																		//}
+																	//}
+																//});
+															//}
+														//}
+													//}
+												//],
+												//listeners: {
+													//added: function() {
+														//DV.cmp.dimension.organisationunit.toolbar = this;
+													//}
+												//}
+											//},
 											{
 												xtype: 'treepanel',
 												cls: 'dv-tree',
+												style: 'border-top: 1px solid #ddd; padding-top: 1px',
 												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_padding,
 												rootVisible: false,
 												autoScroll: true,
