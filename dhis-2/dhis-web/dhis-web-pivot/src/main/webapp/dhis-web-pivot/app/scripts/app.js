@@ -3477,7 +3477,7 @@ Ext.onReady( function() {
 					}
 				}
 			});
-acc = accordion;
+
 			westRegion = Ext.create('Ext.panel.Panel', {
 				region: 'west',
 				preventHeader: true,
