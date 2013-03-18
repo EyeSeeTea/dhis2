@@ -756,3 +756,22 @@ input:-moz-placeholder
 {
   font-weight: normal !important;
 }
+
+/*----------------------------------------------------------------------------*/
+/* Messages used for sharing                                                  */
+/*----------------------------------------------------------------------------*/
+
+.message 
+{
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    width: 450px;
+    padding: 9px;
+    margin-bottom: 8px;
+}
+
+.message-info 
+{
+    background-color: #f3f3f3;
+	color: #222;
+}

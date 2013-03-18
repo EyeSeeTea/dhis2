@@ -38,6 +38,8 @@ import org.hisp.dhis.scheduling.TaskId;
 public class ImportMetaDataTask
     implements Runnable
 {
+    private String userUid;
+
     private ImportService importService;
 
     private ImportOptions importOptions;
@@ -46,8 +48,9 @@ public class ImportMetaDataTask
 
     private MetaData metaData;
 
-    public ImportMetaDataTask( ImportService importService, ImportOptions importOptions, TaskId taskId, MetaData metaData )
+    public ImportMetaDataTask( String userUid, ImportService importService, ImportOptions importOptions, TaskId taskId, MetaData metaData )
     {
+        this.userUid = userUid;
         this.importService = importService;
         this.importOptions = importOptions;
         this.taskId = taskId;
@@ -57,6 +60,6 @@ public class ImportMetaDataTask
     @Override
     public void run()
     {
-        importService.importMetaData( metaData, importOptions, taskId );
+        importService.importMetaData( userUid, metaData, importOptions, taskId );
     }
 }

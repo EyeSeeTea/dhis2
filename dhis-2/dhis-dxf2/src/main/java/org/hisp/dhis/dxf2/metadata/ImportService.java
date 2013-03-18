@@ -36,11 +36,11 @@ import org.springframework.stereotype.Service;
 @Service
 public interface ImportService
 {
-    ImportSummary importMetaData( MetaData metaData );
+    ImportSummary importMetaData( String userUid, MetaData metaData );
 
-    ImportSummary importMetaData( MetaData metaData, TaskId taskId );
+    ImportSummary importMetaData( String userUid, MetaData metaData, TaskId taskId );
 
-    ImportSummary importMetaData( MetaData metaData, ImportOptions importOptions );
+    ImportSummary importMetaData( String userUid, MetaData metaData, ImportOptions importOptions );
 
-    ImportSummary importMetaData( MetaData metaData, ImportOptions importOptions, TaskId taskId );
+    ImportSummary importMetaData( String userUid, MetaData metaData, ImportOptions importOptions, TaskId taskId );
 }

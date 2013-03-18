@@ -358,3 +358,13 @@ jQuery.each(attributes, function(i, item) {
 </tr>
 </script>
 #end
+
+#macro( sharingCreateNotification $type )
+<div class="message message-info">
+    #if( $security.canCreatePublic( $type ) )
+    $i18n.getString("object_will_created_public")
+    #elseif( $security.canCreatePrivate( $type ) )
+    $i18n.getString("object_will_created_private")
+    #end
+</div>
+#end
