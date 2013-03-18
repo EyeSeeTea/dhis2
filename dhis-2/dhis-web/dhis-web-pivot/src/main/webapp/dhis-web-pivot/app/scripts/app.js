@@ -68,7 +68,7 @@ Ext.onReady( function() {
 				console.log("factor", factor);
 			}
 
-			if (factor > 8) {
+			if (factor > 7) {
 				pt.viewport.accordion.setAutoScroll(false);
 				pt.viewport.westRegion.setWidth(pt.conf.layout.west_width);
 			}
