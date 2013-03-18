@@ -46,8 +46,6 @@ Ext.onReady( function() {
 
 		init.afterRender = function() {
 
-			// Left gui
-
 			// Resize event handler
 			pt.viewport.westRegion.on('resize', function() {
 				var panel = pt.util.dimension.panel.getExpanded();
@@ -57,9 +55,10 @@ Ext.onReady( function() {
 				}
 			});
 
-			// Left scrollbar
+			// Left gui
 			var vph = pt.viewport.westRegion.getHeight(),
-				no = pt.init.ougs.length + pt.init.degs.length;
+				no = pt.init.ougs.length + pt.init.degs.length,
+				factor = 0;
 
 			console.log("westRegion.getHeight", vph);
 			console.log("no of degs and ougs", no);
@@ -3481,7 +3480,7 @@ Ext.onReady( function() {
 				preventHeader: true,
 				collapsible: true,
 				collapseMode: 'mini',
-				width: pt.conf.layout.west_width + 15,
+				width: pt.conf.layout.west_width + 13,
 				items: accordion
 			});
 

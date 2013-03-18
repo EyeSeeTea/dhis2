@@ -40,6 +40,25 @@
  * General
  *--------------------------------------------------------------------------*/
 
+::-webkit-scrollbar {
+    width: 13px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #ddd;
+    border-radius: 1px;
+    margin: 2px 0;
+    border-right: 3px solid white;
+    border-left: 1px solid white;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: #bbb;
+    border-radius: 1px;
+    border-right: 3px solid white;
+    border-left: 1px solid white;
+}
+
 body,
 .x-body,
 .x-btn-default-toolbar-small .x-btn-inner,
