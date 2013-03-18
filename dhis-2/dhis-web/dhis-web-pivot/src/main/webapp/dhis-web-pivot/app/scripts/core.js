@@ -162,6 +162,8 @@ PT.core.getConfigs = function() {
 			'LAST_4_QUARTERS': 'last4Quarters',
 			'LAST_SIX_MONTH': 'lastSixMonth',
 			'LAST_2_SIXMONTHS': 'last2SixMonths',
+			'LAST_FINANCIAL_YEAR': 'lastFinancialYear',
+			'LAST_5_FINANCIAL_YEARS': 'last5FinancialYears',
 			'THIS_YEAR': 'thisYear',
 			'LAST_YEAR': 'lastYear',
 			'LAST_5_YEARS': 'last5Years'
@@ -179,6 +181,8 @@ PT.core.getConfigs = function() {
 			'last4Quarters': 'LAST_4_QUARTERS',
 			'lastSixMonth': 'LAST_SIX_MONTH',
 			'last2SixMonths': 'LAST_2_SIXMONTHS',
+			'lastFinancialYear': 'LAST_FINANCIAL_YEAR',
+			'last5FinancialYears': 'LAST_5_FINANCIAL_YEARS',
 			'thisYear': 'THIS_YEAR',
 			'lastYear': 'LAST_YEAR',
 			'last5Years': 'LAST_5_YEARS'

@@ -1018,7 +1018,7 @@ Ext.onReady( function() {
 
 					if (obj.objectName === pt.conf.finals.dimension.period.objectName) {
 						for (var j = 0, item; j < obj.items.length; j++) {
-							item = obj.items[j];
+							item = obj.itemws[j];
 
 							if (pt.conf.period.relativePeriodValueKeys[item]) {
 								key = pt.conf.finals.dimension.relativePeriod.value;
@@ -3483,7 +3483,7 @@ acc = accordion;
 				preventHeader: true,
 				collapsible: true,
 				collapseMode: 'mini',
-				width: Ext.isWebKit ? pt.conf.layout.west_width + 9 : pt.conf.layout.west_width + 17,
+				width: Ext.isWebKit ? pt.conf.layout.west_width + 7 : pt.conf.layout.west_width + 17,
 				items: accordion
 			});
 
@@ -3671,12 +3671,6 @@ acc = accordion;
 
 				// Relative periods
 				if (Ext.isObject(r.relativePeriods)) {
-
-					//todo
-					r.relativePeriods.reportingMonth = r.relativePeriods.lastMonth;
-					r.relativePeriods.reportingBimonth = r.relativePeriods.lastBimonth;
-					r.relativePeriods.reportingQuarter = r.relativePeriods.lastQuarter;
-
 					for (var key in r.relativePeriods) {
 						if (r.relativePeriods.hasOwnProperty(key) && pt.conf.period.relativePeriodParamKeys.hasOwnProperty(key)) {
 							var value = pt.conf.period.relativePeriodParamKeys[key];
