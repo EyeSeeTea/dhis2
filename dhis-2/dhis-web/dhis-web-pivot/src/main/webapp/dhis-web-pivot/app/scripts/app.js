@@ -65,8 +65,12 @@ Ext.onReady( function() {
 			}
 
 			if (factor > 7) {
-				pt.viewport.accordion.setAutoScroll(false);
-				pt.viewport.westRegion.setWidth(pt.conf.layout.west_width);
+				if (!Ext.isIE) {
+					pt.viewport.accordion.setAutoScroll(false);
+					pt.viewport.westRegion.setWidth(pt.conf.layout.west_width);
+					pt.viewport.accordion.getEl().setStyle('margin-right', '2px');
+					pt.viewport.accordion.doLayout();
+				}
 			}
 			else {
 				pt.viewport.westRegion.hasScrollbar = true;
@@ -799,7 +803,7 @@ Ext.onReady( function() {
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: 'Hide empty rows', //i18n
-			style: 'margin-bottom:4px',
+			style: 'margin-bottom:4px'
 		});
 		pt.viewport.hideEmptyRows = hideEmptyRows;
 
@@ -3460,8 +3464,11 @@ Ext.onReady( function() {
 			});
 
 			accordion = Ext.create('Ext.panel.Panel', {
-				//xtype: 'panel',
-				bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll',
+				bodyStyle: function() {
+					var style = 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;';
+					style += Ext.isWebKit ? ' padding-right:0;' : '';
+					return style;
+				}(),
 				layout: 'fit',
 				items: accordionBody,
 				listeners: {
@@ -3470,13 +3477,13 @@ Ext.onReady( function() {
 					}
 				}
 			});
-
+acc = accordion;
 			westRegion = Ext.create('Ext.panel.Panel', {
 				region: 'west',
 				preventHeader: true,
 				collapsible: true,
 				collapseMode: 'mini',
-				width: pt.conf.layout.west_width + 13,
+				width: Ext.isWebKit ? pt.conf.layout.west_width + 9 : pt.conf.layout.west_width + 17,
 				items: accordion
 			});
 
@@ -3664,6 +3671,12 @@ Ext.onReady( function() {
 
 				// Relative periods
 				if (Ext.isObject(r.relativePeriods)) {
+
+					//todo
+					r.relativePeriods.reportingMonth = r.relativePeriods.lastMonth;
+					r.relativePeriods.reportingBimonth = r.relativePeriods.lastBimonth;
+					r.relativePeriods.reportingQuarter = r.relativePeriods.lastQuarter;
+
 					for (var key in r.relativePeriods) {
 						if (r.relativePeriods.hasOwnProperty(key) && pt.conf.period.relativePeriodParamKeys.hasOwnProperty(key)) {
 							var value = pt.conf.period.relativePeriodParamKeys[key];
@@ -3784,9 +3797,6 @@ Ext.onReady( function() {
 					}
 				}
 			});
-acc = accordion;
-
-wr = westRegion;
 
 			addListeners = function() {
 				pt.store.indicatorAvailable.on('load', function() {
@@ -3830,4 +3840,3 @@ wr = westRegion;
 			PT.app.init.onInitialize(r);
 	}});
 });
-
