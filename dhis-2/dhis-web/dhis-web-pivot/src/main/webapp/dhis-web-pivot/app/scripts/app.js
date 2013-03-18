@@ -60,12 +60,8 @@ Ext.onReady( function() {
 				no = pt.init.ougs.length + pt.init.degs.length,
 				factor = 0;
 
-			console.log("westRegion.getHeight", vph);
-			console.log("no of degs and ougs", no);
-
 			if (vph > 535) {
-				var factor = (vph - 535) / 27;
-				console.log("factor", factor);
+				var factor = (vph - 535) / 28;
 			}
 
 			if (factor > 7) {
@@ -3668,12 +3664,6 @@ Ext.onReady( function() {
 
 				// Relative periods
 				if (Ext.isObject(r.relativePeriods)) {
-
-					//todo
-					r.relativePeriods.reportingMonth = r.relativePeriods.lastMonth;
-					r.relativePeriods.reportingBimonth = r.relativePeriods.lastBimonth;
-					r.relativePeriods.reportingQuarter = r.relativePeriods.lastQuarter;
-
 					for (var key in r.relativePeriods) {
 						if (r.relativePeriods.hasOwnProperty(key) && pt.conf.period.relativePeriodParamKeys.hasOwnProperty(key)) {
 							var value = pt.conf.period.relativePeriodParamKeys[key];
