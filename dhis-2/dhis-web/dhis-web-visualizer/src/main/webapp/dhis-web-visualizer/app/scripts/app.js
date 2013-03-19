@@ -2762,7 +2762,7 @@ Ext.onReady( function() {
 				text: 'Create', //i18n
 				handler: function() {
 					var favorite = getBody();
-					favorite.name = nameTextfield.getValue	();
+					favorite.name = nameTextfield.getValue();
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
@@ -2777,12 +2777,12 @@ Ext.onReady( function() {
 							success: function(r) {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
 
-								//pt.favorite = favorite;
-
+								DV.cmp.toolbar.share.enable();
+								DV.c.currentFavorite = {
+									id: id,
+									name: favorite.name
+								};
 								DV.store.favorite.loadStore();
-
-								//pt.viewport.interpretationButton.enable();
-
 								window.destroy();
 							}
 						});
@@ -3004,8 +3004,11 @@ Ext.onReady( function() {
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
 												success: function() {
-													//pt.favorite = favorite;
 													DV.cmp.toolbar.share.enable();
+													DV.c.currentFavorite = {
+														id: record.data.id,
+														name: favorite.name
+													};
 													DV.store.favorite.loadStore();
 												}
 											});
