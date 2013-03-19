@@ -3848,6 +3848,10 @@ Ext.onReady( function() {
 					pt.viewport.parentOrganisationUnit.setValue(r.reportParams.paramParentOrganisationUnit);
 				}
 
+				// Upgrade fixes
+				//var has
+				//if (!(r.periods && Ext.isArray(r.periods)) && !(Ext.isObject(r.reportParams !pt.util.object.hasTrueProperty(
+
 				update();
 			};
 
