@@ -924,7 +924,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: 'Table options', //i18n
-			bodyStyle: 'background-color:#fff; padding:8px 8px 6px',
+			bodyStyle: 'background-color:#fff; padding:8px 8px 8px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -965,7 +965,7 @@ Ext.onReady( function() {
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px',
 					style: 'margin-bottom:6px',
-					html: '<b>Parameters</b> <span style="font-size:11px"> (for standard reports)</span>'
+					html: '<b>Parameters</b> <span style="font-size:11px"> (for standard reports only)</span>'
 				},
 				parameters
 			],
@@ -1929,16 +1929,18 @@ Ext.onReady( function() {
 				userOrganisationUnitChildren,
 				treePanel,
 				organisationUnit,
-				groupSetIdAvailableStoreMap,
-				groupSetIdSelectedStoreMap,
+				groupSetIdAvailableStoreMap = {},
+				groupSetIdSelectedStoreMap = {},
 				getGroupSetPanels,
 				validateSpecialCases,
 				update,
 
 				layoutButton,
 				optionsButton,
+				favoriteButton,
 				downloadButton,
 
+				accordionBody,
 				accordion,
 				westRegion,
 				centerRegion,
@@ -3217,9 +3219,6 @@ Ext.onReady( function() {
 				}
 			};
 
-			groupSetIdAvailableStoreMap = {};
-			groupSetIdSelectedStoreMap = {};
-
 			getGroupSetPanels = function(groupSets, objectName, iconCls) {
 				var	getAvailableStore,
 					getSelectedStore,
@@ -3862,14 +3861,6 @@ Ext.onReady( function() {
 					if (Ext.isObject(r.reportParams) && r.reportParams.paramParentOrganisationUnit) {
 						userOrganisationUnit.setValue(true);
 					}
-
-
-				}
-
-				if (!Ext.isArray(r.organisationUnits) || !r.organisationUnits.length) {
-					if (Ext.isObject(r.reportParams) && r.reportParams.paramOrganisationUnit) {
-						userOrganisationUnit.setValue(true);
-					}
 				}
 
 				update();
@@ -3889,7 +3880,6 @@ Ext.onReady( function() {
 				userOrganisationUnit: userOrganisationUnit,
 				userOrganisationUnitChildren: userOrganisationUnitChildren,
 				setFavorite: setFavorite,
-				//groupSetIdStoreMap: groupSetIdStoreMap,
 				items: [
 					westRegion,
 					centerRegion
