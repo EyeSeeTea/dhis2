@@ -289,17 +289,6 @@ PT.core.getUtils = function(pt) {
 			}
 
 			return size;
-		},
-		hasTrueProperty: function(object) {
-			for (var key in object) {
-				if (object.hasOwnProperty(key)) {
-					if (object[key] === true) {
-						return true;
-					}
-				}
-			}
-
-			return false;
 		}
 	};
 

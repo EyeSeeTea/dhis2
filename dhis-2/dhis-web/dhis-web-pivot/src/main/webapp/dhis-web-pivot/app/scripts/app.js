@@ -58,10 +58,12 @@ Ext.onReady( function() {
 			// Left gui
 			var vph = pt.viewport.westRegion.getHeight(),
 				no = pt.init.ougs.length + pt.init.degs.length,
-				factor = 0;
+				factor = 0,
+				staticHeight = 535,
+				tabHeight = 28;
 
-			if (vph > 535) {
-				var factor = (vph - 535) / 28;
+			if (vph > staticHeight) {
+				var factor = (vph - staticHeight) / tabHeight;
 			}
 
 			if (factor > 7) {
@@ -806,29 +808,9 @@ Ext.onReady( function() {
 		});
 		pt.viewport.hideEmptyRows = hideEmptyRows;
 
-		digitGroupSeparator = Ext.create('Ext.form.field.ComboBox', {
-			labelStyle: 'color:#333',
-			cls: 'pt-combo',
-			width: 250,
-			labelWidth: 130,
-			fieldLabel: 'Digit group separator', //i18n
-			queryMode: 'local',
-			valueField: 'id',
-			editable: false,
-			value: 'space',
-			store: Ext.create('Ext.data.Store', {
-				fields: ['id', 'text'],
-				data: [
-					{id: 'comma', text: 'Comma'},
-					{id: 'space', text: 'Space'},
-					{id: 'none', text: 'None'}
-				]
-			})
-		});
-		pt.viewport.digitGroupSeparator = digitGroupSeparator;
-
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
+			style: 'margin-bottom:3px',
 			width: 250,
 			labelWidth: 130,
 			fieldLabel: 'Display density', //i18n
@@ -850,6 +832,7 @@ Ext.onReady( function() {
 
 		fontSize = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'pt-combo',
+			style: 'margin-bottom:3px',
 			width: 250,
 			labelWidth: 130,
 			fieldLabel: 'Font size', //i18n
@@ -868,6 +851,28 @@ Ext.onReady( function() {
 			})
 		});
 		pt.viewport.fontSize = fontSize;
+
+		digitGroupSeparator = Ext.create('Ext.form.field.ComboBox', {
+			labelStyle: 'color:#333',
+			cls: 'pt-combo',
+			style: 'margin-bottom:3px',
+			width: 250,
+			labelWidth: 130,
+			fieldLabel: 'Digit group separator', //i18n
+			queryMode: 'local',
+			valueField: 'id',
+			editable: false,
+			value: 'space',
+			store: Ext.create('Ext.data.Store', {
+				fields: ['id', 'text'],
+				data: [
+					{id: 'comma', text: 'Comma'},
+					{id: 'space', text: 'Space'},
+					{id: 'none', text: 'None'}
+				]
+			})
+		});
+		pt.viewport.digitGroupSeparator = digitGroupSeparator;
 
 		reportingPeriod = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: 'Reporting period', //i18n
@@ -940,7 +945,7 @@ Ext.onReady( function() {
 			},
 			items: [
 				{
-					bodyStyle: 'border:0 none; color:#444; font-size:12px; font-weight:bold',
+					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px',
 					html: 'Data'
 				},
@@ -949,7 +954,7 @@ Ext.onReady( function() {
 					bodyStyle: 'border:0 none; padding:7px'
 				},
 				{
-					bodyStyle: 'border:0 none; color:#444; font-size:12px; font-weight:bold',
+					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px',
 					html: 'Style'
 				},
@@ -958,9 +963,9 @@ Ext.onReady( function() {
 					bodyStyle: 'border:0 none; padding:7px'
 				},
 				{
-					bodyStyle: 'border:0 none; color:#444; font-size:12px; font-weight:bold',
+					bodyStyle: 'border:0 none; color:#222; font-size:12px',
 					style: 'margin-bottom:6px',
-					html: 'Report parameters'
+					html: '<b>Parameters</b> <span style="font-size:11px"> (for standard reports)</span>'
 				},
 				parameters
 			],
@@ -3849,8 +3854,23 @@ Ext.onReady( function() {
 				}
 
 				// Upgrade fixes
-				//var has
-				//if (!(r.periods && Ext.isArray(r.periods)) && !(Ext.isObject(r.reportParams !pt.util.object.hasTrueProperty(
+				if (!Ext.isArray(r.organisationUnits) || !r.organisationUnits.length) {
+					if (Ext.isObject(r.reportParams) && r.reportParams.paramOrganisationUnit) {
+						userOrganisationUnit.setValue(true);
+					}
+
+					if (Ext.isObject(r.reportParams) && r.reportParams.paramParentOrganisationUnit) {
+						userOrganisationUnit.setValue(true);
+					}
+
+
+				}
+
+				if (!Ext.isArray(r.organisationUnits) || !r.organisationUnits.length) {
+					if (Ext.isObject(r.reportParams) && r.reportParams.paramOrganisationUnit) {
+						userOrganisationUnit.setValue(true);
+					}
+				}
 
 				update();
 			};
