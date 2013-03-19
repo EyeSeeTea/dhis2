@@ -3698,7 +3698,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'tbseparator',
 							height: 18,
-							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 8px; margin-left: 5px',
+							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 6px; margin-left: 3px',
 						},
                         {
                             xtype: 'button',
