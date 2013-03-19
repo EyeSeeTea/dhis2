@@ -736,11 +736,8 @@ PT.core.getUtils = function(pt) {
 				var extendHeaders = function() {
 
 					// Extend headers: index, items (ordered), size
-					for (var i = 0, header, settingsItems, responseItems, orderedResponseItems; i < response.headers.length; i++) {
+					for (var i = 0, header; i < response.headers.length; i++) {
 						header = response.headers[i];
-						settingsItems = xLayout.nameItemsMap[header.name],
-						responseItems = [];
-						orderedResponseItems = [];
 
 						// index
 						header.index = i;
