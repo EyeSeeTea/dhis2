@@ -735,19 +735,13 @@ PT.core.getUtils = function(pt) {
 
 				var extendHeaders = function() {
 
-					// Extend headers: index, items (ordered), size
+					// Extend headers: index, items, size
 					for (var i = 0, header; i < response.headers.length; i++) {
 						header = response.headers[i];
-
-						// index
 						header.index = i;
 
 						if (header.meta) {
-
-							// items
-							header.items = header.name === pt.conf.finals.dimension.period.dimensionName ? response.periods : xLayout.nameItemsMap[header.name];
-
-							// size
+							header.items = header.name === pt.conf.finals.dimension.period.dimensionName ? [].concat(response.periods) : xLayout.nameItemsMap[header.name];
 							header.size = header.items.length;
 						}
 					}
