@@ -776,9 +776,14 @@ Ext.onReady( function() {
 			digitGroupSeparator,
 			displayDensity,
 			fontSize,
+			reportingPeriod,
+			organisationUnit,
+			parentOrganisationUnit,
 
 			data,
 			style,
+			parameters,
+
 			window;
 
 		showTotals = Ext.create('Ext.form.field.Checkbox', {
@@ -864,6 +869,24 @@ Ext.onReady( function() {
 		});
 		pt.viewport.fontSize = fontSize;
 
+		reportingPeriod = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: 'Reporting period', //i18n
+			style: 'margin-bottom:4px',
+		});
+		pt.viewport.reportingPeriod = reportingPeriod;
+
+		organisationUnit = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: 'Organisation unit', //i18n
+			style: 'margin-bottom:4px',
+		});
+		pt.viewport.organisationUnit = organisationUnit;
+
+		parentOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: 'Parent organisation unit', //i18n
+			style: 'margin-bottom:4px',
+		});
+		pt.viewport.parentOrganisationUnit = parentOrganisationUnit;
+
 		data = {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
@@ -884,9 +907,19 @@ Ext.onReady( function() {
 			]
 		};
 
+		parameters = {
+			bodyStyle: 'border:0 none',
+			style: 'margin-left:14px',
+			items: [
+				reportingPeriod,
+				organisationUnit,
+				parentOrganisationUnit
+			]
+		};
+
 		window = Ext.create('Ext.window.Window', {
 			title: 'Table options', //i18n
-			bodyStyle: 'background-color:#fff; padding:8px 8px 3px',
+			bodyStyle: 'background-color:#fff; padding:8px 8px 6px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -899,7 +932,10 @@ Ext.onReady( function() {
 					hideEmptyRows: hideEmptyRows.getValue(),
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
-					digitGroupSeparator: digitGroupSeparator.getValue()
+					digitGroupSeparator: digitGroupSeparator.getValue(),
+					reportingPeriod: reportingPeriod.getValue(),
+					organisationUnit: organisationUnit.getValue(),
+					parentOrganisationUnit: parentOrganisationUnit.getValue()
 				};
 			},
 			items: [
@@ -917,7 +953,16 @@ Ext.onReady( function() {
 					style: 'margin-bottom:6px',
 					html: 'Style'
 				},
-				style
+				style,
+				{
+					bodyStyle: 'border:0 none; padding:7px'
+				},
+				{
+					bodyStyle: 'border:0 none; color:#444; font-size:12px; font-weight:bold',
+					style: 'margin-bottom:6px',
+					html: 'Report parameters'
+				},
+				parameters
 			],
 			bbar: [
 				'->',
@@ -1004,7 +1049,19 @@ Ext.onReady( function() {
 
 				// Server sync
 				favorite.totals = favorite.showTotals;
+				delete favorite.showTotals;
+
 				favorite.subtotals = favorite.showSubTotals;
+				delete favorite.showSubTotals;
+
+				favorite.reportParams = {
+					paramReportingMonth: favorite.reportingPeriod,
+					paramOrganisationUnit: favorite.organisationUnit,
+					paramParentOrganisationUnit: favorite.parentOrganisationUnit
+				};
+				delete favorite.reportingPeriod;
+				delete favorite.organisationUnit;
+				delete favorite.parentOrganisationUnit;
 
 				// Dimensions
 				for (var i = 0, obj, key, items; i < pt.xLayout.objects.length; i++) {
@@ -3784,6 +3841,12 @@ Ext.onReady( function() {
 				pt.viewport.displayDensity.setValue(r.displayDensity);
 				pt.viewport.fontSize.setValue(r.fontSize);
 				pt.viewport.digitGroupSeparator.setValue(r.digitGroupSeparator);
+
+				if (Ext.isObject(r.reportParams)) {
+					pt.viewport.reportingPeriod.setValue(r.reportParams.paramReportingMonth);
+					pt.viewport.organisationUnit.setValue(r.reportParams.paramOrganisationUnit);
+					pt.viewport.parentOrganisationUnit.setValue(r.reportParams.paramParentOrganisationUnit);
+				}
 
 				update();
 			};
