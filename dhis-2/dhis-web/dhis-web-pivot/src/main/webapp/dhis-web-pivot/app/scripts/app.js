@@ -3676,9 +3676,33 @@ Ext.onReady( function() {
 						favoriteButton,
 						downloadButton,
                         '->',
+						{
+							text: 'Table', //i18n
+                            toggleGroup: 'module',
+							pressed: true
+						},
+						{
+							text: 'Chart', //i18n
+                            toggleGroup: 'module',
+							handler: function(b) {
+                                window.location.href = '../../dhis-web-visualizer/app/index.html';
+							}
+						},
+						{
+							text: 'Map', //i18n
+                            toggleGroup: 'module',
+							handler: function(b) {
+                                window.location.href = '../../dhis-web-mapping/app/index.html';
+							}
+						},
+						{
+							xtype: 'tbseparator',
+							height: 18,
+							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 8px; margin-left: 5px',
+						},
                         {
                             xtype: 'button',
-                            text: 'Exit',
+                            text: 'Home',
                             handler: function() {
                                 window.location.href = '../../dhis-web-commons-about/redirect.action';
                             }
