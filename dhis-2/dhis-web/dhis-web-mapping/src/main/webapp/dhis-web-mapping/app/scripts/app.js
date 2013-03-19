@@ -1716,7 +1716,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					var pos = gis.viewport.mapWindow.getPosition();
+					var pos = gis.viewport.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
 				}
 			}
@@ -1745,7 +1745,7 @@ Ext.onReady( function() {
 		return panel;
 	};
 
-	GIS.app.MapWindow = function() {
+	GIS.app.FavoriteWindow = function() {
 
 		// Objects
 		var NameWindow,
@@ -1766,7 +1766,7 @@ Ext.onReady( function() {
 			createButton,
 			updateButton,
 			cancelButton,
-			mapWindow,
+			favoriteWindow,
 
 		// Vars
 			windowWidth = 500,
@@ -1907,7 +1907,7 @@ Ext.onReady( function() {
 				],
 				listeners: {
 					show: function() {
-						this.setPosition(mapWindow.x + 14, mapWindow.y + 67);
+						this.setPosition(favoriteWindow.x + 14, favoriteWindow.y + 67);
 					}
 				}
 			});
@@ -2273,7 +2273,7 @@ Ext.onReady( function() {
 			}
 		});
 
-		mapWindow = Ext.create('Ext.window.Window', {
+		favoriteWindow = Ext.create('Ext.window.Window', {
 			title: 'Manage favorites',
 			iconCls: 'gis-window-title-icon-favorite',
 			cls: 'gis-container-default',
@@ -2306,7 +2306,7 @@ Ext.onReady( function() {
 			}
 		});
 
-		return mapWindow;
+		return favoriteWindow;
 	};
 
 	GIS.app.LegendSetWindow = function() {
@@ -4766,12 +4766,12 @@ Ext.onReady( function() {
 							text: 'Favorites', //i18n
 							menu: {},
 							handler: function() {
-								if (viewport.mapWindow && viewport.mapWindow.destroy) {
-									viewport.mapWindow.destroy();
+								if (viewport.favoriteWindow && viewport.favoriteWindow.destroy) {
+									viewport.favoriteWindow.destroy();
 								}
 
-								viewport.mapWindow = GIS.app.MapWindow();
-								viewport.mapWindow.show();
+								viewport.favoriteWindow = GIS.app.FavoriteWindow();
+								viewport.favoriteWindow.show();
 							}
 						});
 						if (gis.init.user.isAdmin) {
