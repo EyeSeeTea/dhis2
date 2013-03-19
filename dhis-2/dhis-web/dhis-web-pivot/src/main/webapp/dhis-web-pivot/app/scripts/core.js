@@ -730,18 +730,14 @@ PT.core.getUtils = function(pt) {
 			};
 
 			extendResponse = function(response, xLayout) {
-				var headers = response.headers,
-					metaData = response.metaData,
-					rows = response.rows;
-
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
 				var extendHeaders = function() {
 
 					// Extend headers: index, items (ordered), size
-					for (var i = 0, header, settingsItems, responseItems, orderedResponseItems; i < headers.length; i++) {
-						header = headers[i];
+					for (var i = 0, header, settingsItems, responseItems, orderedResponseItems; i < response.headers.length; i++) {
+						header = response.headers[i];
 						settingsItems = xLayout.nameItemsMap[header.name],
 						responseItems = [];
 						orderedResponseItems = [];
@@ -752,32 +748,7 @@ PT.core.getUtils = function(pt) {
 						if (header.meta) {
 
 							// items
-							for (var j = 0; j < rows.length; j++) {
-								responseItems.push(rows[j][header.index]);
-							}
-
-							responseItems = Ext.Array.unique(responseItems);
-
-							if (settingsItems.length) {
-								for (var j = 0, item; j < settingsItems.length; j++) {
-									item = settingsItems[j];
-
-									if (header.name === dimConf.period.dimensionName && pt.conf.period.relativePeriods[item]) {
-										orderedResponseItems = responseItems;
-										orderedResponseItems.sort();
-									}
-									else {
-										if (Ext.Array.contains(responseItems, item)) {
-											orderedResponseItems.push(item);
-										}
-									}
-								}
-							}
-							else {
-								orderedResponseItems = responseItems.sort();
-							}
-
-							header.items = orderedResponseItems;
+							header.items = header.name === pt.conf.finals.dimension.period.dimensionName ? response.periods : xLayout.nameItemsMap[header.name];
 
 							// size
 							header.size = header.items.length;
@@ -785,8 +756,8 @@ PT.core.getUtils = function(pt) {
 					}
 
 					// nameHeaderMap (headerName: header)
-					for (var i = 0, header; i < headers.length; i++) {
-						header = headers[i];
+					for (var i = 0, header; i < response.headers.length; i++) {
+						header = response.headers[i];
 
 						response.nameHeaderMap[header.name] = header;
 					}
@@ -803,8 +774,8 @@ PT.core.getUtils = function(pt) {
 					}
 
 					// idValueMap
-					for (var i = 0, row, id; i < rows.length; i++) {
-						row = rows[i];
+					for (var i = 0, row, id; i < response.rows.length; i++) {
+						row = response.rows[i];
 						id = '';
 
 						for (var j = 0; j < idIndexOrder.length; j++) {
