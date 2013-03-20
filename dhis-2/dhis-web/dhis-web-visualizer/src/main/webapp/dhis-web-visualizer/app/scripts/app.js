@@ -3496,7 +3496,7 @@ Ext.onReady( function() {
                             {
                                 xtype: 'label',
                                 text: DV.i18n.chart_type,
-                                style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 7px'
+                                style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 6px'
                             },
                             {
 								xtype: 'button',
@@ -3547,7 +3547,7 @@ Ext.onReady( function() {
                         xtype: 'toolbar',
                         id: 'chartsettings_tb',
                         style: 'padding-left: 2px;',
-                        height: 47,
+                        height: 46,
                         items: [
                             {
                                 xtype: 'panel',
@@ -3654,7 +3654,7 @@ Ext.onReady( function() {
                     },
                     {
                         xtype: 'panel',
-                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:2px;',
+                        bodyStyle: 'border-style:none; border-top:2px groove #eee; padding:1px 2px 2px;',
                         layout: 'fit',
                         items: [
 							{
@@ -5147,6 +5147,11 @@ Ext.onReady( function() {
                                 DV.exe.execute();
                             }
                         },
+						{
+							xtype: 'tbseparator',
+							height: 18,
+							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
+						},
                         {
                             text: DV.i18n.favorites,
                             menu: {},
@@ -5163,11 +5168,6 @@ Ext.onReady( function() {
 									DV.cmp.toolbar.favorite = this;
 								}
 							}
-						},
-						{
-							xtype: 'tbseparator',
-							height: 18,
-							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
 						},
                         {
                             xtype: 'button',
@@ -5413,7 +5413,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'tbseparator',
 							height: 18,
-							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 6px; margin-left: 3px',
+							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 3px; margin-left: 0px',
 						},
                         {
                             xtype: 'button',
