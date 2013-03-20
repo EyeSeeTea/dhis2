@@ -242,10 +242,10 @@ DV.conf = {
         west_fieldset_width: 416,
         west_width_padding: 4,
         west_fill: 101,
-        west_fill_accordion_indicator: 63,
-        west_fill_accordion_dataelement: 63,
+        west_fill_accordion_indicator: 59,
+        west_fill_accordion_dataelement: 59,
         west_fill_accordion_dataset: 33,
-        west_fill_accordion_period: 240,
+        west_fill_accordion_period: 232,
         west_fill_accordion_organisationunit: 62,
         west_maxheight_accordion_indicator: 500,
         west_maxheight_accordion_dataelement: 500,
@@ -3673,12 +3673,11 @@ Ext.onReady( function() {
 											{
 												xtype: 'combobox',
 												cls: 'dv-combo',
-												style: 'margin-bottom:4px; margin-top:2px',
+												style: 'margin-bottom:2px; margin-top:0px',
 												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_padding,
 												valueField: 'id',
 												displayField: 'name',
-												fieldLabel: DV.i18n.select_group,
-												labelStyle: 'padding-left:8px;',
+												emptyText: 'Select indicator group',
 												editable: false,
 												queryMode: 'remote',
 												store: Ext.create('Ext.data.Store', {
@@ -3843,12 +3842,11 @@ Ext.onReady( function() {
 											{
 												xtype: 'combobox',
 												cls: 'dv-combo',
-												style: 'margin-bottom:4px; margin-top:2px',
+												style: 'margin-bottom:2px; margin-top:0px',
 												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_padding,
 												valueField: 'id',
 												displayField: 'name',
-												fieldLabel: DV.i18n.select_group,
-												labelStyle: 'padding-left:8px',
+												emptyText: 'Select data element group',
 												editable: false,
 												queryMode: 'remote',
 												store: Ext.create('Ext.data.Store', {
@@ -4133,18 +4131,15 @@ Ext.onReady( function() {
 												xtype: 'panel',
 												layout: 'column',
 												bodyStyle: 'border-style:none',
-												style: 'margin-top:2px',
 												items: [
 													{
 														xtype: 'combobox',
 														cls: 'dv-combo',
-														style: 'margin-bottom:4px',
-														width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_padding - 62 - 62 - 7,
+														style: 'margin-bottom:2px; margin-top:0px',
+														width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_padding - 62 - 62 - 4,
 														valueField: 'id',
 														displayField: 'name',
-														fieldLabel: DV.i18n.select_type,
-														labelStyle: 'padding-left:8px;',
-														labelWidth: 110,
+														emptyText: 'Select period type',
 														editable: false,
 														queryMode: 'remote',
 														store: DV.store.periodtype,
@@ -4170,7 +4165,7 @@ Ext.onReady( function() {
 													{
 														xtype: 'button',
 														text: 'Prev year',
-														style: 'margin-left:4px; border-radius:2px',
+														style: 'margin-left:2px; border-radius:2px',
 														height: 24,
 														handler: function() {
 															var cb = this.up('panel').down('combobox');
@@ -4183,7 +4178,7 @@ Ext.onReady( function() {
 													{
 														xtype: 'button',
 														text: 'Next year',
-														style: 'margin-left:3px; border-radius:2px',
+														style: 'margin-left:2px; border-radius:2px',
 														height: 24,
 														handler: function() {
 															var cb = this.up('panel').down('combobox');
@@ -4199,7 +4194,7 @@ Ext.onReady( function() {
 
 												xtype: 'panel',
 												layout: 'column',
-												bodyStyle: 'border-style:none; padding-bottom:4px',
+												bodyStyle: 'border-style:none; padding-bottom:2px',
 												items: [
 													{
 														xtype: 'multiselect',
@@ -4855,9 +4850,7 @@ Ext.onReady( function() {
 												width: DV.conf.layout.west_fieldset_width - DV.conf.layout.west_width_padding,
 												valueField: 'id',
 												displayField: 'name',
-												fieldLabel: 'Group set', //i18n
-												labelWidth: 85,
-												labelStyle: 'padding-left:7px;',
+												emptyText: 'Organisation unit group set',
 												editable: false,
 												queryMode: 'remote',
 												value: DV.i18n.none,
