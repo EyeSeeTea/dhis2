@@ -587,9 +587,7 @@ Ext.onReady( function() {
 						count = 0;
                     for (var key in rp) {
                         if (rp[key]) {
-							var no = DV.conf.period.relativePeriods[key];
-							console.log("no", no);
-							count += no;
+							count += DV.conf.period.relativePeriods[key];
                         }
                     }
                     for (var i = 0; i < count; i++) {
@@ -2672,7 +2670,7 @@ Ext.onReady( function() {
 
 					for (var i = 0, r; i < DV.c.indicator.records.length; i++) {
 						r = Ext.clone(DV.c.indicator.records[i]);
-						favorite.indicators.push({id: r.id || r.data.id, name: r.name || r.data.name});
+						favorite.indicators.push({id: r.id, name: r.name});
 					}
 				}
 
@@ -2682,7 +2680,7 @@ Ext.onReady( function() {
 
 					for (var i = 0, r; i < DV.c.dataelement.records.length; i++) {
 						r = Ext.clone(DV.c.dataelement.records[i]);
-						favorite.dataElements.push({id: r.id || r.data.id, name: r.name || r.data.name});
+						favorite.dataElements.push({id: r.id, name: r.name});
 					}
 				}
 
@@ -2692,7 +2690,7 @@ Ext.onReady( function() {
 
 					for (var i = 0, r; i < DV.c.dataset.records.length; i++) {
 						r = Ext.clone(DV.c.dataset.records[i]);
-						favorite.dataSets.push({id: r.id || r.data.id, name: r.name || r.data.name});
+						favorite.dataSets.push({id: r.id, name: r.name});
 					}
 				}
 
@@ -2702,7 +2700,7 @@ Ext.onReady( function() {
 
 					for (var i = 0, r; i < DV.c.period.records.length; i++) {
 						r = Ext.clone(DV.c.period.records[i]);
-						favorite.periods.push({id: r.id || r.data.id, name: r.name || r.data.name});
+						favorite.periods.push({id: r.id, name: r.name});
 					}
 				}
 
@@ -3253,6 +3251,7 @@ Ext.onReady( function() {
 					fieldLabel: isPublicAccess ? 'Public access' : obj.name, //i18n
 					labelStyle: 'color:#333',
 					cls: 'pt-combo',
+					fieldStyle: 'padding-left:5px',
 					width: 380,
 					labelWidth: 250,
 					queryMode: 'local',
