@@ -3402,8 +3402,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: 'Sharing layout',
-			bodyStyle: 'padding:8px 8px 3px; background-color:#fff',
-			width: 434,
+			bodyStyle: 'padding:6px 6px 0px; background-color:#fff',
 			resizable: false,
 			modal: true,
 			destroyOnBlur: true,
