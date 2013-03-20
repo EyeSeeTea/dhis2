@@ -1086,7 +1086,7 @@ PT.core.getUtils = function(pt) {
 								type: 'dimension',
 								cls: 'pivot-dim',
 								colSpan: colSpan,
-								htmlValue: xResponse.metaData[id]
+								htmlValue: xResponse.metaData.names[id]
 							}));
 
 							if (doSubTotals(xColAxis) && i === 0) {
@@ -1152,7 +1152,7 @@ PT.core.getUtils = function(pt) {
 								obj.cls = 'pivot-dim td-nobreak';
 								obj.noBreak = true;
 								obj.hidden = !(obj.rowSpan || obj.colSpan);
-								obj.htmlValue = xResponse.metaData[obj.id];
+								obj.htmlValue = xResponse.metaData.names[obj.id];
 
 								row.push(obj);
 							}
