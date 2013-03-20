@@ -1682,11 +1682,6 @@ Ext.onReady( function() {
 						}
 
 						if (f.relativePeriods) {
-							f.relativePeriods.reportingMonth = f.relativePeriods.lastMonth;
-							f.relativePeriods.reportingQuarter = f.relativePeriods.lastQuarter;
-							delete f.relativePeriods.lastMonth;
-							delete f.relativePeriods.lastQuarter;
-
 							DV.c.relativeperiod.rp = f.relativePeriods;
 							DV.c.relativeperiod.rewind = f.rewindRelativePeriods;
 						}
