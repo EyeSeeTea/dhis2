@@ -2740,7 +2740,7 @@ Ext.onReady( function() {
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
-				width: 250,
+				width: 371,
 				fieldStyle: 'padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
 				style: 'margin-bottom:0',
 				emptyText: 'Favorite name',
@@ -2832,7 +2832,7 @@ Ext.onReady( function() {
 			window = Ext.create('Ext.window.Window', {
 				title: id ? 'Rename favorite' : 'Create new favorite',
 				//iconCls: 'dv-window-title-icon-favorite',
-				bodyStyle: 'padding:5px; background:#fff',
+				bodyStyle: 'padding:2px; background:#fff',
 				resizable: false,
 				modal: true,
 				items: nameTextfield,
