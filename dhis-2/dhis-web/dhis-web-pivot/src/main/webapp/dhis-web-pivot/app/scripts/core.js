@@ -741,7 +741,7 @@ PT.core.getUtils = function(pt) {
 						header.index = i;
 
 						if (header.meta) {
-							header.items = header.name === pt.conf.finals.dimension.period.dimensionName ? [].concat(response.periods) : xLayout.nameItemsMap[header.name];
+							header.items = header.name === pt.conf.finals.dimension.period.dimensionName ? [].concat(response.metaData.periods) : xLayout.nameItemsMap[header.name];
 							header.size = header.items.length;
 						}
 					}
