@@ -2052,12 +2052,11 @@ Ext.onReady( function() {
 						{
 							xtype: 'combobox',
 							cls: 'pt-combo',
-							style: 'margin-bottom:4px; margin-top:2px',
+							style: 'margin-bottom:2px; margin-top:0px',
 							width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
 							valueField: 'id',
 							displayField: 'name',
-							fieldLabel: 'Select group', //i18n pt.i18n.select_group
-							labelStyle: 'padding-left:8px',
+							emptyText: 'Select indicator group',
 							editable: false,
 							store: {
 								xtype: 'store',
@@ -2243,12 +2242,11 @@ Ext.onReady( function() {
 					{
 						xtype: 'combobox',
 						cls: 'pt-combo',
-						style: 'margin-bottom:4px; margin-top:2px',
+						style: 'margin-bottom:2px; margin-top:0px',
 						width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding,
 						valueField: 'id',
 						displayField: 'name',
-						fieldLabel: 'Select group', //i18n pt.i18n.select_group
-						labelStyle: 'padding-left:8px',
+						emptyText: 'Select data element group',
 						editable: false,
 						store: {
 							xtype: 'store',
@@ -2908,18 +2906,16 @@ Ext.onReady( function() {
 						xtype: 'panel',
 						layout: 'column',
 						bodyStyle: 'border-style:none',
-						style: 'margin-top:2px',
+						style: 'margin-top:0px',
 						items: [
 							{
 								xtype: 'combobox',
 								cls: 'pt-combo',
-								style: 'margin-bottom:4px',
-								width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 62 - 62 - 7,
+								style: 'margin-bottom:2px',
+								width: pt.conf.layout.west_fieldset_width - pt.conf.layout.west_width_padding - 62 - 62 - 4,
 								valueField: 'id',
 								displayField: 'name',
-								fieldLabel: 'Select period type', //i18n pt.i18n.select_type,
-								labelStyle: 'padding-left:8px',
-								labelWidth: 110,
+								emptyText: 'Select period type',
 								editable: false,
 								queryMode: 'remote',
 								store: pt.store.periodType,
@@ -2944,7 +2940,7 @@ Ext.onReady( function() {
 							{
 								xtype: 'button',
 								text: 'Prev year', //i18n
-								style: 'margin-left:4px; border-radius:2px',
+								style: 'margin-left:2px; border-radius:2px',
 								height: 24,
 								handler: function() {
 									var cb = this.up('panel').down('combobox');
@@ -2957,7 +2953,7 @@ Ext.onReady( function() {
 							{
 								xtype: 'button',
 								text: 'Next year', //i18n
-								style: 'margin-left:3px; border-radius:2px',
+								style: 'margin-left:2px; border-radius:2px',
 								height: 24,
 								handler: function() {
 									var cb = this.up('panel').down('combobox');
