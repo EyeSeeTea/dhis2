@@ -3079,7 +3079,7 @@ Ext.onReady( function() {
 		panel = Ext.create('Ext.panel.Panel', {
 			cls: 'gis-container-inner',
 			html: '<b>Link: </b>' + gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id, //todo
-			style: 'padding-top:6px 0 6px 1px'
+			style: 'padding:6px 0 6px 1px'
 		});
 
 		button = Ext.create('Ext.button.Button', {
