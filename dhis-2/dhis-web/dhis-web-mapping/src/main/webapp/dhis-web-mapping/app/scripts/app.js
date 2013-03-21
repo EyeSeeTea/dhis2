@@ -2435,7 +2435,7 @@ Ext.onReady( function() {
 					{
 						dataIndex: 'name',
 						sortable: false,
-						width: 363
+						width: 369
 					},
 					{
 						xtype: 'actioncolumn',
