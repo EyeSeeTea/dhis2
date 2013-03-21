@@ -2,6 +2,8 @@ isAjax = true;
 
 function multiDataEntryOrgunitSelected( orgUnits, orgUnitNames )
 {
+	setFieldValue('orgunitName', orgUnitNames[0]);
+	setFieldValue('orgunitId', orgUnits[0]);
 	hideById("listPatientDiv");
 	clearListById('programIdAddPatient');
 	$('#contentDataRecord').html('');
@@ -78,7 +80,6 @@ function getPatientList(searchTexts)
 		{
 			programId:programId,
 			listAll:false,
-			searchBySelectedOrgunit: false,
 			searchTexts: searchTexts
 		}, 
 		function()
