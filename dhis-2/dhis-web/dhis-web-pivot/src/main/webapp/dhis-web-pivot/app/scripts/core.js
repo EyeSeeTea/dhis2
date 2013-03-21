@@ -844,7 +844,7 @@ PT.core.getUtils = function(pt) {
 							aSpan.push(nCols); //if just one item and top level, span all
 						}
 						else {
-							if (options.hideEmptyRows) {	
+							if (options.hideEmptyRows && type === 'row') {	
 								aSpan.push(nCols / aAccNumCols[i]);
 							}
 							else {
