@@ -376,13 +376,13 @@ public class DefaultAnalyticsService
      */
     private Map<String, Double> getAggregatedValueMap( DataQueryParams params, String tableName )        
     {
-        Timer t = new Timer().start();
-
         int optimalQueries = MathUtils.getWithin( SystemUtils.getCpuCores(), 1, MAX_QUERIES );
+        
+        Timer t = new Timer().start();
         
         List<DataQueryParams> queries = queryPlanner.planQuery( params, optimalQueries, tableName );
         
-        t.getTime( "Planned query for optimal: " + optimalQueries + ", got: " + queries.size() );
+        t.getSplitTime( "Planned query" );
         
         List<Future<Map<String, Double>>> futures = new ArrayList<Future<Map<String, Double>>>();
         
@@ -413,7 +413,7 @@ public class DefaultAnalyticsService
             }
         }
         
-        t.getTime( "Got aggregated values" );
+        t.getTime( "Got aggregated value" );
         
         return map;
     }
