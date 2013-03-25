@@ -748,7 +748,7 @@ Ext.onReady( function() {
 			item;
 
 		item = {
-			text: 'Edit layer..', //i18n
+			text: GIS.i18n.edit_layer,
 			iconCls: 'gis-menu-item-icon-edit',
 			cls: 'gis-menu-item-first',
 			alwaysEnabled: true,
@@ -764,7 +764,7 @@ Ext.onReady( function() {
 		});
 
 		item = {
-			text: 'Labels..', //i18n
+			text: GIS.i18n.labels,
 			iconCls: 'gis-menu-item-icon-labels',
 			handler: function() {
 				if (layer.labelWindow) {
@@ -780,7 +780,7 @@ Ext.onReady( function() {
 
 		if (layer.id !== gis.layer.boundary.id) {
 			item = {
-				text: 'Filter..', //i18n
+				text: GIS.i18n.filter + '..', //i18n
 				iconCls: 'gis-menu-item-icon-filter',
 				handler: function() {
 					if (layer.filterWindow) {
@@ -801,7 +801,7 @@ Ext.onReady( function() {
 		}
 
 		item = {
-			text: 'Search..', //i18n
+			text: GIS.i18n.search,
 			iconCls: 'gis-menu-item-icon-search',
 			handler: function() {
 				if (layer.searchWindow) {
@@ -825,7 +825,7 @@ Ext.onReady( function() {
 		});
 
 		item = {
-			text: 'Close', //i18n
+			text: GIS.i18n.close,
 			iconCls: 'gis-menu-item-icon-clear',
 			handler: function() {
 				gis.viewport.interpretationButton.disable();
@@ -940,7 +940,7 @@ Ext.onReady( function() {
 			bbar: [
 				'->',
 				{
-					text: 'Update', //i18n
+					text: GIS.i18n.update, //i18n
 					handler: function() {
 						var view = layer.widget.getView();
 
@@ -1440,7 +1440,7 @@ Ext.onReady( function() {
 						items: [
 							{
 								cls: 'gis-panel-html-label',
-								html: 'Color:', //i18n
+								html: GIS.i18n.color + ':',
 								width: gis.conf.layout.tool.itemlabel_width
 							},
 							color
@@ -1452,7 +1452,7 @@ Ext.onReady( function() {
 				'->',
 				{
 					xtype: 'button',
-					text: 'Show / hide', //i18n
+					text: GIS.i18n.showhide,
 					handler: function() {
 						if (layer.hasLabels) {
 							layer.hasLabels = false;
@@ -1505,12 +1505,12 @@ Ext.onReady( function() {
 
 			getData = function() {
 				var data = [
-					{id: 'r-------', name: 'Can view'}, //i18n
-					{id: 'rw------', name: 'Can edit and view'}
+					{id: 'r-------', name: GIS.i18n.can_view},
+					{id: 'rw------', name: GIS.i18n.can_edit_and_view}
 				];
 
 				if (isPublicAccess) {
-					data.unshift({id: '-------', name: 'None'});
+					data.unshift({id: '-------', name: GIS.i18n.none});
 				}
 
 				return data;
@@ -1525,7 +1525,7 @@ Ext.onReady( function() {
 				var items = [];
 
 				combo = Ext.create('Ext.form.field.ComboBox', {
-					fieldLabel: isPublicAccess ? 'Public access' : obj.name, //i18n
+					fieldLabel: isPublicAccess ? GIS.i18n.public_access : obj.name, //i18n
 					labelStyle: 'color:#333',
 					cls: 'gis-combo',
 					width: 380,
@@ -1621,7 +1621,7 @@ Ext.onReady( function() {
 		userGroupField = Ext.create('Ext.form.field.ComboBox', {
 			valueField: 'id',
 			displayField: 'name',
-			emptyText: 'Search for user groups', //i18n
+			emptyText: GIS.i18n.search_for_user_groups,
 			queryParam: 'key',
 			queryDelay: 200,
 			minChars: 1,
@@ -1812,7 +1812,7 @@ Ext.onReady( function() {
 			});
 
 			createButton = Ext.create('Ext.button.Button', {
-				text: 'Create', //i18n
+				text: GIS.i18n.create,
 				handler: function() {
 					var name = nameTextfield.getValue(),
 						layers = gis.util.map.getVisibleVectorLayers(),
@@ -1874,7 +1874,7 @@ Ext.onReady( function() {
 			});
 
 			updateButton = Ext.create('Ext.button.Button', {
-				text: 'Update', //i18n
+				text: GIS.i18n.update,
 				handler: function() {
 					var name = nameTextfield.getValue();
 
@@ -1890,7 +1890,7 @@ Ext.onReady( function() {
 			});
 
 			cancelButton = Ext.create('Ext.button.Button', {
-				text: 'Cancel', //i18n
+				text: GIS.i18n.cancel,
 				handler: function() {
 					window.destroy();
 				}
@@ -1919,7 +1919,7 @@ Ext.onReady( function() {
 		};
 
 		addButton = Ext.create('Ext.button.Button', {
-			text: 'Add new', //i18n
+			text: GIS.i18n.add_new,
 			width: 67,
 			height: 26,
 			style: 'border-radius: 1px;',
@@ -1934,7 +1934,7 @@ Ext.onReady( function() {
 			width: windowCmpWidth - addButton.width - 11,
 			height: 26,
 			fieldStyle: 'padding-right: 0; padding-left: 6px; border-radius: 1px; border-color: #bbb; font-size:11px',
-			emptyText: 'Search for favorites', //i18n
+			emptyText: GIS.i18n.search_for_favorites,
 			enableKeyEvents: true,
 			currentValue: '',
 			listeners: {
@@ -1954,7 +1954,7 @@ Ext.onReady( function() {
 		});
 
 		prevButton = Ext.create('Ext.button.Button', {
-			text: 'Prev', //i18n
+			text: GIS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
 					url = value ? gis.baseUrl + gis.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
@@ -1966,7 +1966,7 @@ Ext.onReady( function() {
 		});
 
 		nextButton = Ext.create('Ext.button.Button', {
-			text: 'Next', //i18n
+			text: GIS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
 					url = value ? gis.baseUrl + gis.conf.url.path_api +  'maps/query/' + value + '.json?links=false' : null,
@@ -2100,7 +2100,7 @@ Ext.onReady( function() {
 										}
 									}
 									else {
-										alert('No layers to save'); //i18n
+										alert(GIS.i18n.no_map_to_save);
 									}
 								}
 							}
@@ -2220,7 +2220,7 @@ Ext.onReady( function() {
 							var el = editArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: 'Rename', //i18n
+								html: GIS.i18n.rename,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -2231,7 +2231,7 @@ Ext.onReady( function() {
 							el = overwriteArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: 'Overwrite', //i18n
+								html: GIS.i18n.overwrite,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -2242,7 +2242,7 @@ Ext.onReady( function() {
 							el = sharingArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: 'Share with other people', //i18n
+								html: GIS.i18n.share_with_other_people,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -2253,7 +2253,7 @@ Ext.onReady( function() {
 							el = dashboardArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: 'Add to dashboard', //i18n
+								html: GIS.i18n.add_to_dashboard,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -2264,7 +2264,7 @@ Ext.onReady( function() {
 							el = deleteArray[i];
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
-								html: 'Delete', //i18n
+								html: GIS.i18n.delete_,
 								'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
@@ -2416,7 +2416,7 @@ Ext.onReady( function() {
 				addButton;
 
 			addButton = Ext.create('Ext.button.Button', {
-				text: 'Add new', //i18n
+				text: GIS.i18n.add_new,
 				height: 26,
 				style: 'border-radius: 1px',
 				menu: {},
@@ -2566,7 +2566,7 @@ Ext.onReady( function() {
 				width: 428,
 				height: 25,
 				fieldStyle: 'padding-left: 6px; border-color: #bbb',
-				fieldLabel: 'Legend set name' //i18n
+				fieldLabel: GIS.i18n.legend_set_name
 			});
 
 			legendName = Ext.create('Ext.form.field.Text', {
@@ -2574,7 +2574,7 @@ Ext.onReady( function() {
 				fieldStyle: 'padding-left: 6px',
 				width: 415,
 				height: 23,
-				fieldLabel: 'Legend name' //i18n
+				fieldLabel: GIS.i18n.legend_name
 			});
 
 			startValue = Ext.create('Ext.form.field.Number', {
@@ -2597,13 +2597,13 @@ Ext.onReady( function() {
 			color = Ext.create('Ext.ux.button.ColorButton', {
 				width: 310,
 				height: 23,
-				fieldLabel: 'Symbolizer', //i18n
+				fieldLabel: GIS.i18n.legend_symbolizer,
 				style: 'border-radius: 1px',
 				value: 'e1e1e1'
 			});
 
 			addLegend = Ext.create('Ext.button.Button', {
-				text: 'Add legend', //i18n
+				text: GIS.i18n.add_legend,
 				height: 26,
 				style: 'border-radius: 1px',
 				handler: function() {
@@ -2741,7 +2741,7 @@ Ext.onReady( function() {
 						cls: 'gis-panel-html-separator'
 					},
 					{
-						html: 'Add legend', //i18n
+						html: GIS.i18n.add_legend,
 						cls: 'gis-panel-html-title'
 					},
 					{
