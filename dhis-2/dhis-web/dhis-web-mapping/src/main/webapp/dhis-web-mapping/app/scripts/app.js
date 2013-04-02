@@ -99,7 +99,7 @@ Ext.onReady( function() {
 
 		util.map.getTransformedPointByXY = function(x, y) {
 			var p = new OpenLayers.Geometry.Point(parseFloat(x), parseFloat(y));
-			return p.transform(new OpenLayers.Projection("EPSG:4326"), new OpenLayers.Projection("EPSG:900913"));
+			return p.transform(new OpenLayers.Projection('EPSG:4326'), new OpenLayers.Projection('EPSG:900913'));
 		};
 
 		util.map.getLonLatByXY = function(x, y) {
@@ -169,7 +169,7 @@ Ext.onReady( function() {
 			for (var i = layers.length - 1; i > 0; i--) {
 				if (layers[i].id === gis.layer.facility.id) {
 					layers.splice(i, 1);
-					console.log('Facility layer export currently not supported');
+					console.log(GIS.i18n.facility_layer_export_currently_not_supported);
 				}
 			}
 
@@ -240,7 +240,7 @@ Ext.onReady( function() {
 		util.json = {};
 
 		util.json.encodeString = function(str) {
-			return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
+			return Ext.isString(str) ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
 		};
 
 		util.json.decodeAggregatedValues = function(responseText) {
@@ -980,7 +980,7 @@ Ext.onReady( function() {
 
 		if (!data.length) {
 			GIS.logg.push([data, layer.id + '.search.data: feature ids/names']);
-			alert('Layer has no organisation units'); //todo
+			alert(GIS.i18n.layer + ' ' + GIS.i18n.has_no_orgunits);
 			return;
 		}
 
@@ -3026,7 +3026,7 @@ Ext.onReady( function() {
 					exportForm = document.getElementById('exportForm');
 
 				if (!svg) {
-					alert(GIS.i18n.please_create_map_first); //todo
+					alert(GIS.i18n.please_create_map_first);
 					return;
 				}
 
@@ -3078,7 +3078,7 @@ Ext.onReady( function() {
 
 		panel = Ext.create('Ext.panel.Panel', {
 			cls: 'gis-container-inner',
-			html: '<b>Link: </b>' + gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id, //todo
+			html: '<b>' + GIS.i18n.link_ + ': </b>' + gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id,
 			style: 'padding:6px 0 6px 1px'
 		});
 
@@ -3345,7 +3345,7 @@ Ext.onReady( function() {
 		validateView = function(view) {
 			if (!view.organisationUnitLevel.id || !Ext.isString(view.organisationUnitLevel.id)) {
 				GIS.logg.push([view.organisationUnitLevel.id, layer.id + '.organisationUnitLevel.id: string']);
-					alert('No level selected'); //todo
+				alert(GIS.i18n.no_level_selected);
 				return false;
 			}
 			if (!view.organisationUnitLevel.name || !Ext.isString(view.organisationUnitLevel.name)) {
@@ -3360,7 +3360,7 @@ Ext.onReady( function() {
 			}
 			if (!view.parentOrganisationUnit.id || !Ext.isString(view.parentOrganisationUnit.id)) {
 				GIS.logg.push([view.parentOrganisationUnit.id, layer.id + '.parentOrganisationUnit.id: string']);
-					alert('No parent organisation unit selected'); //todo
+				alert(GIS.i18n.no_parent_organisationunit_selected);
 				return false;
 			}
 			if (!view.parentOrganisationUnit.name || !Ext.isString(view.parentOrganisationUnit.name)) {
@@ -3381,7 +3381,7 @@ Ext.onReady( function() {
 
 			if (view.parentOrganisationUnit.level > view.organisationUnitLevel.level) {
 				GIS.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, layer.id + '.parentOrganisationUnit.level: number <= ' + layer.id + '.organisationUnitLevel.level']);
-					alert('Orgunit level cannot be higher than parent level'); //todo
+				alert(GIS.i18n.level_not_higher_than_parent_level);
 				return false;
 			}
 
@@ -4346,7 +4346,7 @@ Ext.onReady( function() {
 
 			if (view.parentOrganisationUnit.level > view.organisationUnitLevel.level) {
 				GIS.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, layer.id + '.parentOrganisationUnit.level: number <= ' + layer.id + '.organisationUnitLevel.level']);
-					alert('Orgunit level cannot be higher than parent level'); //todo
+				alert(GIS.i18n.level_not_higher_than_parent_level);
 				return false;
 			}
 
@@ -4628,13 +4628,13 @@ Ext.onReady( function() {
 		validateView = function(view) {
 			if (!view.organisationUnitGroupSet.id || !Ext.isString(view.organisationUnitGroupSet.id)) {
 				GIS.logg.push([view.organisationUnitGroupSet.id, layer.id + '.organisationUnitGroupSet.id: string']);
-					alert('No group set selected'); //todo
+				alert(GIS.i18n.no_groupset_selected);
 				return false;
 			}
 
 			if (!view.organisationUnitLevel.id || !Ext.isString(view.organisationUnitLevel.id)) {
 				GIS.logg.push([view.organisationUnitLevel.id, layer.id + '.organisationUnitLevel.id: string']);
-					alert('No level selected'); //todo
+				alert(GIS.i18n.no_level_selected);
 				return false;
 			}
 			if (!view.organisationUnitLevel.name || !Ext.isString(view.organisationUnitLevel.name)) {
@@ -4649,7 +4649,7 @@ Ext.onReady( function() {
 			}
 			if (!view.parentOrganisationUnit.id || !Ext.isString(view.parentOrganisationUnit.id)) {
 				GIS.logg.push([view.parentOrganisationUnit.id, layer.id + '.parentOrganisationUnit.id: string']);
-					alert('No parent organisation unit selected'); //todo
+				alert(GIS.i18n.no_parent_organisationunit_selected);
 				return false;
 			}
 			if (!view.parentOrganisationUnit.name || !Ext.isString(view.parentOrganisationUnit.name)) {
@@ -4670,7 +4670,7 @@ Ext.onReady( function() {
 
 			if (view.parentOrganisationUnit.level > view.organisationUnitLevel.level) {
 				GIS.logg.push([view.parentOrganisationUnit.level, view.organisationUnitLevel.level, layer.id + '.parentOrganisationUnit.level: number <= ' + layer.id + '.organisationUnitLevel.level']);
-					alert('Orgunit level cannot be higher than parent level'); //todo
+				alert(GIS.i18n.level_not_higher_than_parent_level);
 				return false;
 			}
 

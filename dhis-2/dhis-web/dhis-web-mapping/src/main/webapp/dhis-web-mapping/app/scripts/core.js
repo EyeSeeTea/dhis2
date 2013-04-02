@@ -1094,7 +1094,7 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 
 				if (!features.length) {
 					olmap.mask.hide();
-					alert(GIS.i18n.no_valid_coordinates_found); //todo
+					alert(GIS.i18n.no_valid_coordinates_found);
 					return;
 				}
 
@@ -1311,7 +1311,7 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 
 				if (!features.length) {
 					olmap.mask.hide();
-					alert(GIS.i18n.no_valid_coordinates_found); //todo
+					alert(GIS.i18n.no_valid_coordinates_found);
 					return;
 				}
 
@@ -1353,7 +1353,7 @@ GIS.core.LayerLoaderThematic = function(gis, layer) {
 					newFeatures = [];
 
 				if (values.length === 0) {
-					alert(GIS.i18n.no_aggregated_data_found); //todo
+					alert(GIS.i18n.no_aggregated_data_found);
 					olmap.mask.hide();
 					return;
 				}
@@ -1600,7 +1600,7 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 
 				if (!features.length) {
 					olmap.mask.hide();
-					alert(GIS.i18n.no_valid_coordinates_found); //todo
+					alert(GIS.i18n.no_valid_coordinates_found);
 					return;
 				}
 
