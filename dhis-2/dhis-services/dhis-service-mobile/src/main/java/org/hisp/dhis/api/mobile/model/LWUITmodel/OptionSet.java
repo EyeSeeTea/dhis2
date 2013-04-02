@@ -1,5 +1,3 @@
-package org.hisp.dhis.api.mobile.model;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -26,6 +24,7 @@ package org.hisp.dhis.api.mobile.model;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.api.mobile.model.LWUITmodel;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -33,11 +32,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hisp.dhis.api.mobile.model.DataStreamSerializable;
+import org.hisp.dhis.api.mobile.model.Model;
+
+/**
+ * @author Nguyen Kim Lai
+ * 
+ * @version OptionSet.java 3:42:54 PM Mar 12, 2013 $
+ */
 public class OptionSet
     extends Model
     implements DataStreamSerializable
 {
-    private String clientVersion;
+private String clientVersion;
     
     private List<String> options = new ArrayList<String>();
 
@@ -60,11 +67,12 @@ public class OptionSet
     {
         this.clientVersion = clientVersion;
     }
-
+    
     @Override
     public void serialize( DataOutputStream dout )
         throws IOException
     {
+
         dout.writeInt( this.getId() );
         dout.writeUTF( this.getName() );
         dout.writeInt( this.options.size() );
@@ -73,50 +81,31 @@ public class OptionSet
         {
             dout.writeUTF( option );
         }
+
     }
     
     @Override
-    public void serializeVersion2_8( DataOutputStream dout )
+    public void deSerialize( DataInputStream dint )
         throws IOException
     {
-        dout.writeInt( this.getId() );
-        dout.writeUTF( this.getName() );
-        dout.writeInt( this.options.size() );
-
-        for ( String option : this.options )
+        int id = dint.readInt();
+        if ( id != 0 )
         {
-            dout.writeUTF( option );
+            this.setId( id );
+            this.setName( dint.readUTF() );
+            int optionSize = dint.readInt();
+            if ( optionSize > 0 )
+            {
+                for ( int i = 0; i < optionSize; i++ )
+                {
+                    String option = dint.readUTF();
+                    options.add( option );
+                }
+            }
         }
-    }
-    
-    @Override
-    public void serializeVersion2_9( DataOutputStream dout )
-        throws IOException
-    {
-        dout.writeInt( this.getId() );
-        dout.writeUTF( this.getName() );
-        dout.writeInt( this.options.size() );
-
-        for ( String option : this.options )
-        {	
-        	if (option != null) {
-        		dout.writeUTF( option );
-        	}
-        }
-    }
-
-    @Override
-    public void deSerialize( DataInputStream dataInputStream )
-        throws IOException
-    {
-        this.setId( dataInputStream.readInt() );
-        this.setName( dataInputStream.readUTF() );
-        int optionSize = dataInputStream.readInt();
-
-        for ( int i = 0; i < optionSize; i++ )
+        else
         {
-            String option = dataInputStream.readUTF();
-            options.add( option );
+            this.setId( id );
         }
     }
 }

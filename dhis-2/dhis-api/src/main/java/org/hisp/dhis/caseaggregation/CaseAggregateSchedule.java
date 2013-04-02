@@ -25,29 +25,61 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.patientreport;
-
-import java.util.Collection;
-
-import org.hisp.dhis.user.User;
+package org.hisp.dhis.caseaggregation;
 
 /**
  * @author Chau Thu Tran
- *
- * @version $PatientTabularReportService.java May 7, 2012 1:01:39 PM$
+ * 
+ * @version CaseAggregateSchedule.java Apr 1, 2013 11:03:02 AM $
  */
-public interface PatientTabularReportService
+public class CaseAggregateSchedule
 {
-    void saveOrUpdate( PatientTabularReport patientTabularReport );
+    private Integer dataSetId;
 
-    PatientTabularReport getPatientTabularReport( int id );
+    private String dataSetName;
 
-    void deletePatientTabularReport( PatientTabularReport patientTabularReport );
+    private String periodTypeName;
 
-    Collection<PatientTabularReport> getAllCharts();
-    
-    Collection<PatientTabularReport> getPatientTabularReports( User user, String query, Integer min, Integer max );
-    
-    int countPatientTabularReportList( User user, String query );
-    
+    public CaseAggregateSchedule()
+    {
+        
+    }
+
+    public CaseAggregateSchedule( Integer dataSetId, String dataSetName, String periodTypeName )
+    {
+        this.dataSetId = dataSetId;
+        this.dataSetName = dataSetName;
+        this.periodTypeName = periodTypeName;
+    }
+
+    public Integer getDataSetId()
+    {
+        return dataSetId;
+    }
+
+    public void setDataSetId( Integer dataSetId )
+    {
+        this.dataSetId = dataSetId;
+    }
+
+    public String getDataSetName()
+    {
+        return dataSetName;
+    }
+
+    public void setDataSetName( String dataSetName )
+    {
+        this.dataSetName = dataSetName;
+    }
+
+    public String getPeriodTypeName()
+    {
+        return periodTypeName;
+    }
+
+    public void setPeriodTypeName( String periodTypeName )
+    {
+        this.periodTypeName = periodTypeName;
+    }
+
 }
