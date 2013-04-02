@@ -209,7 +209,6 @@ GIS.core.getOLMap = function(gis) {
 			displayClass: 'olControlButton',
 			trigger: function() {
 				fn.call(gis.olmap);
-				gis.layer.googleHybrid.redraw();
 			}
 		});
 
@@ -228,6 +227,7 @@ GIS.core.getOLMap = function(gis) {
 	olmap = new OpenLayers.Map({
 		controls: [
 			new OpenLayers.Control.Navigation({
+				zoomWheelEnabled: true,
 				documentDrag: true
 			}),
 			new OpenLayers.Control.MousePosition({
@@ -451,7 +451,7 @@ GIS.core.createSelectHandlers = function(gis, layer) {
 					}
 
 					layer.infrastructuralWindow = Ext.create('Ext.window.Window', {
-						title: GIS.i18n.show_information_sheet,
+						title: GIS.i18n.information,
 						layout: 'column',
 						iconCls: 'gis-window-title-icon-information',
 						cls: 'gis-container-default',

@@ -790,7 +790,7 @@ Ext.onReady( function() {
 						else {
 							layer.filterWindow.destroy();
 						}
-					}organisationUnitLe
+					}
 
 					layer.filterWindow = layer.id === gis.layer.facility.id ?
 						GIS.app.FilterWindowFacility(layer) : GIS.app.FilterWindow(layer);
@@ -4939,7 +4939,7 @@ Ext.onReady( function() {
 						}
 					},
 					{
-						title: GIS.i18n.GIS.i18n.thematic_layer_1_legend,
+						title: GIS.i18n.facility_layer_legend,
 						contentEl: 'facilityLegend',
 						bodyStyle: 'padding: 4px 6px 6px; border: 0 none',
 						collapsible: true,
