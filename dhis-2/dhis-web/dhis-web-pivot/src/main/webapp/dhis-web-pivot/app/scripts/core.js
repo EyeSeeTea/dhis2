@@ -1380,6 +1380,7 @@ PT.core.getUtils = function(pt) {
 									});
 									rowCount = 0;
 									subTotal = 0;
+									empty = [];
 								}
 							}
 						}
