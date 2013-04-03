@@ -1293,6 +1293,7 @@ PT.core.getUtils = function(pt) {
 										cls: 'pivot-value-subtotal',
 										value: rowSubTotal,
 										htmlValue: Ext.Array.contains(empty, false) ? rowSubTotal.toString() : '&nbsp',
+										empty: !Ext.Array.contains(empty, false),
 										collapsed: !Ext.Array.contains(collapsed, false)
 									});
 
