@@ -1215,10 +1215,7 @@ PT.core.getUtils = function(pt) {
 
 					// Value total objects
 					if (xColAxis && doTotals()) {
-						for (var i = 0, empty, total; i < valueObjects.length; i++) {
-							empty = [];
-							total = 0;
-
+						for (var i = 0, empty = [], total = 0; i < valueObjects.length; i++) {
 							for (j = 0, obj; j < valueObjects[i].length; j++) {
 								obj = valueObjects[i][j];
 
@@ -1230,8 +1227,12 @@ PT.core.getUtils = function(pt) {
 								type: 'valueTotal',
 								cls: 'pivot-value-total',
 								value: total,
-								htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(total, 1).toString() : '&nbsp;'
+								htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(total, 1).toString() : '&nbsp;',
+								empty: !Ext.Array.contains(empty, false)
 							});
+
+							empty = [];
+							total = 0;
 						}
 					}
 
@@ -1266,7 +1267,7 @@ PT.core.getUtils = function(pt) {
 						}
 					}
 
-					// Hide col subtotal dim (todo)
+					// Col subtotals
 					if (doSubTotals(xColAxis)) {
 						var tmpValueObjects = [];
 
@@ -1351,12 +1352,11 @@ PT.core.getUtils = function(pt) {
 							}
 						}
 
-						// Create tmpValueObjects arrays
+						// tmpValueObjects
 						for (var i = 0; i < tmpAxisObjects.length; i++) {
 							tmpValueObjects.push([]);
 						}
 
-						// Populate tmpValueObjects arrays
 						for (var i = 0; i < valueObjects[0].length; i++) {
 							for (var j = 0, rowCount = 0, tmpCount = 0, subTotal = 0, empty = [], collapsed, item; j < valueObjects.length; j++) {
 								item = valueObjects[j][i];
@@ -1369,7 +1369,6 @@ PT.core.getUtils = function(pt) {
 									collapsed = !!axisObjects[j][0].collapsed;
 								}
 
-								//if (rowCount === rowUniqueFactor) {
 								if (!Ext.isArray(axisObjects[j+1]) || axisObjects[j+1][0].root) {
 									tmpValueObjects[tmpCount++].push({
 										type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
@@ -1389,13 +1388,13 @@ console.log("valueObjects", valueObjects);
 console.log("tmpAxisObjects", tmpAxisObjects);
 console.log("tmpValueObjects", tmpValueObjects);
 
-
-						// Total value objects
-						for (var i = 0, obj, collapsed = [], subTotal = 0, count = 0; i < totalValueObjects.length; i++) {
+						// tmpTotalValueObjects
+						for (var i = 0, obj, collapsed = [], empty = [], subTotal = 0, count = 0; i < totalValueObjects.length; i++) {
 							obj = totalValueObjects[i];
 							tmpTotalValueObjects.push(obj);
 
 							collapsed.push(!!obj.collapsed);
+							empty.push(!!obj.empty);
 							subTotal += obj.value;
 							count++;
 
@@ -1404,11 +1403,13 @@ console.log("tmpValueObjects", tmpValueObjects);
 									type: 'valueTotalSubgrandtotal',
 									cls: 'pivot-value-total-subgrandtotal',
 									value: subTotal,
-									htmlValue: pt.util.number.roundIf(subTotal, 1).toString(),
+									htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(subTotal, 1).toString() : '&nbsp;',
+									empty: !Ext.Array.contains(empty, false),
 									collapsed: !Ext.Array.contains(collapsed, false)
 								});
 
 								collapsed = [];
+								empty = [];
 								subTotal = 0;
 								count = 0;
 							}
