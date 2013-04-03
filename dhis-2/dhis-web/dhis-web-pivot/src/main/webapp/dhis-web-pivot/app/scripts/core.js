@@ -1027,7 +1027,7 @@ PT.core.getUtils = function(pt) {
 
 					valueItems = [],
 					valueObjects = [],
-					totalColItems = [],
+					totalColObjects = [],
 					htmlArray;
 
 				getTdHtml = function(options, config) {
@@ -1455,6 +1455,7 @@ PT.core.getUtils = function(pt) {
 					var a = [];
 
 					if (xRowAxis && doTotals()) {
+						var xTotalColObjects;
 
 						// Total col items
 						for (var i = 0, total = 0, empty = []; i < valueObjects[0].length; i++) {
@@ -1465,7 +1466,7 @@ PT.core.getUtils = function(pt) {
 								empty.push(!!obj.empty);
 							}
 
-							totalColItems.push({
+							totalColObjects.push({
 								type: 'valueTotal',
 								value: total,
 								htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(total, 1).toString() : '&nbsp;',
@@ -1477,11 +1478,13 @@ PT.core.getUtils = function(pt) {
 							empty = [];
 						}
 
+						xTotalColObjects = Ext.clone(totalColObjects);
+
 						if (xColAxis && doSubTotals(xColAxis)) {
 							var tmp = [];
 
-							for (var i = 0, item, subTotal = 0, empty = [], colCount = 0; i < totalColItems.length; i++) {
-								item = totalColItems[i];
+							for (var i = 0, item, subTotal = 0, empty = [], colCount = 0; i < xTotalColObjects.length; i++) {
+								item = xTotalColObjects[i];
 								tmp.push(item);
 								subTotal += item.value;
 								empty.push(!!item.empty);
@@ -1501,12 +1504,12 @@ PT.core.getUtils = function(pt) {
 								}
 							}
 
-							totalColItems = tmp;
+							xTotalColObjects = tmp;
 						}
 
 						// Total col html items
-						for (var i = 0; i < totalColItems.length; i++) {
-							a.push(getTdHtml(options, totalColItems[i]));
+						for (var i = 0; i < xTotalColObjects.length; i++) {
+							a.push(getTdHtml(options, xTotalColObjects[i]));
 						}
 					}
 
@@ -1514,21 +1517,25 @@ PT.core.getUtils = function(pt) {
 				};
 
 				getGrandTotalHtmlArray = function() {
-					var grandTotalSum,
-						values = [],
+					var total = 0,
+						empty = [],
 						a = [];
 
 					if (doTotals()) {
-						for (var i = 0; i < totalColItems.length; i++) {
-							values.push(totalColItems[i].value);
+						for (var i = 0, obj; i < totalColObjects.length; i++) {
+							obj = totalColObjects[i];
+
+							total += obj.value;
+							empty.push(obj.empty);
+							//values.push(totalColObjects[i].value);
 						}
 
 						if (xColAxis && xRowAxis) {
-							grandTotalSum = Ext.Array.sum(values);
-
 							a.push(getTdHtml(options, {
+								type: 'valueGrandTotal',
 								cls: 'pivot-value-grandtotal',
-								htmlValue: pt.util.number.roundIf(grandTotalSum, 1).toString()
+								htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(total, 1).toString() : '&nbsp;',
+								empty: !Ext.Array.contains(empty, false)
 							}));
 						}
 					}
@@ -1546,6 +1553,7 @@ PT.core.getUtils = function(pt) {
 					if (doTotals()) {
 						if (xRowAxis) {
 							dimTotalArray = [getTdHtml(options, {
+								type: 'dimensionSubtotal',
 								cls: 'pivot-dim-total',
 								colSpan: xRowAxis.dims,
 								htmlValue: 'Total'
