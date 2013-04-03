@@ -1308,11 +1308,12 @@ PT.core.getUtils = function(pt) {
 						valueObjects = tmpValueObjects;
 					}
 
-					// Hide row subtotal dim
+					// Row subtotals
 					if (doSubTotals(xRowAxis)) {
 						var tmpAxisObjects = [],
 							tmpValueObjects = [],
-							tmpTotalValueObjects = [];
+							tmpTotalValueObjects = [],
+							getAxisSubTotalRow;
 
 						getAxisSubTotalRow = function(collapsed) {
 							var row = [];
@@ -1337,52 +1338,56 @@ PT.core.getUtils = function(pt) {
 							return row;
 						};
 
-						// Row axis objects
-						for (var i = 0, row, collapsed = [], count = 0; i < axisObjects.length; i++) {
+						// tmpAxisObjects
+						for (var i = 0, row, collapsed = []; i < axisObjects.length; i++) {
 							tmpAxisObjects.push(axisObjects[i]);
 							collapsed.push(!!axisObjects[i][0].collapsed);
-							count++;
 
-							if (count === xRowAxis.span[0]) {
+							// Insert subtotal after last objects
+							if (!Ext.isArray(axisObjects[i+1]) || !!axisObjects[i+1][0].root) {
 								tmpAxisObjects.push(getAxisSubTotalRow(collapsed));
 
 								collapsed = [];
-								count = 0;
 							}
 						}
 
-						// Create tmp value object arrays
+						// Create tmpValueObjects arrays
 						for (var i = 0; i < tmpAxisObjects.length; i++) {
 							tmpValueObjects.push([]);
 						}
 
-						// Populate tmp value object arrays
+						// Populate tmpValueObjects arrays
 						for (var i = 0; i < valueObjects[0].length; i++) {
-							for (var j = 0, rowCount = 0, tmpCount = 0, subTotal = 0, collapsed, item; j < valueObjects.length; j++) {
+							for (var j = 0, rowCount = 0, tmpCount = 0, subTotal = 0, empty = [], collapsed, item; j < valueObjects.length; j++) {
 								item = valueObjects[j][i];
 								tmpValueObjects[tmpCount++].push(item);
 								subTotal += item.value;
+								empty.push(!!item.empty);
 								rowCount++;
 
-								if (rowCount === 1) {
-									collapsed = !!tmpAxisObjects[j][0].collapsed;
+								if (axisObjects[j][0].root) {
+									collapsed = !!axisObjects[j][0].collapsed;
 								}
 
-								if (rowCount === rowUniqueFactor) {
+								//if (rowCount === rowUniqueFactor) {
+								if (!Ext.isArray(axisObjects[j+1]) || axisObjects[j+1][0].root) {
 									tmpValueObjects[tmpCount++].push({
-										type: item.cls === 'pivot-value-subtotal' ? 'valueSubtotal' : 'valueSubtotalTotal',
+										type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
 										value: subTotal,
-										htmlValue: pt.util.number.roundIf(subTotal, 1).toString(),
+										htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(subTotal, 1).toString() : '&nbsp;',
 										collapsed: collapsed,
-										cls: item.cls === 'pivot-value-subtotal' ? 'pivot-value-subtotal-total' : 'pivot-value-subtotal'
+										cls: item.type === 'value' ? 'pivot-value-subtotal' : 'pivot-value-subtotal-total'
 									});
 									rowCount = 0;
 									subTotal = 0;
 								}
 							}
 						}
+console.log("axisObjects", axisObjects);
+console.log("valueObjects", valueObjects);
 console.log("tmpAxisObjects", tmpAxisObjects);
 console.log("tmpValueObjects", tmpValueObjects);
+
 
 						// Total value objects
 						for (var i = 0, obj, collapsed = [], subTotal = 0, count = 0; i < totalValueObjects.length; i++) {
