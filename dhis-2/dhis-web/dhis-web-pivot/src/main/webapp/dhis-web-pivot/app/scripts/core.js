@@ -844,7 +844,7 @@ PT.core.getUtils = function(pt) {
 							aSpan.push(nCols); //if just one item and top level, span all
 						}
 						else {
-							if (options.hideEmptyRows && type === 'row') {	
+							if (options.hideEmptyRows && type === 'row') {
 								aSpan.push(nCols / aAccNumCols[i]);
 							}
 							else {
@@ -1235,7 +1235,7 @@ PT.core.getUtils = function(pt) {
 						}
 					}
 
-					// Hide empty rows/totals
+					// Hide empty rows (dims/values/totals)
 					if (xColAxis && xRowAxis) {
 						if (options.hideEmptyRows) {
 							for (var i = 0, valueRow, empty, parent; i < valueObjects.length; i++) {
@@ -1266,6 +1266,7 @@ PT.core.getUtils = function(pt) {
 						}
 					}
 
+					// Hide col subtotal dim (todo)
 					if (doSubTotals(xColAxis)) {
 						var tmpValueObjects = [];
 
@@ -1293,6 +1294,7 @@ PT.core.getUtils = function(pt) {
 										htmlValue: Ext.Array.contains(empty, false) ? rowSubTotal.toString() : '&nbsp',
 										collapsed: !Ext.Array.contains(collapsed, false)
 									});
+
 									colCount = 0;
 									rowSubTotal = 0;
 									empty = [];
@@ -1306,6 +1308,7 @@ PT.core.getUtils = function(pt) {
 						valueObjects = tmpValueObjects;
 					}
 
+					// Hide row subtotal dim
 					if (doSubTotals(xRowAxis)) {
 						var tmpAxisObjects = [],
 							tmpValueObjects = [],
@@ -1321,7 +1324,7 @@ PT.core.getUtils = function(pt) {
 								obj.collapsed = Ext.Array.contains(collapsed, true);
 
 								if (i === 0) {
-									obj.htmlValue = '&nbsp;'; //i18n
+									obj.htmlValue = '&nbsp;';
 									obj.colSpan = xRowAxis.dims;
 								}
 								else {
@@ -1378,6 +1381,8 @@ PT.core.getUtils = function(pt) {
 								}
 							}
 						}
+console.log("tmpAxisObjects", tmpAxisObjects);
+console.log("tmpValueObjects", tmpValueObjects);
 
 						// Total value objects
 						for (var i = 0, obj, collapsed = [], subTotal = 0, count = 0; i < totalValueObjects.length; i++) {
