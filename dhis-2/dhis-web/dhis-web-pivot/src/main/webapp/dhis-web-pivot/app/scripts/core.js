@@ -1026,6 +1026,7 @@ PT.core.getUtils = function(pt) {
 					rowUniqueFactor = getUniqueFactor(xRowAxis),
 
 					valueItems = [],
+					valueObjects = [],
 					totalColItems = [],
 					htmlArray;
 
@@ -1138,7 +1139,7 @@ PT.core.getUtils = function(pt) {
 				getRowHtmlArray = function() {
 					var a = [],
 						axisObjects = [],
-						valueObjects = [],
+						xValueObjects,
 						totalValueObjects = [],
 						mergedObjects = [],
 						valueItemsCopy,
@@ -1267,17 +1268,19 @@ PT.core.getUtils = function(pt) {
 						}
 					}
 
+					xValueObjects = Ext.clone(valueObjects);
+
 					// Col subtotals
 					if (doSubTotals(xColAxis)) {
 						var tmpValueObjects = [];
 
-						for (var i = 0, row, rowSubTotal, colCount; i < valueObjects.length; i++) {
+						for (var i = 0, row, rowSubTotal, colCount; i < xValueObjects.length; i++) {
 							row = [];
 							rowSubTotal = 0;
 							colCount = 0;
 
-							for (var j = 0, item, collapsed = [], empty = []; j < valueObjects[i].length; j++) {
-								item = valueObjects[i][j];
+							for (var j = 0, item, collapsed = [], empty = []; j < xValueObjects[i].length; j++) {
+								item = xValueObjects[i][j];
 								rowSubTotal += item.value;
 								empty.push(!!item.empty);
 								collapsed.push(!!item.collapsed);
@@ -1307,7 +1310,7 @@ PT.core.getUtils = function(pt) {
 							tmpValueObjects.push(row);
 						}
 
-						valueObjects = tmpValueObjects;
+						xValueObjects = tmpValueObjects;
 					}
 
 					// Row subtotals
@@ -1358,9 +1361,9 @@ PT.core.getUtils = function(pt) {
 							tmpValueObjects.push([]);
 						}
 
-						for (var i = 0; i < valueObjects[0].length; i++) {
-							for (var j = 0, rowCount = 0, tmpCount = 0, subTotal = 0, empty = [], collapsed, item; j < valueObjects.length; j++) {
-								item = valueObjects[j][i];
+						for (var i = 0; i < xValueObjects[0].length; i++) {
+							for (var j = 0, rowCount = 0, tmpCount = 0, subTotal = 0, empty = [], collapsed, item; j < xValueObjects.length; j++) {
+								item = xValueObjects[j][i];
 								tmpValueObjects[tmpCount++].push(item);
 								subTotal += item.value;
 								empty.push(!!item.empty);
@@ -1384,10 +1387,6 @@ PT.core.getUtils = function(pt) {
 								}
 							}
 						}
-console.log("axisObjects", axisObjects);
-console.log("valueObjects", valueObjects);
-console.log("tmpAxisObjects", tmpAxisObjects);
-console.log("tmpValueObjects", tmpValueObjects);
 
 						// tmpTotalValueObjects
 						for (var i = 0, obj, collapsed = [], empty = [], subTotal = 0, count = 0; i < totalValueObjects.length; i++) {
@@ -1417,19 +1416,19 @@ console.log("tmpValueObjects", tmpValueObjects);
 						}
 
 						axisObjects = tmpAxisObjects;
-						valueObjects = tmpValueObjects;
+						xValueObjects = tmpValueObjects;
 						totalValueObjects = tmpTotalValueObjects;
 					}
 
 					// Merge dim, value, total
-					for (var i = 0, row; i < valueObjects.length; i++) {
+					for (var i = 0, row; i < xValueObjects.length; i++) {
 						row = [];
 
 						if (xRowAxis) {
 							row = row.concat(axisObjects[i]);
 						}
 
-						row = row.concat(valueObjects[i]);
+						row = row.concat(xValueObjects[i]);
 
 						if (xColAxis) {
 							row = row.concat(totalValueObjects[i]);
@@ -1458,35 +1457,42 @@ console.log("tmpValueObjects", tmpValueObjects);
 					if (xRowAxis && doTotals()) {
 
 						// Total col items
-						for (var i = 0, colSum; i < valueItems[0].length; i++) {
-							colSum = 0;
+						for (var i = 0, total = 0, empty = []; i < valueObjects[0].length; i++) {
+							for (var j = 0, obj; j < valueObjects.length; j++) {
+								obj = valueObjects[j][i];
 
-							for (var j = 0; j < valueItems.length; j++) {
-								colSum += valueItems[j][i];
+								total += obj.value;
+								empty.push(!!obj.empty);
 							}
 
 							totalColItems.push({
 								type: 'valueTotal',
-								value: colSum,
-								htmlValue: pt.util.number.roundIf(colSum, 1).toString(),
+								value: total,
+								htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(total, 1).toString() : '&nbsp;',
+								empty: !Ext.Array.contains(empty, false),
 								cls: 'pivot-value-total'
 							});
+
+							total = 0;
+							empty = [];
 						}
 
 						if (xColAxis && doSubTotals(xColAxis)) {
 							var tmp = [];
 
-							for (var i = 0, item, subTotal = 0, colCount = 0; i < totalColItems.length; i++) {
+							for (var i = 0, item, subTotal = 0, empty = [], colCount = 0; i < totalColItems.length; i++) {
 								item = totalColItems[i];
 								tmp.push(item);
 								subTotal += item.value;
+								empty.push(!!item.empty);
 								colCount++;
 
 								if (colCount === colUniqueFactor) {
 									tmp.push({
 										type: 'valueTotalSubgrandtotal',
 										value: subTotal,
-										htmlValue: pt.util.number.roundIf(subTotal, 1).toString(),
+										htmlValue: Ext.Array.contains(empty, false) ? pt.util.number.roundIf(subTotal, 1).toString() : '&nbsp;',
+										empty: !Ext.Array.contains(empty, false),
 										cls: 'pivot-value-total-subgrandtotal'
 									});
 
@@ -1499,14 +1505,8 @@ console.log("tmpValueObjects", tmpValueObjects);
 						}
 
 						// Total col html items
-						for (var i = 0, item; i < totalColItems.length; i++) {
-							item = totalColItems[i];
-							item.htmlValue = pt.util.number.roundIf(item.htmlValue, 1).toString();
-
-							a.push(getTdHtml(options, {
-								cls: item.cls,
-								htmlValue: item.htmlValue
-							}));
+						for (var i = 0; i < totalColItems.length; i++) {
+							a.push(getTdHtml(options, totalColItems[i]));
 						}
 					}
 
