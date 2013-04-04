@@ -139,6 +139,15 @@ body.x-windows {
 	opacity: 0.5;
 }
 
+.selectable {
+	-webkit-touch-callout: all;
+	-webkit-user-select: all;
+	-khtml-user-select: all;
+	-moz-user-select: all;
+	-ms-user-select: all;
+	user-select: all;
+}
+
 /*----------------------------------------------------------------------------
  * Pivot
  *--------------------------------------------------------------------------*/
@@ -147,13 +156,6 @@ table.pivot {
 	border-collapse: collapse;
 	border-spacing: 0px;
 	border: 0 none;
-
-	-webkit-touch-callout: all;
-	-webkit-user-select: all;
-	-khtml-user-select: all;
-	-moz-user-select: all;
-	-ms-user-select: all;
-	user-select: all;
 }
 .pivot td {
 	padding: 5px;

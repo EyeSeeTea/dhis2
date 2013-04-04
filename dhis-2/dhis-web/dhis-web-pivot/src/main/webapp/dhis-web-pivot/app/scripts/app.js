@@ -1472,7 +1472,7 @@ Ext.onReady( function() {
 										},
 										success: function(r) {
 											var sharing = Ext.decode(r.responseText),
-												window = PT.app.SharingWindow(sharing);
+												window = PT.app.SharingWindow(sharing, record);
 											window.show();
 										}
 									});
@@ -1547,7 +1547,7 @@ Ext.onReady( function() {
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
 								html: 'Rename', //i18n
-								'anchor': 'bottom',
+								//'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
 							});
@@ -1558,7 +1558,7 @@ Ext.onReady( function() {
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
 								html: 'Overwrite', //i18n
-								'anchor': 'bottom',
+								//'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
 							});
@@ -1569,7 +1569,7 @@ Ext.onReady( function() {
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
 								html: 'Share with other people', //i18n
-								'anchor': 'bottom',
+								//'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
 							});
@@ -1580,7 +1580,7 @@ Ext.onReady( function() {
 							Ext.create('Ext.tip.ToolTip', {
 								target: el,
 								html: 'Delete', //i18n
-								'anchor': 'bottom',
+								//'anchor': 'bottom',
 								anchorOffset: -14,
 								showDelay: 1000
 							});
@@ -1642,7 +1642,7 @@ Ext.onReady( function() {
 		return favoriteWindow;
 	};
 
-	PT.app.SharingWindow = function(sharing) {
+	PT.app.SharingWindow = function(sharing, record) {
 
 		// Objects
 		var UserGroupRow,
@@ -1688,11 +1688,12 @@ Ext.onReady( function() {
 				var items = [];
 
 				combo = Ext.create('Ext.form.field.ComboBox', {
-					fieldLabel: isPublicAccess ? 'Public access' : obj.name, //i18n
-					labelStyle: 'color:#333',
 					cls: 'pt-combo',
-					width: 380,
-					labelWidth: 250,
+					width: 436,
+					style: 'margin-bottom:3px',
+					fieldLabel: isPublicAccess ? 'Public access' : obj.name, //i18n
+					labelWidth: 306,
+					labelStyle: 'padding-left:7px',
 					queryMode: 'local',
 					valueField: 'id',
 					displayField: 'name',
@@ -1791,7 +1792,7 @@ Ext.onReady( function() {
 			hideTrigger: true,
 			fieldStyle: 'height:26px; padding-left:6px; border-radius:1px; font-size:11px',
 			style: 'margin-bottom:5px',
-			width: 380,
+			width: 436,
 			store: userGroupStore,
 			listeners: {
 				beforeselect: function(cb) { // beforeselect instead of select, fires regardless of currently selected item
@@ -1842,7 +1843,7 @@ Ext.onReady( function() {
 		window = Ext.create('Ext.window.Window', {
 			title: 'Sharing settings',
 			bodyStyle: 'padding:6px 6px 0px; background-color:#fff',
-			width: 434,
+			width: 490,
 			resizable: false,
 			modal: true,
 			destroyOnBlur: true,
@@ -1861,7 +1862,11 @@ Ext.onReady( function() {
 						userGroupButton
 					]
 				},
-				userGroupRowContainer
+				userGroupRowContainer,
+				{
+					bodyStyle: 'border:0 none; padding-top:8px; padding-bottom:5px',
+					html: '<b>Link: </b><span class="selectable">' + pt.baseUrl + '/dhis-web-pivot/app/index.html?id=' + record.data.id + '</span>'
+				}
 			],
 			bbar: [
 				'->',
@@ -1886,14 +1891,25 @@ Ext.onReady( function() {
 					var pos = pt.viewport.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
 
+					// Blur handlers
 					if (!w.hasDestroyOnBlurHandler) {
 						pt.util.window.addDestroyOnBlurHandler(w);
 					}
 
 					pt.viewport.favoriteWindow.destroyOnBlur = false;
+
+					// Allow right click (copy link)
+					document.body.oncontextmenu = function() {
+						return true;
+					};
 				},
 				destroy: function() {
 					pt.viewport.favoriteWindow.destroyOnBlur = true;
+
+					// Deactivate right click
+					document.body.oncontextmenu = function() {
+						return false;
+					};
 				}
 			}
 		});

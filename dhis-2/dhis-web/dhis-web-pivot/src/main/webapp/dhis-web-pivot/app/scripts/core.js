@@ -1569,7 +1569,7 @@ PT.core.getUtils = function(pt) {
 				};
 
 				getHtml = function() {
-					var s = '<table id="' + pt.el + '" class="pivot">';
+					var s = '<table id="' + pt.el + '" class="pivot selectable">';
 
 					for (var i = 0; i < htmlArray.length; i++) {
 						s += '<tr>' + htmlArray[i].join('') + '</tr>';
