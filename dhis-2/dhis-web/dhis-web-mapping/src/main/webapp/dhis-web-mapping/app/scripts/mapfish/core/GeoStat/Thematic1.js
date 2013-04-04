@@ -202,8 +202,7 @@ mapfish.GeoStat.Thematic1 = OpenLayers.Class(mapfish.GeoStat, {
 		var calculateRadius = OpenLayers.Function.bind(
 			function(feature) {
 				var value = feature.attributes[this.indicator];
-                var size = (value - this.minVal) / (this.maxVal - this.minVal) *
-					(this.maxSize - this.minSize) + this.minSize;
+                var size = (value - this.minVal) / (this.maxVal - this.minVal) * (this.maxSize - this.minSize) + this.minSize;
                 return size || this.minSize;
             },	this
 		);
