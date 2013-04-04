@@ -3525,7 +3525,17 @@ Ext.onReady( function() {
 				preventHeader: true,
 				collapsible: true,
 				collapseMode: 'mini',
-				width: Ext.isWebKit ? pt.conf.layout.west_width + 8 : pt.conf.layout.west_width + 13,
+				width: function() {
+					if (Ext.isWebKit) {
+						return pt.conf.layout.west_width + 8;
+					}
+					else {
+						if (Ext.isLinux && Ext.isGecko) {
+							return pt.conf.layout.west_width + 13;
+						}
+						return pt.conf.layout.west_width + 17;
+					}
+				}(),
 				items: accordion
 			});
 
