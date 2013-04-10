@@ -52,13 +52,13 @@
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramStageStore" 
-		class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+		class="org.hisp.dhis.program.hibernate.HibernateProgramStageStore">
 		<property name="clazz" value="org.hisp.dhis.program.ProgramStage" />
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramStageSectionStore" 
-		class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+		class="org.hisp.dhis.program.hibernate.HibernateProgramStageSectionStore">
 		<property name="clazz" value="org.hisp.dhis.program.ProgramStageSection" />
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
@@ -519,7 +519,7 @@
 		<property name="dataElementService"
 			ref="org.hisp.dhis.dataelement.DataElementService" />
 		<property name="dataEntryFormService"
-			ref="org.hisp.dhis.dataentryform.DataEntryFormService" />		
+			ref="org.hisp.dhis.dataentryform.DataEntryFormService" />
 	</bean>
 
 	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">

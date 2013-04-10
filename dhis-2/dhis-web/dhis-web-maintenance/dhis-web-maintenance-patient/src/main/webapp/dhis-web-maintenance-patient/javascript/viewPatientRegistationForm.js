@@ -1,3 +1,5 @@
+var isSave;
+var interval = 60000;
 
 $( document ).ready( function() 
 {
@@ -9,6 +11,7 @@ $( document ).ready( function()
 	$("#insertButton").button("option", "icons", { primary: "ui-icon-plusthick" });
 	$("#propertiesButton").button("option", "icons", { primary: "ui-icon-newwin" });
 	$("#insertImagesButton").button("option", "icons", { primary: "ui-icon-newwin" });
+	$("#insertImageButton").button("option", "icons", { primary: "ui-icon-plusthick" });
 	
 	$("#imageDialog").bind("dialogopen", function(event, ui) {
 		$("#insertImagesButton").button("disable");
@@ -18,8 +21,18 @@ $( document ).ready( function()
 	})
 	
 	$("#insertImagesButton").click(function() {
-		$("#imageDialog").dialog();
+		$("#imageDialog").dialog({
+			overlay:{background:'#000000', opacity:0.1},
+			width:400,
+			height:300,
+			position: [$("body").width()- 50, 0],
+		});
 	});
+	
+	if( autoSave )
+	{
+		timeOut = window.setTimeout( "validateRegistrationFormTimeout( false );", interval );
+	}
 });
 	
 function openPropertiesSelector()
@@ -34,6 +47,7 @@ function openPropertiesSelector()
 			overlay:{background:'#000000', opacity:0.1},
 			width:500,
 			height:460,
+			position: [$("body").width()- 50, 0],
 			close: function(ev, ui) { 
 				$("#propertiesButton").removeClass("ui-state-active2"); 
 			}
@@ -127,15 +141,7 @@ function getRequiredFields()
 		}
 	});
 	
-	return requiredFields;
-}
-
-function validateForm()
-{
-	var result = false;
 	var html = jQuery("#designTextarea").ckeditorGet().getData();
-	requiredFields = getRequiredFields();
-	
 	var input = jQuery( html ).find("input");
 	if( input.length > 0 )
 	{
@@ -158,42 +164,94 @@ function validateForm()
 				inputKey = jQuery(item).attr('programid');
 				key = 'programid=' + inputKey
 			}
-			
+				
 			for (var idx in requiredFields){
-				//var field = requiredFields[idx];
 				if( key == idx)
 				{
-					//requiredFields.splice(idx,1);
 					delete requiredFields[idx];
 				}
 			}
 		});
-	
 	}
-	if( Object.keys(requiredFields).length > 0 ) {
-		setFieldValue('requiredField','');
-		var violate = '<h3>' + i18n_please_insert_all_required_fields + '<h3>';
+	
+	return requiredFields;
+}
+
+function validateFormOnclick()
+{
+	setFieldValue('requiredField','');
+	var requiredFields = getRequiredFields();
+	var violate = "";
+	if( Object.keys(requiredFields).length > 0 )
+	{
+		violate = '<h3>' + i18n_please_insert_all_required_fields + '<h3>';
 		for (var idx in requiredFields){
 			violate += " - " + requiredFields[idx] + '<br>';
 		}
-		
-		setInnerHTML('validateDiv', violate);
-		jQuery('#validateDiv').dialog({
-			title:i18n_required_fields_valivation,
-			maximize:true, 
-			closable:true,
-			modal:false,
-			overlay:{background:'#000000', opacity:0.1},
-			width:500,
-			height:300
-		});
+	}
+	else
+	{
+		violate = '<h3>' + i18n_validate_success + '<h3>';
+	}
+	
+	setInnerHTML('validateDiv', violate);
+	jQuery('#validateDiv').dialog({
+		title:i18n_required_fields_valivation,
+		maximize:true, 
+		closable:true,
+		modal:false,
+		overlay:{background:'#000000', opacity:0.1},
+		width:500,
+		height:300
+	});
+}
+
+function validateForm( checkViolate )
+{
+	var result = false;
+	requiredFields = getRequiredFields();
+	
+	if( Object.keys(requiredFields).length > 0 )
+	{
+		if ( byId('autoSave').checked )
+		{
+			setHeaderMessage( i18n_save_unsuccess_please_insert_all_required_fields );
+			return;
+		}
+		else
+		{
+			setFieldValue('requiredField','');
+			var violate = '<h3>' + i18n_please_insert_all_required_fields + '<h3>';
+			for (var idx in requiredFields){
+				violate += " - " + requiredFields[idx] + '<br>';
+			}
+			
+			setInnerHTML('validateDiv', violate);
+			jQuery('#validateDiv').dialog({
+				title:i18n_required_fields_valivation,
+				maximize:true, 
+				closable:true,
+				modal:false,
+				overlay:{background:'#000000', opacity:0.1},
+				width:500,
+				height:300
+			});
+			
+		}
 		
 		return false;
 	}
-	else{
+	else
+	{
 		setFieldValue('requiredField','everything_is_ok');
 		setInnerHTML( 'designTextarea' , jQuery("#designTextarea").ckeditorGet().getData() );
-		byId('saveDataEntryForm').submit();
+		if(isSave='true'){
+			autoSavePatientRegistrationForm();
+		}
+		else
+		{
+			byId('saveDataEntryForm').submit();
+		}
 	}
 }
 
@@ -291,4 +349,76 @@ function insertImage() {
 	var html = "<img src=\"" + image + "\" title=\"" + $("#imageDialog :selected").text() + "\">";
 	var oEditor = $("#designTextarea").ckeditorGet();
 	oEditor.insertHtml( html );
+}
+
+// -------------------------------------------------------
+// Auto-save data entry form
+// -------------------------------------------------------
+
+function setAutoSaveRegistrationSetting(_autoSave)
+{
+	jQuery.postJSON("setAutoSavePatientRegistrationSetting.action", {autoSave:_autoSave}, function(json) {
+		autoSave = _autoSave;
+		if (_autoSave) {
+			window.setTimeout( "validateRegistrationFormTimeout( false );", 6000 );
+		}
+		else{
+			window.clearTimeout(timeOut);
+		}
+	});
+}
+
+function validateRegistrationFormTimeout()
+{
+	validateDataEntryForm();
+	timeOut = window.setTimeout( "validateRegistrationFormTimeout();", interval );
+}
+
+function validateDataEntryForm()
+{
+	var name = getFieldValue('name');
+	if( name =='' || name.length<4 || name.length > 150 )
+	{
+		setHeaderDelayMessage( i18n_enter_a_name );
+	}
+	else if ( !validateForm() )
+	{
+		return;
+	}
+	else
+	{
+		$.post( 'validateDataEntryForm.action',
+		{
+			name: getFieldValue('name'),
+			dataEntryFormId: getFieldValue('dataEntryFormId')
+		}, 
+		function( json )
+		{
+			if ( json.response == 'success' )
+			{
+				autoSavePatientRegistrationForm();
+			}
+			else if ( json.response = 'error' )
+			{
+				setHeaderDelayMessage( json.message );
+			}
+		} );
+	}
+}
+
+function autoSavePatientRegistrationForm()
+{
+	$.postUTF8( 'autoSavePatientRegistrationForm.action',
+	{
+		name: getFieldValue('name'),
+		designTextarea: jQuery("#designTextarea").ckeditorGet().getData(),
+		programId: getFieldValue('programId'),
+		id: getFieldValue('id')
+	},
+	function( json ) 
+	{
+		setFieldValue('dataEntryFormId', json.message);
+		showById('deleteButton');
+		setHeaderDelayMessage( i18n_save_success ); 
+	} );
 }

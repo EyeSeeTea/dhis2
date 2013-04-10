@@ -6,8 +6,6 @@ $( document ).ready( function () {
         cache: false
     } );
 
-    setHeaderMessage( "Loading.. please wait" );
-
     $( "#orgUnitTree" ).one( "ouwtLoaded", function () {
         // initialize the stores, and then try and add the data
         DAO.programs = new dhis2.storage.Store( {name: 'programs', adapter: 'dom-ss'}, function ( store ) {
@@ -26,7 +24,54 @@ $( document ).ready( function () {
         } );
     } );
 
+    $( document ).bind( 'dhis2.online', function ( event, loggedIn ) {
+        if ( loggedIn ) {
+            setHeaderDelayMessage( i18n_online_notification );
+        }
+        else {
+            var form = [
+                '<form style="display:inline;">',
+                '<label for="username">Username</label>',
+                '<input name="username" id="username" type="text" style="width: 70px; margin-left: 10px; margin-right: 10px" size="10"/>',
+                '<label for="password">Password</label>',
+                '<input name="password" id="password" type="password" style="width: 70px; margin-left: 10px; margin-right: 10px" size="10"/>',
+                '<button id="login_button" type="button">Login</button>',
+                '</form>'
+            ].join( '' );
+
+            setHeaderMessage( form );
+            ajax_login();
+        }
+    } );
+
+    $( document ).bind( 'dhis2.offline', function () {
+        setHeaderMessage( i18n_offline_notification );
+    } );
+
+    dhis2.availability.startAvailabilityCheck();
 } );
+
+function ajax_login()
+{
+    $( '#login_button' ).bind( 'click', function()
+    {
+        var username = $( '#username' ).val();
+        var password = $( '#password' ).val();
+
+        $.post( '../dhis-web-commons-security/login.action', {
+            'j_username' : username,
+            'j_password' : password
+        } ).success( function()
+        {
+            var ret = dhis2.availability.syncCheckAvailability();
+
+            if ( !ret )
+            {
+                alert( i18n_ajax_login_failed );
+            }
+        } );
+    } );
+}
 
 function organisationUnitSelected( orgUnits, orgUnitNames ) {
     showById( 'dataEntryMenu' );
@@ -55,15 +100,16 @@ function organisationUnitSelected( orgUnits, orgUnitNames ) {
             }
         } );
 
-        if( programs.length > 0) {
-            updateProgramList( programs );
-        } else {
-            // if we are online, also check server to see if there are any programs
-            dhis2.storage.Store.plugins['anonymous-online'].call( {}, function ( arr ) {
-                updateProgramList( arr );
-            } );
-        }
+        updateProgramList( programs );
     } );
+
+    /*
+    // try online first, then fallback to what we have stored in browser
+    dhis2.storage.Store.plugins['online-anonymous-programs'].call( {}, function ( arr ) {
+        updateProgramList( arr );
+    }, function () {
+    } );
+    */
 }
 
 function updateProgramList( arr ) {
@@ -144,7 +190,9 @@ function getDataElements() {
 
             enableCriteriaDiv();
             validateSearchEvents( true );
-        } );
+        } ).fail(function() {
+            enable( 'addBtn' );
+        });
 }
 
 function dataElementOnChange( this_ ) {
@@ -491,37 +539,7 @@ function showUpdateEvent( programStageInstanceId ) {
     setInnerHTML( 'dataEntryFormDiv', '' );
     showLoader();
 
-    $( '#dataEntryFormDiv' ).load( "dataentryform.action",
-        {
-            programStageInstanceId: programStageInstanceId
-        }, function () {
-            jQuery( '#inputCriteriaDiv' ).remove();
-            showById( 'programName' );
-            showById( 'actionDiv' );
-            var programName = jQuery( '#programId option:selected' ).text();
-            var programStageId = jQuery( '#programId option:selected' ).attr( 'psid' );
-            jQuery( '.stage-object-selected' ).attr( 'psid', programStageId );
-            setInnerHTML( 'programName', programName );
-            if ( getFieldValue( 'completed' ) == 'true' ) {
-                disable( "completeBtn" );
-                enable( "uncompleteBtn" );
-            }
-            else {
-                enable( "completeBtn" );
-                disable( "uncompleteBtn" );
-            }
-            hideById( 'loaderDiv' );
-            showById( 'dataEntryInfor' );
-            showById( 'entryFormContainer' );
-
-            jQuery( "#entryForm :input" ).each( function () {
-                if ( ( jQuery( this ).attr( 'options' ) != null && jQuery( this ).attr( 'options' ) == 'true' )
-                    || ( jQuery( this ).attr( 'username' ) != null && jQuery( this ).attr( 'username' ) == 'true' ) ) {
-                    var input = jQuery( this );
-                    input.parent().width( input.width() + 200 );
-                }
-            } );
-        } );
+    service.loadDataEntryForm( programStageInstanceId, getFieldValue( 'orgunitId' ) );
 }
 
 function backEventList() {
@@ -556,26 +574,11 @@ function addNewEvent() {
     var programStageInstanceId = getFieldValue( 'programStageInstanceId' );
     var programId = jQuery( '#programId option:selected' ).val();
     var executionDate = getFieldValue( 'executionDate' );
+    var orgunitId = getFieldValue( 'orgunitId' );
+
     jQuery( "#executionDate" ).css( 'background-color', SAVING_COLOR );
-    jQuery.postJSON( "saveExecutionDate.action",
-        {
-            programStageInstanceId: programStageInstanceId,
-            programId: programId,
-            executionDate: executionDate
-        },
-        function ( json ) {
-            if ( json.response == 'success' ) {
-                jQuery( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
-                setFieldValue( 'programStageInstanceId', json.message );
-                if ( programStageInstanceId != json.message ) {
-                    showUpdateEvent( json.message );
-                }
-            }
-            else {
-                jQuery( "#executionDate" ).css( 'background-color', ERROR_COLOR );
-                showWarningMessage( json.message );
-            }
-        } );
+
+    service.saveExecutionDate( programId, programStageInstanceId, executionDate, orgunitId );
 }
 
 function completedAndAddNewEvent() {
@@ -644,3 +647,68 @@ function removeAllOption() {
     jQuery( '#searchText' ).val( "" );
     searchEvents( eval( getFieldValue( "listAll" ) ) );
 }
+
+// execution date module
+var service = (function () {
+    return {
+        saveExecutionDate: function( programId, programStageInstanceId, executionDate, organisationUnitId ) {
+            jQuery.postJSON( "saveExecutionDate.action", {
+                programId: programId,
+                programStageInstanceId: programStageInstanceId,
+                executionDate: executionDate,
+                organisationUnitId: organisationUnitId
+            },
+            function ( json ) {
+                if ( json.response == 'success' ) {
+                    jQuery( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
+                    setFieldValue( 'programStageInstanceId', json.message );
+                    if ( programStageInstanceId != json.message ) {
+                        showUpdateEvent( json.message );
+                    }
+                }
+                else {
+                    jQuery( "#executionDate" ).css( 'background-color', ERROR_COLOR );
+                    showWarningMessage( json.message );
+                }
+            } );
+        },
+
+        loadDataEntryForm: function( programStageInstanceId, organisationUnitId ) {
+            $( '#dataEntryFormDiv' ).load( "dataentryform.action", {
+                programStageInstanceId: programStageInstanceId,
+                organisationUnitId: organisationUnitId
+            }, function () {
+                jQuery( '#inputCriteriaDiv' ).remove();
+                showById( 'programName' );
+                showById( 'actionDiv' );
+                var programName = jQuery( '#programId option:selected' ).text();
+                var programStageId = jQuery( '#programId option:selected' ).attr( 'psid' );
+                jQuery( '.stage-object-selected' ).attr( 'psid', programStageId );
+                setInnerHTML( 'programName', programName );
+                jQuery('#executionDate').css('width',430);
+                jQuery('#executionDate').css('margin-right',30);
+
+                if ( getFieldValue( 'completed' ) == 'true' ) {
+                    disable( "completeBtn" );
+                    enable( "uncompleteBtn" );
+                }
+                else {
+                    enable( "completeBtn" );
+                    disable( "uncompleteBtn" );
+                }
+                hideById( 'loaderDiv' );
+                showById( 'dataEntryInfor' );
+                showById( 'entryFormContainer' );
+
+                jQuery( "#entryForm :input" ).each( function () {
+                    if ( ( jQuery( this ).attr( 'options' ) != null && jQuery( this ).attr( 'options' ) == 'true' )
+                        || ( jQuery( this ).attr( 'username' ) != null && jQuery( this ).attr( 'username' ) == 'true' ) ) {
+                        var input = jQuery( this );
+                        input.parent().width( input.width() + 200 );
+                    }
+                } );
+            } );
+
+        }
+    }
+})();

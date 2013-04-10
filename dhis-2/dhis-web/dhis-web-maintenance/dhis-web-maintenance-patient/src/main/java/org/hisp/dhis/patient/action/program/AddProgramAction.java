@@ -42,7 +42,6 @@ import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
-import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -94,13 +93,6 @@ public class AddProgramAction
     public void setPatientAttributeService( PatientAttributeService patientAttributeService )
     {
         this.patientAttributeService = patientAttributeService;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
     }
 
     // -------------------------------------------------------------------------
@@ -172,7 +164,7 @@ public class AddProgramAction
 
     private Boolean generateBydEnrollmentDate;
 
-    public void setGeneratedByEnrollmentDate( Boolean generateBydEnrollmentDate )
+    public void setGenerateBydEnrollmentDate( Boolean generateBydEnrollmentDate )
     {
         this.generateBydEnrollmentDate = generateBydEnrollmentDate;
     }
@@ -198,6 +190,14 @@ public class AddProgramAction
         this.onlyEnrollOnce = onlyEnrollOnce;
     }
 
+
+    private Boolean remindCompleted = false;
+
+    public void setRemindCompleted( Boolean remindCompleted )
+    {
+        this.remindCompleted = remindCompleted;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -211,6 +211,7 @@ public class AddProgramAction
         ignoreOverdueEvents = (ignoreOverdueEvents == null) ? false : ignoreOverdueEvents;
         blockEntryForm = (blockEntryForm == null) ? false : blockEntryForm;
         onlyEnrollOnce = (onlyEnrollOnce == null) ? false : onlyEnrollOnce;
+        remindCompleted = (remindCompleted == null) ? false : remindCompleted;
 
         Program program = new Program();
 
@@ -224,7 +225,8 @@ public class AddProgramAction
         program.setDisplayIncidentDate( displayIncidentDate );
         program.setBlockEntryForm( blockEntryForm );
         program.setOnlyEnrollOnce( onlyEnrollOnce );
-        
+        program.setRemindCompleted( remindCompleted );
+
         if ( type == Program.MULTIPLE_EVENTS_WITH_REGISTRATION )
         {
             program.setGeneratedByEnrollmentDate( generateBydEnrollmentDate );
@@ -268,10 +270,6 @@ public class AddProgramAction
 
         programService.saveProgram( program );
 
-        program.setPublicAccess( "rw------" );
-        program.setUser( currentUserService.getCurrentUser() );
-        programService.updateProgram( program );
-        
         if ( program.getType().equals( Program.SINGLE_EVENT_WITH_REGISTRATION )
             || program.getType().equals( Program.SINGLE_EVENT_WITHOUT_REGISTRATION ) )
         {
@@ -297,7 +295,7 @@ public class AddProgramAction
             programInstance.setEnrollmentDate( new Date() );
             programInstance.setDateOfIncident( new Date() );
             programInstance.setProgram( program );
-            programInstance.setCompleted( false );
+            programInstance.setStatus( ProgramInstance.STATUS_ACTIVE );
 
             programInstanceService.addProgramInstance( programInstance );
         }

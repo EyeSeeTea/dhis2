@@ -139,7 +139,7 @@ public class LoadProgramStageInstancesAction
         if ( program.getType() == Program.MULTIPLE_EVENTS_WITH_REGISTRATION)
         {
             programInstances = new ArrayList<ProgramInstance>( programInstanceService.getProgramInstances( patient,
-                program, false ) );
+                program, ProgramInstance.STATUS_ACTIVE ) );
         }
         else if ( program.getType() == Program.SINGLE_EVENT_WITH_REGISTRATION )
         {
@@ -151,7 +151,7 @@ public class LoadProgramStageInstancesAction
             programInstances = new ArrayList<ProgramInstance>( programInstanceService.getProgramInstances( program ) );
         }
 
-        if ( programInstances != null && programInstances.size() > 0 )
+        if ( !programInstances.isEmpty() )
         {
             programInstance = programInstances.iterator().next();
 

@@ -109,8 +109,15 @@ public class Program
     private Boolean blockEntryForm = false;
 
     private Set<UserAuthorityGroup> userRoles = new HashSet<UserAuthorityGroup>();
-    
+
     private Boolean onlyEnrollOnce = false;
+
+    /**
+     * Enabled this property to show a pop-up for confirming Complete a program
+     * after to complete a progam-stage
+     * 
+     */
+    private Boolean remindCompleted = false;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -199,6 +206,19 @@ public class Program
     public void setVersion( Integer version )
     {
         this.version = version;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getRemindCompleted()
+    {
+        return remindCompleted;
+    }
+
+    public void setRemindCompleted( Boolean remindCompleted )
+    {
+        this.remindCompleted = remindCompleted;
     }
 
     @JsonProperty( value = "organisationUnits" )
@@ -396,11 +416,8 @@ public class Program
             {
                 return programStage;
             }
-            else
-            {
-                count++;
-            }
 
+            count++;
         }
 
         return null;
@@ -417,7 +434,7 @@ public class Program
 
                 // Compare property value with compare value
 
-                int i = ((Comparable<Object>) propertyValue).compareTo( (Comparable<Object>) criteria.getValue() );
+                int i = ((Comparable<Object>) propertyValue).compareTo( criteria.getValue() );
 
                 // Return validation criteria if criteria is not met
 
