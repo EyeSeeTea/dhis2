@@ -29,14 +29,18 @@ package org.hisp.dhis.patient.action.schedule;
 
 import static org.hisp.dhis.sms.outbound.OutboundSms.DHIS_SYSTEM_SENDER;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
+import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.SchedulingProgramObject;
 import org.hisp.dhis.sms.SmsServiceException;
 import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsService;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.opensymphony.xwork2.Action;
 
@@ -59,13 +63,13 @@ public class ExecuteSendMessageAction
         this.programStageInstanceService = programStageInstanceService;
     }
 
-    private JdbcTemplate jdbcTemplate;
+    private ProgramInstanceService programInstanceService;
 
-    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
+    public void setProgramInstanceService( ProgramInstanceService programInstanceService )
     {
-        this.jdbcTemplate = jdbcTemplate;
+        this.programInstanceService = programInstanceService;
     }
-
+    
     private OutboundSmsService outboundSmsService;
 
     public void setOutboundSmsService( OutboundSmsService outboundSmsService )
@@ -80,8 +84,42 @@ public class ExecuteSendMessageAction
     @Override
     public String execute()
     {
-        Collection<SchedulingProgramObject> schedulingProgramObjects = programStageInstanceService
-            .getSendMesssageEvents();
+        // ---------------------------------------------------------------------
+        // Send program-instance messages
+        // ---------------------------------------------------------------------
+
+        Collection<SchedulingProgramObject> schedulingProgramObjects = programInstanceService.getSendMesssageEvents();
+
+        for ( SchedulingProgramObject schedulingProgramObject : schedulingProgramObjects )
+        {
+            String message = schedulingProgramObject.getMessage();
+            try
+            {
+                OutboundSms outboundSms = new OutboundSms( message, schedulingProgramObject.getPhoneNumber() );
+                outboundSms.setSender( DHIS_SYSTEM_SENDER );
+                outboundSmsService.sendMessage( outboundSms, null );
+
+                ProgramInstance programInstance = programInstanceService.getProgramInstance( schedulingProgramObject.getProgramInstanceId() );
+                List<OutboundSms> messages = programInstance.getOutboundSms();
+                if( messages == null )
+                {
+                    messages = new ArrayList<OutboundSms>();
+                }
+                messages.add( outboundSms );
+                programInstance.setOutboundSms( messages );
+                programInstanceService.updateProgramInstance( programInstance );
+            }
+            catch ( SmsServiceException e )
+            {
+                message = e.getMessage();
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // Send program-stage-instance messages
+        // ---------------------------------------------------------------------
+
+        schedulingProgramObjects = programStageInstanceService.getSendMesssageEvents();
 
         for ( SchedulingProgramObject schedulingProgramObject : schedulingProgramObjects )
         {
@@ -95,12 +133,15 @@ public class ExecuteSendMessageAction
                 outboundSms.setSender( DHIS_SYSTEM_SENDER );
                 outboundSmsService.sendMessage( outboundSms, null );
 
-                String sql = "INSERT INTO programstageinstance_outboundsms"
-                    + "( programstageinstanceid, outboundsmsid, sort_order) VALUES " + "("
-                    + schedulingProgramObject.getProgramStageInstanceId() + ", " + outboundSms.getId() + ","
-                    + (System.currentTimeMillis() / 1000) + ") ";
-                
-                jdbcTemplate.execute( sql );
+                ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( schedulingProgramObject.getProgramStageInstanceId() );
+                List<OutboundSms> messages = programStageInstance.getOutboundSms();
+                if( messages == null )
+                {
+                    messages = new ArrayList<OutboundSms>();
+                }
+                messages.add( outboundSms );
+                programStageInstance.setOutboundSms( messages );
+                programStageInstanceService.updateProgramStageInstance( programStageInstance );
             }
             catch ( SmsServiceException e )
             {
