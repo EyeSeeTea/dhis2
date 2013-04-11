@@ -179,41 +179,6 @@ public class HibernateProgramInstanceStore
         return rs != null ? rs.intValue() : 0;
     }
 
-    // @SuppressWarnings( "unchecked" )
-    // public Collection<ProgramInstance> getUnenrollment( Program program,
-    // Collection<Integer> orgunitIds,
-    // Date startDate, Date endDate )
-    // {
-    // return getCriteria( Restrictions.eq( "program", program ),
-    // Restrictions.ge( "enrollmentDate", startDate ),
-    // Restrictions.le( "enrollmentDate", endDate ) ).createAlias( "patient",
-    // "patient" )
-    // .createAlias( "programStageInstances", "programStageInstance" )
-    // .createAlias( "patient.organisationUnit", "organisationUnit" )
-    // .add( Restrictions.in( "organisationUnit.id", orgunitIds ) ).add(
-    // Restrictions.eq( "completed", true ) )
-    // .add( Restrictions.eq( "programStageInstance.completed", false )
-    // ).list();
-    // }
-    //
-    // public int countUnenrollment( Program program, Collection<Integer>
-    // orgunitIds, Date startDate, Date endDate )
-    // {
-    // Number rs = (Number) getCriteria( Restrictions.eq( "program", program ),
-    // Restrictions.ge( "endDate", startDate ), Restrictions.le( "endDate",
-    // endDate ) )
-    // .createAlias( "patient", "patient" ).createAlias(
-    // "programStageInstances", "programStageInstance" )
-    // .createAlias( "patient.organisationUnit", "organisationUnit" )
-    // .add( Restrictions.in( "organisationUnit.id", orgunitIds ) ).add(
-    // Restrictions.eq( "completed", true ) )
-    // .add( Restrictions.eq( "programStageInstance.completed", false ) )
-    // .setProjection( Projections.projectionList().add(
-    // Projections.countDistinct( "id" ) ) ).uniqueResult();
-    //
-    // return rs != null ? rs.intValue() : 0;
-    // }
-
     public int countByStatus( Integer status, Program program, Collection<Integer> orgunitIds, Date startDate,
         Date endDate )
     {
@@ -245,9 +210,9 @@ public class HibernateProgramInstanceStore
         jdbcTemplate.execute( sql );
     }
 
-    public Collection<SchedulingProgramObject> getSendMesssageEvents()
+    public Collection<SchedulingProgramObject> getSendMesssageEvents( String dateToCompare )
     {
-        String sql = "select pi.programinstanceid, p.phonenumber, prm.templatemessage, "
+        String sql = "SELECT pi.programinstanceid, p.phonenumber, prm.templatemessage, "
             + "         p.firstname, p.middlename, p.lastname, org.name as orgunitName, "
             + "         pg.name as programName, pi.dateofincident , "
             + "         pi.enrollmentdate,(DATE(now()) - DATE(pi.enrollmentdate) ) as days_since_erollment_date, "
@@ -256,12 +221,13 @@ public class HibernateProgramInstanceStore
             + "              ON p.patientid=pi.patientid INNER JOIN program pg "
             + "              ON pg.programid=pi.programid INNER JOIN organisationunit org "
             + "              ON org.organisationunitid = p.organisationunitid INNER JOIN patientreminder prm "
-            + "              ON prm.programid = pi.programid   " 
+            + "              ON prm.programid = pi.programid " 
             + "       WHERE pi.status= " + ProgramInstance.STATUS_ACTIVE
             + "         and p.phonenumber is not NULL and p.phonenumber != ''   "
             + "         and prm.templatemessage is not NULL and prm.templatemessage != ''   "
             + "         and pg.type=1 and prm.daysallowedsendmessage is not null    "
-            + "         and (  DATE(now()) - DATE(pi.enrollmentdate) ) = prm.daysallowedsendmessage";
+            + "         and ( DATE(now()) - DATE(pi." + dateToCompare + ") ) = prm.daysallowedsendmessage "
+            + "         and prm.dateToCompare='" + dateToCompare + "'";
         
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
 
@@ -274,7 +240,6 @@ public class HibernateProgramInstanceStore
             String message = "";
             for ( int i = 1; i <= cols; i++ )
             {
-
                 message = rs.getString( "templatemessage" );
                 String patientName = rs.getString( "firstName" );
                 String organisationunitName = rs.getString( "orgunitName" );

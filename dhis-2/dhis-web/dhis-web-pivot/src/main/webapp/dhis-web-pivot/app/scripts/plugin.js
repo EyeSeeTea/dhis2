@@ -89,7 +89,8 @@ xResponse = {
 			meta: true,
 			index: 0,
 			size: 3,
-			items: []
+			items: [
+
 		}
 	],
 	metaData: {
