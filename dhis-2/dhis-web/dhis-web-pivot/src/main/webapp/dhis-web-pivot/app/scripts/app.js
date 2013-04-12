@@ -3489,7 +3489,7 @@ Ext.onReady( function() {
 				layout: 'accordion',
 				activeOnTop: true,
 				cls: 'pt-accordion',
-				bodyStyle: 'border:0 none; margin-bottom:2px',
+				bodyStyle: 'border:0 none; margin-bottom:2px: border:1px solid red',
 				height: 700,
 				items: function() {
 					var panels = [
