@@ -65,7 +65,7 @@ Ext.onReady( function() {
 			if (vph > staticHeight) {
 				var factor = (vph - staticHeight) / tabHeight;
 			}
-
+			
 			if (factor > 7) {
 				if (!Ext.isIE) {
 					pt.viewport.accordion.setAutoScroll(false);
@@ -89,7 +89,7 @@ Ext.onReady( function() {
 			// Fade in
 			Ext.defer( function() {
 				Ext.getBody().fadeIn({
-					duration: 800
+					duration: 400
 				});
 			}, 500 );
 		};
@@ -3489,7 +3489,7 @@ Ext.onReady( function() {
 				layout: 'accordion',
 				activeOnTop: true,
 				cls: 'pt-accordion',
-				bodyStyle: 'border:0 none; margin-bottom:2px: border:1px solid red',
+				bodyStyle: 'border:0 none; margin-bottom:2px',
 				height: 700,
 				items: function() {
 					var panels = [
@@ -3899,6 +3899,51 @@ Ext.onReady( function() {
 				userOrganisationUnit: userOrganisationUnit,
 				userOrganisationUnitChildren: userOrganisationUnitChildren,
 				setFavorite: setFavorite,
+				onResize: function(p) {
+					var viewportHeight = this.westRegion.getHeight(),
+						tabHeight = 28,
+						numberOfGroupSets = pt.init.ougs.length + pt.init.degs.length;
+
+					
+					
+
+					// Scrollbar
+					var wrh = this.westRegion.getHeight(),
+						no = pt.init.ougs.length + pt.init.degs.length,
+						factor = 0,
+						staticHeight = 535,
+						tabHeight = 28;
+
+					if (wrh > staticHeight) {
+						var factor = (wrh - staticHeight) / tabHeight;
+					}
+					
+					if (factor > 7) {
+						if (!Ext.isIE) {
+							pt.viewport.accordion.setAutoScroll(false);
+							pt.viewport.westRegion.setWidth(pt.conf.layout.west_width);
+							pt.viewport.accordion.doLayout();
+						}
+					}
+					else {
+						pt.viewport.westRegion.hasScrollbar = true;
+					}
+
+
+					//					
+					if (Ext.isWebKit) {
+						return pt.conf.layout.west_width + 8;
+					}
+					else {
+						if (Ext.isLinux && Ext.isGecko) {
+							return pt.conf.layout.west_width + 13;
+						}
+						return pt.conf.layout.west_width + 17;
+					}
+
+
+
+					
 				items: [
 					westRegion,
 					centerRegion
