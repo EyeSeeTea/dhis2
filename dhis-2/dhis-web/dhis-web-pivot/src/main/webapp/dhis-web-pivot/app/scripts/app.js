@@ -778,6 +778,7 @@ Ext.onReady( function() {
 			showSubTotals,
 			hideEmptyRows,
 			digitGroupSeparator,
+			legendSet,
 			displayDensity,
 			fontSize,
 			reportingPeriod,
@@ -876,6 +877,24 @@ Ext.onReady( function() {
 		});
 		pt.viewport.digitGroupSeparator = digitGroupSeparator;
 
+		legendSet = Ext.create('Ext.form.field.ComboBox', {
+			labelStyle: 'color:#333',
+			cls: 'pt-combo',
+			style: 'margin-bottom:3px',
+			width: 250,
+			labelWidth: 130,
+			fieldLabel: 'Legend set', //i18n
+			queryMode: 'local',
+			valueField: 'id',
+			editable: false,
+			value: 'space',
+			store: Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: pt.init.legendSets
+			})
+		});
+		pt.viewport.legendSet = legendSet;
+
 		reportingPeriod = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: 'Reporting period', //i18n
 			style: 'margin-bottom:4px',
@@ -910,7 +929,8 @@ Ext.onReady( function() {
 			items: [
 				displayDensity,
 				fontSize,
-				digitGroupSeparator
+				digitGroupSeparator,
+				legendSet
 			]
 		};
 
@@ -940,6 +960,7 @@ Ext.onReady( function() {
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
 					digitGroupSeparator: digitGroupSeparator.getValue(),
+					legendSet: legendSet.getValue(),
 					reportingPeriod: reportingPeriod.getValue(),
 					organisationUnit: organisationUnit.getValue(),
 					parentOrganisationUnit: parentOrganisationUnit.getValue()
@@ -3848,6 +3869,7 @@ Ext.onReady( function() {
 				pt.viewport.displayDensity.setValue(r.displayDensity);
 				pt.viewport.fontSize.setValue(r.fontSize);
 				pt.viewport.digitGroupSeparator.setValue(r.digitGroupSeparator);
+				pt.viewport.legendSet.setValue(r.legendSet.id);
 
 				if (Ext.isObject(r.reportParams)) {
 					pt.viewport.reportingPeriod.setValue(r.reportParams.paramReportingPeriod);
