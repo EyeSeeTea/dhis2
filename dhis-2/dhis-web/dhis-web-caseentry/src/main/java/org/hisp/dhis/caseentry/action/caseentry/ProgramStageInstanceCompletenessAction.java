@@ -1,5 +1,3 @@
-package org.hisp.dhis.dataadmin.action.sqlview;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,34 +25,50 @@ package org.hisp.dhis.dataadmin.action.sqlview;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.hisp.dhis.caseentry.action.caseentry;
+
+import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.sqlview.SqlViewService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStageInstanceService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * Updates a existing sqlview in database.
- * 
- * @author Dang Duy Hieu
- * @version $Id CheckViewTableExistenceAction.java July 16, 2010$
+ * @author Chau Thu Tran
+ * @version $ ProgramStageInstanceCompletenessAction.java Apr 16, 2013 8:53:27
+ *          AM $
  */
-public class CheckViewTableExistenceAction
+public class ProgramStageInstanceCompletenessAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private SqlViewService sqlViewService;
+    private OrganisationUnitSelectionManager selectionManager;
 
-    public void setSqlViewService( SqlViewService sqlViewService )
+    public void setSelectionManager( OrganisationUnitSelectionManager selectionManager )
     {
-        this.sqlViewService = sqlViewService;
+        this.selectionManager = selectionManager;
     }
 
-    // -------------------------------------------------------------------------
-    // I18n
-    // -------------------------------------------------------------------------
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+
+    private ProgramStageInstanceService programStageInstanceService;
+
+    public void setProgramStageInstanceService( ProgramStageInstanceService programStageInstanceService )
+    {
+        this.programStageInstanceService = programStageInstanceService;
+    }
 
     private I18n i18n;
 
@@ -64,52 +78,59 @@ public class CheckViewTableExistenceAction
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Input/output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer programId;
 
-    public void setId( Integer id )
+    public void setProgramId( Integer programId )
     {
-        this.id = id;
+        this.programId = programId;
     }
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
+    private String startDate;
 
-    private String message;
-
-    public String getMessage()
+    public void setStartDate( String startDate )
     {
-        return message;
+        this.startDate = startDate;
+    }
+
+    private String endDate;
+
+    public void setEndDate( String endDate )
+    {
+        this.endDate = endDate;
+    }
+
+    private String type;
+
+    public void setType( String type )
+    {
+        this.type = type;
+    }
+
+    private Grid grid;
+
+    public Grid getGrid()
+    {
+        return grid;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
+        throws Exception
     {
-        if ( id == null || (id.intValue() == -1) )
-        {
-            message = i18n.getString( "sql_view_instance_invalid" );
+        Program program = programService.getProgram( programId );
 
-            return ERROR;
-        }
+        OrganisationUnit orgunit = selectionManager.getSelectedOrganisationUnit();
 
-        String viewTableName = sqlViewService.getSqlView( id ).getViewName();
+        grid = programStageInstanceService.getCompletenessProgramStageInstance( orgunit, program, startDate, endDate,
+            i18n );
 
-        if ( !sqlViewService.viewTableExists( viewTableName ) )
-        {
-            message = i18n.getString( "sql_view_table_is_not_created_yet" );
-
-            return ERROR;
-        }
-
-        message = viewTableName;
-
-        return SUCCESS;
+        return (type == null) ? SUCCESS : type;
     }
-
 }
