@@ -255,8 +255,7 @@ GIS.core.getOLMap = function(gis) {
 	};
 
 	olmap.closeAllLayers = function() {
-		gis.layer.boundary1.core.reset();
-		gis.layer.boundary2.core.reset();
+		gis.layer.boundary.core.reset();
 		gis.layer.thematic1.core.reset();
 		gis.layer.thematic2.core.reset();
 		gis.layer.thematic3.core.reset();
@@ -321,15 +320,9 @@ GIS.core.getLayers = function(gis) {
     });
     layers.openStreetMap.id = 'openStreetMap';
 
-	layers.boundary1 = GIS.core.VectorLayer(gis, 'boundary1', 'Boundary layer 1', {opacity: 0.8});
-	layers.boundary1.core = new mapfish.GeoStat.Boundary1(gis.olmap, {
-		layer: layers.boundary1,
-		gis: gis
-	});
-
-	layers.boundary2 = GIS.core.VectorLayer(gis, 'boundary2', 'Boundary layer 2', {opacity: 0.8});
-	layers.boundary2.core = new mapfish.GeoStat.Boundary2(gis.olmap, {
-		layer: layers.boundary2,
+	layers.boundary = GIS.core.VectorLayer(gis, 'boundary', 'Boundary layer', {opacity: 0.8});
+	layers.boundary.core = new mapfish.GeoStat.Boundary(gis.olmap, {
+		layer: layers.boundary,
 		gis: gis
 	});
 
@@ -842,7 +835,7 @@ GIS.core.StyleMap = function(id, labelConfig) {
 			cursor: 'pointer'
 		};
 
-	if (id === 'boundary1' || id === 'boundary2') {
+	if (id === gis.layer.boundary.id) {
 		defaults.fillOpacity = 0;
 		defaults.strokeColor = '#000';
 

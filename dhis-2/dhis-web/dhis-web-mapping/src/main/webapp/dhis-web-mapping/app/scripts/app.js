@@ -187,7 +187,7 @@ Ext.onReady( function() {
 				svgArray.push(layer.div.innerHTML);
 
 				// Legend
-				if (id !== gis.layer.boundary1.id && id !== gis.layer.boundary2.id && id !== gis.layer.facility.id) {
+				if (id !== gis.layer.boundary.id && id !== gis.layer.facility.id) {
 					what = '<g id="indicator" style="display: block; visibility: visible;">' +
 						   '<text id="indicator" x="' + x + '" y="' + y + '" font-size="12">' +
 						   '<tspan>' + legendConfig.what + '</tspan></text></g>';
