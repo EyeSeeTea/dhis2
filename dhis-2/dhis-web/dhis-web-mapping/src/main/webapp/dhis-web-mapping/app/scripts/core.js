@@ -835,7 +835,7 @@ GIS.core.StyleMap = function(id, labelConfig) {
 			cursor: 'pointer'
 		};
 
-	if (id === gis.layer.boundary.id) {
+	if (id === 'boundary') {
 		defaults.fillOpacity = 0;
 		defaults.strokeColor = '#000';
 
