@@ -809,10 +809,8 @@ GIS.core.StyleMap = function(id, labelConfig) {
 	}
 
 	return new OpenLayers.StyleMap({
-		'default': new OpenLayers.Style(
-			OpenLayers.Util.applyDefaults(defaults),
-			OpenLayers.Feature.Vector.style['default']),
-		select: new OpenLayers.Style(select)
+		'default': defaults,
+		select: select
 	});
 };
 
