@@ -148,9 +148,11 @@ Ext.onReady( function() {
 				namespace,
 				titleSVG,
 				legendSVG = '',
+				scalelineSVG,
 				x = 20,
 				y = 35,
-				center = gis.viewport.centerRegion;
+				center = gis.viewport.centerRegion,
+				scalelineEl = Ext.get(Ext.query('.olControlScaleLineTop')[0]);
 
 			if (!layers.length) {
 				return false;
@@ -228,11 +230,22 @@ Ext.onReady( function() {
 				}
 			}
 
+			// Scale line
+			scalelineSVG = '<text x="' + (x + 3) + '" y="' + y + '" fill="#000">' + scalelineEl.dom.innerHTML + '</text>';
+
+			y += 3;
+			scalelineSVG += '<line x1="' + x + '" y1="' + y + '" x2="' + x + '" y2="' + (y + 3) + '" style="stroke:#000;stroke-width:1" />';
+			scalelineSVG += '<line x1="' + (x + scalelineEl.getWidth()) + '" y1="' + y + '" x2="' + (x + scalelineEl.getWidth()) + '" y2="' + (y + 3) + '" style="stroke:#000;stroke-width:1" />';
+
+			y += 3;
+			scalelineSVG += '<line x1="' + x + '" y1="' + y + '" x2="' + (x + scalelineEl.getWidth()) + '" y2="' + y + '" style="stroke:#000;stroke-width:1" />';
+
+			// Map
 			if (svgArray.length) {
 				svg = util.svg.merge(svg, svgArray);
 			}
 
-			svg = svg.replace('</svg>', (titleSVG + legendSVG) + '</svg>');
+			svg = svg.replace('</svg>', (titleSVG + legendSVG + scalelineSVG) + '</svg>');
 
 			return svg;
 		};
