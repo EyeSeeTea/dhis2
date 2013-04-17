@@ -576,6 +576,10 @@ Ext.onReady( function() {
 				if (value && this.layer.layerType === gis.conf.finals.layer.type_base) {
 					gis.olmap.setBaseLayer(this.layer);
 				}
+
+				if (this.layer.circleLayer) {
+					this.layer.circleLayer.setVisibility(value);
+				}
 			},
 			initComponent: function() {
 				var that = this,
@@ -5070,8 +5074,14 @@ Ext.onReady( function() {
 			gis.util = GIS.app.getUtils();
 			gis.store = GIS.app.getStores();
 
-			layer = gis.layer.boundary;
+			layer = gis.layer.facility;
 			layer.menu = GIS.app.LayerMenu(layer, 'gis-toolbar-btn-menu-first');
+			layer.widget = GIS.app.LayerWidgetFacility(layer);
+			layer.window = GIS.app.WidgetWindow(layer);
+			GIS.core.createSelectHandlers(gis, layer);
+
+			layer = gis.layer.boundary;
+			layer.menu = GIS.app.LayerMenu(layer);
 			layer.widget = GIS.app.LayerWidgetBoundary(layer);
 			layer.window = GIS.app.WidgetWindow(layer);
 			GIS.core.createSelectHandlers(gis, layer);
@@ -5097,12 +5107,6 @@ Ext.onReady( function() {
 			layer = gis.layer.thematic4;
 			layer.menu = GIS.app.LayerMenu(layer);
 			layer.widget = GIS.app.LayerWidgetThematic(layer);
-			layer.window = GIS.app.WidgetWindow(layer);
-			GIS.core.createSelectHandlers(gis, layer);
-
-			layer = gis.layer.facility;
-			layer.menu = GIS.app.LayerMenu(layer);
-			layer.widget = GIS.app.LayerWidgetFacility(layer);
 			layer.window = GIS.app.WidgetWindow(layer);
 			GIS.core.createSelectHandlers(gis, layer);
 

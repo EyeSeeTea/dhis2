@@ -1629,6 +1629,7 @@ GIS.core.LayerLoaderFacility = function(gis, layer) {
 		}
 		if (Ext.isDefined(radius) && radius) {
 			layer.circleLayer = GIS.app.CircleLayer(layer.features, radius);
+			nissa = layer.circleLayer;
 		}
 	};
 
