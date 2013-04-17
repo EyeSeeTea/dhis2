@@ -1,5 +1,3 @@
-package org.hisp.dhis.mobile.action.incoming;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,37 +25,35 @@ package org.hisp.dhis.mobile.action.incoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.sms.incoming.IncomingSmsService;
+package org.hisp.dhis.patient.action.programtindicator;
+
+import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramIndicatorService;
+
 import com.opensymphony.xwork2.Action;
 
 /**
-* @author Nguyen Kim Lai
-*/
-public class DeleteReceiveSMSAction
+ * @author Chau Thu Tran
+ * @version $ RemoveProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
+ */
+public class RemoveProgramIndicatorAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private IncomingSmsService incomingSmsService;
+    private ProgramIndicatorService programIndicatorService;
 
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
+    public void setProgramIndicatorService( ProgramIndicatorService programIndicatorService )
     {
-        this.incomingSmsService = incomingSmsService;
+        this.programIndicatorService = programIndicatorService;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Setters
     // -------------------------------------------------------------------------
 
-    private Integer[] ids;
-
-    public void setIds( Integer[] ids )
-    {
-        this.ids = ids;
-    }
-    
     private Integer id;
 
     public void setId( Integer id )
@@ -66,24 +62,18 @@ public class DeleteReceiveSMSAction
     }
 
     // -------------------------------------------------------------------------
-    // Action Implementation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @Override
     public String execute()
         throws Exception
     {
-        if ( ids != null && ids.length > 0 )
-        {
-            for ( Integer each : ids )
-            {
-                incomingSmsService.deleteById( each );
-            }
-        }
-        if ( id != null )
-        {
-            incomingSmsService.deleteById( id );
-        }
+        ProgramIndicator programIndicator = programIndicatorService.getProgramIndicator( id );
+
+        programIndicatorService.deleteProgramIndicator( programIndicator );
+
         return SUCCESS;
     }
+
 }

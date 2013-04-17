@@ -1,5 +1,3 @@
-package org.hisp.dhis.mobile.action.incoming;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,63 +25,21 @@ package org.hisp.dhis.mobile.action.incoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.sms.incoming.IncomingSmsService;
-import com.opensymphony.xwork2.Action;
+package org.hisp.dhis.program.comparator;
+
+import java.util.Comparator;
+
+import org.hisp.dhis.program.ProgramIndicator;
 
 /**
-* @author Nguyen Kim Lai
-*/
-public class DeleteReceiveSMSAction
-    implements Action
+ * @author Chau Thu Tran
+ * @version $ ProgramIndicatorComparator.java Apr 16, 2013 3:47:30 PM $
+ */
+public class ProgramIndicatorComparator
+    implements Comparator<ProgramIndicator>
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private IncomingSmsService incomingSmsService;
-
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
+    public int compare( ProgramIndicator programIndicator0, ProgramIndicator programIndicator1 )
     {
-        this.incomingSmsService = incomingSmsService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private Integer[] ids;
-
-    public void setIds( Integer[] ids )
-    {
-        this.ids = ids;
-    }
-    
-    private Integer id;
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action Implementation
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String execute()
-        throws Exception
-    {
-        if ( ids != null && ids.length > 0 )
-        {
-            for ( Integer each : ids )
-            {
-                incomingSmsService.deleteById( each );
-            }
-        }
-        if ( id != null )
-        {
-            incomingSmsService.deleteById( id );
-        }
-        return SUCCESS;
+        return programIndicator0.getDisplayName().compareTo( programIndicator1.getDisplayName() );
     }
 }

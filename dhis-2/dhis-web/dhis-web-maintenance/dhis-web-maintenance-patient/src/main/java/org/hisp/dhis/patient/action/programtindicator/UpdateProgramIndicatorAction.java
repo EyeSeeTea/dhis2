@@ -1,5 +1,3 @@
-package org.hisp.dhis.mobile.action.incoming;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,37 +25,35 @@ package org.hisp.dhis.mobile.action.incoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.sms.incoming.IncomingSmsService;
+package org.hisp.dhis.patient.action.programtindicator;
+
+import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramIndicatorService;
+
 import com.opensymphony.xwork2.Action;
 
 /**
-* @author Nguyen Kim Lai
-*/
-public class DeleteReceiveSMSAction
+ * @author Chau Thu Tran
+ * @version $ UpdateProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
+ */
+public class UpdateProgramIndicatorAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private IncomingSmsService incomingSmsService;
+    private ProgramIndicatorService programIndicatorService;
 
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
+    public void setProgramIndicatorService( ProgramIndicatorService programIndicatorService )
     {
-        this.incomingSmsService = incomingSmsService;
+        this.programIndicatorService = programIndicatorService;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Setters
     // -------------------------------------------------------------------------
 
-    private Integer[] ids;
-
-    public void setIds( Integer[] ids )
-    {
-        this.ids = ids;
-    }
-    
     private Integer id;
 
     public void setId( Integer id )
@@ -65,25 +61,87 @@ public class DeleteReceiveSMSAction
         this.id = id;
     }
 
+    private String name;
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    private String code;
+
+    public void setCode( String code )
+    {
+        this.code = code;
+    }
+
+    private String description;
+
+    public void setDescription( String description )
+    {
+        this.description = description;
+    }
+
+    private String valueType;
+
+    public void setValueType( String valueType )
+    {
+        this.valueType = valueType;
+    }
+
+    private String expression;
+
+    public void setExpression( String expression )
+    {
+        this.expression = expression;
+    }
+
+    private String rootDate;
+
+    public void setRootDate( String rootDate )
+    {
+        this.rootDate = rootDate;
+    }
+
+    private String shortName;
+
+    public void setShortName( String shortName )
+    {
+        this.shortName = shortName;
+    }
+
+    private Integer programId;
+
+    public Integer getProgramId()
+    {
+        return programId;
+    }
+
     // -------------------------------------------------------------------------
-    // Action Implementation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @Override
     public String execute()
         throws Exception
     {
-        if ( ids != null && ids.length > 0 )
-        {
-            for ( Integer each : ids )
-            {
-                incomingSmsService.deleteById( each );
-            }
-        }
-        if ( id != null )
-        {
-            incomingSmsService.deleteById( id );
-        }
+        code = (code == null && code.trim().length() == 0) ? null : code;
+        
+        ProgramIndicator programIndicator = programIndicatorService.getProgramIndicator( id );
+
+        programIndicator.setName( name );
+        programIndicator.setShortName( shortName );
+        programIndicator.setCode( code );
+        programIndicator.setDescription( description );
+        programIndicator.setExpression( expression );
+        programIndicator.setValueType( valueType );
+        programIndicator.setRootDate( rootDate );
+
+        programIndicatorService.updateProgramIndicator( programIndicator );
+
+        programId = programIndicator.getProgram().getId();
+        
         return SUCCESS;
     }
+
 }

@@ -1,5 +1,3 @@
-package org.hisp.dhis.mobile.action.incoming;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,63 +25,85 @@ package org.hisp.dhis.mobile.action.incoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.sms.incoming.IncomingSmsService;
+package org.hisp.dhis.patient.action.programtindicator;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramIndicatorService;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.comparator.ProgramIndicatorComparator;
+
 import com.opensymphony.xwork2.Action;
 
 /**
-* @author Nguyen Kim Lai
-*/
-public class DeleteReceiveSMSAction
+ * @author Chau Thu Tran
+ * @version $ UpdateProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
+ */
+public class GetProgramIndicatorListAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private IncomingSmsService incomingSmsService;
+    private ProgramIndicatorService programIndicatorService;
 
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
+    public void setProgramIndicatorService( ProgramIndicatorService programIndicatorService )
     {
-        this.incomingSmsService = incomingSmsService;
+        this.programIndicatorService = programIndicatorService;
+    }
+
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Setters
     // -------------------------------------------------------------------------
 
-    private Integer[] ids;
+    private Integer programId;
 
-    public void setIds( Integer[] ids )
+    public void setProgramId( Integer programId )
     {
-        this.ids = ids;
+        this.programId = programId;
     }
-    
-    private Integer id;
 
-    public void setId( Integer id )
+    private List<ProgramIndicator> programIndicators;
+
+    public List<ProgramIndicator> getProgramIndicators()
     {
-        this.id = id;
+        return programIndicators;
+    }
+
+    private Program program;
+
+    public Program getProgram()
+    {
+        return program;
     }
 
     // -------------------------------------------------------------------------
-    // Action Implementation
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @Override
     public String execute()
         throws Exception
     {
-        if ( ids != null && ids.length > 0 )
-        {
-            for ( Integer each : ids )
-            {
-                incomingSmsService.deleteById( each );
-            }
-        }
-        if ( id != null )
-        {
-            incomingSmsService.deleteById( id );
-        }
+        program = programService.getProgram( programId );
+
+        programIndicators = new ArrayList<ProgramIndicator>( programIndicatorService.getProgramIndicators( program ) );
+
+        Collections.sort( programIndicators, new ProgramIndicatorComparator() );
+
         return SUCCESS;
     }
+
 }

@@ -62,6 +62,7 @@
 		<property name="patientDataValueService"
 			ref="org.hisp.dhis.patientdatavalue.PatientDataValueService" />
 		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+		<property name="programIndicatorService" ref="org.hisp.dhis.program.ProgramIndicatorService" />
 	</bean>
 
 	<bean
@@ -1082,6 +1083,7 @@
 		<property name="patientAuditService" ref="org.hisp.dhis.patient.PatientAuditService" />
 		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
+		<property name="programIndicatorService" ref="org.hisp.dhis.program.ProgramIndicatorService" />
 	</bean>
 
 	<bean
@@ -1127,6 +1129,10 @@
     <property name="selectionManager" ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
     <property name="programService" ref="org.hisp.dhis.program.ProgramService" />
     <property name="programStageInstanceService" ref="org.hisp.dhis.program.ProgramStageInstanceService" />
+  </bean>
+
+  <bean id="org.hisp.dhis.caseentry.action.caseentry.UploadAnonymousEventAction"
+    class="org.hisp.dhis.caseentry.action.caseentry.UploadAnonymousEventAction" scope="prototype">
   </bean>
 
 </beans>

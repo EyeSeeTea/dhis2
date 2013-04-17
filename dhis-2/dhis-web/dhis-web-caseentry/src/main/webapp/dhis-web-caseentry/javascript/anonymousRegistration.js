@@ -2,8 +2,7 @@ var DAO = DAO || {};
 
 var PROGRAMS_STORE = 'anonymousPrograms';
 var PROGRAM_STAGES_STORE = 'anonymousProgramStages';
-var EXECUTION_DATES_STORE = 'anonymousExecutionDates';
-var DATA_VALUES_STORE = 'anonymousDataValues';
+var OFFLINE_DATA_STORE = 'anonymousExecutionDates';
 
 function initalizeProgramStages() {
     DAO.programStages = new dhis2.storage.Store( {name: PROGRAM_STAGES_STORE, adapter: 'dom-ss'}, function(store) {
@@ -41,27 +40,22 @@ function initializePrograms() {
     } );
 }
 
-function initializeExecutionDates() {
-    DAO.executionDates = new dhis2.storage.Store( {name: EXECUTION_DATES_STORE, adapter: 'dom'}, function(store) {
-        $( document ).trigger('dhis2.anonymous.executionDatesInitialized');
-    });
-}
-
-function initializeDataValues() {
-    DAO.dataValues = new dhis2.storage.Store( {name: DATA_VALUES_STORE, adapter: 'dom'}, function(store) {
-        $( document ).trigger('dhis2.anonymous.dataValuesInitialized');
+function initializeOfflineData() {
+    DAO.offlineData = new dhis2.storage.Store( {name: OFFLINE_DATA_STORE, adapter: 'dom'}, function(store) {
+        $( document ).trigger('dhis2.anonymous.offlineData');
     });
 }
 
 function showOfflineEvents() {
-    DAO.executionDates.fetchAll(function(store, arr) {
+    DAO.offlineData.fetchAll(function(store, arr) {
         var target = $( '#offlineEventList' );
         target.children().remove();
 
         if ( arr.length > 0 ) {
             var template = $( '#offline-event-template' );
 
-            $.each( arr, function ( idx, event ) {
+            $.each( arr, function ( idx, item ) {
+                var event = item.executionDate;
                 event.index = idx + 1;
                 var tmpl = _.template( template.html() );
                 var html = tmpl(event);
@@ -80,31 +74,31 @@ function showOfflineEvents() {
 var haveLocalData = false;
 
 function checkOfflineData() {
-    DAO.executionDates.fetchAll( function ( store, arr ) {
-        if ( arr.length > 0 ) {
-            haveLocalData = true;
-        }
-
+    DAO.offlineData.fetchAll( function ( store, arr ) {
+        haveLocalData = arr.length > 0;
         $( document ).trigger('dhis2.anonymous.checkOfflineData');
     } );
 }
 
-function uploadExecutionDate( key, programId, executionDate, organisationUnitId ) {
-    return ajaxExecutionDate(programId, "0", executionDate, organisationUnitId ).done(function(json) {
+function uploadOfflineData( item ) {
+    $.ajax({
+        url: 'uploadAnonymousEvent.action',
+        contentType: 'application/json',
+        data: JSON.stringify( item )
+    } ).done(function(json) {
         if ( json.response == 'success' ) {
-            // console.log( key + " turned into " + json.message );
-
-            DAO.executionDates.remove(key, function(store) {
+            DAO.offlineData.remove( item.key, function ( store ) {
                 showOfflineEvents();
-            });
+                searchEvents( eval( getFieldValue( 'listAll' ) ) );
+            } );
         }
-    } );
+    });
 }
 
 function uploadLocalData() {
     setHeaderWaitMessage( i18n_uploading_data_notification );
 
-    DAO.executionDates.fetchAll( function ( store, arr ) {
+    DAO.offlineData.fetchAll( function ( store, arr ) {
         if(arr.length == 0) {
             setHeaderDelayMessage( i18n_sync_success );
             return;
@@ -115,7 +109,7 @@ function uploadLocalData() {
 
         $.each(arr, function(idx, item) {
             promise = promise.pipe(function () {
-                uploadExecutionDate(item.key, item.programId, item.executionDate, item.organisationUnitId);
+                uploadOfflineData( item );
             });
         });
 
@@ -151,8 +145,7 @@ $( document ).ready( function () {
         } );
 
         initalizeProgramStages();
-        initializeExecutionDates();
-        initializeDataValues();
+        initializeOfflineData();
     } );
 
     $( document ).bind( 'dhis2.online', function ( event, loggedIn ) {
@@ -699,7 +692,7 @@ function removeEvent( programStageId ) {
 
     if( s.indexOf("local") != -1) {
         if ( confirm( i18n_comfirm_delete_event ) ) {
-            DAO.executionDates.remove(programStageId, function(store) {
+            DAO.offlineData.remove(programStageId, function(store) {
                 // redisplay list
                 showOfflineEvents();
             });
@@ -716,6 +709,7 @@ function showUpdateEvent( programStageInstanceId ) {
     hideById( 'selectDiv' );
     hideById( 'searchDiv' );
     hideById( 'listDiv' );
+    hideById( 'offlineListDiv' );
     setFieldValue( 'programStageInstanceId', programStageInstanceId );
     setInnerHTML( 'dataEntryFormDiv', '' );
     showLoader();
@@ -861,7 +855,7 @@ var service = (function () {
                 }
             } ).fail( function () {
                 if(programStageInstanceId == 0) {
-                    DAO.executionDates.keys(function(store, keys) {
+                    DAO.offlineData.keys(function(store, keys) {
                         var i = 100;
 
                         for(; i<10000; i++) {
@@ -874,8 +868,9 @@ var service = (function () {
                         jQuery( "#executionDate" ).css( 'background-color', SUCCESS_COLOR );
                         showUpdateEvent( programStageInstanceId );
 
-                        var data = createExecutionDate(programId, programStageInstanceId, executionDate, organisationUnitId);
-                        DAO.executionDates.add(programStageInstanceId, data);
+                        var data = {};
+                        data.executionDate = createExecutionDate(programId, programStageInstanceId, executionDate, organisationUnitId);
+                        DAO.offlineData.add(programStageInstanceId, data);
                     });
                 } else {
                     // if we have a programStageInstanceId, just reuse that one

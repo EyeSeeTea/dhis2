@@ -1,5 +1,3 @@
-package org.hisp.dhis.mobile.action.incoming;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,63 +25,29 @@ package org.hisp.dhis.mobile.action.incoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.sms.incoming.IncomingSmsService;
-import com.opensymphony.xwork2.Action;
+package org.hisp.dhis.program.hibernate;
+
+import java.util.Collection;
+
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramIndicatorStore;
 
 /**
-* @author Nguyen Kim Lai
-*/
-public class DeleteReceiveSMSAction
-    implements Action
+ * @author Chau Thu Tran
+ * @version $ HibernateProgramIndicatorStore.java Apr 16, 2013 1:39:19 PM $
+ */
+public class HibernateProgramIndicatorStore
+    extends HibernateIdentifiableObjectStore<ProgramIndicator>
+    implements ProgramIndicatorStore
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private IncomingSmsService incomingSmsService;
-
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
-    {
-        this.incomingSmsService = incomingSmsService;
-    }
-
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
-
-    private Integer[] ids;
-
-    public void setIds( Integer[] ids )
-    {
-        this.ids = ids;
-    }
     
-    private Integer id;
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action Implementation
-    // -------------------------------------------------------------------------
-
+    @SuppressWarnings( "unchecked" )
     @Override
-    public String execute()
-        throws Exception
+    public Collection<ProgramIndicator> getByProgram( Program program )
     {
-        if ( ids != null && ids.length > 0 )
-        {
-            for ( Integer each : ids )
-            {
-                incomingSmsService.deleteById( each );
-            }
-        }
-        if ( id != null )
-        {
-            incomingSmsService.deleteById( id );
-        }
-        return SUCCESS;
+        return getCriteria( Restrictions.eq( "program", program ) ).list();
     }
 }

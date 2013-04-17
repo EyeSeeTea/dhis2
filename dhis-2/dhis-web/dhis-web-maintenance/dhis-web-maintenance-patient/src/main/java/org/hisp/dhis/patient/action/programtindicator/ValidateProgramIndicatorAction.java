@@ -1,5 +1,3 @@
-package org.hisp.dhis.mobile.action.incoming;
-
 /*
  * Copyright (c) 2004-2012, University of Oslo
  * All rights reserved.
@@ -27,37 +25,36 @@ package org.hisp.dhis.mobile.action.incoming;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.sms.incoming.IncomingSmsService;
+package org.hisp.dhis.patient.action.programtindicator;
+
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.program.ProgramIndicator;
+import org.hisp.dhis.program.ProgramIndicatorService;
+
 import com.opensymphony.xwork2.Action;
 
 /**
-* @author Nguyen Kim Lai
-*/
-public class DeleteReceiveSMSAction
+ * @author Chau Thu Tran
+ * @version $ ValidateProgramIndicatorAction.java Apr 16, 2013 3:29:11 PM $
+ */
+public class ValidateProgramIndicatorAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private IncomingSmsService incomingSmsService;
+    private ProgramIndicatorService programIndicatorService;
 
-    public void setIncomingSmsService( IncomingSmsService incomingSmsService )
+    public void setProgramIndicatorService( ProgramIndicatorService programIndicatorService )
     {
-        this.incomingSmsService = incomingSmsService;
+        this.programIndicatorService = programIndicatorService;
     }
 
     // -------------------------------------------------------------------------
-    // Input
+    // Setters
     // -------------------------------------------------------------------------
 
-    private Integer[] ids;
-
-    public void setIds( Integer[] ids )
-    {
-        this.ids = ids;
-    }
-    
     private Integer id;
 
     public void setId( Integer id )
@@ -65,25 +62,78 @@ public class DeleteReceiveSMSAction
         this.id = id;
     }
 
+    private String name;
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    private String shortName;
+
+    public void setShortName( String shortName )
+    {
+        this.shortName = shortName;
+    }
+
+    private String code;
+
+    public void setCode( String code )
+    {
+        this.code = code;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+
     // -------------------------------------------------------------------------
-    // Action Implementation
+    // Action implementation
     // -------------------------------------------------------------------------
 
-    @Override
     public String execute()
         throws Exception
     {
-        if ( ids != null && ids.length > 0 )
+        ProgramIndicator match = null;
+
+        if ( name != null )
         {
-            for ( Integer each : ids )
-            {
-                incomingSmsService.deleteById( each );
-            }
+            name = name.trim();
+
+            match = programIndicatorService.getProgramIndicator( name );
         }
-        if ( id != null )
+        else if ( shortName != null )
         {
-            incomingSmsService.deleteById( id );
+            shortName = shortName.trim();
+
+            match = programIndicatorService.getProgramIndicatorByShortName( shortName );
         }
+        else if ( code != null )
+        {
+            code = code.trim();
+
+            match = programIndicatorService.getProgramIndicator( code );
+        }
+
+        if ( match != null && (id == null || match.getId() != id.intValue()) )
+        {
+            message = i18n.getString( "name_exists" );
+
+            return ERROR;
+        }
+        
+        message = i18n.getString( "everything_is_ok" );
+
         return SUCCESS;
     }
 }
