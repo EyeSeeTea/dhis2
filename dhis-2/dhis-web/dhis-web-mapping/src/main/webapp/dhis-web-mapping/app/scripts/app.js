@@ -4891,7 +4891,7 @@ Ext.onReady( function() {
 
                         a.push({
                             xtype: 'button',
-                            text: 'Home',
+                            text: GIS.i18n.home,
                             handler: function() {
                                 window.location.href = '../../dhis-web-commons-about/redirect.action';
                             }

@@ -318,39 +318,39 @@ GIS.core.getLayers = function(gis) {
     });
     layers.openStreetMap.id = 'openStreetMap';
 
-	layers.boundary = GIS.core.VectorLayer(gis, 'boundary', 'Boundary layer', {opacity: 0.8});
+	layers.facility = GIS.core.VectorLayer(gis, 'facility', GIS.i18n.facility_layer, {opacity: 0.8});
+	layers.facility.core = new mapfish.GeoStat.Facility(gis.olmap, {
+		layer: layers.facility,
+		gis: gis
+	});
+
+	layers.boundary = GIS.core.VectorLayer(gis, 'boundary', GIS.i18n.boundary_layer, {opacity: 0.8});
 	layers.boundary.core = new mapfish.GeoStat.Boundary(gis.olmap, {
 		layer: layers.boundary,
 		gis: gis
 	});
 
-	layers.thematic1 = GIS.core.VectorLayer(gis, 'thematic1', 'Thematic layer 1', {opacity: 0.8});
+	layers.thematic1 = GIS.core.VectorLayer(gis, 'thematic1', GIS.i18n.thematic_layer + ' 1', {opacity: 0.8});
 	layers.thematic1.core = new mapfish.GeoStat.Thematic1(gis.olmap, {
 		layer: layers.thematic1,
 		gis: gis
 	});
 
-	layers.thematic2 = GIS.core.VectorLayer(gis, 'thematic2', 'Thematic layer 2', {opacity: 0.8});
+	layers.thematic2 = GIS.core.VectorLayer(gis, 'thematic2', GIS.i18n.thematic_layer + ' 2', {opacity: 0.8});
 	layers.thematic2.core = new mapfish.GeoStat.Thematic2(gis.olmap, {
 		layer: layers.thematic2,
 		gis: gis
 	});
 
-	layers.thematic3 = GIS.core.VectorLayer(gis, 'thematic3', 'Thematic layer 3', {opacity: 0.8});
+	layers.thematic3 = GIS.core.VectorLayer(gis, 'thematic3', GIS.i18n.thematic_layer + ' 3', {opacity: 0.8});
 	layers.thematic3.core = new mapfish.GeoStat.Thematic3(gis.olmap, {
 		layer: layers.thematic3,
 		gis: gis
 	});
 
-	layers.thematic4 = GIS.core.VectorLayer(gis, 'thematic4', 'Thematic layer 4', {opacity: 0.8});
+	layers.thematic4 = GIS.core.VectorLayer(gis, 'thematic4', GIS.i18n.thematic_layer + ' 4', {opacity: 0.8});
 	layers.thematic4.core = new mapfish.GeoStat.Thematic4(gis.olmap, {
 		layer: layers.thematic4,
-		gis: gis
-	});
-
-	layers.facility = GIS.core.VectorLayer(gis, 'facility', 'Facility layer', {opacity: 0.8});
-	layers.facility.core = new mapfish.GeoStat.Facility(gis.olmap, {
-		layer: layers.facility,
 		gis: gis
 	});
 
