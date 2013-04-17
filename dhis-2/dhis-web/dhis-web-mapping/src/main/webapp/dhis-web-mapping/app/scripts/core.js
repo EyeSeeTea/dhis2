@@ -1075,7 +1075,7 @@ GIS.core.LayerLoaderBoundary = function(gis, layer) {
 
     loadData = function(view, features) {
 		view = view || layer.core.view;
-		features = features || layer.features.slice(0);;
+		features = features || layer.features.slice(0);
 
 		for (var i = 0; i < features.length; i++) {
 			features[i].attributes.label = features[i].attributes.name;
@@ -1706,11 +1706,17 @@ GIS.core.getInstance = function(config) {
 	gis.olmap = GIS.core.getOLMap(gis);
 	gis.layer = GIS.core.getLayers(gis);
 
-	for (var key in gis.layer) {
-		if (gis.layer.hasOwnProperty(key)) {
-			gis.olmap.addLayer(gis.layer[key]);
-		}
-	}
+	gis.olmap.addLayers([
+		gis.layer.googleStreets,
+		gis.layer.googleHybrid,
+		gis.layer.openStreetMap,
+		gis.layer.thematic4,
+		gis.layer.thematic3,
+		gis.layer.thematic2,
+		gis.layer.thematic1,
+		gis.layer.boundary,
+		gis.layer.facility
+	]);
 
 	return gis;
 };

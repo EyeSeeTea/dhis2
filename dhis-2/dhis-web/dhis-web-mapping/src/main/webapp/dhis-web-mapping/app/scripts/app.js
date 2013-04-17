@@ -879,18 +879,10 @@ Ext.onReady( function() {
 			item,
 			panel,
 			visibleLayer = window.google ? layers.googleStreets : layers.openStreetMap,
-			reversedLayers = [];
+			orderedLayers = gis.olmap.layers.reverse();
 
-		for (var key in gis.layer) {
-			if (gis.layer.hasOwnProperty(key)) {
-				reversedLayers.push(gis.layer[key]);
-			}
-		}
-
-		reversedLayers = reversedLayers.reverse();
-
-		for (var i = 0; i < reversedLayers.length; i++) {
-			layer = reversedLayers[i];
+		for (var i = 0; i < orderedLayers.length; i++) {
+			layer = orderedLayers[i];
 
 			item = Ext.create('Ext.ux.panel.LayerItemPanel', {
 				cls: 'gis-container-inner',
@@ -4759,6 +4751,11 @@ Ext.onReady( function() {
 					items: function() {
 						var a = [];
 						a.push({
+							iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
+							menu: gis.layer.facility.menu,
+							width: 26
+						});
+						a.push({
 							iconCls: 'gis-btn-icon-' + gis.layer.boundary.id,
 							menu: gis.layer.boundary.menu,
 							width: 26
@@ -4781,11 +4778,6 @@ Ext.onReady( function() {
 						a.push({
 							iconCls: 'gis-btn-icon-' + gis.layer.thematic4.id,
 							menu: gis.layer.thematic4.menu,
-							width: 26
-						});
-						a.push({
-							iconCls: 'gis-btn-icon-' + gis.layer.facility.id,
-							menu: gis.layer.facility.menu,
 							width: 26
 						});
 						a.push({
