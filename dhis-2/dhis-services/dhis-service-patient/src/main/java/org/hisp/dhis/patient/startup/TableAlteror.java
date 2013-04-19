@@ -209,6 +209,13 @@ public class TableAlteror
         updateUidInDataEntryFrom();
 
         updateProgramInstanceStatus();
+        
+        executeSql( "UPDATE program SET disableRegistrationFields=false where disableRegistrationFields is null" );
+        executeSql( "ALTER TABLE program ALTER COLUMN dateofincidentdescription DROP NOT NULL");
+        executeSql( "ALTER TABLE patient ALTER COLUMN birthdate DROP NOT NULL");
+        executeSql( "ALTER TABLE patient ALTER COLUMN gender DROP NOT NULL");
+        executeSql( "ALTER TABLE patient ALTER COLUMN underage DROP NOT NULL");
+        executeSql( "ALTER TABLE program ALTER COLUMN dateofenrollmentdescription DROP NOT NULL");
     }
 
     // -------------------------------------------------------------------------

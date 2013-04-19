@@ -295,6 +295,12 @@ function ValueSaver( dataElementId_, value_, dataElementType_, resultColor_  )
             var key = dataElementUid;
 
             DAO.offlineData.fetch( dataValueKey, function ( store, arr ) {
+                if ( arr.length == 0 ) {
+                    markValue( ERROR );
+                    window.alert( i18n_saving_value_failed_error_code + '\n\n' + errorCode );
+                    return;
+                }
+
                 var obj = arr[0];
 
                 if ( !obj.values ) {
@@ -533,9 +539,14 @@ function runCompleteEvent( isCreateEvent )
     }else {
         if( confirm(i18n_complete_confirm_message) )
 		{
-            $.postJSON( "completeDataEntry.action", {
-                programStageInstanceId: getFieldValue( 'programStageInstanceId' )
-            }, function (json) {
+            $.ajax({
+                url: 'completeDataEntry.action',
+                dataType: 'json',
+                data: {
+                    programStageInstanceId: getFieldValue( 'programStageInstanceId' )
+                },
+                type: 'POST'
+            } ).done(function(json) {
                 jQuery(".stage-object-selected").css('border-color', COLOR_GREEN);
                 jQuery(".stage-object-selected").css('background-color', COLOR_LIGHT_GREEN);
 
@@ -566,6 +577,7 @@ function runCompleteEvent( isCreateEvent )
                 }
 
                 disableCompletedButton(true);
+
                 var eventBox = jQuery('#ps_' + getFieldValue('programStageInstanceId'));
                 eventBox.attr('status',1);
                 resetActiveEvent( eventBox.attr("pi") );
@@ -574,6 +586,32 @@ function runCompleteEvent( isCreateEvent )
 
                 if ( isCreateEvent ) {
                     showAddEventForm();
+                }
+            } ).fail(function() {
+                if ( getProgramType() == 3 ) {
+                    var programStageInstanceId = getFieldValue( 'programStageInstanceId' );
+
+                    if ( window.DAO && window.DAO.offlineData ) {
+                        jQuery(".stage-object-selected").css('border-color', COLOR_GREEN);
+                        jQuery(".stage-object-selected").css('background-color', COLOR_LIGHT_GREEN);
+
+                        DAO.offlineData.fetch( programStageInstanceId, function ( store, arr ) {
+                            if ( arr.length > 0 ) {
+                                var obj = arr[0];
+                                obj.executionDate.completed = true;
+                                DAO.offlineData.add( programStageInstanceId, obj );
+                            }
+                        } );
+
+                        var blocked = jQuery('#entryFormContainer [id=blockEntryForm]').val();
+
+                        if( blocked=='true' ) {
+                            blockEntryForm();
+                        }
+
+                        disableCompletedButton(true);
+                        hideLoader();
+                    }
                 }
             });
 		}
@@ -584,9 +622,14 @@ function doUnComplete( isCreateEvent )
 {	
 	if( confirm(i18n_incomplete_confirm_message) )
 	{
-		$.postJSON( "uncompleteDataEntry.action", {
-            programStageInstanceId: getFieldValue('programStageInstanceId')
-        }, function (data) {
+        $.ajax({
+            url: 'uncompleteDataEntry.action',
+            dataType: 'json',
+            data: {
+                programStageInstanceId: getFieldValue( 'programStageInstanceId' )
+            },
+            type: 'POST'
+        } ).done(function(json) {
             jQuery(".stage-object-selected").css('border-color', COLOR_LIGHTRED);
             jQuery(".stage-object-selected").css('background-color', COLOR_LIGHT_LIGHTRED);
             unblockEntryForm();
@@ -594,6 +637,23 @@ function doUnComplete( isCreateEvent )
             var eventBox = jQuery('#ps_' + getFieldValue('programStageInstanceId'));
             eventBox.attr('status',2);
             resetActiveEvent( eventBox.attr("pi") );
+        } ).fail(function() {
+            if ( getProgramType() == 3 ) {
+                var programStageInstanceId = getFieldValue( 'programStageInstanceId' );
+
+                if ( window.DAO && window.DAO.offlineData ) {
+                    DAO.offlineData.fetch( programStageInstanceId, function ( store, arr ) {
+                        if ( arr.length > 0 ) {
+                            var obj = arr[0];
+                            obj.executionDate.completed = false;
+                            DAO.offlineData.add( programStageInstanceId, obj );
+                        }
+                    } );
+                }
+
+                unblockEntryForm();
+                disableCompletedButton(false);
+            }
         });
 	}
 }
@@ -655,81 +715,110 @@ TOGGLE = {
     }
 };
 
-function loadProgramStageInstance(programStageInstanceId) {
-    return $.ajax({
-        url: 'getProgramStageInstance.action',
-        data: {
-            'programStageInstanceId': programStageInstanceId
-        },
-        type: 'GET',
-        dataType: 'json'
-    } ).done(function(data) {
-        $( "#programStageInstanceId" ).val( data.id );
-        $( "#entryFormContainer input[id='programStageInstanceId']" ).val( data.id );
-        $( "#entryFormContainer input[id='incidentDate']" ).val( data.programInstance.dateOfIncident );
-        $( "#entryFormContainer input[id='programInstanceId']" ).val( data.programInstance.id );
-        $( "#entryFormContainer input[id='irregular']" ).val( data.programStage.irregular );
-        $( "#entryFormContainer input[id='displayGenerateEventBox']" ).val( data.programStage.displayGenerateEventBox );
-        $( "#entryFormContainer input[id='completed']" ).val( data.completed );
-        $( "#entryFormContainer input[id='programStageId']" ).val( data.programStage.id  );
-        $( "#entryFormContainer input[id='programStageUid']" ).val( data.programStage.uid  );
-        $( "#entryFormContainer input[id='programId']" ).val( data.program.id );
-        $( "#entryFormContainer input[id='validCompleteOnly']" ).val( data.programStage.validCompleteOnly );
-        $( "#entryFormContainer input[id='currentUsername']" ).val( data.currentUsername );
-        $( "#entryFormContainer input[id='blockEntryForm']" ).val( data.program.blockEntryForm );
-        $( "#entryFormContainer input[id='remindCompleted']" ).val( data.program.remindCompleted );
+function loadProgramStageInstance( programStageInstanceId, always ) {
+    if( programStageInstanceId.indexOf('local') != -1 ) {
+        $( "#programStageInstanceId" ).val( programStageInstanceId );
+        $( "#entryFormContainer input[id='programStageInstanceId']" ).val( programStageInstanceId );
 
-        $( "input[id='dueDate']" ).val( data.dueDate );
-        $( "input[id='executionDate']" ).val( data.executionDate );
+        DAO.offlineData.fetch(programStageInstanceId, function(store, arr) {
+            if(arr.length > 0 ) {
+                var obj = arr[0];
 
-        if ( data.program.type != '1' ) {
-            hideById( 'newEncounterBtn' );
-        }
+                if(obj.values !== undefined ) {
+                    _.each( _.keys(obj.values), function(key, idx) {
+                        var fieldId = getProgramStageUid() + '-' + key + '-val';
+                        var field = $('#' + fieldId);
 
-        if ( data.program.type == '1' && data.programInstance.status == '1' ) {
-            jQuery("[id=entryFormContainer] :input").prop('disabled', true);
-            jQuery("[id=entryFormContainer] :input").datepicker("destroy");
-            jQuery("[id=executionDate]").prop('disabled', true);
-            jQuery("[id=executionDate]").datepicker("destroy");
-        }
-
-        if(data.executionDate) {
-            $( '#executionDate' ).val(data.executionDate);
-            $( '#entryForm' ).removeClass( 'hidden' ).addClass( 'visible' );
-            $( '#inputCriteriaDiv' ).removeClass( 'hidden' );
-        }
-
-        if ( data.programStage.captureCoordinates ) {
-            $( '#longitude' ).val( data.longitude );
-            $( '#latitude' ).val( data.latitude );
-        }
-
-        if(data.comments.length > 0) {
-            $.each(data.comments, function(idx, item) {
-                var comment = [
-                    "<tr>",
-                    "<td>" + item.createdDate + "</td>",
-                    "<td>" + item.creator + "</td>",
-                    "<td>" + item.text + "</td>",
-                    "</tr>"
-                ].join(' ');
-
-                $( '#commentTB' ).append( comment )
-            });
-        }
-
-        _.each( data.dataValues, function ( value, key ) {
-            var fieldId = getProgramStageUid() + '-' + key + '-val';
-            var field = $('#' + fieldId);
-
-            if ( field ) {
-                field.val( value.value );
+                        if ( field ) {
+                            field.val( obj.values[key].value );
+                        }
+                    });
+                }
             }
-        } );
 
-    } ).fail(function() {
-        $('#commentInput').attr('disabled', true)
-    });
+            if( always ) always();
+
+            $('#commentInput').attr('disabled', true);
+            $('#validateBtn').attr('disabled', true);
+        });
+    } else {
+        return $.ajax({
+            url: 'getProgramStageInstance.action',
+            data: {
+                'programStageInstanceId': programStageInstanceId
+            },
+            type: 'GET',
+            dataType: 'json'
+        } ).done(function(data) {
+            $( "#programStageInstanceId" ).val( data.id );
+            $( "#entryFormContainer input[id='programStageInstanceId']" ).val( data.id );
+            $( "#entryFormContainer input[id='incidentDate']" ).val( data.programInstance.dateOfIncident );
+            $( "#entryFormContainer input[id='programInstanceId']" ).val( data.programInstance.id );
+            $( "#entryFormContainer input[id='irregular']" ).val( data.programStage.irregular );
+            $( "#entryFormContainer input[id='displayGenerateEventBox']" ).val( data.programStage.displayGenerateEventBox );
+            $( "#entryFormContainer input[id='completed']" ).val( data.completed );
+            $( "#entryFormContainer input[id='programStageId']" ).val( data.programStage.id  );
+            $( "#entryFormContainer input[id='programStageUid']" ).val( data.programStage.uid  );
+            $( "#entryFormContainer input[id='programId']" ).val( data.program.id );
+            $( "#entryFormContainer input[id='validCompleteOnly']" ).val( data.programStage.validCompleteOnly );
+            $( "#entryFormContainer input[id='currentUsername']" ).val( data.currentUsername );
+            $( "#entryFormContainer input[id='blockEntryForm']" ).val( data.program.blockEntryForm );
+            $( "#entryFormContainer input[id='remindCompleted']" ).val( data.program.remindCompleted );
+
+            $( "input[id='dueDate']" ).val( data.dueDate );
+            $( "input[id='executionDate']" ).val( data.executionDate );
+
+            if ( data.program.type != '1' ) {
+                hideById( 'newEncounterBtn' );
+            }
+
+            if ( data.program.type == '1' && data.programInstance.status == '1' ) {
+                jQuery("[id=entryFormContainer] :input").prop('disabled', true);
+                jQuery("[id=entryFormContainer] :input").datepicker("destroy");
+                jQuery("[id=executionDate]").prop('disabled', true);
+                jQuery("[id=executionDate]").datepicker("destroy");
+            }
+
+            if(data.executionDate) {
+                $( '#executionDate' ).val(data.executionDate);
+                $( '#entryForm' ).removeClass( 'hidden' ).addClass( 'visible' );
+                $( '#inputCriteriaDiv' ).removeClass( 'hidden' );
+            }
+
+            if ( data.programStage.captureCoordinates ) {
+                $( '#longitude' ).val( data.longitude );
+                $( '#latitude' ).val( data.latitude );
+            }
+
+            if(data.comments.length > 0) {
+                $.each(data.comments, function(idx, item) {
+                    var comment = [
+                        "<tr>",
+                        "<td>" + item.createdDate + "</td>",
+                        "<td>" + item.creator + "</td>",
+                        "<td>" + item.text + "</td>",
+                        "</tr>"
+                    ].join(' ');
+
+                    $( '#commentTB' ).append( comment )
+                });
+            }
+
+            _.each( data.dataValues, function ( value, key ) {
+                var fieldId = getProgramStageUid() + '-' + key + '-val';
+                var field = $('#' + fieldId);
+
+                if ( field ) {
+                    field.val( value.value );
+                }
+            } );
+
+            if( always ) always();
+
+            $('#commentInput').removeAttr('disabled');
+            $('#validateBtn').removeAttr('disabled');
+        } );
+    }
 }
 
 function entryFormContainerOnReady()
@@ -737,9 +826,8 @@ function entryFormContainerOnReady()
 	var currentFocus = undefined;
     var programStageInstanceId = getFieldValue( 'programStageInstanceId' );
 	
-    loadProgramStageInstance(programStageInstanceId ).always(function() {
+    loadProgramStageInstance( programStageInstanceId, function() {
         if( jQuery("#entryFormContainer") ) {
-
             // Display entry form if excution-date is not null
             if ( jQuery( "#executionDate" ).val() == '' ) {
                 hideById( 'entryForm' );
@@ -815,6 +903,58 @@ function runValidation()
 		});
 }
 
+var MAX_OPTIONS_DISPLAYED = 30;
+
+function searchOptionSet( uid, query, success ) {
+    if(window.DAO !== undefined && window.DAO.optionSets !== undefined ) {
+        DAO.optionSets.fetch(uid, function(store, arr) {
+            if ( arr.length > 0 ) {
+                var obj = arr[0];
+                var options = [];
+
+                if(query == null || query == "") {
+                    options = obj.optionSet.options.slice(0, MAX_OPTIONS_DISPLAYED-1);
+                } else {
+                    query = query.toLowerCase();
+
+                    _.each(obj.optionSet.options, function(item, idx) {
+                        if ( item.toLowerCase().indexOf( query ) != -1 ) {
+                            options.push(item);
+                        }
+                    });
+                }
+
+                success( $.map( options, function ( item ) {
+                    return {
+                        label: item,
+                        id: item
+                    };
+                } ) );
+            } else {
+                getOptions( uid, query, success );
+            }
+        } );
+    } else {
+        getOptions( uid, query, success );
+    }
+}
+
+function getOptions( uid, query, success ) {
+    $.ajax( {
+        url: "getOptions.action?id=" + uid + "&query=" + query,
+        dataType: "json",
+        cache: true,
+        success: function ( data ) {
+            success( $.map( data.options, function ( item ) {
+                return {
+                    label: item.o,
+                    id: item.o
+                };
+            } ) );
+        }
+    } );
+}
+
 function autocompletedField( idField )
 {
 	var input = jQuery( "#" +  idField );
@@ -825,30 +965,18 @@ function autocompletedField( idField )
 		delay: 0,
 		minLength: 0,
 		source: function( request, response ){
-			$.ajax({
-				url: "getOptions.action?id=" + dataElementUid + "&query=" + input.val(),
-				dataType: "json",
-				cache: true,
-				success: function(data) {
-					response($.map(data.options, function(item) {
-						return {
-							label: item.o,
-							id: item.o
-						};
-					}));
-				}
-			});
+            searchOptionSet( dataElementUid, input.val(), response );
 		},
 		minLength: 0,
 		select: function( event, ui ) {
 			var fieldValue = ui.item.value;
-			
+
 			if ( !dhis2.trigger.invoke( "caseentry-value-selected", [dataElementUid, fieldValue] ) ) {
 				input.val( "" );
 				return false;
 			}
-			
-			input.val( fieldValue );			
+
+			input.val( fieldValue );
 			if ( !unSave ) {
 				saveVal( dataElementUid );
 			}
@@ -903,6 +1031,22 @@ function autocompletedField( idField )
 		});
 }
 
+function searchUsername( query, success ) {
+    $.ajax({
+        url: "getUsernameList.action?query=" + query,
+        dataType: "json",
+        cache: true,
+        success: function(data) {
+            success($.map(data.usernames, function(item) {
+                return {
+                    label: item.u,
+                    id: item.u
+                };
+            }));
+        }
+    });
+}
+
 function autocompletedUsernameField( idField )
 {
 	var input = jQuery( "#" +  idField );
@@ -913,19 +1057,7 @@ function autocompletedUsernameField( idField )
 		delay: 0,
 		minLength: 0,
 		source: function( request, response ){
-			$.ajax({
-				url: "getUsernameList.action?query=" + input.val(),
-				dataType: "json",
-				cache: true,
-				success: function(data) {
-					response($.map(data.usernames, function(item) {
-						return {
-							label: item.u,
-							id: item.u
-						};
-					}));
-				}
-			});
+            searchUsername( input.val(), response );
 		},
 		minLength: 0,
 		select: function( event, ui ) {

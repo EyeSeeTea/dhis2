@@ -1343,7 +1343,21 @@ Ext.onReady( function() {
 		var createViewport;
 
 		createViewport = function() {
-			var indicatorAvailable,
+			var column,
+				stackedColumn,
+				bar,
+				stackedBar,
+				line,
+				area,
+				pie,
+				chartType,
+
+				series,
+				category,
+				filter,
+				layout,
+
+				indicatorAvailable,
 				indicatorSelected,
 				indicator,
 				dataElementAvailable,
@@ -1380,6 +1394,186 @@ Ext.onReady( function() {
 
 				viewport,
 				addListeners;
+
+			column = Ext.create('Ext.button.Button', {
+				icon: 'images/column.png',
+				name: DV.conf.finals.chart.column,
+				tooltipText: DV.i18n.column_chart,
+				pressed: true
+			};
+
+			stackedColumn = Ext.create('Ext.button.Button', {
+				icon: 'images/column-stacked.png',
+				name: DV.conf.finals.chart.stackedcolumn,
+				tooltipText: DV.i18n.stacked_column_chart
+			};
+
+			bar = Ext.create('Ext.button.Button', {
+				icon: 'images/bar.png',
+				name: DV.conf.finals.chart.bar,
+				tooltipText: DV.i18n.bar_chart
+			};
+
+			stackedBar = Ext.create('Ext.button.Button', {
+				icon: 'images/bar-stacked.png',
+				name: DV.conf.finals.chart.stackedbar,
+				tooltipText: DV.i18n.stacked_bar_chart
+			};
+
+			line = Ext.create('Ext.button.Button', {
+				icon: 'images/line.png',
+				name: DV.conf.finals.chart.line,
+				tooltipText: DV.i18n.line_chart
+			};
+
+			area = Ext.create('Ext.button.Button', {
+				icon: 'images/area.png',
+				name: DV.conf.finals.chart.area,
+				tooltipText: DV.i18n.area_chart
+			};
+
+			pie = Ext.create('Ext.button.Button', {
+				icon: 'images/pie.png',
+				name: DV.conf.finals.chart.pie,
+				tooltipText: DV.i18n.pie_chart
+			};
+
+			chartType = Ext.create('Ext.toolbar.Toolbar', {
+				height: 45,
+				style: 'padding-top:0px; border-style:none',
+				defaults: {
+					height: 40,
+					toggleGroup: 'charttype',
+					handler: DV.util.button.type.toggleHandler,
+					listeners: {
+						afterrender: function(b) {
+							if (b.xtype === 'button') {
+
+								Ext.create('Ext.tip.ToolTip', {
+									target: b.getEl(),
+									html: b.tooltipText,
+									'anchor': 'bottom'
+								});
+							}
+						}
+					}
+				},
+				items: [
+					{
+						xtype: 'label',
+						text: DV.i18n.chart_type,
+						style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 6px'
+					},
+					column,
+					stackedColumn,
+					bar,
+					stackedBar,
+					line,
+					area,
+					pie
+				]
+			});
+
+			series = Ext.create('Ext.form.field.ComboBox', {
+				cls: 'dv-combo',
+				baseBodyCls: 'small',
+				name: DV.conf.finals.chart.series,
+				emptyText: DV.i18n.series,
+				queryMode: 'local',
+				editable: false,
+				valueField: 'id',
+				displayField: 'name',
+				width: (DV.conf.layout.west_fieldset_width / 3) - 1,
+				store: DV.store.dimension(),
+				value: DV.conf.finals.dimension.data.value,
+				listeners: {
+					select: function() {
+						DV.util.combobox.filter.category();
+					}
+				}
+			});
+
+			category = Ext.create('Ext.form.field.ComboBox', {
+				cls: 'dv-combo',
+				baseBodyCls: 'small',
+				name: DV.conf.finals.chart.category,
+				emptyText: DV.i18n.category,
+				queryMode: 'local',
+				editable: false,
+				lastQuery: '',
+				valueField: 'id',
+				displayField: 'name',
+				width: (DV.conf.layout.west_fieldset_width / 3) - 1,
+				store: DV.store.dimension(),
+				value: DV.conf.finals.dimension.period.value,
+				listeners: {
+					select: function(cb) {
+						DV.util.combobox.filter.filter();
+					}
+				}
+			});
+
+			filter = Ext.create('Ext.form.field.ComboBox', {
+				cls: 'dv-combo',
+				baseBodyCls: 'small',
+				name: DV.conf.finals.chart.filter,
+				emptyText: DV.i18n.filter,
+				queryMode: 'local',
+				editable: false,
+				lastQuery: '',
+				valueField: 'id',
+				displayField: 'name',
+				width: (DV.conf.layout.west_fieldset_width / 3) - 1,
+				store: DV.store.dimension(),
+				value: DV.conf.finals.dimension.organisationunit.value
+			});
+
+			layout = Ext.create('Ext.toolbar.Toolbar', {
+				id: 'chartlayout_tb',
+				style: 'padding-left: 2px;',
+				height: 46,
+				items: [
+					{
+						xtype: 'panel',
+						bodyStyle: 'border-style:none; background-color:transparent; padding:0',
+						items: [
+							{
+								xtype: 'label',
+								text: DV.i18n.series,
+								style: 'font-size:11px; font-weight:bold; padding:0 4px'
+							},
+							{ bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
+							series
+						]
+					},
+					{
+						xtype: 'panel',
+						bodyStyle: 'border-style:none; background-color:transparent; padding:0',
+						items: [
+							{
+								xtype: 'label',
+								text: DV.i18n.category,
+								style: 'font-size:11px; font-weight:bold; padding:0 4px'
+							},
+							{ bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
+							category
+						]
+					},
+					{
+						xtype: 'panel',
+						bodyStyle: 'border-style:none; background-color:transparent; padding:0',
+						items: [
+							{
+								xtype: 'label',
+								text: 'Filter',
+								style: 'font-size:11px; font-weight:bold; padding:0 4px'
+							},
+							{ bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
+							filter
+						]
+					}
+				]
+			});
 
 			indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 				cls: 'pt-toolbar-multiselect-left',
@@ -2978,19 +3172,11 @@ Ext.onReady( function() {
 						return dv.conf.layout.west_width + 17;
 					}
 				}(),
-				items: accordion
-			});
-
-			layoutButton = Ext.create('Ext.button.Button', {
-				text: 'Layout',
-				menu: {},
-				handler: function() {
-					if (!dv.viewport.layoutWindow) {
-						dv.viewport.layoutWindow = DV.app.LayoutWindow(pt);
-					}
-
-					dv.viewport.layoutWindow.show();
-				}
+				items: [
+					chartType,
+					layout,
+					accordion
+				]
 			});
 
 			optionsButton = Ext.create('Ext.button.Button', {

@@ -2,7 +2,8 @@ var DAO = DAO || {};
 
 var PROGRAMS_STORE = 'anonymousPrograms';
 var PROGRAM_STAGES_STORE = 'anonymousProgramStages';
-var OFFLINE_DATA_STORE = 'anonymousExecutionDates';
+var OPTION_SET_STORE = 'optionSets';
+var OFFLINE_DATA_STORE = 'anonymousOfflineData';
 
 function initalizeProgramStages() {
     DAO.programStages = new dhis2.storage.Store( {name: PROGRAM_STAGES_STORE, adapter: 'dom-ss'}, function(store) {
@@ -15,6 +16,8 @@ function initializePrograms() {
         jQuery.getJSON( "getProgramMetaData.action", {},function ( data ) {
             var keys = _.keys( data.metaData.programs );
             var objs = _.values( data.metaData.programs );
+
+            loadOptionSets( data.metaData.optionSets );
 
             DAO.programs.addAll( keys, objs, function ( store ) {
                 var deferred = $.Deferred();
@@ -36,6 +39,8 @@ function initializePrograms() {
         } ).fail( function () {
             selection.setListenerFunction( organisationUnitSelected );
             $( document ).trigger('dhis2.anonymous.programsInitialized');
+
+            DAO.optionSets = new dhis2.storage.Store( {name: OPTION_SET_STORE, adapter: 'dom-ss'}, function() {} );
         } );
     } );
 }
@@ -73,10 +78,12 @@ function showOfflineEvents() {
 
 var haveLocalData = false;
 
-function checkOfflineData() {
+function checkOfflineData(callback) {
     DAO.offlineData.fetchAll( function ( store, arr ) {
         haveLocalData = arr.length > 0;
         $( document ).trigger('dhis2.anonymous.checkOfflineData');
+
+        if(callback && typeof callback == 'function') callback(haveLocalData);
     } );
 }
 
@@ -142,6 +149,7 @@ $( document ).ready( function () {
         $( document ).one( 'dhis2.anonymous.checkOfflineEvents', checkOfflineData );
         $( document ).one( 'dhis2.anonymous.checkOfflineData', function() {
             dhis2.availability.startAvailabilityCheck();
+            selection.responseReceived();
         } );
 
         initalizeProgramStages();
@@ -150,20 +158,23 @@ $( document ).ready( function () {
 
     $( document ).bind( 'dhis2.online', function ( event, loggedIn ) {
         if ( loggedIn ) {
-            if ( haveLocalData ) {
-                var message = i18n_need_to_sync_notification
-   	            	+ ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>';
+            checkOfflineData(function(localData) {
+                if ( localData ) {
+                    var message = i18n_need_to_sync_notification
+       	            	+ ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>';
 
-   	            setHeaderMessage( message );
+       	            setHeaderMessage( message );
 
-   	            $( '#sync_button' ).bind( 'click', uploadLocalData );
-            } else {
-                setHeaderDelayMessage( i18n_online_notification );
-            }
+       	            $( '#sync_button' ).bind( 'click', uploadLocalData );
+                } else {
+                    setHeaderDelayMessage( i18n_online_notification );
+                }
 
-            enableFiltering();
-            searchEvents( eval( getFieldValue( 'listAll' ) ) );
-            $('#commentInput').removeAttr('disabled');
+                enableFiltering();
+                searchEvents( eval( getFieldValue( 'listAll' ) ) );
+                $('#commentInput').removeAttr('disabled');
+                $('#validateBtn').removeAttr('disabled');
+            });
         }
         else {
             var form = [
@@ -184,6 +195,7 @@ $( document ).ready( function () {
     $( document ).bind( 'dhis2.offline', function () {
         setHeaderMessage( i18n_offline_notification );
         $('#commentInput').attr('disabled', true);
+        $('#validateBtn').attr('disabled', true);
         disableFiltering();
     } );
 } );
@@ -870,6 +882,8 @@ var service = (function () {
 
                         var data = {};
                         data.executionDate = createExecutionDate(programId, programStageInstanceId, executionDate, organisationUnitId);
+                        data.executionDate.completed = false;
+
                         DAO.offlineData.add(programStageInstanceId, data);
                     });
                 } else {
@@ -974,4 +988,23 @@ function loadProgramStage( programStageId, programStageInstanceId, organisationU
             });
         }
     });
+}
+
+function loadOptionSets(uids, success ) {
+    DAO.optionSets = new dhis2.storage.Store( {name: OPTION_SET_STORE, adapter: 'dom-ss'}, function ( store ) {
+        var deferred = $.Deferred();
+        var promise = deferred.promise();
+
+        _.each( uids, function(item, idx) {
+            promise = promise.pipe($.ajax({
+                url: 'getOptionSet.action?dataElementUid=' + item,
+                dataType: 'json',
+                success: function(json) {
+                    DAO.optionSets.add(item, json);
+                }
+            }));
+        });
+
+        deferred.resolve();
+    } );
 }
