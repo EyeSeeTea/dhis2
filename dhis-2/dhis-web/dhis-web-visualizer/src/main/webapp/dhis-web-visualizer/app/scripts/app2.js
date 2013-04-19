@@ -77,7 +77,7 @@ Ext.onReady( function() {
 			var id = dv.util.url.getUrlParam('id');
 
 			if (id) {
-				dv.util.pivot.loadTable(id);
+				dv.util.chart.loadTable(id);
 			}
 
 			// Fade in
@@ -725,13 +725,13 @@ Ext.onReady( function() {
 						DV.util.window.setAnchorPosition(w, addButton);
 
 						//if (!w.hasDestroyBlurHandler) {
-							//pt.util.window.addDestroyOnBlurHandler(w);
+							//dv.util.window.addDestroyOnBlurHandler(w);
 						//}
 
-						//pt.viewport.favoriteWindow.destroyOnBlur = false;
+						//dv.viewport.favoriteWindow.destroyOnBlur = false;
 					},
 					destroy: function() {
-						//pt.viewport.favoriteWindow.destroyOnBlur = true;
+						//dv.viewport.favoriteWindow.destroyOnBlur = true;
 					}
 				}
 			});
@@ -1071,7 +1071,7 @@ Ext.onReady( function() {
 					DV.util.window.setAnchorPosition(w, DV.cmp.toolbar.favorite);
 
 					//if (!w.hasDestroyOnBlurHandler) {
-						//pt.util.window.addDestroyOnBlurHandler(w);
+						//dv.util.window.addDestroyOnBlurHandler(w);
 					//}
 				}
 			}
@@ -1079,3 +1079,2324 @@ Ext.onReady( function() {
 
 		return favoriteWindow;
 	};
+
+	DV.app.SharingWindow = function(sharing) {
+
+		// Objects
+		var UserGroupRow,
+
+		// Functions
+			getBody,
+
+		// Components
+			userGroupStore,
+			userGroupField,
+			userGroupButton,
+			userGroupRowContainer,
+			publicGroup,
+			window;
+
+		UserGroupRow = function(obj, isPublicAccess, disallowPublicAccess) {
+			var getData,
+				store,
+				getItems,
+				combo,
+				getAccess,
+				panel;
+
+			getData = function() {
+				var data = [
+					{id: 'r-------', name: 'Can view'}, //i18n
+					{id: 'rw------', name: 'Can edit and view'}
+				];
+
+				if (isPublicAccess) {
+					data.unshift({id: '-------', name: 'None'});
+				}
+
+				return data;
+			}
+
+			store = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: getData()
+			});
+
+			getItems = function() {
+				var items = [];
+
+				combo = Ext.create('Ext.form.field.ComboBox', {
+					fieldLabel: isPublicAccess ? 'Public access' : obj.name, //i18n
+					labelStyle: 'color:#333',
+					cls: 'pt-combo',
+					fieldStyle: 'padding-left:5px',
+					width: 380,
+					labelWidth: 250,
+					queryMode: 'local',
+					valueField: 'id',
+					displayField: 'name',
+					labelSeparator: null,
+					editable: false,
+					disabled: !!disallowPublicAccess,
+					value: obj.access || 'rw------',
+					store: store
+				});
+
+				items.push(combo);
+
+				if (!isPublicAccess) {
+					items.push(Ext.create('Ext.Img', {
+						src: 'images/grid-delete_16.png',
+						style: 'margin-top:2px; margin-left:7px',
+						overCls: 'pointer',
+						width: 16,
+						height: 16,
+						listeners: {
+							render: function(i) {
+								i.getEl().on('click', function(e) {
+									i.up('panel').destroy();
+									window.doLayout();
+								});
+							}
+						}
+					}));
+				}
+
+				return items;
+			};
+
+			getAccess = function() {
+				return {
+					id: obj.id,
+					name: obj.name,
+					access: combo.getValue()
+				};
+			};
+
+			panel = Ext.create('Ext.panel.Panel', {
+				layout: 'column',
+				bodyStyle: 'border:0 none',
+				getAccess: getAccess,
+				items: getItems()
+			});
+
+			return panel;
+		};
+
+		getBody = function() {
+			var body = {
+				object: {
+					id: sharing.object.id,
+					name: sharing.object.name,
+					publicAccess: publicGroup.down('combobox').getValue(),
+					user: {
+						id: DV.init.user.id,
+						name: DV.init.user.name
+					}
+				}
+			};
+
+			if (userGroupRowContainer.items.items.length > 1) {
+				body.object.userGroupAccesses = [];
+				for (var i = 1, item; i < userGroupRowContainer.items.items.length; i++) {
+					item = userGroupRowContainer.items.items[i];
+					body.object.userGroupAccesses.push(item.getAccess());
+				}
+			}
+
+			return body;
+		};
+
+		// Initialize
+		userGroupStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: DV.init.contextPath + '/api/sharing/search',
+				reader: {
+					type: 'json',
+					root: 'userGroups'
+				}
+			}
+		});
+
+		userGroupField = Ext.create('Ext.form.field.ComboBox', {
+			valueField: 'id',
+			displayField: 'name',
+			emptyText: 'Search for user groups', //i18n
+			queryParam: 'key',
+			queryDelay: 200,
+			minChars: 1,
+			hideTrigger: true,
+			fieldStyle: 'height:26px; padding-left:6px; border-radius:1px; font-size:11px',
+			style: 'margin-bottom:5px',
+			width: 380,
+			store: userGroupStore,
+			listeners: {
+				beforeselect: function(cb) { // beforeselect instead of select, fires regardless of currently selected item
+					userGroupButton.enable();
+				},
+				afterrender: function(cb) {
+					cb.inputEl.on('keyup', function() {
+						userGroupButton.disable();
+					});
+				}
+			}
+		});
+
+		userGroupButton = Ext.create('Ext.button.Button', {
+			text: '+',
+			style: 'margin-left:2px; padding-right:4px; padding-left:4px; border-radius:1px',
+			disabled: true,
+			height: 26,
+			handler: function(b) {
+				userGroupRowContainer.add(UserGroupRow({
+					id: userGroupField.getValue(),
+					name: userGroupField.getRawValue(),
+					access: 'r-------'
+				}));
+
+				userGroupField.clearValue();
+				b.disable();
+			}
+		});
+
+		userGroupRowContainer = Ext.create('Ext.container.Container', {
+			bodyStyle: 'border:0 none'
+		});
+
+		publicGroup = userGroupRowContainer.add(UserGroupRow({
+			id: sharing.object.id,
+			name: sharing.object.name,
+			access: sharing.object.publicAccess
+		}, true, !sharing.meta.allowPublicAccess));
+
+		if (Ext.isArray(sharing.object.userGroupAccesses)) {
+			for (var i = 0, userGroupRow; i < sharing.object.userGroupAccesses.length; i++) {
+				userGroupRow = UserGroupRow(sharing.object.userGroupAccesses[i]);
+				userGroupRowContainer.add(userGroupRow);
+			}
+		}
+
+		window = Ext.create('Ext.window.Window', {
+			title: 'Sharing layout',
+			bodyStyle: 'padding:6px 6px 0px; background-color:#fff',
+			resizable: false,
+			modal: true,
+			destroyOnBlur: true,
+			items: [
+				{
+					html: sharing.object.name,
+					bodyStyle: 'border:0 none; font-weight:bold; color:#333',
+					style: 'margin-bottom:8px'
+				},
+				{
+					xtype: 'container',
+					layout: 'column',
+					bodyStyle: 'border:0 none',
+					items: [
+						userGroupField,
+						userGroupButton
+					]
+				},
+				userGroupRowContainer
+			],
+			bbar: [
+				'->',
+				{
+					text: 'Save',
+					handler: function() {
+						Ext.Ajax.request({
+							url: DV.init.contextPath + '/api/sharing?type=chart&id=' + sharing.object.id,
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							params: Ext.encode(getBody())
+						});
+
+						window.destroy();
+					}
+				}
+			],
+			listeners: {
+				show: function(w) {
+					var pos = DV.cmp.favorite.window.getPosition();
+					w.setPosition(pos[0] + 5, pos[1] + 5);
+
+					//if (!w.hasDestroyOnBlurHandler) {
+						//dv.util.window.addDestroyOnBlurHandler(w);
+					//}
+
+					//dv.viewport.favoriteWindow.destroyOnBlur = false;
+				},
+				destroy: function() {
+					//dv.viewport.favoriteWindow.destroyOnBlur = true;
+				}
+			}
+		});
+
+		return window;
+	};
+
+	DV.app.init.onInitialize = function(r) {
+		var createViewport;
+
+		createViewport = function() {
+			var indicatorAvailable,
+				indicatorSelected,
+				indicator,
+				dataElementAvailable,
+				dataElementSelected,
+				dataElement,
+				dataSetAvailable,
+				dataSetSelected,
+				dataSet,
+				rewind,
+				relativePeriod,
+				fixedPeriodAvailable,
+				fixedPeriodSelected,
+				period,
+				userOrganisationUnit,
+				userOrganisationUnitChildren,
+				treePanel,
+				organisationUnit,
+				groupSetIdAvailableStoreMap = {},
+				groupSetIdSelectedStoreMap = {},
+				getGroupSetPanels,
+				validateSpecialCases,
+				update,
+
+				optionsButton,
+				favoriteButton,
+				downloadButton,
+
+				accordionBody,
+				accordion,
+				westRegion,
+				centerRegion,
+
+				setFavorite,
+
+				viewport,
+				addListeners;
+
+			indicatorAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'pt-toolbar-multiselect-left',
+				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+				valueField: 'id',
+				displayField: 'name',
+				store: dv.store.indicatorAvailable,
+				tbar: [
+					{
+						xtype: 'label',
+						text: DV.i18n.available,
+						cls: 'pt-toolbar-multiselect-left-label'
+					},
+					'->',
+					{
+						xtype: 'button',
+						icon: 'images/arrowright.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.select(indicatorAvailable, indicatorSelected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowrightdouble.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.selectAll(indicatorAvailable, indicatorSelected);
+						}
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							dv.util.multiselect.select(this, indicatorSelected);
+						}, this);
+					}
+				}
+			});
+
+			indicatorSelected = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'pt-toolbar-multiselect-right',
+				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+				valueField: 'id',
+				displayField: 'name',
+				ddReorder: true,
+				store: dv.store.indicatorSelected,
+				tbar: [
+					{
+						xtype: 'button',
+						icon: 'images/arrowleftdouble.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.unselectAll(indicatorAvailable, indicatorSelected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowleft.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.unselect(indicatorAvailable, indicatorSelected);
+						}
+					},
+					'->',
+					{
+						xtype: 'label',
+						text: DV.i18n.selected,
+						cls: 'pt-toolbar-multiselect-right-label'
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							dv.util.multiselect.unselect(indicatorAvailable, this);
+						}, this);
+					}
+				}
+			});
+
+			indicator = {
+				xtype: 'panel',
+				title: '<div class="pt-panel-title-data">' + DV.i18n.indicators + '</div>',
+				hideCollapseTool: true,
+				getData: function() {
+					var data = {
+						dimensionName: dv.conf.finals.dimension.indicator.dimensionName,
+						objectName: dv.conf.finals.dimension.indicator.objectName,
+						items: []
+					};
+
+					dv.store.indicatorSelected.each( function(r) {
+						data.items.push(r.data.id);
+					});
+
+					return data.items.length ? data : null;
+				},
+				onExpand: function() {
+					var h = dv.viewport.westRegion.hasScrollbar ?
+						dv.conf.layout.west_scrollbarheight_accordion_indicator : dv.conf.layout.west_maxheight_accordion_indicator;
+					dv.util.dimension.panel.setHeight(h);
+					dv.util.multiselect.setHeight(
+						[indicatorAvailable, indicatorSelected],
+						this,
+						dv.conf.layout.west_fill_accordion_indicator
+					);
+				},
+				items: [
+					{
+						xtype: 'combobox',
+						cls: 'pt-combo',
+						style: 'margin-bottom:2px; margin-top:0px',
+						width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
+						valueField: 'id',
+						displayField: 'name',
+						emptyText: DV.i18n.select_indicator_group,
+						editable: false,
+						store: {
+							xtype: 'store',
+							fields: ['id', 'name', 'index'],
+							proxy: {
+								type: 'ajax',
+								url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.indicatorgroup_get,
+								reader: {
+									type: 'json',
+									root: 'indicatorGroups'
+								}
+							},
+							listeners: {
+								load: function(s) {
+									s.add({
+										id: 0,
+										name: DV.i18n.all_indicator_groups,
+										index: -1
+									});
+									s.sort([
+										{
+											property: 'index',
+											direction: 'ASC'
+										},
+										{
+											property: 'name',
+											direction: 'ASC'
+										}
+									]);
+								}
+							}
+						},
+						listeners: {
+							select: function(cb) {
+								var store = dv.store.indicatorAvailable;
+								store.parent = cb.getValue();
+
+								if (dv.util.store.containsParent(store)) {
+									dv.util.store.loadFromStorage(store);
+									dv.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
+								}
+								else {
+									if (cb.getValue() === 0) {
+										store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.indicator_getall;
+										store.load();
+									}
+									else {
+										store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.indicator_get + cb.getValue() + '.json';
+										store.load();
+									}
+								}
+							}
+						}
+					},
+					{
+						xtype: 'panel',
+						layout: 'column',
+						bodyStyle: 'border-style:none',
+						items: [
+							indicatorAvailable,
+							indicatorSelected
+						]
+					}
+				],
+				listeners: {
+					added: function() {
+						dv.cmp.dimension.panels.push(this);
+					},
+					expand: function(p) {
+						p.onExpand();
+					}
+				}
+			};
+
+			dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'pt-toolbar-multiselect-left',
+				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+				valueField: 'id',
+				displayField: 'name',
+				store: dv.store.dataElementAvailable,
+				tbar: [
+					{
+						xtype: 'label',
+						text: DV.i18n.available,
+						cls: 'pt-toolbar-multiselect-left-label'
+					},
+					'->',
+					{
+						xtype: 'button',
+						icon: 'images/arrowright.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.select(dataElementAvailable, dataElementSelected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowrightdouble.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.selectAll(dataElementAvailable, dataElementSelected);
+						}
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							dv.util.multiselect.select(this, dataElementSelected);
+						}, this);
+					}
+				}
+			});
+
+			dataElementSelected = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'pt-toolbar-multiselect-right',
+				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+				valueField: 'id',
+				displayField: 'name',
+				ddReorder: true,
+				store: dv.store.dataElementSelected,
+				tbar: [
+					{
+						xtype: 'button',
+						icon: 'images/arrowleftdouble.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.unselectAll(dataElementAvailable, dataElementSelected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowleft.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.unselect(dataElementAvailable, dataElementSelected);
+						}
+					},
+					'->',
+					{
+						xtype: 'label',
+						text: DV.i18n.selected,
+						cls: 'pt-toolbar-multiselect-right-label'
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							dv.util.multiselect.unselect(dataElementAvailable, this);
+						}, this);
+					}
+				}
+			});
+
+			dataElement = {
+				xtype: 'panel',
+				title: '<div class="pt-panel-title-data">' + DV.i18n.data_elements + '</div>',
+				hideCollapseTool: true,
+				getData: function() {
+					var data = {
+						dimensionName: dv.conf.finals.dimension.dataElement.dimensionName,
+						objectName: dv.conf.finals.dimension.dataElement.objectName,
+						items: []
+					};
+
+					dv.store.dataElementSelected.each( function(r) {
+						data.items.push(r.data.id);
+					});
+
+					return data.items.length ? data : null;
+				},
+				onExpand: function() {
+					var h = dv.viewport.westRegion.hasScrollbar ?
+						dv.conf.layout.west_scrollbarheight_accordion_dataelement : dv.conf.layout.west_maxheight_accordion_dataelement;
+					dv.util.dimension.panel.setHeight(h);
+					dv.util.multiselect.setHeight(
+						[dataElementAvailable, dataElementSelected],
+						this,
+						dv.conf.layout.west_fill_accordion_indicator
+					);
+				},
+				items: [
+					{
+						xtype: 'combobox',
+						cls: 'pt-combo',
+						style: 'margin-bottom:2px; margin-top:0px',
+						width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
+						valueField: 'id',
+						displayField: 'name',
+						emptyText: DV.i18n.select_data_element_group,
+						editable: false,
+						store: {
+							xtype: 'store',
+							fields: ['id', 'name', 'index'],
+							proxy: {
+								type: 'ajax',
+								url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelementgroup_get,
+								reader: {
+									type: 'json',
+									root: 'dataElementGroups'
+								}
+							},
+							listeners: {
+								load: function(s) {
+									s.add({
+										id: 0,
+										name: DV.i18n.all_data_element_groups,
+										index: -1
+									});
+									s.sort([
+										{
+											property: 'index',
+											direction: 'ASC'
+										},
+										{
+											property: 'name',
+											direction: 'ASC'
+										}
+									]);
+								}
+							}
+						},
+						listeners: {
+							select: function(cb) {
+								var store = dv.store.dataElementAvailable;
+								store.parent = cb.getValue();
+
+								if (dv.util.store.containsParent(store)) {
+									dv.util.store.loadFromStorage(store);
+									dv.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
+								}
+								else {
+									if (cb.getValue() === 0) {
+										store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelement_getall;
+										store.load();
+									}
+									else {
+										store.proxy.url = dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataelement_get + cb.getValue() + '.json';
+										store.load();
+									}
+								}
+							}
+						}
+					},
+					{
+						xtype: 'panel',
+						layout: 'column',
+						bodyStyle: 'border-style:none',
+						items: [
+							dataElementAvailable,
+							dataElementSelected
+						]
+					}
+				],
+				listeners: {
+					added: function() {
+						dv.cmp.dimension.panels.push(this);
+					},
+					expand: function(p) {
+						p.onExpand();
+					}
+				}
+			};
+
+			dataSetAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'pt-toolbar-multiselect-left',
+				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+				valueField: 'id',
+				displayField: 'name',
+				store: dv.store.dataSetAvailable,
+				tbar: [
+					{
+						xtype: 'label',
+						text: DV.i18n.available,
+						cls: 'pt-toolbar-multiselect-left-label'
+					},
+					'->',
+					{
+						xtype: 'button',
+						icon: 'images/arrowright.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.select(dataSetAvailable, dataSetSelected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowrightdouble.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.selectAll(dataSetAvailable, dataSetSelected);
+						}
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							dv.util.multiselect.select(this, dataSetSelected);
+						}, this);
+					}
+				}
+			});
+
+			dataSetSelected = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'pt-toolbar-multiselect-right',
+				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+				valueField: 'id',
+				displayField: 'name',
+				ddReorder: true,
+				store: dv.store.dataSetSelected,
+				tbar: [
+					{
+						xtype: 'button',
+						icon: 'images/arrowleftdouble.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.unselectAll(dataSetAvailable, dataSetSelected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowleft.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.unselect(dataSetAvailable, dataSetSelected);
+						}
+					},
+					'->',
+					{
+						xtype: 'label',
+						text: DV.i18n.selected,
+						cls: 'pt-toolbar-multiselect-right-label'
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							dv.util.multiselect.unselect(dataSetAvailable, this);
+						}, this);
+					}
+				}
+			});
+
+			dataSet = {
+				xtype: 'panel',
+				title: '<div class="pt-panel-title-data">' + DV.i18n.reporting_rates + '</div>',
+				hideCollapseTool: true,
+				getData: function() {
+					var data = {
+						dimensionName: dv.conf.finals.dimension.dataSet.dimensionName,
+						objectName: dv.conf.finals.dimension.dataSet.objectName,
+						items: []
+					};
+
+					dv.store.dataSetSelected.each( function(r) {
+						data.items.push(r.data.id);
+					});
+
+					return data.items.length ? data : null;
+				},
+				onExpand: function() {
+					var h = dv.viewport.westRegion.hasScrollbar ?
+						dv.conf.layout.west_scrollbarheight_accordion_dataset : dv.conf.layout.west_maxheight_accordion_dataset;
+					dv.util.dimension.panel.setHeight(h);
+					dv.util.multiselect.setHeight(
+						[dataSetAvailable, dataSetSelected],
+						this,
+						dv.conf.layout.west_fill_accordion_dataset
+					);
+
+					if (!dv.store.dataSetAvailable.isLoaded) {
+						dv.store.dataSetAvailable.load();
+					}
+				},
+				items: [
+					{
+						xtype: 'panel',
+						layout: 'column',
+						bodyStyle: 'border-style:none',
+						items: [
+							dataSetAvailable,
+							dataSetSelected
+						]
+					}
+				],
+				listeners: {
+					added: function() {
+						dv.cmp.dimension.panels.push(this);
+					},
+					expand: function(p) {
+						p.onExpand();
+					}
+				}
+			};
+
+			rewind = Ext.create('Ext.form.field.Checkbox', {
+				relativePeriodId: 'rewind',
+				boxLabel: 'Rewind one period',
+				xable: function() {
+					this.setDisabled(dv.util.checkbox.isAllFalse());
+				}
+			});
+
+			relativePeriod = {
+				xtype: 'panel',
+				hideCollapseTool: true,
+				autoScroll: true,
+				bodyStyle: 'border:0 none',
+				valueComponentMap: {},
+				items: [
+					{
+						xtype: 'container',
+						layout: 'column',
+						bodyStyle: 'border-style:none',
+						items: [
+							{
+								xtype: 'panel',
+								columnWidth: 0.34,
+								bodyStyle: 'border-style:none; padding:0 0 0 8px',
+								defaults: {
+									labelSeparator: '',
+									style: 'margin-bottom:2px',
+									listeners: {
+										added: function(chb) {
+											if (chb.xtype === 'checkbox') {
+												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+											}
+										},
+										change: function() {
+											rewind.xable();
+										}
+									}
+								},
+								items: [
+									{
+										xtype: 'label',
+										text: DV.i18n.weeks,
+										cls: 'pt-label-period-heading'
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_WEEK',
+										boxLabel: DV.i18n.last_week
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_4_WEEKS',
+										boxLabel: DV.i18n.last_4_weeks
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_12_WEEKS',
+										boxLabel: DV.i18n.last_12_weeks
+									}
+								]
+							},
+							{
+								xtype: 'panel',
+								columnWidth: 0.33,
+								bodyStyle: 'border-style:none',
+								defaults: {
+									labelSeparator: '',
+									style: 'margin-bottom:2px',
+									listeners: {
+										added: function(chb) {
+											if (chb.xtype === 'checkbox') {
+												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+											}
+										},
+										change: function() {
+											rewind.xable();
+										}
+									}
+								},
+								items: [
+									{
+										xtype: 'label',
+										text: DV.i18n.months,
+										cls: 'pt-label-period-heading'
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_MONTH',
+										boxLabel: DV.i18n.last_month
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_3_MONTHS',
+										boxLabel: DV.i18n.last_3_months
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_12_MONTHS',
+										boxLabel: DV.i18n.last_12_months,
+										checked: true
+									}
+								]
+							},
+							{
+								xtype: 'panel',
+								columnWidth: 0.33,
+								bodyStyle: 'border-style:none',
+								defaults: {
+									labelSeparator: '',
+									style: 'margin-bottom:2px',
+									listeners: {
+										added: function(chb) {
+											if (chb.xtype === 'checkbox') {
+												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+											}
+										},
+										change: function() {
+											rewind.xable();
+										}
+									}
+								},
+								items: [
+									{
+										xtype: 'label',
+										text: DV.i18n.bimonths,
+										cls: 'pt-label-period-heading'
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_BIMONTH',
+										boxLabel: DV.i18n.last_bimonth
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_6_BIMONTHS',
+										boxLabel: DV.i18n.last_6_bimonths
+									}
+								]
+							}
+						]
+					},
+					{
+						xtype: 'container',
+						layout: 'column',
+						bodyStyle: 'border-style:none',
+						items: [
+							{
+								xtype: 'panel',
+								columnWidth: 0.34,
+								bodyStyle: 'border-style:none; padding:5px 0 0 10px',
+								defaults: {
+									labelSeparator: '',
+									style: 'margin-bottom:2px',
+									listeners: {
+										added: function(chb) {
+											if (chb.xtype === 'checkbox') {
+												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+											}
+										},
+										change: function() {
+											rewind.xable();
+										}
+									}
+								},
+								items: [
+									{
+										xtype: 'label',
+										text: DV.i18n.quarters,
+										cls: 'pt-label-period-heading'
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_QUARTER',
+										boxLabel: DV.i18n.last_quarter
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_4_QUARTERS',
+										boxLabel: DV.i18n.last_4_quarters
+									}
+								]
+							},
+							{
+								xtype: 'panel',
+								columnWidth: 0.33,
+								bodyStyle: 'border-style:none; padding:5px 0 0',
+								defaults: {
+									labelSeparator: '',
+									style: 'margin-bottom:2px',
+									listeners: {
+										added: function(chb) {
+											if (chb.xtype === 'checkbox') {
+												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+											}
+										},
+										change: function() {
+											rewind.xable();
+										}
+									}
+								},
+								items: [
+									{
+										xtype: 'label',
+										text: DV.i18n.sixmonths,
+										cls: 'pt-label-period-heading'
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_SIX_MONTH',
+										boxLabel: DV.i18n.last_sixmonth
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_2_SIXMONTHS',
+										boxLabel: DV.i18n.last_2_sixmonths
+									}
+								]
+							},
+							{
+								xtype: 'panel',
+								columnWidth: 0.33,
+								bodyStyle: 'border-style:none; padding:5px 0 0',
+								defaults: {
+									labelSeparator: '',
+									style: 'margin-bottom:2px',
+									listeners: {
+										added: function(chb) {
+											if (chb.xtype === 'checkbox') {
+												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+											}
+										},
+										change: function() {
+											rewind.xable();
+										}
+									}
+								},
+								items: [
+									{
+										xtype: 'label',
+										text: DV.i18n.financial_years,
+										cls: 'pt-label-period-heading'
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_FINANCIAL_YEAR',
+										boxLabel: DV.i18n.last_financial_year
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
+										boxLabel: DV.i18n.last_5_financial_years
+									}
+								]
+							}
+
+							//{
+								//xtype: 'panel',
+								//layout: 'anchor',
+								//bodyStyle: 'border-style:none; padding:5px 0 0 46px',
+								//defaults: {
+									//labelSeparator: '',
+									//style: 'margin-bottom:2px',
+								//},
+								//items: [
+									//{
+										//xtype: 'label',
+										//text: 'Options',
+										//cls: 'pt-label-period-heading-options'
+									//},
+									//rewind
+								//]
+							//}
+						]
+					},
+					{
+						xtype: 'container',
+						layout: 'column',
+						bodyStyle: 'border-style:none',
+						items: [
+							{
+								xtype: 'panel',
+								columnWidth: 0.35,
+								bodyStyle: 'border-style:none; padding:5px 0 0 10px',
+								defaults: {
+									labelSeparator: '',
+									style: 'margin-bottom:2px',
+									listeners: {
+										added: function(chb) {
+											if (chb.xtype === 'checkbox') {
+												dv.cmp.dimension.relativePeriod.checkbox.push(chb);
+												relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+											}
+										},
+										change: function() {
+											rewind.xable();
+										}
+									}
+								},
+								items: [
+									{
+										xtype: 'label',
+										text: DV.i18n.years,
+										cls: 'pt-label-period-heading'
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'THIS_YEAR',
+										boxLabel: DV.i18n.this_year
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_YEAR',
+										boxLabel: DV.i18n.last_year
+									},
+									{
+										xtype: 'checkbox',
+										relativePeriodId: 'LAST_5_YEARS',
+										boxLabel: DV.i18n.last_5_years
+									}
+								]
+							}
+						]
+					}
+				]
+			};
+
+			fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'pt-toolbar-multiselect-left',
+				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+				height: 180,
+				valueField: 'id',
+				displayField: 'name',
+				store: dv.store.fixedPeriodAvailable,
+				tbar: [
+					{
+						xtype: 'label',
+						text: DV.i18n.available,
+						cls: 'pt-toolbar-multiselect-left-label'
+					},
+					'->',
+					{
+						xtype: 'button',
+						icon: 'images/arrowright.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowrightdouble.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
+						}
+					},
+					' '
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							dv.util.multiselect.select(fixedPeriodAvailable, fixedPeriodSelected);
+						}, this);
+					}
+				}
+			});
+
+			fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'pt-toolbar-multiselect-right',
+				width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+				height: 180,
+				valueField: 'id',
+				displayField: 'name',
+				ddReorder: true,
+				store: dv.store.fixedPeriodSelected,
+				tbar: [
+					' ',
+					{
+						xtype: 'button',
+						icon: 'images/arrowleftdouble.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowleft.png',
+						width: 22,
+						handler: function() {
+							dv.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+						}
+					},
+					'->',
+					{
+						xtype: 'label',
+						text: DV.i18n.selected,
+						cls: 'pt-toolbar-multiselect-right-label'
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							dv.util.multiselect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+						}, this);
+					}
+				}
+			});
+
+			period = {
+				xtype: 'panel',
+				title: '<div class="pt-panel-title-period">Periods</div>',
+				hideCollapseTool: true,
+				getData: function() {
+					var data = {
+							dimensionName: dv.conf.finals.dimension.period.dimensionName,
+							objectName: dv.conf.finals.dimension.period.objectName,
+							items: []
+						},
+						chb = dv.cmp.dimension.relativePeriod.checkbox;
+
+					dv.store.fixedPeriodSelected.each( function(r) {
+						data.items.push(r.data.id);
+					});
+
+					for (var i = 0; i < chb.length; i++) {
+						if (chb[i].getValue()) {
+							data.items.push(chb[i].relativePeriodId);
+						}
+					}
+
+					return data.items.length ? data : null;
+				},
+				onExpand: function() {
+					var h = dv.viewport.westRegion.hasScrollbar ?
+						dv.conf.layout.west_scrollbarheight_accordion_period : dv.conf.layout.west_maxheight_accordion_period;
+					dv.util.dimension.panel.setHeight(h);
+					dv.util.multiselect.setHeight(
+						[fixedPeriodAvailable, fixedPeriodSelected],
+						this,
+						dv.conf.layout.west_fill_accordion_period
+					);
+				},
+				items: [
+					{
+						xtype: 'panel',
+						layout: 'column',
+						bodyStyle: 'border-style:none',
+						style: 'margin-top:0px',
+						items: [
+							{
+								xtype: 'combobox',
+								cls: 'pt-combo',
+								style: 'margin-bottom:2px',
+								width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding - 62 - 62 - 4,
+								valueField: 'id',
+								displayField: 'name',
+								emptyText: DV.i18n.select_period_type,
+								editable: false,
+								queryMode: 'remote',
+								store: dv.store.periodType,
+								periodOffset: 0,
+								listeners: {
+									select: function() {
+										var ptype = new PeriodType(),
+											periodType = this.getValue();
+
+										var periods = ptype.get(periodType).generatePeriods({
+											offset: this.periodOffset,
+											filterFuturePeriods: true,
+											reversePeriods: true
+										});
+
+										dv.store.fixedPeriodAvailable.setIndex(periods);
+										dv.store.fixedPeriodAvailable.loadData(periods);
+										dv.util.multiselect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
+									}
+								}
+							},
+							{
+								xtype: 'button',
+								text: DV.i18n.prev_year,
+								style: 'margin-left:2px; border-radius:2px',
+								height: 24,
+								handler: function() {
+									var cb = this.up('panel').down('combobox');
+									if (cb.getValue()) {
+										cb.periodOffset--;
+										cb.fireEvent('select');
+									}
+								}
+							},
+							{
+								xtype: 'button',
+								text: DV.i18n.next_year,
+								style: 'margin-left:2px; border-radius:2px',
+								height: 24,
+								handler: function() {
+									var cb = this.up('panel').down('combobox');
+									if (cb.getValue() && cb.periodOffset < 0) {
+										cb.periodOffset++;
+										cb.fireEvent('select');
+									}
+								}
+							}
+						]
+					},
+					{
+						xtype: 'panel',
+						layout: 'column',
+						bodyStyle: 'border-style:none; padding-bottom:2px',
+						items: [
+							fixedPeriodAvailable,
+							fixedPeriodSelected
+						]
+					},
+					relativePeriod
+				],
+				listeners: {
+					added: function() {
+						dv.cmp.dimension.panels.push(this);
+					},
+					expand: function(p) {
+						p.onExpand();
+					}
+				}
+			};
+
+			treePanel = Ext.create('Ext.tree.Panel', {
+				cls: 'pt-tree',
+				style: 'border-top: 1px solid #ddd; padding-top: 1px',
+				width: dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding,
+				rootVisible: false,
+				autoScroll: true,
+				multiSelect: true,
+				rendered: false,
+				reset: function() {
+					var rootNode = this.getRootNode().findChild('id', dv.init.rootNodes[0].id);
+					this.collapseAll();
+					this.expandPath(rootNode.getPath());
+					this.getSelectionModel().select(rootNode);
+				},
+				selectRootIf: function() {
+					if (this.getSelectionModel().getSelection().length < 1) {
+						var node = this.getRootNode().findChild('id', dv.init.rootNodes[0].id);
+						if (this.rendered) {
+							this.getSelectionModel().select(node);
+						}
+						return node;
+					}
+				},
+				numberOfRecords: 0,
+				recordsToSelect: [],
+				multipleSelectIf: function(doUpdate) {
+					if (this.recordsToSelect.length === this.numberOfRecords) {
+						this.getSelectionModel().select(this.recordsToSelect);
+						this.recordsToSelect = [];
+						this.numberOfRecords = 0;
+
+						if (doUpdate) {
+							update();
+						}
+					}
+				},
+				multipleExpand: function(id, path, doUpdate) {
+					this.expandPath('/' + dv.conf.finals.root.id + path, 'id', '/', function() {
+						var record = this.getRootNode().findChild('id', id, true);
+						this.recordsToSelect.push(record);
+						this.multipleSelectIf(doUpdate);
+					}, this);
+				},
+				select: function(url, params) {
+					if (!params) {
+						params = {};
+					}
+					Ext.Ajax.request({
+						url: url,
+						method: 'GET',
+						params: params,
+						scope: this,
+						success: function(r) {
+							var a = Ext.decode(r.responseText).organisationUnits;
+							this.numberOfRecords = a.length;
+							for (var i = 0; i < a.length; i++) {
+								this.multipleExpand(a[i].id, a[i].path);
+							}
+						}
+					});
+				},
+				selectByGroup: function(id) {
+					if (id) {
+						var url = dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunit_getbygroup,
+							params = {id: id};
+						this.select(url, params);
+					}
+				},
+				selectByLevel: function(level) {
+					if (level) {
+						var url = dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunit_getbylevel,
+							params = {level: level};
+						this.select(url, params);
+					}
+				},
+				selectByIds: function(ids) {
+					if (ids) {
+						var url = dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunit_getbyids;
+						Ext.Array.each(ids, function(item) {
+							url = Ext.String.urlAppend(url, 'ids=' + item);
+						});
+						if (!this.rendered) {
+							dv.cmp.dimension.organisationUnit.panel.expand();
+						}
+						this.select(url);
+					}
+				},
+				store: Ext.create('Ext.data.TreeStore', {
+					proxy: {
+						type: 'ajax',
+						url: dv.conf.finals.ajax.path_visualizer + dv.conf.finals.ajax.organisationunitchildren_get
+					},
+					root: {
+						id: dv.conf.finals.root.id,
+						expanded: true,
+						children: dv.init.rootNodes
+					},
+					listeners: {
+						load: function(s, node, r) {
+							for (var i = 0; i < r.length; i++) {
+								r[i].data.text = dv.conf.util.jsonEncodeString(r[i].data.text);
+							}
+						}
+					}
+				}),
+				xable: function(checked, value) {
+					if (checked || value) {
+						this.disable();
+					}
+					else {
+						this.enable();
+					}
+				},
+				listeners: {
+					added: function() {
+						dv.cmp.dimension.organisationUnit.treepanel = this;
+					},
+					render: function() {
+						this.rendered = true;
+					},
+					afterrender: function() {
+						this.getSelectionModel().select(0);
+					},
+					itemcontextmenu: function(v, r, h, i, e) {
+						v.getSelectionModel().select(r, false);
+
+						if (v.menu) {
+							v.menu.destroy();
+						}
+						v.menu = Ext.create('Ext.menu.Menu', {
+							id: 'treepanel-contextmenu',
+							showSeparator: false,
+							shadow: false
+						});
+						if (!r.data.leaf) {
+							v.menu.add({
+								id: 'treepanel-contextmenu-item',
+								text: DV.i18n.select_all_children,
+								icon: 'images/node-select-child.png',
+								handler: function() {
+									r.expand(false, function() {
+										v.getSelectionModel().select(r.childNodes, true);
+										v.getSelectionModel().deselect(r);
+									});
+								}
+							});
+						}
+						else {
+							return;
+						}
+
+						v.menu.showAt(e.xy);
+					}
+				}
+			});
+
+			userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
+				columnWidth: 0.5,
+				boxLabel: DV.i18n.user_organisation_unit,
+				labelWidth: dv.conf.layout.form_label_width,
+				handler: function(chb, checked) {
+					treePanel.xable(checked, userOrganisationUnitChildren.getValue());
+				}
+			});
+
+			userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
+				columnWidth: 0.5,
+				boxLabel: DV.i18n.user_organisation_unit_children,
+				labelWidth: dv.conf.layout.form_label_width,
+				handler: function(chb, checked) {
+					treePanel.xable(checked, userOrganisationUnit.getValue());
+				}
+			});
+
+			organisationUnit = {
+				xtype: 'panel',
+				title: '<div class="pt-panel-title-organisationunit">' + DV.i18n.organisation_units + '</div>',
+				bodyStyle: 'padding-top:5px',
+				hideCollapseTool: true,
+				collapsed: false,
+				getData: function() {
+					var records = treePanel.getSelectionModel().getSelection(),
+						data = {
+							dimensionName: dv.conf.finals.dimension.organisationUnit.dimensionName,
+							objectName: dv.conf.finals.dimension.organisationUnit.objectName,
+							items: []
+						};
+
+					for (var i = 0; i < records.length; i++) {
+						data.items.push(records[i].data.id);
+					}
+
+					return data.items.length ? data : null;
+				},
+				onExpand: function() {
+					var h = dv.viewport.westRegion.hasScrollbar ?
+						dv.conf.layout.west_scrollbarheight_accordion_organisationunit : dv.conf.layout.west_maxheight_accordion_organisationunit;
+					dv.util.dimension.panel.setHeight(h);
+					treePanel.setHeight(this.getHeight() - dv.conf.layout.west_fill_accordion_organisationunit);
+				},
+				items: [
+					{
+						layout: 'column',
+						bodyStyle: 'border:0 none; padding-bottom:3px; padding-left:7px',
+						items: [
+							userOrganisationUnit,
+							userOrganisationUnitChildren
+						]
+					},
+					treePanel
+				],
+				listeners: {
+					added: function() {
+						dv.cmp.dimension.panels.push(this);
+					},
+					expand: function(p) {
+						p.onExpand();
+					}
+				}
+			};
+
+			getGroupSetPanels = function(groupSets, objectName, iconCls) {
+				var	getAvailableStore,
+					getSelectedStore,
+
+					createPanel,
+					getPanels;
+
+				getAvailableStore = function(groupSet) {
+					return Ext.create('Ext.data.Store', {
+						fields: ['id', 'name'],
+						data: groupSet.items,
+						isLoaded: false,
+						storage: {},
+						sortStore: function() {
+							this.sort('name', 'ASC');
+						},
+						reload: function() {
+							this.removeAll();
+							this.storage = {};
+							this.loadData(groupSet.items);
+						},
+						listeners: {
+							load: function(s) {
+								s.isLoaded = true;
+								s.each( function(r) {
+									r.data.name = dv.conf.util.jsonEncodeString(r.data.name);
+								});
+								dv.util.store.addToStorage(s);
+							}
+						}
+					});
+				};
+
+				getSelectedStore = function() {
+					return Ext.create('Ext.data.Store', {
+						fields: ['id', 'name'],
+						data: []
+					});
+				};
+
+				createPanel = function(groupSet) {
+					var getAvailable,
+						getSelected,
+
+						availableStore,
+						selectedStore,
+						available,
+						selected,
+
+						panel;
+
+					getAvailable = function(availableStore) {
+						return Ext.create('Ext.ux.form.MultiSelect', {
+							cls: 'pt-toolbar-multiselect-left',
+							width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+							valueField: 'id',
+							displayField: 'name',
+							store: availableStore,
+							tbar: [
+								{
+									xtype: 'label',
+									text: DV.i18n.available,
+									cls: 'pt-toolbar-multiselect-left-label'
+								},
+								'->',
+								{
+									xtype: 'button',
+									icon: 'images/arrowright.png',
+									width: 22,
+									handler: function() {
+										dv.util.multiselect.select(available, selected);
+									}
+								},
+								{
+									xtype: 'button',
+									icon: 'images/arrowrightdouble.png',
+									width: 22,
+									handler: function() {
+										dv.util.multiselect.selectAll(available, selected);
+									}
+								}
+							],
+							listeners: {
+								afterrender: function() {
+									this.boundList.on('itemdblclick', function() {
+										dv.util.multiselect.select(available, selected);
+									}, this);
+								}
+							}
+						});
+					};
+
+					getSelected = function(selectedStore) {
+						return Ext.create('Ext.ux.form.MultiSelect', {
+							cls: 'pt-toolbar-multiselect-right',
+							width: (dv.conf.layout.west_fieldset_width - dv.conf.layout.west_width_padding) / 2,
+							valueField: 'id',
+							displayField: 'name',
+							ddReorder: true,
+							store: selectedStore,
+							tbar: [
+								{
+									xtype: 'button',
+									icon: 'images/arrowleftdouble.png',
+									width: 22,
+									handler: function() {
+										dv.util.multiselect.unselectAll(available, selected);
+									}
+								},
+								{
+									xtype: 'button',
+									icon: 'images/arrowleft.png',
+									width: 22,
+									handler: function() {
+										dv.util.multiselect.unselect(available, selected);
+									}
+								},
+								'->',
+								{
+									xtype: 'label',
+									text: DV.i18n.selected,
+									cls: 'pt-toolbar-multiselect-right-label'
+								}
+							],
+							listeners: {
+								afterrender: function() {
+									this.boundList.on('itemdblclick', function() {
+										dv.util.multiselect.unselect(available, selected);
+									}, this);
+								}
+							}
+						});
+					};
+
+					availableStore = getAvailableStore(groupSet);
+					selectedStore = getSelectedStore();
+
+					groupSetIdAvailableStoreMap[groupSet.id] = availableStore;
+					groupSetIdSelectedStoreMap[groupSet.id] = selectedStore;
+
+					available = getAvailable(availableStore);
+					selected = getSelected(selectedStore);
+
+					availableStore.on('load', function() {
+						dv.util.multiselect.filterAvailable(available, selected);
+					});
+
+					panel = {
+						xtype: 'panel',
+						title: '<div class="' + iconCls + '">' + groupSet.name + '</div>',
+						hideCollapseTool: true,
+						getData: function() {
+							var data = {
+								dimensionName: groupSet.id,
+								objectName: objectName,
+								items: []
+							};
+
+							selectedStore.each( function(r) {
+								data.items.push(r.data.id);
+							});
+
+							return data.items.length ? data : null;
+						},
+						onExpand: function() {
+							if (!availableStore.isLoaded) {
+								availableStore.load();
+							}
+
+							var h = dv.viewport.westRegion.hasScrollbar ?
+								dv.conf.layout.west_scrollbarheight_accordion_group : dv.conf.layout.west_maxheight_accordion_group;
+							dv.util.dimension.panel.setHeight(h);
+
+							dv.util.multiselect.setHeight(
+								[available, selected],
+								this,
+								dv.conf.layout.west_fill_accordion_dataset
+							);
+						},
+						items: [
+							{
+								xtype: 'panel',
+								layout: 'column',
+								bodyStyle: 'border-style:none',
+								items: [
+									available,
+									selected
+								]
+							}
+						],
+						listeners: {
+							added: function() {
+								dv.cmp.dimension.panels.push(this);
+							},
+							expand: function(p) {
+								p.onExpand();
+							}
+						}
+					};
+
+					return panel;
+				};
+
+				getPanels = function() {
+					var panels = [],
+						groupSet,
+						last;
+
+					for (var i = 0, panel; i < groupSets.length; i++) {
+						groupSet = groupSets[i];
+
+						panel = createPanel(groupSet);
+
+						panels.push(panel);
+					}
+
+					return panels;
+				};
+
+				return getPanels();
+			};
+
+			validateSpecialCases = function(layout) {
+				var dimConf = dv.conf.finals.dimension,
+					dimensionNames = [],
+					layoutObjects = [].concat(Ext.clone(layout.col || []), Ext.clone(layout.row || []), Ext.clone(layout.filter || []));
+
+				// Layout names
+				for (var i = 0; i < layoutObjects.length; i++) {
+					dimensionNames.push(layoutObjects[i].dimensionName);
+				}
+
+				// Indicator as filter
+				if (layout.filter && dv.store.indicatorSelected.data.length) {
+					for (var i = 0; i < layout.filter.length; i++) {
+						if (layout.filter[i].dimensionName === dimConf.data.dimensionName) {
+							alert(DV.i18n.indicators_cannot_be_specified_as_filter);
+							return;
+						}
+					}
+				}
+
+				// Categories as filter
+				if (layout.filter && dv.viewport.layoutWindow.filterStore.getById(dimConf.category.dimensionName)) {
+					alert(DV.i18n.categories_cannot_be_specified_as_filter);
+					return;
+				}
+
+				// Degs and datasets in the same query
+				if (Ext.Array.contains(dimensionNames, dimConf.data.dimensionName) && dv.store.dataSetSelected.data.length) {
+					for (var i = 0; i < dv.init.degs.length; i++) {
+						if (Ext.Array.contains(dimensionNames, dv.init.degs[i].id)) {
+							alert(DV.i18n.data_element_group_sets_cannot_be_specified_together_with_data_sets);
+							return;
+						}
+					}
+				}
+
+				return true;
+			};
+
+			update = function() {
+				var config = dv.util.chart.getLayoutConfig(),
+					layout = dv.api.Layout(config);
+
+				if (!layout) {
+					return;
+				}
+				if (!validateSpecialCases(layout)) {
+					return;
+				}
+
+				if (layout) {
+					dv.util.chart.getTable(layout, pt);
+				}
+			};
+
+			accordionBody = Ext.create('Ext.panel.Panel', {
+				layout: 'accordion',
+				activeOnTop: true,
+				cls: 'pt-accordion',
+				bodyStyle: 'border:0 none; margin-bottom:2px',
+				height: 700,
+				items: function() {
+					var panels = [
+						indicator,
+						dataElement,
+						dataSet,
+						period,
+						organisationUnit
+					],
+					ougs = Ext.clone(dv.init.ougs),
+					degs = Ext.clone(dv.init.degs);
+
+					dv.util.array.sortObjectsByString(ougs);
+					dv.util.array.sortObjectsByString(degs);
+
+					panels = panels.concat(getGroupSetPanels(ougs, dv.conf.finals.dimension.organisationUnitGroupSet.objectName, 'pt-panel-title-organisationunitgroupset'));
+					panels = panels.concat(getGroupSetPanels(degs, dv.conf.finals.dimension.dataElementGroupSet.objectName, 'pt-panel-title-dataelementgroupset'));
+
+					last = panels[panels.length - 1];
+					last.cls = 'pt-accordion-last';
+
+					return panels;
+				}()
+			});
+
+			accordion = Ext.create('Ext.panel.Panel', {
+				bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
+				items: accordionBody,
+				listeners: {
+					added: function() {
+						dv.cmp.dimension.accordion = this;
+					}
+				}
+			});
+
+			westRegion = Ext.create('Ext.panel.Panel', {
+				region: 'west',
+				preventHeader: true,
+				collapsible: true,
+				collapseMode: 'mini',
+				width: function() {
+					if (Ext.isWebKit) {
+						return dv.conf.layout.west_width + 8;
+					}
+					else {
+						if (Ext.isLinux && Ext.isGecko) {
+							return dv.conf.layout.west_width + 13;
+						}
+						return dv.conf.layout.west_width + 17;
+					}
+				}(),
+				items: accordion
+			});
+
+			layoutButton = Ext.create('Ext.button.Button', {
+				text: 'Layout',
+				menu: {},
+				handler: function() {
+					if (!dv.viewport.layoutWindow) {
+						dv.viewport.layoutWindow = DV.app.LayoutWindow(pt);
+					}
+
+					dv.viewport.layoutWindow.show();
+				}
+			});
+
+			optionsButton = Ext.create('Ext.button.Button', {
+				text: 'Options',
+				menu: {},
+				handler: function() {
+					if (!dv.viewport.optionsWindow) {
+						dv.viewport.optionsWindow = DV.app.OptionsWindow();
+					}
+
+					dv.viewport.optionsWindow.show();
+				}
+			});
+
+			favoriteButton = Ext.create('Ext.button.Button', {
+				text: 'Favorites',
+				menu: {},
+				handler: function() {
+					if (dv.viewport.favoriteWindow) {
+						dv.viewport.favoriteWindow.destroy();
+					}
+
+					dv.viewport.favoriteWindow = DV.app.FavoriteWindow();
+					dv.viewport.favoriteWindow.show();
+				}
+			});
+
+			downloadButton = Ext.create('Ext.button.Button', {
+				text: 'Download',
+				disabled: true,
+				menu: {
+					cls: 'pt-menu',
+					width: 105,
+					shadow: false,
+					showSeparator: false,
+					items: [
+						{
+							text: 'Excel (XLS)',
+							iconCls: 'pt-menu-item-xls',
+							handler: function() {
+								if (dv.baseUrl && dv.paramString) {
+									window.location.href = dv.baseUrl + '/api/analytics.xls' + dv.paramString;
+								}
+							}
+						},
+						{
+							text: 'CSV',
+							iconCls: 'pt-menu-item-csv',
+							handler: function() {
+								if (dv.baseUrl && dv.paramString) {
+									window.location.href = dv.baseUrl + '/api/analytics.csv' + dv.paramString;
+								}
+							}
+						},
+						{
+							text: 'JSON',
+							iconCls: 'pt-menu-item-csv',
+							handler: function() {
+								if (dv.baseUrl && dv.paramString) {
+									window.open(dv.baseUrl + '/api/analytics.json' + dv.paramString);
+								}
+							}
+						},
+						{
+							text: 'XML',
+							iconCls: 'pt-menu-item-csv',
+							handler: function() {
+								if (dv.baseUrl && dv.paramString) {
+									window.open(dv.baseUrl + '/api/analytics.xml' + dv.paramString);
+								}
+							}
+						}
+					],
+					listeners: {
+						afterrender: function() {
+							this.getEl().addCls('pt-toolbar-btn-menu');
+						}
+					}
+				}
+			});
+
+			centerRegion = Ext.create('Ext.panel.Panel', {
+				region: 'center',
+				bodyStyle: 'padding:1px',
+				autoScroll: true,
+				tbar: {
+                    defaults: {
+                        height: 26
+                    },
+					items: [
+						{
+							text: '<<<',
+							handler: function(b) {
+								var text = b.getText();
+								text = text === '<<<' ? '>>>' : '<<<';
+								b.setText(text);
+
+								westRegion.toggleCollapse();
+							}
+						},
+						{
+							text: '<b>' + DV.i18n.update + '</b>',
+							handler: function() {
+								update();
+							}
+						},
+						layoutButton,
+						optionsButton,
+						{
+							xtype: 'tbseparator',
+							height: 18,
+							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 4px',
+						},
+						favoriteButton,
+						downloadButton,
+                        '->',
+						{
+							text: DV.i18n.table,
+                            toggleGroup: 'module',
+							pressed: true
+						},
+						{
+							text: DV.i18n.chart,
+                            toggleGroup: 'module',
+							handler: function(b) {
+                                window.location.href = '../../dhis-web-visualizer/app/index.html';
+							}
+						},
+						{
+							text: DV.i18n.map,
+                            toggleGroup: 'module',
+							handler: function(b) {
+                                window.location.href = '../../dhis-web-mapping/app/index.html';
+							}
+						},
+						{
+							xtype: 'tbseparator',
+							height: 18,
+							style: 'border-color: transparent #d1d1d1 transparent transparent; margin-right: 6px; margin-left: 3px',
+						},
+                        {
+                            xtype: 'button',
+                            text: DV.i18n.home,
+                            handler: function() {
+                                window.location.href = '../../dhis-web-commons-about/redirect.action';
+                            }
+                        }
+					]
+				},
+				listeners: {
+					afterrender: function(p) {
+						var liStyle = 'padding:3px 10px; color:#333',
+							html = '';
+
+						html += '<div style="padding:20px">';
+						html += '<div style="font-size:14px; padding-bottom:8px">' + DV.i18n.example1 + '</div>';
+						html += '<div style="' + liStyle + '">- ' + DV.i18n.example2 + '</div>';
+						html += '<div style="' + liStyle + '">- ' + DV.i18n.example3 + '</div>';
+						html += '<div style="' + liStyle + '">- ' + DV.i18n.example4 + '</div>';
+						html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + DV.i18n.example5 + '</div>';
+						html += '<div style="' + liStyle + '">- ' + DV.i18n.example6 + '</div>';
+						html += '<div style="' + liStyle + '">- ' + DV.i18n.example7 + '</div>';
+						html += '<div style="' + liStyle + '">- ' + DV.i18n.example8 + '</div>';
+						html += '</div>';
+
+						p.update(html);
+					}
+				}
+			});
+
+			setFavorite = function(r) {
+
+				// Indicators
+				dv.store.indicatorSelected.removeAll();
+				if (Ext.isArray(r.indicators)) {
+					dv.store.indicatorSelected.add(r.indicators);
+				}
+
+				// Data elements
+				dv.store.dataElementSelected.removeAll();
+				if (Ext.isArray(r.dataElements)) {
+					dv.store.dataElementSelected.add(r.dataElements);
+				}
+
+				// Data sets
+				dv.store.dataSetSelected.removeAll();
+				if (Ext.isArray(r.dataSets)) {
+					dv.store.dataSetSelected.add(r.dataSets);
+				}
+
+				// Fixed periods
+				dv.store.fixedPeriodSelected.removeAll();
+				if (Ext.isArray(r.periods)) {
+					dv.store.fixedPeriodSelected.add(r.periods);
+				}
+
+				// Relative periods
+				if (Ext.isObject(r.relativePeriods)) {
+					for (var key in r.relativePeriods) {
+						if (r.relativePeriods.hasOwnProperty(key) && dv.conf.period.relativePeriodParamKeys.hasOwnProperty(key)) {
+							var value = dv.conf.period.relativePeriodParamKeys[key];
+							relativePeriod.valueComponentMap[value].setValue(!!r.relativePeriods[key]);
+						}
+					}
+				}
+
+				// Organisation units: tree sync/async
+
+				// User orgunit
+				userOrganisationUnit.setValue(r.userOrganisationUnit);
+				userOrganisationUnitChildren.setValue(r.userOrganisationUnitChildren);
+
+				// Reset groupset stores
+				for (var key in groupSetIdSelectedStoreMap) {
+					if (groupSetIdSelectedStoreMap.hasOwnProperty(key)) {
+						var a = groupSetIdAvailableStoreMap[key],
+							s = groupSetIdSelectedStoreMap[key];
+
+						if (s.getCount() > 0) {
+							a.reload();
+							s.removeAll();
+						}
+					}
+				}
+
+				// Organisation unit group sets
+				if (Ext.isObject(r.organisationUnitGroupSets)) {
+					for (var key in r.organisationUnitGroupSets) {
+						if (r.organisationUnitGroupSets.hasOwnProperty(key)) {
+							groupSetIdSelectedStoreMap[key].add(r.organisationUnitGroupSets[key]);
+							dv.util.multiselect.filterAvailable({store: groupSetIdAvailableStoreMap[key]}, {store: groupSetIdSelectedStoreMap[key]});
+						}
+					}
+				}
+
+				// Data element group sets
+				if (Ext.isObject(r.dataElementGroupSets)) {
+					for (var key in r.dataElementGroupSets) {
+						if (r.dataElementGroupSets.hasOwnProperty(key)) {
+							groupSetIdSelectedStoreMap[key].add(r.dataElementGroupSets[key]);
+							dv.util.multiselect.filterAvailable({store: groupSetIdAvailableStoreMap[key]}, {store: groupSetIdSelectedStoreMap[key]});
+						}
+					}
+				}
+
+				// Layout
+				dv.viewport.dimensionStore.reset(true);
+				dv.viewport.colStore.removeAll();
+				dv.viewport.rowStore.removeAll();
+				dv.viewport.filterStore.removeAll();
+
+				if (Ext.isArray(r.columnDimensions)) {
+					for (var i = 0, dim; i < r.columnDimensions.length; i++) {
+						dim = dv.conf.finals.dimension.objectNameMap[r.columnDimensions[i]];
+
+						dv.viewport.colStore.add({
+							id: dim.dimensionName,
+							name: dim.name
+						});
+
+						dv.viewport.dimensionStore.remove(dv.viewport.dimensionStore.getById(dim.dimensionName));
+
+					}
+				}
+
+				if (Ext.isArray(r.rowDimensions)) {
+					for (var i = 0, dim; i < r.rowDimensions.length; i++) {
+						dim = dv.conf.finals.dimension.objectNameMap[r.rowDimensions[i]];
+
+						dv.viewport.rowStore.add({
+							id: dim.dimensionName,
+							name: dim.name
+						});
+
+						dv.viewport.dimensionStore.remove(dv.viewport.dimensionStore.getById(dim.dimensionName));
+					}
+				}
+
+				if (Ext.isArray(r.filterDimensions)) {
+					for (var i = 0, dim; i < r.filterDimensions.length; i++) {
+						dim = dv.conf.finals.dimension.objectNameMap[r.filterDimensions[i]];
+
+						dv.viewport.filterStore.add({
+							id: dim.dimensionName,
+							name: dim.name
+						});
+
+						dv.viewport.dimensionStore.remove(dv.viewport.dimensionStore.getById(dim.dimensionName));
+					}
+				}
+
+				// Options
+				dv.viewport.showTotals.setValue(r.totals);
+				dv.viewport.showSubTotals.setValue(r.subtotals);
+				dv.viewport.hideEmptyRows.setValue(r.hideEmptyRows);
+				dv.viewport.displayDensity.setValue(r.displayDensity);
+				dv.viewport.fontSize.setValue(r.fontSize);
+				dv.viewport.digitGroupSeparator.setValue(r.digitGroupSeparator);
+
+				if (Ext.isObject(r.reportParams)) {
+					dv.viewport.reportingPeriod.setValue(r.reportParams.paramReportingPeriod);
+					dv.viewport.organisationUnit.setValue(r.reportParams.paramOrganisationUnit);
+					dv.viewport.parentOrganisationUnit.setValue(r.reportParams.paramParentOrganisationUnit);
+				}
+
+				// Upgrade fixes
+				if (!Ext.isArray(r.organisationUnits) || !r.organisationUnits.length) {
+					if (Ext.isObject(r.reportParams) && r.reportParams.paramOrganisationUnit) {
+						userOrganisationUnit.setValue(true);
+					}
+
+					if (Ext.isObject(r.reportParams) && r.reportParams.paramParentOrganisationUnit) {
+						userOrganisationUnit.setValue(true);
+					}
+				}
+
+				// Organisation units: If fav has organisation units, execute from tree callback instead
+				if (Ext.isArray(r.organisationUnits) && Ext.isObject(r.parentGraphMap)) {
+					treePanel.numberOfRecords = dv.util.object.getLength(r.parentGraphMap);
+					for (var key in r.parentGraphMap) {
+						if (r.parentGraphMap.hasOwnProperty(key)) {
+							treePanel.multipleExpand(key, r.parentGraphMap[key], true);
+						}
+					}
+				}
+				else {
+					treePanel.reset();
+					update();
+				}
+			};
+
+			viewport = Ext.create('Ext.container.Viewport', {
+				layout: 'border',
+				accordion: accordion,
+				accordionBody: accordionBody,
+				westRegion: westRegion,
+				centerRegion: centerRegion,
+				updateViewport: update,
+				layoutButton: layoutButton,
+				optionsButton: optionsButton,
+				favoriteButton: favoriteButton,
+				downloadButton: downloadButton,
+				userOrganisationUnit: userOrganisationUnit,
+				userOrganisationUnitChildren: userOrganisationUnitChildren,
+				setFavorite: setFavorite,
+				items: [
+					westRegion,
+					centerRegion
+				],
+				listeners: {
+					render: function(vp) {
+						dv.viewport = vp;
+					},
+					afterrender: function() {
+						dv.init.afterRender();
+					}
+				}
+			});
+
+			addListeners = function() {
+				dv.store.indicatorAvailable.on('load', function() {
+					dv.util.multiselect.filterAvailable(indicatorAvailable, indicatorSelected);
+				});
+
+				dv.store.dataElementAvailable.on('load', function() {
+					dv.util.multiselect.filterAvailable(dataElementAvailable, dataElementSelected);
+				});
+
+				dv.store.dataSetAvailable.on('load', function(s) {
+					dv.util.multiselect.filterAvailable(dataSetAvailable, dataSetSelected);
+					s.sort('name', 'ASC');
+				});
+			}();
+
+			return viewport;
+		};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		dv.init = DV.app.getInit(r);
+		dv.baseUrl = dv.init.contextPath;
+
+		dv.util = DV.app.getUtil();
+		dv.store = DV.app.getStore();
+
+		dv.viewport = createViewport();
+		dv.viewport.optionsWindow = DV.app.OptionsWindow();
+		dv.viewport.optionsWindow.hide();
+	};
+
+	Ext.Ajax.request({
+		url: dv.conf.finals.ajax.path_visualizer + 'initialize.action',
+		success: function(r) {
+			DV.app.init.onInitialize(r);
+	}});
+});
+
