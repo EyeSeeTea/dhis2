@@ -90,3 +90,155 @@ Ext.onReady( function() {
 
 		return init;
 	};
+
+	DV.app.getStores = function() {
+		var store = dv.store || {};
+
+		store.indicatorAvailable = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				reader: {
+					type: 'json',
+					root: 'indicators'
+				}
+			},
+			storage: {},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			},
+			listeners: {
+				load: function(s) {
+					dv.util.store.addToStorage(s);
+					dv.util.multiselect.filterAvailable({store: s}, {store: store.indicatorSelected});
+				}
+			}
+		});
+
+		store.indicatorSelected = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		store.dataElementAvailable = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				reader: {
+					type: 'json',
+					root: 'dataElements'
+				}
+			},
+			storage: {},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			},
+			listeners: {
+				load: function(s) {
+					dv.util.store.addToStorage(s);
+					dv.util.multiselect.filterAvailable({store: s}, {store: store.dataElementSelected});
+				}
+			}
+		});
+
+		store.dataElementSelected = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		store.dataSetAvailable = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			proxy: {
+				type: 'ajax',
+				url: dv.conf.finals.ajax.path_api + dv.conf.finals.ajax.dataset_get,
+				reader: {
+					type: 'json',
+					root: 'dataSets'
+				}
+			},
+			storage: {},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			},
+			isLoaded: false,
+			listeners: {
+				load: function(s) {
+					this.isLoaded = true;
+					dv.util.store.addToStorage(s);
+					dv.util.multiselect.filterAvailable({store: s}, {store: store.dataSetSelected});
+				}
+			}
+		});
+
+		store.dataSetSelected = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		store.periodType = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: dv.conf.period.periodTypes
+		});
+
+		store.fixedPeriodAvailable = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'index'],
+			data: [],
+			setIndex: function(periods) {
+				for (var i = 0; i < periods.length; i++) {
+					periods[i].index = i;
+				}
+			},
+			sortStore: function() {
+				this.sort('index', 'ASC');
+			}
+		});
+
+		store.fixedPeriodSelected = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+		store.charts = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'lastUpdated', 'access'],
+			proxy: {
+				type: 'ajax',
+				reader: {
+					type: 'json',
+					root: 'charts'
+				}
+			},
+			isLoaded: false,
+			pageSize: 10,
+			page: 1,
+			defaultUrl: pt.baseUrl + '/api/charts.json?links=false',
+			loadStore: function(url) {
+				this.proxy.url = url || this.defaultUrl;
+
+				this.load({
+					params: {
+						pageSize: this.pageSize,
+						page: this.page
+					}
+				});
+			},
+			loadFn: function(fn) {
+				if (this.isLoaded) {
+					fn.call();
+				}
+				else {
+					this.load(fn);
+				}
+			},
+			listeners: {
+				load: function(s) {
+					if (!this.isLoaded) {
+						this.isLoaded = true;
+					}
+
+					this.sort('name', 'ASC');
+				}
+			}
+		});
+
+		return store;
+	};
