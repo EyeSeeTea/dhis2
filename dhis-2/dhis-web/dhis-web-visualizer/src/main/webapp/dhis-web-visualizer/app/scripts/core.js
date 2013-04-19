@@ -1362,10 +1362,10 @@ DV.core.getInstance = function(config) {
 
 	dv.conf = DV.core.getConfig();
 	dv.cmp = DV.core.getCmp();
-	dv.util = DV.core.getUtils(dv);
+	dv.util = DV.core.getUtil(dv);
 	dv.api = DV.core.getAPI(dv);
 
-	return pt;
+	return dv;
 };
 
 });
