@@ -95,9 +95,6 @@ DV.core.getConfig = function() {
         ajax: {
             path_visualizer: '../',
             path_api: '../../api/',
-            path_commons: '../../dhis-web-commons-ajax-json/',
-            path_lib: '../../dhis-web-commons/javascripts/',
-            path_images: 'images/',
             initialize: 'initialize.action',
             redirect: 'dhis-web-commons-about/redirect.action',
             data_get: 'chartValues.json',
@@ -125,11 +122,18 @@ DV.core.getConfig = function() {
         dimension: {
             data: {
                 value: 'data',
-                rawvalue: DV.i18n.data,
+                name: DV.i18n.data,
+                dimensionName: 'dx',
+                objectName: 'dx',
                 warning: {
 					filter: DV.i18n.wm_multiple_filter_ind_de
 				}
             },
+            category: {
+				name: DV.i18n.categories,
+				dimensionName: 'co',
+                objectName: 'co',
+			},
             indicator: {
                 value: 'indicator',
                 rawvalue: DV.i18n.indicator,
@@ -297,37 +301,6 @@ DV.core.getConfig = function() {
 	};
 
 	return conf;
-};
-
-DV.core.getCmp = function() {
-	var cmp = {
-		region: {},
-		charttype: [],
-		settings: {},
-		dimension: {
-			indicator: {},
-			dataelement: {},
-			dataset: {},
-			period: {},
-			fixedperiod: {},
-			relativeperiod: {
-				checkbox: []
-			},
-			organisationunit: {},
-			organisationunitgroup: {}
-		},
-		options: {},
-		toolbar: {
-			menuitem: {}
-		},
-		statusbar: {},
-		favorite: {
-			rename: {}
-		},
-		share: {}
-	};
-
-	return cmp;
 };
 
 DV.core.getUtil = function() {
@@ -1363,7 +1336,7 @@ DV.core.getInstance = function(config) {
 	dv.conf = DV.core.getConfig();
 	dv.cmp = DV.core.getCmp();
 	dv.util = DV.core.getUtil(dv);
-	dv.api = DV.core.getAPI(dv);
+	//dv.api = DV.core.getAPI(dv);
 
 	return dv;
 };

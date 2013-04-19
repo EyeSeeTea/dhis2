@@ -91,6 +91,37 @@ Ext.onReady( function() {
 		return init;
 	};
 
+	DV.app.getCmp = function() {
+		var cmp = {
+			region: {},
+			charttype: [],
+			settings: {},
+			dimension: {
+				indicator: {},
+				dataelement: {},
+				dataset: {},
+				period: {},
+				fixedperiod: {},
+				relativeperiod: {
+					checkbox: []
+				},
+				organisationunit: {},
+				organisationunitgroup: {}
+			},
+			options: {},
+			toolbar: {
+				menuitem: {}
+			},
+			statusbar: {},
+			favorite: {
+				rename: {}
+			},
+			share: {}
+		};
+
+		return cmp;
+	};
+
 	DV.app.getStores = function() {
 		var store = dv.store || {};
 
@@ -1400,43 +1431,43 @@ Ext.onReady( function() {
 				name: DV.conf.finals.chart.column,
 				tooltipText: DV.i18n.column_chart,
 				pressed: true
-			};
+			});
 
 			stackedColumn = Ext.create('Ext.button.Button', {
 				icon: 'images/column-stacked.png',
 				name: DV.conf.finals.chart.stackedcolumn,
 				tooltipText: DV.i18n.stacked_column_chart
-			};
+			});
 
 			bar = Ext.create('Ext.button.Button', {
 				icon: 'images/bar.png',
 				name: DV.conf.finals.chart.bar,
 				tooltipText: DV.i18n.bar_chart
-			};
+			});
 
 			stackedBar = Ext.create('Ext.button.Button', {
 				icon: 'images/bar-stacked.png',
 				name: DV.conf.finals.chart.stackedbar,
 				tooltipText: DV.i18n.stacked_bar_chart
-			};
+			});
 
 			line = Ext.create('Ext.button.Button', {
 				icon: 'images/line.png',
 				name: DV.conf.finals.chart.line,
 				tooltipText: DV.i18n.line_chart
-			};
+			});
 
 			area = Ext.create('Ext.button.Button', {
 				icon: 'images/area.png',
 				name: DV.conf.finals.chart.area,
 				tooltipText: DV.i18n.area_chart
-			};
+			});
 
 			pie = Ext.create('Ext.button.Button', {
 				icon: 'images/pie.png',
 				name: DV.conf.finals.chart.pie,
 				tooltipText: DV.i18n.pie_chart
-			};
+			});
 
 			chartType = Ext.create('Ext.toolbar.Toolbar', {
 				height: 45,
