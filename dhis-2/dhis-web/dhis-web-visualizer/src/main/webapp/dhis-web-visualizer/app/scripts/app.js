@@ -3552,7 +3552,7 @@ Ext.onReady( function() {
                     },
                     {
                         xtype: 'toolbar',
-                        id: 'chartsettings_tb',
+                        id: 'chartlayout_tb',
                         style: 'padding-left: 2px;',
                         height: 46,
                         items: [
