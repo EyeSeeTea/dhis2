@@ -97,26 +97,18 @@ Ext.onReady( function() {
 			charttype: [],
 			settings: {},
 			dimension: {
+				panels: [],
+
 				indicator: {},
-				dataelement: {},
-				dataset: {},
-				period: {},
-				fixedperiod: {},
-				relativeperiod: {
+				dataElement: {},
+				dataSet: {},
+				relativePeriod: {
 					checkbox: []
 				},
-				organisationunit: {},
-				organisationunitgroup: {}
+				fixedPeriod: {},
+				organisationUnit: {}
 			},
-			options: {},
-			toolbar: {
-				menuitem: {}
-			},
-			statusbar: {},
-			favorite: {
-				rename: {}
-			},
-			share: {}
+			favorite: {}
 		};
 
 		return cmp;
