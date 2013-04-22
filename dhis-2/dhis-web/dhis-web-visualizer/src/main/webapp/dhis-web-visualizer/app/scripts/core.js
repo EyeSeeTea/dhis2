@@ -336,51 +336,24 @@ DV.core.getConfig = function() {
 DV.core.getUtil = function() {
 	var util = {};
 
-	util.getCmp = function(q) {
-		return DV.viewport.query(q)[0];
-	};
-
-	util.getUrlParam = function(s) {
-		var output = '';
-		var href = window.location.href;
-		if (href.indexOf('?') > -1 ) {
-			var query = href.substr(href.indexOf('?') + 1);
-			var query = query.split('&');
-			for (var i = 0; i < query.length; i++) {
-				if (query[i].indexOf('=') > -1) {
-					var a = query[i].split('=');
-					if (a[0].toLowerCase() === s) {
-						output = a[1];
-						break;
+    util.url = {
+		getParam: function(s) {
+			var output = '';
+			var href = window.location.href;
+			if (href.indexOf('?') > -1 ) {
+				var query = href.substr(href.indexOf('?') + 1);
+				var query = query.split('&');
+				for (var i = 0; i < query.length; i++) {
+					if (query[i].indexOf('=') > -1) {
+						var a = query[i].split('=');
+						if (a[0].toLowerCase() === s) {
+							output = a[1];
+							break;
+						}
 					}
 				}
 			}
-		}
-		return unescape(output);
-	};
-
-	util.viewport = {
-		getSize: function() {
-			return {x: DV.cmp.region.center.getWidth(), y: DV.cmp.region.center.getHeight()};
-		},
-		getXY: function() {
-			return {x: DV.cmp.region.center.x + 15, y: DV.cmp.region.center.y + 43};
-		},
-		getPageCenterX: function(cmp) {
-			return ((screen.width/2)-(cmp.width/2));
-		},
-		getPageCenterY: function(cmp) {
-			return ((screen.height/2)-((cmp.height/2)-100));
-		},
-		resizeDimensions: function() {
-			var a = [DV.cmp.dimension.indicator.panel, DV.cmp.dimension.dataelement.panel, DV.cmp.dimension.dataset.panel,
-					DV.cmp.dimension.period.panel, DV.cmp.dimension.organisationunit.panel, DV.cmp.dimension.organisationunitgroup.panel,
-					DV.cmp.options.panel];
-			for (var i = 0; i < a.length; i++) {
-				if (!a[i].collapsed) {
-					a[i].fireEvent('expand');
-				}
-			}
+			return unescape(output);
 		}
 	};
 
@@ -396,11 +369,14 @@ DV.core.getUtil = function() {
 			}
 			this.filterAvailable(a, s);
 		},
-		selectAll: function(a, s) {
+		selectAll: function(a, s, doReverse) {
 			var array = [];
 			a.store.each( function(r) {
 				array.push({id: r.data.id, name: r.data.name});
 			});
+			if (doReverse) {
+				array.reverse();
+			}
 			s.store.add(array);
 			this.filterAvailable(a, s);
 		},
@@ -435,17 +411,6 @@ DV.core.getUtil = function() {
 			for (var i = 0; i < ms.length; i++) {
 				ms[i].setHeight(panel.getHeight() - fill);
 			}
-		}
-	};
-
-	util.treepanel = {
-		getHeight: function() {
-			var h1 = DV.cmp.region.west.getHeight();
-			var h2 = DV.cmp.options.panel.getHeight();
-			var h = h1 - h2 - DV.conf.layout.treepanel_fill_default;
-			var mx = DV.conf.layout.treepanel_maxheight;
-			var mn = DV.conf.layout.treepanel_minheight;
-			return h > mx ? mx : h < mn ? mn : h;
 		}
 	};
 
@@ -1355,6 +1320,8 @@ DV.core.getUtil = function() {
 			}
 		}
 	};
+
+	return util;
 };
 
 DV.core.getInstance = function(config) {

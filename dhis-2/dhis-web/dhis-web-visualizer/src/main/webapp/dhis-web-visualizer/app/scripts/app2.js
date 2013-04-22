@@ -1478,8 +1478,9 @@ Ext.onReady( function() {
 					handler: dv.util.button.type.toggleHandler,
 					listeners: {
 						afterrender: function(b) {
+							console.log(b);
+							alert(b.xtype);
 							if (b.xtype === 'button') {
-
 								Ext.create('Ext.tip.ToolTip', {
 									target: b.getEl(),
 									html: b.tooltipText,

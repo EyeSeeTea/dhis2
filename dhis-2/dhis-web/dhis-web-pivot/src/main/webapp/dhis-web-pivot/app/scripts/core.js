@@ -362,17 +362,6 @@ PT.core.getUtils = function(pt) {
 		}
 	};
 
-	util.treepanel = {
-		getHeight: function() {
-			var h1 = PT.cmp.region.west.getHeight();
-			var h2 = PT.cmp.options.panel.getHeight();
-			var h = h1 - h2 - PT.conf.layout.treepanel_fill_default;
-			var mx = PT.conf.layout.treepanel_maxheight;
-			var mn = PT.conf.layout.treepanel_minheight;
-			return h > mx ? mx : h < mn ? mn : h;
-		}
-	};
-
 	util.store = {
 		addToStorage: function(s, records) {
 			s.each( function(r) {
