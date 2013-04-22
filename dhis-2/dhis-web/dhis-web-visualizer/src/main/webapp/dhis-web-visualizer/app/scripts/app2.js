@@ -58,7 +58,9 @@ Ext.onReady( function() {
 				numberOfTabs = dv.init.ougs.length + dv.init.degs.length + 5,
 				tabHeight = 28,
 				minPeriodHeight = 380,
-				settingsHeight = 92;
+				settingsHeight = 91;
+alert(viewportHeight);
+alert(numberOfTabs * tabHeight + minPeriodHeight + settingsHeight);
 
 			if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight + settingsHeight) {
 				if (!Ext.isIE) {
@@ -120,16 +122,17 @@ Ext.onReady( function() {
 		util.dimension = {
 			panel: {
 				setHeight: function(mx) {
-					var panelHeight = dv.cmp.dimension.panels.length * 28,
+					var settingsHeight = 91,
+						panelHeight = settingsHeight + dv.cmp.dimension.panels.length * 28,
 						height;
 
 					if (dv.viewport.westRegion.hasScrollbar) {
 						height = panelHeight + mx;
-						dv.viewport.accordion.setHeight(dv.viewport.getHeight() - 2);
-						dv.viewport.accordionBody.setHeight(height - 2);
+						dv.viewport.accordion.setHeight(dv.viewport.getHeight() - settingsHeight - 2);
+						dv.viewport.accordionBody.setHeight(height - settingsHeight - 2);
 					}
 					else {
-						height = dv.viewport.westRegion.getHeight() - dv.conf.layout.west_fill;
+						height = dv.viewport.westRegion.getHeight() - dv.conf.layout.west_fill - settingsHeight;
 						mx += panelHeight;
 						dv.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
 						dv.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
