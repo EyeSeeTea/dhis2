@@ -356,18 +356,6 @@ DV.core.getConfig = function() {
         multiselect_fill_reportingrates: 315
     };
 
-    conf.util = {
-		jsonEncodeString: function(str) {
-			return typeof str === 'string' ? str.replace(/[^a-zA-Z 0-9(){}<>_!+;:?*&%#-]+/g,'') : str;
-		},
-		jsonEncodeArray: function(a) {
-			for (var i = 0; i < a.length; i++) {
-				a[i] = DV.conf.util.jsonEncodeString(a[i]);
-			}
-			return a;
-		}
-	};
-
 	return conf;
 };
 
@@ -1173,10 +1161,10 @@ DV.core.getUtil = function() {
 			var a = [];
 			for (var i = 0; i < values.length; i++) {
 				var v = {
-					value: DV.conf.util.jsonEncodeString(parseFloat(values[i][0])),
-					data: DV.conf.util.jsonEncodeString(values[i][1]),
-					period: DV.conf.util.jsonEncodeString(values[i][2]),
-					organisationunit: DV.conf.util.jsonEncodeString(values[i][3])
+					value: parseFloat(values[i][0]),
+					data: values[i][1],
+					period: values[i][2],
+					organisationunit: values[i][3]
 				};
 				a.push(v);
 			}

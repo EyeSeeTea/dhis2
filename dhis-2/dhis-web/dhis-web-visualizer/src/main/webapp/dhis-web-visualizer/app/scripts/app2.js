@@ -702,7 +702,7 @@ Ext.onReady( function() {
 			//cls: 'dv-textfield-alt1',
 			style: 'margin-bottom:0; margin-left:2px',
 			width: 310,
-			fieldLabel: DV.i18n.domain_axis_label,
+			fieldLabel: DV.i18n.range_axis_label,
 			labelStyle: 'padding-left:16px',
 			labelWidth: 123,
 			maxLength: 100,
@@ -1721,7 +1721,6 @@ Ext.onReady( function() {
 				area,
 				pie,
 				chartType,
-
 				seriesStore,
 				categoryStore,
 				filterStore,
@@ -1917,7 +1916,6 @@ Ext.onReady( function() {
 			layout = Ext.create('Ext.toolbar.Toolbar', {
 				id: 'chartlayout_tb',
 				style: 'padding:2px 0 0 2px; background:#f5f5f5; border:0 none; border-top:1px dashed #ccc; border-bottom:1px solid #ccc',
-				//style: 'padding-left: 2px;',
 				height: 46,
 				items: [
 					{
@@ -3101,13 +3099,6 @@ Ext.onReady( function() {
 						id: dv.conf.finals.root.id,
 						expanded: true,
 						children: dv.init.rootNodes
-					},
-					listeners: {
-						load: function(s, node, r) {
-							for (var i = 0; i < r.length; i++) {
-								r[i].data.text = dv.conf.util.jsonEncodeString(r[i].data.text);
-							}
-						}
 					}
 				}),
 				xable: function(checked, value) {
@@ -3250,9 +3241,6 @@ Ext.onReady( function() {
 						listeners: {
 							load: function(s) {
 								s.isLoaded = true;
-								s.each( function(r) {
-									r.data.name = dv.conf.util.jsonEncodeString(r.data.name);
-								});
 								dv.util.store.addToStorage(s);
 							}
 						}
@@ -3682,14 +3670,15 @@ Ext.onReady( function() {
 						{
 							text: DV.i18n.table,
                             toggleGroup: 'module',
-							pressed: true
+							handler: function(b) {
+                                window.location.href = '../../dhis-web-pivot/app/index.html';
+							}
 						},
 						{
 							text: DV.i18n.chart,
                             toggleGroup: 'module',
-							handler: function(b) {
-                                window.location.href = '../../dhis-web-visualizer/app/index.html';
-							}
+							pressed: true,
+							handler: dv.util.button.type.toggleHandler
 						},
 						{
 							text: DV.i18n.map,
