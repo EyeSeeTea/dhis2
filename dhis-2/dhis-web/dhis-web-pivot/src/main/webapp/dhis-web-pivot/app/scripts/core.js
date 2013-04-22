@@ -284,27 +284,6 @@ PT.core.getUtils = function(pt) {
 		}
 	};
 
-    util.url = {
-		getParam: function(s) {
-			var output = '';
-			var href = window.location.href;
-			if (href.indexOf('?') > -1 ) {
-				var query = href.substr(href.indexOf('?') + 1);
-				var query = query.split('&');
-				for (var i = 0; i < query.length; i++) {
-					if (query[i].indexOf('=') > -1) {
-						var a = query[i].split('=');
-						if (a[0].toLowerCase() === s) {
-							output = a[1];
-							break;
-						}
-					}
-				}
-			}
-			return unescape(output);
-		}
-	};
-
 	util.multiselect = {
 		select: function(a, s) {
 			var selected = a.getValue();

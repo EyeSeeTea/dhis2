@@ -122,6 +122,309 @@ Ext.onReady( function() {
 		return cmp;
 	};
 
+	DV.app.getUtil = function() {
+		var util = dv.util || {};
+
+		util.dimension = {
+			panel: {
+				setHeight: function(mx) {
+					var panelHeight = pt.cmp.dimension.panels.length * 28,
+						height;
+
+					if (pt.viewport.westRegion.hasScrollbar) {
+						height = panelHeight + mx;
+						pt.viewport.accordion.setHeight(pt.viewport.getHeight() - 2);
+						pt.viewport.accordionBody.setHeight(height - 2);
+					}
+					else {
+						height = pt.viewport.westRegion.getHeight() - pt.conf.layout.west_fill;
+						mx += panelHeight;
+						pt.viewport.accordion.setHeight((height > mx ? mx : height) - 2);
+						pt.viewport.accordionBody.setHeight((height > mx ? mx : height) - 2);
+					}
+				},
+
+				getExpanded: function() {
+					for (var i = 0, panel; i < pt.cmp.dimension.panels.length; i++) {
+						panel = pt.cmp.dimension.panels[i];
+
+						if (!panel.collapsed) {
+							return panel;
+						}
+					}
+
+					return null;
+				}
+			}
+		};
+
+		util.window = {
+			setAnchorPosition: function(w, target) {
+				var vpw = pt.viewport.getWidth(),
+					targetx = target ? target.getPosition()[0] : 4,
+					winw = w.getWidth(),
+					y = target ? target.getPosition()[1] + target.getHeight() + 4 : 33;
+
+				if ((targetx + winw) > vpw) {
+					w.setPosition((vpw - winw - 2), y);
+				}
+				else {
+					w.setPosition(targetx, y);
+				}
+			},
+			addHideOnBlurHandler: function(w) {
+				var el = Ext.get(Ext.query('.x-mask')[0]);
+
+				el.on('click', function() {
+					if (w.hideOnBlur) {
+						w.hide();
+					}
+				});
+
+				w.hasHideOnBlurHandler = true;
+			},
+			addDestroyOnBlurHandler: function(w) {
+				var el = Ext.get(Ext.query('.x-mask')[0]);
+
+				el.on('click', function() {
+					if (w.destroyOnBlur) {
+						w.destroy();
+					}
+				});
+
+				w.hasDestroyOnBlurHandler = true;
+			}
+		};
+
+		util.url = {
+			getUrlParam: function(s) {
+				var output = '';
+				var href = window.location.href;
+				if (href.indexOf('?') > -1 ) {
+					var query = href.substr(href.indexOf('?') + 1);
+					var query = query.split('&');
+					for (var i = 0; i < query.length; i++) {
+						if (query[i].indexOf('=') > -1) {
+							var a = query[i].split('=');
+							if (a[0].toLowerCase() === s) {
+								output = a[1];
+								break;
+							}
+						}
+					}
+				}
+				return unescape(output);
+			}
+		};
+
+		util.multiselect = {
+			select: function(a, s) {
+				var selected = a.getValue();
+				if (selected.length) {
+					var array = [];
+					Ext.Array.each(selected, function(item) {
+						array.push({id: item, name: a.store.getAt(a.store.findExact('id', item)).data.name});
+					});
+					s.store.add(array);
+				}
+				this.filterAvailable(a, s);
+			},
+			selectAll: function(a, s, doReverse) {
+				var array = [];
+				a.store.each( function(r) {
+					array.push({id: r.data.id, name: r.data.name});
+				});
+				if (doReverse) {
+					array.reverse();
+				}
+				s.store.add(array);
+				this.filterAvailable(a, s);
+			},
+			unselect: function(a, s) {
+				var selected = s.getValue();
+				if (selected.length) {
+					Ext.Array.each(selected, function(item) {
+						s.store.remove(s.store.getAt(s.store.findExact('id', item)));
+					});
+					this.filterAvailable(a, s);
+				}
+			},
+			unselectAll: function(a, s) {
+				s.store.removeAll();
+				a.store.clearFilter();
+				this.filterAvailable(a, s);
+			},
+			filterAvailable: function(a, s) {
+				a.store.filterBy( function(r) {
+					var keep = true;
+					s.store.each( function(r2) {
+						if (r.data.id == r2.data.id) {
+							keep = false;
+						}
+
+					});
+					return keep;
+				});
+				a.store.sortStore();
+			},
+			setHeight: function(ms, panel, fill) {
+				for (var i = 0; i < ms.length; i++) {
+					ms[i].setHeight(panel.getHeight() - fill);
+				}
+			}
+		};
+
+		util.store = {
+			addToStorage: function(s, records) {
+				s.each( function(r) {
+					if (!s.storage[r.data.id]) {
+						s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
+					}
+				});
+				if (records) {
+					Ext.Array.each(records, function(r) {
+						if (!s.storage[r.data.id]) {
+							s.storage[r.data.id] = {id: r.data.id, name: r.data.name, parent: s.parent};
+						}
+					});
+				}
+			},
+			loadFromStorage: function(s) {
+				var items = [];
+				s.removeAll();
+				for (var obj in s.storage) {
+					if (s.storage[obj].parent === s.parent) {
+						items.push(s.storage[obj]);
+					}
+				}
+				s.add(items);
+				s.sort('name', 'ASC');
+			},
+			containsParent: function(s) {
+				for (var obj in s.storage) {
+					if (s.storage[obj].parent === s.parent) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+
+		util.mask = {
+			showMask: function(cmp, msg) {
+				cmp = cmp || pt.viewport;
+				msg = msg || 'Loading..';
+
+				if (pt.viewport.mask) {
+					pt.viewport.mask.destroy();
+				}
+				pt.viewport.mask = new Ext.create('Ext.LoadMask', cmp, {
+					id: 'pt-loadmask',
+					shadow: false,
+					msg: msg,
+					style: 'box-shadow:0',
+					bodyStyle: 'box-shadow:0'
+				});
+				pt.viewport.mask.show();
+			},
+			hideMask: function() {
+				if (pt.viewport.mask) {
+					pt.viewport.mask.hide();
+				}
+			}
+		};
+
+		util.object = {
+			getLength: function(object) {
+				var size = 0;
+
+				for (var key in object) {
+					if (object.hasOwnProperty(key)) {
+						size++;
+					}
+				}
+
+				return size;
+			}
+		};
+
+		util.array = {
+			sortDimensions: function(dimensions, key) {
+				key = key || 'dimensionName';
+
+				// Sort object order
+				Ext.Array.sort(dimensions, function(a,b) {
+					if (a[key] < b[key]) {
+						return -1;
+					}
+					if (a[key] > b[key]) {
+						return 1;
+					}
+					return 0;
+				});
+
+				// Sort object items order
+				for (var i = 0, dim; i < dimensions.length; i++) {
+					dim = dimensions[i];
+
+					if (dim.items) {
+						dimensions[i].items.sort();
+					}
+				}
+
+				return dimensions;
+			},
+
+			sortObjectsByString: function(array, key) {
+				key = key || 'name';
+				array.sort( function(a, b) {
+					var nameA = a[key].toLowerCase(),
+						nameB = b[key].toLowerCase();
+
+					if (nameA < nameB) {
+						return -1;
+					}
+					if (nameA > nameB) {
+						return 1;
+					}
+					return 0;
+				});
+				return array;
+			}
+		};
+
+		util.number = {
+			getNumberOfDecimals: function(x) {
+				var tmp = new String(x);
+				return (tmp.indexOf(".") > -1) ? (tmp.length - tmp.indexOf(".") - 1) : 0;
+			},
+
+			roundIf: function(x, fix) {
+				if (Ext.isString(x)) {
+					x = parseFloat(x);
+				}
+
+				if (Ext.isNumber(x) && Ext.isNumber(fix)) {
+					var dec = pt.util.number.getNumberOfDecimals(x);
+					return parseFloat(dec > fix ? x.toFixed(fix) : x);
+				}
+				return x;
+			},
+
+			pp: function(x, nf) {
+				nf = nf || 'space';
+
+				if (nf === 'none') {
+					return x;
+				}
+
+				return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, pt.conf.pivot.digitGroupSeparator[nf]);
+			}
+		};
+
+		return util;
+	};
+
 	DV.app.getStores = function() {
 		var store = dv.store || {};
 
@@ -282,8 +585,8 @@ Ext.onReady( function() {
 							{id: dimConf.organisationUnit.value, name: dimConf.organisationUnit.name}
 						];
 
-					data.push(dv.init.ougs);
-					data.push(dv.init.degs);
+					data.push(Ext.clone(dv.init.ougs));
+					data.push(Ext.clone(dv.init.degs));
 
 					return data;
 				}()
@@ -1582,7 +1885,7 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				value: dv.conf.finals.dimension.organisationunit.value,
+				value: dv.conf.finals.dimension.organisationUnit.value,
 				store: filterStore
 			});
 
@@ -3616,7 +3919,7 @@ Ext.onReady( function() {
 		dv.baseUrl = dv.init.contextPath;
 
 		dv.cmp = DV.app.getCmp();
-		//dv.util = DV.app.getUtil();
+		dv.util = DV.app.getUtil();
 		dv.store = DV.app.getStores();
 
 		dv.viewport = createViewport();
