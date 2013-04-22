@@ -519,7 +519,7 @@ Ext.onReady( function() {
 			windowWidth = 500,
 			windowCmpWidth = windowWidth - 22;
 
-		DV.store.charts.on('load', function(store, records) {
+		dv.store.charts.on('load', function(store, records) {
 			var pager = store.proxy.reader.jsonData.pager;
 
 			info.setText('Page ' + pager.page + ' of ' + pager.pageCount);
@@ -539,76 +539,76 @@ Ext.onReady( function() {
 		getBody = function() {
 			var favorite;
 
-			if (DV.c.rendered) {
+			if (dv.c.rendered) {
 				favorite = {};
 
-				favorite.type = DV.c.type;
-				favorite.series = DV.c.dimension.series;
-				favorite.category = DV.c.dimension.category;
-				favorite.filter = DV.c.dimension.filter;
-				favorite.hideLegend = DV.c.hidelegend;
-				favorite.hideSubtitle = DV.c.hidesubtitle;
-				favorite.showData = DV.c.showdata;
-				favorite.regression = DV.c.trendline;
-				favorite.userOrganisationUnit = DV.c.userorganisationunit;
-				favorite.userOrganisationUnitChildren = DV.c.userorganisationunitchildren;
+				favorite.type = dv.c.type;
+				favorite.series = dv.c.dimension.series;
+				favorite.category = dv.c.dimension.category;
+				favorite.filter = dv.c.dimension.filter;
+				favorite.hideLegend = dv.c.hidelegend;
+				favorite.hideSubtitle = dv.c.hidesubtitle;
+				favorite.showData = dv.c.showdata;
+				favorite.regression = dv.c.trendline;
+				favorite.userOrganisationUnit = dv.c.userorganisationunit;
+				favorite.userOrganisationUnitChildren = dv.c.userorganisationunitchildren;
 
 				// Options
-				if (DV.c.domainaxislabel) {
-					favorite.domainAxisLabel = DV.c.domainaxislabel;
+				if (dv.c.domainaxislabel) {
+					favorite.domainAxisLabel = dv.c.domainaxislabel;
 				}
-				if (DV.c.rangeaxislabel) {
-					favorite.rangeAxisLabel = DV.c.rangeaxislabel;
+				if (dv.c.rangeaxislabel) {
+					favorite.rangeAxisLabel = dv.c.rangeaxislabel;
 				}
-				if (DV.c.targetlinevalue) {
-					favorite.targetLineValue = DV.c.targetlinevalue;
+				if (dv.c.targetlinevalue) {
+					favorite.targetLineValue = dv.c.targetlinevalue;
 				}
-				if (DV.c.targetlinelabel) {
-					favorite.targetLineLabel = DV.c.targetlinelabel;
+				if (dv.c.targetlinelabel) {
+					favorite.targetLineLabel = dv.c.targetlinelabel;
 				}
-				if (DV.c.baselinevalue) {
-					favorite.baseLineValue = DV.c.baselinevalue;
+				if (dv.c.baselinevalue) {
+					favorite.baseLineValue = dv.c.baselinevalue;
 				}
-				if (DV.c.baselinelabel) {
-					favorite.baseLineLabel = DV.c.baselinelabel;
+				if (dv.c.baselinelabel) {
+					favorite.baseLineLabel = dv.c.baselinelabel;
 				}
 
 				// Indicators
-				if (Ext.isObject(DV.c.indicator) && Ext.isArray(DV.c.indicator.records) && DV.c.indicator.records.length) {
+				if (Ext.isObject(dv.c.indicator) && Ext.isArray(dv.c.indicator.records) && dv.c.indicator.records.length) {
 					favorite.indicators = [];
 
-					for (var i = 0, r; i < DV.c.indicator.records.length; i++) {
-						r = Ext.clone(DV.c.indicator.records[i]);
+					for (var i = 0, r; i < dv.c.indicator.records.length; i++) {
+						r = Ext.clone(dv.c.indicator.records[i]);
 						favorite.indicators.push({id: r.id, name: r.name});
 					}
 				}
 
 				// Data elements
-				if (Ext.isObject(DV.c.dataelement) && Ext.isArray(DV.c.dataelement.records) && DV.c.dataelement.records.length) {
+				if (Ext.isObject(dv.c.dataelement) && Ext.isArray(dv.c.dataelement.records) && dv.c.dataelement.records.length) {
 					favorite.dataElements = [];
 
-					for (var i = 0, r; i < DV.c.dataelement.records.length; i++) {
-						r = Ext.clone(DV.c.dataelement.records[i]);
+					for (var i = 0, r; i < dv.c.dataelement.records.length; i++) {
+						r = Ext.clone(dv.c.dataelement.records[i]);
 						favorite.dataElements.push({id: r.id, name: r.name});
 					}
 				}
 
 				// Data sets
-				if (Ext.isObject(DV.c.dataset) && Ext.isArray(DV.c.dataset.records) && DV.c.dataset.records.length) {
+				if (Ext.isObject(dv.c.dataset) && Ext.isArray(dv.c.dataset.records) && dv.c.dataset.records.length) {
 					favorite.dataSets = [];
 
-					for (var i = 0, r; i < DV.c.dataset.records.length; i++) {
-						r = Ext.clone(DV.c.dataset.records[i]);
+					for (var i = 0, r; i < dv.c.dataset.records.length; i++) {
+						r = Ext.clone(dv.c.dataset.records[i]);
 						favorite.dataSets.push({id: r.id, name: r.name});
 					}
 				}
 
 				// Fixed periods
-				if (Ext.isObject(DV.c.fixedperiod) && Ext.isArray(DV.c.fixedperiod.records) && DV.c.fixedperiod.records.length) {
+				if (Ext.isObject(dv.c.fixedperiod) && Ext.isArray(dv.c.fixedperiod.records) && dv.c.fixedperiod.records.length) {
 					favorite.periods = [];
 
-					for (var i = 0, r; i < DV.c.period.records.length; i++) {
-						r = Ext.clone(DV.c.period.records[i]);
+					for (var i = 0, r; i < dv.c.period.records.length; i++) {
+						r = Ext.clone(dv.c.period.records[i]);
 						favorite.periods.push({id: r.id, name: r.name});
 					}
 				}
@@ -616,12 +616,12 @@ Ext.onReady( function() {
 				// Relative periods
 				favorite.relativePeriods = {};
 
-				if (Ext.isObject(DV.c.relativeperiod)) {
-					favorite.rewindRelativePeriods = !!DV.c.relativeperiod.rewind;
+				if (Ext.isObject(dv.c.relativeperiod)) {
+					favorite.rewindRelativePeriods = !!dv.c.relativeperiod.rewind;
 
-					if (Ext.isObject(DV.c.relativeperiod.rp)) {
-						for (var key in DV.c.relativeperiod.rp) {
-							if (DV.c.relativeperiod.rp.hasOwnProperty(key) && !!DV.c.relativeperiod.rp[key]) {
+					if (Ext.isObject(dv.c.relativeperiod.rp)) {
+						for (var key in dv.c.relativeperiod.rp) {
+							if (dv.c.relativeperiod.rp.hasOwnProperty(key) && !!dv.c.relativeperiod.rp[key]) {
 								favorite.relativePeriods[key] = true;
 							}
 						}
@@ -629,13 +629,13 @@ Ext.onReady( function() {
 				}
 
 				// Organisation units
-				if (Ext.isObject(DV.c.organisationunit)) {
-					if (Ext.isString(DV.c.organisationunit.groupsetid)) {
-						favorite.organisationUnitGroupSetId = DV.c.organisationunit.groupsetid;
+				if (Ext.isObject(dv.c.organisationunit)) {
+					if (Ext.isString(dv.c.organisationunit.groupsetid)) {
+						favorite.organisationUnitGroupSetId = dv.c.organisationunit.groupsetid;
 					}
 
-					if (Ext.isArray(DV.c.organisationunit.records) && DV.c.organisationunit.records.length) {
-						favorite.organisationUnits = Ext.clone(DV.c.organisationunit.records);
+					if (Ext.isArray(dv.c.organisationunit.records) && dv.c.organisationunit.records.length) {
+						favorite.organisationUnits = Ext.clone(dv.c.organisationunit.records);
 					}
 				}
 			}
@@ -645,7 +645,7 @@ Ext.onReady( function() {
 
 		NameWindow = function(id) {
 			var window,
-				record = DV.store.favorite.getById(id);
+				record = dv.store.favorite.getById(id);
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
@@ -669,23 +669,23 @@ Ext.onReady( function() {
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
-							url: DV.init.contextPath + '/api/charts/',
+							url: dv.init.contextPath + '/api/charts/',
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
 							failure: function(r) {
-								DV.util.mask.hideMask();
+								dv.util.mask.hideMask();
 								alert(r.responseText);
 							},
 							success: function(r) {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
 
-								DV.c.currentFavorite = {
+								dv.c.currentFavorite = {
 									id: id,
 									name: favorite.name
 								};
-								DV.cmp.toolbar.share.xable();
-								DV.store.favorite.loadStore();
+								dv.cmp.toolbar.share.xable();
+								dv.store.favorite.loadStore();
 								window.destroy();
 							}
 						});
@@ -701,10 +701,10 @@ Ext.onReady( function() {
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: DV.init.contextPath + '/api/charts/' + id + '.json?links=false',
+							url: dv.init.contextPath + '/api/charts/' + id + '.json?links=false',
 							method: 'GET',
 							failure: function(r) {
-								DV.util.mask.hideMask();
+								dv.util.mask.hideMask();
 								alert(r.responseText);
 							},
 							success: function(r) {
@@ -712,16 +712,16 @@ Ext.onReady( function() {
 								favorite.name = name;
 
 								Ext.Ajax.request({
-									url: DV.init.contextPath + '/api/charts/' + favorite.id,
+									url: dv.init.contextPath + '/api/charts/' + favorite.id,
 									method: 'PUT',
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(favorite),
 									failure: function(r) {
-										DV.util.mask.hideMask();
+										dv.util.mask.hideMask();
 										alert(r.responseText);
 									},
 									success: function(r) {
-										DV.store.favorite.loadStore();
+										dv.store.favorite.loadStore();
 										window.destroy();
 									}
 								});
@@ -753,7 +753,7 @@ Ext.onReady( function() {
 				],
 				listeners: {
 					show: function(w) {
-						DV.util.window.setAnchorPosition(w, addButton);
+						dv.util.window.setAnchorPosition(w, addButton);
 
 						//if (!w.hasDestroyBlurHandler) {
 							//dv.util.window.addDestroyOnBlurHandler(w);
@@ -776,7 +776,7 @@ Ext.onReady( function() {
 			height: 26,
 			style: 'border-radius: 1px;',
 			menu: {},
-			disabled: !DV.c.rendered,
+			disabled: !dv.c.rendered,
 			handler: function() {
 				nameWindow = new NameWindow(null, 'create');
 				nameWindow.show();
@@ -796,8 +796,8 @@ Ext.onReady( function() {
 						this.currentValue = this.getValue();
 
 						var value = this.getValue(),
-							url = value ? DV.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
-							store = DV.store.favorite;
+							url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
+							store = dv.store.favorite;
 
 						store.page = 1;
 						store.loadStore(url);
@@ -810,8 +810,8 @@ Ext.onReady( function() {
 			text: 'Prev', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? DV.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
-					store = DV.store.favorite;
+					url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
+					store = dv.store.favorite;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
 				store.loadStore(url);
@@ -822,8 +822,8 @@ Ext.onReady( function() {
 			text: 'Next', //i18n
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? DV.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
-					store = DV.store.favorite;
+					url = value ? dv.init.contextPath + '/api/charts/query/' + value + '.json?links=false' : null,
+					store = dv.store.favorite;
 
 				store.page = store.page + 1;
 				store.loadStore(url);
@@ -853,7 +853,7 @@ Ext.onReady( function() {
 								element.addClsOnOver('link');
 								element.load = function() {
 									favoriteWindow.hide();
-									DV.exe.execute(record.data.id);
+									dv.exe.execute(record.data.id);
 								};
 								element.dom.setAttribute('onclick', 'Ext.get(this).load();');
 							}
@@ -902,17 +902,17 @@ Ext.onReady( function() {
 
 										if (confirm(message)) {
 											Ext.Ajax.request({
-												url: DV.init.contextPath + '/api/charts/' + record.data.id,
+												url: dv.init.contextPath + '/api/charts/' + record.data.id,
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
 												success: function() {
-													DV.cmp.toolbar.share.enable();
-													DV.c.currentFavorite = {
+													dv.cmp.toolbar.share.enable();
+													dv.c.currentFavorite = {
 														id: record.data.id,
 														name: favorite.name
 													};
-													DV.store.favorite.loadStore();
+													dv.store.favorite.loadStore();
 												}
 											});
 										}
@@ -933,10 +933,10 @@ Ext.onReady( function() {
 
 								if (record.data.access.manage) {
 									Ext.Ajax.request({
-										url: DV.init.contextPath + '/api/sharing?type=chart&id=' + record.data.id,
+										url: dv.init.contextPath + '/api/sharing?type=chart&id=' + record.data.id,
 										method: 'GET',
 										failure: function(r) {
-											DV.util.mask.hideMask();
+											dv.util.mask.hideMask();
 											alert(r.responseText);
 										},
 										success: function(r) {
@@ -962,10 +962,10 @@ Ext.onReady( function() {
 
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: DV.init.contextPath + '/api/charts/' + record.data.id,
+											url: dv.init.contextPath + '/api/charts/' + record.data.id,
 											method: 'DELETE',
 											success: function() {
-												DV.store.favorite.loadStore();
+												dv.store.favorite.loadStore();
 											}
 										});
 									}
@@ -979,7 +979,7 @@ Ext.onReady( function() {
 					width: 6
 				}
 			],
-			store: DV.store.favorite,
+			store: dv.store.favorite,
 			bbar: [
 				info,
 				'->',
@@ -988,15 +988,15 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				added: function() {
-					DV.viewport.favoriteGrid = this;
+					dv.viewport.favoriteGrid = this;
 				},
 				render: function() {
-					var size = Math.floor((DV.viewport.centerRegion.getHeight() - 155) / DV.conf.layout.grid_row_height);
+					var size = Math.floor((dv.viewport.centerRegion.getHeight() - 155) / dv.conf.layout.grid_row_height);
 					this.store.pageSize = size;
 					this.store.page = 1;
 					this.store.loadStore();
 
-					DV.store.favorite.on('load', function() {
+					dv.store.favorite.on('load', function() {
 						if (this.isVisible()) {
 							this.fireEvent('afterrender');
 						}
@@ -1099,7 +1099,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					DV.util.window.setAnchorPosition(w, DV.cmp.toolbar.favorite);
+					dv.util.window.setAnchorPosition(w, dv.cmp.toolbar.favorite);
 
 					//if (!w.hasDestroyOnBlurHandler) {
 						//dv.util.window.addDestroyOnBlurHandler(w);
@@ -1221,8 +1221,8 @@ Ext.onReady( function() {
 					name: sharing.object.name,
 					publicAccess: publicGroup.down('combobox').getValue(),
 					user: {
-						id: DV.init.user.id,
-						name: DV.init.user.name
+						id: dv.init.user.id,
+						name: dv.init.user.name
 					}
 				}
 			};
@@ -1243,7 +1243,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: DV.init.contextPath + '/api/sharing/search',
+				url: dv.init.contextPath + '/api/sharing/search',
 				reader: {
 					type: 'json',
 					root: 'userGroups'
@@ -1338,7 +1338,7 @@ Ext.onReady( function() {
 					text: 'Save',
 					handler: function() {
 						Ext.Ajax.request({
-							url: DV.init.contextPath + '/api/sharing?type=chart&id=' + sharing.object.id,
+							url: dv.init.contextPath + '/api/sharing?type=chart&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -1352,7 +1352,7 @@ Ext.onReady( function() {
 			],
 			listeners: {
 				show: function(w) {
-					var pos = DV.cmp.favorite.window.getPosition();
+					var pos = dv.cmp.favorite.window.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
 
 					//if (!w.hasDestroyOnBlurHandler) {
@@ -1475,7 +1475,7 @@ Ext.onReady( function() {
 				defaults: {
 					height: 40,
 					toggleGroup: 'charttype',
-					handler: DV.util.button.type.toggleHandler,
+					handler: dv.util.button.type.toggleHandler,
 					listeners: {
 						afterrender: function(b) {
 							if (b.xtype === 'button') {
@@ -1515,11 +1515,11 @@ Ext.onReady( function() {
 				valueField: 'id',
 				displayField: 'name',
 				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
-				store: DV.store.dimension(),
+				store: dv.store.dimension(),
 				value: dv.conf.finals.dimension.data.value,
 				listeners: {
 					select: function() {
-						DV.util.combobox.filter.category();
+						dv.util.combobox.filter.category();
 					}
 				}
 			});
@@ -1527,19 +1527,19 @@ Ext.onReady( function() {
 			category = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'dv-combo',
 				baseBodyCls: 'small',
-				name: DV.conf.finals.chart.category,
+				name: dv.conf.finals.chart.category,
 				emptyText: DV.i18n.category,
 				queryMode: 'local',
 				editable: false,
 				lastQuery: '',
 				valueField: 'id',
 				displayField: 'name',
-				width: (DV.conf.layout.west_fieldset_width / 3) - 1,
-				store: DV.store.dimension(),
-				value: DV.conf.finals.dimension.period.value,
+				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
+				store: dv.store.dimension(),
+				value: dv.conf.finals.dimension.period.value,
 				listeners: {
 					select: function(cb) {
-						DV.util.combobox.filter.filter();
+						dv.util.combobox.filter.filter();
 					}
 				}
 			});
@@ -1547,16 +1547,16 @@ Ext.onReady( function() {
 			filter = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'dv-combo',
 				baseBodyCls: 'small',
-				name: DV.conf.finals.chart.filter,
+				name: dv.conf.finals.chart.filter,
 				emptyText: DV.i18n.filter,
 				queryMode: 'local',
 				editable: false,
 				lastQuery: '',
 				valueField: 'id',
 				displayField: 'name',
-				width: (DV.conf.layout.west_fieldset_width / 3) - 1,
-				store: DV.store.dimension(),
-				value: DV.conf.finals.dimension.organisationunit.value
+				width: (dv.conf.layout.west_fieldset_width / 3) - 1,
+				store: dv.store.dimension(),
+				value: dv.conf.finals.dimension.organisationunit.value
 			});
 
 			layout = Ext.create('Ext.toolbar.Toolbar', {
