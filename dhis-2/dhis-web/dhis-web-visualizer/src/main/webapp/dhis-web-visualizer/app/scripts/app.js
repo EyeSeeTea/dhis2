@@ -2144,9 +2144,11 @@ Ext.onReady( function() {
             params = {
 				periodIsFilter: (DV.c.dimension.filter === DV.conf.finals.dimension.period.value),
 				userOrganisationUnit: DV.c.userorganisationunit,
-				userOrganisationUnitChildren: DV.c.userorganisationunitchildren,
-				rewind: DV.c.relativeperiod.rewind
+				userOrganisationUnitChildren: DV.c.userorganisationunitchildren
 			};
+			if (DV.c.relativeperiod.rewind) {
+				params.rewind = DV.c.relativeperiod.rewind;
+			}
 			if (DV.c.organisationunit.groupsetid) {
 				params.organisationUnitGroupSetId = DV.c.organisationunit.groupsetid;
 			}
