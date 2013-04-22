@@ -1835,6 +1835,7 @@ Ext.onReady( function() {
 			series = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'dv-combo',
 				baseBodyCls: 'small',
+				style: 'margin-bottom:0',
 				name: dv.conf.finals.chart.series,
 				emptyText: DV.i18n.series,
 				queryMode: 'local',
@@ -1854,6 +1855,7 @@ Ext.onReady( function() {
 			category = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'dv-combo',
 				baseBodyCls: 'small',
+				style: 'margin-bottom:0',
 				name: dv.conf.finals.chart.category,
 				emptyText: DV.i18n.category,
 				queryMode: 'local',
@@ -1874,6 +1876,7 @@ Ext.onReady( function() {
 			filter = Ext.create('Ext.form.field.ComboBox', {
 				cls: 'dv-combo',
 				baseBodyCls: 'small',
+				style: 'margin-bottom:0',
 				name: dv.conf.finals.chart.filter,
 				emptyText: DV.i18n.filter,
 				queryMode: 'local',
@@ -1888,7 +1891,8 @@ Ext.onReady( function() {
 
 			layout = Ext.create('Ext.toolbar.Toolbar', {
 				id: 'chartlayout_tb',
-				style: 'padding-left: 2px;',
+				style: 'padding:2px 0 0 2px; background:#f5f5f5; border:0 none; border-top:1px dashed #ccc; border-bottom:1px solid #ccc',
+				//style: 'padding-left: 2px;',
 				height: 46,
 				items: [
 					{
