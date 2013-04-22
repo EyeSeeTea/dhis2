@@ -59,8 +59,6 @@ Ext.onReady( function() {
 				tabHeight = 28,
 				minPeriodHeight = 380,
 				settingsHeight = 91;
-alert(viewportHeight);
-alert(numberOfTabs * tabHeight + minPeriodHeight + settingsHeight);
 
 			if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight + settingsHeight) {
 				if (!Ext.isIE) {
