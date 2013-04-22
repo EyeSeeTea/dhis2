@@ -161,5 +161,7 @@ financial_years:'$encoder.jsEscape($i18n.getString( 'financial_years' ) , "'")',
 last_financial_year:'$encoder.jsEscape($i18n.getString( 'last_financial_year' ) , "'")',
 last_5_financial_years:'$encoder.jsEscape($i18n.getString( 'last_5_financial_years' ) , "'")',
 prev_year: '$encoder.jsEscape($i18n.getString( 'prev_year' ) , "'")',
-next_year: '$encoder.jsEscape($i18n.getString( 'next_year' ) , "'")'
+next_year: '$encoder.jsEscape($i18n.getString( 'next_year' ) , "'")',
+user_organisation_unit: '$encoder.jsEscape($i18n.getString( 'user_organisation_unit' ) , "'")',
+user_organisation_unit_children: '$encoder.jsEscape($i18n.getString( 'user_organisation_unit_children' ) , "'")'
 };

@@ -3104,12 +3104,7 @@ Ext.onReady( function() {
 					}
 				}),
 				xable: function(checked, value) {
-					if (checked || value) {
-						this.disable();
-					}
-					else {
-						this.enable();
-					}
+					this.setDisabled(!!(checked || value));
 				},
 				listeners: {
 					added: function() {
